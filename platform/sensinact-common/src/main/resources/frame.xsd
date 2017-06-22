@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
+
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+targetNamespace="http://org.eclipse.sensinact/frame"
+xmlns:sensinact="http://org.eclipse.sensinact/frame" elementFormDefault="qualified">
+	
+	<simpleType name="delimitationType">
+		<restriction base="unsignedInt">
+			<enumeration id="START_DELIMITED" value="0"/>
+			<enumeration id="END_DELIMITED" value="1"/>
+			<enumeration id="START_END_DELIMITED" value="2"/>
+			<enumeration id="SIZE_DELIMITED" value="3" />
+			<enumeration id="SIZE_START_DELIMITED" value="4"/>
+			<enumeration id="SIZE_END_DELIMITED" value="5"/>
+			<enumeration id="SIZE_START_END_DELIMITED" value="6"/>
+			<enumeration id="EMPTY_BUFFER_DELIMITED" value="7"/>
+		</restriction>
+	</simpleType>
+
+	<complexType name="definitionType">
+	   <sequence>	
+	   		<element name="name" type="QName" maxOccurs="1" minOccurs="1" />
+	   		<element name="implementation" type="QName" maxOccurs="1" minOccurs="1" />
+	   		<element name="length" type="int" maxOccurs="1" minOccurs="0" /> 
+	   </sequence>
+    </complexType>
+        
+	<complexType name="frame">
+		<sequence maxOccurs="1" minOccurs="1">
+			<element name="frame" type="sensinact:frame" maxOccurs="unbounded" minOccurs="0"/>
+		</sequence>
+		<attribute name="name" use="required" type="QName" />
+		<attribute name="offset" use="required" type="unsignedInt" />
+    </complexType>
+    
+    <complexType name="definitionsType">
+	   <sequence maxOccurs="unbounded" minOccurs="0">	
+	   		<element name="type" type="sensinact:definitionType"/>
+	   </sequence>
+    </complexType>    
+    
+    <complexType name="frames">
+    	<sequence minOccurs="1" maxOccurs="1">
+    		<element name="types" type="sensinact:definitionsType" maxOccurs="1" minOccurs="1">    			
+		   		<unique name="definitionKey">
+	    			<selector xpath="sensinact:definition"/>
+	    			<field xpath="sensinact:name"/>
+	  			</unique>
+    		</element>
+    		<element name="frame" type="sensinact:frame" maxOccurs="1" minOccurs="1"/>
+    	</sequence>	
+	    <attribute name="delimiter" use="required" type="sensinact:delimitationType"/>
+	    <attribute name="start" use="optional" type="byte"/>
+	    <attribute name="end" use="optional" type="byte"/>
+	    <attribute name="escape" use="optional" type="byte"/>
+    </complexType>
+    
+    <element name="frames" type="sensinact:frames">	
+	    <key name="frameName">
+	      <selector xpath=".//sensinact:types/sensinact:type"/>
+	      <field xpath="sensinact:name"/>
+	    </key>
+	    <keyref name="frameNameRef" refer="sensinact:frameName">
+      		<selector xpath=".//sensinact:frame"/>
+      		<field xpath="@name"/>
+    	</keyref>
+  	</element>
+</schema>

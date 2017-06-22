@@ -1,0 +1,181 @@
+<!--
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway</groupId>
+		<artifactId>sensinact-security</artifactId>
+		<version>1.5-SNAPSHOT</version>
+	</parent>
+
+	<modelVersion>4.0.0</modelVersion>
+	<packaging>bundle</packaging>
+
+	<artifactId>sensinact-signature-validator</artifactId>
+
+	<name>OSGi Security Layer - Jar Validation</name>
+	<url>http://sfelix.gforge.inria.fr/</url>
+
+	<properties>
+		<bnd.path>${java.home}/../bin/jarsigner</bnd.path>
+		<bouncycastle.version>1.47</bouncycastle.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>${bouncycastle.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcmail-jdk15on</artifactId>
+			<version>${bouncycastle.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<version>${bouncycastle.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-utils</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-common</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-core</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-generic</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.13</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.main</artifactId>
+			<version>4.4.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!--
+             <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-compiler-plugin</artifactId>
+               <configuration>
+                 <source>1.6</source>
+                 <target>1.6</target>
+               </configuration>
+             </plugin>
+             -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.bouncycastle</groupId>
+									<artifactId>bcmail-jdk15on</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.bouncycastle</groupId>
+									<artifactId>bcprov-jdk15on</artifactId>
+								</artifactItem>
+                                <artifactItem>
+                                    <groupId>org.bouncycastle</groupId>
+                                    <artifactId>bcpkix-jdk15on</artifactId>
+                                </artifactItem>
+							</artifactItems>
+							<overWrite>true</overWrite>
+							<outputDirectory>${project.basedir}/target/build</outputDirectory>
+							<excludes>
+								META-INF/,
+								org/bouncycastle/util/test/,
+								**/*Test.class,
+								**/Test*.class,
+								**/*Test*.class
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Include-Resource>
+							${project.basedir}/target/build,
+							about.html
+						</Include-Resource>
+						<_nouses>true</_nouses>
+						<Bundle-Activator>
+							org.eclipse.sensinact.gateway.security.signature.osgi.BundleValidationActivator
+						</Bundle-Activator>
+						<Export-Package>
+							org.eclipse.sensinact.gateway.security.signature.api,
+							org.eclipse.sensinact.gateway.security.signature.osgi
+						</Export-Package>
+						<_plugin>aQute.bnd.signing.JartoolSigner;alias="selfsigned";path="${bnd.path}";keystore="../cert/keystore.jks";storepass="sensiNact_team"</_plugin>
+						<_sign>selfsigned</_sign>
+						<_failok>true</_failok>
+						<Bundle-ClassPath>.</Bundle-ClassPath>
+						<Import-Package>
+							!org.bouncycastle.*,
+							*
+						</Import-Package>
+						<Provide-Capability>
+							org.eclipse.sensinact.signature.validator
+						</Provide-Capability>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

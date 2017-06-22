@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string", "enum": [ "in" ] },
+    "runparameters": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "value": {},
+            "type": { "type": "string", "enum": [ "resource", "variable", "event" ] }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "value": {},
+            "type": { "type": "string", "enum": [ "integer", "double", "long", "float", "resource", "variable", "event" ] }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "value": {},
+            "type": { "type": "string", "enum": [ "integer", "double", "long", "float", "resource", "variable", "event" ] }
+          }
+        }
+      ]
+    }
+  },
+  "required": [ "name", "runparameters" ]
+}

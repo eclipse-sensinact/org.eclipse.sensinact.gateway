@@ -1,0 +1,100 @@
+<!--
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway</groupId>
+		<artifactId>sensinact-datastore</artifactId>
+		<version>1.5-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>sensinact-sqlite-connector</artifactId>
+	<name>sensiNact IoT Gateway - SQLite DataBase Connector</name>
+
+	<packaging>bundle</packaging>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-utils</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-common</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-datastore-api</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.xerial</groupId>
+			<artifactId>sqlite-jdbc</artifactId>
+			<version>3.8.10.1</version>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<Embed-Dependency>*;scope=compile</Embed-Dependency>
+						<Embed-Transitive>false</Embed-Transitive>
+						<_nouses>true</_nouses>
+						<Bundle-Activator>org.eclipse.sensinact.gateway.datastore.sqlite.osgi.Activator</Bundle-Activator>
+						<Export-Package></Export-Package>
+                        <Include-Resource>
+                            about.html,
+                            src/main/resources/
+                        </Include-Resource>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.7</version>
+				<executions>
+					<execution>
+						<id>copy-sample-db</id>
+						<phase>test-compile</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/test-resources/</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.basedir}/src/test/resources/</directory>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

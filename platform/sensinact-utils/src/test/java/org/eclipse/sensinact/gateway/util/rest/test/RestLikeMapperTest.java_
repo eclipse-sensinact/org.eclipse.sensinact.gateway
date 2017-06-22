@@ -1,0 +1,243 @@
+package org.eclipse.sensinact.gateway.util.rest.test;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.felix.framework.FrameworkFactory;
+import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.junit.Test;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.launch.Framework;
+
+//import org.eclipse.sensinact.gateway.device.api.ActionResponse;
+//import org.eclipse.sensinact.gateway.device.api.Device;
+//import org.eclipse.sensinact.gateway.device.api.Parameter;
+//import org.eclipse.sensinact.gateway.device.api.Resource;
+//import org.eclipse.sensinact.gateway.device.api.Response;
+//import org.eclipse.sensinact.gateway.device.impl.AbstractDevice;
+//import org.eclipse.sensinact.gateway.device.impl.ActionResource;
+//import org.eclipse.sensinact.gateway.device.impl.SmartObjectService;
+import RestLikeMapper;
+import RestLikeMappingReport;
+
+//TODO : complete
+/**
+ * REST like mapping test
+ */
+public class RestLikeMapperTest extends OSGiTestCase
+{
+//	private static final Map<String, String> CONFIGURATION = 
+//			new HashMap<String, String>();
+//	static
+//	{
+//		CONFIGURATION.put("felix.cache.rootdir","./target/felix");
+//		CONFIGURATION.put("org.osgi.framework.storage","felix-cache");
+//		CONFIGURATION.put("felix.auto.deploy.dir","./target/felix/bundle");
+//		CONFIGURATION.put("felix.auto.deploy.action","install,start");
+//		CONFIGURATION.put("felix.log.level", "4");
+//		CONFIGURATION.put("org.osgi.framework.system.packages.extra", 
+//				"info.dmtree;version=1.0.1,"+
+//				"info.dmtree.spi;version=1.0,"+
+//				"info.dmtree.registry;version=1.0,"+
+//				"info.dmtree.notification.spi;version=1.0,"+
+//				"info.dmtree.security;version=1.0,"+
+//				"info.dmtree.notification;version=1.0,"+
+//				"org.osgi.application;version=1.0,"+
+//				"org.osgi.service.application;version=1.1,"+
+//				"org.osgi.service.blueprint.container;version=1.0,"+
+//				"org.osgi.service.blueprint.reflect;version=1.0,"+
+//				"org.osgi.service.cm;version=1.3,"+
+//				"org.osgi.service.component;version=1.1,"+
+//				"org.osgi.service.deploymentadmin.spi;version=1.0.1,"+
+//				"org.osgi.service.deploymentadmin;version=1.1,"+
+//				"org.osgi.service.device;version=1.1,"+
+//				"org.osgi.service.event;version=1.2,"+
+//				"org.osgi.service.http;version=1.2.1,"+
+//				"org.osgi.service.io;version=1.0,"+
+//				"org.osgi.service.log;version=1.3,"+
+//				"org.osgi.service.metatype;version=1.1,"+
+//				"org.osgi.service.monitor;version=1.0,"+
+//				"org.osgi.service.prefs;version=1.1.1,"+
+//				"org.osgi.service.provisioning;version=1.2,"+
+//				"org.osgi.service.upnp;version=1.1,"+
+//				"org.osgi.service.useradmin;version=1.1,"+
+//				"org.osgi.service.wireadmin;version=1.0,"+
+//				"org.osgi.util.measurement;version=1.0.1,"+
+//				"org.osgi.util.position;version=1.0.1,"+
+//				"org.osgi.util.cdma;version=1.0,"+
+//				"org.osgi.util.gsm;version=1.0.1,"+
+//				"org.osgi.util.mobile;version=1.0,"+
+//				"org.osgi.util.tracker;version=1.4,"+
+//				"org.osgi.util.xml;version=1.0.1");
+//	}
+//	private static final Framework FELIX = new FrameworkFactory().newFramework(
+//			CONFIGURATION);
+//	
+//	@Test
+//	public void testMapping() throws Exception
+//	{
+//		try
+//		{
+//			FELIX.init();
+//			FELIX.start();
+//			
+//		} catch (BundleException e)
+//		{
+//			e.printStackTrace();
+//		}	
+//		assertTrue(FELIX.getState() == Bundle.ACTIVE);
+//		super.setBundleContext(FELIX.getBundleContext());
+//
+//		RestLikeMapper mapper = new RestLikeMapper(
+//				context,
+//				new String[][]{
+//					new String[]{"device", "serial-number", "org.eclipse.sensinact.gateway.device.api.Device" },
+//					new String[]{"service", null , "org.eclipse.sensinact.gateway.device.api.Service" },
+//					new String[]{"resource", null , null}
+//				},
+//				new String[][]{
+//					new String[]{"device" , "service" , null , "device.serial-number" },
+//					new String[]{"service" , "resource" , "resources" , null }
+//				},
+//				new String[]{
+//					"GET","SET","ACT","SUBSCRIBE","UNSUBSCRIBE"}
+//				);
+//		Resource action  = new ActionResource("turn-on"){
+//
+//			@Override
+//			public ActionResponse act() {
+//				
+//				return act((Set<Parameter>)null);
+//			}
+//
+//			@Override
+//			public ActionResponse act(Set<Parameter> parameters) 
+//			{
+//				return act(parameters.toArray());
+//			}
+//			
+//			@Override
+//			public ActionResponse act(Object... parameters) {
+//				
+//				return new ActionResponse(Response.Status.SUCCESS,
+//						Arrays.toString(parameters));
+//			}
+//		};
+//		AbstractDevice device = this.newDevice("PHDG_128045");
+//		SmartObjectService service = this.newService(
+//				"LEDService_PHDGT_128045",device, Collections.singleton(action));
+//		
+//		RestLikeMappingReport report = mapper.parseURI(
+//				"devices/PHDG_128045/services/LEDService_PHDGT_128045/resources/turn-on/ACT"); 
+//
+//		report.printStackTrace(System.err);
+//		System.out.println(report.method());
+//		System.out.println(report.unparsed());
+//		System.out.println(report.implementation());
+//		
+//		ServiceReference[] references = report.get("services");
+//		assertEquals(1,references.length);
+//		assertEquals(service,super.context.getService(references[0]));
+//		
+//		report = mapper.parseURI(
+//				"devices/PHDG_128045/services/LEDService_PHDGT_128045/resurces/turn-on/ACT");
+//		references = report.get("services");	
+//		assertEquals(1,references.length);	
+//
+//		report = mapper.parseURI("devices/PHDG_128045/services");
+//		references = report.get("services");		
+//		assertEquals(1,references.length);
+//		
+//		report = mapper.parseURI(
+//				"devices/PHDG_128046/services/LEDService_PHDGT_128045/resources/turn-on/ACT");
+//		references = report.get("services");		
+//		assertEquals(0,references.length);	
+//
+//		report = mapper.parseURI(
+//				"devuces/PHDG_128045/services/LEDService_PHDGT_128045/resources/turn-on/ACT");
+//		references = report.get("services");		
+//		assertEquals(0,references.length);	
+//		
+//		report = mapper.parseURI(
+//				"devices/PHDG_128045/servuces/LEDService_PHDGT_128045/resources/turn-on/ACT");
+//		references = report.get("services");		
+//		assertEquals(0,references.length);
+//		
+//		try
+//		{
+//			FELIX.stop();
+//			
+//		} catch (BundleException e)
+//		{
+//			e.printStackTrace();
+//		}
+//	}
+//
+//	private AbstractDevice newDevice(final String serialNumber) throws Exception
+//	{
+//		AbstractDevice device = new AbstractDevice(super.context)
+//		{
+//			private String status = Device.STATUS_ACTIVE;
+//			
+//			public String getSerialNumber() 
+//			{
+//				return serialNumber;
+//			}
+//
+//			public String getStatus() {
+//				
+//				return this.status;
+//			}
+//
+//			public void setStatus(String status)
+//			{
+//				this.status = status;
+//			}
+//
+//			@Override
+//			protected String doGetJSON() 
+//			{
+//				return null;
+//			}};
+//			
+//			Method initialize = AbstractDevice.class.getDeclaredMethod(
+//					"initialize");
+//			initialize.setAccessible(true);
+//			initialize.invoke(device);
+//			return device;
+//	}
+//	
+//	private SmartObjectService newService(final String id, 
+//			final AbstractDevice device, final Set<Resource> resources) throws Exception
+//	{
+//		SmartObjectService service = new SmartObjectService(context, device, resources)
+//		{
+//			public String getID() 
+//			{
+//				return id;
+//			}
+//
+//			public Class[] getRegistrationInterfaces() 
+//			{
+//				return null;
+//			}
+//		};
+//		Method addService = AbstractDevice.class.getDeclaredMethod(
+//				"addService",new Class[]{SmartObjectService.class});
+//		addService.setAccessible(true);
+//		addService.invoke(device,new Object[]{service});
+//
+//		Method register = SmartObjectService.class.getDeclaredMethod(
+//				"registerService");
+//		register.setAccessible(true);
+//		register.invoke(service);
+//		
+//		return service;
+//	}
+}

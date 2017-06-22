@@ -1,0 +1,1027 @@
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
+ */
+package org.eclipse.sensinact.gateway.core;
+
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.eclipse.sensinact.gateway.common.primitive.*;
+import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
+import org.eclipse.sensinact.gateway.core.method.Signature;
+import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
+import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
+import org.json.JSONObject;
+
+import org.eclipse.sensinact.gateway.common.constraint.Constraint;
+import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
+import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
+import org.eclipse.sensinact.gateway.core.message.BufferCallback;
+import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.message.ScheduledBufferCallback;
+import org.eclipse.sensinact.gateway.core.message.ScheduledCallback;
+import org.eclipse.sensinact.gateway.core.message.SnaCallback;
+import org.eclipse.sensinact.gateway.core.message.SnaConstants;
+import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.core.message.SnaNotificationMessageImpl;
+import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
+import org.eclipse.sensinact.gateway.core.message.SubscriptionFilter;
+import org.eclipse.sensinact.gateway.core.message.UnaryCallback;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.util.UriUtils;
+
+/**
+ * Basis {@link Resource} implementation
+ * 
+ * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ */
+public class ResourceImpl 
+extends ModelElement<ModelInstance<?>, 
+ResourceProcessableContainer, Attribute, AttributeDescription> 
+implements Typable<Resource.Type>
+{
+	/**
+	 * {@link AccessMethod}s of this {@link Resource}
+	 */
+	protected final Map<AccessMethod.Type, AccessMethod> methods;
+	
+	/**
+	 * Path of registered {@link LinkedResourceImpl} referring to 
+	 * this resource
+	 */
+	protected final List<String> links;
+	
+	/**
+	 * Extended {@link Resource} type of this
+	 * implementation
+	 */
+	protected final Class<?> resourceType;
+	
+	/**
+	 * the name of the default attribute of this resource
+	 */
+	protected String defaultAttribute;
+
+	/**
+	 * this ResourceImpl's update policy :
+	 * NONE : updates are made by the way of the client request
+	 * INIT : the first upate is made by the way of the client request
+	 * 		  and is automatic after that
+	 * AUTO : updates are automatic 
+	 */
+	protected Resource.UpdatePolicy updatePolicy;
+		
+	/**
+	 * Constructor
+	 * 
+	 * @param mediator
+	 * @param resourceType
+	 * @param service
+	 */
+	protected ResourceImpl(ModelInstance<?> modelInstance, 
+			ResourceConfig resourceConfig, ServiceImpl service)
+	{
+		super(modelInstance, service, UriUtils.getUri(
+			new String[]{service.getPath(), resourceConfig.getName(
+					service.getName())}));
+
+		this.resourceType = resourceConfig.getTypeConfig(
+				).getResourceImplementedInterface();
+		
+		this.methods = new EnumMap<AccessMethod.Type, AccessMethod>(
+				AccessMethod.Type.class);
+			
+		this.links = new ArrayList<String>();
+		
+		this.setUpdatePolicy(resourceConfig.getUpdatePolicy());
+		buildAttributes(resourceConfig);
+	}
+
+	/** 
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.ModelElementOld#
+	 * proces(org.eclipse.sensinact.gateway.core.ProcessableData)
+	 */
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void process(ResourceProcessableContainer data) 
+	{
+		if(data == null)
+		{
+			return;
+		}
+		Iterator<ResourceProcessableData> iterator = data.iterator();  
+        
+        while(iterator.hasNext())
+        {
+        	ResourceProcessableData resourceProcessableData = iterator.next();        	
+        	String attributeId = resourceProcessableData.getAttributeId();
+        	String metadataName = resourceProcessableData.getMetadataId();        	
+            try
+            {
+	           this.update(attributeId, metadataName, 
+	            		resourceProcessableData.getData(),
+	            		resourceProcessableData.getTimestamp());
+            }
+            catch (InvalidValueException e)
+            {
+            	super.modelInstance.mediator().error(e,
+            	   new StringBuilder().append("'").append(
+            		  getPath()).append( "' resource cannot be updated"
+							).toString());
+            }
+        }
+	}
+    
+	/**
+     * Updates this ResourceImpl instance. If the attributeName parameter
+     * is null the default one is targeted. If the metadataName argument
+     * is not null the {@link Metadata} with the specified name is updated
+     * 
+     * @param attributeName
+     * 		the name of the attribute to update the value of
+     * @param metadataName
+     * 		the name of the metadata to update the value of
+     * @param value
+     * 		the value to update
+     * @param timestamp
+     * 		the update timestamp
+     * 
+	 * @throws InvalidValueException 
+     */
+    protected void update(
+    		String attributeName, 
+    		String metadataName, 
+    		Object value, long timestamp) 
+    		throws InvalidValueException
+    {
+    	if(value == null)
+        {
+            super.modelInstance.mediator().warn(new StringBuilder().append(
+                "Null object value : unable to update resource '"
+                	).append(getPath()).append("'").toString());
+            return;
+        }
+    	String name = attributeName==null
+    			?this.getDefault():attributeName;
+    			
+    	if(name == null)
+    	{
+            super.modelInstance.mediator().warn(new StringBuilder().append(
+            		"Null attribute name : unable to update resource '"
+            		).append(getPath()).append("'").toString());
+            return;
+    	}
+        Attribute attribute = this.getAttribute(name); 
+        byte buildPolicy = super.getModelInstance().configuration(
+        		).getResourceBuildPolicy();
+        
+        if(attribute == null && SensiNactResourceModelConfiguration.BuildPolicy.isBuildPolicy(buildPolicy,
+        	SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED))
+        {
+        	attribute = new Attribute(super.modelInstance.mediator(), this, 
+            	name, String.class, null, Modifiable.UPDATABLE, 
+            	false);
+            	
+            if(!this.addAttribute(attribute))
+            {
+                super.modelInstance.mediator().warn(new StringBuilder().append(
+                	"Error when creating attribute '").append(name).append(
+                		"': unable to update resource '"
+                		).append(getPath()).append("'"
+                				).toString());
+                return;
+            }
+        }
+        if(attribute == null)
+        {
+            super.modelInstance.mediator().warn(new StringBuilder().append(
+            	"Null attribute '").append(name).append(
+            		"': unable to update resource '"
+            		).append(getPath()).append("'"
+            				).toString());
+            return;
+        }
+    	if(metadataName != null)
+    	{
+    		Metadata metadata=attribute.get(metadataName);
+    		
+    		if(metadata == null && SensiNactResourceModelConfiguration.BuildPolicy.isBuildPolicy(buildPolicy,
+    	        SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED))
+            {
+    			metadata = new Metadata(super.modelInstance.mediator(), 
+    			metadataName, String.class, null, Modifiable.UPDATABLE);    		
+    			attribute.addMetadata(metadata);
+            } 
+    		if(metadata == null)
+            {
+                super.modelInstance.mediator().warn(new StringBuilder().append(
+                	"Null metadata ").append(metadataName).append(
+                		": unable to update resource '"
+                		).append(getPath()).append("'"
+                				).toString());
+                return;
+            }
+            attribute.setMetadataValue(metadataName, value);
+            
+    	} else
+    	{
+        	long valueTimestamp = timestamp>0
+        			?timestamp:System.currentTimeMillis();        	
+    		attribute.setValue(value, valueTimestamp);    		
+    	}
+    }
+    
+	/**
+	 * Creates the set of {@link Attribute}s of this 
+	 * {@link ResourceImpl} according to the configuration
+	 * of the {@link ResourceConfig} passed as parameter
+	 * 
+	 * @param resourceConfig
+	 * 		the {@link ResourceConfig} holding the set of
+	 * 		{@link AttributeBuilder}s
+	 */
+	public void buildAttributes(ResourceConfig resourceConfig)
+	{
+		String parentPath = UriUtils.getParentUri(super.getPath());
+		String parentName = UriUtils.getLeaf(parentPath);
+		
+		String defaultAttributeName = resourceConfig.getTypeConfig(
+		    ).<String>getConstantValue(Resource.ATTRIBUTE_DEFAULT_PROPERTY, 
+		    		false) ;
+		this.setDefault(defaultAttributeName);
+
+		List<AttributeBuilder> builders = 
+			resourceConfig.getAttributeBuilders(
+					parentName);
+       
+		int length = builders==null?0:builders.size();			
+		int index = 0;
+		
+		for (; index < length; index++)
+		{				
+			Attribute attribute = null;		
+			try
+			{
+			  attribute = builders.get(index).getAttribute(
+				 super.modelInstance.mediator(), this, 
+				 resourceConfig.getTypeConfig());
+			  
+			} catch(InvalidAttributeException e)
+			{
+				super.modelInstance.mediator().error(e);
+			}
+			if(attribute != null)
+			{				
+				if(attribute.getName().equals(defaultAttributeName))
+				{			
+					try
+					{
+						Metadata metadata = new Metadata(
+							super.modelInstance.mediator(),
+							Attribute.NICKNAME, String.class, 
+							this.getName(), Modifiable.FIXED);	
+						
+						attribute.addMetadata(metadata);
+						
+					} catch (InvalidValueException e)
+					{
+						super.modelInstance.mediator().error(e);
+					}		
+				}		
+				this.addAttribute(attribute);
+			}
+		}
+	}
+	
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.PrimitiveCollection#
+	 * set(java.lang.String, java.lang.Object)
+	 */
+	public AttributeDescription set(String name, Object value)
+	        throws InvalidValueException
+	{
+		AttributeDescription description = null;
+		if (name == null)
+		{
+			return description;
+		}
+		Attribute attribute = this.getAttribute(name);
+		if(attribute != null)
+		{
+			if(!Modifiable.MODIFIABLE.equals(attribute.getModifiable()))
+			{
+				throw new InvalidValueException(
+					new StringBuilder().append(name).append(
+						" attribute is not modifiable"
+							).toString());
+			}
+			if(attribute.getLocked())
+			{
+				throw new InvalidValueException(
+					new StringBuilder().append(name).append(
+						" attribute has been locked by an action trigger"
+							).toString());
+			}
+			attribute.setValue(value);
+			description = (AttributeDescription) 
+					attribute.getDescription();
+		}
+		return description;
+	}
+	
+	/**
+	 * Sets the value of the default {@link Attribute} of this 
+	 * Resource if it is defined and return the extended 
+	 * {@link Description} describing it
+	 * 
+	 * @return 
+	 * 		the {@link AttributeDescription} describing this 
+	 * 		Resource's default {@link Attribute}
+	 */
+	public AttributeDescription set(Object value) 
+			throws InvalidValueException
+	{
+		return this.set(this.getDefault(), value);
+	}
+
+	/**
+	 * Adds the given {@link Attribute} to this Resource. The 
+	 * {@link Attribute} will not be added if there exist one 
+	 * with the same name. In order to update an existing 
+	 * {@link Attribute} the set methods must be used.
+	 * 
+	 * @param attribute
+	 *            the {@link Attribute} to add
+	 */
+	public boolean addAttribute(Attribute attribute)
+	{
+		return super.addElement(attribute);
+	}
+
+	/**
+	 * Removes the {@link Attribute} whose name is passed 
+	 * as parameter
+	 * 
+	 * @param primitive
+	 *            the name of the {@link Attribute} to remove
+	 */
+	public boolean removeAttribute(String attributeName)
+	{
+		if (attributeName == null ||
+				Resource.NAME.intern() == attributeName.intern() ||
+				Resource.TYPE.intern() == attributeName.intern() ||
+				DataResource.VALUE.intern() == attributeName.intern())
+		{
+			return false;
+		}
+		return (super.removeElement(attributeName)!=null);
+	}
+    
+    /**
+	 * Returns the {@link Attribute} of this
+	 * ResourceImpl, whose name is the same as 
+	 * the specified one 
+	 * 
+	 * @param name
+	 * 		the name of the searched {@link Attribute}
+	 * @return
+	 * 		the  {@link Attribute} with the specified 
+	 * 		name 
+	 */
+	public Attribute getAttribute(String name)
+	{
+		return super.element(name);
+	}
+
+	/**
+	 * Returns the {@link AttributeDescription} of the 
+	 * {@link Attribute} owned by this ResourceImpl 
+	 * and whose name is passed as parameter
+	 * 
+	 * @param name
+	 * 		the name of the {@link Attribute} to return the 
+	 * 		description of
+	 * @return 
+	 * 		the {@link AttributeDescription} of the {@link Attribute} 
+	 * 		whose name is passed as parameter or null if this ResourceImpl 
+	 * 		does not own a {@link Attribute} with the specified name
+	 */
+    public AttributeDescription getDescription(String name)
+	{
+		AttributeDescription description = null;
+		Attribute attribute = getAttribute(name);		
+		if(attribute != null)
+		{
+			description = attribute.getDescription();
+		}
+		return description;
+	}
+	
+	/**
+	 * Returns the array of {@link Description}s of all 
+	 * owned {@link Describable}s
+	 * 
+	 * @return 
+	 * 		the {@link Description}s of all 
+	 * 		owned {@link Describable}s
+	 */
+	public List<AttributeDescription> getAllDescriptions()
+	{
+		List<AttributeDescription> descriptions = 
+				new ArrayList<AttributeDescription>();  
+		
+		synchronized(super.elements)
+		{ 			
+			Iterator<Attribute> iterator = super.elements.iterator();			
+			while(iterator.hasNext())
+			{
+				descriptions.add(iterator.next(
+					).<AttributeDescription>getDescription());
+			}
+		}
+		return descriptions;
+	}
+
+	/**
+	 * Returns the name of the default {@link Attribute}
+	 * of this ResourceImpl
+	 * 
+	 * @return 
+	 * 		the name of this ResourceImpl's default 
+	 * 		{@link Attribute}
+	 */
+    public String getDefault()
+    {
+	    return this.defaultAttribute;
+    }
+	
+	/**
+	 * Defines the name of the default {@link Attribute}
+	 * of this ResourceImpl
+	 * 
+	 * @param defaultAttribute
+	 *         the name of the default {@link Attribute}
+	 */
+	public void setDefault(String defaultAttribute)
+	{
+		this.defaultAttribute = defaultAttribute;
+	}
+	
+	/**
+	 * This ResourceImpl is hidden if its default
+	 * attribute is
+	 * 
+	 * @return
+	 * 		<ul>
+	 * 			<li>true if this ResourceImpl is hidden;</li>
+	 * 			<li>false otherwise</li>
+	 * 		</ul>
+	 */
+	public boolean isHidden()
+	{
+		if(this.defaultAttribute == null)
+		{
+			return false;
+		}
+		Attribute attribute = this.getAttribute(defaultAttribute);
+		return attribute.isHidden();
+	}
+	
+	
+	/**
+	 * Returns the extended {@link Resource} type
+	 * of this resource
+	 * 
+	 * @return
+	 * 		the extended {@link Resource} type of
+	 * 		this resource
+	 */
+	@SuppressWarnings("unchecked")
+    public <S extends Resource> Class<S> getResourceType() 
+	{ 
+		return (Class<S>) this.resourceType;
+	}	
+
+    /**
+     * @inheritDoc
+     *
+     * @see Elements#getName()
+     */
+	@Override
+    public String getName()
+    {
+    	return (String) this.getAttribute(
+	    	Resource.NAME).getValue();
+    }
+    
+    /**
+     * @inheritDoc
+     *
+     * @see Typable#getType()
+     */
+	@Override
+    public Resource.Type getType()
+    {
+    	return (Resource.Type) this.getAttribute(
+	    	Resource.TYPE).getValue();
+    }
+    	
+	/**
+	 * Registers a listener for the attribute whose name
+	 * is passed as parameter
+	 * 
+	 * @param attributeName
+	 * 		the name of the attribute to listen
+	 * @param recipient
+	 * 		the {@link Recipient} to callback
+	 * @param conditions
+	 * 		the set of {@link Constraint}s applied
+	 * 		on the listened events
+	 * 
+	 * @return
+	 * 		a registration identifier if the listener has
+	 * 		been registered properly; null otherwise  
+	 */
+	protected String listen(String attributeName, 
+			Recipient recipient, Set<Constraint> conditions)
+	{
+		StringBuilder buffer = new StringBuilder();
+		buffer = new StringBuilder();
+		buffer.append(this.getPath());
+		buffer.append(UriUtils.PATH_SEPARATOR);
+		buffer.append(attributeName);						
+		String filter = buffer.toString();
+		
+		StringBuilder callbackIdBuffer = new StringBuilder();
+		callbackIdBuffer.append(this.getName());
+		callbackIdBuffer.append(Math.abs(filter.hashCode()));
+		callbackIdBuffer.append(System.currentTimeMillis());
+		
+		String callbackId = callbackIdBuffer.toString();
+		SnaCallback callback = null;
+
+		switch(recipient.getSnaCallBackType())
+		{
+			case BUFFERERIZED_AND_SCHEDULED:
+				callback = new ScheduledBufferCallback(
+						super.modelInstance.mediator(),
+						callbackId, null,recipient,
+						recipient.getLifetime(), 
+						recipient.getSchedulerDelay(), 
+						recipient.getBufferSize());
+				break;
+			case BUFFERIZED:
+				callback = new BufferCallback(
+						super.modelInstance.mediator(),
+						callbackId, null,recipient,
+						recipient.getLifetime(), 
+						recipient.getBufferSize());
+				break;
+			case SCHEDULED:
+				callback = new ScheduledCallback(
+						super.modelInstance.mediator(),
+						callbackId, null, recipient,
+						recipient.getLifetime(), 
+						recipient.getSchedulerDelay());
+				break;
+			case UNARY:
+				callback = new UnaryCallback(
+						super.modelInstance.mediator(), 
+						callbackId, null,recipient,
+						recipient.getLifetime());
+				break;
+			default:
+				break;
+		}
+		if(callback != null)
+		{
+			super.modelInstance.registerCallback(
+				new SubscriptionFilter(super.modelInstance.mediator(),
+						filter, conditions), callback);
+			
+			return callbackId;
+		}
+		return null;
+	}
+	
+	/**
+	 * Unregisters the listener whose callback's identifier
+	 * is passed as parameter
+	 * 
+	 * @param callbackId
+	 * 		the callback identifier
+	 */
+	protected void unlisten(String callbackId)
+	{
+		super.modelInstance.unregisterCallback(callbackId);
+	}
+	
+	/**
+	 * Returns the {@link AccessMethod} of this resource whose 
+	 * {@link AccessMethod.Type} is passed as parameter
+	 * 
+	 * @param type
+	 * 		the {@link AccessMethod.Type} of the {@link AccessMethod}
+	 * 		to return
+	 * @return
+	 * 		the {@link AccessMethod} of this resource of the 
+	 * 		specified type
+	 */
+	public AccessMethod getAccessMethod(AccessMethod.Type type)
+	{
+		return this.methods.get(type);
+	}
+    
+    /**
+	 * Registers a {@link Signature} to create and to associate
+	 * with the specified {@link AccessMethodExecutor}
+	 * 
+	 * @param type
+	 * 		the type of the {@link AccessMethod} associated
+	 * 		to the signature to create
+	 * @param parameterNames
+	 * 		the array of parameter names of the signature
+	 * 		to create
+	 * @param parameterTypes
+	 * 		the array of parameter types of the signature
+	 * 		to create
+	 * @param executor
+	 * 		the {@link AccessMethodExecutor} to associate to
+	 * 		the signature to create
+	 * @param policy
+	 * 		the execution policy of the {@link AccessMethodExecutor}
+	 * @throws InvalidValueException
+	 * @throws InvalidConstraintDefinitionException 
+	 */
+	public AccessMethod registerExecutor(
+			AccessMethod.Type type, 
+			Class<?>[] parameterTypes, 
+			String[] parameterNames, 
+			AccessMethodExecutor executor,
+			AccessMethodExecutor.ExecutionPolicy policy) 
+			throws InvalidValueException
+	{		
+        AccessMethod method = this.getAccessMethod(type);
+        if(method != null)
+        {
+        	((AbstractAccessMethod)method).addSignature(
+        			parameterTypes, parameterNames, 
+        				executor, policy);
+        }
+		return method;
+	}
+	
+	/**
+	 * Registers the {@link Signature} passed as parameter 
+	 * and associates it with the specified 
+	 * {@link AccessMethodExecutor}
+	 * 
+	 * @param signature
+	 * 		the {@link Signature} to register
+	 * @param executor
+	 * 		the {@link AccessMethodExecutor} to associate 
+	 * 		to the {@link Signature} to register
+	 * @param policy
+	 * 		the execution policy of the specified 
+	 * 		{@link AccessMethodExecutor}
+	 * @throws InvalidConstraintDefinitionException 
+	 * @throws InvalidValueException
+	 */
+	public AccessMethod registerExecutor(
+			Signature signature, AccessMethodExecutor executor,
+			AccessMethodExecutor.ExecutionPolicy policy)
+	{
+		AccessMethod.Type type = AccessMethod.Type.valueOf(signature.getName());
+		AccessMethod method = this.getAccessMethod(type);
+        if(method != null)
+        {        
+        	((AbstractAccessMethod)method).addSignature(
+        			signature, executor, policy);
+        }
+		return method;
+	}
+    
+    /**
+	 * Returns the {@link Enumeration} of the set 
+	 * of {@link Attribute}s of this ResourceImpl
+	 * 
+	 * @return
+	 * 		the the {@link Enumeration} of this 
+	 * 		ResourceImpl's {@link Attribute}s
+	 */
+    public Enumeration<Attribute> attributes()
+    {
+    	return super.elements();
+    }
+
+    /**
+     * @param attribute
+     * @param value
+     * @param hasChanged 
+     */
+    @SuppressWarnings("rawtypes")
+	protected void updated(Attribute attribute, Object value, boolean hasChanged)
+    {  	
+    	if(!super.started.get() || attribute.isHidden())
+    	{
+    		return;
+    	}
+    	String[] links = new String[this.links.size()+1];
+    	
+    	synchronized(this.links)
+    	{
+    		this.links.toArray(links);
+    	}
+    	links[this.links.size()] = this.getPath();
+    	int index = 0;
+    	int length = links.length;   
+
+		JSONObject attributeDescription = new JSONObject(
+			attribute.getDescription().getJSON());
+		
+    	for(;index < length; index++)
+    	{
+	    	StringBuilder buffer = new StringBuilder();
+			buffer = new StringBuilder();
+			buffer.append(links[index]);
+			buffer.append(UriUtils.PATH_SEPARATOR);
+			buffer.append(attribute.getName());
+			
+			String path = buffer.toString();
+			
+			SnaUpdateMessage message = SnaNotificationMessageImpl.Builder.<
+			  SnaUpdateMessage>notification(super.modelInstance.mediator(), 
+			    SnaUpdateMessage.Update.ATTRIBUTE_VALUE_UPDATED,
+			    path);
+			
+			message.setNotification(attributeDescription);	
+			((AbstractSnaMessage)message).put("hasChanged", hasChanged, true);
+			 
+			super.modelInstance.postMessage(message);
+    	}
+    } 
+
+	/**
+	 * Registers the path of a {@link LinkedResourceImpl} linked 
+	 * to this ResouceImpl instance
+	 *  
+	 * @param path
+	 * 		the path of the {@link LinkedResourceImpl} linked 
+	 * 		to this ResouceImpl instance
+	 */
+    protected void registerLink(String path)
+    {
+    	this.links.add(path);
+    }
+
+	/** 
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.SnaObject#isRegistered()
+	 */
+    @Override
+	public void start() 
+	{	
+		if(!super.getModelInstance().isRegistered() || this.isHidden())
+    	{
+    		//already registered or hidden resource
+    		return;
+    	}  
+		if(super.started.get())
+    	{
+    		this.modelInstance.mediator().debug("%s already started", this.getName());
+    		return;
+    	}    	
+		super.started.set(true);
+		super.modelInstance.mediator().debug( "'%s' resource registered",this.getName());
+		
+		String path = this.getPath();
+		
+		SnaLifecycleMessage notification = SnaNotificationMessageImpl.Builder.<
+	    	SnaLifecycleMessage>notification(super.modelInstance.mediator(), 
+	    	SnaLifecycleMessage.Lifecycle.RESOURCE_APPEARING, path);
+    	
+    	JSONObject notificationObject = new JSONObject();
+    	
+    	notificationObject.put(SnaConstants.ADDED_OR_REMOVED, 
+    			SnaLifecycleMessage.Lifecycle.RESOURCE_APPEARING.name());    	
+    	notificationObject.put(Resource.TYPE, this.getType()); 
+    	
+    	notification.setNotification(notificationObject);
+    		
+		Attribute attribute = null;
+		
+    	if(this.defaultAttribute!=null && (attribute = 
+			this.getAttribute(this.defaultAttribute))!=null)
+    	{   
+    		JSONObject jsonAttribute = new JSONObject(
+    			attribute.getDescription().getJSON());
+    		
+    		MetadataDescription[] metadataDescriptions = 
+    				attribute.getAllDescriptions();
+    		
+    		int index =0;
+    		int length = metadataDescriptions.length;
+    		
+    		for(;index < length; index++)
+    		{
+    			MetadataDescription metadataDescription = 
+    					metadataDescriptions[index];    			
+    			String metadataName = metadataDescription.getName().intern();
+    			
+    			if (Modifiable.FIXED.equals(metadataDescription.getModifiable())
+    				&& Metadata.LOCKED.intern()!= metadataName
+    				&& Metadata.MODIFIABLE.intern()!= metadataName
+    	    		&& Metadata.HIDDEN.intern()!= metadataName
+    	    		&& Attribute.NICKNAME.intern()!= metadataName)
+    			{
+    				 jsonAttribute.put(metadataDescription.getName(), 
+    					PrimitiveDescription.toJson(metadataDescription.getType(),
+    						metadataDescription.getValue()));
+    			}
+    		}    		
+    		((SnaLifecycleMessageImpl)notification).put("initial", jsonAttribute);
+    	}
+    	super.modelInstance.postMessage(notification);
+	}
+    
+	/**
+	 * Deletes all associated access method
+	 * and the link with its description 
+	 * object
+	 */
+    public void stop()
+    {
+    	if(this.isHidden())
+    	{
+    		return;
+    	}
+    	AccessMethod.Type[] types = AccessMethod.Type.values();
+    	
+    	int index = 0;
+    	int length = types==null?0:types.length;
+    	for(;index < length; index++)
+    	{
+    		AccessMethod method = this.methods.remove(types[index]);
+    		if(method != null)
+    		{
+    			((AbstractAccessMethod)method).stop();
+    		}
+    	}	    
+    	super.stop();
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @see ModelElement#
+     * passOn(AccessMethod.Type,
+     * java.lang.String, java.lang.Object[])
+     */
+    @Override
+	protected <TASK> TASK passOn(AccessMethod.Type type, 
+			String uri, Object[] parameters) 
+			throws Exception 
+	{
+    	if (type != AccessMethod.Type.GET ||
+    			this.getUpdatePolicy() == Resource.UpdatePolicy.NONE ||
+    			this.getUpdatePolicy() == Resource.UpdatePolicy.INIT)
+    	{	
+			if(type == AccessMethod.Type.GET 
+				&& this.getUpdatePolicy() == Resource.UpdatePolicy.INIT)
+			{
+				this.setUpdatePolicy(Resource.UpdatePolicy.AUTO);
+			}
+			return super.passOn(type, uri, parameters);			
+    	}
+		return null;
+	}
+	
+	/**
+	 * Registers the {@link AccessMethod} passed as parameter, 
+	 * mapped to the specified {@link AccessMethod.Type}
+	 * 
+	 * @param type
+	 * 		the {@link AccessMethod.Type} of the {@link AccessMethod} 
+	 * 		to register
+	 * @param method
+	 * 		the {@link AccessMethod} to register
+	 */
+    void registerMethod(AccessMethod.Type type, AccessMethod method)
+    {
+    	if(this.methods.get(type) == null)
+    	{
+    		this.methods.put(type, method);
+    	}
+    }
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see ModelElement#getProxyType()
+	 */
+	@Override
+	protected Class<?> getProxyType() 
+	{
+		return this.resourceType;
+	}
+	
+	/**
+	 * @inheritDoc
+	 *
+	 * @see ModelElement#getRegisteredEvent()
+	 */
+	@Override
+	protected SnaLifecycleMessage.Lifecycle getRegisteredEvent()
+	{
+		return SnaLifecycleMessage.Lifecycle.RESOURCE_APPEARING;
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see ModelElement#getUnregisteredEvent()
+	 */
+	@Override
+	protected SnaLifecycleMessage.Lifecycle getUnregisteredEvent()
+	{
+		return SnaLifecycleMessage.Lifecycle.RESOURCE_DISAPPEARING;
+	}
+
+	/**
+	 * Defines this resource's update policy
+	 * 
+	 * @param updatePolicy
+	 * 		this resource's update policy
+	 */
+    public void setUpdatePolicy(Resource.UpdatePolicy updatePolicy)
+    {
+    	this.updatePolicy = updatePolicy;
+    }
+    
+    /**
+	 * Returns this resource's update policy
+	 * 
+	 * @return
+	 * 		this resource's update policy
+	 */
+    public Resource.UpdatePolicy getUpdatePolicy()
+    {
+    	return this.updatePolicy;
+    }
+	
+	/**
+	 * @inheritDoc
+	 *
+	 * @see ModelElement#
+	 * getElementProxy(AccessLevelOption,
+	 * Nameable)
+	 */
+	@Override
+	protected AttributeDescription getElementProxy(
+			AccessLevelOption accessLevelOption, Attribute element)
+	        throws ModelElementProxyBuildException
+	{		
+	    return element.<AttributeDescription>getDescription();
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see ModelElement#
+	 * getProxy(AccessMethod.Type[],
+	 * java.util.List, int)
+	 */
+	@Override
+	public SensiNactResourceModelElementProxy<AttributeDescription> getProxy(
+		List<MethodAccessibility> methodAccessibilities,
+		List<AttributeDescription> proxies)
+	{
+		if(this.isHidden())
+		{
+			return null;
+		}
+	    return new ResourceProxy(super.modelInstance.mediator(), 
+	    		this, proxies, methodAccessibilities);
+	}
+
+}

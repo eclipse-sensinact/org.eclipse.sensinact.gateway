@@ -1,0 +1,103 @@
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
+ */
+
+package org.eclipse.sensinact.gateway.app.manager.json;
+
+import org.eclipse.sensinact.gateway.common.primitive.JSONable;
+import org.json.JSONObject;
+
+/**
+ * Wrapper of a parameter
+ *
+ * @author Remi Druilhe
+ */
+public class AppParameter implements JSONable {
+
+    protected Object value;
+    protected String type;
+
+    /**
+     * Java constructor of a parameter.
+     * @param value the value of the parameter
+     * @param type the string type of the parameter. It include AppManager specifics types
+     *             (resource, variable, event, operator).
+     */
+    public AppParameter(Object value, String type) {
+        this.value = value;
+        this.type = type;
+    }
+
+    /**
+     * JSON constructor of a parameter
+     * @param json the json value of the parameter
+     */
+    public AppParameter(JSONObject json) {
+        this.value = json.get(AppJsonConstant.VALUE);
+        this.type = json.getString(AppJsonConstant.TYPE);
+    }
+
+    /**
+     * Get the value of the parameter
+     * @return the value
+     */
+    public Object getValue() {
+        return this.value;
+    }
+
+    /**
+     * Get the type of the parameter
+     * @return the type
+     */
+    public String getType() {
+        return this.type;
+    }
+
+    /**
+     * @see Object#equals(Object)
+     */
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        AppParameter parameter = (AppParameter) o;
+
+        if (!value.equals(parameter.value)) {
+            return false;
+        }
+
+        return type.equals(parameter.type);
+
+    }
+
+    /**
+     * @see Object#hashCode()
+     */
+    public int hashCode() {
+        int result = value.hashCode();
+        result = 31 * result + type.hashCode();
+        return result;
+    }
+
+    /**
+     * @see JSONable#getJSON()
+     */
+    public String getJSON() {
+        return new JSONObject()
+                .put(AppJsonConstant.VALUE, value)
+                .put(AppJsonConstant.TYPE, type)
+                .toString();
+    }
+}

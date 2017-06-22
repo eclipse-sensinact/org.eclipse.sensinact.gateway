@@ -1,0 +1,38 @@
+<!--
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
+
+<resourceInfos xmlns="http://org.eclipse.sensinact/resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../../platform/sensinact-generic/src/main/resources/sensinact-resource.xsd">
+    <resourceInfo xsi:type="resourceInfoAction" name="DISPLAY"  target="screen">
+        <identifier xsi:type="stringContent">DISPLAY</identifier>
+       <methods>
+        <method type="ACT">
+            <parameter name="message" type="string"/>
+            <references>
+                <reference reference="MESSAGE" passOn="true" xsi:type="copyReference" index="0"/>
+            </references>
+        </method>
+      </methods>
+    </resourceInfo>
+    <resourceInfo xsi:type="resourceInfoVariable" name="MESSAGE"  target="screen">
+        <identifier xsi:type="stringContent">MESSAGE</identifier>   
+	    <attributes>
+	    	<attribute name="value" type="string">
+	    		<value>Hello sensiNact</value>
+	    	</attribute>
+	    </attributes>
+    </resourceInfo>
+    <devices>
+        <device identifier="billboard">
+            <service name="screen"/>
+        </device>
+    </devices>
+</resourceInfos>

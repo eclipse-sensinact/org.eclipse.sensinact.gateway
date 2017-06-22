@@ -1,0 +1,98 @@
+<!--
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.sensinact.gateway</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.5-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>sensinact-core</artifactId>
+    <packaging>bundle</packaging>
+    	
+    <name>sensiNact IoT Gateway - Core</name>
+
+	<dependencies>
+        <dependency>
+            <groupId>org.eclipse.sensinact.gateway</groupId>
+            <artifactId>sensinact-common</artifactId>
+            <version>${project.version}</version>
+			<scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.sensinact.gateway</groupId>
+            <artifactId>sensinact-utils</artifactId>
+            <version>${project.version}</version>
+			<scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.sensinact.gateway</groupId>
+            <artifactId>sensinact-datastore-api</artifactId>
+            <version>${project.version}</version>
+			<scope>compile</scope>
+        </dependency>
+		<dependency>
+			<groupId>org.skyscreamer</groupId>
+			<artifactId>jsonassert</artifactId>
+			<version>1.2.3</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	
+    <!-- Build -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Bundle-Activator>org.eclipse.sensinact.gateway.core.osgi.Activator</Bundle-Activator>
+                        <Export-Package>
+                            org.eclipse.sensinact.gateway.core,
+                            org.eclipse.sensinact.gateway.core.message,
+                            org.eclipse.sensinact.gateway.core.method,
+                            org.eclipse.sensinact.gateway.core.method.trigger,
+                            org.eclipse.sensinact.gateway.core.method.builder,
+                            org.eclipse.sensinact.gateway.core.osgi,
+                            org.eclipse.sensinact.gateway.core.security
+                        </Export-Package>
+                        <!--
+                        <Import-Package>
+                        	org.osgi.service.condpermadmin,
+                        	org.osgi.service.permissionadmin,
+                        	org.eclipse.sensinact.gateway.common.execution,
+                        	org.eclipse.sensinact.gateway.datastore.api
+                        </Import-Package>
+                        -->
+                        <DynamicImport-Package>
+                        	org.eclipse.sensinact.gateway.core.security.impl
+                        </DynamicImport-Package>
+                        <Require-Capability>
+                            org.eclipse.sensinact.security,
+                            org.eclipse.sensinact.datastore,
+                            org.eclipse.sensinact.datastore.connector,
+                            org.eclipse.sensinact.signature.validator
+                        </Require-Capability>
+                        <Include-Resource>
+                            about.html
+                        </Include-Resource>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

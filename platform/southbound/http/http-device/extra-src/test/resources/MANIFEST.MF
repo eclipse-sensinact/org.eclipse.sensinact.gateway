@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Import-Package: org.eclipse.sensinact.gateway.sthbnd.http;version="1.4.0",org.eclipse.
+ sensinact.gateway.sthbnd.http.smpl;version="1.4.0",org.eclipse.sensinact.gateway.sthbn
+ d.http.mid;version="1.4.0",org.eclipse.sensinact.gateway.sthbnd.http.task;versio
+ n="1.4.0",org.eclipse.sensinact.gateway.sthbnd.http.annotation;version="1.4.0",org
+ .eclipse.sensinact.gateway.common.bundle;version="1.4.0",org.eclipse.sensinact.gateway.ge
+ neric;version="1.4.0",org.json;version="1.4.0"
+Tool: Bnd-2.3.0.201405100607
+Bundle-Name: sensiNact IoT Gateway - HTTP Protocol Device Moke
+Created-By: 1.6.0_45 (Sun Microsystems Inc.)
+Bundle-Vendor: Eclipse
+Bundle-Version: 1.3.0.20170212
+Bnd-LastModified: 1486914830926
+Bundle-ManifestVersion: 2
+Bundle-Activator: org.eclipse.sensinact.gateway.sthbnd.http.test.bundle1.Activator
+Bundle-Description: sensiNact IoT Gateway - HTTP Protocol Device Moke
+Bundle-SymbolicName: http-device-moke

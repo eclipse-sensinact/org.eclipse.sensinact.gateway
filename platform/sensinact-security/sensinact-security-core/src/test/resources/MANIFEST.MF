@@ -1,0 +1,369 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1479395256927
+Build-By: Eclipse
+Build-Jdk: 1.6.0_38
+Built-By: CM239742
+Bundle-Description: sensiNact IoT Gateway - Security Core
+Bundle-ManifestVersion: 2
+Bundle-Name: sensiNact IoT Gateway - Security Core
+Bundle-SymbolicName: sensinact-security-core
+Bundle-Vendor: Eclipse
+Bundle-Version: 1.3.0.20161117
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.eclipse.sensinact.gateway.core.security.impl;version="1.3.0"
+Fragment-Host: sensinact-core
+Import-Package: org.eclipse.sensinact.gateway.common.bundle;version="[1.3,2)",org.eclipse
+ .sensinact.gateway.common.execution;version="[1.3,2)",org.eclipse.sensinact.gateway.com
+ mon.primitive;version="[1.3,2)",org.eclipse.sensinact.gateway.core,org.eclipse.sensinact.gate
+ way.core.message;version="[1.3,2)",org.eclipse.sensinact.gateway.core.security,org.
+ eclipse.sensinact.gateway.datastore.api;version="[1.3,2)",org.eclipse.sensinact.gateway.util
+ ;version="[1.3,2)",org.eclipse.sensinact.gateway.util.tree;version="[1.3,2)",org.j
+ son;version="[1.3,2)",org.osgi.framework;version="[1.6,2)"
+Provide-Capability: org.eclipse.sensinact.security,org.eclipse.sensinact.datastore,org.eclipse.sensinact.
+ datastore.connector,org.eclipse.sensinact.signature.validator
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.6))"
+Tool: Bnd-2.3.0.201405100607
+
+Name: META-INF/services/org.eclipse.sensinact.gateway.core.security.SecuredAccessFa
+ ctory
+SHA1-Digest: k1YMAfCiu5NP4Kwq1tYCPU3jH9Y=
+
+Name: fr/cea/sna/gateway/core/security/dao/AbstractImmutableSnaDAO.class
+SHA1-Digest: AZype6fN9G3Ph4T9EN7wA/ZxmrU=
+
+Name: fr/cea/sna/gateway/core/security/dao/AbstractMutableSnaDAO.class
+SHA1-Digest: XjWiLorxIR29vjqcOJm7PGCS+9g=
+
+Name: fr/cea/sna/gateway/core/security/dao/AbstractSnaDAO$1.class
+SHA1-Digest: ZC65Mv3uVMlwwOWTL3m//k+PjJc=
+
+Name: fr/cea/sna/gateway/core/security/dao/AbstractSnaDAO$2.class
+SHA1-Digest: 7gpBAEF1W8+E2IA+1hP7S3k8Vl0=
+
+Name: fr/cea/sna/gateway/core/security/dao/AbstractSnaDAO$3.class
+SHA1-Digest: L2kucCGw4wVf32nV6+11tdWm6LI=
+
+Name: fr/cea/sna/gateway/core/security/dao/AbstractSnaDAO$4.class
+SHA1-Digest: bLUnWYs2spPn6pGSuGm0x8J5ZNE=
+
+Name: fr/cea/sna/gateway/core/security/dao/AbstractSnaDAO$UserDefinedSel
+ ectStatement.class
+SHA1-Digest: pqgLkk9WVV/58OBU3bfwhCPSTxk=
+
+Name: fr/cea/sna/gateway/core/security/dao/AbstractSnaDAO.class
+SHA1-Digest: VD3TiuleNx+WFlY11b7LezCuHpE=
+
+Name: fr/cea/sna/gateway/core/security/dao/AgentAccessDAO$1.class
+SHA1-Digest: +iuqNn6Dlj1u7+qvzg4k0TFanSA=
+
+Name: fr/cea/sna/gateway/core/security/dao/AgentAccessDAO.class
+SHA1-Digest: Z6L1xgR2p0XwPLwU8xaOLCKeuFs=
+
+Name: fr/cea/sna/gateway/core/security/dao/AgentAccessLevelDAO$1.class
+SHA1-Digest: 716QigTFj1mLaskqScqzyfOeE1k=
+
+Name: fr/cea/sna/gateway/core/security/dao/AgentAccessLevelDAO$2.class
+SHA1-Digest: CkLbriDsyR7CoCoF8qafJlmrirk=
+
+Name: fr/cea/sna/gateway/core/security/dao/AgentAccessLevelDAO.class
+SHA1-Digest: PhAm2e48UVCAetJfJBpCdBp++aI=
+
+Name: fr/cea/sna/gateway/core/security/dao/AgentDAO$1.class
+SHA1-Digest: WppYrs/zbvNn0KHHuFbqOMnmJcs=
+
+Name: fr/cea/sna/gateway/core/security/dao/AgentDAO$2.class
+SHA1-Digest: 3GaXVwNsBySERMB23l8mxjDwejs=
+
+Name: fr/cea/sna/gateway/core/security/dao/AgentDAO$3.class
+SHA1-Digest: DzCXMpdhTn+09fsCjVU0kKR0Km4=
+
+Name: fr/cea/sna/gateway/core/security/dao/AgentDAO.class
+SHA1-Digest: S1cKa4AUSk9DBQhxuaVwHW3wK9M=
+
+Name: fr/cea/sna/gateway/core/security/dao/AuthenticatedDAO$1.class
+SHA1-Digest: o8RWYSkm6jxg12u19bEOsoFCJ/4=
+
+Name: fr/cea/sna/gateway/core/security/dao/AuthenticatedDAO.class
+SHA1-Digest: nvJITo8DY/rbfOmWvdP+CiKbg+o=
+
+Name: fr/cea/sna/gateway/core/security/dao/BundleDAO$1.class
+SHA1-Digest: h23szS+nTQw5WOslYdzmN0mUh6U=
+
+Name: fr/cea/sna/gateway/core/security/dao/BundleDAO$2.class
+SHA1-Digest: TntVennAeVmiGAFQf8g+gb1+jFM=
+
+Name: fr/cea/sna/gateway/core/security/dao/BundleDAO.class
+SHA1-Digest: c7MVudwtuSRKXy5lUhaHR3X4GB0=
+
+Name: fr/cea/sna/gateway/core/security/dao/DAOException.class
+SHA1-Digest: SMWVSHJfGuY8qLqucgD/gUnMA4E=
+
+Name: fr/cea/sna/gateway/core/security/dao/DataStoreConnector$1.class
+SHA1-Digest: q3MyNMtZvj1HPPXQ8D/xXkzxooY=
+
+Name: fr/cea/sna/gateway/core/security/dao/DataStoreConnector$2.class
+SHA1-Digest: PQjn9iopiA7z1AztE/exsGUGyJw=
+
+Name: fr/cea/sna/gateway/core/security/dao/DataStoreConnector$3.class
+SHA1-Digest: y6aqJOZ6/otDuawWwIX3fFAX4FY=
+
+Name: fr/cea/sna/gateway/core/security/dao/DataStoreConnector$4.class
+SHA1-Digest: 7AQUW9QwD9TQyDvOcUAXtz1VUlE=
+
+Name: fr/cea/sna/gateway/core/security/dao/DataStoreConnector.class
+SHA1-Digest: 2Ql4DHzNqhhFOLzMg2FccKx5X8w=
+
+Name: fr/cea/sna/gateway/core/security/dao/MethodDAO$1.class
+SHA1-Digest: RyY++agF9Dqe4+k85nyyw2tsbzw=
+
+Name: fr/cea/sna/gateway/core/security/dao/MethodDAO$2.class
+SHA1-Digest: eAVDWUgK2Jn4rf46sj547sMi8nc=
+
+Name: fr/cea/sna/gateway/core/security/dao/MethodDAO.class
+SHA1-Digest: q6tv73xDcmUV3kVOgBoiSNV8ttM=
+
+Name: fr/cea/sna/gateway/core/security/dao/ObjectAccessDAO$1.class
+SHA1-Digest: jWFVkF0NTYXEK24iTYQg1m74zXI=
+
+Name: fr/cea/sna/gateway/core/security/dao/ObjectAccessDAO.class
+SHA1-Digest: pq8+zghROMSlNfbqC6wGuPVfdbo=
+
+Name: fr/cea/sna/gateway/core/security/dao/ObjectDAO$1.class
+SHA1-Digest: wik+FnhBIPI3pRNklwKACvXArG4=
+
+Name: fr/cea/sna/gateway/core/security/dao/ObjectDAO.class
+SHA1-Digest: HVIW09+5REY+O99fyDYEISf7cLQ=
+
+Name: fr/cea/sna/gateway/core/security/dao/ObjectProfileAccessDAO$1.clas
+ s
+SHA1-Digest: YMNsSky9GcHNiomHGL74ZBhle6o=
+
+Name: fr/cea/sna/gateway/core/security/dao/ObjectProfileAccessDAO.class
+SHA1-Digest: PPpm9PwLx+luZbilDQucbPP5fdc=
+
+Name: fr/cea/sna/gateway/core/security/dao/ObjectProfileDAO$1.class
+SHA1-Digest: VwCSu8EESx98XQL36l4bca6R90s=
+
+Name: fr/cea/sna/gateway/core/security/dao/ObjectProfileDAO$2.class
+SHA1-Digest: dBzxzvo8ZmM/2wafL8aOwH7VB+U=
+
+Name: fr/cea/sna/gateway/core/security/dao/ObjectProfileDAO.class
+SHA1-Digest: 8w2ScGlO5Gj9v9vdj3HEhHgfw8M=
+
+Name: fr/cea/sna/gateway/core/security/dao/SnaDAO.class
+SHA1-Digest: qok52jwOj9WeRbhO538CF1Y7+LQ=
+
+Name: fr/cea/sna/gateway/core/security/dao/UserAccessDAO$1.class
+SHA1-Digest: aBdcfiuzpf8LCoPTUgLbhXhbCUA=
+
+Name: fr/cea/sna/gateway/core/security/dao/UserAccessDAO$2.class
+SHA1-Digest: 3L0XEU4yEz4B0hhVrlq0aOoaf0k=
+
+Name: fr/cea/sna/gateway/core/security/dao/UserAccessDAO$3.class
+SHA1-Digest: Pi25u9ogtxhOoO+dtlZJ4vhrOBY=
+
+Name: fr/cea/sna/gateway/core/security/dao/UserAccessDAO.class
+SHA1-Digest: jyRxJcrSI8n/adVrw91R0o0ufFw=
+
+Name: fr/cea/sna/gateway/core/security/dao/UserAccessLevelDAO$1.class
+SHA1-Digest: sJNng4+XwFSMK4S4aUxFcLzX4xM=
+
+Name: fr/cea/sna/gateway/core/security/dao/UserAccessLevelDAO$2.class
+SHA1-Digest: OWGMLkGGdpfTMsW+PJ+K7FlEw2s=
+
+Name: fr/cea/sna/gateway/core/security/dao/UserAccessLevelDAO.class
+SHA1-Digest: Rwd/P41qMdEwcCMVxO6z384SQwk=
+
+Name: fr/cea/sna/gateway/core/security/dao/UserDAO$1.class
+SHA1-Digest: /XnjepnACtLslu6VNpb2SrF9ZUI=
+
+Name: fr/cea/sna/gateway/core/security/dao/UserDAO$2.class
+SHA1-Digest: Bs3sgQ7BIBYLrRBkkuQVdgXSAn4=
+
+Name: fr/cea/sna/gateway/core/security/dao/UserDAO$3.class
+SHA1-Digest: atbMRhOcA5fCZzGQtHUbsEcgcSE=
+
+Name: fr/cea/sna/gateway/core/security/dao/UserDAO.class
+SHA1-Digest: WtDHycNDqSrgSWYp/aYIpvW4a2s=
+
+Name: fr/cea/sna/gateway/core/security/dao/directive/CreateDirective.cla
+ ss
+SHA1-Digest: RLLJIgPuF7VPyjkYg0LqcVKdnvQ=
+
+Name: fr/cea/sna/gateway/core/security/dao/directive/DeleteDirective.cla
+ ss
+SHA1-Digest: S8HpOmzo6zOqTBEekLSi8DUCUfA=
+
+Name: fr/cea/sna/gateway/core/security/dao/directive/Directive.class
+SHA1-Digest: Q59mhLDXaTNyO4MlRPs9k73xIvk=
+
+Name: fr/cea/sna/gateway/core/security/dao/directive/KeyDirective$Foreig
+ nKeyEntry.class
+SHA1-Digest: s5QJ1A0RAWW9vdqTGK4EfIwgAHQ=
+
+Name: fr/cea/sna/gateway/core/security/dao/directive/KeyDirective$KeyEnt
+ ry.class
+SHA1-Digest: AP57A3Kk27JIIqQwLvFniV/ZFiU=
+
+Name: fr/cea/sna/gateway/core/security/dao/directive/KeyDirective.class
+SHA1-Digest: samBUaIYsXoXD2hSfD0aUn3r3pI=
+
+Name: fr/cea/sna/gateway/core/security/dao/directive/SelectDirective.cla
+ ss
+SHA1-Digest: gT2QVV1xpuuqdJrGauSbH8WGYRA=
+
+Name: fr/cea/sna/gateway/core/security/dao/directive/UpdateDirective.cla
+ ss
+SHA1-Digest: 3rA2pTouTbnohduz8gc+EJd1gPI=
+
+Name: fr/cea/sna/gateway/core/security/entity/AgentAccessEntity.class
+SHA1-Digest: 02ltQZ7JitORRTxaYeFaGhGTJlA=
+
+Name: fr/cea/sna/gateway/core/security/entity/AgentAccessLevelEntity.cla
+ ss
+SHA1-Digest: i0xN86FIUTM8iSAJNYXJal31jDM=
+
+Name: fr/cea/sna/gateway/core/security/entity/AgentEntity.class
+SHA1-Digest: hiNKJ4rZwrGEn6tDuC5Q63jsjMo=
+
+Name: fr/cea/sna/gateway/core/security/entity/AuthenticatedEntity.class
+SHA1-Digest: tXECe/0R/hBuZwgyTLoLMihus1k=
+
+Name: fr/cea/sna/gateway/core/security/entity/BundleEntity.class
+SHA1-Digest: Cz3x/smrnGLUsDs8IxqpM16g7to=
+
+Name: fr/cea/sna/gateway/core/security/entity/ImmutableSnaEntity.class
+SHA1-Digest: Me2heNd+MLnlkFcUwtJAVfIGZDo=
+
+Name: fr/cea/sna/gateway/core/security/entity/MethodEntity.class
+SHA1-Digest: B7UhReD3+Zrvhphiuiy6eCGwgVI=
+
+Name: fr/cea/sna/gateway/core/security/entity/ObjectAccessEntity.class
+SHA1-Digest: TVbmgR3l3nPBx8tWH6GNBdAw0ZQ=
+
+Name: fr/cea/sna/gateway/core/security/entity/ObjectEntity.class
+SHA1-Digest: ROyqMOGsvzt5b16g1rXzghvJiU4=
+
+Name: fr/cea/sna/gateway/core/security/entity/ObjectProfileAccessEntity.
+ class
+SHA1-Digest: Ct7j5fuHMNAt3FZ6QGDpURI+Nm4=
+
+Name: fr/cea/sna/gateway/core/security/entity/ObjectProfileEntity.class
+SHA1-Digest: Wa2KzUrnPKn4iQ2fOISfgKnPDE4=
+
+Name: fr/cea/sna/gateway/core/security/entity/SnaEntity$Key.class
+SHA1-Digest: td8FXvkcjKBVmJ4HEOAe7AQ/Qko=
+
+Name: fr/cea/sna/gateway/core/security/entity/SnaEntity.class
+SHA1-Digest: lhV7UKdm6GyQOU/EY/17fQfOFL4=
+
+Name: fr/cea/sna/gateway/core/security/entity/UserAccessEntity.class
+SHA1-Digest: TRCr59TxPo82ZaiS4ZvgVEAKcgU=
+
+Name: fr/cea/sna/gateway/core/security/entity/UserAccessLevelEntity.clas
+ s
+SHA1-Digest: m3XvXM3SZ09LEQr5vqf+oJIAHCU=
+
+Name: fr/cea/sna/gateway/core/security/entity/UserEntity.class
+SHA1-Digest: /wSVZc9nvHFQCTaemLsBlPsxcdo=
+
+Name: fr/cea/sna/gateway/core/security/entity/annotation/Column.class
+SHA1-Digest: DFifyktRjBWyzMCasgFUoiVt4SE=
+
+Name: fr/cea/sna/gateway/core/security/entity/annotation/Default.class
+SHA1-Digest: ymIdeEhUkWTGh1NSJjpwpbikTIg=
+
+Name: fr/cea/sna/gateway/core/security/entity/annotation/ForeignKey.clas
+ s
+SHA1-Digest: Vf43As0Qujgaeo0CUU8o46h5s4k=
+
+Name: fr/cea/sna/gateway/core/security/entity/annotation/Immutable$Opera
+ tion.class
+SHA1-Digest: 5hf3jSgGPtxFVNG80xEcX6m93Pw=
+
+Name: fr/cea/sna/gateway/core/security/entity/annotation/Immutable.class
+SHA1-Digest: x7zmA1Cgk6KdbQUflhmCVZQrP1Y=
+
+Name: fr/cea/sna/gateway/core/security/entity/annotation/NotNull.class
+SHA1-Digest: /atSNFQewpmiTS48PFpLat+sBiM=
+
+Name: fr/cea/sna/gateway/core/security/entity/annotation/PrimaryKey.clas
+ s
+SHA1-Digest: oYan7+bS5nhVpqAS2L/qR3Egz4c=
+
+Name: fr/cea/sna/gateway/core/security/entity/annotation/Table.class
+SHA1-Digest: 4T1iCJPGHhhQq1E+2WlFbuLStNM=
+
+Name: fr/cea/sna/gateway/core/security/impl/AbstractSession.class
+SHA1-Digest: V8xjf4bVbBZUQXwg+3uKgKeErKQ=
+
+Name: fr/cea/sna/gateway/core/security/impl/AuthorizationServiceImpl.cla
+ ss
+SHA1-Digest: LlcmA4cqwpWfro46qABkb4rl3pc=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessFactoryImpl.cla
+ ss
+SHA1-Digest: lTl2Vn8CtREZIDvZ+BAZqRuJc7s=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$1.class
+SHA1-Digest: /E+u277x2kUQ8xdPVAsSzRL1oWk=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$10.class
+SHA1-Digest: 8vBhbeNBDasGxxVH1iWcIaeXw1w=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$11.class
+SHA1-Digest: Q4y72XeIklWMnywzPEXzeFk2muM=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$12.class
+SHA1-Digest: OpuUnS4HYrwY/tCZ8bw4YwlKJMw=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$13.class
+SHA1-Digest: i5kNUbmAZI8r9Do+VjRd1fX67n4=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$2.class
+SHA1-Digest: LiVthUOxRh0ZrvSJ5pOioj24xW8=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$3.class
+SHA1-Digest: mZB7a4oGEy4p5oissCbW5gs6uWY=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$4.class
+SHA1-Digest: QiBQrdh9NBYSIhXX2c3ghDuO+Xg=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$5.class
+SHA1-Digest: zrAXYikr+Lbltd7xDEJRCcuZfp0=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$6$1.class
+SHA1-Digest: EKOZd4kd8XrWzQv3kAVq6ZAo00M=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$6$2.class
+SHA1-Digest: F505Uj6P7QvTf3g115yEGaVjKQA=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$6$3.class
+SHA1-Digest: N04kNib2SFsY5CHX6/Zu/4eorfI=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$6$4.class
+SHA1-Digest: p8+HV+LSXz6ooheBwqsEJMzzNDE=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$6.class
+SHA1-Digest: oFHQm56amt4lmJcJ8jQ78SzmTGw=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$7.class
+SHA1-Digest: eKJqw6tyqMvqZsQS7kNhcQme6Q0=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$8.class
+SHA1-Digest: 5+bvYxTWwdq69ag/QpYtMnH6dbU=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$9.class
+SHA1-Digest: lyKEN1K6zlYhN4Im29h8buV5cAk=
+
+Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl.class
+SHA1-Digest: T063xQBsRI3sUB6ftObBhUBQISU=
+
+Name: fr/cea/sna/gateway/core/security/impl/SessionsImpl.class
+SHA1-Digest: Niv7D6TUcnwKsSJhEcS60l9YDhc=
+
+Name: script/getMethodAccessibilities.sql
+SHA1-Digest: mMF2Nv55Oj3LJY057GHRdv24zyo=
+
+Name: script/getObjectFromPath.sql
+SHA1-Digest: TtY2zYpzkBiPYdGMqZemXoikoas=

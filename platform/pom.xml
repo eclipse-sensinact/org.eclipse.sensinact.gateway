@@ -1,0 +1,127 @@
+<!--
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.sensinact</groupId>
+        <artifactId>gateway</artifactId>
+        <version>1.5-SNAPSHOT</version>
+    </parent>
+
+    <groupId>org.eclipse.sensinact.gateway</groupId>
+	<artifactId>parent</artifactId>
+    <packaging>pom</packaging>
+
+	<name>sensiNact IoT Gateway - Platform</name>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+                <version>1.12</version>
+				<configuration>
+					<licenseName>sensinact</licenseName>
+					<licenseResolver>classpath://fr/license</licenseResolver>
+					<organizationName>CEA</organizationName>
+					<inceptionYear>2017</inceptionYear>
+					<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+					<canUpdateLicense>false</canUpdateLicense>
+					<canUpdateDescription>false</canUpdateDescription>
+					<canUpdateCopyright>false</canUpdateCopyright>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>update-file-header</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<include>**/*.java</include>
+							</includes>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
+						<artifactId>sensinact-license</artifactId>
+						<version>1.5-SNAPSHOT</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+	</build>
+
+	<properties>
+	    <powermock.version>1.5.2</powermock.version>
+        <coap.version>0.8.3-SNAPSHOT</coap.version>
+    </properties>
+
+	<dependencies>		
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>  		
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<version>${osgi.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+			<version>${osgi.version}</version>
+			<scope>provided</scope>
+		</dependency>
+	    <dependency>
+	      <groupId>org.powermock</groupId>
+	      <artifactId>powermock-module-junit4</artifactId>
+	      <version>${powermock.version}</version>
+	      <scope>test</scope>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.powermock</groupId>
+	      <artifactId>powermock-api-mockito</artifactId>
+	      <version>${powermock.version}</version>
+	      <scope>test</scope>
+	    </dependency> 	
+	</dependencies>
+    
+	<modules>
+        <module>sensinact-utils</module>
+        <module>sensinact-common</module>
+        <module>sensinact-annotation-processor</module>
+		<module>tools</module>
+        <module>sensinact-datastore</module>
+        <module>sensinact-core</module>
+        <module>protocol</module>
+		<module>northbound/sensinact-access</module>
+        <module>sensinact-security</module>
+        <module>sensinact-generic</module>
+        <module>../simulated-devices</module>
+        <module>sensinact-security/sensinact-signature-validator</module>
+        <module>sensinact-security/sensinact-security-core</module>
+		<module>northbound</module>
+        <module>southbound</module>
+        <module>sensinact-system</module>
+		<module>sensinact-shell</module>
+        <module>sensinact-application</module>
+	</modules>
+</project>

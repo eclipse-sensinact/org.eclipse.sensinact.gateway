@@ -1,0 +1,103 @@
+Manifest-Version: 1.0
+Export-Package: org.eclipse.sensinact.gateway.nthbnd.rest.osgi;version="1.4.0"
+Tool: Bnd-2.3.0.201405100607
+Bundle-Name: sensiNact IoT Gateway - HTTP REST Access
+Created-By: 1.7.0_79 (Oracle Corporation)
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.7))"
+Bundle-Vendor: Eclipse
+Bundle-Version: 1.4.0.20170410
+Bnd-LastModified: 1491801487984
+Bundle-Activator: org.eclipse.sensinact.gateway.nthbnd.rest.osgi.Activator
+Bundle-ManifestVersion: 2
+Bundle-Description: sensiNact IoT Gateway - HTTP REST Access
+Import-Package: org.eclipse.sensinact.gateway.common.bundle;version="[1.4,2)",org.
+ eclipse.sensinact.gateway.common.execution;version="[1.4,2)",org.eclipse.sensinact.gateway
+ .common.primitive;version="[1.4,2)",org.eclipse.sensinact.gateway.core.message;v
+ ersion="[1.4,2)",org.eclipse.sensinact.gateway.core.method;version="[1.4,2)",org.
+ eclipse.sensinact.gateway.core.security;version="[1.4,2)",org.eclipse.sensinact.gateway.nt
+ hbnd.endpoint;version="[1.4,2)",org.eclipse.sensinact.gateway.nthbnd.endpoint.fo
+ rmat;version="[1.4,2)",org.eclipse.sensinact.gateway.protocol.http.client;versio
+ n="[1.4,2)",org.eclipse.sensinact.gateway.util;version="[1.4,2)",javax.servlet;v
+ ersion="[3.1,4)",javax.servlet.annotation;version="[3.1,4)",javax.ser
+ vlet.http;version="[3.1,4)",org.apache.felix.http.api;version="[2.0,3
+ )",org.eclipse.jetty.websocket.api;version="[9.2,10)",org.eclipse.jet
+ ty.websocket.api.annotations;version="[9.2,10)",org.eclipse.jetty.web
+ socket.servlet;version="[9.2,10)",org.json;version="[1.4,2)",org.osgi
+ .framework;version="[1.7,2)",org.osgi.service.http;version="[1.2,2)"
+Bundle-SymbolicName: rest-access
+Build-By: Eclipse
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/http/CorsFilter.class
+SHA-256-Digest: Lwhy4Jlj7SqSepXsf/nQrUW/UUCaD3SVbpkfDd9OE28=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/http/LongPollingCallback
+ .class
+SHA-256-Digest: IO7M8zfy9cEu8f9roS3Jv0Rl3xldBYbyH1El189zpR0=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/http/HttpRestAccessReque
+ st.class
+SHA-256-Digest: IqTfCFeVI4CrRDaNEycH5YjHr2WJoQ4awnk0dwoDs8c=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/RestAccess.class
+SHA-256-Digest: Qk1jnEuAxHogHTjz6ORtwQrn9Hmy9CTQ4/uzCT6JdxQ=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/Accountings.class
+SHA-256-Digest: zZwtWH/D2TEov0R1eYzcd+nRrpWP6Id971mCIP/4oXo=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/osgi/Activator$2.class
+SHA-256-Digest: HcP9cEQiZPWWm2aKDx9yQRvZfBemUKapIW/jHp4mkF0=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/ws/WsCallback.class
+SHA-256-Digest: JFAqmOz3737XOr8RIPQsZvfCLAgtab9qtBAT7ebJ+z8=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/osgi/Activator.class
+SHA-256-Digest: irxlPgEZqhq+fWJon1F9rVljZPlLi5sQFr04a/08zkc=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/http/ContentCallback.cla
+ ss
+SHA-256-Digest: xwdM1futhM0P3ZUiTE8lqaS0/kmQkXIFtDzc2JVWJD0=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/ws/WebSocketWrapperPool.
+ class
+SHA-256-Digest: ipJsWqf5I+Kg6R25R8Z/Prs3o7Iv54tSoBu5SO0u1+g=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/RequestWrapper.class
+SHA-256-Digest: ymzAMDyhWthIJ7svwIeOlDdXI1J5L95hWWgmqb3ijTA=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/ws/WsRestAccess.class
+SHA-256-Digest: pWIw7fjTJugNqBRwq/iKVniXHwdsiYO5lqvJ0S6LZMI=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/AccountingEntry.class
+SHA-256-Digest: ie7oUZx2aMcb7/y1peQYc7WVZ14COVOOCGjeFhpamxM=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/osgi/Activator$1$1.class
+SHA-256-Digest: n18a795VAZ2buK4ZsAmbBQQr8abw/pNduUCGjMWY5ik=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/ws/WsRestAccessRequest.c
+ lass
+SHA-256-Digest: MLOl4jJQjldTBVFShd+LygNnY3kUdfTHGnjE42fgmXk=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/ws/WebSocketWrapper.clas
+ s
+SHA-256-Digest: PsWP+dYGLI8njKl6Zr5T0d7itHo0+5L8XSmi29NJuns=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/http/HttpEndpoint.class
+SHA-256-Digest: fDvD4+iv/U+KMpyFu4169mpXLntxepFsqoV1d1GrlhA=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/Callback.class
+SHA-256-Digest: T0HQi4a+qaauowkljLas5KMFhX1/tDc8lESJgviMglw=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/http/HttpRestAccess.clas
+ s
+SHA-256-Digest: HPF9wEbmvaahG8naD3F6YwEqVoxEfNSaER6BjB2Zqo8=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/http/HttpEndpoint$1.clas
+ s
+SHA-256-Digest: qBNMcgF6Rq1SQTzRlgos3KuEoTyfSsPgaCaBO+64FG8=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/osgi/Activator$1.class
+SHA-256-Digest: mHpsswIhDrN5xgBZaNnhT1AMpytAVqjaf11jZzNEP/M=
+
+Name: fr/cea/sna/gateway/nthbnd/rest/internal/RestAccess$1.class
+SHA-256-Digest: FI+Q9n9TH0PYFUtKJ5aJ4X7b4XIy8FN41HS58ySGl30=
+

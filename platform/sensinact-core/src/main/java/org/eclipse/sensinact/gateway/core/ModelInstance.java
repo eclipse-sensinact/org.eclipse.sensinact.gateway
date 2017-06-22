@@ -1,0 +1,636 @@
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
+ */
+package org.eclipse.sensinact.gateway.core;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
+
+import org.eclipse.sensinact.gateway.core.message.MessageHandler;
+import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
+import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
+import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
+import org.eclipse.sensinact.gateway.core.security.Session;
+import org.osgi.framework.ServiceRegistration;
+
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.common.primitive.Nameable;
+import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
+import org.eclipse.sensinact.gateway.core.ServiceProvider.LifecycleStatus;
+import org.eclipse.sensinact.gateway.core.message.SnaCallback;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaMessageListener;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.util.ReflectUtils;
+import org.eclipse.sensinact.gateway.util.UriUtils;
+
+
+/**
+ * A sensiNact Resource Model instance
+ * 
+ * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ */
+public class ModelInstance<C extends ModelConfiguration> 
+implements SensiNactResourceModel<C>, LifecycleStatusListener 
+{	
+	/**
+	 * Returns the initial location of the sensiNact gateway 
+	 * and so of the service providers for which it is not 
+	 * specified. This method should be called once at
+	 * initialization time
+	 * 
+	 * @return
+	 * 		the initial string location value (
+	 * 		latitude:longitude)
+	 */
+	public static String defaultLocation(Mediator mediator)
+	{
+		double systemLatitude = 0d;
+	    double systemLongitude = 0d; 		    
+	    try
+	    {
+	    	systemLatitude = Double.parseDouble(mediator.getContext(
+	    		).getProperty(ServiceProvider.LATITUDE_PROPERTY));
+	    	
+	    	systemLongitude = Double.parseDouble(mediator.getContext(
+	    		).getProperty(ServiceProvider.LONGITUDE_PROPERTY));
+	    
+	    } catch(Exception e)
+	    {
+	    	systemLatitude = 
+	    			ServiceProvider.DEFAULT_CEA_LOCATION_LATITUDE;
+	    	systemLongitude = 
+	    			ServiceProvider.DEFAULT_CEA_LOCATION_LONGITUDE;
+	    }
+	    String locationStr = new StringBuilder().append(systemLatitude
+	    		).append(":").append(systemLongitude).toString();
+	    return locationStr;
+	}
+	
+	/**
+	 * the {@link Mediator} allowing to interact 
+	 * with the OSGi host environment
+	 */
+	protected Mediator mediator;
+	
+	/**
+	 * the {@link SensiNactResourceModelConfiguration} of this 
+	 * ModelInstance
+	 */
+	protected final C configuration;
+	
+	/**
+	 * the root {@link ServiceProviderImpl} of this instance of the 
+	 * sensiNact resource model
+	 */
+	protected ServiceProviderImpl provider;
+
+	/**
+	 * <ul>
+	 * 		<li>true if this SensiNactResourceModel
+	 * 			has been registered in the OSGi host
+	 * 			environment</li>
+	 * 		<li>false otherwise</li>
+	 * </ul>
+	 */
+	protected boolean registered;
+
+	/**
+	 * the String unique identifier of this SensiNactResourceModel
+	 * in the OSGi host environment
+	 */
+	private final String identifier;
+	
+	/**
+	 * the {@link MesssageHandler} handling 
+	 * messages coming from this SensiNactResourceModel 
+	 */
+	protected MessageHandler messageHandler;
+	
+	/**
+	 * the String identifier of the profile of this 
+	 * SnaServiceProvider
+	 */
+	protected final String profileId;
+
+	/**
+	 * The {@link ServiceRegistration} in the OSGi host environment
+	 * for this {@link SensiNactResourceModel} instance
+	 */
+	private ServiceRegistration<SensiNactResourceModel> registration;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param mediator the {@link Mediator} allowing to interact
+	 * with the OSGi host environment
+	 * @param configuration the extended {@link ModelConfiguration}
+	 * gathering the configuration properties applying on
+	 * the ModelInstance to be created
+	 * 
+	 * @throws InvalidServiceProviderException 
+	 */
+	public ModelInstance(final Mediator mediator,
+	    C resourceModelConfig, String name, String profileId) 
+			throws InvalidServiceProviderException
+	{
+		this.mediator = mediator;
+		this.profileId = profileId;
+		this.configuration = resourceModelConfig;
+		
+		List<String> initialSetOfServices = this.configuration.getFixedServices(name);		
+		initialSetOfServices.addAll(this.configuration.getServices(profileId));
+		
+		this.provider = ReflectUtils.getInstance(ServiceProviderImpl.class, 
+			this.configuration.getProviderImplementationType(), 
+			    new Object[]{ this, name, initialSetOfServices });
+		
+		if(this.provider == null)
+		{
+			throw new InvalidServiceProviderException(
+			    "Unable to instantiate the root services provider");
+		}
+		//retrieve the identifier in the datastore of the sensiNact 
+		//framework holding it
+		this.identifier = this.mediator.callService(SecuredAccess.class,
+			new Executable<SecuredAccess, String>()
+			{
+				@Override
+				public String execute(SecuredAccess service) 
+				throws Exception
+				{
+					return service.validate(mediator.getContext(
+							).getBundle());
+				}
+			}
+		);
+	}
+	
+	/** 
+	 * @inheritDoc
+	 * 
+	 * @see SensiNactResourceModel#configuration()
+	 */
+	@Override
+	public C configuration()
+	{
+		return this.configuration;
+	}
+	
+    /**
+     * Returns a new {@link ServiceBuilder} instance
+     * 
+     * @return a new {@link ServiceBuilder} instance
+     */
+    public ServiceBuilder getServiceBuilder()
+    {
+        ServiceBuilder builder = new ServiceBuilder(
+    			this.mediator, ServiceImpl.class);
+    	
+    	builder.configureImplementationClass(
+    		this.configuration.getServiceImplementationType());
+    	
+    	return builder;
+    }
+
+    /**
+     * Returns a new {@link ResourceBuilder} parameterized by 
+     * the  {@link ResourceConfig} passed as parameter
+     * 
+     * @param resourceConfig the {@link ResourceConfig} 
+     * parameterizing the {@link ResourceBuilder} to be created
+     * 
+     * @return a new {@link ResourceBuilder} instance parameterized
+     * by the specified {@link ResourceConfig} 
+     */
+    public ResourceBuilder getResourceBuilder(
+    		ResourceConfig resourceConfig)
+    {
+    	ResourceBuilder builder = new ResourceBuilder(
+    		this.mediator, resourceConfig);
+    	
+    	return builder;
+    }
+    
+    /**
+     * @param descriptor
+     * @return
+     */
+    protected ResourceBuilder getResourceBuilder(
+    	ResourceDescriptor descriptor, byte buildPolicy)
+    {
+    	ResourceBuilder builder = null;
+    	
+		if(SensiNactResourceModelConfiguration.BuildPolicy.isBuildPolicy(buildPolicy,
+				SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION))
+		{
+			builder = getResourceBuilder(descriptor);
+		}
+		if(builder == null &&  SensiNactResourceModelConfiguration.BuildPolicy.isBuildPolicy(buildPolicy,
+				SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED))
+		{
+			builder = createResourceBuilder(descriptor);
+		}
+		return builder;
+    }
+    
+    /**
+     * Returns a {@link ResourceBuilder} wrapping a previously registered
+     * {@link ResourceConfig} for the {@link ResourceDescriptor} 
+     * passed as parameter. If no appropriate {@link ResourceConfig} can
+     * be retrieved, null is returned
+     *  
+     * @param descriptor the {@link ResourceDescriptor} describing 
+     * the {@link ResourceConfig} wrapped by the {@link ResourceBuilder} to
+     * be returned 
+     * 
+     * @return a new {@link ResourceBuilder} instance
+     */
+    public ResourceBuilder getResourceBuilder(
+    		ResourceDescriptor descriptor)
+    {
+    	ResourceConfig resourceConfig = this.configuration(
+    			).getResourceConfig(descriptor);
+    	
+    	if(resourceConfig == null)
+    	{
+    		return null;
+    	}
+    	return configureResourceBuilder(resourceConfig,descriptor);
+    }
+    
+    /**
+     * Returns a {@link ResourceBuilder} wrapping a newly created  
+     * {@link ResourceConfig} for the {@link ResourceDescriptor} 
+     * passed as parameter. If no appropriate {@link ResourceConfig} can
+     * be created, null is returned
+     *  
+     * @param descriptor the {@link ResourceDescriptor} describing 
+     * the {@link ResourceConfig} wrapped by the {@link ResourceBuilder} to
+     * be returned 
+     * 
+     * @return a new {@link ResourceBuilder} instance
+     */
+    public ResourceBuilder  createResourceBuilder(
+    		ResourceDescriptor descriptor)
+    {
+    	ResourceConfig resourceConfig = this.configuration(
+    			).createResourceConfig(descriptor);
+
+    	if(resourceConfig == null)
+    	{
+    		return null;
+    	}
+    	return configureResourceBuilder(resourceConfig,descriptor);
+    }
+    
+    /**
+     * Returns a newly created {@link ResourceBuilder} capable of 
+     * creating a new resource
+     * 
+     * @param descriptor the {@link ResourceDescriptor} describing 
+     * the {@link ResourceConfig} wrapped by the {@link ResourceBuilder} 
+     * to be returned 
+     * 
+     * @return a new {@link ResourceBuilder} instance
+     */
+    private <G extends ResourceConfig> ResourceBuilder 
+    configureResourceBuilder( G resourceConfig,
+    		ResourceDescriptor descriptor)
+    {
+    	ResourceBuilder builder = new ResourceBuilder(
+    			this.mediator, resourceConfig);
+    	
+    	if(descriptor.resourceName() != null)
+    	{
+    		builder.configureName(descriptor.resourceName());
+    	}
+    	if(descriptor.dataType()!= null)
+    	{
+    		builder.configureType(descriptor.dataType());
+    	}
+    	if(descriptor.dataValue() !=null)
+    	{
+    		builder.configureValue(descriptor.dataValue());
+    	}
+    	if(descriptor.modifiable() !=null)
+    	{
+    		builder.configureRequirement(DataResource.VALUE, 
+    			AttributeBuilder.Requirement.MODIFIABLE, 
+    			descriptor.modifiable());
+    	}
+    	if(descriptor.hidden() !=null)
+    	{
+    		builder.configureRequirement(DataResource.VALUE, 
+    			AttributeBuilder.Requirement.HIDDEN, 
+    			descriptor.hidden().booleanValue());
+    	}
+    	return builder;
+    }
+
+	/**
+	 * Returns the {@link Mediator} of this SensiNactResourceModel 
+	 * allowing to interact with the OSGi host environment
+	 * 
+	 * @return this SensiNactResourceModel's {@link Mediator}
+	 */
+	public Mediator mediator()
+	{
+		return this.mediator;
+	}
+	
+	/**
+	 * Posts the {@link SnaMessage} past as parameter
+	 * to the {@link MessageHandler} of this 
+	 * SensiNactResourceModel
+	 *  
+	 * @param message
+	 * 		the {@link SnaMessage} to post
+	 */
+	public void postMessage(SnaMessage<?> message)
+	{
+		if(this.messageHandler == null)
+		{
+			return;
+		}
+		this.messageHandler.handle(message);
+	}
+
+	/**
+	 * Registers this sensiNact resource model instance 
+	 * in the OSGi host environment.
+
+	 * @throws ModelAlreadyRegisteredException if this sensiNact resource
+	 * model instance has been previously registered
+	 */
+	protected final void register(
+			ServiceRegistration<SensiNactResourceModel> registration) 
+			throws ModelAlreadyRegisteredException
+	{
+		this.registration = registration;
+		if(registration != null)
+		{
+			this.registered = true;
+			this.messageHandler = new SnaMessageListener(mediator,
+						this.configuration());
+					
+			if(this.configuration().getStartAtInitializationTime())
+			{
+				this.provider.start();
+			}
+		}
+	}
+
+	/**
+	 * Unregisters this sensiNact resource model instance 
+	 * from the OSGi host environment
+	 * 
+	 * @throws IllegalStateException if this sensiNact resource model
+	 * instance has been previously unregistered
+	 */
+	public final void unregister() throws IllegalStateException 
+	{
+		if(!this.isRegistered())
+		{
+			throw new IllegalStateException(
+				this.getRootElement().getName());
+		}	
+		this.registered = false;
+		try
+		{
+			this.getRootElement().stop();
+		
+		} catch(Exception e)
+		{
+			mediator.error(e);
+		}
+		this.mediator.callService(SecuredAccess.class, 
+				new Executable<SecuredAccess, Void>()
+		{
+			@Override
+			public Void execute(SecuredAccess service) 
+			throws Exception
+			{
+				service.unregister(ModelInstance.this.registration);
+				return null;
+			}
+		});
+		this.messageHandler.close(true);
+		this.messageHandler = null;	
+	}
+	
+	/**
+	 * Returns true if this SensiNactResourceModel has been
+	 * registered; returns false otherwise
+	 *  
+	 * @return 
+	 * 		<ul>
+	 * 			<li>true if this SensiNactResourceModel 
+	 * 				has already been registered</li>
+	 * 			<li>false otherwise</li>
+	 * 		</ul>
+	 */
+	public boolean isRegistered()
+	{
+		return this.registered;
+	}
+    
+    /**
+     * Returns the root {@link ServiceProviderImpl} of this 
+     * instance of the sensiNact resource model
+     * 
+     * @return
+     * 		this resource model instance's root {@link 
+     * 		ServiceProviderImpl}
+     * 
+     * @see SensiNactResourceModel#getRootElement()
+     */
+	@Override
+    public ServiceProviderImpl getRootElement()
+    {
+    	return this.provider;
+    }
+
+	/**
+	 * @param userId
+	 * @return
+	 * @throws ModelElementProxyBuildException
+	 */
+	public ServiceProvider getRootElementProxy(Session.Key key)
+			throws ModelElementProxyBuildException 
+	{
+		if(!registered)
+		{
+			throw new ModelElementProxyBuildException(
+				"this model instance must be registered first");
+		}
+		if(this.provider == null)
+		{
+			throw new ModelElementProxyBuildException(
+				"this model instance's root ServiceProvider is null");
+		}
+		ServiceProvider serviceProvider = this.getRootElement().getProxy(key);
+		return serviceProvider;
+	}
+    
+    /**
+	 * @inheritedDoc
+	 *
+	 * @see Nameable#getName()
+	 */
+    @Override
+    public String getName()
+    {
+	    return this.getRootElement().getName();
+    }
+
+    /**
+	 * @inheritedDoc
+	 *
+     * @see SensiNactResourceModel#getIdentifier()
+     */
+    @Override
+    public String getIdentifier()
+    {
+	    return this.identifier;
+    }
+    
+    /**
+     * @param filter 
+     * @param callback
+     */
+    protected void registerCallback(SnaFilter filter, SnaCallback callback)
+    {
+    	if(this.messageHandler == null)
+    	{
+    		return;
+    	}
+    	this.messageHandler.addCallback(filter, callback);
+    }
+
+    /**
+     * 
+     * @param callback
+     */
+    protected void unregisterCallback(String callback)
+    {
+    	if(this.messageHandler == null)
+    	{
+    		return;
+    	}
+    	this.messageHandler.deleteCallback(callback);
+    }
+
+	/**
+	 * Returns the string identifier of the profile to
+	 * which this model instance belongs to
+	 * 
+	 * @return
+	 * 		this model instance profile identifier
+	 */
+	public String getProfile() 
+	{
+		return this.profileId;
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see LifecycleStatusListener#
+	 * update(ServiceProvider.LifecycleStatus)
+	 */
+	@Override
+	public void update(LifecycleStatus status)
+	{
+		this.mediator.callService(SecuredAccess.class, 
+				new Executable<SecuredAccess, Void>()
+		{
+			@Override
+			public Void execute(SecuredAccess service) 
+			throws Exception
+			{
+				service.update(ModelInstance.this, 
+						ModelInstance.this.registration);
+				return null;
+			}
+		});
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see SensiNactResourceModel#getProperties()
+	 */
+	@Override
+	public Dictionary<String, String> getProperties()
+	{
+		Dictionary<String, String> props = new Hashtable<String, String>();
+		props.put("uri", UriUtils.getUri(new String[]{this.getName()}));
+		props.put("lifecycle.status", this.getRootElement().getStatus().name());
+		return props;
+	}
+	
+	/**
+	 * Returns the {@link AccessLevelOption} for the {@link Session} whose
+	 * {@link Session.Key} is passed as parameter, and for the {@link 
+	 * ModelElement} belonging to this resource model instance whose path 
+	 * is also passed as parameter
+	 *  
+	 * @param modelElement the targeted resource model element	
+	 * @param key the requirer {@link Session}'s key 
+	 * 
+	 * @return the {@link AccessLevelOption} for the specified session and 
+	 * resource
+	 */
+	public final <I extends ModelInstance<?>, 
+	P extends ProcessableData, E extends Nameable, R extends Nameable>
+	AccessLevelOption getAccessLevelOption(ModelElement<I, P, E, R> 
+	modelElement, Session.Key key)
+	{
+		if(modelElement.getModelInstance() != this)
+		{
+			throw new RuntimeException(
+			   "the model element argument must belong to this model instance");
+		}
+		final String path = modelElement.getPath();
+		return this.configuration().getUserAccessLevelOption(path, key.getPublicKey());
+	}
+	
+	/**
+	 * Returns the set of the specified {@link ModelElement} accessible 
+	 * {@link AccessMethod.Type}s for the {@link AccessLevelOption} passed 
+	 * as parameter and
+	 *  
+	 * @param modelElement the {@link ModelElement} for which to retrieve 
+	 * the set of accessible {@link AccessMethod.Type}s	
+	 * @param accessLevelOption the requirer {@link AccessLevelOption} 
+	 * 
+	 * @return the set of accessible {@link AccessMethod.Type} of the
+	 * specified {@link ModelElement} for the specified {@link 
+	 * AccessLevelOption}
+	 */
+	public final <I extends ModelInstance<?>, P extends ProcessableData, 
+	E extends Nameable, R extends Nameable> List<MethodAccessibility>
+	getAuthorizations(ModelElement<I, P, E, R> modelElement, 
+			AccessLevelOption accessLevelOption)
+	{
+		if(modelElement.getModelInstance() != this)
+		{
+			throw new RuntimeException(
+				"the model element argument must belong to this model instance");
+		}
+		final String path = modelElement.getPath();
+		return this.configuration().getAccessibleMethods(
+				path, accessLevelOption);
+	}
+}

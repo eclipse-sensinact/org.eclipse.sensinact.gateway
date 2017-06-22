@@ -1,0 +1,12 @@
+weather
+
+http://api.openweathermap.org/data/2.5/weather?lat=44.5067&lon=8.9&APPID=d664a4539c8758150563184b44fbdaf5
+http://api.openweathermap.org/data/2.5/forecast?lat=44.5067&lon=8.9&APPID=d664a4539c8758150563184b44fbdaf5
+
+uv index 
+
+http://api.owm.io/air/1.0/uvi/current?lat=44&lon=9&APPID=d664a4539c8758150563184b44fbdaf5
+
+icon
+
+http://openweathermap.org/img/w/01d.png?APPID=d664a4539c8758150563184b44fbdaf5

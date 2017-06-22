@@ -1,0 +1,45 @@
+{
+  "parameters": [
+    {
+      "name": "name",
+      "type": "java.lang.String",
+      "value": "simple_modulo"
+    },
+    {
+      "name": "content",
+      "type": "org.json.JSONObject",
+      "value": {
+        "initialize": {},
+        "application": [
+          {
+            "identifier": "result",
+            "events": [
+              {
+                "value": "/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider",
+                "type": "resource"
+              }
+            ],
+            "function": {
+              "name": "mod",
+              "buildparameters": [],
+              "runparameters": [
+                {
+                  "value": "/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider",
+                  "type": "resource"
+                },
+                {
+                  "value": 8,
+                  "type": "int"
+                }
+              ]
+            },
+            "properties": {
+              "register": true
+            }
+          }
+        ],
+        "finalize": {}
+      }
+    }
+  ]
+}

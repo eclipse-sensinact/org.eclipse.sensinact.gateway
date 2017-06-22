@@ -1,0 +1,261 @@
+<!--
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
+<resourceInfos xmlns="http://org.eclipse.sensinact/resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../../../sensinact-generic/src/main/resources/sensinact-resource.xsd"
+ empty_profile="true">
+
+    <resourceInfo xsi:type="resourceInfoProperty" name="JsonUrl" target="admin">
+        <policy name="PROPERTY" update="AUTO"/>
+        <identifier xsi:type="stringContent">name</identifier>
+        <attributes>
+        	<attribute name="value" type="string" modifiable="UPDATABLE"/>
+        </attributes>
+    </resourceInfo>
+
+    <resourceInfo xsi:type="resourceInfoSensor" name="Player.GetActivePlayers" target="video-player">
+        <identifier xsi:type="stringContent">text</identifier>
+        <attributes>
+        	<attribute name="value" type="array"/>
+        </attributes>
+    </resourceInfo>
+
+    <resourceInfo xsi:type="resourceInfoAction" name="Player.Open"  target="video-player">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT">
+	            <parameter name="item" type="object"/>
+	        </method>
+        </methods>
+    </resourceInfo>
+
+    <resourceInfo xsi:type="resourceInfoSensor" name="ButtonPressed"  target="remote-control">
+        <policy name="SENSOR" update="AUTO"/>
+        <identifier xsi:type="stringContent">string</identifier>
+        <attributes>
+        	<attribute name="value" type="string"/>
+        </attributes>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoSensor" name="LastEvent"  target="remote-control">
+        <policy name="SENSOR" update="AUTO"/>
+        <identifier xsi:type="stringContent"/>
+        <attributes>
+        	<attribute name="value" type="long">
+        		<metadata>
+        			<meta name="Unit" type="string">
+			            <value>MS</value>
+			        </meta>
+        		</metadata>
+        	</attribute>
+        </attributes>
+    </resourceInfo>
+
+    <resourceInfo xsi:type="resourceInfoAction" name="Player.PlayPause"  target="video-player">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT">
+	            <parameter name="playerid" type="int"/>
+	        </method>
+        </methods>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="Player.Stop"  target="video-player">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT">
+	            <parameter name="playerid" type="int"/>
+	        </method>
+        </methods>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="Player.Seek"  target="video-player">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT">
+	            <parameter name="playerid" type="int"/>
+	            <parameter name="value" type="int"/>
+	        </method>
+        </methods>
+    </resourceInfo>
+   
+    <resourceInfo xsi:type="resourceInfoSensor" name="Player.GetProperties"  target="video-player">
+        <identifier xsi:type="stringContent">text</identifier>
+        <attributes>
+        	<attribute name="value" type="string"/>
+        </attributes>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoSensor" name="Files.GetSources"  target="file-explorer">
+        <identifier xsi:type="stringContent">text</identifier>
+        <attributes>
+        	<attribute name="media" type="string">
+        		<constraints>
+        			<fixed value="video"/>
+        		</constraints>
+        	</attribute>
+        </attributes>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoSensor" name="Files.GetDirectory"  target="file-explorer">
+        <identifier xsi:type="stringContent">text</identifier>
+        <attributes>
+        	<attribute name="media" type="string">
+        		<constraints>
+        			<fixed value="video"/>
+        		</constraints>
+        	</attribute>
+        	<attribute name="directory" type="string"/>
+        </attributes>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="GUI.ShowNotification"  target="gui">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT">
+	            <parameter name="title" type="string"/>
+	            <parameter name="message" type="string"/>
+	            <parameter name="image" type="string">
+	                <contraints>
+	                    <pattern value="()|(info)|(warning)|(error)"/>
+	                </contraints>
+	            </parameter>
+	            <parameter name="displaytime" type="int"/>
+	        </method>
+        </methods>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoSensor" name="Addons.GetAddons"  target="addons">
+        <identifier xsi:type="stringContent">text</identifier>
+        <attributes>
+        	<attribute name="value" type="array"/>
+        </attributes>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="Addons.SetAddonEnabled"  target="addons">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT">
+	            <parameter name="addonid" type="string"/>
+	            <parameter name="enabled" type="boolean"/>
+	        </method>
+        </methods>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="Addons.ExecuteAddon"  target="addons">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT">
+	            <parameter name="addonid" type="string"/>
+	        </method>
+        </methods>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="Input.Back"  target="input">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT"/>
+        </methods>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="Input.ContextMenu"  target="input">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT"/>
+        </methods>
+    </resourceInfo>
+    <resourceInfo xsi:type="resourceInfoAction" name="Input.Down"  target="input">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT"/>
+        </methods>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="Input.Up"  target="input">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT"/>
+        </methods>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="Input.Home"  target="input">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT"/>
+        </methods>
+    </resourceInfo>
+    <resourceInfo xsi:type="resourceInfoAction" name="Input.Info"  target="input">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT"/>
+        </methods>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="Input.Left"  target="input">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT"/>
+        </methods>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="Input.Right"  target="input">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT"/>
+        </methods>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="Input.Select"  target="input">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT"/>
+        </methods>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="Input.ShowOSD"  target="input">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT"/>
+        </methods>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="Input.ExecuteAction"  target="input">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT">
+	            <parameter name="action" type="string"/>
+	        </method>
+        </methods>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="Application.SetMute"  target="application">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT">
+	            <parameter name="mute" type="boolean"/>
+	        </method>
+        </methods>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoAction" name="Application.SetVolume"  target="application">
+        <identifier xsi:type="stringContent">text</identifier>
+        <methods>
+	        <method type="ACT">
+	            <parameter name="volume" type="int">	            	
+	                <contraints>
+	                    <minInclusive value="0"/>
+	                    <maxInclusive value="100"/>
+	                </contraints>
+	            </parameter>
+	        </method>
+        </methods>
+    </resourceInfo>
+    
+</resourceInfos>

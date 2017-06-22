@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string", "enum": ["equal", "diff", "lesserThan", "lesserEqual", "greaterThan", "greaterEqual", "abs", "delta", "regex"] },
+    "runparameters": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "value": {},
+            "type": { "type": "string",
+              "enum": [ "string", "boolean", "integer", "double", "long", "float", "resource", "event", "variable" ] }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "value": {},
+            "type": { "type": "string",
+              "enum": [ "string", "boolean", "integer", "double", "long", "float", "resource", "event", "variable" ]}
+          }
+        }
+      ]
+    }
+  },
+  "required": [ "name", "runparameters" ]
+}

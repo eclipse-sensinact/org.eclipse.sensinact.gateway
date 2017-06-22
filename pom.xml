@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.eclipse.sensinact</groupId>
+    <artifactId>gateway</artifactId>
+    <version>1.5-SNAPSHOT</version>
+
+    <packaging>pom</packaging>
+    <name>sensiNact IoT Gateway - Gateway Project</name>
+
+    <developers>
+        <developer>
+            <name>Levent Gürgen</name>
+            <email>levent.gurgen@cea.fr</email>
+            <organization>CEA</organization>
+            <roles>
+                <role>Documentation</role>
+                <role>Project Admin</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Christophe Munilla</name>
+            <email>christophe.munilla@cea.fr</email>
+            <organization>CEA</organization>
+            <roles>
+                <role>Developer</role>
+                <role>Documentation</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Remi Druilhe</name>
+            <email>remi.druilhe@cea.fr</email>
+            <organization>CEA</organization>
+            <roles>
+                <role>Developer</role>
+                <role>Documentation</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Etienne Gandrille</name>
+            <email>etienne.gandrille@cea.fr</email>
+            <organization>CEA</organization>
+            <roles>
+                <role>Developer</role>
+                <role>Documentation</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Jander Botelho do Nascimento</name>
+            <email>jander.botelhodonascimento@cea.fr</email>
+            <organization>CEA</organization>
+            <roles>
+                <role>Developer</role>
+                <role>Documentation</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Mathieu Galissot</name>
+            <organization>CEA</organization>
+            <roles>
+                <role>Developer</role>
+                <role>Documentation</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Ozan Gunalp</name>
+            <organization>CEA</organization>
+            <roles>
+                <role>Developer</role>
+                <role>Documentation</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Yazid Benazzouz</name>
+            <organization>CEA</organization>
+            <roles>
+                <role>Developer</role>
+                <role>Documentation</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Diana Moreno</name>
+            <organization>CEA</organization>
+            <roles>
+                <role>Developer</role>
+                <role>Documentation</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <properties>
+        <osgi.version>5.0.0</osgi.version>
+        <junit.version>4.8.1</junit.version>
+        <ipojo.version>1.12.0</ipojo.version>
+        <gogo.shell.version>0.12.0</gogo.shell.version>
+        <gogo.runtime.version>0.16.2</gogo.runtime.version>
+        <gogo.command.version>0.16.0</gogo.command.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.build.timestamp.format>yyyyMMd</maven.build.timestamp.format>
+        <sonar.jacoco.itReportPath>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
+		<signer.path>${java.home}/../bin/jarsigner</signer.path>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>${osgi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.compendium</artifactId>
+                <version>${osgi.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <profiles>
+        <profile>
+            <id>sonar</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-surefire-plugin</artifactId>
+                            <version>2.18.1</version>
+                            <configuration>
+                                <argLine>${surefire.argLine} -XX:MaxPermSize=512m</argLine>
+                            </configuration>
+                            <dependencies>
+                                <dependency>
+                                    <groupId>org.apache.maven.surefire</groupId>
+                                    <artifactId>common-junit48</artifactId>
+                                    <version>2.18.1</version>
+                                </dependency>
+                            </dependencies>
+                        </plugin>
+                        <plugin>
+                            <artifactId>maven-failsafe-plugin</artifactId>
+                            <version>2.12</version>
+                            <executions>
+                                <execution>
+                                    <id>default-integration-test</id>
+                                    <goals>
+                                        <goal>integration-test</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.7.4.201502262128</version>
+                        <configuration>
+                            <append>true</append>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>default-prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                                <configuration>
+                                    <propertyName>surefire.argLine</propertyName>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>default-prepare-agent-integration</id>
+                                <goals>
+                                    <goal>prepare-agent-integration</goal>
+                                </goals>
+                                <configuration>
+                                    <destFile>${sonar.jacoco.itReportPath}</destFile>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>default-jacoco-site</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>doc</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>internet</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-surefire-plugin</artifactId>
+                            <version>2.18.1</version>
+                            <dependencies>
+                                <dependency>
+                                    <groupId>org.apache.maven.surefire</groupId>
+                                    <artifactId>common-junit48</artifactId>
+                                    <version>2.18.1</version>
+                                </dependency>
+                            </dependencies>
+                        </plugin>
+                        <plugin>
+                            <artifactId>maven-failsafe-plugin</artifactId>
+                            <version>2.12</version>
+                            <executions>
+                                <execution>
+                                    <goals>
+                                        <goal>integration-test</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
+        <pluginManagement>
+            <plugins>               
+				<plugin>
+				    <groupId>org.codehaus.gmaven</groupId>
+				    <artifactId>groovy-maven-plugin</artifactId>
+				    <version>2.0</version>
+				    <executions>
+				        <execution>
+				            <id>search-root-clean</id>				            
+				            <phase>pre-clean</phase>
+				            <goals>
+				                <goal>execute</goal>
+				            </goals>
+				            <configuration>
+				                <defaults>
+				                    <name>find-root</name>
+				                </defaults>				                
+				                <source>
+				                	String basedir = project.basedir.absolutePath.replace('\\','/');
+				                    File projectFile = new File(basedir)
+				                    File pomFile = null
+				                    while((pomFile = new File(projectFile.getParentFile(),"pom.xml")).exists())
+				                    {
+				                    	projectFile = projectFile.getParentFile()
+				                    }
+				                    project.properties.setProperty('sensinact.rootdir',projectFile.getAbsolutePath())
+				                    log.info('PATH: {}', projectFile.getAbsolutePath())
+				                </source>
+				            </configuration>
+				        </execution>
+				        <execution>
+				            <id>search-root-validate</id>
+				            <phase>validate</phase>
+				            <goals>
+				                <goal>execute</goal>
+				            </goals>
+				            <configuration>
+				                <defaults>
+				                    <name>find-root</name>
+				                </defaults>
+				                <source>
+				                	String basedir = project.basedir.absolutePath.replace('\\','/');
+				                    File projectFile = new File(basedir)
+				                    File pomFile = null
+				                    while((pomFile = new File(projectFile.getParentFile(),"pom.xml")).exists())
+				                    {
+				                    	projectFile = projectFile.getParentFile()
+				                    }
+				                    project.properties.setProperty('sensinact.rootdir',projectFile.getAbsolutePath())
+				                    log.info('PATH: {}', projectFile.getAbsolutePath())
+				                </source>
+				            </configuration>
+				        </execution>
+						<execution>
+				            <id>search-sha</id>
+				            <phase>install</phase>
+				            <goals>
+				                <goal>execute</goal>
+				            </goals>
+				            <configuration>
+				                <defaults>
+				                    <name>extract-sha</name>
+				                </defaults>
+				                <source>				                            
+				                	File basedir = new File(project.basedir.absolutePath.replace('\\','/'));    				                	
+				                    File signature = new File(basedir, "/target/classes/META-INF/SELFSIGN.SF")
+				                			
+				                    if(signature.exists())
+				                    {
+				                    	String fileContents = signature.getText('UTF-8')
+				                    	matcher = (fileContents =~ /(?s)SHA(1|-256)-Digest-Manifest\s*:\s*([^\s]+)\s*$?/)
+				                    	
+				                    	String sha = matcher.getAt(0).getAt(2)
+				                    	log.info('SHA: {}', sha)
+				                    	project.properties.setProperty('sha',sha)
+				                    }
+				                </source>
+				            </configuration>
+				        </execution>
+				    </executions>
+				</plugin>
+            	<plugin>
+		            <groupId>org.codehaus.mojo</groupId>
+		            <artifactId>sql-maven-plugin</artifactId>
+		            <version>1.5</version>
+		            <dependencies>
+		            	<dependency>
+   							<groupId>org.xerial</groupId>
+   							<artifactId>sqlite-jdbc</artifactId>
+   							<version>3.8.10.1</version>
+						</dependency>
+		            </dependencies>
+		            <configuration>
+		                <driver>org.sqlite.JDBC</driver>
+		                <url>jdbc:sqlite:${sensinact.rootdir}/platform/sensinact-security/sensinact-security-core/src/test/resources/sensinact.sqlite</url>
+		            	<autocommit>true</autocommit>
+		            	<printResultSet>true</printResultSet>
+		            	<delimiter>;</delimiter>
+		            	<escapeProcessing>false</escapeProcessing>
+		            </configuration>
+        		</plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>2.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.0</version>
+                    <configuration>
+                        <source>1.7</source>
+                        <target>1.7</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>2.5.3</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <unpackBundle>true</unpackBundle>
+                        <instructions>
+                            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                            <Bundle-Name>${project.name}</Bundle-Name>
+                            <Bundle-Vendor>Eclipse</Bundle-Vendor>
+                            <Build-By>Eclipse</Build-By>
+                            <Bundle-Description>${project.name}</Bundle-Description>
+                            <_nouses>true</_nouses>
+                            <_snapshot>${maven.build.timestamp}</_snapshot>
+                            <_plugin>aQute.bnd.signing.JartoolSigner;alias="selfsigned";path="${signer.path}";keystore="${sensinact.rootdir}/platform/sensinact-security/cert/keystore.jks";storepass="sensiNact_team"</_plugin>
+                    		<_sign>selfsigned</_sign>
+                    		<_failok>true</_failok>
+                    		<!--
+                            <_exportcontents>
+                                *,
+                                !*.internal,
+                                !*.internal.*,
+                                !${private.package}
+                            </_exportcontents>
+                            -->
+                        </instructions>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.9.1</version>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <excludePackageNames>*.internal:*.internal.*</excludePackageNames>
+                        <links>
+                            <link>http://docs.oracle.com/javase/6/docs/api/</link>
+                        </links>
+                        <version>true</version>
+                        <show>protected</show>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>1.8</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+        	<plugin>
+			    <groupId>org.codehaus.gmaven</groupId>
+		        <artifactId>groovy-maven-plugin</artifactId>
+		   	</plugin>        	
+        </plugins>
+    </build>
+
+    <modules>
+        <module>platform</module>
+        <!--<module>simulated-devices</module>-->
+  </modules>
+</project>

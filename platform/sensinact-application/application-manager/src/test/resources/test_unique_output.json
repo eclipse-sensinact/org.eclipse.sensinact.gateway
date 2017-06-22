@@ -1,0 +1,65 @@
+{
+  "parameters": [
+    {
+      "name": "name",
+      "type": "java.lang.String",
+      "value": "test_unique_output"
+    },
+    {
+      "name": "content",
+      "type": "org.json.JSONObject",
+      "value": {
+        "initialize": {},
+        "application": [
+          {
+            "identifier": "result1",
+            "events": [
+              {
+                "value": "/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider",
+                "type": "resource"
+              }
+            ],
+            "function": {
+              "name": "test_instance_1",
+              "buildparameters": [],
+              "runparameters": [
+                {
+                  "value": "/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider",
+                  "type": "resource"
+                },
+                {
+                  "value": 1,
+                  "type": "int"
+                }
+              ]
+            }
+          },
+          {
+            "identifier": "result1",
+            "events": [
+              {
+                "value": "/test_unique_output/result1/result",
+                "type": "variable"
+              }
+            ],
+            "function": {
+              "name": "test_instance_1",
+              "buildparameters": [],
+              "runparameters": [
+                {
+                  "value": "/test_unique_output/result1/result",
+                  "type": "variable"
+                },
+                {
+                  "value": 1,
+                  "type": "int"
+                }
+              ]
+            }
+          }
+        ],
+        "finalize": {}
+      }
+    }
+  ]
+}

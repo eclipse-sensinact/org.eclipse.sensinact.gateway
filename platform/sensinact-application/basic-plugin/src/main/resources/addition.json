@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://sensinact.com",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string", "enum": [ "add" ] },
+    "runparameters": {
+      "type": "array",
+      "minItems": 2,
+      "items":
+      {
+        "type": "object",
+        "properties": {
+          "value": {},
+          "type": { "type": "string",
+            "enum": [ "integer", "double", "long", "float", "resource", "event", "variable" ] }
+        }
+      }
+    }
+  },
+  "required": [ "name", "runparameters" ]
+}

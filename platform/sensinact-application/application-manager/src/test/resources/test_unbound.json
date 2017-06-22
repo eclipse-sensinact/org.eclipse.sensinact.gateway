@@ -1,0 +1,80 @@
+{
+  "parameters": [
+    {
+      "name": "name",
+      "type": "java.lang.String",
+      "value": "test_unbound"
+    },
+    {
+      "name": "content",
+      "type": "org.json.JSONObject",
+      "value": {
+        "initialize": {},
+        "application": [
+          {
+            "identifier": "result1",
+            "events": [
+              {
+                "value": "slider",
+                "type": "resource"
+              }
+            ],
+            "function": {
+              "name": "test_instance_1",
+              "buildparameters": [],
+              "runparameters": [
+                {
+                  "value": "slider",
+                  "type": "event"
+                },
+                {
+                  "value": 1,
+                  "type": "int"
+                }
+              ]
+            }
+          },
+          {
+            "identifier": "result2",
+            "events": [
+              {
+                "value": "result1",
+                "type": "variable"
+              }
+            ],
+            "function": {
+              "name": "test_instance_1",
+              "buildparameters": [],
+              "runparameters": [
+                {
+                  "value": "result1",
+                  "type": "event"
+                }
+              ]
+            }
+          },
+          {
+            "identifier": "result3",
+            "events": [
+              {
+                "value": "result",
+                "type": "variable"
+              }
+            ],
+            "function": {
+              "name": "test_instance_2",
+              "buildparameters": [],
+              "runparameters": [
+                {
+                  "value": "result1",
+                  "type": "event"
+                }
+              ]
+            }
+          }
+        ],
+        "finalize": {}
+      }
+    }
+  ]
+}

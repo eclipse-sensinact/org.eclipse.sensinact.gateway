@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
+
+<sensinact:frames
+ xmlns:sensinact="http://org.eclipse.sensinact/frame"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ xsi:schemaLocation="http://org.eclipse.sensinact/frame ../../main/resources/frame.xsd "
+ delimiter="3">
+  <sensinact:types>
+  	<sensinact:type>
+  		<sensinact:name>first</sensinact:name>
+  		<sensinact:implementation>org.eclipse.sensinact.gateway.common.automata.test.TFrame</sensinact:implementation>
+  	</sensinact:type>
+  	<sensinact:type>
+  		<sensinact:name>second</sensinact:name>
+  		<sensinact:implementation>org.eclipse.sensinact.gateway.common.automata.test.TFrame_1</sensinact:implementation>
+  		<sensinact:length>1</sensinact:length>
+  	</sensinact:type>
+  	<sensinact:type>
+  		<sensinact:name>third</sensinact:name>
+  		<sensinact:implementation>org.eclipse.sensinact.gateway.common.automata.test.TFrame_2</sensinact:implementation>
+  		<sensinact:length>3</sensinact:length>
+  	</sensinact:type>
+  	<sensinact:type>
+  		<sensinact:name>fourth</sensinact:name>
+  		<sensinact:implementation>org.eclipse.sensinact.gateway.common.automata.test.TFrame_3</sensinact:implementation>
+  		<sensinact:length>2</sensinact:length>
+  	</sensinact:type>
+  	<sensinact:type>
+  		<sensinact:name>fifth</sensinact:name>
+  		<sensinact:implementation>org.eclipse.sensinact.gateway.common.automata.test.TFrame_4</sensinact:implementation>
+  		<sensinact:length>1</sensinact:length>
+  	</sensinact:type>
+  </sensinact:types>
+  <sensinact:frame name="first" offset="0">
+  	<sensinact:frame name="third" offset="0"/>
+  	<sensinact:frame name="fourth" offset="3">
+  		<sensinact:frame name="fifth" offset="0"/>
+  		<sensinact:frame name="second" offset="1"/>  		
+  	</sensinact:frame>  	
+  </sensinact:frame>
+</sensinact:frames>

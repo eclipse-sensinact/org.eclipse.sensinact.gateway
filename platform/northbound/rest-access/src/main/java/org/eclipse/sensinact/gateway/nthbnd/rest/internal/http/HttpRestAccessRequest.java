@@ -1,0 +1,273 @@
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
+ */
+package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RequestWrapper;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccess;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import org.eclipse.sensinact.gateway.core.method.Parameter;
+import org.eclipse.sensinact.gateway.core.security.Authentication;
+import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
+import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
+import org.eclipse.sensinact.gateway.util.IOUtils;
+
+public class HttpRestAccessRequest extends HttpServletRequestWrapper 
+implements RequestWrapper
+{
+	/**
+	 * @param queryString
+	 * @throws UnsupportedEncodingException
+	 */
+	private static Map<String,List<String>> processRequestQuery(
+			String queryString) 
+			throws UnsupportedEncodingException
+	{		
+		if(queryString == null)
+		{
+			return Collections.<String,List<String>>emptyMap();
+		}
+		Map<String,List<String>> queryMap = 
+				new HashMap<String,List<String>>();
+		
+		char[] characters = queryString.toCharArray();
+		int index = 0;
+		int length = characters.length;
+		
+		String name = null;
+		String value = null;
+		StringBuilder element = new StringBuilder();
+		
+		for(;index < length;index++)
+		{
+			char c = characters[index];
+			switch(c)
+			{
+				case '?':;
+					break;
+				case '=':
+					name = element.toString();
+					element = new StringBuilder();
+					break;
+				case '&':				
+					value = element.toString();
+					addQueryParameter(queryMap, name, value);
+					element = new StringBuilder();
+					break;
+				default:
+					element.append(c);
+			}
+		}
+		value = element.toString();
+		addQueryParameter(queryMap, name, value);
+		return queryMap;
+	}
+
+	/**
+	 * @param name
+	 * @param value
+	 * @throws UnsupportedEncodingException
+	 */
+	private static void addQueryParameter(
+			Map<String,List<String>> queryMap, 
+			String name, String value) 
+			throws UnsupportedEncodingException
+	{
+		if(name == null || name.length() == 0)
+		{	
+			name = RestAccess.RAW_QUERY_PARAMETER;
+			
+		} else
+		{
+			name = URLDecoder.decode(name,"UTF-8");
+		}
+		List<String> values = queryMap.get(name);
+		if(values == null)
+		{
+			values = new ArrayList<String>();
+			queryMap.put(name, values);
+		}
+		values.add(URLDecoder.decode(value, "UTF-8"));
+	}	
+	
+	private NorthboundMediator mediator;
+	private Map<String,List<String>> queryMap;
+	private Authentication<?> authentication;
+	private String content;
+
+	public HttpRestAccessRequest(NorthboundMediator mediator, 
+			HttpServletRequest request)
+	{
+		super(request);
+		if(mediator == null)
+		{
+			throw new NullPointerException("Mediator needed");
+		}
+		this.mediator = mediator;
+	}
+	
+	/**
+	 * @inheritDoc
+	 *
+	 * @see RequestWrapper#
+	 * getMediator()
+	 */
+	@Override
+	public NorthboundMediator getMediator() 
+	{
+		return this.mediator;
+	}
+	
+	/**
+	 * @inheritDoc
+	 *
+	 * @see RequestWrapper#
+	 * getQueryMap()
+	 */
+	@Override
+	public Map<String,List<String>> getQueryMap() 
+	{
+		if(this.queryMap == null)
+		{
+			try
+			{
+				this.queryMap = processRequestQuery(
+						super.getQueryString());
+			}
+			catch (UnsupportedEncodingException e)
+			{
+				mediator.error(e.getMessage(),e);
+				this.queryMap = 
+					Collections.<String,List<String>>emptyMap();
+			}
+		}
+		return queryMap;
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see RequestWrapper#
+	 * getContent()
+	 */
+	@Override
+	public String getContent() 
+	{
+		if(this.content == null)
+		{
+			try
+			{
+				ServletInputStream input = super.getInputStream();				
+				byte[] stream = IOUtils.read(input,
+						super.getContentLength(),true);
+				this.content = new String(stream);
+				
+			} catch (IOException e)
+			{
+				this.mediator.error(e.getMessage(), e);
+			}
+		}
+		return this.content;
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see RequestWrapper#
+	 * getAuthentication()
+	 */
+	@Override
+	public Authentication<?> getAuthentication() 
+	{
+		if(this.authentication == null)
+		{
+			String tokenHeader = super.getHeader("X-Auth-Token");
+			String authorizationHeader = super.getHeader("Authorization");
+			
+			if(tokenHeader != null)
+			{
+				this.authentication = new AuthenticationToken(tokenHeader);
+		
+			} else if(authorizationHeader != null)
+			{
+				this.authentication =  new Credentials(authorizationHeader);
+			}
+		}
+		return this.authentication;
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see RequestWrapper#
+	 * createRecipient(Parameter[])
+	 */
+	@Override
+	public NorthboundRecipient createRecipient(Parameter[] parameters)
+	{
+		NorthboundRecipient recipient = null;
+		
+		int index = 0;
+		int length = parameters==null?0:parameters.length;				
+		String callback = null;
+		JSONObject conditions = null;
+		
+		for(;index < length; index++)
+		{
+			String name = parameters[index].getName();
+			if("callback".equals(name))
+			{
+				callback = (String) parameters[index].getValue();
+				continue;
+			}
+			if("conditions".equals(name) && JSONArray.class.isAssignableFrom(
+					parameters[index].getType()))
+			{
+				conditions = new JSONObject();
+				conditions.put("conditions", parameters[index].getValue());
+				continue;
+			}
+		}
+		if(callback != null)
+		{
+			recipient = new ContentCallback(
+			mediator, callback, conditions);
+		}
+		return recipient;
+	}
+
+	/**
+	 * 
+	 */
+	public void destroy()
+	{
+		this.queryMap = null;
+		this.authentication = null;
+		this.content = null;
+	}
+
+}

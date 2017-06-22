@@ -1,0 +1,43 @@
+{
+  "parameters": [
+    {
+      "name": "name",
+      "type": "java.lang.String",
+      "value": "simple_substring"
+    },
+    {
+      "name": "content",
+      "type": "org.json.JSONObject",
+      "value": {
+        "initialize": {},
+        "application": [
+          {
+            "identifier": "result",
+            "events": [
+              {
+                "value": "/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider",
+                "type": "resource"
+              }
+            ],
+            "function": {
+              "name": "substr",
+              "buildparameters": [],
+              "runparameters": [
+                {
+                  "value": "sensiNact",
+                  "type": "string"
+                },
+                {
+                  "value": 6,
+                  "type": "int"
+                }
+              ]
+            },
+            "properties": {}
+          }
+        ],
+        "finalize": {}
+      }
+    }
+  ]
+}

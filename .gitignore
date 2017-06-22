@@ -1,0 +1,13 @@
+/.idea
+*.iml
+target
+*~
+*.log
+.settings
+.classpath
+.project
+.gradle
+deploy_local.sh
+deploy.sh
+bin
+build

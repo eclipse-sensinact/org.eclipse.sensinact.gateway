@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
+
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+xmlns:sensinact="http://org.eclipse.sensinact/frame"
+targetNamespace="http://org.eclipse.sensinact/frame"
+elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<simpleType name="format">
+		<restriction base="string">
+			<enumeration value="binary"/>
+			<enumeration value="xml"/>
+			<enumeration value="json"/>
+			<enumeration value="bson"/>
+		</restriction>
+	</simpleType>
+	
+	<simpleType name="cardinality">
+		<restriction base="string">
+			<pattern value="([0-9]+)|n|([0-9]+\.\.([0-9]+|n))"/>
+		</restriction>
+	</simpleType>
+	
+	<attribute name="cardinality" type="sensinact:cardinality"/>
+	<attribute name="format" type="sensinact:format"/>
+	<attribute name="key" type="QName"/>
+	<attribute name="factory" type="QName"/>
+	<attribute name="implementation" type="QName"/>
+	<attribute name="schema" type="anyURI"/>
+	<attribute name="delimiter" type="unsignedByte"/>
+	<attribute name="offset" type="positiveInteger" />
+	
+	<complexType name="abstractPacket" abstract="true">
+		<annotation>
+			<documentation>Abstract packet object definition</documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element name="packet" type="sensinact:innerPacket" maxOccurs="unbounded"/>
+		</sequence>
+		<attribute ref="sensinact:cardinality" use="optional"/>
+		<attribute ref="sensinact:format" use="optional"/>
+		<attribute ref="sensinact:key" use="optional"/>
+		<attribute ref="sensinact:delimiter" use="optional"/>
+		<attribute ref="sensinact:offset" use="optional" />
+		<attribute ref="sensinact:factory"  use="optional"/>
+		<attribute ref="sensinact:implementation" use="optional"/>
+		<attribute ref="sensinact:schema"  use="optional"/>
+	</complexType>
+	
+	<complexType name="innerPacket" block="extension" abstract="false">
+		<annotation>
+			<documentation>Sub-Packet object definition</documentation>
+		</annotation>
+		<complexContent mixed="false">
+			<restriction base="sensinact:abstractPacket">
+				<sequence minOccurs="0">
+					<element name="packet" type="sensinact:innerPacket" maxOccurs="unbounded"/>
+				</sequence>
+				<attribute ref="sensinact:cardinality" use="optional"/>
+				<attribute ref="sensinact:format" use="prohibited"/>
+				<attribute ref="sensinact:key" use="prohibited"/>
+				<attribute ref="sensinact:delimiter" use="prohibited"/>
+				<attribute ref="sensinact:offset" use="optional" />
+				<attribute ref="sensinact:factory"  use="prohibited"/>
+				<attribute ref="sensinact:implementation" use="required"/>
+				<attribute ref="sensinact:schema"  use="prohibited"/>
+			</restriction>
+		</complexContent>	
+	</complexType>
+	
+	<complexType name="binaryPacket">
+		<annotation>
+			<documentation>Packet object Binary(String) encoded</documentation>
+		</annotation>
+		<complexContent mixed="false">
+			<restriction base="sensinact:abstractPacket">
+				<sequence minOccurs="1">
+					<element name="packet" type="sensinact:innerPacket"/>
+				</sequence>
+				<attribute ref="sensinact:format" use="required" fixed="binary"/>
+				<attribute ref="sensinact:key" use="required"/>
+				<attribute ref="sensinact:delimiter" use="required"/>
+				<attribute ref="sensinact:offset" use="prohibited" />
+				<attribute ref="sensinact:factory"  use="required"/>
+				<attribute ref="sensinact:implementation" use="prohibited"/>
+				<attribute ref="sensinact:schema"  use="prohibited"/>
+			</restriction>
+		</complexContent>	
+	</complexType>
+	
+	<complexType name="xmlPacket">
+		<annotation>
+			<documentation>Packet object XML encoded</documentation>
+		</annotation>
+		<complexContent mixed="false">
+			<restriction base="sensinact:abstractPacket">
+				<sequence minOccurs="1">
+					<element name="packet" type="sensinact:innerPacket"/>
+				</sequence>
+				<attribute ref="sensinact:format" use="required" fixed="xml"/>
+				<attribute ref="sensinact:key" use="required"/>
+				<attribute ref="sensinact:delimiter" use="prohibited"/>
+				<attribute ref="sensinact:offset" use="prohibited" />
+				<attribute ref="sensinact:factory"  use="required"/>
+				<attribute ref="sensinact:implementation" use="prohibited"/>
+				<attribute ref="sensinact:schema"  use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="jsonPacket" abstract="false">
+		<annotation>
+			<documentation>Packet object JSON encoded</documentation>
+		</annotation>
+		<complexContent mixed="false">
+			<restriction base="sensinact:abstractPacket">
+				<sequence minOccurs="1">
+					<element name="packet" type="sensinact:innerPacket"/>
+				</sequence>
+				<attribute ref="sensinact:format" use="required" fixed="json"/>
+				<attribute ref="sensinact:key" use="required"/>
+				<attribute ref="sensinact:delimiter" use="prohibited"/>
+				<attribute ref="sensinact:offset" use="prohibited" />
+				<attribute ref="sensinact:factory"  use="required"/>
+				<attribute ref="sensinact:implementation" use="prohibited"/>
+				<attribute ref="sensinact:schema"  use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="bsonPacket" abstract="false">
+		<annotation>
+			<documentation>Packet object BSON encoded</documentation>
+		</annotation>
+		<complexContent mixed="false">
+			<restriction base="sensinact:abstractPacket">
+				<sequence minOccurs="1">
+					<element name="packet" type="sensinact:innerPacket"/>
+				</sequence>
+				<attribute ref="sensinact:format" use="required" fixed="bson"/>
+				<attribute ref="sensinact:key" use="required"/>
+				<attribute ref="sensinact:delimiter" use="prohibited"/>
+				<attribute ref="sensinact:offset" use="prohibited" />
+				<attribute ref="sensinact:factory"  use="required"/>
+				<attribute ref="sensinact:implementation" use="prohibited"/>
+				<attribute ref="sensinact:schema"  use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	
+	<element name="packet" type="sensinact:abstractPacket"/>
+
+</schema>

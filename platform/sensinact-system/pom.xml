@@ -1,0 +1,134 @@
+<!--
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.sensinact.gateway</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.5-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>sensinact-system</artifactId>
+    <packaging>bundle</packaging>
+
+    <name>sensiNact IoT Gateway - System</name>
+
+    <build>
+        <plugins>
+            <!--
+                <plugin>
+                    <groupId>org.codehaus.gmaven</groupId>
+                    <artifactId>groovy-maven-plugin</artifactId>
+                    <version>2.0</version>
+                    <executions>
+                        <execution>
+                            <id>search-sha</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>execute</goal>
+                            </goals>
+                            <configuration>
+                                <defaults>
+                                    <name>extract-sha</name>
+                                </defaults>
+                                <source>
+                                    File basedir = new File(project.basedir.absolutePath.replace('\\','/'));
+                                    String fileContents = new File(basedir,
+                                    "/target/classes/META-INF/SELFSIGN.SF").getText('UTF-8')
+                                    matcher = (fileContents =~ /(?s)SHA1-Digest-Manifest\s*:\s*([^\s]+)\s*$?/)
+                                    String sha = matcher.getAt(0).getAt(1)
+                                    project.properties.setProperty('sha',sha)
+                                    log.info('SHA: {}', sha)
+                                </source>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>sql-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>insert-bundle-signature</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <sqlCommand>UPDATE BUNDLE SET BSHA = '${sha}' WHERE BNAME = '${project.artifactId}'</sqlCommand>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <unpackBundle>true</unpackBundle>
+                    <instructions>
+                        <Import-Package>
+                            org.eclipse.sensinact.gateway.core,
+                            org.eclipse.sensinact.gateway.core.message,
+                            org.eclipse.sensinact.gateway.core.method,
+                            org.eclipse.sensinact.gateway.core.security,
+                            org.eclipse.sensinact.gateway.generic,
+                            org.eclipse.sensinact.gateway.generic.annotation,
+                            org.eclipse.sensinact.gateway.generic.local,
+                            org.eclipse.sensinact.gateway.generic.packet,
+                            org.eclipse.sensinact.gateway.generic.packet.annotation,
+                            org.eclipse.sensinact.gateway.generic.parser,
+                            org.eclipse.sensinact.gateway.generic.stream,
+                            org.eclipse.sensinact.gateway.generic.uri,
+                            org.eclipse.sensinact.gateway.common.bundle,
+                            org.eclipse.sensinact.gateway.common.execution,
+                            org.eclipse.sensinact.gateway.util,
+                            javax.xml.parsers,
+                            org.json,
+                            org.osgi.framework;version="[1.6,2)",
+                            org.xml.sax
+                        </Import-Package>
+                        <Bundle-Activator>org.eclipse.sensinact.gateway.system.osgi.Activator</Bundle-Activator>
+                        <Include-Resource>
+                            about.html,
+                            src/main/resources/
+                        </Include-Resource>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.sensinact.gateway</groupId>
+            <artifactId>sensinact-core</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.sensinact.gateway</groupId>
+            <artifactId>sensinact-common</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.sensinact.gateway</groupId>
+            <artifactId>sensinact-generic</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+</project>

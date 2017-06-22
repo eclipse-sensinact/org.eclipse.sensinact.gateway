@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!--
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
+
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="openweather-token">d664a4539c8758150563184b44fbdaf5</entry>
+<entry key="openweather-stations">org.eclipse.sensinact.gateway.weather.stations</entry>
+<entry key="openweather-station-latitude">org.eclipse.sensinact.gateway.weather.latitude</entry>
+<entry key="openweather-station-longitude">org.eclipse.sensinact.gateway.weather.longitude</entry>
+<entry key="openweather-station-label">org.eclipse.sensinact.gateway.weather.label</entry>
+<entry key="org.eclipse.sensinact.gateway.weather.stations">santander,genova,paris</entry>
+<entry key="org.eclipse.sensinact.gateway.weather.label.paris">Paris_WeatherStation</entry>
+<entry key="org.eclipse.sensinact.gateway.weather.label.genova">Genova_WeatherStation</entry>
+<entry key="org.eclipse.sensinact.gateway.weather.label.santander">Santander_WeatherStation</entry>
+<entry key="org.eclipse.sensinact.gateway.weather.latitude.santander">43.4647200</entry>
+<entry key="org.eclipse.sensinact.gateway.weather.longitude.santander">-3.8044400</entry>
+<entry key="org.eclipse.sensinact.gateway.weather.latitude.genova">44.4264000</entry>
+<entry key="org.eclipse.sensinact.gateway.weather.longitude.genova">8.9151900</entry>
+<entry key="org.eclipse.sensinact.gateway.weather.latitude.paris">48.85</entry>
+<entry key="org.eclipse.sensinact.gateway.weather.longitude.paris">2.35</entry>
+</properties>
+

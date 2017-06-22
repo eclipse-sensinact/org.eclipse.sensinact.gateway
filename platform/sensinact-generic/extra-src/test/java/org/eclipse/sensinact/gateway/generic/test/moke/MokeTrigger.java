@@ -1,0 +1,77 @@
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
+ */
+
+package org.eclipse.sensinact.gateway.generic.test.moke;
+
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
+import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
+
+/** 
+ * 
+ */
+public class MokeTrigger implements AccessMethodTrigger<AccessMethodResult>
+{
+	/**
+	 * @InheritedDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.common.execution.Executable#execute(java.lang.Object)
+	 */
+    @Override
+    public Object execute(AccessMethodResult parameter) throws Exception
+    {
+	    return 0.2f;
+    }
+
+	/**
+	 * @InheritedDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.common.primitive.JSONable#getJSON()
+	 */
+    @Override
+    public String getJSON()
+    {
+	    return "{\"index\":0,\"passOn\":false,\"type\":\"VARIATIONTEST_TRIGGER\"}";
+    }
+
+	/**
+	 * @InheritedDoc
+	 *
+	 * @see AccessMethodTrigger#getParameters()
+	 */
+    @Override
+    public Parameters getParameters()
+    {
+	    return Parameters.INTERMEDIATE;
+    }
+
+	/**
+	 * @InheritedDoc
+	 *
+	 * @see AccessMethodTrigger#getName()
+	 */
+    @Override
+    public String getName()
+    {
+	    return "VARIATIONTEST_TRIGGER";
+    }
+
+	/**
+	 * @InheritedDoc
+	 *
+	 * @see AccessMethodTrigger#passOn()
+	 */
+    @Override
+    public boolean passOn()
+    {
+	    return false;
+    }
+
+}

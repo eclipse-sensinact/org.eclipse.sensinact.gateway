@@ -1,0 +1,101 @@
+Signature-Version: 1.0
+Created-By: 1.5.0_07 (Sun Microsystems Inc.)
+SHA1-Digest-Manifest-Main-Attributes: oJQXhlTcCO8uZipolLuv53ckOM4=
+SHA1-Digest-Manifest: A8xej22wxwduOkOSSfIxphrx4U0=
+
+Name: bundles/obr/resource/FilterImpl.class
+SHA1-Digest: q8MrUk+PKvKt+SLxUcO5QUpTS5o=
+
+Name: org/osgi/service/obr/RepositoryPermission.class
+SHA1-Digest: 8DYy8g/lcth62I3fTdjR0flZYp4=
+
+Name: org/osgi/service/obr/RepositoryAdmin.class
+SHA1-Digest: b+i5XanEa+BTm377GEaMJfoMhks=
+
+Name: bundles/obr/bindex/Index.class
+SHA1-Digest: s+RKVCHFGLo41uXItSuwJ/f+zmA=
+
+Name: org/osgi/service/obr/Repository.class
+SHA1-Digest: YPxPLT2oVht95vyN4xLa/VQbYWU=
+
+Name: bundles/obr/bindex/BindexActivator.class
+SHA1-Digest: Jj3w8R6xTLC4MIUucyJwGOXfq0o=
+
+Name: org/kxml2/io/KXmlParser.class
+SHA1-Digest: vIe9/MmFTTWk9cQhj6tBilqxXkI=
+
+Name: bundles/obr/resource/StringSet.class
+SHA1-Digest: CkMWWbUX5ag+Pnbj7l7clEKCwTY=
+
+Name: bundles/obr/resource/FilterImpl$Query.class
+SHA1-Digest: W4Qm/w5LVN4/eJNhH3gvhbvaoCI=
+
+Name: org/xmlpull/v1/XmlPullParser.class
+SHA1-Digest: zg1mWoeTUW9EpMhxz5qvlAOEk6Y=
+
+Name: bundles/obr/bindex/ManifestEntry.class
+SHA1-Digest: Q7RuPSNs5mRL211LDeYxRsW76XA=
+
+Name: org/osgi/service/obr/Requirement.class
+SHA1-Digest: CD6G58B1D+9uqdSx2Zkd8gMIltA=
+
+Name: bundles/obr/bindex/Parameter.class
+SHA1-Digest: af5oqY3N+gNhRdNTTlj/FrXHWjU=
+
+Name: bundles/obr/resource/CapabilityImpl.class
+SHA1-Digest: n9boO4jptFaLdRxv+w/B0anlRwE=
+
+Name: bundles/obr/resource/ResourceImpl.class
+SHA1-Digest: 2E64GuQiptc4sPE5fuEXXbxmI14=
+
+Name: bundles/obr/bindex/Native.class
+SHA1-Digest: EKcZ0WTXb0JmYcwLRBaqPlBrqV8=
+
+Name: bundles/obr/resource/RequirementImpl.class
+SHA1-Digest: Ne7Yj1ujULprUVH0JoXrho2i8Gc=
+
+Name: bundles/obr/resource/VersionImpl.class
+SHA1-Digest: /H3qNuXPCXrwotaf7Uo142K4zPI=
+
+Name: bundles/obr/bindex/Index$1.class
+SHA1-Digest: KsotuG9i9yeOCeLIFrtOxFTiheY=
+
+Name: org/osgi/service/obr/Capability.class
+SHA1-Digest: NCFYmCzfmqtSbOfZuvichmY4ZLY=
+
+Name: org/osgi/service/obr/CapabilityProvider.class
+SHA1-Digest: kijVvE13I58dsT9/kw/YrFn7/AU=
+
+Name: META-INF/maven/OSGi-Alliance/bindex/pom.xml
+SHA1-Digest: N6leRNZEIVgFGhkUKs5869jYS9I=
+
+Name: org/xmlpull/v1/XmlPullParserException.class
+SHA1-Digest: CIi8Nq70Kr8ttH5XtZRsLI4LNIs=
+
+Name: bundles/obr/resource/RepositoryImpl.class
+SHA1-Digest: HZbPV+OJcPBRE/iyO7Q0yFZWwRk=
+
+Name: bundles/obr/resource/BundleInfo.class
+SHA1-Digest: 1krNHUb80q3DbUr3gTIV4DOxHko=
+
+Name: org/osgi/service/obr/Resolver.class
+SHA1-Digest: cNYIrsPOH6YQOsazmFKRKbuBLP4=
+
+Name: META-INF/maven/OSGi-Alliance/bindex/pom.properties
+SHA1-Digest: nBjfdoKRpbFdQWturFsAEeCUc38=
+
+Name: bundles/obr/resource/FilterImpl$DictQuery.class
+SHA1-Digest: sAxwpIoR1NNwpPb9U/hk9YdRpQ8=
+
+Name: org/osgi/service/obr/Resource.class
+SHA1-Digest: 6cmNA+xqZdApBCjcwBYSXKTaKo0=
+
+Name: bundles/obr/resource/Tag.class
+SHA1-Digest: tD7ydIcBhQMJmz7jca4Gso7XeMM=
+
+Name: bundles/obr/bindex/Manifest.class
+SHA1-Digest: IRYZI08+kzY2OIp1CCPfAvNr6hw=
+
+Name: bundles/obr/resource/VersionRange.class
+SHA1-Digest: qxU0WI4+d+hJeXHvLD6TVhteO2A=
+
