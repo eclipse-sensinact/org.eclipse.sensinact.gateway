@@ -113,6 +113,20 @@
 		<signer.path>${java.home}/../bin/jarsigner</signer.path>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>repo.eclipse.org</id>
+            <name>sensiNact Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/sensinact-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo.eclipse.org</id>
+            <name>sensiNact Repository - Snapshots</name>
+            <url>https://repo.eclipse.org/content/repositories/sensinact-snapshots/</url>
+            <uniqueVersion>true</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
