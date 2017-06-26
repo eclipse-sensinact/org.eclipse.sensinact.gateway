@@ -24,6 +24,6 @@ Import-Package: org.eclipse.sensinact.gateway.common.bundle;version="[1.4,2)",or
  ethod.builder;version="[1.4,2)",org.eclipse.sensinact.gateway.core.method.trigge
  r;version="[1.4,2)",org.eclipse.sensinact.gateway.core.security;version="[1.4,2)
  ",org.eclipse.sensinact.gateway.util;version="[1.4,2)",org.eclipse.sensinact.gateway.util.x
- ml;version="[1.4,2)",javax.xml.parsers,org.json;version="[1.4,2)",org
+ ml;version="[1.4,2)",javax.xml.parsers,org.json;version="20080701",org
  .osgi.framework;version="[1.7,2)",org.xml.sax
 Build-By: Eclipse

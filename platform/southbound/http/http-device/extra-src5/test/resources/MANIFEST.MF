@@ -4,7 +4,7 @@ Import-Package: org.eclipse.sensinact.gateway.sthbnd.http;version="1.4.0",org.ec
  d.http.mid;version="1.4.0",org.eclipse.sensinact.gateway.sthbnd.http.task;versio
  n="1.4.0",org.eclipse.sensinact.gateway.sthbnd.http.annotation;version="1.4.0",org
  .eclipse.sensinact.gateway.common.bundle;version="1.4.0",org.eclipse.sensinact.gateway.ge
- neric;version="1.4.0",org.json;version="1.4.0"
+ neric;version="1.4.0",org.json;version="20080701"
 Tool: Bnd-2.3.0.201405100607
 Bundle-Name: sensiNact IoT Gateway - HTTP Protocol Device Moke5
 Created-By: 1.6.0_45 (Sun Microsystems Inc.)

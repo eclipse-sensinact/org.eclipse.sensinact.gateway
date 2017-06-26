@@ -22,7 +22,7 @@ Import-Package: org.eclipse.sensinact.gateway.common.bundle;version="[1.4,2)",or
  vlet.http;version="[3.1,4)",org.apache.felix.http.api;version="[2.0,3
  )",org.eclipse.jetty.websocket.api;version="[9.2,10)",org.eclipse.jet
  ty.websocket.api.annotations;version="[9.2,10)",org.eclipse.jetty.web
- socket.servlet;version="[9.2,10)",org.json;version="[1.4,2)",org.osgi
+ socket.servlet;version="[9.2,10)",org.json;version="20080701",org.osgi
  .framework;version="[1.7,2)",org.osgi.service.http;version="[1.2,2)"
 Bundle-SymbolicName: rest-access
 Build-By: Eclipse

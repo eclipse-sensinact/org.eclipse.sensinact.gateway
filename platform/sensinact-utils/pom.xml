@@ -97,6 +97,9 @@
 						<Include-Resource>
 							about.html
 						</Include-Resource>
+						<Export-Package>
+							org.json.*;version="20080701"
+						</Export-Package>
 					</instructions>
 				</configuration>
 			</plugin>

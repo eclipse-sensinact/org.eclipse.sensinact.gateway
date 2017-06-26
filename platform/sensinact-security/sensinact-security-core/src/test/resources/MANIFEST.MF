@@ -10,15 +10,15 @@ Bundle-SymbolicName: sensinact-security-core
 Bundle-Vendor: Eclipse
 Bundle-Version: 1.3.0.20161117
 Created-By: Apache Maven Bundle Plugin
-Export-Package: org.eclipse.sensinact.gateway.core.security.impl;version="1.3.0"
+Export-Package: org.eclipse.sensinact.gateway.core.security.impl;version="1.5.0"
 Fragment-Host: sensinact-core
-Import-Package: org.eclipse.sensinact.gateway.common.bundle;version="[1.3,2)",org.eclipse
- .sensinact.gateway.common.execution;version="[1.3,2)",org.eclipse.sensinact.gateway.com
- mon.primitive;version="[1.3,2)",org.eclipse.sensinact.gateway.core,org.eclipse.sensinact.gate
- way.core.message;version="[1.3,2)",org.eclipse.sensinact.gateway.core.security,org.
- eclipse.sensinact.gateway.datastore.api;version="[1.3,2)",org.eclipse.sensinact.gateway.util
- ;version="[1.3,2)",org.eclipse.sensinact.gateway.util.tree;version="[1.3,2)",org.j
- son;version="[1.3,2)",org.osgi.framework;version="[1.6,2)"
+Import-Package: org.eclipse.sensinact.gateway.common.bundle;version="[1.5,2)",org.eclipse
+ .sensinact.gateway.common.execution;version="[1.5,2)",org.eclipse.sensinact.gateway.com
+ mon.primitive;version="[1.5,2)",org.eclipse.sensinact.gateway.core,org.eclipse.sensinact.gate
+ way.core.message;version="[1.5,2)",org.eclipse.sensinact.gateway.core.security,org.
+ eclipse.sensinact.gateway.datastore.api;version="[1.5,2)",org.eclipse.sensinact.gateway.util
+ ;version="[1.5,2)",org.eclipse.sensinact.gateway.util.tree;version="[1.5,2)",org.j
+ son;version="20080701",org.osgi.framework;version="[1.6,2)"
 Provide-Capability: org.eclipse.sensinact.security,org.eclipse.sensinact.datastore,org.eclipse.sensinact.
  datastore.connector,org.eclipse.sensinact.signature.validator
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.6))"
