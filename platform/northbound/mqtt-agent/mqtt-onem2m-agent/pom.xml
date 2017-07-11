@@ -48,6 +48,10 @@
                             about.html,
                             src/main/resources/
                         </Include-Resource>
+                        <Import-Package>
+                            org.json.*;version="[1.5,2)",
+                            *
+                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
