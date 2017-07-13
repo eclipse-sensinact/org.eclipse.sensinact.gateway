@@ -40,9 +40,6 @@ public class TestDataBaseService
 	
 	private static final String MOCK_BUNDLE_NAME = "MockedBundle";
 	private static final long MOCK_BUNDLE_ID = 1;
-	
-	private static final String PERSON_JSON ="[{\"id\":1,\"name\":\"leo\"}]";
-	private static final String INSERTED_JSON ="[{\"id\":10,\"name\":\"robert\"}]";
 
 	private BundleContext context = null;
 	private Bundle bundle = null;
@@ -87,7 +84,8 @@ public class TestDataBaseService
 	{
 		JSONArray json = dataService.select("SELECT * FROM person WHERE person.id=1");
 		System.out.println(json);
-		assertEquals(PERSON_JSON,json.toString());
+		assertEquals(json.getJSONObject(0).getInt("id"), 1);
+		assertEquals(json.getJSONObject(0).getString("name"), "leo");
 	}
 
 	@Test
@@ -112,7 +110,8 @@ public class TestDataBaseService
 		System.out.println("Last generated ID :"+ entries);
 		JSONArray json = dataService.select("SELECT * FROM person WHERE person.id=10");
 		System.out.println(json);
-		assertEquals(INSERTED_JSON,json.toString());
+		assertEquals(json.getJSONObject(0).getInt("id"), 10);
+		assertEquals(json.getJSONObject(0).getString("name"), "robert");
 		entries = dataService.delete("DELETE FROM person WHERE person.id=10");
 		assertEquals(1,entries);		
 	}
