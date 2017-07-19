@@ -166,10 +166,6 @@
 						<_sign>selfsigned</_sign>
 						<_failok>true</_failok>
 						<Bundle-ClassPath>.</Bundle-ClassPath>
-						<Import-Package>
-							!org.bouncycastle.*,
-							*
-						</Import-Package>
 						<Provide-Capability>
 							org.eclipse.sensinact.signature.validator
 						</Provide-Capability>
