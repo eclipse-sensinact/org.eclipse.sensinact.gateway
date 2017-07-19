@@ -67,39 +67,6 @@
     		<version>1.5-SNAPSHOT</version>
     		<scope>test</scope>
 		</dependency>
-		<!--
-	  	<dependency>
-	  		<groupId>org.xerial</groupId>
-	  		<artifactId>sqlite-jdbc</artifactId>
-	  		<version>3.8.9</version>
-    		<scope>test</scope>
-	    </dependency>--> 
-	    <!--
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-generic</artifactId>
-            <version>${project.version}</version>
-			<scope>test</scope>
-        </dependency>	
-		<dependency>
-			<groupId>org.eclipse.sensinact.gateway.simulated.devices</groupId>
-			<artifactId>slider</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.sensinact.gateway.simulated.devices</groupId>
-			<artifactId>button</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>  
-		<dependency>
-			<groupId>org.eclipse.sensinact.gateway.simulated.devices</groupId>
-			<artifactId>fan</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>    
-		-->
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.main</artifactId>
