@@ -39,7 +39,7 @@ public class PathNodeList implements Iterable<PathNode>
 	 * 
 	 * @return
 	 */
-	PathNode get(String nodeName)
+	public PathNode get(String nodeName)
 	{
 		if (nodeName == null)
 		{
