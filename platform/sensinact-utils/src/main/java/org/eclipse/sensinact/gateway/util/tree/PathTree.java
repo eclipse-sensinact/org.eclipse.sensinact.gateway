@@ -35,7 +35,7 @@ public class PathTree<N extends PathNode>
 	//********************************************************************//
 
 	protected final N root;
-	private final PathNodeFactory<N> factory;
+	protected final PathNodeFactory<N> factory;
 	
 	/**
 	 * Constructor
@@ -94,6 +94,17 @@ public class PathTree<N extends PathNode>
 				:factory.createPathNode(uriElement));
 		}
 		return current;
+	}
+
+	/**
+	 * Returns the root {@link PathNode} of this
+	 * PathTree
+	 *
+	 * @return this PathTree root {@link PathNode}
+	 */
+	public N getRoot()
+	{
+		return this.root;
 	}
 	
 	/**

@@ -192,6 +192,17 @@ public class PathNode
 				:pattern.matcher(objectName
 						).matches();
 	}
+
+	/**
+     * Returns the size of this node, meaning the
+     * number of its children
+     *
+     * @return the number of this node's children
+     */
+	public int size()
+    {
+        return this.children.size();
+    }
 	
 	/**
 	 * @inheritDoc
