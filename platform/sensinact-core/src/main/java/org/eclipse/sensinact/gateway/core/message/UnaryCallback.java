@@ -34,9 +34,7 @@ implements SnaCallback
 
 	protected Recipient recipient;
 	
-	protected final long timeout; 
-	
-//	protected boolean handleUnchanged;
+	protected final long timeout;
 
 	/**
 	 * Mediator used to interact with the OSGi host
@@ -115,33 +113,6 @@ implements SnaCallback
     {
     	return this.timeout;
     }
-
-//	/** 
-//	 * Defines whether this callback handles unchanged value notifications, 
-//	 * meaning that only the timestamp has been updated. 
-//	 * 
-//	 * @param handleUnchanged
-//	 * 		<ul>
-//     * 			<li>true if this callback handles unchanged value
-//     * 			notifications</li>
-//     * 			<li>false otherwise</li>
-//     * 		</ul>
-//	 */
-//	public void handleUnchanged(boolean handleUnchanged)
-//	{
-//		this.handleUnchanged = handleUnchanged;
-//	}
-//	
-//	/** 
-//	 * @inheritDoc
-//	 * 
-//	 * @see SnaCallback#handleUnchanged()
-//	 */
-//	@Override
-//	public boolean handleUnchanged()
-//	{
-//		return this.handleUnchanged;
-//	}
 	
 	/**
 	 * @inheritDoc

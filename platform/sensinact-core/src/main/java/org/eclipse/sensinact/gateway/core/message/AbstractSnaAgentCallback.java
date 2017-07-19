@@ -36,13 +36,6 @@ public abstract class AbstractSnaAgentCallback implements SnaAgentCallback
 	 */
 	protected int used;
 
-//	/**
-//	 * Defines whether a message about a resource update
-//	 * in which the value has not been changed is processed or
-//	 * not
-//	 */
-//	private boolean handleUnchanged;
-	
 	/**
 	 * Constructor
 	 * 
@@ -54,7 +47,6 @@ public abstract class AbstractSnaAgentCallback implements SnaAgentCallback
 	{
 		this.locations = new HashMap<String,String>();
 		this.used = 0;
-//		this.handleUnchanged = false;
 	}
 	
 	/**
@@ -100,33 +92,6 @@ public abstract class AbstractSnaAgentCallback implements SnaAgentCallback
     {
     	return used;
     }
-
-//	/** 
-//	 * Defines whether this callback handles unchanged value notifications, 
-//	 * meaning that only the timestamp has been updated. 
-//	 * 
-//	 * @param handleUnchanged
-//	 * 		<ul>
-//     * 			<li>true if this callback handles unchanged value
-//     * 			notifications</li>
-//     * 			<li>false otherwise</li>
-//     * 		</ul>
-//	 */
-//	public void handleUnchanged(boolean handleUnchanged)
-//	{
-//		this.handleUnchanged = handleUnchanged;
-//	}
-//	
-//	/** 
-//	 * @inheritDoc
-//	 * 
-//	 * @see SnaCallback#handleUnchanged()
-//	 */
-//	@Override
-//	public boolean handleUnchanged()
-//	{
-//		return this.handleUnchanged;
-//	}
     
 	/**
 	 * @inheritDoc
@@ -180,7 +145,7 @@ public abstract class AbstractSnaAgentCallback implements SnaAgentCallback
 			case UPDATE:
 				this.doHandle((SnaUpdateMessageImpl) message);
 				break;	
-			default:;			
+			default:;
 		}
 		used--;
     }    
