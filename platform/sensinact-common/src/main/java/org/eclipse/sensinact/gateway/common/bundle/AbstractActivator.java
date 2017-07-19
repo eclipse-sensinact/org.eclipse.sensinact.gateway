@@ -30,6 +30,8 @@ import org.eclipse.sensinact.gateway.util.PropertyUtils;
  */
 public abstract class AbstractActivator<M extends Mediator> implements BundleActivator 
 {
+	public static final String SENSINACT_CONFIG_FILE = "sensiNact-conf.xml";
+
 	/**
 	 * Completes the starting process 
 	 */
@@ -76,7 +78,7 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 		 Properties properties = new Properties();
 		 
 		 URL config  =  context.getBundle().getResource(
-				 "sensiNact-conf.xml");
+				 SENSINACT_CONFIG_FILE);
 		 
 		 if(config != null)
 		 {
