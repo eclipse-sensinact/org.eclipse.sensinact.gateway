@@ -55,7 +55,7 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.gogo.runtime</artifactId>
-            <version>${gogo.runtime.version}</version>
+            <version>${gogo.version}</version>
             <scope>provided</scope>
             <exclusions>
             	<exclusion>
