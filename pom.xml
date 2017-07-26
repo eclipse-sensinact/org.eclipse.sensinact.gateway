@@ -453,5 +453,6 @@
     <modules>
         <module>platform</module>
         <!--<module>simulated-devices</module>-->
+        <module>distribution</module>
   </modules>
 </project>

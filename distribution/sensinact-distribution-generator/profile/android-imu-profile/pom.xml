@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.sensinact.gateway.distribution</groupId>
+        <artifactId>profile</artifactId>
+        <version>1.5-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>android-imu</artifactId>
+    <packaging>pom</packaging>
+
+    <name>sensiNact IoT Gateway - sensiNact Runtime (${project.artifactId} bridge dependencies)</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
+            <artifactId>android-http</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/sensinact/load/${project.artifactId}</outputDirectory>
+                            <excludeArtifactIds>${excludeArtifactId}</excludeArtifactIds>
+                            <excludeGroupIds>${excludeGroupId}</excludeGroupIds>
+                            <excludeTransitive>${excludeTransitive}</excludeTransitive>
+                            <excludeTypes>pom</excludeTypes>
+                        </configuration>
+                        <inherited>false</inherited>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

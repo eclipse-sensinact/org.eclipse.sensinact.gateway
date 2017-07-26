@@ -1,0 +1,128 @@
+#!/bin/bash
+
+# Copyright (c) 2017 CEA.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+# Contributors:
+#    CEA - initial API and implementation
+
+export SCRIPT_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CONFIG_FELIX="-Dfelix.config.properties=file:conf/config.properties"
+CONFIG_SECURITY="-Djava.security.egd=file:/dev/./urandom -Djava.security.policy=conf/all.policy"
+CONFIG_LOG="-Dlogback.configurationFile=conf/logback.xml"
+JAVA_OPTIONS="-Xms64m -Xmx256m"
+JAVA_CLASSPATH="bin/felix.jar"
+
+function isReadmeFile (){
+	if [ ! "$1" = "README" ]; then
+	  return 1; 
+	fi
+	return 0;
+}
+
+function updateDeployedBundleReference(){
+	pushd . > /dev/null
+	cd $SCRIPT_DIRECTORY
+	rm bundle/*.jar || true
+	for f in .profile-enabled/*
+	do
+		export targetfile=$(echo $f|cut -d "/" -f 2)
+		if ! isReadmeFile $targetfile; then
+		  find load/$targetfile/ -type f -exec ln -f {} bundle/ \;
+		fi
+	done
+	popd > /dev/null
+}
+
+if ! which java > /dev/null; then
+	echo "Java not found. Exiting."
+	exit 1
+else
+	JAVA_BINARY=`which java`
+fi
+
+cd $SCRIPT_DIRECTORY
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		-c|--configure)
+			i=0
+			for f in load/*
+			do
+				file=`sed -e 's/load\///g' <<< $f`
+				if ! isReadmeFile $file; then
+					title=`sed -e 's/load\///g' <<< $f`
+					item=$f
+					state="off"
+
+					if [ -f ".profile-enabled/$title" ]; then
+						state="on"
+					fi
+
+					files[i]=$(echo -en "\0$(( $1 / 64 * 100 + $1 % 64 / 8 * 10 + $1 % 8 ))")
+					files[i+1]="$title $item $state"
+					((i+=2))
+				fi
+			done
+
+			result=$(whiptail --title "sensiNact Profile Configurator" \
+				--checklist "Please select the profiles to activate" 26 46 16 ${files[@]} 2>&1 >/dev/tty)
+			
+			if [ $? == 1 ]; then
+				echo "Cancelling"
+				exit 0
+			fi
+
+			if [ "$(ls -A .profile-enabled/)" ]; then
+				rm -f bundle/*.jar || true
+			fi
+
+			rm -f .profile-enabled/* || true
+			cd bundle
+
+			for f in $result
+			do
+				file=`sed -e 's/"//g' <<< $f`
+				if ! isReadmeFile $file; then
+				  touch ../.profile-enabled/$file
+				  find ../load/$file/ -type f -exec ln -f {} . \;
+				fi
+			done
+			exit 0
+			;;
+		-u)
+		    echo "Updating links of bundle deployed"
+			updateDeployedBundleReference
+			exit 0
+			;;
+		-d|--debug)
+			JAVA_OPTIONS="$JAVA_OPTIONS -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -Xnoagent"
+			shift
+			;;
+		-h|--help)
+			echo "Syntax: sensinact [-options]"
+			echo "	-c,--configure		Change current profiles"
+			echo "	-d,--debug		Add debug options to Java"
+			echo "	-h,--help		Display this help"
+			exit 0
+			;;
+		*)
+			echo "Invalid options: $1" >&2
+			exit 1
+			;;
+	esac
+done
+
+if [ -f $SCRIPT_DIRECTORY/profile-enabled/org.apache.felix.fileinstall-usb.cfg ]; then
+	if [ -z "$SUDO_USER" ] && (! groups | grep &>/dev/null '\bdialout\b'); then
+		echo "You must be root, use \"sudo\" or be part of the group dialout to launch sensiNact with USB access. Exiting."
+		exit 1
+	fi
+fi
+
+COMMAND="$JAVA_BINARY $JAVA_OPTIONS $CONFIG_SECURITY $CONFIG_FELIX $CONFIG_LOG -cp $JAVA_CLASSPATH org.apache.felix.main.Main"
+
+$COMMAND
