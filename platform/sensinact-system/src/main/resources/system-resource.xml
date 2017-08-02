@@ -27,14 +27,6 @@
 	    </attributes>
     </resourceInfo>
 
-    <resourceInfo xsi:type="resourceInfoProperty" name="EVENT"  target="system">
-        <policy name="PROPERTY" update="AUTO"/>
-        <identifier xsi:type="stringContent">event</identifier>
-	    <attributes>
-	     	<attribute name="value" type="string" modifiable="UPDATABLE"/>
-	    </attributes>
-    </resourceInfo>
-
     <resourceInfo xsi:type="resourceInfoProperty" name="ADDRESS"  target="system">
         <policy name="PROPERTY" update="INIT"/>
         <identifier xsi:type="stringContent">address</identifier>

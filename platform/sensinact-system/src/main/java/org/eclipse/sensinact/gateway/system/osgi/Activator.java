@@ -16,29 +16,21 @@ import java.util.Collections;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.sensinact.gateway.system.listener.SystemAgent;
+import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.osgi.framework.BundleContext;
 
 import org.xml.sax.SAXException;
 
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
-import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
-import org.eclipse.sensinact.gateway.system.internal.SystemPacket;
 
 public class Activator extends AbstractActivator<Mediator> {
 
     private ExtModelConfiguration manager = null;
-    private LocalProtocolStackEndpoint<SystemPacket> connector = null;
-
-    private String agent = null;
-    private String registration = null;
-    private Session session;
+    private LocalProtocolStackEndpoint<Packet> connector = null;
 
     /**
      * @throws IOException
@@ -53,28 +45,16 @@ public class Activator extends AbstractActivator<Mediator> {
         if(manager == null)
         {
         	manager = new ExtModelInstanceBuilder(
-        	super.mediator, SystemPacket.class
+        	super.mediator, Packet.class
             	).withStartAtInitializationTime(true
                 ).buildConfiguration("system-resource.xml", 
                 Collections.<String,String>emptyMap());
         }
         if(this.connector == null)
         {
-        	this.connector = new LocalProtocolStackEndpoint<SystemPacket>(mediator);
+        	this.connector = new LocalProtocolStackEndpoint<Packet>(mediator);
         }
         this.connector.connect(manager);
-        
-        this.agent = mediator.callService(SecuredAccess.class, 
-        		new Executable<SecuredAccess,String>()
-		{
-			@Override
-			public String execute(SecuredAccess service) 
-					throws Exception 
-			{
-				return service.registerAgent(mediator,
-					new SystemAgent(mediator, connector), null);
-			}	
-		});
     }
 
     /**
@@ -90,21 +70,6 @@ public class Activator extends AbstractActivator<Mediator> {
     		this.connector = null;
     	}
         this.manager = null;
-
-        mediator.callService(SecuredAccess.class, 
-    		new Executable<SecuredAccess,Void>()
-		{
-			@Override
-			public Void execute(SecuredAccess service) 
-					throws Exception 
-			{
-				service.unregisterAgent(
-						Activator.this.agent);
-				return null;
-			}
-	
-		});
-        this.agent = null;
     }
 
     /**
