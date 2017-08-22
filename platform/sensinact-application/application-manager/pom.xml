@@ -81,12 +81,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-	    <groupId>com.doctusoft</groupId>
-            <artifactId>json-schema-java7</artifactId>
-            <version>1.4.1.1</version>
-	    <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.sensinact.gateway</groupId>
             <artifactId>sensinact-security-none</artifactId>
             <version>${project.version}</version>

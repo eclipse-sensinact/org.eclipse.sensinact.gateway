@@ -11,12 +11,9 @@
 package org.eclipse.sensinact.gateway.app.manager.checker;
 
 import org.eclipse.sensinact.gateway.app.api.exception.FunctionNotFoundException;
-import org.eclipse.sensinact.gateway.app.api.exception.InvalidApplicationException;
+import org.eclipse.sensinact.gateway.app.api.exception.ValidationException;
 import org.eclipse.sensinact.gateway.app.manager.osgi.PluginsProxy;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -38,8 +35,8 @@ public class JsonValidator {
      * Validate a JSON application against the JSON Schema for the applications
      * @param mediator the mediator to print output
      * @param json the JSON to validate
-     * @throws ValidationException
-     * @throws FileNotFoundException
+     * @throws ValidationException JSON file is not valid
+     * @throws FileNotFoundException unable to find the JSON schema
      */
     public static void validateApplication(AppServiceMediator mediator, JSONObject json)
             throws ValidationException, FileNotFoundException {
@@ -56,18 +53,25 @@ public class JsonValidator {
             throw new FileNotFoundException("Unable to find the JSON schema file");
         }
 
-        Schema schema = SchemaLoader.load(rawSchema);
-        schema.validate(json);
+        /*Json inputJson = Json.read(json.toString());
+        Json schemaJson = Json.read(mediator.getContext().getBundle().getResource("/" + JSON_SCHEMA));
+        Json.Schema schema = Json.schema(schemaJson);
+        Json errors = schema.validate(inputJson);
+
+        if (!errors.at("ok").asBoolean()) {
+            throw new ValidationException("Validation error " + errors.toString());
+        }*/
     }
 
     /**
      * Validate the application components against there JSON Schema in the plugins
      * @param mediator the mediator to print output
      * @param components the components to validate
-     * @throws ValidationException
+     * @throws ValidationException JSON file is not valid
+     * @throws FileNotFoundException unable to find the JSON schema
      */
     public static void validateFunctionsParameters(AppServiceMediator mediator, JSONArray components)
-            throws ValidationException, InvalidApplicationException {
+            throws ValidationException, FileNotFoundException {
 
         for(int i = 0; i < components.length(); i++) {
             String function = components.getJSONObject(i).getJSONObject("function").getString("name");
@@ -88,7 +92,7 @@ public class JsonValidator {
                     mediator.error("The JSON of the application is not valid.");
                 }
 
-                throw new InvalidApplicationException("Unable to find the JSON schema of the function: " + function);
+                throw new FileNotFoundException("Unable to find the JSON schema of the function: " + function);
             }
 
             JSONObject reformatedFunction = new JSONObject();
@@ -102,9 +106,24 @@ public class JsonValidator {
             reformatedFunction.put("runparameters", components.getJSONObject(i).getJSONObject("function")
                     .getJSONArray("runparameters"));
 
-            Schema schema = SchemaLoader.load(functionSchema);
+            //Schema schema = SchemaLoader.load(functionSchema);
 
-            try {
+            /*Json inputJson = Json.read(reformatedFunction.toString());
+            Json schemaJson = Json.read(functionSchema.toString());
+            Json.Schema schema = Json.schema(schemaJson);
+            Json errors = schema.validate(inputJson);
+
+            if (!errors.at("ok").asBoolean()) {
+                if(mediator.isDebugLoggable()) {
+                    mediator.debug("The JSON of the component \""
+                            + components.getJSONObject(i).getString("identifier") + "\" is not valid");
+                }
+
+                throw new ValidationException("The JSON of the component \"" + components.getJSONObject(i).getString("identifier")
+                        + "\" is not valid: " + errors.toString());
+            }*/
+
+            /*try {
                 schema.validate(reformatedFunction);
             } catch (ValidationException e) {
                 if(mediator.isDebugLoggable()) {
@@ -116,7 +135,7 @@ public class JsonValidator {
                         "The JSON of the component \"" + components.getJSONObject(i).getString("identifier")
                                 + "\" is not valid",
                         e.getKeyword());
-            }
+            }*/
         }
     }
 }

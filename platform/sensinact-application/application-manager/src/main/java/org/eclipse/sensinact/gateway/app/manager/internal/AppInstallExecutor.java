@@ -30,7 +30,6 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
 
 import org.eclipse.sensinact.gateway.app.manager.json.AppContainer;
-import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
 
 /**
@@ -70,7 +69,7 @@ class AppInstallExecutor implements AccessMethodExecutor {
         }
 
         // Validate the JSON application against the JSON schema of the application
-        try {
+        /*try {
             JsonValidator.validateApplication(mediator, content);
         } catch (ValidationException exception) {
             if(mediator.isErrorLoggable()) {
@@ -78,10 +77,10 @@ class AppInstallExecutor implements AccessMethodExecutor {
             }
 
             throw exception;
-        }
+        }*/
 
         // Validate the JSON components against the JSON schema of each components
-        try {
+        /*try {
             JsonValidator.validateFunctionsParameters(mediator, content.getJSONArray(AppJsonConstant.APPLICATION));
         } catch (ValidationException exception) {
             if(mediator.isErrorLoggable()) {
@@ -89,13 +88,13 @@ class AppInstallExecutor implements AccessMethodExecutor {
             }
 
             throw exception;
-        } catch (InvalidApplicationException exception) {
+        } catch (FileNotFoundException exception) {
             if(mediator.isErrorLoggable()) {
-                mediator.error("Problem in the application architecture", exception);
+                mediator.error("Unable to find the JSON schema", exception);
             }
 
             throw exception;
-        }
+        }*/
 
         // Transform JSON to Java object
         AppContainer appContainer = new AppContainer(mediator, name, content);
