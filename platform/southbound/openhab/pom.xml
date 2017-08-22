@@ -39,7 +39,7 @@
                         </Bundle-SymbolicName>
                         <Bundle-Activator>org.eclipse.sensinact.gateway.device.openhab.sensinact.Activator</Bundle-Activator>
                         <Import-Package>
-                            org.json.*;version="[1.5,2]",
+                            org.json,
                             *
                         </Import-Package>
                         <Include-Resource>
