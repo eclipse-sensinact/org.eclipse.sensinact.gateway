@@ -13,7 +13,7 @@
 
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-    <entry key="sensinact.mail">levent.gurgen@cea.fr</entry>
-    <entry key="sensinact.user">levent.gurgen@cea.fr</entry>
-    <entry key="sensinact.password">$sensiNact2016$</entry>
+    <entry key="sensinact.mail"></entry>
+    <entry key="sensinact.user"></entry>
+    <entry key="sensinact.password"></entry>
 </properties>
