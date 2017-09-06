@@ -42,13 +42,20 @@ extends HttpAuthenticationTask<SimpleHttpResponse, SimpleHttpRequest>
 
         super.setAuthenticationHeaderKey(LiveObjectsConstant.X_API_KEY);
 
-        Executable tokenExtractor = new Executable<Object, String>(){
+        Executable<Object, String> tokenExtractor = 
+        	new Executable<Object, String>()
+        {
             @Override
             public String execute(Object parameter) throws Exception {
-                JSONObject content = new JSONObject(new String((byte[]) parameter));
-
-                return content.getJSONObject(LiveObjectsConstant.JSON_FIELD_APIKEY)
+                
+            	JSONObject content = new JSONObject(new String((byte[]) parameter));
+            	String token = content.getJSONObject(LiveObjectsConstant.JSON_FIELD_APIKEY)
                         .getString(LiveObjectsConstant.JSON_FIELD_APIKEY_VALUE);
+            	
+            	System.out.println("CONTENT: " + content);
+            	System.out.println("TOKEN: " + token);
+            	
+                return token;
             }
         };
         super.registerTokenExtractor(tokenExtractor);
@@ -85,10 +92,5 @@ extends HttpAuthenticationTask<SimpleHttpResponse, SimpleHttpRequest>
     @Override
     public String getContentType() {
         return "application/json";
-    }
-
-    @Override
-    public boolean isDirect() {
-        return true;
     }
 }

@@ -18,6 +18,7 @@ import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.liveobjects.LiveObjectsConstant;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -26,7 +27,14 @@ import org.json.JSONTokener;
  */
 public class LiveObjectsPacketReader extends SimplePacketReader<HttpPacket> {
 
-    LiveObjectsPacketReader(Mediator mediator) {
+    /**
+     * Constructor
+     * 
+     * @param mediator the {@link Mediator} allowing to interact
+     * with the OSGi host environment
+     */
+    public LiveObjectsPacketReader(Mediator mediator) 
+    {
         super(mediator);
     }
 
@@ -36,23 +44,42 @@ public class LiveObjectsPacketReader extends SimplePacketReader<HttpPacket> {
      * @see SimplePacketReader#parse(Packet)
      */
     @Override
-    public void parse(HttpPacket packet) throws InvalidPacketException {
+    public void parse(HttpPacket packet) throws InvalidPacketException
+    {
         String content = new String(packet.getBytes());
         Object json = new JSONTokener(content).nextValue();
 
-        if (json instanceof JSONObject) {
+        if (json instanceof JSONObject)
+        {
             JSONObject jsonObject = (JSONObject)json;
 
-            if(jsonObject.has("data")) {
-                JSONArray devices = jsonObject.getJSONArray("data");
-
-                for(int i = 0; i < devices.length(); i++) {
-                    super.setServiceProviderId(devices.getJSONObject(i).getString("namespace") + ":" +
-                            devices.getJSONObject(i).getString("id").replace(" ", ""));
-                    super.setServiceId("admin");
-                    super.setResourceId("connected");
-                    super.setData(devices.getJSONObject(i).getBoolean("connected"));
-                    super.configure();
+            if(jsonObject.has("data")) 
+            {
+                JSONArray devices = jsonObject.optJSONArray("data");
+                int length = devices==null?0:devices.length();
+                
+                for(int i = 0; i < length; i++)
+                {
+                	try
+                	{
+	                	JSONObject jo = devices.optJSONObject(i);
+	                	if(JSONObject.NULL.equals(jo))
+	                	{
+	                		continue;
+	                	}
+	                	String serviceProviderId= jo.getString(
+	                		"namespace") + ":" + jo.getString(
+	                		"id").replace(" ", "");
+	                    super.setServiceProviderId(serviceProviderId);
+	                    super.setServiceId("admin");
+	                    super.setResourceId("connected");
+	                    super.setData(jo.getBoolean("connected"));
+	                    super.configure();
+	                    
+                	} catch(JSONException e)
+                	{
+                		throw new InvalidPacketException(e);
+                	}
                 }
             }
         } else if (json instanceof JSONArray) {

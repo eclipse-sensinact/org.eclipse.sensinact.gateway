@@ -66,8 +66,10 @@ public class Activator extends HttpActivator
    	    
         super.endpoint.registerDiscoveryTask(
         		new LiveObjectsGetAssetsList(mediator, super.endpoint));
+        
         super.endpoint.registerDisconnexionTask(
         		new LiveObjectsUserLogout(mediator, super.endpoint));
+        
         super.connect(configuration);
 	}
 }
