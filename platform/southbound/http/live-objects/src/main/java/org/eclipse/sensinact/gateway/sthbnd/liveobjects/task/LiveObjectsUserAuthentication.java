@@ -51,11 +51,7 @@ extends HttpAuthenticationTask<SimpleHttpResponse, SimpleHttpRequest>
             	JSONObject content = new JSONObject(new String((byte[]) parameter));
             	String token = content.getJSONObject(LiveObjectsConstant.JSON_FIELD_APIKEY)
                         .getString(LiveObjectsConstant.JSON_FIELD_APIKEY_VALUE);
-            	
-            	System.out.println("CONTENT: " + content);
-            	System.out.println("TOKEN: " + token);
-            	
-                return token;
+            	return token;
             }
         };
         super.registerTokenExtractor(tokenExtractor);
