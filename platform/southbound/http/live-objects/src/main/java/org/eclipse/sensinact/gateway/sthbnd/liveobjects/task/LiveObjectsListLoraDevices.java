@@ -31,7 +31,6 @@ public class LiveObjectsListLoraDevices extends HttpBrowsingTask<SimpleHttpRespo
     public String getUri() 
     {
     	String uri = LiveObjectsConstant.ROOT_URL + LiveObjectsConstant.ROOT_PATH + "vendors/lora/devices";
-    	System.out.println("URI : " + uri);
     	return uri;
     }
 
