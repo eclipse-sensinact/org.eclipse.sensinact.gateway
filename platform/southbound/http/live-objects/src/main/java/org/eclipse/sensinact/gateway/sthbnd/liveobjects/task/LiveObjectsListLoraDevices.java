@@ -28,8 +28,11 @@ public class LiveObjectsListLoraDevices extends HttpBrowsingTask<SimpleHttpRespo
     }
 
     @Override
-    public String getUri() {
-        return LiveObjectsConstant.ROOT_URL + LiveObjectsConstant.ROOT_PATH + "vendors/lora/devices";
+    public String getUri() 
+    {
+    	String uri = LiveObjectsConstant.ROOT_URL + LiveObjectsConstant.ROOT_PATH + "vendors/lora/devices";
+    	System.out.println("URI : " + uri);
+    	return uri;
     }
 
     @Override
@@ -45,10 +48,5 @@ public class LiveObjectsListLoraDevices extends HttpBrowsingTask<SimpleHttpRespo
     @Override
     public String getContentType() {
         return "application/json";
-    }
-
-    @Override
-    public boolean isDirect() {
-        return false;
     }
 }
