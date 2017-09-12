@@ -239,11 +239,11 @@
                                     <artifactId>sensinact-system</artifactId>
                                     <version>${project.version}</version>
                                 </artifactItem>
-                                <dependency>
+                                <artifactItem>
                                     <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
                                     <artifactId>sensinact-northbound-access</artifactId>
                                     <version>${project.version}</version>
-                                </dependency>
+                                </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}/dependencies/bundle/3</outputDirectory>
                         </configuration>
