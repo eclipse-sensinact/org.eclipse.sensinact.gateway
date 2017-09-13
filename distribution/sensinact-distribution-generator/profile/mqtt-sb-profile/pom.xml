@@ -29,8 +29,13 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.sthbnd</groupId>
-	    <artifactId>sensinact-mosquitto</artifactId>
+	        <artifactId>sensinact-mosquitto</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>1.1.0</version>
         </dependency>
     </dependencies>
 

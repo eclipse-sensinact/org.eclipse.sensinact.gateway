@@ -82,7 +82,6 @@
         <module>application-profile</module>
         <module>http-profile</module>
         <module>kodi-profile</module>
-        <module>mqtt-profile</module>
         <module>mqtt-sb-profile</module>
         <module>mqtt-agent-profile</module>
         <module>openhab-profile</module>
