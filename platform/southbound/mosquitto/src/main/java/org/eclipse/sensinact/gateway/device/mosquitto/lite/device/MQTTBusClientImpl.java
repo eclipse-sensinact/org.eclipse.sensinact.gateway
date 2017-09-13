@@ -11,18 +11,17 @@
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.device;
 
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.client.MQTTClient;
-import org.eclipse.sensinact.gateway.device.mosquitto.lite.client.ServerConnectionCache;
-import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.exception.MQTTConnectionException;
 import org.apache.felix.ipojo.annotations.*;
-import org.eclipse.paho.client.mqttv3.MqttException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(name = "MQTTBusClient")
+import java.util.List;
+
+@Component(name = "mosquitto",propagation = false)
 @Provides
 /**
- * EchoNet Lamp class
- * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Nascimento</a>
+ * Implementation of the interface that will generate Sesinact device based on a file descriptor put into FileInstall directory.
+ * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class MQTTBusClientImpl implements MQTTBusClient {
 
@@ -41,6 +40,18 @@ public class MQTTBusClientImpl implements MQTTBusClient {
 
     @Property(mandatory = true)
     String topic;
+
+    @Property(name = "processor",mandatory = false)
+    String payloadFormat;
+
+    @Property(name = "location.latitude",mandatory = false)
+    Float latitude;
+
+    @Property(name = "location.longitude",mandatory = false)
+    Float longitude;
+
+    @Property(name = "discovery.firstMessage",value = "false")
+    Boolean discoveryOnFirstMessage;
 
     @Validate
     public void validate(){
@@ -91,17 +102,35 @@ public class MQTTBusClientImpl implements MQTTBusClient {
          */
     }
 
-    @Override
-    public void connect() throws MQTTConnectionException {
-        client=ServerConnectionCache.getInstance(host, port);
-        client.connect();
+    public String getProcessor() {
+        return payloadFormat;
     }
 
-    public void disconnect() throws MQTTConnectionException{
-        try {
-            client.getConnection().disconnect();
-        } catch (MqttException e) {
-            LOG.error("Failed to disconnect {}",id,e);
-        }
+    public void setPayloadFormat(String payloadFormat) {
+        this.payloadFormat = payloadFormat;
+    }
+
+    public Float getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Float latitude) {
+        this.latitude = latitude;
+    }
+
+    public Float getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Float longitude) {
+        this.longitude = longitude;
+    }
+
+    public Boolean getDiscoveryOnFirstMessage() {
+        return discoveryOnFirstMessage;
+    }
+
+    public void setDiscoveryOnFirstMessage(Boolean discoveryOnFirstMessage) {
+        this.discoveryOnFirstMessage = discoveryOnFirstMessage;
     }
 }

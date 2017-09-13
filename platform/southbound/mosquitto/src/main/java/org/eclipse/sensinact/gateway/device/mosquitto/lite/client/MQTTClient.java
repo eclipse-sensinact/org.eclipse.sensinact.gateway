@@ -10,14 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.client;
 
-import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.exception.MQTTConnectionException;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.exception.MQTTConnectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.UUID;
+
+/**
+ * MQTT clients enabled connection sharing among different devices pointing for the same topic
+ * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
+ */
 public class MQTTClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(MQTTClient.class);
@@ -31,8 +37,8 @@ public class MQTTClient {
         this.broker=broker;
     }
 
-    public void connect() throws MQTTConnectionException {
-        String clientId=broker;
+    public void connect() throws MQTTConnectionException{
+        String clientId= UUID.randomUUID().toString();
         try {
             connection = new MqttClient(broker, clientId, persistence);
             connOpts.setCleanSession(true);
@@ -56,10 +62,19 @@ public class MQTTClient {
         this.broker = broker;
     }
 
-    public MqttClient getConnection() throws MQTTConnectionException {
+    public synchronized MqttClient getConnection() throws MQTTConnectionException {
 
         if(connection==null || !connection.isConnected()){
             connect();
+        }
+
+        while(!connection.isConnected()){
+            try {
+                LOG.info("Waiting to connect.");
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                LOG.error("Failed waiting for MQTT connection.");
+            }
         }
 
         return connection;

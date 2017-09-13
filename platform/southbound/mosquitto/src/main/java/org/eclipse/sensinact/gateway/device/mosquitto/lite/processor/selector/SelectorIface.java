@@ -8,21 +8,16 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.device.mosquitto.lite.client;
+package org.eclipse.sensinact.gateway.device.mosquitto.lite.processor.selector;
 
 /**
- * Generate the connection string necessary for the MQTT broker
+ * This interface define the name of the processor and the expression that to interporlate.
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
-public class MQTTConnectionFactory {
+public interface SelectorIface {
 
-    public static MQTTClient create(String host, Long port){
+    String getName();
 
-        String broker=String.format("tcp://%s:%d",host,port);
-        MQTTClient client=new MQTTClient(broker);//"java client"
-        client.setBroker(broker);
-        return client;
-
-    }
+    String getExpression();
 
 }

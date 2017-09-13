@@ -8,24 +8,30 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.device.mosquitto.lite.device.exception;
+package org.eclipse.sensinact.gateway.device.mosquitto.lite.processor.selector;
 
 /**
- * Exception raised when the link between the platform and the broker are lost
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
-public class MQTTConnectionException extends Exception{
+public class Selector implements SelectorIface {
 
-    public MQTTConnectionException(String message) {
-        super(message);
+    private final String name;
+    private final String expression;
+
+    public Selector(String name, String expression){
+        this.name=name;
+        this.expression=expression;
     }
 
-    public MQTTConnectionException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    public String getName() {
+        return name;
     }
 
-    public MQTTConnectionException(Throwable cause) {
-        super(cause);
+    @Override
+    public String getExpression() {
+        return expression;
     }
+
 
 }

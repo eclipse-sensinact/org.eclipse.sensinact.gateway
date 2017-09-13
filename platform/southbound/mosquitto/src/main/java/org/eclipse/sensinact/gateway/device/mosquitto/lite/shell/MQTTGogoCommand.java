@@ -23,7 +23,7 @@ import java.util.List;
 @Instantiate
 @Provides
 /**
- * EchoNet command shell
+ * MQTT command shell
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Nascimento</a>
  */
 public class MQTTGogoCommand {
@@ -39,10 +39,10 @@ public class MQTTGogoCommand {
     @Requires (optional = true,specification = MQTTBusClient.class)
     List<MQTTBusClient> dums;
 
-    @Descriptor(value = "List echo net devices")
+    @Descriptor(value = "")
     public void clients(@Descriptor("") String... parameters) throws IOException {
 
-        System.out.println("To be implemented");
+        System.out.println("Not implemented");
 
     }
 
