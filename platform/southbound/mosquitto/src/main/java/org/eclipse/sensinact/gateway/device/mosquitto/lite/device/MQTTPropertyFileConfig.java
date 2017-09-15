@@ -10,11 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.device;
 
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Resource;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Service;
+
+import java.util.List;
+
 /**
  * POJO that is base to express the mapping between one MQTT topic and a sensinact device.
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
-public interface MQTTBusClient {
+public interface MQTTPropertyFileConfig {
 
     String getHost();
     Long getPort();

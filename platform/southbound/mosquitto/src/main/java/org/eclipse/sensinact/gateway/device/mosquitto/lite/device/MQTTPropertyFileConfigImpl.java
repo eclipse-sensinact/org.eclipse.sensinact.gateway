@@ -15,17 +15,15 @@ import org.apache.felix.ipojo.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
 @Component(name = "mosquitto",propagation = false)
 @Provides
 /**
  * Implementation of the interface that will generate Sesinact device based on a file descriptor put into FileInstall directory.
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
-public class MQTTBusClientImpl implements MQTTBusClient {
+public class MQTTPropertyFileConfigImpl implements MQTTPropertyFileConfig {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MQTTBusClientImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MQTTPropertyFileConfigImpl.class);
 
     private MQTTClient client;
 

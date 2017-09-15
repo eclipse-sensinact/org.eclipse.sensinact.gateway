@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.shell;
 
-import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.MQTTBusClient;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.MQTTPropertyFileConfig;
 import org.apache.felix.ipojo.annotations.*;
 import org.apache.felix.service.command.Descriptor;
 import org.slf4j.Logger;
@@ -36,8 +36,8 @@ public class MQTTGogoCommand {
     @ServiceProperty(name = "osgi.command.function", value = "{}")
     private String[] function = new String[]{"clients"};
 
-    @Requires (optional = true,specification = MQTTBusClient.class)
-    List<MQTTBusClient> dums;
+    @Requires (optional = true,specification = MQTTPropertyFileConfig.class)
+    List<MQTTPropertyFileConfig> dums;
 
     @Descriptor(value = "")
     public void clients(@Descriptor("") String... parameters) throws IOException {

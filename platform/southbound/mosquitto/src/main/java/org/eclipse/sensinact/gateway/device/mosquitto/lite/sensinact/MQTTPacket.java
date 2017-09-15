@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.sensinact;
 
-import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.MQTTBusClient;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Provider;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.*;
 
@@ -40,7 +40,7 @@ public class MQTTPacket implements Packet
     @Data
     private String payload;
 
-    private MQTTBusClient currentState;
+    private Provider currentState;
 
     public String getResourceId() {
         return resourceId;
@@ -117,11 +117,11 @@ public class MQTTPacket implements Packet
     	return this.isGoodByeMessage;
     }
 
-    public MQTTBusClient getCurrentState() {
+    public Provider getCurrentState() {
         return currentState;
     }
 
-    public void setCurrentState(MQTTBusClient currentState) {
+    public void setCurrentState(Provider currentState) {
         this.currentState = currentState;
     }
 

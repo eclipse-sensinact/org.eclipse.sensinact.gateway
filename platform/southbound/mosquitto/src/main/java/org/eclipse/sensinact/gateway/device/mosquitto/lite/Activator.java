@@ -12,8 +12,12 @@ package org.eclipse.sensinact.gateway.device.mosquitto.lite;
 
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.MQTTBusClient;
-import org.eclipse.sensinact.gateway.device.mosquitto.lite.sensinact.MQTTBusClientTracker;
+
+import static org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.MQTTPropertyFileConfig;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Provider;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.sensinact.MQTTPojoConfigTracker;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.sensinact.MQTTPropertyFileConfigTracker;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.sensinact.MQTTPacket;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
@@ -44,13 +48,19 @@ public class Activator extends AbstractActivator<Mediator>
     @Override
     public void doStart() throws Exception {
 
-        MQTTDeviceFactory =new ExtModelInstanceBuilder(mediator,MQTTPacket.class).withStartAtInitializationTime(true).buildConfiguration("mosquitto-resource.xml", Collections.emptyMap());
+        MQTTDeviceFactory =new ExtModelInstanceBuilder(mediator,MQTTPacket.class)
+                .withServiceBuildPolicy((byte) (BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy()))
+                .withResourceBuildPolicy((byte) (BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy()))
+                .withStartAtInitializationTime(true)
+                .buildConfiguration("mosquitto-resource.xml", Collections.emptyMap());
         MQTTConnector =new LocalProtocolStackEndpoint<MQTTPacket>(mediator);
         MQTTConnector.connect(MQTTDeviceFactory);
 
         this.registration = super.mediator.getContext().registerService(
                 ProtocolStackEndpoint.class, MQTTConnector, null);
-        MQTTBusServiceTracker = new ServiceTracker(super.mediator.getContext(), MQTTBusClient.class.getName(), new MQTTBusClientTracker(MQTTConnector,super.mediator.getContext()));
+        MQTTBusServiceTracker = new ServiceTracker(super.mediator.getContext(), Provider.class.getName(), new MQTTPojoConfigTracker(MQTTConnector,super.mediator.getContext()));
+        MQTTBusServiceTracker.open(true);
+        MQTTBusServiceTracker = new ServiceTracker(super.mediator.getContext(), MQTTPropertyFileConfig.class.getName(), new MQTTPropertyFileConfigTracker(MQTTConnector,super.mediator.getContext()));
         MQTTBusServiceTracker.open(true);
 
     }
