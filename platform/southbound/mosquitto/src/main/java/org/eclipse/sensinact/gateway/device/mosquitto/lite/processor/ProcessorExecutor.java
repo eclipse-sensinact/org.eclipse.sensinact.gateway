@@ -24,13 +24,13 @@ import java.util.Map;
  * Processor is the entity that will execute the Selector requests based on the supported Processors.
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
-public class ProcessorImpl {
+public class ProcessorExecutor {
 
     private final Map<String,ProcessorFormatIface> processors=new HashMap<String, ProcessorFormatIface>();
 
-    private static final Logger LOG = LoggerFactory.getLogger(ProcessorImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProcessorExecutor.class);
 
-    public ProcessorImpl(final List<ProcessorFormatIface> processors){
+    public ProcessorExecutor(final List<ProcessorFormatIface> processors){
 
         for(ProcessorFormatIface processor:processors){
             addProcessorFormatSupport(processor);
@@ -49,8 +49,9 @@ public class ProcessorImpl {
         for(SelectorIface selector:selectors){
 
             try {
-                LOG.info("IN {} Selector {} Expression {}",incompleteProcessedInData,selector.getName(),selector.getExpression());
+                LOG.info("Selector {} IN Data {}  Expression {}",selector.getName(),incompleteProcessedInData,selector.getExpression());
                 incompleteProcessedInData=processors.get(selector.getName()).process(incompleteProcessedInData,selector);
+                LOG.info("Selector {} OUT {}",selector.getName(),incompleteProcessedInData);
             }catch(Exception e){
                 throw new ProcessorException("Failed to execute processor "+selector.getName(),e);
             }

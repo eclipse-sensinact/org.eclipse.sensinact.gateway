@@ -14,17 +14,21 @@ import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.Activator;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.client.MQTTClient;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.client.MQTTConnection;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.client.ServerConnectionCache;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.client.subscriber.MQTTResourceMessage;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Provider;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Resource;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Service;
-import org.eclipse.sensinact.gateway.device.mosquitto.lite.processor.ProcessorImpl;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.processor.ProcessorExecutor;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.processor.ProcessorUtil;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.processor.formats.ProcessorFormatArray;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.processor.formats.ProcessorFormatBase64;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.processor.formats.ProcessorFormatJSON;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.processor.formats.ProcessorFormatString;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.processor.formats.iface.ProcessorFormatIface;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.processor.selector.SelectorIface;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.runtime.MQTTManagerRuntime;
 import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.osgi.framework.BundleContext;
@@ -44,73 +48,13 @@ public class MQTTPojoConfigTracker implements ServiceTrackerCustomizer {
 
     private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
     private final BundleContext bundleContext;
-    /**
-     * This is the list that will contains the processor formats supported by the mosquitto bridge.
-     */
-    private final List<ProcessorFormatIface> supportedProcessorFormat=new ArrayList<ProcessorFormatIface>();
     private ProtocolStackEndpoint<MQTTPacket> connector;
 
-    public MQTTPojoConfigTracker(ProtocolStackEndpoint<MQTTPacket> connector, BundleContext bundleContext) {
-        this.connector=connector;
+    MQTTManagerRuntime runtime;
+
+    public MQTTPojoConfigTracker(MQTTManagerRuntime runtime,BundleContext bundleContext){//ProtocolStackEndpoint<MQTTPacket> connector) {
         this.bundleContext=bundleContext;
-        supportedProcessorFormat.add(new ProcessorFormatArray());
-        supportedProcessorFormat.add(new ProcessorFormatString());
-        supportedProcessorFormat.add(new ProcessorFormatJSON());
-    }
-
-    private void processRemoval(String processorId) throws InvalidPacketException {
-        MQTTPacket packet=new MQTTPacket(processorId);
-        packet.isGoodbye(true);
-        connector.process(packet);
-    }
-
-    private void processData(String provider,String service,String resource, String value) throws InvalidPacketException {
-
-        MQTTPacket packet=new MQTTPacket(provider);
-        packet.isHello(true);
-
-        try {
-            packet.setInfo(service, resource, value);
-            connector.process(packet);
-        }catch(Exception e){
-            LOG.info("Failed to process {}/{}/{} value {}",provider,service,resource,value);
-        }
-
-        /*
-        packet.setCurrentState(busclient);
-        if(busclient!=null&&busclient.getLatitude()!=null&&busclient.getLongitude()!=null)
-            try {
-                packet.setInfo("admin","location",String.format("%s:%s",packet.getCurrentState().getLatitude(),packet.getCurrentState().getLongitude()));
-                connector.process(packet);
-            }catch(Exception e){
-                LOG.error("Failed to load location from device {}",packet.getServiceProviderIdentifier(),e);
-            }
-        else {
-            LOG.info("Latitude or longitude are null for {}",packet.getServiceProviderIdentifier());
-        }
-
-
-        try {
-            packet.setInfo("info", "other", payload);
-            connector.process(packet);
-        }catch(Exception e){
-            LOG.info("Failed to process info/other received for device {}",packet.getServiceProviderIdentifier());
-        }
-
-        try {
-            packet.setInfo("me", "meother", payload);
-            connector.process(packet);
-        }catch(Exception e){
-            LOG.info("Failed to process me/meother received for device {}",packet.getServiceProviderIdentifier());
-        }
-
-        try {
-            packet.setInfo("info", "value", payload);
-            connector.process(packet);
-        }catch(Exception e){
-            LOG.info("Failed to process info/value received for device {}",packet.getServiceProviderIdentifier());
-        }
-        */
+        this.runtime=runtime;
     }
 
     @Override
@@ -122,52 +66,40 @@ public class MQTTPojoConfigTracker implements ServiceTrackerCustomizer {
         LOG.debug("Loading POJO device configuration {}", provider.getName());
 
         try {
-            final MQTTClient client=ServerConnectionCache.getInstance(provider.getName(), provider.getHost(), provider.getPort());
+
+            final MQTTClient client=ServerConnectionCache.getInstance(provider.getName(), provider.getBroker());
 
             for(final Service service:provider.getServices()){
                 for(final Resource resource:service.getResources()){
 
-                    LOG.info("**** Subscribing to topic: {}", resource.getTopic());
+                    LOG.info("Subscribing to topic: {}", resource.getTopic());
 
-                    if(resource.getTopic()!=null)
-                    client.getConnection().subscribe(resource.getTopic(),new IMqttMessageListener(){
-                        @Override
-                        public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-                            LOG.info("message received: {}", new String(mqttMessage.getPayload()));
-                            try {
-                                String payload=new String(mqttMessage.getPayload());
-                                MQTTPacket packet = null;
-                                if(resource.getProcessor()!=null){
-                                    LOG.debug("processor defined {}", resource.getProcessor());
-                                    List<SelectorIface> selectors= ProcessorUtil.transformProcessorListInSelector(resource.getProcessor());
-                                    ProcessorImpl processor=new ProcessorImpl(supportedProcessorFormat);
-                                    payload=processor.execute(payload, selectors);
-                                }else {
-                                    LOG.debug("processor NOT defined");
-                                }
-                                processData(provider.getName(),service.getName(),resource.getName(),payload);
-
-                            }catch (Exception e){
-                                LOG.error("Failed to process MQTT message",e);
-                            }
-
-                        }
-                    });
-                    if(!provider.isDiscoveryOnFirstMessage()){
-                        LOG.info("Initiating {}/{}/{} with empty value",provider.getName(), service.getName(), resource.getName());
-                        processData(provider.getName(), service.getName(), resource.getName(),"");
+                    if(resource.getTopic()!=null){
+                        client.getConnection().subscribeResource(resource, runtime);
+                    }else {
+                        LOG.warn("Failed to register device {}, topic assigned cannot be null", provider.getName());
                     }
 
-                    LOG.info("**** Subscribed {}/{}/{} to the topic {}", provider.getName(),service.getName(),resource.getName(),resource.getTopic());
+                    if(!provider.isDiscoveryOnFirstMessage()){
+                        LOG.info("Initiating {}/{}/{} with empty value",provider.getName(), service.getName(), resource.getName());
+                        runtime.messageReceived(client.getConnection(),resource,"");
+                        //runtime.updateValue(provider.getName(), service.getName(), resource.getName(), "");
+                    } else {
+                        LOG.warn("Device {}/{}/{} is hidden until the first message is received", provider.getName(), service.getName(), resource.getName());
+                    }
+
+                    LOG.info("Subscribed {}/{}/{} to the topic {}", provider.getName(),service.getName(),resource.getName(),resource.getTopic());
 
                 }
             }
 
+            /*
             if(!provider.isDiscoveryOnFirstMessage()){
-                processData(provider.getName(), null,null,null);
+                runtime.updateValue(provider.getName(), null,null,null);
             }else {
                 LOG.info("Device {} will appear as soon as one of the topic associated received the first message",provider.getName());
-            }
+            }*/
+
             LOG.info("Sensinact Device created with the id {}", provider.getName());
 
         } catch (Exception e) {
@@ -178,7 +110,7 @@ public class MQTTPojoConfigTracker implements ServiceTrackerCustomizer {
 
     @Override
     public void modifiedService(ServiceReference serviceReference, Object o) {
-        //Not used
+        //Not used; this generates a lot of duplicated message dispatching.
     }
 
     @Override
@@ -186,7 +118,8 @@ public class MQTTPojoConfigTracker implements ServiceTrackerCustomizer {
         LOG.info("Dettaching devices MQTT Bus service");
         try{
             Provider provider=(Provider)o;
-            processRemoval(provider.getName());
+            //processRemoval
+            runtime.processRemoval(provider.getName());
             LOG.info("Sensinact Device {} removed", provider.getName());
             LOG.info("Dettaching devices {} MQTT Bus service", provider.getName());
             ServerConnectionCache.disconnectInstance(provider.getName());

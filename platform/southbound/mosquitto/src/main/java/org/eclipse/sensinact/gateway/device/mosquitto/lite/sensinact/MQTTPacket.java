@@ -70,6 +70,11 @@ public class MQTTPacket implements Packet
         this.processorId=processorId;
     }
 
+    public MQTTPacket(String processorId,Boolean hello){
+        this.processorId=processorId;
+        this.isHelloMessage=hello;
+    }
+
     public void setInfo(String service,String resourceId,String data){
         this.serviceId=service;
         this.resourceId=resourceId;

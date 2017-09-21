@@ -11,10 +11,15 @@
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.sensinact;
 
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.Activator;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.client.MQTTClient;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.client.ServerConnectionCache;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.MQTTPropertyFileConfig;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Provider;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Resource;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Service;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.mqtt.MQTTBroker;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.runtime.MQTTManagerRuntime;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.smartTopic.SmartTopic;
 import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -36,60 +41,121 @@ public class MQTTPropertyFileConfigTracker implements ServiceTrackerCustomizer {
 
     private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
     private final BundleContext bundleContext;
+    private final MQTTManagerRuntime runtime;
     private Map<String,ServiceRegistration> registration=new HashMap<>();
     /**
      * This is the list that will contains the processor formats supported by the mosquitto bridge.
      */
-    public MQTTPropertyFileConfigTracker(ProtocolStackEndpoint<MQTTPacket> connector, BundleContext bundleContext) {
+    public MQTTPropertyFileConfigTracker(ProtocolStackEndpoint<MQTTPacket> connector, BundleContext bundleContext,MQTTManagerRuntime runtime) {
         this.bundleContext=bundleContext;
+        this.runtime=runtime;
+    }
+
+    private Provider buildProvider(MQTTPropertyFileConfig configFile) throws Exception{
+
+        Provider provider=new Provider();
+        provider.setName(configFile.getId());
+        Service serviceAdmin=new Service(provider);
+        serviceAdmin.setName("admin");
+        Service serviceInfo=new Service(provider);
+        serviceInfo.setName("info");
+        provider.getServices().add(serviceAdmin);
+        provider.getServices().add(serviceInfo);
+
+        if(configFile.getProtocol()!=null){
+            try {
+                provider.getBroker().setProtocol(MQTTBroker.PROTOCOL.valueOf(configFile.getProtocol()));
+            }catch(IllegalArgumentException e){
+                LOG.error("Security protocol {} for MQTT broker {} does not exist, possible values are ssl/tcp, configuration was ignored", configFile.getProtocol(), configFile.getId());
+                return null;
+            }
+        }else {
+            provider.getBroker().setProtocol(MQTTBroker.PROTOCOL.tcp);
+        }
+
+        if(configFile.getHost()!=null){
+            provider.getBroker().setHost(configFile.getHost());
+        }else {
+            provider.getBroker().setHost("127.0.0.1");
+        }
+
+        if(configFile.getPort()!=null){
+            provider.getBroker().setPort(configFile.getPort());
+        }else {
+            provider.getBroker().setPort(1883l);
+        }
+
+        if(configFile.getUsername()!=null){
+            provider.getBroker().getAuth().setUsername(configFile.getUsername());
+        }else {
+            //No default value for username or password
+        }
+
+        if(configFile.getPassword()!=null){
+            provider.getBroker().getAuth().setPassword(configFile.getPassword());
+        }else {
+            //No default value for username or password
+        }
+
+        provider.setIsDiscoveryOnFirstMessage(configFile.getDiscoveryOnFirstMessage());
+
+        if(configFile!=null&&configFile.getLatitude()!=null&&configFile.getLongitude()!=null)
+            try {
+                Resource locationResource=new Resource(serviceAdmin);
+                locationResource.setName("location");
+                locationResource.setValue(String.format("%s:%s",configFile.getLatitude(),configFile.getLongitude()));
+                serviceAdmin.getResources().add(locationResource);
+            }catch(Exception e){
+                LOG.error("Failed to load location from device {}",configFile.getId(),e);
+            }
+        else {
+            LOG.info("Latitude or longitude are null for {}",configFile.getId());
+        }
+
+        try {
+            Resource valueResource=new Resource(serviceInfo);
+            valueResource.setName("value");
+            valueResource.setTopic(configFile.getTopic());
+            valueResource.setProcessor(configFile.getProcessor());
+            serviceInfo.getResources().add(valueResource);
+        }catch(Exception e){
+            LOG.info("Failed to process info/value received for device {}",configFile.getId());
+        }
+
+        if(configFile.getTopicType().equals("smarttopic")){
+            LOG.info("This topic config {} is a SmartTopic",configFile.getId());
+            final MQTTClient client= ServerConnectionCache.getInstance(configFile.getId(), provider.getBroker());
+            SmartTopic st=new SmartTopic(configFile.getTopic(),client.getConnection(),this.runtime);
+            if(configFile.getProcessor()!=null){
+                st.setProcessor(configFile.getProcessor());
+            }
+            st.activate();
+            LOG.info("SmartTopic service started.");
+            return null;
+        }else {
+            return provider;
+        }
+
     }
 
     @Override
     public Object addingService(ServiceReference serviceReference) {
         LOG.info("Attaching MQTT Bus service");
-        final MQTTPropertyFileConfig busClient=(MQTTPropertyFileConfig)bundleContext.getService(serviceReference);
-        LOG.debug("Updating MQTT Bus service {}",busClient.getId());
+        final MQTTPropertyFileConfig configFile=(MQTTPropertyFileConfig)bundleContext.getService(serviceReference);
+        LOG.debug("Updating MQTT Bus service {}",configFile.getId());
 
-        Provider provider=new Provider();
-        provider.setName(busClient.getId());
-        provider.setHost(busClient.getHost());
-        provider.setPort(busClient.getPort());
-        provider.setIsDiscoveryOnFirstMessage(busClient.getDiscoveryOnFirstMessage());
-
-
-        Service serviceAdmin=new Service();
-        serviceAdmin.setName("admin");
-        Service serviceInfo=new Service();
-        serviceInfo.setName("info");
-        provider.getServices().add(serviceAdmin);
-        provider.getServices().add(serviceInfo);
-
-        if(busClient!=null&&busClient.getLatitude()!=null&&busClient.getLongitude()!=null)
-            try {
-                Resource locationResource=new Resource();
-                locationResource.setName("location");
-                locationResource.setValue(String.format("%s:%s",busClient.getLatitude(),busClient.getLongitude()));
-                serviceAdmin.getResources().add(locationResource);
-            }catch(Exception e){
-                LOG.error("Failed to load location from device {}",busClient.getId(),e);
-            }
-        else {
-            LOG.info("Latitude or longitude are null for {}",busClient.getId());
-        }
-
+        Provider provider= null;
         try {
-            Resource valueResource=new Resource();
-            valueResource.setName("value");
-            valueResource.setTopic(busClient.getTopic());
-            valueResource.setProcessor(busClient.getProcessor());
-            serviceInfo.getResources().add(valueResource);
-        }catch(Exception e){
-            LOG.info("Failed to process info/value received for device {}",busClient.getId());
+            provider = buildProvider(configFile);
+            Dictionary<String,String> properties=new Hashtable<String,String>();
+
+            if(provider!=null){
+                registration.put(serviceReference.getProperty("service.pid").toString(),bundleContext.registerService(Provider.class,provider,properties));
+            }
+
+        } catch (Exception e) {
+            LOG.error("Failed to create MQTT device for file {}",configFile.getId(),e);
         }
-
-        Dictionary<String,String> properties=new Hashtable<String,String>();
-
-        registration.put(serviceReference.getProperty("service.pid").toString(),bundleContext.registerService(Provider.class,provider,properties));
 
         /***
         try {
@@ -106,7 +172,7 @@ public class MQTTPropertyFileConfigTracker implements ServiceTrackerCustomizer {
                         MQTTPacket packet = null;
                         if(busClient.getProcessor()!=null){
                             List<SelectorIface> selectors= ProcessorUtil.transformProcessorListInSelector(busClient.getProcessor());
-                            ProcessorImpl processor=new ProcessorImpl(supportedProcessorFormat);
+                            ProcessorExecutor processor=new ProcessorExecutor(supportedProcessorFormat);
                             payload=processor.execute(payload, selectors);
                             processData(busClient, busClient.getId(), payload);
                         }else {

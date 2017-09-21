@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.client;
 
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.mqtt.MQTTBroker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,15 +30,12 @@ public class ServerConnectionCache {
 
     }
 
-    private static String convertToKey(String host,Long port){
-        return String.format("%s:%s",host,port.toString());
-    }
-
-    public static MQTTClient getInstance(String id,String server, Long port){
+    public static MQTTClient getInstance(String id,MQTTBroker broker){
 
         if(!instances.containsKey(id)){
             //Create new instance of the server here
-            MQTTClient client=MQTTConnectionFactory.create(server, port);
+
+            MQTTClient client=MQTTConnectionFactory.create(broker);
             instances.put(id,client);
         }
 

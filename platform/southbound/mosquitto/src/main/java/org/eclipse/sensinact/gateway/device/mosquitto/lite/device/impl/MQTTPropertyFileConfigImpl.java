@@ -8,10 +8,11 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.device.mosquitto.lite.device;
+package org.eclipse.sensinact.gateway.device.mosquitto.lite.device.impl;
 
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.client.MQTTClient;
 import org.apache.felix.ipojo.annotations.*;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.MQTTPropertyFileConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,17 +31,26 @@ public class MQTTPropertyFileConfigImpl implements MQTTPropertyFileConfig {
     @Property
     String id;
 
-    @Property(value="127.0.0.1",mandatory = false)
+    @Property(mandatory = false)
     String host;
 
-    @Property(value="1883")
+    @Property(mandatory = false)
     Long port;
 
     @Property(mandatory = true)
     String topic;
 
+    @Property(mandatory = false)
+    String protocol;
+
     @Property(name = "processor",mandatory = false)
     String payloadFormat;
+
+    @Property(name = "auth.username",mandatory = false)
+    String username;
+
+    @Property(name = "auth.password",mandatory = false)
+    String password;
 
     @Property(name = "location.latitude",mandatory = false)
     Float latitude;
@@ -50,6 +60,9 @@ public class MQTTPropertyFileConfigImpl implements MQTTPropertyFileConfig {
 
     @Property(name = "discovery.firstMessage",value = "false")
     Boolean discoveryOnFirstMessage;
+
+    @Property(name = "topic.type",value = "mqtt")
+    String topicType;
 
     @Validate
     public void validate(){
@@ -73,24 +86,43 @@ public class MQTTPropertyFileConfigImpl implements MQTTPropertyFileConfig {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public void setPort(Long port) {
-        this.port = port;
+    @Override
+    public String getTopicType() {
+        return topicType;
     }
 
     public String getTopic() {
         return topic;
     }
 
-    public void setTopic(String topic) {
-        this.topic = topic;
+    public String getProcessor() {
+        return payloadFormat;
+    }
+
+    public Float getLatitude() {
+        return latitude;
+    }
+
+    public Float getLongitude() {
+        return longitude;
+    }
+
+    public Boolean getDiscoveryOnFirstMessage() {
+        return discoveryOnFirstMessage;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    public String getProtocol(){
+        return protocol;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 
     @Override
@@ -98,37 +130,5 @@ public class MQTTPropertyFileConfigImpl implements MQTTPropertyFileConfig {
         /**
          * This bridge will not invoke action on the backend service
          */
-    }
-
-    public String getProcessor() {
-        return payloadFormat;
-    }
-
-    public void setPayloadFormat(String payloadFormat) {
-        this.payloadFormat = payloadFormat;
-    }
-
-    public Float getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Float latitude) {
-        this.latitude = latitude;
-    }
-
-    public Float getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Float longitude) {
-        this.longitude = longitude;
-    }
-
-    public Boolean getDiscoveryOnFirstMessage() {
-        return discoveryOnFirstMessage;
-    }
-
-    public void setDiscoveryOnFirstMessage(Boolean discoveryOnFirstMessage) {
-        this.discoveryOnFirstMessage = discoveryOnFirstMessage;
     }
 }

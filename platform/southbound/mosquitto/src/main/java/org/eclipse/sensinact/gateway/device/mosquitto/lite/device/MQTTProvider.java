@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.device;
 
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Service;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.mqtt.MQTTBroker;
 
 import java.util.List;
 
@@ -22,11 +23,9 @@ public interface MQTTProvider {
 
     String getName();
 
-    String getHost();
-
-    Long getPort();
-
     Boolean isDiscoveryOnFirstMessage();
 
     List<Service> getServices();
+
+    MQTTBroker getBroker();
 }
