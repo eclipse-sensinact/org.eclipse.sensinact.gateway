@@ -34,9 +34,7 @@ public class ServerConnectionCache {
 
         if(!instances.containsKey(id)){
             //Create new instance of the server here
-
-            MQTTClient client=MQTTConnectionFactory.create(broker);
-            instances.put(id,client);
+            instances.put(id,new MQTTClient(broker));
         }
 
         return instances.get(id);

@@ -52,7 +52,7 @@ public class MQTTManagerRuntime implements MQTTResourceMessage{
         this.bundleContext=bundleContext;
     }
 
-    private void updateValue(String provider,String service,String resource,String value){
+    private void messageReceived(String provider, String service, String resource, String value){
 
         MQTTPacket packet=new MQTTPacket(provider);
         packet.isHello(true);
@@ -89,7 +89,7 @@ public class MQTTManagerRuntime implements MQTTResourceMessage{
             }else {
                 LOG.debug("processor NOT defined");
             }
-            updateValue(provider.getName(), service.getName(), resource.getName(), payload);
+            messageReceived(provider.getName(), service.getName(), resource.getName(), payload);
 
         }catch (Exception e){
             LOG.error("Failed to process MQTT message",e);
