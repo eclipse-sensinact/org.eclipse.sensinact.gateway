@@ -166,11 +166,9 @@ public abstract class CastUtils
 	
 	/**
 	 * Loads and returns the Class whose name is passed 
-	 * as parameter, using the specified {@link Mediator}
-	 * to retrieve the appropriate ClassLoader
+	 * as parameter, using the appropriate ClassLoader
 	 * 
-	 * @param mediator
-	 * 		the {@link Mediator} used to retrieve
+	 * @param classloader
 	 * 		the appropriate ClassLoader
 	 * @param type
 	 * 		the name of the Class to load
@@ -401,7 +399,9 @@ public abstract class CastUtils
 	/**
 	 * Casts the specified object argument into 
 	 * the type passed as parameter
-	 * 
+	 *
+     * @param classloader
+     * 		the appropriate classloader
 	 * @param clazz
 	 * 		the destination type
 	 * @param object
@@ -488,7 +488,9 @@ public abstract class CastUtils
 	/**
 	 * Cast the object passed as parameter into the Array class 
 	 * also passed as parameter
-	 * 
+	 *
+     * @param classloader
+     * 		the appropriate classloader
 	 * @param clazz
 	 * 		the destination Array class to cast the object argument into
 	 * @param object
@@ -561,7 +563,9 @@ public abstract class CastUtils
 	 * Cast the String object passed as parameter into the Array class 
 	 * also passed as parameter using the String delimiter argument
 	 * to distinguish each element of the array to create
-	 * 
+	 *
+     * @param classloader
+     * 		the appropriate classloader
 	 * @param clazz
 	 * 		the destination Array class to cast the String argument into
 	 * @param objectStr
@@ -1013,7 +1017,9 @@ public abstract class CastUtils
 	/**
 	 * Converts and returns a JSONObject instance into the Java
 	 * object it describes
-	 *  
+	 *
+	 * @param classloader
+	 * 		the appropriate classloader
 	 * @param clazz
 	 * 		the Class of the Java object to instantiate
 	 * @param jsonObject
@@ -1056,7 +1062,9 @@ public abstract class CastUtils
 	/**
 	 * Converts and returns a JSONArray instance into the Java
 	 * object it describes
-	 *  
+	 *
+     * @param classloader
+     * 		the appropriate classloader
 	 * @param clazz
 	 * 		the Class of the Java object to instantiate
 	 * @param jsonArray
@@ -1101,7 +1109,13 @@ public abstract class CastUtils
 	/**
 	 * Converts and returns the JSON formated string passed as 
 	 * parameter into a {@link Map}
-	 * 
+	 *
+     * @param classloader
+     * 		the appropriate classloader
+     * @param clazz
+     *      the Class of the Java object to instantiate
+     * @param subtype
+     *      the type of the Java object to instantiate
 	 * @param jsonString
 	 * 		the JSON formated string to convert into a {@link Map}
 	 * @return
@@ -1131,7 +1145,13 @@ public abstract class CastUtils
 	/**
 	 * Converts and returns the {@link JSONObject} object passed as 
 	 * parameter into a {@link Map}
-	 * 
+	 *
+     * @param classloader
+     * 		the appropriate classloader
+     * @param clazz
+     *      the Class of the Java object to instantiate
+     * @param subtype
+     *      the type of the Java object to instantiate
 	 * @param jsonObject
 	 * 		the {@link JSONObject} object to convert into a {@link Map}
 	 * @return
@@ -1183,7 +1203,13 @@ public abstract class CastUtils
 	/**
 	 * Converts and returns the {@link JSONArray} object passed as 
 	 * parameter into a {@link List}
-	 * 
+	 *
+     * @param classloader
+     * 		the appropriate classloader
+     * @param clazz
+     *      the Class of the Java object to instantiate
+     * @param subtype
+     *      the type of the Java object to instantiate
 	 * @param jsonArray
 	 * 		the {@link JSONArray} object to convert into a {@link List}
 	 * @return
@@ -1343,7 +1369,9 @@ public abstract class CastUtils
 	/**
 	 * Returns a copy of the value of this Primitive.
 	 * Only allowed types are handled
-	 * 
+	 *
+     * @param type
+     *      the type of the object to copy
 	 * @param value
 	 * 		the object to return the copy of
 	 * @return 
