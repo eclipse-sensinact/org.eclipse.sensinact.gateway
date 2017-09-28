@@ -197,15 +197,15 @@
                                     <artifactId>sensinact-datastore-api</artifactId>
                                     <version>${project.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.sensinact.gateway</groupId>
+                                    <artifactId>sensinact-signature-validator</artifactId>
+                                    <version>${project.version}</version>
+                                </artifactItem>
                                 <!-- SECURITY  -->
                                 <!--<artifactItem>
                                 	<groupId>org.eclipse.sensinact.gateway</groupId>
                                 	<artifactId>sensinact-sqlite-connector</artifactId>
-                                	<version>${project.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                	<groupId>org.eclipse.sensinact.gateway</groupId>
-                                	<artifactId>sensinact-signature-validator</artifactId>
                                 	<version>${project.version}</version>
                                 </artifactItem>
                                 <artifactItem>

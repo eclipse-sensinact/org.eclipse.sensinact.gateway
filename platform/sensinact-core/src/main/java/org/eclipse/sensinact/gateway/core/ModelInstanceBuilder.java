@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.core;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.osgi.framework.ServiceRegistration;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -30,10 +31,6 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 
 /**
  * Allows to build in a simple way a {@link ModelInstance}
- * 
- * @param <C> the extended {@link ModelConfiguration}
- * type in use
- * @param <I> the extended {@link ModelInstance} type in use
  */
 public class ModelInstanceBuilder
 {
@@ -73,8 +70,7 @@ public class ModelInstanceBuilder
 	protected ResourceConfigBuilder defaultResourceConfigBuilder;
 	
 	/**
-	 * @param resourceModelType
-	 * @param name
+	 * @param mediator
 	 */
 	public  ModelInstanceBuilder(Mediator mediator)
 	{
@@ -84,7 +80,7 @@ public class ModelInstanceBuilder
 	
 	/**
 	 * @param resourceModelType
-	 * @param name
+	 * @param resourceModelConfigurationType
 	 */
 	public <C extends ModelConfiguration,I extends ModelInstance<C>> 
 	ModelInstanceBuilder(Mediator mediator, 
@@ -269,7 +265,7 @@ public class ModelInstanceBuilder
 	 * Defines the default {@link ResourceConfigCatalog} providing the
 	 *  available {@link ResourceConfig}s
 	 * 
-	 * @param resourceConfigCatalog the {@link ResourceConfigBuilder} to 
+	 * @param defaultResourceConfigBuilder the {@link ResourceConfigBuilder} to
 	 * be set
 	 */
 	public ModelInstanceBuilder withDefaultResourceConfigBuilder(
@@ -283,7 +279,7 @@ public class ModelInstanceBuilder
    	 * Defines whether the resource model is build dynamically according
    	 * to the content of a parsed communication packet
      * 
-     * @param buildDynamically
+     * @param startAtInitializationTime
      * 		<ul>
      * 			<li>true if the resource model has to be build
      * 				dynamically according to the content
@@ -302,7 +298,7 @@ public class ModelInstanceBuilder
 	 * Defines the {@link ModelConfiguration} which applies
      * on new created {@link ModelInstance}s
      * 
-     * @param configuration
+     * @param modelConfiguration
      *      the {@link ModelConfiguration} which applies
 	 */
 	public ModelInstanceBuilder withConfiguration(
@@ -356,78 +352,64 @@ public class ModelInstanceBuilder
      }
 
     /**
-     * Creates and returns the {@link RootNode} of the {@link AccessNode}s
+     * Creates and returns the {@link AccessTree} of the {@link AccessNode}s
      * hierarchy for the {@link SensiNactResourceModel}(s) to be built
      * by the intermediate of this builder
      * 
-     * @return the {@link RootNode} of the {@link AccessNode}s hierarchy 
+     * @return the {@link AccessTree} of the {@link AccessNode}s hierarchy
      * for the {@link SensiNactResourceModel}(s) to be built
      */
-    protected AccessTree buildAccessTree()
-    {
-    	return this.mediator.callService(
-		SecuredAccess.class, new Executable<SecuredAccess, AccessTree>()
-		{
-			@Override
-			public AccessTree execute(SecuredAccess service) 
-			throws Exception
-			{
-				AccessTree accessTree = null;
-				
-				String identifier = service.validate(
-					ModelInstanceBuilder.this.mediator.getContext(
-							).getBundle());
+    protected AccessTree buildAccessTree() {
 
-				if(identifier == null)
-				{
-					accessTree = new AccessTree(
-							ModelInstanceBuilder.this.mediator);
-					
-				} else
-				{
-					accessTree =  service.getAccessTree(
-							identifier);
+        final String identifier = this.mediator.callService(BundleValidation.class,
+                new Executable<BundleValidation, String>() {
+                    @Override
+                    public String execute(BundleValidation service) throws Exception {
+                        return service.check(ModelInstanceBuilder.this.mediator.getContext().getBundle());
+                    }
+                });
+
+    	return this.mediator.callService(SecuredAccess.class,
+                new Executable<SecuredAccess, AccessTree>() {
+			@Override
+			public AccessTree execute(SecuredAccess service) throws Exception {
+				if(identifier == null) {
+					return new AccessTree(ModelInstanceBuilder.this.mediator);
+				} else {
+					return service.getAccessTree(identifier);
 				}
-				return accessTree;
 			}
 		});
     }
     
     /**
      * Creates the {@link AccessNode} for the {@link SensiNactResourceModel}
-     * to be built, and add it to the {@link RootNode} passed as parameter
+     * to be built, and add it to the {@link AccessTree} passed as parameter
      * 
-     * @param root the {@link RootNode} to which attach the new created
-     * {@link AccessNode}
+     * @param accessTree the {@link AccessTree} to which attach the new created {@link AccessNode}
+	 * @param name
      */
-    protected void buildAccessNode(
-    		final AccessTree accessTree, final String name)
-    {
+    protected void buildAccessNode(final AccessTree accessTree, final String name) {
     	final AccessProfile accessProfile = this.accessProfile;
     	
-		this.mediator.callService(SecuredAccess.class, 
-			new Executable<SecuredAccess, Void>()
-		{
-			@Override
-			public Void execute(SecuredAccess service) 
-			throws Exception
-			{
-				String identifier  = service.validate(
-					ModelInstanceBuilder.this.mediator.getContext(
-							).getBundle());
+		final String identifier = this.mediator.callService(BundleValidation.class,
+                new Executable<BundleValidation, String>() {
+            @Override
+            public String execute(BundleValidation service) throws Exception {
+                return service.check(ModelInstanceBuilder.this.mediator.getContext().getBundle());
+            }
+        });
 
-				if(identifier == null)
-				{	
-					accessTree.add(UriUtils.getUri(new String[]{name})
-					).withAccessProfile(accessProfile==null?
-					AccessProfileOption.ALL_ANONYMOUS.getAccessProfile():
-					accessProfile);
+        this.mediator.callService(SecuredAccess.class, new Executable<SecuredAccess, Void>() {
+            @Override
+            public Void execute(SecuredAccess service) throws Exception {
+				if(identifier == null) {
+					accessTree.add(UriUtils.getUri(new String[]{name})).withAccessProfile(
+					        accessProfile==null?AccessProfileOption.ALL_ANONYMOUS.getAccessProfile():accessProfile);
+				} else {
+					service.buildAccessNodesHierarchy(identifier, name, accessTree);
+				}
 
-				} else
-				{
-					service.buildAccessNodesHierarchy(identifier , 
-						name, accessTree);
-				}	
 				return null;
 			}
 		});

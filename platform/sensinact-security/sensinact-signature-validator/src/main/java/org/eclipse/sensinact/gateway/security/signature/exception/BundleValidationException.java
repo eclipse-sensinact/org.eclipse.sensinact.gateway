@@ -8,7 +8,7 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.security;
+package org.eclipse.sensinact.gateway.security.signature.exception;
 
 public class BundleValidationException extends Exception 
 {

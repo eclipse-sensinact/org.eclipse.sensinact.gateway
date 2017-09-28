@@ -19,6 +19,7 @@ import org.eclipse.sensinact.gateway.app.basic.sna.SetActionFunction;
 import org.eclipse.sensinact.gateway.app.manager.component.data.ConstantData;
 import org.eclipse.sensinact.gateway.app.manager.component.data.ResourceData;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ModelConfiguration;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
@@ -41,6 +42,8 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import junit.framework.TestCase;
 
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
+import org.eclipse.sensinact.gateway.security.signature.exception.BundleValidationException;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -66,8 +69,8 @@ public class TestSnaFunction extends TestCase {
     @Mock
     private AppServiceMediator mediator;
 
-    private ModelInstance modelInstance; 
-    
+    private ModelInstance modelInstance;
+
     @Mock
     private Session session;
 
@@ -79,6 +82,14 @@ public class TestSnaFunction extends TestCase {
     {
         AuthorizationService authorization = Mockito.mock(AuthorizationService.class);
         SecuredAccess securedAccess = Mockito.mock(SecuredAccess.class);
+
+        Mockito.when(mediator.callService(Mockito.any(Class.class), Mockito.any(Executable.class)))
+                .thenReturn(new BundleValidation() {
+                    @Override
+                    public String check(Bundle bundle) throws BundleValidationException {
+                        return "xxxxxxxxxxx00000000";
+                    }
+                });
 
         Mockito.when(authorization.getUserAccessLevelOption(Mockito.anyString(), 
         		Mockito.anyLong())).thenReturn(AccessLevelOption.ANONYMOUS);
@@ -159,12 +170,11 @@ public class TestSnaFunction extends TestCase {
         
         Mockito.when(context.getBundle()).thenReturn(bundle);
         
-       this.mediator = new AppServiceMediator(context);
+        this.mediator = new AppServiceMediator(context);
     	
-        this.modelInstance = new ModelInstanceBuilder(
-        	mediator, ModelInstance.class, ModelConfiguration.class
-        	).withStartAtInitializationTime(true
-        	).build("SimulatedLight_001", null);
+        this.modelInstance = new ModelInstanceBuilder(mediator, ModelInstance.class, ModelConfiguration.class)
+                .withStartAtInitializationTime(true)
+                .build("SimulatedLight_001", null);
 
         ServiceProviderImpl serviceProvider = modelInstance.getRootElement();        
         ServiceImpl service = serviceProvider.addService("LightService_SimulatedLight_001");        

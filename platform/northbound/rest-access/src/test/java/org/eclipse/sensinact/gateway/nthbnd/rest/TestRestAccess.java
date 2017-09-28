@@ -88,7 +88,8 @@ public class TestRestAccess extends MidOSGiTest
 		  + "file:target/felix/bundle/sensinact-generic.jar");
 		
 		configuration.put("felix.auto.start.2",
-			"file:target/felix/bundle/sensinact-core.jar ");
+		  	"file:target/felix/bundle/sensinact-signature-validator.jar "
+		  +	"file:target/felix/bundle/sensinact-core.jar ");
 
 		configuration.put("felix.auto.start.3", 
 		"file:target/felix/bundle/javax.servlet-api.jar "
@@ -101,6 +102,9 @@ public class TestRestAccess extends MidOSGiTest
 		configuration.put("felix.auto.start.4", 
 		"file:target/felix/bundle/slider.jar "
 		+ "file:target/felix/bundle/light.jar ");
+
+		configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
+		configuration.put("org.eclipse.sensinact.gateway.security.jks.password","sensiNact_team");
 
 		configuration.put("org.osgi.service.http.port", "8091");
 		configuration.put("org.apache.felix.http.jettyEnabled", "true");

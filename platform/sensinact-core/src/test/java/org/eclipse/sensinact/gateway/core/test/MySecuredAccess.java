@@ -81,18 +81,6 @@ class MySecuredAccess implements SecuredAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see SecuredAccess#
-	 * validate(org.osgi.framework.Bundle)
-	 */
-	@Override
-	public String validate(Bundle bundle) 
-	{
-		return "xxxxxxxxxxxxxx000000";
-	}
-
-	/**
-	 * @inheritDoc
-	 *
 	 * @see SecuredAccess#buildAccessNodesHierarchy(String, String, AccessTree)
 	 */
 	@Override

@@ -20,6 +20,7 @@ import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.Session;
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.osgi.framework.ServiceRegistration;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -112,7 +113,7 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 	private final String identifier;
 	
 	/**
-	 * the {@link MesssageHandler} handling 
+	 * the {@link MessageHandler} handling
 	 * messages coming from this SensiNactResourceModel 
 	 */
 	protected MessageHandler messageHandler;
@@ -134,7 +135,7 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 	 * 
 	 * @param mediator the {@link Mediator} allowing to interact
 	 * with the OSGi host environment
-	 * @param configuration the extended {@link ModelConfiguration}
+	 * @param resourceModelConfig the extended {@link ModelConfiguration}
 	 * gathering the configuration properties applying on
 	 * the ModelInstance to be created
 	 * 
@@ -162,14 +163,14 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 		}
 		//retrieve the identifier in the datastore of the sensiNact 
 		//framework holding it
-		this.identifier = this.mediator.callService(SecuredAccess.class,
-			new Executable<SecuredAccess, String>()
+		this.identifier = this.mediator.callService(BundleValidation.class,
+			new Executable<BundleValidation, String>()
 			{
 				@Override
-				public String execute(SecuredAccess service) 
+				public String execute(BundleValidation service)
 				throws Exception
 				{
-					return service.validate(mediator.getContext(
+					return service.check(mediator.getContext(
 							).getBundle());
 				}
 			}
@@ -462,7 +463,7 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
     }
 
 	/**
-	 * @param userId
+	 * @param key
 	 * @return
 	 * @throws ModelElementProxyBuildException
 	 */

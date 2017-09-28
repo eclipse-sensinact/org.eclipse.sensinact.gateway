@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.sensinact.gateway.core.*;
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -30,10 +32,6 @@ import org.osgi.framework.ServiceRegistration;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.ModelAlreadyRegisteredException;
-import org.eclipse.sensinact.gateway.core.ModelElementProxyBuildException;
-import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
-import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaAgentImpl;
@@ -44,7 +42,6 @@ import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
-import org.eclipse.sensinact.gateway.core.security.BundleValidation;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
@@ -204,8 +201,7 @@ public class SecuredAccessImpl implements SecuredAccess
 	}
 	
 	/**
-	 * @param login
-	 * @param password
+	 * @param userId
 	 * @return
 	 * @throws InvalidKeyException
 	 * @throws DataStoreException
@@ -226,8 +222,7 @@ public class SecuredAccessImpl implements SecuredAccess
 	}
 	
 	/**
-	 * @param login
-	 * @param password
+	 * @param token
 	 * @return
 	 * @throws InvalidKeyException
 	 * @throws DataStoreException
@@ -250,8 +245,7 @@ public class SecuredAccessImpl implements SecuredAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see SecuredAccess#
-	 * getAnonymousSession()
+	 * @see SecuredAccess#getAnonymousSession()
 	 */
 	@Override
 	public Session getAnonymousSession() 
@@ -332,33 +326,6 @@ public class SecuredAccessImpl implements SecuredAccess
 //			this.mediator.error(e);
 //		}
 //	}
-
-	/** 
-	 * @inheritDoc
-	 * 
-	 * @see SecuredAccess#
-	 * validate(org.osgi.framework.Bundle)
-	 */
-	@Override
-	public String validate(final Bundle bundle)
-	{
-//		System.out.println("VALDATING BUNDLE :" + bundle.getSymbolicName());
-//		System.out.println("---------------------------------------------");
-		String identifier = mediator.callService(
-		BundleValidation.class,			
-		new Executable<BundleValidation, String>() 
-		{
-			@Override
-			public String execute(BundleValidation service) 
-					throws Exception 
-			{
-				return service.check(bundle);
-			}
-		});
-//		System.out.println( "IDENTIFIER  " + identifier);
-//		System.out.println("---------------------------------------------");
-		return identifier;
-	}
 
 	private final Session createSession(final Session.Key sessionKey) 
 	{
@@ -539,9 +506,7 @@ public class SecuredAccessImpl implements SecuredAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see SecuredAccess#
-	 * buildAccessNodesHierarchy(java.lang.String, java.lang.String, 
-	 * org.eclipse.sensinact.gateway.core.security.RootNode)
+	 * @see SecuredAccess#buildAccessNodesHierarchy(String, String, AccessTree)
 	 */
 	@Override
 	public void buildAccessNodesHierarchy(String signature, 
@@ -584,8 +549,7 @@ public class SecuredAccessImpl implements SecuredAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see SecuredAccess#
-	 * getRootNode(java.lang.String)
+	 * @see SecuredAccess#getAccessTree(String)
 	 */
 	@Override
 	public AccessTree getAccessTree(String signature) 
@@ -694,7 +658,7 @@ public class SecuredAccessImpl implements SecuredAccess
 	}
 
 	/**
-	 * @param root
+	 * @param tree
 	 * @param object
 	 * @throws Exception
 	 */
@@ -739,8 +703,7 @@ public class SecuredAccessImpl implements SecuredAccess
 	 * @throws SecuredAccessException 
 	 * @inheritDoc
 	 *
-	 * @see SecuredAccess#
-	 * createAuthorizationService()
+	 * @see SecuredAccess#createAuthorizationService()
 	 */
 	@Override
 	public void createAuthorizationService() throws SecuredAccessException
@@ -764,7 +727,7 @@ public class SecuredAccessImpl implements SecuredAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.security.impl.Session#getServiceProviders()
+	 * @see Session#getServiceProviders()
 	 */
 	private Set<ServiceProvider> getServiceProviders(final Session.Key key)
 	{
@@ -829,8 +792,7 @@ public class SecuredAccessImpl implements SecuredAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.security.impl.Session#
-	 * getServiceProvider(java.lang.String)
+	 * @see Session#getServiceProvider(String)
 	 */
 	private ServiceProvider getServiceProvider(
 			final String serviceProviderName,
@@ -889,8 +851,8 @@ public class SecuredAccessImpl implements SecuredAccess
 	 * Registers the {@link SensiNactResourceModel}  as a system one,
 	 * meaning it exists in the system's datastore
 	 * 
-	 * @param snaModelInstance the {@link SensiNactResourceModel} to 
-	 * register
+	 * @param modelInstance the {@link SensiNactResourceModel} to register
+	 *
 	 * @return 
 	 * 
 	 * @throws SecuredAccessException 
@@ -970,9 +932,16 @@ public class SecuredAccessImpl implements SecuredAccess
 	{			
 		final Bundle bundle = mediator.getContext(
 				).getBundle();
-		
-    	String bundleIdentifier = this.validate(bundle);
-    	String agentKey = null;
+
+        String bundleIdentifier = this.mediator.callService(BundleValidation.class,
+                new Executable<BundleValidation, String>() {
+                    @Override
+                    public String execute(BundleValidation service) throws Exception {
+                        return service.check(bundle);
+                    }
+                });
+
+        String agentKey = null;
 		try
 		{
 			agentKey = this.getAgentPublicKey(bundleIdentifier);
@@ -1010,7 +979,7 @@ public class SecuredAccessImpl implements SecuredAccess
 	}
 
 	/**
-	 * @param identifier
+	 * @param signature
 	 * @return
 	 * @throws DAOException 
 	 */
