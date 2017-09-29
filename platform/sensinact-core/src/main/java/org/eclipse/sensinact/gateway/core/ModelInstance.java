@@ -24,6 +24,7 @@ import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.Session;
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.core.security.SessionKey;
 import org.osgi.framework.ServiceRegistration;
 
@@ -165,19 +166,19 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 			throw new InvalidServiceProviderException(
 			    "Unable to instantiate the root services provider");
 		}
-		//retrieve the unique identifier if it exits
-		this.identifier = this.mediator.callService(SecuredAccess.class,
-			new Executable<SecuredAccess, String>()
+		//retrieve the identifier in the datastore of the sensiNact 
+		//framework holding it
+		this.identifier = this.mediator.callService(BundleValidation.class,
+			new Executable<BundleValidation, String>()
 			{
 				@Override
-				public String execute(SecuredAccess service) 
+				public String execute(BundleValidation service)
 				throws Exception
 				{
-					return service.validate(mediator.getContext(
+					return service.check(mediator.getContext(
 							).getBundle());
 				}
-			}
-		);
+			});
 	}
 	
 	/** 

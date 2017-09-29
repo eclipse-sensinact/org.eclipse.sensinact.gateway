@@ -16,6 +16,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
@@ -374,6 +377,16 @@ public class ModelInstanceBuilder
      */
     protected AccessTree<?> buildAccessTree()
     {
+    	final String identifier = this.mediator.callService(BundleValidation.class,
+            new Executable<BundleValidation, String>() 
+		{
+            @Override
+            public String execute(BundleValidation service) throws Exception
+            {
+                return service.check(ModelInstanceBuilder.this.mediator.getContext(
+                		).getBundle());
+            }
+        });
     	return this.mediator.callService(
 		SecuredAccess.class, new 
 		Executable<SecuredAccess, AccessTree<?>>()
@@ -382,12 +395,7 @@ public class ModelInstanceBuilder
 			public AccessTree<?> execute(
 					SecuredAccess service)  throws Exception
 			{
-				AccessTree<? extends AccessNode> accessTree = null;
-				
-				String identifier = service.validate(
-					ModelInstanceBuilder.this.mediator.getContext(
-							).getBundle());
-
+				 AccessTree<?> accessTree =null;
 				if(identifier == null)
 				{
 					accessTree = new AccessTreeImpl(mediator
@@ -415,7 +423,19 @@ public class ModelInstanceBuilder
     		final String name)
     {
     	final AccessProfile accessProfile = this.accessProfile;
-    	
+
+		final String identifier = this.mediator.callService(BundleValidation.class,
+                new Executable<BundleValidation, String>()
+		{
+            @Override
+            public String execute(BundleValidation service) 
+            		throws Exception 
+            {
+                return service.check(
+                ModelInstanceBuilder.this.mediator.getContext().getBundle());
+            }
+        });
+
 		this.mediator.callService(SecuredAccess.class, 
 			new Executable<SecuredAccess, Void>()
 		{
@@ -423,10 +443,6 @@ public class ModelInstanceBuilder
 			public Void execute(SecuredAccess service) 
 			throws Exception
 			{
-				String identifier  = service.validate(
-					ModelInstanceBuilder.this.mediator.getContext(
-							).getBundle());
-
 				if(identifier == null)
 				{	
 					accessTree.add(UriUtils.getUri(
