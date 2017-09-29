@@ -16,7 +16,6 @@ package org.eclipse.sensinact.gateway.core.security;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
 //import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.util.tree.PathTree;
-import org.osgi.framework.Bundle;
 //import org.osgi.framework.ServiceRegistration;
 
 /**
@@ -28,20 +27,6 @@ public interface SecuredAccess
 {
 	public static final long ANONYMOUS_ID = 0L;
 	public static final String ANONYMOUS_PKEY = "anonymous";
-	
-	/**
-	 * Validates the signature of the {@link Bundle} passed
-	 * as parameter, and if valid returns its manifest file's 
-	 * string SHA-1 signature ; otherwise returns null
-	 * 
-	 * @param bundle the {@link Bundle} to validate the signature
-	 * of
-	 * 
-	 * @return the string SHA-1 signature of the specified {@link 
-	 * Bundle}'s manifest if the {@link Bundle} is valid ; 
-	 * null otherwise
-	 */
-	 String validate(Bundle bundle);
 
 	/**
 	 * @param bundleIdentifier
