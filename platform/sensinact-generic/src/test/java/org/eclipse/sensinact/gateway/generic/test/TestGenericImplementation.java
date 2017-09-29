@@ -421,12 +421,17 @@ public class TestGenericImplementation extends MidOSGiTest
 		  + "file:target/felix/bundle/sensinact-datastore-api.jar "
 		  + "file:target/felix/bundle/sensinact-framework-extension.jar "
 		  + "file:target/felix/bundle/sensinact-security-none.jar ");
-		
+
 		configuration.put("felix.auto.start.2",
-			"file:target/felix/bundle/sensinact-core.jar ");
+			"file:target/felix/bundle/sensinact-core.jar "
+		  + "file:target/felix/bundle/sensinact-signature-validator.jar ");
 
 		configuration.put("felix.auto.install.3",
 		    "file:target/felix/bundle/dynamicBundle.jar ");
+
+		configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
+		configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
+	}
 	}
 	
 	private void initializeMoke(URL resource, Map defaults, 
