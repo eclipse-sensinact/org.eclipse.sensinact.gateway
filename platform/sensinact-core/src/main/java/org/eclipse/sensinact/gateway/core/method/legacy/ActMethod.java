@@ -8,10 +8,13 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.method;
+package org.eclipse.sensinact.gateway.core.method.legacy;
 
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 
 /**
  * Extended {@link AccessMethod} dedicated to an Actuation
@@ -40,7 +43,7 @@ public class ActMethod extends AbstractAccessMethod
 			AccessMethodExecutor preProcessingExecutor, 
 			AccessMethodExecutor postProcessingExecutor)
     {
-	    super(mediator, uri, AccessMethod.Type.ACT, preProcessingExecutor,
+	    super(mediator, uri, AccessMethod.ACT, preProcessingExecutor,
 	    		postProcessingExecutor, null);
     }
 

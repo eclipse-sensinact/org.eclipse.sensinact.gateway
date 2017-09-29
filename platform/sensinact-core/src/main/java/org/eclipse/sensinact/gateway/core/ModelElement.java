@@ -13,16 +13,11 @@ package org.eclipse.sensinact.gateway.core;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.eclipse.sensinact.gateway.core.message.SnaConstants;
-import org.eclipse.sensinact.gateway.core.security.AccessLevel;
-import org.eclipse.sensinact.gateway.core.security.Session;
-import org.json.JSONObject;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
@@ -31,12 +26,18 @@ import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
+import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.core.message.SnaNotificationMessageImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.core.security.AccessLevel;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
+import org.eclipse.sensinact.gateway.core.security.AccessNode;
+import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
+import org.eclipse.sensinact.gateway.core.security.SessionKey;
+import org.json.JSONObject;
 
 /**
  * Abstract sensiNact resource model element (service provider, service 
@@ -48,7 +49,6 @@ public abstract class ModelElement<I extends ModelInstance<?>,
 P extends ProcessableData, E extends Nameable, R extends Nameable> 
 extends Elements<E> implements SensiNactResourceModelElement<R>
 {		
-	
 	/**
 	 * Returns the {@link Lifecycle} event associated
 	 * to the registration of this ModelElement 
@@ -106,7 +106,6 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 			AccessLevelOption accessLevelOption,
 			E element) throws ModelElementProxyBuildException;
 	
-	
 	/**
 	 * this ModelElement's parent 
 	 */
@@ -122,7 +121,7 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 	 * the proxies of this AbstractResourceModelElement mapped to 
 	 * the profile identifiers for which they have been created
 	 */
-	protected Map<Session.Key, AccessLevelOption> sessions;
+	protected Map<String, AccessLevelOption> sessions;
 
 	/**
 	 * the proxies of this AbstractResourceModelElement mapped to 
@@ -135,7 +134,6 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 	 */
 	protected AtomicBoolean started;
 
-	
 	/**
 	 * Constructor
 	 * 
@@ -158,7 +156,7 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 		this.parent = parent;
 		this.modelInstance = modelInstance;
 		this.started = new AtomicBoolean(false);
-		this.sessions = new WeakHashMap<Session.Key, AccessLevelOption>();
+		this.sessions = new HashMap<String, AccessLevelOption>();
 		this.proxies = new EnumMap<AccessLevelOption, ElementsProxy<R>>(
 				AccessLevelOption.class);
 	}
@@ -188,7 +186,7 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
      * 
      * @throws ModelElementProxyBuildException 
      */
-	public <S extends  ElementsProxy<R>> S getProxy(final Session.Key key) 
+	public <S extends  ElementsProxy<R>> S getProxy(final String publicKey) 
     		throws ModelElementProxyBuildException 
     {
     	if(!this.started.get())
@@ -196,13 +194,47 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
     		throw new ModelElementProxyBuildException(
     				"this model element must be started first");
     	}
-    	AccessLevelOption accessLevelOption = this.sessions.get(key);
+    	AccessLevelOption accessLevelOption = this.sessions.get(publicKey);
     	if(accessLevelOption == null)
     	{
     		accessLevelOption = 
-    			this.modelInstance.getAccessLevelOption(this, key);
-    		this.sessions.put(key, accessLevelOption);
+    			this.modelInstance.getAccessLevelOption(this, publicKey);
+    		this.sessions.put(publicKey, accessLevelOption);
     	}
+    	return this.getProxy(accessLevelOption);
+    }
+
+    /**
+     * Creates and returns a proxy of this AbstractModelElement
+     * 
+     * @param uid
+     * 		the long unique identifier of the user for who to 
+     * 		create the appropriate proxy
+     * @return
+     * 		a new proxy object based on this ModelElement
+     * 
+     * @throws ModelElementProxyBuildException 
+     */
+	public <S extends  ElementsProxy<R>> S getProxy(SessionKey key) 
+    		throws ModelElementProxyBuildException 
+    {
+    	if(!this.started.get())
+    	{
+    		throw new ModelElementProxyBuildException(
+    				"this model element must be started first");
+    	}
+    	AccessTree<? extends AccessNode> accessTree = key.getAccessTree();
+    	if(accessTree == null || accessTree.getRoot()==null)
+    	{
+    		throw new ModelElementProxyBuildException(
+    				"A valid access tree was expected");
+    	}
+		AccessNode node = accessTree.getRoot().get(super.getPath());
+		//AccessLevelOption will be the same for all methods, just check
+		//what is the one associated with the DESCRIBE one
+		AccessLevelOption accessLevelOption = 
+			node.getAccessLevelOption(AccessMethod.Type.valueOf(
+					AccessMethod.DESCRIBE));		
     	return this.getProxy(accessLevelOption);
     }
 
@@ -229,7 +261,8 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
     	}
     	if(accessLevelOption == null)
     	{
-    		throw new NullPointerException("Access level option expected");
+    		throw new ModelElementProxyBuildException(
+    				"Access level option expected");
     	}
 		Class<?> proxied = this.getProxyType();
     	ElementsProxy<R> proxy = this.proxies.get(accessLevelOption);
@@ -245,9 +278,8 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 	    	//if the describe method does not exists it means 
 	    	//that the user is not allowed to access this ModelElement
 	    	if((index = methodAccessibilities.indexOf(new Name<
-	    		MethodAccessibility>(AccessMethod.Type.DESCRIBE.name(
-	    				))))==-1 || !methodAccessibilities.get(index
-	    						).isAccessible())
+	    		MethodAccessibility>(AccessMethod.DESCRIBE)))==-1 || 
+	    		!methodAccessibilities.get(index).isAccessible())
 	    	{
 	    		proxy = new UnaccessibleModelElement<R>(
 	    			this.modelInstance.mediator(), proxied, 
@@ -265,8 +297,7 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 						public Void execute(E element) throws Exception
 						{
 							R proxy = ModelElement.this.getElementProxy(
-									accessLevelOption, element);
-							
+									accessLevelOption, element);							
 							if(proxy != null)
 							{
 								proxies.add(proxy); 
@@ -278,7 +309,7 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 	        	{
 	        		throw new ModelElementProxyBuildException(e);
 	        	}
-	        	proxy = this.getProxy(methodAccessibilities, proxies);	        	
+	        	proxy = this.getProxy(methodAccessibilities, proxies);	
 	        	if(proxy == null)
 	        	{
 	        		return null;
@@ -288,8 +319,7 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
     	}
         //creates the java proxy based on the created ModelElementProxy 
         //and returns it
-        return  (S) Proxy.newProxyInstance(
-        		ModelElement.class.getClassLoader(),
+        return  (S) Proxy.newProxyInstance(ModelElement.class.getClassLoader(),
         		new Class<?>[]{ proxied }, proxy);
     }
 	
@@ -310,8 +340,7 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 	 * 		object of the execution chain 
 	 * @throws Exception 
 	 */
-	protected <TASK> TASK passOn(AccessMethod.Type type, 
-			String uri, Object[] parameters) 
+	protected <TASK> TASK passOn(String type, String uri, Object[] parameters) 
 			throws Exception 
 	{
 		if(this.parent != null)

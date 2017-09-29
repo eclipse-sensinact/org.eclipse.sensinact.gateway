@@ -23,10 +23,10 @@ import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
-import org.eclipse.sensinact.gateway.core.method.ActMethod;
 import org.eclipse.sensinact.gateway.core.method.InvalidTriggerException;
 import org.eclipse.sensinact.gateway.core.method.LinkedActMethod;
 import org.eclipse.sensinact.gateway.core.method.Signature;
+import org.eclipse.sensinact.gateway.core.method.legacy.ActMethod;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
@@ -380,7 +380,7 @@ ServiceProcessableData, ResourceImpl, Resource>
 			AccessMethodExecutor.ExecutionPolicy policy) 
 					throws InvalidValueException
 	{
-		if(signature.getName().intern()!= AccessMethod.Type.ACT.name().intern())
+		if(signature.getName().intern()!= AccessMethod.ACT)
 		{
 			throw new InvalidTriggerException("ACT method expected");
 		}
@@ -440,7 +440,7 @@ ServiceProcessableData, ResourceImpl, Resource>
 					if(trigger.passOn())
 					{
 						ServiceImpl.this.passOn(
-							AccessMethod.Type.SET, target,
+							AccessMethod.SET, target,
 							new Object[]{DataResource.VALUE, result});
 					}						
 					attribute.setValue(result);	
@@ -510,12 +510,12 @@ ServiceProcessableData, ResourceImpl, Resource>
 	 * @throws Exception 
 	 */
 	@Override
-	protected <TASK> TASK passOn(AccessMethod.Type type, 
+	protected <TASK> TASK passOn(String type, 
 			String path, Object[] parameters) throws Exception 
 	{
-		this.subscriptionsCount+=(type==AccessMethod.Type.UNSUBSCRIBE)?-1:0;		
+		this.subscriptionsCount+=(type==AccessMethod.UNSUBSCRIBE)?-1:0;		
 		TASK task = super.passOn(type, path, parameters);
-		this.subscriptionsCount+=(type==AccessMethod.Type.SUBSCRIBE)?1:0;
+		this.subscriptionsCount+=(type==AccessMethod.SUBSCRIBE)?1:0;
 		return task;
 	}
 	

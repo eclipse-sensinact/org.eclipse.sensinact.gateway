@@ -266,9 +266,8 @@ public class SnaFilter
 	 * 			<li>false otherwise</li>
 	 * 		</ul>
 	 */
-	boolean matches(SnaMessage message)
+	boolean matches(SnaMessage<?> message)
 	{
-		String uri = message.getPath();
 		boolean matchType = this.matchesType(message);
 		if(!matchType)
 		{

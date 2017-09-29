@@ -8,19 +8,22 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.method;
+package org.eclipse.sensinact.gateway.core.method.legacy;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Response;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 
 /**
- * Extended {@link AbstractSnaMessage} returned by an 
- * {@link SubscribeMethod} invocation
+ * Extended {@link AbstractSnaMessage} returned by an
+ * {@link SetMethod} invocation
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class SubscribeResponse extends AccessMethodResponse
+public class SetResponse extends AccessMethodResponse
 {
 	/**
 	 * Constructor 
@@ -28,8 +31,7 @@ public class SubscribeResponse extends AccessMethodResponse
 	 * @param status
 	 * 		the associated {@link Status}
 	 */
-    protected SubscribeResponse(Mediator mediator, 
-    		String uri, Status status)
+    protected SetResponse(Mediator mediator, String uri, Status status)
     {
 	    this(mediator, uri, status, Status.SUCCESS.equals(status)
 	    	?SnaErrorfulMessage.NO_ERROR:SnaErrorfulMessage.UNKNOWN_ERROR_CODE);
@@ -43,21 +45,10 @@ public class SubscribeResponse extends AccessMethodResponse
 	 * @param code
 	 * 		the associated status code 
 	 */
-    protected SubscribeResponse(Mediator mediator, 
+    public SetResponse(Mediator mediator, 
     		String uri, Status status, int code)
     {
-    	super(mediator, uri, AccessMethodResponse.Response.SUBSCRIBE_RESPONSE, 
-    		status, code);
-    }
-    
-    /**
-     * Returns the subscription identifier
-     * 
-     * @return
-     * 		the subscription identifier
-     */
-    String getSubscriptionId()
-    {
-    	return super.getResponse(String.class, "subscriptionId");
+    	super(mediator, uri, 
+    	AccessMethodResponse.Response.SET_RESPONSE, status, code);
     }
 }

@@ -70,8 +70,7 @@ public abstract class AbstractAccessMethod implements AccessMethod
 	 * 		{@link AccessMethod} type to instantiate
 	 */
 	protected AbstractAccessMethod(Mediator mediator, 
-			String uri, AccessMethod.Type type, 
-			AccessMethodExecutor preProcessingExecutor)
+	    String uri, String type, AccessMethodExecutor preProcessingExecutor)
 	{
 		this(mediator, uri, type, preProcessingExecutor, null, null);
 	}
@@ -84,8 +83,7 @@ public abstract class AbstractAccessMethod implements AccessMethod
 	 * 		{@link AccessMethod} type to instantiate
 	 */
 	protected AbstractAccessMethod(Mediator mediator, 
-			String uri, AccessMethod.Type type, 
-			AccessMethodExecutor preProcessingExecutor,
+	    String uri, String type, AccessMethodExecutor preProcessingExecutor,
 			ErrorHandler errorHandler)
 	{
 		this(mediator, uri, type, preProcessingExecutor, null, errorHandler);
@@ -99,13 +97,11 @@ public abstract class AbstractAccessMethod implements AccessMethod
 	 * 		{@link AccessMethod} type to instantiate
 	 */
 	protected AbstractAccessMethod(Mediator mediator, 
-			String uri, AccessMethod.Type type, 
-			AccessMethodExecutor preProcessingExecutor,
-			AccessMethodExecutor postProcessingExecutor,
-			ErrorHandler errorHandler)
+	    String uri, String type, AccessMethodExecutor preProcessingExecutor,
+			AccessMethodExecutor postProcessingExecutor, ErrorHandler errorHandler)
 	{
 		this.uri = uri;
-		this.type = type;
+		this.type = AccessMethod.Type.valueOf(type);
 		this.mediator = mediator;
 		this.map = new IdentityHashMap<Signature, 
 				Deque<AccessMethodExecutor>>();
@@ -222,7 +218,7 @@ public abstract class AbstractAccessMethod implements AccessMethod
 	            e.printStackTrace();
             }
 		}
-		signature = new Signature(this.mediator, type, parameters);
+		signature = new Signature(this.mediator, type.name(), parameters);
 		return signature;
 	}
 	
@@ -576,8 +572,7 @@ public abstract class AbstractAccessMethod implements AccessMethod
 	/**
 	 * @inheritDoc
 	 *
-	 * @see AccessMethod#
-	 * getSignatures()
+	 * @see AccessMethod#getSignatures()
 	 */
     @Override
     public Set<Signature> getSignatures()
@@ -609,7 +604,7 @@ public abstract class AbstractAccessMethod implements AccessMethod
     private final AccessMethodResponse error( int statusCode, String message)
     {
     	AccessMethodResponse snaMessage = AccessMethodResponse.error(this.mediator, 
-    			uri, this.getType(), statusCode, message, null);
+    			uri, this.getType().name(), statusCode, message, null);
 		return snaMessage;
     }
 

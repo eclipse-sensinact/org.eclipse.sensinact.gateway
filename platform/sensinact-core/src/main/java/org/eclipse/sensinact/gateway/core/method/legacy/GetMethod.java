@@ -8,10 +8,13 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.method;
+package org.eclipse.sensinact.gateway.core.method.legacy;
 
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 
 
 /**
@@ -27,7 +30,7 @@ public class GetMethod extends AbstractAccessMethod
     public GetMethod(Mediator mediator, String uri, 
 			AccessMethodExecutor preProcessingExecutor)
     {
-	    super(mediator, uri, AccessMethod.Type.GET, preProcessingExecutor);
+	    super(mediator, uri, AccessMethod.GET, preProcessingExecutor);
     }
 
 	/**

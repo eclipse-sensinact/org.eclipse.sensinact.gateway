@@ -192,7 +192,7 @@ Stateful<ServiceProvider.LifecycleStatus>
      * getAccessMethod(AccessMethod.Type)
      */
     @Override
-	public AccessMethod getAccessMethod(Type type)
+	public AccessMethod getAccessMethod(String name)
     {
 	    return null;
     }

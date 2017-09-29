@@ -278,10 +278,9 @@ public interface SensiNactResourceModelConfiguration
        		boolean startAtInitializationTime);
 
 	/**
-	 * Returns an array of accessible {@link AccessMethod.Type} for
-	 * the {@link AccessLevel} of the {@link AccessLevelOption} passed
-	 * as parameter and for the targeted resource whose path is also 
-	 * passed as parameter 
+	 * Returns an array of Strig names of the  accessible {@link AccessMethod.Type} 
+	 * for the {@link AccessLevel} of the {@link AccessLevelOption} passed as parameter 
+	 * and for the targeted resource whose path is also passed as parameter 
 	 *  
 	 * @param path the string path of the targeted resource	
 	 * @param accessLevelOption the {@link AccessLevelOption}  
@@ -289,33 +288,22 @@ public interface SensiNactResourceModelConfiguration
 	 * @return the array of accessible {@link AccessMethod.Type} for
 	 * the specified access level option and resource
 	 */
-	List<MethodAccessibility> getAccessibleMethods(String path, AccessLevelOption
-			accessLevelOption);
+	List<MethodAccessibility> getAccessibleMethods(String path, 
+			AccessLevelOption accessLevelOption);
 
 	/**
-	 * Returns the {@link AccessLevelOption} for the user whose public
-	 * key is passed as parameter, and for the targeted resource whose 
-	 * path is also passed as parameter 
-	 *  
-	 * @param path the string path of the targeted resource	
-	 * @param publicKey the user public string key
-	 * 
-	 * @return the {@link AccessLevelOption} for the specified user
-	 *  and resource
-	 */
-	AccessLevelOption getUserAccessLevelOption(String path, String publicKey);
-	
-	/**
-	 * Returns the {@link AccessLevelOption} for the agent 
-	 * whose public key is passed as parameter, and for the targeted 
+	 * Returns the {@link AccessLevelOption} for the agent, the application
+	 * or the user whose public key is passed as parameter, and for the targeted 
 	 * resource whose path is also passed as parameter 
 	 *  
 	 * @param path the string path of the targeted resource	
-	 * @param publicKey the agent public string key
+	 * @param publicKey the agent, the application
+	 * or the user's public string key
 	 * 
-	 * @return the {@link AccessLevelOption} for the specified agent
-	 *  and resource
+	 * @return the {@link AccessLevelOption} for the specified the agent, 
+	 * the application or the user, and resource
 	 */
-	AccessLevelOption getAgentAccessLevelOption(String path, String publicKey);
+	AccessLevelOption getAuthenticatedAccessLevelOption(String path, 
+			String publicKey);
 
 }

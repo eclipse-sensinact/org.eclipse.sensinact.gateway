@@ -12,23 +12,23 @@ package org.eclipse.sensinact.gateway.core;
 
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.common.primitive.*;
-import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
-import org.eclipse.sensinact.gateway.core.method.Signature;
-import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
-import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
+import org.eclipse.sensinact.gateway.common.primitive.Describable;
+import org.eclipse.sensinact.gateway.common.primitive.Description;
+import org.eclipse.sensinact.gateway.common.primitive.Elements;
+import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
+import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
+import org.eclipse.sensinact.gateway.common.primitive.Nameable;
+import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
+import org.eclipse.sensinact.gateway.common.primitive.Typable;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.BufferCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
@@ -42,16 +42,21 @@ import org.eclipse.sensinact.gateway.core.message.SnaNotificationMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
 import org.eclipse.sensinact.gateway.core.message.SubscriptionFilter;
 import org.eclipse.sensinact.gateway.core.message.UnaryCallback;
+import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
+import org.eclipse.sensinact.gateway.core.method.Signature;
+import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
+import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.json.JSONObject;
 
 /**
  * Basis {@link Resource} implementation
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ResourceImpl 
-extends ModelElement<ModelInstance<?>, 
+public class ResourceImpl extends ModelElement<ModelInstance<?>, 
 ResourceProcessableContainer, Attribute, AttributeDescription> 
 implements Typable<Resource.Type>
 {
@@ -103,9 +108,7 @@ implements Typable<Resource.Type>
 		this.resourceType = resourceConfig.getTypeConfig(
 				).getResourceImplementedInterface();
 		
-		this.methods = new EnumMap<AccessMethod.Type, AccessMethod>(
-				AccessMethod.Type.class);
-			
+		this.methods = new HashMap<AccessMethod.Type, AccessMethod>();			
 		this.links = new ArrayList<String>();
 		
 		this.setUpdatePolicy(resourceConfig.getUpdatePolicy());
@@ -142,9 +145,7 @@ implements Typable<Resource.Type>
             catch (InvalidValueException e)
             {
             	super.modelInstance.mediator().error(e,
-            	   new StringBuilder().append("'").append(
-            		  getPath()).append( "' resource cannot be updated"
-							).toString());
+            	"'%s' resource cannot be updated",getPath());
             }
         }
 	}
@@ -201,21 +202,18 @@ implements Typable<Resource.Type>
             	
             if(!this.addAttribute(attribute))
             {
-                super.modelInstance.mediator().warn(new StringBuilder().append(
-                	"Error when creating attribute '").append(name).append(
-                		"': unable to update resource '"
-                		).append(getPath()).append("'"
-                				).toString());
+                super.modelInstance.mediator().warn(
+                "Error when creating attribute '%s': unable to update resource '%s",
+                name,getPath());
                 return;
             }
         }
         if(attribute == null)
         {
             super.modelInstance.mediator().warn(new StringBuilder().append(
-            	"Null attribute '").append(name).append(
-            		"': unable to update resource '"
-            		).append(getPath()).append("'"
-            				).toString());
+            "Null attribute '").append(name).append("': unable to update resource '"
+            		).append(getPath()).append("'").toString());
+            
             return;
         }
     	if(metadataName != null)
@@ -639,16 +637,16 @@ implements Typable<Resource.Type>
 	 * Returns the {@link AccessMethod} of this resource whose 
 	 * {@link AccessMethod.Type} is passed as parameter
 	 * 
-	 * @param type
+	 * @param act
 	 * 		the {@link AccessMethod.Type} of the {@link AccessMethod}
 	 * 		to return
 	 * @return
 	 * 		the {@link AccessMethod} of this resource of the 
 	 * 		specified type
 	 */
-	public AccessMethod getAccessMethod(AccessMethod.Type type)
+	public AccessMethod getAccessMethod(AccessMethod.Type method)
 	{
-		return this.methods.get(type);
+		return this.methods.get(method);
 	}
     
     /**
@@ -710,8 +708,8 @@ implements Typable<Resource.Type>
 			Signature signature, AccessMethodExecutor executor,
 			AccessMethodExecutor.ExecutionPolicy policy)
 	{
-		AccessMethod.Type type = AccessMethod.Type.valueOf(signature.getName());
-		AccessMethod method = this.getAccessMethod(type);
+		AccessMethod method = this.getAccessMethod(AccessMethod.Type.valueOf(
+				signature.getName()));
         if(method != null)
         {        
         	((AbstractAccessMethod)method).addSignature(
@@ -739,7 +737,8 @@ implements Typable<Resource.Type>
      * @param hasChanged 
      */
     @SuppressWarnings("rawtypes")
-	protected void updated(Attribute attribute, Object value, boolean hasChanged)
+	protected void updated(Attribute attribute, Object value, 
+			boolean hasChanged)
     {  	
     	if(!super.started.get() || attribute.isHidden())
     	{
@@ -881,7 +880,9 @@ implements Typable<Resource.Type>
     	int length = types==null?0:types.length;
     	for(;index < length; index++)
     	{
-    		AccessMethod method = this.methods.remove(types[index]);
+    		AccessMethod method = this.methods.remove(
+    				types[index].name());
+    		
     		if(method != null)
     		{
     			((AbstractAccessMethod)method).stop();
@@ -898,15 +899,14 @@ implements Typable<Resource.Type>
      * java.lang.String, java.lang.Object[])
      */
     @Override
-	protected <TASK> TASK passOn(AccessMethod.Type type, 
-			String uri, Object[] parameters) 
+	protected <TASK> TASK passOn(String type, String uri, Object[] parameters) 
 			throws Exception 
 	{
-    	if (type != AccessMethod.Type.GET ||
+    	if (type.equals(AccessMethod.GET) ||
     			this.getUpdatePolicy() == Resource.UpdatePolicy.NONE ||
     			this.getUpdatePolicy() == Resource.UpdatePolicy.INIT)
     	{	
-			if(type == AccessMethod.Type.GET 
+			if(type.equals(AccessMethod.GET) 
 				&& this.getUpdatePolicy() == Resource.UpdatePolicy.INIT)
 			{
 				this.setUpdatePolicy(Resource.UpdatePolicy.AUTO);

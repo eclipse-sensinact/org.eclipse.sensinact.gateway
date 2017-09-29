@@ -16,14 +16,14 @@ import java.util.Set;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.method.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
-import org.eclipse.sensinact.gateway.core.method.SetResponse;
-import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
-import org.eclipse.sensinact.gateway.core.method.UnsubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 
 /**
- * Extended {@link Resource} owning a 'value' attribute
+ * Extended {@link Resource} holding a 'value' attribute
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */

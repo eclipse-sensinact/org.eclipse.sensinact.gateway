@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.core;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Elements;
@@ -61,7 +60,6 @@ extends Elements<P> implements SensiNactResourceModelElementProxy<P>
 		super(uri);
 		this.mediator = mediator;
 		this.proxied = proxied;
-		this.elements = new ArrayList<P>();
 	}
 
     /**
@@ -74,6 +72,7 @@ extends Elements<P> implements SensiNactResourceModelElementProxy<P>
     public Object invoke(Object proxy, Method method, 
     		Object[] parameters) throws Throwable
     {    	
+    	Object result = null;
     	if(this.proxied.isAssignableFrom(method.getDeclaringClass()))
     	{
     		Object[] calledParameters = null;
@@ -89,11 +88,13 @@ extends Elements<P> implements SensiNactResourceModelElementProxy<P>
     		{
     			calledParameters = parameters;
     		}    		
-    		return this.invoke(AccessMethod.Type.valueOf(
-    				method.getName().toUpperCase()), 
+    		result = this.invoke(method.getName().toUpperCase(), 
     				calledParameters);
     	}
-    	Object result = method.invoke(this, parameters);
+    	else
+     	{
+     		result = method.invoke(this, parameters);
+     	}
     	if(result == this)
     	{
     		return proxy;
@@ -113,16 +114,17 @@ extends Elements<P> implements SensiNactResourceModelElementProxy<P>
      * 
      * @return the appropriate {@link SnaMessage}
    	 */
-     public AccessMethodResponse invoke(AccessMethod.Type type,
-										Object[] parameters) throws Throwable
+     public AccessMethodResponse invoke(String type,
+				Object[] parameters) throws Throwable
      {    	       		 		
 		AccessMethod accessMethod = this.getAccessMethod(type);
+		
 		if (accessMethod == null) 
 		{
-	    	AccessMethodResponse message = AccessMethodResponse.error(
-	    	this.mediator, uri, type, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
-	    		new StringBuilder().append(type.name()).append(
-	    		" method not found").toString(), null);
+	    	AccessMethodResponse message = AccessMethodResponse.error(this.mediator, 
+	    		uri, type, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+	    		new StringBuilder().append(type).append(" method not found"
+	    				).toString(), null);
 	    	
 			return message;			
 		}

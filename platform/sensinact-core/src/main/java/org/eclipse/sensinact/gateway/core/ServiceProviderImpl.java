@@ -488,13 +488,6 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
     				builder.getConfiguredName());
     		return null;
     	}
-//    	if(this.getAdminService()!=null && service.getResource(
-//    			LocationResource.LOCATION) == null)
-//    	{
-//    		service.addLinkedResource(LocationResource.LOCATION, 
-//        		this.getAdminService().getResource(
-//        				LocationResource.LOCATION));
-//    	}
 	    return super.addElement(service)?service:null;
     }
     

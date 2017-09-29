@@ -8,27 +8,29 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.method;
+package org.eclipse.sensinact.gateway.core.method.legacy;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 
 /**
- * Extended  {@link AccessMethodResult} dedicated to {@link DescribeMethod}
+ * Extended  {@link AccessMethodResult} dedicated to {@link SubscribeMethod}
  * execution
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class GetResult extends AccessMethodResult
+public class SubscribeResult extends AccessMethodResult
 {
 	/**
 	 * @param uri 
 	 * @param parameters
 	 */
-    protected GetResult(Mediator mediator, 
+    protected SubscribeResult(Mediator mediator, 
     		String uri, Object[] parameters)
     {
-	    super(mediator, uri, parameters);
+	    super(mediator, uri,parameters);
     }
 
 	/**
@@ -38,8 +40,9 @@ public class GetResult extends AccessMethodResult
 	 * createSnaResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
 	 */
     @Override
-    protected AccessMethodResponse createSnaResponse(Status status)
+    protected AccessMethodResponse createSnaResponse(AccessMethodResponse.Status status)
     {
-		return new GetResponse(super.mediator, super.getPath(), status);
+		return new SubscribeResponse(super.mediator, 
+				super.getPath(), status);
     }
 }

@@ -12,14 +12,12 @@ package org.eclipse.sensinact.gateway.core.security;
 
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
-import org.osgi.framework.ServiceRegistration;
-
-import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
-import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 
 /**
@@ -27,135 +25,45 @@ import org.eclipse.sensinact.gateway.util.CastUtils;
  */
 public interface Session
 {	 
-	//********************************************************************//
-	//						NESTED DECLARATIONS		    				  //
-	//********************************************************************//
+	/**
+	 * Returns the String identifier of the current Session
+	 * 
+	 * @return this Session's String identifier
+	 */
+	String getId();
 	
-	class Key implements UserKey
-	{
-		private long uid;
-		private String token;
-		private String publicKey;
-
-		public Key(){}
-		
-		/**
-		 * @return the uid
-		 */
-		public long getUid() {
-			return uid;
-		}
-		/**
-		 * @param uid the uid to set
-		 */
-		public void setUid(long uid) {
-			this.uid = uid;
-		}
-
-		/**
-		 * @return
-		 */
-		public void setPublicKey(String publicKey)
-		{
-			this.publicKey = publicKey;
-		}
-		
-		/**
-		 * @return
-		 */
-		public String getPublicKey()
-		{
-			return this.publicKey;
-		}
-		
-		/**
-		 * @return the token
-		 */
-		public String getToken() {
-			return token;
-		}
-		/**
-		 * @param token the token to set
-		 */
-		public void setToken(String token) {
-			this.token = token;
-		}
-		
-		/** 
-		 * inheritDoc
-		 * 
-		 * @see java.lang.Object#equals(java.lang.Object)
-		 */
-		public boolean equals(Object object)
-		{
-			if(object == null)
-			{
-				return false;
-			}
-			if(object.getClass() == String.class)
-			{
-				return object.equals(this.token);
-			}
-			Double dble = CastUtils.primitiveNumberToDouble(object);
-			if(dble != null)
-			{
-				return this.uid == dble.longValue();
-			}
-			if(Session.Key.class.isAssignableFrom(object.getClass()))
-			{
-				return this.equals(((Session.Key)object).getToken())
-					|| this.equals(((Session.Key)object).getUid());
-			}
-			return false;
-		}
-	}
-
-	//********************************************************************//
-	//						ABSTRACT DECLARATIONS						  //
-	//********************************************************************//
-	
-
-	//********************************************************************//
-	//						STATIC DECLARATIONS		      				  //
-	//********************************************************************//
-
-
-	//********************************************************************//
-	//						INSTANCE DECLARATIONS						  //
-	//********************************************************************//
-
-    /**
-     * @return
-     */
-    Key getSessionKey();
-    
 	/**
 	 * Returns the set of  {@link ServiceProvider}s accessible
 	 * for this session's user
 	 * 
-	 * @return
-	 * 		the set of accessible {@link ServiceProvider}s
+	 * @return the set of accessible {@link ServiceProvider}s
 	 */
-	Set<ServiceProvider> getServiceProviders();
+	Set<ServiceProvider> serviceProviders();
 	
 	/**
-	 * @param uri
-	 * @return
+	 * Returns the set of {@link ServiceProvider}s accessible
+	 * for this session's user
+	 * 
+	 * @param filter the String LDAP formated filter allowing
+	 * to discriminate the appropriate {@link ServiceProvider}s
+	 * 
+	 * @return the set of accessible {@link ServiceProvider}s
+	 * according to the specified LDAP filter 
 	 */
-    <S extends ElementsProxy<?>> S  getFromUri(String uri);
+	Set<ServiceProvider> serviceProviders(String filter);
     
     /**
      * @param serviceProviderName
      * @return
      */
-    ServiceProvider getServiceProvider(String serviceProviderName);
+    ServiceProvider serviceProvider(String serviceProviderName);
 
     /**
      * @param serviceProviderName
      * @param serviceName
      * @return
      */
-    Service getService(String serviceProviderName, String serviceName);
+    Service service(String serviceProviderName, String serviceName);
 
     /**
      * @param serviceProviderName
@@ -163,32 +71,119 @@ public interface Session
      * @param resourceName
      * @return
      */
-     Resource getResource(String serviceProviderName, String serviceName,
+     Resource resource(String serviceProviderName, String serviceName,
     		 String resourceName);  
 
-	/**
-	 * Registers the {@link SensiNactResourceModel} passed
-	 * as parameter in the OSGi host environment
-	 * 
-	 * @param modelInstance the {@link SensiNactResourceModel}
-	 * to be registered
-	 *
-	 * @return 
-	 * @throws SecuredAccessException 
-	 */
-	ServiceRegistration<SensiNactResourceModel> register(
-		SensiNactResourceModel<?> modelInstance) 
-			throws SecuredAccessException;
+   	/**
+   	 * @return
+   	 */
+   	JSONObject getAll();
+   	
+   	/**
+   	 * @param filter
+   	 * @return
+   	 */
+   	JSONObject getAll(String filter);
+   	
+   	/**
+   	 * @return
+   	 */
+   	JSONObject getLocations();
+ 
+     /**
+     * @return
+     */
+    JSONObject getProviders();
 
-	/**
-	 * Unregisters the {@link SensiNactResourceModel} passed 
-	 * as parameter from the OSGi host environment
-	 * 
-	 * @param modelInstance the {@link SensiNactResourceModel}
-	 * to unregister
-	 * 
-	 * @throws SecuredAccessException 
-	 */
-	void unregister(ServiceRegistration<SensiNactResourceModel> registration) 
-			throws SecuredAccessException;   
+     /**
+     * @param serviceProviderId
+     * @return
+     */
+    JSONObject getProvider(String serviceProviderId);
+
+     /**
+     * @param serviceProviderId
+     * @return
+     */
+    JSONObject getServices(String serviceProviderId);
+
+     /**
+     * @param serviceProviderId
+     * @param serviceId
+     * @return
+     */
+    JSONObject getService(String serviceProviderId,String serviceId);
+
+     /**
+     * @param serviceProviderId
+     * @param serviceId
+     * @return
+     */
+    JSONObject getResources(String serviceProviderId, String serviceId);
+
+     /**
+     * @param serviceProviderId
+     * @param serviceId
+     * @param resourceId
+     * @return
+     */
+    JSONObject getResource(String serviceProviderId, 
+     		String serviceId, String resourceId);
+     
+     /**
+     * @param serviceProviderId
+     * @param serviceId
+     * @param resourceId
+     * @param attributeId
+     * @return
+     */
+    JSONObject get(String serviceProviderId, 
+     		String serviceId, String resourceId, 
+     		String attributeId);
+
+     /**
+     * @param serviceProviderId
+     * @param serviceId
+     * @param resourceId
+     * @param attributeId
+     * @param parameter
+     * @return
+     */
+    JSONObject set(String serviceProviderId,
+            String serviceId, String resourceId, 
+            String attributeId, Object parameter);
+
+     /**
+     * @param serviceProviderId
+     * @param serviceId
+     * @param resourceId
+     * @param parameters
+     * @return
+     */
+    JSONObject act(String serviceProviderId,
+             String serviceId, String resourceId, 
+             Object[] parameters );
+     
+     /**
+     * @param serviceProviderId
+     * @param serviceId
+     * @param resourceId
+     * @param recipient
+     * @param conditions
+     * @return
+     */
+    JSONObject subscribe(String serviceProviderId,
+             String serviceId, String resourceId, 
+ 	        Recipient recipient, JSONArray conditions);
+        
+     /**
+     * @param serviceProviderId
+     * @param serviceId
+     * @param resourceId
+     * @param subscriptionId
+     * @return
+     */
+    JSONObject unsubscribe(String serviceProviderId,
+             String serviceId, String resourceId, 
+            String subscriptionId );
 }

@@ -21,7 +21,10 @@ import org.eclipse.sensinact.gateway.common.props.TypedKey;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 
 /**
- * Abstract implementation of an {@link SnaMessage}
+ * An SnaMessage provide information about a {@link ServiceProvider}, 
+ * a {@link Service}, or a {@link Resource} of sensiNact. It can be the 
+ * response to an access method call, relative to the lifecycle of 
+ * an entity of the system or an value update, or an error
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */

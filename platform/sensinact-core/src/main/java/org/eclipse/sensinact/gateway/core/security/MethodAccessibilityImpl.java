@@ -36,11 +36,20 @@ public class MethodAccessibilityImpl implements MethodAccessibility
 	//						STATIC DECLARATIONS							  //
 	//********************************************************************//
 
+	/**
+	 * @param method
+	 * @param option
+	 * @return
+	 */
 	public static MethodAccessibility unaccessible(Type method, AccessLevelOption option ) 
 	{
 		return new MethodAccessibilityImpl(method, option, false);
 	}
 	
+	/**
+	 * @param option
+	 * @return
+	 */
 	public static List<MethodAccessibility> unaccessible(AccessLevelOption option) 
 	{
 		List<MethodAccessibility> accessibilities = new ArrayList<MethodAccessibility>();
@@ -142,6 +151,7 @@ public class MethodAccessibilityImpl implements MethodAccessibility
 	 *
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object object)
 	{
 		if(object == null)
@@ -170,5 +180,20 @@ public class MethodAccessibilityImpl implements MethodAccessibility
 			&& this.equals(((MethodAccessibility)object).getAccessLevelOption());
 		}
 		return false;
+	}
+	
+	/**
+	 * @inheritDoc
+	 *
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		return new StringBuilder().append(method.name()
+			).append("[Level:").append(option.name()
+				).append("]").append("[Accessible:"
+					).append(accessible).append("]"
+							).toString();
 	}
 }

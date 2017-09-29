@@ -11,10 +11,6 @@
 package org.eclipse.sensinact.gateway.core.security;
 
 /**
- * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
- */
-/**
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */

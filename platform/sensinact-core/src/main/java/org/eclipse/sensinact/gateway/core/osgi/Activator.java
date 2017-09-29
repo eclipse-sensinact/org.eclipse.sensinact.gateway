@@ -13,23 +13,19 @@ package org.eclipse.sensinact.gateway.core.osgi;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ConcurrentModificationException;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ServiceLoader;
 
-import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
+import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.Core;
+import org.eclipse.sensinact.gateway.core.SensiNact;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
-
-import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 
 /**
  * Bundle Activator
@@ -38,37 +34,19 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
  */
 public class Activator extends AbstractActivator<Mediator>
 {	
-	private SecuredAccess securedAccess;
 	private ServiceRegistration registration;
 
-    /**
+	/**
 	 * @inheritDoc
 	 *
-	 * @see AbstractActivator#doStart()
+	 * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#
+	 * doStart()
 	 */
 	@Override
 	public void doStart() throws Exception
 	{    		
-		ServiceLoader<SecuredAccessFactory> serviceLoader = ServiceLoader
-		        .load(SecuredAccessFactory.class, mediator.getClassLoader());
-
-		Iterator<SecuredAccessFactory> iterator = serviceLoader.iterator();
-
-		if (iterator.hasNext())
-		{
-			SecuredAccessFactory factory = iterator.next();
-			if (factory != null)
-			{
-				securedAccess = factory.newInstance(super.mediator);
-			}
-		}
-		if (securedAccess == null)
-		{
-			throw new BundleException(
-			        "A fragment providing SecuredAccess was excepted");
-		}
-		securedAccess.createAuthorizationService();
-
+		final Core core = new SensiNact(super.mediator);
+		
 		ServiceReference<ConditionalPermissionAdmin> sRef = super.mediator.getContext(
 				).getServiceReference(ConditionalPermissionAdmin.class);
 
@@ -85,8 +63,9 @@ public class Activator extends AbstractActivator<Mediator>
 		List piList = cpu.getConditionalPermissionInfos();
 		ConditionalPermissionInfo cpiDeny = cpa.newConditionalPermissionInfo(String.format(
             "DENY {" + "[org.eclipse.sensinact.gateway.core.security.perm.SensiNactCoreCondition \"%s\" \"!\"]"
-                    + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.Core\" \"register\")"
-                    + "(org.osgi.framework.ServicePermission \"SecuredAccess\" \"register\")"
+                    + "(org.osgi.framework.ServicePermission \"Core\" \"register\")"
+                    + "(org.osgi.framework.ServicePermission \"RemoteCore\" \"register,get\")"
+                    + "(org.osgi.framework.ServicePermission \"SecuredAccess\" \"register,get\")"
                     + "(org.osgi.framework.ServicePermission \"SensiNactResourceModel\" \"register,get\")"
                     + "(org.osgi.framework.ServicePermission \"SensiNactResourceModelElement\" \"register,get\")"
                     + "(org.osgi.framework.ServicePermission \"SnaAgent\" \"register\")"
@@ -120,8 +99,7 @@ public class Activator extends AbstractActivator<Mediator>
 	        public ServiceRegistration run()
 	        {
 		        return mediator.getContext().registerService(
-		                SecuredAccess.class.getCanonicalName(),
-		                securedAccess, null);
+		           Core.class.getCanonicalName(),core, null);
 	        }
         });
 	}
@@ -129,7 +107,7 @@ public class Activator extends AbstractActivator<Mediator>
 	/**
 	 * @inheritDoc
 	 *
-	 * @see AbstractActivator#
+	 * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#
 	 * doStop()
 	 */
 	@Override
@@ -139,26 +117,24 @@ public class Activator extends AbstractActivator<Mediator>
 		{
 			try
 			{
-				SecuredAccess access = AccessController.doPrivileged(
-				new PrivilegedAction<SecuredAccess>()
+				Core core = AccessController.doPrivileged(
+				new PrivilegedAction<Core>()
 				{
 			        @SuppressWarnings("unchecked")
 					@Override
-			        public SecuredAccess run()
+			        public Core run()
 			        {
-				        return (SecuredAccess) mediator.getContext(
+				        return (Core) mediator.getContext(
 				        ).getService(Activator.this.registration.getReference());
 			        }
 		        });
-				access.close();
+				core.close();
 				this.registration.unregister();
 				
 			} catch(IllegalStateException e)
 			{
-				if(super.mediator.isErrorLoggable())
-				{
-					super.mediator.error(e, e.getMessage());
-				}
+				super.mediator.error(e, e.getMessage());
+				
 			} finally
 			{
 				this.registration = null;
@@ -169,7 +145,7 @@ public class Activator extends AbstractActivator<Mediator>
 	/**
 	 * @inheritDoc
 	 *
-	 * @see AbstractActivator#
+	 * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#
 	 * doInstantiate(org.osgi.framework.BundleContext)
 	 */
 	@Override

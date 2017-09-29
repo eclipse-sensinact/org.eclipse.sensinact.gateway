@@ -20,6 +20,12 @@ import java.util.Set;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.message.SnaMessageSubType;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
+import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 import org.json.JSONObject;
 
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaErrorfulMessage;
@@ -49,7 +55,8 @@ implements SnaResponseMessage<AccessMethodResponse.Response>
 		SET_RESPONSE,
 		ACT_RESPONSE,
 		SUBSCRIBE_RESPONSE,
-		UNSUBSCRIBE_RESPONSE;
+		UNSUBSCRIBE_RESPONSE,
+		UNKNOWN_METHOD_RESPONSE;
 
 		final Set<TypedKey<?>> keys;
 		
@@ -122,48 +129,71 @@ implements SnaResponseMessage<AccessMethodResponse.Response>
 
 	/**
 	 * Error SnaMessages factory
+	 * 
+	 * @param mediator
+	 * @param uri
+	 * @param method
+	 * @param statusCode
+	 * @param message
+	 * @param throwable
+	 * @return
 	 */
 	public static final AccessMethodResponse error(Mediator mediator, 
-			String uri, AccessMethod.Type type, int statusCode, 
+			String uri, AccessMethod.Type method, int statusCode, 
+			String message, Throwable throwable)
+	{
+		return AccessMethodResponse.error(mediator, uri, method.name(), 
+			statusCode, message, throwable);
+	}
+
+	/**
+	 * Error SnaMessages factory
+	 * 
+	 * @param mediator
+	 * @param uri
+	 * @param method
+	 * @param statusCode
+	 * @param message
+	 * @param throwable
+	 * @return
+	 */
+	public static final AccessMethodResponse error(Mediator mediator, 
+			String uri, String method, int statusCode, 
 			String message, Throwable throwable)
 	{
 		int code = statusCode==AccessMethodResponse.SUCCESS_CODE
 				?SnaErrorfulMessage.UNKNOWN_ERROR_CODE:statusCode;	
 
 		AccessMethodResponse snaResponse = null;
-		switch(type)
+		switch(method)
 		{
-			case ACT:
-				snaResponse =
-				new ActResponse(mediator, uri,
+			case "ACT":
+				snaResponse = new ActResponse(mediator, uri,
 						AccessMethodResponse.Status.ERROR, code);
 				break;
-			case DESCRIBE:
-				snaResponse =
-				new DescribeResponse(mediator, uri,
+			case "DESCRIBE":
+				snaResponse = new DescribeResponse(mediator, uri,
 						AccessMethodResponse.Status.ERROR, code);
 				break;
-			case GET:
-				snaResponse =
-				new GetResponse(mediator, uri,
+			case "GET":
+				snaResponse = new GetResponse(mediator, uri,
 						AccessMethodResponse.Status.ERROR, code);
 				break;
-			case SET:
-				snaResponse =
-				new SetResponse(mediator, uri,
+			case "SET":
+				snaResponse = new SetResponse(mediator, uri,
 						AccessMethodResponse.Status.ERROR, code);
 				break;
-			case SUBSCRIBE:
-				snaResponse =
-				new SubscribeResponse(mediator, uri,
+			case "SUBSCRIBE":
+				snaResponse = new SubscribeResponse(mediator, uri,
 						AccessMethodResponse.Status.ERROR, code);
 				break;
-			case UNSUBSCRIBE:
-				snaResponse =
-				new UnsubscribeResponse(mediator, uri,
+			case "UNSUBSCRIBE":
+				snaResponse = new UnsubscribeResponse(mediator, uri,
 						AccessMethodResponse.Status.ERROR, code);
 				break;
 			default:
+				snaResponse = new UnknownAccessMethodResponse(
+						mediator,uri);
 				break;
 		}
 		if(snaResponse!=null && message != null)

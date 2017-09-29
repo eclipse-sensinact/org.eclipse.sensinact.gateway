@@ -8,24 +8,29 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.method;
+package org.eclipse.sensinact.gateway.core.method.legacy;
+
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
+
 
 /**
- * Setter {@link AccessMethod} 
+ * Unsubscription {@link AccessMethod} 
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class SetMethod  extends AbstractAccessMethod
+public class UnsubscribeMethod  extends AbstractAccessMethod
 {
 	/**
 	 * Constructor
 	 */
-    public SetMethod(Mediator mediator, String uri, 
+    public UnsubscribeMethod(Mediator mediator, String uri, 
 			AccessMethodExecutor preProcessingExecutor)
     {
-	    super(mediator, uri, AccessMethod.Type.SET, preProcessingExecutor);
+	    super(mediator, uri, AccessMethod.UNSUBSCRIBE, preProcessingExecutor);
     }
 
 	/**
@@ -35,8 +40,8 @@ public class SetMethod  extends AbstractAccessMethod
 	 * createAccessMethodResult(java.lang.Object[])
 	 */
     @Override
-    protected SetResult createAccessMethodResult(Object[] parameters)
+    protected UnsubscribeResult createAccessMethodResult(Object[] parameters)
     {
-    	return new SetResult(super.mediator, uri,parameters);
-    }
+	    return new UnsubscribeResult(super.mediator, uri,parameters);
+    }	
 }

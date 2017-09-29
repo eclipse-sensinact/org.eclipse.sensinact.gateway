@@ -153,15 +153,15 @@ public class ServiceBuilder
 		int index = 0;
 		int length = methodAccessibilities == null?0:methodAccessibilities.size();
 		//Get method
-		AccessMethod getMethod =  null;
+		ServiceAccessMethod getMethod =  null;
 		//Set method
-		AccessMethod setMethod = null;
+		ServiceAccessMethod setMethod = null;
 		//Subscribe method
-		AccessMethod subscribeMethod =  null;
+		ServiceAccessMethod subscribeMethod =  null;
 		//Unsubscribe method
-		AccessMethod unsubscribeMethod =  null;	
+		ServiceAccessMethod unsubscribeMethod =  null;	
 		//Act method
-		AccessMethod actMethod =  null;
+		ServiceAccessMethod actMethod =  null;
 		
 		for(;index < length; index++)
 		{
@@ -172,27 +172,27 @@ public class ServiceBuilder
 			{
 				continue;
 			}
-			switch(methodAccessibility.getMethod())
+			switch(methodAccessibility.getMethod().name())
 			{
-				case ACT:
+				case "ACT":
 					actMethod = getServiceAccessMethod(mediator, service, 
 							methodAccessibility, handler);
 					break;
-				case DESCRIBE:
+				case "DESCRIBE":
 					break;
-				case GET:
+				case "GET":
 					getMethod = getServiceAccessMethod(mediator, service, 
 							methodAccessibility, handler);
 					break;
-				case SET:
+				case "SET":
 					setMethod = getServiceAccessMethod(mediator, service, 
 							methodAccessibility, handler);
 					break;
-				case SUBSCRIBE:
+				case "SUBSCRIBE":
 					subscribeMethod = getServiceAccessMethod(mediator, service, 
 							methodAccessibility, handler);
 					break;
-				case UNSUBSCRIBE:
+				case "UNSUBSCRIBE":
 					unsubscribeMethod = getServiceAccessMethod(mediator, service, 
 							methodAccessibility, handler);
 					break;
@@ -200,146 +200,132 @@ public class ServiceBuilder
 					break;		
 			}
 		}
-		Signature getSignature = new Signature(mediator,
-				AccessMethod.Type.GET,
+		AccessMethod.Type GET = AccessMethod.Type.valueOf(AccessMethod.GET);
+		AccessMethod.Type SET = AccessMethod.Type.valueOf(AccessMethod.SET);
+		AccessMethod.Type ACT = AccessMethod.Type.valueOf(AccessMethod.ACT);
+		AccessMethod.Type SUBSCRIBE = AccessMethod.Type.valueOf(AccessMethod.SUBSCRIBE);
+		AccessMethod.Type UNSUBSCRIBE = AccessMethod.Type.valueOf(AccessMethod.UNSUBSCRIBE);
+		AccessMethod.Type DESCRIBE = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
+		
+		Signature getSignature = new Signature(mediator, GET,
 				new Class<?>[]{String.class,String.class}, 
 				new String[]{"resourceName","attributeName"});
 		
-		Signature setSignature = new Signature(mediator,
-				AccessMethod.Type.SET,
+		Signature setSignature = new Signature(mediator, SET,
 				new Class<?>[]{String.class, String.class, Object.class}, 
 				new String[]{"resourceName","attributeName", "value"});
 		
-		Signature actSignature = new Signature(mediator,
-				AccessMethod.Type.ACT,
+		Signature actSignature = new Signature(mediator, ACT,
 				new Class<?>[]{String.class, Object[].class}, 
 				new String[]{"resourceName", "arguments"});
 		
-		Signature subscribeSignature = new Signature(mediator,
-				AccessMethod.Type.SUBSCRIBE,
+		Signature subscribeSignature = new Signature(mediator, SUBSCRIBE,
 				new Class<?>[]{String.class,String.class, Recipient.class, Set.class},
 				new String[]{"resourceName","attributeName", "listener", "conditions"});
 		
-		Signature unsubscribeSignature = new Signature(mediator,
-				AccessMethod.Type.UNSUBSCRIBE,
+		Signature unsubscribeSignature = new Signature(mediator, UNSUBSCRIBE,
 				new Class<?>[]{String.class, String.class, String.class}, 
 				new String[]{"resourceName","attributeName", "subscriptionId"});		
 		
-		ServiceAccessMethod snaMethod = null;
-		
 		// Get method
 		if(getMethod != null)
-		{		
-			snaMethod = (ServiceAccessMethod)getMethod;
-			snaMethod.addSignature(getSignature);
-			
-			Signature getAttributeShortcut = new Signature(mediator,
-					AccessMethod.Type.GET, new Class<?>[]{String.class}, 
+		{					
+			getMethod.addSignature(getSignature);			
+			Signature getAttributeShortcut = new Signature(mediator, GET,
+					new Class<?>[]{String.class}, 
 					new String[]{"resourceName"});
 					
-			snaMethod.addSignature(getAttributeShortcut);
+			getMethod.addSignature(getAttributeShortcut);
+			service.registerMethod(AccessMethod.GET, getMethod);
 		
 		} else
 		{
-			getMethod = new UnaccessibleAccessMethod(
-					mediator,
-					service.getPath(), 
-					AccessMethod.Type.GET);
+			AccessMethod snaMethod = new UnaccessibleAccessMethod(
+				mediator, service.getPath(), AccessMethod.Type.valueOf(
+						AccessMethod.GET));
+			service.registerMethod(AccessMethod.GET, snaMethod);
 		}
 		// Set method
 		if(setMethod!=null)
 		{	
-			snaMethod = (ServiceAccessMethod)setMethod;
-			snaMethod.addSignature(setSignature);
-			
-			Signature setAttributeShortcut = new Signature(mediator,
-					AccessMethod.Type.SET,
+			setMethod.addSignature(setSignature);			
+			Signature setAttributeShortcut = new Signature(mediator, SET, 
 					new Class<?>[]{String.class,Object.class}, 
-					new String[]{"resourceName","value"});
-					
-			snaMethod.addSignature(setAttributeShortcut);
+					new String[]{"resourceName","value"});					
+			setMethod.addSignature(setAttributeShortcut);
+			service.registerMethod(AccessMethod.SET, setMethod);
 			
 		} else
 		{
-			setMethod = new UnaccessibleAccessMethod(
-					mediator,
-					service.getPath(), 
-					AccessMethod.Type.SET);
+			AccessMethod snaMethod = new UnaccessibleAccessMethod(
+			    mediator, service.getPath(), AccessMethod.Type.valueOf(
+						AccessMethod.SET));
+			service.registerMethod(AccessMethod.SET, snaMethod);	
 		}
 		// Set method
 		if(actMethod !=null)
 		{		
-			snaMethod = (ServiceAccessMethod)actMethod;
-			snaMethod.addSignature(actSignature);
+			actMethod.addSignature(actSignature);
+			service.registerMethod(AccessMethod.ACT, actMethod);
 			
 		} else
 		{
-			actMethod = new UnaccessibleAccessMethod(
-					mediator,
-					service.getPath(), 
-					AccessMethod.Type.ACT);
-		}
-		// Subscribe method		
+			AccessMethod snaMethod = new UnaccessibleAccessMethod(
+			    mediator, service.getPath(), AccessMethod.Type.valueOf(
+						AccessMethod.ACT));
+			service.registerMethod(AccessMethod.ACT, snaMethod);
+		}	
+		//Subscribe method
 		if(subscribeMethod !=null)
 		{	
-			snaMethod = (ServiceAccessMethod)subscribeMethod;
-			snaMethod.addSignature(subscribeSignature);
+			subscribeMethod.addSignature(subscribeSignature);
 			
 			Signature subscribeConditionsShortcut = new Signature(
-					mediator,
-					AccessMethod.Type.SUBSCRIBE,
+					mediator, SUBSCRIBE,
 					new Class<?>[]{String.class, String.class, Recipient.class}, 
 					new String[]{"resourceName","attributeName", "listener"});
 			
-			snaMethod.addSignature(subscribeConditionsShortcut);	
+			subscribeMethod.addSignature(subscribeConditionsShortcut);	
 			
 			Signature subscribeNameConditionsShortcut = new Signature(
-					mediator,
-					AccessMethod.Type.SUBSCRIBE,
+					mediator, SUBSCRIBE,
 					new Class<?>[]{String.class,Recipient.class}, 
 					new String[]{"resourceName","listener"});
 
 			Signature subscribeNameShortcut = new Signature(
-					mediator,
-					AccessMethod.Type.SUBSCRIBE,
+					mediator, SUBSCRIBE,
 					new Class<?>[]{String.class, Recipient.class, Set.class}, 
 					new String[]{"resourceName", "listener", "conditions"});
 
-			snaMethod.addSignature(subscribeNameConditionsShortcut);		
-			snaMethod.addSignature(subscribeNameShortcut);
+			subscribeMethod.addSignature(subscribeNameConditionsShortcut);		
+			subscribeMethod.addSignature(subscribeNameShortcut);
+			service.registerMethod(AccessMethod.SUBSCRIBE, subscribeMethod);
+
 		} else
 		{
-			subscribeMethod = new UnaccessibleAccessMethod(
-					mediator,
-					service.getPath(), 
-					AccessMethod.Type.SUBSCRIBE);
+			AccessMethod snaMethod = new UnaccessibleAccessMethod(
+				mediator, service.getPath(), AccessMethod.Type.valueOf(
+						AccessMethod.SUBSCRIBE));
+			service.registerMethod(AccessMethod.SUBSCRIBE, snaMethod);
 		}
 		// Unsubscribe method		
 		if(unsubscribeMethod!=null)
 		{		
-			snaMethod = (ServiceAccessMethod)subscribeMethod;
-			snaMethod.addSignature(unsubscribeSignature);
-			
+			unsubscribeMethod.addSignature(unsubscribeSignature);			
 			Signature unsubscribeNameShortcut = new Signature(
-					mediator,
-					AccessMethod.Type.SUBSCRIBE,
+					mediator, UNSUBSCRIBE,
 					new Class<?>[]{String.class,String.class}, 
 					new String[]{"resourceName","subscriptionId"});
-
-			snaMethod.addSignature(unsubscribeNameShortcut);
+			unsubscribeMethod.addSignature(unsubscribeNameShortcut);	
+			service.registerMethod(AccessMethod.UNSUBSCRIBE, unsubscribeMethod);
 			
 		} else
 		{
-			unsubscribeMethod = new UnaccessibleAccessMethod(
-					mediator,
-					service.getPath(), 
-					AccessMethod.Type.UNSUBSCRIBE);
+			AccessMethod snaMethod = new UnaccessibleAccessMethod(
+					mediator,service.getPath(),AccessMethod.Type.valueOf(
+							AccessMethod.UNSUBSCRIBE));	
+			service.registerMethod(AccessMethod.UNSUBSCRIBE, snaMethod);
 		}
-		service.registerMethod(AccessMethod.Type.GET, getMethod);
-		service.registerMethod(AccessMethod.Type.SET, setMethod);
-		service.registerMethod(AccessMethod.Type.ACT, actMethod);
-		service.registerMethod(AccessMethod.Type.SUBSCRIBE, subscribeMethod);
-		service.registerMethod(AccessMethod.Type.UNSUBSCRIBE, unsubscribeMethod);
 	}
 
 	/**

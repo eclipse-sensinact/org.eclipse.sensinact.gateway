@@ -29,17 +29,8 @@ public class MetadataDescription extends PrimitiveDescription
 	/**
 	 * Constructor
 	 * 
-	 * @param name
-	 *            the name of the described {@link Metadata}
-	 * @param type
-	 *            the type of the described {@link Metadata}
-	 * @param value
-	 *            the value of the described {@link Metadata}
-	 * @param timestamp
-	 *            the timestamp of the last change of the value of the described
-	 *            {@link Metadata}
-	 * @param modifiable
-	 *            Is the value of the described {@link Metadata} modifiable ?
+	 * @param metadata the {@link Metadata} for which to instantiate
+	 * the MetadataDescription 
 	 */
 	public MetadataDescription(Metadata metadata)
 	{

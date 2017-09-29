@@ -8,7 +8,7 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.method;
+package org.eclipse.sensinact.gateway.core.method.legacy;
 
 
 
@@ -23,6 +23,9 @@ import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.core.StateVariableResource;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Response;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 
 /**
@@ -46,7 +49,7 @@ public class ActResponse extends AccessMethodResponse
 	/**
 	 * @param status
 	 */
-    protected ActResponse(Mediator mediator, 
+    public ActResponse(Mediator mediator, 
     		String uri,Status status, int code)
     {
 	    super(mediator, uri, 

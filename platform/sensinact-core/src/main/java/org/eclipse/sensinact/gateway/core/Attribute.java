@@ -31,7 +31,7 @@ import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 
 /**
- * Extended {@link Primitive} defining an Attribute
+ * Extended {@link Primitive} defining an Attribute of a {@link Resource}
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
@@ -384,8 +384,6 @@ public class Attribute extends DescribablePrimitive
 		return copy;
 	}
 	
-	
-	
 	/**
 	 * @inheritDoc
 	 *
@@ -454,7 +452,6 @@ public class Attribute extends DescribablePrimitive
     {
     	this.recipient++;
     }
-    
 
     /**
      * Defines the change notifications recipient
@@ -587,10 +584,7 @@ public class Attribute extends DescribablePrimitive
 
 			} catch (ClassCastException e)
 			{
-				if(this.mediator.isErrorLoggable())
-				{
-					this.mediator.error(e,e.getMessage());
-				}
+				this.mediator.error(e,e.getMessage());
 			}
 		}
 		return hidden;

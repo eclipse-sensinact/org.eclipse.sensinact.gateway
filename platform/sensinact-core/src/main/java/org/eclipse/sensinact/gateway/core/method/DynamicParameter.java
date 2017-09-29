@@ -67,8 +67,7 @@ public class DynamicParameter extends Parameter
     @Override
 	public Object getValue()
 	{
-		return ((DynamicParameterValue)super.fixedValue
-	        		).getValue();
+		return ((DynamicParameterValue)super.fixedValue).getValue();
 	}
     
     /**

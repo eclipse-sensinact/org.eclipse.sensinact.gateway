@@ -173,12 +173,12 @@ public abstract class ServiceAccessMethod implements AccessMethod
 				Proxy.getInvocationHandler(
 				resource);
 			
-			return resourceProxy.invoke(this.getType(), subparameters);
+			return resourceProxy.invoke(this.getType().name(), subparameters);
 			
 		} catch (Throwable e) 
 		{
 	    	AccessMethodResponse snaMessage = AccessMethodResponse.error(this.mediator,
-	    			uri, this.getType(), SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, 
+	    			uri, this.getType().name(), SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, 
 					null, e);    	
 			return snaMessage;
 		}

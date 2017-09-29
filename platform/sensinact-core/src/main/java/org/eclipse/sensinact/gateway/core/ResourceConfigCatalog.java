@@ -32,14 +32,6 @@ public interface ResourceConfigCatalog
 	 */
 	<G extends ResourceConfig, D extends ResourceDescriptor>
 	G getResourceConfig(D resourceConfigDescriptor);
-	
-//	/**
-//	 * Returns the complete and unmodifiable List of 
-//	 * {@link ResourceConfig}s stored by this catalog
-//	 * 
-//	 * @return the all {@link ResourceConfig}s 
-//	 */
-//	<G extends ResourceConfig> List<G> getResourceConfigs();	
 
 	/**
 	 * Returns the List of {@link ResourceConfig}s

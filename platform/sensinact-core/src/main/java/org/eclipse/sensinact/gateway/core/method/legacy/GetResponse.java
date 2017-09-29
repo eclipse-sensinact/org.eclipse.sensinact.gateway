@@ -8,11 +8,14 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.method;
+package org.eclipse.sensinact.gateway.core.method.legacy;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Response;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 
 /**
  * Extended {@link AbstractSnaMessage} returned by an
@@ -43,7 +46,7 @@ public class GetResponse extends AccessMethodResponse
 	 * @param code
 	 * 		the associated status code 
 	 */
-    protected GetResponse(Mediator mediator, 
+    public GetResponse(Mediator mediator, 
     		String uri, Status status, int code)
     {
     	super(mediator, uri, AccessMethodResponse.Response.GET_RESPONSE, 

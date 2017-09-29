@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.security;
 
-
 /**
  * Authentication service
  * 
@@ -26,9 +25,9 @@ public interface AuthenticationService
 	 * to build a {@link UserKey}
 	 * 
 	 * @return a {@link UserKey} for the specified {@link 
-	 * Credentials}
+	 * Credentials} 
 	 * 
-	 * @throws DAOException 
+	 * @throws Exception 
 	 */
-	UserKey buildKey(Credentials credentials);
+	UserKey buildKey(Credentials credentials) throws Exception;
 }

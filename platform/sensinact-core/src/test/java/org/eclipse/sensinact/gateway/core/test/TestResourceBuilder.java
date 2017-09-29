@@ -18,38 +18,15 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
-import org.eclipse.sensinact.gateway.core.method.Shortcut;
-import org.eclipse.sensinact.gateway.core.method.Signature;
-import org.eclipse.sensinact.gateway.core.method.trigger.Constant;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
-import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
-import org.eclipse.sensinact.gateway.core.security.Session;
-import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.log.LogService;
-import org.skyscreamer.jsonassert.JSONAssert;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Changed;
@@ -72,12 +49,14 @@ import org.eclipse.sensinact.gateway.core.ModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.core.PropertyResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
+import org.eclipse.sensinact.gateway.core.SensiNact;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
 import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.StateVariableResource;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
@@ -87,15 +66,41 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
-import org.eclipse.sensinact.gateway.core.method.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.LinkedActMethod;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
-import org.eclipse.sensinact.gateway.core.method.SetResponse;
-import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.Shortcut;
+import org.eclipse.sensinact.gateway.core.method.Signature;
+import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.trigger.Constant;
+import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
+import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
+import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
+import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
+import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.log.LogService;
+import org.skyscreamer.jsonassert.JSONAssert;
+
 import junit.framework.Assert;
 
 /**
@@ -103,15 +108,7 @@ import junit.framework.Assert;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TestResourceBuilder<R extends ModelInstance>
-{       
-	private static final Session.Key KEY =  new Session.Key();
-	
-	static
-	{
-		KEY.setToken("FAKEKEY");
-		KEY.setUid(0);
-	}
-	
+{          
 	private static final String LOG_FILTER = "("+Constants.OBJECTCLASS+"="+
 		LogService.class.getCanonicalName()+")";	
 
@@ -144,7 +141,7 @@ public class TestResourceBuilder<R extends ModelInstance>
 
     private final ServiceReference referenceAgent = 
 			Mockito.mock(ServiceReference.class);
-	private final ServiceRegistration snaObjectRegistration = 
+	private final ServiceRegistration referenceCore = 
 			Mockito.mock(ServiceRegistration.class);
 	private final ServiceReference referenceAuthorization = 
 			Mockito.mock(ServiceReference.class);
@@ -152,12 +149,15 @@ public class TestResourceBuilder<R extends ModelInstance>
 			Mockito.mock(ServiceReference.class);
 	private final ServiceRegistration registration = 
 			Mockito.mock(ServiceRegistration.class);
+	private final ServiceRegistration registrationAccess = 
+			Mockito.mock(ServiceRegistration.class);
 	private final ServiceRegistration registrationAgent = 
 			Mockito.mock(ServiceRegistration.class);
 	private final ServiceReference referenceProvider = 
 			Mockito.mock(ServiceReference.class);
 
 	private SecuredAccess securedAccess;
+	private SensiNact sensinact;
 	private Mediator mediator;
 	private MyModelInstance instance;	
 	
@@ -168,10 +168,13 @@ public class TestResourceBuilder<R extends ModelInstance>
 	private volatile int extraCallbackCount;
 	private volatile int agentCallbackCount;
 
+	protected Dictionary<String,Object> props;
 	
 	@Before
-	public void init() throws InvalidServiceProviderException, InvalidSyntaxException 
-	{
+	public void init() 
+			throws InvalidServiceProviderException, InvalidSyntaxException, 
+			SecuredAccessException, BundleException 
+	{	    
 		Filter filter = Mockito.mock(Filter.class);
 		Mockito.when(filter.toString()).thenReturn(LOG_FILTER);		
 		
@@ -184,6 +187,7 @@ public class TestResourceBuilder<R extends ModelInstance>
 
 		Mockito.when(context.createFilter(AGENT_FILTER)).thenReturn(filterAgent);
 		Mockito.when(filterAgent.toString()).thenReturn(AGENT_FILTER);
+		Mockito.when(filterAgent.match(referenceAgent)).thenReturn(true);
 		
 		Mockito.when(context.createFilter(DATA_STORE_FILTER)
 				).thenReturn(filterDataStore);
@@ -199,6 +203,8 @@ public class TestResourceBuilder<R extends ModelInstance>
 				).thenReturn(filterAccess);
 		Mockito.when(filterAccess.toString()).thenReturn(
 				ACCESS_FILTER);
+		Mockito.when(filterAccess.match(referenceAccess)).thenReturn(
+				true);
 		
 		Mockito.when(context.createFilter(AUTHORIZATION_FILTER)
 				).thenReturn(filterAuthorization);
@@ -208,92 +214,76 @@ public class TestResourceBuilder<R extends ModelInstance>
 		Mockito.when(filterAuthorization.match(referenceAuthorization)
 				).thenReturn(true);
 
-    	Mockito.when(context.getServiceReferences(
-    		Mockito.any(Class.class),
-    		Mockito.anyString())).then(
-    			new Answer<Collection<ServiceReference>>()
-		{
-			@Override
-            public Collection<ServiceReference> answer(InvocationOnMock invocation)
-                    throws Throwable
-            {
-				Object[] arguments = invocation.getArguments();
-				if(arguments==null || arguments.length !=2)
-				{
-					return null;
-				}
-				if(arguments[0]!=null && arguments[0].equals(
-						SnaAgent.class))
-				{
-					if(agent == null)
+		Mockito.when(context.getServiceReferences(
+	    		Mockito.any(Class.class), Mockito.anyString())).then(
+	    			new Answer<Collection<ServiceReference>>()
+			{
+				@Override
+	            public Collection<ServiceReference> answer(
+	            		InvocationOnMock invocation)
+	                    throws Throwable
+	            {
+					Object[] arguments = invocation.getArguments();
+					if(SnaAgent.class.equals(arguments[0]))
 					{
-						return null;
+						return Collections.singletonList(referenceAgent);
+						
+					}else if(SensiNactResourceModel.class.equals(arguments[0]))
+					{
+						if(initialized())
+						{
+							return Collections.singletonList(referenceProvider);
+						} else
+						{
+							return Collections.emptyList();
+						}
+					} else if((AuthorizationService.class.equals(arguments[0])
+							&& arguments[1]==null)||(arguments[0]==null &&
+							arguments[1].equals(AUTHORIZATION_FILTER)))
+					{
+		                return Collections.singletonList(referenceAuthorization);
+		                
+					} else if((SecuredAccess.class.equals(arguments[0])&& 
+							arguments[1]==null)||(arguments[0]==null &&
+							arguments[1].equals(ACCESS_FILTER)))
+					{
+		                return Collections.singletonList(referenceAccess);
 					}
-					return Collections.singletonList(referenceAgent);
-					
-				} else if(arguments[0]!=null && arguments[0].equals(
-						SensiNactResourceModel.class)
-						&& arguments[1]!=null && arguments[1].equals(
-								"(uri=/serviceProvider)"))
-				{
-					return Collections.singletonList(referenceProvider);
-					
-				} else if((arguments[0]!=null && arguments[0].equals(
-						AuthorizationService.class)
-						&& arguments[1]==null)||(arguments[0]==null &&
-						arguments[1].equals(AUTHORIZATION_FILTER)))
-				{
-	                return Collections.singletonList(referenceAuthorization);
-	                
-				} else if((arguments[0]!=null && arguments[0].equals(
-						SecuredAccess.class)
-						&& arguments[1]==null)||(arguments[0]==null &&
-						arguments[1].equals(ACCESS_FILTER)))
-				{
-	                return Collections.singletonList(referenceAccess);
-				}
-				return null;	
-            }
-		});
+					return null;	
+	            }
+			});
     	Mockito.when(context.getServiceReferences(
-    			Mockito.anyString(),
-    			Mockito.anyString())).then(
-    					new Answer<ServiceReference[]>()
+    		Mockito.anyString(), Mockito.anyString())).then(
+    				new Answer<ServiceReference[]>()
 		{
 			@Override
             public ServiceReference[] answer(InvocationOnMock invocation)
                     throws Throwable
             {
 				Object[] arguments = invocation.getArguments();
-				if(arguments==null || arguments.length !=2)
+				if(SnaAgent.class.getCanonicalName().equals(arguments[0])
+					||(arguments[0]==null && arguments[1].equals(AGENT_FILTER)))
 				{
-					return null;
-				}
-				if(arguments[0]!=null && arguments[0].equals(
-						SnaAgent.class.getCanonicalName()))
-				{
-					if(agent== null)
-					{
-						return null;
-					}
 					return new ServiceReference[]{referenceAgent};
 					
-				} else if(arguments[0]!=null && arguments[0].equals(
-						SensiNactResourceModel.class.getCanonicalName())
-						&& arguments[1]!=null && arguments[1].equals(
-								"(uri=/serviceProvider)"))
-				{
-					return new ServiceReference[]{referenceProvider};
+				} else if(SensiNactResourceModel.class.getCanonicalName(
+						).equals(arguments[0]))
+				{ 
+					if(initialized())
+					{
+						return new ServiceReference[]{referenceProvider};
+					} else
+					{
+						return new ServiceReference[]{};
+					}
 					
-				} else if((arguments[0]!=null && arguments[0].equals(
-						AuthorizationService.class.getCanonicalName())
+				} else if((AuthorizationService.class.getCanonicalName().equals(arguments[0])
 						&& arguments[1]==null)||(arguments[0]==null &&
 						arguments[1].equals(AUTHORIZATION_FILTER)))
 				{
 	                return new ServiceReference[]{referenceAuthorization};
 	                
-				} else if((arguments[0]!=null && arguments[0].equals(
-						SecuredAccess.class.getCanonicalName())
+				} else if((SecuredAccess.class.getCanonicalName().equals(arguments[0])
 						&& arguments[1]==null)||(arguments[0]==null &&
 						arguments[1].equals(ACCESS_FILTER)))
 				{
@@ -303,8 +293,7 @@ public class TestResourceBuilder<R extends ModelInstance>
             }
 		});
     	Mockito.when(context.getServiceReference(
-    			Mockito.any(Class.class))).then(
-    					new Answer<ServiceReference>()
+    		Mockito.any(Class.class))).then(new Answer<ServiceReference>()
 		{
 			@Override
             public ServiceReference answer(InvocationOnMock invocation)
@@ -343,11 +332,16 @@ public class TestResourceBuilder<R extends ModelInstance>
 				}
 				else if(arguments[0]==referenceAgent)
 				{
-					return agent;						
+					return TestResourceBuilder.this.getAgent();						
 				}
 				else if(arguments[0]==referenceAccess)
 				{
-					return securedAccess;
+					return TestResourceBuilder.this.getSecuredAccess();
+					
+				}
+				else if(arguments[0]==referenceCore)
+				{
+					return sensinact;
 					
 				}else if(arguments[0] ==referenceProvider)
 				{
@@ -356,39 +350,79 @@ public class TestResourceBuilder<R extends ModelInstance>
 				return null;	
             }				
 		}); 	
-		Mockito.when(context.registerService(
-			Mockito.any(Class.class), 
-			Mockito.any(Object.class), 
-			Mockito.any(Dictionary.class))).thenAnswer(
-				new Answer<ServiceRegistration>()
+		Mockito.when(context.registerService(Mockito.any(Class.class), 
+			Mockito.any(Object.class), Mockito.any(Dictionary.class))
+			).thenAnswer(new Answer<ServiceRegistration>()
 		{
 			@Override
             public ServiceRegistration answer(InvocationOnMock invocation)
                     throws Throwable
             {
 				Object[] arguments = invocation.getArguments();
-				if(arguments==null || arguments.length!=3)
+				if(SecuredAccess.class.equals(arguments[0]))
 				{
-					return null;						
-				} 
-				else if(SnaAgent.class.isAssignableFrom(
-						(Class)arguments[0]))
+					securedAccess = (SecuredAccess) arguments[1];
+                    return registrationAccess;
+					
+				}else if(SnaAgent.class.equals(arguments[0]))
 				{
 					TestResourceBuilder.this.agentCallbackCount = 0;
-					TestResourceBuilder.this.setAgent(
-					(SnaAgent) arguments[1]);
+					TestResourceBuilder.this.setAgent((SnaAgent) arguments[1]);
                     return registrationAgent;
 					
-				}else if(ModelInstance.class.isAssignableFrom(
-				(Class)arguments[0]) || SensiNactResourceModel.class.isAssignableFrom(
-						(Class)arguments[0]))
+				}else if(SensiNactResourceModel.class.equals(arguments[0]))
 				{
-					return snaObjectRegistration;							
+					TestResourceBuilder.this.props = (Dictionary<String, Object>)
+							arguments[2];
+					return registration;							
 				}
 				return null;
             }
-		});	
-	 	
+		});	 	
+		Mockito.when(referenceProvider.getProperty(Mockito.anyString())
+				).thenAnswer(new Answer<Object>()
+				{
+					@Override
+					public Object answer(InvocationOnMock invocation)
+							throws Throwable
+					{
+						return TestResourceBuilder.this.props.get(
+								invocation.getArguments()[0]);
+					}
+			
+				});	
+		Mockito.when(referenceProvider.getPropertyKeys()
+				).thenAnswer(new Answer<String[]>()
+				{
+					@Override
+					public String[] answer(InvocationOnMock invocation)
+							throws Throwable
+					{
+						Enumeration<String> e = 
+								TestResourceBuilder.this.props.keys();
+						List<String> l = new ArrayList<String>();
+						while(e.hasMoreElements())
+						{
+							l.add(e.nextElement());
+						}
+						return l.toArray(new String[0]);
+					}
+			
+				});
+		Mockito.doAnswer(new Answer<Void>()
+		{
+			@Override
+			public Void answer(InvocationOnMock invocation)
+					throws Throwable
+			{
+				TestResourceBuilder.this.props= (Dictionary<String, Object>) 
+						invocation.getArguments()[0];
+				return null;
+			}
+	
+		}).when(registration).setProperties(Mockito.any(
+				Dictionary.class));
+		
 		Mockito.when(registration.getReference()).thenReturn(referenceProvider);
 		Mockito.when(registrationAgent.getReference()).thenReturn(referenceAgent);
 		
@@ -398,17 +432,24 @@ public class TestResourceBuilder<R extends ModelInstance>
 		Mockito.when(bundle.getState()).thenReturn(Bundle.ACTIVE);
 		
 		mediator = new Mediator(context);
-    	securedAccess = new MySecuredAccess(mediator);
-    	
+    	sensinact = new SensiNact(mediator);
         instance = new ModelInstanceBuilder(mediator, MyModelInstance.class, 
         	ModelConfiguration.class).withStartAtInitializationTime(true
-        			).build("serviceProvider", null);     
-        
+        			).build("serviceProvider", null); 
+        initialized=true;
+    	
         callbackCount = 0;
         linkCallbackCount = 0;
         extraCallbackCount = 0;
     }
-
+	
+    
+    private boolean initialized = false;
+    private final boolean initialized()
+    {
+    	return initialized;
+    }
+    
 	@After
 	public void tearDown()
 	{
@@ -425,8 +466,9 @@ public class TestResourceBuilder<R extends ModelInstance>
     			PropertyResource.class, "TestProperty", 
     			String.class, "hello");  
     	
-        PropertyResource r1 = r1impl.<PropertyResource>getProxy(KEY);
-        
+        PropertyResource r1 = r1impl.<PropertyResource>getProxy(
+        		SecuredAccess.ANONYMOUS_PKEY);
+
         //test shortcut
         Assert.assertEquals("TestProperty",r1.getName()); 
         Assert.assertEquals(Resource.Type.PROPERTY, r1.getType());
@@ -435,56 +477,56 @@ public class TestResourceBuilder<R extends ModelInstance>
         String get2 = r1.get().getJSON();
 
         JSONAssert.assertEquals(get1,get2, false); 
-        SubscribeResponse res = r1.subscribe(
-       		new Recipient()
-       		{
-				@Override
-				public void callback(String callbackId, 
-						SnaMessage[] messages) throws Exception
-	            {	
-					boolean hasChanged = ((TypedProperties<?>
-					)messages[0]).<Boolean>get("hasChanged");
-					
-					if(!hasChanged);
-					{
-						extraCallbackInc();
-					}
-	            }
-	
-				@Override
-	            public String getJSON()
-	            {
-		            return null;
-	            }
-	
-				@Override
-	            public SnaCallback.Type getSnaCallBackType()
-	            {
-		            return  SnaCallback.Type.UNARY;
-	            }
-	
-				@Override
-	            public long getLifetime()
-	            {
-		            return -1;
-	            }
-	
-				@Override
-	            public int getBufferSize()
-	            {
-		            return 0;
-	            }
-	
-				@Override
-	            public int getSchedulerDelay()
-	            {
-		            return 0;
-	            }
-			},
-       		new HashSet<Constraint>()
-			{{
-				this.add(new Changed(Thread.currentThread().getContextClassLoader(),true));
-			}}
+        SubscribeResponse res = r1.subscribe(new Recipient()
+   		{
+			@Override
+			public void callback(String callbackId, 
+					SnaMessage[] messages) throws Exception
+            {	
+				boolean hasChanged = ((TypedProperties<?>
+				)messages[0]).<Boolean>get("hasChanged");
+
+				if(!hasChanged);
+				{
+					extraCallbackInc();
+				}
+            }
+
+			@Override
+            public String getJSON()
+            {
+	            return null;
+            }
+
+			@Override
+            public SnaCallback.Type getSnaCallBackType()
+            {
+	            return  SnaCallback.Type.UNARY;
+            }
+
+			@Override
+            public long getLifetime()
+            {
+	            return -1;
+            }
+
+			@Override
+            public int getBufferSize()
+            {
+	            return 0;
+            }
+
+			@Override
+            public int getSchedulerDelay()
+            {
+	            return 0;
+            }
+		},
+   		new HashSet<Constraint>()
+		{{
+			this.add(new Changed(Thread.currentThread(
+					).getContextClassLoader(),true));
+		}}
 		);        
         
         r1.set("hello");        
@@ -497,9 +539,9 @@ public class TestResourceBuilder<R extends ModelInstance>
     	ResourceImpl r2impl = service.addDataResource(PropertyResource.class, 
     		"TestProperty2", String.class, null); 
     	
-        PropertyResource r2 = r2impl.<PropertyResource>getProxy(KEY);        		
+        PropertyResource r2 = r2impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);        		
         ResourceImpl r3impl = service.addLinkedResource("LinkedProperty", r1impl);
-    	PropertyResource r3 = r3impl.<PropertyResource>getProxy(KEY);
+    	PropertyResource r3 = r3impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);
 
     	service.addLinkedResource(LocationResource.LOCATION,
     		instance.getRootElement().getAdminService().getResource(
@@ -508,7 +550,7 @@ public class TestResourceBuilder<R extends ModelInstance>
     	ResourceImpl r4impl = service.getResource("location");
 
         r4impl.registerExecutor(
-        		AccessMethod.Type.GET, 
+        		AccessMethod.Type.valueOf(AccessMethod.GET), 
         		new Class<?>[0], 
         		new String[0],
         		new AccessMethodExecutor()
@@ -529,7 +571,7 @@ public class TestResourceBuilder<R extends ModelInstance>
         		AccessMethodExecutor.ExecutionPolicy.AFTER);
 
         String attributeValue = (String) r4impl.getAttribute("value").getValue();       
-   	    LocationResource r4 = r4impl.<LocationResource>getProxy(KEY);    	 
+   	    LocationResource r4 = r4impl.<LocationResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);    	 
    	    
    	    Thread.sleep(250);
    	
@@ -659,7 +701,7 @@ public class TestResourceBuilder<R extends ModelInstance>
         r2.unsubscribe(subId);
         org.junit.Assert.assertEquals(0, instance.getHandler().count(filter));
 
-	    Service proxy = service.<Service>getProxy(KEY);
+	    Service proxy = service.<Service>getProxy(SecuredAccess.ANONYMOUS_PKEY);
         SetResponse error = proxy.set("location","unknown");
         assertTrue(error.getStatusCode()==403); 
 
@@ -686,45 +728,46 @@ public class TestResourceBuilder<R extends ModelInstance>
        //wait for the previously generated events to be consumed
        Thread.sleep(1000);
        SnaFilter filter = new SnaFilter(mediator, 
-    		   "/(serviceProvider)/(test).*", 
+    		   "/serviceProvider/(test).*", 
     		   true, false);
        
        filter.addHandledType(SnaMessage.Type.UPDATE);
-       
-       securedAccess.registerAgent( mediator,
-       new AbstractSnaAgentCallback()
-       {
-		@Override
-		public void doHandle(SnaLifecycleMessageImpl message){}
+       sensinact.registerAgent( mediator,
+	   new AbstractSnaAgentCallback()
+	   {
+			@Override
+			public void doHandle(SnaLifecycleMessageImpl message){
+				/*System.out.println(message);*/}
+	
+			@Override
+			public void doHandle(SnaErrorMessageImpl message){
+				/*System.out.println(message);*/}
+	
+			@Override
+			public void doHandle(SnaResponseMessage message){
+				/*System.out.println(message);*/}
+	
+			@Override
+			public void doHandle(SnaUpdateMessageImpl message){
+				TestResourceBuilder.this.agentCallbackCount++;
+				/*System.out.println("TestResourceBuilder.this.agentCallbackCount++");*/}
+	
+			@Override
+			public  void stop()
+	        {}
+	   },filter);
+       PropertyResource r1 = r1impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);
+       PropertyResource r2 = r2impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);
 
-		@Override
-		public void doHandle(SnaErrorMessageImpl message){}
-
-		@Override
-		public void doHandle(SnaResponseMessage message){}
-
-		@Override
-		public void doHandle(SnaUpdateMessageImpl message)
-        {
-			TestResourceBuilder.this.agentCallbackCount++;
-        }
-
-		@Override
-		public  void stop()
-        {	        
-        }},filter);
-
-       PropertyResource r1 = r1impl.<PropertyResource>getProxy(KEY);
-       PropertyResource r2 = r2impl.<PropertyResource>getProxy(KEY);
-       
    	   assertEquals(0, this.agentCallbackCount);   	   
    	   r2.set("goodbye");
-		
+
        Thread.sleep(250);
    	   assertEquals(0, this.agentCallbackCount);
-   	   
+
    	   r1.set("goodbye");
-       Thread.sleep(250);
+       
+   	   Thread.sleep(250); 
    	   assertEquals(1, this.agentCallbackCount);
    	   
    	   Mockito.when(context.getProperty(Mockito.anyString())).thenAnswer(
@@ -762,7 +805,7 @@ public class TestResourceBuilder<R extends ModelInstance>
 			return null;
 		}   				   
 	   });  	   
-   	   securedAccess.registerAgent( mediator,
+   	   sensinact.registerAgent( mediator,
    	       new AbstractSnaAgentCallback()
    	       {
    			@Override
@@ -814,30 +857,30 @@ public class TestResourceBuilder<R extends ModelInstance>
     	ResourceImpl r4impl = service.getResource("location");
     	
         r4impl.registerExecutor(
-        		AccessMethod.Type.GET, 
-        		new Class<?>[0], 
-        		new String[0],
-        		new AccessMethodExecutor()
-        		{
-					@Override
-                    public Void execute(AccessMethodResult result)
-                            throws Exception
-                    {
-						JSONObject jsonObject = result.getAccessMethodObjectResult();
-						
-						jsonObject.put("value", new StringBuilder().append(
-							jsonObject.get("value")).append(
-								"_suffix").toString());
-						
-						result.setAccessMethodObjectResult(jsonObject);
-	                    return null;
-                    }}, 
-        		AccessMethodExecutor.ExecutionPolicy.AFTER);
+		AccessMethod.Type.valueOf(AccessMethod.GET), 
+		new Class<?>[0], 
+		new String[0],
+		new AccessMethodExecutor()
+		{
+			@Override
+            public Void execute(AccessMethodResult result)
+                    throws Exception
+            {
+				JSONObject jsonObject = result.getAccessMethodObjectResult();
+				
+				jsonObject.put("value", new StringBuilder().append(
+					jsonObject.get("value")).append(
+						"_suffix").toString());
+				
+				result.setAccessMethodObjectResult(jsonObject);
+                return null;
+            }}, 
+		AccessMethodExecutor.ExecutionPolicy.AFTER);
 	   
         String attributeValue = (String) r4impl.getAttribute("value").setValue("0:0");
-    	Session session = securedAccess.getAnonymousSession();  
+    	Session session = sensinact.getAnonymousSession();  
     	
-        Resource r4 = session.getResource("serviceProvider", "testService", "location");       
+        Resource r4 = session.resource("serviceProvider", "testService", "location");       
 
 		Assert.assertNotNull(r4);
 
@@ -849,7 +892,7 @@ public class TestResourceBuilder<R extends ModelInstance>
         String value =  response.getResponse(String.class,DataResource.VALUE);
         assertEquals(buffer.toString(), value);
         
-        r4 = session.getResource("serviceProvider", "admin", "location");
+        r4 = session.resource("serviceProvider", "admin", "location");
         response =  r4.get(DataResource.VALUE);
         value =  response.getResponse(String.class,DataResource.VALUE);
         assertFalse(buffer.toString().equals(value));        
@@ -894,7 +937,7 @@ public class TestResourceBuilder<R extends ModelInstance>
     	ServiceImpl service = instance.getRootElement(
     			).addService("testService");
     	
-    	ServiceProvider proxy = instance.getRootElementProxy(KEY);
+    	ServiceProvider proxy = instance.getRootElementProxy(SecuredAccess.ANONYMOUS_PKEY);
     	
     	List<Service> services = proxy.getServices();
     	Assert.assertEquals(2, services.size());
@@ -923,7 +966,7 @@ public class TestResourceBuilder<R extends ModelInstance>
     	final AtomicInteger counter = new AtomicInteger(0);
     	
     	action.registerExecutor(
-    			new Signature(mediator, AccessMethod.Type.ACT,
+    			new Signature(mediator, AccessMethod.Type.valueOf(AccessMethod.ACT),
     					new Class<?>[]{int.class}, 
     					new String[]{"count"}),
     			new AccessMethodExecutor(){
@@ -942,7 +985,7 @@ public class TestResourceBuilder<R extends ModelInstance>
     			AccessMethodExecutor.ExecutionPolicy.AFTER);
 
     	action.registerExecutor(
-    			new Signature(mediator, AccessMethod.Type.ACT,
+    			new Signature(mediator, AccessMethod.Type.valueOf(AccessMethod.ACT),
     					new Class<?>[]{int.class, boolean.class}, 
     					new String[]{"count","plus"}),
     			new AccessMethodExecutor(){
@@ -978,7 +1021,7 @@ public class TestResourceBuilder<R extends ModelInstance>
     	Method method = ResourceImpl.class.getDeclaredMethod("getAccessMethod", AccessMethod.Type.class);
     	method.setAccessible(true);
     	LinkedActMethod linkedActMethod = (LinkedActMethod) method.invoke(emptyLinkedAction, 
-    			AccessMethod.Type.ACT);
+    			AccessMethod.Type.valueOf(AccessMethod.ACT));
     			
     	method = LinkedActMethod.class.getDeclaredMethod("createShortcut", new Class<?>[]
     			{Signature.class, Shortcut.class});
@@ -986,10 +1029,10 @@ public class TestResourceBuilder<R extends ModelInstance>
     	
     	method.invoke(linkedActMethod, new Object[]{
     			new Signature(mediator, 
-    					AccessMethod.Type.ACT, new Class<?>[]{int.class}, 
+    					AccessMethod.Type.valueOf(AccessMethod.ACT), new Class<?>[]{int.class}, 
     					new String[]{"count"}),
     			new Shortcut(mediator, 
-    					AccessMethod.Type.ACT, new Class<?>[0], new String[0], 
+    					AccessMethod.Type.valueOf(AccessMethod.ACT), new Class<?>[0], new String[0], 
     					new HashMap<Integer,Parameter>(){{this.put(0,
     							new Parameter(mediator,"count",int.class,4));
     					}})});
@@ -997,7 +1040,8 @@ public class TestResourceBuilder<R extends ModelInstance>
     	//securedAccess.getAnonymousSession().registered(instance);
         //instance.getServiceProvider().start();
     	
-    	ServiceProvider proxy = (ServiceProvider) instance.getRootElement().getProxy(KEY);
+    	ServiceProvider proxy = (ServiceProvider) instance.getRootElement().getProxy(
+    			SecuredAccess.ANONYMOUS_PKEY);
     	Service testService = proxy.getService("testService");    
     	
     	ActionResource resource = testService.<ActionResource>getResource("action");
@@ -1035,7 +1079,7 @@ public class TestResourceBuilder<R extends ModelInstance>
     			String.class, "untriggered"); 	
 
        service.addActionTrigger("TestAction", "TestVariable", 
-    		   new Signature(mediator, AccessMethod.Type.ACT, null, null),
+    		   new Signature(mediator, AccessMethod.Type.valueOf(AccessMethod.ACT), null, null),
     		   new Constant("triggered", false),
     		   AccessMethodExecutor.ExecutionPolicy.AFTER);
        
@@ -1053,7 +1097,7 @@ public class TestResourceBuilder<R extends ModelInstance>
    		//instance.getServiceProvider().start();
        //test trigger
        assertEquals("untriggered", r2impl.getAttribute(DataResource.VALUE).getValue());
-       ActionResource proxy = (ActionResource) r1impl.getProxy(KEY);
+       ActionResource proxy = (ActionResource) r1impl.getProxy(SecuredAccess.ANONYMOUS_PKEY);
        proxy.act();
        assertEquals("triggered", r2impl.getAttribute(DataResource.VALUE).getValue());    		   
     }
@@ -1061,6 +1105,15 @@ public class TestResourceBuilder<R extends ModelInstance>
     private final void setAgent(SnaAgent agent)
     {
     	this.agent = agent;
+    }
+
+    private final SnaAgent getAgent()
+    {
+    	return this.agent;
+    }
+    private final SecuredAccess getSecuredAccess()
+    {
+    	return this.securedAccess;
     }
 
     private final void callbackInc()

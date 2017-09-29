@@ -8,20 +8,22 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.method;
+package org.eclipse.sensinact.gateway.core.method.legacy;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
-
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Response;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 
 /**
- * Extended {@link AbstractSnaMessage} returned by an
- * {@link UnsubscribeMethod} invocation
+ * Extended {@link AbstractSnaMessage} returned by an 
+ * {@link SubscribeMethod} invocation
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class UnsubscribeResponse extends AccessMethodResponse
+public class SubscribeResponse extends AccessMethodResponse
 {
 	/**
 	 * Constructor 
@@ -29,11 +31,11 @@ public class UnsubscribeResponse extends AccessMethodResponse
 	 * @param status
 	 * 		the associated {@link Status}
 	 */
-    protected UnsubscribeResponse(Mediator mediator, 
+    protected SubscribeResponse(Mediator mediator, 
     		String uri, Status status)
     {
 	    this(mediator, uri, status, Status.SUCCESS.equals(status)
-	    	? SnaErrorfulMessage.NO_ERROR:SnaErrorfulMessage.UNKNOWN_ERROR_CODE);
+	    	?SnaErrorfulMessage.NO_ERROR:SnaErrorfulMessage.UNKNOWN_ERROR_CODE);
     }	
     
     /**
@@ -44,10 +46,21 @@ public class UnsubscribeResponse extends AccessMethodResponse
 	 * @param code
 	 * 		the associated status code 
 	 */
-    protected UnsubscribeResponse(Mediator mediator, 
+    public SubscribeResponse(Mediator mediator, 
     		String uri, Status status, int code)
     {
-    	super(mediator, uri, AccessMethodResponse.Response.UNSUBSCRIBE_RESPONSE,
+    	super(mediator, uri, AccessMethodResponse.Response.SUBSCRIBE_RESPONSE, 
     		status, code);
+    }
+    
+    /**
+     * Returns the subscription identifier
+     * 
+     * @return
+     * 		the subscription identifier
+     */
+    String getSubscriptionId()
+    {
+    	return super.getResponse(String.class, "subscriptionId");
     }
 }

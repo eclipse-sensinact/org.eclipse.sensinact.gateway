@@ -8,24 +8,26 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.method;
+package org.eclipse.sensinact.gateway.core.method.legacy;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 
 /**
- * Extended  {@link AccessMethodResult} dedicated to {@link UnsubscribeMethod}
+ * Extended  {@link AccessMethodResult} dedicated to {@link GetMethod}
  * execution
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class UnsubscribeResult extends AccessMethodResult
+public class GetResult extends AccessMethodResult
 {
 	/**
 	 * @param uri 
 	 * @param parameters
 	 */
-    protected UnsubscribeResult(Mediator mediator, 
+    protected GetResult(Mediator mediator, 
     		String uri, Object[] parameters)
     {
 	    super(mediator, uri, parameters);
@@ -38,9 +40,8 @@ public class UnsubscribeResult extends AccessMethodResult
 	 * createSnaResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
 	 */
     @Override
-    protected AccessMethodResponse createSnaResponse(AccessMethodResponse.Status status)
+    protected AccessMethodResponse createSnaResponse(Status status)
     {
-		return new UnsubscribeResponse(super.mediator, 
-				super.getPath(), status);
+		return new GetResponse(super.mediator, super.getPath(), status);
     }
 }

@@ -20,6 +20,7 @@ import org.json.JSONObject;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 
 /**
@@ -43,11 +44,16 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable
     protected final String name;
     
     /**
-	 * Mediator used to interact with the OSGi host
+	 * The {@link Mediator} used to interact with the OSGi host
 	 * environment 
 	 */
 	protected final Mediator mediator;
 	
+    /**
+     * The {@link AccessMethodResponse.Response} defining the 
+     * Type of the response of an {@link  AccessMethod} based 
+     * on that Signature
+     */
     protected final AccessMethodResponse.Response returnedType;
             
     /**
@@ -60,7 +66,7 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable
      * 		array
      */
    	public Signature(Mediator mediator, 
-   			AccessMethod.Type methodType,	Parameter[] parameters) 
+   		String methodType, Parameter[] parameters) 
    	{
    		this.mediator = mediator;
 	    int length = parameters==null?0:parameters.length;	    
@@ -70,14 +76,15 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable
 		{
 		    this.parameters[index] = parameters[index];
 		}
-		this.name = methodType.name();
-		this.returnedType = methodType.getReturnedType();
+		this.name = methodType;
+		this.returnedType = AccessMethod.Type.valueOf(
+				this.name).getReturnedType();
    	}
    	
     /**
      * Constructor
      * 
-     * @param methodType
+     * @param type
      * 		the type of the {@link AccessMethod} associates
      * 		to the signature to instantiate
      * @param parameterTypes
@@ -89,7 +96,7 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable
      * @throws InvalidValueException 
      */
     public Signature(Mediator mediator, 
-    		AccessMethod.Type methodType,	Class<?>[] parameterTypes, 
+    	AccessMethod.Type type,	Class<?>[] parameterTypes, 
    		String[] parameterNames) throws InvalidValueException
     {
     	this.mediator = mediator;
@@ -119,8 +126,9 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable
 			
 			name = null;
 		}
-	    this.name = methodType.name();
-		this.returnedType = methodType.getReturnedType();
+		this.name = type.name();
+		this.returnedType = AccessMethod.Type.valueOf(
+				this.name).getReturnedType();
     }
 
     protected Signature(Mediator mediator, String name, 

@@ -96,12 +96,10 @@ public abstract class AbstractSnaAgentCallback implements SnaAgentCallback
 	/**
 	 * @inheritDoc
      *
-     * @see MessageRegisterer#
-     * register(SnaMessage)
+     * @see MessageRegisterer#register(SnaMessage)
      */
-    @SuppressWarnings("rawtypes")
     @Override
-    public void register(SnaMessage message)
+    public void register(SnaMessage<?> message)
     {
 		used++;    	
     	if(message == null)

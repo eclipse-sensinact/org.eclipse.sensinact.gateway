@@ -31,7 +31,7 @@ public interface AuthorizationService
 	 * and resource
 	 * @throws DAOException 
 	 */
-	AccessLevelOption getUserAccessLevelOption(String path, long uid) 
+	AccessLevelOption getAuthenticatedAccessLevelOption(String path, long uid) 
 			throws AuthorizationServiceException ;
 
 	/**
@@ -45,36 +45,6 @@ public interface AuthorizationService
 	 * @return the {@link AccessLevelOption} for the specified user 
 	 * and resource
 	 */
-	AccessLevelOption getUserAccessLevelOption(String path, String publicKey)
+	AccessLevelOption getAuthenticatedAccessLevelOption(String path, String publicKey)
 			throws AuthorizationServiceException ;
-
-	/**
-	 * Returns the {@link AccessLevelOption} for the agent whose long 
-	 * identifier is passed as parameter and for the targeted 
-	 * resource whose path is also passed as parameter
-	 *  
-	 * @param path the string path of the targeted resource	 
-	 * @param uid the long identifier of the agent 
-	 * 
-	 * @return the {@link AccessLevelOption} for the specified agent
-	 * and resource
-	 * @throws DAOException 
-	 */
-	AccessLevelOption getAgentAccessLevelOption(String path, long uid) 
-			throws AuthorizationServiceException ;
-
-	/**
-	 * Returns the {@link AccessLevelOption} for the agent whose String 
-	 * public key is passed as parameter and for the targeted 
-	 * resource whose path is also passed as parameter
-	 *  
-	 * @param path the string path of the targeted resource	
-	 * @param publicKey the String public key of the agent 
-	 * 
-	 * @return the {@link AccessLevelOption} for the specified agent 
-	 * and resource
-	 */
-	AccessLevelOption getAgentAccessLevelOption(String path, String publicKey)
-			throws AuthorizationServiceException ;
-
 }

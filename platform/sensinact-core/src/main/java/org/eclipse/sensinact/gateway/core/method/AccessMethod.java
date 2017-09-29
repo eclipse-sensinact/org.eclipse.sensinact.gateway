@@ -10,14 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.core.method;
 
+//import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+//import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.common.primitive.Describable;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
-import org.eclipse.sensinact.gateway.common.primitive.Typable;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+//import org.eclipse.sensinact.gateway.common.primitive.Typable;
+//import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 
 
 /**
@@ -25,50 +31,166 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface AccessMethod extends Nameable, Describable, 
-PathElement, Typable<AccessMethod.Type>
+public interface AccessMethod extends Nameable, Describable, PathElement
 {       
-	/**
-	 * Type of an AccessMethod
-	 */
-	public enum Type
-	{
-		GET(AccessMethodResponse.Response.GET_RESPONSE),
-		SET(AccessMethodResponse.Response.SET_RESPONSE),
-		ACT(AccessMethodResponse.Response.ACT_RESPONSE),
-		SUBSCRIBE(AccessMethodResponse.Response.SUBSCRIBE_RESPONSE),
-		UNSUBSCRIBE(AccessMethodResponse.Response.UNSUBSCRIBE_RESPONSE),
-		DESCRIBE(AccessMethodResponse.Response.DESCRIBE_RESPONSE);
+	public static final String GET          = "GET".intern();
+	public static final String SET          = "SET".intern();
+	public static final String ACT          = "ACT".intern();
+	public static final String SUBSCRIBE    = "SUBSCRIBE".intern();
+	public static final String UNSUBSCRIBE  = "UNSUBSCRIBE".intern();
+	public static final String DESCRIBE     = "DESCRIBE".intern();
+	
+	public static class Type
+	{		
+		private static final Map<String, Type> METHODS = new HashMap<String,Type>();
+		private static boolean initialized = false;
 		
-		/**
-		 * the extended {@link SnaMessage} type returned
-		 * 		by an AccessMethod of this type
-		 */
-		private final AccessMethodResponse.Response responseType; 
-		
-		/**
-		 * Constructor
-		 * 
-		 * @param responseType
-		 * 		the extended {@link SnaMessage} type returned
-		 * 		by an AccessMethod of this type
-		 */
-		Type(AccessMethodResponse.Response responseType)
+		static 
 		{
-			this.responseType = responseType;
+			initialize();
+		}	
+		
+		/**
+		 * 
+		 */
+		private static final void initialize()
+		{
+			if(initialized)
+			{
+				return;
+			}
+			initialized = true;
+			new Type(AccessMethod.GET, AccessMethodResponse.Response.GET_RESPONSE);
+			new Type(AccessMethod.SET, AccessMethodResponse.Response.SET_RESPONSE);
+			new Type(AccessMethod.ACT, AccessMethodResponse.Response.ACT_RESPONSE);
+			new Type(AccessMethod.SUBSCRIBE, AccessMethodResponse.Response.SUBSCRIBE_RESPONSE);
+			new Type(AccessMethod.UNSUBSCRIBE, AccessMethodResponse.Response.UNSUBSCRIBE_RESPONSE);
+			new Type(AccessMethod.DESCRIBE, AccessMethodResponse.Response.DESCRIBE_RESPONSE);
 		}
 		
 		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.core.model.method.AccessMethodType#getMessageType()
+		 * @param name
+		 * @return
 		 */
+		public static final Type valueOf(String name)
+		{
+			if(!initialized)
+			{
+				initialize();
+			}
+			if(name == null)
+			{
+				return null;
+			}
+			return METHODS.get(name);
+		}
+
+		/**
+		 * @param response
+		 * @return
+		 */
+		public static final Type valueOf(AccessMethodResponse.Response response)
+		{
+			if(!initialized)
+			{
+				initialize();
+			}
+			if(response == null)
+			{
+				return null;
+			}
+			Collection<Type> methods = METHODS.values();			
+			Iterator<Type> it = methods.iterator();
+			Type m=null;
+			for(;;)
+			{	
+				if(!it.hasNext()) break ;
+				m = it.next();
+				if(response.equals(m.response))
+				{
+					return m;
+				}
+			}
+			return null;
+		}
+		
+		/**
+		 * @return
+		 */
+		public static final Type[] values()
+		{
+			if(!initialized)
+			{
+				initialize();
+			}
+			return METHODS.values().toArray(new Type[0]);
+		}
+		
+		private final String name;
+		private final AccessMethodResponse.Response response;
+		private final int ordinal;
+		
+		/**
+		 * @param name
+		 * @param response
+		 */
+		public Type(String name, AccessMethodResponse.Response response)
+		{
+			if(valueOf(name)!=null)
+			{
+				throw new IllegalArgumentException("This method already exists");
+			}
+			this.name = name;
+			this.response = response;
+			this.ordinal = METHODS.size();
+			METHODS.put(this.name, this);
+		}
+
+		/**
+		 * @return
+		 */
+		public String name()
+		{
+			return this.name;
+		}
+		
+		/**
+		 * @return
+		 */
+		public int ordinal()
+		{
+			return this.ordinal;
+		}
+
+        /**
+         * @return
+         */
         public AccessMethodResponse.Response getReturnedType()
         {
-	        return this.responseType;
+	        return this.response;
+        }
+        
+        /* (non-Javadoc)
+         * @see java.lang.Object#hashCode()
+         */
+        public int hashCode()
+        {
+        	return this.ordinal();
+        }
+        
+        /* (non-Javadoc)
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
+        public boolean equals(Object o)
+        {
+        	if(AccessMethod.Type.class.isAssignableFrom(o.getClass()))
+        	{
+        		return ((AccessMethod.Type)o).ordinal() == this.ordinal();
+        	}
+        	return false;
         }
 	}
-
+	
 	Object EMPTY = new Object();
 	
     /**
@@ -98,6 +220,11 @@ PathElement, Typable<AccessMethod.Type>
    	 * 		the {@link ErrorHandler} handling errors
    	 */
     ErrorHandler getErrorHandler();
+    
+    /**
+     * @return
+     */
+    AccessMethod.Type getType();
     
     /**
      * Invokes this method by using the objects array argument 

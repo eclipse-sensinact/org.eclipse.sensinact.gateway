@@ -10,10 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.osgi.framework.ServiceRegistration;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
@@ -21,12 +22,20 @@ import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.core.security.AccessLevel;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
+import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessProfile;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
+import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
+import org.eclipse.sensinact.gateway.core.security.ImmutableAccessNode;
+import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
+import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
+import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 
 /**
  * Allows to build in a simple way a {@link ModelInstance}
@@ -76,10 +85,9 @@ public class ModelInstanceBuilder
 	 * @param resourceModelType
 	 * @param name
 	 */
-	public  ModelInstanceBuilder(Mediator mediator)
+	public ModelInstanceBuilder(Mediator mediator)
 	{
-		<ModelConfiguration,ModelInstance>this(
-		mediator, ModelInstance.class, ModelConfiguration.class);
+		this(mediator, ModelInstance.class, ModelConfiguration.class);
 	}
 	
 	/**
@@ -216,7 +224,8 @@ public class ModelInstanceBuilder
 	 * 
 	 * @return this ModelInstanceBuilder
 	 */
-	public ModelInstanceBuilder withDefaultModifiable(Modifiable defaultModifiable)
+	public ModelInstanceBuilder withDefaultModifiable(
+			Modifiable defaultModifiable)
 	{
 		this.defaultModifiable = defaultModifiable;
 		return this;		
@@ -233,7 +242,8 @@ public class ModelInstanceBuilder
 	 * 
 	 * @return this ModelInstanceBuilder
 	 */
-	public ModelInstanceBuilder withDefaultUpdatePolicy(Resource.UpdatePolicy defaultUpdatePolicy)
+	public ModelInstanceBuilder withDefaultUpdatePolicy(
+			Resource.UpdatePolicy defaultUpdatePolicy)
 	{
 		this.defaultUpdatePolicy = defaultUpdatePolicy;
 		return this;			
@@ -318,8 +328,7 @@ public class ModelInstanceBuilder
      * @param configuration the {@link ModelConfiguration} to 
      * configure
      */
-    protected  <C extends ModelConfiguration> 
-    void configure(C configuration)
+    protected  <C extends ModelConfiguration> void configure(C configuration)
     {
 	   	 configuration.setServiceBuildPolicy(this.serviceBuildPolicy
 	   		).setResourceBuildPolicy(this.resourceBuildPolicy
@@ -356,23 +365,24 @@ public class ModelInstanceBuilder
      }
 
     /**
-     * Creates and returns the {@link RootNode} of the {@link AccessNode}s
+     * Creates and returns the {@link RootNode} of the {@link AccessNodeImpl}s
      * hierarchy for the {@link SensiNactResourceModel}(s) to be built
      * by the intermediate of this builder
      * 
-     * @return the {@link RootNode} of the {@link AccessNode}s hierarchy 
+     * @return the {@link RootNode} of the {@link AccessNodeImpl}s hierarchy 
      * for the {@link SensiNactResourceModel}(s) to be built
      */
-    protected AccessTree buildAccessTree()
+    protected AccessTree<?> buildAccessTree()
     {
     	return this.mediator.callService(
-		SecuredAccess.class, new Executable<SecuredAccess, AccessTree>()
+		SecuredAccess.class, new 
+		Executable<SecuredAccess, AccessTree<?>>()
 		{
 			@Override
-			public AccessTree execute(SecuredAccess service) 
-			throws Exception
+			public AccessTree<?> execute(
+					SecuredAccess service)  throws Exception
 			{
-				AccessTree accessTree = null;
+				AccessTree<? extends AccessNode> accessTree = null;
 				
 				String identifier = service.validate(
 					ModelInstanceBuilder.this.mediator.getContext(
@@ -380,8 +390,8 @@ public class ModelInstanceBuilder
 
 				if(identifier == null)
 				{
-					accessTree = new AccessTree(
-							ModelInstanceBuilder.this.mediator);
+					accessTree = new AccessTreeImpl(mediator
+						).withAccessProfile(AccessProfileOption.DEFAULT);
 					
 				} else
 				{
@@ -394,14 +404,15 @@ public class ModelInstanceBuilder
     }
     
     /**
-     * Creates the {@link AccessNode} for the {@link SensiNactResourceModel}
+     * Creates the {@link AccessNodeImpl} for the {@link SensiNactResourceModel}
      * to be built, and add it to the {@link RootNode} passed as parameter
      * 
      * @param root the {@link RootNode} to which attach the new created
-     * {@link AccessNode}
+     * {@link AccessNodeImpl}
      */
     protected void buildAccessNode(
-    		final AccessTree accessTree, final String name)
+    		final MutableAccessTree<? extends MutableAccessNode> accessTree,
+    		final String name)
     {
     	final AccessProfile accessProfile = this.accessProfile;
     	
@@ -418,10 +429,10 @@ public class ModelInstanceBuilder
 
 				if(identifier == null)
 				{	
-					accessTree.add(UriUtils.getUri(new String[]{name})
-					).withAccessProfile(accessProfile==null?
-					AccessProfileOption.ALL_ANONYMOUS.getAccessProfile():
-					accessProfile);
+					accessTree.add(UriUtils.getUri(
+						new String[]{name})).withAccessProfile(accessProfile==null
+						?AccessProfileOption.ALL_ANONYMOUS.getAccessProfile()
+								:accessProfile);
 
 				} else
 				{
@@ -439,12 +450,11 @@ public class ModelInstanceBuilder
 	 * 
 	 * @return the new created {@link ModelConfiguration} 
 	 */
-	@SuppressWarnings("unchecked")
 	public <C extends ModelConfiguration>
 	C buildConfiguration(Object...parameters)
 	{	
 		C configuration  =  null;
-		AccessTree accessTree = this.buildAccessTree();
+		AccessTree<?> accessTree = this.buildAccessTree();
 		
 		int parametersLength = (parameters==null?0:parameters.length);
 		int offset = (this.defaultResourceConfigBuilder != null)?3:2;
@@ -463,8 +473,7 @@ public class ModelInstanceBuilder
 	   	}
 		configuration =  ReflectUtils.<ModelConfiguration,C>getInstance(
 			ModelConfiguration.class, (Class<C>)
-			this.resourceModelConfigurationType,
-			arguments);
+			this.resourceModelConfigurationType, arguments);
 		
 		if(configuration != null)
 		{
@@ -482,9 +491,8 @@ public class ModelInstanceBuilder
 	 * 
 	 * @return the new created {@link SensiNactResourceModel} 
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <C extends ModelConfiguration,I extends ModelInstance<C>>
-	I build(String name, String profileId, Object...parameters)
+	I build(final String name, String profileId, Object...parameters)
 	{	
 		I instance = null;
 		if(this.modelConfiguration == null)
@@ -492,16 +500,46 @@ public class ModelInstanceBuilder
 			this.buildConfiguration(parameters);
 		}					
 		if(this.modelConfiguration != null)
-		{ 
-			this.buildAccessNode(
-				this.modelConfiguration.getAccessTree(), name);
-			
-			instance = (I) ReflectUtils.<ModelInstance,I>getInstance(
-				ModelInstance.class, (Class<I>) this.resourceModelType,
-				this.mediator, this.modelConfiguration, name, 
-				profileId);
-
-			this.register(instance);
+		{ 			
+			boolean exists= AccessController.<Boolean>doPrivileged(
+						new PrivilegedAction<Boolean>()
+			{
+				@Override
+				public Boolean run()
+				{				
+					Collection<ServiceReference<SensiNactResourceModel>> 
+					references = null;
+					try
+					{
+						references = ModelInstanceBuilder.this.mediator.getContext(
+						).getServiceReferences(SensiNactResourceModel.class, 
+							new StringBuilder().append("(name=").append(name
+									).append(")").toString());
+					}
+					catch (InvalidSyntaxException e)
+					{
+						ModelInstanceBuilder.this.mediator.error(e);
+					}
+					return (references!=null && references.size()>0);
+				}
+			});    	
+			if(!exists)
+			{
+				this.buildAccessNode(this.modelConfiguration.getAccessTree(),
+						name);
+				
+				instance = (I) ReflectUtils.<ModelInstance,I>getInstance(
+					ModelInstance.class, (Class<I>) this.resourceModelType,
+					this.mediator, this.modelConfiguration, name, 
+					profileId);
+	
+				this.register(instance);				
+			}else
+			{
+				mediator.error(
+				"Unable to register the model instance '%s', it already exists", 
+				 name);
+			}
 		}			
 		return instance;
 	}
@@ -512,28 +550,10 @@ public class ModelInstanceBuilder
 	protected final <C extends ModelConfiguration,I extends ModelInstance<C>>
 	void register(final I instance)
 	{
-		if(instance != null)
+		if(instance == null)
 		{
-			if(instance.isRegistered())
-			{
-				throw new ModelAlreadyRegisteredException(
-						instance.getName());
-			}
-			ServiceRegistration<SensiNactResourceModel> registration = null;
-			if((registration = this.mediator.callService(
-				SecuredAccess.class, new Executable<SecuredAccess, 
-				ServiceRegistration<SensiNactResourceModel>>()
-				{
-					@Override
-					public ServiceRegistration<SensiNactResourceModel> 
-					execute(SecuredAccess service) throws Exception
-					{
-						return service.register(instance);
-					}
-				}))!=null)
-			{
-				instance.register(registration);
-			}	
-		}	
+			return;
+		}
+		instance.register();
 	}
 }
