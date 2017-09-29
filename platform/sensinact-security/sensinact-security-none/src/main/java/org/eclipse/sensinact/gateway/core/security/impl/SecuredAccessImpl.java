@@ -43,18 +43,6 @@ class SecuredAccessImpl implements SecuredAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see SecuredAccess#
-	 * validate(org.osgi.framework.Bundle)
-	 */
-	@Override
-	public String validate(Bundle bundle)
-	{
-		return null;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
 	 * @see org.eclipse.sensinact.gateway.core.security.SecuredAccess#getAgentPublicKey(java.lang.String)
 	 */
 	@Override

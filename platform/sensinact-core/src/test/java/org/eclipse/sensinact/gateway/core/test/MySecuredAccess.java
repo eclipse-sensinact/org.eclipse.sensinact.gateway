@@ -21,7 +21,6 @@ import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
-import org.osgi.framework.Bundle;
 
 class MySecuredAccess implements SecuredAccess
 {
@@ -33,19 +32,6 @@ class MySecuredAccess implements SecuredAccess
 	public MySecuredAccess(Mediator mediator)
 	{
 		this.mediator = mediator;
-	}
-
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SecuredAccess#
-	 * validate(org.osgi.framework.Bundle)
-	 */
-	@Override
-	public String validate(Bundle bundle) 
-	{
-		return "xxxxxxxxxxxxxx000000";
 	}
 
 	/**
