@@ -16,14 +16,14 @@ import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
-import org.eclipse.sensinact.gateway.core.security.entity.UserAccessLevelEntity;
+import org.eclipse.sensinact.gateway.core.security.entity.AuthenticatedAccessLevelEntity;
 
 /**
  * User Access Level DAO 
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class UserAccessLevelDAO extends AbstractImmutableSnaDAO<UserAccessLevelEntity>
+public class AuthenticatedAccessLevelDAO extends AbstractImmutableSnaDAO<AuthenticatedAccessLevelEntity>
 {
 	//********************************************************************//
 	//						NESTED DECLARATIONS	     					  //
@@ -50,14 +50,14 @@ public class UserAccessLevelDAO extends AbstractImmutableSnaDAO<UserAccessLevelE
 	 * 		interact with the OSGi host environment
 	 * @throws DAOException 
 	 */
-    public UserAccessLevelDAO(Mediator mediator) throws DAOException
+    public AuthenticatedAccessLevelDAO(Mediator mediator) throws DAOException
     {
-	    super(mediator, UserAccessLevelEntity.class);
+	    super(mediator, AuthenticatedAccessLevelEntity.class);
 	    this.objectDAO = new ObjectDAO(mediator);
     }
 
 	/**
-     * Returns the {@link UserAccessLevelEntity} from the datastore 
+     * Returns the {@link AuthenticatedAccessLevelEntity} from the datastore 
      * matching the given object path and user public key.
      * 
      * @param objectIdentifier the object's long identifier for which 
@@ -65,18 +65,18 @@ public class UserAccessLevelDAO extends AbstractImmutableSnaDAO<UserAccessLevelE
      * @param publicKey the user's public key for which to retrieve 
      * the access level
      * 
-     * @return the {@link UserAccessLevelEntity} for the specified
+     * @return the {@link AuthenticatedAccessLevelEntity} for the specified
      *  object and user.
      *  
 	 * @throws DAOException 
      */
-    protected UserAccessLevelEntity find(final long objectIdentifier, 
+    protected AuthenticatedAccessLevelEntity find(final long objectIdentifier, 
     		final String publicKey) throws DAOException 
     {
-    	List<UserAccessLevelEntity> userAccessLevelEntities = 
+    	List<AuthenticatedAccessLevelEntity> userAccessLevelEntities = 
     		super.select(new HashMap<String,Object>(){{
-    		this.put("OID", objectIdentifier);
-    		this.put("SUPUBLIC_KEY", publicKey);}});
+    		this.put("UOID", objectIdentifier);
+    		this.put("PUBLIC_KEY", publicKey);}});
 
     	if(userAccessLevelEntities.size() != 1)
     	{
@@ -86,7 +86,7 @@ public class UserAccessLevelDAO extends AbstractImmutableSnaDAO<UserAccessLevelE
     }
 
 	/**
-     * Returns the {@link UserAccessLevelEntity} from the datastore 
+     * Returns the {@link AuthenticatedAccessLevelEntity} from the datastore 
      * matching the given object path and user long identifier.
      * 
      * @param objectIdentifier the object's long identifier for which 
@@ -94,18 +94,18 @@ public class UserAccessLevelDAO extends AbstractImmutableSnaDAO<UserAccessLevelE
      * @param userIdentifier the user's long identifier for which 
      * to retrieve the access level
      * 
-     * @return the {@link UserAccessLevelEntity} for the specified
+     * @return the {@link AuthenticatedAccessLevelEntity} for the specified
      *  object and user.
      *  
 	 * @throws DAOException 
      */
-    protected UserAccessLevelEntity find(final long objectIdentifier, 
+    protected AuthenticatedAccessLevelEntity find(final long objectIdentifier, 
     		final long userIdentifier) throws DAOException 
     {
-    	List<UserAccessLevelEntity> userAccessLevelEntities = 
+    	List<AuthenticatedAccessLevelEntity> userAccessLevelEntities = 
     		super.select(new HashMap<String,Object>(){{
-    		this.put("OID", objectIdentifier);
-    		this.put("SUID",userIdentifier);}});
+    		this.put("UOID", objectIdentifier);
+    		this.put("UID",userIdentifier);}});
     	
     	if(userAccessLevelEntities.size() != 1)
     	{
@@ -115,7 +115,7 @@ public class UserAccessLevelDAO extends AbstractImmutableSnaDAO<UserAccessLevelE
     }
     
 	/**
-     * Returns the {@link UserAccessLevelEntity} from the datastore 
+     * Returns the {@link AuthenticatedAccessLevelEntity} from the datastore 
      * matching the given object path and user public key.
      * 
      * @param path the string path of the object for which to retrieve 
@@ -123,12 +123,12 @@ public class UserAccessLevelDAO extends AbstractImmutableSnaDAO<UserAccessLevelE
      * @param publicKey the user's public key for which to retrieve 
      * the access level
      * 
-     * @return the {@link UserAccessLevelEntity} for the specified
+     * @return the {@link AuthenticatedAccessLevelEntity} for the specified
      *  object and user.
      *  
 	 * @throws DAOException 
      */
-    public UserAccessLevelEntity find(String path, String publicKey) 
+    public AuthenticatedAccessLevelEntity find(String path, String publicKey) 
     		throws DAOException 
     {    
     	ObjectEntity objectEntity = this.objectDAO.find(path);
@@ -136,7 +136,7 @@ public class UserAccessLevelDAO extends AbstractImmutableSnaDAO<UserAccessLevelE
     }
     
 	/**
-     * Returns the {@link UserAccessLevelEntity} from the datastore 
+     * Returns the {@link AuthenticatedAccessLevelEntity} from the datastore 
      * matching the given object path and user identifier.
      * 
      * @param path the string path of the object for which to retrieve 
@@ -144,12 +144,12 @@ public class UserAccessLevelDAO extends AbstractImmutableSnaDAO<UserAccessLevelE
      * @param identifier the user's long identifier for which to retrieve 
      * the access level
      * 
-     * @return the {@link UserAccessLevelEntity} for the specified
+     * @return the {@link AuthenticatedAccessLevelEntity} for the specified
      *  object and user.
      *  
 	 * @throws DAOException 
      */
-    public UserAccessLevelEntity find(String path, long identifier) 
+    public AuthenticatedAccessLevelEntity find(String path, long identifier) 
     		throws DAOException 
     {    
     	final ObjectEntity objectEntity = this.objectDAO.find(path); 

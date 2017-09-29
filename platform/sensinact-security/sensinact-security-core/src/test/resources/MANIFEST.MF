@@ -1,369 +1,361 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1479395256927
-Build-By: Eclipse
-Build-Jdk: 1.6.0_38
-Built-By: CM239742
-Bundle-Description: sensiNact IoT Gateway - Security Core
-Bundle-ManifestVersion: 2
-Bundle-Name: sensiNact IoT Gateway - Security Core
-Bundle-SymbolicName: sensinact-security-core
-Bundle-Vendor: Eclipse
-Bundle-Version: 1.3.0.20161117
-Created-By: Apache Maven Bundle Plugin
-Export-Package: org.eclipse.sensinact.gateway.core.security.impl;version="1.5.0"
-Fragment-Host: sensinact-core
-Import-Package: org.eclipse.sensinact.gateway.common.bundle;version="[1.5,2)",org.eclipse
- .sensinact.gateway.common.execution;version="[1.5,2)",org.eclipse.sensinact.gateway.com
- mon.primitive;version="[1.5,2)",org.eclipse.sensinact.gateway.core,org.eclipse.sensinact.gate
- way.core.message;version="[1.5,2)",org.eclipse.sensinact.gateway.core.security,org.
- eclipse.sensinact.gateway.datastore.api;version="[1.5,2)",org.eclipse.sensinact.gateway.util
- ;version="[1.5,2)",org.eclipse.sensinact.gateway.util.tree;version="[1.5,2)",org.j
- son;version="20080701",org.osgi.framework;version="[1.6,2)"
-Provide-Capability: org.eclipse.sensinact.security,org.eclipse.sensinact.datastore,org.eclipse.sensinact.
- datastore.connector,org.eclipse.sensinact.signature.validator
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.6))"
+Export-Package: org.eclipse.sensinact.gateway.core.security.impl;versi
+ on="1.5.0"
 Tool: Bnd-2.3.0.201405100607
-
-Name: META-INF/services/org.eclipse.sensinact.gateway.core.security.SecuredAccessFa
- ctory
-SHA1-Digest: k1YMAfCiu5NP4Kwq1tYCPU3jH9Y=
-
-Name: fr/cea/sna/gateway/core/security/dao/AbstractImmutableSnaDAO.class
-SHA1-Digest: AZype6fN9G3Ph4T9EN7wA/ZxmrU=
-
-Name: fr/cea/sna/gateway/core/security/dao/AbstractMutableSnaDAO.class
-SHA1-Digest: XjWiLorxIR29vjqcOJm7PGCS+9g=
-
-Name: fr/cea/sna/gateway/core/security/dao/AbstractSnaDAO$1.class
-SHA1-Digest: ZC65Mv3uVMlwwOWTL3m//k+PjJc=
-
-Name: fr/cea/sna/gateway/core/security/dao/AbstractSnaDAO$2.class
-SHA1-Digest: 7gpBAEF1W8+E2IA+1hP7S3k8Vl0=
-
-Name: fr/cea/sna/gateway/core/security/dao/AbstractSnaDAO$3.class
-SHA1-Digest: L2kucCGw4wVf32nV6+11tdWm6LI=
-
-Name: fr/cea/sna/gateway/core/security/dao/AbstractSnaDAO$4.class
-SHA1-Digest: bLUnWYs2spPn6pGSuGm0x8J5ZNE=
-
-Name: fr/cea/sna/gateway/core/security/dao/AbstractSnaDAO$UserDefinedSel
- ectStatement.class
-SHA1-Digest: pqgLkk9WVV/58OBU3bfwhCPSTxk=
-
-Name: fr/cea/sna/gateway/core/security/dao/AbstractSnaDAO.class
-SHA1-Digest: VD3TiuleNx+WFlY11b7LezCuHpE=
-
-Name: fr/cea/sna/gateway/core/security/dao/AgentAccessDAO$1.class
-SHA1-Digest: +iuqNn6Dlj1u7+qvzg4k0TFanSA=
-
-Name: fr/cea/sna/gateway/core/security/dao/AgentAccessDAO.class
-SHA1-Digest: Z6L1xgR2p0XwPLwU8xaOLCKeuFs=
-
-Name: fr/cea/sna/gateway/core/security/dao/AgentAccessLevelDAO$1.class
-SHA1-Digest: 716QigTFj1mLaskqScqzyfOeE1k=
-
-Name: fr/cea/sna/gateway/core/security/dao/AgentAccessLevelDAO$2.class
-SHA1-Digest: CkLbriDsyR7CoCoF8qafJlmrirk=
-
-Name: fr/cea/sna/gateway/core/security/dao/AgentAccessLevelDAO.class
-SHA1-Digest: PhAm2e48UVCAetJfJBpCdBp++aI=
-
-Name: fr/cea/sna/gateway/core/security/dao/AgentDAO$1.class
-SHA1-Digest: WppYrs/zbvNn0KHHuFbqOMnmJcs=
-
-Name: fr/cea/sna/gateway/core/security/dao/AgentDAO$2.class
-SHA1-Digest: 3GaXVwNsBySERMB23l8mxjDwejs=
-
-Name: fr/cea/sna/gateway/core/security/dao/AgentDAO$3.class
-SHA1-Digest: DzCXMpdhTn+09fsCjVU0kKR0Km4=
-
-Name: fr/cea/sna/gateway/core/security/dao/AgentDAO.class
-SHA1-Digest: S1cKa4AUSk9DBQhxuaVwHW3wK9M=
-
-Name: fr/cea/sna/gateway/core/security/dao/AuthenticatedDAO$1.class
-SHA1-Digest: o8RWYSkm6jxg12u19bEOsoFCJ/4=
-
-Name: fr/cea/sna/gateway/core/security/dao/AuthenticatedDAO.class
-SHA1-Digest: nvJITo8DY/rbfOmWvdP+CiKbg+o=
-
-Name: fr/cea/sna/gateway/core/security/dao/BundleDAO$1.class
-SHA1-Digest: h23szS+nTQw5WOslYdzmN0mUh6U=
-
-Name: fr/cea/sna/gateway/core/security/dao/BundleDAO$2.class
-SHA1-Digest: TntVennAeVmiGAFQf8g+gb1+jFM=
-
-Name: fr/cea/sna/gateway/core/security/dao/BundleDAO.class
-SHA1-Digest: c7MVudwtuSRKXy5lUhaHR3X4GB0=
-
-Name: fr/cea/sna/gateway/core/security/dao/DAOException.class
-SHA1-Digest: SMWVSHJfGuY8qLqucgD/gUnMA4E=
-
-Name: fr/cea/sna/gateway/core/security/dao/DataStoreConnector$1.class
-SHA1-Digest: q3MyNMtZvj1HPPXQ8D/xXkzxooY=
-
-Name: fr/cea/sna/gateway/core/security/dao/DataStoreConnector$2.class
-SHA1-Digest: PQjn9iopiA7z1AztE/exsGUGyJw=
-
-Name: fr/cea/sna/gateway/core/security/dao/DataStoreConnector$3.class
-SHA1-Digest: y6aqJOZ6/otDuawWwIX3fFAX4FY=
-
-Name: fr/cea/sna/gateway/core/security/dao/DataStoreConnector$4.class
-SHA1-Digest: 7AQUW9QwD9TQyDvOcUAXtz1VUlE=
-
-Name: fr/cea/sna/gateway/core/security/dao/DataStoreConnector.class
-SHA1-Digest: 2Ql4DHzNqhhFOLzMg2FccKx5X8w=
-
-Name: fr/cea/sna/gateway/core/security/dao/MethodDAO$1.class
-SHA1-Digest: RyY++agF9Dqe4+k85nyyw2tsbzw=
-
-Name: fr/cea/sna/gateway/core/security/dao/MethodDAO$2.class
-SHA1-Digest: eAVDWUgK2Jn4rf46sj547sMi8nc=
-
-Name: fr/cea/sna/gateway/core/security/dao/MethodDAO.class
-SHA1-Digest: q6tv73xDcmUV3kVOgBoiSNV8ttM=
-
-Name: fr/cea/sna/gateway/core/security/dao/ObjectAccessDAO$1.class
-SHA1-Digest: jWFVkF0NTYXEK24iTYQg1m74zXI=
-
-Name: fr/cea/sna/gateway/core/security/dao/ObjectAccessDAO.class
-SHA1-Digest: pq8+zghROMSlNfbqC6wGuPVfdbo=
-
-Name: fr/cea/sna/gateway/core/security/dao/ObjectDAO$1.class
-SHA1-Digest: wik+FnhBIPI3pRNklwKACvXArG4=
-
-Name: fr/cea/sna/gateway/core/security/dao/ObjectDAO.class
-SHA1-Digest: HVIW09+5REY+O99fyDYEISf7cLQ=
-
-Name: fr/cea/sna/gateway/core/security/dao/ObjectProfileAccessDAO$1.clas
- s
-SHA1-Digest: YMNsSky9GcHNiomHGL74ZBhle6o=
-
-Name: fr/cea/sna/gateway/core/security/dao/ObjectProfileAccessDAO.class
-SHA1-Digest: PPpm9PwLx+luZbilDQucbPP5fdc=
-
-Name: fr/cea/sna/gateway/core/security/dao/ObjectProfileDAO$1.class
-SHA1-Digest: VwCSu8EESx98XQL36l4bca6R90s=
-
-Name: fr/cea/sna/gateway/core/security/dao/ObjectProfileDAO$2.class
-SHA1-Digest: dBzxzvo8ZmM/2wafL8aOwH7VB+U=
-
-Name: fr/cea/sna/gateway/core/security/dao/ObjectProfileDAO.class
-SHA1-Digest: 8w2ScGlO5Gj9v9vdj3HEhHgfw8M=
-
-Name: fr/cea/sna/gateway/core/security/dao/SnaDAO.class
-SHA1-Digest: qok52jwOj9WeRbhO538CF1Y7+LQ=
-
-Name: fr/cea/sna/gateway/core/security/dao/UserAccessDAO$1.class
-SHA1-Digest: aBdcfiuzpf8LCoPTUgLbhXhbCUA=
-
-Name: fr/cea/sna/gateway/core/security/dao/UserAccessDAO$2.class
-SHA1-Digest: 3L0XEU4yEz4B0hhVrlq0aOoaf0k=
-
-Name: fr/cea/sna/gateway/core/security/dao/UserAccessDAO$3.class
-SHA1-Digest: Pi25u9ogtxhOoO+dtlZJ4vhrOBY=
-
-Name: fr/cea/sna/gateway/core/security/dao/UserAccessDAO.class
-SHA1-Digest: jyRxJcrSI8n/adVrw91R0o0ufFw=
-
-Name: fr/cea/sna/gateway/core/security/dao/UserAccessLevelDAO$1.class
-SHA1-Digest: sJNng4+XwFSMK4S4aUxFcLzX4xM=
-
-Name: fr/cea/sna/gateway/core/security/dao/UserAccessLevelDAO$2.class
-SHA1-Digest: OWGMLkGGdpfTMsW+PJ+K7FlEw2s=
-
-Name: fr/cea/sna/gateway/core/security/dao/UserAccessLevelDAO.class
-SHA1-Digest: Rwd/P41qMdEwcCMVxO6z384SQwk=
-
-Name: fr/cea/sna/gateway/core/security/dao/UserDAO$1.class
-SHA1-Digest: /XnjepnACtLslu6VNpb2SrF9ZUI=
-
-Name: fr/cea/sna/gateway/core/security/dao/UserDAO$2.class
-SHA1-Digest: Bs3sgQ7BIBYLrRBkkuQVdgXSAn4=
-
-Name: fr/cea/sna/gateway/core/security/dao/UserDAO$3.class
-SHA1-Digest: atbMRhOcA5fCZzGQtHUbsEcgcSE=
-
-Name: fr/cea/sna/gateway/core/security/dao/UserDAO.class
-SHA1-Digest: WtDHycNDqSrgSWYp/aYIpvW4a2s=
-
-Name: fr/cea/sna/gateway/core/security/dao/directive/CreateDirective.cla
- ss
-SHA1-Digest: RLLJIgPuF7VPyjkYg0LqcVKdnvQ=
-
-Name: fr/cea/sna/gateway/core/security/dao/directive/DeleteDirective.cla
- ss
-SHA1-Digest: S8HpOmzo6zOqTBEekLSi8DUCUfA=
-
-Name: fr/cea/sna/gateway/core/security/dao/directive/Directive.class
-SHA1-Digest: Q59mhLDXaTNyO4MlRPs9k73xIvk=
-
-Name: fr/cea/sna/gateway/core/security/dao/directive/KeyDirective$Foreig
- nKeyEntry.class
-SHA1-Digest: s5QJ1A0RAWW9vdqTGK4EfIwgAHQ=
-
-Name: fr/cea/sna/gateway/core/security/dao/directive/KeyDirective$KeyEnt
- ry.class
-SHA1-Digest: AP57A3Kk27JIIqQwLvFniV/ZFiU=
-
-Name: fr/cea/sna/gateway/core/security/dao/directive/KeyDirective.class
-SHA1-Digest: samBUaIYsXoXD2hSfD0aUn3r3pI=
-
-Name: fr/cea/sna/gateway/core/security/dao/directive/SelectDirective.cla
- ss
-SHA1-Digest: gT2QVV1xpuuqdJrGauSbH8WGYRA=
-
-Name: fr/cea/sna/gateway/core/security/dao/directive/UpdateDirective.cla
- ss
-SHA1-Digest: 3rA2pTouTbnohduz8gc+EJd1gPI=
-
-Name: fr/cea/sna/gateway/core/security/entity/AgentAccessEntity.class
-SHA1-Digest: 02ltQZ7JitORRTxaYeFaGhGTJlA=
-
-Name: fr/cea/sna/gateway/core/security/entity/AgentAccessLevelEntity.cla
- ss
-SHA1-Digest: i0xN86FIUTM8iSAJNYXJal31jDM=
-
-Name: fr/cea/sna/gateway/core/security/entity/AgentEntity.class
-SHA1-Digest: hiNKJ4rZwrGEn6tDuC5Q63jsjMo=
-
-Name: fr/cea/sna/gateway/core/security/entity/AuthenticatedEntity.class
-SHA1-Digest: tXECe/0R/hBuZwgyTLoLMihus1k=
-
-Name: fr/cea/sna/gateway/core/security/entity/BundleEntity.class
-SHA1-Digest: Cz3x/smrnGLUsDs8IxqpM16g7to=
-
-Name: fr/cea/sna/gateway/core/security/entity/ImmutableSnaEntity.class
-SHA1-Digest: Me2heNd+MLnlkFcUwtJAVfIGZDo=
-
-Name: fr/cea/sna/gateway/core/security/entity/MethodEntity.class
-SHA1-Digest: B7UhReD3+Zrvhphiuiy6eCGwgVI=
-
-Name: fr/cea/sna/gateway/core/security/entity/ObjectAccessEntity.class
-SHA1-Digest: TVbmgR3l3nPBx8tWH6GNBdAw0ZQ=
-
-Name: fr/cea/sna/gateway/core/security/entity/ObjectEntity.class
-SHA1-Digest: ROyqMOGsvzt5b16g1rXzghvJiU4=
-
-Name: fr/cea/sna/gateway/core/security/entity/ObjectProfileAccessEntity.
+Bundle-Name: sensiNact IoT Gateway - Security Core
+Created-By: 1.7.0_80 (Oracle Corporation)
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.7))"
+Bundle-Vendor: Eclipse
+Fragment-Host: sensinact-core
+Provide-Capability: org.eclipse.sensinact.security,org.eclipse.sensina
+ ct.datastore,org.eclipse.sensinact.datastore.connector,org.eclipse.se
+ nsinact.signature.validator
+Bundle-Version: 1.5.0.20170927
+Bnd-LastModified: 1506506723699
+Bundle-ManifestVersion: 2
+Bundle-Description: sensiNact IoT Gateway - Security Core
+Import-Package: org.eclipse.sensinact.gateway.common.bundle;version="[
+ 1.5,2)",org.eclipse.sensinact.gateway.common.execution;version="[1.5,
+ 2)",org.eclipse.sensinact.gateway.common.primitive;version="[1.5,2)",
+ org.eclipse.sensinact.gateway.core.method;version="[1.5,2)",org.eclip
+ se.sensinact.gateway.core.security,org.eclipse.sensinact.gateway.data
+ store.api;version="[1.5,2)",org.eclipse.sensinact.gateway.util;versio
+ n="[1.5,2)",org.eclipse.sensinact.gateway.util.tree;version="[1.5,2)"
+ ,org.json;version="[20080701.0,20080702)",org.osgi.framework;version=
+ "[1.7,2)"
+Bundle-SymbolicName: sensinact-security-core
+Build-By: Eclipse
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/annotation/De
+ fault.class
+SHA-256-Digest: ZSkLxweqfyy2DP+cBStus22+aRk0835CwIuVX4szLzU=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/AbstractSnaDAO.c
+ lass
+SHA-256-Digest: DD+ePPR+RWTZZUCJ9bYM5Ef5uEWNR0COCm4AqbEoNeY=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/AbstractSnaDAO$4
+ .class
+SHA-256-Digest: WQcsIkS9k59CfXP3bh5pXvlA8ADF33LzVz2cknEuZrA=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/BundleDAO.class
+SHA-256-Digest: S3NVPH7uEtZpycCEXc423ta9kAIPRKePAlgTYN9bOJA=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/Authenticated
+ Entity.class
+SHA-256-Digest: CupuYmFcKou8DDftOdbs//m+pur+lLBppfBIvAqOVXI=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/AbstractMutableS
+ naDAO.class
+SHA-256-Digest: qfCie/CMhkWC3SHFlMBlmuOCmKjOvJ9n1U5LC6DNsjk=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/UserAccessEnt
+ ity.class
+SHA-256-Digest: CbLH5WcFd2NOVYYNilhxe5xrA6vFymcJwIB/+6ldMYo=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/SnaDAO.class
+SHA-256-Digest: NCbxG7OYUfDAR0ht7An1fMiRinCzZKnDOowZ6pthe6k=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/AgentDAO$1.class
+SHA-256-Digest: qPDfuh+TvZMwYdx7WmdJmJVCDW+8iW++7rFsumg2izk=
+
+Name: org/eclipse/sensinact/gateway/core/security/impl/SecuredAccessFa
+ ctoryImpl.class
+SHA-256-Digest: NmY4BHuu+iMRW7guAycKFy+mw1FIhgrqnnH2XsM59OE=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/AgentDAO$2.class
+SHA-256-Digest: 94mu61r3OPJ9JtTX9DEtM9sEYCDVEOy8Vy9jwGgtZzo=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/UserAccessDAO$3.
  class
-SHA1-Digest: Ct7j5fuHMNAt3FZ6QGDpURI+Nm4=
+SHA-256-Digest: fQFyZ0UM45cHYUtCSuZrtUyYRb6J4guyp6hV/vxod+g=
 
-Name: fr/cea/sna/gateway/core/security/entity/ObjectProfileEntity.class
-SHA1-Digest: Wa2KzUrnPKn4iQ2fOISfgKnPDE4=
+Name: org/eclipse/sensinact/gateway/core/security/entity/AgentEntity.c
+ lass
+SHA-256-Digest: Az06YQw0wps6eCOZfjFkYQCVrzo1eaamPA/VnNIRYXo=
 
-Name: fr/cea/sna/gateway/core/security/entity/SnaEntity$Key.class
-SHA1-Digest: td8FXvkcjKBVmJ4HEOAe7AQ/Qko=
+Name: org/eclipse/sensinact/gateway/core/security/dao/ObjectProfileDAO
+ .class
+SHA-256-Digest: 7IKGfAnFKgkRGJAZnpy1HdHKA525sxl/P9qu/3Djpvs=
 
-Name: fr/cea/sna/gateway/core/security/entity/SnaEntity.class
-SHA1-Digest: lhV7UKdm6GyQOU/EY/17fQfOFL4=
+Name: org/eclipse/sensinact/gateway/core/security/entity/annotation/Im
+ mutable$Operation.class
+SHA-256-Digest: IVnzv0eSzhUW8CKkrAMKYEHR00QxapPNK6jPkk3s+ZI=
 
-Name: fr/cea/sna/gateway/core/security/entity/UserAccessEntity.class
-SHA1-Digest: TRCr59TxPo82ZaiS4ZvgVEAKcgU=
+Name: org/eclipse/sensinact/gateway/core/security/impl/AuthorizationSe
+ rviceImpl.class
+SHA-256-Digest: LOHVuL2Ya4KlhUYwxqu+O192HwsPIpqekC06bt6vdPw=
 
-Name: fr/cea/sna/gateway/core/security/entity/UserAccessLevelEntity.clas
- s
-SHA1-Digest: m3XvXM3SZ09LEQr5vqf+oJIAHCU=
-
-Name: fr/cea/sna/gateway/core/security/entity/UserEntity.class
-SHA1-Digest: /wSVZc9nvHFQCTaemLsBlPsxcdo=
-
-Name: fr/cea/sna/gateway/core/security/entity/annotation/Column.class
-SHA1-Digest: DFifyktRjBWyzMCasgFUoiVt4SE=
-
-Name: fr/cea/sna/gateway/core/security/entity/annotation/Default.class
-SHA1-Digest: ymIdeEhUkWTGh1NSJjpwpbikTIg=
-
-Name: fr/cea/sna/gateway/core/security/entity/annotation/ForeignKey.clas
- s
-SHA1-Digest: Vf43As0Qujgaeo0CUU8o46h5s4k=
-
-Name: fr/cea/sna/gateway/core/security/entity/annotation/Immutable$Opera
- tion.class
-SHA1-Digest: 5hf3jSgGPtxFVNG80xEcX6m93Pw=
-
-Name: fr/cea/sna/gateway/core/security/entity/annotation/Immutable.class
-SHA1-Digest: x7zmA1Cgk6KdbQUflhmCVZQrP1Y=
-
-Name: fr/cea/sna/gateway/core/security/entity/annotation/NotNull.class
-SHA1-Digest: /atSNFQewpmiTS48PFpLat+sBiM=
-
-Name: fr/cea/sna/gateway/core/security/entity/annotation/PrimaryKey.clas
- s
-SHA1-Digest: oYan7+bS5nhVpqAS2L/qR3Egz4c=
-
-Name: fr/cea/sna/gateway/core/security/entity/annotation/Table.class
-SHA1-Digest: 4T1iCJPGHhhQq1E+2WlFbuLStNM=
-
-Name: fr/cea/sna/gateway/core/security/impl/AbstractSession.class
-SHA1-Digest: V8xjf4bVbBZUQXwg+3uKgKeErKQ=
-
-Name: fr/cea/sna/gateway/core/security/impl/AuthorizationServiceImpl.cla
+Name: org/eclipse/sensinact/gateway/core/security/dao/DAOException.cla
  ss
-SHA1-Digest: LlcmA4cqwpWfro46qABkb4rl3pc=
+SHA-256-Digest: nbRf10UqGbaKmT3SDEz2h4gaRbAOSc3FhKfHgH08dQk=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessFactoryImpl.cla
- ss
-SHA1-Digest: lTl2Vn8CtREZIDvZ+BAZqRuJc7s=
+Name: org/eclipse/sensinact/gateway/core/security/dao/ObjectProfileDAO
+ $2.class
+SHA-256-Digest: b2vU9xpFMW2WBrQ7uSvzCwhVSqCfB0uev1Qnrat0+dg=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$1.class
-SHA1-Digest: /E+u277x2kUQ8xdPVAsSzRL1oWk=
+Name: org/eclipse/sensinact/gateway/core/security/entity/annotation/Fo
+ reignKey.class
+SHA-256-Digest: SOacIlpZtQ0OUo7+4vbCS5jRhdAh3JzLmzIiJYi3TVk=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$10.class
-SHA1-Digest: 8vBhbeNBDasGxxVH1iWcIaeXw1w=
+Name: org/eclipse/sensinact/gateway/core/security/dao/ObjectProfileDAO
+ $1.class
+SHA-256-Digest: Bt/VA8Y2VncalPNyoMKrTOELqLvZotOCoABCcgzKACA=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$11.class
-SHA1-Digest: Q4y72XeIklWMnywzPEXzeFk2muM=
+Name: org/eclipse/sensinact/gateway/core/security/impl/SecuredAccessIm
+ pl.class
+SHA-256-Digest: 5RgUCptxyWUTxb0nLbFUQThxxvfQkBNx0KsS6sE/aWg=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$12.class
-SHA1-Digest: OpuUnS4HYrwY/tCZ8bw4YwlKJMw=
+Name: org/eclipse/sensinact/gateway/core/security/dao/directive/Direct
+ ive.class
+SHA-256-Digest: jQ9D9rK3RT0+SB34Ln48lZj7zotOA2vP+valEvD1b8c=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$13.class
-SHA1-Digest: i5kNUbmAZI8r9Do+VjRd1fX67n4=
+Name: org/eclipse/sensinact/gateway/core/security/dao/MethodDAO.class
+SHA-256-Digest: fd9OmLoW241ircxvpJVeOa7eEz2Lo0f5C+f6Wm3n4Cc=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$2.class
-SHA1-Digest: LiVthUOxRh0ZrvSJ5pOioj24xW8=
+Name: org/eclipse/sensinact/gateway/core/security/dao/AgentDAO.class
+SHA-256-Digest: 1A+ZPeDcw8+cDlLOiSmhaAfsGKjc7S5rCDbtX3qIlbE=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$3.class
-SHA1-Digest: mZB7a4oGEy4p5oissCbW5gs6uWY=
+Name: org/eclipse/sensinact/gateway/core/security/dao/AuthenticatedAcc
+ essLevelDAO$2.class
+SHA-256-Digest: Flh7K4XuL4+2oQSOvHqAsWqIbHv8A4jMaL0lDNX4Dqg=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$4.class
-SHA1-Digest: QiBQrdh9NBYSIhXX2c3ghDuO+Xg=
+Name: org/eclipse/sensinact/gateway/core/security/dao/AbstractImmutabl
+ eSnaDAO.class
+SHA-256-Digest: XyEZQBHgZP83rRn7QDjNUqEIY2DFlTXG8uKfofTaa3s=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$5.class
-SHA1-Digest: zrAXYikr+Lbltd7xDEJRCcuZfp0=
+Name: org/eclipse/sensinact/gateway/core/security/dao/AuthenticatedAcc
+ essLevelDAO$1.class
+SHA-256-Digest: A4zd1dYyMhpq9bQkFINTiHrEN786/IPPMc4gtJxjZso=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$6$1.class
-SHA1-Digest: EKOZd4kd8XrWzQv3kAVq6ZAo00M=
+Name: org/eclipse/sensinact/gateway/core/security/dao/MethodDAO$1.clas
+ s
+SHA-256-Digest: D7lqwvO9jRdwmpCksqByesaFE3cDFB2LCK1/NBDuyYE=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$6$2.class
-SHA1-Digest: F505Uj6P7QvTf3g115yEGaVjKQA=
+Name: org/eclipse/sensinact/gateway/core/security/entity/ObjectProfile
+ AccessEntity.class
+SHA-256-Digest: sWalWLVSp7zU6ohGT/DDSGWcF6HbLehyyMjzVFxSypc=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$6$3.class
-SHA1-Digest: N04kNib2SFsY5CHX6/Zu/4eorfI=
+Name: org/eclipse/sensinact/gateway/core/security/dao/UserDAO$2.class
+SHA-256-Digest: +eHfuglL4v29zROaBQRPJcRLn6SAUIlVrRhwKduQPKM=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$6$4.class
-SHA1-Digest: p8+HV+LSXz6ooheBwqsEJMzzNDE=
+Name: META-INF/services/org.eclipse.sensinact.gateway.core.security.Se
+ curedAccessFactory
+SHA-256-Digest: oBN6UJtohZZxHRlnWyyAFz2kr6kw786NS/2R/Z3kpic=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$6.class
-SHA1-Digest: oFHQm56amt4lmJcJ8jQ78SzmTGw=
+Name: org/eclipse/sensinact/gateway/core/security/entity/annotation/Ta
+ ble.class
+SHA-256-Digest: BMXDJB9WyXxUzP+pE6qNLNwFQJqaxpnHPsNhRHQGp6U=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$7.class
-SHA1-Digest: eKJqw6tyqMvqZsQS7kNhcQme6Q0=
+Name: org/eclipse/sensinact/gateway/core/security/dao/directive/Update
+ Directive.class
+SHA-256-Digest: 024bzEYtkkJlH3YkehV/BEbrd9Dku+TsxHSvTS4iTV4=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$8.class
-SHA1-Digest: 5+bvYxTWwdq69ag/QpYtMnH6dbU=
+Name: org/eclipse/sensinact/gateway/core/security/dao/AuthenticatedDAO
+ $1.class
+SHA-256-Digest: aYhf5Q7sWjChvAUe9wWo4SAzNEZZmGD4haFCwbMDUx0=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl$9.class
-SHA1-Digest: lyKEN1K6zlYhN4Im29h8buV5cAk=
+Name: org/eclipse/sensinact/gateway/core/security/dao/directive/KeyDir
+ ective.class
+SHA-256-Digest: bJtaoR+k8FM9XN/G2/un4E3w2ZesgM0MR6+aa57zkLc=
 
-Name: fr/cea/sna/gateway/core/security/impl/SecuredAccessImpl.class
-SHA1-Digest: T063xQBsRI3sUB6ftObBhUBQISU=
+Name: org/eclipse/sensinact/gateway/core/security/dao/AbstractSnaDAO$2
+ .class
+SHA-256-Digest: WFVdwwbjXBQbUM5lYFJt6Y1izUaB8/HZECd6q0S4jOg=
 
-Name: fr/cea/sna/gateway/core/security/impl/SessionsImpl.class
-SHA1-Digest: Niv7D6TUcnwKsSJhEcS60l9YDhc=
+Name: org/eclipse/sensinact/gateway/core/security/dao/UserAccessDAO.cl
+ ass
+SHA-256-Digest: ebrhVUwfGBEDhk8j4EGLlgwwZ4cAvMKZRg9ZvHFLsl8=
 
-Name: script/getMethodAccessibilities.sql
-SHA1-Digest: mMF2Nv55Oj3LJY057GHRdv24zyo=
+Name: org/eclipse/sensinact/gateway/core/security/entity/BundleEntity.
+ class
+SHA-256-Digest: vpqyPyqjlyWXdqN+AYt6Tkk9adhynl5AkcZBhGRiZsc=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/AuthenticatedAcc
+ essLevelDAO.class
+SHA-256-Digest: PCcrOX5uRFIQ7Z5gNyR/e8bzPqreQ+CWncI80Wf4DR4=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/ObjectDAO.class
+SHA-256-Digest: Cpx5jPIgjn5Oxjy9WxAus83VkK7zuHPi9tbofz3tq20=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/ApplicationEn
+ tity.class
+SHA-256-Digest: c2skiQ7ZbtJs7NabUYVeJZmoiA8hT57UwJ3wj8oIXDI=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/ImmutableSnaE
+ ntity.class
+SHA-256-Digest: +M7i/1yd8JGWduVXdikyzwgYx3WtJDzFBsmqOJ510q8=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/UserDAO$1.class
+SHA-256-Digest: fP0brP1fZCAW+tf/MPT9/XkKIgJXD6FKy93tv1cAVko=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/ObjectProfile
+ Entity.class
+SHA-256-Digest: yZ5o58tQdEKOQkHxEAhIplrJR8qjJ0mXffgp3fzQcGA=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/directive/KeyDir
+ ective$ForeignKeyEntry.class
+SHA-256-Digest: ii42FdNSP6OGgJQqNzpuLdKFpu+6hRFWWmXlO4ydIvc=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/BundleDAO$1.clas
+ s
+SHA-256-Digest: UtxuuFcZFRZ74o+ARv2a35dzkHTmjpWk6pfE4Ztckl4=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/AbstractSnaDAO$1
+ .class
+SHA-256-Digest: xRaAd/THrhTCnRGd9b8zWS7IPEMqczRY32clGXdwhJ0=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/ObjectProfileAcc
+ essDAO.class
+SHA-256-Digest: t0cZG9BB3VCknhQ2BVL1YnUzu0C2wAo7Nc5CgPUjzoI=
+
+Name: org/eclipse/sensinact/gateway/core/security/impl/SecuredAccessIm
+ pl$1.class
+SHA-256-Digest: 5UZjcJQ23AWv5PrWD3bmhcoa9k5DE9owx703JDI2CYI=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/AuthenticatedDAO
+ .class
+SHA-256-Digest: MPLHtsEqsxLqjaRnYlKeXqakPlOnT6y7LGeyklhxjBk=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/MethodDAO$2.clas
+ s
+SHA-256-Digest: WzADz3SRHRAQo8NFoOLng4p7KMSmOnaFgp3AOoRYL1k=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/ApplicationDAO$2
+ .class
+SHA-256-Digest: donuuZpQn3WJW1RnBI86jY3n/V1QP13uxnsLSoBNYsw=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/AgentDAO$3.class
+SHA-256-Digest: MkkUYC8pbRgE7/L9WTnkPh61hXU9nwicQ1te7rDo8bw=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/annotation/Co
+ lumn.class
+SHA-256-Digest: Jf3GYQh1kbscrnH96ryF6rsGHgrxAonbvjawx5175DM=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/ObjectAccessDAO$
+ 1.class
+SHA-256-Digest: jm2MVZLQ/vmsu4UDRXiMFHkSiiN7DsNyXT7ASrBHmOI=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/ObjectEntity.
+ class
+SHA-256-Digest: dimuRcKJZQJwiRydtqBYmLYAWMC2RmA8kggAGBIco5g=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/UserDAO.class
+SHA-256-Digest: cJjjhUPBCr+8txfeYNQeN7r89629LuthSzSdxngGeL0=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/ObjectAccessE
+ ntity.class
+SHA-256-Digest: zYIaeGRq9jrO1zjVk9kju5fbIBurzn5raPg735Fnd/A=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/UserDAO$3.class
+SHA-256-Digest: f4JFSiMBVqGaf04h/v6CcgL1DmPKkiyNcIFObNRSktI=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/AbstractSnaDAO$3
+ .class
+SHA-256-Digest: 81JPLkEMU6qsAAEei7LCAFzZL6KoZqoJppo9tqVWDic=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/ApplicationDAO$1
+ .class
+SHA-256-Digest: 6AYyf1bVxVroxwgLUkCabejz4K8cp9WGITNwqsQghJU=
+
+Name: about.html
+SHA-256-Digest: vuFwTp1xHKAQWF+DRiSVx6xqpwOvJaUcOSfU9wQtY+A=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/ApplicationDAO.c
+ lass
+SHA-256-Digest: N8yJUoZIYfQETd1rJ+6ATvTblroZd1SDIAhgjIt58Sk=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/Authenticated
+ AccessLevelEntity.class
+SHA-256-Digest: EBobgpOXqzuI9RAYvDVnq47G3c+nJFUNMQ9LAu+fWKs=
 
 Name: script/getObjectFromPath.sql
-SHA1-Digest: TtY2zYpzkBiPYdGMqZemXoikoas=
+SHA-256-Digest: b4x3farVZCfXb66QY+ijfyoxFeO2wGXCNocP91Axykw=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/ObjectDAO$1.clas
+ s
+SHA-256-Digest: z+i8DbKAnucqmSLe4nDShPXunqoGm1ulncoPGP1XtKw=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/UserEntity.cl
+ ass
+SHA-256-Digest: GnLOjknc8si7RVxIh2usv0TVg/DxN0yBnwvW/5ZzHJU=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/SnaEntity$Key
+ .class
+SHA-256-Digest: 1Da//goraqaQ8ftFq22AZ3GXj1N+htdDLZaqXm3yE78=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/MethodEntity.
+ class
+SHA-256-Digest: 5vbBYnktD2zl3wagODDmbm08rU8fiEDhxxWh6VBDdYo=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/ObjectAccessDAO.
+ class
+SHA-256-Digest: jb/9YJL/hAv6n2R7EQKX/Gb9TQkhzKqDhv1wuuf0NiM=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/directive/Delete
+ Directive.class
+SHA-256-Digest: 3SYFUK5zC8hdLPb+bF3y2ocbohaloxULvwzM3DFPhQ4=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/UserAccessDAO$2.
+ class
+SHA-256-Digest: uBzPXajXjTUC97L9Y9ltQq4SYi8jwVDPYOK++Ke0OTs=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/SnaEntity.cla
+ ss
+SHA-256-Digest: +iIPZaCm2objCynfsfVUb3iSum+k7gyiCcsBB3wKCu8=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/ObjectProfileAcc
+ essDAO$1.class
+SHA-256-Digest: +YjUcEl/CYJTLGBv/IQnBKa1ofRO/7trcpTQ/uCXj9M=
+
+Name: script/getMethodAccessibilities.sql
+SHA-256-Digest: 3jMemXwhSX7SAdr3xDQB81gZ00/1BBuzKLoda4p+6pc=
+
+Name: org/eclipse/sensinact/gateway/core/security/impl/AuthenticationS
+ erviceImpl.class
+SHA-256-Digest: mvWq5r2V044h7brfhFnuwkWCNxWX0cMHeVpopfSddXo=
+
+Name: org/eclipse/sensinact/gateway/core/security/impl/SecuredAccessIm
+ pl$2.class
+SHA-256-Digest: M8pnu+2IMSsZ1zG2q4CeFaQcPbNf0U8vwWwF065Ec2w=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/UserAccessDAO$1.
+ class
+SHA-256-Digest: 9yv+UWfRAvjNuNtiIJjwuFuTkVhdJjixe7Fw+aY9pC0=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/annotation/No
+ tNull.class
+SHA-256-Digest: +oMxZr7mR2SxTIbwGxiv3s+ssIFNI4DKhRX6zo+3ucw=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/directive/Select
+ Directive.class
+SHA-256-Digest: vhLoxaNVzOsQZscRO7JpMMHdLmBsgZLGqpHmFy/s1Iw=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/directive/KeyDir
+ ective$KeyEntry.class
+SHA-256-Digest: ZXaEA35tzKNG4mMYQD/KDTjkccMd9W1/YVLlEjsDfwE=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/annotation/Im
+ mutable.class
+SHA-256-Digest: n4nyVpMIB/oEtgA/jwsMG/oiT6ksDozpezxSnp8r08U=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/directive/Create
+ Directive.class
+SHA-256-Digest: dZMrp+LJ4yzBcoc7bV9CSeGeor9o5Quq+HGHMBmw+uo=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/BundleDAO$2.clas
+ s
+SHA-256-Digest: JQP6eXKbwsmtmchGFOGc1Gr1M12FS7dMLMiG15XhCVI=
+
+Name: org/eclipse/sensinact/gateway/core/security/entity/annotation/Pr
+ imaryKey.class
+SHA-256-Digest: s3BMKGxNt0GsY8mxJ2Rp6VOMS7GNi/6SknNKXF0shZc=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/ApplicationDAO$3
+ .class
+SHA-256-Digest: PKzlnrbPkcm2dnUR8ZdBBHcbhZnl7z19/e27C6FxROg=
+
+Name: org/eclipse/sensinact/gateway/core/security/dao/AbstractSnaDAO$U
+ serDefinedSelectStatement.class
+SHA-256-Digest: swOzHdp8QeVWkVwulNo6Rt0slA3E4W2qjEGiZd+zIoc=
+

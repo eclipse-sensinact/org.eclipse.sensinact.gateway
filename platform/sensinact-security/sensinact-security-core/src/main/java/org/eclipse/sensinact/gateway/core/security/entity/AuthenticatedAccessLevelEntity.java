@@ -10,36 +10,33 @@
  */
 package org.eclipse.sensinact.gateway.core.security.entity;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AccessLevel;
+import org.eclipse.sensinact.gateway.core.security.AccessLevelImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
-import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
 import org.json.JSONObject;
-
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.AccessLevelImpl;
-import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 
 /**
  * UserAccessLevel DAO Entity 
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@Table(value = "USER_ACCESS_LEVEL")
-@PrimaryKey(value = {"OID, SUID"})
-public class UserAccessLevelEntity extends ImmutableSnaEntity implements AccessLevel
+@Table(value = "AUTHENTICATED_ACCESS_LEVEL")
+public class AuthenticatedAccessLevelEntity extends ImmutableSnaEntity implements AccessLevel
 {
-	@Column(value = "SUID")
-	@ForeignKey(refer = "SUID", table = "SNAUSER")
-	private long user;
-	
-	@Column(value = "OID")
-	@ForeignKey(refer = "OID", table = "OBJECT")
-	private long object;
-	
-	@Column(value = "SUPUBLIC_KEY")
+	@Column(value = "UOID")
+	private long objectId;
+
+	@Column(value = "PUBLIC_KEY")
 	private String publicKey;
+	
+	@Column(value = "UID")
+	private long authenticatedId;
+	
+	@Column(value = "UAID")
+	private long userAccessId;
 	
 	@Column(value = "UALEVEL")
 	private int accessLevel;
@@ -51,7 +48,7 @@ public class UserAccessLevelEntity extends ImmutableSnaEntity implements AccessL
 	 * 		the {@link Mediator} allowing to
 	 * 		interact with the OSGi host environment
 	 */
-	public UserAccessLevelEntity(Mediator mediator)
+	public AuthenticatedAccessLevelEntity(Mediator mediator)
 	{
 		super(mediator);
 	}
@@ -64,7 +61,7 @@ public class UserAccessLevelEntity extends ImmutableSnaEntity implements AccessL
 	 * @param row the JSON formated description of the 
 	 * 		UserAccessLevelEntity to be instantiated
 	 */
-	public UserAccessLevelEntity(Mediator mediator, JSONObject row)
+	public AuthenticatedAccessLevelEntity(Mediator mediator, JSONObject row)
 	{
 		super(mediator, row);
 	}
@@ -80,17 +77,66 @@ public class UserAccessLevelEntity extends ImmutableSnaEntity implements AccessL
 	 * @param object
 	 * @param accessLevel
 	 */
-	public UserAccessLevelEntity(Mediator mediator, 
-			String publicKey, long user, long object, 
-			int accessLevel)
+	public AuthenticatedAccessLevelEntity(Mediator mediator, 
+			long objectId,String publicKey, long authenticatedId, 
+			long userAccessId,int accessLevel)
 	{
 		this(mediator);
-		this.setUser(user);
-		this.setObject(object);
+		this.setObjectId(objectId);
 		this.setPublicKey(publicKey);
+		this.setAuthenticatedId(authenticatedId);
+		this.setUserAccessId(userAccessId);
 		this.setAccessLevel(accessLevel);
 	}
 
+	/**
+	 * @param objectId
+	 */
+	public void setObjectId(long objectId)
+	{
+		this.objectId = objectId;
+	}
+
+	/**
+	 * @return
+	 */
+	public long getObjectId()
+	{
+		return this.objectId;
+	}
+	
+	/**
+	 * @param authenticatedId
+	 */
+	public void setAuthenticatedId(long authenticatedId) 
+	{
+		this.authenticatedId = authenticatedId;
+	}
+
+	/**
+	 * @return
+	 */
+	public long getAuthenticatedId() 
+	{
+		return this.authenticatedId;
+	}
+	
+	/**
+	 * @param userAccessId
+	 */
+	public void setUserAccessId(long userAccessId) 
+	{
+		this.userAccessId = userAccessId;
+	}
+
+	/**
+	 * @return
+	 */
+	public long getUserAccessId() 
+	{
+		return this.userAccessId;
+	}
+	
 	/**
 	 * 
 	 * @return the public key of the associated user
@@ -109,40 +155,20 @@ public class UserAccessLevelEntity extends ImmutableSnaEntity implements AccessL
     }
 
 	/**
-	 * @return the object identifier
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.security.AccessLevel#getLevel()
 	 */
-    public long getObject()
-    {
-	    return object;
-    }
-
-	/**
-	 * @param object the object identifier 
-	 * to set
-	 */
-    public void setObject(long object)
-    {
-	    this.object = object;
-    }
-
-	/**
-	 * @return the user identifier
-	 */
-	public long getUser() {
-		return user;
-	}
-
-	/**
-	 * @param user the user identifier to set
-	 */
-	public void setUser(long user) {
-		this.user = user;
+	@Override
+	public int getLevel() 
+	{
+		return this.getAccessLevel();
 	}
 	
 	/**
 	 * @return access level
 	 */
-	public int getLevel() 
+	public int getAccessLevel() 
 	{
 		return this.accessLevel;
 	}

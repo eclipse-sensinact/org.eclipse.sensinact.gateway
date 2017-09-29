@@ -15,7 +15,6 @@ import java.security.InvalidKeyException;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
-import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.core.security.UserKey;
 import org.eclipse.sensinact.gateway.core.security.dao.DAOException;
 import org.eclipse.sensinact.gateway.core.security.dao.UserDAO;
@@ -34,39 +33,27 @@ public class AuthenticationServiceImpl implements AuthenticationService
 	}
 	
 	/**
+	 * @throws InvalidKeyException 
+	 * @throws DAOException
+	 *  
 	 * @inheritDoc
 	 * 
 	 * @see AuthenticationService#
 	 * getUserId(Credentials)
 	 */
 	@Override
-	public UserKey buildKey(Credentials credentials)
+	public UserKey buildKey(Credentials credentials) throws Exception
 	{
-		Session.Key key = new Session.Key();
-		try 
-		{
-			String md5 = CryptoUtils.cryptWithMD5(credentials.password);
-			
-//			System.out.println("---------------------------");
-//			System.out.println(credentials.password + "==" + md5);
-//			System.out.println("---------------------------");
-			
-			UserEntity userEntity = this.userDAO.find(
-					credentials.login, md5);
-			
-			key.setUid(userEntity.getIdentifier());
-			key.setPublicKey(userEntity.getPublicKey());
-			
-			
-		} catch (DAOException e) 
-		{
-			mediator.error(e);
-		}
-		catch (InvalidKeyException e)
-		{
-			mediator.error(e);
-		}
-		return key;
+		String md5 = CryptoUtils.cryptWithMD5(credentials.password);
+		
+//		System.out.println("---------------------------");
+//		System.out.println(credentials.password + "==" + md5);
+//		System.out.println("---------------------------");
+		
+		UserEntity userEntity = this.userDAO.find(
+				credentials.login, md5);
+		
+		return new UserKey(userEntity.getPublicKey());		
 	}
 
 }

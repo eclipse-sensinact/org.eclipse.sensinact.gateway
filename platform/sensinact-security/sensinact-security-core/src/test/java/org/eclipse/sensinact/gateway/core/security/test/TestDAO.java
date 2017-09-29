@@ -11,6 +11,7 @@
 
 package org.eclipse.sensinact.gateway.core.security.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -251,9 +252,9 @@ public class TestDAO
 		
 		Object[][] objects = new Object[][]
 		{
-			new Object[]{5, 4, "/slider/cursor/position", 3, "position", 1},
-			new Object[]{3, 2, "/slider/[^/]+/location", 3, "location", 1},
-			new Object[]{4, 1, "/slider/cursor", 3, "cursor", 1}
+			new Object[]{6, 5, "/slider/cursor/position", 3, "position", 1},
+			new Object[]{4, 3, "/slider/[^/]+/location", 3, "location", 1},
+			new Object[]{5, 2, "/slider/cursor", 3, "cursor", 1}
 		};
 		String[] paths = new String[]{
 				"/slider/cursor/position",
@@ -316,11 +317,11 @@ public class TestDAO
 	public void testSelectObjectChildren() throws DAOException
 	{
 		ObjectDAO objectDAO = new ObjectDAO(mediator);
-		List<ObjectEntity> list = objectDAO.findChildren(1l);
+		List<ObjectEntity> list = objectDAO.findChildren(2l);
 		
 		assertTrue(list.size() == 2);
-		assertTrue(list.get(0).getIdentifier() == 2l);
-		assertTrue(list.get(1).getIdentifier() == 4l);		
+		assertTrue(list.get(0).getIdentifier() == 3l);
+		assertTrue(list.get(1).getIdentifier() == 5l);		
 	}
 
 	@Test
@@ -356,9 +357,9 @@ public class TestDAO
 		ObjectDAO objectDAO = new ObjectDAO(mediator);
 		List<ObjectEntity> list = objectDAO.select(
 				"getObjectFromPath","/slider/cursor/position");	
-		assertTrue(list.size() == 10);
+		assertEquals(11,list.size());
 	}
-
+	
 	@Test(expected=DAOException.class)
 	public void testImmutableCreate() throws DAOException
 	{
@@ -402,7 +403,7 @@ public class TestDAO
 	{
 		ObjectDAO objectDAO = new ObjectDAO(mediator);		
 		ObjectEntity entity = new ObjectEntity(
-				mediator, 2l, 2l, "admin", 0, 1, 1, null);
+				mediator, 2l, 2l, "admin", 0, 1, 2, null);
 		objectDAO.create(entity);
 		
 		long identifier = entity.getIdentifier();

@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.security.entity.AgentEntity;
+import org.eclipse.sensinact.gateway.core.security.entity.ApplicationEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.AuthenticatedEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectProfileEntity;
@@ -45,6 +47,8 @@ public class AuthenticatedDAO extends AbstractMutableSnaDAO<AuthenticatedEntity>
 
 	private ObjectDAO objectDAO = null;
 	private UserDAO userDAO = null;
+	private AgentDAO agentDAO = null;
+	private ApplicationDAO applicationDAO = null;
 	
 	/**
 	 * Constructor
@@ -59,6 +63,8 @@ public class AuthenticatedDAO extends AbstractMutableSnaDAO<AuthenticatedEntity>
 	    super(mediator, AuthenticatedEntity.class);
 	    this.objectDAO = new ObjectDAO(mediator);
 	    this.userDAO = new UserDAO(mediator);
+	    this.agentDAO = new AgentDAO(mediator);
+	    this.applicationDAO = new ApplicationDAO(mediator);
     }
     
     
@@ -75,7 +81,7 @@ public class AuthenticatedDAO extends AbstractMutableSnaDAO<AuthenticatedEntity>
      * 
      * @throws DAOException If something fails at datastore level.
      */
-    public AuthenticatedEntity find(String path, long uid) 
+    public AuthenticatedEntity findFromUser(String path, long uid) 
     		throws DAOException
     {
     	AuthenticatedEntity entity = null;
@@ -86,7 +92,57 @@ public class AuthenticatedDAO extends AbstractMutableSnaDAO<AuthenticatedEntity>
     	}
     	return entity;
     }
-	  
+
+    /**
+     * Returns the {@link AuthenticatedEntity} from the datastore
+     * matching the given Long identifier, otherwise null.
+     * 
+     * @param objectProfileEntityId
+     * 		The Long identifier specifying the primary key of 
+     * 		the {@link ObjectProfileEntity} to be returned.
+     * @return 
+     * 		the {@link ObjectProfileEntity} from the datastore matching 
+     * 		the given Long identifier, otherwise null.
+     * 
+     * @throws DAOException If something fails at datastore level.
+     */
+    public AuthenticatedEntity findFromAgent(String path, long aid) 
+    		throws DAOException
+    {
+    	AuthenticatedEntity entity = null;
+    	AgentEntity agent = this.agentDAO.find(aid);
+    	if(agent != null)
+    	{
+    		entity = this.find(path, agent.getPublicKey());
+    	}
+    	return entity;
+    }
+
+    /**
+     * Returns the {@link AuthenticatedEntity} from the datastore
+     * matching the given Long identifier, otherwise null.
+     * 
+     * @param objectProfileEntityId
+     * 		The Long identifier specifying the primary key of 
+     * 		the {@link ObjectProfileEntity} to be returned.
+     * @return 
+     * 		the {@link ObjectProfileEntity} from the datastore matching 
+     * 		the given Long identifier, otherwise null.
+     * 
+     * @throws DAOException If something fails at datastore level.
+     */
+    public AuthenticatedEntity findFromApplication(String path, long appid) 
+    		throws DAOException
+    {
+    	AuthenticatedEntity entity = null;
+    	ApplicationEntity application = this.applicationDAO.find(appid);
+    	if(application != null)
+    	{
+    		entity = this.find(path, application.getPublicKey());
+    	}
+    	return entity;
+    }
+    
     /**
      * Returns the {@link ObjectEntity} from the datastore 
      * matching the given Long identifier, otherwise null.
@@ -108,7 +164,7 @@ public class AuthenticatedDAO extends AbstractMutableSnaDAO<AuthenticatedEntity>
     	List<AuthenticatedEntity> authenticatedEntities = 
     		super.select(new HashMap<String,Object>(){{
     		this.put("OID", objectEntity.getIdentifier());
-    		this.put("SUPUBLIC_KEY",publicKey);}});
+    		this.put("PUBLIC_KEY",publicKey);}});
     	
     	if(authenticatedEntities.size() != 1)
     	{
