@@ -23,13 +23,15 @@ import org.eclipse.sensinact.gateway.app.manager.json.AppContainer;
 import org.eclipse.sensinact.gateway.app.manager.json.AppJsonConstant;
 import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.*;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.method.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.core.security.Sessions;
 import org.eclipse.sensinact.gateway.util.UriUtils;
@@ -76,6 +78,9 @@ public class TestComponentInstance extends TestCase implements TestResult {
     @Mock
     private Resource resource;
 
+    @Mock
+    private Core core;
+
     private SnaMessage message;
     private int result;
 
@@ -103,8 +108,7 @@ public class TestComponentInstance extends TestCase implements TestResult {
         ServiceReference[] serviceReferencesResult1 = new ServiceReference[]{serviceReferenceResult1};
 
         // Mock of the session
-        Session session = Mockito.mock(Session.class);
-        Sessions.SESSIONS.set(session);
+        final Session session = Mockito.mock(Session.class);
 
         // Mock of the responses
         GetResponse getResponse = Mockito.mock(GetResponse.class);
@@ -178,16 +182,12 @@ public class TestComponentInstance extends TestCase implements TestResult {
                 .thenReturn(getResponse);
         Mockito.when(resource.get(DataResource.VALUE))
                 .thenReturn(getResponse);
-        Mockito.when(session.<Resource>getFromUri(Mockito.anyString()))
+        Mockito.when(session.resource(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
                 .thenReturn(resource);
         Mockito.when(subscribeResponse.getResponse(String.class, SnaConstants.SUBSCRIBE_ID_KEY))
                 .thenReturn("id");
         Mockito.when(resource.subscribe(Mockito.anyString(), Mockito.any(Recipient.class), Mockito.anySet()))
                 .thenReturn(subscribeResponse);
-        Mockito.when(session.<Resource>getFromUri(Mockito.anyString()))
-                .thenReturn(resource);
-        Mockito.when(session.getResource(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(resource);
         Mockito.when(device.getName())
                 .thenReturn("TestAppDevice");
         Mockito.when(device.getPath())
@@ -243,6 +243,33 @@ public class TestComponentInstance extends TestCase implements TestResult {
                         return serviceRegistration;
                     }
                 });
+
+        Mockito.when(core.getApplicationSession(
+        	Mockito.any(Mediator.class), Mockito.anyString())
+        		).thenAnswer(new Answer<Session>()
+				{
+					@Override
+					public Session answer(InvocationOnMock invocation)
+					        throws Throwable
+					{
+						return session;
+					}
+			
+				});
+        
+        Mockito.when(mediator.callService(Mockito.eq(Core.class), 
+        Mockito.any(Executable.class))).then(
+		new Answer()
+		{
+			@Override
+			public Object answer(InvocationOnMock invocation)
+			        throws Throwable
+			{
+				Object result = ((Executable)invocation.getArguments()[1]
+						).execute(core);
+				return result;
+			}
+		});
     }
 
     @Test
@@ -261,8 +288,6 @@ public class TestComponentInstance extends TestCase implements TestResult {
                     .getJSONObject(0).getString(AppJsonConstant.VALUE);
             JSONObject json = new JSONObject(content).getJSONArray("parameters")
                     .getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
-
-            Session session = Sessions.SESSIONS.get();
 
             AppContainer container = new AppContainer(mediator, name, json);
 
@@ -295,7 +320,7 @@ public class TestComponentInstance extends TestCase implements TestResult {
                 e.printStackTrace();
             }
 
-            application.start(session);
+            application.start();
 
             message = new AppTestSnaMessage(mediator,
                     "/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider",
@@ -316,7 +341,7 @@ public class TestComponentInstance extends TestCase implements TestResult {
 
             assertTrue(result == 2);
 
-            application.stop(session);
+            application.stop();
         }
     }
 

@@ -8,6 +8,7 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
+
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal;
 
 import java.util.List;

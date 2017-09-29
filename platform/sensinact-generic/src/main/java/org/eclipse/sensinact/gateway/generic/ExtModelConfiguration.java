@@ -31,7 +31,7 @@ import org.eclipse.sensinact.gateway.core.ModelConfiguration;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
-import org.eclipse.sensinact.gateway.core.security.AccessTree;
+import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
 import org.eclipse.sensinact.gateway.generic.parser.Commands;
 import org.eclipse.sensinact.gateway.generic.parser.XmlResourceConfigHandler;
 
@@ -120,7 +120,7 @@ public class ExtModelConfiguration extends ModelConfiguration
      * @throws SAXException 
      * @throws ParserConfigurationException 
 	 */
-	public ExtModelConfiguration(Mediator mediator,  AccessTree accessTree,
+	public ExtModelConfiguration(Mediator mediator,  AccessTreeImpl accessTree,
 			Class<? extends Packet> packetType, String configurationFile,
 			Map<String,String> defaults) 
 			throws ParserConfigurationException, SAXException, IOException
@@ -139,7 +139,7 @@ public class ExtModelConfiguration extends ModelConfiguration
 	 * @throws SAXException 
 	 * @throws ParserConfigurationException 
 	 */
-	public ExtModelConfiguration(Mediator mediator,  AccessTree accessTree, 
+	public ExtModelConfiguration(Mediator mediator,  AccessTreeImpl accessTree, 
 			Class<? extends Packet> packetType, 
 			ResourceConfigBuilder defaultResourceConfigBuilder, 
 			String configurationFile, Map<String,String> defaults) 
@@ -165,7 +165,7 @@ public class ExtModelConfiguration extends ModelConfiguration
 	 * @throws ParserConfigurationException 
 	 */
 	protected ExtModelConfiguration(Mediator mediator,  
-			AccessTree accessTree, 
+			AccessTreeImpl accessTree, 
 			Class<? extends Packet> packetType, 
 			ResourceConfigBuilder defaultResourceConfigBuilder,
 			String configurationFile,
@@ -194,7 +194,7 @@ public class ExtModelConfiguration extends ModelConfiguration
      * @throws ParserConfigurationException 
      */
     public ExtModelConfiguration(Mediator mediator,  
-			AccessTree accessTree, 
+			AccessTreeImpl accessTree, 
 			Class<? extends Packet> packetType, 
 			ResourceConfigBuilder defaultResourceConfigBuilder, 
 			URL configurationFile,

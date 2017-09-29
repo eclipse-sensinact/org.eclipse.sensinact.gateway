@@ -44,8 +44,11 @@ public class AppManagerFactory {
      * @throws InvalidServiceException
      * @throws InvalidValueException
      */
-    public AppManagerFactory(AppServiceMediator mediator) throws InvalidResourceException,
-            InvalidServiceProviderException, InvalidServiceException, InvalidValueException {
+    public AppManagerFactory(AppServiceMediator mediator) 
+    		throws InvalidResourceException,
+            InvalidServiceProviderException,
+            InvalidServiceException, InvalidValueException
+    {
         this.modelInstance = new ModelInstanceBuilder(
                 mediator, ModelInstance.class, ModelConfiguration.class)
                 .withStartAtInitializationTime(true)
@@ -59,9 +62,9 @@ public class AppManagerFactory {
         ServiceImpl adminService =  this.serviceProvider.getAdminService();
 
         ResourceImpl installResource = adminService.addActionResource(AppConstant.INSTALL, ActionResource.class);
-        
+        AccessMethod.Type act = AccessMethod.Type.valueOf(AccessMethod.ACT);
         installResource.registerExecutor(
-                new Signature(mediator, AccessMethod.Type.ACT, 
+                new Signature(mediator, act, 
                 new Class[]{String.class, JSONObject.class}, null),
                 new AppInstallExecutor(mediator, this.serviceProvider),
                 AccessMethodExecutor.ExecutionPolicy.AFTER);
@@ -69,7 +72,7 @@ public class AppManagerFactory {
         ResourceImpl uninstallResource = adminService.addActionResource(AppConstant.UNINSTALL, ActionResource.class);
         
         uninstallResource.registerExecutor(
-                new Signature(mediator, AccessMethod.Type.ACT, new Class[]{String.class}, null),
+                new Signature(mediator, act, new Class[]{String.class}, null),
                 new AppUninstallExecutor(mediator, this.serviceProvider),
                 AccessMethodExecutor.ExecutionPolicy.AFTER);
 
@@ -82,17 +85,16 @@ public class AppManagerFactory {
     /**
      * Uninstall properly the AppManager service provider
      */
-    public void deleteAppManager() throws Exception {
-        Session session = Sessions.SESSIONS.get();
-
-        for(ServiceImpl service : serviceProvider.getServices()) {
-            if (service instanceof ApplicationService) {
-                ((ApplicationService) service).getApplication().stop(session);
+    public void deleteAppManager() throws Exception 
+    {
+        for(ServiceImpl service : serviceProvider.getServices())
+        {
+            if (service instanceof ApplicationService) 
+            {
+                ((ApplicationService) service).getApplication().stop();
             }
         }
-
         modelInstance.unregister();
-
         jsonSchemaListener.stop();
     }
 }

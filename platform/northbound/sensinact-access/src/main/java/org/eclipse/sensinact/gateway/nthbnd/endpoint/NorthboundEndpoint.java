@@ -26,8 +26,8 @@ import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
-import org.eclipse.sensinact.gateway.core.method.UnsubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.ResponseFormat;
@@ -57,7 +57,7 @@ public class NorthboundEndpoint
 	 */
 	public String getSessionToken()
 	{
-		return this.session.getSessionKey().getToken();
+		return this.session.getId();
 	}
 	
 	/**
@@ -81,7 +81,6 @@ public class NorthboundEndpoint
 		{
 			Method method = getClass().getDeclaredMethod(
 			    request.getMethod(), parameterTypes);
-			
 			result = method.invoke(this, Argument.getParameters(
 					arguments));
 			
@@ -102,7 +101,7 @@ public class NorthboundEndpoint
      */
     public ServiceProvider serviceProvider(String serviceProviderId)
     {
-        ServiceProvider serviceProvider = session.getServiceProvider(
+        ServiceProvider serviceProvider = session.serviceProvider(
         		serviceProviderId);
         return serviceProvider;
     }
@@ -117,7 +116,7 @@ public class NorthboundEndpoint
      */
     public Service service(String serviceProviderId, String serviceId)
     {
-    	Service service = session.getService(
+    	Service service = session.service(
     			serviceProviderId, serviceId);
 		return service;
     }
@@ -133,7 +132,7 @@ public class NorthboundEndpoint
     public Resource resource(String serviceProviderId, 
     		String serviceId, String resourceId)
     {
-        Resource resource = session.getResource(serviceProviderId, 
+        Resource resource = session.resource(serviceProviderId, 
         		serviceId, resourceId);
         return resource;
     }
@@ -146,7 +145,7 @@ public class NorthboundEndpoint
     public JSONObject serviceProvidersList()
     {
         JSONArray serviceProvidersJson = new JSONArray();
-        Set<ServiceProvider> serviceProviders = session.getServiceProviders();
+        Set<ServiceProvider> serviceProviders = session.serviceProviders();
 
         for (ServiceProvider provider : serviceProviders) 
         {
@@ -372,7 +371,8 @@ public class NorthboundEndpoint
         {
             return AccessMethodResponse.error(mediator, UriUtils.getUri(
             	new String[]{serviceProviderId, serviceId, resourceId}), 
-            	AccessMethod.Type.GET, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+            	AccessMethod.Type.valueOf(AccessMethod.GET), 
+            	SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
             		"sensinact Resource '" + resourceId + "' not found",
             		null);
         }
@@ -402,7 +402,8 @@ public class NorthboundEndpoint
         {
             return AccessMethodResponse.error(mediator, UriUtils.getUri(
             	new String[]{serviceProviderId, serviceId, resourceId}), 
-            	AccessMethod.Type.SET, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+            	AccessMethod.Type.valueOf(AccessMethod.SET), 
+            	SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
             		"sensinact Resource '" + resourceId + "' not found",
             		null);
         } 
@@ -429,7 +430,7 @@ public class NorthboundEndpoint
         {
             return AccessMethodResponse.error(mediator, UriUtils.getUri(
             	new String[]{serviceProviderId, serviceId, resourceId}), 
-            	AccessMethod.Type.ACT, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+            	AccessMethod.Type.valueOf(AccessMethod.ACT), SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
             		"sensinact Resource '" + resourceId + "' not found",
             		null);
         }
@@ -437,7 +438,7 @@ public class NorthboundEndpoint
         {
             return AccessMethodResponse.error(mediator, UriUtils.getUri(
             	new String[]{serviceProviderId, serviceId, resourceId}), 
-            	AccessMethod.Type.ACT, SnaErrorfulMessage.BAD_REQUEST_ERROR_CODE,
+            		AccessMethod.Type.valueOf(AccessMethod.ACT), SnaErrorfulMessage.BAD_REQUEST_ERROR_CODE,
             	"Resource '" + resource.getPath() +  "' is not an ActionResource",
             		null);
         }
@@ -468,8 +469,8 @@ public class NorthboundEndpoint
         {
             AccessMethodResponse errorResponse = AccessMethodResponse.error(
                 this.mediator,UriUtils.getUri(new String[]{serviceProviderId,
-                  serviceId,resourceId}), AccessMethod.Type.SUBSCRIBE, 
-                    SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+                  serviceId,resourceId}), AccessMethod.Type.valueOf(
+                    AccessMethod.SUBSCRIBE),  SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
                     "Cannot create the instance: resource doesn't exist",
                        null);
             
@@ -501,8 +502,8 @@ public class NorthboundEndpoint
         {
             AccessMethodResponse errorResponse = AccessMethodResponse.error(
                this.mediator, UriUtils.getUri(new String[]{serviceProviderId,
-                 serviceId,resourceId}),AccessMethod.Type.UNSUBSCRIBE, 
-                   SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+                 serviceId,resourceId}),AccessMethod.Type.valueOf(
+                	AccessMethod.UNSUBSCRIBE), SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
                     "Cannot create the instance: resource doesn't exist", 
                       null);
             

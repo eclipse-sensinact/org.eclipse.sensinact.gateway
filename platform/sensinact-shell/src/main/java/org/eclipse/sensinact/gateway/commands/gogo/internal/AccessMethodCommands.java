@@ -17,15 +17,15 @@ import org.json.JSONObject;
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.core.method.ActResponse;
-import org.eclipse.sensinact.gateway.core.method.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
 import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceDescription;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.UnsubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 
 public class AccessMethodCommands {
 
@@ -53,7 +53,7 @@ public class AccessMethodCommands {
                        @Descriptor("the resource ID") String resourceID,
                        @Descriptor("the method type") String methodType) {
         StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().getServiceProvider(serviceProviderID).getService(serviceID).getResource(resourceID);
+        Resource resource = mediator.getSession().serviceProvider(serviceProviderID).getService(serviceID).getResource(resourceID);
 
         if (resource != null) {
             JSONArray methods = new JSONObject(resource.getDescription().getDescription()).getJSONArray("accessMethods");
@@ -101,7 +101,7 @@ public class AccessMethodCommands {
                     @Descriptor("the resource ID") String resourceID)
     {
         StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().getResource(serviceProviderID, serviceID, resourceID);
+        Resource resource = mediator.getSession().resource(serviceProviderID, serviceID, resourceID);
 
         if(resource != null)
         {
@@ -135,7 +135,7 @@ public class AccessMethodCommands {
                     @Descriptor("the attribute ID") String attributeID)
     {
         StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().getResource(serviceProviderID, serviceID, resourceID);
+        Resource resource = mediator.getSession().resource(serviceProviderID, serviceID, resourceID);
 
         if (resource != null)
         {
@@ -195,8 +195,7 @@ public class AccessMethodCommands {
                     @Descriptor("the resource value") Object value) 
     {
         StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().getResource(
-        		serviceProviderID, serviceID, resourceID);
+        Resource resource = mediator.getSession().resource(serviceProviderID, serviceID, resourceID);
 
         if (resource != null)
         {
@@ -239,7 +238,7 @@ public class AccessMethodCommands {
                     @Descriptor("the resource ID") String resourceID) 
     {
         StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().getResource(serviceProviderID, serviceID, resourceID);
+        Resource resource = mediator.getSession().resource(serviceProviderID, serviceID, resourceID);
 
         if(resource != null)
         {
@@ -285,7 +284,7 @@ public class AccessMethodCommands {
                     Object... parameters)
     {
         StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().getResource(serviceProviderID, serviceID, resourceID);
+        Resource resource = mediator.getSession().resource(serviceProviderID, serviceID, resourceID);
 
         if(resource != null)
         {
@@ -339,7 +338,7 @@ public class AccessMethodCommands {
                             @Descriptor("the subscription ID") String subscriptionID) 
     {
         StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().getResource(serviceProviderID, serviceID, resourceID);
+        Resource resource = mediator.getSession().resource(serviceProviderID, serviceID, resourceID);
 
         if (resource != null) 
         {

@@ -15,6 +15,7 @@ import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.GenericMqttAgen
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.osgi.framework.BundleContext;
 
@@ -49,14 +50,17 @@ public abstract class AbstractMqttActivator extends AbstractActivator<Mediator> 
         this.agent = new GenericMqttAgent(broker, qos);
         this.handler.setAgent(agent);
 
-        this.registration = mediator.callService(SecuredAccess.class,
-                new Executable<SecuredAccess,String>() {
-                    @Override
-                    public String execute(SecuredAccess service) throws Exception {
-                        return service.registerAgent(mediator, AbstractMqttActivator.this.handler, null);
-                    }
-                }
-        );
+        this.registration = mediator.callService(Core.class,
+        new Executable<Core,String>() 
+        {
+            @Override
+            public String execute(Core service) throws Exception
+            {
+                return service.registerAgent(mediator, 
+                		AbstractMqttActivator.this.handler, 
+                		null);
+            }
+        });
     }
 
     /**
@@ -69,14 +73,17 @@ public abstract class AbstractMqttActivator extends AbstractActivator<Mediator> 
             super.mediator.debug("Stopping MQTT agent");
         }
 
-        mediator.callService(SecuredAccess.class,
-                new Executable<SecuredAccess,Void>() {
-                    @Override
-                    public Void execute(SecuredAccess service) throws Exception {
-                        service.unregisterAgent(AbstractMqttActivator.this.registration);
-                        return null;
-                    }
-                });
+        mediator.callService(Core.class,
+        new Executable<Core,Void>()
+        {
+            @Override
+            public Void execute(Core service) throws Exception
+            {
+                service.unregisterAgent(
+                	AbstractMqttActivator.this.registration);
+                return null;
+            }
+        });
 
         this.registration = null;
         this.handler = null;

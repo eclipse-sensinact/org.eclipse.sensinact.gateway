@@ -19,24 +19,12 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-//import javax.xml.parsers.DocumentBuilder;
-//import javax.xml.parsers.DocumentBuilderFactory;
-//import javax.xml.parsers.ParserConfigurationException;
-//import javax.xml.transform.OutputKeys;
-//import javax.xml.transform.Transformer;
-//import javax.xml.transform.TransformerException;
-//import javax.xml.transform.TransformerFactory;
-//import javax.xml.transform.dom.DOMSource;
-//import javax.xml.transform.stream.StreamResult;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreConnectionProvider;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-//import org.w3c.dom.Document;
-//import org.w3c.dom.Element;
-//import java.io.StringWriter;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
@@ -45,13 +33,14 @@ import org.eclipse.sensinact.gateway.datastore.api.UnableToLoadDriverClassExcept
 
 /**
  * {@link DataStoreService} service implementation
+ * 
+ * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 //insert method must be implemented by the extended JdbcDataStoreService
 //because retrieving the last inserted row identifier depends on the SGBD
 //in use
 public abstract class JdbcDataStoreService implements DataStoreService
 {	
-	
 	/**
 	 * Returns the {@link DataStoreConnectionProvider} providing
 	 * JDBC {@link Connection}s
@@ -100,64 +89,7 @@ public abstract class JdbcDataStoreService implements DataStoreService
 	    }
 		this.simpleDbName = dbName.substring(
 				dbName.lastIndexOf(File.separatorChar)+1);
-	}	
-	
-//	/**
-//	 * Convert a results set to an XML string. The resulting XML is
-//	 * written to the {@link StringWriter} passed as parameter
-//	 *  
-//	 * @param resultSet
-//	 * 		the results set to convert 
-//	 * 
-//	 * @throws ParserConfigurationException
-//	 * 		if an error occurred during 
-//	 * @throws TransformerException
-//	 * 		if an error occurred during the transformation into XML String
-//	 * @throws SQLException
-//	 * 		if an error occurred during the manipulation of the results set
-//	 */
-//	private void resultSetToXML(ResultSet resultSet, 
-//			StringWriter stringWriter)
-//			throws ParserConfigurationException, 
-//			TransformerException, SQLException
-//	{
-//		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-//	    DocumentBuilder builder = factory.newDocumentBuilder();
-//	    Document doc = builder.newDocument();
-//	    
-//	    Element results = doc.createElement("Results");
-//	    doc.appendChild(results);
-//	    
-//		ResultSetMetaData rsmd = resultSet.getMetaData();
-//	    int colCount = rsmd.getColumnCount();
-//
-//	    while (resultSet.next())
-//	    {
-//	      Element row = doc.createElement("Row");
-//	      results.appendChild(row);
-//	      
-//	      for (int i = 1; i <= colCount; i++) 
-//	      {
-//	        String columnName = rsmd.getColumnName(i);
-//	        Object value = resultSet.getObject(i);
-//	        Element node = doc.createElement(columnName);
-//	        node.setAttribute("sqlitetype", rsmd.getColumnTypeName(i));
-//	        node.appendChild(doc.createTextNode(value != null?value.toString():""));	        
-//	        row.appendChild(node);
-//	      }
-//	    }
-//	    DOMSource domSource = new DOMSource(doc);
-//	    
-//	    TransformerFactory transformerFactory = TransformerFactory.newInstance();
-//	    Transformer transformer = transformerFactory.newTransformer();
-//	    
-//	    transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-//	    transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-//	    transformer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
-//	    	    
-//	    StreamResult sr = new StreamResult(stringWriter);	    
-//	    transformer.transform(domSource, sr);
-//	}
+	}
 	
 	/**
 	 * Converts the {@link ResultSet} passed as parameter into

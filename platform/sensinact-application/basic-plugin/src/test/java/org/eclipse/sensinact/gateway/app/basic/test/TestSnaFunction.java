@@ -35,7 +35,7 @@ import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.TypeConfig;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
-import org.eclipse.sensinact.gateway.core.security.AccessTree;
+import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.Session;
@@ -80,14 +80,14 @@ public class TestSnaFunction extends TestCase {
         AuthorizationService authorization = Mockito.mock(AuthorizationService.class);
         SecuredAccess securedAccess = Mockito.mock(SecuredAccess.class);
 
-        Mockito.when(authorization.getUserAccessLevelOption(Mockito.anyString(), 
+        Mockito.when(authorization.getAuthenticatedAccessLevelOption(Mockito.anyString(), 
         		Mockito.anyLong())).thenReturn(AccessLevelOption.ANONYMOUS);
         
-        Mockito.when(authorization.getUserAccessLevelOption(Mockito.anyString(), 
+        Mockito.when(authorization.getAuthenticatedAccessLevelOption(Mockito.anyString(), 
         		Mockito.anyString())).thenReturn(AccessLevelOption.ANONYMOUS);
         
         Mockito.when(securedAccess.getAccessTree(Mockito.any(String.class))
-        	).thenReturn(new AccessTree(mediator).withAccessProfile(
+        	).thenReturn(new AccessTreeImpl(mediator).withAccessProfile(
                 		AccessProfileOption.ALL_ANONYMOUS));
 
         BundleContext context = Mockito.mock(BundleContext.class);
@@ -133,9 +133,6 @@ public class TestSnaFunction extends TestCase {
         Mockito.when(context.getService(referenceAuth)).thenReturn(authorization);
         
         ServiceRegistration registration = Mockito.mock(ServiceRegistration.class);
-
-        Mockito.when(securedAccess.register(Mockito.any(SensiNactResourceModel.class))
-        		).thenReturn(registration);
         
         Mockito.when(context.registerService(Mockito.eq(SensiNactResourceModel.class),
         		Mockito.any(SensiNactResourceModel.class),
@@ -169,13 +166,18 @@ public class TestSnaFunction extends TestCase {
         ServiceProviderImpl serviceProvider = modelInstance.getRootElement();        
         ServiceImpl service = serviceProvider.addService("LightService_SimulatedLight_001");        
         ResourceImpl resource = service.addDataResource(PropertyResource.class, "DIM", int.class, 0);
-        dimResource = resource.getProxy(new Session.Key(){{ this.setUid(0); this.setToken("xxxxx000000");}});
+        dimResource = resource.getProxy("xxxxx000000");
 
-        Mockito.when(session.<Resource>getFromUri(Mockito.eq("/SimulatedLight_001/LightService_SimulatedLight_001/TURN_ON")))
+        Mockito.when(session.resource(Mockito.eq("SimulatedLight_001"), 
+        		Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("TURN_ON")))
                 .thenReturn(new StateActionResource(mediator, "TURN_ON", this));
-        Mockito.when(session.<Resource>getFromUri(Mockito.eq("/SimulatedTV_001/DisplayService_SimulatedTV_001/DISPLAY")))
+        
+        Mockito.when(session.resource(Mockito.eq("SimulatedTV_001"),
+        		Mockito.eq("DisplayService_SimulatedTV_001"),Mockito.eq("DISPLAY")))
                 .thenReturn(new DisplayActionResource(mediator, this));
-        Mockito.when(session.<Resource>getFromUri(Mockito.eq("/SimulatedLight_001/LightService_SimulatedLight_001/DIM")))
+        
+        Mockito.when(session.resource(Mockito.eq("SimulatedLight_001"), 
+        		Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("DIM")))
                 .thenReturn(dimResource);
     }
 

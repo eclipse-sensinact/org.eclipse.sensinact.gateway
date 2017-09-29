@@ -18,10 +18,13 @@ import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Attribute;
+import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
+import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.message.*;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.Session;
+import org.eclipse.sensinact.gateway.util.UriUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,6 +57,16 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
         this.registrations = new ArrayList<String>();
     }
 
+    private Resource getResource(Session session, String uri)
+    {
+    	String[] uriElements = UriUtils.getUriElements(uri);
+    	if(uriElements.length != 3)
+    	{
+    		return null;
+    	}
+    	return session.resource(uriElements[0],uriElements[1],uriElements[2]);
+    }
+    
     /**
      * @see AbstractAppWatchDog#start(Session)
      */
@@ -64,7 +77,7 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
         {
             try
             {
-                session.getFromUri(resourceUri);
+                getResource(session, resourceUri).getName();
                 
             } catch (NullPointerException e)
             {
@@ -73,11 +86,11 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
                     resourceUri + " does not exist or you are not allowed to access it.");
             }
         }
-        mediator.callService(SecuredAccess.class, 
-    	new Executable<SecuredAccess,Void>()
+        mediator.callService(Core.class, 
+    	new Executable<Core,Void>()
 		{
 			@Override
-			public Void execute(SecuredAccess service) 
+			public Void execute(Core service) 
 					throws Exception 
 			{
 		        for(String resourceUri : resourceUris)
@@ -100,11 +113,11 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
      */
     public SnaErrorMessage stop(Session session)
     {
-        mediator.callService(SecuredAccess.class, 
-    	new Executable<SecuredAccess,Void>()
+        mediator.callService(Core.class, 
+    	new Executable<Core,Void>()
 		{
 			@Override
-			public Void execute(SecuredAccess service) 
+			public Void execute(Core service) 
 					throws Exception 
 			{
 		        for(String registration : 

@@ -38,7 +38,7 @@ public class ServiceCommands {
     @Descriptor("display the existing sensiNact service instances")
     public void services(@Descriptor("the service provider ID") String serviceProviderID) {
         StringBuilder buffer = new StringBuilder();
-        List<Service> services = mediator.getSession().getServiceProvider(serviceProviderID).getServices();
+        List<Service> services = mediator.getSession().serviceProvider(serviceProviderID).getServices();
 
         if (!services.isEmpty()) {
             buffer.append("\nsensiNact service instances for service provider /" + serviceProviderID +":\n");
@@ -65,7 +65,7 @@ public class ServiceCommands {
     public void service(@Descriptor("the service provider ID") String serviceProviderID,
                         @Descriptor("the service ID") String serviceID) {
         StringBuilder buffer = new StringBuilder();
-        Service service = mediator.getSession().getService(serviceProviderID, serviceID);
+        Service service = mediator.getSession().service(serviceProviderID, serviceID);
 
         if(service != null) {
             buffer.append("\n" + _line);

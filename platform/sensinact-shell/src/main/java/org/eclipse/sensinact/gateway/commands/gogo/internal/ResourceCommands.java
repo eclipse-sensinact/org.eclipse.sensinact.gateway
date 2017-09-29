@@ -40,7 +40,7 @@ public class ResourceCommands {
     public void resources(@Descriptor("the service provider ID") String serviceProviderID,
                           @Descriptor("the service ID") String serviceID) {
         StringBuilder buffer = new StringBuilder();
-        Service service = mediator.getSession().getService(serviceProviderID, serviceID);
+        Service service = mediator.getSession().service(serviceProviderID, serviceID);
 
         if (service != null) {
             buffer.append("\nsensiNact resource instances for " + service.getPath() +":\n");
@@ -70,7 +70,7 @@ public class ResourceCommands {
                          @Descriptor("the service ID") String serviceID,
                          @Descriptor("the resource IS") String resourceID) {
         StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().getResource(serviceProviderID, serviceID, resourceID);
+        Resource resource = mediator.getSession().resource(serviceProviderID, serviceID, resourceID);
 
         if (resource != null) {
             buffer.append("\n" + _line);

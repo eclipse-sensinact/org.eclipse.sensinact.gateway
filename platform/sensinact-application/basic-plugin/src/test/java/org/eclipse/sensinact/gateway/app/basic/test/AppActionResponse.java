@@ -11,7 +11,7 @@
 
 package org.eclipse.sensinact.gateway.app.basic.test;
 
-import org.eclipse.sensinact.gateway.core.method.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 
 class AppActionResponse extends ActResponse {

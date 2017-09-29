@@ -25,6 +25,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+/**
+ *
+ * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ */
 final class ServiceCaller
 {
 	private BundleContext context;
@@ -42,16 +46,15 @@ final class ServiceCaller
 		this.count = new AtomicInteger(0);
 		this.references = new HashMap<String, List<ServiceReference<?>>>();
 	}
-	
+
 	/**
 	 * @param clazz
+	 * @param filter
 	 * @return
-	 * @throws InvalidSyntaxException 
-	 * @ 
+	 * @throws InvalidSyntaxException
 	 */
 	private <S> List<ServiceReference<?>> getServiceReferences(
-			Class<S> clazz, String filter) throws InvalidSyntaxException
-			
+		Class<S> clazz, String filter) throws InvalidSyntaxException
 	{
 		String classname = clazz.getCanonicalName();
 		StringBuilder builder = new StringBuilder();
@@ -89,25 +92,34 @@ final class ServiceCaller
         			 this.context.getServiceReferences(clazz,filter);
         	
         	referenceList = referenceCollection==null
-        			?Collections.<ServiceReference<?>>emptyList()
-        			:Collections.<ServiceReference<?>>unmodifiableList(
-        			new ArrayList<ServiceReference<S>>(referenceCollection));
+        		?Collections.<ServiceReference<?>>emptyList()
+        		:Collections.<ServiceReference<?>>unmodifiableList(
+        		new ArrayList<ServiceReference<S>>(referenceCollection));
         	
         	this.references.put(classname, referenceList);	        	
         }
         return referenceList;
 	}
 	
+    /**
+     * @return
+     */
     public int attach()
     {
     	return count.incrementAndGet();
     }
 
+    /**
+     * @return
+     */
     public int release()
     {
     	return count.decrementAndGet();
     }
 
+    /**
+     * @throws IllegalStateException
+     */
     private void checkContext() throws IllegalStateException
     {
         switch (this.context.getBundle().getState())
@@ -120,12 +132,25 @@ final class ServiceCaller
         }
     }
     
+    /**
+     * @param serviceType
+     * @param executor
+     * @return
+     * @throws Exception
+     */
     public <S, R> R callService(Class<S> serviceType, 
     	Executable<S,R> executor) throws Exception
     {
         return this.callService(serviceType, null, executor);
     }
 
+    /**
+     * @param serviceType
+     * @param filter
+     * @param executor
+     * @return
+     * @throws Exception
+     */
     public <S, R> R callService(Class<S> serviceType,
     	String filter, Executable<S,R> executor) throws Exception
     {
@@ -141,16 +166,7 @@ final class ServiceCaller
         }        
         List<ServiceReference<?>> serviceReferences = 
 	        	this.getServiceReferences(serviceType, filter);
-
-//	        if(filter != null)
-//	        {
-//		        System.out.println("+++++++++++++++++++++++++++++");
-//		        System.out.println(serviceType);
-//		        System.out.println(filter);
-//		        System.out.println(serviceReferences);
-//		        System.out.println(this.getServiceReferences(serviceType, null));
-//		        System.out.println("+++++++++++++++++++++++++++++");
-//	        }
+        
     	if(serviceReferences!= null && !serviceReferences.isEmpty())
     	{
     		Iterator<ServiceReference<?>> iterator = 
@@ -159,8 +175,7 @@ final class ServiceCaller
     		while(iterator.hasNext())
     		{
     			ServiceReference<?> serviceReference = iterator.next();
-    			if((service =  (S) this.context.getService(
-    					serviceReference))!=null)
+    			if((service =  (S) this.context.getService(serviceReference))!=null)
 		    	{
     	    		try
     	    		{
@@ -175,8 +190,7 @@ final class ServiceCaller
     	    		{
 		    			if(service != null)
 		    			{
-		    				this.context.ungetService(
-		    					serviceReference);
+		    				this.context.ungetService(serviceReference);
 		    			}
 		    			service = null;
     	    		}
@@ -186,17 +200,27 @@ final class ServiceCaller
     	return result;	    	
     }
     
+    /**
+     * @param serviceType
+     * @param executor
+     * @throws Exception
+     */
     public <S> void callServices(Class<S> serviceType, 
     	Executable<S,Void> executor) throws Exception
     {
         this.callServices(serviceType, null, executor);
     }
 
+    /**
+     * @param serviceType
+     * @param filter
+     * @param executor
+     * @throws Exception
+     */
     public <S> void callServices(Class<S> serviceType, 
     		String filter, Executable<S,Void> executor) 
     				throws Exception
     {	        
-    	
         try
         {
             checkContext();
@@ -207,18 +231,16 @@ final class ServiceCaller
         }     
         List<ServiceReference<?>> serviceReferences = 
 	        	this.getServiceReferences(serviceType, filter);
-    	
+
     	if(serviceReferences!= null && !serviceReferences.isEmpty())
     	{
-    		Iterator<ServiceReference<?>> iterator = 
-    				serviceReferences.iterator();
+    		Iterator<ServiceReference<?>> iterator = serviceReferences.iterator();
     		S service = null;
     		
     		while(iterator.hasNext())
     		{
     			ServiceReference<?> serviceReference = iterator.next();
-    			if((service =  (S) this.context.getService(
-    					serviceReference))!=null)
+    			if((service =  (S) this.context.getService(serviceReference))!=null)
 		    	{
 		    		try
 		    		{
@@ -232,8 +254,7 @@ final class ServiceCaller
 		    		{
 		    			if(service != null)
 		    			{
-		    				this.context.ungetService(
-		    						serviceReference);
+		    				this.context.ungetService(serviceReference);
 		    			}
 		    			service = null;
 		    		}
@@ -242,10 +263,17 @@ final class ServiceCaller
     	}
     }
 
+    /**
+     * @param serviceType
+     * @param returnType
+     * @param filter
+     * @param executor
+     * @return
+     * @throws Exception
+     */
     public <S, R> Collection<R> callServices(Class<S> serviceType, 
-    		Class<R> returnType, String filter, 
-    		Executable<S,R> executor) 
-    				throws Exception
+    	Class<R> returnType, String filter, Executable<S,R> executor) 
+    			throws Exception
     {	
     	try
         {
@@ -269,8 +297,7 @@ final class ServiceCaller
     		while(iterator.hasNext())
     		{
     			ServiceReference<?> serviceReference = iterator.next();
-    			if((service =  (S) this.context.getService(
-    					serviceReference))!=null)
+    			if((service =  (S) this.context.getService(serviceReference))!=null)
 		    	{
 		    		try
 		    		{
@@ -285,8 +312,7 @@ final class ServiceCaller
 		    		{
 		    			if(service != null)
 		    			{
-		    				this.context.ungetService(
-		    						serviceReference);
+		    				this.context.ungetService(serviceReference);
 		    			}
 		    			service = null;
 		    		}

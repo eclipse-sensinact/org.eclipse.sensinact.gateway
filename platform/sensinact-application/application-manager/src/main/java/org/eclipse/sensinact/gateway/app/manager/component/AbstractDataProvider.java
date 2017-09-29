@@ -73,31 +73,31 @@ public abstract class AbstractDataProvider implements DataProviderItf {
      * @param value the value to set in the {@link DataProvider}
      *
      */
-    public void updateAndNotify(UUID eventUuid, Object value, List<String> route) {
-        //System.out.println("--> Update and Notify <--");
-
-        this.data = new Data(UUID.randomUUID(), uri, getDataType(), value, System.currentTimeMillis());
-
+    public void updateAndNotify(UUID eventUuid, Object value, List<String> route) 
+    {
+        this.data = new Data(new UUID(System.currentTimeMillis(),System.currentTimeMillis()), 
+        		uri, getDataType(), value, System.currentTimeMillis());
+        
         route.add(uri);
-
         Event event = new Event(eventUuid, data, route);
 
         // Notify the listeners
-        for(Map.Entry<DataListenerItf, Set<Constraint>> listener : listeners.entrySet()) {
-            if(listener.getValue() != null) {
-                boolean comply = true;
-
-                for(Constraint constraint : listener.getValue()) {
-                    if (!constraint.complies(value)) {
+        for(Map.Entry<DataListenerItf, Set<Constraint>> listener : listeners.entrySet())
+        {
+            boolean comply = true;
+            if(listener.getValue() != null) 
+            {
+                for(Constraint constraint : listener.getValue())
+                {
+                    if (!constraint.complies(value))
+                    {
                         comply = false;
                         break;
                     }
                 }
-
-                if(comply) {
-                    listener.getKey().eventNotification(event);
-                }
-            } else {
+            }
+            if(comply) 
+            {
                 listener.getKey().eventNotification(event);
             }
         }

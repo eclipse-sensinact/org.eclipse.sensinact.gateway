@@ -25,10 +25,9 @@ import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.*;
-import org.eclipse.sensinact.gateway.core.method.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.Session;
-import org.eclipse.sensinact.gateway.core.security.Sessions;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import junit.framework.TestCase;
 
@@ -77,7 +76,6 @@ public class TestComponentFactory extends TestCase {
         ServiceReference[] serviceReferences = new ServiceReference[]{serviceReference};
         SecuredAccess securedAccess = Mockito.mock(SecuredAccess.class);
         Session session = Mockito.mock(Session.class);
-        Sessions.SESSIONS.set(session);
 
         PluginInstaller installer = Mockito.mock(PluginInstaller.class);
 
@@ -119,7 +117,8 @@ public class TestComponentFactory extends TestCase {
                 .thenReturn("int");
         Mockito.when(resource.get(DataResource.VALUE))
                 .thenReturn(getResponse);
-        Mockito.when(session.<Resource>getFromUri(Mockito.anyString()))
+        Mockito.when(session.resource(Mockito.anyString(),
+        		Mockito.anyString(),Mockito.anyString()))
                 .thenReturn(resource);
         Mockito.when(device.getName())
                 .thenReturn("TestAppDevice");

@@ -121,7 +121,7 @@ public class ExtServiceImpl extends ServiceImpl
     protected void buildTriggers(String resourceName, 
     		Signature signature, List<ReferenceDefinition> references) 
     {    	
-    	if(signature.getName().intern() != AccessMethod.Type.ACT.name().intern())
+    	if(signature.getName().intern() != AccessMethod.ACT)
     	{
   	      super.modelInstance.mediator().debug("Action trigger allowed for ACT method only");
   	      return;

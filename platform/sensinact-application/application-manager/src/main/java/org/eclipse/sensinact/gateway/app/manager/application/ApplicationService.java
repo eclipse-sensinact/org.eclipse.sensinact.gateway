@@ -32,7 +32,8 @@ import java.util.HashMap;
  *
  * @author Remi Druilhe
  */
-public class ApplicationService extends ServiceImpl {
+public class ApplicationService extends ServiceImpl 
+{
 
     private Application application;
 
@@ -43,8 +44,10 @@ public class ApplicationService extends ServiceImpl {
      * @param device the appmanager device
      * @throws InvalidServiceException
      */
-    public ApplicationService(ModelInstance<?> modelInstance, String name, ServiceProviderImpl device)
-            throws InvalidServiceException {
+    public ApplicationService(ModelInstance<?> modelInstance, 
+    	String name, ServiceProviderImpl device)
+           throws InvalidServiceException 
+    {
         super(modelInstance, name, device);
     }
 
@@ -56,77 +59,87 @@ public class ApplicationService extends ServiceImpl {
      * @throws InvalidValueException
      */
     public final void createSnaService(AppContainer appContainer, Application application)
-            throws InvalidResourceException, InvalidValueException {
-
+            throws InvalidResourceException, InvalidValueException
+    {
+    	AccessMethod.Type act = AccessMethod.Type.valueOf(AccessMethod.ACT);
         this.application = application;
 
-        ResourceImpl startResource = this.addActionResource(AppConstant.START, ActionResource.class);
-        startResource.registerExecutor(new Signature(super.modelInstance.mediator(), AccessMethod.Type.ACT, null, null),
-                new AppStartExecutor(this),
+        ResourceImpl startResource = this.addActionResource(AppConstant.START, 
+        		ActionResource.class);
+        
+        startResource.registerExecutor(new Signature(super.modelInstance.mediator(),
+        		act, null, null), new AppStartExecutor(this),
                 AccessMethodExecutor.ExecutionPolicy.AFTER);
 
-        ResourceImpl stopResource = this.addActionResource(AppConstant.STOP, ActionResource.class);
-        stopResource.registerExecutor(new Signature(super.modelInstance.mediator(), AccessMethod.Type.ACT, null, null),
-                new AppStopExecutor(this),
+        ResourceImpl stopResource = this.addActionResource(AppConstant.STOP, 
+        		ActionResource.class);
+        
+        stopResource.registerExecutor(new Signature(super.modelInstance.mediator(), act,
+        		null, null), new AppStopExecutor(this),
                 AccessMethodExecutor.ExecutionPolicy.AFTER);
 
         // TODO: hide this resource + it should not be used by users/admins
-        ResourceImpl exceptionResource = this.addActionResource(AppConstant.EXCEPTION, ActionResource.class);
+        ResourceImpl exceptionResource = this.addActionResource(AppConstant.EXCEPTION, 
+        		ActionResource.class);
+        
         exceptionResource.registerExecutor(
-                new Signature(super.modelInstance.mediator(), AccessMethod.Type.ACT, null, null),
+                new Signature(super.modelInstance.mediator(), act, null, null),
                 new AppExceptionExecutor(this),
                 AccessMethodExecutor.ExecutionPolicy.AFTER);
 
         ResourceImpl uninstallResource = ((ServiceProviderImpl) super.parent).getAdminService()
                 .getResource(AppConstant.UNINSTALL);
-        ResourceImpl uninstallLinkedResource = this.addLinkedActionResource(AppConstant.UNINSTALL,
-                uninstallResource,
-                false);
+        
+        ResourceImpl uninstallLinkedResource = this.addLinkedActionResource(
+        		AppConstant.UNINSTALL,  uninstallResource, false);
 
-        LinkedActMethod method = (LinkedActMethod) uninstallLinkedResource.getAccessMethod(AccessMethod.Type.ACT);
+        LinkedActMethod method = (LinkedActMethod) 
+        		uninstallLinkedResource.getAccessMethod(
+        		act);
 
-        method.createShortcut(new Signature(super.modelInstance.mediator(), AccessMethod.Type.ACT, new Class[]{String.class}, null),
-                new Shortcut(super.modelInstance.mediator(),
-                        AccessMethod.Type.ACT,
-                        new Class[]{},
-                        null,
-                        new HashMap<Integer, Parameter>() {{
-                            this.put(0, new Parameter(ApplicationService.super.modelInstance.mediator(), "name", String.class, name));
-                        }}));
+        method.createShortcut(new Signature(super.modelInstance.mediator(),
+        		act, new Class[]{String.class}, null),
+                new Shortcut(super.modelInstance.mediator(),act, new Class[]{},  null,
+                new HashMap<Integer, Parameter>()
+                {{
+                    this.put(0, new Parameter(
+                        ApplicationService.super.modelInstance.mediator(), 
+                            "name", String.class, name));
+                }}));
 
         ResourceImpl status = this.addDataResource(StateVariableResource.class,
                 AppConstant.STATUS,
                 ApplicationStatus.class,
                 ApplicationStatus.INSTALLED);
-        status.addAttribute(new Attribute(super.modelInstance.mediator(), status, AppConstant.STATUS_MESSAGE,
-                String.class,
-                "Application installed",
+        
+        status.addAttribute(new Attribute(super.modelInstance.mediator(), status, 
+        		AppConstant.STATUS_MESSAGE, String.class,  "Application installed",
                 Modifiable.UPDATABLE, false));
 
         AppLifecycleTrigger appLifecycleTrigger = new AppLifecycleTrigger(this);
         this.addActionTrigger(AppConstant.START,
                 AppConstant.STATUS,
-                new Signature(super.modelInstance.mediator(), AccessMethod.Type.ACT, null, null),
+                new Signature(super.modelInstance.mediator(), act, null, null),
                 appLifecycleTrigger,
                 AccessMethodExecutor.ExecutionPolicy.BEFORE);
         this.addActionTrigger(AppConstant.START,
                 AppConstant.STATUS,
-                new Signature(super.modelInstance.mediator(), AccessMethod.Type.ACT, null, null),
+                new Signature(super.modelInstance.mediator(), act, null, null),
                 appLifecycleTrigger,
                 AccessMethodExecutor.ExecutionPolicy.AFTER);
         this.addActionTrigger(AppConstant.STOP,
                 AppConstant.STATUS,
-                new Signature(super.modelInstance.mediator(), AccessMethod.Type.ACT, null, null),
+                new Signature(super.modelInstance.mediator(), act, null, null),
                 appLifecycleTrigger,
                 AccessMethodExecutor.ExecutionPolicy.AFTER);
         this.addActionTrigger(AppConstant.UNINSTALL,
                 AppConstant.STATUS,
-                new Signature(super.modelInstance.mediator(), AccessMethod.Type.ACT, null, null),
+                new Signature(super.modelInstance.mediator(), act, null, null),
                 appLifecycleTrigger,
                 AccessMethodExecutor.ExecutionPolicy.BEFORE);
         this.addActionTrigger(AppConstant.EXCEPTION,
                 AppConstant.STATUS,
-                new Signature(super.modelInstance.mediator(), AccessMethod.Type.ACT, null, null),
+                new Signature(super.modelInstance.mediator(), act, null, null),
                 appLifecycleTrigger,
                 AccessMethodExecutor.ExecutionPolicy.AFTER);
 
@@ -145,14 +158,13 @@ public class ApplicationService extends ServiceImpl {
 
         // Creation of the AppResourceLifecycleWatchdog
         AppWatchdogExecutor appWatchdogExecutor = new AppWatchdogExecutor(
-                (AppServiceMediator) super.modelInstance.mediator(),
-                this,
+                (AppServiceMediator) super.modelInstance.mediator(), this,
                 appContainer.getResourceUris());
-        startResource.registerExecutor(new Signature(super.modelInstance.mediator(), AccessMethod.Type.ACT, null, null),
-                appWatchdogExecutor,
+        startResource.registerExecutor(new Signature(super.modelInstance.mediator(), 
+        		act, null, null), appWatchdogExecutor,
                 AccessMethodExecutor.ExecutionPolicy.BEFORE);
-        stopResource.registerExecutor(new Signature(super.modelInstance.mediator(), AccessMethod.Type.ACT, null, null),
-                appWatchdogExecutor,
+        stopResource.registerExecutor(new Signature(super.modelInstance.mediator(), 
+        		act, null, null), appWatchdogExecutor,
                 AccessMethodExecutor.ExecutionPolicy.AFTER);
     }
 

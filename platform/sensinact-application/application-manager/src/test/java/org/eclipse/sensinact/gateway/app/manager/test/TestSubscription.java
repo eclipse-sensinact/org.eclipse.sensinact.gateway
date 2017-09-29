@@ -23,13 +23,15 @@ import org.eclipse.sensinact.gateway.app.manager.json.AppContainer;
 import org.eclipse.sensinact.gateway.app.manager.json.AppJsonConstant;
 import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.*;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.method.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.core.security.Sessions;
 import org.eclipse.sensinact.gateway.util.UriUtils;
@@ -51,6 +53,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
@@ -76,13 +79,23 @@ public class TestSubscription extends TestCase implements TestResult {
     @Mock
     private Resource resource;
 
+    @Mock
+    private Core core;
+    
     private SnaMessage message;
     private int result;
 
     private Map<String, DataProviderItf> mockedRegistry;
 
+    /**
+     * @throws Exception
+     */
+    /**
+     * @throws Exception
+     */
     @Before
-    public void init() throws Exception {
+    public void init() throws Exception
+    {
         MockitoAnnotations.initMocks(this);
 
         mockedRegistry = new HashMap<String, DataProviderItf>();
@@ -100,9 +113,8 @@ public class TestSubscription extends TestCase implements TestResult {
         ServiceReference[] serviceReferencesResource = new ServiceReference[]{serviceReferenceResource};
 
         // Mock of the session
-        Session session = Mockito.mock(Session.class);
-        Sessions.SESSIONS.set(session);
-
+        final Session session = Mockito.mock(Session.class);
+        
         // Mock of the responses
         GetResponse getResponse = Mockito.mock(GetResponse.class);
         SubscribeResponse subscribeResponse = Mockito.mock(SubscribeResponse.class);
@@ -161,30 +173,29 @@ public class TestSubscription extends TestCase implements TestResult {
         
         Mockito.when(mediator.getContext()).thenReturn(context);
 
-        Mockito.when(getResponse.getResponse(DataResource.VALUE))
-                .thenAnswer(new Answer<Integer>() {
-                    @Override
-                    public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        return new JSONObject(message.getJSON()).getJSONObject("notification"
-                        		).getInt(DataResource.VALUE);
-                    }
-                });
+        Mockito.when(getResponse.getResponse(DataResource.VALUE)).thenAnswer(
+        new Answer<Integer>()
+        {
+            @Override
+            public Integer answer(InvocationOnMock invocationOnMock) 
+            		throws Throwable 
+            {
+                return new JSONObject(message.getJSON()).getJSONObject("notification"
+                		).getInt(DataResource.VALUE);
+            }
+        });
         Mockito.when(getResponse.getResponse(DataResource.TYPE))
                 .thenReturn("int");
         Mockito.when(resource.get(DataResource.TYPE))
                 .thenReturn(getResponse);
         Mockito.when(resource.get(DataResource.VALUE))
                 .thenReturn(getResponse);
-        Mockito.when(session.<Resource>getFromUri(Mockito.anyString()))
+        Mockito.when(session.resource(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
                 .thenReturn(resource);
         Mockito.when(subscribeResponse.getResponse(String.class, SnaConstants.SUBSCRIBE_ID_KEY))
                 .thenReturn("id");
         Mockito.when(resource.subscribe(Mockito.anyString(), Mockito.any(Recipient.class), Mockito.anySet()))
                 .thenReturn(subscribeResponse);
-        Mockito.when(session.<Resource>getFromUri(Mockito.anyString()))
-                .thenReturn(resource);
-        Mockito.when(session.getResource(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(resource);
         Mockito.when(device.getName())
                 .thenReturn("TestAppDevice");
         Mockito.when(device.getPath())
@@ -206,13 +217,18 @@ public class TestSubscription extends TestCase implements TestResult {
                 "(type=" + PluginHook.class.getName() + "))"))
                 .thenReturn(serviceReferencesActionHook);
 
-        Mockito.when(mediator.getService(serviceReferenceResource))
-                .thenAnswer(new Answer<DataProviderItf>() {
-                    @Override
-                    public DataProviderItf answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        return mockedRegistry.get("/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider");
-                    }
-                });
+        Mockito.when(mediator.getService(serviceReferenceResource)).thenAnswer(
+        new Answer<DataProviderItf>() 
+        {
+            @Override
+            public DataProviderItf answer(InvocationOnMock invocationOnMock)
+            throws Throwable 
+            {
+                DataProviderItf d =  mockedRegistry.get(
+                "/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider");
+            	return d;
+            }
+        });
         Mockito.when(mediator.getServiceReferences("(&(objectClass=" + DataProviderItf.class.getName() + ")" +
                 "(uri=/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider))"))
                 .thenReturn(serviceReferencesResource);
@@ -222,7 +238,9 @@ public class TestSubscription extends TestCase implements TestResult {
                 Mockito.any(Dictionary.class)))
                 .thenAnswer(new Answer<ServiceRegistration>() {
                     @Override
-                    public ServiceRegistration answer(InvocationOnMock invocationOnMock) throws Throwable {
+                    public ServiceRegistration answer(InvocationOnMock invocationOnMock)
+                    throws Throwable 
+                    {
                         mockedRegistry.put(((Dictionary<String, String>) invocationOnMock.getArguments()[2]).get("uri"),
                                 (DataProviderItf) invocationOnMock.getArguments()[1]);
 
@@ -230,6 +248,32 @@ public class TestSubscription extends TestCase implements TestResult {
                     }
                 });
 
+        Mockito.when(core.getApplicationSession(
+        	Mockito.any(Mediator.class), Mockito.anyString())
+        		).thenAnswer(new Answer<Session>()
+				{
+					@Override
+					public Session answer(InvocationOnMock invocation)
+					        throws Throwable
+					{
+						return session;
+					}
+			
+				});
+        
+        Mockito.when(mediator.callService(Mockito.eq(Core.class), 
+        Mockito.any(Executable.class))).then(
+		new Answer()
+		{
+			@Override
+			public Object answer(InvocationOnMock invocation)
+			        throws Throwable
+			{
+				Object result = ((Executable)invocation.getArguments()[1]
+						).execute(core);
+				return result;
+			}
+		});
         this.result = 0;
     }
 
@@ -237,10 +281,13 @@ public class TestSubscription extends TestCase implements TestResult {
     public void testSubscription() {
         String content = null;
 
-        try {
-            content = TestUtils.readFile(this.getClass().getResourceAsStream("/test_subscription.json"),
-                    Charset.defaultCharset());
-        } catch (IOException e) {
+        try 
+        {
+            content = TestUtils.readFile(this.getClass().getResourceAsStream(
+            	"/test_subscription.json"), Charset.defaultCharset());
+            
+        } catch (IOException e) 
+        {
             e.printStackTrace();
         }
 
@@ -249,8 +296,6 @@ public class TestSubscription extends TestCase implements TestResult {
                     .getJSONObject(0).getString(AppJsonConstant.VALUE);
             JSONObject json = new JSONObject(content).getJSONArray("parameters")
                     .getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
-
-            Session session = Sessions.SESSIONS.get();
 
             AppContainer container = new AppContainer(mediator, name, json);
 
@@ -265,12 +310,15 @@ public class TestSubscription extends TestCase implements TestResult {
             assertNotNull(service);
 
             Application application = null;
-            try {
-                application = ApplicationFactory.createApplication(mediator, container, service);
-            } catch (ApplicationFactoryException e) {
+            try 
+            {
+                application = ApplicationFactory.createApplication(
+                		mediator, container, service);
+                
+            } catch (ApplicationFactoryException e)
+            {
                 e.printStackTrace();
             }
-
             assertNotNull(application);
 
             try {
@@ -281,7 +329,7 @@ public class TestSubscription extends TestCase implements TestResult {
                 e.printStackTrace();
             }
 
-            application.start(session);
+            application.start();
 
             message = new AppTestSnaMessage(mediator,
                     "/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider",
@@ -342,7 +390,8 @@ public class TestSubscription extends TestCase implements TestResult {
         }
     }
 
-    public void setValue(int value) {
+    public void setValue(int value) 
+    {
         result = value;
     }
 }

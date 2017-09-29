@@ -25,6 +25,7 @@ import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.Bu
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessLevel;
+import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessProfile;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
@@ -357,7 +358,7 @@ public class ExtModelInstanceBuilder extends ModelInstanceBuilder
 	C buildConfiguration(Object...parameters)
 	{	
 		C configuration  =  null;
-		AccessTree accessTree = super.buildAccessTree();
+		AccessTree<? extends AccessNode> accessTree = super.buildAccessTree();
 		
 		int parametersLength = (parameters==null?0:parameters.length);
 		int offset = (super.defaultResourceConfigBuilder != null)?4:3;
