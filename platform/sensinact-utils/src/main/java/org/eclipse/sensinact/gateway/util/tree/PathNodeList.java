@@ -10,18 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.util.tree;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * A list of {PathNode}s
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class PathNodeList implements Iterable<PathNode>
+public class PathNodeList<P extends PathNode<P>> implements Iterable<P>
 {
 	private final Object lock = new Object();
 	
-	private PathNodeBucket[] table;
+	private PathNodeBucket<?>[] table;
 	private int threshold = 2;
 	private int size = 0;
 	private int length = 5;
@@ -31,7 +33,7 @@ public class PathNodeList implements Iterable<PathNode>
 	 */
 	protected PathNodeList()
 	{
-		table = new PathNodeBucket[length];
+		table = new PathNodeBucket<?>[length];
 	}
 	
 	/**
@@ -39,7 +41,7 @@ public class PathNodeList implements Iterable<PathNode>
 	 * 
 	 * @return
 	 */
-	public PathNode get(String nodeName)
+	public P get(String nodeName)
 	{
 		if (nodeName == null)
 		{
@@ -52,8 +54,9 @@ public class PathNodeList implements Iterable<PathNode>
 		synchronized(lock)
 		{
 			//search for exact match
-			for (PathNodeBucket b = table[(hash & (length - 2)) + 1];
-				b != null; b = b.next)
+			for (PathNodeBucket<P> b = (PathNodeBucket<P>)
+				table[(hash & (length - 2)) + 1];
+				    b != null; b = b.next)
 			{
 			    if (b.node.nodeName.equals(nodeName))
 			    {
@@ -61,7 +64,8 @@ public class PathNodeList implements Iterable<PathNode>
 			    }
 			}
 			//search for pattern match
-			for (PathNodeBucket b = table[0];b != null; b = b.next)
+			for (PathNodeBucket<P> b = (PathNodeBucket<P>)table[0];
+					b != null; b = b.next)
 			{
 			    if (b.node.equals(nodeName))
 			    {
@@ -80,7 +84,7 @@ public class PathNodeList implements Iterable<PathNode>
      * @return the added PathNode or null if an error 
      * occurred.
      */
-     public PathNode add(PathNode node)
+     public P add(P node)
      {	
     	if(node == null)
     	{
@@ -90,29 +94,30 @@ public class PathNodeList implements Iterable<PathNode>
 		{
 	        if (++size > threshold)
 	        {
-	        	PathNodeBucket[] oldTable = table;
+	        	PathNodeBucket<?>[] oldTable = table;
 		        int oldCapacity = length;
 		        
 		        length = oldCapacity * 2;	        
-		        table = new PathNodeBucket[length];
+		        table = new PathNodeBucket<?>[length];
 		        threshold = (length >> 1) + (length >> 2);
 		        
 		        table[0] = oldTable[0];
 		        
 		        for (int j = 1; j < oldCapacity; j++) 
 		        {
-		        	PathNodeBucket b = oldTable[j];	
+		        	PathNodeBucket<P> b = (PathNodeBucket<P>)
+		        			oldTable[j];	
 		        	
 		            while(b != null)
 		            {
-		            	PathNodeBucket p = b;
+		            	PathNodeBucket<P> p = b;
 		            	b = b.next;
 		            	p.next = null;
 		            	add(p);	            	
 		            }
 		        }
 	        }
-	    	add(new PathNodeBucket(node));
+	    	add(new PathNodeBucket<P>(node));
 		}
 		return node;
     }
@@ -122,7 +127,7 @@ public class PathNodeList implements Iterable<PathNode>
      * 
      * @param b the PathNodeBucket to be added
      */
-    private void add(PathNodeBucket b)
+    private void add(PathNodeBucket<P> b)
     {
     	int index = 0;
     	if(!b.node.isPattern)
@@ -132,8 +137,8 @@ public class PathNodeList implements Iterable<PathNode>
 			hash ^= (hash >>> 7) ^ (hash >>> 4);				  
 		    index = (hash & (length - 2)) + 1;
     	}
-	    PathNodeBucket bu = null;
-	    if((bu = table[index])== null)
+	    PathNodeBucket<P> bu = null;
+	    if((bu = (PathNodeBucket<P>) table[index])== null)
 	    {
 	    	table[index] = b;
 	    		
@@ -153,7 +158,7 @@ public class PathNodeList implements Iterable<PathNode>
      * 
      * @return the remove PathNode
      */
-    public PathNode remove(String nodeName) 
+    public P remove(String nodeName) 
     {
         if (nodeName == null) 
         {
@@ -167,8 +172,8 @@ public class PathNodeList implements Iterable<PathNode>
 	    {
 	         int index = (hash & (table.length - 2)) + 1;
 	         //search for name
-	         for (PathNodeBucket b = table[index], prev = null;
-	                 b != null; prev = b, b = b.next) 
+	         for (PathNodeBucket<P> b = (PathNodeBucket<P>)table[index], 
+	        		 prev = null; b != null; prev = b, b = b.next) 
 	         {
 	             if (nodeName.equals(b.node.nodeName))
 	             {
@@ -185,8 +190,8 @@ public class PathNodeList implements Iterable<PathNode>
 	             }
 	         }
 	         //search for patterns
-	         for (PathNodeBucket b = table[0], prev = null;
-	                 b != null; prev = b, b = b.next) 
+	         for (PathNodeBucket<P> b = (PathNodeBucket<P> )table[0], 
+	        		 prev = null; b != null; prev = b, b = b.next) 
 	         {
 	             if (nodeName.equals(b.node.nodeName))
 	             {
@@ -216,19 +221,54 @@ public class PathNodeList implements Iterable<PathNode>
     	return size;
     }
     
+	/**
+	 * @param ic
+	 * @param parent
+	 * 
+	 * @return
+	 */
+	public <N extends ImmutablePathNode<N>> ImmutablePathNodeList<N> 
+	immutable(final N parent)
+	{
+		return new ImmutablePathNodeList<N>(
+		new ArrayList<ImmutablePathNodeBucket<N>>()
+		{
+			private static final long serialVersionUID = 1L;
+
+			public List<ImmutablePathNodeBucket<N>> addAll()
+			{
+				int index = 0;
+				int length = PathNodeList.this.table.length;
+				for(;index < length; index++)				
+				{
+					if(PathNodeList.this.table[index]==null)
+					{
+						super.add(null);
+						continue;
+					}
+					super.add(
+						index, PathNodeList.this.table[index].<N>immutable(
+								(Class<N>)parent.getClass(), parent));
+				}
+				return this;
+			
+			}
+		}.addAll());
+	}
+	
     /**
      * @inheritDoc
      *
      * @see java.lang.Iterable#iterator()
      */
-    public Iterator<PathNode> iterator()
+    public Iterator<P> iterator()
     {
-    	return new Iterator<PathNode>()
+    	return new Iterator<P>()
     	{
     		int position = -1;
     		
-    		PathNodeBucket bucket = null;
-    		PathNode node = null;
+    		PathNodeBucket<P> bucket = null;
+    		P node = null;
     		    		
 			/**
 			 * @inheritDoc
@@ -251,9 +291,9 @@ public class PathNodeList implements Iterable<PathNode>
 			 * @see java.util.Iterator#next()
 			 */
 			@Override
-			public PathNode next() 
+			public P next() 
 			{
-				PathNode current = node;
+				P current = node;
 				if(bucket != null)
 				{						
 					bucket = bucket.next;
@@ -261,7 +301,8 @@ public class PathNodeList implements Iterable<PathNode>
 				if(bucket == null)
 				{
 					while(++position < length 
-					&& (bucket = table[position])==null);
+					&& (bucket = (PathNodeBucket<P>)table[position]
+							)==null);
 				}
 				node = bucket==null?null:bucket.node;				
 				return current;

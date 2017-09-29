@@ -15,7 +15,7 @@ package org.eclipse.sensinact.gateway.util.tree;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface PathNodeFactory<N extends PathNode>
+public interface PathNodeFactory<P extends PathNode<P>>
 {
 	/**
 	 * Returns a {@link PathNode} whose name is 
@@ -26,7 +26,7 @@ public interface PathNodeFactory<N extends PathNode>
 	 * 
 	 * @return the newly created {@link PathNode}
 	 */
-	N createPathNode(String nodeName);
+	P createPathNode(String nodeName);
 
 	/**
 	 * Returns a {@link PathNode} whose pattern is 
@@ -37,12 +37,12 @@ public interface PathNodeFactory<N extends PathNode>
 	 * 
 	 * @return the newly created {@link PathNode}
 	 */
-	N createPatternNode(String nodeName);
+	P createPatternNode(String nodeName);
 
 	/**
 	 * Returns a new root {@link PathNode} 
 	 * 
 	 * @return the newly created root {@link PathNode}
 	 */
-	N createRootNode();
+	P createRootNode();
 }

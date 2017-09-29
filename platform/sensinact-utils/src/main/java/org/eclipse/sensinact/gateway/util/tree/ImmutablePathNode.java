@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.util.tree;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
@@ -19,11 +20,11 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class PathNode<P extends PathNode<P>>
+public class ImmutablePathNode<P extends ImmutablePathNode<P>>
 {
-	protected P parent;
+	protected final P parent;
 	protected final String nodeName;
-	protected final PathNodeList<P> children;
+	protected final ImmutablePathNodeList<P> children;
 	protected final Pattern pattern;
 	
 	protected final boolean isRoot;
@@ -35,9 +36,9 @@ public class PathNode<P extends PathNode<P>>
 	 * @param nodeName the name of the PathNode
 	 * to be instantiated
 	 */
-	public PathNode()
+	public ImmutablePathNode(PathNodeList<?> children)
 	{
-		this(UriUtils.PATH_SEPARATOR);
+		this(UriUtils.PATH_SEPARATOR, children);
 	}
 
 	/**
@@ -46,9 +47,9 @@ public class PathNode<P extends PathNode<P>>
 	 * @param nodeName the name of the PathNode
 	 * to be instantiated
 	 */
-	public PathNode(String nodeName)
+	public ImmutablePathNode(String nodeName,PathNodeList<?> children)
 	{
-		this(nodeName, false);
+		this(null, nodeName, false, children);
 	}
 	
 	/**
@@ -57,13 +58,23 @@ public class PathNode<P extends PathNode<P>>
 	 * @param nodeName the name of the PathNode
 	 * to be instantiated
 	 */
-	public PathNode(String nodeName, boolean isPattern)
+	public ImmutablePathNode(P parent,  String nodeName, boolean isPattern,
+			PathNodeList<?> children )
 	{
+		this.parent = parent;
 		this.nodeName = nodeName;
-		this.children = new PathNodeList<P>();
 		this.isRoot = (nodeName.intern() == UriUtils.PATH_SEPARATOR);
 		this.isPattern = isPattern;
 		this.pattern = isPattern?Pattern.compile(nodeName):null;
+		if(children != null)
+		{
+			this.children = children.immutable((P)this);
+		} else
+		{
+			this.children = new ImmutablePathNodeList<P>(
+				Collections.<ImmutablePathNodeBucket<P>>
+					emptyList());
+		}
 	}
 
 	/**
@@ -102,34 +113,6 @@ public class PathNode<P extends PathNode<P>>
 		return node;
 	}
 
-	/**
-	 * @param node
-	 * @return
-	 */
-	public P add(P node)
-	{
-		if(node == null)
-		{
-			return null;
-		}
-		P child = this.children.get(node.nodeName);
-		if(child != null)
-		{
-			return child;
-		}
-		node.parent = (P) this;
-		return this.children.add(node);
-	}
-
-	/**
-	 * @param nodeName
-	 * @return
-	 */
-	public P remove(String nodeName)
-	{
-		return this.children.remove(nodeName);
-	}
-	
 	/**
 	 * @inheritDoc
 	 *
@@ -175,9 +158,11 @@ public class PathNode<P extends PathNode<P>>
 	{
 		String objectName = null;
 		
-		if(PathNode.class.isAssignableFrom(object.getClass()))
+		if(ImmutablePathNode.class.isAssignableFrom(
+				object.getClass()))
 		{
-			objectName = ((PathNode<?>)object).nodeName;
+			objectName = ((ImmutablePathNode<?>)object
+					).nodeName;
 			
 		} else if(String.class == object.getClass())
 		{
@@ -203,30 +188,6 @@ public class PathNode<P extends PathNode<P>>
     {
         return this.children.size();
     }
-	
-	/**
-	 * Creates and returns an immutable clone of this PathNode
-	 * 
-	 * @param ic the immutable path node type
-	 * @param parent the immutable clone of this PathNode's parent
-	 * 
-	 * @return this PathNode immutable clone
-	 */
-	public <N extends ImmutablePathNode<N>> N immutable(Class<N> ic,
-			N parent)
-	{
-		try
-		{
-			return ic.getConstructor(new Class<?>[]{ic, String.class, 
-				boolean.class, PathNodeList.class}).newInstance(
-				parent, this.nodeName, this.isPattern, this.children);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		return null;
-	}
 	
 	/**
 	 * @inheritDoc

@@ -10,30 +10,29 @@
  */
 package org.eclipse.sensinact.gateway.util.tree;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * {@link PathNode}s linker in a {@link PathNodeList}
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-class PathNodeBucket<P extends PathNode<P>> 
+class ImmutablePathNodeBucket<P extends ImmutablePathNode<P>> 
 {		
-	PathNodeBucket<P> next = null;
-	P node;
-	int hash;
+	final ImmutablePathNodeBucket<P> next;
+	final P node;
+	final int hash;
 	
 	/**
 	 * Constructor
 	 * 
-	 * @param node the {@link PathNode} wrapped by
-	 * the PathNodeBucket to be instantiated
+	 * @param node the {@link ImmutablePathNode} wrapped by
+	 * the ImmutablePathNodeBucket to be instantiated
+	 * @param next
 	 */
-	PathNodeBucket(P node)
+	ImmutablePathNodeBucket(P node, ImmutablePathNodeBucket<P> next)
 	{
 		this.node = node;
 		this.hash = node.hashCode();
+		this.next = next;
 	}
 
 	/**
@@ -43,24 +42,11 @@ class PathNodeBucket<P extends PathNode<P>>
 	 */
 	public boolean equals(Object object)
 	{
-		if(PathNodeBucket.class.isAssignableFrom(object.getClass()))
+		if(ImmutablePathNodeBucket.class.isAssignableFrom(object.getClass()))
 		{
-			return node.equals(((PathNodeBucket<?>)object).node);
+			return node.equals(((ImmutablePathNodeBucket<?>)object).node);
 		}
 		return node.equals(object);
-	}
-	
-	/**
-	 * @param ic
-	 * @param parent
-	 * 
-	 * @return
-	 */
-	public <N extends ImmutablePathNode<N>> ImmutablePathNodeBucket<N> 
-	immutable(Class<N> ic, N parent)
-	{
-		return new ImmutablePathNodeBucket<N>(node.<N>immutable(ic, parent),
-				next!=null?next.immutable(ic, parent):null);
 	}
 
     /**
