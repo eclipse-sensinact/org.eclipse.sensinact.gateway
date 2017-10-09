@@ -23,8 +23,8 @@ import java.util.Map;
 import org.osgi.framework.Bundle;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.BundleValidation;
-import org.eclipse.sensinact.gateway.core.security.BundleValidationException;
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
+import org.eclipse.sensinact.gateway.security.signature.exception.BundleValidationException;
 
 /**
  * An implementation of the BundleValidation service

@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.test;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -34,6 +33,8 @@ import org.eclipse.sensinact.gateway.core.method.trigger.Constant;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.Session;
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
+import org.eclipse.sensinact.gateway.security.signature.exception.BundleValidationException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -123,6 +124,9 @@ public class TestResourceBuilder<R extends ModelInstance>
 
 	private static final String ACCESS_FILTER = "("+Constants.OBJECTCLASS+"="+
 		SecuredAccess.class.getCanonicalName()+")";
+
+    private static final String VALIDATION_FILTER = "("+Constants.OBJECTCLASS+"="+
+        BundleValidation.class.getCanonicalName()+")";
 	
 	private static final String AGENT_FILTER = "("+Constants.OBJECTCLASS+"="+
 		SnaAgent.class.getCanonicalName()+")";
@@ -135,6 +139,7 @@ public class TestResourceBuilder<R extends ModelInstance>
 	
 	private final Filter filterAgent = Mockito.mock(Filter.class);	
 	private final Filter filterAccess = Mockito.mock(Filter.class);
+    private final Filter filterValidation = Mockito.mock(Filter.class);
 	private final Filter filterDataStore = Mockito.mock(Filter.class);
 	private final Filter filterAuthentication = Mockito.mock(Filter.class);
 	private final Filter filterAuthorization = Mockito.mock(Filter.class);
@@ -150,6 +155,8 @@ public class TestResourceBuilder<R extends ModelInstance>
 			Mockito.mock(ServiceReference.class);
 	private final ServiceReference referenceAccess = 
 			Mockito.mock(ServiceReference.class);
+    private final ServiceReference referenceValidation =
+            Mockito.mock(ServiceReference.class);
 	private final ServiceRegistration registration = 
 			Mockito.mock(ServiceRegistration.class);
 	private final ServiceRegistration registrationAgent = 
@@ -157,6 +164,7 @@ public class TestResourceBuilder<R extends ModelInstance>
 	private final ServiceReference referenceProvider = 
 			Mockito.mock(ServiceReference.class);
 
+	private BundleValidation bundleValidation;
 	private SecuredAccess securedAccess;
 	private Mediator mediator;
 	private MyModelInstance instance;	
@@ -199,6 +207,11 @@ public class TestResourceBuilder<R extends ModelInstance>
 				).thenReturn(filterAccess);
 		Mockito.when(filterAccess.toString()).thenReturn(
 				ACCESS_FILTER);
+
+		Mockito.when(context.createFilter(VALIDATION_FILTER)
+				).thenReturn(filterValidation);
+		Mockito.when(filterValidation.toString()).thenReturn(
+				VALIDATION_FILTER);
 		
 		Mockito.when(context.createFilter(AUTHORIZATION_FILTER)
 				).thenReturn(filterAuthorization);
@@ -251,7 +264,14 @@ public class TestResourceBuilder<R extends ModelInstance>
 						arguments[1].equals(ACCESS_FILTER)))
 				{
 	                return Collections.singletonList(referenceAccess);
-				}
+				} else if((arguments[0]!=null && arguments[0].equals(
+                        BundleValidation.class)
+                        && arguments[1]==null)||(arguments[0]==null &&
+                        arguments[1].equals(VALIDATION_FILTER)))
+                {
+                    return Collections.singletonList(referenceValidation);
+                }
+
 				return null;	
             }
 		});
@@ -298,7 +318,13 @@ public class TestResourceBuilder<R extends ModelInstance>
 						arguments[1].equals(ACCESS_FILTER)))
 				{
 	                return new ServiceReference[]{referenceAccess};
-				}
+				} else if((arguments[0]!=null && arguments[0].equals(
+                        BundleValidation.class.getCanonicalName())
+                        && arguments[1]==null)||(arguments[0]==null &&
+                        arguments[1].equals(VALIDATION_FILTER)))
+                {
+                    return new ServiceReference[]{referenceValidation};
+                }
 				return null;	
             }
 		});
@@ -316,11 +342,17 @@ public class TestResourceBuilder<R extends ModelInstance>
 				{
 	                return referenceAuthorization;
 	                
-				}if(arguments[0]!=null && arguments[0].equals(
+				}
+				if(arguments[0]!=null && arguments[0].equals(
 						SecuredAccess.class))
 				{
 	                return referenceAccess;
 				}
+                if(arguments[0]!=null && arguments[0].equals(
+                        BundleValidation.class))
+                {
+                    return referenceValidation;
+                }
 				return null;	
             }
 		});
@@ -349,7 +381,12 @@ public class TestResourceBuilder<R extends ModelInstance>
 				{
 					return securedAccess;
 					
-				}else if(arguments[0] ==referenceProvider)
+				}
+				else if(arguments[0]==referenceValidation)
+                {
+                    return bundleValidation;
+                }
+				else if(arguments[0]==referenceProvider)
 				{
 					return instance;
 				}
@@ -399,6 +436,12 @@ public class TestResourceBuilder<R extends ModelInstance>
 		
 		mediator = new Mediator(context);
     	securedAccess = new MySecuredAccess(mediator);
+        bundleValidation = new BundleValidation() {
+            @Override
+            public String check(Bundle bundle) throws BundleValidationException {
+                return "xxxxxxxxxxxxxx000000";
+            }
+        };
     	
         instance = new ModelInstanceBuilder(mediator, MyModelInstance.class, 
         	ModelConfiguration.class).withStartAtInitializationTime(true

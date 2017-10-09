@@ -121,13 +121,13 @@ public class TestSecurity extends MidOSGiTest
 				+ "sun.security.action");
 
 		configuration.put("org.eclipse.sensinact.simulated.gui.enabled", "false");
-		
+
 		configuration.put("org.eclipse.sensinact.gateway.security.jks.filename",
-				"src/test/resources/keystore.jks");
+				"target/felix/bundle/keystore.jks");
 		
 		configuration.put("org.eclipse.sensinact.gateway.security.jks.password","sensiNact_team");
 		//configuration.put("org.eclipse.sensinact.gateway.security.signer.password",null);
-		
+
 		configuration.put("org.eclipse.sensinact.gateway.security.database",
 				new File("src/test/resources/sensinact.sqlite").getAbsolutePath());
 		

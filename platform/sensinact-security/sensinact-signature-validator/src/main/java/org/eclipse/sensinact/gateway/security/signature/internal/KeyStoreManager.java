@@ -40,10 +40,8 @@ public class KeyStoreManager
     /**
      * Constructor
      * @param keystoreFile
-     * @throws IOException 
-     * @throws CertificateException 
-     * @throws NoSuchAlgorithmException 
-     * @throws KeyStoreException 
+	 * @param keyStorePassword
+     * @throws KeyStoreManagerException
      */
     public KeyStoreManager(String keystoreFile, String keyStorePassword)
 	throws KeyStoreManagerException
@@ -74,7 +72,6 @@ public class KeyStoreManager
 	 * A method for retrieving a public Key Certificate
 	 * stored in the KeyStore
 	 * @param subject
-	 * @param password
 	 * @return Certificate
 	 */
 	public Certificate getCertificate(String subject)
@@ -89,7 +86,7 @@ public class KeyStoreManager
 	/**
 	 * 
 	 * @param subject
-	 * @param password
+	 * @param keyPasswd
 	 * @return PrivateKey
 	 */
 	public PrivateKey getPrivateKey(final String subject,

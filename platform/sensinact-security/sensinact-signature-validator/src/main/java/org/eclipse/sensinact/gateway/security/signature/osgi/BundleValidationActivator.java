@@ -16,7 +16,7 @@ import org.osgi.framework.ServiceRegistration;
 
 import org.eclipse.sensinact.gateway.security.signature.internal.BundleValidationImpl;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.BundleValidation;
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 
 public class BundleValidationActivator implements BundleActivator
 {

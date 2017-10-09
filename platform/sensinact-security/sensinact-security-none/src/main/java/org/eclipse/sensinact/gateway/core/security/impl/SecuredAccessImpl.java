@@ -59,7 +59,7 @@ class SecuredAccessImpl implements SecuredAccess
 			/**
 			 * @inheritDoc
 			 *
-			 * @see org.eclipse.sensinact.gateway.core.security.impl.Session#getServiceProviders()
+			 * @see Session#getServiceProviders()
 			 */
 			@Override
 			public Set<ServiceProvider> getServiceProviders()
@@ -71,7 +71,7 @@ class SecuredAccessImpl implements SecuredAccess
 			/**
 			 * @inheritDoc
 			 *
-			 * @see org.eclipse.sensinact.gateway.core.security.impl.Session#getServiceProvider(java.lang.String)
+			 * @see Session#getServiceProvider(String)
 			 */
 			@Override
 			public ServiceProvider getServiceProvider(String serviceProviderName)
@@ -83,7 +83,7 @@ class SecuredAccessImpl implements SecuredAccess
 			/**
 			 * @inheritDoc
 			 *
-			 * @see org.eclipse.sensinact.gateway.core.security.impl.Session#getService(java.lang.String, java.lang.String)
+			 * @see Session#getService(String, String)
 			 */
 			@Override
 			public Service getService(String serviceProviderName,
@@ -96,7 +96,7 @@ class SecuredAccessImpl implements SecuredAccess
 			/**
 			 * @inheritDoc
 			 *
-			 * @see org.eclipse.sensinact.gateway.core.security.impl.Session#getResource(java.lang.String, java.lang.String, java.lang.String)
+			 * @see Session#getResource(String, String, String)
 			 */
 			@Override
 			public Resource getResource(String serviceProviderName,
@@ -111,7 +111,7 @@ class SecuredAccessImpl implements SecuredAccess
 			 * @throws ModelAlreadyRegisteredException 
 			 * @inheritDoc
 			 *
-			 * @see org.eclipse.sensinact.gateway.core.security.impl.Session#registered(SensiNactResourceModel)
+			 * @see Session#register(SensiNactResourceModel)
 			 */
 			@Override
 			public ServiceRegistration<SensiNactResourceModel> 
@@ -125,7 +125,7 @@ class SecuredAccessImpl implements SecuredAccess
 			 * @throws SecuredAccessException 
 			 * @inheritDoc
 			 *
-			 * @see org.eclipse.sensinact.gateway.core.security.impl.Session#unregister(SensiNactResourceModel)
+			 * @see Session#unregister(ServiceRegistration)
 			 */
 			@Override
 			public void unregister(
@@ -139,7 +139,7 @@ class SecuredAccessImpl implements SecuredAccess
 			/**
 			 * @inheritDoc
 			 *
-			 * @see org.eclipse.sensinact.gateway.core.security.impl.Session#getFromUri(java.lang.String)
+			 * @see Session#getFromUri(String)
 			 */
 			@Override
 			public <S extends ElementsProxy<?>> S getFromUri(String uri)
@@ -169,7 +169,7 @@ class SecuredAccessImpl implements SecuredAccess
 			/**
 			 * @inheritDoc
 			 *
-			 * @see org.eclipse.sensinact.gateway.core.security.impl.Session#getSessionKey()
+			 * @see Session#getSessionKey()
 			 */
 			@Override
 			public Session.Key getSessionKey()
@@ -200,8 +200,7 @@ class SecuredAccessImpl implements SecuredAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.security.impl.SecuredAccess#
-	 * getSession(java.lang.String, java.lang.String)
+	 * @see SecuredAccess#getSession(Authentication)
 	 */
 	@Override
 	public Session getSession(Authentication<?> authentication)
@@ -213,8 +212,7 @@ class SecuredAccessImpl implements SecuredAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.security.impl.SecuredAccess#
-	 * getAnonymousSession()
+	 * @see SecuredAccess#getAnonymousSession()
 	 */
 	@Override
 	public Session getAnonymousSession()
@@ -226,18 +224,6 @@ class SecuredAccessImpl implements SecuredAccess
 			Sessions.SESSIONS.set(session);
 		}
 		return session;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SecuredAccess#
-	 * validate(org.osgi.framework.Bundle)
-	 */
-	@Override
-	public String validate(Bundle bundle)
-	{
-		return null;
 	}
 
 	/**
@@ -336,7 +322,7 @@ class SecuredAccessImpl implements SecuredAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.security.impl.Session#getServiceProvider(java.lang.String)
+	 * @see Session#getServiceProvider(String)
 	 */
 	private ServiceProvider getServiceProvider(final Session.Key key, 
 			final String serviceProviderName)
@@ -395,7 +381,7 @@ class SecuredAccessImpl implements SecuredAccess
 	 * Registers the {@link SensiNactResourceModel}  as a system one,
 	 * meaning it exists in the system's datastore
 	 * 
-	 * @param snaModelInstance the {@link SensiNactResourceModel} to 
+	 * @param modelInstance the {@link SensiNactResourceModel} to
 	 * register
 	 * 
 	 * @throws SecuredAccessException 
@@ -432,7 +418,7 @@ class SecuredAccessImpl implements SecuredAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see SecuredAccess#unregister(SensiNactResourceModel)
+	 * @see SecuredAccess#unregister(ServiceRegistration)
 	 */
 	@Override
 	public void unregister(
@@ -540,7 +526,7 @@ class SecuredAccessImpl implements SecuredAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see SecuredAccess#update(SensiNactResourceModel)
+	 * @see SecuredAccess#update(SensiNactResourceModel, ServiceRegistration)
 	 */
 	@Override
 	public void update(final SensiNactResourceModel<?> modelInstance,

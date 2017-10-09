@@ -58,24 +58,10 @@ public interface SecuredAccess
 		throws InvalidKeyException, DataStoreException;
 
 	/**
-	 * Validates the signature of the {@link Bundle} passed
-	 * as parameter, and if valid returns its manifest file's 
-	 * string SHA-1 signature ; otherwise returns null
-	 * 
-	 * @param bundle the {@link Bundle} to validate the signature
-	 * of
-	 * 
-	 * @return the string SHA-1 signature of the specified {@link 
-	 * Bundle}'s manifest if the {@link Bundle} is valid ; 
-	 * null otherwise
-	 */
-	 String validate(Bundle bundle);
-
-	/**
 	 * Creates the {@link AccessNode}s hierarchy for the {@link 
 	 * SensiNactResourceModel} whose holding bundle's identifier
 	 * and name are passed as parameters, and attaches it
-	 * to the parent {@link RootNode} also passed as parameter
+	 * to the parent {@link AccessTree} also passed as parameter
 	 * 
 	 * @param identifier the String identifier of the 
 	 * Bundle holding the specified {@link SensiNactResourceModel} 
@@ -113,7 +99,7 @@ public interface SecuredAccess
 	 * @param modelInstance the sensiNact resource model to be registered
 	 * in the OSGi host environment
 	 * 
-	 * @param the {@link ServiceRegistration} for the specified {@link 
+	 * @return  the {@link ServiceRegistration} for the specified {@link
 	 * SensiNactResourceModel}
 	 * @throws SecuredAccessException 
 	 */
@@ -144,7 +130,7 @@ public interface SecuredAccess
 	 * @param filter the {@link SnaFilter} helping in filtering the messages 
 	 * transmitted to the {@link SnaAgent} to be created and registered
 	 *  
-	 * @param the String identifier of the registered {@link SnaAgent}
+	 * @return  the String identifier of the registered {@link SnaAgent}
 	 */
 	String registerAgent(Mediator mediator, SnaAgentCallback callback, 
 			SnaFilter filter);

@@ -27,7 +27,7 @@ import org.osgi.framework.launch.Framework;
 
 import org.eclipse.sensinact.gateway.security.signature.internal.BundleValidationImpl;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.BundleValidation;
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 
 /*
  * signature validation with embedded archive: embedded archives are to be signed by the same signer as the main archive
