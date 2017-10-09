@@ -30,7 +30,6 @@
                 <exclude>**/*.iml</exclude>
                 <exclude>**/.gitignore</exclude>
                 <exclude>**/pom.xml</exclude>
-                <exclude>**/datastore/</exclude>
                 <exclude>**/${project.build.directory}/**</exclude>
                 <exclude>**/about.html</exclude>
             </excludes>

@@ -10,20 +10,24 @@
  */
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.device;
 
-import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.exception.MQTTConnectionException;
-
 /**
- * Interface that abstracts echonet lamps
- * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Nascimento</a>
+ * POJO that is base to express the mapping between one MQTT topic and a sensinact device.
+ * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
-public interface MQTTBusClient {
+public interface MQTTPropertyFileConfig {
 
     String getHost();
     Long getPort();
     String getId();
+    String getTopicType();
     String getTopic();
+    String getProcessor();
+    String getProtocol();
+    Float getLongitude();
+    Float getLatitude();
+    Boolean getDiscoveryOnFirstMessage();
+    String getUsername();
+    String getPassword();
     void act(String command, Object... parameters);
-    void connect() throws MQTTConnectionException;
-    void disconnect() throws MQTTConnectionException;
 
 }

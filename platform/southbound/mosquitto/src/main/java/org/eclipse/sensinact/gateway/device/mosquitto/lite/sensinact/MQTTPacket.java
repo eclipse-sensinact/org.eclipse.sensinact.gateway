@@ -10,125 +10,127 @@
  */
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.sensinact;
 
-import org.eclipse.sensinact.gateway.core.ServiceProvider;
-import org.eclipse.sensinact.gateway.generic.Task.CommandType;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Provider;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.CommandID;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.Data;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.GoodbyeMessage;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.HelloMessage;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.ResourceID;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceID;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.*;
 
 
 /**
  * Sensinact Packet
- * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Nascimento</a>
+ * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class MQTTPacket implements Packet
 {
+
+    @ResourceID
+    private String resourceId;
+
+    @ServiceID
+    private String serviceId;
+
+    @ServiceProviderID
     private String processorId;
-	private boolean isHelloMessage;
-	private boolean isGoodByeMessage;
+
+    @HelloMessage
+    private Boolean isHelloMessage=false;
+
+    @GoodbyeMessage
+    private Boolean isGoodByeMessage=false;
+
+    @Data
     private String payload;
 
-    public MQTTPacket(String processorId, boolean learn){
-        this.processorId=processorId;
-        this.learn=learn;
+    private Provider currentState;
+
+    public String getResourceId() {
+        return resourceId;
     }
 
-    public MQTTPacket(String processorId, boolean learn, String payload){
-        this.processorId=processorId;
-        this.learn=learn;
-        this.payload=payload;
-
+    public void setResourceId(String resourceId) {
+        this.resourceId = resourceId;
     }
 
-    public MQTTPacket(String processorId, boolean learn, boolean goodbye){
-        this(processorId, learn);
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    public String getProcessorId() {
+        return processorId;
+    }
+
+    public void setProcessorId(String processorId) {
+        this.processorId = processorId;
+    }
+
+    public MQTTPacket(String processorId){
+        this.processorId=processorId;
+    }
+
+    public MQTTPacket(String processorId,Boolean hello){
+        this.processorId=processorId;
+        this.isHelloMessage=hello;
+    }
+
+    public void setInfo(String service,String resourceId,String data){
+        this.serviceId=service;
+        this.resourceId=resourceId;
+        this.payload=data;
+    }
+
+    public MQTTPacket(String processorId, String serviceId, String resourceId, String data){
+        this.processorId=processorId;
+        this.serviceId=serviceId;
+        this.resourceId=resourceId;
+        this.payload=data;
+    }
+
+    public MQTTPacket(String processorId, String serviceId, String resourceId, String data,Boolean hello,Boolean goodbye){
+        this(serviceId,resourceId,processorId,data);
+        this.isHelloMessage=hello;
         this.isGoodByeMessage=goodbye;
     }
-
-    private boolean learn = false;
-
-
-    /**
-    public MQTTBusClient getCurrentState() {
-        return currentState;
-    }
-
-    public void setCurrentState(MQTTBusClient currentState) {
-        this.currentState = currentState;
-    }
-     **/
-
-    public String getPayload(){
-        return payload;
-    }
-    
     @Override
     public byte[] getBytes() {
         return new byte[0];
     }
 
-    public boolean isLearn() {
-        return learn;
-    }
-
-    @CommandID
-    public CommandType getCommand()
-    {
-    	 return CommandType.GET;
-    }
-
-    @ServiceProviderID
-    public String getServiceProviderIdentifier()
-    {
+    public String getServiceProviderIdentifier() {
         return processorId;
-    }
-
-    @ServiceID
-    public String getServiceId()
-    {
-   	 	return (getPayload()!=null)
-   		?"info":ServiceProvider.ADMINISTRATION_SERVICE_NAME;
-    }
-    
-    @ResourceID
-    public String getResourceId()
-    {
-   	 	return (getPayload()!=null)
-   		?"value":"signal";
-    }
-
-    @Data
-    public Object getData()
-    {
-   	 	return (getPayload()!=null)?getPayload():0;
-    }
-
-    @HelloMessage
-    public boolean isHello()
-    {
-    	return (getPayload()!=null)
-    		?false:this.isHelloMessage;
-    }
-    
-    @GoodbyeMessage
-    public boolean isGoodbye()
-    {
-    	return (getPayload()!=null)
-    		?false:this.isGoodByeMessage;
     }
 
     public void isHello(boolean isHelloMessage)
     {
     	this.isHelloMessage = isHelloMessage;
     }
+
+    public boolean isHello()
+    {
+    	return this.isHelloMessage;
+    }
     
     public void isGoodbye(boolean isGoodByeMessage)
     {
     	this.isGoodByeMessage = isGoodByeMessage;
     }    
+    
+    public boolean isGoodbye()
+    {
+    	return this.isGoodByeMessage;
+    }
+
+    public Provider getCurrentState() {
+        return currentState;
+    }
+
+    public void setCurrentState(Provider currentState) {
+        this.currentState = currentState;
+    }
+
+    public String getPayload(){
+        return payload;
+    }
 }

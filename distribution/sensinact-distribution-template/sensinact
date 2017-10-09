@@ -1,13 +1,6 @@
 #!/bin/bash
-
-# Copyright (c) 2017 CEA.
-# All rights reserved. This program and the accompanying materials
-# are made available under the terms of the Eclipse Public License v1.0
-# which accompanies this distribution, and is available at
-# http://www.eclipse.org/legal/epl-v10.html
-#
-# Contributors:
-#    CEA - initial API and implementation
+#set -ex
+#This file will be interpolates by Maven resources plugin (Author: Jander Modification)
 
 export SCRIPT_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CONFIG_FELIX="-Dfelix.config.properties=file:conf/config.properties"
@@ -105,6 +98,7 @@ while [[ $# -gt 0 ]]; do
 		-h|--help)
 			echo "Syntax: sensinact [-options]"
 			echo "	-c,--configure		Change current profiles"
+			echo "	-u			Update hardlinks of selected profiled"
 			echo "	-d,--debug		Add debug options to Java"
 			echo "	-h,--help		Display this help"
 			exit 0

@@ -10,13 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.core.security;
 
-//import java.security.InvalidKeyException;
-
-//import org.eclipse.sensinact.gateway.core.ModelInstanceRegistration;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
-//import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.util.tree.PathTree;
-//import org.osgi.framework.ServiceRegistration;
 
 /**
  * A secured {@link Session}s provider service 
@@ -27,7 +22,7 @@ public interface SecuredAccess
 {
 	public static final long ANONYMOUS_ID = 0L;
 	public static final String ANONYMOUS_PKEY = "anonymous";
-
+	
 	/**
 	 * @param bundleIdentifier
 	 * @return

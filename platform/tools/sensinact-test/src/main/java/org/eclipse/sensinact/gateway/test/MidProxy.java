@@ -86,7 +86,8 @@ public class MidProxy<T> implements InvocationHandler
 	}
 
 	/**
-	 * @param classes
+	 * @param instanceType
+	 * @param parameterTypes
 	 * @param objects
 	 * @return
 	 * @throws ClassNotFoundException 

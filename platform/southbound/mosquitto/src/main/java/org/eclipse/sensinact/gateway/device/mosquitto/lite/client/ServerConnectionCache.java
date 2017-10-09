@@ -10,31 +10,58 @@
  */
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.client;
 
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.mqtt.MQTTBroker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Pool of connection for the MQTT broker
+ * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
+ */
 public class ServerConnectionCache {
 
     private static Map<String,MQTTClient> instances=new HashMap<String,MQTTClient>();
+    private static final Logger LOG = LoggerFactory.getLogger(ServerConnectionCache.class);
 
     private ServerConnectionCache(){
 
     }
 
-    private static String convertToKey(String host,Long port){
-        return String.format("%s:%s",host,port.toString());
-    }
+    public static MQTTClient getInstance(String id,MQTTBroker broker){
 
-    public static MQTTClient getInstance(String server, Long port){
-
-        if(!instances.containsKey(convertToKey(server,port))){
+        if(!instances.containsKey(id)){
             //Create new instance of the server here
-            MQTTClient client=MQTTConnectionFactory.create(server, port);
-            instances.put(convertToKey(server,port),client);
+            instances.put(id,new MQTTClient(broker));
         }
 
-        return instances.get(convertToKey(server, port));
+        return instances.get(id);
 
+    }
+
+    public static Boolean hasInstance(String id){
+        return instances.containsKey(id);
+    }
+
+    public static void disconnectInstance(String id){
+        LOG.info("Trying to disconnect MQTT server instance {}",id);
+        if(instances.containsKey(id)){
+            //Create new instance of the server here
+            LOG.info("MQTT server instance {} found, disconnecting..",id);
+            MQTTClient client=instances.remove(id);
+            if(client!=null)
+            try {
+                client.getConnection().disconnect();
+                LOG.info("MQTT server instance {} disconnected.",id);
+            } catch (Exception e) {
+                LOG.error("MQTT server instance {} failed to disconnect.",id);
+            }
+            instances.put(id,client);
+        }else {
+            LOG.info("MQTT server instance {} does not exist",id);
+        }
     }
 
 }

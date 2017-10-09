@@ -197,15 +197,15 @@
                                     <artifactId>sensinact-datastore-api</artifactId>
                                     <version>${project.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.sensinact.gateway</groupId>
+                                    <artifactId>sensinact-signature-validator</artifactId>
+                                    <version>${project.version}</version>
+                                </artifactItem>
                                 <!-- SECURITY  -->
                                 <!--<artifactItem>
                                 	<groupId>org.eclipse.sensinact.gateway</groupId>
                                 	<artifactId>sensinact-sqlite-connector</artifactId>
-                                	<version>${project.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                	<groupId>org.eclipse.sensinact.gateway</groupId>
-                                	<artifactId>sensinact-signature-validator</artifactId>
                                 	<version>${project.version}</version>
                                 </artifactItem>
                                 <artifactItem>
@@ -239,11 +239,11 @@
                                     <artifactId>sensinact-system</artifactId>
                                     <version>${project.version}</version>
                                 </artifactItem>
-                                <dependency>
+                                <artifactItem>
                                     <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
                                     <artifactId>sensinact-northbound-access</artifactId>
                                     <version>${project.version}</version>
-                                </dependency>
+                                </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}/dependencies/bundle/3</outputDirectory>
                         </configuration>

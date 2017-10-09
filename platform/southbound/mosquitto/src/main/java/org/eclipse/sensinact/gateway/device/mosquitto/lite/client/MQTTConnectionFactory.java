@@ -10,16 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.client;
 
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.mqtt.MQTTBroker;
+
+/**
+ * Generate the connection string necessary for the MQTT broker
+ * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
+ */
 public class MQTTConnectionFactory {
 
-    public static MQTTClient create(String host, Long port){
+    public static MQTTClient create(MQTTBroker broker){
 
-        String broker=String.format("tcp://%s:%d",host,port);
         MQTTClient client=new MQTTClient(broker);//"java client"
-        client.setBroker(broker);
+
         return client;
 
     }
-
 
 }

@@ -10,10 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.device.exception;
 
+/**
+ * Exception raised when the link between the platform and the broker are lost
+ * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
+ */
 public class MQTTConnectionException extends Exception{
-
-    public MQTTConnectionException() {
-    }
 
     public MQTTConnectionException(String message) {
         super(message);
@@ -27,7 +28,4 @@ public class MQTTConnectionException extends Exception{
         super(cause);
     }
 
-//    public MQTTConnectionException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-//        super(message, cause, enableSuppression, writableStackTrace);
-//    }
 }

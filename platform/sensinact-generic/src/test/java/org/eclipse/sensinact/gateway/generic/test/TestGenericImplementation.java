@@ -33,7 +33,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.eclipse.sensinact.gateway.common.primitive.Describable;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.core.ActionResource;
-import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.Service;
@@ -97,12 +96,13 @@ public class TestGenericImplementation extends MidOSGiTest
 		starter.start("SmartPlug");
 
 		Thread.sleep(2000);
-		MidProxy<Core> mid = new MidProxy<Core>(classloader, 
-				this, Core.class);
-		Core core = mid.buildProxy();		
-		Session session = core.getAnonymousSession();
+		MidProxy<SecuredAccess> mid = new MidProxy<SecuredAccess>(classloader, 
+				this, SecuredAccess.class);
+		SecuredAccess securedAccess = mid.buildProxy();
 		
-		ServiceProvider provider = session.serviceProvider("SmartPlug");
+		Session session = securedAccess.getAnonymousSession();
+		
+		ServiceProvider provider = session.getServiceProvider("SmartPlug");
 		Service service = provider.getService("PowerService");
 		Resource variable = service.getResource("status");
 		Resource variation = service.getResource("variation");
@@ -171,12 +171,13 @@ public class TestGenericImplementation extends MidOSGiTest
 		
 		 Thread.sleep(2000);
 
-		 MidProxy<Core> mid = new MidProxy<Core>(classloader, 
-					this, Core.class);
-		 Core core = mid.buildProxy();		
-		 Session session = core.getAnonymousSession();
-
-		 ServiceProvider provider = session.serviceProvider("TestForSensiNactGateway");
+		 MidProxy<SecuredAccess> mid = new MidProxy<SecuredAccess>(classloader, 
+					this, SecuredAccess.class);
+		 SecuredAccess securedAccess = mid.buildProxy();
+			
+		 Session session = securedAccess.getAnonymousSession();
+			
+		 ServiceProvider provider = session.getServiceProvider("TestForSensiNactGateway");
 		 Service service = provider.getService("sensor");
 		 Resource temperature = service.getResource("temperature");
 
@@ -215,12 +216,13 @@ public class TestGenericImplementation extends MidOSGiTest
 		 starter.start("weather_5");
 
 		 Thread.sleep(2000);
-		 MidProxy<Core> mid = new MidProxy<Core>(classloader, 
-					this, Core.class);
-		 Core core = mid.buildProxy();		
-		 Session session = core.getAnonymousSession();
+		 MidProxy<SecuredAccess> mid = new MidProxy<SecuredAccess>(classloader, 
+					this, SecuredAccess.class);
+		 SecuredAccess securedAccess = mid.buildProxy();
+			
+		 Session session = securedAccess.getAnonymousSession();
 
-		 ServiceProvider provider = session.serviceProvider("weather_5");
+		 ServiceProvider provider = session.getServiceProvider("weather_5");
 		 Service service = provider.getService("admin");
 		 
 		 JSONObject jsonObject;
@@ -252,11 +254,13 @@ public class TestGenericImplementation extends MidOSGiTest
 		 processor.process("device1");
 
 		 Thread.sleep(2000);
-		 MidProxy<Core> mid = new MidProxy<Core>(classloader, 
-					this, Core.class);
-		 Core core = mid.buildProxy();		
-		 Session session = core.getAnonymousSession();
-		 ServiceProvider provider = session.serviceProvider("device1");
+		 MidProxy<SecuredAccess> mid = new MidProxy<SecuredAccess>(classloader, 
+					this, SecuredAccess.class);
+		 SecuredAccess securedAccess = mid.buildProxy();
+		 
+		 Session session = securedAccess.getAnonymousSession();
+
+		 ServiceProvider provider = session.getServiceProvider("device1");
 		 Service ldrService = provider.getService("ldr");	
 		 
 		 MidProxy midService = (MidProxy) Proxy.getInvocationHandler(ldrService);
@@ -317,12 +321,13 @@ public class TestGenericImplementation extends MidOSGiTest
 				 "dynamicBundle.jar").toURI().toURL()).start();
 
 		 Thread.sleep(7000);
-		 MidProxy<Core> mid = new MidProxy<Core>(classloader, 
-					this, Core.class);
-		 Core core = mid.buildProxy();		
-		 Session session = core.getAnonymousSession();
+		 MidProxy<SecuredAccess> mid = new MidProxy<SecuredAccess>(
+				 classloader, this, SecuredAccess.class);
+		 
+		 SecuredAccess securedAccess = mid.buildProxy();			
+		 Session session = securedAccess.getAnonymousSession();
 		
-		 Resource resource = session.resource("providerTest", "measureTest",
+		 Resource resource = session.getResource("providerTest", "measureTest",
 		 "condition");
 
 		 MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(resource);
@@ -350,12 +355,12 @@ public class TestGenericImplementation extends MidOSGiTest
 				 "dynamicBundle.jar").toURI().toURL()).start();
 
 		 Thread.sleep(5000);
-
-		 MidProxy<Core> mid = new MidProxy<Core>(classloader, 
-					this, Core.class);
-		 Core core = mid.buildProxy();		
-		 Session session = core.getAnonymousSession();
 		 
+		 MidProxy<SecuredAccess> mid = new MidProxy<SecuredAccess>(
+				 classloader, this, SecuredAccess.class);
+		 
+		 SecuredAccess securedAccess = mid.buildProxy();			
+		 Session session = securedAccess.getAnonymousSession();
 
 		 ServiceReference reference = super.getBundleContext(
 					).getServiceReference(StarterService.class);
@@ -369,7 +374,7 @@ public class TestGenericImplementation extends MidOSGiTest
 
 		 Thread.sleep(2000);
 
-		 ServiceProvider provider = session.serviceProvider("weather_7");
+		 ServiceProvider provider = session.getServiceProvider("weather_7");
 		 Service service = provider.getService("admin");
 		 Resource resource = service.getResource("location");
 		 
@@ -421,7 +426,7 @@ public class TestGenericImplementation extends MidOSGiTest
 		  + "file:target/felix/bundle/sensinact-datastore-api.jar "
 		  + "file:target/felix/bundle/sensinact-framework-extension.jar "
 		  + "file:target/felix/bundle/sensinact-security-none.jar ");
-
+		
 		configuration.put("felix.auto.start.2",
 			"file:target/felix/bundle/sensinact-core.jar "
 		  + "file:target/felix/bundle/sensinact-signature-validator.jar ");
@@ -431,7 +436,6 @@ public class TestGenericImplementation extends MidOSGiTest
 
 		configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
 		configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
-	}
 	}
 	
 	private void initializeMoke(URL resource, Map defaults, 

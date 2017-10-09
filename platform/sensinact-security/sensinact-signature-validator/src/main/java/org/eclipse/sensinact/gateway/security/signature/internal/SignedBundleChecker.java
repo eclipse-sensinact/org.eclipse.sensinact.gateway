@@ -24,7 +24,8 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.BundleValidationException;
+import org.eclipse.sensinact.gateway.security.signature.exception.BundleValidationException;
+
 
 public class SignedBundleChecker
 {
@@ -195,11 +196,11 @@ public class SignedBundleChecker
 	 * A method for checking whether the Signature File is valid (that is to say
 	 * whether given Manifest digest matches real Manifest of the the archive).
 	 * 
-	 * @param impl
+	 * @param cryptoUtils
 	 *            TODO
 	 * @param signer
 	 *            TODO
-	 * @param JarFile,
+	 * @param signedJar,
 	 *            the archive to be checked
 	 * @return boolean, true if the signature File matches Manifest of archive.
 	 */
@@ -227,7 +228,7 @@ public class SignedBundleChecker
 	 * A method for checking whether manifest is valid against the archive (that
 	 * is to say whether given file digests match real file digests).
 	 * 
-	 * @param JarFile,
+	 * @param signedJar,
 	 *            the archive to be checked
 	 * @return boolean, true if the digests from Manifest File match the real
 	 *         digest of files in archive.
@@ -284,9 +285,9 @@ public class SignedBundleChecker
 	 * - or the resources in the embedded archive are signed as if there were
 	 * directly stored in the main archive
 	 * 
-	 * @param JarFile,
+	 * @param signedJar,
 	 *            the jar to be analysed
-	 * @param Manifest,
+	 * @param manifest,
 	 *            the manifest of the jar
 	 * @return boolean, true if all manifest entries exist as resource in the
 	 *         archive.
@@ -318,9 +319,9 @@ public class SignedBundleChecker
 	 * This method should only be called when checkManifestEntriesExist and
 	 * checkJarFilesKnown return true.
 	 * 
-	 * @param JarFile,
+	 * @param signedJar,
 	 *            the jar to be analysed
-	 * @param Manifest,
+	 * @param manifest,
 	 *            the manifest of the jar
 	 * @return boolean, true if all entries in the manifest have valid hash
 	 *         values when compared to resources in the archive
@@ -397,9 +398,9 @@ public class SignedBundleChecker
 	 * A method for checking whether, for each file in the archive, matching
 	 * manifest entry exists
 	 * 
-	 * @param JarFile,
+	 * @param signedJar,
 	 *            the jar to be analysed
-	 * @param Manifest,
+	 * @param manifest,
 	 *            the manifest of the jar
 	 * @return boolean, true if every resource in the archive has an entry in
 	 *         the manifest;
@@ -475,7 +476,7 @@ public class SignedBundleChecker
 	 * A method for checking whether the resources in a signed archive stream
 	 * are in a valid order.<br>
 	 * 
-	 * @param JarFile,
+	 * @param signedJar,
 	 *            the archive to be checked
 	 * @return boolean, true if the order of resources is valid
 	 */

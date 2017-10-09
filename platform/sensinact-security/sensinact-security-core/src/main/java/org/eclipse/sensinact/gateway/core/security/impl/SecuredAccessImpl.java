@@ -24,11 +24,27 @@ import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileImpl;
+
+import org.eclipse.sensinact.gateway.core.*;
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.core.message.SnaAgent;
+import org.eclipse.sensinact.gateway.core.message.SnaAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.SnaAgentImpl;
+import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
+
 import org.eclipse.sensinact.gateway.core.security.BundleValidation;
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessNode;
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
@@ -36,6 +52,7 @@ import org.eclipse.sensinact.gateway.core.security.MethodAccess;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessImpl;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
+
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.dao.AgentDAO;
@@ -135,39 +152,10 @@ public class SecuredAccessImpl implements SecuredAccess
 		}
 	}
 
-	/** 
-	 * @inheritDoc
-	 * 
-	 * @see SecuredAccess#
-	 * validate(org.osgi.framework.Bundle)
-	 */
-	@Override
-	public String validate(final Bundle bundle)
-	{
-//		System.out.println("VALDATING BUNDLE :" + bundle.getSymbolicName());
-//		System.out.println("---------------------------------------------");
-		String identifier = mediator.callService(
-		BundleValidation.class,			
-		new Executable<BundleValidation, String>() 
-		{
-			@Override
-			public String execute(BundleValidation service) 
-					throws Exception 
-			{
-				return service.check(bundle);
-			}
-		});
-//		System.out.println( "IDENTIFIER  " + identifier);
-//		System.out.println("---------------------------------------------");
-		return identifier;
-	}
-
 	/**
 	 * @inheritDoc
 	 *
-	 * @see SecuredAccess#
-	 * buildAccessNodesHierarchy(java.lang.String, java.lang.String, 
-	 * org.eclipse.sensinact.gateway.core.security.RootNode)
+	 * @see SecuredAccess#buildAccessNodesHierarchy(String, String, AccessTree)
 	 */
 	@Override
 	public void buildAccessNodesHierarchy(String signature, 
@@ -299,7 +287,7 @@ public class SecuredAccessImpl implements SecuredAccess
 	}
 	
 	/**
-	 * @param root
+	 * @param tree
 	 * @param object
 	 * @throws Exception
 	 */
@@ -446,9 +434,9 @@ public class SecuredAccessImpl implements SecuredAccess
 	}
 	
 	/**
-	 * @param root
-	 * @param object
-	 * @throws Exception
+	 * @param tree
+	 * @param application
+	 * @throws SecuredAccessException
 	 */
 	private void buildTree( MutableAccessTree<? extends MutableAccessNode> tree, 
 			ApplicationEntity application) throws SecuredAccessException
@@ -509,7 +497,7 @@ public class SecuredAccessImpl implements SecuredAccess
 	 * @param signature
 	 * @param name
 	 * @return
-	 * @throws DAOException 
+	 * @throws SecuredAccessException 
 	 */
 	private boolean checkIdentifier(String signature, String name)
 			throws SecuredAccessException
@@ -540,7 +528,7 @@ public class SecuredAccessImpl implements SecuredAccess
 	}
 
 	/**
-	 * @param root
+	 * @param tree
 	 * @param object
 	 * @throws Exception
 	 */
@@ -606,7 +594,8 @@ public class SecuredAccessImpl implements SecuredAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.security.SecuredAccess#getAgentPublicKey(java.lang.String)
+	 * @see org.eclipse.sensinact.gateway.core.security.SecuredAccess#
+	 * getAgentPublicKey(java.lang.String)
 	 */
 	@Override
 	public String getAgentPublicKey(String signature) 
@@ -631,7 +620,8 @@ public class SecuredAccessImpl implements SecuredAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.security.SecuredAccess#getApplicationPublicKey(java.lang.String)
+	 * @see org.eclipse.sensinact.gateway.core.security.SecuredAccess#
+	 * getApplicationPublicKey(java.lang.String)
 	 */
 	@Override
 	public String getApplicationPublicKey(String privateKey) 

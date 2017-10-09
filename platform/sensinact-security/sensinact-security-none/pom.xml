@@ -43,14 +43,6 @@
             <version>${project.version}</version>
 			<scope>provided</scope>
         </dependency>
-        <!--
-		<dependency>
-			<groupId>org.eclipse.sensinact.gateway</groupId>
-			<artifactId>sensinact-condperm</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		-->
         <dependency>
             <groupId>org.eclipse.sensinact.gateway</groupId>
             <artifactId>sensinact-datastore-api</artifactId>
@@ -82,8 +74,7 @@
                         <Provide-Capability>
                         	org.eclipse.sensinact.security,
                         	org.eclipse.sensinact.datastore,
-                    		org.eclipse.sensinact.datastore.connector,
-                    		org.eclipse.sensinact.signature.validator
+                    		org.eclipse.sensinact.datastore.connector
                         </Provide-Capability>
                         <Include-Resource>
                             about.html,

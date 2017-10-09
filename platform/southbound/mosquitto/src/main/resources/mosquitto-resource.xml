@@ -27,11 +27,14 @@
         	</attribute>
         </attributes>
     </resourceInfo>
+
+    <!--
     <resourceInfo xsi:type="resourceInfoVariable" name="VALUE" target="info">
         <identifier xsi:type="stringContent">infoState</identifier>
         <attributes>
         	<attribute name="value" type="string"/>
         </attributes>
     </resourceInfo>
+    -->
 
 </resourceInfos>

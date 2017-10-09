@@ -144,11 +144,9 @@ public abstract class MidOSGiTest implements BundleContextProvider
 	 * manifest. If a manifest is present and verify is true, also attempts
 	 * to verify the signatures if the JarInputStream is signed.
 	 *
-	 * @param in
-	 *            the actual input stream
-	 * @param verify
-	 *            whether or not to verify the JarInputStream if it is
-	 *            signed.
+	 * @param manifestFile
+	 * @param destDirectory
+	 * @param sourceDirectories
 	 * @exception IOException
 	 *                if an I/O error has occurred
 	 */
@@ -239,7 +237,7 @@ public abstract class MidOSGiTest implements BundleContextProvider
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.nthbnd.rest.BundleContextProvider#getBundleContext()
+	 * @see BundleContextProvider#getBundleContext()
 	 */
 	@Override
 	public BundleContext getBundleContext()
@@ -299,6 +297,8 @@ public abstract class MidOSGiTest implements BundleContextProvider
 						+ "org.xml.sax," 
 						+ "org.xml.sax.helpers,"
 						+ "sun.misc,"
+						+ "javax.mail,"
+					  	+ "javax.mail.internet,"
 						+ "sun.security.action");
 		configuration.put("org.osgi.framework.storage.clean","onFirstInit");
 		configuration.put("felix.auto.deploy.action", "install");
