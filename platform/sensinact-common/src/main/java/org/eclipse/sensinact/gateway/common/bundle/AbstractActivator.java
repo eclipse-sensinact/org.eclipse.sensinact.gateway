@@ -11,12 +11,10 @@
 
 package org.eclipse.sensinact.gateway.common.bundle;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
-import java.util.Iterator;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -24,6 +22,7 @@ import org.osgi.framework.BundleContext;
 
 
 import org.eclipse.sensinact.gateway.util.PropertyUtils;
+import org.osgi.service.log.LogService;
 
 /**
  * Abstract implementation of the {@link BundleActivator} interface
@@ -31,6 +30,14 @@ import org.eclipse.sensinact.gateway.util.PropertyUtils;
 public abstract class AbstractActivator<M extends Mediator> implements BundleActivator 
 {
 	public static final String SENSINACT_CONFIG_FILE = "sensiNact-conf.xml";
+	public static final String DEFAULT_BUNDLE_PROPERTY_FILEDIR="felix.fileinstall.dir";
+
+	/**
+	 * Completes the starting process, this alternative method allows extentions to override this method and receive properties declared in cfg file.
+	 */
+	public void doStart(Dictionary<String,String> properties) throws Exception {
+		doStart();
+	}
 
 	/**
 	 * Completes the starting process 
@@ -75,7 +82,7 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 	 */
 	public void start(BundleContext context) throws Exception 
 	{
-		 Properties properties = new Properties();
+		Properties properties = new Properties();
 		 
 		 URL config  =  context.getBundle().getResource(
 				 SENSINACT_CONFIG_FILE);
@@ -87,10 +94,65 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 			 input.close();
 		 }
 	     //initialize fields
-	     this.properties = properties;	     
+	     this.properties = properties;
+
 	     this.mediator = this.initMediator(context);
-	     //complete starting process
-	     this.doStart();
+
+		final Dictionary<String,String> bundleProperties=loadBundleProperties(context);
+
+		//complete starting process
+		 this.doStart(bundleProperties);
+	}
+
+	private Dictionary<String,String> loadBundleProperties(BundleContext context){
+		Properties bundleProperties=null;
+
+		try{
+			final String fileInstallDir=context.getProperty(DEFAULT_BUNDLE_PROPERTY_FILEDIR);
+
+			mediator.log(LogService.LOG_INFO,"Configuration directory "+fileInstallDir);
+
+			final String symbolicName=context.getBundle().getSymbolicName();
+			mediator.log(LogService.LOG_INFO,"Bundle symbolic name "+symbolicName);
+
+			bundleProperties=new Properties();
+
+			final String bundlePropertyFileName=String.format("%s/%s.properties",fileInstallDir,symbolicName);
+			final String bundlePropertyFileNameFallback=String.format("%s/%s.property",fileInstallDir,symbolicName);
+
+			/**
+			 * Looks for property files put into config directory
+			 */
+			try{
+				bundleProperties.load(new FileInputStream(bundlePropertyFileName));
+				mediator.log(LogService.LOG_WARNING,String.format("File %s loaded successfully",bundlePropertyFileName));
+				logBundleProperties(symbolicName,bundlePropertyFileName,bundleProperties);
+			}catch(FileNotFoundException e){
+				mediator.log(LogService.LOG_WARNING,String.format("Failed to load bundle property file %s, trying %s.",bundlePropertyFileName,bundlePropertyFileNameFallback));
+				bundleProperties.load(new FileInputStream(bundlePropertyFileNameFallback));
+				logBundleProperties(symbolicName,bundlePropertyFileNameFallback,bundleProperties);
+				mediator.log(LogService.LOG_WARNING,String.format("File %s loaded successfully",bundlePropertyFileNameFallback));
+			}
+
+		}catch(Exception e){
+			bundleProperties=null;
+		}
+
+		Hashtable<String, String> map = new Hashtable<String,String>();
+		for (final String name: bundleProperties.stringPropertyNames())
+			map.put(name, properties.getProperty(name));
+
+		return map;
+	}
+
+	private void logBundleProperties(String bundleName,String propertyFile,Properties properties){
+
+		mediator.log(LogService.LOG_INFO,String.format("Loading properties for bundle %s located in %s",bundleName,propertyFile));
+
+		for(Map.Entry<Object,Object> entry:properties.entrySet()){
+			mediator.log(LogService.LOG_INFO,String.format("%s:%s",entry.getKey(),entry.getValue()));
+		}
+
 	}
 
 	/**
