@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.agent.mqtt.onem2m.osgi;
 
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.osgi.AbstractMqttActivator;
 import org.eclipse.sensinact.gateway.agent.mqtt.onem2m.internal.SnaEventOneM2MMqttHandler;
+import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 
 /**
@@ -20,14 +21,15 @@ import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
  */
 public class Activator extends AbstractMqttActivator {
 
+    @Property(name = "org.eclipse.sensinact.gateway.northbound.mqtt.onem2m.csebase")
+    public String cseBase;
+
     /** @inheritDoc
      *
      * @see AbstractActivator#doStart()
      */
     @Override
     public void doStart() throws Exception {
-        String cseBase = (String) super.getProperty("org.eclipse.sensinact.gateway.northbound.mqtt.onem2m.csebase");
-
         super.doStart(new SnaEventOneM2MMqttHandler(cseBase));
     }
 }
