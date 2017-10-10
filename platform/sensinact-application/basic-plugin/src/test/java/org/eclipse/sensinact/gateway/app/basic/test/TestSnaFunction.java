@@ -19,6 +19,7 @@ import org.eclipse.sensinact.gateway.app.basic.sna.SetActionFunction;
 import org.eclipse.sensinact.gateway.app.manager.component.data.ConstantData;
 import org.eclipse.sensinact.gateway.app.manager.component.data.ResourceData;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ModelConfiguration;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
@@ -39,10 +40,11 @@ import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.Session;
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
+import org.eclipse.sensinact.gateway.security.signature.exception.BundleValidationException;
+
 import junit.framework.TestCase;
 
-import org.eclipse.sensinact.gateway.core.security.BundleValidation;
-import org.eclipse.sensinact.gateway.core.security.BundleValidationException;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -82,13 +84,16 @@ public class TestSnaFunction extends TestCase {
         AuthorizationService authorization = Mockito.mock(AuthorizationService.class);
         SecuredAccess securedAccess = Mockito.mock(SecuredAccess.class);
 
-        Mockito.when(mediator.callService(Mockito.any(Class.class), Mockito.any(Executable.class)))
-                .thenReturn(new BundleValidation() {
-                    @Override
-                    public String check(Bundle bundle) throws BundleValidationException {
-                        return "xxxxxxxxxxx00000000";
-                    }
-                });
+        Mockito.when(mediator.callService(Mockito.any(Class.class), 
+        Mockito.any(Executable.class))).thenReturn(
+        new BundleValidation() 
+        {
+            @Override
+            public String check(Bundle bundle) throws BundleValidationException
+            {
+                return "xxxxxxxxxxx00000000";
+            }
+        });
 
         Mockito.when(authorization.getAuthenticatedAccessLevelOption(Mockito.anyString(), 
         		Mockito.anyLong())).thenReturn(AccessLevelOption.ANONYMOUS);
