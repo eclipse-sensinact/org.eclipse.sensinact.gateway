@@ -217,6 +217,13 @@ public interface ConstraintFactory
 				
 			} catch(Exception e)
 			{
+				JSONObject uniqueConstraint = null;
+				
+				if(constraint.length() == 1 && !JSONObject.NULL.equals(
+						(uniqueConstraint = constraint.optJSONObject(0))))
+				{
+					return Loader.load(classloader, uniqueConstraint);
+				}
 				logicalOperator = Expression.LogicalOperator.AND;
 			}
 			return Loader.load(classloader, constraint, logicalOperator);
