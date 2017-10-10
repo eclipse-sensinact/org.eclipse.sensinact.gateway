@@ -45,27 +45,27 @@ public class BundleValidationTest
 		CONFIGURATION.put("felix.auto.deploy.action", "install,start");
 		CONFIGURATION.put("felix.log.level", "4");		
 		CONFIGURATION.put("org.osgi.framework.system.packages.extra",
-				"org.eclipse.sensinact.gateway.generic.core;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.generic.core.impl;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.generic.core.packet;version=\"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.generic.stream;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.generic.uri;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.generic.parser;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.generic.automata;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.generic.annotation;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.generic.local;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.util;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.util.constraint;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.util.crypto;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.util.json;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.util.mediator;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.util.properties;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.util.reflect;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.util.rest;version= \"1.2.0\"," +
-				"org.eclipse.sensinact.gateway.util.xml;version= \"1.2.0\"," +
-				"json-20140107.jar;version= \"1.2.0\"," +
-				"org.json;version;version= \"1.2.0\"," +
-				"org.json.zip;version=\"1.2.0\"");
+				"org.eclipse.sensinact.gateway.generic.core;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.generic.core.impl;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.generic.core.packet;version=\"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.generic.stream;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.generic.uri;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.generic.parser;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.generic.automata;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.generic.annotation;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.generic.local;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.util;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.util.constraint;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.util.crypto;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.util.json;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.util.mediator;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.util.properties;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.util.reflect;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.util.rest;version= \"1.5.0\"," +
+				"org.eclipse.sensinact.gateway.util.xml;version= \"1.5.0\"," +
+				"json-20140107.jar;version= \"1.5.0\"," +
+				"org.json;version;version= \"1.5.0\"," +
+				"org.json.zip;version=\"1.5.0\"");
 	}
 	
 	private Framework felix = new FrameworkFactory().newFramework(CONFIGURATION);
