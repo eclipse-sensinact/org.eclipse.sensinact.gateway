@@ -69,19 +69,21 @@ implements Constraint
 			Constraint constraint = iterator.next();
 			boolean complies = constraint.complies(value);
 			
-			if(!complies && this.operator.equals(
-					LogicalOperator.AND))
+			if(complies)
 			{
-				return false;
-				
-			} else if(complies && this.operator.equals(
-					LogicalOperator.OR))
+				if(this.operator.equals(LogicalOperator.OR))
+				{
+					return true;
+				}
+			} else
 			{
-				break;
+				if(this.operator.equals(LogicalOperator.AND))
+				{
+					return false;
+				}
 			}
 		}
-		return !this.operator.equals(
-				LogicalOperator.OR);
+		return !this.operator.equals(LogicalOperator.OR);
 	}
 
 	/** 
