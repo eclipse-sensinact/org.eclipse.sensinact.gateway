@@ -601,9 +601,9 @@ public class TestResourceBuilder<R extends ModelInstance>
     	ResourceImpl r2impl = service.addDataResource(PropertyResource.class, 
     		"TestProperty2", String.class, null); 
     	
-        PropertyResource r2 = r2impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);        		
+        //PropertyResource r2 = r2impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);        		
         ResourceImpl r3impl = service.addLinkedResource("LinkedProperty", r1impl);
-    	PropertyResource r3 = r3impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);
+    	//PropertyResource r3 = r3impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);
 
     	service.addLinkedResource(LocationResource.LOCATION,
     		instance.getRootElement().getAdminService().getResource(
@@ -633,7 +633,7 @@ public class TestResourceBuilder<R extends ModelInstance>
         		AccessMethodExecutor.ExecutionPolicy.AFTER);
 
         String attributeValue = (String) r4impl.getAttribute("value").getValue();       
-   	    LocationResource r4 = r4impl.<LocationResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);    	 
+   	    //LocationResource r4 = r4impl.<LocationResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);    	 
    	    
    	    Thread.sleep(250);
    	
@@ -647,14 +647,25 @@ public class TestResourceBuilder<R extends ModelInstance>
         assertEquals(buffer.toString(), message.getJSONObject("response"
         		).getString(DataResource.VALUE));
         
-//        //test linked resource
-//        JSONAssert.assertEquals(((GetResponse) r1.get()).getResponse(),
-//                ((GetResponse) r3.get()).getResponse(), false);
-//        
-//        r1.set(new Object[]{"testLink"}).getJSON();
-//        
-//        JSONAssert.assertEquals(((GetResponse) r1.get()).getResponse(),
-//                ((GetResponse) r3.get()).getResponse(), false);
+        //test linked resource
+        JSONAssert.assertEquals(
+        	session.get("serviceProvider", "testService",
+            "TestProperty", null).getJSONObject("response"),
+        	session.get("serviceProvider", "testService",
+        	"LinkedProperty", DataResource.VALUE).getJSONObject("response"),
+        	false);
+        
+        r1.set(new Object[]{"testLink"}).getJSON();
+        
+        session.set("serviceProvider", "testService", 
+            "LinkedProperty", DataResource.VALUE, "testLink");
+
+        JSONAssert.assertEquals(
+            	session.get("serviceProvider", "testService",
+                "TestProperty", DataResource.VALUE).getJSONObject("response"),
+            	session.get("serviceProvider", "testService",
+            	"LinkedProperty", null).getJSONObject("response"),
+            	false);
 //
 //        //test subscription
 //        String subId = ((SubscribeResponse)r2.subscribe(
@@ -764,7 +775,7 @@ public class TestResourceBuilder<R extends ModelInstance>
 //        r2.unsubscribe(subId);
 //        org.junit.Assert.assertEquals(0, instance.getHandler().count(filter));
 //
-//	    Service proxy = service.<Service>getProxy(SecuredAccess.ANONYMOUS_PKEY);
+//	      Service proxy = service.<Service>getProxy(SecuredAccess.ANONYMOUS_PKEY);
 //        SetResponse error = proxy.set("location","unknown");
 //        assertTrue(error.getStatusCode()==403); 
 //
