@@ -21,10 +21,10 @@ class AuthorizationServiceImpl implements AuthorizationService
 	 * @inheritDoc
 	 *
 	 * @see AuthorizationService#
-	 * getUserAccessLevelOption(java.lang.String, long)
+	 * getAuthenticatedAccessLevelOption(java.lang.String, long)
 	 */
 	@Override
-	public AccessLevelOption getUserAccessLevelOption(
+	public AccessLevelOption getAuthenticatedAccessLevelOption(
 		String path, long uid) throws AuthorizationServiceException
 	{	
 		return AccessLevelOption.ANONYMOUS;
@@ -34,38 +34,10 @@ class AuthorizationServiceImpl implements AuthorizationService
 	 * @inheritDoc
 	 *
 	 * @see AuthorizationService#
-	 * getUserAccessLevelOption(java.lang.String, java.lang.String)
+	 * getAuthenticatedAccessLevelOption(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public AccessLevelOption getUserAccessLevelOption(
-			String path, String publicKey)
-			throws AuthorizationServiceException 
-	{	
-		return AccessLevelOption.ANONYMOUS;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AuthorizationService#
-	 * getAgentAccessLevelOption(java.lang.String, long)
-	 */
-	@Override
-	public AccessLevelOption getAgentAccessLevelOption(
-			String path, long uid) 
-			throws AuthorizationServiceException
-	{	
-		return AccessLevelOption.ANONYMOUS;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AuthorizationService#
-	 * getAgentAccessLevelOption(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public AccessLevelOption getAgentAccessLevelOption(
+	public AccessLevelOption getAuthenticatedAccessLevelOption(
 			String path, String publicKey)
 			throws AuthorizationServiceException 
 	{	

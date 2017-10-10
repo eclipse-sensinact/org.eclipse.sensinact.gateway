@@ -13,6 +13,9 @@ package org.eclipse.sensinact.gateway.core.message;
 import org.eclipse.sensinact.gateway.util.stack.StackEngineHandler;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.osgi.framework.ServiceRegistration;
+
+import java.util.Dictionary;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler;
@@ -28,26 +31,20 @@ implements SnaAgent
 	//						STATIC DECLARATIONS  						  //
 	//********************************************************************//
 	
-	public static final String SNAFILTER_AGENT_SUFFIX_PROPERTY = "org.eclipse.sensinact.gateway.filter.suffix";
-	public static final String SNAFILTER_AGENT_TYPES_PROPERTY = "org.eclipse.sensinact.gateway.filter.types";
-	public static final String SNAFILTER_AGENT_SENDER_PROPERTY = "org.eclipse.sensinact.gateway.filter.sender";
-	public static final String SNAFILTER_AGENT_PATTERN_PROPERTY = "org.eclipse.sensinact.gateway.filter.pattern";
-	public static final String SNAFILTER_AGENT_COMPLEMENT_PROPERTY = "org.eclipse.sensinact.gateway.filter.complement";
-	public static final String SNAFILTER_AGENT_CONDITIONS_PROPERTY = "org.eclipse.sensinact.gateway.filter.conditions";
 
-	public static final String COMMA = ",";
-	public static final String DOT = ".";
-	
 	/**
-     * Creates an {@link SnaAgent} with the callback 
-     * is passed as parameter
+     * Creates an {@link SnaAgent} with the callback and filter which are 
+     * passed as parameter
      * 
-     * @param mediator
-     * @param callback
-     *      the {@link AbstractSnaAgentCallback} that will 
-     *      be called by the SnaAgent to be created
-     * @param filter
-     * @return
+     * @param mediator the {@link Mediator} allowing the {@link SnaAgent} 
+     * to be created to interact with the OSGi host environment
+     * @param callback the {@link AbstractSnaAgentCallback} that will 
+     * be called by the{@link SnaAgent} to be created
+     * @param filter the {@link SnaFilter} that will be used by the
+     * {@link SnaAgent} to be created to discriminate the handled {@link 
+     * SnaMessage}s
+     * 
+     * @return the newly created {@link SnaAgent}
      */
     public static SnaAgentImpl createAgent(
     	Mediator mediator, SnaAgentCallback callback, 
@@ -101,7 +98,7 @@ implements SnaAgent
 	 * @param suffix
 	 * @return
 	 */
-	private static JSONArray getConditions(
+	protected static JSONArray getConditions(
 			Mediator mediator, String suffix)
 	{
 		JSONArray conditions = null;
@@ -134,7 +131,7 @@ implements SnaAgent
 	 * @param suffix
 	 * @return
 	 */
-	private static SnaMessage.Type[] getTypes(
+	protected static SnaMessage.Type[] getTypes(
 			Mediator mediator, String suffix)
 	{
 		SnaMessage.Type[] messageTypes = null;
@@ -173,13 +170,13 @@ implements SnaAgent
 	 * @param suffix
 	 * @return
 	 */
-	private static String getSender(
+	protected static String getSender(
 			Mediator mediator, 
 			String suffix)
 	{
 		return (String) mediator.getProperty(
-				buildProperty(SNAFILTER_AGENT_SENDER_PROPERTY,
-						suffix));
+			buildProperty(SNAFILTER_AGENT_SENDER_PROPERTY,
+				suffix));
 	}
 
 	/**
@@ -187,7 +184,7 @@ implements SnaAgent
 	 * @param suffix
 	 * @return
 	 */
-	private static boolean isPattern(
+	protected static boolean isPattern(
 			Mediator mediator, 
 			String suffix)
 	{
@@ -207,7 +204,7 @@ implements SnaAgent
 	 * @param suffix
 	 * @return
 	 */
-	private static boolean isComplement(
+	protected static boolean isComplement(
 			Mediator mediator, String suffix)
 	{
 		boolean isComplement = false;
@@ -240,37 +237,27 @@ implements SnaAgent
 	/**
      * the {@link AbstractSnaAgentCallback} type 
      */
-	private final SnaAgentCallback callback;
+	protected final SnaAgentCallback callback;
 	
 	/**
 	 * the {@link SnaFilter} used to validate the 
 	 * received {@link SnaMessage} before transmitting
 	 * them to the dedicated {@link AbstractSnaAgentCallback}
 	 */
-	private SnaFilter filter;
+	protected SnaFilter filter;
 	
 	/**
 	 * the String public key of this {@link SnaAgent}
 	 */
-	private final String publicKey;
+	protected final String publicKey;
 	
 	/**
 	 * the {@link Mediator} allowing to interact
 	 * with the OSGi host environment
 	 */
-	private Mediator mediator;
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param mediator
-	 * @param callback
-	 */
-	public SnaAgentImpl(Mediator mediator, 
-		SnaAgentCallback callback, String publicKey)
-	{
-		this(mediator, callback, null, publicKey);		
-	}
+	protected Mediator mediator;
+
+	protected ServiceRegistration<SnaAgent> registration;
 	
 	/**
 	 * Constructor
@@ -278,8 +265,9 @@ implements SnaAgent
 	 * @param mediator
 	 * @param callback
 	 * @param filter
+	 * @param publicKey
 	 */
-	public SnaAgentImpl(Mediator mediator, 
+	protected SnaAgentImpl(Mediator mediator, 
 		SnaAgentCallback callback, SnaFilter filter, 
 		String publicKey)
 	{
@@ -295,13 +283,13 @@ implements SnaAgent
 			this.filter.addHandledType(SnaMessage.Type.values());
 		}
 	}
-
+	
     /**
      * @inheritDoc
-     *
-	 * @see MessageRegisterer#
-	 * register(SnaMessage)
-	 */
+     * 
+     * @see org.eclipse.sensinact.gateway.core.message.MessageRegisterer#
+     * register(org.eclipse.sensinact.gateway.core.message.SnaMessage)
+     */
     @Override
     public synchronized void register(SnaMessage message)
     {
@@ -315,7 +303,7 @@ implements SnaAgent
     /**
      * @inheritDoc
      *
-     * @see SnaAgent#getPublicKey()
+     * @see org.eclipse.sensinact.gateway.core.message.SnaAgent#getPublicKey()
      */
     public String getPublicKey()
     {
@@ -325,8 +313,8 @@ implements SnaAgent
     /**
      * @inheritDoc
      *
-	 * @see StackEngineHandler#doHandle(java.lang.Object)
-	 */
+     * @see org.eclipse.sensinact.gateway.util.stack.StackEngineHandler#doHandle(java.lang.Object)
+     */
     @Override
     public void doHandle(SnaMessage message)
     {
@@ -338,12 +326,29 @@ implements SnaAgent
         {
         	this.mediator.error(e);
         }
-    }   
-
+    }
+   
+	/**
+	 * @param properties
+	 */
+	public void start(Dictionary<String,Object> properties)
+	{
+		try
+		{
+			this.registration = this.mediator.getContext(
+				).registerService(SnaAgent.class, this, 
+						properties);
+	
+		} catch(IllegalStateException e)
+		{
+			this.mediator.error("The agent is not registered");
+		}
+	}
+	
     /**
      * @inheritDoc
      *
-     * @see SnaAgent#stop()
+     * @see org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler#stop()
      */
     @Override
     public void stop()
@@ -357,16 +362,17 @@ implements SnaAgent
     	{
         	this.mediator.error(e);
     	}
+    	if(this.registration == null)
+    	{
+    		return;
+    	}
+    	try
+    	{
+    		this.registration.unregister();
+    		
+    	} catch(IllegalStateException e)
+    	{
+        	this.mediator.error(e);
+    	}
     }
-
-//	/** 
-//	 * @inheritDoc
-//	 * 
-//	 * @see MessageRegisterer#handleUnchanged()
-//	 */
-//	@Override
-//	public boolean handleUnchanged()
-//	{
-//		return this.callback.handleUnchanged();
-//	}
 }

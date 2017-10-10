@@ -45,8 +45,8 @@ extends AbstractAccessMethodExecutor
 			throw new InvalidReflectiveExecutorException(
 					"Incompatible method and target types");
 		}
-		if(!JSONObject.class.isAssignableFrom((Class)method.getGenericReturnType())
-				&& !Void.class.isAssignableFrom((Class)method.getGenericReturnType()))
+		if(!JSONObject.class.isAssignableFrom((Class<?>)method.getGenericReturnType())
+				&& !Void.class.isAssignableFrom((Class<?>)method.getGenericReturnType()))
 		{
 			throw new InvalidReflectiveExecutorException(
 					"Incompatible returned type : JSONObject or Void expected");

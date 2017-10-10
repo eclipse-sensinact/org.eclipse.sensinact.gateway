@@ -12,183 +12,307 @@ package org.eclipse.sensinact.gateway.core.security;
 
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
-import org.osgi.framework.ServiceRegistration;
-
-import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
-import org.eclipse.sensinact.gateway.util.CastUtils;
-
+import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
+ * A Session allows to invoke access method on resources, and to access to 
+ * available service providers, services, and/or resources 
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface Session
 {	 
-	//********************************************************************//
-	//						NESTED DECLARATIONS		    				  //
-	//********************************************************************//
+	/**
+	 * Returns the String identifier of this Session
+	 * 
+	 * @return this Session's String identifier
+	 */
+	String getId();
 	
-	class Key implements UserKey
-	{
-		private long uid;
-		private String token;
-		private String publicKey;
-
-		public Key(){}
-		
-		/**
-		 * @return the uid
-		 */
-		public long getUid() {
-			return uid;
-		}
-		/**
-		 * @param uid the uid to set
-		 */
-		public void setUid(long uid) {
-			this.uid = uid;
-		}
-
-		/**
-		 * @return
-		 */
-		public void setPublicKey(String publicKey)
-		{
-			this.publicKey = publicKey;
-		}
-		
-		/**
-		 * @return
-		 */
-		public String getPublicKey()
-		{
-			return this.publicKey;
-		}
-		
-		/**
-		 * @return the token
-		 */
-		public String getToken() {
-			return token;
-		}
-		/**
-		 * @param token the token to set
-		 */
-		public void setToken(String token) {
-			this.token = token;
-		}
-		
-		/** 
-		 * inheritDoc
-		 * 
-		 * @see java.lang.Object#equals(java.lang.Object)
-		 */
-		public boolean equals(Object object)
-		{
-			if(object == null)
-			{
-				return false;
-			}
-			if(object.getClass() == String.class)
-			{
-				return object.equals(this.token);
-			}
-			Double dble = CastUtils.primitiveNumberToDouble(object);
-			if(dble != null)
-			{
-				return this.uid == dble.longValue();
-			}
-			if(Session.Key.class.isAssignableFrom(object.getClass()))
-			{
-				return this.equals(((Session.Key)object).getToken())
-					|| this.equals(((Session.Key)object).getUid());
-			}
-			return false;
-		}
-	}
-
-	//********************************************************************//
-	//						ABSTRACT DECLARATIONS						  //
-	//********************************************************************//
-	
-
-	//********************************************************************//
-	//						STATIC DECLARATIONS		      				  //
-	//********************************************************************//
-
-
-	//********************************************************************//
-	//						INSTANCE DECLARATIONS						  //
-	//********************************************************************//
-
-    /**
-     * @return
-     */
-    Key getSessionKey();
-    
 	/**
 	 * Returns the set of  {@link ServiceProvider}s accessible
-	 * for this session's user
+	 * for this Session
 	 * 
-	 * @return
-	 * 		the set of accessible {@link ServiceProvider}s
+	 * @return the set of accessible {@link ServiceProvider}s
 	 */
-	Set<ServiceProvider> getServiceProviders();
+	Set<ServiceProvider> serviceProviders();
 	
 	/**
-	 * @param uri
-	 * @return
+	 * Returns the set of {@link ServiceProvider}s compliant
+	 * to the String LDAP formated filter passed as parameter
+	 * 
+	 * @param filter the String LDAP formated filter
+	 * 
+	 * @return the set of accessible {@link ServiceProvider}s
+	 * according to the specified LDAP filter 
 	 */
-    <S extends ElementsProxy<?>> S  getFromUri(String uri);
+	Set<ServiceProvider> serviceProviders(String filter);
     
-    /**
-     * @param serviceProviderName
-     * @return
+	/**
+     * Returns the {@link ServiceProvider} whose String identifier is 
+     * passed as parameter 
+     * 
+     * @param serviceProviderId the String identifier of the service provider
+     * 
+     * @return the {@link ServiceProvider}
      */
-    ServiceProvider getServiceProvider(String serviceProviderName);
+    ServiceProvider serviceProvider(String serviceProviderName);
 
     /**
-     * @param serviceProviderName
-     * @param serviceName
-     * @return
+     * Returns the {@link Service} whose String identifier is passed as 
+     * parameter, held by the specified service provider
+     * 
+     * @param serviceProviderId the String identifier of the service provider
+     * holding the service
+     * @param servideId the String identifier of the service
+     * 
+     * @return the {@link Service}
      */
-    Service getService(String serviceProviderName, String serviceName);
+    Service service(String serviceProviderName, String serviceName);
 
     /**
-     * @param serviceProviderName
-     * @param serviceName
-     * @param resourceName
-     * @return
+     * Returns the {@link Resource} whose String identifier is passed as 
+     * parameter, held by the specified service provider and service
+     * 
+     * @param serviceProviderId the String identifier of the service provider
+     * holding the service providing the resource
+     * @param servideId the String identifier of the service providing the 
+     * resource
+     * @param resourceId the String identifier of the resource
+     * 
+     * @return the {@link Resource}
      */
-     Resource getResource(String serviceProviderName, String serviceName,
+     Resource resource(String serviceProviderName, String serviceName,
     		 String resourceName);  
+ 	
+    /**
+   	 * Returns the JSON formated list of all registered resource 
+   	 * model instances, accessible to this Session, from the local 
+   	 * sensiNact instance, as well as from the connected remote ones 
+   	 * 
+   	 * @return the JSON formated list of the resource model instances for 
+   	 * this Session
+   	 */
+   	JSONObject getAll();
+   	
+   	/**
+  	 * Returns the JSON formated list of all registered resource 
+  	 * model instances, accessible to this Session and compliant 
+  	 * to the specified String LDAP formated filter, from the local 
+  	 * sensiNact instance, as well as from the connected remote ones 
+  	 * 
+  	 * @param filter the String LDAP formated filter 
+  	 * 
+  	 * @return the JSON formated list of the resource model instances for 
+  	 * this Session and compliant to the specified filter.
+  	 */
+   	JSONObject getAll(String filter);
 
-	/**
-	 * Registers the {@link SensiNactResourceModel} passed
-	 * as parameter in the OSGi host environment
-	 * 
-	 * @param modelInstance the {@link SensiNactResourceModel}
-	 * to be registered
-	 *
-	 * @return 
-	 * @throws SecuredAccessException 
-	 */
-	ServiceRegistration<SensiNactResourceModel> register(
-		SensiNactResourceModel<?> modelInstance) 
-			throws SecuredAccessException;
+  	/**
+  	 * Returns the JSON formated list of locations of all registered resource 
+  	 * model instances, accessible to this Session, from the local sensiNact 
+  	 * instance as well as from the connected remote ones 
+  	 * 
+  	 * @param publicKey the String public key of the user for which to 
+  	 * retrieve the list of accessible resource model instances
+  	 * 
+  	 * @return the JSON formated list of the location of the resource model 
+  	 * instances for this Session.
+  	 */
+  	JSONObject getLocations();
+     
+    /**
+     * Invokes the GET access method on the resource whose String identifier
+     * is passed as parameter, held by the specified service provider and 
+     * service
+     * 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service providing the resource
+     * on which applies the access method call
+     * @param serviceId the String identifier of the service providing
+     * the resource on which applies the access method call
+     * @param resourceId the String identifier  of the resource 
+     * on which applies the access method call
+     * @param attributeId the String identifier of the resource's attribute 
+     * targeted by the access method call 
+     * 
+     * @return the JSON formated response of the GET access method invocation
+     */
+    JSONObject get(String serviceProviderId, 
+     		String serviceId, String resourceId, 
+     		String attributeId);
 
-	/**
-	 * Unregisters the {@link SensiNactResourceModel} passed 
-	 * as parameter from the OSGi host environment
-	 * 
-	 * @param modelInstance the {@link SensiNactResourceModel}
-	 * to unregister
-	 * 
-	 * @throws SecuredAccessException 
-	 */
-	void unregister(ServiceRegistration<SensiNactResourceModel> registration) 
-			throws SecuredAccessException;   
+    /** 
+     * Invokes the SET access method on the resource whose String identifier
+     * is passed as parameter, held by the specified service provider and 
+     * service
+     * 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service providing the resource
+     * on which applies the access method call
+     * @param serviceId the String identifier of the service providing
+     * the resource on which applies the access method call
+     * @param resourceId the String identifier  of the resource 
+     * on which applies the access method call
+     * @param attributeId the String identifier of the resource's attribute 
+     * targeted by the access method call 
+     * @param parameter the value object to be set
+     * 
+     * @return the JSON formated response of the SET access method 
+     * invocation
+     */
+    JSONObject set(String serviceProviderId,
+            String serviceId, String resourceId, 
+            String attributeId, Object parameter);
+
+    /** 
+     * Invokes the ACT access method on the resource whose String identifier
+     * is passed as parameter, held by the specified service provider and 
+     * service
+     * 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service providing the resource
+     * on which applies the access method call
+     * @param serviceId the String identifier of the service providing
+     * the resource on which applies the access method call
+     * @param resourceId the String identifier  of the resource 
+     * on which applies the access method call
+     * @param parameters the Objects array parameterizing the 
+     * call 
+     * 
+     * @return the JSON formated response of the ACT access method 
+     * invocation
+     */
+    JSONObject act(String serviceProviderId,
+             String serviceId, String resourceId, 
+             Object[] parameters );
+     
+    /** 
+     * Invokes the SUBSCRIBE access method on the resource whose String 
+     * identifier is passed as parameter, held by the specified service 
+     * provider and service
+     * 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service providing the resource
+     * on which applies the access method call
+     * @param serviceId the String identifier of the service providing
+     * the resource on which applies the access method call
+     * @param resourceId the String identifier  of the resource 
+     * on which applies the access method call
+     * @param recipient the {@link Recipient} to which the update events
+     * generated by the subscription will be transmitted
+     * @param conditions the JSON formated set of constraints applying
+     * on the subscription to be created
+     * 
+     * @return the JSON formated response of the SUBSCRIBE access method 
+     * invocation
+     */
+    JSONObject subscribe(String serviceProviderId,
+             String serviceId, String resourceId, 
+ 	        Recipient recipient, JSONArray conditions);
+        
+    /** 
+     * Invokes the UNSUBSCRIBE access method on the resource whose String 
+     * identifier is passed as parameter, held by the specified service 
+     * provider and service
+     * 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service providing the resource
+     * on which applies the access method call
+     * @param serviceId the String identifier of the service providing
+     * the resource on which applies the access method call
+     * @param resourceId the String identifier  of the resource 
+     * on which applies the access method call
+     * @param subscriptionId the String identifier of the subscription
+     * to be deleted
+     * 
+     * @return the JSON formated response of the UNSUBSCRIBE access method 
+     * invocation
+     */
+    JSONObject unsubscribe(String serviceProviderId,
+             String serviceId, String resourceId, 
+            String subscriptionId );
+    
+
+    /**
+     * Returns the JSON formated list of available service providers for
+     * the user whose public key is passed as parameter
+     * 
+     * @return the JSON formated list of available service providers
+     */
+    JSONObject getProviders();
+
+    /**
+     * Returns the JSON formated description of the service provider whose
+     * String identifier is passed as parameter
+     * 
+     * @param serviceProviderId the String identifier of the 
+     * service provider
+     * 
+     * @return the JSON formated description of the specified service provider
+     */
+    JSONObject getProvider(String serviceProviderId);
+
+    /**
+     * Returns the JSON formated list of available services for the service 
+     * provider whose String identifier is passed as parameter
+     * 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the services
+     * 
+     * @return the JSON formated list of available services for the 
+     * specified service provider
+     */
+    JSONObject getServices(String serviceProviderId);
+
+    /**
+     * Returns the JSON formated description of the service whose String
+     * identifier is passed as parameter, and held by the specified service 
+     * provider
+     * 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service
+     * @param serviceId the String identifier of the service to return the 
+     * description of
+     * 
+     * @return the JSON formated description of the specified service
+     */
+    JSONObject getService(String serviceProviderId,String serviceId);
+
+    /**
+     * Returns the JSON formated list of available resources, for the service 
+     * and service provider whose String identifiers are passed as parameter
+     * 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service
+     * @param serviceId the String identifier of the service providing 
+     * the resources
+     * 
+     * @return the JSON formated list of available resources for the 
+     * specified service and service provider
+     */
+    JSONObject getResources(String serviceProviderId, String serviceId);
+
+    /**
+     * Returns the JSON formated description of the resource whose String
+     * identifier is passed as parameter, and held by the service 
+     * provider and service whose String identifiers are also passed as 
+     * parameter
+     * 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service, providing the resource
+     * @param serviceId the String identifier of the service providing
+     * the resource
+     * @param resourceId the String identifier  of the resource 
+     * to return the description of
+     * 
+     * @return the JSON formated description of the specified resource
+     */
+    JSONObject getResource(String serviceProviderId, 
+    		String serviceId, String resourceId);
 }

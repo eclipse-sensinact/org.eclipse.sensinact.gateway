@@ -18,6 +18,7 @@ import java.util.Stack;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
 
 /**
  * Shortcut to a {@link Signature} of an {@link AccessMethod} 
@@ -32,7 +33,7 @@ public class Shortcut extends Signature
     /**
      * Constructor 
      * 
-     * @param methodType
+     * @param type
      * 		the type of the {@link AccessMethod} associates
      * 		to the shortcut to instantiate
      * @param parameterTypes
@@ -47,11 +48,11 @@ public class Shortcut extends Signature
      * @throws InvalidValueException 
      */
     public  Shortcut(Mediator mediator, 
-    		AccessMethod.Type methodType,	Class<?>[] parameterTypes, 
+    	AccessMethod.Type type,	Class<?>[] parameterTypes, 
    		String[] parameterNames, Map<Integer, Parameter> 
     		fixedParameters) throws InvalidValueException
     {
-	    super(mediator, methodType, parameterTypes, parameterNames);
+	    super(mediator, type, parameterTypes, parameterNames);
 	    this.fixedParameters = Collections.unmodifiableMap(fixedParameters);
 	    this.shortucts = new Stack<Shortcut>();
     }
@@ -70,9 +71,8 @@ public class Shortcut extends Signature
      * 		the set of fixed {@link Parameter}s mapped to their 
      * 		index in the method signature
      */
-    public Shortcut(Mediator mediator, 
-    		AccessMethod.Type methodType, Parameter[] parameters, 
-    		Map<Integer, Parameter> fixedParameters)
+    public Shortcut(Mediator mediator, String methodType, 
+    	Parameter[] parameters, Map<Integer, Parameter> fixedParameters)
     {
 	    super(mediator, methodType, parameters);
 	    this.fixedParameters = Collections.unmodifiableMap(fixedParameters);

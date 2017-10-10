@@ -31,20 +31,6 @@ public interface Recipient extends JSONable
 	 */
 	SnaCallback.Type getSnaCallBackType();
 
-//	/**
-//	 * Returns true if this Recipient requires to
-//	 * be notified even if the value of an updated
-//	 * resource did not change 
-//	 * 
-//	 * @return
-//	 * 		<ul>
-//	 * 			<li>true if the unchanged value notification
-//	 * 			is required</li>
-//	 * 			<li>false otherwise</li>
-//	 * 		</ul>
-//	 */
-//	boolean handleUnchanged();
-	
 	/**
 	 * Returns the lifetime of the {@link SnaCallBack}
 	 * associated to this recipient

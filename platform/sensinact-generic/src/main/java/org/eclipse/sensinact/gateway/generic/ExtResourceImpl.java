@@ -30,12 +30,12 @@ import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
-import org.eclipse.sensinact.gateway.core.method.ActMethod;
 import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor.ExecutionPolicy;
+import org.eclipse.sensinact.gateway.core.method.legacy.ActMethod;
 import org.eclipse.sensinact.gateway.generic.parser.SignatureDefinition;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 
@@ -65,12 +65,12 @@ public class ExtResourceImpl extends ResourceImpl
 	 * @throws Exception 
 	 */
 	@Override
-	protected JSONObject passOn(AccessMethod.Type type, String uri, 
+	protected JSONObject passOn(String type, String uri, 
 			Object[] parameters) throws Exception
 	{		
 	    Task task = super.<Task>passOn(type, uri, parameters);	    
 		
-		if(type == AccessMethod.Type.GET && task != null 
+		if(type.equals(AccessMethod.GET) && task != null 
 		        && task.isResultAvailable() 
 		        && task.getResult()!=AccessMethod.EMPTY)
 		{
@@ -96,21 +96,21 @@ public class ExtResourceImpl extends ResourceImpl
      * 		{@link AccessMethod.Type} 
      */
     private Class<? extends Annotation> annotationFromAccessMethodType(
-    		AccessMethod.Type type)
+    		String type)
     {
     	switch(type)
     	{
-			case ACT:
+			case "ACT":
 				return Act.class;
-			case DESCRIBE:
+			case "DESCRIBE":
 				break;
-			case GET:
+			case "GET":
 				return Get.class;
-			case SET:
+			case "SET":
 				return org.eclipse.sensinact.gateway.generic.annotation.Set.class;
-			case SUBSCRIBE:
+			case "SUBSCRIBE":
 				return Subscribe.class;
-			case UNSUBSCRIBE:
+			case "UNSUBSCRIBE":
 				return Unsubscribe.class;
     	}
     	return null;
@@ -167,7 +167,8 @@ public class ExtResourceImpl extends ResourceImpl
                 }	    		    		    		
 	    		Class<?>[] parameterTypes = signature.getParameterTypes();	    		
 	    		Class<? extends Annotation> annotationClass =
-	    				this.annotationFromAccessMethodType(method.getType());
+	    			this.annotationFromAccessMethodType(method.getType(
+	    					).name());
 	    		
 	    		if(annotationClass == null)
 	    		{

@@ -10,11 +10,21 @@
  */
 package org.eclipse.sensinact.gateway.core.test;
 
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.primitive.Nameable;
+import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.ModelConfiguration;
+import org.eclipse.sensinact.gateway.core.ModelElement;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.core.message.MessageHandler;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
+import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
+import org.eclipse.sensinact.gateway.core.security.Session;
+import org.eclipse.sensinact.gateway.core.security.SessionKey;
 
 /**
  *
@@ -22,7 +32,6 @@ import org.eclipse.sensinact.gateway.core.message.MessageHandler;
  */
 public class MyModelInstance extends ModelInstance<ModelConfiguration>
 {
-
 	/**
 	 * @param mediator
 	 * @param modelConfiguration
@@ -41,6 +50,48 @@ public class MyModelInstance extends ModelInstance<ModelConfiguration>
 	{
 		return super.messageHandler;
 	}
+	/**
+	 * Returns the {@link AccessLevelOption} for the {@link Session} whose
+	 * {@link SessionKey} is passed as parameter, and for the {@link 
+	 * ModelElement} belonging to this resource model instance whose path 
+	 * is also passed as parameter
+	 *  
+	 * @param modelElement the targeted resource model element	
+	 * @param key the requirer {@link Session}'s key 
+	 * 
+	 * @return the {@link AccessLevelOption} for the specified session and 
+	 * resource
+	 */
+	public <I extends ModelInstance<?>, 
+	P extends ProcessableData, E extends Nameable, R extends Nameable>
+	AccessLevelOption getAccessLevelOption(ModelElement<I, P, E, R> 
+	modelElement, String publicKey)
+	{
+		return AccessLevelOption.ANONYMOUS;
+	}
 	
-
+	/**
+	 * Returns the set of the specified {@link ModelElement} accessible 
+	 * {@link AccessMethod.Type}s for the {@link AccessLevelOption} passed 
+	 * as parameter and
+	 *  
+	 * @param modelElement the {@link ModelElement} for which to retrieve 
+	 * the set of accessible {@link AccessMethod.Type}s	
+	 * @param accessLevelOption the requirer {@link AccessLevelOption} 
+	 * 
+	 * @return the set of accessible {@link AccessMethod.Type} of the
+	 * specified {@link ModelElement} for the specified {@link 
+	 * AccessLevelOption}
+	 */
+	public <I extends ModelInstance<?>, P extends ProcessableData, 
+	E extends Nameable, R extends Nameable> List<MethodAccessibility>
+	getAuthorizations(ModelElement<I, P, E, R> modelElement, 
+			AccessLevelOption accessLevelOption)
+	{
+		final String path = modelElement.getPath();
+		List<MethodAccessibility> methodAccessibilities =
+			this.configuration().getAccessibleMethods(
+				path, accessLevelOption);
+		return methodAccessibilities;
+	}
 }

@@ -11,7 +11,7 @@
 
 package org.eclipse.sensinact.gateway.core;
 
-import org.eclipse.sensinact.gateway.core.method.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
 
 /**
  * Extended {@link Resource} for Action

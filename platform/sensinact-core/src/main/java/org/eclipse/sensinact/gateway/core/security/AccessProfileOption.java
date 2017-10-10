@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.security;
 
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,51 +26,82 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 @SuppressWarnings("serial")
 public enum AccessProfileOption
 {	
-	DEFAULT(new EnumMap<AccessMethod.Type,Integer>(AccessMethod.Type.class)
+	DEFAULT(new HashMap<AccessMethod.Type,Integer>()
 	{{
-		put(AccessMethod.Type.GET, new Integer(1));
-		put(AccessMethod.Type.SET, new Integer(2));
-		put(AccessMethod.Type.ACT, new Integer(2));
-		put(AccessMethod.Type.SUBSCRIBE, new Integer(1));
-		put(AccessMethod.Type.UNSUBSCRIBE, new Integer(1));
-		put(AccessMethod.Type.DESCRIBE, new Integer(1));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.GET), new Integer(1));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.SET), new Integer(2));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.ACT), new Integer(2));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.SUBSCRIBE), new Integer(1));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.UNSUBSCRIBE), new Integer(1));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.DESCRIBE), new Integer(1));
 	}}),
-	ALL_ANONYMOUS(new EnumMap<AccessMethod.Type,Integer>(AccessMethod.Type.class)
+	ALL_ANONYMOUS(new HashMap<AccessMethod.Type,Integer>()
 	{{
-		put(AccessMethod.Type.GET, new Integer(1));
-		put(AccessMethod.Type.SET, new Integer(1));
-		put(AccessMethod.Type.ACT, new Integer(1));
-		put(AccessMethod.Type.SUBSCRIBE, new Integer(1));
-		put(AccessMethod.Type.UNSUBSCRIBE, new Integer(1));
-		put(AccessMethod.Type.DESCRIBE, new Integer(1));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.GET), new Integer(1));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.SET), new Integer(1));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.ACT), new Integer(1));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.SUBSCRIBE), new Integer(1));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.UNSUBSCRIBE), new Integer(1));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.DESCRIBE), new Integer(1));
 	}}),
-	NO_ANONYMOUS(new EnumMap<AccessMethod.Type,Integer>(AccessMethod.Type.class)
+	NO_ANONYMOUS(new HashMap<AccessMethod.Type,Integer>()
 	{{
-		put(AccessMethod.Type.GET, new Integer(2));
-		put(AccessMethod.Type.SET, new Integer(2));
-		put(AccessMethod.Type.ACT, new Integer(2));
-		put(AccessMethod.Type.SUBSCRIBE, new Integer(2));
-		put(AccessMethod.Type.UNSUBSCRIBE, new Integer(2));
-		put(AccessMethod.Type.DESCRIBE, new Integer(2));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.GET), new Integer(2));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.SET), new Integer(2));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.ACT), new Integer(2));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.SUBSCRIBE), new Integer(2));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.UNSUBSCRIBE), new Integer(2));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.DESCRIBE), new Integer(2));
 	}}),
-	ADMIN(new EnumMap<AccessMethod.Type,Integer>(AccessMethod.Type.class)
+	ADMIN(new HashMap<AccessMethod.Type,Integer>()
 	{{
-		put(AccessMethod.Type.GET, new Integer(3));
-		put(AccessMethod.Type.SET, new Integer(3));
-		put(AccessMethod.Type.ACT, new Integer(3));
-		put(AccessMethod.Type.SUBSCRIBE, new Integer(3));
-		put(AccessMethod.Type.UNSUBSCRIBE, new Integer(3));
-		put(AccessMethod.Type.DESCRIBE, new Integer(3));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.GET), new Integer(3));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.SET), new Integer(3));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.ACT), new Integer(3));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.SUBSCRIBE), new Integer(3));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.UNSUBSCRIBE), new Integer(3));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.DESCRIBE), new Integer(3));
 	}}),	
-	OWNER(new EnumMap<AccessMethod.Type,Integer>(AccessMethod.Type.class)
+	OWNER(new HashMap<AccessMethod.Type,Integer>()
 	{{
-		put(AccessMethod.Type.GET, new Integer(3));
-		put(AccessMethod.Type.SET, new Integer(4));
-		put(AccessMethod.Type.ACT, new Integer(4));
-		put(AccessMethod.Type.SUBSCRIBE, new Integer(3));
-		put(AccessMethod.Type.UNSUBSCRIBE, new Integer(3));
-		put(AccessMethod.Type.DESCRIBE, new Integer(3));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.GET), new Integer(3));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.SET), new Integer(4));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.ACT), new Integer(4));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.SUBSCRIBE), new Integer(3));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.UNSUBSCRIBE), new Integer(3));
+		put(AccessMethod.Type.valueOf(
+				AccessMethod.DESCRIBE), new Integer(3));
 	}});
+	
 	
 	/**
 	 * @param map
@@ -79,7 +109,7 @@ public enum AccessProfileOption
 	 * @return 
 	 */
 	private static final Set<MethodAccess> buildMethodAccesses(
-			EnumMap<AccessMethod.Type, Integer> map)
+			HashMap<AccessMethod.Type, Integer> map)
 	{
 		Set<MethodAccess> methodAccesses = new HashSet<MethodAccess>();
 		
@@ -88,12 +118,10 @@ public enum AccessProfileOption
 		
 		while(iterator.hasNext())
 		{
-			Map.Entry<AccessMethod.Type, Integer> entry = 
-					iterator.next();
-			
-			methodAccesses.add(new MethodAccessImpl(
-					new AccessLevelImpl(entry.getValue()), 
-					entry.getKey()));
+			Map.Entry<AccessMethod.Type, Integer> entry = iterator.next();	
+			AccessMethod.Type type = entry.getKey();
+			AccessLevel accessLevel = new AccessLevelImpl(entry.getValue());
+			methodAccesses.add(new MethodAccessImpl(accessLevel,type));
 		}
 		return methodAccesses;
 	}
@@ -135,8 +163,7 @@ public enum AccessProfileOption
 		for(;index < length ; index++)
 		{
 			AccessProfile optionProfile = values[index].getAccessProfile();
-			Set<MethodAccess> optionAccesses = 
-					optionProfile.getMethodAccesses();
+			Set<MethodAccess> optionAccesses = optionProfile.getMethodAccesses();
 
 			Iterator<MethodAccess> optionIterator = optionAccesses.iterator();
 			boolean found = true;
@@ -178,7 +205,7 @@ public enum AccessProfileOption
 	 * 
 	 * @param map 
 	 */
-	AccessProfileOption(EnumMap<AccessMethod.Type,Integer> map)
+	AccessProfileOption(HashMap<AccessMethod.Type,Integer> map)
 	{
 		Set<MethodAccess> methodAccesses  = buildMethodAccesses(map);
 		this.accessProfile = new AccessProfileImpl(methodAccesses);

@@ -20,11 +20,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.core.ActionResource;
+import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.junit.Test;
 
@@ -155,21 +155,20 @@ public class TestSecurity extends MidOSGiTest
 		configuration.put("felix.auto.start.4",
 				"file:target/felix/bundle/slider.jar "
 			  + "file:target/felix/bundle/fan.jar "
-			  + "file:target/felix/bundle/button.jar ");		
+			  + "file:target/felix/bundle/button.jar ");
 	}
 	
 	@Test
 	public void testSecurityAccessInitialization() throws Throwable
 	{		
-		MidProxy<SecuredAccess> mid = new MidProxy<SecuredAccess>(
-			classloader, this, SecuredAccess.class);
+		MidProxy<Core> mid = new MidProxy<Core>(
+			classloader, this, Core.class);
 		
-		SecuredAccess securedAccess = mid.buildProxy();
-		Session session = securedAccess.getAnonymousSession();
-		
+		Core core = mid.buildProxy();
+		Session session = core.getAnonymousSession();		
 		assertNotNull(session);
 		
-		Set providers = session.getServiceProviders();
+		Set providers = session.serviceProviders();
 		Iterator iterator = providers.iterator();
 		
 		while(iterator.hasNext())
@@ -181,8 +180,7 @@ public class TestSecurity extends MidOSGiTest
 					iterator.next());
 			
 			System.out.println(serviceProvider.getDescription().getJSON());			
-		}
-		
+		}		
 		System.out.println("============================================");
 
 		MidProxy<Authentication> midCredentials = new MidProxy<Authentication>(
@@ -200,7 +198,7 @@ public class TestSecurity extends MidOSGiTest
 		
 		assertNotNull(session);
 		
-		providers = session.getServiceProviders();
+		providers = session.serviceProviders();
 		iterator = providers.iterator();
 		
 		while(iterator.hasNext())

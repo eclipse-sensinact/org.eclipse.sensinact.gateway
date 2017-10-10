@@ -11,8 +11,8 @@
 
 package org.eclipse.sensinact.gateway.commands.gogo.osgi;
 
+import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -36,7 +36,7 @@ public class CommandServiceMediator extends Mediator {
      */
     public CommandServiceMediator(BundleContext context)  {
         super(context);
-        this.session = getSecuredAccess().getAnonymousSession();
+        this.session = getCore().getAnonymousSession();
         this.userId = "anonymous";
     }
 
@@ -47,8 +47,9 @@ public class CommandServiceMediator extends Mediator {
      * @throws DataStoreException
      * @throws InvalidKeyException
      */
-    public void switchUser(String login, String password) throws DataStoreException, InvalidKeyException {
-        this.session = getSecuredAccess().getSession(new Credentials(login, password));
+    public void switchUser(String login, String password) 
+    		throws DataStoreException, InvalidKeyException {
+        this.session = getCore().getSession(new Credentials(login, password));
         this.userId = login;
     }
 
@@ -72,19 +73,19 @@ public class CommandServiceMediator extends Mediator {
      * Get the secured access from the OSGi registry
      * @return the secured access object
      */
-    private SecuredAccess getSecuredAccess() {
+    private Core getCore() {
         ServiceReference[] references = null;
 
         try {
             references = super.getContext().getAllServiceReferences(
-            		SecuredAccess.class.getCanonicalName(), null);
+            		Core.class.getCanonicalName(), null);
         } catch (InvalidSyntaxException e) {
             e.printStackTrace();
         }
 
         if(references != null) {
             if(references.length == 1) {
-                return (SecuredAccess) super.getContext().getService(references[0]);
+                return (Core) super.getContext().getService(references[0]);
             }
         }
 

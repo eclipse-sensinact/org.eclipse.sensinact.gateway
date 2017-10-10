@@ -131,11 +131,11 @@ public class SignatureDefinition implements Comparable<SignatureDefinition>
         		new Parameter[parameters.size()]);
         if(fixedParameters.isEmpty())
         {
-            signature = new Signature(mediator, AccessMethod.Type.ACT,
+            signature = new Signature(mediator, AccessMethod.ACT,
             		parametersArray);           
         } else
         {
-           signature = new Shortcut(mediator, AccessMethod.Type.ACT,  
+           signature = new Shortcut(mediator, AccessMethod.ACT,  
         		   parametersArray, fixedParameters);
         }
         return signature;

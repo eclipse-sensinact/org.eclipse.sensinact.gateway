@@ -126,6 +126,10 @@ class MediatorManagedConfiguration implements ManagedService
 	 */
 	public void unregister()
 	{
+		if(this.registration == null)
+		{
+			return;
+		}
 		try
 		{
 			this.registration.unregister();

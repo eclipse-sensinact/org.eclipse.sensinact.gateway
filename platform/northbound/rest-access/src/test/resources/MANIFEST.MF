@@ -14,16 +14,16 @@ Import-Package: org.eclipse.sensinact.gateway.common.bundle;version="[1.4,2)",or
  eclipse.sensinact.gateway.common.execution;version="[1.4,2)",org.eclipse.sensinact.gateway
  .common.primitive;version="[1.4,2)",org.eclipse.sensinact.gateway.core.message;v
  ersion="[1.4,2)",org.eclipse.sensinact.gateway.core.method;version="[1.4,2)",org.
- eclipse.sensinact.gateway.core.security;version="[1.4,2)",org.eclipse.sensinact.gateway.nt
- hbnd.endpoint;version="[1.4,2)",org.eclipse.sensinact.gateway.nthbnd.endpoint.fo
- rmat;version="[1.4,2)",org.eclipse.sensinact.gateway.protocol.http.client;versio
- n="[1.4,2)",org.eclipse.sensinact.gateway.util;version="[1.4,2)",javax.servlet;v
- ersion="[3.1,4)",javax.servlet.annotation;version="[3.1,4)",javax.ser
- vlet.http;version="[3.1,4)",org.apache.felix.http.api;version="[2.0,3
- )",org.eclipse.jetty.websocket.api;version="[9.2,10)",org.eclipse.jet
- ty.websocket.api.annotations;version="[9.2,10)",org.eclipse.jetty.web
- socket.servlet;version="[9.2,10)",org.json;version="20080701",org.osgi
- .framework;version="[1.7,2)",org.osgi.service.http;version="[1.2,2)"
+ eclipse.sensinact.gateway.core.method.legacy;version="[1.4,2)",org.eclipse.sensin
+ act.gateway.core.security;version="[1.4,2)",org.eclipse.sensinact.gateway.nthbnd.
+ endpoint;version="[1.4,2)",org.eclipse.sensinact.gateway.nthbnd.endpoint.format;v
+ ersion="[1.4,2)",org.eclipse.sensinact.gateway.protocol.http.client;version="[1.4
+ ,2)",org.eclipse.sensinact.gateway.util;version="[1.4,2)",javax.servlet;version="
+ [3.1,4)",javax.servlet.annotation;version="[3.1,4)",javax.servlet.http;version="[
+ 3.1,4)",org.apache.felix.http.api;version="[2.0,3)",org.eclipse.jetty.websocket.a
+ pi;version="[9.2,10)",org.eclipse.jetty.websocket.api.annotations;version="[9.2,1
+ 0)",org.eclipse.jetty.websocket.servlet;version="[9.2,10)",org.json;version="2008
+ 0701",org.osgi.framework;version="[1.7,2)",org.osgi.service.http;version="[1.2,2)"
 Bundle-SymbolicName: rest-access
 Build-By: Eclipse
 

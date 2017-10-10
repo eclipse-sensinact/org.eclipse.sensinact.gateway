@@ -14,9 +14,8 @@ import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.osgi.framework.BundleContext;
-
 import org.eclipse.sensinact.gateway.agent.storage.internal.StorageAgent;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
+import org.eclipse.sensinact.gateway.core.Core;
 
 /**
  * Extended {@link AbstractActivator}
@@ -40,14 +39,16 @@ public class Activator extends AbstractActivator<Mediator> {
 
             this.handler = new StorageAgent(super.mediator);
 
-            this.registration = mediator.callService(SecuredAccess.class,
-                    new Executable<SecuredAccess,String>() {
-                        @Override
-                        public String execute(SecuredAccess service) throws Exception {
-                            return service.registerAgent(mediator, Activator.this.handler, null);
-                        }
-                    }
-            );
+            this.registration = mediator.callService(Core.class,
+                    new Executable<Core,String>()
+            {
+                @Override
+                public String execute(Core service) throws Exception
+                {
+                   return service.registerAgent(mediator, 
+                		   Activator.this.handler, null);
+                }
+            });
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -63,16 +64,16 @@ public class Activator extends AbstractActivator<Mediator> {
         if(super.mediator.isDebugLoggable()) {
             super.mediator.debug("Stopping storage agent.");
         }
-
-        mediator.callService(SecuredAccess.class,
-                new Executable<SecuredAccess,Void>() {
-                    @Override
-                    public Void execute(SecuredAccess service) throws Exception {
-                        service.unregisterAgent(Activator.this.registration);
-                        return null;
-                    }
-                });
-
+        mediator.callService(Core.class,
+                new Executable<Core,Void>()
+        {
+            @Override
+            public Void execute(Core service) throws Exception
+            {
+                service.unregisterAgent(Activator.this.registration);
+                return null;
+            }
+        });
         this.registration = null;
         this.handler = null;
     }

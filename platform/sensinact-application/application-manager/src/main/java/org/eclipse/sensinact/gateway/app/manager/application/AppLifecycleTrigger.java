@@ -25,68 +25,86 @@ import org.eclipse.sensinact.gateway.common.primitive.JSONable;
  *
  * @author Remi Druilhe
  */
-public class AppLifecycleTrigger implements AccessMethodTrigger<AccessMethodResult> {
+public class AppLifecycleTrigger implements AccessMethodTrigger<AccessMethodResult> 
+{
 
     private static final String APP_LIFECYCLE_TRIGGER = "AppLifecycleTrigger";
 
     private final ApplicationService service;
 
-    public AppLifecycleTrigger(ApplicationService service) {
+    public AppLifecycleTrigger(ApplicationService service) 
+    {
         this.service = service;
     }
 
     /**
      * @see AccessMethodTrigger#getName()
      */
-    public String getName() {
+    public String getName() 
+    {
         return APP_LIFECYCLE_TRIGGER;
     }
 
     /**
      * @see AccessMethodTrigger#getParameters()
      */
-    public Parameters getParameters() {
+    public Parameters getParameters() 
+    {
         return Parameters.INTERMEDIATE;
     }
 
     /**
      * @see Executable#execute(java.lang.Object)
      */
-    public Object execute(AccessMethodResult snaResult) throws Exception {
+    public Object execute(AccessMethodResult snaResult) throws Exception
+    {
         String uri = snaResult.getPath();
 
-        ApplicationStatus currentStatus = (ApplicationStatus) service.getResource(AppConstant.STATUS)
-                .getAttribute(DataResource.VALUE).getValue();
+        ApplicationStatus currentStatus = (ApplicationStatus) service.getResource(
+        	AppConstant.STATUS).getAttribute(DataResource.VALUE).getValue();
 
-        if (uri.endsWith(AppConstant.START)) {
-            if (!snaResult.hasError()) {
-                if (ApplicationStatus.INSTALLED.equals(currentStatus) || ApplicationStatus.UNRESOLVED.equals(currentStatus)) {
+        if (uri.endsWith(AppConstant.START)) 
+        {
+            if (!snaResult.hasError()) 
+            {
+                if (ApplicationStatus.INSTALLED.equals(currentStatus) 
+                		|| ApplicationStatus.UNRESOLVED.equals(currentStatus)) 
+                {
                     currentStatus = ApplicationStatus.RESOLVING;
-                } else if (currentStatus.equals(ApplicationStatus.RESOLVING)) {
+                    
+                } else if (currentStatus.equals(ApplicationStatus.RESOLVING))
+                {
                     currentStatus = ApplicationStatus.ACTIVE;
                 }
             } else {
                 return ApplicationStatus.UNRESOLVED;
             }
         } else if (uri.endsWith(AppConstant.UNINSTALL)) {
-            if (ApplicationStatus.INSTALLED.equals(currentStatus) || ApplicationStatus.UNRESOLVED.equals(currentStatus)) {
+            if (ApplicationStatus.INSTALLED.equals(currentStatus) 
+            		|| ApplicationStatus.UNRESOLVED.equals(currentStatus))
+            {
                 currentStatus = ApplicationStatus.UNINSTALLED;
-            } else {
-                snaResult.registerException(new LifeCycleException("Unable to UNINSTALL an application " +
+                
+            } else
+            {
+                snaResult.registerException(new LifeCycleException(
+                		"Unable to UNINSTALL an application " +
                         "which is not in an INSTALLED or UNRESOLVED state"));
             }
         } else if (uri.endsWith(AppConstant.STOP)) {
             if (ApplicationStatus.ACTIVE.equals(currentStatus)) {
                 currentStatus = ApplicationStatus.INSTALLED;
             } else {
-                snaResult.registerException(new LifeCycleException("Unable to STOP an application " +
+                snaResult.registerException(new LifeCycleException(
+                		"Unable to STOP an application " +
                         "which is not in an ACTIVE state"));
             }
         } else if (uri.endsWith(AppConstant.EXCEPTION)) {
             if (ApplicationStatus.ACTIVE.equals(currentStatus)) {
                 currentStatus = ApplicationStatus.UNRESOLVED;
             } else {
-                snaResult.registerException(new LifeCycleException("This should never happened"));
+                snaResult.registerException(new LifeCycleException(
+                		"This should never happened"));
             }
         }
 

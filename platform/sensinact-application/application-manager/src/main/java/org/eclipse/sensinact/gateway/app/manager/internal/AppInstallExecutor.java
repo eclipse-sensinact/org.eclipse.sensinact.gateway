@@ -19,8 +19,6 @@ import org.eclipse.sensinact.gateway.app.manager.application.Application;
 import org.eclipse.sensinact.gateway.app.manager.checker.ArchitectureChecker;
 import org.eclipse.sensinact.gateway.app.manager.factory.ApplicationFactory;
 import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
-import org.eclipse.sensinact.gateway.app.manager.checker.JsonValidator;
-import org.eclipse.sensinact.gateway.app.manager.json.AppJsonConstant;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;

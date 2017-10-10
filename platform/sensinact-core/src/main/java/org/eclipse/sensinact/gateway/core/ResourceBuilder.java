@@ -26,15 +26,15 @@ import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
-import org.eclipse.sensinact.gateway.core.method.ActMethod;
-import org.eclipse.sensinact.gateway.core.method.GetMethod;
 import org.eclipse.sensinact.gateway.core.method.LinkedActMethod;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
-import org.eclipse.sensinact.gateway.core.method.SetMethod;
 import org.eclipse.sensinact.gateway.core.method.Shortcut;
 import org.eclipse.sensinact.gateway.core.method.Signature;
-import org.eclipse.sensinact.gateway.core.method.SubscribeMethod;
-import org.eclipse.sensinact.gateway.core.method.UnsubscribeMethod;
+import org.eclipse.sensinact.gateway.core.method.legacy.ActMethod;
+import org.eclipse.sensinact.gateway.core.method.legacy.GetMethod;
+import org.eclipse.sensinact.gateway.core.method.legacy.SetMethod;
+import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeMethod;
+import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeMethod;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 
 /**
@@ -44,6 +44,14 @@ import org.eclipse.sensinact.gateway.util.ReflectUtils;
  */
 public class ResourceBuilder
 {	    
+
+	private final AccessMethod.Type GET = AccessMethod.Type.valueOf(AccessMethod.GET);
+	private final AccessMethod.Type SET = AccessMethod.Type.valueOf(AccessMethod.SET);
+	private final AccessMethod.Type ACT = AccessMethod.Type.valueOf(AccessMethod.ACT);
+	private final AccessMethod.Type SUBSCRIBE = AccessMethod.Type.valueOf(AccessMethod.SUBSCRIBE);
+	private final AccessMethod.Type UNSUBSCRIBE = AccessMethod.Type.valueOf(AccessMethod.UNSUBSCRIBE);
+	private final AccessMethod.Type DESCRIBE = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
+	
 	protected final Mediator mediator;	
 	protected final ResourceConfig resourceConfig;
 	
@@ -298,10 +306,10 @@ public class ResourceBuilder
         
     	actMethod = new LinkedActMethod(this.mediator,
 			linkedResourceImpl.getPath(), (ActMethod)
-			target.getAccessMethod(AccessMethod.Type.ACT),
+			target.getAccessMethod(ACT),
 			copyActMethod);
     	
-    	linkedResourceImpl.registerMethod(AccessMethod.Type.ACT, actMethod);
+    	linkedResourceImpl.registerMethod(ACT, actMethod);
 		return linkedResourceImpl;
 	}
 	
@@ -336,41 +344,34 @@ public class ResourceBuilder
 		UnsubscribeMethod unsubscribeMethod = null;
 		//Unsubscribe access method signature		 
 		Signature unsubscribeSignature = null;
-				
-		getMethod = new GetMethod(this.mediator, resource.getPath(),
-		            this.getPreProcessingExecutor( resource, 
-		            		AccessMethod.Type.GET));
 		
-		getSignature = new Signature(this.mediator,
-				AccessMethod.Type.GET,
-		        new Class<?>[] { String.class },
-		        new String[] { "attributeName" });
+		getMethod = new GetMethod(this.mediator, resource.getPath(),
+		    this.getPreProcessingExecutor(resource, AccessMethod.GET));
+		
+		getSignature = new Signature(this.mediator, GET,
+		    new Class<?>[] { String.class }, new String[] { "attributeName" });
 					
 		setMethod = new SetMethod(this.mediator, resource.getPath(),
-		            this.getPreProcessingExecutor( resource, 
-		            		AccessMethod.Type.SET));
+		    this.getPreProcessingExecutor( resource, AccessMethod.SET));
 		
-		setSignature = new Signature(this.mediator,
-				AccessMethod.Type.SET,
+		setSignature = new Signature(this.mediator,  SET,
 		        new Class<?>[] { String.class, Object.class },
 		        new String[] { "attributeName", "value" });					
 		
 		subscribeMethod = new SubscribeMethod(this.mediator, resource.getPath(), 
 		        this.getPreProcessingExecutor(resource, 
-		        		AccessMethod.Type.SUBSCRIBE));
+		        		AccessMethod.SUBSCRIBE));
 		
-		subscribeSignature = new Signature(this.mediator,
-		        AccessMethod.Type.SUBSCRIBE, new Class<?>[] {
+		subscribeSignature = new Signature(this.mediator, SUBSCRIBE, new Class<?>[] {
 		            String.class, Recipient.class, Set.class},
 		                new String[] {"attributeName", "listener", 
 		        		"conditions"});
 						
 		unsubscribeMethod = new UnsubscribeMethod(this.mediator, 
 		        resource.getPath(), this.getPreProcessingExecutor(
-		        		resource, AccessMethod.Type.UNSUBSCRIBE));
+		        		resource, AccessMethod.UNSUBSCRIBE));
 		
-		unsubscribeSignature = new Signature(this.mediator,
-		        AccessMethod.Type.UNSUBSCRIBE, new Class<?>[] {
+		unsubscribeSignature = new Signature(this.mediator, UNSUBSCRIBE, new Class<?>[] {
 		                String.class, String.class }, new String[] {
 		                "attributeName", "subscriptionId" });
 		// Get method
@@ -403,10 +404,8 @@ public class ResourceBuilder
 		fixedConditionsParameters.put(2, conditionsParameter);
 							
 		Shortcut subscribeConditionsShortcut = new Shortcut(this.mediator,
-				AccessMethod.Type.SUBSCRIBE,
-				new Class<?>[]{String.class, Recipient.class}, 
-				new String[]{"attributeName", "listener"},
-				fixedConditionsParameters);
+			SUBSCRIBE, new Class<?>[]{String.class, Recipient.class}, 
+			new String[]{"attributeName", "listener"}, fixedConditionsParameters);
 		
 		subscribeMethod.addShortcut(
 				subscribeConditionsShortcut, 
@@ -424,11 +423,8 @@ public class ResourceBuilder
 			fixedNameParameter.put(0, nameParameter);
 			
 			//Get method - name parameter shortcut
-			Shortcut getAttributeShortcut = new Shortcut(this.mediator,
-				AccessMethod.Type.GET,
-			    new Class<?>[0], 
-			    new String[0], 
-			    fixedNameParameter);
+			Shortcut getAttributeShortcut = new Shortcut(this.mediator, GET, 
+					new Class<?>[0],  new String[0], fixedNameParameter);
 			
 			getMethod.addShortcut(getAttributeShortcut, getSignature);
 
@@ -439,40 +435,30 @@ public class ResourceBuilder
 			if(defaultAttribute!=null && !Modifiable.FIXED.equals(
 					defaultAttribute.getModifiable()))
 			{
-				Shortcut setAttributeShortcut = new Shortcut(this.mediator,
-						AccessMethod.Type.SET,
-						new Class<?>[]{Object.class}, 
-						new String[]{"value"}, 
-						fixedNameParameter);
+				Shortcut setAttributeShortcut = new Shortcut(this.mediator, SET,
+					new Class<?>[]{Object.class}, new String[]{"value"}, 
+						    fixedNameParameter);
 						
 				setMethod.addShortcut(
 					setAttributeShortcut, setSignature);			
 			}
 			Shortcut subscribeNameConditionsShortcut = new Shortcut(this.mediator,
-					AccessMethod.Type.SUBSCRIBE,
-					new Class<?>[]{Recipient.class}, 
-					new String[]{"listener"},
-					fixedNameParameter);
+			    SUBSCRIBE, new Class<?>[]{Recipient.class}, 
+					new String[]{"listener"}, fixedNameParameter);
 			
 			Shortcut subscribeNameShortcut = new Shortcut(this.mediator,
-					AccessMethod.Type.SUBSCRIBE,
-					new Class<?>[]{Recipient.class, Set.class}, 
-					new String[]{"listener", "conditions"},
-					fixedNameParameter);
+			    SUBSCRIBE, new Class<?>[]{Recipient.class, Set.class}, 
+					new String[]{"listener", "conditions"}, fixedNameParameter);
 
-			subscribeMethod.addShortcut(
-					subscribeNameConditionsShortcut, 
+			subscribeMethod.addShortcut(subscribeNameConditionsShortcut, 
 					subscribeConditionsShortcut);
 
-			subscribeMethod.addShortcut(
-					subscribeNameShortcut, 
+			subscribeMethod.addShortcut(subscribeNameShortcut, 
 					subscribeSignature);
 
 			Shortcut unsubscribeNameShortcut = new Shortcut(this.mediator,
-					AccessMethod.Type.UNSUBSCRIBE,
-					new Class<?>[]{String.class}, 
-					new String[]{"subscriptionId"},
-					fixedNameParameter);
+			    UNSUBSCRIBE, new Class<?>[]{String.class}, 
+					new String[]{"subscriptionId"}, fixedNameParameter);
 
 			unsubscribeMethod.addShortcut(
 					unsubscribeNameShortcut, 
@@ -484,15 +470,15 @@ public class ResourceBuilder
 				resource.getClass()))
 		{  
 			ActMethod actMethod = new ActMethod(this.mediator, resource.getPath(), 
-				this.getPreProcessingExecutor(resource, AccessMethod.Type.ACT),
+				this.getPreProcessingExecutor(resource, AccessMethod.ACT),
 				this.getActPostProcessingExecutor(resource));
 			
-			resource.registerMethod(AccessMethod.Type.ACT, actMethod);
+			resource.registerMethod(ACT, actMethod);
 		}
-		resource.registerMethod(AccessMethod.Type.GET, getMethod);
-		resource.registerMethod(AccessMethod.Type.SET, setMethod);
-		resource.registerMethod(AccessMethod.Type.SUBSCRIBE, subscribeMethod);
-		resource.registerMethod(AccessMethod.Type.UNSUBSCRIBE, unsubscribeMethod);
+		resource.registerMethod(GET, getMethod);
+		resource.registerMethod(SET, setMethod);
+		resource.registerMethod(SUBSCRIBE, subscribeMethod);
+		resource.registerMethod(UNSUBSCRIBE, unsubscribeMethod);
 	}
 	
 	/**
@@ -506,7 +492,7 @@ public class ResourceBuilder
 	 */
     private AccessMethodExecutor getPreProcessingExecutor(
     		final ResourceImpl resource, 
-    		final AccessMethod.Type type)
+    		final String type)
     {
 	    return new AccessMethodExecutor()
 	   {

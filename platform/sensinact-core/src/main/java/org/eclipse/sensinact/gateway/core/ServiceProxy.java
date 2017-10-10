@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.core;
 
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ implements ElementsProxy<Resource> , ResourceCollection
 	/**
 	 * {@link AccessMethod}s of this ModelElementProxy
 	 */
-	protected final Map<AccessMethod.Type, AccessMethod> methods;	
+	protected final Map<String, AccessMethod> methods;	
 
 	/**
 	 * this ModelElementProxy's description
@@ -59,8 +60,7 @@ implements ElementsProxy<Resource> , ResourceCollection
 		super(mediator, Service.class, path);
 		
 		super.elements.addAll(resources);
-		this.methods = new EnumMap<AccessMethod.Type,AccessMethod>(
-				AccessMethod.Type.class);		
+		this.methods = new HashMap<String,AccessMethod>();		
 	    try
         {
 	        ServiceBuilder.buildMethods(mediator, this, 
@@ -123,26 +123,26 @@ implements ElementsProxy<Resource> , ResourceCollection
      * getAccessMethod(AccessMethod.Type)
      */
     @Override
-	public AccessMethod getAccessMethod(Type type)
+	public AccessMethod getAccessMethod(String method)
     {
-	    return this.methods.get(type);
+	    return this.methods.get(method);
     }
   
 	/**
 	 * Registers the {@link AccessMethod} passed as parameter, 
 	 * mapped to the specified {@link AccessMethod.Type}
 	 * 
-	 * @param type
+	 * @param method
 	 * 		the {@link AccessMethod.Type} of the {@link AccessMethod} 
 	 * 		to register
 	 * @param method
 	 * 		the {@link AccessMethod} to register
 	 */
-    void registerMethod(AccessMethod.Type type, AccessMethod method)
+    void registerMethod(String methodType, AccessMethod method)
     {
-    	if(this.methods.get(type) == null)
+    	if(this.methods.get(methodType) == null)
     	{
-    		this.methods.put(type, method);
+    		this.methods.put(methodType, method);
     	}
     }
 }

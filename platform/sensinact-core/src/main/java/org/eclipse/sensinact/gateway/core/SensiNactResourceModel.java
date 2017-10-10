@@ -63,8 +63,7 @@ extends Nameable
 	 * @return this SensinactResourceModel instance's root
 	 * {@link ModelElement}
 	 */
-	 <I extends ModelInstance<?>, 
-	 P extends ProcessableData, E extends Nameable, R extends Nameable> 
+	 <I extends ModelInstance<?>, P extends ProcessableData, E extends Nameable, R extends Nameable> 
 	 ModelElement<I,P,E,R> getRootElement();
 	 
 	/**
@@ -85,5 +84,10 @@ extends Nameable
 	 * OSGi host environment
 	 */
 	 Dictionary<String, String> getProperties();
+
+	/**
+	 * 
+	 */
+	void unregister();
 	 
 }

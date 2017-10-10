@@ -56,5 +56,6 @@
         <module>mosquitto</module>
         <module>openhab</module>
         <module>http</module>
+        <!--<module>soxfire</module>-->
     </modules>
 </project>

@@ -28,12 +28,12 @@ import org.osgi.framework.Bundle;
 
 import org.eclipse.sensinact.gateway.common.primitive.Describable;
 import org.eclipse.sensinact.gateway.core.ActionResource;
+import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
@@ -199,13 +199,13 @@ public class TestHttpDevice extends MidOSGiTest
 				new File("./extra-src/test/resources/meta"),
 				new File("./target/extra-test-classes"));
 		
-		MidProxy<SecuredAccess> mid = new MidProxy<SecuredAccess>(classloader, 
-				this, SecuredAccess.class);
-		SecuredAccess securedAccess = mid.buildProxy();
+		MidProxy<Core> mid = new MidProxy<Core>(classloader, 
+				this, Core.class);
+		Core core = mid.buildProxy();
 		
-		Session session = securedAccess.getAnonymousSession();
+		Session session = core.getAnonymousSession();
 		
-		ServiceProvider provider = session.getServiceProvider("TestForSensiNactGateway");
+		ServiceProvider provider = session.serviceProvider("TestForSensiNactGateway");
 		Service service = provider.getService("service1");
 		Resource variable = service.getResource("temperature");
 
@@ -245,13 +245,14 @@ public class TestHttpDevice extends MidOSGiTest
 				new File("./extra-src5/test/resources/meta"),
 				new File("./target/extra-test-classes5"));
 		
-		MidProxy<SecuredAccess> mid = new MidProxy<SecuredAccess>(classloader, 
-				this, SecuredAccess.class);
-		SecuredAccess securedAccess = mid.buildProxy();
+
+		MidProxy<Core> mid = new MidProxy<Core>(classloader, 
+				this, Core.class);
+		Core core = mid.buildProxy();
 		
-		Session session = securedAccess.getAnonymousSession();
+		Session session = core.getAnonymousSession();
 		
-		ServiceProvider provider = session.getServiceProvider("TestForSensiNactGateway5");
+		ServiceProvider provider = session.serviceProvider("TestForSensiNactGateway5");
 		Service service = provider.getService("service1");
 		Resource variable = service.getResource("temperature");
 
@@ -291,13 +292,14 @@ public class TestHttpDevice extends MidOSGiTest
 				new File("./extra-src4/test/resources/meta"),
 				new File("./target/extra-test-classes4"));
 		Thread.sleep(1000);
-		MidProxy<SecuredAccess> mid = new MidProxy<SecuredAccess>(classloader, 
-				this, SecuredAccess.class);
-		SecuredAccess securedAccess = mid.buildProxy();
+
+		MidProxy<Core> mid = new MidProxy<Core>(classloader, 
+				this, Core.class);
+		Core core = mid.buildProxy();
 		
-		Session session = securedAccess.getAnonymousSession();
+		Session session = core.getAnonymousSession();
 		
-		ServiceProvider provider = session.getServiceProvider("TestForSensiNactGateway4");
+		ServiceProvider provider = session.serviceProvider("TestForSensiNactGateway4");
 		Service service = provider.getService("service1");
 		Resource variable = service.getResource("temperature");
 
@@ -337,13 +339,13 @@ public class TestHttpDevice extends MidOSGiTest
 				new File("./extra-src3/test/resources/meta"),
 				new File("./target/extra-test-classes3"));
 		
-		MidProxy<SecuredAccess> mid = new MidProxy<SecuredAccess>(classloader, 
-				this, SecuredAccess.class);
-		SecuredAccess securedAccess = mid.buildProxy();
+
+		MidProxy<Core> mid = new MidProxy<Core>(classloader, 
+				this, Core.class);
+		Core core = mid.buildProxy();
 		
-		Session session = securedAccess.getAnonymousSession();
-		
-		ServiceProvider provider = session.getServiceProvider("TestForSensiNactGateway3");
+		Session session = core.getAnonymousSession();
+		ServiceProvider provider = session.serviceProvider("TestForSensiNactGateway3");
 		Service service = provider.getService("service1");
 		Resource variable = service.getResource("temperature");
 
@@ -371,13 +373,13 @@ public class TestHttpDevice extends MidOSGiTest
 				new File("./extra-src2/test/resources/meta"),
 				new File("./target/extra-test-classes2"));
 
-		MidProxy<SecuredAccess> mid = new MidProxy<SecuredAccess>(classloader, 
-				this, SecuredAccess.class);
-		SecuredAccess securedAccess = mid.buildProxy();
+
+		MidProxy<Core> mid = new MidProxy<Core>(classloader, 
+				this, Core.class);
+		Core core = mid.buildProxy();
 		
-		Session session = securedAccess.getAnonymousSession();
-		
-		ServiceProvider provider = session.getServiceProvider("TestForSensiNactGateway2");
+		Session session = core.getAnonymousSession();
+		ServiceProvider provider = session.serviceProvider("TestForSensiNactGateway2");
 		Service service = provider.getService("service1");
 		Resource variable = service.getResource("temperature");
 
@@ -455,7 +457,7 @@ public class TestHttpDevice extends MidOSGiTest
 		  + "file:target/felix/bundle/sensinact-northbound-access.jar ");
 		
 		configuration.put("felix.auto.start.2",
-			"file:target/felix/bundle/sensinact-core.jar "
+		    "file:target/felix/bundle/sensinact-core.jar "
 		  + "file:target/felix/bundle/sensinact-signature-validator.jar ");
 
 		configuration.put("felix.auto.start.3", 

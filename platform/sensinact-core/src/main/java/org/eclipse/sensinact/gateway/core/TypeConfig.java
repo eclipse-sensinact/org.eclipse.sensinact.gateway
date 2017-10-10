@@ -128,7 +128,7 @@ public class TypeConfig implements Typable<TypeConfig.Type>
 	 * @see Typable#getType()
 	 */
 	@Override
-	public Type getType() 
+	public TypeConfig.Type getType() 
 	{
 		return this.type;
 	}

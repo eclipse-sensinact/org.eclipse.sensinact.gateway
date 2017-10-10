@@ -28,8 +28,9 @@ import org.eclipse.sensinact.gateway.common.primitive.PathElement;
  */
 public class UnaccessibleAccessMethod implements AccessMethod
 {	
-	private final AccessMethod.Type type;
+	private final AccessMethod.Type method;
 	private final String uri;
+	
 	/**
 	 * Mediator used to interact with the OSGi host
 	 * environment 
@@ -38,13 +39,13 @@ public class UnaccessibleAccessMethod implements AccessMethod
 
 	/**
 	 * @param uri
-	 * @param type
+	 * @param method
 	 */
 	public UnaccessibleAccessMethod(Mediator mediator, 
-			String uri , AccessMethod.Type type)
+			String uri , AccessMethod.Type method)
 	{
 		this.mediator = mediator;
-		this.type = type;
+		this.method = method;
 		this.uri = uri;
 	}
 
@@ -67,7 +68,7 @@ public class UnaccessibleAccessMethod implements AccessMethod
 	@Override
 	public String getName()
 	{
-		return this.type.name();
+		return this.method.name();
 	}
 
 	/**
@@ -78,7 +79,7 @@ public class UnaccessibleAccessMethod implements AccessMethod
 	@Override
 	public Type getType()
 	{
-		return this.type;
+		return this.method;
 	}
 	
 	/**
@@ -90,8 +91,8 @@ public class UnaccessibleAccessMethod implements AccessMethod
 	public AccessMethodResponse invoke(Object[] parameters)
 	{
     	AccessMethodResponse response = 
-    		AccessMethodResponse.error( this.mediator, uri, type, 
-    		AccessMethodResponse.FORBIDDEN_ERROR_CODE, 
+    		AccessMethodResponse.error(this.mediator, uri, 
+    		this.method, AccessMethodResponse.FORBIDDEN_ERROR_CODE, 
     		"Unaccessible method", null);  
     	
 		return response;

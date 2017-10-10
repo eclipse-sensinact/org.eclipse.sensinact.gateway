@@ -14,19 +14,16 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationServiceException;
-import org.eclipse.sensinact.gateway.core.security.dao.AgentAccessLevelDAO;
 import org.eclipse.sensinact.gateway.core.security.dao.DAOException;
-import org.eclipse.sensinact.gateway.core.security.dao.UserAccessLevelDAO;
-import org.eclipse.sensinact.gateway.core.security.entity.AgentAccessLevelEntity;
-import org.eclipse.sensinact.gateway.core.security.entity.UserAccessLevelEntity;
+import org.eclipse.sensinact.gateway.core.security.dao.AuthenticatedAccessLevelDAO;
+import org.eclipse.sensinact.gateway.core.security.entity.AuthenticatedAccessLevelEntity;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class AuthorizationServiceImpl implements AuthorizationService
 {
-	private UserAccessLevelDAO userAccessLevelDAO;
-	private AgentAccessLevelDAO agentAccessLevelDAO;
+	private AuthenticatedAccessLevelDAO authenticatedAccessLevelDAO;
 	
 	/**
 	 * Constructor
@@ -36,8 +33,7 @@ public class AuthorizationServiceImpl implements AuthorizationService
 	 */
 	public AuthorizationServiceImpl(Mediator mediator) throws DAOException
 	{
-		this.userAccessLevelDAO = new UserAccessLevelDAO(mediator);
-		this.agentAccessLevelDAO = new AgentAccessLevelDAO(mediator);
+		this.authenticatedAccessLevelDAO = new AuthenticatedAccessLevelDAO(mediator);
 	}
 
 	/** 
@@ -48,7 +44,7 @@ public class AuthorizationServiceImpl implements AuthorizationService
 	 * getAccessLevel(java.lang.String, long)
 	 */
 	@Override
-	public AccessLevelOption getUserAccessLevelOption(
+	public AccessLevelOption getAuthenticatedAccessLevelOption(
 		String path, long uid) throws AuthorizationServiceException
 	{	
 		if(uid <= 0)
@@ -57,8 +53,9 @@ public class AuthorizationServiceImpl implements AuthorizationService
 		}
 		try
 		{
-			UserAccessLevelEntity userAccessLevelEntity = 
-					this.userAccessLevelDAO.find(path, uid);
+			AuthenticatedAccessLevelEntity userAccessLevelEntity = 
+					this.authenticatedAccessLevelDAO.find(path, 
+							uid);
 			
 			return AccessLevelOption.valueOf(userAccessLevelEntity);
 		}
@@ -75,7 +72,7 @@ public class AuthorizationServiceImpl implements AuthorizationService
 	 * getAccessLevel(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public AccessLevelOption getUserAccessLevelOption(
+	public AccessLevelOption getAuthenticatedAccessLevelOption(
 			String path, String publicKey)
 			throws AuthorizationServiceException 
 	{	
@@ -85,8 +82,10 @@ public class AuthorizationServiceImpl implements AuthorizationService
 		}
 		try
 		{
-			UserAccessLevelEntity userAccessLevelEntity = 
-					this.userAccessLevelDAO.find(path, publicKey);
+			AuthenticatedAccessLevelEntity userAccessLevelEntity = 
+					this.authenticatedAccessLevelDAO.find(path, 
+							publicKey);
+			
 			return AccessLevelOption.valueOf(userAccessLevelEntity);
 		}
 		catch (Exception e)
@@ -94,62 +93,5 @@ public class AuthorizationServiceImpl implements AuthorizationService
 			e.printStackTrace();
 			throw new AuthorizationServiceException(e);
 		}
-	}
-
-	/** 
-	 * @throws DAOException 
-	 * @inheritDoc
-	 * 
-	 * @see AuthorizationService#
-	 * getAccessLevel(java.lang.String, long)
-	 */
-	@Override
-	public AccessLevelOption getAgentAccessLevelOption(
-			String path, long uid) 
-			throws AuthorizationServiceException
-	{	
-		if(uid <= 0)
-		{
-			return AccessLevelOption.ANONYMOUS;
-		}
-		try
-		{
-			AgentAccessLevelEntity agentAccessLevelEntity = 
-					this.agentAccessLevelDAO.find(path, uid);
-			
-			return AccessLevelOption.valueOf(agentAccessLevelEntity);
-		}
-		catch (DAOException e)
-		{
-			throw new AuthorizationServiceException(e);
-		}		
-	}
-
-	/** 
-	 * @inheritDoc
-	 * 
-	 * @see AuthorizationService#
-	 * getAccessLevel(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public AccessLevelOption getAgentAccessLevelOption(
-			String path, String publicKey)
-			throws AuthorizationServiceException 
-	{	
-		if(publicKey == null || "anonymous".equals(publicKey))
-		{
-			return AccessLevelOption.ANONYMOUS;
-		}		
-		try
-		{
-			AgentAccessLevelEntity agentAccessLevelEntity = 
-					this.agentAccessLevelDAO.find(path, publicKey);
-			
-			return AccessLevelOption.valueOf(agentAccessLevelEntity);
-		}
-		catch (DAOException e)
-		{
-			throw new AuthorizationServiceException(e);
-		}		
 	}
 }

@@ -19,6 +19,7 @@ import org.eclipse.sensinact.gateway.core.Attribute;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
+import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
 import org.eclipse.sensinact.gateway.core.security.Session;
@@ -34,22 +35,22 @@ class AppStopExecutor implements AccessMethodExecutor {
 
     private final ApplicationService service;
 
-    AppStopExecutor(ApplicationService service) {
+    AppStopExecutor(ApplicationService service)
+    {
         this.service = service;
     }
 
     /**
      * @see Executable#execute(java.lang.Object)
      */
-    public Void execute(AccessMethodResult jsonObjects) throws Exception {
-        Session session = Sessions.SESSIONS.get();
-
+    public Void execute(AccessMethodResult jsonObjects) throws Exception 
+    {
         ApplicationStatus status = getApplicationState(service.getResource(AppConstant.STATUS));
 
         if (ApplicationStatus.ACTIVE.equals(status)) {
             Application application = service.getApplication();
 
-            SnaErrorMessage message = application.stop(session);
+            SnaErrorMessage message = application.stop();
 
             if (message.getType() == SnaErrorMessage.Error.NO_ERROR) {
                 jsonObjects.push(new JSONObject().put("message", "Application " + service.getName() + " stopped"));

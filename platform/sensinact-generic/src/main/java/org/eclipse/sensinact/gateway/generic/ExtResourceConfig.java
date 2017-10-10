@@ -95,19 +95,13 @@ implements Iterable<MethodDefinition>
         
         } catch (Exception e)
         {
-        	if(mediator.isErrorLoggable())
-        	{
-        		mediator.error(e, e.getMessage());
-        	}
-            e.printStackTrace();
+        	mediator.error(e, e.getMessage());
         }
         return null;
     }
 
     protected byte[] identifier;
 	protected byte subscriptionMode;
-    
-    protected Resource.UpdatePolicy updatePolicy;
 
     protected List<AttributeDefinition> attributeDefinitions;
     protected List<MethodDefinition> methodDefinitions;
@@ -141,30 +135,6 @@ implements Iterable<MethodDefinition>
     {
         return this.identifier;
     }   
-
-    /**
-     * Returns the update policy to apply to the resource 
-     * mapped to this XmlResourceConfig
-     * 
-     * @return 
-     *      the update policy to apply to the resource
-     */
-    public Resource.UpdatePolicy getUpdatePolicy()
-    {
-        return this.updatePolicy;
-    }
-
-    /**
-     * Returns the update policy to apply to the resource 
-     * mapped to this XmlResourceConfig
-     * 
-     * @param updatePolicy 
-     *      the update policy to apply to the resource
-     */
-    public void setUpdatePolicy(Resource.UpdatePolicy updatePolicy)
-    {
-        this.updatePolicy = updatePolicy;
-    }
     
     /**
      * Defines the subscription mode handled by the
@@ -252,8 +222,7 @@ implements Iterable<MethodDefinition>
 						attributeDefinition.getRequirementBuilders(service);
 				
 				int index = 0;
-				int length = requirementBuilders==null
-						?0:requirementBuilders.size();
+				int length = requirementBuilders.size();
 				
 				for(;index < length; index++)
 				{

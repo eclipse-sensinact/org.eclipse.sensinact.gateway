@@ -10,13 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.util.tree;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
 /**
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class PathTree<N extends PathNode>
+public class PathTree<P extends PathNode<P>>
 {
 	//********************************************************************//
 	//						NESTED DECLARATIONS			  			      //
@@ -34,15 +36,15 @@ public class PathTree<N extends PathNode>
 	//						INSTANCE DECLARATIONS						  //
 	//********************************************************************//
 
-	protected final N root;
-	protected final PathNodeFactory<N> factory;
+	protected final P root;
+	protected final PathNodeFactory<P> factory;
 	
 	/**
 	 * Constructor
 	 * 
 	 * @param factory
 	 */
-	public PathTree(PathNodeFactory<N> factory)
+	public PathTree(PathNodeFactory<P> factory)
 	{
 		this.factory = factory;
 		this.root = this.factory.createRootNode();
@@ -51,7 +53,7 @@ public class PathTree<N extends PathNode>
 	/**
 	 * @param uri
 	 */
-	public N add(String uri)
+	public P add(String uri)
 	{
 		String[] uriElements = UriUtils.getUriElements(uri);
 		StringBuilder builder = new StringBuilder();
@@ -59,7 +61,7 @@ public class PathTree<N extends PathNode>
 		int index = 0;
 		int length = uriElements==null?0:uriElements.length;
 		
-		N node = null;
+		P node = null;
 		
 		for(;index < length; index++)
 		{
@@ -74,7 +76,7 @@ public class PathTree<N extends PathNode>
 	 * @param uri
 	 * @param uriElement
 	 */
-	public N add(String uri, String uriElement)
+	public P add(String uri, String uriElement)
 	{
 		return this.add(uri, uriElement, false);
 	}
@@ -84,12 +86,12 @@ public class PathTree<N extends PathNode>
 	 * @param uriElement
 	 * @param isPattern
 	 */
-	public N add(String uri, String uriElement, boolean isPattern)
+	public P add(String uri, String uriElement, boolean isPattern)
 	{
-		N current = this.get(uri);
+		P current = this.get(uri);
 		if(current != null)
 		{
-			current = (N) current.add(isPattern
+			current = current.add(isPattern
 				?factory.createPatternNode(uriElement)
 				:factory.createPathNode(uriElement));
 		}
@@ -102,7 +104,7 @@ public class PathTree<N extends PathNode>
 	 *
 	 * @return this PathTree root {@link PathNode}
 	 */
-	public N getRoot()
+	public P getRoot()
 	{
 		return this.root;
 	}
@@ -111,22 +113,22 @@ public class PathTree<N extends PathNode>
 	 * @param uri
 	 * @return
 	 */
-	public N get(String uri)
+	public P get(String uri)
 	{
-		return (N) this.root.get(uri);
+		return this.root.get(uri);
 	}
 	
 	/**
 	 * @param uri
 	 * @return
 	 */
-	public N delete(String uri)
+	public P delete(String uri)
 	{
 		String parentUri = UriUtils.getParentUri(uri);
-		PathNode parent = this.root.get(parentUri);
+		P parent = this.root.get(parentUri);
 		if(parent != null)
 		{
-			return (N) parent.remove(UriUtils.getLeaf(uri));
+			return parent.remove(UriUtils.getLeaf(uri));
 		}
 		return null;
 	}	
@@ -139,5 +141,24 @@ public class PathTree<N extends PathNode>
 	public String toString()
 	{
 		return this.root.toString();
+	}
+	
+	/**
+	 * @param ic
+	 * @return
+	 */
+	public <N extends ImmutablePathNode<N>, T extends ImmutablePathTree<N>> T immutable(
+			Class<T> tc, Class<N> ic)
+	{
+		try
+		{
+			return tc.getConstructor(new Class<?>[]{ic}).newInstance(
+					this.root.<N>immutable(ic, null));
+			
+		} catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

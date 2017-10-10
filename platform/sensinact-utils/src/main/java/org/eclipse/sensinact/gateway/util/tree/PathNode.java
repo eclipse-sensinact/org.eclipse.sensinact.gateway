@@ -19,11 +19,11 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class PathNode
+public class PathNode<P extends PathNode<P>>
 {
-	protected PathNode parent;
+	protected P parent;
 	protected final String nodeName;
-	protected final PathNodeList children;
+	protected final PathNodeList<P> children;
 	protected final Pattern pattern;
 	
 	protected final boolean isRoot;
@@ -60,7 +60,7 @@ public class PathNode
 	public PathNode(String nodeName, boolean isPattern)
 	{
 		this.nodeName = nodeName;
-		this.children = new PathNodeList();
+		this.children = new PathNodeList<P>();
 		this.isRoot = (nodeName.intern() == UriUtils.PATH_SEPARATOR);
 		this.isPattern = isPattern;
 		this.pattern = isPattern?Pattern.compile(nodeName):null;
@@ -70,7 +70,7 @@ public class PathNode
 	 * @param path
 	 * @return
 	 */
-	public PathNode get(String path)
+	public P get(String path)
 	{
 		return this.get(UriUtils.getUriElements(path), 0);
 	}
@@ -80,9 +80,9 @@ public class PathNode
 	 * @param index
 	 * @return
 	 */
-	public PathNode get(String[] path, int index)
+	public P get(String[] path, int index)
 	{
-		PathNode node = null;
+		P node = null;
 		
 		if((isRoot && index!=0) || 
 			(!isRoot && (path.length - index < 1 
@@ -91,8 +91,8 @@ public class PathNode
 			return node;
 		}
 		int inc = isRoot?0:1;
-		node = this;	
-		PathNode child = null;
+		node = (P) this;	
+		P child = null;
 		
 		if(path.length - index > inc && (child = 
 			this.children.get(path[index+inc]))!=null)	
@@ -106,18 +106,18 @@ public class PathNode
 	 * @param node
 	 * @return
 	 */
-	public PathNode add(PathNode node)
+	public P add(P node)
 	{
 		if(node == null)
 		{
 			return null;
 		}
-		PathNode child = this.children.get(node.nodeName);
+		P child = this.children.get(node.nodeName);
 		if(child != null)
 		{
 			return child;
 		}
-		node.parent = this;
+		node.parent = (P) this;
 		return this.children.add(node);
 	}
 
@@ -125,7 +125,7 @@ public class PathNode
 	 * @param nodeName
 	 * @return
 	 */
-	public PathNode remove(String nodeName)
+	public P remove(String nodeName)
 	{
 		return this.children.remove(nodeName);
 	}
@@ -177,7 +177,7 @@ public class PathNode
 		
 		if(PathNode.class.isAssignableFrom(object.getClass()))
 		{
-			objectName = ((PathNode)object).nodeName;
+			objectName = ((PathNode<?>)object).nodeName;
 			
 		} else if(String.class == object.getClass())
 		{
@@ -205,6 +205,30 @@ public class PathNode
     }
 	
 	/**
+	 * Creates and returns an immutable clone of this PathNode
+	 * 
+	 * @param ic the immutable path node type
+	 * @param parent the immutable clone of this PathNode's parent
+	 * 
+	 * @return this PathNode immutable clone
+	 */
+	public <N extends ImmutablePathNode<N>> N immutable(Class<N> ic,
+			N parent)
+	{
+		try
+		{
+			return ic.getConstructor(new Class<?>[]{ic, String.class, 
+				boolean.class, PathNodeList.class}).newInstance(
+				parent, this.nodeName, this.isPattern, this.children);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
 	 * @inheritDoc
 	 * 
 	 * @see java.lang.Object#toString()
@@ -214,10 +238,10 @@ public class PathNode
 		StringBuilder builder = new StringBuilder();
 		builder.append(this.nodeName);
 		builder.append("[");
-		Iterator<PathNode> iterator = children.iterator();
+		Iterator<P> iterator = children.iterator();
 		while(iterator.hasNext())
 		{
-			PathNode node = iterator.next();
+			P node = iterator.next();
 			builder.append(node.toString());
 		}
 		builder.append("]");

@@ -191,43 +191,38 @@ public class Connector<P extends Packet> extends TaskManager
 		    	continue;
 		    }
 	    	int index = -1;
+	    	ExtModelInstance<?> instance = null;
 	        ExtServiceProviderImpl serviceProvider = null;
 	        
 	        if ((index = this.instances.indexOf(
 	        new Name<ExtModelInstance<?>>(serviceProviderName)))>-1)
 	        {	        	 
-		    	serviceProvider = (ExtServiceProviderImpl) this.instances.get(
-		    		index).getRootElement(); 
+		    	instance = this.instances.get(index);
 	        }
 		    if(subPacket.isGoodByeMessage())
 		    { 
-		    	this.processGoodbye(serviceProvider);
+		    	this.processGoodbye(instance);
 		    	if(index > -1)
 		    	{
 		    		this.instances.remove(index);
 		    	}
 		    	continue;
 		    }
-		    if(serviceProvider == null)
+		    if(instance == null)
 		    {
 			    try 
 	            {	
-					ExtModelInstance<?> instance = this.addModelInstance(
+					instance = this.addModelInstance(
 						subPacket.getProfileId(), serviceProviderName);
-
-		            if(super.mediator.isDebugLoggable())
-		            {
-		                super.mediator.debug(new StringBuilder().append(
-		                    "Service provider discovered : ").append(
-		                    	serviceProviderName).toString());
-		            }
-		            serviceProvider = instance.getRootElement();
-		            
+		            super.mediator.debug("Service provider discovered : %s",
+		            		serviceProviderName);
+		        	            
 				} catch (InvalidServiceProviderException e) 
 	            {
 					throw new InvalidPacketException(e);
 				}
 		    }
+		    serviceProvider = instance.getRootElement();
 		    if(subPacket.isHelloMessage())
 		    { 
 		    	this.processHello(serviceProvider);		    	
@@ -266,24 +261,24 @@ public class Connector<P extends Packet> extends TaskManager
      * @param serviceProvider
      * 		the {@link ServiceProvider} leaving the network
      */
-    protected void processGoodbye(final ExtServiceProviderImpl serviceProvider)
+    protected void processGoodbye(final ExtModelInstance<?> instance)
     {      
-        if (serviceProvider == null)
+        if (instance == null)
         {
         	if(super.mediator.isDebugLoggable())
         	{
         		super.mediator.debug(
-            	"An unknown service provider is leaving the network");
+            	"An unknown model instance is leaving the network");
         	}
             return;
         }
         if (super.mediator.isInfoLoggable())
 		{
 			 super.mediator.info(new StringBuilder().append(
-	             "Service provider '").append(serviceProvider.getName()
+	             "Service provider '").append(instance.getName()
 	                ).append("' is leaving the network").toString());
 		}	    
-		serviceProvider.stop();
+		instance.unregister();
     }
     
     /**
@@ -301,8 +296,7 @@ public class Connector<P extends Packet> extends TaskManager
 	 * @throws InvalidServiceProviderException 
      */
 	protected ExtModelInstance<?> addModelInstance(String profileId, 
-			final String serviceProviderName) 
-				throws InvalidServiceProviderException 
+		final String serviceProviderName) throws InvalidServiceProviderException 
 	{
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		ExtModelInstance<?> instance = new ExtModelInstanceBuilder(
@@ -329,8 +323,7 @@ public class Connector<P extends Packet> extends TaskManager
 	 */
 	public ExtModelInstance<?> getModelInstance(String instanceName) 
 	{
-		int index = this.instances.indexOf(
-				new Name<ExtModelInstance<?>>(
+		int index = this.instances.indexOf(new Name<ExtModelInstance<?>>(
 				instanceName));
 		
 		if(index < 0)
@@ -353,7 +346,7 @@ public class Connector<P extends Packet> extends TaskManager
         }
         synchronized(this.instances)
         {        	
-			int length = this.instances==null?0:this.instances.size();
+			int length = this.instances.size();
 			for(;length>0;)
 			{ 
 				try

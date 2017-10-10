@@ -70,7 +70,7 @@ public class ExtServiceProviderImpl extends ServiceProviderImpl
      * java.lang.String, java.lang.Object[])
      */
     @Override
-    protected Task passOn(AccessMethod.Type type, String path, 
+    protected Task passOn(String type, String path, 
     		Object[] parameters) throws Exception
 	{
 		String[] pathElements = UriUtils.getUriElements(path);
@@ -82,7 +82,7 @@ public class ExtServiceProviderImpl extends ServiceProviderImpl
 			service = pathElements[1];
 			resource = pathElements[2];
 		}
-		Task.CommandType command = Task.CommandType.valueOf(type.name());
+		Task.CommandType command = Task.CommandType.valueOf(type);
 		ResourceConfig resourceConfig = null;
 		
 		resourceConfig =  ((ExtModelInstance<?>)super.modelInstance

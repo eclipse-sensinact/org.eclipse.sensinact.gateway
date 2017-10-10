@@ -140,9 +140,9 @@ public class NorthboundRequestBuilder<F>
 		{
 			return request;
 		}
-		switch(this.method)
+		switch(this.method.name())
 		{
-			case ACT:
+			case "ACT":
 				if(this.resource != null)
 				{
 					Object[] arguments = null;
@@ -162,7 +162,7 @@ public class NorthboundRequestBuilder<F>
 						        arguments);
 				}
 				break;
-			case DESCRIBE:
+			case "DESCRIBE":
 				if(this.resource != null)
 				{
 					request = new ResourceRequest<F>(
@@ -197,7 +197,7 @@ public class NorthboundRequestBuilder<F>
 					request = new ServiceProvidersRequest<F>(mediator);
 				}
 				break;
-			case GET:
+			case "GET":
 				if(this.attribute != null)
 				{
 					request = new AttributeGetRequest<F>(
@@ -205,7 +205,7 @@ public class NorthboundRequestBuilder<F>
 						        attribute);
 				}
 				break;
-			case SET:
+			case "SET":
 				if(this.attribute != null)
 				{
 					request = new AttributeSetRequest<F>(
@@ -213,7 +213,7 @@ public class NorthboundRequestBuilder<F>
 						        attribute, argument);
 				}
 				break;
-			case SUBSCRIBE:
+			case "SUBSCRIBE":
 				if(this.attribute != null && this.argument!=null &&
 				    NorthboundRecipient.class.isAssignableFrom(
 						this.argument.getClass()))
@@ -224,7 +224,7 @@ public class NorthboundRequestBuilder<F>
 						            argument);
 				}
 				break;
-			case UNSUBSCRIBE:
+			case "UNSUBSCRIBE":
 				if(this.attribute != null)
 				{
 					String argument = CastUtils.cast(

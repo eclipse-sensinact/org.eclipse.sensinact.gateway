@@ -107,7 +107,6 @@
 	<modules>
         <module>sensinact-utils</module>
         <module>sensinact-common</module>
-        <module>sensinact-annotation-processor</module>
 		<module>tools</module>
         <module>sensinact-datastore</module>
         <module>sensinact-core</module>

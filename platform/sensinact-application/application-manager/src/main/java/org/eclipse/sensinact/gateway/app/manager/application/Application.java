@@ -10,6 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.application;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import org.eclipse.sensinact.gateway.app.api.exception.ApplicationRuntimeException;
 import org.eclipse.sensinact.gateway.app.api.exception.LifeCycleException;
 import org.eclipse.sensinact.gateway.app.api.exception.ResourceNotFoundException;
@@ -22,25 +31,21 @@ import org.eclipse.sensinact.gateway.app.manager.watchdog.AppExceptionWatchDog;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Resource;
-import org.eclipse.sensinact.gateway.core.message.*;
-import org.eclipse.sensinact.gateway.core.security.Session;
-import org.eclipse.sensinact.gateway.common.primitive.JSONable;
+import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.message.SnaConstants;
+import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONObject;
 import org.osgi.framework.ServiceRegistration;
-
-import java.util.*;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * This class wraps the components and handles the lifecycle of the components
  *
  * @author Rémi Druilhe
  */
-public class Application implements Recipient {
-
-    private final AppServiceMediator mediator;
-    private final String identifier;
-
+public class Application extends AbstractSensiNactApplication
+{
     private final List<ServiceRegistration> serviceRegistrations;
     private final Map<ResourceDataProvider, Collection<ResourceSubscription>> resourceSubscriptions;
     private final Map<String, Component> components;
@@ -49,6 +54,25 @@ public class Application implements Recipient {
     private final ActionHookQueue actionHookQueue;
 
     private final AppExceptionWatchDog watchDog;
+    
+    /**
+     * Constructor
+     * @param mediator the mediator
+     * @param identifier the name of the application
+     * @param serviceRegistrations the OSGi service registrations for this application (i.e., the output of
+     *                             each components)
+     * @param resourceSubscriptions the subscriptions to the sNa resources
+     * @param components the components making up the application
+     * @param watchDog the exception watchdog that is associated with the threads
+     */
+    public Application(AppServiceMediator mediator,
+    	String name,List<ServiceRegistration> serviceRegistrations,
+        Map<ResourceDataProvider, Collection<ResourceSubscription>> resourceSubscriptions,
+        Map<String, Component> components, AppExceptionWatchDog watchDog) 
+    {
+        this(mediator, name, null, serviceRegistrations, resourceSubscriptions,
+        components, watchDog);
+    }
 
     /**
      * Constructor
@@ -60,22 +84,20 @@ public class Application implements Recipient {
      * @param components the components making up the application
      * @param watchDog the exception watchdog that is associated with the threads
      */
-    public Application(AppServiceMediator mediator, String identifier, List<ServiceRegistration> serviceRegistrations,
-                       Map<ResourceDataProvider, Collection<ResourceSubscription>> resourceSubscriptions,
-                       Map<String, Component> components, AppExceptionWatchDog watchDog) {
-        this.mediator = mediator;
-        this.identifier = identifier;
+    public Application(AppServiceMediator mediator,
+    	String name, String identifier, List<ServiceRegistration> serviceRegistrations,
+        Map<ResourceDataProvider, Collection<ResourceSubscription>> resourceSubscriptions,
+        Map<String, Component> components, AppExceptionWatchDog watchDog) 
+    {
+        super(mediator,name, identifier);
 
         this.serviceRegistrations = serviceRegistrations;
         this.resourceSubscriptions = resourceSubscriptions;
 
         //TODO: switch to an unmodifiable collection ?
         this.components = components;
-
         this.waitingEvents = new LinkedBlockingQueue<SnaMessage>();
-
         this.actionHookQueue = new ActionHookQueue(mediator);
-
         this.watchDog = watchDog;
     }
 
@@ -83,172 +105,228 @@ public class Application implements Recipient {
      * Start the application
      * @return a success/error message
      */
-    public SnaErrorMessage start(Session session) {
-        try {
+    protected SnaErrorMessage doStart()
+    {
+        try 
+        {
             this.actionHookQueue.instantiate();
-        } catch (LifeCycleException e) {
-            return new AppSnaMessage(this.mediator, "/AppManager/" + identifier, SnaErrorMessage.Error.SYSTEM_ERROR,
-                    "Unable to start the application " + identifier + " > " + e.getMessage());
+            
+        } catch (LifeCycleException e)
+        {
+            return new AppSnaMessage(super.mediator, "/AppManager/" 
+            + getName(), SnaErrorMessage.Error.SYSTEM_ERROR,
+            "Unable to start the application " + getName() + " > "
+            + e.getMessage());
         }
-
-        for(Map.Entry<String, Component> map : components.entrySet()) {
-            try {
-                map.getValue().instantiate(session);
-            } catch (LifeCycleException e) {
-                return new AppSnaMessage(this.mediator, "/AppManager/" + identifier, SnaErrorMessage.Error.SYSTEM_ERROR,
-                        "Unable to start the application " + identifier + " > " + e.getMessage());
-            } catch (ApplicationRuntimeException e) {
-                return new AppSnaMessage(this.mediator, "/AppManager/" + identifier, SnaErrorMessage.Error.SYSTEM_ERROR,
-                        "Unable to start the application " + identifier + " > " + e.getMessage());
+        for(Map.Entry<String, Component> map : components.entrySet()) 
+        {
+            try 
+            {
+                map.getValue().instantiate(super.getSession());
+                
+            } catch (LifeCycleException e)
+            {
+                return new AppSnaMessage(this.mediator, "/AppManager/" 
+                	+ getName(), SnaErrorMessage.Error.SYSTEM_ERROR,
+                    "Unable to start the application " + getName() + " > " 
+                    + e.getMessage());
+                
+            } catch (ApplicationRuntimeException e)
+            {
+                return new AppSnaMessage(this.mediator, "/AppManager/" 
+                + getName(), SnaErrorMessage.Error.SYSTEM_ERROR,
+                "Unable to start the application " + getName() + " > " 
+                + e.getMessage());
             }
         }
-
-        try {
-            for(Map.Entry<ResourceDataProvider, Collection<ResourceSubscription>> map : resourceSubscriptions.entrySet()) {
+        try
+        {
+            for(Map.Entry<ResourceDataProvider, Collection<ResourceSubscription>> map : 
+            	resourceSubscriptions.entrySet())
+            {
                 Collection<ResourceSubscription> resourceSubscriptions = map.getValue();
 
-                for(ResourceSubscription resourceSubscription : resourceSubscriptions) {
-                    Resource resource = session.getFromUri(resourceSubscription.getResourceUri());
+                for(ResourceSubscription resourceSubscription : resourceSubscriptions) 
+                {
+                	String[] uriElements = UriUtils.getUriElements(resourceSubscription.getResourceUri());
+                	if(uriElements.length!=3)
+                	{
+                		continue;
+                	}
+                    Resource resource = super.getSession().resource(uriElements[0], 
+                    		uriElements[1],uriElements[2]);
 
-                    if (resource == null) {
-                        throw new ResourceNotFoundException("The resource " + resourceSubscription.getResourceUri() +
-                                " does not exist. Unable to subscribe to the resource.");
+                    if (resource == null) 
+                    {
+                        throw new ResourceNotFoundException("The resource " + 
+                          resourceSubscription.getResourceUri() 
+                            + " does not exist. Unable to subscribe to the resource.");
                     }
-
                     Set<Constraint> constraints = new HashSet<Constraint>();
 
-                    if (resourceSubscription.getConditions() != null) {
-                        for(AppCondition condition : resourceSubscription.getConditions()) {
+                    if (resourceSubscription.getConditions() != null) 
+                    {
+                        for(AppCondition condition : resourceSubscription.getConditions()) 
+                        {
                             constraints.add(condition.getConstraint());
                         }
                     }
-
-                    String subscriptionId = resource.subscribe(DataResource.VALUE, this, constraints)
-                            .getResponse(String.class, SnaConstants.SUBSCRIBE_ID_KEY);
+                    String subscriptionId = resource.subscribe(DataResource.VALUE, 
+                    	this, constraints).getResponse(String.class, 
+                    			SnaConstants.SUBSCRIBE_ID_KEY);
 
                     resourceSubscription.setSubscriptionId(subscriptionId);
                 }
             }
-        } catch (ResourceNotFoundException e) {
-            return new AppSnaMessage(this.mediator, "/AppManager/" + identifier, SnaErrorMessage.Error.SYSTEM_ERROR,
-                    "Unable to start the application " + identifier + " > " + e.getMessage());
+        } catch (ResourceNotFoundException e) 
+        {
+            return new AppSnaMessage(this.mediator, "/AppManager/" + 
+            		getName(), SnaErrorMessage.Error.SYSTEM_ERROR,
+                   "Unable to start the application " + getName() + " > " + 
+            		     e.getMessage());
         }
-
-        return new AppSnaMessage(this.mediator, "/AppManager/" + identifier, SnaErrorMessage.Error.NO_ERROR,
-                "Application " + identifier + " started");
+        return new AppSnaMessage(this.mediator, "/AppManager/" + 
+        		getName(), SnaErrorMessage.Error.NO_ERROR,
+                "Application " + getName() + " started");
     }
 
     /**
      * Stop the application
      * @return a success/error message
      */
-    public SnaErrorMessage stop(Session session) {
-            for(Map.Entry<ResourceDataProvider, Collection<ResourceSubscription>> map : resourceSubscriptions.entrySet()) {
-                Collection<ResourceSubscription> resourceSubscriptions = map.getValue();
+    protected SnaErrorMessage doStop() 
+    {
+    	
+        for(Map.Entry<ResourceDataProvider, Collection<ResourceSubscription>> map : 
+        	resourceSubscriptions.entrySet()) 
+        {
+            Collection<ResourceSubscription> resourceSubscriptions = map.getValue();
 
-                for(ResourceSubscription resourceSubscription : resourceSubscriptions) {
-                    Resource resource;
+            for(ResourceSubscription resourceSubscription : resourceSubscriptions) 
+            {
+                Resource resource;
+                try 
+                {
+                	String[] uriElements = UriUtils.getUriElements(
+                			resourceSubscription.getResourceUri());
+                	
+                	if(uriElements.length!=3)
+                	{
+                		continue;
+                	}
+                    resource = super.getSession().resource(uriElements[0], 
+                    	uriElements[1],uriElements[2]);
 
-                    try {
-                        resource = session.getFromUri(resourceSubscription.getResourceUri());
-                    } catch (NullPointerException e) {
-                        continue;
-                    }
-
-                    resource.unsubscribe(DataResource.VALUE, resourceSubscription.getSubscriptionId());
-
-                    /*if (resource == null) {
-                        throw new ResourceNotFoundException("The resource " + resourceSubscription.getResourceUri() +
-                                " does not exist. Unable to unsubscribe to the resource.");
-                    }*/
+                } catch (NullPointerException e) 
+                {
+                    continue;
                 }
+                resource.unsubscribe(DataResource.VALUE, 
+                	resourceSubscription.getSubscriptionId());
             }
-        /*catch (ResourceNotFoundException e) {
-            return new AppSnaMessage(this.mediator, "/AppManager/" + identifier, SnaErrorMessage.Error.SYSTEM_ERROR,
-                    e.getMessage());
-        }*/
-
-        for(Map.Entry<String, Component> map : components.entrySet()) {
-            try {
+        }
+        for(Map.Entry<String, Component> map : components.entrySet())
+        {
+            try 
+            {
                 map.getValue().uninstantiate();
-            } catch (LifeCycleException e) {
-                return new AppSnaMessage(this.mediator, "/AppManager/" + identifier, SnaErrorMessage.Error.SYSTEM_ERROR,
-                        "Unable to stop the application " + identifier + " > " + e.getMessage());
+                
+            } catch (LifeCycleException e) 
+            {
+                return new AppSnaMessage(this.mediator,
+                	"/AppManager/" + getName(), SnaErrorMessage.Error.SYSTEM_ERROR,
+                    "Unable to stop the application " + getName() + " > " + 
+                	e.getMessage());
             }
         }
-
-        try {
+        try 
+        {
             this.actionHookQueue.uninstantiate();
-        } catch (LifeCycleException e) {
-            return new AppSnaMessage(this.mediator, "/AppManager/" + identifier, SnaErrorMessage.Error.SYSTEM_ERROR,
-                    "Unable to start the application " + identifier + " > " + e.getMessage());
+            
+        } catch (LifeCycleException e) 
+        {
+            return new AppSnaMessage(this.mediator, "/AppManager/" 
+            		+ getName(), SnaErrorMessage.Error.SYSTEM_ERROR,
+                    "Unable to start the application " + getName() + " > " 
+            		+ e.getMessage());
         }
-
-        return new AppSnaMessage(this.mediator, "/AppManager/" + identifier, SnaErrorMessage.Error.NO_ERROR,
-                "Application " + identifier + " stopped");
+        return new AppSnaMessage(this.mediator, "/AppManager/" 
+        + getName(), SnaErrorMessage.Error.NO_ERROR, "Application " 
+        + getName() + " stopped");
     }
 
     /**
      * Uninstall properly the application
      * @return a success/error message
      */
-    public SnaErrorMessage uninstall() {
-        for(ServiceRegistration serviceRegistration : serviceRegistrations) {
+    public SnaErrorMessage uninstall() 
+    {
+        for(ServiceRegistration serviceRegistration : serviceRegistrations)
+        {
             serviceRegistration.unregister();
         }
-
-        return new AppSnaMessage(this.mediator, "/AppManager/" + identifier, SnaErrorMessage.Error.NO_ERROR,
-                "Application " + identifier + " uninstalled");
+        return new AppSnaMessage(this.mediator, "/AppManager/" 
+        	+ getName(), SnaErrorMessage.Error.NO_ERROR, "Application " + 
+        	getName() + " uninstalled");
     }
 
     /**
      * @see Recipient#callback(String, SnaMessage[])
      */
-    public void callback(String callbackId, SnaMessage[] messages) throws Exception {
-        //System.out.println("---------------> New event <---------------");
-
+    public void callback(String callbackId, SnaMessage[] messages) 
+    		throws Exception 
+    {
         waitingEvents.put(messages[0]);
-
         triggerNextEvent();
     }
 
     /**
      * This function create a {@link Thread} to wrap the processing of the next event
      */
-    private void triggerNextEvent() throws Exception {
-        Thread thread = new Thread() {
-            public void run() {
+    private void triggerNextEvent() throws Exception
+    {
+        Thread thread = new Thread()
+        {
+            public void run() 
+            {
                 SnaMessage message = waitingEvents.poll();
                 JSONObject messageJson = new JSONObject(message.getJSON());
 
                 String[] uri = message.getPath().split("/");
-
                 String resourceUri = "/" + uri[1] + "/" + uri[2] + "/" + uri[3];
-                Object value = messageJson.getJSONObject("notification").get("value");
+                Object value = messageJson.getJSONObject(
+                		"notification").get("value");
 
                 ResourceDataProvider dataProvider = null;
 
-                for(Map.Entry<ResourceDataProvider, Collection<ResourceSubscription>> subscription : resourceSubscriptions.entrySet()) {
-                    if(resourceUri.equals(subscription.getKey().getUri())) {
+                for(Map.Entry<ResourceDataProvider, Collection<ResourceSubscription>> 
+                subscription : resourceSubscriptions.entrySet())
+                {
+                    if(resourceUri.equals(subscription.getKey().getUri())) 
+                    {
                         dataProvider = subscription.getKey();
+                        break;
                     }
                 }
-
-                if(dataProvider == null) {
-                    try {
-                        throw new ResourceNotFoundException("Resource " + resourceUri + " not found while " +
-                                "triggering a new event");
-                    } catch (ResourceNotFoundException e) {
+                if(dataProvider == null) 
+                {
+                    try
+                    {
+                        throw new ResourceNotFoundException("Resource " + resourceUri 
+                        	+ " not found while triggering a new event");
+                        
+                    } catch (ResourceNotFoundException e)
+                    {
                         e.printStackTrace();
                     }
                 }
-
                 List<String> sources = new ArrayList<String>();
                 sources.add(resourceUri);
-
+                
                 // Notify the first component with the new event
-                dataProvider.updateAndNotify(UUID.randomUUID(), value, sources);
-
+                dataProvider.updateAndNotify(new UUID(System.currentTimeMillis(), 
+                		System.currentTimeMillis()), value, sources);
+                
                 // Fire the PluginHook actions after the component graph browsing
                 actionHookQueue.fireHooks();
 
@@ -261,59 +339,7 @@ public class Application implements Recipient {
                 }
             }
         };
-
         thread.setUncaughtExceptionHandler(watchDog);
         thread.start();
-    }
-
-    /**
-     * @return
-     */
-    public boolean handleUnchanged()
-    {
-    	return false;
-    }
-    
-    /**
-     * Gets the identifier of the application
-     * @return the identifier
-     */
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    /**
-     * @see Recipient#getSnaCallBackType()
-     */
-    public SnaCallback.Type getSnaCallBackType() {
-        return SnaCallback.Type.UNARY;
-    }
-
-    /**
-     * @see Recipient#getLifetime()
-     */
-    public long getLifetime() {
-        return -1;
-    }
-
-    /**
-     * @see Recipient#getBufferSize()
-     */
-    public int getBufferSize() {
-        return 0;
-    }
-
-    /**
-     * @see Recipient#getSchedulerDelay()
-     */
-    public int getSchedulerDelay() {
-        return 0;
-    }
-
-    /**
-     * @see JSONable#getJSON()
-     */
-    public String getJSON() {
-        return null;
     }
 }

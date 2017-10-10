@@ -15,10 +15,9 @@ import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.core.Resource.Type;
+import org.eclipse.sensinact.gateway.common.primitive.Typable;
 //import AccessMethod;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.eclipse.sensinact.gateway.common.primitive.Typable;
 
 /**
  * Linked {@link Resource} implementation
@@ -151,23 +150,11 @@ public class LinkedResourceImpl extends ResourceImpl
      *
      * @see Typable#getType()
      */
-    public Type getType()
+	@Override
+    public Resource.Type getType()
     {
 	    return this.targetedResource.getType();
     }
-
-//    /**
-//     * @inheritDoc
-//     *
-//     * @see ResourceImpl#
-//     * passOn(AccessMethod.Type, java.lang.Object[])
-//     */
-//    @Override
-//	protected <TASK> TASK passOn(AccessMethod.Type type, String uri,
-//			Object[] parameters) throws Exception 
-//	{
-//		return this.targetedResource.<TASK>passOn(type, uri, parameters);
-//	}
     
     /**
      * @InheritedDoc

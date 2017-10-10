@@ -11,6 +11,7 @@
 
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal;
 
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -152,14 +153,14 @@ public abstract class RestAccess
 			this.method = AccessMethod.Type.valueOf(matcher.group(4));
 			this.match = true;
 			return;
-		}
+		}	
+	    this.method =AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
 		matcher = RESOURCE_PATTERN.matcher(path);
 		if(matcher.matches())
 		{
 			this.serviceProvider = matcher.group(1);
 			this.service = matcher.group(2);
-			this.resource = matcher.group(3);			
-			this.method = AccessMethod.Type.DESCRIBE;
+			this.resource = matcher.group(3);		
 			this.match = true;
 			return;
 		}
@@ -168,7 +169,6 @@ public abstract class RestAccess
 		{
 			this.serviceProvider = matcher.group(1);
 			this.service = matcher.group(2);		
-			this.method = AccessMethod.Type.DESCRIBE;
 			this.isElementList = true;
 			this.match = true;
 			return;
@@ -177,8 +177,7 @@ public abstract class RestAccess
 		if(matcher.matches())
 		{
 			this.serviceProvider = matcher.group(1);
-			this.service = matcher.group(2);		
-			this.method = AccessMethod.Type.DESCRIBE;
+			this.service = matcher.group(2);
 			this.match = true;
 			return;
 		}
@@ -187,7 +186,6 @@ public abstract class RestAccess
 		{
 			this.serviceProvider = matcher.group(1);
 			this.isElementList = true;		
-			this.method = AccessMethod.Type.DESCRIBE;
 			this.match = true;
 			return;
 		}
@@ -195,14 +193,12 @@ public abstract class RestAccess
 		if(matcher.matches())
 		{
 			this.serviceProvider = matcher.group(1);		
-			this.method = AccessMethod.Type.DESCRIBE;
 			this.match = true;
 			return;
 		}
 		matcher = SERVICEPROVIDERS_PATTERN.matcher(path);
 		if(matcher.matches())
 		{
-			this.method = AccessMethod.Type.DESCRIBE;
 			this.match = true;		
 			this.isElementList = true;
 		}	
@@ -361,17 +357,17 @@ public abstract class RestAccess
 				).withService(service
 				).withResource(resource);
 		
-		if(!method.equals(AccessMethod.Type.ACT))
+		if(!method.name().equals(AccessMethod.ACT))
 		{
 			this.processAttribute(builder);
 		}
-		switch(method)
+		switch(method.name())
 		{
-			case DESCRIBE:
+			case "DESCRIBE":
 				builder.isElementsList(isElementList);
-			case GET:
+			case "GET":
 				break;
-			case ACT:
+			case "ACT":
 				int index = 0;
 				int length = parameters==null?
 					0:parameters.length;
@@ -384,8 +380,8 @@ public abstract class RestAccess
 				}
 				builder.withArgument(arguments);
 				break;
-			case SET:
-			case UNSUBSCRIBE:
+			case "SET":
+			case "UNSUBSCRIBE":
 				if(parameters == null || parameters.length!=1
 						|| parameters[0] == null)
 				{
@@ -399,7 +395,7 @@ public abstract class RestAccess
 				}
 				builder.withArgument(parameters[0].getValue());
 				break;
-			case SUBSCRIBE:				
+			case "SUBSCRIBE":				
 				NorthboundRecipient recipient = 
 						this.request.createRecipient(parameters);
 				if(recipient == null)

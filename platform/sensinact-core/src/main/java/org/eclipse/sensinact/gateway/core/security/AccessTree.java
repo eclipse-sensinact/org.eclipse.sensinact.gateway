@@ -13,66 +13,19 @@
  */
 package org.eclipse.sensinact.gateway.core.security;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.util.tree.PathNodeFactory;
 import org.eclipse.sensinact.gateway.util.tree.PathTree;
 
 /**
- * @author christophe
- *
+ * Extended {@link PathTree} gathering access rights to a sensiNact 
+ * gateway's data model instance using an hierarchical data structure 
+ * 
+ * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class AccessTree extends PathTree<AccessNode>
+public interface AccessTree<A extends AccessNode>
 {
 	//********************************************************************//
 	//						NESTED DECLARATIONS	     					  //
 	//********************************************************************//
-	
-    private static class AccessNodeFactory implements PathNodeFactory<AccessNode>
-    {    	
-    	private Mediator mediator;
-
-		/**
-		 * Constructor
-		 * 
-		 * @param mediator
-		 * 		the {@link Mediator} allowing to interact
-		 * 		with the OSGi host environment
-		 */
-		AccessNodeFactory(Mediator mediator)
-    	{
-    		this.mediator = mediator;
-    	}
-		
-    	/**
-    	 * @inheritDoc
-    	 * 
-    	 * @see PathNodeFactory#createPathNode(java.lang.String)
-    	 */
-    	public AccessNode createPathNode(String nodeName)
-    	{
-    		return new AccessNode(mediator, nodeName, false);
-    	}
-
-    	/**
-    	 * @inheritDoc
-    	 * 
-    	 * @see PathNodeFactory#createPatternNode(java.lang.String)
-    	 */
-    	public AccessNode createPatternNode(String nodeName)
-    	{
-    		return new AccessNode(mediator, nodeName, true);
-    	}
-
-    	/**
-    	 * @inheritDoc
-    	 * 
-    	 * @see PathNodeFactory#createRootNode()
-    	 */
-    	public AccessNode createRootNode()
-    	{
-    		return new AccessNode(mediator);
-    	}
-    }
     
 	//********************************************************************//
 	//						ABSTRACT DECLARATIONS						  //
@@ -86,24 +39,22 @@ public class AccessTree extends PathTree<AccessNode>
 	//						INSTANCE DECLARATIONS						  //
 	//********************************************************************//
 
-	private Mediator mediator;
-
 	/**
-	 * @param factory
+	 * Returns the root {@link AccessNode} of this AccessTree
+	 * 
+	 * @return this AccessTree's root node
 	 */
-	public AccessTree(Mediator mediator) 
-	{
-		super(new AccessNodeFactory(mediator));
-		this.mediator = mediator;
-	}
+	A getRoot();
 
 	/**
-	 * @param allAnonymous
+	 * Returns true if this AccessTree is mutable, meaning that
+	 * it is possible to add/remove {@link AccessNode} to/from it
+	 * 
 	 * @return
+	 * 		<ul>
+	 * 			<li>true if this AccessTree is mutable</li>
+	 * 			<li>false otherwise</li>
+	 * 		</ul>
 	 */
-	public AccessTree withAccessProfile(AccessProfileOption option)
-	{
-		super.root.withAccessProfile(option.getAccessProfile());
-		return this;
-	}
+	boolean isMutable();
 }

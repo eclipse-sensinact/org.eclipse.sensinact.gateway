@@ -31,9 +31,12 @@ class AppWatchdogExecutor implements AccessMethodExecutor {
     private final ApplicationService service;
     private final AppResourceLifecycleWatchDog resourceWatchDog;
 
-    AppWatchdogExecutor(AppServiceMediator mediator, ApplicationService service, Collection<String> resources) {
+    AppWatchdogExecutor(AppServiceMediator mediator, 
+    		ApplicationService service, Collection<String> resources) 
+    {
         this.service = service;
-        this.resourceWatchDog = new AppResourceLifecycleWatchDog(mediator, service, resources);
+        this.resourceWatchDog = new AppResourceLifecycleWatchDog(
+        		mediator, service, resources);
     }
 
     /**
@@ -48,7 +51,8 @@ class AppWatchdogExecutor implements AccessMethodExecutor {
         if (uri.endsWith(AppConstant.START)) {
             if (!snaResult.hasError()) {
                 if (ApplicationStatus.INSTALLED.equals(status)) {
-                    SnaErrorMessage message = resourceWatchDog.start(Sessions.SESSIONS.get());
+                    SnaErrorMessage message = resourceWatchDog.start(service.getApplication(
+                    		).getSession());
 
                     if(message != null) {
                         snaResult.registerException(new ResourceNotFoundException(
@@ -58,7 +62,8 @@ class AppWatchdogExecutor implements AccessMethodExecutor {
             }
         } else if (uri.endsWith(AppConstant.STOP)) {
             if (ApplicationStatus.ACTIVE.equals(status)) {
-                SnaErrorMessage message = this.resourceWatchDog.stop(Sessions.SESSIONS.get());
+                SnaErrorMessage message = this.resourceWatchDog.stop(service.getApplication(
+                		).getSession());
 
                 if(message != null) {
                     snaResult.registerException(new ResourceNotFoundException(

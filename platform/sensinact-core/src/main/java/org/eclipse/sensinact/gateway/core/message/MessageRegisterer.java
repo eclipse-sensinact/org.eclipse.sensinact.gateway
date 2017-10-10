@@ -11,31 +11,14 @@
 package org.eclipse.sensinact.gateway.core.message;
 
 /**
- *	
+ *	A MessageRegisterer is a recipient for {@link SnaMessage}s
  */
 public interface MessageRegisterer 
 {
 	/**
-	 * Registers the SnaMessage passed as parameter
-	 * for a future transmission. 
+	 * Registers the {@link SnaMessage} passed as parameter
 	 * 
-	 * @param message
-	 * 		the {@link SnaMessage} to register
+	 * @param message the {@link SnaMessage} to be registered
 	 */
-	void register(SnaMessage message);
-
-//    /**
-//     * Returns true if this callback handle unchanged value 
-//     * notifications, meaning that only the timestamp has been
-//     * updated. The default is false
-//     * 
-//     * 
-//     * @return 
-//     * 		<ul>
-//     * 			<li>true if this callback handles unchanged value
-//     * 			notifications</li>
-//     * 			<li>false otherwise</li>
-//     * 		</ul>
-//     */
-//    boolean handleUnchanged();
+	void register(SnaMessage<?> message);
 }

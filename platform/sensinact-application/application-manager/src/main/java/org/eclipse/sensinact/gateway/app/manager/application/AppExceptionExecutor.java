@@ -26,21 +26,19 @@ class AppExceptionExecutor implements AccessMethodExecutor {
 
     private final ApplicationService service;
 
-    AppExceptionExecutor(ApplicationService service) {
+    AppExceptionExecutor(ApplicationService service)
+    {
         this.service = service;
     }
 
     /**
      * @see Executable#execute(java.lang.Object)
      */
-    public Void execute(AccessMethodResult jsonObjects) throws Exception {
-        Session session = Sessions.SESSIONS.get();
-
-        service.getApplication().stop(session);
-
+    public Void execute(AccessMethodResult jsonObjects) throws Exception 
+    {
+        service.getApplication().stop();
         jsonObjects.push(new JSONObject().put("message", "The application " + service.getName()
                 + " has throw an exception. Stopping it."));
-
         return null;
     }
 }

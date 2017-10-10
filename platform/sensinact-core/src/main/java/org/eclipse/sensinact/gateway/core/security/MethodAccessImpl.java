@@ -10,8 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.core.security;
 
-import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 
 /**
  *
@@ -66,5 +66,13 @@ public class MethodAccessImpl implements MethodAccess
 	{
 		return this.method.name();
 	}
+	
+	
+	public String toString()
+	{
+		return new StringBuilder().append(this.method
+				).append(this.accessLevel).toString();
+	}
+	
 
 }

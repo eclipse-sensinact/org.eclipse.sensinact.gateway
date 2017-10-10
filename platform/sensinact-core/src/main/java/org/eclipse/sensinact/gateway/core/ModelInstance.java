@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -17,9 +19,11 @@ import java.util.List;
 import org.eclipse.sensinact.gateway.core.message.MessageHandler;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
+import org.eclipse.sensinact.gateway.core.security.AccessNode;
+import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.Session;
+import org.eclipse.sensinact.gateway.core.security.SessionKey;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.osgi.framework.ServiceRegistration;
 
@@ -113,7 +117,7 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 	private final String identifier;
 	
 	/**
-	 * the {@link MessageHandler} handling
+	 * the {@link MesssageHandler} handling 
 	 * messages coming from this SensiNactResourceModel 
 	 */
 	protected MessageHandler messageHandler;
@@ -128,14 +132,14 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 	 * The {@link ServiceRegistration} in the OSGi host environment
 	 * for this {@link SensiNactResourceModel} instance
 	 */
-	private ServiceRegistration<SensiNactResourceModel> registration;
+	private ModelInstanceRegistration registration;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param mediator the {@link Mediator} allowing to interact
 	 * with the OSGi host environment
-	 * @param resourceModelConfig the extended {@link ModelConfiguration}
+	 * @param configuration the extended {@link ModelConfiguration}
 	 * gathering the configuration properties applying on
 	 * the ModelInstance to be created
 	 * 
@@ -161,13 +165,12 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 			throw new InvalidServiceProviderException(
 			    "Unable to instantiate the root services provider");
 		}
-		//retrieve the identifier in the datastore of the sensiNact 
-		//framework holding it
+		//retrieve the unique identifier if it exits
 		this.identifier = this.mediator.callService(BundleValidation.class,
 			new Executable<BundleValidation, String>()
 			{
 				@Override
-				public String execute(BundleValidation service)
+				public String execute(BundleValidation service) 
 				throws Exception
 				{
 					return service.check(mediator.getContext(
@@ -224,8 +227,13 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
     }
     
     /**
-     * @param descriptor
-     * @return
+     * 
+     * @param descriptor 
+     * @param buildPolicy
+     * 
+     * @return the appropriate {@link ResourceBuiler} according to
+     * the specified {@link ResourceDescriptor} and the build
+     * policy 
      */
     protected ResourceBuilder getResourceBuilder(
     	ResourceDescriptor descriptor, byte buildPolicy)
@@ -233,12 +241,12 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
     	ResourceBuilder builder = null;
     	
 		if(SensiNactResourceModelConfiguration.BuildPolicy.isBuildPolicy(buildPolicy,
-				SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION))
+			SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION))
 		{
 			builder = getResourceBuilder(descriptor);
 		}
-		if(builder == null &&  SensiNactResourceModelConfiguration.BuildPolicy.isBuildPolicy(buildPolicy,
-				SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED))
+		if(builder == null && SensiNactResourceModelConfiguration.BuildPolicy.isBuildPolicy(
+			buildPolicy, SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED))
 		{
 			builder = createResourceBuilder(descriptor);
 		}
@@ -267,7 +275,7 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
     	{
     		return null;
     	}
-    	return configureResourceBuilder(resourceConfig,descriptor);
+    	return configureResourceBuilder(resourceConfig, descriptor);
     }
     
     /**
@@ -296,9 +304,12 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
     }
     
     /**
-     * Returns a newly created {@link ResourceBuilder} capable of 
-     * creating a new resource
+     * Returns a {@link ResourceBuilder} capable of creating a new
+     * resource based on both the {@link ResourceConfig} and the 
+     * {@link ResourceDescriptor} passed as parameters
      * 
+     * @param resourceConfig the {@link ResourceConfig} that will
+     * be used by the {@link ResourceBuilder} to be returned 
      * @param descriptor the {@link ResourceDescriptor} describing 
      * the {@link ResourceConfig} wrapped by the {@link ResourceBuilder} 
      * to be returned 
@@ -371,20 +382,83 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 	 * Registers this sensiNact resource model instance 
 	 * in the OSGi host environment.
 
-	 * @throws ModelAlreadyRegisteredException if this sensiNact resource
-	 * model instance has been previously registered
+	 * @throws ModelAlreadyRegisteredException if this sensiNact 
+	 * resource model instance is already registered
 	 */
-	protected final void register(
-			ServiceRegistration<SensiNactResourceModel> registration) 
+	protected final void register() 
 			throws ModelAlreadyRegisteredException
 	{
-		this.registration = registration;
-		if(registration != null)
+		if(this.registered)
+		{
+			throw new ModelAlreadyRegisteredException(
+					this.registration.getName());
+		}
+		final String name = this.getRootElement().getName(); 
+		final String uri = UriUtils.getUri(new String[] {name});
+		
+    	final Dictionary<String,Object> props = new Hashtable<String,Object>();
+    	props.put("name", name);
+
+    	String location = null;    	
+		try
+		{
+			location = this.getRootElement().getLocation();
+    		props.put(LocationResource.LOCATION, location);
+    		
+		} catch(NullPointerException e)
+		{
+			mediator.debug(String.format("No initial location defined for %s", name));
+		}
+		AccessNode node = null;
+		AccessNode root = this.configuration.getAccessTree().getRoot();
+		AccessMethod.Type[] accessMethodTypes = AccessMethod.Type.values();
+		int typesLength = accessMethodTypes==null?0:accessMethodTypes.length;		
+		if((node = (AccessNodeImpl<?>)root.get(uri)) == null)
+		{
+			node = root;
+		}		
+		int index = 0;	
+		for(;index < typesLength; index++)
+		{
+			AccessLevelOption accessLevelOption = node.getAccessLevelOption(
+				accessMethodTypes[index]);
+			
+			props.put(new StringBuilder().append(name).append(".").append(
+				accessMethodTypes[index].name()).toString(), 
+					accessLevelOption.getAccessLevel(
+							).getLevel());
+		}
+		ServiceRegistration<SensiNactResourceModel> instanceRegistration = 
+			AccessController.<ServiceRegistration<SensiNactResourceModel>>doPrivileged(
+				new PrivilegedAction<ServiceRegistration<SensiNactResourceModel>>()
+		{
+			@Override
+			public ServiceRegistration<SensiNactResourceModel> run()
+			{				
+				return ModelInstance.this.mediator.getContext(
+					).registerService(SensiNactResourceModel.class, 
+						ModelInstance.this, props);
+			}
+		});    	
+		if(instanceRegistration != null)
 		{
 			this.registered = true;
+			
+			this.registration = new ModelInstanceRegistration(uri, 
+				instanceRegistration, this.configuration);
 			this.messageHandler = new SnaMessageListener(mediator,
-						this.configuration());
-					
+				this.configuration());
+
+			SnaFilter filter = new SnaFilter(mediator, new StringBuilder(
+				).append(uri).append("/admin/location/value"
+						).toString());
+			filter.addHandledType(SnaMessage.Type.UPDATE);    		
+			this.messageHandler.addCallback(filter,registration);
+			
+			filter = new SnaFilter(mediator, "(\\/[^\\/]+)+", true, false);
+		    filter.addHandledType(SnaMessage.Type.LIFECYCLE);    		
+		    this.messageHandler.addCallback(filter,registration);
+			
 			if(this.configuration().getStartAtInitializationTime())
 			{
 				this.provider.start();
@@ -396,15 +470,15 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 	 * Unregisters this sensiNact resource model instance 
 	 * from the OSGi host environment
 	 * 
-	 * @throws IllegalStateException if this sensiNact resource model
-	 * instance has been previously unregistered
+	 * @throws IllegalStateException if this sensiNact resource 
+	 * model instance is not registered
 	 */
 	public final void unregister() throws IllegalStateException 
 	{
 		if(!this.isRegistered())
 		{
 			throw new IllegalStateException(
-				this.getRootElement().getName());
+					this.registration.getName());
 		}	
 		this.registered = false;
 		try
@@ -415,19 +489,19 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 		{
 			mediator.error(e);
 		}
-		this.mediator.callService(SecuredAccess.class, 
-				new Executable<SecuredAccess, Void>()
+		this.messageHandler.close(true);
+		this.messageHandler = null;	
+
+		AccessController.<Void>doPrivileged(
+		new PrivilegedAction<Void>()
 		{
 			@Override
-			public Void execute(SecuredAccess service) 
-			throws Exception
+			public Void run()
 			{
-				service.unregister(ModelInstance.this.registration);
+				ModelInstance.this.registration.unregister();
 				return null;
 			}
 		});
-		this.messageHandler.close(true);
-		this.messageHandler = null;	
 	}
 	
 	/**
@@ -463,11 +537,11 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
     }
 
 	/**
-	 * @param key
+	 * @param userId
 	 * @return
 	 * @throws ModelElementProxyBuildException
 	 */
-	public ServiceProvider getRootElementProxy(Session.Key key)
+	public ServiceProvider getRootElementProxy(String publicKey)
 			throws ModelElementProxyBuildException 
 	{
 		if(!registered)
@@ -480,7 +554,8 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 			throw new ModelElementProxyBuildException(
 				"this model instance's root ServiceProvider is null");
 		}
-		ServiceProvider serviceProvider = this.getRootElement().getProxy(key);
+		ServiceProvider serviceProvider = this.getRootElement(
+				).getProxy(publicKey);
 		return serviceProvider;
 	}
     
@@ -553,18 +628,7 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 	@Override
 	public void update(LifecycleStatus status)
 	{
-		this.mediator.callService(SecuredAccess.class, 
-				new Executable<SecuredAccess, Void>()
-		{
-			@Override
-			public Void execute(SecuredAccess service) 
-			throws Exception
-			{
-				service.update(ModelInstance.this, 
-						ModelInstance.this.registration);
-				return null;
-			}
-		});
+		this.registration.updateLifecycle(status);
 	}
 
 	/**
@@ -583,7 +647,7 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 	
 	/**
 	 * Returns the {@link AccessLevelOption} for the {@link Session} whose
-	 * {@link Session.Key} is passed as parameter, and for the {@link 
+	 * {@link SessionKey} is passed as parameter, and for the {@link 
 	 * ModelElement} belonging to this resource model instance whose path 
 	 * is also passed as parameter
 	 *  
@@ -593,10 +657,10 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 	 * @return the {@link AccessLevelOption} for the specified session and 
 	 * resource
 	 */
-	public final <I extends ModelInstance<?>, 
+	public <I extends ModelInstance<?>, 
 	P extends ProcessableData, E extends Nameable, R extends Nameable>
 	AccessLevelOption getAccessLevelOption(ModelElement<I, P, E, R> 
-	modelElement, Session.Key key)
+	modelElement, String publicKey)
 	{
 		if(modelElement.getModelInstance() != this)
 		{
@@ -604,7 +668,8 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 			   "the model element argument must belong to this model instance");
 		}
 		final String path = modelElement.getPath();
-		return this.configuration().getUserAccessLevelOption(path, key.getPublicKey());
+		return this.configuration().getAuthenticatedAccessLevelOption(
+				path, publicKey);
 	}
 	
 	/**
@@ -620,7 +685,7 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 	 * specified {@link ModelElement} for the specified {@link 
 	 * AccessLevelOption}
 	 */
-	public final <I extends ModelInstance<?>, P extends ProcessableData, 
+	public <I extends ModelInstance<?>, P extends ProcessableData, 
 	E extends Nameable, R extends Nameable> List<MethodAccessibility>
 	getAuthorizations(ModelElement<I, P, E, R> modelElement, 
 			AccessLevelOption accessLevelOption)

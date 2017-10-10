@@ -11,7 +11,7 @@
 package org.eclipse.sensinact.gateway.core;
 
 import java.util.Collections;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +22,6 @@ import org.eclipse.sensinact.gateway.common.primitive.Describable;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.Typable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodDescription;
 import org.eclipse.sensinact.gateway.core.method.UnaccessibleAccessMethod;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
@@ -38,7 +37,7 @@ implements ElementsProxy<AttributeDescription> ,Typable<Resource.Type>
 	/**
 	 * {@link AccessMethod}s of this ResourceProxy
 	 */
-	protected final Map<AccessMethod.Type, AccessMethod> methods;	
+	protected final Map<String, AccessMethod> methods;	
 	
 	/**
 	 * the {@link Resource.Type} of the {@link ResourceImpl}
@@ -61,10 +60,7 @@ implements ElementsProxy<AttributeDescription> ,Typable<Resource.Type>
 		super.elements.addAll(descriptions);
 		this.type = resource.getType();
 		
-		Map<AccessMethod.Type, AccessMethod> methods = 
-				new EnumMap<AccessMethod.Type,AccessMethod>(
-				AccessMethod.Type.class);
-		
+		Map<String, AccessMethod> methods = new HashMap<String, AccessMethod>();		
 		AccessMethod.Type[] existingTypes=AccessMethod.Type.values();
 		
 		int index = 0;
@@ -73,27 +69,26 @@ implements ElementsProxy<AttributeDescription> ,Typable<Resource.Type>
 		for(;index < length; index++)
 		{ 
 			AccessMethod method = null;
-			if((method=resource.getAccessMethod(
-					existingTypes[index]))==null)
+			if((method=resource.getAccessMethod(existingTypes[index]))==null)
 			{
 				continue;
 			}
 			int accessIndex = -1;
 			
 			if((accessIndex = methodAccessibilities.indexOf(
-				new Name<MethodAccessibility>(method.getType().name())))==-1 || 
+				new Name<MethodAccessibility>(existingTypes[index].name())))==-1 || 
 					!methodAccessibilities.get(accessIndex).isAccessible()) 
 			{
-				methods.put(existingTypes[index], 
+				methods.put(existingTypes[index].name(), 
 					new UnaccessibleAccessMethod(mediator,super.uri,
 							existingTypes[index]));
 			} else
 			{
-				methods.put(existingTypes[index],method);
+				methods.put(existingTypes[index].name(),method);
 			}
 		}
-		this.methods = Collections.<AccessMethod.Type, 
-				AccessMethod>unmodifiableMap(methods);
+		this.methods = Collections.<String,AccessMethod>unmodifiableMap(
+				methods);
 	}
 
 	/**
@@ -117,7 +112,7 @@ implements ElementsProxy<AttributeDescription> ,Typable<Resource.Type>
     {
     	int index= 0;
     	
-    	Iterator<Map.Entry<AccessMethod.Type, AccessMethod>> 
+    	Iterator<Map.Entry<String, AccessMethod>> 
     	iterator = this.methods.entrySet().iterator();
     	
     	AccessMethodDescription[] descriptions =
@@ -125,7 +120,7 @@ implements ElementsProxy<AttributeDescription> ,Typable<Resource.Type>
     	
     	while(iterator.hasNext())
     	{
-    		Map.Entry<AccessMethod.Type, AccessMethod> 
+    		Map.Entry<String, AccessMethod> 
     		entry = iterator.next(); 
     		descriptions[index++] = entry.getValue().getDescription();
     	}
@@ -138,10 +133,10 @@ implements ElementsProxy<AttributeDescription> ,Typable<Resource.Type>
 	 * @inheritDoc
 	 *
      * @see SensiNactResourceModelElementProxy#
-     * getAccessMethod(AccessMethod.Type)
+     * getAccessMethod(String)
      */
     @Override
-	public AccessMethod getAccessMethod(Type type)
+	public AccessMethod getAccessMethod(String type)
     {
 	    return this.methods.get(type);
     }

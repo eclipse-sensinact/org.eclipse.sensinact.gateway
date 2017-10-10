@@ -23,43 +23,42 @@ import org.eclipse.sensinact.gateway.util.tree.PathNodeFactory;
 public class PathTreeTest
 {
 	
-	class MyTree extends PathTree<PathNode>
+	class MyTree<P extends PathNode<P>> extends PathTree<P>
 	{
 		
 		MyTree()
 		{
-			super(new PathNodeFactory<PathNode>()
+			super(new PathNodeFactory<P>()
 			{
 				@Override
-				public PathNode createPathNode(String nodeName)
+				public P createPathNode(String nodeName)
 				{
-					return new PathNode(nodeName);
+					return (P) new PathNode<P>(nodeName);
 				}
 
 				@Override
-				public PathNode createPatternNode(String nodeName)
+				public P createPatternNode(String nodeName)
 				{
-					return new PathNode(nodeName,true);
+					return (P) new PathNode<P>(nodeName,true);
 				}
 
 				@Override
-				public PathNode createRootNode()
+				public P createRootNode()
 				{
-					return new PathNode();
+					return (P) new PathNode<P>();
 				}
-				
 			});
 		}
 	}
 	
-	private MyTree tree = new MyTree();
 	
 	/**
 	 * 
 	 */
 	@Test
-	public void testTree()
+	public <P extends PathNode<P>> void testTree()
 	{
+		MyTree<P> tree = new MyTree<P>();
 		tree.add("/aaaaaaa");
 		tree.add("/vvvvvvv");
 		tree.add("/ccccccc");
@@ -72,7 +71,7 @@ public class PathTreeTest
 		
 		System.out.println(tree.toString());
 		
-		PathNode node = tree.get("/test/myservice/location");
+		P node = tree.get("/test/myservice/location");
 		System.out.println(node.getPath());
 
 		tree.delete("/test/service");

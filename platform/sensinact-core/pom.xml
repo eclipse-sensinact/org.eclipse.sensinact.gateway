@@ -70,6 +70,7 @@
                             org.eclipse.sensinact.gateway.core,
                             org.eclipse.sensinact.gateway.core.message,
                             org.eclipse.sensinact.gateway.core.method,
+                            org.eclipse.sensinact.gateway.core.method.legacy,
                             org.eclipse.sensinact.gateway.core.method.trigger,
                             org.eclipse.sensinact.gateway.core.method.builder,
                             org.eclipse.sensinact.gateway.core.osgi,

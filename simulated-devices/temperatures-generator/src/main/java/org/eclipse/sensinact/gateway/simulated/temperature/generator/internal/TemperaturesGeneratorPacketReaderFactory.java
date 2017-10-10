@@ -17,7 +17,6 @@ import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.generic.packet.PacketReader;
 import org.eclipse.sensinact.gateway.generic.packet.PacketReaderFactory;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.discovery.TemperaturesGeneratorDiscoveryPacket;
-import org.eclipse.sensinact.gateway.simulated.temperature.generator.discovery.TemperaturesGeneratorDiscoveryPacketReader;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.reader.TemperaturesGeneratorPacketReader;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 
@@ -52,7 +51,7 @@ implements PacketReaderFactory
     	
         if(packet instanceof TemperaturesGeneratorDiscoveryPacket) 
         {
-            PacketReader<TemperaturesGeneratorAbstractPacket> reader = new TemperaturesGeneratorDiscoveryPacketReader(mediator);
+            PacketReader<TemperaturesGeneratorAbstractPacket> reader = new TemperaturesGeneratorPacketReader(mediator);
             reader.parse(tpacket);
             return (PacketReader<P>) reader;
             

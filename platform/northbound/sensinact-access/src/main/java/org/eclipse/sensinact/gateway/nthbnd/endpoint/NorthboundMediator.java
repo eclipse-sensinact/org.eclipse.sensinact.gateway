@@ -10,15 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import org.osgi.framework.BundleContext;
-
-import org.osgi.framework.ServiceReference;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.Session;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  *
@@ -31,12 +29,9 @@ public class NorthboundMediator extends Mediator
 	//********************************************************************//
 
 	private static final class SessionExecutor
-	implements Executable<SecuredAccess, Session>
+	implements Executable<Core, Session>
 	{
 		private Authentication<?> authentication;
-
-		SessionExecutor()
-		{}
 
 		SessionExecutor(Authentication<?> authentication)
 		{
@@ -49,17 +44,20 @@ public class NorthboundMediator extends Mediator
 		 * @see Executable#execute(java.lang.Object)
 		 */
 		@Override
-		public Session execute(SecuredAccess securedAccess) throws Exception
+		public Session execute(Core core) throws Exception
 		{
-			if(this.authentication == null)
+			Session s= null;
+			if(this.authentication != null)
 			{ 
-				return securedAccess.getAnonymousSession();
-
-			} else
-			{
-				return securedAccess.getSession(authentication);			
+				s=core.getSession(authentication);
 			}
-		}}
+			if(s==null)
+			{
+				s= core.getAnonymousSession();
+			}
+			return s;
+		 }
+	}
 	
 	//********************************************************************//
 	//						ABSTRACT DECLARATIONS						  //
@@ -88,22 +86,22 @@ public class NorthboundMediator extends Mediator
 	 */
 	public Session getSession(Authentication<?> authentication)
 	{
-		ServiceReference<SecuredAccess> reference = 
+		ServiceReference<Core> reference = 
 				super.getContext().getServiceReference(
-						SecuredAccess.class);
-		SecuredAccess access = null;
+						Core.class);
+		Core core = null;
 		
-		if(reference != null && (access = super.getContext(
+		if(reference != null && (core = super.getContext(
 				).getService(reference))!=null)
 		{
 			try
 			{
 				return new SessionExecutor(authentication
-					).execute(access);
+					).execute(core);
 			}	
 			catch (Exception e)
 			{
-				super.error(e.getMessage(),e);
+				super.error(e);
 				
 			} finally
 			{

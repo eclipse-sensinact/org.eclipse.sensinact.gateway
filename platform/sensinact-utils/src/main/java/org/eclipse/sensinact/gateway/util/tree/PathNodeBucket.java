@@ -10,16 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.util.tree;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * {@link PathNode}s linker in a {@link PathNodeList}
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-class PathNodeBucket 
+class PathNodeBucket<P extends PathNode<P>> 
 {		
-	PathNodeBucket next = null;
-
-	PathNode node;
+	PathNodeBucket<P> next = null;
+	P node;
 	int hash;
 	
 	/**
@@ -28,7 +30,7 @@ class PathNodeBucket
 	 * @param node the {@link PathNode} wrapped by
 	 * the PathNodeBucket to be instantiated
 	 */
-	PathNodeBucket(PathNode node)
+	PathNodeBucket(P node)
 	{
 		this.node = node;
 		this.hash = node.hashCode();
@@ -43,9 +45,22 @@ class PathNodeBucket
 	{
 		if(PathNodeBucket.class.isAssignableFrom(object.getClass()))
 		{
-			return node.equals(((PathNodeBucket)object).node);
+			return node.equals(((PathNodeBucket<?>)object).node);
 		}
 		return node.equals(object);
+	}
+	
+	/**
+	 * @param ic
+	 * @param parent
+	 * 
+	 * @return
+	 */
+	public <N extends ImmutablePathNode<N>> ImmutablePathNodeBucket<N> 
+	immutable(Class<N> ic, N parent)
+	{
+		return new ImmutablePathNodeBucket<N>(node.<N>immutable(ic, parent),
+				next!=null?next.immutable(ic, parent):null);
 	}
 
     /**

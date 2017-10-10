@@ -82,7 +82,8 @@ public class KodiTaskConfigurator implements HttpTaskConfigurator
 		        {
 		        	actMethodDefinition = iterator.next();
 		        	if(!actMethodDefinition.getType().equals(
-		        			AccessMethod.Type.ACT))
+		        			AccessMethod.Type.valueOf(
+		        					AccessMethod.ACT)))
 		        	{
 		        		continue;
 		        	}

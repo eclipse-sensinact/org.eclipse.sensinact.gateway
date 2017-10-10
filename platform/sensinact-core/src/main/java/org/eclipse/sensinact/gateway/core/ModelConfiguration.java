@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -22,10 +24,14 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
+import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessProfile;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
+import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
+import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
+import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 
 /**
  * Configuration of a sensiNact Resource Model instance
@@ -56,11 +62,11 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	protected Map<String, List<String>> fixed;
 	
 	/**
-	 * the root {@link  AccessNode} of the {@link AccessProfile}s
+	 * the {@link  AccessTree} of the {@link AccessProfile}s
 	 * hierarchy describing the access policy applying on this
 	 * sensiNact resource model
 	 */
-	protected final AccessTree accessTree;
+	protected final MutableAccessTree<? extends MutableAccessNode> accessTree;
 	protected Mediator mediator;
 		
 	/**
@@ -70,7 +76,8 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	 * Defines {@link ServiceImpl} type as the default service one
 	 * Defines {@link ResourceImpl} type as the default resource one 
 	 */
-	public ModelConfiguration(Mediator mediator,  AccessTree accessTree)
+	public ModelConfiguration(Mediator mediator,  
+			MutableAccessTree<? extends MutableAccessNode> accessTree)
 	{
 		this(mediator, accessTree, new DefaultResourceConfigBuilder());
 	}
@@ -82,7 +89,8 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	 * Defines {@link ServiceImpl} type as the default service one
 	 * Defines {@link ResourceImpl} type as the default resource one 
 	 */
-	public ModelConfiguration(Mediator mediator,  AccessTree accessTree, 
+	public ModelConfiguration(Mediator mediator,  
+			MutableAccessTree<? extends MutableAccessNode> accessTree, 
 			ResourceConfigBuilder defaultResourceConfigBuilder)
 	{
 		this(mediator, accessTree, defaultResourceConfigBuilder, 
@@ -102,7 +110,7 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	 */
 	protected ModelConfiguration(
 			Mediator mediator, 
-			AccessTree accessTree,
+			MutableAccessTree<? extends MutableAccessNode> accessTree,
 			Class<? extends ServiceProviderImpl> defaultServiceProviderType,
 			Class<? extends ServiceImpl> defaultServiceType, 
 			Class<? extends ResourceImpl> defaultResourceType)
@@ -128,7 +136,7 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	 */
 	protected ModelConfiguration(
 			Mediator mediator, 
-			AccessTree accessTree,
+			MutableAccessTree<? extends MutableAccessNode> accessTree,
 			ResourceConfigBuilder defaultResourceConfigBuilder,
 			Class<? extends ServiceProviderImpl> defaultServiceProviderType,
 			Class<? extends ServiceImpl> defaultServiceType, 
@@ -221,12 +229,12 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
      }
     
 	/**
-	 * The {@link AccessTree} applying on {@link ModelInstance}s 
+	 * The {@link AccessTreeImpl} applying on {@link ModelInstance}s 
 	 * configured by this {@link ModelConfiguration}
 	 * 
-	 * @return the applying {@link AccessTree}
+	 * @return the applying {@link AccessTreeImpl}
 	 */
-	public AccessTree getAccessTree()
+	public MutableAccessTree<? extends MutableAccessNode> getAccessTree()
 	{
 		return this.accessTree;
 	}
@@ -242,7 +250,8 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	{
 		if(this.defaultResourceConfigBuilder != null)
 		{
-			this.defaultResourceConfigBuilder.setDefaultResourceType(defaultResourceType);
+			this.defaultResourceConfigBuilder.setDefaultResourceType(
+					defaultResourceType);
 		}	
 		return this;
 	}
@@ -257,7 +266,8 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	{
 		if(this.defaultResourceConfigBuilder != null)
 		{
-			this.defaultResourceConfigBuilder.setDefaultDataType(defaultDataType);
+			this.defaultResourceConfigBuilder.setDefaultDataType(
+					defaultDataType);
 		}
 		return this;			
 	}
@@ -272,7 +282,8 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	{
 		if(this.defaultResourceConfigBuilder != null)
 		{
-			this.defaultResourceConfigBuilder.setDefaultModifiable(defaultModifiable);
+			this.defaultResourceConfigBuilder.setDefaultModifiable(
+					defaultModifiable);
 		}	
 		return this;		
 	}
@@ -283,11 +294,13 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	 * @see SensiNactResourceModelConfiguration#
 	 * setDefaultUpdatePolicy(Resource.UpdatePolicy)
 	 */
-	public ModelConfiguration setDefaultUpdatePolicy(Resource.UpdatePolicy defaultUpdatePolicy)
+	public ModelConfiguration setDefaultUpdatePolicy(
+			Resource.UpdatePolicy defaultUpdatePolicy)
 	{
 		if(this.defaultResourceConfigBuilder != null)
 		{
-			this.defaultResourceConfigBuilder.setDefaultUpdatePolicy(defaultUpdatePolicy);
+			this.defaultResourceConfigBuilder.setDefaultUpdatePolicy(
+					defaultUpdatePolicy);
 		}
 		return this;			
 	}
@@ -445,8 +458,8 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
  	public ResourceConfig createResourceConfig(ResourceDescriptor descriptor) 
  	{
  		ResourceConfig resourceConfig = 
- 				this.defaultResourceConfigBuilder.getResourceConfig(
- 					descriptor);
+ 			this.defaultResourceConfigBuilder.getResourceConfig(
+ 				descriptor);
  		return resourceConfig;
  	}
   
@@ -469,7 +482,8 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	 * @return the list of {@link ResourceConfig}s
 	 * for the specified service 
 	 */
-	public List<ResourceConfig> getResourceConfigs(String profile,String serviceId)
+	public List<ResourceConfig> getResourceConfigs(String profile, 
+			String serviceId)
 	{
 		List<ResourceConfig> configs = new ArrayList<ResourceConfig>();
 		
@@ -494,7 +508,8 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	 * @return the default {@link ResourceConfig} for the
 	 * specified service
 	 */
-	 public ResourceConfig getDefaultResourceConfig(String profile, String serviceName)
+	 public ResourceConfig getDefaultResourceConfig(String profile,
+			 String serviceName)
 	 {
 		ResourceConfig config = null;
 	 		
@@ -526,7 +541,8 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	 */
 	 public ResourceConfig getDefaultResourceConfig(String serviceName)
 	 {
-		return this.getDefaultResourceConfig(ResourceConfig.ALL_PROFILES, serviceName);
+		return this.getDefaultResourceConfig(
+				ResourceConfig.ALL_PROFILES, serviceName);
 	 }
 	 
 	/**
@@ -645,10 +661,11 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	 */
 	@Override
 	public List<MethodAccessibility> getAccessibleMethods(String path,
-														  AccessLevelOption accessLevelOption)
+			AccessLevelOption accessLevelOption)
 	{		
-		return this.accessTree.get(path).getAccessibleMethods(
-				accessLevelOption);
+		List<MethodAccessibility> list = this.accessTree.getRoot(
+			).get(path).getAccessibleMethods(accessLevelOption);
+		return list;
 	}
 	
 	/**
@@ -658,42 +675,28 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	 * getUserAccessLevelOption(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public AccessLevelOption getUserAccessLevelOption(final String path, 
-			final String publicKey)
+	public AccessLevelOption getAuthenticatedAccessLevelOption(
+			final String path, final String publicKey)
 	{		
-		return mediator.callService(
-		AuthorizationService.class, new Executable<AuthorizationService,
-		AccessLevelOption>()
+		return AccessController.<AccessLevelOption>doPrivileged(
+		new PrivilegedAction<AccessLevelOption>()
 		{
 			@Override
-			public AccessLevelOption execute(AuthorizationService service) 
-			throws Exception
+			public AccessLevelOption run() 
 			{
-				return service.getUserAccessLevelOption(path, publicKey);
+				return mediator.callService(AuthorizationService.class, 
+				new Executable<AuthorizationService,AccessLevelOption>()
+				{
+					@Override
+					public AccessLevelOption execute(AuthorizationService service) 
+					throws Exception
+					{
+						return service.getAuthenticatedAccessLevelOption(
+								path, publicKey);
+					}
+				});
 			}
 		});
-	}
-	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration#
-	 * getAgentAccessLevelOption(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public AccessLevelOption getAgentAccessLevelOption(final String path, 
-			final String publicKey)
-	{
-		return  mediator.callService(
-		AuthorizationService.class, new Executable<AuthorizationService, 
-		AccessLevelOption>()
-		{
-			@Override
-			public AccessLevelOption execute(AuthorizationService service) 
-			throws Exception
-			{
-				return service.getAgentAccessLevelOption(path , publicKey);
-			}
-		});
+		
 	}
 }

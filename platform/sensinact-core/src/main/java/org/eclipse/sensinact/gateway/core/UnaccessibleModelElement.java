@@ -16,9 +16,9 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.Describable;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
+import org.eclipse.sensinact.gateway.common.primitive.Typable;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 
 /**
@@ -52,22 +52,16 @@ extends ModelElementProxy<R> implements ElementsProxy<R>
     		Object[] parameters) throws Throwable
     {    
     	Object result = null;
-    	AccessMethod.Type type = null;
-    	
-    	if(super.proxied.isAssignableFrom(method.getDeclaringClass()))
+    	if(this.proxied.isAssignableFrom(method.getDeclaringClass()))
     	{
-        	type = AccessMethod.Type.valueOf(method.getName().toUpperCase());
-        	result = AccessMethodResponse.error(super.mediator, 
-        		uri, type, SnaErrorfulMessage.FORBIDDEN_ERROR_CODE, 
-    				"Unaccessible object", null);
-    	} else
-    	{
-    		result = method.invoke(this, parameters);
-    		if(result == this)
-    		{
-    			return proxy;
-    		}
+    		result = AccessMethodResponse.error(super.mediator,  uri, method.getName(
+            	).toUpperCase(), SnaErrorfulMessage.FORBIDDEN_ERROR_CODE, 
+        			"Unaccessible object", null);
     	}
+    	else
+     	{
+     		result = method.invoke(this, parameters);
+     	}
     	return result;
     }
 
@@ -89,7 +83,7 @@ extends ModelElementProxy<R> implements ElementsProxy<R>
      * getAccessMethod(AccessMethod.Type)
      */
     @Override
-	public AccessMethod getAccessMethod(Type type)
+	public AccessMethod getAccessMethod(String method)
     {
 	    return null;
     }

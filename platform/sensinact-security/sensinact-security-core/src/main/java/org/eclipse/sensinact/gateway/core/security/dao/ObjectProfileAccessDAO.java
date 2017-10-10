@@ -43,8 +43,6 @@ public class ObjectProfileAccessDAO extends AbstractImmutableSnaDAO<ObjectProfil
 	//********************************************************************//
 
 	private ObjectProfileDAO objectProfileDAO;
-//	private ObjectAccessDAO objectAccessDAO;
-//	private MethodDAO methodDAO;
 	
 	/**
 	 * Constructor
@@ -57,8 +55,6 @@ public class ObjectProfileAccessDAO extends AbstractImmutableSnaDAO<ObjectProfil
     {
 	    super(mediator, ObjectProfileAccessEntity.class);
 	    this.objectProfileDAO = new ObjectProfileDAO(mediator);
-//	    this.objectAccessDAO = new ObjectAccessDAO(mediator);
-//	    this.methodDAO = new MethodDAO(mediator);
     }
 
 
@@ -73,61 +69,6 @@ public class ObjectProfileAccessDAO extends AbstractImmutableSnaDAO<ObjectProfil
 		ObjectProfileEntity entity = this.objectProfileDAO.find(objectProfile);
 		return AccessProfileOption.valueOf(entity.getName());
 	}
-    
-//	/**
-//	 * @param objectProfile
-//	 * @return
-//	 * @throws DAOException
-//	 */
-//	public AccessProfile buildAccessProfile(long objectProfile) 
-//			throws DAOException
-//	{
-//		List<ObjectProfileAccessEntity> objectProfileAccessesEntities = 
-//		getObjectProfileAccesses(objectProfile);
-//	
-//		int length =  objectProfileAccessesEntities==null
-//    		?0:objectProfileAccessesEntities.size();
-//		
-//		if(length == 0)
-//		{
-//			return null;
-//		}
-//		int index = 0;
-//		Set<MethodAccess> methodAccesses = new HashSet<MethodAccess>();
-//		
-//        for(;index < length; index++)
-//        {
-//        	ObjectProfileAccessEntity objectProfileAccessesEntity = 
-//        			 objectProfileAccessesEntities.get(index);	 
-//
-//        	ObjectAccessEntity objectAccessEntity = this.objectAccessDAO.find(
-//        		objectProfileAccessesEntity.getObjectAccessEntity());
-//        		
-//        	if(objectAccessEntity == null)
-//        	{
-//        		continue;
-//        	}
-//        	AccessLevel accessLevel = new AccessLevelImpl(
-//        			objectAccessEntity.getLevel());
-//        	
-//        	MethodEntity methodEntity = this.methodDAO.find(
-//        		objectProfileAccessesEntity.getMethodEntity());
-//        	
-//        	if(methodEntity == null)
-//        	{
-//        		continue;
-//        	}
-//        	AccessMethod.Type method =  AccessMethod.Type.valueOf(
-//        			methodEntity.getName());  
-//    	
-//        	MethodAccess methodAccess = new MethodAccessImpl(
-//        			accessLevel, method);
-//        	
-//        	methodAccesses.add(methodAccess);	        	
-//        }	  
-//        AccessProfile accessProfile = new AccessProfileImpl(methodAccesses);
-//        return accessProfile;
-//	}
 	
     /**
      * Returns the {@link ObjectEntity} from the datastore

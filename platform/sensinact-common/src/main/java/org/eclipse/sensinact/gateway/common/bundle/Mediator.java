@@ -64,12 +64,10 @@ public class Mediator implements ManagedConfigurationListener
 	private List<ServiceRegistration<?>> registrations;
 	private MediatorManagedConfiguration configuration;
 	
-		
 	/**
-	 * Construtor
+	 * Constructor
 	 * 
-	 * @param context the associated {@link BundleContext}
-	 * @ 
+	 * @param context
 	 */
 	public Mediator(BundleContext context)
 	{

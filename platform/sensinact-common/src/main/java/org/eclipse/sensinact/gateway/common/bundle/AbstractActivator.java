@@ -22,10 +22,8 @@ import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-
-
-import org.eclipse.sensinact.gateway.util.PropertyUtils;
 import org.osgi.service.log.LogService;
+import org.eclipse.sensinact.gateway.util.PropertyUtils;
 
 /**
  * Abstract implementation of the {@link BundleActivator} interface
@@ -155,48 +153,56 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 		try{
 			final String fileInstallDir=context.getProperty(DEFAULT_BUNDLE_PROPERTY_FILEDIR);
 
-			mediator.log(LogService.LOG_INFO,"Configuration directory "+fileInstallDir);
+			mediator.info("Configuration directory %s",fileInstallDir);
 
 			final String symbolicName=context.getBundle().getSymbolicName();
-			mediator.log(LogService.LOG_INFO,"Bundle symbolic name "+symbolicName);
+			mediator.info("Bundle symbolic name %s");
 
 			bundleProperties=new Properties();
 
-			final String bundlePropertyFileName=String.format("%s/%s.properties",fileInstallDir,symbolicName);
-			final String bundlePropertyFileNameFallback=String.format("%s/%s.property",fileInstallDir,symbolicName);
+			final String bundlePropertyFileName=String.format(
+					"%s/%s.properties",fileInstallDir,symbolicName);
+			final String bundlePropertyFileNameFallback=String.format(
+					"%s/%s.property",fileInstallDir,symbolicName);
 
 			/**
 			 * Looks for property files put into config directory
 			 */
-			try{
+			try
+			{
 				bundleProperties.load(new FileInputStream(bundlePropertyFileName));
-				mediator.log(LogService.LOG_WARNING,String.format("File %s loaded successfully",bundlePropertyFileName));
+				mediator.warn("File %s loaded successfully",bundlePropertyFileName);
 				logBundleProperties(symbolicName,bundlePropertyFileName,bundleProperties);
-			}catch(FileNotFoundException e){
-				mediator.log(LogService.LOG_WARNING,String.format("Failed to load bundle property file %s, trying %s.",bundlePropertyFileName,bundlePropertyFileNameFallback));
+			
+			}catch(FileNotFoundException e)
+			{
+				mediator.warn("Failed to load bundle property file %s, trying %s.",
+						bundlePropertyFileName, 
+						bundlePropertyFileNameFallback);
+				
 				bundleProperties.load(new FileInputStream(bundlePropertyFileNameFallback));
-				logBundleProperties(symbolicName,bundlePropertyFileNameFallback,bundleProperties);
-				mediator.log(LogService.LOG_WARNING,String.format("File %s loaded successfully",bundlePropertyFileNameFallback));
+				logBundleProperties(symbolicName, bundlePropertyFileNameFallback, 
+						bundleProperties);
+				mediator.warn("File %s loaded successfully",bundlePropertyFileNameFallback);
 			}
 
 			for (Map.Entry<Object,Object> name: bundleProperties.entrySet()){
 				map.put(name.getKey().toString(), name.getValue().toString());
 			}
-
-
 		}catch(Exception e){
 			bundleProperties=null;
 		}
-
 		return map;
 	}
 
-	private void logBundleProperties(String bundleName,String propertyFile,Properties properties){
-
-		mediator.log(LogService.LOG_INFO,String.format("Loading properties for bundle %s located in %s",bundleName,propertyFile));
-
-		for(Map.Entry<Object,Object> entry:properties.entrySet()){
-			mediator.log(LogService.LOG_INFO,String.format("%s:%s",entry.getKey(),entry.getValue()));
+	private void logBundleProperties(String bundleName, 
+			String propertyFile,Properties properties)
+	{
+		mediator.info("Loading properties for bundle %s located in %s", 
+				bundleName, propertyFile);
+		for(Map.Entry<Object,Object> entry:properties.entrySet())
+		{
+			mediator.info("%s:%s",entry.getKey(),entry.getValue());
 		}
 
 	}

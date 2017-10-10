@@ -15,7 +15,6 @@ import java.lang.reflect.InvocationHandler;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
 
 /**
  * A proxy of an {@link SensiNactResourceModelElement}
@@ -29,10 +28,10 @@ extends InvocationHandler, ElementsProxy<P>
 	 * Returns the {@link AccessMethod} of this SensiNactResourceModelElementProxy
 	 * whose {@link AccessMethod.Type} is passed as parameter
 	 * 
-	 * @param type the {@link AccessMethod.Type} of the {@link AccessMethod}
+	 * @param type the {@link AccessMethod.Type} name of the {@link AccessMethod}
 	 * to be returned
 	 * @return the method of this SensiNactResourceModelElementProxy with 
 	 * the specified type
 	 */
-    AccessMethod getAccessMethod(Type type);
+    AccessMethod getAccessMethod(String type);
 }

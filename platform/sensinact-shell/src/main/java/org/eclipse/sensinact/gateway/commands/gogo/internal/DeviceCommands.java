@@ -43,7 +43,7 @@ public class DeviceCommands {
     public void devices() {
         StringBuilder buffer = new StringBuilder();
 
-        Set<ServiceProvider> devices = mediator.getSession().getServiceProviders();
+        Set<ServiceProvider> devices = mediator.getSession().serviceProviders();
 
         if (devices != null) {
             buffer.append("\nsensiNact service provider instances:\n" + _line + "\n");
@@ -67,16 +67,18 @@ public class DeviceCommands {
     @Descriptor("display the description of a specific sensiNact service provider instance")
     public void device(@Descriptor("the device ID") String serviceProviderID) {
         StringBuilder buffer = new StringBuilder();
-        ServiceProvider device = mediator.getSession().getServiceProvider(serviceProviderID);
+        ServiceProvider device = mediator.getSession().serviceProvider(serviceProviderID);
 
         if (device != null) {
             buffer.append("\n" + _line);
             buffer.append("\n" + _tab + "ID: " + device.getName());
 
             System.out.println();
-            buffer.append("\n" + _tab + "Location: " + mediator.getSession()
-                    .getResource(serviceProviderID, ServiceProvider.ADMINISTRATION_SERVICE_NAME, LocationResource.LOCATION)
-                    .get(DataResource.VALUE).getResponse().get(DataResource.VALUE));
+            
+            buffer.append("\n" + _tab + "Location: " + mediator.getSession().resource(
+            	serviceProviderID, ServiceProvider.ADMINISTRATION_SERVICE_NAME, 
+            	LocationResource.LOCATION).get(DataResource.VALUE
+            		).getResponse().get(DataResource.VALUE));
 
             List<Service> services = device.getServices();
             

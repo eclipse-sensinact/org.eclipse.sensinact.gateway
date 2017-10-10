@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.method.legacy.ActMethod;
 
 /**
  * Extended {@link AccessMethod} dedicated to an Actuation

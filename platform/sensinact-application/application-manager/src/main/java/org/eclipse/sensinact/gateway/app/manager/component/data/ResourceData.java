@@ -16,6 +16,7 @@ import org.eclipse.sensinact.gateway.core.Metadata;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.eclipse.sensinact.gateway.util.UriUtils;
 
 /**
  * This class acts as a proxy to a sNa resource
@@ -41,19 +42,35 @@ public class ResourceData implements DataItf {
     }
 
     /**
+     * The resource registered in the OSGi registry.
+     * @return the resource. Null if the resource does not exist
+     */
+    public Resource getResource()
+    {
+    	String[] uriElements = UriUtils.getUriElements(getSourceUri());
+    	if(uriElements.length != 3)
+    	{
+    		return null;
+    	}
+    	return session.resource(uriElements[0],uriElements[1],uriElements[2]);
+    }
+    
+    /**
      * Get the value of the {@link Resource}
      * @return the value
      */
-    public Object getValue() {
-        return session.<Resource>getFromUri(uri).get(DataResource.VALUE).getResponse(DataResource.VALUE);
+    public Object getValue() 
+    {
+        return getResource().get(DataResource.VALUE).getResponse(DataResource.VALUE);
     }
 
     /**
      * Get the Java type of the {@link Resource}
      * @return the Java type
      */
-    public Class<?> getType() {
-        return CastUtils.jsonTypeToJavaType((String) session.<Resource>getFromUri(uri).get(DataResource.VALUE)
+    public Class<?> getType() 
+    {
+        return CastUtils.jsonTypeToJavaType((String) getResource().get(DataResource.VALUE)
                 .getResponse(DataResource.TYPE));
     }
 
@@ -61,16 +78,9 @@ public class ResourceData implements DataItf {
      * Get the timestamp of the data
      * @return the timestamp of the data
      */
-    public long getTimestamp() {
-        return session.<Resource>getFromUri(uri).get(DataResource.VALUE)
-                .getResponse(Long.class, Metadata.TIMESTAMP);
-    }
-
-    /**
-     * The resource registered in the OSGi registry.
-     * @return the resource. Null if the resource does not exist
-     */
-    public Resource getResource() {
-        return session.<Resource>getFromUri(uri);
+    public long getTimestamp()
+    {
+        return getResource().get(DataResource.VALUE).getResponse(
+        		Long.class, Metadata.TIMESTAMP);
     }
 }

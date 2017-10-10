@@ -29,7 +29,6 @@ import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler;
-import org.eclipse.sensinact.gateway.util.stack.StackEngineHandler;
 
 /**
  * {@link SnaMessage} handler managing a set of 
@@ -39,7 +38,7 @@ import org.eclipse.sensinact.gateway.util.stack.StackEngineHandler;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class SnaMessageListener 
-extends AbstractStackEngineHandler<SnaMessage> 
+extends AbstractStackEngineHandler<SnaMessage<?>> 
 implements MessageHandler
 {
 	/**
@@ -68,13 +67,15 @@ implements MessageHandler
 	 * host environment
 	 */
 	private Mediator mediator;
-
 	
 	/**
 	 * Constructor
+	 * 
+	 * @param mediator
+	 * @param configuration
 	 */
 	public SnaMessageListener(Mediator mediator, 
-			SensiNactResourceModelConfiguration configuration)
+		SensiNactResourceModelConfiguration configuration)
 	{
 		super();
 		this.mediator = mediator;
@@ -86,9 +87,9 @@ implements MessageHandler
 	/**
 	 * @inheritDoc
 	 *
-	 * @see MessageHandler#
-	 * addCallback(SnaFilter,
-	 * SnaCallback)
+	 * @see org.eclipse.sensinact.gateway.core.message.MessageHandler#
+	 * addCallback(org.eclipse.sensinact.gateway.core.message.SnaFilter,
+	 *  org.eclipse.sensinact.gateway.core.message.SnaCallback)
 	 */
 	@Override
 	public void addCallback(SnaFilter filter, SnaCallback callback)
@@ -112,14 +113,12 @@ implements MessageHandler
 	/**
 	 * @inheritDoc
 	 *
-	 * @see MessageHandler#
-	 * deleteCallback(java.lang.Object)
+	 * @see org.eclipse.sensinact.gateway.core.message.MessageHandler#
+	 * deleteCallback(java.lang.String)
 	 */
 	@Override
 	public void deleteCallback(String callback)
 	{		 
-		String filter = null;
-		
 		synchronized(this.callbacks)
 		{			
 			Iterator<Entry<SnaFilter, List<SnaCallback>>> 
@@ -146,8 +145,7 @@ implements MessageHandler
 	/**
 	 * @inheritDoc
 	 *
-	 * @see MessageHandler#
-	 * count(java.lang.String)
+	 * @see MessageHandler#count(java.lang.String)
 	 */
 	@Override
 	public int count(String uri)
@@ -188,28 +186,26 @@ implements MessageHandler
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see MessageHandler#
-	 * handle(SnaMessage)
+	 * @see org.eclipse.sensinact.gateway.core.message.MessageHandler#
+	 * handle(org.eclipse.sensinact.gateway.core.message.SnaMessage)
 	 */
 	@Override 
 	public void handle(SnaMessage message) 
 	{
-		super.eventEngine.push(message);    	
+		super.eventEngine.push(message);   
 	}
 
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see StackEngineHandler#
+	 * @see org.eclipse.sensinact.gateway.util.stack.StackEngineHandler#
 	 * doHandle(java.lang.Object)
 	 */
-	@SuppressWarnings("rawtypes")
 	@Override
-	public void doHandle(SnaMessage message)
-	{			
-		doHandleSubscribers(message);
-		
-		AccessMethod.Type messageMethod = null;
+	public void doHandle(SnaMessage<?> message)
+	{		
+		doHandleSubscribers(message);		
+		String messageMethod = null;
 		
 		switch(((SnaMessageSubType)message.getType()
 				).getSnaMessageType())
@@ -219,22 +215,22 @@ implements MessageHandler
 						)message.getType())
 				{
 					case ACT_RESPONSE:
-						messageMethod = AccessMethod.Type.ACT;
+						messageMethod = AccessMethod.ACT;
 						break;
 					case DESCRIBE_RESPONSE:
-						messageMethod = AccessMethod.Type.DESCRIBE;
+						messageMethod = AccessMethod.DESCRIBE;
 						break;
 					case GET_RESPONSE:
-						messageMethod = AccessMethod.Type.GET;
+						messageMethod = AccessMethod.GET;
 						break;
 					case SET_RESPONSE:
-						messageMethod = AccessMethod.Type.SET;
+						messageMethod = AccessMethod.SET;
 						break;
 					case SUBSCRIBE_RESPONSE:
-						messageMethod = AccessMethod.Type.SUBSCRIBE;
+						messageMethod = AccessMethod.SUBSCRIBE;
 						break;
 					case UNSUBSCRIBE_RESPONSE:
-						messageMethod = AccessMethod.Type.UNSUBSCRIBE;
+						messageMethod = AccessMethod.UNSUBSCRIBE;
 						break;
 					default:
 						break;						
@@ -242,10 +238,10 @@ implements MessageHandler
 				break;
 			case ERROR:
 			case LIFECYCLE:
-				messageMethod = AccessMethod.Type.DESCRIBE;
+				messageMethod = AccessMethod.DESCRIBE;
 				break;
 			case UPDATE:
-				messageMethod = AccessMethod.Type.GET;
+				messageMethod = AccessMethod.GET;
 				break;					
 			default:
 				break;					
@@ -263,8 +259,7 @@ implements MessageHandler
 	 * 
 	 * @param message the {@link SnaMessage} to transmit
 	 */
-	@SuppressWarnings("rawtypes")
-	private void doHandleSubscribers(final SnaMessage message)
+	private void doHandleSubscribers(final SnaMessage<?> message)
 	{			
 		synchronized(this.callbacks)
 		{
@@ -313,8 +308,8 @@ implements MessageHandler
 	 * 
 	 * @param message the {@link SnaMessage} to transmit
 	 */
-	private void doHandleAgents(final SnaMessage message, 
-			final AccessMethod.Type method)
+	private void doHandleAgents(final SnaMessage<?> message, 
+			final String method)
 	{		
 		final String path = message.getPath();
 		mediator.callServices(SnaAgent.class, new Executable<SnaAgent,Void>()
@@ -323,6 +318,7 @@ implements MessageHandler
 			public Void execute(SnaAgent agent) throws Exception 
 			{
 				String agentKey = agent.getPublicKey();
+				
 				List<MethodAccessibility> methodAccessibilities = 
 				SnaMessageListener.this.agentsAccessibility.get(agentKey);
 				
@@ -330,16 +326,16 @@ implements MessageHandler
 				if(methodAccessibilities==null)
 				{
 					AccessLevelOption option =
-					SnaMessageListener.this.configuration.getAgentAccessLevelOption(
+					SnaMessageListener.this.configuration.getAuthenticatedAccessLevelOption(
 							path, agentKey);
 					methodAccessibilities  = 
 					SnaMessageListener.this.configuration.getAccessibleMethods(
 							path, option);
 					SnaMessageListener.this.agentsAccessibility.put(
 							agentKey, methodAccessibilities);
-				}					
+				}	
 				if((index = methodAccessibilities.indexOf(
-					new Name<MethodAccessibility>(method.name()))) > -1
+					new Name<MethodAccessibility>(method))) > -1
 					&& methodAccessibilities.get(index).isAccessible())
 				{			
 					agent.register(message);

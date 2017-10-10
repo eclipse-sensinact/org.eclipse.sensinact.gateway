@@ -59,6 +59,7 @@ abstract class AbstractAppWatchDog {
         }
 
         service.getResource(AppConstant.EXCEPTION).getAccessMethod(
-        		AccessMethod.Type.ACT).invoke(null);
+        	AccessMethod.Type.valueOf(AccessMethod.ACT)
+        		).invoke(null);
     }
 }

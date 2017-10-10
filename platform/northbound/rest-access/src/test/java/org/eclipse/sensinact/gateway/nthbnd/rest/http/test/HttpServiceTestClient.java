@@ -30,8 +30,6 @@ public class HttpServiceTestClient {
 		SimpleResponse response;
         ConnectionConfigurationImpl<SimpleResponse,SimpleRequest> builder = 
         		new ConnectionConfigurationImpl<SimpleResponse,SimpleRequest>();
-
-    	//System.out.println("**********************************" + url);
         builder.setUri(url);
         builder.addHeader("Authorization", 
         		"Basic " + Base64.encodeBytes(
@@ -60,10 +58,7 @@ public class HttpServiceTestClient {
         	response = request.send();
 
         	byte[] responseContent = response.getContent();
-        	String contentStr =  (responseContent==null?null:new String(responseContent));
-        	
-        	//System.out.println("********************************** CONTENT "+contentStr);
-        	
+        	String contentStr =  (responseContent==null?null:new String(responseContent));        	
         	return contentStr;
 
         } catch (JSONException e) {

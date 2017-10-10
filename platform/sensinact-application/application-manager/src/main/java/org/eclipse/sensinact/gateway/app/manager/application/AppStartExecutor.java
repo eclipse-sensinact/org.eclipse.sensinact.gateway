@@ -41,15 +41,14 @@ class AppStartExecutor implements AccessMethodExecutor {
     /**
      * @see Executable#execute(java.lang.Object)
      */
-    public Void execute(AccessMethodResult jsonObjects) throws Exception {
+    public Void execute(AccessMethodResult jsonObjects) throws Exception
+    {
         ApplicationStatus status = getApplicationState(service.getResource(AppConstant.STATUS));
 
         if (ApplicationStatus.RESOLVING.equals(status) || ApplicationStatus.UNRESOLVED.equals(status)) {
             Application application = service.getApplication();
 
-            Session session = Sessions.SESSIONS.get();
-
-            SnaErrorMessage message = application.start(session);
+            SnaErrorMessage message = application.start();
 
             if (message.getType() == SnaErrorMessage.Error.NO_ERROR) {
                 jsonObjects.push(new JSONObject().put("message", "Application " + service.getName() + " started"));

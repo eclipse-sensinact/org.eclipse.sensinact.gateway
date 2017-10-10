@@ -31,7 +31,7 @@ import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 
 /**
- * Extended {@link Primitive} defining an Attribute
+ * Extended {@link Primitive} defining an Attribute of a {@link Resource}
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
@@ -51,15 +51,15 @@ public class Attribute extends DescribablePrimitive
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *        the associated {@link Mediator}
-	 * @param uri
-	 *        the string uri of the Attribute to instantiate
-	 * @param name
-	 *        the name of the Attribute to instantiate
-	 * @param type
-	 *        the type of the Attribute to instantiate
-	 * @throws InvalidConstraintDefinitionException
+	 * @param mediator the {@link Mediator} allowing the 
+	 * Attribute to be instantiated to interact with the OSGi host
+	 * environment 
+	 * @param resource the ResourceImpl holding the Attribute
+	 * to be instantiated
+	 * @param name the name of the Attribute to instantiate
+	 * @param type the type of the Attribute to instantiate
+	 * 
+	 * @throws InvalidValueException
 	 */
 	public Attribute(Mediator mediator, 
 			ResourceImpl resource,
@@ -74,22 +74,20 @@ public class Attribute extends DescribablePrimitive
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *     the associated {@link Mediator}
-	 * @param uri
-	 *     the string uri of the Attribute to instantiate
-	 * @param name
-	 *     the name of the Attribute to instantiate
-	 * @param type
-	 *     the type of the Attribute to instantiate
-	 * @param value
-	 *     the initial value of the Attribute to instantiate
-	 * @param modifiable
-	 *     is the value of Attribute to instantiate modifiable 
-	 *     or not ?
-	 * @param hidden
-	 *     does the Attribute to instantiate provide its own 
+	 * @param mediator the {@link Mediator} allowing the 
+	 * Attribute to be instantiated to interact with the OSGi host
+	 * environment 
+	 * @param resource the ResourceImpl holding the Attribute
+	 * to be instantiated
+	 * @param name the name of the Attribute to instantiate
+	 * @param type the type of the Attribute to instantiate
+	 * @param value the initial value of the Attribute to instantiate
+	 * @param modifiable is the value of Attribute to instantiate 
+	 * modifiable or not ?
+	 * @param hidden does the Attribute to instantiate provide its own 
 	 *     JSON formated description or not
+	 *     
+	 * @throws InvalidValueException
 	 */
 	public Attribute(Mediator mediator, 
 			ResourceImpl resource,
@@ -140,11 +138,11 @@ public class Attribute extends DescribablePrimitive
 	/**
 	 * Constructs an attribute with the given {@link JSONObject}
 	 * 
-	 * @param mediator
-	 *     the associated {@link Mediator}
-	 * @param attribute
-	 *     the {@link JSONObject} describing the attribute 
-	 *     to instantiate
+	 * @param mediator the {@link Mediator} allowing the 
+	 * Attribute to be instantiated to interact with the OSGi host
+	 * environment 
+	 * @param attribute the {@link JSONObject} describing the 
+	 * attribute to instantiate
 	 */
 	protected Attribute(Mediator mediator, 
 			ResourceImpl resource,
@@ -384,8 +382,6 @@ public class Attribute extends DescribablePrimitive
 		return copy;
 	}
 	
-	
-	
 	/**
 	 * @inheritDoc
 	 *
@@ -454,7 +450,6 @@ public class Attribute extends DescribablePrimitive
     {
     	this.recipient++;
     }
-    
 
     /**
      * Defines the change notifications recipient
@@ -587,10 +582,7 @@ public class Attribute extends DescribablePrimitive
 
 			} catch (ClassCastException e)
 			{
-				if(this.mediator.isErrorLoggable())
-				{
-					this.mediator.error(e,e.getMessage());
-				}
+				this.mediator.error(e,e.getMessage());
 			}
 		}
 		return hidden;

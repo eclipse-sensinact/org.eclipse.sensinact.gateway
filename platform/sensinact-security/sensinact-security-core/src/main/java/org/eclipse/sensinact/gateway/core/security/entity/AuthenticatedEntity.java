@@ -25,12 +25,11 @@ import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @Table(value = "AUTHENTICATED")
-@PrimaryKey(value = {"SUPUBLIC_KEY","OID","UAID"})
+@PrimaryKey(value = {"PUBLIC_KEY","OID","UAID"})
 public class AuthenticatedEntity extends SnaEntity
 {
 	@NotNull
-	@Column(value = "SUPUBLIC_KEY")
-	@ForeignKey(refer = "SUPUBLIC_KEY", table = "SNAUSER")
+	@Column(value = "PUBLIC_KEY")
 	private String publicKey;
 
 	@NotNull
@@ -63,7 +62,7 @@ public class AuthenticatedEntity extends SnaEntity
 	 * 		interact with the OSGi host environment
 	 * @param row
 	 */
-	protected AuthenticatedEntity(
+	public AuthenticatedEntity(
 			Mediator mediator, 
 			JSONObject row)
 	{
@@ -80,7 +79,7 @@ public class AuthenticatedEntity extends SnaEntity
 	 * @param objectProfileEntity
 	 * @param objectAccessEntity
 	 */
-	protected AuthenticatedEntity(
+	public AuthenticatedEntity(
 			Mediator mediator, String publicKey,
 			long objectEntity, long userAccessEntity)
 	{

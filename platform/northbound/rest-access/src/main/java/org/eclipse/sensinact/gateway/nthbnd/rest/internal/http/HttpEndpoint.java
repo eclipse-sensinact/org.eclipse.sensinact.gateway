@@ -103,12 +103,11 @@ public class HttpEndpoint extends HttpServlet
 					
 					HttpRestAccessRequest wrapper = new HttpRestAccessRequest(
 							mediator, request);
-	
 					if(restAccess.init(wrapper))
 					{
 				        AccessMethod.Type method  = restAccess.getMethod();			        
-				        boolean getOrDescribe = method.equals(AccessMethod.Type.GET)
-				        		|| method.equals(AccessMethod.Type.DESCRIBE);
+				        boolean getOrDescribe = method.name().equals(AccessMethod.GET)
+				        		|| method.name().equals(AccessMethod.DESCRIBE);
 				        
 				        if((doGet && !getOrDescribe) || (!doGet && getOrDescribe))
 						{
@@ -125,6 +124,7 @@ public class HttpEndpoint extends HttpServlet
 					}
 				} catch (Exception e) 
 				{
+					e.printStackTrace();
 					mediator.error(e);
 					
 				} finally

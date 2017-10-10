@@ -31,7 +31,7 @@ public class DefaultAccessMethodTriggerFactory implements AccessMethodTriggerFac
 	/**
 	 * @inheritDoc
 	 *
-	 * @see AccessMethodTriggerFactory#
+	 * @see org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory#
 	 * handle(java.lang.String)
 	 */
 	@Override
@@ -50,8 +50,8 @@ public class DefaultAccessMethodTriggerFactory implements AccessMethodTriggerFac
 	/**
 	 * @inheritDoc
 	 *
-	 * @see AccessMethodTriggerFactory#
-	 * newInstance(org.json.JSONObject)
+	 * @see org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory#
+	 * newInstance(org.eclipse.sensinact.gateway.common.bundle.Mediator, org.json.JSONObject)
 	 */
 	@SuppressWarnings({"unchecked" })
     @Override
