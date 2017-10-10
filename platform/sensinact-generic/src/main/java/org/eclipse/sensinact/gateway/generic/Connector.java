@@ -323,8 +323,7 @@ public class Connector<P extends Packet> extends TaskManager
 	 */
 	public ExtModelInstance<?> getModelInstance(String instanceName) 
 	{
-		int index = this.instances.indexOf(
-				new Name<ExtModelInstance<?>>(
+		int index = this.instances.indexOf(new Name<ExtModelInstance<?>>(
 				instanceName));
 		
 		if(index < 0)
@@ -347,7 +346,7 @@ public class Connector<P extends Packet> extends TaskManager
         }
         synchronized(this.instances)
         {        	
-			int length = this.instances==null?0:this.instances.size();
+			int length = this.instances.size();
 			for(;length>0;)
 			{ 
 				try
