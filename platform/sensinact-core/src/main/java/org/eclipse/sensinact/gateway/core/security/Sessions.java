@@ -141,6 +141,7 @@ public class Sessions
 	        this.value = value;
 	        this.hash  = hash;
 	        this.next  = next;
+	        this.observer = observer;
 	    }
 	
 	    public Session getKey() {
