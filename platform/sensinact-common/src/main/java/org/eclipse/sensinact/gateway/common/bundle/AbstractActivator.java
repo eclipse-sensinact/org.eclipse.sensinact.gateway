@@ -19,8 +19,7 @@ import java.util.Map.Entry;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-
-
+import org.osgi.service.log.LogService;
 import org.eclipse.sensinact.gateway.util.PropertyUtils;
 
 /**
@@ -94,10 +93,25 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 		 }
 	     //initialize fields
 	     this.properties = properties;
-
 	     this.mediator = this.initMediator(context);
 
+		/** Integrate local bundle property **/
 		final Dictionary<String,String> bundleProperties=loadBundleProperties(context);
+		Enumeration<String> enumProperties=bundleProperties.keys();
+		while(enumProperties.hasMoreElements()){
+			final String key=enumProperties.nextElement();
+			final String value=bundleProperties.get(key);
+
+			try {
+				this.properties.setProperty(key,value);
+			}catch(NullPointerException cpe){
+				cpe.printStackTrace();
+				this.mediator.log(LogService.LOG_WARNING,String.format("Failed to set property/value for the local abstract activator properties"));
+			}
+
+
+
+		}
 
 		//complete starting process
 		 this.doStart(bundleProperties);
@@ -106,8 +120,9 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 	private Dictionary<String,String> loadBundleProperties(BundleContext context)
 	{
 		Properties bundleProperties=null;
-		try
-		{
+		Hashtable<String, String> map = new Hashtable<String,String>();
+
+		try{
 			final String fileInstallDir=context.getProperty(DEFAULT_BUNDLE_PROPERTY_FILEDIR);
 
 			mediator.info("Configuration directory %s",fileInstallDir);
@@ -142,16 +157,12 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 						bundleProperties);
 				mediator.warn("File %s loaded successfully",bundlePropertyFileNameFallback);
 			}
-		}catch(Exception e)
-		{
-			bundleProperties=null;
-		}
 
-		Hashtable<String, String> map = new Hashtable<String,String>();
-		if(bundleProperties != null)
-		{
-			for (final String name: bundleProperties.stringPropertyNames())
-				map.put(name, properties.getProperty(name));
+			for (Map.Entry<Object,Object> name: bundleProperties.entrySet()){
+				map.put(name.getKey().toString(), name.getValue().toString());
+			}
+		}catch(Exception e){
+			bundleProperties=null;
 		}
 		return map;
 	}
