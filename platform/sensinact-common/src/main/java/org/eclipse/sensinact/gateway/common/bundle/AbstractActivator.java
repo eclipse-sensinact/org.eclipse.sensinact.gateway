@@ -12,10 +12,13 @@
 package org.eclipse.sensinact.gateway.common.bundle;
 
 import java.io.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.*;
 import java.util.Map.Entry;
 
+import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -83,7 +86,7 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 	public void start(BundleContext context) throws Exception 
 	{
 		Properties properties = new Properties();
-		 
+
 		 URL config  =  context.getBundle().getResource(
 				 SENSINACT_CONFIG_FILE);
 		 
@@ -111,12 +114,38 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 				this.mediator.log(LogService.LOG_WARNING,String.format("Failed to set property/value for the local abstract activator properties"));
 			}
 
-
-
 		}
+
+		injectPropertyFields(context);
 
 		//complete starting process
 		 this.doStart(bundleProperties);
+	}
+
+	private void injectPropertyFields(BundleContext context){
+
+		this.mediator.debug("Starting introspection in bundle %s", context.getBundle().getSymbolicName());
+		for(Field field:this.getClass().getDeclaredFields()){
+			this.mediator.debug("Evaluating field %s", field.getName());
+			for(Annotation propertyAnnotation:field.getAnnotations()){
+				try {
+					Property propAn=(Property)propertyAnnotation;
+					if(this.properties.getProperty(propAn.name())!=null){
+						String value=this.properties.getProperty(propAn.name());
+						this.mediator.info("Setting property %s from bundleActivator %s on field %s to value %s", propAn.name(), context.getBundle().getSymbolicName(), field.getName(), value);
+						field.set(this, value);
+					}else if(propAn.defaultValue()!=null&&!propAn.defaultValue().trim().equals("")){
+						String value=propAn.defaultValue();
+						field.set(this, propAn.defaultValue());
+						this.mediator.info("Setting property %s from bundleActivator %s on field %s to default value which is %s", propAn.name(), context.getBundle().getSymbolicName(), field.getName(),value);
+					}else {
+						this.mediator.error("Property %s from bundleActivator %s is mandatory, bundle might not be configured correctly", propAn.name(),context.getBundle().getSymbolicName());
+					}
+				} catch (IllegalAccessException e) {
+					this.mediator.error(e);
+				}
+			}
+		}
 	}
 
 	private Dictionary<String,String> loadBundleProperties(BundleContext context){
@@ -254,6 +283,7 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 			 }
 			 
 		 }
+
 		 return mediator;
 	}
 
