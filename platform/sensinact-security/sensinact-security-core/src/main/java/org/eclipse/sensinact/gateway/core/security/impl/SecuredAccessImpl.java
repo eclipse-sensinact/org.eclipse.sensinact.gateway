@@ -18,26 +18,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileImpl;
 
-import org.eclipse.sensinact.gateway.core.*;
-import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.message.SnaAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaAgentImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
@@ -45,7 +33,6 @@ import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 
-import org.eclipse.sensinact.gateway.core.security.BundleValidation;
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessNode;
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccess;
@@ -70,8 +57,6 @@ import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.AuthenticatedAccessLevelEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.UserEntity;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceRegistration;
 
 /**
  * Secured access service implementation
