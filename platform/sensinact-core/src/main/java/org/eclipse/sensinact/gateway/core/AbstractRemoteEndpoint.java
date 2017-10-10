@@ -7,6 +7,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.security.Sessions.SessionObserver;
 import org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,7 +19,8 @@ import org.json.JSONObject;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class AbstractRemoteEndpoint 
-extends AbstractStackEngineHandler<SnaMessage<?>> implements RemoteEndpoint
+extends AbstractStackEngineHandler<SnaMessage<?>> 
+implements RemoteEndpoint, SessionObserver
 {
 
 	//********************************************************************//
@@ -33,17 +35,28 @@ extends AbstractStackEngineHandler<SnaMessage<?>> implements RemoteEndpoint
 	 * Transmits the subscription request to the remote connected 
 	 * {@link RemoteEndpoint} 
 	 *  
+	 * @param publicKey the String public key of the {@link Session} requiring
+	 * for the subscription to be created
 	 * @param serviceProviderId the service provider String identifier
 	 * @param serviceId the service String identifier
 	 * @param resourceId the resource String identifier
-	 * @param conditions the Json formated array of constraints applying
-	 * on the subscription to be transmitted
+	 * @param conditions the JSON formated list of constraints applying
+	 * on the subscription to be created
 	 *  
-	 * @return the Json formated subscription response
+	 * @return the JSON formated subscription response
 	 */
 	protected abstract JSONObject doSubscribe(String publicKey, 
 		String serviceProviderId, String serviceId, String resourceId, 
 		JSONArray conditions);
+
+	/**
+	 * Asks for the close of the remote {@link Session} whose String public
+	 * key is passed as parameter
+	 *  
+	 * @param publicKey the String public key of the remote {@link Session} 
+	 * to be closed
+	 */
+	protected abstract void closeSession(String publicKey);
 
 	/**
 	 * Connects this {@link RemoteEndpoint} with the one held by 
@@ -227,9 +240,9 @@ extends AbstractStackEngineHandler<SnaMessage<?>> implements RemoteEndpoint
 	}
 	
 	/**
-	 * Returns the String namespace of the local instance of
-	 * the sensiNact gateway this {@link RemoteEndpoint} is 
-	 * connected to, through the {@link RemoteCore}
+	 * Returns the String namespace of the local sensiNact instance 
+	 * this {@link RemoteEndpoint} is connected to, through the {@link 
+	 * RemoteCore}
 	 * 
 	 * @return the local sensiNact gateway's String namespace 
 	 */
@@ -237,4 +250,16 @@ extends AbstractStackEngineHandler<SnaMessage<?>> implements RemoteEndpoint
 	{
 		return this.localNamespace;
 	}
+	
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.security.Sessions.SessionObserver#
+	 * diseappearing(java.lang.String)
+	 */
+	public void diseappearing(String publicKey)
+	{
+		this.closeSession(publicKey);
+	}
 }
+

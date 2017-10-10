@@ -6,20 +6,30 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
- * Extended {@link Endpoint} in charge of realizing and maintaining the 
- * connection between a registered {@link RemoteCore} and the {@link Core} 
- * of the sensiNact instance it is connected to 
+ * Extended {@link Endpoint} in charge of connecting a {@link RemoteCore} 
+ * to the local sensiNact instance's {@link Core}
  *  
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 abstract class LocalEndpoint implements Endpoint
 {
-
 	/**
-	 * @param publicKey
-	 * @return
+	 * Returns the {@link Session} for the user's String public 
+	 * key passed as parameter
+	 *  
+	 * @param publicKey the user's String public key
+	 * 
+	 * @return the {@link Session} for the specified user
 	 */
 	abstract Session getSession(String publicKey);
+	
+	/**
+	 * Closes the {@link Session} of the user whose 
+	 * String public key passed as parameter
+	 *  
+	 * @param publicKey the user's String public key
+	 */
+	abstract void closeSession(String publicKey);
 	
 	
 	private final int localID;
@@ -27,7 +37,8 @@ abstract class LocalEndpoint implements Endpoint
 	/**
 	 * Constructor
 	 * 
-	 * @param localID
+	 * @param localID this integer identifier
+	 * of the LocalEndpoint to be instantiated
 	 */
 	LocalEndpoint(int localID)
 	{
@@ -35,7 +46,9 @@ abstract class LocalEndpoint implements Endpoint
 	}
 	
 	/**
-	 * @return
+	 * Returns the integer identifier of this LocalEndpoint
+	 * 
+	 * @return this LocalEndpoint's integer identifier
 	 */
 	public int localID()
 	{

@@ -25,8 +25,8 @@ public interface Core
 	
 	/**
 	 * Returns this Core's String namespace. The namespace will be used to 
-	 * prefix the identifiers of the service providers that belongs to this 
-	 * Core
+	 * prefix the identifiers of the service providers that are handled by
+	 * this Core
 	 * 
 	 * @return this Core's String namespace
 	 */
@@ -38,14 +38,14 @@ public interface Core
 	 * extended {@link AbstractRemoteEndpoint} passed as parameter
 	 * 
 	 * @param remoteEndpoint the extended {@link AbstractRemoteEndpoint} 
-	 * to connect to the {@link RemoteCore} to be instantiated
+	 * to attach to the {@link RemoteCore} to be instantiated
 	 */
 	void createRemoteCore(AbstractRemoteEndpoint remoteEnpoint);
 	
 	/**
-	 * Instantiates a new {@link SnaAgent} build with the {@link 
-	 * AbstractSnaAgentCallback} and the {@link SnaFilter} passed as parameters 
-	 * in the OSGi host environment
+	 * Instantiates and registers a new {@link SnaAgent}, build with the 
+	 * {@link AbstractSnaAgentCallback} and the {@link SnaFilter} passed as 
+	 * parameters in the OSGi host environment
 	 * 
 	 * @param mediator the {@link Mediator} provided by the bundle to which 
 	 * the {@link SnaAgent} to be instantiated belongs to.

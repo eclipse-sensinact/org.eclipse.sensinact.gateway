@@ -111,7 +111,6 @@ public class SnaFilter
 		
 		this.isPattern = isPattern;
 		this.isComplement = isComplement;
-//		this.handleUnchanged = false;
 		
 		Pattern pattern = null;		
 		if(this.isPattern)
@@ -192,6 +191,8 @@ public class SnaFilter
 	 * @param jsonCondition
 	 * 		the {@link Constraint} to add
 	 */
+    //TODO: FIX BUG when the condition is an Expression we are not able 
+	//to identify and extract the Changed constraint applying
 	public void addCondition(Constraint condition)
 	{
 		if(condition == null)

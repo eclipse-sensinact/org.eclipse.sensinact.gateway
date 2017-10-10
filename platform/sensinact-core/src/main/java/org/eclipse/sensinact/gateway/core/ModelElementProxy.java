@@ -17,12 +17,11 @@ import org.eclipse.sensinact.gateway.common.primitive.Elements;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 
 /**
- * Abstract {@link ModelElementProxyOld} implementation
+ * Abstract {@link SensiNactResourceModelElementProxy} implementation
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
@@ -43,16 +42,13 @@ extends Elements<P> implements SensiNactResourceModelElementProxy<P>
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 * 		the {@link Mediator} that will allow the {@link 
-	 * 		ModelElementProxyOld} to instantiate to interact
-	 * 		with the OSGi host environment
-	 * @param proxied
-	 * 		the extended {@link Resource} type the {@link 
-	 * 		ModelElementProxyOld} to instantiate will be the proxy of
-	 * @param uri
-	 * 		the string uri path of the {@link ModelElementProxyOld}
-	 * 		to instantiate
+	 * @param mediator the {@link Mediator} that will allow the 
+	 * ModelElementProxy to instantiate to interact with the OSGi 
+	 * host environment
+	 * @param proxied the extended {@link Resource} type the 
+	 * ModelElementProxy to instantiate will be the proxy of
+	 * @param uri the string uri path of the ModelElementProxy 
+	 * to instantiate
 	 */
 	protected ModelElementProxy(
 			Mediator mediator, Class<?> proxied, String uri) 
@@ -103,8 +99,9 @@ extends Elements<P> implements SensiNactResourceModelElementProxy<P>
     }
     
     /**
-   	 * Processes an {@link AccessMethod} method invocation on this {@link 
-   	 * ModelElementProxy} instance and returns the appropriate {@link SnaMessage}.
+   	 * Processes an {@link AccessMethod} method invocation on this 
+   	 * ModelElementProxy and returns the {@link AccessMethodResponse} 
+   	 * resulting of the invocation
 	 * 
 	 * @param method the {@link AccessMethod.Type} of the {@link AccessMethod} 
 	 * to process
@@ -112,7 +109,7 @@ extends Elements<P> implements SensiNactResourceModelElementProxy<P>
      * passed in the method invocation on the proxy instance, or null if interface
      * method takes no arguments.
      * 
-     * @return the appropriate {@link SnaMessage}
+     * @return the resulting {@link AccessMethodResponse} 
    	 */
      public AccessMethodResponse invoke(String type,
 				Object[] parameters) throws Throwable

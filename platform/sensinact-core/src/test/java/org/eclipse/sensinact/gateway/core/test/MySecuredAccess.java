@@ -21,7 +21,6 @@ import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
-import org.osgi.framework.Bundle;
 
 class MySecuredAccess implements SecuredAccess
 {

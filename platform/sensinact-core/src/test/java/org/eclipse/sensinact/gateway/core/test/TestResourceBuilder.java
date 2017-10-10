@@ -85,6 +85,7 @@ import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.security.signature.exception.BundleValidationException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -180,7 +181,6 @@ public class TestResourceBuilder<R extends ModelInstance>
 
 	protected Dictionary<String,Object> props;
 	
-	@SuppressWarnings("unused")
 	@Before
 	public void init() 
 			throws InvalidServiceProviderException, InvalidSyntaxException, 
@@ -450,8 +450,7 @@ public class TestResourceBuilder<R extends ModelInstance>
 					public String[] answer(InvocationOnMock invocation)
 							throws Throwable
 					{
-						Enumeration<String> e = 
-								TestResourceBuilder.this.props.keys();
+						Enumeration<String> e = TestResourceBuilder.this.props.keys();
 						List<String> l = new ArrayList<String>();
 						while(e.hasMoreElements())
 						{
@@ -510,6 +509,268 @@ public class TestResourceBuilder<R extends ModelInstance>
 		//instance.getServiceProvider().stop();
 	}
 	
+	 @Test
+    public void testSessionMethods() throws Exception
+    {
+    	ServiceImpl service = instance.getRootElement(
+    			).addService("testService");
+        
+    	ResourceImpl r1impl = service.addDataResource(
+    			PropertyResource.class, "TestProperty", 
+    			String.class, "hello");  
+    	
+    	Session session = sensinact.getAnonymousSession();
+
+        PropertyResource r1 = r1impl.<PropertyResource>getProxy(
+        		SecuredAccess.ANONYMOUS_PKEY);
+
+        //test shortcut
+        Assert.assertEquals("TestProperty",r1.getName()); 
+        Assert.assertEquals(Resource.Type.PROPERTY, r1.getType());
+
+        String get1 = session.get("serviceProvider", "testService", 
+        	"TestProperty", DataResource.VALUE).toString();	        
+        String get2 = r1.get().getJSON();
+
+        JSONAssert.assertEquals(get1,get2, false); 
+        
+		final JSONObject changed = new JSONObject(new Changed(
+				Thread.currentThread().getContextClassLoader(),
+				true).getJSON());
+
+        JSONObject res = session.subscribe("serviceProvider", "testService", 
+        	"TestProperty",  new Recipient()
+   		{
+			@Override
+			public void callback(String callbackId, 
+					SnaMessage[] messages) throws Exception
+            {	
+				boolean hasChanged = ((TypedProperties<?>
+				)messages[0]).<Boolean>get("hasChanged");
+
+				if(!hasChanged);
+				{
+					extraCallbackInc();
+				}
+            }
+
+			@Override
+            public String getJSON()
+            {
+	            return null;
+            }
+
+			@Override
+            public SnaCallback.Type getSnaCallBackType()
+            {
+	            return  SnaCallback.Type.UNARY;
+            }
+
+			@Override
+            public long getLifetime()
+            {
+	            return -1;
+            }
+
+			@Override
+            public int getBufferSize()
+            {
+	            return 0;
+            }
+
+			@Override
+            public int getSchedulerDelay()
+            {
+	            return 0;
+            }
+		},
+   		new JSONArray()
+		{{
+			this.put(changed);
+		}}
+		);
+
+        session.set("serviceProvider", "testService", 
+            "TestProperty", DataResource.VALUE, "hello");
+
+        Thread.sleep(500);
+
+        Assert.assertEquals("the message should have been processed even if the value has not changed",
+        	1, extraCallbackCount);
+        
+    	ResourceImpl r2impl = service.addDataResource(PropertyResource.class, 
+    		"TestProperty2", String.class, null); 
+    	
+        PropertyResource r2 = r2impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);        		
+        ResourceImpl r3impl = service.addLinkedResource("LinkedProperty", r1impl);
+    	PropertyResource r3 = r3impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);
+
+    	service.addLinkedResource(LocationResource.LOCATION,
+    		instance.getRootElement().getAdminService().getResource(
+				LocationResource.LOCATION));
+    	
+    	ResourceImpl r4impl = service.getResource("location");
+
+        r4impl.registerExecutor(
+        		AccessMethod.Type.valueOf(AccessMethod.GET), 
+        		new Class<?>[0], 
+        		new String[0],
+        		new AccessMethodExecutor()
+        		{
+					@Override
+                    public Void execute(AccessMethodResult result)
+                            throws Exception
+                    {
+						JSONObject jsonObject = result.getAccessMethodObjectResult();
+						
+						jsonObject.put("value", new StringBuilder().append(
+							jsonObject.get("value")).append(
+								"_suffix").toString());
+						
+						result.setAccessMethodObjectResult(jsonObject);
+	                    return null;
+                    }}, 
+        		AccessMethodExecutor.ExecutionPolicy.AFTER);
+
+        String attributeValue = (String) r4impl.getAttribute("value").getValue();       
+   	    LocationResource r4 = r4impl.<LocationResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);    	 
+   	    
+   	    Thread.sleep(250);
+   	
+        StringBuilder buffer = new StringBuilder();
+        buffer.append(attributeValue);
+        buffer.append("_suffix");
+        
+        JSONObject message = session.get("serviceProvider", "testService",
+        		"location", DataResource.VALUE);
+        
+        assertEquals(buffer.toString(), message.getJSONObject("response"
+        		).getString(DataResource.VALUE));
+        
+//        //test linked resource
+//        JSONAssert.assertEquals(((GetResponse) r1.get()).getResponse(),
+//                ((GetResponse) r3.get()).getResponse(), false);
+//        
+//        r1.set(new Object[]{"testLink"}).getJSON();
+//        
+//        JSONAssert.assertEquals(((GetResponse) r1.get()).getResponse(),
+//                ((GetResponse) r3.get()).getResponse(), false);
+//
+//        //test subscription
+//        String subId = ((SubscribeResponse)r2.subscribe(
+//        		new Recipient()
+//        		{
+//					@Override
+//					public void callback(String callbackId, 
+//							SnaMessage[] messages) throws Exception
+//		            {
+//						TestResourceBuilder.this.callbackInc();	
+//		            }
+//		
+//					@Override
+//		            public String getJSON()
+//		            {
+//			            return null;
+//		            }
+//		
+//					@Override
+//		            public SnaCallback.Type getSnaCallBackType()
+//		            {
+//			            return  SnaCallback.Type.UNARY;
+//		            }
+//		
+//					@Override
+//		            public long getLifetime()
+//		            {
+//			            return -1;
+//		            }
+//		
+//					@Override
+//		            public int getBufferSize()
+//		            {
+//			            return 0;
+//		            }
+//		
+//					@Override
+//		            public int getSchedulerDelay()
+//		            {
+//			            return 0;
+//		            }
+//			})).getResponse(String.class,"subscriptionId");
+//                
+//         r3.subscribe(
+//        		new Recipient()
+//        		{
+//					@Override
+//					public void callback(String callbackId, 
+//							SnaMessage[] messages) throws Exception
+//		            {
+//						TestResourceBuilder.this.linkCallbackInc();
+//		            }
+//		
+//					@Override
+//		            public String getJSON()
+//		            {
+//			            return null;
+//		            }
+//		
+//					@Override
+//		            public SnaCallback.Type getSnaCallBackType()
+//		            {
+//			            return  SnaCallback.Type.UNARY;
+//		            }
+//		
+//					@Override
+//		            public long getLifetime()
+//		            {
+//			            return -1;
+//		            }
+//		
+//					@Override
+//		            public int getBufferSize()
+//		            {
+//			            return 0;
+//		            }
+//		
+//					@Override
+//		            public int getSchedulerDelay()
+//		            {
+//			            return 0;
+//		            }
+//			});   
+//        JSONObject set1 = r2.set("property3").getResponse();
+//        Thread.sleep(250); 
+//        
+//        JSONObject set2 = r2.set("value","property3").getResponse();
+//        
+//        Assert.assertEquals(set1.get(DataResource.VALUE),set2.get(DataResource.VALUE)); 
+//
+//        JSONObject set3 = r1.set("value", "TEST LINKED SUBSCRIPTION").getResponse();
+//        Thread.sleep(250);
+//        
+//        long time1 = (Long)set1.get(Metadata.TIMESTAMP);
+//        long time2= (Long)set2.get(Metadata.TIMESTAMP);
+//
+//        Thread.sleep(500); 
+//        Assert.assertTrue(time1 != time2);  
+//        assertEquals(1, callbackCount); 
+//        
+//        r2.set("value","property5").getJSON();
+//        Thread.sleep(500); 
+//        assertEquals(2, callbackCount);
+//        
+//        String filter ="/serviceProvider/testService/TestProperty2/value";        
+//        org.junit.Assert.assertEquals(1, instance.getHandler().count(filter));
+//        r2.unsubscribe(subId);
+//        org.junit.Assert.assertEquals(0, instance.getHandler().count(filter));
+//
+//	    Service proxy = service.<Service>getProxy(SecuredAccess.ANONYMOUS_PKEY);
+//        SetResponse error = proxy.set("location","unknown");
+//        assertTrue(error.getStatusCode()==403); 
+//
+//        assertEquals(1, linkCallbackCount);         
+    }
+	 
     @Test
     public void testResourceModel() throws Exception
     {

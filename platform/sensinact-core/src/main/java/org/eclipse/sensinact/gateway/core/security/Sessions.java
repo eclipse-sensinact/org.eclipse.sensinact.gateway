@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core.security;
 
+
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -30,7 +31,26 @@ public class Sessions
 	//********************************************************************//
 	
 	/**
+	 * A SessionObserver is informed about the disappearance 
+	 * of a {@link Session}  
 	 * 
+	 * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+	 */
+	public static interface SessionObserver
+	{
+		/**
+		 * This SessionObserver is alerted that the Session whose
+		 * String public key is passed as parameter is disappearing
+		 * 
+		 * @param publicKey the String public key of the disappearing 
+		 * Session
+		 */
+		void diseappearing(String publicKey);
+	}
+	
+	/**
+	 * Possible {@link KeyExtractor}'s search index type
+	 *  
 	 * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
 	 */
 	public static enum KeyExtractorType
@@ -40,8 +60,10 @@ public class Sessions
 	}
 	
 	/**
+	 * A KeyExtractor allows to search into the set of {@link Session}s
+	 * using different indexes
 	 * 
-	 * @param <E>
+	 * @param <E> the extended KeyExtractorType
 	 * 
 	 * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
 	 */
@@ -96,7 +118,7 @@ public class Sessions
 			return v.hashCode();
 		}
 	}
-
+	
 	/**
 	 * The entries in this hash table extend WeakReference, using its main ref
 	 * field as the key.
@@ -105,15 +127,16 @@ public class Sessions
 	implements Map.Entry<Session,SessionKey> 
 	{
 	    SessionKey value;
+	    SessionObserver observer;
 	    int hash;
 	    Entry next;
 	
 	    /**
 	     * Creates new entry.
 	     */
-	    Entry(Object key, SessionKey value,
-	          ReferenceQueue<Object> queue,
-	          int hash, Entry next) {
+	    Entry(Object key, SessionKey value, SessionObserver observer, 
+	    	ReferenceQueue<Object> queue, int hash, Entry next) 
+	    {
 	        super(key, queue);
 	        this.value = value;
 	        this.hash  = hash;
@@ -158,6 +181,24 @@ public class Sessions
 	
 	    public String toString() {
 	        return getKey() + "=" + getValue();
+	    }
+	    
+	    /**
+	     * @inheritDoc
+	     * 
+	     * @see java.lang.ref.Reference#enqueue()
+	     */
+	    public boolean enqueue() 
+	    {
+	        if(super.enqueue())
+	        {
+	        	if(observer != null)
+	        	{
+	        		observer.diseappearing(value.getPublicKey());
+	        	}
+	        	return true;
+	        }
+	        return false;
 	    }
 	}
 
@@ -245,42 +286,17 @@ public class Sessions
 	private final ReferenceQueue<Object> queue = new ReferenceQueue<>();
 
 	/**
-	 * Constructs a new, empty <tt>Sessions</tt> with the given initial
-	 * capacity and the given load factor.
-	 *
-	 * @param  initialCapacity The initial capacity of the <tt>Sessions</tt>
-	 * @param  loadFactor      The load factor of the <tt>Sessions</tt>
-	 * @throws IllegalArgumentException if the initial capacity is negative,
-	 *         or if the load factor is nonpositive.
-	 */
-	private Sessions(int initialCapacity, float loadFactor) {
-	    if (initialCapacity < 0)
-	        throw new IllegalArgumentException("Illegal Initial Capacity: "+
-	                                           initialCapacity);
-	    if (initialCapacity > MAXIMUM_CAPACITY)
-	        initialCapacity = MAXIMUM_CAPACITY;
-	
-	    if (loadFactor <= 0 || Float.isNaN(loadFactor))
-	        throw new IllegalArgumentException("Illegal Load factor: "+
-	                                           loadFactor);
-	    int capacity = 1;
-	    while (capacity < initialCapacity)
-	        capacity <<= 1;
-	    table = newTable(capacity);
-	    this.loadFactor = loadFactor;
-	    threshold = (int)(capacity * loadFactor);
-	}
-
-	/**
 	 * Constructs a new, empty <tt>Sessions</tt> with the default initial
-	 * capacity (16) and load factor (0.75).
+	 * capacity (128) and load factor (0.75).
 	 */
-	public Sessions() {
-	    this(DEFAULT_INITIAL_CAPACITY, DEFAULT_LOAD_FACTOR);
-	}
-	
-	private Entry[] newTable(int n) {
-	    return (Entry[]) new Entry[n];
+	public Sessions()
+	{
+	    int capacity = 1;
+	    while (capacity < DEFAULT_INITIAL_CAPACITY)
+	        capacity <<= 1;
+	    table = (Entry[]) new Entry[capacity];
+	    this.loadFactor = DEFAULT_LOAD_FACTOR;
+	    threshold = (int)(capacity * loadFactor);
 	}
 	
     /**
@@ -485,15 +501,26 @@ public class Sessions
 	 *
 	 * @param key key with which the specified value is to be associated.
 	 * @param value value to be associated with the specified key.
-	 * @return the previous value associated with <tt>key</tt>, or
-	 *         <tt>null</tt> if there was no mapping for <tt>key</tt>.
-	 *         (A <tt>null</tt> return can also indicate that the map
-	 *    
-	 *         previously associated <tt>null</tt> with <tt>key</tt>.)
 	 */
 	public void put(SessionKey key, Session value) 
 	{
-	    if(key == null)
+	    this.put(key,value, null);
+	}
+	
+	/**
+	 * Associates the specified value with the specified key in this map.
+	 * If the map previously contained a mapping for this key, the old
+	 * value is replaced.
+	 *
+	 * @param key key with which the specified value is to be associated.
+	 * @param value value to be associated with the specified key.
+	 * @para observer the SessionObserver to be alerted when the reference 
+	 * is enqueued
+	 */
+	public void put(SessionKey key, Session value,
+			SessionObserver observer)
+	{
+		if(key == null)
 	    {
 	    	return;
 	    }
@@ -525,6 +552,7 @@ public class Sessions
 		        		e.getKey().getId())) 
 		        {
 		            e.value = key;
+		            e.observer = observer;
 		            found = true;
 		            break;
 		        }
@@ -535,7 +563,7 @@ public class Sessions
 		    	continue;
 		    }
 		    Entry e = tab[i];
-		    tab[i] = new Entry(value, key, queue, h, e);
+		    tab[i] = new Entry(value, key, observer, queue, h, e);
 		    if (++size >= threshold)
 		        resize(tab.length * 2);
 	    }
@@ -564,7 +592,7 @@ public class Sessions
 	        threshold = Integer.MAX_VALUE;
 	        return;
 	    }	
-	    Entry[] newTable = newTable(newCapacity);
+	    Entry[] newTable = (Entry[]) new Entry[newCapacity];
 	    transfer(oldTable, newTable);
 	    table = newTable;	
 	    /*

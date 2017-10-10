@@ -24,10 +24,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
 
@@ -66,6 +68,7 @@ import org.eclipse.sensinact.gateway.core.security.Sessions.KeyExtractor;
 import org.eclipse.sensinact.gateway.core.security.Sessions.KeyExtractorType;
 import org.eclipse.sensinact.gateway.core.security.UserKey;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
@@ -424,6 +427,7 @@ public class SensiNact implements Core
 	        	if(!resource.getType().equals(Resource.Type.ACTION))
 				{
 					response = ((DataResource) resource).set(parameter);
+					
 				}else
 				{
 					String uri = new StringBuilder().append(UriUtils.PATH_SEPARATOR
@@ -435,7 +439,7 @@ public class SensiNact implements Core
 						mediator, uri,  AccessMethod.Type.valueOf(AccessMethod.SET), 
 							420, "Unknown method", null);
 				}
-	        }else
+	        } else
 	        {
 	        	response = resource.set(attributeId,parameter);
 	        }        
@@ -560,7 +564,7 @@ public class SensiNact implements Core
     		        {
     					mediator.error(e.getMessage(),e);	
     				}
-    	        }            	        
+    	        }
 				response = ((DataResource) resource
 	        	        	).subscribe(recipient, (constraint==null
 	        	        	?Collections.<Constraint>emptySet()
@@ -1524,15 +1528,11 @@ public class SensiNact implements Core
         this.registry = new RegistryEndpoint();
     }
 
-
 	/**
-	 * 
-	 * @param authentication
-	 * 
-	 * @return
-	 * 
-	 * @throws InvalidKeyException
-	 * @throws DataStoreException
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.Core#
+	 * getSession(org.eclipse.sensinact.gateway.core.security.Authentication)
 	 */
 	@Override
 	public Session getSession(final Authentication<?> authentication)
@@ -1607,11 +1607,9 @@ public class SensiNact implements Core
 	}
 	
 	/**
-	 * @param login
-	 * @param password
-	 * @return
-	 * @throws InvalidKeyException
-	 * @throws DataStoreException
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.Core#getSession(java.lang.String)
 	 */
 	@Override
 	public Session getSession(final String token)
@@ -1623,7 +1621,7 @@ public class SensiNact implements Core
 	/**
 	 * @inheritDoc
 	 *
-	 * @see SecuredAccess#getAnonymousSession()
+	 * @see org.eclipse.sensinact.gateway.core.Core#getAnonymousSession()
 	 */
 	@Override
 	public Session getAnonymousSession() 
@@ -1673,27 +1671,6 @@ public class SensiNact implements Core
 			}
 		});
 	}
-	/**
-	 * @return
-	 * @throws InvalidKeyException
-	 */
-	String nextToken() throws InvalidKeyException
-	{	
-		boolean exists = false;
-		String token = null;
-		do
-		{
-			token = CryptoUtils.createToken();
-
-			synchronized(this.sessions)
-			{	
-				exists = this.sessions.get(
-					new Sessions.KeyExtractor<Sessions.KeyExtractorType>(
-						Sessions.KeyExtractorType.TOKEN, token))!=null;
-			}
-		} while(exists);		
-		return token;		
-	}
 	
 	/**
 	 * @inheritDoc
@@ -1723,6 +1700,17 @@ public class SensiNact implements Core
 			public String run()
 			{
 				final Bundle bundle = mediator.getContext().getBundle();
+
+				final String bundleIdentifier = mediator.callService(
+	    		BundleValidation.class, new Executable<BundleValidation,String>()
+			    {
+					@Override
+					public String execute(BundleValidation bundleValidation)
+							throws Exception
+					{
+						return bundleValidation.check(bundle);
+					}
+			    });    	
 		    	final String agentKey = mediator.callService(
 		    		SecuredAccess.class, new Executable<SecuredAccess, 
 		    		String>()
@@ -1731,8 +1719,6 @@ public class SensiNact implements Core
 						public String execute(SecuredAccess securedAccess)
 								throws Exception
 						{
-							String bundleIdentifier = securedAccess.validate(
-									bundle);
 							try
 							{
 								return securedAccess.getAgentPublicKey(
@@ -1848,11 +1834,14 @@ public class SensiNact implements Core
 	 * createRemoteCore(org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint)
 	 */
 	@Override
-	public void createRemoteCore(AbstractRemoteEndpoint remoteEndpoint)
+	public void createRemoteCore(final AbstractRemoteEndpoint remoteEndpoint)
 	{   
     	final RemoteSensiNact remoteCore = new RemoteSensiNact(
     		mediator, remoteEndpoint, new LocalEndpoint(count)
 		{
+    		private Map<String, Session> remoteSessions = 
+    				new HashMap<String, Session>();
+    		
 			private Session createSession(final String publicKey)
 			{
 				return AccessController.<Session>doPrivileged(
@@ -1881,7 +1870,7 @@ public class SensiNact implements Core
 		    					sessionKey.setUserKey(new UserKey(publicKey));			
 		    					Session session = new SensiNactSession(
 		    						SensiNact.this.mediator, sessionKey.getToken());
-		    					SensiNact.this.sessions.put(sessionKey, session);
+		    					SensiNact.this.sessions.put(sessionKey, session, remoteEndpoint);
 		    					return session;
 		    				}
 		    			});	
@@ -1889,6 +1878,12 @@ public class SensiNact implements Core
 				});
 			}
 			
+			/** 
+			 * @inheritDoc
+			 * 
+			 * @see org.eclipse.sensinact.gateway.core.LocalEndpoint#
+			 * getSession(java.lang.String)
+			 */
 			public Session getSession(String publicKey)
 			{
 				String filteredKey = publicKey;
@@ -1898,14 +1893,36 @@ public class SensiNact implements Core
 						SecuredAccess.ANONYMOUS_PKEY).append("_").append(
 								localID()).toString();
 				}
-				Session session = SensiNact.this.sessions.getSessionFromPublicKey(
-						publicKey);
+				Session session = this.remoteSessions.get(filteredKey);
 				
 				if(session == null)
 				{
 					session = createSession(filteredKey);
+					if(session != null)
+					{
+						this.remoteSessions.put(filteredKey, session);
+					}
 				}
 				return session;
+			}
+
+			/**
+			 * @inheritDoc
+			 * 
+			 * @see org.eclipse.sensinact.gateway.core.LocalEndpoint#
+			 * closeSession(java.lang.String)
+			 */
+			@Override
+			void closeSession(String publicKey)
+			{
+				String filteredKey = publicKey;
+				if(SecuredAccess.ANONYMOUS_PKEY.equals(publicKey))
+				{
+					filteredKey = new StringBuilder().append("remote_").append(
+						SecuredAccess.ANONYMOUS_PKEY).append("_").append(
+								localID()).toString();
+				}
+				this.remoteSessions.remove(filteredKey);
 			}
 		});
     	
@@ -1927,14 +1944,17 @@ public class SensiNact implements Core
 		    	remoteCore.close();
 				return null;
 			}
-		});  
-    	
+		}); 
 	}	
 
 	/**
-	 * @param namespace
+	 * Unregisters the {@link RemoteCore} whose String namespace
+	 * is passed as parameter
+	 * 
+	 * @param namespace the String namespace of the {@link RemoteCore}
+	 * to be unregistered
 	 */
-	public void unregisterEndpoint(final String namespace)
+	protected void unregisterEndpoint(final String namespace)
 	{
 		if(namespace == null)
 		{
@@ -1963,13 +1983,112 @@ public class SensiNact implements Core
 		});
 	}
 
+    /**
+     * Returns the Set of available {@link ServiceProvider}s compliant 
+     * to the LDAP formated filter passed as parameter
+     * 
+     * @param identifier the String identifier of the {@link Session} 
+     * requiring the list of available service providers
+     * @param filter the String LDAP formated filter 
+     * 
+     * @return the Set of available {@link ServiceProvider}s compliant to
+     * the specified filter and for the specified {@link Session}
+     */
+	protected Set<ServiceProvider> serviceProviders(String identifier, String filter)
+	{
+		final SessionKey sessionKey = sessions.get(
+				new KeyExtractor<KeyExtractorType>(
+					KeyExtractorType.TOKEN,identifier));
+			
+		Set<ServiceProvider> set = new HashSet<ServiceProvider>();
+		set.addAll(this.registry.serviceProviders(sessionKey,
+				filter));
+		return set;
+	}
+		
 	/**
-	 * @param localID
-	 * @param serviceProviderId
-	 * @param executable
-	 * @return
+     * Returns the {@link ServiceProvider} whose String identifier is 
+     * passed as parameter
+     * 
+     * @param identifier the String identifier of the {@link Session} 
+     * requiring the service provider
+     * @param serviceProviderId the String identifier of the service provider
+     * 
+     * @return the {@link ServiceProvider}
+     */
+	protected ServiceProvider serviceProvider(String identifier, 
+			String serviceProviderId)
+	{
+		final SessionKey sessionKey = sessions.get(
+				new KeyExtractor<KeyExtractorType>(
+					KeyExtractorType.TOKEN,identifier));
+			
+		return this.registry.serviceProvider(sessionKey,
+				serviceProviderId);
+	}
+
+	/**
+     * Returns the {@link Service} whose String identifier is passed as 
+     * parameter, held by the specified service provider
+     * 
+     * @param identifier the String identifier of the {@link Session} 
+     * requiring the service
+     * @param serviceProviderId the String identifier of the service provider
+     * holding the service
+     * @param servideId the String identifier of the service
+     * 
+     * @return the {@link Service}
+     */
+	protected Service service(String identifier, String serviceProviderId,
+	        String serviceId)
+	{
+		final SessionKey sessionKey = sessions.get(
+				new KeyExtractor<KeyExtractorType>(
+					KeyExtractorType.TOKEN,identifier));
+			
+		return this.registry.service(sessionKey,
+				serviceProviderId, serviceId);
+	}
+
+	/**
+     * Returns the {@link Resource} whose String identifier is passed as 
+     * parameter, held by the specified service provider and service
+     * 
+     * @param identifier the String identifier of the {@link Session} 
+     * requiring the resource
+     * @param serviceProviderId the String identifier of the service provider
+     * holding the service providing the resource
+     * @param servideId the String identifier of the service providing the 
+     * resource
+     * @param resourceId the String identifier of the resource
+     * 
+     * @return the {@link Resource}
+     */
+	protected Resource resource(String identifier, String serviceProviderId,
+	        String serviceId, String resourceId)
+	{
+		final SessionKey sessionKey = sessions.get(
+				new KeyExtractor<KeyExtractorType>(
+					KeyExtractorType.TOKEN,identifier));
+			
+		return this.registry.resource(sessionKey,
+				serviceProviderId, serviceId, resourceId);
+	}
+	
+	/**
+	 * Executes the {@link Executable} passed as parameter which 
+	 * expects a {@link RemoteCore} parameter, and returns its JSON 
+	 * formated execution result
+	 * 
+	 * @param serviceProviderId the String identifier of the 
+	 * service provider whose prefix allows to identified the
+	 * targeted  {@link RemoteCore}
+	 * @param executable the {@link Executable} to be executed
+	 * 
+	 * @return the JSON formated result of the {@link Executable}
+	 * execution
 	 */
-	private JSONObject connector(String serviceProviderId,
+	private JSONObject remoteCoreInvocation(String serviceProviderId,
 			Executable<RemoteCore,JSONObject> executable)
 	{
 		String[] serviceProviderIdElements = serviceProviderId.split(":");
@@ -1986,82 +2105,23 @@ public class SensiNact implements Core
 		return object;
 	}
 	
-	/**
-	 * @param publicKey
-	 * @param filter
-	 * @return
-	 */
-	protected Set<ServiceProvider> serviceProviders(String identifier, String filter)
-	{
-		final SessionKey sessionKey = sessions.get(
-				new KeyExtractor<KeyExtractorType>(
-					KeyExtractorType.TOKEN,identifier));
-			
-		Set<ServiceProvider> set = new HashSet<ServiceProvider>();
-		set.addAll(this.registry.serviceProviders(sessionKey,
-				filter));
-		return set;
-	}
-	
-	/**
-	 * @param publicKey
-	 * @param serviceProviderId
-	 * @return
-	 */
-	protected ServiceProvider serviceProvider(String identifier, 
-			String serviceProviderId)
-	{
-		final SessionKey sessionKey = sessions.get(
-				new KeyExtractor<KeyExtractorType>(
-					KeyExtractorType.TOKEN,identifier));
-			
-		return this.registry.serviceProvider(sessionKey,
-				serviceProviderId);
-	}
-
-	/**
-	 * @param publicKey
-	 * @param serviceProviderId
-	 * @param serviceId
-	 * @return
-	 */
-	protected Service service(String identifier, String serviceProviderId,
-	        String serviceId)
-	{
-		final SessionKey sessionKey = sessions.get(
-				new KeyExtractor<KeyExtractorType>(
-					KeyExtractorType.TOKEN,identifier));
-			
-		return this.registry.service(sessionKey,
-				serviceProviderId, serviceId);
-	}
-
-	/**
-	 * @param publicKey
-	 * @param serviceProviderId
-	 * @param serviceId
-	 * @param resourceId
-	 * @return
-	 */
-	protected Resource resource(String identifier, String serviceProviderId,
-	        String serviceId, String resourceId)
-	{
-		final SessionKey sessionKey = sessions.get(
-				new KeyExtractor<KeyExtractorType>(
-					KeyExtractorType.TOKEN,identifier));
-			
-		return this.registry.resource(sessionKey,
-				serviceProviderId, serviceId, resourceId);
-	}
-	
-	/**
-	 * @param publicKey
-	 * @param localID
-	 * @param serviceProviderId
-	 * @param serviceId
-	 * @param resourceId
-	 * @return
-	 */
+	 /**
+     * Returns the JSON formated description of the resource whose String
+     * identifier is passed as parameter, and held by the service 
+     * provider and service whose String identifiers are also passed as 
+     * parameter
+     * 
+     * @param identifier the String identifier of the {@link Session} requiring 
+     * the resource description 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service, providing the resource
+     * @param serviceId the String identifier of the service providing
+     * the resource
+     * @param resourceId the String identifier  of the resource 
+     * to return the description of
+     * 
+     * @return the JSON formated description of the specified resource
+     */
 	protected JSONObject getResource(String identifier, 
 		final String serviceProviderId, final String serviceId, 
 		final String resourceId)
@@ -2070,7 +2130,7 @@ public class SensiNact implements Core
 				new KeyExtractor<KeyExtractorType>(
 					KeyExtractorType.TOKEN,identifier));
 			
-		return connector(serviceProviderId, 
+		return remoteCoreInvocation(serviceProviderId, 
 				new Executable<RemoteCore,JSONObject>()
 		{
 			@Override
@@ -2091,12 +2151,19 @@ public class SensiNact implements Core
 	}
 
 	/**
-	 * @param publicKey
-	 * @param localID
-	 * @param serviceProviderId
-	 * @param serviceId
-	 * @return
-	 */
+     * Returns the JSON formated list of available resources, for the service 
+     * and service provider whose String identifiers are passed as parameter
+     * 
+     * @param identifier the String identifier of the {@link Session} requiring 
+     * the description 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service
+     * @param serviceId the String identifier of the service providing 
+     * the resources
+     * 
+     * @return the JSON formated list of available resources for the 
+     * specified service and service provider
+     */
 	protected JSONObject getResources(String identifier, 
 			final String serviceProviderId, final String serviceId) 
 	{
@@ -2104,7 +2171,8 @@ public class SensiNact implements Core
 				new KeyExtractor<KeyExtractorType>(
 					KeyExtractorType.TOKEN,identifier));
 			
-		return connector(serviceProviderId, new Executable<RemoteCore,JSONObject>()
+		return remoteCoreInvocation(serviceProviderId, 
+				new Executable<RemoteCore,JSONObject>()
 		{
 			@Override
 			public JSONObject execute(RemoteCore connector)
@@ -2123,12 +2191,19 @@ public class SensiNact implements Core
 	}
 
 	/**
-	 * @param publicKey
-	 * @param localID
-	 * @param serviceProviderId
-	 * @param serviceId
-	 * @return
-	 */
+     * Returns the JSON formated description of the service whose String
+     * identifier is passed as parameter, and held by the specified service 
+     * provider
+     * 
+     * @param identifier the String identifier of the {@link Session} requiring 
+     * the service description 
+     * @param serviceProviderId the String identifier of the  service provider 
+     * holding the service
+     * @param serviceId the String identifier of the service to return the 
+     * description of
+     * 
+     * @return the JSON formated description of the specified service
+     */
 	protected JSONObject getService(String identifier, 
 			final String serviceProviderId, final String serviceId) 
 	{
@@ -2136,7 +2211,7 @@ public class SensiNact implements Core
 				new KeyExtractor<KeyExtractorType>(
 					KeyExtractorType.TOKEN,identifier));
 			
-		return connector(serviceProviderId, new Executable<RemoteCore,JSONObject>()
+		return remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore,JSONObject>()
 		{
 			@Override
 			public JSONObject execute(RemoteCore connector)
@@ -2155,11 +2230,17 @@ public class SensiNact implements Core
 	}
 
 	/**
-	 * @param publicKey
-	 * @param localID
-	 * @param serviceProviderId
-	 * @return
-	 */
+     * Returns the JSON formated list of available services for the service 
+     * provider whose String identifier is passed as parameter
+     * 
+     * @param identifier the String identifier of the {@link Session} requiring 
+     * the list of available services
+     * @param serviceProviderId the String identifier of the  service provider 
+     * holding the services
+     * 
+     * @return the JSON formated list of available services for the 
+     * specified service provider
+     */
 	protected JSONObject getServices(String identifier, 
 			final String serviceProviderId)
     {
@@ -2167,7 +2248,7 @@ public class SensiNact implements Core
 				new KeyExtractor<KeyExtractorType>(
 					KeyExtractorType.TOKEN,identifier));
 			
-		return connector(serviceProviderId, new Executable<RemoteCore,JSONObject>()
+		return remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore,JSONObject>()
 		{
 			@Override
 			public JSONObject execute(RemoteCore connector)
@@ -2185,11 +2266,16 @@ public class SensiNact implements Core
 	}
 
 	/**
-	 * @param publicKey
-	 * @param localID
-	 * @param serviceProviderId
-	 * @return
-	 */
+     * Returns the JSON formated description of the service provider whose
+     * String identifier is passed as parameter
+     * 
+     * @param identifier the String identifier of the {@link Session} 
+     * requiring the service provider description
+     * @param serviceProviderId the String identifier of the service provider
+     * to return the description of
+     * 
+     * @return the JSON formated description of the specified service provider
+     */
 	protected JSONObject getProvider(String identifier,  
 			final String serviceProviderId)
 	{
@@ -2197,7 +2283,7 @@ public class SensiNact implements Core
 				new KeyExtractor<KeyExtractorType>(
 					KeyExtractorType.TOKEN,identifier));
 			
-		return connector(serviceProviderId, new Executable<RemoteCore,JSONObject>()
+		return remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore,JSONObject>()
 		{
 			@Override
 			public JSONObject execute(RemoteCore connector)
@@ -2214,15 +2300,26 @@ public class SensiNact implements Core
 		});
 	}
 
-	/**
-	 * @param publicKey
-	 * @param localID
-	 * @param serviceProviderId
-	 * @param serviceId
-	 * @param resourceId
-	 * @param subscriptionId
-	 * @return
-	 */
+	/** 
+     * Invokes the UNSUBSCRIBE access method on the resource whose String 
+     * identifier is passed as parameter, held by the specified service 
+     * provider and service
+     * 
+     * @param identifier the String identifier of the {@link Session} invoking
+     * the access method 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service providing the resource
+     * on which applies the access method call
+     * @param serviceId the String identifier of the service providing
+     * the resource on which applies the access method call
+     * @param resourceId the String identifier  of the resource 
+     * on which applies the access method call
+     * @param subscriptionId the String identifier of the subscription
+     * to be deleted
+     * 
+     * @return the JSON formated response of the UNSUBSCRIBE access method 
+     * invocation
+     */
 	protected JSONObject unsubscribe(String identifier, 
 		final String serviceProviderId, final String serviceId, 
 		final String resourceId, final String subscriptionId) 
@@ -2231,7 +2328,7 @@ public class SensiNact implements Core
 			new KeyExtractor<KeyExtractorType>(
 				KeyExtractorType.TOKEN,identifier));
 		
-		return connector(serviceProviderId, new Executable<RemoteCore,JSONObject>()
+		return remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore,JSONObject>()
 		{
 			@Override
 			public JSONObject execute(RemoteCore connector)
@@ -2251,26 +2348,37 @@ public class SensiNact implements Core
 		});
 	}
 
-	/**
-	 * @param publicKey
-	 * @param localID
-	 * @param serviceProviderId
-	 * @param serviceId
-	 * @param resourceId
-	 * @param recipient
-	 * @param conditions
-	 * @return
-	 */
+	 /** 
+     * Invokes the SUBSCRIBE access method on the resource whose String 
+     * identifier is passed as parameter, held by the specified service 
+     * provider and service
+     * 
+     * @param identifier the String identifier of the {@link Session} invoking
+     * the access method 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service providing the resource
+     * on which applies the access method call
+     * @param serviceId the String identifier of the service providing
+     * the resource on which applies the access method call
+     * @param resourceId the String identifier  of the resource 
+     * on which applies the access method call
+     * @param recipient the {@link Recipient} to which the update events
+     * generated by the subscription will be transmitted
+     * @param conditions the JSON formated set of constraints applying
+     * on the subscription to be created
+     * 
+     * @return the JSON formated response of the SUBSCRIBE access method 
+     * invocation
+     */
 	protected JSONObject subscribe(String identifier, 
 		final String serviceProviderId, final String serviceId,
 		    final String resourceId, final Recipient recipient, 
 			    final JSONArray conditions) 
 	{
-		final SessionKey sessionKey = sessions.get(
-				new KeyExtractor<KeyExtractorType>(
+		final SessionKey sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(
 					KeyExtractorType.TOKEN,identifier));
 			
-		return connector(serviceProviderId, new Executable<RemoteCore,JSONObject>()
+		return remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore,JSONObject>()
 		{
 			@Override
 			public JSONObject execute(RemoteCore connector)
@@ -2291,21 +2399,34 @@ public class SensiNact implements Core
 		});
 	}
 
-	/**
-	 * @param publicKey
-	 * @param localID
-	 * @param serviceProviderId
-	 * @param serviceId
-	 * @param resourceId
-	 * @param parameters
-	 * @return
-	 */
+	 /** 
+     * Invokes the ACT access method on the resource whose String identifier
+     * is passed as parameter, held by the specified service provider and 
+     * service
+     * 
+     * @param identifier the String identifier of the {@link Session} invoking
+     * the access method 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service providing the resource
+     * on which applies the access method call
+     * @param serviceId the String identifier of the service providing
+     * the resource on which applies the access method call
+     * @param resourceId the String identifier  of the resource 
+     * on which applies the access method call
+     * @param parameters the Objects array parameterizing the 
+     * call 
+     * 
+     * @return the JSON formated response of the ACT access method 
+     * invocation
+     */
 	protected JSONObject act(String identifier, 
 		final String serviceProviderId, final String serviceId, 
 		    final String resourceId, final Object[] parameters) 
 	{
-		final SessionKey sessionKey =  sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN,identifier));
-		return connector(serviceProviderId, new Executable<RemoteCore,JSONObject>()
+		final SessionKey sessionKey =  sessions.get(new KeyExtractor<KeyExtractorType>(
+		KeyExtractorType.TOKEN,identifier));
+		
+		return remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore,JSONObject>()
 		{
 			@Override
 			public JSONObject execute(RemoteCore connector)
@@ -2325,16 +2446,27 @@ public class SensiNact implements Core
 		});
 	}
 
-	/**
-	 * @param publicKey
-	 * @param localID
-	 * @param serviceProviderId
-	 * @param serviceId
-	 * @param resourceId
-	 * @param attributeId
-	 * @param parameter
-	 * @return
-	 */
+	/** 
+     * Invokes the SET access method on the resource whose String identifier
+     * is passed as parameter, held by the specified service provider and 
+     * service
+     * 
+     * @param identifier the String identifier of the {@link Session} invoking
+     * the access method 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service providing the resource
+     * on which applies the access method call
+     * @param serviceId the String identifier of the service providing
+     * the resource on which applies the access method call
+     * @param resourceId the String identifier  of the resource 
+     * on which applies the access method call
+     * @param attributeId the String identifier of the resource's attribute 
+     * targeted by the access method call 
+     * @param parameter the value object to be set
+     * 
+     * @return the JSON formated response of the SET access method 
+     * invocation
+     */
 	protected JSONObject set(String identifier,  
 		final String serviceProviderId, final String serviceId, 
 		    final String resourceId,  final String attributeId, 
@@ -2344,7 +2476,7 @@ public class SensiNact implements Core
 			new KeyExtractor<KeyExtractorType>(
 				KeyExtractorType.TOKEN,identifier));
 		
-		return connector(serviceProviderId, new Executable<RemoteCore,JSONObject>()
+		return remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore,JSONObject>()
 		{
 			@Override
 			public JSONObject execute(RemoteCore connector)
@@ -2366,14 +2498,24 @@ public class SensiNact implements Core
 	}
 
 	/**
-	 * @param publicKey
-	 * @param localID
-	 * @param serviceProviderId
-	 * @param serviceId
-	 * @param resourceId
-	 * @param attributeId
-	 * @return
-	 */
+     * Invokes the GET access method on the resource whose String identifier
+     * is passed as parameter, held by the specified service provider and 
+     * service
+     *  
+     * @param identifier the String identifier of the {@link Session} invoking
+     * the access method 
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service providing the resource
+     * on which applies the access method call
+     * @param serviceId the String identifier of the service providing
+     * the resource on which applies the access method call
+     * @param resourceId the String identifier  of the resource 
+     * on which applies the access method call
+     * @param attributeId the String identifier of the resource's attribute 
+     * targeted by the access method call 
+     * 
+     * @return the JSON formated response of the GET access method invocation
+     */
 	protected JSONObject get(String identifier, 
 		final String serviceProviderId, final String serviceId, 
 		    final String resourceId, final String attributeId)
@@ -2382,7 +2524,7 @@ public class SensiNact implements Core
 			new KeyExtractor<KeyExtractorType>(
 				KeyExtractorType.TOKEN,identifier));
 		
-		return connector(serviceProviderId, new Executable<RemoteCore,JSONObject>()
+		return remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore,JSONObject>()
 		{
 			@Override
 			public JSONObject execute(RemoteCore connector)
@@ -2403,19 +2545,25 @@ public class SensiNact implements Core
 	}
 
 	/**
-	 * @param publicKey
-	 * @param resolveNamespace
-	 * @param localID
-	 * @return
-	 */
+  	 * Returns the JSON formated list of locations of all registered resource model 
+  	 * instances, accessible by the {@link Session} whose String identifier is passed 
+  	 * as parameter
+  	 * 
+  	 * @param identifier the String identifier of the {@link Session} for which to 
+  	 * retrieve the list of accessible resource model instances
+  	 * 
+  	 * @return the JSON formated list of the location of the resource model 
+  	 * instances for the specified {@link Session}.
+  	 */
 	protected JSONObject getLocations(String identifier) 
 	{		
 		final SessionKey sessionKey =  sessions.get(
 			new KeyExtractor<KeyExtractorType>(
-				KeyExtractorType.TOKEN,identifier));
+				KeyExtractorType.TOKEN, identifier));
 		
 		JSONObject object = this.registry.getLocations(sessionKey,
 				sessionKey.localID()!=0);
+		
 		if(object == null)
 		{
 			object=new JSONObject();
@@ -2464,11 +2612,14 @@ public class SensiNact implements Core
 	}
 	
 	/**
-	 * @param publicKey
-	 * @param resolveNamespace
-	 * @param localID
-	 * @return
-	 */
+     * Returns the JSON formated list of available service providers for
+     * the {@link Session} whose String  identifier is passed as parameter
+     * 
+     * @param identifier the String  identifier of the {@link Session} 
+     * requiring the list of available service providers
+     * 
+     * @return the JSON formated list of available service providers
+     */
 	protected JSONObject getProviders(String identifier) 
 	{		
 		final SessionKey sessionKey =  sessions.get(
@@ -2521,12 +2672,18 @@ public class SensiNact implements Core
 	}
 
 	/**
-	 * @param publicKey
-	 * @param resolveNamespace
-	 * @param localID
-	 * @param filter
-	 * @return
-	 */
+  	 * Returns the JSON formated list of all registered resource 
+  	 * model instances, accessible by the {@link Session} whose 
+  	 * String identifier is passed as parameter and compliant to  
+  	 * the specified String LDAP formated filter.
+  	 * 
+  	 * @param identifier the String identifier of the {@link Session} for 
+  	 * which to retrieve the list of accessible resource model instances
+  	 * @param filter the String LDAP formated filter 
+  	 * 
+  	 * @return the JSON formated list of the resource model instances for 
+  	 * the specified {@link Session} and compliant to the specified filter.
+  	 */
 	protected JSONObject getAll(String identifier, String filter)
 	{
 		final SessionKey sessionKey =  sessions.get(
@@ -2594,9 +2751,11 @@ public class SensiNact implements Core
 		return object;
 	}
 
-	/**
-	 * 
-	 */
+    /**
+     * @inheritDoc
+     *
+     * @see org.eclipse.sensinact.gateway.core.Core#close()
+     */
     public void close()
     {
         mediator.debug("closing sensiNact core");
@@ -2642,4 +2801,25 @@ public class SensiNact implements Core
 			}
 		});    	
     }
+
+	/**
+	 */
+	String nextToken() throws InvalidKeyException
+	{	
+		boolean exists = false;
+		String token = null;
+		do
+		{
+			token = CryptoUtils.createToken();
+
+			synchronized(this.sessions)
+			{	
+				exists = this.sessions.get(
+					new Sessions.KeyExtractor<Sessions.KeyExtractorType>(
+						Sessions.KeyExtractorType.TOKEN, token))!=null;
+			}
+		} while(exists);		
+		return token;		
+	}
+	
 }

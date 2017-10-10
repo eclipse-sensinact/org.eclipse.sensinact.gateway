@@ -26,10 +26,10 @@ public class DefaultResourceConfigBuilder implements ResourceConfigBuilder
 	private Resource.UpdatePolicy defaultUpdatePolicy;
 	
 	/** 
-	 * @InheritDoc
-	 * 
-	 * @see ResourceConfigCatalog#
-	 * getResourceConfig(ResourceConfigCatalog.ResourceDescriptor)
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.ResourceConfigBuilder#
+	 * getResourceConfig(org.eclipse.sensinact.gateway.core.ResourceDescriptor)
 	 */
 	@Override
 	public ResourceConfig getResourceConfig(ResourceDescriptor 

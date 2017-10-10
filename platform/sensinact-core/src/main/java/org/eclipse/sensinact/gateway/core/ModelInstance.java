@@ -22,7 +22,6 @@ import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.core.security.SessionKey;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
@@ -305,9 +304,12 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
     }
     
     /**
-     * Returns a newly created {@link ResourceBuilder} capable of 
-     * creating a new resource
+     * Returns a {@link ResourceBuilder} capable of creating a new
+     * resource based on both the {@link ResourceConfig} and the 
+     * {@link ResourceDescriptor} passed as parameters
      * 
+     * @param resourceConfig the {@link ResourceConfig} that will
+     * be used by the {@link ResourceBuilder} to be returned 
      * @param descriptor the {@link ResourceDescriptor} describing 
      * the {@link ResourceConfig} wrapped by the {@link ResourceBuilder} 
      * to be returned 

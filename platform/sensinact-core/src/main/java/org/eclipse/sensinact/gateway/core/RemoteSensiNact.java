@@ -153,11 +153,12 @@ public class RemoteSensiNact implements RemoteCore
 	 * 
 	 * @param mediator the {@link Mediator} allowing to interact with
 	 * the OSGi host environment
-	 * @param remoteEndpoint the {@link RemoteEndpoint} implementation
-	 * the {@link RemoteCore} to be instantiated will be attached to in 
+	 * @param remoteEndpoint the {@link RemoteEndpoint} the {@link 
+	 * RemoteCore} to be instantiated will be attached to, in 
 	 * manner of communicating with a remote instance of sensiNact
-	 * @param localID the integer identifier of the {@link RemoteCore}
-	 * to be instantiated, in the local instance of sensiNact
+	 * @param localEndpoint the {@link LocalEndpoint} the {@link 
+	 * RemoteCore} to be instantiated will be attached to in 
+	 * manner of communicating with the local instance of sensiNact
 	 */
 	protected RemoteSensiNact(
 		Mediator mediator,
@@ -195,8 +196,7 @@ public class RemoteSensiNact implements RemoteCore
 					).registerService(RemoteCore.class, RemoteSensiNact.this, 
 						   props);
 				
-				mediator.debug("RemoteCore '%s' registration done", 
-						namespace);
+				mediator.debug("RemoteCore '%s' registration done", namespace);
 				return null;
 			}
 		});
@@ -577,6 +577,17 @@ public class RemoteSensiNact implements RemoteCore
 		});
 	} 
 
+	/** 
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.RemoteCore#closeSession(java.lang.String)
+	 */
+	@Override
+	public void closeSession(String publicKey)
+	{
+		this.localEndpoint.closeSession(publicKey);
+	}
+	
 	/**
 	 * @param agentId
 	 * @param local
