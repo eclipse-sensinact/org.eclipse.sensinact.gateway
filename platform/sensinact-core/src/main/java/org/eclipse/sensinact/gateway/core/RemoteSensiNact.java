@@ -1,21 +1,13 @@
 /*
- * #%L
- * sensiNact IoT Gateway - HTTP REST Access
- * %%
- * Copyright (C) 2015 CEA
- * %%
- * sensiNact - 2015
- * 
- * CEA - Commissariat a l'energie atomique et aux energies alternatives
- * 17 rue des Martyrs
- * 38054 Grenoble
- * France
- * 
- * Copyright(c) CEA
- * All Rights Reserved
- * #L%
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.core;
 
 

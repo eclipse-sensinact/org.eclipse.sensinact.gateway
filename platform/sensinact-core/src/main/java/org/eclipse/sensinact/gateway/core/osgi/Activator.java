@@ -63,12 +63,12 @@ public class Activator extends AbstractActivator<Mediator>
 		List piList = cpu.getConditionalPermissionInfos();
 		ConditionalPermissionInfo cpiDeny = cpa.newConditionalPermissionInfo(String.format(
             "DENY {" + "[org.eclipse.sensinact.gateway.core.security.perm.SensiNactCoreCondition \"%s\" \"!\"]"
-                    + "(org.osgi.framework.ServicePermission \"Core\" \"register\")"
-                    + "(org.osgi.framework.ServicePermission \"RemoteCore\" \"register,get\")"
-                    + "(org.osgi.framework.ServicePermission \"SecuredAccess\" \"register,get\")"
-                    + "(org.osgi.framework.ServicePermission \"SensiNactResourceModel\" \"register,get\")"
-                    + "(org.osgi.framework.ServicePermission \"SensiNactResourceModelElement\" \"register,get\")"
-                    + "(org.osgi.framework.ServicePermission \"SnaAgent\" \"register\")"
+                    + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.Core\" \"register\")"
+                    + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.RemoteCore\" \"register,get\")"
+                    + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecuredAccess\" \"register,get\")"
+                    + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModel\" \"register,get\")"
+                    + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement\" \"register,get\")"
+                    + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.SnaAgent\" \"register\")"
                     + "} null",
             mediator.getContext().getBundle().getLocation()));
 		piList.add(cpiDeny);

@@ -28,14 +28,12 @@ public interface Executable<P,V>
 	 * parameter and returns the invocation result 
 	 * <code>&lt;V&gt;</code> typed object
 	 * 
-	 * @param parameter
-	 * 		the <code>&lt;P&gt;</code> typed
-	 * 		parameter
-	 * @return
-	 * 		<code>&lt;V&gt;</code> typed result object 
-	 * 		of the execution
-	 * @throws Exception
-	 * 		if an error is occurred during the invocation
+	 * @param parameter the <code>&lt;P&gt;</code> typed parameter
+	 * 
+	 * @return <code>&lt;V&gt;</code> typed result object 
+	 * of the execution
+	 * 
+	 * @throws Exception if an error is occurred during the invocation
 	 */
 	V execute(P parameter) throws Exception;
 }

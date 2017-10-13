@@ -10,9 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Dictionary;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.core.RemoteCore;
+import org.eclipse.sensinact.gateway.core.SensiNact;
 import org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -297,7 +302,7 @@ implements SnaAgent
     	}
     	super.eventEngine.push(message);
     }
-
+    
     /**
      * @inheritDoc
      *
@@ -329,20 +334,103 @@ implements SnaAgent
 	/**
 	 * @param properties
 	 */
-	public void start(Dictionary<String,Object> properties)
+	public void start(Dictionary<String, Object> properties)
 	{
+		boolean local = false;
+		String identifier = null;
+		
+		Object localProp = properties.get(
+			"org.eclipse.sensinact.gateway.agent.local");
+		Object identifierProp = properties.get(
+			"org.eclipse.sensinact.gateway.agent.id");
+		
+		try
+		{
+			identifier = (String)identifierProp;
+		}catch(Exception e)
+		{
+			mediator.error("Invalid 'identifier' property : %s",
+					e.getMessage());
+		}
+		if(identifier == null)
+		{
+			return;
+		}
+		try
+		{
+			local = ((Boolean)localProp).booleanValue();
+		}catch(Exception e)
+		{
+			mediator.warn("Invalid 'local' property :%s",
+					e.getMessage());
+		}
 		try
 		{
 			this.registration = this.mediator.getContext(
 				).registerService(SnaAgent.class, this, 
-						properties);
-	
+						properties);	
+			if(local)
+			{
+				registerRemote(identifier);
+			}
 		} catch(IllegalStateException e)
 		{
-			this.mediator.error("The agent is not registered");
+			this.mediator.error(
+				"The agent is not registered ", e);
 		}
 	}
 	
+    /**
+     * Registers this SnaAgent into the referenced {@link 
+     * RemoteCore}s 
+     * 
+     * @param identifier this SnaAgent's identifier
+     */
+    protected void registerRemote(final String identifier)
+    {
+    	AccessController.doPrivileged(new PrivilegedAction<Void>()
+		{
+			@Override
+			public Void run()
+			{
+				SnaAgentImpl.this.mediator.callServices(
+				RemoteCore.class, new Executable<RemoteCore,Void>()
+			    {
+					@Override
+					public Void execute(RemoteCore remoteCore) 
+							throws Exception
+					{
+						SnaAgentImpl.this.registerRemote(
+								remoteCore, identifier);
+						return null;
+					}
+			    });
+				return null;
+			}
+		});
+    }
+
+    /**
+     * Registers this SnaAgent into the {@link RemoteCore}
+     * passed as parameter 
+     * 
+     * @param remoteCore the {@link RemoteCore} into which 
+     * register this SnaAgent
+     * @param identifier this SnaAgent's identifier
+     */
+    public void registerRemote(RemoteCore remoteCore, 
+    		String identifier)
+    {
+    	if(remoteCore == null 
+    			|| identifier == null 
+    			|| identifier.length()==0)
+    	{
+    		return;
+    	}
+    	remoteCore.endpoint().registerAgent(identifier, 
+    		filter, publicKey);
+    }
+    
     /**
      * @inheritDoc
      *

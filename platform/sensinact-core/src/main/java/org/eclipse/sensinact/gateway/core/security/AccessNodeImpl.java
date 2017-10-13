@@ -26,7 +26,6 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
 import org.eclipse.sensinact.gateway.util.tree.ImmutablePathNode;
 import org.eclipse.sensinact.gateway.util.tree.PathNode;
 
-
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
@@ -52,30 +51,6 @@ implements MutableAccessNode
 	protected Mediator mediator;	
 	protected Map<AccessLevelOption, List<MethodAccessibility>> accesses;
 	private AccessProfile profile;
-
-	/**
-	 * Constructor
-	 * 
-	 * @param mediator
-	 */
-    public AccessNodeImpl(Mediator mediator)
-	{
-    	super();
-    	this.mediator = mediator;
-    	this.accesses = new EnumMap<AccessLevelOption, 
-    		List<MethodAccessibility>>(AccessLevelOption.class);
-	}
-
-	/**
-	 * Constructor
-	 * 
-	 * @param mediator
-	 * @param name
-	 */
-    public AccessNodeImpl(Mediator mediator, String name)
-	{
-    	this(mediator, name, false);
-	}
     
 	/**
 	 * Constructor
@@ -141,8 +116,7 @@ implements MutableAccessNode
 		    if(methodAccesses.isEmpty())
 	        {
 	        	return;
-	        }
-		    
+	        }		    
     		int[] accessLevels = null;
 
 	        Iterator<AccessLevelOption> iterator = 
@@ -165,8 +139,7 @@ implements MutableAccessNode
 	        while(iterator.hasNext())
 	        {
 	        	index = 0;
-	        	AccessLevelOption optionLevel = iterator.next();
-	        	
+	        	AccessLevelOption optionLevel = iterator.next();	        	
 	        	for(;index < length;index++)
 	        	{	    			
 	        		this.setAccessibleMethod(types[index], optionLevel, 
@@ -280,7 +253,6 @@ implements MutableAccessNode
 		{
 			MethodAccessibility access =  methodAccesses.get(index);
 			accessible = access==null?false:access.isAccessible();
-			//System.out.println(getPath() + " access : " + access);
 		}
 		return 	accessible;
 	}
@@ -332,10 +304,7 @@ implements MutableAccessNode
 	/**
 	 * Creates and returns a clone of this AccessNode
 	 * 
-	 * @param parent the parent node 
-	 * @param parent the immutable clone of this AccessNode's parent
-	 * 
-	 * @return this AccessNode immutable clone
+	 * @return this AccessNode clone
 	 */
 	public N clone()
 	{
@@ -351,11 +320,11 @@ implements MutableAccessNode
 			Iterator<N> iterator = children.iterator();
 			while(iterator.hasNext())
 			{
-				super.add((N)iterator.next().clone());			
+				clone.add((N)iterator.next().clone());			
 			}			
 		} catch (Exception e)
 		{
-			e.printStackTrace();
+			mediator.error(e);
 		}
 		return clone;
 	}

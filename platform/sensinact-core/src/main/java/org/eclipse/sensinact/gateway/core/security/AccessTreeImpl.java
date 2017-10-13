@@ -16,6 +16,7 @@ package org.eclipse.sensinact.gateway.core.security;
 import java.util.Iterator;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.eclipse.sensinact.gateway.util.tree.PathNodeFactory;
 import org.eclipse.sensinact.gateway.util.tree.PathTree;
 
@@ -61,7 +62,8 @@ implements MutableAccessTree<AccessNodeImpl<N>>
 		 */
 		public N createPathNode(String nodeName)
     	{
-    		return (N) new AccessNodeImpl<N>(mediator, nodeName, false);
+    		return (N) new AccessNodeImpl<N>(
+    				mediator, nodeName, false);
     	}
 
 		/**
@@ -72,7 +74,8 @@ implements MutableAccessTree<AccessNodeImpl<N>>
 		 */
 		public N createPatternNode(String nodeName)
     	{
-    		return (N) new AccessNodeImpl<N>(mediator, nodeName, true);
+    		return (N) new AccessNodeImpl<N>(
+    				mediator, nodeName, true);
     	}
 		
 		/**
@@ -83,7 +86,8 @@ implements MutableAccessTree<AccessNodeImpl<N>>
 		 */
 		public N createRootNode()
     	{
-    		return (N) new AccessNodeImpl<N>(mediator);
+    		return (N) new AccessNodeImpl<N>(mediator, 
+    			UriUtils.PATH_SEPARATOR, false);
     	}
     }
     

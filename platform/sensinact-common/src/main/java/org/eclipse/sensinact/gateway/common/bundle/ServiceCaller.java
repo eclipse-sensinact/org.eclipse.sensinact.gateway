@@ -175,7 +175,8 @@ final class ServiceCaller
     		while(iterator.hasNext())
     		{
     			ServiceReference<?> serviceReference = iterator.next();
-    			if((service =  (S) this.context.getService(serviceReference))!=null)
+    			if((service =  (S) this.context.getService(
+    					serviceReference))!=null)
 		    	{
     	    		try
     	    		{
@@ -240,7 +241,8 @@ final class ServiceCaller
     		while(iterator.hasNext())
     		{
     			ServiceReference<?> serviceReference = iterator.next();
-    			if((service =  (S) this.context.getService(serviceReference))!=null)
+    			if((service =  (S) this.context.getService(
+    					serviceReference))!=null)
 		    	{
 		    		try
 		    		{
@@ -297,7 +299,8 @@ final class ServiceCaller
     		while(iterator.hasNext())
     		{
     			ServiceReference<?> serviceReference = iterator.next();
-    			if((service =  (S) this.context.getService(serviceReference))!=null)
+    			if((service =  (S) this.context.getService(
+    					serviceReference))!=null)
 		    	{
 		    		try
 		    		{
