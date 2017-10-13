@@ -20,7 +20,7 @@ package org.eclipse.sensinact.gateway.core.security;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface MutableAccessTree<A extends MutableAccessNode>
-extends AccessTree<A>
+extends AccessTree<A>, Cloneable
 {
 	//********************************************************************//
 	//						NESTED DECLARATIONS	     					  //
@@ -83,4 +83,20 @@ extends AccessTree<A>
 	 * @return the removed {@link AccessNode}
 	 */
 	A delete(String uri);	
+	
+	/**
+	 * 
+	 * @param option the {@link AccessProfileOption}  wrapping the 
+	 * {@link AccessProfile} applying to the root node of this {@link 
+	 * AccessTree}
+	 * 
+	 * @return this AccessTree instance
+	 */
+	MutableAccessTree<A> withAccessProfile(AccessProfile profile);
+
+	/**
+	 * @return
+	 */
+	MutableAccessTree<A> clone();
+	
 }

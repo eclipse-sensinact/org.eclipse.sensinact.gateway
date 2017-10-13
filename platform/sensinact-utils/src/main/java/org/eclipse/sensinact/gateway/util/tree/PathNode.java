@@ -19,7 +19,7 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class PathNode<P extends PathNode<P>>
+public class PathNode<P extends PathNode<P>> implements Iterable<P>
 {
 	protected P parent;
 	protected final String nodeName;
@@ -246,5 +246,16 @@ public class PathNode<P extends PathNode<P>>
 		}
 		builder.append("]");
 		return builder.toString();
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see java.lang.Iterable#iterator()
+	 */
+	@Override
+	public Iterator<P> iterator()
+	{
+		return this.children.iterator();
 	}
 }

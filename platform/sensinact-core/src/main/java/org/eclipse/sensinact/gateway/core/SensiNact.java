@@ -58,6 +58,7 @@ import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
@@ -119,18 +120,15 @@ public class SensiNact implements Core
 		}
 
 		/**
-		 * Creates and registers an {@link SnaAgent} attached to this Session
-		 * and that will be unregistered 
-		 * 
-		 * @param callback the {@link SnaAgentCallback} of the {@link SnaAgent}
-		 * to be created
-		 * @param filter the {@link SnaFilter} of the {@link SnaAgent}
-		 * to be created
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.security.Session#
+		 * registerSessionAgent(org.eclipse.sensinact.gateway.core.message.SnaAgentCallback, org.eclipse.sensinact.gateway.core.message.SnaFilter)
 		 */
-		public void registerSessionAgent(final SnaAgentCallback callback, 
+		public String registerSessionAgent(final SnaAgentCallback callback, 
 				final SnaFilter filter)
 		{			
-			AccessController.<String>doPrivileged(new PrivilegedAction<String>()
+			return AccessController.<String>doPrivileged(new PrivilegedAction<String>()
 			{
 				@Override
 				public String run()
@@ -140,36 +138,30 @@ public class SensiNact implements Core
 					{
 						return null;
 					}
+					final String identifier = key.registerAgent(callback, filter);
+					
 					final String publicKey = key.getPublicKey();
 					final int localId = key.localID();
-					
-					final SnaAgentImpl agent = SnaAgentImpl.createAgent(
-						mediator, callback, filter, publicKey);
-					
-					final String identifier = new StringBuilder().append(
-						"agent_").append(agent.hashCode()).toString();
-					
-					Dictionary<String,Object> props = new Hashtable<String,Object>();
-					props.put("org.eclipse.sensinact.gateway.agent.id",identifier);
-				    props.put("org.eclipse.sensinact.gateway.agent.local",(localId==0));
-				    	
-					agent.start(props);
-					
-					SensiNact.this.mediator.callService(RemoteCore.class,
-							new Executable<RemoteCore,Void>()
-				    {
-						@Override
-						public Void execute(RemoteCore remoteCore) 
-								throws Exception
-						{
-							if(remoteCore.localID()!=localId)
+										
+					//propagate only local requests
+					if(localId == 0)
+					{
+						SensiNact.this.mediator.callService(RemoteCore.class,
+								new Executable<RemoteCore,Void>()
+					    {
+							@Override
+							public Void execute(RemoteCore remoteCore) 
+									throws Exception
 							{
-								remoteCore.endpoint().registerAgent(
-									identifier, filter, publicKey);
+								if(remoteCore.localID()!=localId)
+								{
+									remoteCore.endpoint().registerAgent(
+										identifier, filter, publicKey);
+								}
+								return null;
 							}
-							return null;
-						}
-				    });
+					    });
+					}
 					return identifier;
 				}
 			});
@@ -604,13 +596,14 @@ public class SensiNact implements Core
 		 * @see org.eclipse.sensinact.gateway.core.Endpoint#jsonUnsubscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 		 */
 		public JSONObject unsubscribe(final String serviceProviderId,
-		        final String serviceId, final String resourceId, final String subscriptionId)
+		        final String serviceId, final String resourceId, 
+		        final String subscriptionId)
 		{     		
 			Resource resource = this.resource(serviceProviderId, serviceId, resourceId);
 			if(resource == null)
 			{
 				return AccessController.doPrivileged(new PrivilegedAction<JSONObject>()
-				 {
+				{
 					@Override
 		            public JSONObject run()
 		            {
@@ -621,7 +614,7 @@ public class SensiNact implements Core
 				    		resourceId, 
 				    		subscriptionId);
 		            }
-				 });
+				});
 			}
 			UnsubscribeResponse response =null;
         	if(!resource.getType().equals(Resource.Type.ACTION))
@@ -828,7 +821,8 @@ public class SensiNact implements Core
 		/**
 		 * @inheritDoc
 		 *
-		 * @see org.eclipse.sensinact.gateway.core.Endpoint#jsonResources(java.lang.String, java.lang.String)
+		 * @see org.eclipse.sensinact.gateway.core.Endpoint#
+		 * jsonResources(java.lang.String, java.lang.String)
 		 */
 		@Override
 		public JSONObject getResources(
@@ -838,7 +832,8 @@ public class SensiNact implements Core
 			Service service = this.service(serviceProviderId, serviceId);
 			if(service == null)
 			{
-    			 return AccessController.doPrivileged(new PrivilegedAction<JSONObject>()
+    			 return AccessController.doPrivileged(
+    			 new PrivilegedAction<JSONObject>()
     			 {
     				@Override
     	            public JSONObject run()
@@ -1451,8 +1446,9 @@ public class SensiNact implements Core
 	//						INSTANCE DECLARATIONS						  //
 	//********************************************************************//
 
+	final AccessTree<? extends AccessNode> anonymousTree;
 	final Sessions sessions;	
-	private final Session localAnonymousSession;
+	//private final Session localAnonymousSession;
 	
 	Mediator mediator;
 	private RegistryEndpoint registry;
@@ -1471,8 +1467,7 @@ public class SensiNact implements Core
      * @throws SecuredAccessException 
      * @throws BundleException 
      */
-    public SensiNact(Mediator mediator) 
-    		throws SecuredAccessException, BundleException
+    public SensiNact(Mediator mediator) throws SecuredAccessException, BundleException
     {
     	this.namespace = SensiNact.namespace(mediator);
     	SecuredAccess securedAccess = null;
@@ -1501,7 +1496,7 @@ public class SensiNact implements Core
         this.defaultLocation = ModelInstance.defaultLocation(mediator);
         this.sessions = new Sessions();
 
-		final AccessTree<? extends AccessNode> tree = mediator.callService(
+		this.anonymousTree = mediator.callService(
 		SecuredAccess.class, new Executable<SecuredAccess, 
 		AccessTree<? extends AccessNode>>() 
 		{
@@ -1514,16 +1509,6 @@ public class SensiNact implements Core
 						SecuredAccess.ANONYMOUS_PKEY);
 			}
 		});
-		
-		SessionKey localAnonymousSessionKey = new SessionKey(
-			LOCAL_ID, SecuredAccess.ANONYMOUS_PKEY, tree);
-		localAnonymousSessionKey.setUserKey(new UserKey(
-				SecuredAccess.ANONYMOUS_PKEY));		
-		this.localAnonymousSession = new SensiNactSession(mediator, 
-				localAnonymousSessionKey.getToken());		
-		this.sessions.put(localAnonymousSessionKey, 
-				localAnonymousSession);
-		
         this.mediator = mediator;
         this.registry = new RegistryEndpoint();
     }
@@ -1561,7 +1546,8 @@ public class SensiNact implements Core
 					});	
 				}
 			});
-			if(userKey == null)
+			if(userKey == null || SecuredAccess.ANONYMOUS_PKEY.equals(
+					userKey.getPublicKey()))
 			{
 				session = getAnonymousSession();
 				
@@ -1585,14 +1571,21 @@ public class SensiNact implements Core
 								userKey.getPublicKey());
 						if(tree == null)
 						{
-							tree = securedAccess.getUserAccessTree(
-									SecuredAccess.ANONYMOUS_PKEY);
+							if(MutableAccessTree.class.isAssignableFrom(
+									SensiNact.this.anonymousTree.getClass()))
+							{
+								tree = ((MutableAccessTree<?>)
+									SensiNact.this.anonymousTree).clone();
+							} else
+							{
+								tree =  SensiNact.this.anonymousTree;
+							}
 						}
 						return tree;
 					}
 				});
-				SessionKey sessionKey = new SessionKey(LOCAL_ID,
-						SensiNact.this.nextToken(), tree);						
+				SessionKey sessionKey = new SessionKey(mediator,
+					LOCAL_ID, SensiNact.this.nextToken(), tree);						
 				sessionKey.setUserKey(userKey);						
 				session = new SensiNactSession(mediator, sessionKey.getToken());						
 				sessions.put(sessionKey, session);	
@@ -1626,7 +1619,29 @@ public class SensiNact implements Core
 	@Override
 	public Session getAnonymousSession() 
 	{
-		return localAnonymousSession;
+		count++;
+		String pkey = new StringBuilder().append(
+			SecuredAccess.ANONYMOUS_PKEY).append("_"
+				).append(count).toString();
+
+		AccessTree<?> tree = null;
+		if(MutableAccessTree.class.isAssignableFrom(
+				SensiNact.this.anonymousTree.getClass()))
+		{
+			tree = ((MutableAccessTree<?>)
+				SensiNact.this.anonymousTree).clone();
+		} else
+		{
+			tree =  SensiNact.this.anonymousTree;
+		}
+		SessionKey sessionKey = new SessionKey(mediator, 
+			LOCAL_ID, this.nextToken(), tree);
+		
+		sessionKey.setUserKey(new UserKey(pkey));
+		Session session = new SensiNactSession(mediator, 
+				sessionKey.getToken());
+		this.sessions.put(sessionKey,session);
+		return session;
 	}
 
 	/**
@@ -1639,7 +1654,8 @@ public class SensiNact implements Core
 	public Session getApplicationSession(final Mediator mediator, 
 			final String privateKey)
 	{
-		return AccessController.<Session>doPrivileged(new PrivilegedAction<Session>()
+		return AccessController.<Session>doPrivileged(
+		new PrivilegedAction<Session>()
 		{
 			@Override
 			public Session run() 
@@ -1651,19 +1667,23 @@ public class SensiNact implements Core
 					public Session execute(SecuredAccess securedAccess)
 					        throws Exception
 					{
-						String publicKey = securedAccess.getApplicationPublicKey(privateKey);
+						String publicKey = securedAccess.getApplicationPublicKey(
+								privateKey);
 						if(publicKey == null 
 							|| SecuredAccess.ANONYMOUS_PKEY.equals(publicKey))
 						{
 							return SensiNact.this.getAnonymousSession();
 						}
 						AccessTree<? extends AccessNode> tree = 
-								securedAccess.getApplicationAccessTree(publicKey);
-						SessionKey sessionKey = new SessionKey(LOCAL_ID, 
-								SensiNact.this.nextToken(), tree);
+							securedAccess.getApplicationAccessTree(publicKey);
+						
+						SessionKey sessionKey = new SessionKey(mediator, 
+							LOCAL_ID, SensiNact.this.nextToken(), tree);
+						
 						sessionKey.setUserKey(new UserKey(publicKey));	
 						Session session = new SensiNactSession(mediator, 
-								sessionKey.getToken());							
+								sessionKey.getToken());
+						
 						sessions.put(sessionKey, session);
 						return session;
 					}
@@ -1836,6 +1856,7 @@ public class SensiNact implements Core
 	@Override
 	public void createRemoteCore(final AbstractRemoteEndpoint remoteEndpoint)
 	{   
+		count++;
     	final RemoteSensiNact remoteCore = new RemoteSensiNact(
     		mediator, remoteEndpoint, new LocalEndpoint(count)
 		{
@@ -1859,18 +1880,28 @@ public class SensiNact implements Core
 		    				{ 
 		    					AccessTree<? extends AccessNode> tree = 
 		    						securedAccess.getUserAccessTree(publicKey);
-		    					
 		    					if(tree == null)
 		    					{
-		    						tree = securedAccess.getUserAccessTree(
-		    								SecuredAccess.ANONYMOUS_PKEY);
+									if(MutableAccessTree.class.isAssignableFrom(
+											SensiNact.this.anonymousTree.getClass()))
+									{
+										tree = ((MutableAccessTree<?>)
+											SensiNact.this.anonymousTree).clone();
+									} else
+									{
+										tree =  SensiNact.this.anonymousTree;
+									}
 		    					}
-		    					SessionKey sessionKey = new SessionKey(localID(), 
-		    						SensiNact.this.nextToken(), tree);
+		    					SessionKey sessionKey = new SessionKey(
+		    						mediator, localID(), SensiNact.this.nextToken(), 
+		    							tree);
+		    					
 		    					sessionKey.setUserKey(new UserKey(publicKey));			
+		    					
 		    					Session session = new SensiNactSession(
 		    						SensiNact.this.mediator, sessionKey.getToken());
-		    					SensiNact.this.sessions.put(sessionKey, session, remoteEndpoint);
+		    					SensiNact.this.sessions.put(sessionKey, session, 
+		    							remoteEndpoint);
 		    					return session;
 		    				}
 		    			});	
@@ -1924,9 +1955,19 @@ public class SensiNact implements Core
 				}
 				this.remoteSessions.remove(filteredKey);
 			}
+
+
+			/**
+			 * @inheritDoc
+			 * 
+			 * @see org.eclipse.sensinact.gateway.core.LocalEndpoint#close()
+			 */
+			@Override
+			void close()
+			{
+				this.remoteSessions.clear();
+			}
 		});
-    	
-		count++;
     	remoteCore.endpoint().onConnected(new Executable<String,Void>()
 		{
 			@Override
@@ -2804,14 +2845,21 @@ public class SensiNact implements Core
 
 	/**
 	 */
-	String nextToken() throws InvalidKeyException
+	String nextToken() 
 	{	
 		boolean exists = false;
 		String token = null;
 		do
 		{
-			token = CryptoUtils.createToken();
-
+			try
+			{
+				token = CryptoUtils.createToken();
+			}
+			catch (InvalidKeyException e)
+			{
+				token = Long.toHexString(
+						System.currentTimeMillis());
+			}
 			synchronized(this.sessions)
 			{	
 				exists = this.sessions.get(

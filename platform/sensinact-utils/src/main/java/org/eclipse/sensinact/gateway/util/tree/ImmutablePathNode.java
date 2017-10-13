@@ -20,7 +20,7 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ImmutablePathNode<P extends ImmutablePathNode<P>>
+public class ImmutablePathNode<P extends ImmutablePathNode<P>> implements Iterable<P>
 {
 	protected final P parent;
 	protected final String nodeName;
@@ -207,5 +207,16 @@ public class ImmutablePathNode<P extends ImmutablePathNode<P>>
 		}
 		builder.append("]");
 		return builder.toString();
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see java.lang.Iterable#iterator()
+	 */
+	@Override
+	public Iterator<P> iterator()
+	{
+		return this.children.iterator();
 	}
 }

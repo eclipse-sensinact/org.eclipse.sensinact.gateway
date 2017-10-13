@@ -190,7 +190,7 @@ public class SecuredAccessImpl implements SecuredAccess
 	public MutableAccessTree<? extends MutableAccessNode> getAccessTree(
 			String signature) throws SecuredAccessException
 	{
-		AccessTreeImpl<? extends AccessNodeImpl<?>> tree = null;	
+		MutableAccessTree<? extends AccessNodeImpl<?>> tree = null;	
 		BundleEntity object = null;
 		AccessProfileOption option = null;		
 		try 
@@ -205,7 +205,7 @@ public class SecuredAccessImpl implements SecuredAccess
 				option = this.objectProfileAccessDAO.getAccessProfileOption(
 					object.getObjectProfileEntity());
 			}
-			tree = new AccessTreeImpl(mediator).withAccessProfile(option);
+			tree = new AccessTreeImpl<>(mediator).withAccessProfile(option);
 			
 		} catch (Exception e)
 		{
@@ -256,7 +256,7 @@ public class SecuredAccessImpl implements SecuredAccess
 				methodAccesses.add(new MethodAccessImpl(
 						option.getAccessLevel(), types[index]));
 			}
-			tree = new AccessTreeImpl(mediator);
+			tree = new AccessTreeImpl<>(mediator);
 			tree.getRoot().withAccessProfile(
 					new AccessProfileImpl(methodAccesses));
 			this.buildTree(tree, user);

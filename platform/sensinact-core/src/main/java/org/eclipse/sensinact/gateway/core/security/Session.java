@@ -16,6 +16,9 @@ import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.message.SnaAgent;
+import org.eclipse.sensinact.gateway.core.message.SnaAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -33,6 +36,20 @@ public interface Session
 	 * @return this Session's String identifier
 	 */
 	String getId();
+	
+	/**
+	 * Creates and registers an {@link SnaAgent} attached to this Session
+	 * and that will be unregistered when this last one will disappear
+	 * 
+	 * @param callback the {@link SnaAgentCallback} of the {@link SnaAgent}
+	 * to be created
+	 * @param filter the {@link SnaFilter} of the {@link SnaAgent}
+	 * to be created
+	 * @return the String identifier of the newly created and registered
+	 * {@link SnaAgent}
+	 */
+	String registerSessionAgent(final SnaAgentCallback callback, 
+			final SnaFilter filter);
 	
 	/**
 	 * Returns the set of  {@link ServiceProvider}s accessible

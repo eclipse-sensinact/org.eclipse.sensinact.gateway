@@ -93,6 +93,17 @@ implements MutableAccessNode
 	}
 
 	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.security.AccessNode#getProfile()
+	 */
+	@Override
+	public AccessProfile getProfile()
+	{
+		return this.profile;
+	}
+
+	/**
      * Defines the Map of available {@link AccessMethod.Type} for all 
      * pre-defined {@link AccessLevelOption}s according to the one
      * passed as parameter
@@ -318,4 +329,34 @@ implements MutableAccessNode
 				this.profile);
 	}
 	
+	/**
+	 * Creates and returns a clone of this AccessNode
+	 * 
+	 * @param parent the parent node 
+	 * @param parent the immutable clone of this AccessNode's parent
+	 * 
+	 * @return this AccessNode immutable clone
+	 */
+	public N clone()
+	{
+		N clone = null;
+		try
+		{
+			clone = ((Class<N>) getClass()).getConstructor(
+				new Class<?>[] {Mediator.class, String.class, boolean.class}
+				  ).newInstance(new Object[] {this.mediator, this.nodeName, 
+						this.isPattern});
+
+			clone.withAccessProfile(this.profile);
+			Iterator<N> iterator = children.iterator();
+			while(iterator.hasNext())
+			{
+				super.add((N)iterator.next().clone());			
+			}			
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return clone;
+	}
 }

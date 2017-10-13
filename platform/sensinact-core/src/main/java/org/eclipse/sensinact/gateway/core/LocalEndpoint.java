@@ -31,6 +31,10 @@ abstract class LocalEndpoint implements Endpoint
 	 */
 	abstract void closeSession(String publicKey);
 	
+	/**
+	 * Closes this local endpoint
+	 */
+	abstract void close(); 
 	
 	private final int localID;
 

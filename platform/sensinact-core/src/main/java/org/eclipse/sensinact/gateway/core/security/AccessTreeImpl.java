@@ -13,6 +13,8 @@
  */
 package org.eclipse.sensinact.gateway.core.security;
 
+import java.util.Iterator;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.tree.PathNodeFactory;
 import org.eclipse.sensinact.gateway.util.tree.PathTree;
@@ -123,10 +125,44 @@ implements MutableAccessTree<AccessNodeImpl<N>>
 	 * 
 	 * @return this AccessTree instance
 	 */
-	public AccessTreeImpl<N> withAccessProfile(AccessProfileOption option)
+	public MutableAccessTree<AccessNodeImpl<N>> withAccessProfile(
+			AccessProfileOption option)
 	{
-		super.root.withAccessProfile(option.getAccessProfile());
+		return this.withAccessProfile(option.getAccessProfile());
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.security.MutableAccessTree#
+	 * withAccessProfile(org.eclipse.sensinact.gateway.core.security.AccessProfile)
+	 */
+	@Override
+	public MutableAccessTree<AccessNodeImpl<N>> withAccessProfile(
+	        AccessProfile profile)
+	{
+		super.root.withAccessProfile(profile);
 		return this;
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public MutableAccessTree<AccessNodeImpl<N>> clone()
+	{
+		MutableAccessTree<AccessNodeImpl<N>> tree = 
+			new AccessTreeImpl<N>(this.mediator).withAccessProfile(
+					getRoot().getProfile());
+
+		Iterator<N> iterator = getRoot().iterator();
+		while(iterator.hasNext())
+		{
+			tree.getRoot().add(iterator.next().clone());
+		}
+		return tree;		
 	}
 
 	/**
@@ -139,4 +175,5 @@ implements MutableAccessTree<AccessNodeImpl<N>>
 	{
 		return true;
 	}
+
 }

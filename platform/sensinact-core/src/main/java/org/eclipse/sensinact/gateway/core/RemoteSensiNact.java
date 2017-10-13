@@ -21,17 +21,16 @@ package org.eclipse.sensinact.gateway.core;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
+import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.message.SnaAgentImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
@@ -45,7 +44,7 @@ import org.osgi.framework.ServiceRegistration;
 
 /**
  * {@link RemoteCore} implementation
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class RemoteSensiNact implements RemoteCore
@@ -53,7 +52,11 @@ public class RemoteSensiNact implements RemoteCore
 	//********************************************************************//
 	//						NESTED DECLARATIONS		    				  //
 	//********************************************************************//
-	
+		
+	/**
+	 *
+	 * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+	 */
 	final class RemoteSensiNactCallback extends AbstractSnaAgentCallback
 	{	
 		private String agentId;
@@ -123,8 +126,7 @@ public class RemoteSensiNact implements RemoteCore
 			RemoteSensiNact.this.mediator.debug(
 				"RemoteSensiNactCallback '%s' stopped", this.agentId);
 		}
-	}
-	
+	}	
 	
 	//********************************************************************//
 	//						ABSTRACT DECLARATIONS						  //
@@ -144,8 +146,8 @@ public class RemoteSensiNact implements RemoteCore
 	protected LocalEndpoint localEndpoint;
 	protected RemoteEndpoint remoteEndpoint;
 
+	protected Map<String, String> localAgents;	
 	protected ServiceRegistration<RemoteCore> registration;
-	protected List<String> agents;
 
 
 	/**
@@ -166,7 +168,7 @@ public class RemoteSensiNact implements RemoteCore
 		LocalEndpoint localEndpoint)
 	{
 		this.mediator = mediator;
-		this.agents = new ArrayList<String>();
+		this.localAgents = new HashMap<String,String>();
 		
 		this.remoteEndpoint = remoteEndpoint;
 		if(this.remoteEndpoint == null)
@@ -190,12 +192,10 @@ public class RemoteSensiNact implements RemoteCore
 			public Void run()
 			{		
 				Dictionary<String,Object> props = new Hashtable<String,Object>();
-		    	props.put(NAMESPACE_PROP, namespace);
-		    	
+		    	props.put(NAMESPACE_PROP, namespace);		    	
 				RemoteSensiNact.this.registration = mediator.getContext(
 					).registerService(RemoteCore.class, RemoteSensiNact.this, 
-						   props);
-				
+						   props);				
 				mediator.debug("RemoteCore '%s' registration done", namespace);
 				return null;
 			}
@@ -225,35 +225,14 @@ public class RemoteSensiNact implements RemoteCore
 					{
 						RemoteSensiNact.this.mediator.error(e);
 					}
-				}	
-				if(!RemoteSensiNact.this.agents.isEmpty())
-				{
-					StringBuilder builder = new StringBuilder();
-					builder.append("(&(org.eclipse.sensinact.gateway.agent.local=false)");
-					builder.append("(|");
-					while(!RemoteSensiNact.this.agents.isEmpty())
-					{
-						builder.append("(");
-						builder.append("org.eclipse.sensinact.gateway.agent.id=");
-						builder.append(RemoteSensiNact.this.agents.remove(0));
-						builder.append(")");
-					}
-					builder.append(")");
-					RemoteSensiNact.this.mediator.callServices(SnaAgent.class, 
-					builder.toString(), new Executable<SnaAgent, Void>()
-					{
-						@Override
-						public Void execute(SnaAgent snaAgent)
-						        throws Exception
-						{
-							snaAgent.stop();
-							return null;
-						}
-					});
 				}
 				return null;
 			}
 		});
+		this.localAgents.clear();
+
+		this.localEndpoint.close();
+		this.localEndpoint = null;
 	}
 	
 	/**
@@ -512,35 +491,34 @@ public class RemoteSensiNact implements RemoteCore
 	 *  java.lang.String)
 	 */
 	@Override
-	public void registerAgent(final String agentId, 
-			final SnaFilter filter, final String agentKey )
-	{			
-		AccessController.<Void>doPrivileged(new PrivilegedAction<Void>()
+	public void registerAgent(final String remoteAgentId, 
+			final SnaFilter filter, final String publicKey)
+	{
+		String localAgentId = this.localEndpoint.getSession(publicKey
+			).registerSessionAgent(new RemoteSensiNactCallback(
+				remoteAgentId), filter);
+		
+		if(localAgentId!=null)
 		{
-			@Override
-			public Void run()
-			{				
-				final SnaAgentImpl agent = SnaAgentImpl.createAgent(
-					mediator, new RemoteSensiNactCallback(agentId), 
-						filter, agentKey);				
-				Dictionary<String,Object> props = new Hashtable<String,Object>();
-				props.put("org.eclipse.sensinact.gateway.agent.id", agentId);
-			    props.put("org.eclipse.sensinact.gateway.agent.local", false);
-				agent.start(props);
-				return null;
-			}
-		});
+			this.localAgents.put(remoteAgentId, localAgentId);
+		}
 	}
 	
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.RemoteCore#unregisterAgent(java.lang.String)
+	 * @see org.eclipse.sensinact.gateway.core.RemoteCore#
+	 * unregisterAgent(java.lang.String)
 	 */
 	@Override
-	public void unregisterAgent(String agentId)
+	public void unregisterAgent(String remoteAgentId)
 	{
-		this.callAgent(agentId, false, new Executable<SnaAgent,Void>()
+		String localAgentId = this.localAgents.remove(remoteAgentId);
+		if(localAgentId == null)
+		{
+			return;
+		}
+		this.callAgent(localAgentId, false, new Executable<SnaAgent,Void>()
 		{
 			@Override
 			public Void execute(SnaAgent agent) throws Exception
@@ -580,7 +558,8 @@ public class RemoteSensiNact implements RemoteCore
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.RemoteCore#closeSession(java.lang.String)
+	 * @see org.eclipse.sensinact.gateway.core.RemoteCore#
+	 * closeSession(java.lang.String)
 	 */
 	@Override
 	public void closeSession(String publicKey)
@@ -601,11 +580,13 @@ public class RemoteSensiNact implements RemoteCore
 			@Override
 			public Void run()
 			{
-				return RemoteSensiNact.this.mediator.callService(SnaAgent.class, 
-				new StringBuilder().append("(&(org.eclipse.sensinact.gateway.agent.id="
-				).append(agentId).append(")(org.eclipse.sensinact.gateway.agent.local="
-					).append(Boolean.toString(local)).append("))"
-							).toString(),executable);
+				return RemoteSensiNact.this.mediator.callService(
+					SnaAgent.class, new StringBuilder(
+					).append("(&(org.eclipse.sensinact.gateway.agent.id="
+					).append(agentId
+					).append(")(org.eclipse.sensinact.gateway.agent.local="
+					).append(Boolean.toString(local)
+					).append("))").toString(), executable);
 			}
 		});
 	}

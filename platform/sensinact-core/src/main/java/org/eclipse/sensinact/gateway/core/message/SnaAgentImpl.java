@@ -10,15 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
-import org.eclipse.sensinact.gateway.util.stack.StackEngineHandler;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.osgi.framework.ServiceRegistration;
-
 import java.util.Dictionary;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>

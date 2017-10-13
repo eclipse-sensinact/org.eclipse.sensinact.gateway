@@ -59,4 +59,12 @@ public interface AccessNode
      * @return the child AccessNode with the specified path
      */
     AccessNode get(String path);
+    
+    /**
+     * Returns the {@link AccessProfile} applying on this
+     * AccessNode
+     * 
+     * @return this AccessNode's {@link AccessProfile} 
+     */
+    AccessProfile getProfile();
 }

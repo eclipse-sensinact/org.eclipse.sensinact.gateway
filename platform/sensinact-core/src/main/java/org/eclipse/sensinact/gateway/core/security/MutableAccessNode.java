@@ -40,4 +40,10 @@ public interface MutableAccessNode extends AccessNode
       * AccessLevelOption}s
       */
 	 void withAccessProfile(AccessProfile profile);
+	 
+
+	 /**
+	  * @return
+	  */
+	 MutableAccessNode clone();
 }

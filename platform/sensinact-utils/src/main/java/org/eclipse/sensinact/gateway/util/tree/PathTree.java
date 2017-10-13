@@ -10,8 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.util.tree;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
 /**

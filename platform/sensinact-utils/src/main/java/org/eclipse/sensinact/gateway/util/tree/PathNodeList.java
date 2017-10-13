@@ -33,7 +33,17 @@ public class PathNodeList<P extends PathNode<P>> implements Iterable<P>
 	 */
 	protected PathNodeList()
 	{
-		table = new PathNodeBucket<?>[length];
+		clear();
+	}
+
+	/**
+	 * 
+	 */
+	public void clear()
+	{
+		this.length = 5;
+		this.size = 0;
+		this.table = new PathNodeBucket<?>[length];
 	}
 	
 	/**
@@ -220,7 +230,7 @@ public class PathNodeList<P extends PathNode<P>> implements Iterable<P>
     {
     	return size;
     }
-    
+        
 	/**
 	 * @param ic
 	 * @param parent

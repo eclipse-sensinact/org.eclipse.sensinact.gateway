@@ -15,7 +15,13 @@ import org.json.JSONObject;
  * instantiated because of the accesses to the local sensiNact instance 
  * from the remote connected one. It is also in charge of deleting them 
  * when their remote counterpart disappear
- * 
+ * <p/>
+ * RemoteCore data flow:
+ * <p/>
+ * |sensiNact|localendpoint|remotecore|remoteendpoint|remoteendpoint|remotecore|localendpoint|sensiNact|<p/>
+ * |	X ---|-------------|----------|----> X ------|------> X ----|---> X----|-----> X ----|---> X   |<p/>
+ * |	X <--|----- X <----|---- X <--|----- X <-----|------- X <---|----------|-------------|---- |   |
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface RemoteCore extends Endpoint

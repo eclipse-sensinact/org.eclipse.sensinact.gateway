@@ -69,6 +69,16 @@ extends ImmutablePathNode<ImmutableAccessNode> implements AccessNode
     	this.profile = profile;
 	}
 
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.security.AccessNode#getProfile()
+	 */
+	@Override
+	public AccessProfile getProfile()
+	{
+		return this.profile;
+	}
 	
 	/**
      * Defines the Map of available {@link AccessMethod.Type} for all 
