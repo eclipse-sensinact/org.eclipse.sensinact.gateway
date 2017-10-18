@@ -19,6 +19,7 @@ import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.SensiNact;
+import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
@@ -45,8 +46,6 @@ public class Activator extends AbstractActivator<Mediator>
 	@Override
 	public void doStart() throws Exception
 	{    		
-		final Core core = new SensiNact(super.mediator);
-		
 		ServiceReference<ConditionalPermissionAdmin> sRef = super.mediator.getContext(
 				).getServiceReference(ConditionalPermissionAdmin.class);
 
@@ -65,41 +64,43 @@ public class Activator extends AbstractActivator<Mediator>
             "DENY {" + "[org.eclipse.sensinact.gateway.core.security.perm.SensiNactCoreCondition \"%s\" \"!\"]"
                     + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.Core\" \"register\")"
                     + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.RemoteCore\" \"register,get\")"
-                    + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecuredAccess\" \"register,get\")"
-                    + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModel\" \"register,get\")"
+                    + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModel\" \"register,get\")"                    
                     + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement\" \"register,get\")"
                     + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.SnaAgent\" \"register\")"
+                    + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecuredAccess\" \"register,get\")"
+                   // + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.security.signature.api.BundleValidation\" \"register\")"
                     + "} null",
             mediator.getContext().getBundle().getLocation()));
 		piList.add(cpiDeny);
 		
-		ConditionalPermissionInfo cpiAllow = cpa.newConditionalPermissionInfo(String.format(
+		ConditionalPermissionInfo cpiAllow = cpa.newConditionalPermissionInfo(
 			"ALLOW {"
-			       + "[org.eclipse.sensinact.gateway.core.security.perm.SensiNactCoreCondition \"%s\" \"!\"]"
+			       + "[org.eclipse.sensinact.gateway.core.security.perm.SensiNactCoreCondition \"*\"]"
 			       + "(java.security.AllPermission \"\" \"\")" 
-			       + "} null",
-		    mediator.getContext().getBundle().getLocation()));
-		piList.add(cpiAllow);
-
-		ConditionalPermissionInfo cpiAllowCurrent = cpa.newConditionalPermissionInfo(String.format(
-			"ALLOW {"
-		            + "[org.eclipse.sensinact.gateway.core.security.perm.SensiNactCoreCondition \"%s\"]"
-		            + "(java.security.AllPermission \"\" \"\")"
-		            + "} null",
-		    mediator.getContext().getBundle().getLocation()));
-		piList.add(cpiAllowCurrent );   	
+			       + "} null");
+		piList.add(cpiAllow);	
 
 		if (!cpu.commit())
 		{
 			throw new ConcurrentModificationException("Permissions changed during update");
 		}
 		registration = AccessController.doPrivileged(
-		new PrivilegedAction<ServiceRegistration>() {
+		new PrivilegedAction<ServiceRegistration>() 
+		{
 	        @Override
 	        public ServiceRegistration run()
 	        {
-		        return mediator.getContext().registerService(
-		           Core.class.getCanonicalName(),core, null);
+		        try
+				{
+					return mediator.getContext().registerService(
+					   Core.class.getCanonicalName(),  
+					   new SensiNact(mediator) , null);
+				}
+				catch (Exception e)
+				{
+					mediator.error(e);
+				}
+		        return null;
 	        }
         });
 	}
