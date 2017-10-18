@@ -313,13 +313,12 @@ public class TestGenericImplementation extends MidOSGiTest
 		 super.installDynamicBundle(new File(tmpDirectory,
 				 "dynamicBundle.jar").toURI().toURL()).start();
 
-		 Thread.sleep(7000);
+		 Thread.sleep(5000);
 		 MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
 		 Core core = mid.buildProxy();
 		 Session session = core.getAnonymousSession();
 					
-		 Resource resource = session.resource("providerTest", "measureTest",
-		 "condition");
+		 Resource resource = session.resource("providerTest", "measureTest", "condition");
 
 		 MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(resource);
 		 Description description = (Description) midResource.invoke(getDescription, 
@@ -346,19 +345,14 @@ public class TestGenericImplementation extends MidOSGiTest
 				 "dynamicBundle.jar").toURI().toURL()).start();
 
 		 Thread.sleep(5000);
+		 
          MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
 		 Core core = mid.buildProxy();
-		 Session session = core.getAnonymousSession();
-			
+		 Session session = core.getAnonymousSession();	
 
-		 ServiceReference reference = super.getBundleContext(
-					).getServiceReference(StarterService.class);
-		 
 		 MidProxy<StarterService> starter = new MidProxy<StarterService>(
-				 classloader, this, StarterService.class);
-		 
-		 StarterService starterService = starter.buildProxy();	
-		 
+				 classloader, this, StarterService.class);		 
+		 StarterService starterService = starter.buildProxy();		 
 		 starterService.start("weather_7");
 
 		 Thread.sleep(2000);
@@ -417,8 +411,9 @@ public class TestGenericImplementation extends MidOSGiTest
 		  + "file:target/felix/bundle/sensinact-security-none.jar ");
 		
 		configuration.put("felix.auto.start.2",
-			"file:target/felix/bundle/sensinact-core.jar "
-		  + "file:target/felix/bundle/sensinact-signature-validator.jar ");
+		 "file:target/felix/bundle/sensinact-test-configuration.jar "
+		  +  "file:target/felix/bundle/sensinact-signature-validator.jar "
+		  +	"file:target/felix/bundle/sensinact-core.jar ");
 
 		configuration.put("felix.auto.install.3",
 		    "file:target/felix/bundle/dynamicBundle.jar ");

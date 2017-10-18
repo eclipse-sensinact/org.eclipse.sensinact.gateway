@@ -273,6 +273,7 @@ public abstract class MidOSGiTest implements BundleContextProvider
 		if (System.getSecurityManager() == null)
 		{
 			configuration.put("org.osgi.framework.security", "osgi");
+			System.setProperty("java.security.policy", "all.policy");
 		}
 		configuration.put("felix.cache.rootdir", felixDir.getPath());
 		configuration.put("org.osgi.framework.storage", "felix-cache");
@@ -280,6 +281,7 @@ public abstract class MidOSGiTest implements BundleContextProvider
 		configuration.put("org.osgi.framework.system.packages.extra",
 						  "org.eclipse.sensinact.gateway.test,"
 					    + "com.sun.net.httpserver," 
+						+ "javax.activation," 
 						+ "javax.net.ssl,"
 						+ "javax.xml.parsers," 
 						+ "javax.imageio," 
@@ -324,7 +326,8 @@ public abstract class MidOSGiTest implements BundleContextProvider
 				}
 				return super.get(key);
 			}
-		});		
+		});	
+		configuration.put("org.eclipse.sensinact.gateway.test.codeBase", getAllowedCodeBase());	
 		this.doInit(configuration);
 		
 	    final Class<?> factoryClass = classloader.loadClass(FELIX_FRAMEWORK_FACTORY);
@@ -360,5 +363,33 @@ public abstract class MidOSGiTest implements BundleContextProvider
 		Assert.assertTrue(((Integer) bundleClass.getDeclaredMethod(BUNDLE_STATE
 				).invoke(felix)) == Bundle.ACTIVE);	
 	}
+
+	/**
+	 * @return
+	 */
+	protected String getAllowedCodeBase()
+	{
+		String m2 = this.getMavenRepository();
+		String path = "file:".concat(m2.concat("/*"));
+		path = path.concat(",http://felix.extensions:9/");
+		return path;
+	}
 	
+	/**
+	 * @return
+	 */
+	protected String getMavenRepository()
+	{
+		String m2 = System.getenv().get("M2_REPO");
+		if(m2 == null)
+		{
+			m2 = System.getProperty("user.home");
+			m2 = m2.concat(".m2/repository");
+		}		
+		if(!m2.startsWith("/"))
+		{
+			m2="/".concat(m2);
+		}
+		return m2;
+	}
 }

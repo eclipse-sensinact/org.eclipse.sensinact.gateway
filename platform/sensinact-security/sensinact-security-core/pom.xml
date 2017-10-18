@@ -143,6 +143,13 @@
 									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-framework-extension.jar</destFileName>
+								</artifactItem>								
+								<artifactItem>
+									<groupId>org.eclipse.sensinact.gateway.tools</groupId>
+									<artifactId>sensinact-test-configuration</artifactId>
+									<version>${project.version}</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>sensinact-test-configuration.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>

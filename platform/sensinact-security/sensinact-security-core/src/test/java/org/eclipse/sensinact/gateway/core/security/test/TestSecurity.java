@@ -109,7 +109,8 @@ public class TestSecurity extends MidOSGiTest
 				+ "javax.mail,"
 				+ "javax.mail.internet,"
 				+ "javax.management.modelmbean,"
-				+ "javax.management.remote," 
+				+ "javax.management.remote,"
+				+ "javax.xml.parsers,"
 				+ "javax.security.auth," 
 				+ "javax.security.cert,"
 				+ "junit.framework,"
@@ -145,7 +146,8 @@ public class TestSecurity extends MidOSGiTest
 		  + "file:target/felix/bundle/dynamicBundle.jar");
 
 		configuration.put("felix.auto.start.2",
-			"file:target/felix/bundle/sensinact-signature-validator.jar "
+			"file:target/felix/bundle/sensinact-test-configuration.jar "
+		  +	"file:target/felix/bundle/sensinact-signature-validator.jar "
 		  + "file:target/felix/bundle/sensinact-sqlite-connector.jar ");
 
 		configuration.put("felix.auto.start.3",

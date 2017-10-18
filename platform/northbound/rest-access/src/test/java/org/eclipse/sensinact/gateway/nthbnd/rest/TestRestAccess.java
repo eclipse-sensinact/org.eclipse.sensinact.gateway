@@ -88,7 +88,8 @@ public class TestRestAccess extends MidOSGiTest
 		  + "file:target/felix/bundle/sensinact-generic.jar");
 		
 		configuration.put("felix.auto.start.2",
-		  	"file:target/felix/bundle/sensinact-signature-validator.jar "
+		  	"file:target/felix/bundle/sensinact-test-configuration.jar "
+		  + "file:target/felix/bundle/sensinact-signature-validator.jar "
 		  +	"file:target/felix/bundle/sensinact-core.jar ");
 
 		configuration.put("felix.auto.start.3", 

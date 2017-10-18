@@ -234,7 +234,6 @@ AbstractStackEngineHandler<REQUEST>
     @Override
     public void doHandle(REQUEST element)
     {
-    	//System.out.println("DO HANDLE ["+currentDelay+"] " + element);
     	RESPONSE response = null;
 		try
 		{
@@ -290,7 +289,6 @@ AbstractStackEngineHandler<REQUEST>
      */ 
     private void handleError(Exception e, REQUEST element)
     {
-    	//LOG.log(Level.SEVERE, e.getMessage(),e);
 		this.updateDelay();		
 		this.reactivate = true;
 		super.eventEngine.locked(this.getCurrentDelay());

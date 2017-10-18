@@ -26,6 +26,7 @@
 	<name>sensiNact IoT Gateway - Platform Tools</name>
 	
 	<modules>
+		<module>sensinact-test-configuration</module>
 		<module>sensinact-test</module>
 		<!--<module>studio-web</module>-->
 	</modules>

@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.test;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -21,6 +23,11 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
+
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWiring;
 
 public final class FilterOSGiClassLoader extends ClassLoader
 {
@@ -52,6 +59,46 @@ public final class FilterOSGiClassLoader extends ClassLoader
 		return this.loadClass(clazz, false);
 	}
 
+//	private Bundle findBundle(String bundleName)
+//	{		
+//		if ( bundleName != null)
+//		{
+//			Bundle[] bundles  = 
+//				this.contextProvider.getBundleContext().getBundles();
+//			
+//			int index = 0;
+//			int length = bundles == null?0:bundles.length;
+//			for(;index < length; index++)
+//			{
+//				final Bundle tmp = bundles[index];
+//				if(bundleName.equals(tmp.getSymbolicName()))
+//				{
+//					return AccessController.doPrivileged(
+//				    new PrivilegedAction<Bundle>()
+//				    {
+//				    	public Bundle run()
+//				    	{ 
+//				    		Bundle bundle = null;
+//				    		
+//				    		if((tmp.adapt(BundleRevision.class).getTypes() 
+//									& BundleRevision.TYPE_FRAGMENT) != 0
+//								&& tmp.getState()==Bundle.RESOLVED)
+//							{
+//								bundle = findBundle(tmp.getHeaders().get(
+//										Constants.FRAGMENT_HOST));	
+//							} else
+//							{
+//								bundle = tmp;
+//							}
+//							return bundle;
+//				    	}
+//				    });
+//				}
+//			}
+//		}
+//		return null;
+//	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -74,40 +121,31 @@ public final class FilterOSGiClassLoader extends ClassLoader
 //				throw new ClassNotFoundException(classname);
 //			}	
 //			this.loadingClass = classname;				
-//			Bundle[] bundles  = this.contextProvider.getBundleContext().getBundles();
-//			
-//			int index = 0;
-//			int length = bundles == null?0:bundles.length;
-//			for(;index < length; index++)
+//			final Bundle bundle = findBundle(bundleName);	
+//			if(bundle != null)
 //			{
-//				final Bundle bundle = bundles[index];
-//				if(bundleName.equals(bundle.getSymbolicName()))
+//				try
 //				{
-//					try
+//					ClassLoader loader = AccessController.doPrivileged(
+//				    new PrivilegedAction<ClassLoader>()
+//				    {
+//				    	public ClassLoader run()
+//				    	{
+//				    		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+//				    		if(wiring != null)
+//				    		{
+//				    			return wiring.getClassLoader();
+//				    		}
+//							return null;
+//				    	}
+//				    });
+//					if(loader != null)
 //					{
-//						ClassLoader loader = AccessController.doPrivileged(
-//					    new PrivilegedAction<ClassLoader>()
-//					    {
-//					    	public ClassLoader run()
-//					    	{
-//					    		BundleWiring wiring = null;
-//					    		//System.out.println(bundle.getSymbolicName());
-//					    		//System.out.println((
-//					    		wiring = bundle.adapt(BundleWiring.class);
-//					    		//));
-//					    		if(wiring != null)
-//					    		{
-//					    			return wiring.getClassLoader();
-//					    		}
-//					    		return FilterOSGiClassLoader.this.getParent();
-//					    	}
-//					    });
 //						return loader.loadClass(classname);
-//						
-//					} finally
-//					{
-//						this.loadingClass = null;
 //					}
+//				} finally
+//				{
+//					this.loadingClass = null;
 //				}
 //			}
 			return null;
@@ -150,28 +188,26 @@ public final class FilterOSGiClassLoader extends ClassLoader
 //				return null;
 //			}
 //			this.loadingResource = name;
-//			Bundle[] bundles  = this.contextProvider.getBundleContext().getBundles();
-//			
-//			int index = 0;
-//			int length = bundles == null?0:bundles.length;
-//			for(;index < length; index++)
+//			final Bundle bundle = findBundle(bundleName);	
+//			if(bundle != null)
 //			{
-//				final Bundle bundle = bundles[index];
-//				if(bundleName.equals(bundle.getSymbolicName()))
+//				try
 //				{
-//					URL url =  AccessController.doPrivileged(
-//					    		new PrivilegedAction<URL>()
-//					    {
-//					    	public URL run()
-//					    	{
-//								return bundle.getResource(name);
-//					    	}
-//					    });
-//				
+//					URL url  = AccessController.doPrivileged(
+//				    new PrivilegedAction<URL>()
+//				    {
+//				    	public URL run()
+//				    	{
+//							return bundle.getResource(name);
+//				    	}
+//				    });
 //					return url;
+//			
+//				} finally
+//				{
+//					this.loadingResource = null;
 //				}
 //			}
-//			this.loadingResource = null;
 			return null;
 		}
 		return super.findResource(name);

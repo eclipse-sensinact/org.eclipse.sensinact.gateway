@@ -457,7 +457,8 @@ public class TestHttpDevice extends MidOSGiTest
 		  + "file:target/felix/bundle/sensinact-northbound-access.jar ");
 		
 		configuration.put("felix.auto.start.2",
-		    "file:target/felix/bundle/sensinact-core.jar "
+			"file:target/felix/bundle/sensinact-test-configuration.jar "
+		  + "file:target/felix/bundle/sensinact-core.jar "
 		  + "file:target/felix/bundle/sensinact-signature-validator.jar ");
 
 		configuration.put("felix.auto.start.3", 
