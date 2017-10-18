@@ -23,8 +23,6 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
-import org.eclipse.sensinact.gateway.core.security.AccessNode;
-import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessProfile;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
@@ -72,9 +70,11 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	/**
 	 * Constructor
 	 * 
-	 * Defines {@link ServiceProviderImpl} type as the default service provider one 
-	 * Defines {@link ServiceImpl} type as the default service one
-	 * Defines {@link ResourceImpl} type as the default resource one 
+	 * @param mediator the {@link Mediator} allowing the ModelConfiguration 
+	 * to be instantiated to interact with the OSGi host environment
+	 * @param accessTree the {@link AccessTree} defining the access rights 
+	 * applying on the instances of the data model based on the ModelConfiguration
+	 * to be instantiated 
 	 */
 	public ModelConfiguration(Mediator mediator,  
 			MutableAccessTree<? extends MutableAccessNode> accessTree)
@@ -85,9 +85,13 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	/**
 	 * Constructor
 	 * 
-	 * Defines {@link ServiceProviderImpl} type as the default service provider one 
-	 * Defines {@link ServiceImpl} type as the default service one
-	 * Defines {@link ResourceImpl} type as the default resource one 
+	 * @param mediator the {@link Mediator} allowing the ModelConfiguration 
+	 * to be instantiated to interact with the OSGi host environment
+	 * @param accessTree the {@link AccessTree} defining the access rights 
+	 * applying on the instances of the data model based on the ModelConfiguration
+	 * to be instantiated 
+	 * @param defaultResourceConfigBuilder the {@link ResourceConfigBuilder} 
+	 * to be used by default to instantiate new {@link ResourceConfig}s
 	 */
 	public ModelConfiguration(Mediator mediator,  
 			MutableAccessTree<? extends MutableAccessNode> accessTree, 
@@ -100,13 +104,14 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	/**
 	 * Constructor
 	 * 
-	 * @param defaultServiceProviderType
-	 * 		the extended {@link ServiceProviderImpl} type to define as the default 
-	 * 		service provider one
-	 * @param defaultServiceType
-	 * 		the extended {@link ServiceImpl} type to define as the default service one
-	 * @param defaultResourceType
-	 * 		the extended {@link ResourceImpl} type to define as the default resource one 
+	 * @param mediator the {@link Mediator} allowing the ModelConfiguration 
+	 * to be instantiated to interact with the OSGi host environment
+	 * @param accessTree the {@link AccessTree} defining the access rights 
+	 * applying on the instances of the data model based on the ModelConfiguration
+	 * to be instantiated 
+	 * @param defaultServiceProviderType the extended {@link ServiceProviderImpl} type to define as the default 
+	 * @param defaultServiceType the extended {@link ServiceImpl} type to define as the default service one
+	 * @param defaultResourceType the extended {@link ResourceImpl} type to define as the default resource one 
 	 */
 	protected ModelConfiguration(
 			Mediator mediator, 
@@ -122,9 +127,11 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator the {@link Mediator} allowing to interact with the
-	 * OSGi host environment
-	 * @param accessTree 
+	 * @param mediator the {@link Mediator} allowing the ModelConfiguration 
+	 * to be instantiated to interact with the OSGi host environment
+	 * @param accessTree the {@link AccessTree} defining the access rights 
+	 * applying on the instances of the data model based on the ModelConfiguration
+	 * to be instantiated 
 	 * @param defaultResourceConfigBuilder the {@link ResourceConfigBuilder} 
 	 * to be used by default to instantiate new {@link ResourceConfig}s
 	 * @param defaultServiceProviderType the extended {@link ServiceProviderImpl}

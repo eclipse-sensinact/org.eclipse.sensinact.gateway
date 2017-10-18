@@ -126,20 +126,18 @@ public final class SQLiteDataStoreFactory {
 		Statement statement = null;			
 		try
 		{
-			System.out.println("------------------------------------");
-			System.out.println(query);
+//			System.out.println("------------------------------------");
+//			System.out.println(query);
 			statement = connection.createStatement();
 			statement.setQueryTimeout(30);	
 			statement.executeUpdate(query);
-			System.out.println("DONE");
-			System.out.println("------------------------------------");
-
-
+//			System.out.println("DONE");
+//			System.out.println("------------------------------------");
 			
 		} catch(Exception e)
 		{
-			System.out.println("ERROR");
-			System.out.println("------------------------------------");
+//			System.out.println("ERROR");
+//			System.out.println("------------------------------------");
 			LOG.log(Level.SEVERE,e.getMessage(),e);
 			
 		} finally

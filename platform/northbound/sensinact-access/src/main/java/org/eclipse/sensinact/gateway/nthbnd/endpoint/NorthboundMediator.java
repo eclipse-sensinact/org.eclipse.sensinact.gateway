@@ -47,13 +47,23 @@ public class NorthboundMediator extends Mediator
 		public Session execute(Core core) throws Exception
 		{
 			Session s= null;
-			if(this.authentication != null)
-			{ 
-				s=core.getSession(authentication);
-			}
-			if(s==null)
+			try
 			{
-				s= core.getAnonymousSession();
+				if(this.authentication != null)
+				{ 
+					s=core.getSession(authentication);
+					if(s == null)
+					{
+						s = core.getAnonymousSession();
+					}
+				}
+				if(s==null)
+				{
+					s= core.getAnonymousSession();
+				}
+			}catch(Exception e)
+			{
+				e.printStackTrace();
 			}
 			return s;
 		 }
@@ -90,7 +100,6 @@ public class NorthboundMediator extends Mediator
 				super.getContext().getServiceReference(
 						Core.class);
 		Core core = null;
-		
 		if(reference != null && (core = super.getContext(
 				).getService(reference))!=null)
 		{

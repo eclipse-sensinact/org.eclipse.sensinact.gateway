@@ -219,7 +219,6 @@ extends ImmutablePathNode<ImmutableAccessNode> implements AccessNode
 		{
 			MethodAccessibility access =  methodAccesses.get(index);
 			accessible = access==null?false:access.isAccessible();
-			//System.out.println(getPath() + " access : " + access);
 		}
 		return 	accessible;
 	}

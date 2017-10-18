@@ -21,14 +21,11 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.core.security.AccessLevel;
-import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessProfile;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
-import org.eclipse.sensinact.gateway.core.security.ImmutableAccessNode;
-import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
@@ -375,38 +372,44 @@ public class ModelInstanceBuilder
      */
     protected AccessTree<?> buildAccessTree()
     {
-    	final String identifier = this.mediator.callService(
-		BundleValidation.class, new Executable<BundleValidation, String>()
+		return AccessController.<AccessTree<?>>doPrivileged(
+		new PrivilegedAction<AccessTree<?>>() 
 		{
 			@Override
-			public String execute(BundleValidation service) 
-					throws Exception
+			public AccessTree<?> run() 
 			{
-				return service.check(
-					ModelInstanceBuilder.this.mediator.getContext(
-							).getBundle());
-			}
-		});
-    	return this.mediator.callService(
-		SecuredAccess.class, new 
-		Executable<SecuredAccess, AccessTree<?>>()
-		{
-			@Override
-			public AccessTree<?> execute(
-					SecuredAccess service)  throws Exception
-			{
-				AccessTree<? extends AccessNode> accessTree = null;
-				
+				final String identifier = ModelInstanceBuilder.this.mediator.callService(    				
+				BundleValidation.class, new Executable<BundleValidation, String>()
+				{
+					@Override
+					public String execute(BundleValidation service) 
+							throws Exception
+					{
+						return service.check(
+							ModelInstanceBuilder.this.mediator.getContext(
+									).getBundle());
+					}
+				});
+		    	AccessTree<?> tree = null;
 				if(identifier == null)
 				{
-					accessTree = new AccessTreeImpl(mediator
-						).withAccessProfile(AccessProfileOption.DEFAULT);
+					tree = new AccessTreeImpl<>(mediator).withAccessProfile(
+							AccessProfileOption.ALL_ANONYMOUS);
 					
 				} else
 				{
-					accessTree = service.getAccessTree(identifier);
-				}
-				return accessTree;
+			    	tree = ModelInstanceBuilder.this.mediator.callService(
+					SecuredAccess.class, new Executable<SecuredAccess, AccessTree<?>>()
+					{
+						@Override
+						public AccessTree<?> execute(SecuredAccess service) 
+								throws Exception
+						{
+							return service.getAccessTree(identifier);
+						}
+					});
+		    	 }
+				return tree;
 			}
 		});
     }
@@ -423,26 +426,25 @@ public class ModelInstanceBuilder
     	final String name)
     {
     	final AccessProfile accessProfile = this.accessProfile;
+    	
+    	AccessController.<Void>doPrivileged(new PrivilegedAction<Void>() 
+		{
+			@Override
+			public Void run() 
+			{
+		    	final String identifier = ModelInstanceBuilder.this.mediator.callService(
+				BundleValidation.class, new Executable<BundleValidation, String>()
+				{
+					@Override
+					public String execute(BundleValidation service) 
+							throws Exception
+					{
+						return service.check(
+							ModelInstanceBuilder.this.mediator.getContext(
+									).getBundle());
+					}
+				});
 
-    	final String identifier = this.mediator.callService(
-		BundleValidation.class, new Executable<BundleValidation, String>()
-		{
-			@Override
-			public String execute(BundleValidation service) 
-					throws Exception
-			{
-				return service.check(
-					ModelInstanceBuilder.this.mediator.getContext(
-							).getBundle());
-			}
-		});
-		this.mediator.callService(SecuredAccess.class, 
-			new Executable<SecuredAccess, Void>()
-		{
-			@Override
-			public Void execute(SecuredAccess service) 
-			throws Exception
-			{
 				if(identifier == null)
 				{	
 					accessTree.add(UriUtils.getUri(
@@ -452,10 +454,21 @@ public class ModelInstanceBuilder
 
 				} else
 				{
-					service.buildAccessNodesHierarchy(identifier , 
-						name, accessTree);
-				}	
-				return null;
+			    	ModelInstanceBuilder.this.mediator.callService(
+			    	SecuredAccess.class, new Executable<SecuredAccess, Void>()
+					{
+						@Override
+						public Void execute(SecuredAccess service) 
+						throws Exception
+						{
+							service.buildAccessNodesHierarchy(identifier , 
+								name, accessTree);
+							
+							return null;
+						}
+					});
+				}
+		    	return null;
 			}
 		});
     }

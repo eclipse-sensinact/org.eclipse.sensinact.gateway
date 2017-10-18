@@ -22,7 +22,6 @@ import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceRegistration;
 
 class SecuredAccessImpl implements SecuredAccess
@@ -107,7 +106,7 @@ class SecuredAccessImpl implements SecuredAccess
 			String identifier) throws SecuredAccessException
 	{
 		MutableAccessTree<? extends MutableAccessNode> accessTree = 
-			new AccessTreeImpl(mediator).withAccessProfile(
+			new AccessTreeImpl<>(mediator).withAccessProfile(
 			    AccessProfileOption.ALL_ANONYMOUS);	
 		return accessTree;
 	}
@@ -161,7 +160,7 @@ class SecuredAccessImpl implements SecuredAccess
 			{
 				this.authorizationRegistration.unregister();
 				
-			} catch(IllegalStateException e)
+			}  catch(IllegalStateException e)
 			{
 				try
 				{

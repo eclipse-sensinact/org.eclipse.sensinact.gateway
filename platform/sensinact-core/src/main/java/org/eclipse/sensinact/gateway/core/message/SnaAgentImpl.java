@@ -10,14 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Dictionary;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.RemoteCore;
-import org.eclipse.sensinact.gateway.core.SensiNact;
 import org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -260,6 +257,9 @@ implements SnaAgent
 	 */
 	protected Mediator mediator;
 
+	/**
+	 * this SnaAgent service OSGi registration
+	 */
 	protected ServiceRegistration<SnaAgent> registration;
 	
 	/**
@@ -388,26 +388,18 @@ implements SnaAgent
      */
     protected void registerRemote(final String identifier)
     {
-    	AccessController.doPrivileged(new PrivilegedAction<Void>()
-		{
+    	SnaAgentImpl.this.mediator.callServices(
+		RemoteCore.class, new Executable<RemoteCore,Void>()
+	    {
 			@Override
-			public Void run()
+			public Void execute(RemoteCore remoteCore) 
+					throws Exception
 			{
-				SnaAgentImpl.this.mediator.callServices(
-				RemoteCore.class, new Executable<RemoteCore,Void>()
-			    {
-					@Override
-					public Void execute(RemoteCore remoteCore) 
-							throws Exception
-					{
-						SnaAgentImpl.this.registerRemote(
-								remoteCore, identifier);
-						return null;
-					}
-			    });
+				SnaAgentImpl.this.registerRemote(
+						remoteCore, identifier);
 				return null;
 			}
-		});
+	      });
     }
 
     /**

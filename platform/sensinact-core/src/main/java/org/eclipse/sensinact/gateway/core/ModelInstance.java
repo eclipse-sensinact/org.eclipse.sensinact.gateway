@@ -652,7 +652,7 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 	 * is also passed as parameter
 	 *  
 	 * @param modelElement the targeted resource model element	
-	 * @param key the requirer {@link Session}'s key 
+	 * @param pubicKey the requirer user's {@link Session} public key 
 	 * 
 	 * @return the {@link AccessLevelOption} for the specified session and 
 	 * resource

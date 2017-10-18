@@ -1219,8 +1219,6 @@ public abstract class ReflectUtils
   		}
   		return assignables;
   	}
-  	
-  	
   	/**
   	 * Returns the array of existing types from the Bundle
   	 *  passed as  parameter
@@ -1229,9 +1227,9 @@ public abstract class ReflectUtils
   	 * 
   	 * @return the array of types from the specified Bundle
   	 */
-  	public static List<Class<?>> getAllTypes(Bundle bundle)
+  	public static List<String> getAllStringTypes(Bundle bundle)
   	{
-  		List<Class<?>> types = new ArrayList<Class<?>>();
+  		List<String> types = new ArrayList<String>();
   		
   		Enumeration<URL> entries = bundle.findEntries("/","*.class", true);
 		
@@ -1246,16 +1244,40 @@ public abstract class ReflectUtils
 				
 				classname = classname.substring(startIndex, endIndex);					
 				classname = classname.replace('/', '.');
-				try 
-				{
-					Class<?> clazz = bundle.loadClass(classname);
-					types.add(clazz);
-					
-				} catch (ClassNotFoundException ex) 
-				{
-					continue;
-				}
+				types.add(classname);
 	  		}
+  		}
+  		return types;
+  	}
+  	
+  	/**
+  	 * Returns the array of existing types from the Bundle
+  	 *  passed as  parameter
+  	 * 
+  	 * @param bundle the Bundle to search for the types in
+  	 * 
+  	 * @return the array of types from the specified Bundle
+  	 */
+  	public static List<Class<?>> getAllTypes(Bundle bundle)
+  	{
+  		List<String> strTypes = ReflectUtils.getAllStringTypes(bundle);
+  		
+  		List<Class<?>> types = new ArrayList<Class<?>>();
+  		if(strTypes == null || strTypes.size()==0)
+  		{
+  			return types;
+  		}
+  		Iterator<String> iterator = strTypes.iterator();
+  		while(iterator.hasNext())
+  		{
+			try 
+			{
+				types.add(bundle.loadClass(iterator.next()));
+				
+			} catch (ClassNotFoundException ex) 
+			{
+				continue;
+			}
   		}
   		return types;
   	}

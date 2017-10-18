@@ -12,7 +12,7 @@
 package org.eclipse.sensinact.gateway.app.manager.osgi;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
+import org.eclipse.sensinact.gateway.core.Core;
 import org.osgi.framework.*;
 
 import java.util.Dictionary;
@@ -35,19 +35,14 @@ public class AppServiceMediator extends Mediator {
      * Get the secured access from the OSGi registry
      * @return the secured access object
      */
-    public SecuredAccess getSecuredAccess() {
-        ServiceReference[] references = null;
-
-        try {
-            references = super.getContext().getServiceReferences(SecuredAccess.class.getCanonicalName(), null);
-        } catch (InvalidSyntaxException e) {
-            e.printStackTrace();
-        }
-
-        if(references != null) {
-            if(references.length == 1) {
-                return (SecuredAccess) super.getContext().getService(references[0]);
-            }
+    public Core getCore()
+    {
+        ServiceReference<Core> reference = 
+            reference = super.getContext().getServiceReference(Core.class);
+        
+        if(reference != null)
+        {
+           return super.getContext().getService(reference); 
         }
 
         return null;

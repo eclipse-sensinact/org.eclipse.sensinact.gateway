@@ -446,12 +446,20 @@ public class Sessions
 	
 	public Session getSessionFromToken(String token)
 	{
+		if(token == null)
+		{
+			return null;
+		}
 	    return getSession(new KeyExtractor<KeyExtractorType>(
 	    		KeyExtractorType.TOKEN, token));
 	}
 
 	public Session getSessionFromPublicKey(String publicKey)
 	{
+		if(publicKey == null)
+		{
+			return null;
+		}
 	    return getSession(new KeyExtractor<KeyExtractorType>(
 	    		KeyExtractorType.PUBLIC, publicKey));
 	}
