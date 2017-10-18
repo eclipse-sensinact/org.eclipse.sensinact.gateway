@@ -14,14 +14,12 @@ package org.eclipse.sensinact.gateway.core.security.perm;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Dictionary;
-import java.util.Hashtable;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.condpermadmin.Condition;
 import org.osgi.service.condpermadmin.ConditionInfo;
 
@@ -36,9 +34,62 @@ import org.osgi.service.condpermadmin.ConditionInfo;
  */
 public class SensiNactCoreCondition implements Condition
 {
+	private static final class ConditionPod
+	{
+		Condition c = null;
+	}
+	
+	
 	private static final String	CONDITION_TYPE	=
 			"org.eclipse.sensinact.gateway.core.security.perm.SensiNactCoreCondition";
 
+	private static final char ESCAPE = '\\';
+	
+	private static final char WILDCARD = '*';
+	
+	private static final Bundle findBundle(BundleContext context, String name, boolean location)
+	{
+		Bundle bundle = null;
+		if ( name != null && context!=null)
+		{
+			if(location)
+			{
+				bundle = context.getBundle(name);
+				if((bundle.adapt(BundleRevision.class).getTypes() 
+						& BundleRevision.TYPE_FRAGMENT) != 0
+						&& bundle.getState()==Bundle.RESOLVED)
+				{
+					bundle = findBundle(context, bundle.getHeaders().get(
+						Constants.FRAGMENT_HOST), false);	
+				}
+				return bundle;
+			}
+			Bundle[] bundles  = context.getBundles();
+			
+			int index = 0;
+			int length = bundles == null?0:bundles.length;
+			for(;index < length; index++)
+			{
+				final Bundle tmp = bundles[index];
+				if(name.equals(tmp.getSymbolicName()))
+				{
+					if((tmp.adapt(BundleRevision.class).getTypes() 
+						& BundleRevision.TYPE_FRAGMENT) != 0
+						&& tmp.getState()==Bundle.RESOLVED)
+					{
+						bundle = findBundle(context, tmp.getHeaders().get(
+								Constants.FRAGMENT_HOST), false);	
+					} else
+					{
+						bundle = tmp;
+					}
+					break;
+				}
+			}
+		}
+		return bundle;
+	}
+	
 	/**
 	 * Constructs a condition that tries to match the passed Bundle's location
 	 * to the location pattern.
@@ -60,8 +111,7 @@ public class SensiNactCoreCondition implements Condition
 	 *        ignored.
 	 * @return Condition object for the requested condition.
 	 */
-	public static Condition getCondition(final Bundle bundle,
-			final ConditionInfo info) 
+	public static Condition getCondition(final Bundle bundle, final ConditionInfo info) 
 	{
 		if (!CONDITION_TYPE.equals(info.getType()))
 		{
@@ -73,62 +123,122 @@ public class SensiNactCoreCondition implements Condition
 		{
 			throw new IllegalArgumentException("Illegal number of args: " + args.length);
 		}
-		String bundleLocation = AccessController.doPrivileged(
-		new PrivilegedAction<String>() 
+		final char[] expected = info.getArgs()[0].toCharArray();
+		 
+		if(expected.length == 1 && (expected[0]== WILDCARD))
 		{
-			public String run() 
-			{
-				String location = null;
-				if((bundle.adapt(BundleRevision.class
-						).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0)
+			//it means that ACCEPT {["*" "!"]...} will give the same result as DENY {["*"]...}
+			return Condition.TRUE;
+		}		
+		final Condition complies = (info.getArgs().length == 2 
+			&& "!".equals(info.getArgs()[1])) ?Condition.FALSE:Condition.TRUE;
+		final Condition uncomplies = complies.equals(Condition.FALSE)
+				?Condition.TRUE:Condition.FALSE;
+		
+		final ConditionPod pod = new ConditionPod();
+		pod.c = uncomplies;
+		
+		AccessController.doPrivileged(new PrivilegedAction<Void>() 
+		{
+			//TODO: TO BE IMPROVED (A LOT)
+			public Void run() 
+			{	
+				//Is it the right way to do it ? Or is it better to use
+				//the bundle argument classloader ?
+				
+				//retieve the appropriate class loader
+				Bundle b = null;
+				ClassLoader classloader = null;
+				try
 				{
-					String hostName = bundle.getHeaders().get(Constants.FRAGMENT_HOST);
-					if("sensinact-core".equals(hostName) 
-							&& bundle.getState()==Bundle.RESOLVED)
-					{
-						location = info.getArgs()[0];
-						
-					} else
-					{
-						location = bundle.getLocation();
+					b = findBundle(bundle.getBundleContext(), info.getArgs()[0], true);
+					if(b == null)
+					{ 
+						if((bundle.adapt(BundleRevision.class).getTypes() 
+						& BundleRevision.TYPE_FRAGMENT) != 0 
+						&& bundle.getState() == Bundle.RESOLVED)
+						{
+							b = findBundle(bundle.getBundleContext(),
+								bundle.getHeaders().get(Constants.FRAGMENT_HOST), 
+								false);	
+						} else
+						{
+							b = bundle;
+						}
 					}
-				} else
+					classloader = b.adapt(BundleWiring.class).getClassLoader();
+					
+				} catch(Exception e)
 				{
-					location = bundle.getLocation();
+					classloader = SensiNactCoreCondition.class.getClassLoader();
 				}
-				return location;
+				//search into the current thread's calls stack the one 
+				//coming from the allowed code base
+				StackTraceElement[] stacktraceElements = Thread.currentThread().getStackTrace();
+				
+				for(StackTraceElement e : stacktraceElements)
+				{
+					Class<?> c = null;
+					try
+					{
+						c = classloader.loadClass(e.getClassName());
+						if(c == null)
+						{
+							continue;
+						}
+						char[] ccs = c.getProtectionDomain(
+							).getCodeSource().getLocation().toString(
+									).toCharArray();
+						
+						int index = 0;
+						//TODO: handle escape char
+						for(;;)
+						{
+							if(index >= ccs.length 
+							|| index >= expected.length)
+							{
+								break;
+							}
+							if(expected[index] == WILDCARD)
+							{
+								index++;
+								break;
+							}
+							if(ccs[index] != expected[index])
+							{
+								index=0;
+								break;
+							}
+							index++;
+						}
+						if(index > 0)
+						{
+							pod.c = complies;
+							break;
+						}
+					}
+					catch (Exception ex)
+					{
+						continue;
+					}
+//						if(c!=null)
+//						{
+//							System.out.println(e.getClassName() + " / " + 
+//							c.getProtectionDomain().getCodeSource().getLocation().toString() + " / " +
+//							info.getArgs()[0]);
+//						}
+					
+				}
+				return null;
 			}
-		});
-		
-		Filter filter = null;
-		try
-		{
-			filter = FrameworkUtil.createFilter("(location="
-					+ escapeLocation(args[0]) + ")");
-		}
-		catch (InvalidSyntaxException e)
-		{
-			// this should never happen, but just in case
-			throw new RuntimeException("Invalid filter: " + e.getFilter(), e);
-		}
-		if(bundleLocation == null)
-		{
-			return Condition.FALSE;
-		}
-		Dictionary<String, String> matchProps = new Hashtable<String, String>(2);
-		matchProps.put("location", bundleLocation);
-		
-		boolean negate = (args.length == 2) ? "!".equals(args[1]) : false;
-		
-		return (negate ^ filter.match(matchProps)) ? Condition.TRUE
-				: Condition.FALSE;
+		});	
+		return pod.c;
 	}
 
 	private Bundle bundle;
 	private ConditionInfo info;
 
-	private SensiNactCoreCondition()
-	{}
+	private SensiNactCoreCondition(){}
 	
 
 	public SensiNactCoreCondition(Bundle bundle, ConditionInfo info)
@@ -136,44 +246,6 @@ public class SensiNactCoreCondition implements Condition
 		this.bundle = bundle;
 		this.info = info;
 	}
-	
-	/**
-	 * Escape the value string such that '(', ')' and '\' are escaped. The '\'
-	 * char is only escaped if it is not followed by a '*'.
-	 * 
-	 * @param value unescaped value string.
-	 * @return escaped value string.
-	 */
-	private static String escapeLocation(final String value) {
-		boolean escaped = false;
-		int inlen = value.length();
-		int outlen = inlen << 1; /* inlen * 2 */
-
-		char[] output = new char[outlen];
-		value.getChars(0, inlen, output, inlen);
-
-		int cursor = 0;
-		for (int i = inlen; i < outlen; i++) {
-			char c = output[i];
-			switch (c) {
-				case '\\' :
-					if (i + 1 < outlen && output[i + 1] == '*')
-						break;
-				case '(' :
-				case ')' :
-					output[cursor] = '\\';
-					cursor++;
-					escaped = true;
-					break;
-			}
-
-			output[cursor] = c;
-			cursor++;
-		}
-
-		return escaped ? new String(output, 0, cursor) : value;
-	}
-
 
 	/**
 	 * @inheritDoc
