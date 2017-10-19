@@ -32,7 +32,7 @@ import org.json.JSONObject;
 public class WsServiceTestClient implements Runnable
 {
 
-	String destUri = "ws://localhost:8091/ws/sensinact";
+	String destUri = "ws://localhost:8093/ws/sensinact";
 	WebSocketClient client = null;
 	Session session;
 	AtomicBoolean available;
