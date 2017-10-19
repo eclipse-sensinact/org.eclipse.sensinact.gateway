@@ -16,9 +16,8 @@ import java.util.Map;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.core.security.Sessions.SessionObserver;
-import org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -29,7 +28,6 @@ import org.json.JSONObject;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class AbstractRemoteEndpoint 
-extends AbstractStackEngineHandler<SnaMessage<?>> 
 implements RemoteEndpoint, SessionObserver
 {
 
@@ -89,9 +87,9 @@ implements RemoteEndpoint, SessionObserver
 	//********************************************************************//
 	
 	protected final Mediator mediator;
-	protected final RemoteCore remoteCore;
 	protected final String localNamespace;
 	
+	protected RemoteCore remoteCore;
 	protected boolean connected;	
 	protected Map<String, Recipient> recipients;
 	protected Executable<String, Void> onConnectedCallback;
@@ -108,10 +106,8 @@ implements RemoteEndpoint, SessionObserver
 	 * @param localNamespace the String namespace of the local sensiNact
 	 * gateway instance
 	 */
-	public AbstractRemoteEndpoint(Mediator mediator, 
-			RemoteCore remoteCore, String localNamespace)
+	public AbstractRemoteEndpoint(Mediator mediator, String localNamespace)
 	{
-		this.remoteCore = remoteCore;
 		this.mediator = mediator;
 		this.recipients = new HashMap<String,Recipient>();
 		this.connected = false;
@@ -139,32 +135,6 @@ implements RemoteEndpoint, SessionObserver
 	{
 		this.onDisconnectedCallback = onDisconnectedCallback;
 	}	
-	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see fr.cea.sna.gateway.core.model.message.Recipient#
-	 * callback(java.lang.String, fr.cea.sna.gateway.core.message.SnaMessage[])
-	 */
-	public void callback(String callbackId, SnaMessage[] messages) throws Exception
-	{
-		Recipient recipient = this.recipients.get(callbackId);
-		if(recipient != null)
-		{
-			recipient.callback(callbackId, messages);
-		}
-	}
-	
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see fr.cea.sna.gateway.core.model.message.MessageRegisterer#
-	 * createRemoteCore(fr.cea.sna.gateway.core.message.SnaMessage)
-	 */
-	public void register(SnaMessage<?> message)
-	{
-		super.eventEngine.push(message);
-	}
 
 	/**
 	 * @inheritDoc
@@ -200,15 +170,22 @@ implements RemoteEndpoint, SessionObserver
 	 * @see fr.cea.sna.gateway.core.RemoteEndpoint#connect()
 	 */
 	@Override
-	public void connect() 
+	public boolean connect(RemoteCore remoteCore) 
 	{
 		if(this.connected)
 		{
 			mediator.debug("Endpoint already connected");
-			return;
+			return true;
 		}
 		this.connected = true;
+		this.remoteCore = remoteCore;
 		this.doConnect();
+		
+		if(!this.connected)
+		{
+			mediator.debug("Endpoint is not connected");
+			return false;
+		}
 		if(this.onConnectedCallback!=null)
 		{
 			try 
@@ -220,6 +197,7 @@ implements RemoteEndpoint, SessionObserver
 				mediator.error(e.getMessage(),e);
 			}
 		}
+		return true;
 	}   
 
 	/**
@@ -234,6 +212,10 @@ implements RemoteEndpoint, SessionObserver
 			String serviceProviderId, String serviceId,
 	        String resourceId, Recipient recipient, JSONArray conditions)
 	{
+		if(!this.connected)
+		{
+			return null;
+		}
 		JSONObject response = this.doSubscribe(publicKey, 
 				serviceProviderId, serviceId, 
 				resourceId, conditions);
@@ -269,7 +251,10 @@ implements RemoteEndpoint, SessionObserver
 	 */
 	public void diseappearing(String publicKey)
 	{
-		this.closeSession(publicKey);
+		if(this.connected)
+		{
+			this.closeSession(publicKey);
+		}
 	}
 }
 

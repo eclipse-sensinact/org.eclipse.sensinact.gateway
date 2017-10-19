@@ -18,17 +18,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Changed;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.MaxLength;
@@ -43,21 +38,16 @@ import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.LocationResource;
 import org.eclipse.sensinact.gateway.core.Metadata;
-import org.eclipse.sensinact.gateway.core.ModelConfiguration;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
-import org.eclipse.sensinact.gateway.core.ModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.core.PropertyResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
-import org.eclipse.sensinact.gateway.core.SensiNact;
-import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
 import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.StateVariableResource;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
@@ -77,14 +67,9 @@ import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
 import org.eclipse.sensinact.gateway.core.method.trigger.Constant;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
-import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.Session;
-import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
-import org.eclipse.sensinact.gateway.security.signature.exception.BundleValidationException;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -93,15 +78,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.log.LogService;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import junit.framework.Assert;
@@ -109,7 +87,7 @@ import junit.framework.Assert;
 /**
  * Test ResourceFactory
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes"})
 public class TestResourceBuilder<R extends ModelInstance>
 { 
 	protected TestContext testContext;
@@ -218,16 +196,31 @@ public class TestResourceBuilder<R extends ModelInstance>
 
         Thread.sleep(500);
 
-        Assert.assertEquals("the message should have been processed even if the value has not changed",
-        	1, this.testContext.getExtraCallbackCount());
+        Assert.assertEquals(1, this.testContext.getExtraCallbackCount());
         
     	ResourceImpl r2impl = service.addDataResource(PropertyResource.class, 
     		"TestProperty2", String.class, null); 
     	
-        //PropertyResource r2 = r2impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);        		
         ResourceImpl r3impl = service.addLinkedResource("LinkedProperty", r1impl);
-    	//PropertyResource r3 = r3impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);
+    	
+        //test linked resource
+        JSONAssert.assertEquals(
+        	session.get("serviceProvider", "testService",
+            "TestProperty", null).getJSONObject("response"),
+        	session.get("serviceProvider", "testService",
+        	"LinkedProperty", DataResource.VALUE).getJSONObject("response"),
+        	false);
+        
+        session.set("serviceProvider", "testService", 
+            "LinkedProperty", DataResource.VALUE, "testLink");
 
+        JSONAssert.assertEquals(
+            	session.get("serviceProvider", "testService",
+                "TestProperty", DataResource.VALUE).getJSONObject("response"),
+            	session.get("serviceProvider", "testService",
+            	"LinkedProperty", null).getJSONObject("response"),
+            	false);
+        
     	service.addLinkedResource(LocationResource.LOCATION,
     		this.testContext.getModelInstance().getRootElement(
     				).getAdminService().getResource(
@@ -257,8 +250,7 @@ public class TestResourceBuilder<R extends ModelInstance>
         		AccessMethodExecutor.ExecutionPolicy.AFTER);
 
         String attributeValue = (String) r4impl.getAttribute("value").getValue();       
-   	    //LocationResource r4 = r4impl.<LocationResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);    	 
-   	    
+   	   
    	    Thread.sleep(250);
    	
         StringBuilder buffer = new StringBuilder();
@@ -271,139 +263,134 @@ public class TestResourceBuilder<R extends ModelInstance>
         assertEquals(buffer.toString(), message.getJSONObject("response"
         		).getString(DataResource.VALUE));
         
-        //test linked resource
-        JSONAssert.assertEquals(
-        	session.get("serviceProvider", "testService",
-            "TestProperty", null).getJSONObject("response"),
-        	session.get("serviceProvider", "testService",
-        	"LinkedProperty", DataResource.VALUE).getJSONObject("response"),
-        	false);
+        //test subscription
+        String subId = session.subscribe("serviceProvider", "testService", 
+    	"TestProperty2",  new Recipient()
+		{
+			@Override
+			public void callback(String callbackId, 
+					SnaMessage[] messages) throws Exception
+            {
+				TestResourceBuilder.this.testContext.callbackInc();	
+            }
+
+			@Override
+            public String getJSON()
+            {
+	            return null;
+            }
+
+			@Override
+            public SnaCallback.Type getSnaCallBackType()
+            {
+	            return  SnaCallback.Type.UNARY;
+            }
+
+			@Override
+            public long getLifetime()
+            {
+	            return -1;
+            }
+
+			@Override
+            public int getBufferSize()
+            {
+	            return 0;
+            }
+
+			@Override
+            public int getSchedulerDelay()
+            {
+	            return 0;
+            }
+		}, null).getJSONObject("response"
+		).getString("subscriptionId");
+                
+        session.subscribe("serviceProvider", "testService", 
+    	"LinkedProperty",  new Recipient()
+		{
+			@Override
+			public void callback(String callbackId, 
+					SnaMessage[] messages) throws Exception
+            {
+				TestResourceBuilder.this.testContext.linkCallbackInc();
+            }
+
+			@Override
+            public String getJSON()
+            {
+	            return null;
+            }
+
+			@Override
+            public SnaCallback.Type getSnaCallBackType()
+            {
+	            return  SnaCallback.Type.UNARY;
+            }
+
+			@Override
+            public long getLifetime()
+            {
+	            return -1;
+            }
+
+			@Override
+            public int getBufferSize()
+            {
+	            return 0;
+            }
+
+			@Override
+            public int getSchedulerDelay()
+            {
+	            return 0;
+            }
+		}, null);  
+
+        JSONObject set1 = session.set("serviceProvider", "testService", 
+            	"TestProperty2", null, "property3"
+            	).getJSONObject("response");
         
-        r1.set(new Object[]{"testLink"}).getJSON();
+        Thread.sleep(250); 
+
+        JSONObject set2 = session.set("serviceProvider", "testService", 
+            	"TestProperty2", DataResource.VALUE, "property3"
+            	).getJSONObject("response");
+        
+        Assert.assertEquals(set1.get(DataResource.VALUE),set2.get(DataResource.VALUE)); 
+        
+        JSONObject set3 = session.set("serviceProvider", "testService", 
+            	"TestProperty", DataResource.VALUE, "TEST LINKED SUBSCRIPTION"
+            	).getJSONObject("response");
+        
+        Thread.sleep(250);
+        
+        long time1 = (Long)set1.get(Metadata.TIMESTAMP);
+        long time2= (Long)set2.get(Metadata.TIMESTAMP);
+
+        Thread.sleep(500); 
+        Assert.assertTrue(time1 != time2);  
+        assertEquals(1, this.testContext.getCallbackCount()); 
         
         session.set("serviceProvider", "testService", 
-            "LinkedProperty", DataResource.VALUE, "testLink");
+        "TestProperty2", null, "property5").getJSONObject("response");
+        Thread.sleep(500);
+        assertEquals(2, this.testContext.getCallbackCount()); 
+        
+        String filter ="/serviceProvider/testService/TestProperty2/value";        
+        org.junit.Assert.assertEquals(1, ((MyModelInstance)this.testContext.getModelInstance()
+        		).getHandler().count(filter));
+        
+        session.unsubscribe("serviceProvider", "testService","TestProperty2", subId);
+        
+        org.junit.Assert.assertEquals(0, ((MyModelInstance)this.testContext.getModelInstance()
+        		).getHandler().count(filter));
+        
+	    Service proxy = service.<Service>getProxy(SecuredAccess.ANONYMOUS_PKEY);
+        SetResponse error = proxy.set("location","unknown");
+        assertTrue(error.getStatusCode()==403); 
 
-        JSONAssert.assertEquals(
-            	session.get("serviceProvider", "testService",
-                "TestProperty", DataResource.VALUE).getJSONObject("response"),
-            	session.get("serviceProvider", "testService",
-            	"LinkedProperty", null).getJSONObject("response"),
-            	false);
-//
-//        //test subscription
-//        String subId = ((SubscribeResponse)r2.subscribe(
-//        		new Recipient()
-//        		{
-//					@Override
-//					public void callback(String callbackId, 
-//							SnaMessage[] messages) throws Exception
-//		            {
-//						TestResourceBuilder.this.callbackInc();	
-//		            }
-//		
-//					@Override
-//		            public String getJSON()
-//		            {
-//			            return null;
-//		            }
-//		
-//					@Override
-//		            public SnaCallback.Type getSnaCallBackType()
-//		            {
-//			            return  SnaCallback.Type.UNARY;
-//		            }
-//		
-//					@Override
-//		            public long getLifetime()
-//		            {
-//			            return -1;
-//		            }
-//		
-//					@Override
-//		            public int getBufferSize()
-//		            {
-//			            return 0;
-//		            }
-//		
-//					@Override
-//		            public int getSchedulerDelay()
-//		            {
-//			            return 0;
-//		            }
-//			})).getResponse(String.class,"subscriptionId");
-//                
-//         r3.subscribe(
-//        		new Recipient()
-//        		{
-//					@Override
-//					public void callback(String callbackId, 
-//							SnaMessage[] messages) throws Exception
-//		            {
-//						TestResourceBuilder.this.linkCallbackInc();
-//		            }
-//		
-//					@Override
-//		            public String getJSON()
-//		            {
-//			            return null;
-//		            }
-//		
-//					@Override
-//		            public SnaCallback.Type getSnaCallBackType()
-//		            {
-//			            return  SnaCallback.Type.UNARY;
-//		            }
-//		
-//					@Override
-//		            public long getLifetime()
-//		            {
-//			            return -1;
-//		            }
-//		
-//					@Override
-//		            public int getBufferSize()
-//		            {
-//			            return 0;
-//		            }
-//		
-//					@Override
-//		            public int getSchedulerDelay()
-//		            {
-//			            return 0;
-//		            }
-//			});   
-//        JSONObject set1 = r2.set("property3").getResponse();
-//        Thread.sleep(250); 
-//        
-//        JSONObject set2 = r2.set("value","property3").getResponse();
-//        
-//        Assert.assertEquals(set1.get(DataResource.VALUE),set2.get(DataResource.VALUE)); 
-//
-//        JSONObject set3 = r1.set("value", "TEST LINKED SUBSCRIPTION").getResponse();
-//        Thread.sleep(250);
-//        
-//        long time1 = (Long)set1.get(Metadata.TIMESTAMP);
-//        long time2= (Long)set2.get(Metadata.TIMESTAMP);
-//
-//        Thread.sleep(500); 
-//        Assert.assertTrue(time1 != time2);  
-//        assertEquals(1, callbackCount); 
-//        
-//        r2.set("value","property5").getJSON();
-//        Thread.sleep(500); 
-//        assertEquals(2, callbackCount);
-//        
-//        String filter ="/serviceProvider/testService/TestProperty2/value";        
-//        org.junit.Assert.assertEquals(1, instance.getHandler().count(filter));
-//        r2.unsubscribe(subId);
-//        org.junit.Assert.assertEquals(0, instance.getHandler().count(filter));
-//
-//	      Service proxy = service.<Service>getProxy(SecuredAccess.ANONYMOUS_PKEY);
-//        SetResponse error = proxy.set("location","unknown");
-//        assertTrue(error.getStatusCode()==403); 
-//
-//        assertEquals(1, linkCallbackCount);         
+        assertEquals(1, this.testContext.getLinkCallbackCount());         
     }
 	 
     @Test
@@ -498,7 +485,17 @@ public class TestResourceBuilder<R extends ModelInstance>
     		this.testContext.getModelInstance().getRootElement(
     			).getAdminService().getResource(
 				LocationResource.LOCATION));
-    	
+
+        //test linked resource
+        JSONAssert.assertEquals(((GetResponse) r1.get()).getResponse(),
+                ((GetResponse) r3.get()).getResponse(), false);
+        
+        r1.set("testLink");
+        
+        JSONAssert.assertEquals(((GetResponse) r1.get()).getResponse(),
+                ((GetResponse) r3.get()).getResponse(), false);
+
+        
     	ResourceImpl r4impl = service.getResource("location");
 
         r4impl.registerExecutor(
@@ -536,15 +533,6 @@ public class TestResourceBuilder<R extends ModelInstance>
         JSONObject object = ((GetResponse)message).getResponse();
         assertEquals(buffer.toString(), object.getString(DataResource.VALUE));
         
-        //test linked resource
-        JSONAssert.assertEquals(((GetResponse) r1.get()).getResponse(),
-                ((GetResponse) r3.get()).getResponse(), false);
-        
-        r1.set(new Object[]{"testLink"}).getJSON();
-        
-        JSONAssert.assertEquals(((GetResponse) r1.get()).getResponse(),
-                ((GetResponse) r3.get()).getResponse(), false);
-
         //test subscription
         String subId = ((SubscribeResponse)r2.subscribe(
         		new Recipient()

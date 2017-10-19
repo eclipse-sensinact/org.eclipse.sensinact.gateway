@@ -122,5 +122,6 @@
         <module>sensinact-system</module>
 		<module>sensinact-shell</module>
         <module>sensinact-application</module>
+        <module>sensinact-remote</module>
 	</modules>
 </project>

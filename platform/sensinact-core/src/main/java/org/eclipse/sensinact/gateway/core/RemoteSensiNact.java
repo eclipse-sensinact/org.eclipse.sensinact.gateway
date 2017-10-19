@@ -163,9 +163,9 @@ public class RemoteSensiNact implements RemoteCore
 		this.localAgents = new HashMap<String,String>();
 		
 		this.remoteEndpoint = remoteEndpoint;
-		if(this.remoteEndpoint == null)
+		if(this.remoteEndpoint == null || !this.remoteEndpoint.connect(this))
 		{
-			throw new NullPointerException("No remote endpoint");
+			throw new NullPointerException("No remote endpoint connected");
 		}
 		this.localEndpoint = localEndpoint;
 	}

@@ -25,6 +25,7 @@ import org.eclipse.sensinact.gateway.common.constraint.Changed;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
 import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
+import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.common.props.TypedProperties;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage.Type;
 
@@ -35,7 +36,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage.Type;
  *  
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class SnaFilter 
+public class SnaFilter implements JSONable
 {		
 	/**
 	 * List of handled {@link SnaMessage.Type}s
@@ -491,6 +492,45 @@ public class SnaFilter
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * @return
+	 */
+	public JSONObject toJSONObject()
+	{
+		JSONObject object = new JSONObject();
+		JSONArray array = new JSONArray();
+		
+		Iterator<Type> iterator = this.handledTypes.iterator();
+		while(iterator.hasNext())
+		{
+			array.put(iterator.next().name());
+		}
+		object.put("types", array);
+		object.put("sender", this.sender);
+		object.put("pattern", this.isPattern);
+		object.put("complement", this.isComplement);
+		
+		array = new JSONArray();
+		Iterator<Constraint> constraints = this.conditions.iterator();
+		while(constraints.hasNext())
+		{
+			array.put(new JSONObject(constraints.next().getJSON()));
+		}
+		object.put("conditions", array);
+		return object;
+	}
+	
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.common.primitive.JSONable#getJSON()
+	 */
+	@Override
+	public String getJSON()
+	{
+		return toJSONObject().toString();
 	}
 
 }

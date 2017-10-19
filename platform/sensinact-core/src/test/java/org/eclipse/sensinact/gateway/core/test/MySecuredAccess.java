@@ -66,7 +66,7 @@ class MySecuredAccess implements SecuredAccess
 	        throws SecuredAccessException
 	{				
 		MutableAccessTree<? extends MutableAccessNode> accessTree = 
-			new AccessTreeImpl(mediator).withAccessProfile(
+			new AccessTreeImpl<>(mediator).withAccessProfile(
 			    AccessProfileOption.ALL_ANONYMOUS);	
 		return accessTree;
 	}

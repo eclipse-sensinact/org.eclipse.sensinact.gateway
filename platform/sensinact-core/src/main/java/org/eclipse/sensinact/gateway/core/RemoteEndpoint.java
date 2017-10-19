@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.core;
 
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.message.MessageRegisterer;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
@@ -23,13 +22,17 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
  *  
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface RemoteEndpoint extends Endpoint, Recipient, MessageRegisterer
+public interface RemoteEndpoint extends Endpoint, Recipient
 {
 	/**
 	 * Connects this RemoteEndpoint to one provided by a remote
 	 * sensiNact instance 
+	 * 
+	 * @param remoteCore
+	 * 
+	 * @return
 	 */
-	void connect();
+	boolean connect(RemoteCore remoteCore);
 
 	/**
 	 * Disconnects this RemoteEndpoint from the one provided by the remote
