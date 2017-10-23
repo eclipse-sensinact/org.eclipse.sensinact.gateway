@@ -30,15 +30,7 @@ import org.eclipse.sensinact.gateway.util.PropertyUtils;
  */
 public abstract class AbstractActivator<M extends Mediator> implements BundleActivator 
 {
-	public static final String SENSINACT_CONFIG_FILE = "sensiNact-conf.xml";
 	public static final String DEFAULT_BUNDLE_PROPERTY_FILEDIR="felix.fileinstall.dir";
-
-	/**
-	 * Completes the starting process, this alternative method allows extentions to override this method and receive properties declared in cfg file.
-	 */
-	public void doStart(Dictionary<String,String> properties) throws Exception {
-		doStart();
-	}
 
 	/**
 	 * Completes the starting process 
@@ -82,44 +74,45 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 	 * start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception 
-	{
-		Properties properties = new Properties();
-
-		 URL config  =  context.getBundle().getResource(
-				 SENSINACT_CONFIG_FILE);
-		 
-		 if(config != null)
-		 {
-			 InputStream input = config.openStream();  
-			 properties.loadFromXML(input);
-			 input.close();
-		 }
+	{		
 	     //initialize fields
-	     this.properties = properties;
-	     this.mediator = this.initMediator(context);
+	    this.properties = new Properties();
 
 		/** Integrate local bundle property **/
 		final Dictionary<String,String> bundleProperties=loadBundleProperties(context);
 		Enumeration<String> enumProperties=bundleProperties.keys();
-		while(enumProperties.hasMoreElements()){
+		while(enumProperties.hasMoreElements())
+		{
 			final String key=enumProperties.nextElement();
 			final String value=bundleProperties.get(key);
-
-			try {
+			try 
+			{
 				this.properties.setProperty(key,value);
-			}catch(NullPointerException cpe){
-				cpe.printStackTrace();
-				this.mediator.log(LogService.LOG_WARNING,String.format("Failed to set property/value for the local abstract activator properties"));
+				
+			}catch(NullPointerException cpe)
+			{
+				this.mediator.log(LogService.LOG_WARNING,String.format(
+				"Failed to set property/value for the local abstract activator properties"));
 			}
-
 		}
-
+		this.mediator = this.initMediator(context);
 		injectPropertyFields(context);
-
+		
 		//complete starting process
-		 this.doStart(bundleProperties);
+		this.doStart(bundleProperties);
 	}
 
+	/**
+	 * Completes the starting process, this alternative method 
+	 * allows extentions to override this method and receive 
+	 * properties declared in cfg file.
+	 */
+	public void doStart(Dictionary<String,String> properties) 
+			throws Exception 
+	{
+		doStart();
+	}
+	
 	private void injectPropertyFields(BundleContext context){
 
 		this.mediator.debug("Starting introspection in bundle %s", context.getBundle().getSymbolicName());
@@ -252,29 +245,11 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 	 * @ 
 	 * @throws IOException 
 	 */
-	protected M initMediator(BundleContext context) 
-			
+	protected M initMediator(BundleContext context)			
 	{
-		 M mediator = doInstantiate(context);
-		 
-		 String logLevel = PropertyUtils.getProperty(
-				 context, this.properties, "log.level");
-		
-		 if(logLevel != null)
-		 {		
-			 int level = LogExecutor.LOG_INFO;
-			 try
-			 {
-				 level = Integer.parseInt(logLevel);
-				 mediator.setLogLevel(level);
-				 
-			 } catch(NumberFormatException e)
-			 {
-				 level = LogExecutor.NO_LOG;
-			 }
-		 } 
-		 if(this.properties != null)
-		 {
+		M mediator = doInstantiate(context);		
+		if(this.properties != null)
+		{
 			 Iterator<Entry<Object, Object>> iterator = 
 					 this.properties.entrySet().iterator();
 			 
@@ -287,10 +262,9 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 							 entry.getValue());
 				 }
 			 }
-			 
-		 }
-
-		 return mediator;
+		}
+		mediator.init();
+		return mediator;
 	}
 
 }

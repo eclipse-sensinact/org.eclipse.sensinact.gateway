@@ -11,6 +11,8 @@
 
 package org.eclipse.sensinact.gateway.common.bundle;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,8 +37,11 @@ import org.eclipse.sensinact.gateway.util.PropertyUtils;
 /**
  * Mediator Pattern Architecture purpose
  */
-public class Mediator implements ManagedConfigurationListener
+public class Mediator
 {
+
+	public static final String SENSINACT_CONFIG_FILE = "sensiNact-conf.xml";
+	
 	/**
      * ThreadLocal {@link ServiceCaller} used to interact
      * with the OSGi host environment by calling and
@@ -75,19 +80,36 @@ public class Mediator implements ManagedConfigurationListener
 		this.properties = new Properties();
 		this.customizers = new HashMap<String, TrackerCustomizer<?>>();
 		this.trackers = new ArrayList<ServiceTracker<?,?>>();
-		this.registrations = new ArrayList<ServiceRegistration<?>>();
-		
+		this.registrations = new ArrayList<ServiceRegistration<?>>();		
+		try 
+		{
+			URL config  =  context.getBundle(
+			 ).getResource(SENSINACT_CONFIG_FILE);
+			
+			if(config != null)
+			{
+				InputStream input;
+				input = config.openStream();
+				properties.loadFromXML(input);
+				input.close();
+			}
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		}  
 		String managed = (String) this.getProperty(
-				MediatorManagedConfiguration.MANAGED_SENSINACT_MODULE);
-		
+			MediatorManagedConfiguration.MANAGED_SENSINACT_MODULE);
+			
 		if(managed!=null && Boolean.parseBoolean(managed))
 		{
 			this.configuration = new MediatorManagedConfiguration(this, 
-				context.getBundle().getSymbolicName());
-			
+				context.getBundle().getSymbolicName().replace('-', '.'));			
 			this.configuration.register();
-			this.configuration.addListener(this);
 		}
+	}
+
+	protected void init()
+	{
 	    String logLevelStr = (String) this.getProperty("felix.log.level");
 	    try
 	    {
@@ -99,7 +121,7 @@ public class Mediator implements ManagedConfigurationListener
 	    	this.setLogLevel(LogExecutor.DEFAULT_LOG_LEVEL);
 	    }
 	}
-
+	
 	/**
 	 * Adds a {@link ManagedConfigurationListener} to be notified
 	 * when the properties of this this Mediator's
@@ -572,22 +594,6 @@ public class Mediator implements ManagedConfigurationListener
 				Mediator.this.properties, 
 				property);
 	}
-
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see ManagedConfigurationListener#
-	 * updated(java.util.Dictionary)
-	 */
-	public void updated(Dictionary<String, ?> props)
-	{
-		Enumeration<String> keys = props.keys();
-		while(keys.hasMoreElements())
-		{
-			String key = keys.nextElement();
-			this.setProperty(key, props.get(key));
-		}
-	}
 	
 	/**
 	 * Adds a property entry to this Mediator
@@ -603,6 +609,8 @@ public class Mediator implements ManagedConfigurationListener
 		{
 			return;
 		}
+		
+		System.out.println(property + " : " + value);
 		this.properties.put(property, value);
 	}
 

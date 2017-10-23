@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.common.bundle;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +35,9 @@ class MediatorManagedConfiguration implements ManagedService
 	//********************************************************************//
 	//						STATIC DECLARATIONS							  //
 	//********************************************************************//
+	
 	public static final String MANAGED_SENSINACT_MODULE = "org.eclipse.sensinact.gateway.managed";
+
 	//********************************************************************//
 	//						INSTANCE DECLARATIONS						  //
 	//********************************************************************//
@@ -101,7 +104,7 @@ class MediatorManagedConfiguration implements ManagedService
 	 * @return the default set of configuration properties
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Hashtable getDefaults()
+	private Dictionary<String, Object> getDefaults()
 	{
 		Hashtable defaults = new Hashtable();
 	    defaults.put(Constants.SERVICE_PID, pid);
@@ -112,7 +115,6 @@ class MediatorManagedConfiguration implements ManagedService
 	 * Registers this MediatorManagedService in the OSGi
 	 * host environment
 	 */
-	@SuppressWarnings("unchecked")
 	public void register()
 	{	       
 		this.registration = mediator.getContext(
@@ -150,38 +152,45 @@ class MediatorManagedConfiguration implements ManagedService
 	public void updated(Dictionary<String, ?> properties)
 	        throws ConfigurationException
 	{
-		Dictionary<String,?> props = properties==null
-		?new Hashtable<String,Object>():properties;	
-
 		if(registration == null)
 		{
 			return;
 		}
-		try
+		Dictionary<String,Object> props = null;
+		Dictionary<String,Object> dflt = this.getDefaults();
+		
+		if(properties == null) 
 		{
-			if(properties != null)
+			props = dflt;
+			
+		} else
+		{
+			props = (Dictionary<String, Object>) properties;
+			for(Enumeration<String> e = dflt.keys();e.hasMoreElements();)
 			{
-				registration.setProperties(properties);
-				
-			} else
-			{
-				registration.setProperties(getDefaults());
+				String key = e.nextElement();				
+				if(props.get(key)==null)
+					props.put(key, dflt.get(key));
 			}
-			synchronized(this.listeners)
+		}
+		synchronized(this.listeners)
+		{
+			try
 			{
-				Iterator<ManagedConfigurationListener> iterator =
+				registration.setProperties(props);
+	
+				Iterator<ManagedConfigurationListener> iterator = 
 						this.listeners.iterator();
-				
+					
 				while(iterator.hasNext())
 				{
-					ManagedConfigurationListener listener = 
-							iterator.next();
-					listener.updated(properties);
+					ManagedConfigurationListener listener = iterator.next();
+					listener.updated(props);
 				}
+			} catch(Exception e)
+			{
+				throw new ConfigurationException(null, e.getMessage(), e);
 			}
-		} catch(Exception e)
-		{
-			throw new ConfigurationException(null, e.getMessage(), e);
 		}
 	}
 }
