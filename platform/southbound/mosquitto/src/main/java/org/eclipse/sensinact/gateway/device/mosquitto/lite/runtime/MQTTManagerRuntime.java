@@ -21,6 +21,7 @@ import org.eclipse.sensinact.gateway.device.mosquitto.lite.processor.ProcessorUt
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.processor.formats.*;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.processor.formats.iface.ProcessorFormatIface;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.processor.selector.SelectorIface;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.runtime.exception.MQTTManagerException;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.sensinact.MQTTPacket;
 import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
@@ -34,8 +35,8 @@ import java.util.List;
 public class MQTTManagerRuntime implements MQTTResourceMessage{
 
     private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
-    private BundleContext bundleContext;
     private ProtocolStackEndpoint<MQTTPacket> connector;
+    private static MQTTManagerRuntime instance;
     /**
      * This is the list that will contains the processor formats supported by the mosquitto bridge.
      */
@@ -47,12 +48,28 @@ public class MQTTManagerRuntime implements MQTTResourceMessage{
         add(new ProcessorFormatURLEncode());
     }};
 
-    public MQTTManagerRuntime(ProtocolStackEndpoint<MQTTPacket> connector, BundleContext bundleContext){
+    private MQTTManagerRuntime(ProtocolStackEndpoint<MQTTPacket> connector){
         this.connector=connector;
-        this.bundleContext=bundleContext;
     }
 
-    private void messageReceived(String provider, String service, String resource, String value){
+    public static MQTTManagerRuntime getInstance(ProtocolStackEndpoint<MQTTPacket> connector) throws MQTTManagerException {
+        if(instance==null){
+            instance=new MQTTManagerRuntime(connector);
+        }
+        return instance;
+    }
+
+    public static MQTTManagerRuntime getInstance() throws MQTTManagerException {
+        if(instance==null){
+            LOG.warn("Instance not setup, wait for the correct bundle to load it.");
+            return null;
+        }
+        return instance;
+    }
+
+    public void messageReceived(String provider, String service, String resource, String value){
+
+        LOG.info("device {} service {} resource {} message {}", provider,service,resource,value);
 
         MQTTPacket packet=new MQTTPacket(provider);
         packet.isHello(true);

@@ -62,4 +62,15 @@ public class MQTTBroker {
     public void setAuth(MQTTAuth auth) {
         this.auth = auth;
     }
+
+    @Override
+    public String toString() {
+        return "MQTTBroker{" +
+                "host='" + host + '\'' +
+                ", port=" + port +
+                ", protocol=" + protocol +
+                ", session=" + session +
+                ", auth=" + auth +
+                '}';
+    }
 }
