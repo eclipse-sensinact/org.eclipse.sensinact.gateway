@@ -464,7 +464,14 @@ public class SensiNact implements Core
 					    420, "Unknown method", null);
 			} else
 			{
-				response = ((ActionResource) resource).act(parameters);
+				if (parameters != null && parameters.length > 0) 
+			    {
+			           response = ((ActionResource) resource).act(parameters);
+			           
+			    }  else
+			    {
+			    	response = ((ActionResource) resource).act();
+			    }
 			}
 	        JSONObject object= new JSONObject(response.getJSON());
 
