@@ -163,13 +163,28 @@ public class RemoteSensiNact implements RemoteCore
 		this.localAgents = new HashMap<String,String>();
 		
 		this.remoteEndpoint = remoteEndpoint;
-		if(this.remoteEndpoint == null || !this.remoteEndpoint.connect(this))
+		if(this.remoteEndpoint == null)
 		{
-			throw new NullPointerException("No remote endpoint connected");
+			throw new NullPointerException("A remote endpoint is needed");
 		}
 		this.localEndpoint = localEndpoint;
 	}
 
+	/**
+	 * Connects the {@link RemoteEndpoint} of this {@link RemoteCore}
+	 * @return
+	 * <ul>
+	 * 		<li>true if the {@link RemoteEndpoint} of this {@link RemoteCore}
+	 * 			connected properly
+	 * 		</li>
+	 * 		<li>false otherwise</li>	
+	 * </ul>
+	 */
+	boolean connect() 
+	{
+		return this.remoteEndpoint.connect(this);
+	}
+	
 	/**
 	 * @inheritDoc
 	 *
@@ -187,7 +202,7 @@ public class RemoteSensiNact implements RemoteCore
 		    	props.put(NAMESPACE_PROP, namespace);		    	
 				RemoteSensiNact.this.registration = mediator.getContext(
 					).registerService(RemoteCore.class, RemoteSensiNact.this, 
-						   props);				
+						   props);
 				mediator.debug("RemoteCore '%s' registration done", namespace);
 				return null;
 			}
