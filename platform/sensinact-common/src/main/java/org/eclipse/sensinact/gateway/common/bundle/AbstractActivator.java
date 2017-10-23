@@ -96,6 +96,7 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 			}
 		}
 		this.mediator = this.initMediator(context);
+
 		injectPropertyFields(context);
 		
 		//complete starting process
@@ -121,12 +122,17 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 			for(Annotation propertyAnnotation:field.getAnnotations()){
 				try {
 					Property propAn=(Property)propertyAnnotation;
-					if(this.properties.getProperty(propAn.name())!=null){
-						String value=this.properties.getProperty(propAn.name());
-						this.mediator.info("Setting property %s from bundleActivator %s on field %s to value %s", propAn.name(), context.getBundle().getSymbolicName(), field.getName(), value);
-						field.set(this, value);
+					Object propertyValue=null;
+					if(!propAn.name().equals("")){
+						propertyValue=this.properties.getProperty(propAn.name());
+					}else {
+						propertyValue=this.properties.getProperty(field.getName());
+					}
+					if(propertyValue!=null){
+						this.mediator.info("Setting property %s from bundleActivator %s on field %s to value %s", propAn.name(), context.getBundle().getSymbolicName(), field.getName(), propertyValue);
+						field.set(this, propertyValue);
 					}else if(propAn.defaultValue()!=null&&!propAn.defaultValue().trim().equals("")){
-						String value=propAn.defaultValue();
+						String value = propAn.defaultValue();
 						field.set(this, propAn.defaultValue());
 						this.mediator.info("Setting property %s from bundleActivator %s on field %s to default value which is %s", propAn.name(), context.getBundle().getSymbolicName(), field.getName(),value);
 					}else {

@@ -61,7 +61,7 @@ public class Activator extends AbstractActivator<Mediator>
         mqttConnector.connect(MQTTDeviceFactory);
 
         //Manages the subscription to the bus
-        MQTTManagerRuntime runtime=new MQTTManagerRuntime(mqttConnector,super.mediator.getContext());
+        MQTTManagerRuntime runtime=MQTTManagerRuntime.getInstance(mqttConnector);
 
         this.registration = super.mediator.getContext().registerService(
                 ProtocolStackEndpoint.class, mqttConnector, null);
