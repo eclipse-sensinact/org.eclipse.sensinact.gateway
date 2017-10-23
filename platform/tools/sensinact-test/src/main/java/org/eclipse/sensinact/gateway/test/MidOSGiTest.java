@@ -65,33 +65,33 @@ public abstract class MidOSGiTest implements BundleContextProvider
 		}
 	}
 	
-	private static final String AUTO_PROCESSOR = "org.apache.felix.main.AutoProcessor";
-	private static final String FELIX_FRAMEWORK = "org.osgi.framework.launch.Framework";
-	private static final String FELIX_FRAMEWORK_FACTORY = "org.apache.felix.framework.FrameworkFactory";
+	protected static final String AUTO_PROCESSOR = "org.apache.felix.main.AutoProcessor";
+	protected static final String FELIX_FRAMEWORK = "org.osgi.framework.launch.Framework";
+	protected static final String FELIX_FRAMEWORK_FACTORY = "org.apache.felix.framework.FrameworkFactory";
 
-	private static final String BUNDLE = "org.osgi.framework.Bundle";
+	protected static final String BUNDLE = "org.osgi.framework.Bundle";
 
-	private static final String BUNDLE_GET_CONTEXT = "getBundleContext";
-	private static final String BUNDLE_STATE = "getState";
+	protected static final String BUNDLE_GET_CONTEXT = "getBundleContext";
+	protected static final String BUNDLE_STATE = "getState";
 
-	private static final String FRAMEWORK_INIT = "init";
-	private static final String FRAMEWORK_START = "start";
-	private static final String FRAMEWORK_STOP = "stop";
+	protected static final String FRAMEWORK_INIT = "init";
+	protected static final String FRAMEWORK_START = "start";
+	protected static final String FRAMEWORK_STOP = "stop";
 
-	private static final String FRAMEWORK_FACTORY_INIT_FRAMEWORK = "newFramework";
-	private static final Class<?>[] FRAMEWORK_FACTORY_INIT_FRAMEWORK_TYPES = 
+	protected static final String FRAMEWORK_FACTORY_INIT_FRAMEWORK = "newFramework";
+	protected static final Class<?>[] FRAMEWORK_FACTORY_INIT_FRAMEWORK_TYPES = 
 			new Class<?>[] { Map.class };
 
-	private static final String FRAMEWORK_WAIT_FOR_STOP = "waitForStop";
-	private static final Class<?>[] FRAMEWORK_WAIT_FOR_STOP_TYPES = 
+	protected static final String FRAMEWORK_WAIT_FOR_STOP = "waitForStop";
+	protected static final Class<?>[] FRAMEWORK_WAIT_FOR_STOP_TYPES = 
 			new Class<?>[] { long.class };
 			
-	private static final long WAIT_FOR_STOP_TIMEOUT = 60000;
+	protected static final long WAIT_FOR_STOP_TIMEOUT = 60000;
 	
     protected final FilterOSGiClassLoader classloader;
-    private final ClassLoader current;
-	private Object felix;
-	private Class<?> frameworkClass;
+    protected final ClassLoader current;
+	protected Object felix;
+	protected Class<?> frameworkClass;
 	protected BundleContext context;
 
 	protected String policy = null;
@@ -273,7 +273,6 @@ public abstract class MidOSGiTest implements BundleContextProvider
 		if (System.getSecurityManager() == null)
 		{
 			configuration.put("org.osgi.framework.security", "osgi");
-			System.setProperty("java.security.policy", "all.policy");
 		}
 		configuration.put("felix.cache.rootdir", felixDir.getPath());
 		configuration.put("org.osgi.framework.storage", "felix-cache");
@@ -372,6 +371,11 @@ public abstract class MidOSGiTest implements BundleContextProvider
 		String m2 = this.getMavenRepository();
 		String path = "file:".concat(m2.concat("/*"));
 		path = path.concat(",http://felix.extensions:9/");
+		
+		String testPath = new File("target/test-classes").getAbsolutePath();
+		path = path.concat(String.format(",file:%s%s", testPath.startsWith("/")?"":"/",
+				testPath));
+		path=path.concat("/*");
 		return path;
 	}
 	

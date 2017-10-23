@@ -16,6 +16,7 @@ import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
+import java.util.PropertyPermission;
 import java.util.Vector;
 
 /**
@@ -54,7 +55,6 @@ public class TestPolicy extends java.security.Policy
 	 */
 	public TestPolicy()
 	{}
-
 	
 	/**
 	 * @inheritDoc
@@ -83,7 +83,7 @@ public class TestPolicy extends java.security.Policy
 	 */
 	public PermissionCollection getPermissions(ProtectionDomain domain)
 	{
-		return PERMISSION_COLLECTION;
+		return getPermissions(domain.getCodeSource());
 	}
 	
 }
