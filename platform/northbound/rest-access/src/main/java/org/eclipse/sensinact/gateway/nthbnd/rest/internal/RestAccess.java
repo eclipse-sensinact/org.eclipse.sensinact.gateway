@@ -21,12 +21,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletException;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
@@ -37,6 +31,9 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * This class is the REST interface between each others classes 
@@ -44,6 +41,14 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  */
 public abstract class RestAccess
 {
+	//********************************************************************//
+	//						NESTED DECLARATIONS			  			      //
+	//********************************************************************//
+
+	//********************************************************************//
+	//						ABSTRACT DECLARATIONS						  //
+	//********************************************************************//
+	
     /**
      * @param builder
      * @return 
@@ -61,6 +66,11 @@ public abstract class RestAccess
 	protected abstract void sendError(int i, String string)
 			throws IOException;
 	
+	
+	//********************************************************************//
+	//						STATIC DECLARATIONS							  //
+	//********************************************************************//
+
 	public static String RAW_QUERY_PARAMETER = "#RAW#";
 	
 	public static final String ROOT = "\\/sensinact";
@@ -68,34 +78,74 @@ public abstract class RestAccess
 	public static final String ELEMENT_SCHEME = "\\/([^\\/]+)";
 	
 	public static final String SERVICEPROVIDERS_SCHEME =
-			ROOT + "\\/providers";
+		ROOT + "\\/providers";
+	
 	public static final String SERVICEPROVIDER_SCHEME = 
-			SERVICEPROVIDERS_SCHEME + ELEMENT_SCHEME;
+		SERVICEPROVIDERS_SCHEME + ELEMENT_SCHEME;
+	
+	public static final String  SIMPLIFIED_SERVICEPROVIDER_SCHEME =
+		ROOT + "\\/(([^p]|p[^r]|pr[^o]|pro[^v]|prov[^i]|provi[^d]|provid[^e]|provide[^r]|provider[^s]|providers[^\\/])[^\\/]*)";
+	
 	public static final String SERVICES_SCHEME = 
-			SERVICEPROVIDER_SCHEME + "\\/services";
+		SERVICEPROVIDER_SCHEME + "\\/services";
+	
 	public static final String SERVICE_SCHEME = 
-			SERVICES_SCHEME + ELEMENT_SCHEME;
+		SERVICES_SCHEME + ELEMENT_SCHEME;
+
+	public static final String  SIMPLIFIED_SERVICE_SCHEME =
+		SIMPLIFIED_SERVICEPROVIDER_SCHEME + ELEMENT_SCHEME;
+	
 	public static final String RESOURCES_SCHEME = 
-			SERVICE_SCHEME + "\\/resources";
+		SERVICE_SCHEME + "\\/resources";
+	
 	public static final String RESOURCE_SCHEME = 
-			RESOURCES_SCHEME + ELEMENT_SCHEME;
+		RESOURCES_SCHEME + ELEMENT_SCHEME;
+	
+	public static final String  SIMPLIFIED_RESOURCE_SCHEME =
+		SIMPLIFIED_SERVICE_SCHEME + ELEMENT_SCHEME;
+	
 	public static final String METHOD_SCHEME = 
-			RESOURCE_SCHEME + "\\/(GET|SET|ACT|SUBSCRIBE|UNSUBSCRIBE)";
+		RESOURCE_SCHEME + "\\/(GET|SET|ACT|SUBSCRIBE|UNSUBSCRIBE)";
+
+	public static final String  SIMPLIFIED_METHOD_SCHEME =
+		SIMPLIFIED_RESOURCE_SCHEME + "\\/(GET|SET|ACT|SUBSCRIBE|UNSUBSCRIBE)";
 
 	private static final Pattern SERVICEPROVIDERS_PATTERN = 
-			Pattern.compile(SERVICEPROVIDERS_SCHEME);
+		Pattern.compile(SERVICEPROVIDERS_SCHEME);
+
 	private static final Pattern SERVICEPROVIDER_PATTERN = 
-			Pattern.compile(SERVICEPROVIDER_SCHEME);
+		Pattern.compile(SERVICEPROVIDER_SCHEME);
+	
+	private static final Pattern SIMPLIFIED_SERVICEPROVIDER_PATTERN = 
+		Pattern.compile(SIMPLIFIED_SERVICEPROVIDER_SCHEME);
+	
 	private static final Pattern SERVICES_PATTERN = 
-			Pattern.compile(SERVICES_SCHEME);
+		Pattern.compile(SERVICES_SCHEME);
+	
 	private static final Pattern SERVICE_PATTERN = 
-			Pattern.compile(SERVICE_SCHEME);
+		Pattern.compile(SERVICE_SCHEME);
+
+	private static final Pattern SIMPLIFIED_SERVICE_PATTERN = 
+		Pattern.compile(SIMPLIFIED_SERVICE_SCHEME);
+	
 	private static final Pattern RESOURCES_PATTERN = 
-			Pattern.compile(RESOURCES_SCHEME);
+		Pattern.compile(RESOURCES_SCHEME);
+	
 	private static final Pattern RESOURCE_PATTERN = 
-			Pattern.compile(RESOURCE_SCHEME);
+		Pattern.compile(RESOURCE_SCHEME);
+
+	private static final Pattern SIMPLIFIED_RESOURCE_PATTERN = 
+		Pattern.compile(SIMPLIFIED_RESOURCE_SCHEME);
+	
 	private static final Pattern METHOD_PATTERN = 
-			Pattern.compile(METHOD_SCHEME);
+		Pattern.compile(METHOD_SCHEME);
+	
+	private static final Pattern SIMPLIFIED_METHOD_PATTERN = 
+		Pattern.compile(SIMPLIFIED_METHOD_SCHEME);
+	
+	//********************************************************************//
+	//						INSTANCE DECLARATIONS						  //
+	//********************************************************************//
     
 	protected NorthboundMediator mediator = null;
 	
@@ -130,8 +180,7 @@ public abstract class RestAccess
 		String path = null;
 		try
 		{
-			path = UriUtils.formatUri(URLDecoder.decode(
-					requestURI, "UTF-8"));
+			path = UriUtils.formatUri(URLDecoder.decode(requestURI, "UTF-8"));
 			
 		} catch (UnsupportedEncodingException e)
 		{
@@ -153,8 +202,18 @@ public abstract class RestAccess
 			this.method = AccessMethod.Type.valueOf(matcher.group(4));
 			this.match = true;
 			return;
+		}	   
+		matcher = SIMPLIFIED_METHOD_PATTERN.matcher(path);
+		if(matcher.matches())
+		{
+			this.serviceProvider = matcher.group(1);
+			this.service = matcher.group(3);
+			this.resource = matcher.group(4);			
+			this.method = AccessMethod.Type.valueOf(matcher.group(5));
+			this.match = true;
+			return;
 		}	
-	    this.method =AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
+	    this.method = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);		    
 		matcher = RESOURCE_PATTERN.matcher(path);
 		if(matcher.matches())
 		{
@@ -164,7 +223,16 @@ public abstract class RestAccess
 			this.match = true;
 			return;
 		}
-		matcher = RESOURCES_PATTERN.matcher(path);
+		matcher = SIMPLIFIED_RESOURCE_PATTERN.matcher(path);
+		if(matcher.matches())
+		{
+			this.serviceProvider = matcher.group(1);
+			this.service = matcher.group(3);
+			this.resource = matcher.group(4);		
+			this.match = true;
+			return;
+		}		
+		matcher = RESOURCES_PATTERN.matcher(path);		
 		if(matcher.matches())
 		{
 			this.serviceProvider = matcher.group(1);
@@ -172,7 +240,7 @@ public abstract class RestAccess
 			this.isElementList = true;
 			this.match = true;
 			return;
-		}
+		}		
 		matcher = SERVICE_PATTERN.matcher(path);
 		if(matcher.matches())
 		{
@@ -180,7 +248,15 @@ public abstract class RestAccess
 			this.service = matcher.group(2);
 			this.match = true;
 			return;
-		}
+		}		
+		matcher = SIMPLIFIED_SERVICE_PATTERN.matcher(path);	
+		if(matcher.matches())
+		{
+			this.serviceProvider = matcher.group(1);
+			this.service = matcher.group(3);
+			this.match = true;
+			return;
+		}		
 		matcher = SERVICES_PATTERN.matcher(path);
 		if(matcher.matches())
 		{
@@ -196,6 +272,13 @@ public abstract class RestAccess
 			this.match = true;
 			return;
 		}
+		matcher = SIMPLIFIED_SERVICEPROVIDER_PATTERN.matcher(path);
+		if(matcher.matches())
+		{
+			this.serviceProvider = matcher.group(1);		
+			this.match = true;
+			return;
+		}		
 		matcher = SERVICEPROVIDERS_PATTERN.matcher(path);
 		if(matcher.matches())
 		{
@@ -205,8 +288,9 @@ public abstract class RestAccess
 	}
 	
 	/**
-	 * @param request
+	 * @param content
 	 * @return
+	 * @throws IOException
 	 * @throws JSONException
 	 */
 	private Parameter[] processContent(String content)
@@ -258,7 +342,7 @@ public abstract class RestAccess
         }
         return parametersArray;
 	}
-	
+
 	/**
 	 * @param builder
 	 */
@@ -283,6 +367,11 @@ public abstract class RestAccess
 		}
 	}
 	
+	/**
+	 * @param request
+	 * @return
+	 * @throws IOException
+	 */
 	public boolean init(RequestWrapper request) throws IOException
 	{
 		this.mediator = request.getMediator();
@@ -306,13 +395,8 @@ public abstract class RestAccess
 	}
 	
 	/**
-	 * @throws IOException 
-	 * @throws ServletException 
-	 * @inheritDoc
-	 *
-	 * @see javax.servlet.http.HttpServlet#
-	 * service(javax.servlet.http.HttpServletRequest, 
-	 * javax.servlet.http.HttpServletResponse)
+	 * @return
+	 * @throws IOException
 	 */
 	public boolean handle() throws IOException 
 	{		
@@ -339,12 +423,11 @@ public abstract class RestAccess
 		return handle(parameters);
 	}
     
-	/**
-	 * @throws IOException 
-	 * @inheritDoc
-	 *
-	 * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-	 */
+    /**
+     * @param parameters
+     * @return
+     * @throws IOException
+     */
     private boolean handle(Parameter[] parameters) 
     		throws IOException
 	{	    	
