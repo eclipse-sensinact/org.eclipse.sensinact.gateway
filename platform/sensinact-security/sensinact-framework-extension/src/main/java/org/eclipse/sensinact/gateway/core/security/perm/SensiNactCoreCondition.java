@@ -170,11 +170,13 @@ public class SensiNactCoreCondition implements Condition
 					
 				} catch(Exception e)
 				{
-					classloader = SensiNactCoreCondition.class.getClassLoader();
+					classloader = Thread.currentThread().getContextClassLoader();
 				}
 				//search into the current thread's calls stack the one 
 				//coming from the allowed code base
 				StackTraceElement[] stacktraceElements = Thread.currentThread().getStackTrace();
+				
+				//System.out.println(Thread.currentThread().getContextClassLoader());
 				
 				for(StackTraceElement e : stacktraceElements)
 				{
@@ -216,18 +218,16 @@ public class SensiNactCoreCondition implements Condition
 							pod.c = complies;
 							break;
 						}
+//						if(c!=null)
+//						{
+//							System.out.println(e.getClassName() + " / " + 
+//							c.getProtectionDomain().getCodeSource().getLocation().toString());
+//						}		
 					}
 					catch (Exception ex)
 					{
 						continue;
-					}
-//						if(c!=null)
-//						{
-//							System.out.println(e.getClassName() + " / " + 
-//							c.getProtectionDomain().getCodeSource().getLocation().toString() + " / " +
-//							info.getArgs()[0]);
-//						}
-					
+					}			
 				}
 				return null;
 			}
