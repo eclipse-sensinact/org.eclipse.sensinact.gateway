@@ -1,4 +1,4 @@
-package org.eclipse.sensinact.gateway.remote.socket.internal;
+package org.eclipse.sensinact.gateway.remote.socket;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,35 +29,17 @@ class ClientSocketThread implements Runnable
 	
 	private Map<String, JSONObject> requests;
 	protected Mediator mediator;
+	
 	private InetAddress remoteAddress;
 	private int remotePort;
 	
-	ClientSocketThread(Mediator mediator)
+	ClientSocketThread(Mediator mediator, String address, int port)
 			throws IOException
 	{
 		this.mediator = mediator;
 		this.requests = new HashMap<String, JSONObject>();
 
-		String rportProp = (String) mediator.getProperty(
-				"fr.cea.sna.gateway.endpoint.remote.port");
-		String raddressProp = (String) mediator.getProperty(
-				"fr.cea.sna.gateway.endpoint.remote.address");
-	
-		int port = 0;		
-		try
-		{
-			port = rportProp==null?80:Integer.parseInt(rportProp);
-			
-		} catch(NumberFormatException e)
-		{
-			port = 80;
-		}
-		InetAddress address = null;
-		if(raddressProp != null)
-		{
-			address = InetAddress.getByName(raddressProp);
-		}
-		this.remoteAddress = address;
+		this.remoteAddress = InetAddress.getByName(address);
 		this.remotePort = port;
 	}
 	
@@ -83,8 +65,7 @@ class ClientSocketThread implements Runnable
 		{
 			return null;
 		}
-		long timestamp = 
-			System.currentTimeMillis() 
+		long timestamp = System.currentTimeMillis() 
 			+ this.hashCode();
 		
 		String uuid = new StringBuilder().append(
@@ -150,8 +131,8 @@ class ClientSocketThread implements Runnable
 			
 		} catch (IOException e)
 		{
-			mediator.error(e.getMessage(),e);
-			throw new RuntimeException(e);
+		    mediator.error(e.getMessage());
+		    return;
 		}
 		this.running = true;
 		while(running)

@@ -1,4 +1,4 @@
-package org.eclipse.sensinact.gateway.remote.socket.internal;
+package org.eclipse.sensinact.gateway.remote.socket;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,9 +27,7 @@ class ServerSocketThread implements Runnable
 	private OutputStream output;
 	private InputStream input;
 	
-	protected Mediator mediator;	
-	private int localPort;
-	private InetAddress localAddress;
+	protected Mediator mediator;
 	private SocketEndpoint endpoint;
 
 	
@@ -38,28 +36,13 @@ class ServerSocketThread implements Runnable
 	{
 		this.mediator = mediator;
 		this.endpoint = endpoint;
-		String lportProp = (String) mediator.getProperty(
-				"fr.cea.sna.gateway.endpoint.local.port");
-		String laddressProp = (String) mediator.getProperty(
-				"fr.cea.sna.gateway.endpoint.local.address");
-
-		int port = 0;		
-		try
-		{
-			port = lportProp==null?80:Integer.parseInt(lportProp);
-			
-		} catch(NumberFormatException e)
-		{
-			port = 80;
-		}
-		InetAddress address = null;
-		if(laddressProp != null)
-		{
-			address = InetAddress.getByName(laddressProp==null
-				?"127.0.0.1":laddressProp);
-		}
-		this.localAddress = address;
-		this.localPort = port;
+		
+		InetAddress localAddress = InetAddress.getByName(endpoint.getLocalAddress());
+		int localPort = endpoint.getLocalPort();
+		
+		System.out.println(String.format("Binding server socket on %s:%s",
+			endpoint.getLocalAddress(),endpoint.getLocalPort()));
+		
 		this.server = new ServerSocket(localPort,0,localAddress);
 	}
 	

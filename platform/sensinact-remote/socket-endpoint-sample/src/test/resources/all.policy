@@ -1,0 +1,35 @@
+grant codeBase "http://felix.extensions:9/" {
+  permission java.security.AllPermission;
+};
+
+grant codeBase "file:target/felix/bundle/-" {
+  permission java.security.AllPermission;
+};
+
+grant codeBase "file:target/test-classes/-" {
+  permission java.security.AllPermission;
+};
+
+grant codeBase "file:${user.home}/.m2/repository/-" {
+  permission java.security.AllPermission;
+};
+
+grant codeBase "http://felix.extensions:9/" {
+   permission java.util.PropertyPermission "felix.fileinstall.*", "read";
+};
+
+grant codeBase "file:target/felix/bundle/-" {
+   permission java.util.PropertyPermission "felix.fileinstall.*", "read";
+};
+
+grant codeBase "file:target/test-classes/-" {
+   permission java.util.PropertyPermission "felix.fileinstall.*", "read";
+};
+
+ grant codeBase "file:${user.home}/.m2/repository/-" {
+   permission java.util.PropertyPermission "felix.fileinstall.*", "read";
+ };
+ 
+grant {
+  permission java.security.AllPermission;
+};

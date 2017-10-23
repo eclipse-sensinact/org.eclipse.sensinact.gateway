@@ -1,4 +1,4 @@
-package org.eclipse.sensinact.gateway.remote.socket.internal;
+package org.eclipse.sensinact.gateway.remote.socket;
 
 import java.io.IOException;
 import java.util.Timer;
@@ -29,6 +29,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	public final static int PORT = 54460;
 	public final static int MAGIC = 0xDEADBEEF;
 
+
 	static byte[] intToBytes(int l) 
 	{
 	    byte[] result = new byte[8];
@@ -52,54 +53,76 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	protected String remoteNamespace;
 	protected ClientSocketThread client;
 	protected ServerSocketThread server;
+
+	private final String localAddress;
+	private final int localPort;
+	
+	private final String remoteAddress;
+	private final int remotePort;
 	
 	private Timer connectionTimer;
-	TimerTask connectionTask  = new TimerTask()
-	{
-		@Override
-		public void run()
-		{			
-			try 
-			{
-				if(SocketEndpoint.this.client == null)
-				{
-					SocketEndpoint.this.client = new ClientSocketThread(mediator);
-					new Thread(SocketEndpoint.this.client).start();
-					SocketEndpoint.this.mediator.debug("Client socket thread started");
-				}
-				if(SocketEndpoint.this.remoteNamespace == null)
-				{
-					SocketEndpoint.this.namespace();
-					if(SocketEndpoint.this.remoteNamespace!=null)
-					{ 
-						mediator.debug("Connected remote namespace : "+
-								SocketEndpoint.this.remoteNamespace);
-						SocketEndpoint.this.mediator.debug(
-								"Client socket thread connected");
-						SocketEndpoint.this.connectionTimer.cancel();
-					}
-				}
-			} catch (Exception e)
-			{
-				SocketEndpoint.this.mediator.error(e.getMessage(),e);
-				if(SocketEndpoint.this.client!=null 
-						&& !SocketEndpoint.this.client.running())
-				{
-					SocketEndpoint.this.client = null;
-				}
-			}
-		}
-	};
+	//TimerTask connectionTask  = 
+			
 	
+	
+
 	/**
 	 * @param mediator
-	 * @param remoteCore
 	 * @param localNamespace
-	 * @throws IOException
+	 * @param localAddress
+	 * @param localPort
+	 * @param remoteAddress
+	 * @param remotePort
 	 */
-	public SocketEndpoint(Mediator mediator,String localNamespace) 
+	public SocketEndpoint(Mediator mediator, String localNamespace, 
+			String localAddress, int localPort, 
+			String remoteAddress, int remotePort) 
 	{
 		super(mediator, localNamespace);
+		if(localAddress == null || remoteAddress == null)
+		{
+			throw new NullPointerException("Local and remote addresses are needed");
+		}
+		this.localAddress = localAddress;
+		this.localPort = localPort <= 0?80:localPort;
+		this.remoteAddress = remoteAddress;
+		this.remotePort = remotePort <= 0?80:remotePort;
+	}
+
+	/**
+	 * @return 
+	 *     the localAddress
+	 */
+	protected String getLocalAddress()
+	{
+		return localAddress;
+	}
+	
+	/**
+	 * @return 
+	 *     the localPort
+	 */
+	protected int getLocalPort()
+	{
+		return localPort;
+	}
+
+	/**
+	 * @return 
+	 *     the remoteAddress
+	 */
+	protected String getRemoteAddress()
+	{
+		return remoteAddress;
+	}
+
+	/**
+	 * @return 
+	 *     the remotePort
+	 */
+	protected int getRemotePort()
+	{
+		return remotePort;
 	}
 
 	/**
@@ -122,14 +145,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	
 		switch(length)
 		{
-			case 0:
-				if("/".equals(uri))
-				{
-					response = super.remoteCore.getProviders(publicKey);
-				}
-				break;
 			case 1:			
-				String[] subUriELements = uriElements[0].split("?");
+				String[] subUriELements = uriElements[0].split("\\?");
 				switch(subUriELements[0])
 				{
 					case "namespace":
@@ -222,34 +239,38 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 							super.remoteCore.getAll(publicKey)
 					       :super.remoteCore.getAll(publicKey,subUriELements[1]);						
 					break;
-					default:
-						response = super.remoteCore.getProvider(publicKey,
-							uriElements[0]);
+					case "providers":
+						response = super.remoteCore.getProviders(publicKey);
 					break;
 				}
 				break;
 			case 2:
-				response = super.remoteCore.getServices(publicKey,
-						uriElements[0]);
+				response = super.remoteCore.getProvider(publicKey,
+					uriElements[1]);
 				break;
 			case 3:
-				response = super.remoteCore.getService(publicKey, 
-						uriElements[0],uriElements[2]);
+				response = super.remoteCore.getServices(publicKey,
+					uriElements[1]);
 				break;
 			case 4:
-				response = super.remoteCore.getResources(publicKey,
-						uriElements[0],uriElements[2]);
+				response = super.remoteCore.getService(publicKey, 
+					uriElements[1],uriElements[3]);
 				break;
 			case 5:
-				response = super.remoteCore.getResource(publicKey, 
-						uriElements[0],uriElements[2],uriElements[4]);
+				response = super.remoteCore.getResources(publicKey,
+					uriElements[1],uriElements[3]);
 				break;
 			case 6:
-				switch(uriElements[5])
+				response = super.remoteCore.getResource(publicKey, 
+					uriElements[1],uriElements[3],uriElements[5]);
+				break;
+			case 7:
+				switch(uriElements[6])
 				{
 					case "GET":				
 					    response = super.remoteCore.get(publicKey, 
-							uriElements[0],uriElements[2],uriElements[4], null);
+							uriElements[1],uriElements[3],uriElements[5], 
+							null);
 					break;				
 					case "SET":
 						JSONArray parameters = request.optJSONArray("parameters");
@@ -266,7 +287,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 						 data = attr.opt("value");
 						}
 						response = super.remoteCore.set(publicKey,
-								uriElements[0],uriElements[2],uriElements[4],
+							uriElements[1],uriElements[3],uriElements[5],
 								attributeId,data);
 					break;				
 					case "ACT":				
@@ -280,8 +301,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 							args[index]=parameters.getJSONObject(index).opt("value");
 						}
 						response = super.remoteCore.act(publicKey, 
-								uriElements[0],uriElements[2],
-								uriElements[4], args);
+							uriElements[1],uriElements[3],uriElements[5], 
+								args);
 					break;
 					case "SUBSCRIBE":				
 						JSONArray conditions = null;
@@ -293,8 +314,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 									).optJSONArray("value");
 						}
 						response = super.remoteCore.subscribe(publicKey,
-							uriElements[0],uriElements[2], uriElements[4], 
-							conditions);
+							uriElements[1],uriElements[3],uriElements[5], 
+							    conditions);
 					break;
 					case "UNSUBSCRIBE":				
 						String subscriptionId = null;
@@ -306,8 +327,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 									).optString("value");
 						}
 						response = super.remoteCore.unsubscribe(publicKey, 
-							uriElements[0],uriElements[2], uriElements[4], 
-							subscriptionId);
+							uriElements[1],uriElements[3],uriElements[5], 
+							   subscriptionId);
 					break;
 					default: break;
 				}
@@ -441,19 +462,18 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	 * @see org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint#doConnect()
 	 */
 	@Override
-	protected void doConnect() 
+	public void doConnect() 
 	{
-		if(this.server!=null)
+		if(this.remoteNamespace!=null)
+		{
+			return;
+		}
+		if(this.server==null)
 		{
 			try
 			{
-				this.server = new ServerSocketThread(mediator, 
-						this);				
+				this.server = new ServerSocketThread(mediator, this);				
 				new Thread(server).start();
-				
-				this.connectionTimer = new Timer();
-				this.connectionTimer.schedule(this.connectionTask, 
-						1000, 1000*10);
 			}
 			catch (IOException e)
 			{
@@ -462,12 +482,47 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 				return;
 			}
 		}
-		String remoteNamespace = null;
+		this.connectionTimer = new Timer();
+		this.connectionTimer.schedule(new TimerTask()
+		{
+			@Override
+			public void run()
+			{			
+				try 
+				{
+					if(SocketEndpoint.this.client == null)
+					{
+						SocketEndpoint.this.client = new ClientSocketThread(mediator,
+								SocketEndpoint.this.getRemoteAddress(), 
+								SocketEndpoint.this.getRemotePort());
+					}
+					if(!SocketEndpoint.this.client.running())
+					{
+						new Thread(SocketEndpoint.this.client).start();					
+						SocketEndpoint.this.mediator.debug("Client socket thread started");	
+					}
+					if(SocketEndpoint.this.namespace()!=null)
+					{ 
+						mediator.debug(
+						"Client socket thread connected - \n\tremote namespace : %s", 
+						SocketEndpoint.this.remoteNamespace);					
+						SocketEndpoint.this.connectionTimer.cancel();
+					}
+				} catch (Exception e)
+				{
+					if(SocketEndpoint.this.client!=null 
+							&& !SocketEndpoint.this.client.running())
+					{
+						SocketEndpoint.this.client = null;
+					}
+				}
+			}
+		}, 0, 1000*10);		
 		int timeout = 60*1000;
 		
-		while(timeout > 0
-		&& (remoteNamespace = this.namespace())== null)
+		while(timeout > 0 && remoteNamespace == null)
 		{
+			this.namespace();
 			try
 			{
 				timeout-=100;
@@ -478,8 +533,16 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 				Thread.interrupted();
 				break;
 			}
+		}		
+		this.connectionTimer.cancel();
+		this.connectionTimer = null;
+		if(remoteNamespace == null)
+		{
+			super.connected = false;
 		}
-		super.connected = (remoteNamespace != null);
+		mediator.info("%s is%sconnected%s%s", 
+			super.localNamespace, (super.connected?" ":" not "),
+			(super.connected?" to ":""),(super.connected?remoteNamespace:""));
 	}
 
 	/**
@@ -683,7 +746,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		}
 		JSONObject response = this.client.request(
 			new JSONObject(
-					).put("uri", "/"
+					).put("uri", "/providers"
 					).put("pkey", publicKey));
 
 		if(response!=null)
@@ -707,7 +770,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			return null;
 		}
-		String uri = String.format("/%s",serviceProviderId);
+		String uri = String.format("/providers/%s",serviceProviderId);
 
 		JSONObject response = this.client.request(
 			new JSONObject(
@@ -735,7 +798,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			return null;
 		}
-		String uri =String.format("/%s/services", serviceProviderId);
+		String uri =String.format("/providers/%s/services", serviceProviderId);
 
 		JSONObject response = this.client.request(
 			new JSONObject(
@@ -763,7 +826,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			return null;
 		}
-		String uri =String.format("/%s/services/%s", 
+		String uri =String.format("/providers/%s/services/%s", 
 				serviceProviderId,serviceId);
 
 		JSONObject response = this.client.request(
@@ -792,7 +855,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			return null;
 		}
-		String uri =String.format("/%s/services/%s/resources", 
+		String uri =String.format("/providers/%s/services/%s/resources", 
 				serviceProviderId,serviceId);
 
 		JSONObject response = this.client.request(
@@ -822,7 +885,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			return null;
 		}
-		String uri =String.format("/%s/services/%s/resources/%s", 
+		String uri =String.format("/providers/%s/services/%s/resources/%s", 
 				serviceProviderId,serviceId,resourceId);
 
 		JSONObject response = this.client.request(
@@ -852,7 +915,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			return null;
 		}
-		String uri =String.format("/%s/services/%s/resources/%s/GET", 
+		String uri =String.format("/providers/%s/services/%s/resources/%s/GET", 
 				serviceProviderId,serviceId,resourceId);
 
 		JSONObject response = this.client.request(
@@ -882,7 +945,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			return null;
 		}
-		String uri =String.format("/%s/services/%s/resources/%s/SET", 
+		String uri =String.format("/providers/%s/services/%s/resources/%s/SET", 
 				serviceProviderId,serviceId,resourceId);
 
 		JSONArray parameters = new JSONArray();
@@ -927,7 +990,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			return null;
 		}
-		String uri =String.format("/%s/services/%s/resources/%s/ACT", 
+		String uri =String.format("/providers/%s/services/%s/resources/%s/ACT", 
 				serviceProviderId,serviceId,resourceId);
 
 		JSONArray parametersArray = new JSONArray();
@@ -970,7 +1033,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			return null;
 		}
-		String uri =String.format("/%s/services/%s/resources/%s/UNSUBSCRIBE", 
+		String uri =String.format("/providers/%s/services/%s/resources/%s/UNSUBSCRIBE", 
 				serviceProviderId,serviceId,resourceId);
 
 		JSONArray parametersArray = new JSONArray();
@@ -1008,7 +1071,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			return null;
 		}
-		String uri =String.format("/%s/services/%s/resources/%s/SUBSCRIBE", 
+		String uri =String.format("/providers/%s/services/%s/resources/%s/SUBSCRIBE", 
 				serviceProviderId,serviceId,resourceId);
 
 		JSONArray parametersArray = new JSONArray();
