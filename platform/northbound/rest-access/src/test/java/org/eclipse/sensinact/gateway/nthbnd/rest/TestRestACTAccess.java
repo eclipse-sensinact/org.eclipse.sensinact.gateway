@@ -57,6 +57,36 @@ public class TestRestACTAccess  extends TestRestAccess
 
     }
 
+	 @Test
+    public void testSimplifiedHttpACTWithoutParameters() throws Exception 
+    {		 
+		Mediator mediator = new Mediator(context);
+        String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL  +
+        		"/light/switch/status/GET", null, "GET");
+        
+        JSONObject response = new JSONObject(simulated);
+
+        assertTrue(response.get("statusCode").equals(200));
+        assertTrue(response.getString("uri").equals("/light/switch/status"));
+        assertTrue(response.getJSONObject("response").get("value").equals("OFF"));
+
+        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL  + 
+        		"/light/switch/turn_on/ACT",  null, "POST");
+        
+        response = new JSONObject(simulated);
+        assertTrue(response.get("statusCode").equals(200));
+        
+        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL  + 
+        		"/light/switch/status/GET", null, "GET");
+
+        response = new JSONObject(simulated);
+        
+        assertTrue(response.get("statusCode").equals(200));
+        assertTrue(response.getString("uri").equals("/light/switch/status"));
+        assertTrue(response.getJSONObject("response").get("value").equals("ON"));
+    }
+
+
     @Test
     public void testHttpACTWithParameters() throws Exception
     {    	

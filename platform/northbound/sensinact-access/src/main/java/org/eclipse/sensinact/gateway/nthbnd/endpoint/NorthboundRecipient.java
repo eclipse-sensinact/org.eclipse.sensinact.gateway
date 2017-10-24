@@ -30,7 +30,6 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
  */
 public abstract class NorthboundRecipient implements Recipient 
 {
-    protected boolean handleUnchanged;
     protected Set<Constraint> constraints;
 	protected Mediator mediator;
     
@@ -66,7 +65,6 @@ public abstract class NorthboundRecipient implements Recipient
 	        {
 				this.mediator.error(e);
 			}
-	        this.handleUnchanged = jsonObject.optBoolean("handleUnchanged");
         }
     }
 
@@ -76,15 +74,6 @@ public abstract class NorthboundRecipient implements Recipient
      */
     public Set<Constraint> getConstraints() 
     {
-        return Collections.unmodifiableSet(
-        		this.constraints);
-    }
-    
-    /**
-     * @return
-     */
-    public boolean handleUnchanged()
-    {
-    	return this.handleUnchanged;
+        return Collections.unmodifiableSet(this.constraints);
     }
 }
