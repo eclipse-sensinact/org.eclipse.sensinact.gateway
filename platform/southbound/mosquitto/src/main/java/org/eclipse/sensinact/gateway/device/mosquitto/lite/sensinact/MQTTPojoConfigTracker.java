@@ -67,7 +67,7 @@ public class MQTTPojoConfigTracker implements ServiceTrackerCustomizer {
 
         try {
 
-            final MQTTClient client=ServerConnectionCache.getInstance(provider.getName(), provider.getBroker());
+            final MQTTClient client=ServerConnectionCache.getInstance(provider.getName(), provider.getBroker(),null);
 
             for(final Service service:provider.getServices()){
                 for(final Resource resource:service.getResources()){

@@ -10,9 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.client;
 
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.exception.MQTTConnectionException;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.mqtt.MQTTBroker;
@@ -28,15 +26,21 @@ import java.util.UUID;
 public class MQTTClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(MQTTClient.class);
-
+    private final Long  RECONNECT_DELAY_MS=1000l;
     private MQTTBroker broker;
     private MemoryPersistence persistence = new MemoryPersistence();
     private MqttConnectOptions connOpts = new MqttConnectOptions();
     private MQTTConnection connection = null;
+    private MQTTConnectionHandler handler;
 
 
     public MQTTClient(MQTTBroker broker){
         this.broker=broker;
+    }
+
+    public MQTTClient(MQTTBroker broker,MQTTConnectionHandler handler){
+        this(broker);
+        this.handler=handler;
     }
 
     public void connect() throws MQTTConnectionException{
@@ -59,7 +63,35 @@ public class MQTTClient {
             }
 
             LOG.info("Connecting to broker: {} ", broker);
-            connection.getConnection().connect(connOpts);
+            if(handler!=null) {
+                connection.getConnection().setCallback(new MqttCallback() {
+                    @Override
+                    public void connectionLost(Throwable cause) {
+                        MQTTClient.this.handler.connectionLost(null);
+                    }
+
+                    @Override
+                    public void messageArrived(String topic, MqttMessage message) throws Exception {
+                        //Nothing to do here
+                    }
+
+                    @Override
+                    public void deliveryComplete(IMqttDeliveryToken token) {
+                        //Nothing to do here
+                    }
+                });
+            }
+
+            try {
+                connection.getConnection().connect(connOpts);
+                if(handler!=null) handler.connectionEstablished(null);
+            }catch(MqttException exception){
+                if(handler!=null) handler.connectionFailed(null);
+                connection=null;
+                LOG.error("Failed to connect to MQTT broker",exception);
+            }
+
+
             LOG.info("Connected to broker: {} ",broker);
 
         } catch (MqttException e) {
@@ -69,16 +101,21 @@ public class MQTTClient {
 
     }
 
+    private Boolean isNotConnected(){
+        return connection==null||connection.getConnection()==null || !connection.getConnection().isConnected();
+    }
+
+    public void disconnect() throws MQTTConnectionException {
+        getConnection().disconnect();
+    }
+
     public synchronized MQTTConnection getConnection() throws MQTTConnectionException {
 
-        if(connection==null||connection.getConnection()==null || !connection.getConnection().isConnected()){
-            connect();
-        }
-
-        while(!connection.getConnection().isConnected()){
+        while(isNotConnected()){
             try {
                 LOG.info("Waiting to connect.");
-                Thread.sleep(10000);
+                connect();
+                Thread.sleep(RECONNECT_DELAY_MS);
             } catch (InterruptedException e) {
                 LOG.error("Failed waiting for MQTT connection.");
             }
