@@ -10,6 +10,7 @@ import org.eclipse.sensinact.gateway.device.mosquitto.lite.client.subscriber.MQT
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.exception.MQTTConnectionException;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.mqtt.MQTTBroker;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.runtime.exception.MQTTManagerException;
+import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +69,26 @@ public abstract class MQTTAbstractActivator<M extends Mediator> extends Abstract
     protected void data(String provider,String service,String resource,String data){
         providers.add(provider);
         runtime.messageReceived(provider,service,resource,data);
+    }
+
+    /**
+     * Removes sensinact provider from the list of devices, this request will be ignored if such device was not added by the same instance that is trying to remove it.
+     * @param provider
+     */
+    public void providerRemoval(String provider){
+
+        Boolean belongsToCurrentActivator=providers.contains(provider);
+        if(belongsToCurrentActivator){
+            try {
+                providers.remove(provider);
+                runtime.processRemoval(provider);
+            } catch (InvalidPacketException e) {
+                LOG.error("Failed to remove provider {}",provider);
+            }
+        }else {
+            LOG.warn("Provider {} does not exist in the activator {}, thus it cannot be removed",provider,getId());
+        }
+
     }
 
     /**
