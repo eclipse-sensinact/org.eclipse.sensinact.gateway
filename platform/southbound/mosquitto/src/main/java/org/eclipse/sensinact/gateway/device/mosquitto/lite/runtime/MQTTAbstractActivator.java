@@ -22,20 +22,28 @@ import java.util.Set;
 public abstract class MQTTAbstractActivator<M extends Mediator> extends AbstractActivator implements MQTTConnectionHandler{
     private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
     //In charge of MQTT basic connection and operation
-    private MQTTClient mqttClient;
     //Uses the StackConnector of MQTT-SB to publish messages
     private MQTTManagerRuntime runtime;
     //providers created by the instance that inherited from this class
     private Set<String> providers=new HashSet<String>();
+    private Set<String> connectionIds=new HashSet<String>();
     protected final MQTTBroker broker;
 
     public MQTTAbstractActivator() {
         broker=getBroker();
-        mqttClient=ServerConnectionCache.getInstance(getId(), broker, this);
+        //Test broker connection
+        try {
+            MQTTClient mqttClient=ServerConnectionCache.getInstance(getId(), broker, this);
+            mqttClient.getConnection();
+            ServerConnectionCache.disconnectInstance(getId());
+        } catch (MQTTConnectionException e) {
+            LOG.error("Failed to connect to broker {}", e, broker.toString());
+        }
+
         try {
             runtime=MQTTManagerRuntime.getInstance();
         } catch (MQTTManagerException e) {
-            LOG.error("Failed to connect to broker {}",e,broker.toString());
+            LOG.error("Failed to connect to sensinact runtime {}",e,broker.toString());
         }
     }
 
@@ -51,9 +59,10 @@ public abstract class MQTTAbstractActivator<M extends Mediator> extends Abstract
      * @param message
      */
     protected void subscribe(String topic,MQTTTopicMessage message){
-
+        String connectionId=String.format("%s-%s",getId(),topic);
         try {
-            mqttClient.getConnection().subscribe(topic, message);
+            ServerConnectionCache.getInstance(connectionId, broker, this).getConnection().subscribe(topic, message);
+            connectionIds.add(connectionId);
         } catch (Exception e) {
             LOG.error("Failed to start connection",e);
         }
@@ -115,11 +124,14 @@ public abstract class MQTTAbstractActivator<M extends Mediator> extends Abstract
             }
         }
 
-        try {
-            ServerConnectionCache.disconnectInstance(getId());
-        }catch(Exception e){
-            LOG.warn("Failed closing mqtt connection with id {}.",getId(),e);
+        for(String connectionId:connectionIds){
+            try {
+                ServerConnectionCache.disconnectInstance(connectionId);
+            }catch(Exception e){
+                LOG.warn("Failed closing mqtt connection with id {}.",connectionId,e);
+            }
         }
+
 
     }
 
