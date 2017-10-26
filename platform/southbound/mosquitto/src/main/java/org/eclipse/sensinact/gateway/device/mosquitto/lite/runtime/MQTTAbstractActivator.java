@@ -27,15 +27,12 @@ public abstract class MQTTAbstractActivator<M extends Mediator> extends Abstract
     //providers created by the instance that inherited from this class
     private Set<String> providers=new HashSet<String>();
     private Set<String> connectionIds=new HashSet<String>();
-    protected final MQTTBroker broker;
 
     public MQTTAbstractActivator() {
-        broker=getBroker();
-
         try {
             runtime=MQTTManagerRuntime.getInstance();
         } catch (MQTTManagerException e) {
-            LOG.error("Failed to connect to sensinact runtime {}",e,broker.toString());
+            LOG.error("Failed to connect to sensinact runtime {} on class",e,this.getClass().getCanonicalName());
         }
     }
 
@@ -53,7 +50,7 @@ public abstract class MQTTAbstractActivator<M extends Mediator> extends Abstract
     protected void subscribe(String topic,MQTTTopicMessage message){
         String connectionId=String.format("%s-%s",getId(),topic);
         try {
-            ServerConnectionCache.getInstance(connectionId, broker, this).getConnection().subscribe(topic, message);
+            ServerConnectionCache.getInstance(connectionId, getBroker(), this).getConnection().subscribe(topic, message);
             connectionIds.add(connectionId);
         } catch (Exception e) {
             LOG.error("Failed to start connection",e);
