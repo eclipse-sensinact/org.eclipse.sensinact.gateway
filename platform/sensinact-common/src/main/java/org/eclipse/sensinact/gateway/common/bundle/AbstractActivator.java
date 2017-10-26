@@ -141,7 +141,7 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 					}else {
 						propertyName=field.getName();
 					}
-					Object propertyValue=this.properties.getProperty(propertyName);
+					Object propertyValue=this.mediator.getProperty(propertyName);
 					if(propertyValue!=null){
 						this.mediator.info("Setting property '%s' from bundle symbolic '%s' on field '%s' to value '%s'", propertyName, context.getBundle().getSymbolicName(), field.getName(), propertyValue);
 						field.set(this, propertyValue);
