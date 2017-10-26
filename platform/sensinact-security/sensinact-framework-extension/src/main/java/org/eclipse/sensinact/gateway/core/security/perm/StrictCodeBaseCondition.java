@@ -13,13 +13,10 @@ package org.eclipse.sensinact.gateway.core.security.perm;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Arrays;
 import java.util.Dictionary;
 
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.condpermadmin.Condition;
 import org.osgi.service.condpermadmin.ConditionInfo;
 
@@ -32,63 +29,15 @@ import org.osgi.service.condpermadmin.ConditionInfo;
  * Pattern matching is done according to the filter string matching rules.
  * 
  */
-public class SensiNactCoreCondition implements Condition
+public class StrictCodeBaseCondition implements Condition
 {
-	private static final class ConditionPod
-	{
-		Condition c = null;
-	}
-	
-	
 	private static final String	CONDITION_TYPE	=
-			"org.eclipse.sensinact.gateway.core.security.perm.SensiNactCoreCondition";
-
-	private static final char ESCAPE = '\\';
+		"org.eclipse.sensinact.gateway.core.security.perm.StrictCodeBaseCondition";
 	
-	private static final char WILDCARD = '*';
+	private static final String STRICT_CODEBASE_SOURCES_TYPE =
+		"org.eclipse.sensinact.gateway.core.security.perm.StrictCodeBaseCondition$1";
 	
-	private static final Bundle findBundle(BundleContext context, String name, boolean location)
-	{
-		Bundle bundle = null;
-		if ( name != null && context!=null)
-		{
-			if(location)
-			{
-				bundle = context.getBundle(name);
-				if((bundle.adapt(BundleRevision.class).getTypes() 
-						& BundleRevision.TYPE_FRAGMENT) != 0
-						&& bundle.getState()==Bundle.RESOLVED)
-				{
-					bundle = findBundle(context, bundle.getHeaders().get(
-						Constants.FRAGMENT_HOST), false);	
-				}
-				return bundle;
-			}
-			Bundle[] bundles  = context.getBundles();
-			
-			int index = 0;
-			int length = bundles == null?0:bundles.length;
-			for(;index < length; index++)
-			{
-				final Bundle tmp = bundles[index];
-				if(name.equals(tmp.getSymbolicName()))
-				{
-					if((tmp.adapt(BundleRevision.class).getTypes() 
-						& BundleRevision.TYPE_FRAGMENT) != 0
-						&& tmp.getState()==Bundle.RESOLVED)
-					{
-						bundle = findBundle(context, tmp.getHeaders().get(
-								Constants.FRAGMENT_HOST), false);	
-					} else
-					{
-						bundle = tmp;
-					}
-					break;
-				}
-			}
-		}
-		return bundle;
-	}
+	private static CodeBaseCondition.CodeBaseSources _sources = null;
 	
 	/**
 	 * Constructs a condition that tries to match the passed Bundle's location
@@ -116,117 +65,52 @@ public class SensiNactCoreCondition implements Condition
 		if (!CONDITION_TYPE.equals(info.getType()))
 		{
 			throw new IllegalArgumentException(
-					"ConditionInfo must be of type \"" + CONDITION_TYPE + "\"");
+				"ConditionInfo must be of type \"" + CONDITION_TYPE + "\"");
 		}
 		String[] args = info.getArgs();
 		if (args.length != 1 && args.length != 2)
 		{
 			throw new IllegalArgumentException("Illegal number of args: " + args.length);
 		}
-		final char[] expected = info.getArgs()[0].toCharArray();
-		 
-		if(expected.length == 1 && (expected[0]== WILDCARD))
-		{
-			//it means that ACCEPT {["*" "!"]...} will give the same result as DENY {["*"]...}
-			return Condition.TRUE;
-		}		
 		final Condition complies = (info.getArgs().length == 2 
 			&& "!".equals(info.getArgs()[1])) ?Condition.FALSE:Condition.TRUE;
+		
 		final Condition uncomplies = complies.equals(Condition.FALSE)
 				?Condition.TRUE:Condition.FALSE;
 		
-		final ConditionPod pod = new ConditionPod();
+		final CodeBaseCondition.ConditionWrapper pod = 
+				new CodeBaseCondition.ConditionWrapper();
+		
 		pod.c = uncomplies;
+		
+		if(_sources == null)
+		{
+			String[] s = info.getArgs()[0].split(",");	
+			_sources = new CodeBaseCondition.CodeBaseSources(
+					Arrays.<String>asList(s), CONDITION_TYPE, 
+					STRICT_CODEBASE_SOURCES_TYPE){};
+		}
+		_sources.check(STRICT_CODEBASE_SOURCES_TYPE);
 		
 		AccessController.doPrivileged(new PrivilegedAction<Void>() 
 		{
-			//TODO: TO BE IMPROVED (A LOT)
 			public Void run() 
-			{	
-				//Is it the right way to do it ? Or is it better to use
-				//the bundle argument classloader ?
-				
-				//retieve the appropriate class loader
-				Bundle b = null;
-				ClassLoader classloader = null;
-				try
-				{
-					b = findBundle(bundle.getBundleContext(), info.getArgs()[0], true);
-					if(b == null)
-					{ 
-						if((bundle.adapt(BundleRevision.class).getTypes() 
-						& BundleRevision.TYPE_FRAGMENT) != 0 
-						&& bundle.getState() == Bundle.RESOLVED)
-						{
-							b = findBundle(bundle.getBundleContext(),
-								bundle.getHeaders().get(Constants.FRAGMENT_HOST), 
-								false);	
-						} else
-						{
-							b = bundle;
-						}
-					}
-					classloader = b.adapt(BundleWiring.class).getClassLoader();
-					
-				} catch(Exception e)
-				{
-					classloader = Thread.currentThread().getContextClassLoader();
-				}
+			{									
 				//search into the current thread's calls stack the one 
 				//coming from the allowed code base
-				StackTraceElement[] stacktraceElements = Thread.currentThread().getStackTrace();
+				StackTraceElement[] stacktraceElements =
+						Thread.currentThread().getStackTrace();
 				
-				//System.out.println(Thread.currentThread().getContextClassLoader());
+				int index = 0;
+				int length =  stacktraceElements==null?0:stacktraceElements.length;
 				
-				for(StackTraceElement e : stacktraceElements)
+				for(;index < length; index++)
 				{
-					Class<?> c = null;
-					try
+					StackTraceElement e = stacktraceElements[index];						
+					if(_sources.getCache().contains(e.getClassName()))
 					{
-						c = classloader.loadClass(e.getClassName());
-						if(c == null)
-						{
-							continue;
-						}
-						char[] ccs = c.getProtectionDomain(
-							).getCodeSource().getLocation().toString(
-									).toCharArray();
-						
-						int index = 0;
-						//TODO: handle escape char
-						for(;;)
-						{
-							if(index >= ccs.length 
-							|| index >= expected.length)
-							{
-								break;
-							}
-							if(expected[index] == WILDCARD)
-							{
-								index++;
-								break;
-							}
-							if(ccs[index] != expected[index])
-							{
-								index=0;
-								break;
-							}
-							index++;
-						}
-						if(index > 0)
-						{
-							pod.c = complies;
-							break;
-						}
-//						if(c!=null)
-//						{
-//							System.out.println(e.getClassName() + " / " + 
-//							c.getProtectionDomain().getCodeSource().getLocation().toString());
-//						}		
-					}
-					catch (Exception ex)
-					{
-						continue;
+						pod.c = complies;
+						break;
 					}			
 				}
 				return null;
@@ -234,14 +118,13 @@ public class SensiNactCoreCondition implements Condition
 		});	
 		return pod.c;
 	}
-
+	
 	private Bundle bundle;
 	private ConditionInfo info;
 
-	private SensiNactCoreCondition(){}
+	private StrictCodeBaseCondition(){}
 	
-
-	public SensiNactCoreCondition(Bundle bundle, ConditionInfo info)
+	public StrictCodeBaseCondition(Bundle bundle, ConditionInfo info)
 	{
 		this.bundle = bundle;
 		this.info = info;
@@ -258,7 +141,6 @@ public class SensiNactCoreCondition implements Condition
 		return false;
 	}
 
-
 	/**
 	 * @inheritDoc
 	 *
@@ -267,10 +149,9 @@ public class SensiNactCoreCondition implements Condition
 	@Override
 	public boolean isSatisfied()
 	{
-		return SensiNactCoreCondition.getCondition(
+		return StrictCodeBaseCondition.getCondition(
 				bundle, info).isSatisfied();
 	}
-
 
 	/**
 	 * @inheritDoc
@@ -282,7 +163,6 @@ public class SensiNactCoreCondition implements Condition
 	{
 		return true;
 	}
-
 
 	/**
 	 * @inheritDoc
