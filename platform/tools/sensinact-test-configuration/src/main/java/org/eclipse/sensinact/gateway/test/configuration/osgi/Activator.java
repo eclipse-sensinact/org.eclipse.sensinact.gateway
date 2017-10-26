@@ -67,10 +67,9 @@ public class Activator implements BundleActivator
 		for(;index < length; index++)
 		{
 			piList.add(cpa.newConditionalPermissionInfo(String.format(
-	        "ALLOW {[org.eclipse.sensinact.gateway.core.security.perm.SensiNactCoreCondition \"%s\"]" + 
+	        "ALLOW {[org.eclipse.sensinact.gateway.core.security.perm.CodeBaseCondition \"%s\"]" + 
 	        "(java.security.AllPermission \"\" \"\")" + 
-	        "} null",
-	        codeBases[index])));
+	        "} null", codeBases[index])));
 		}		 	
 		if (!cpu.commit())
 		{

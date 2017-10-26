@@ -75,7 +75,7 @@ public abstract class MQTTAbstractActivator<M extends Mediator> extends Abstract
      * @param resource
      * @param data
      */
-    protected void data(String provider,String service,String resource,String data){
+    public void data(String provider,String service,String resource,String data){
         providers.add(provider);
         runtime.messageReceived(provider,service,resource,data);
     }
