@@ -40,7 +40,8 @@ public class Activator extends AbstractActivator<Mediator>
     	try
     	{
 	        dataBaseService = new SQLiteDataStoreService(mediator, 
-	        (String) super.getProperty("org.eclipse.sensinact.gateway.security.database"));
+	        (String) mediator.getProperty(
+	        "org.eclipse.sensinact.gateway.security.database"));
 	        
 	        this.dataServiceRegistration = 
 	                super.mediator.getContext().registerService(

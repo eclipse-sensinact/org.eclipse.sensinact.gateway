@@ -68,7 +68,7 @@ public class Activator extends HttpActivator
 			throws InvalidProtocolStackException
     {
     	devicesDiscovery = new KodiDevicesDiscovery(mediator, super.endpoint,
-                super.properties.getProperty("kodi.regex"));
+               (String) mediator.getProperty("kodi.regex"));
         
     	super.mediator.onServiceAppearing(HttpService.class, null,
     		new Executable<HttpService,Void>()

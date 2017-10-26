@@ -30,7 +30,7 @@ final class LogExecutor implements Executable<LogService, Void>
 	//Log levels
 	public static final int NO_LOG = 0;
 	//Default log level
-	public static final int DEFAULT_LOG_LEVEL = LOG_ERROR;
+	public static final int DEFAULT_LOG_LEVEL = LOG_INFO;
 	
 	/**
 	 * @param level

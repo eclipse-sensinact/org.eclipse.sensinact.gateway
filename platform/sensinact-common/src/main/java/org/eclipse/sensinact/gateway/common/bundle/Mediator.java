@@ -11,6 +11,7 @@
 
 package org.eclipse.sensinact.gateway.common.bundle;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -25,21 +26,20 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.util.PropertyUtils;
 import org.osgi.framework.BundleContext;
-
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
-
-import org.eclipse.sensinact.gateway.util.PropertyUtils;
 
 /**
  * Mediator Pattern Architecture purpose
  */
 public class Mediator
 {
-
+	public static final String DEFAULT_BUNDLE_PROPERTY_FILEDIR="felix.fileinstall.dir";
+	
 	public static final String SENSINACT_CONFIG_FILE = "sensiNact-conf.xml";
 	
 	/**
@@ -76,6 +76,7 @@ public class Mediator
 	 */
 	public Mediator(BundleContext context)
 	{
+		this.logLevel = -1;
 		this.context = context;
 		this.properties = new Properties();
 		this.customizers = new HashMap<String, TrackerCustomizer<?>>();
@@ -96,7 +97,9 @@ public class Mediator
 		} catch (IOException e)
 		{
 			e.printStackTrace();
-		}  
+		}		
+		loadBundleProperties();
+		
 		String managed = (String) this.getProperty(
 			MediatorManagedConfiguration.MANAGED_SENSINACT_MODULE);
 			
@@ -107,10 +110,68 @@ public class Mediator
 			this.configuration.register();
 		}
 	}
-
-	protected void init()
+	
+	private void loadBundleProperties()
 	{
-	    String logLevelStr = (String) this.getProperty("felix.log.level");
+		updateLogLevel("felix.log.level");
+		
+		final String fileInstallDir = context.getProperty(
+				DEFAULT_BUNDLE_PROPERTY_FILEDIR);
+		
+		if(fileInstallDir == null)
+		{
+			return;
+		}
+		info("Configuration directory %s",fileInstallDir);
+
+		final String symbolicName= context.getBundle().getSymbolicName();
+		info("Bundle symbolic name %s");
+
+		final String bundlePropertyFileName=String.format(
+				"%s/%s.properties",fileInstallDir,symbolicName);
+		final String bundlePropertyFileNameFallback=String.format(
+				"%s/%s.property",fileInstallDir,symbolicName);
+
+		Properties bundleProperties = new Properties();
+		
+		/**
+		 * Looks for property files put into config directory
+		 */
+		try
+		{
+			bundleProperties.load(new FileInputStream(bundlePropertyFileName));
+			warn("File %s loaded successfully",bundlePropertyFileName);
+			logBundleProperties(symbolicName,bundlePropertyFileName,
+					bundleProperties);
+		
+		} catch(IOException e)
+		{
+			warn("Failed to load bundle property file %s, trying %s.",
+					bundlePropertyFileName, 
+					bundlePropertyFileNameFallback);
+			try
+			{
+				bundleProperties.load(new FileInputStream(bundlePropertyFileNameFallback));
+				logBundleProperties(symbolicName, bundlePropertyFileNameFallback, 
+					bundleProperties);
+				
+				warn("File %s loaded successfully",bundlePropertyFileNameFallback);
+				
+			} catch(IOException ex)
+			{
+				error("Failed to load bundle property file %s.",
+						bundlePropertyFileNameFallback);
+			}
+		}
+		for (Map.Entry<Object,Object> name: bundleProperties.entrySet()){
+			this.properties.put(name.getKey().toString(), name.getValue().toString());
+		}
+		updateLogLevel("log.level");
+	}
+	
+	private void updateLogLevel(String property)
+	{
+	    String logLevelStr = (String)getProperty(property);
 	    try
 	    {
 	    	int logLevel = Integer.parseInt(logLevelStr);
@@ -118,8 +179,22 @@ public class Mediator
 	    	
 	    } catch(Exception e)
 	    {	
-	    	this.setLogLevel(LogExecutor.DEFAULT_LOG_LEVEL);
+	    	if(logLevel < 0)
+	    	{
+	    		this.setLogLevel(LogExecutor.DEFAULT_LOG_LEVEL);
+	    	}
 	    }
+	}
+
+	private void logBundleProperties(String bundleName, 
+			String propertyFile,Properties properties)
+	{
+		info("Loading properties for bundle %s located in %s", 
+				bundleName, propertyFile);
+		for(Map.Entry<Object,Object> entry:properties.entrySet())
+		{
+			info("%s:%s",entry.getKey(),entry.getValue());
+		}
 	}
 	
 	/**
@@ -609,8 +684,6 @@ public class Mediator
 		{
 			return;
 		}
-		
-		System.out.println(property + " : " + value);
 		this.properties.put(property, value);
 	}
 
