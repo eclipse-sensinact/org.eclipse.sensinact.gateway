@@ -11,19 +11,21 @@
 
 package org.eclipse.sensinact.gateway.common.bundle;
 
-import java.io.*;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.util.*;
-import java.util.Map.Entry;
-
 import org.eclipse.sensinact.gateway.common.annotation.Property;
+import org.eclipse.sensinact.gateway.util.PropertyUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.service.log.LogService;
-import org.eclipse.sensinact.gateway.util.PropertyUtils;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Abstract implementation of the {@link BundleActivator} interface
@@ -75,8 +77,11 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 	 */
 	public void start(BundleContext context) throws Exception 
 	{		
-	     //initialize fields
-	    this.properties = new Properties();
+
+		this.mediator = this.initMediator(context);
+
+		//initialize fields
+		this.properties = new Properties();
 
 		/** Integrate local bundle property **/
 		final Dictionary<String,String> bundleProperties=loadBundleProperties(context);
@@ -85,17 +90,16 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 		{
 			final String key=enumProperties.nextElement();
 			final String value=bundleProperties.get(key);
-			try 
+			try
 			{
 				this.properties.setProperty(key,value);
-				
+
 			}catch(NullPointerException cpe)
 			{
 				this.mediator.log(LogService.LOG_WARNING,String.format(
-				"Failed to set property/value for the local abstract activator properties"));
+						"Failed to set property/value for the local abstract activator properties"));
 			}
 		}
-		this.mediator = this.initMediator(context);
 
 		injectPropertyFields(context);
 		
@@ -114,38 +118,42 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 		doStart();
 	}
 	
-	private void injectPropertyFields(BundleContext context){
+	private void injectPropertyFields(BundleContext context) throws Exception {
 
 		this.mediator.debug("Starting introspection in bundle %s", context.getBundle().getSymbolicName());
 		for(Field field:this.getClass().getDeclaredFields()){
 			this.mediator.debug("Evaluating field %s", field.getName());
 			for(Annotation propertyAnnotation:field.getAnnotations()){
 				try {
+					if(! (propertyAnnotation instanceof Property)) continue;
 					Property propAn=(Property)propertyAnnotation;
-					Object propertyValue=null;
+					String propertyName=null;
 					if(!propAn.name().equals("")){
-						propertyValue=this.properties.getProperty(propAn.name());
+						propertyName=propAn.name();
 					}else {
-						propertyValue=this.properties.getProperty(field.getName());
+						propertyName=field.getName();
 					}
+					Object propertyValue=this.properties.getProperty(propertyName);
 					if(propertyValue!=null){
-						this.mediator.info("Setting property %s from bundleActivator %s on field %s to value %s", propAn.name(), context.getBundle().getSymbolicName(), field.getName(), propertyValue);
+						this.mediator.info("Setting property '%s' from bundle symbolic '%s' on field '%s' to value '%s'", propertyName, context.getBundle().getSymbolicName(), field.getName(), propertyValue);
 						field.set(this, propertyValue);
 					}else if(propAn.defaultValue()!=null&&!propAn.defaultValue().trim().equals("")){
 						String value = propAn.defaultValue();
 						field.set(this, propAn.defaultValue());
-						this.mediator.info("Setting property %s from bundleActivator %s on field %s to default value which is %s", propAn.name(), context.getBundle().getSymbolicName(), field.getName(),value);
+						this.mediator.info("Setting property '%s' from bundle symbolic name '%s' on field '%s' to default value which is '%s'", propertyName, context.getBundle().getSymbolicName(), field.getName(),value);
 					}else {
-						this.mediator.error("Property %s from bundleActivator %s is mandatory, bundle might not be configured correctly", propAn.name(),context.getBundle().getSymbolicName());
+						this.mediator.error("Property %s from symbolic name %s is mandatory, bundle might not be configured correctly", propAn.name(), context.getBundle().getSymbolicName());
+						throw new Exception(String.format("Property '%s' from bundle symbolic name '%s' is mandatory, bundle might not be configured correctly",propertyName,context.getBundle().getSymbolicName()).toString());
 					}
 				} catch (IllegalAccessException e) {
-					this.mediator.error(e);
+					this.mediator.error(String.format("The field '%s' required property injection in bundle symbolic name '%s', although it was not possible to assign the value to the field, make sure the access signature is 'public' ",field.getName(),context.getBundle().getSymbolicName()).toString());
+					throw new Exception(e);
 				}
 			}
 		}
 	}
 
-	private Dictionary<String,String> loadBundleProperties(BundleContext context){
+	private Dictionary<String,String> loadBundleProperties(BundleContext context) throws Exception {
 		Properties bundleProperties=null;
 		Hashtable<String, String> map = new Hashtable<String,String>();
 
@@ -155,7 +163,7 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 			mediator.info("Configuration directory %s",fileInstallDir);
 
 			final String symbolicName=context.getBundle().getSymbolicName();
-			mediator.info("Bundle symbolic name %s");
+			mediator.info("Bundle symbolic name %s",symbolicName);
 
 			bundleProperties=new Properties();
 
@@ -178,7 +186,7 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 				mediator.warn("Failed to load bundle property file %s, trying %s.",
 						bundlePropertyFileName, 
 						bundlePropertyFileNameFallback);
-				
+
 				bundleProperties.load(new FileInputStream(bundlePropertyFileNameFallback));
 				logBundleProperties(symbolicName, bundlePropertyFileNameFallback, 
 						bundleProperties);
