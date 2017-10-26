@@ -85,6 +85,16 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 
 		/** Integrate local bundle property **/
 		final Dictionary<String,String> bundleProperties=loadBundleProperties(context);
+
+		updateMediatorProperties(this.mediator,bundleProperties);
+
+		injectPropertyFields(context);
+		
+		//complete starting process
+		this.doStart(bundleProperties);
+	}
+
+	private void updateMediatorProperties(M mediator,Dictionary<String,String> bundleProperties){
 		Enumeration<String> enumProperties=bundleProperties.keys();
 		while(enumProperties.hasMoreElements())
 		{
@@ -92,7 +102,10 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 			final String value=bundleProperties.get(key);
 			try
 			{
+				//Update local properties
 				this.properties.setProperty(key,value);
+				//Update mediator property
+				mediator.setProperty(key,value.toString());
 
 			}catch(NullPointerException cpe)
 			{
@@ -100,11 +113,6 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 						"Failed to set property/value for the local abstract activator properties"));
 			}
 		}
-
-		injectPropertyFields(context);
-		
-		//complete starting process
-		this.doStart(bundleProperties);
 	}
 
 	/**

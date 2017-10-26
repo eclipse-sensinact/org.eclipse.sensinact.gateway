@@ -31,14 +31,6 @@ public abstract class MQTTAbstractActivator<M extends Mediator> extends Abstract
 
     public MQTTAbstractActivator() {
         broker=getBroker();
-        //Test broker connection
-        try {
-            MQTTClient mqttClient=ServerConnectionCache.getInstance(getId(), broker, this);
-            mqttClient.getConnection();
-            ServerConnectionCache.disconnectInstance(getId());
-        } catch (MQTTConnectionException e) {
-            LOG.error("Failed to connect to broker {}", e, broker.toString());
-        }
 
         try {
             runtime=MQTTManagerRuntime.getInstance();
