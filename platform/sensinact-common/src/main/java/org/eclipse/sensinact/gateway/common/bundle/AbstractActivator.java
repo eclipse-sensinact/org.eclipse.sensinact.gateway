@@ -11,11 +11,12 @@
 
 package org.eclipse.sensinact.gateway.common.bundle;
 
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-
 import org.eclipse.sensinact.gateway.common.annotation.Property;
+import org.eclipse.sensinact.gateway.util.PropertyUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -52,7 +53,6 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 	 */
 	protected M mediator;
 	
-	
 	/**
 	 * @inheritDoc
 	 * 
@@ -68,21 +68,23 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 		this.doStart();
 	}
 
-	private void injectPropertyFields(){
-
+	private void injectPropertyFields() throws Exception {
 		this.mediator.debug("Starting introspection in bundle %s",
 				mediator.getContext().getBundle().getSymbolicName());
 		for(Field field:this.getClass().getDeclaredFields()){
 			this.mediator.debug("Evaluating field %s", field.getName());
 			for(Annotation propertyAnnotation:field.getAnnotations()){
 				try {
+					if(! (propertyAnnotation instanceof Property)) continue;
 					Property propAn=(Property)propertyAnnotation;
-					Object propertyValue=null;
+					String propertyName=null;
 					if(!propAn.name().equals("")){
-						propertyValue= mediator.getProperty(propAn.name());
+						propertyName=propAn.name();
 					}else {
-						propertyValue= mediator.getProperty(field.getName());
+						propertyName=field.getName();
 					}
+					Object propertyValue=this.mediator.getProperty(propertyName);
+					field.setAccessible(true);
 					if(propertyValue!=null){
 						this.mediator.info("Setting property %s from bundleActivator %s on field %s to value %s",
 							propAn.name(), this.mediator.getContext().getBundle().getSymbolicName(),
@@ -99,7 +101,9 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
 								propAn.name(),this.mediator.getContext().getBundle().getSymbolicName());
 					}
 				} catch (IllegalAccessException e) {
-					this.mediator.error(e);
+					this.mediator.error(String.format("The field '%s' required property injection in bundle symbolic name '%s', although it was not possible to assign the value to the field, make sure the access signature is 'public' ",
+						field.getName(),this.mediator.getContext().getBundle().getSymbolicName()).toString());
+					throw new Exception(e);
 				}
 			}
 		}
