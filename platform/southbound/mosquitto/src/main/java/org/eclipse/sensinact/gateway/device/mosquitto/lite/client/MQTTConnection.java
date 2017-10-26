@@ -16,6 +16,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.client.subscriber.MQTTResourceMessage;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.client.subscriber.MQTTTopicMessage;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.exception.MQTTConnectionException;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Resource;
 
 public class MQTTConnection {
@@ -27,12 +28,20 @@ public class MQTTConnection {
         this.client=client;
     }
 
-    public void connect() throws MqttException {
-        client.connect();
+    public void connect() throws MQTTConnectionException {
+        try {
+            client.connect();
+        } catch (Exception e) {
+            throw new MQTTConnectionException(e);
+        }
     }
 
-    public void disconnect() throws MqttException {
-        client.disconnect();
+    public void disconnect() throws MQTTConnectionException {
+        try {
+            client.disconnect();
+        } catch (Exception e) {
+            throw new MQTTConnectionException(e);
+        }
     }
 
     public void subscribe(String topic, final MQTTTopicMessage listener) throws MqttException {

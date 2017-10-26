@@ -124,7 +124,7 @@ public class MQTTPropertyFileConfigTracker implements ServiceTrackerCustomizer {
 
         if(configFile.getTopicType().equals("smarttopic")){
             LOG.info("This topic config {} is a SmartTopic",configFile.getId());
-            final MQTTClient client= ServerConnectionCache.getInstance(configFile.getId(), provider.getBroker());
+            final MQTTClient client= ServerConnectionCache.getInstance(configFile.getId(), provider.getBroker(),null);
             SmartTopic st=new SmartTopic(configFile.getTopic(),client.getConnection(),this.runtime);
             if(configFile.getProcessor()!=null){
                 st.setProcessor(configFile.getProcessor());

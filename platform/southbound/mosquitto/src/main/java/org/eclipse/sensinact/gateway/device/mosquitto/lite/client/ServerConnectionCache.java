@@ -30,11 +30,11 @@ public class ServerConnectionCache {
 
     }
 
-    public static MQTTClient getInstance(String id,MQTTBroker broker){
+    public static MQTTClient getInstance(final String id,MQTTBroker broker, final MQTTConnectionHandler handler){
 
         if(!instances.containsKey(id)){
             //Create new instance of the server here
-            instances.put(id,new MQTTClient(broker));
+            instances.put(id,new MQTTClient(broker,handler));
         }
 
         return instances.get(id);
