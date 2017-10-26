@@ -11,7 +11,9 @@
 package org.eclipse.sensinact.gateway.core.osgi;
 
 import java.security.AccessController;
+import java.security.AllPermission;
 import java.security.PrivilegedAction;
+import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
@@ -27,6 +29,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
+//import org.osgi.service.permissionadmin.PermissionAdmin;
+//import org.osgi.service.permissionadmin.PermissionInfo;
 
 /**
  * Bundle Activator
@@ -35,6 +39,8 @@ import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
  */
 public class Activator extends AbstractActivator<Mediator>
 {	
+	//private static final String VERSION = "1.5-SNAPSHOT";
+	
 	private ServiceRegistration registration;
 
 	/**
@@ -45,7 +51,7 @@ public class Activator extends AbstractActivator<Mediator>
 	 */
 	@Override
 	public void doStart() throws Exception
-	{    		
+	{  
 		ServiceReference<ConditionalPermissionAdmin> sRef = super.mediator.getContext(
 				).getServiceReference(ConditionalPermissionAdmin.class);
 
@@ -53,31 +59,42 @@ public class Activator extends AbstractActivator<Mediator>
 
 		if (sRef == null )
 		{
-			throw new BundleException(
-			    "ConditionalPermissionAdmin services needed");
+			throw new BundleException("ConditionalPermissionAdmin services needed");
+		}
+		List<String> types = ReflectUtils.getAllStringTypes(
+				mediator.getContext().getBundle());
+		
+		StringBuilder builder = new StringBuilder();
+		
+		for(int index=0;index < types.size();index++)
+		{
+			if(index > 0)
+				builder.append(",");
+			builder.append(types.get(index));			
 		}
 		cpa = super.mediator.getContext().getService(sRef);
 
 		ConditionalPermissionUpdate cpu = cpa.newConditionalPermissionUpdate();
 		List piList = cpu.getConditionalPermissionInfos();
+		
 		ConditionalPermissionInfo cpiDeny = cpa.newConditionalPermissionInfo(String.format(
-            "DENY {" + "[org.eclipse.sensinact.gateway.core.security.perm.SensiNactCoreCondition \"%s\" \"!\"]"
+            "DENY { [org.eclipse.sensinact.gateway.core.security.perm.StrictCodeBaseCondition \"%s\" \"!\"]"
                     + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.Core\" \"register\")"
                     + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.RemoteCore\" \"register,get\")"
                     + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModel\" \"register,get\")"                    
                     + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement\" \"register,get\")"
                     + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.SnaAgent\" \"register\")"
                     + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecuredAccess\" \"register,get\")"
-                   // + "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.security.signature.api.BundleValidation\" \"register\")"
-                    + "} null",
-            mediator.getContext().getBundle().getLocation()));
+                    + "} null", builder.toString()));		
 		piList.add(cpiDeny);
 		
-		ConditionalPermissionInfo cpiAllow = cpa.newConditionalPermissionInfo(
+		ConditionalPermissionInfo cpiAllow = null;
+
+		cpiAllow = cpa.newConditionalPermissionInfo(
 			"ALLOW {"
-			       + "[org.eclipse.sensinact.gateway.core.security.perm.SensiNactCoreCondition \"*\"]"
+			       + "[org.eclipse.sensinact.gateway.core.security.perm.CodeBaseCondition \"*\"]"
 			       + "(java.security.AllPermission \"\" \"\")" 
-			       + "} null");
+			       + "} null");		
 		piList.add(cpiAllow);	
 
 		if (!cpu.commit())
