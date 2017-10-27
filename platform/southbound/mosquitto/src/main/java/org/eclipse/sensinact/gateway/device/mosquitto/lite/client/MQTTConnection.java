@@ -18,10 +18,12 @@ import org.eclipse.sensinact.gateway.device.mosquitto.lite.client.subscriber.MQT
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.client.subscriber.MQTTTopicMessage;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.exception.MQTTConnectionException;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MQTTConnection {
 
-
+    private static final Logger LOG = LoggerFactory.getLogger(MQTTConnection.class);
     private final MqttClient client;
 
     public MQTTConnection(MqttClient client){
@@ -48,7 +50,13 @@ public class MQTTConnection {
         client.subscribe(topic, new IMqttMessageListener() {
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
-                listener.messageReceived(MQTTConnection.this,topic,new String(message.getPayload()));
+                try {
+                    String stringMessage=new String(message.getPayload());
+                    LOG.debug("Notifying listener from topic [%s] with the message [%s]",topic,stringMessage);
+                    listener.messageReceived(MQTTConnection.this,topic,stringMessage);
+                }catch(Exception e){
+                    LOG.error("Listener %s failed to process notification with Error.", listener.getClass().getCanonicalName(), e);
+                }
             }
         });
     }
@@ -57,7 +65,14 @@ public class MQTTConnection {
         client.subscribe(resource.getTopic(), new IMqttMessageListener() {
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
-                listener.messageReceived(MQTTConnection.this,resource,new String(message.getPayload()));
+                try {
+                    String stringMessage=new String(message.getPayload());
+                    LOG.debug("Notifying resource listener from topic [%s] with the message [%s]",topic,stringMessage);
+                    listener.messageReceived(MQTTConnection.this,resource,new String(message.getPayload()));
+                }catch(Exception e){
+                    LOG.error("Listener %s failed to process resource notification with Error.",listener.getClass().getCanonicalName(),e);
+                }
+
             }
         });
     }
