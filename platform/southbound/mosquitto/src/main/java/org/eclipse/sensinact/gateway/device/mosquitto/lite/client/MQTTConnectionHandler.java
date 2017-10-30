@@ -3,20 +3,20 @@ package org.eclipse.sensinact.gateway.device.mosquitto.lite.client;
 public interface MQTTConnectionHandler {
     /**
      * Indicated that the connection failed on the first attempt.
-     * @param connectionId
+     * @param connection
      */
-    void connectionFailed(String connectionId);
+    void connectionFailed(MQTTClient connection);
 
     /**
      * Called when the connection is established, either first or consecutive time (if recovering from a disconnection)
-     * @param connectionId
+     * @param connection
      */
-    void connectionEstablished(String connectionId);
+    void connectionEstablished(MQTTClient connection);
 
     /**
      * Method fired when the connection was established at some point but lost
-     * @param connectionId
+     * @param connection
      */
-    void connectionLost(String connectionId);
+    void connectionLost(MQTTClient connection);
 
 }

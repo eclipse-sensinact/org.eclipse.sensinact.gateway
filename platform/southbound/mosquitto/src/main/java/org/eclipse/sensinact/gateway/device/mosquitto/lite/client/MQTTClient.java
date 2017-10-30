@@ -67,7 +67,8 @@ public class MQTTClient {
                 connection.getConnection().setCallback(new MqttCallback() {
                     @Override
                     public void connectionLost(Throwable cause) {
-                        MQTTClient.this.handler.connectionLost(null);
+                        LOG.error("Connection with the broker lost.", cause);
+                        MQTTClient.this.handler.connectionLost(MQTTClient.this);
                     }
 
                     @Override
