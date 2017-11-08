@@ -1,0 +1,10 @@
+package org.eclipse.sensinact.gateway.device.custom.mqtt;
+
+public class Main {
+
+    public static void main(String[] args) {
+        System.out.println("OK");
+    }
+
+}
+
