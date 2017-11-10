@@ -416,7 +416,7 @@ public abstract class RestAccess
 			mediator.error(e.getMessage(),e);
 			if(this.content != null && !this.content.isEmpty())
 			{
-				sendError(400,"Invalid parameters format");
+				sendError(400,"Invalid parameter(s) format");
 				return false;
 			}
 		}
@@ -463,24 +463,31 @@ public abstract class RestAccess
 				}
 				builder.withArgument(arguments);
 				break;
-			case "SET":
 			case "UNSUBSCRIBE":
 				if(parameters == null || parameters.length!=1
-						|| parameters[0] == null)
+				|| parameters[0] == null)
 				{
-					sendError(400, "Parameter(s) expected");
+					sendError(400, "A Parameter was expected");
 					return false;
 				}
 				if(parameters[0].getType() != String.class)
 				{
-					sendError(400, "Invalid parameter(s) format");
+					sendError(400, "Invalid parameter format");
+					return false;
+				}
+				builder.withArgument(parameters[0].getValue());
+				break;
+			case "SET":
+				if(parameters == null || parameters.length!=1
+						|| parameters[0] == null)
+				{
+					sendError(400, "A Parameter was expected");
 					return false;
 				}
 				builder.withArgument(parameters[0].getValue());
 				break;
 			case "SUBSCRIBE":				
-				NorthboundRecipient recipient = 
-						this.request.createRecipient(parameters);
+				NorthboundRecipient recipient = this.request.createRecipient(parameters);
 				if(recipient == null)
 				{	
 					//still handle Long Polling
