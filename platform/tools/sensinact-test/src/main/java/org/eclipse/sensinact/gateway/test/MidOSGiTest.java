@@ -164,8 +164,7 @@ public abstract class MidOSGiTest implements BundleContextProvider
         FileOutputStream fOut = new FileOutputStream(
         		new File(destDirectory, "dynamicBundle.jar"));
 
-        Manifest manifest = new Manifest(
-        		new FileInputStream(manifestFile));
+        Manifest manifest = new Manifest(new FileInputStream(manifestFile));
         
         // Create a buffer for reading the files
         byte[] buf = new byte[1024];
@@ -221,11 +220,13 @@ public abstract class MidOSGiTest implements BundleContextProvider
 	{
 		try
 		{
+			File testFile = new File(loadDir,"test.jar");
+			URL testFileURL = testFile.toURI().toURL();
 			FileOutputStream output = new FileOutputStream(new File(loadDir,"test.jar"));
 			byte[] testJar = IOUtils.read(url.openStream(),true);			
 			IOUtils.write(testJar, output);	
-			this.classloader.addFiltered(new URL("file:target/felix/load/test.jar"));
-			return getBundleContext().installBundle("file:target/felix/load/test.jar");
+			this.classloader.addFiltered(testFileURL);
+			return getBundleContext().installBundle(testFileURL.toExternalForm());
 		}
 		catch (Exception e)
 		{
@@ -326,7 +327,8 @@ public abstract class MidOSGiTest implements BundleContextProvider
 				return super.get(key);
 			}
 		});	
-		configuration.put("org.eclipse.sensinact.gateway.test.codeBase", getAllowedCodeBase());	
+		configuration.put("org.eclipse.sensinact.gateway.test.codeBase", 
+				getAllowedCodeBase());	
 		this.doInit(configuration);
 		
 	    final Class<?> factoryClass = classloader.loadClass(FELIX_FRAMEWORK_FACTORY);
@@ -335,10 +337,9 @@ public abstract class MidOSGiTest implements BundleContextProvider
 		
 		frameworkClass = classloader.loadClass(FELIX_FRAMEWORK);
 		
-		File manifestFile = new File("./src/test/resources/MANIFEST.MF");	
-		this.createDynamicBundle(manifestFile, bundleDir, new File[]{
-				new File("./target/classes")
-		});
+		File manifestFile = new File("./target/generated-test-sources/META-INF/MANIFEST.MF");	
+		this.createDynamicBundle(manifestFile, bundleDir, 
+				new File[]{new File("./target/classes")});
 		
     	Object factory = factoryClass.newInstance();
     	

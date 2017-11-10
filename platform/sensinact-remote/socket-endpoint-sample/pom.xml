@@ -265,7 +265,23 @@
 					<instructions>
 						<Bundle-Activator>org.eclipse.sensinact.gateway.remote.socket.osgi.Activator</Bundle-Activator>
 					</instructions>
-				</configuration>
+				</configuration>								
+				<executions>
+					<execution>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+						<phase>generate-test-resources</phase>
+						<configuration>
+							<manifestLocation>${project.basedir}/target/generated-test-sources/META-INF</manifestLocation>
+							<instructions>
+								<_noee>true</_noee>
+								<_exportcontents>*</_exportcontents>
+								<_nouses>true</_nouses>
+							</instructions>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 	     </plugins>
 	</build>
