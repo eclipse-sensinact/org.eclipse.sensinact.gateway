@@ -15,6 +15,7 @@ import java.util.Iterator;
 //import java.util.List;
 import java.util.Set;
 
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
@@ -46,8 +47,8 @@ public class NorthboundEndpoint
 	/**
 	 * @param mediator
 	 */
-	public NorthboundEndpoint(NorthboundMediator mediator,
-			Authentication<?> authentication)
+	public NorthboundEndpoint(NorthboundMediator mediator, Authentication<?> authentication)
+			throws InvalidCredentialException
 	{
 		this.mediator = mediator;
 		this.session = this.mediator.getSession(authentication);
@@ -165,7 +166,6 @@ public class NorthboundEndpoint
     /**
      * Get the information of a specific service providers and returns it
      * 
-     * @param session the session of the current user
      * @param serviceProviderId the service provider ID
      * @return the response containing the information
      */
@@ -199,7 +199,7 @@ public class NorthboundEndpoint
     
     /**
      * Get the list of services of a service provider and returns it
-     * @param session the session of the current user
+     *
      * @param serviceProviderId the service provider ID
      * @return the response containing the information
      */
@@ -240,7 +240,7 @@ public class NorthboundEndpoint
 
     /**
      * Get the information of a specific service and returns it
-     * @param session the session of the current user
+     *
      * @param serviceProviderId the service provider ID
      * @param serviceId the service ID
      * @return the response containing the information
@@ -275,7 +275,7 @@ public class NorthboundEndpoint
     
     /**
      * Get the list of resources of a service and returns it
-     * @param session the session of the current user
+     *
      * @param serviceProviderId the service provider ID
      * @return the response containing the information
      */
@@ -318,7 +318,7 @@ public class NorthboundEndpoint
 
     /**
      * Get the information of a specific resource and returns it
-     * @param session the session of the current user
+     *
      * @param serviceProviderId the service provider ID
      * @param serviceId the service ID
      * @param resourceId the resource ID
@@ -367,7 +367,7 @@ public class NorthboundEndpoint
 
     /**
      * Perform a sNa GET on a resource
-     * @param session the session of the current user
+     *
      * @param serviceProviderId the service provider ID
      * @param serviceId the service ID
      * @param resourceId the resource ID
@@ -400,11 +400,11 @@ public class NorthboundEndpoint
 
     /**
      * Perform a sNa SET on a resource
-     * @param session the session of the current user
+     *
      * @param serviceProviderId the service provider ID
      * @param serviceId the service ID
      * @param resourceId the resource ID
-     * @param attributetId the value to set
+     * @param attributeId the value to set
      * @return the response containing the value of the resource
      */
     public /*AccessMethodResponse*/ JSONObject set(String serviceProviderId,
@@ -432,7 +432,6 @@ public class NorthboundEndpoint
     /**
      * Perform a sNa ACT on a resource
      * 
-     * @param session the session of the current user
      * @param serviceProviderId the service provider ID
      * @param serviceId the service ID
      * @param resourceId the resource ID
@@ -472,7 +471,7 @@ public class NorthboundEndpoint
 
     /**
      * Perform a subscription to a resource
-     * @param session the session of the user
+     *
      * @param serviceProviderId the service provider ID
      * @param serviceId the service ID
      * @param resourceId the resource ID
@@ -518,11 +517,11 @@ public class NorthboundEndpoint
 
     /**
      * Perform an unsubscription to a resource
-     * @param session the session of the user
+     *
      * @param serviceProviderId the service provider ID
      * @param serviceId the service ID
      * @param resourceId the resource ID
-     * @param usid the subscription ID
+     * @param attributeId the value to unsubscribe
      * @return success or error response
      */
     public /*AccessMethodResponse*/ JSONObject unsubscribe(String serviceProviderId, 

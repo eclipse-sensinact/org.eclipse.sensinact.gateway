@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.commands.gogo.internal;
 
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 
 import org.apache.felix.service.command.Descriptor;
@@ -27,6 +28,22 @@ public class UserCommands {
     }
 
     /**
+     * Enable to switch to the anonymous user
+     */
+    @Descriptor("switch to the anonymous user")
+    public void su() {
+        try {
+            mediator.switchUser();
+        } catch (InvalidCredentialException e) {
+            System.out.println("Invalid credentials. Try again.");
+        } catch (DataStoreException e) {
+            System.out.println("Unable to switch to user anonymous. Problem accessing the DataStore.");
+        } catch (InvalidKeyException e) {
+            System.out.println("Unable to switch to user anonymous. Invalid inputs.");
+        }
+    }
+
+    /**
      * Enable to switch to a different sNa user
      * @param userID the user ID to switch to
      */
@@ -38,6 +55,8 @@ public class UserCommands {
 
         try {
             mediator.switchUser(userID, new String(passwordChar));
+        } catch (InvalidCredentialException e) {
+            System.out.println("Invalid credentials. Try again.");
         } catch (DataStoreException e) {
             System.out.println("Unable to switch to user " + userID + ". Problem accessing the DataStore.");
         } catch (InvalidKeyException e) {

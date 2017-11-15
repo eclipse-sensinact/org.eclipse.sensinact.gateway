@@ -8,6 +8,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 
@@ -40,7 +41,7 @@ public interface Core
 	 * @param remoteEndpoint the extended {@link AbstractRemoteEndpoint} 
 	 * to attach to the {@link RemoteCore} to be instantiated
 	 */
-	void createRemoteCore(AbstractRemoteEndpoint remoteEnpoint);
+	void createRemoteCore(AbstractRemoteEndpoint remoteEndpoint);
 	
 	/**
 	 * Instantiates and registers a new {@link SnaAgent}, build with the 
@@ -102,12 +103,12 @@ public interface Core
 	 * Creates and returns a {@link Session} for the user whose 
 	 * {@link Authentication} instance is passed as parameter 
 	 * 
-	 * @param authenticaton a user's {@link Authentication}
+	 * @param authentication a user's {@link Authentication}
 	 * 
 	 * @return the {@link Session} for the specified user
 	 */
 	Session getSession(Authentication<?> authentication)
-	    throws InvalidKeyException, DataStoreException;
+	    throws InvalidKeyException, DataStoreException, InvalidCredentialException;
 
 	/**
 	 * Closes this Core

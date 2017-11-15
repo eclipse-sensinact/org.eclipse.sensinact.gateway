@@ -44,23 +44,9 @@ import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
-import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
-import org.eclipse.sensinact.gateway.core.security.AccessNode;
-import org.eclipse.sensinact.gateway.core.security.AccessTree;
-import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
-import org.eclipse.sensinact.gateway.core.security.Credentials;
-import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
-import org.eclipse.sensinact.gateway.core.security.Session;
-import org.eclipse.sensinact.gateway.core.security.SessionKey;
-import org.eclipse.sensinact.gateway.core.security.Sessions;
+import org.eclipse.sensinact.gateway.core.security.*;
 import org.eclipse.sensinact.gateway.core.security.Sessions.KeyExtractor;
 import org.eclipse.sensinact.gateway.core.security.Sessions.KeyExtractorType;
-import org.eclipse.sensinact.gateway.core.security.UserKey;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
@@ -1521,57 +1507,54 @@ public class SensiNact implements Core
 	 */
 	@Override
 	public Session getSession(final Authentication<?> authentication)
-			throws InvalidKeyException, DataStoreException 
-	{
+			throws InvalidKeyException, DataStoreException, InvalidCredentialException {
+
 		Session session = null;
-		if(Credentials.class.isAssignableFrom(authentication.getClass()))
-		{
-			final UserKey userKey = this.doPrivilegedService(
-			AuthenticationService.class, null, 
-		    new Executable<AuthenticationService, UserKey>() 
-			{
-				@Override
-				public UserKey execute(AuthenticationService service) 
-						throws Exception 
-				{
-					UserKey key = service.buildKey((Credentials)
-							authentication);
-					return key;
-				}
-			});
-			String pkey = userKey==null
-					?null:userKey.getPublicKey();
+
+		if(authentication == null) {
+            return this.getAnonymousSession();
+        } else if(Credentials.class.isAssignableFrom(authentication.getClass())) {
+            UserKey userKey = this.doPrivilegedService(AuthenticationService.class, null,
+                        new Executable<AuthenticationService, UserKey>() {
+                @Override
+                public UserKey execute(AuthenticationService service)
+                        throws Exception {
+                    return service.buildKey((Credentials) authentication);
+                }
+            });
+
+            if(userKey == null) {
+                throw new InvalidCredentialException("Invalid credentials");
+            }
+
+            String pkey = userKey.getPublicKey();
+
+            session = this.sessions.getSessionFromPublicKey(pkey);
 			
-			session = this.sessions.getSessionFromPublicKey(pkey);
-			
-			if (session == null) 
-			{				    
-				AccessTree<? extends AccessNode> tree = 
-					this.getUserAccessTree(
-					pkey);
-				
-				SessionKey sessionKey = new SessionKey(mediator,
-					LOCAL_ID, SensiNact.this.nextToken(), tree);
-				
-				UserKey ukey = userKey;
-				if(ukey == null)
-				{
+			if (session == null) {
+                /*UserKey ukey = userKey;
+
+                if(ukey == null) {
 					count++;
-					ukey = new UserKey(new StringBuilder().append(
-						SecuredAccess.ANONYMOUS_PKEY).append("_"
-							).append(count).toString());
-				}
-				sessionKey.setUserKey(ukey);				
-				session = new SensiNactSession(mediator, 
-						sessionKey.getToken());						
+					ukey = new UserKey(new StringBuilder()
+                            .append(SecuredAccess.ANONYMOUS_PKEY)
+                            .append("_")
+                            .append(count)
+                            .toString());
+                }*/
+
+			    AccessTree<? extends AccessNode> tree = this.getUserAccessTree(pkey);
+
+				SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, SensiNact.this.nextToken(), tree);
+
+				sessionKey.setUserKey(userKey);
+				session = new SensiNactSession(mediator, sessionKey.getToken());
 				sessions.put(sessionKey, session);	
 			}
-		} else if(AuthenticationToken.class.isAssignableFrom(
-				authentication.getClass()))
-		{
-			session = this.getSession(((AuthenticationToken)authentication
-					).getAuthenticationMaterial());
+		} else if(AuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
+			session = this.getSession(((AuthenticationToken) authentication).getAuthenticationMaterial());
 		}
+
 		return session;
 	}
 	

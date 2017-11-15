@@ -26,6 +26,7 @@ import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
@@ -387,9 +388,16 @@ public abstract class RestAccess
 			sendError(404, "Not found");
 			return false;
 		}
+
 		Authentication<?> authentication = request.getAuthentication();
-		this.query = request.getQueryMap();		
-		this.endpoint = new NorthboundEndpoint(mediator, authentication);
+		try {
+			this.endpoint = new NorthboundEndpoint(mediator, authentication);
+		} catch (InvalidCredentialException e) {
+			sendError(401, "Unauthorized");
+			return false;
+		}
+
+		this.query = request.getQueryMap();
 		this.request = request;
 		return true;
 	}

@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 
 /**
  * A NorthboundEndpoints allow to build a {@link NorthboundEndpoint}. 
@@ -74,9 +75,8 @@ public final class NorthboundEndpoints
 	 * @param password
 	 * @return
 	 */
-	public NorthboundEndpoint withCredentials(
-			NorthboundMediator mediator,
-			String login, String password)
+	public NorthboundEndpoint withCredentials(NorthboundMediator mediator, String login, String password)
+			throws InvalidCredentialException
 	{
 		if(this.endpoint == null)
 		{
@@ -90,8 +90,8 @@ public final class NorthboundEndpoints
 	 * @param encoded
 	 * @return
 	 */
-	public NorthboundEndpoint withCredentials(
-			NorthboundMediator mediator, String encoded)
+	public NorthboundEndpoint withCredentials(NorthboundMediator mediator, String encoded)
+			throws InvalidCredentialException
 	{
 		if(this.endpoint == null)
 		{
@@ -102,11 +102,11 @@ public final class NorthboundEndpoints
 	}
 
 	/**
-	 * @param token
+	 * @param mediator
 	 * @return
 	 */
-	public NorthboundEndpoint withoutAuthentication(
-			NorthboundMediator mediator)
+	public NorthboundEndpoint withoutAuthentication(NorthboundMediator mediator)
+			throws InvalidCredentialException
 	{
 		if(this.endpoint == null)
 		{
@@ -116,7 +116,6 @@ public final class NorthboundEndpoints
 	}
 
 	/**
-	 * @param token
 	 * @return
 	 */
 	public NorthboundEndpoint endpoint()
