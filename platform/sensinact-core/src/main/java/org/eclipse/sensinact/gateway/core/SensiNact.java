@@ -1538,7 +1538,7 @@ public class SensiNact implements Core
 				SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, 
 						SensiNact.this.nextToken(), tree);
 				sessionKey.setUserKey(userKey);
-				session = new SensiNactSession(mediator, sessionKey.getToken());
+				session = new SensiNactSession(sessionKey.getToken());
 				sessions.put(sessionKey, session);	
 			}
 		} else if(AuthenticationToken.class.isAssignableFrom(authentication.getClass())) 
