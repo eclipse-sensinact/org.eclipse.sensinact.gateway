@@ -88,7 +88,6 @@ public class SensiNact implements Core
 	 */
 	final class SensiNactSession implements Session
 	{	    	
-		private Mediator mediator;
 		private final String identifier;
 
 		/**
@@ -99,9 +98,8 @@ public class SensiNact implements Core
 		 * @param identifier the String identifier of the Session
 		 * to be instantiated
 		 */
-		public SensiNactSession(Mediator mediator, String identifier)
+		public SensiNactSession(String identifier)
 		{
-			this.mediator = mediator;
 			this.identifier = identifier;
 		}
 
@@ -362,10 +360,10 @@ public class SensiNact implements Core
 	        {
 	        	response = resource.get(attributeId);
 	        }
-	        JSONObject object= new JSONObject(response.getJSON());
+	        JSONObject object = new JSONObject(response.getJSON());
     		SessionKey sessionKey = SensiNact.this.sessions.get(
-    				new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
-    						this.getId()));
+    			new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
+    				this.getId()));
     		
         	if(sessionKey.localID()!=0)
         	{
@@ -1562,8 +1560,7 @@ public class SensiNact implements Core
 							).append(count).toString());
 				}
 				sessionKey.setUserKey(ukey);				
-				session = new SensiNactSession(mediator, 
-						sessionKey.getToken());						
+				session = new SensiNactSession(sessionKey.getToken());						
 				sessions.put(sessionKey, session);	
 			}
 		} else if(AuthenticationToken.class.isAssignableFrom(
@@ -1605,10 +1602,8 @@ public class SensiNact implements Core
 		SessionKey sessionKey = new SessionKey(mediator, 
 			LOCAL_ID, this.nextToken(), tree);
 		
-		sessionKey.setUserKey(new UserKey(pkey));
-		
-		Session session = new SensiNactSession(mediator, 
-				sessionKey.getToken());
+		sessionKey.setUserKey(new UserKey(pkey));		
+		Session session = new SensiNactSession(sessionKey.getToken());
 		
 		this.sessions.put(sessionKey,session);
 		return session;
@@ -1656,8 +1651,7 @@ public class SensiNact implements Core
 				return sessionKey;
 			}
 		});		
-		Session session = new SensiNactSession(mediator, 
-				skey.getToken());
+		Session session = new SensiNactSession(skey.getToken());
 		
 		sessions.put(skey, session);
 		return session;
@@ -1788,11 +1782,8 @@ public class SensiNact implements Core
 				SessionKey sessionKey = new SessionKey(mediator, localID(), 
 					SensiNact.this.nextToken(), tree);
 				
-				sessionKey.setUserKey(new UserKey(publicKey));			
-				
-				Session session = new SensiNactSession(
-					SensiNact.this.mediator, sessionKey.getToken());
-				
+				sessionKey.setUserKey(new UserKey(publicKey));				
+				Session session = new SensiNactSession(sessionKey.getToken());				
 				SensiNact.this.sessions.put(sessionKey, session, 
 					remoteEndpoint);
 				
