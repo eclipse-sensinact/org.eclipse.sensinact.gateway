@@ -31,9 +31,9 @@ public class HttpServiceTestClient {
         ConnectionConfigurationImpl<SimpleResponse,SimpleRequest> builder = 
         		new ConnectionConfigurationImpl<SimpleResponse,SimpleRequest>();
         builder.setUri(url);
-        builder.addHeader("Authorization", 
+        /*builder.addHeader("Authorization",
         		"Basic " + Base64.encodeBytes(
-                	"cea:sensiNact_team".getBytes()));
+                	"cea:sensiNact_team".getBytes()));*/
         try 
         {
             if(method.equals("GET"))
