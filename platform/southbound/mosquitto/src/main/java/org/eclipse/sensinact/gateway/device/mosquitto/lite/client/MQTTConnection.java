@@ -28,6 +28,8 @@ public class MQTTConnection {
 
     public MQTTConnection(MqttClient client){
         this.client=client;
+        //client.setTimeToWait(2000l);
+        client.setManualAcks(false);
     }
 
     public void connect() throws MQTTConnectionException {
@@ -66,11 +68,11 @@ public class MQTTConnection {
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
                 try {
-                    String stringMessage=new String(message.getPayload());
-                    LOG.debug("Notifying resource listener from topic [%s] with the message [%s]",topic,stringMessage);
-                    listener.messageReceived(MQTTConnection.this,resource,new String(message.getPayload()));
-                }catch(Exception e){
-                    LOG.error("Listener %s failed to process resource notification with Error.",listener.getClass().getCanonicalName(),e);
+                    String stringMessage = new String(message.getPayload());
+                    LOG.debug("Notifying resource listener from topic [%s] with the message [%s]", topic, stringMessage);
+                    listener.messageReceived(MQTTConnection.this, resource, new String(message.getPayload()));
+                } catch (Exception e) {
+                    LOG.error("Listener %s failed to process resource notification with Error.", listener.getClass().getCanonicalName(), e);
                 }
 
             }

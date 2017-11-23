@@ -10,14 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.device.impl;
 
+import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.client.MQTTClient;
-import org.apache.felix.ipojo.annotations.*;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.MQTTPropertyFileConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(name = "mosquitto",propagation = false)
-@Provides
 /**
  * Implementation of the interface that will generate Sesinact device based on a file descriptor put into FileInstall directory.
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
@@ -31,16 +29,16 @@ public class MQTTPropertyFileConfigImpl implements MQTTPropertyFileConfig {
     @Property
     String id;
 
-    @Property(mandatory = false)
+    @Property(defaultValue = "127.0.0.1")
     String host;
 
-    @Property(mandatory = false)
+    @Property(defaultValue = "1883")
     Long port;
 
-    @Property(mandatory = true)
+    @Property
     String topic;
 
-    @Property(mandatory = false)
+    @Property(defaultValue = "tcp")
     String protocol;
 
     @Property(name = "processor",mandatory = false)
@@ -58,21 +56,11 @@ public class MQTTPropertyFileConfigImpl implements MQTTPropertyFileConfig {
     @Property(name = "location.longitude",mandatory = false)
     Float longitude;
 
-    @Property(name = "discovery.firstMessage",value = "false")
+    @Property(name = "discovery.firstMessage",defaultValue = "false")
     Boolean discoveryOnFirstMessage;
 
-    @Property(name = "topic.type",value = "mqtt")
+    @Property(name = "topic.type",defaultValue = "mqtt")
     String topicType;
-
-    @Validate
-    public void validate(){
-        LOG.info("Instantiating Mosquitto device with the host {}:{}",new Object[]{host,port});
-    }
-
-    @Invalidate
-    public void invalidate(){
-        LOG.info("Instantiating Mosquitto device with the host {}:{}", new Object[]{host, port});
-    }
 
     public String getHost() {
         return host;
@@ -130,5 +118,24 @@ public class MQTTPropertyFileConfigImpl implements MQTTPropertyFileConfig {
         /**
          * This bridge will not invoke action on the backend service
          */
+    }
+
+    @Override
+    public String toString() {
+        return "MQTTPropertyFileConfigImpl{" +
+                "client=" + client +
+                ", id='" + id + '\'' +
+                ", host='" + host + '\'' +
+                ", port=" + port +
+                ", topic='" + topic + '\'' +
+                ", protocol='" + protocol + '\'' +
+                ", payloadFormat='" + payloadFormat + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", discoveryOnFirstMessage=" + discoveryOnFirstMessage +
+                ", topicType='" + topicType + '\'' +
+                '}';
     }
 }
