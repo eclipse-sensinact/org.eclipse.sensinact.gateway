@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import org.eclipse.sensinact.gateway.common.annotation.Property;
-import org.eclipse.sensinact.gateway.util.PropertyUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

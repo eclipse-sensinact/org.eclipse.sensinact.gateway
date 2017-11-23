@@ -20,7 +20,7 @@ import org.eclipse.sensinact.gateway.util.ReflectUtils;
 public class DefaultPacketReaderFactory
 implements PacketReaderFactory {
 
-	private List<PacketReader<? extends Packet>> packetReaders;
+	private List<Class<? extends PacketReader>> packetReaders;
 	private Class<? extends Packet> packetType;
 
 	@SuppressWarnings("unchecked")
@@ -28,7 +28,7 @@ implements PacketReaderFactory {
 		Mediator mediator, ExtModelConfiguration ExtModelConfiguration) 
 	{
 		this.packetType = ExtModelConfiguration.getPacketType();
-		this.packetReaders = new ArrayList<PacketReader<? extends Packet>>();
+		this.packetReaders = new ArrayList<Class<? extends PacketReader>>();
 		
 		List<Class<?>> allTypes = ReflectUtils.getAllTypes(
 				mediator.getContext().getBundle());
@@ -45,38 +45,15 @@ implements PacketReaderFactory {
 			
 			for(;index < length; index++)
 			{
-				Class<?> packetReaderType = packetReaderTypes.get(index);
-				PacketReader<? extends Packet> packetReader =
-				ReflectUtils.<PacketReader<? extends Packet>>getTheBestInstance(
-				(Class<PacketReader<? extends Packet>>)packetReaderType, 
-				new Object[]{mediator, ExtModelConfiguration});
-				
-				if(packetReader != null)
-				{
-					this.packetReaders.add(packetReader);
-				}
+				Class<? extends PacketReader> packetReaderType =
+					(Class<? extends PacketReader>) packetReaderTypes.get(
+							index);
+				this.packetReaders.add(packetReaderType);
 			}
 		}		
 		if(this.packetReaders.isEmpty())
 		{
-			List<Class<?>> structurePacketTypes = 
-				ReflectUtils.getAssignableTypes(
-					Packet.class, allTypes);
-			
-			if(structurePacketTypes.size() == 1)
-			{
-				PacketReader<P> packetReader = null;				
-				try
-				{
-					packetReader = new StructuredPacketReader<P>(
-					mediator, (Class<P>) structurePacketTypes.get(0));
-					this.packetReaders.add(packetReader);
-				}
-				catch (InvalidPacketTypeException e)
-				{
-					mediator.error(e);
-				}
-			}
+			this.packetReaders.add(StructuredPacketReader.class);
 		}
 	}
 	
@@ -103,18 +80,27 @@ implements PacketReaderFactory {
 		P packet) throws InvalidPacketException
 	{
 		int index = 0;
-		int length = packetReaders==null
-			?0:packetReaders.size();
+		int length = packetReaders==null?0:packetReaders.size();		
+		PacketReader<P> packetReader = null;
 		
 		for(;index < length; index++)
 		{
 			try
 			{
-				PacketReader<P> packetReader = (PacketReader<P>) 
-						packetReaders.get(index);				
-				packetReader.reset();
+				Class<? extends PacketReader<P>> packetReaderType =
+				(Class<? extends PacketReader<P>>) packetReaders.get(index);
+				
+				if(StructuredPacketReader.class.isAssignableFrom(packetReaderType))
+				{
+					packetReader = new StructuredPacketReader<P>(
+							mediator,(Class<P>) packet.getClass());
+				} else
+				{
+					packetReader = ReflectUtils.getTheBestInstance(
+						packetReaderType, new Object[]{mediator, manager});
+				}
 				packetReader.parse(packet);
-				return packetReader;
+				break;
 				
 			} catch(Exception e)
 			{
@@ -122,6 +108,6 @@ implements PacketReaderFactory {
 				continue;
 			}
 		}
-		return null;
+		return packetReader;
 	}
 }

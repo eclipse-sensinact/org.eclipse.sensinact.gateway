@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.commands.gogo.osgi;
 
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -34,10 +35,29 @@ public class CommandServiceMediator extends Mediator {
      * @ 
      * @see Mediator#Mediator(BundleContext)
      */
-    public CommandServiceMediator(BundleContext context)  {
+    CommandServiceMediator(BundleContext context)  {
         super(context);
-        this.session = getCore().getAnonymousSession();
-        this.userId = "anonymous";
+
+        Core core = getCore();
+
+        if(core != null) {
+            this.session = getCore().getAnonymousSession();
+            this.userId = "anonymous";
+        } else {
+            throw new NullPointerException("Unable to retrieve the Core service");
+        }
+    }
+
+    /**
+     * Switch to the anonymous user
+     * @throws DataStoreException
+     * @throws InvalidKeyException
+     * @throws InvalidCredentialException
+     */
+    public void switchUser()
+            throws DataStoreException, InvalidKeyException, InvalidCredentialException {
+
+        this.switchUser(null, null);
     }
 
     /**
@@ -46,11 +66,24 @@ public class CommandServiceMediator extends Mediator {
      * @param password the password of the user
      * @throws DataStoreException
      * @throws InvalidKeyException
+     * @throws InvalidCredentialException
      */
     public void switchUser(String login, String password) 
-    		throws DataStoreException, InvalidKeyException {
-        this.session = getCore().getSession(new Credentials(login, password));
-        this.userId = login;
+    		throws DataStoreException, InvalidKeyException, InvalidCredentialException {
+
+        Core core = getCore();
+
+        if(core != null) {
+            if (login == null && password == null) {
+                this.session = getCore().getAnonymousSession();
+                this.userId = "anonymous";
+            } else {
+                this.session = getCore().getSession(new Credentials(login, password));
+                this.userId = login;
+            }
+        } else {
+            throw new NullPointerException("Unable to retrieve the Core service");
+        }
     }
 
     /**

@@ -26,6 +26,7 @@ import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
@@ -387,9 +388,16 @@ public abstract class RestAccess
 			sendError(404, "Not found");
 			return false;
 		}
+
 		Authentication<?> authentication = request.getAuthentication();
-		this.query = request.getQueryMap();		
-		this.endpoint = new NorthboundEndpoint(mediator, authentication);
+		try {
+			this.endpoint = new NorthboundEndpoint(mediator, authentication);
+		} catch (InvalidCredentialException e) {
+			sendError(401, "Unauthorized");
+			return false;
+		}
+
+		this.query = request.getQueryMap();
 		this.request = request;
 		return true;
 	}
@@ -416,7 +424,7 @@ public abstract class RestAccess
 			mediator.error(e.getMessage(),e);
 			if(this.content != null && !this.content.isEmpty())
 			{
-				sendError(400,"Invalid parameters format");
+				sendError(400,"Invalid parameter(s) format");
 				return false;
 			}
 		}
@@ -463,24 +471,31 @@ public abstract class RestAccess
 				}
 				builder.withArgument(arguments);
 				break;
-			case "SET":
 			case "UNSUBSCRIBE":
 				if(parameters == null || parameters.length!=1
-						|| parameters[0] == null)
+				|| parameters[0] == null)
 				{
-					sendError(400, "Parameter(s) expected");
+					sendError(400, "A Parameter was expected");
 					return false;
 				}
 				if(parameters[0].getType() != String.class)
 				{
-					sendError(400, "Invalid parameter(s) format");
+					sendError(400, "Invalid parameter format");
+					return false;
+				}
+				builder.withArgument(parameters[0].getValue());
+				break;
+			case "SET":
+				if(parameters == null || parameters.length!=1
+						|| parameters[0] == null)
+				{
+					sendError(400, "A Parameter was expected");
 					return false;
 				}
 				builder.withArgument(parameters[0].getValue());
 				break;
 			case "SUBSCRIBE":				
-				NorthboundRecipient recipient = 
-						this.request.createRecipient(parameters);
+				NorthboundRecipient recipient = this.request.createRecipient(parameters);
 				if(recipient == null)
 				{	
 					//still handle Long Polling
