@@ -101,11 +101,11 @@ public class MosquittoManagedService implements ManagedServiceFactory {
     @Override
     public void deleted(String servicePID) {
 
-        ServiceRegistration sr=registrations.get(Constants.SERVICE_PID);
+        ServiceRegistration sr=registrations.remove(servicePID);
 
         if(sr==null){
 
-            LOG.warn("The service pid {} does not exist, impossible to remove instance");
+            LOG.warn("The service pid {} does not exist, impossible to remove instance",servicePID);
 
         }else {
 
