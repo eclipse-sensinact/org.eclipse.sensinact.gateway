@@ -21,7 +21,7 @@ public class Provider implements MQTTProvider {
     private String name;
     private MQTTBroker broker=new MQTTBroker();
     private List<Service> services=new ArrayList<>();
-    private Boolean discoveryOnFirstMessage;
+    private Boolean discoveryOnFirstMessage=Boolean.FALSE;
 
     @Override
     public String getName() {

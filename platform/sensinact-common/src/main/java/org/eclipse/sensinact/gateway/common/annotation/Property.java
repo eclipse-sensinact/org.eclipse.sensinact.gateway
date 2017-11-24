@@ -11,5 +11,6 @@ public @interface Property {
 
     public String name() default "";
     public String defaultValue() default "";
+    public boolean mandatory() default true;
 
 }

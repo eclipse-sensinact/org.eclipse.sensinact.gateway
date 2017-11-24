@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.device.mosquitto.lite;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.MQTTPropertyFileConfig;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.interpolator.MosquittoManagedService;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Provider;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.runtime.MQTTManagerRuntime;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.sensinact.MQTTPacket;
@@ -24,11 +25,13 @@ import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.Hashtable;
 
 import static org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 
@@ -44,6 +47,7 @@ public class Activator extends AbstractActivator<Mediator>
     private ServiceRegistration registration;
     private ServiceTracker MQTTBusConfigFileServiceTracker;
     private ServiceTracker MQTTBusPojoServiceTracker;
+    private ServiceRegistration<ManagedServiceFactory> managedServiceFactory;
 
     private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
@@ -57,6 +61,7 @@ public class Activator extends AbstractActivator<Mediator>
                 .withResourceBuildPolicy((byte) (BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy()))
                 .withStartAtInitializationTime(true)
                 .buildConfiguration("mosquitto-resource.xml", Collections.emptyMap());
+
         mqttConnector =new LocalProtocolStackEndpoint<MQTTPacket>(mediator);
         mqttConnector.connect(MQTTDeviceFactory);
 
@@ -65,6 +70,9 @@ public class Activator extends AbstractActivator<Mediator>
 
         this.registration = super.mediator.getContext().registerService(
                 ProtocolStackEndpoint.class, mqttConnector, null);
+
+        managedServiceFactory = super.mediator.getContext().registerService(ManagedServiceFactory.class,new MosquittoManagedService(super.mediator.getContext()),new Hashtable(){{put("service.pid", MosquittoManagedService.MANAGERNAME);}});
+
         //Monitor the deployment of a Provider pojo that specifies relation between topic and provider/service/resource, this is the entry point for any MQTT device
         MQTTBusPojoServiceTracker = new ServiceTracker(super.mediator.getContext(), Provider.class.getName(), new MQTTPojoConfigTracker(runtime,super.mediator.getContext()));
         MQTTBusPojoServiceTracker.open(true);
@@ -79,15 +87,28 @@ public class Activator extends AbstractActivator<Mediator>
 
     @Override
     public void doStop() throws Exception{
-        MQTTBusConfigFileServiceTracker.close();
-        mqttConnector.stop();
-        mqttConnector = null;
-        MQTTDeviceFactory = null;
+
         try{
-            this.registration.unregister();
+            MQTTBusConfigFileServiceTracker.close();
+            mqttConnector.stop();
+        }finally{
+            mqttConnector = null;
+            MQTTDeviceFactory = null;
+        }
+
+        try{
+            managedServiceFactory.unregister();
 
         }finally{
             this.registration = null;
+        }
+
+
+        try{
+            registration.unregister();
+
+        }finally{
+            registration = null;
         }
     }
 
