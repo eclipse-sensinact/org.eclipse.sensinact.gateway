@@ -71,7 +71,7 @@ public class Activator extends AbstractActivator<Mediator>
         this.registration = super.mediator.getContext().registerService(
                 ProtocolStackEndpoint.class, mqttConnector, null);
 
-        managedServiceFactory = super.mediator.getContext().registerService(ManagedServiceFactory.class,new MosquittoManagedService(super.mediator.getContext()),new Hashtable(){{put("service.pid", MosquittoManagedService.MANAGERNAME);}});
+        managedServiceFactory = super.mediator.getContext().registerService(ManagedServiceFactory.class,new MosquittoManagedService(super.mediator.getContext()),new Hashtable(){{put("service.pid", MosquittoManagedService.MANAGER_NAME);}});
 
         //Monitor the deployment of a Provider pojo that specifies relation between topic and provider/service/resource, this is the entry point for any MQTT device
         MQTTBusPojoServiceTracker = new ServiceTracker(super.mediator.getContext(), Provider.class.getName(), new MQTTPojoConfigTracker(runtime,super.mediator.getContext()));
