@@ -11,6 +11,7 @@
 
 package org.eclipse.sensinact.gateway.util;
 
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -75,19 +76,14 @@ public class CryptoUtils
     	 }
          try 
          {
+             System.out.println("pass: " + pass);
+
         	//clone the MessageDigest to avoid multithreading congestion
 			MessageDigest mydigest = (MessageDigest) MD5.clone();
 		    mydigest.reset();
-	        byte[] passBytes = pass.getBytes();
-	        byte[] digested = mydigest.digest(passBytes);
-	         
-	        StringBuilder sb = new StringBuilder();
-	        for(int i=0;i<digested.length;i++)
-	        {
-	             sb.append(Integer.toHexString(0xff & digested[i]));
-	        }
-	        return sb.toString();
-	        
+	        byte[] digested = mydigest.digest(pass.getBytes());
+
+             return String.format("%032X", new BigInteger(1, digested)).toLowerCase();
 		 } catch (CloneNotSupportedException e) 
          {			
 			throw new InvalidKeyException(e);
