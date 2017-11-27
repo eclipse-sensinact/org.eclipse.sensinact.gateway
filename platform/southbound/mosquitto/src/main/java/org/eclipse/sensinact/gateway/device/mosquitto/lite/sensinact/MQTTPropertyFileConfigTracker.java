@@ -131,10 +131,10 @@ public class MQTTPropertyFileConfigTracker implements ServiceTrackerCustomizer {
             }
             st.activate();
             LOG.info("SmartTopic service started.");
-            return null;
-        }else {
-            return provider;
+            provider.setIsDiscoveryOnFirstMessage(true);
         }
+
+        return provider;
 
     }
 
@@ -209,10 +209,13 @@ public class MQTTPropertyFileConfigTracker implements ServiceTrackerCustomizer {
     @Override
     public void removedService(ServiceReference serviceReference, Object o) {
 
-
-        ServiceRegistration record=registration.get(serviceReference.getProperty("service.pid").toString());
-
         LOG.info("Detaching devices MQTT Bus service");
+
+        final String servicePID=serviceReference.getProperty("service.pid").toString();
+
+        ServiceRegistration record=registration.get(servicePID);
+
+        LOG.debug("Removing service pid {} which correspond to record {} from the list",servicePID,record);
 
         if(record!=null){
 
