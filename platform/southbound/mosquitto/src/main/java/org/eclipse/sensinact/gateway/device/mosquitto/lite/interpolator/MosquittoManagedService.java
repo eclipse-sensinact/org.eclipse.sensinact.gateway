@@ -12,7 +12,7 @@ package org.eclipse.sensinact.gateway.device.mosquitto.lite.interpolator;
 
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.MQTTPropertyFileConfig;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.impl.MQTTPropertyFileConfigImpl;
-import org.eclipse.sensinact.gateway.device.mosquitto.lite.interpolator.exception.IncompleteDataException;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.interpolator.exception.InterpolationException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
@@ -31,7 +31,8 @@ import java.util.HashMap;
  */
 public class MosquittoManagedService implements ManagedServiceFactory {
 
-    public static final String MANAGERNAME="mosquitto";
+    public static final String MANAGER_NAME ="mosquitto";
+    private static final String OSGI_PROPERTY_FOR_FILENAME="felix.fileinstall.filename";
     private static final Logger LOG = LoggerFactory.getLogger(MosquittoManagedService.class);
     private final BundleContext context;
     private HashMap<String,ServiceRegistration<MQTTPropertyFileConfig>> registrations=new HashMap<>();
@@ -43,7 +44,7 @@ public class MosquittoManagedService implements ManagedServiceFactory {
 
     @Override
     public String getName() {
-        return MANAGERNAME;
+        return MANAGER_NAME;
     }
 
     private void logDictionnary(Dictionary dictionary){
@@ -61,7 +62,7 @@ public class MosquittoManagedService implements ManagedServiceFactory {
     }
 
     @Override
-    public void updated(String s, Dictionary dictionary) throws ConfigurationException {
+    public void updated(String servicePID, Dictionary dictionary) throws ConfigurationException {
 
         LOG.debug("Instantiating mosquitto managed service..");
 
@@ -70,13 +71,13 @@ public class MosquittoManagedService implements ManagedServiceFactory {
         if(registrations.get(Constants.SERVICE_PID)==null){
 
             LOG.debug("new registration for file {}",dictionary.get("felix.fileinstall.filename").toString());
-            register(s,dictionary);
+            register(servicePID,dictionary);
 
         }else {
 
-            LOG.debug("update information received, the instance will be distroyed and re-created for file {}",dictionary.get("felix.fileinstall.filename").toString());
-            deleted(s);
-            register(s,dictionary);
+            LOG.debug("update information received, the instance will be distroyed and re-created for file {}",dictionary.get(OSGI_PROPERTY_FOR_FILENAME).toString());
+            deleted(servicePID);
+            register(servicePID,dictionary);
 
         }
 
@@ -86,14 +87,14 @@ public class MosquittoManagedService implements ManagedServiceFactory {
     private void register(String servicePID, Dictionary dictionary){
 
         try {
-            MosquittoManagedServiceIterpolate mit=new MosquittoManagedServiceIterpolate(MQTTPropertyFileConfigImpl.class,dictionary);
+            Interpolator mit=new Interpolator(MQTTPropertyFileConfigImpl.class,dictionary);
             MQTTPropertyFileConfig config=(MQTTPropertyFileConfig)mit.getInstance();
-            LOG.debug("Interpolation of service PID result {}",config.toString());
+            LOG.debug("Interpolation result of service PID {} with POJO {}",config.toString(),config.getClass().getCanonicalName());
             ServiceRegistration<MQTTPropertyFileConfig> registration= (ServiceRegistration<MQTTPropertyFileConfig>) context.registerService(MQTTPropertyFileConfig.class.getCanonicalName(), config, dictionary);
             LOG.info("Service registered for id {}",config.getId());
             registrations.put(servicePID,registration);
-        } catch (IncompleteDataException e) {
-            LOG.error("Failed to interpolate properties",e);
+        } catch (InterpolationException e) {
+            LOG.error("Failed to interpolate properties in the service pid {}",servicePID,e);
         }
 
     }

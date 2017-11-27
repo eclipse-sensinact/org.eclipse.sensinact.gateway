@@ -10,24 +10,24 @@
  */
 package org.eclipse.sensinact.gateway.device.mosquitto.lite.interpolator.exception;
 
-public class IncompleteDataException extends InterpolationException {
-    public IncompleteDataException(String message, Throwable cause) {
+public class InvalidValueException extends InterpolationException {
+    public InvalidValueException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public IncompleteDataException(Throwable cause) {
+    public InvalidValueException(Throwable cause) {
         super(cause);
     }
 
-    public IncompleteDataException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public InvalidValueException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
-    public IncompleteDataException(String message) {
+    public InvalidValueException(String message) {
         super(message);
     }
 
-    public IncompleteDataException() {
+    public InvalidValueException() {
         super();
     }
 }

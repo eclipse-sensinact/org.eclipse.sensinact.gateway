@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+
+ * Contributors:
+ *    Christophe Munilla - initial API and implementation
+ */
 PRAGMA foreign_keys=TRUE;
 PRAGMA recursive_triggers=TRUE;
 PRAGMA automatic_index=TRUE;
@@ -387,13 +397,13 @@ END;
 ---------------------------------------------------------------------------
 
 -- psswd : "sensiNact_team" / pk : cea:christophe.munilla@cea.fr + machine time
-INSERT INTO SNAUSER VALUES (NULL, "cea",  "acdad7d2c39119f9d7d76d3433ec85", 
+INSERT INTO SNAUSER VALUES (NULL, "cea",  "ac0dad7d2c39119f9d7d76d34303ec85",
 "christophe.munilla@cea.fr", "73c5f1a1e7b4a75c2b5fabafca2cf51e6b0e7426");
 -- psswd : "fake" / pk : fake:fake@cea.fr + machine time
-INSERT INTO SNAUSER VALUES (NULL, "fake", "144c9defac4969c7bfad8efaa8ea194",
+INSERT INTO SNAUSER VALUES (NULL, "fake", "144c9defac04969c7bfad8efaa8ea194",
 "fake@cea.fr", "f92fe92b61e018be14a88ab84f2859c35d832316");
 -- psswd : "fake2" / pk : fake2:fake2@cea.fr + machine time
-INSERT INTO SNAUSER VALUES (NULL, "fake2","503f7fada60da935e2851a1c7326084", 
+INSERT INTO SNAUSER VALUES (NULL, "fake2","503f7fada600da935e2851a1c7326084",
 "fake2@cea.fr", "31e63e9c4a319bf313b8a6d454798e09b3e7344a"); 
 
 INSERT INTO BUNDLE VALUES (2, 0, 1, "fan", "fan");
