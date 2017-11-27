@@ -211,20 +211,20 @@ public class TestHttpDevice extends MidOSGiTest
 
 		MidProxy midVariable = (MidProxy) Proxy.getInvocationHandler(variable);
 				
-		SnaMessage response = (SnaMessage) midVariable.invoke(
-			getMethod, SnaMessage.class, new Object[]{ DataResource.VALUE });		
+		SnaMessage response = (SnaMessage) midVariable.toOSGi(
+			getMethod, new Object[]{ DataResource.VALUE });		
 		
 		JSONObject jsonObject = new JSONObject(response.getJSON());
 		assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
 		
-		response = (SnaMessage) midVariable.invoke(
-			setMethod, SnaMessage.class, new Object[]{ DataResource.VALUE,25 });		
+		response = (SnaMessage) midVariable.toOSGi(
+			setMethod, new Object[]{ DataResource.VALUE,25 });		
 
 		jsonObject = new JSONObject(response.getJSON());
 		assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
 		
-		response = (SnaMessage) midVariable.invoke(
-			getMethod, SnaMessage.class, new Object[]{ DataResource.VALUE });		
+		response = (SnaMessage) midVariable.toOSGi(
+			getMethod, new Object[]{ DataResource.VALUE });		
 
 		jsonObject = new JSONObject(response.getJSON());
 		assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
@@ -258,20 +258,20 @@ public class TestHttpDevice extends MidOSGiTest
 
 		MidProxy midVariable = (MidProxy) Proxy.getInvocationHandler(variable);
 				
-		SnaMessage response = (SnaMessage) midVariable.invoke(
-			getMethod, SnaMessage.class, new Object[]{ DataResource.VALUE });		
+		SnaMessage response = (SnaMessage) midVariable.toOSGi(
+			getMethod, new Object[]{ DataResource.VALUE });		
 
 		JSONObject jsonObject = new JSONObject(response.getJSON());
 		assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
 		
-		response = (SnaMessage) midVariable.invoke(
-			setMethod, SnaMessage.class, new Object[]{ DataResource.VALUE,25 });		
+		response = (SnaMessage) midVariable.toOSGi(
+			setMethod, new Object[]{ DataResource.VALUE,25 });		
 
 		jsonObject = new JSONObject(response.getJSON());
 		assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
 		
-		response = (SnaMessage) midVariable.invoke(
-			getMethod, SnaMessage.class, new Object[]{ DataResource.VALUE });		
+		response = (SnaMessage) midVariable.toOSGi(
+			getMethod, new Object[]{ DataResource.VALUE });		
 
 		jsonObject = new JSONObject(response.getJSON());
 		assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
@@ -305,20 +305,20 @@ public class TestHttpDevice extends MidOSGiTest
 
 		MidProxy midVariable = (MidProxy) Proxy.getInvocationHandler(variable);
 				
-		SnaMessage response = (SnaMessage) midVariable.invoke(
-			getMethod, SnaMessage.class, new Object[]{ DataResource.VALUE });		
+		SnaMessage response = (SnaMessage) midVariable.toOSGi(
+			getMethod, new Object[]{ DataResource.VALUE });		
 
 		JSONObject jsonObject = new JSONObject(response.getJSON());
 		assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
 		
-		response = (SnaMessage) midVariable.invoke(
-			setMethod, SnaMessage.class, new Object[]{ DataResource.VALUE,25 });		
+		response = (SnaMessage) midVariable.toOSGi(
+			setMethod, new Object[]{ DataResource.VALUE,25 });		
 
 		jsonObject = new JSONObject(response.getJSON());
 		assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
 		
-		response = (SnaMessage) midVariable.invoke(
-			getMethod, SnaMessage.class, new Object[]{ DataResource.VALUE });		
+		response = (SnaMessage) midVariable.toOSGi(
+			getMethod, new Object[]{ DataResource.VALUE });		
 
 		jsonObject = new JSONObject(response.getJSON());
 		assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
@@ -351,8 +351,8 @@ public class TestHttpDevice extends MidOSGiTest
 
 		MidProxy midVariable = (MidProxy) Proxy.getInvocationHandler(variable);
 				
-		SnaMessage response = (SnaMessage) midVariable.invoke(
-			getMethod, SnaMessage.class, new Object[]{ DataResource.VALUE });		
+		SnaMessage response = (SnaMessage) midVariable.toOSGi(
+			getMethod, new Object[]{ DataResource.VALUE });		
 
 		JSONObject jsonObject = new JSONObject(response.getJSON());
 		assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
@@ -384,8 +384,8 @@ public class TestHttpDevice extends MidOSGiTest
 		Resource variable = service.getResource("temperature");
 
 		MidProxy midVariable = (MidProxy) Proxy.getInvocationHandler(variable);
-		SnaMessage response = (SnaMessage) midVariable.invoke(
-			getMethod, SnaMessage.class, new Object[]{ DataResource.VALUE });		
+		SnaMessage response = (SnaMessage) midVariable.toOSGi(
+			getMethod, new Object[]{ DataResource.VALUE });		
 
 		JSONObject jsonObject = new JSONObject(response.getJSON());		
 		assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
@@ -398,8 +398,8 @@ public class TestHttpDevice extends MidOSGiTest
 		
 		Thread.sleep(1500);
 		
-		response = (SnaMessage) midVariable.invoke(
-			getMethod, SnaMessage.class, new Object[]{ DataResource.VALUE });		
+		response = (SnaMessage) midVariable.toOSGi(
+			getMethod, new Object[]{ DataResource.VALUE });		
 
 		jsonObject = new JSONObject(response.getJSON());
 		assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
@@ -412,8 +412,8 @@ public class TestHttpDevice extends MidOSGiTest
 		
 		Thread.sleep(1500);
 		
-		response = (SnaMessage) midVariable.invoke(
-			getMethod, SnaMessage.class, new Object[]{ DataResource.VALUE });		
+		response = (SnaMessage) midVariable.toOSGi(
+			getMethod, new Object[]{ DataResource.VALUE });		
 
 		jsonObject = new JSONObject(response.getJSON());		
 		assertEquals(32, (int) jsonObject.getJSONObject("response").getInt("value"));
@@ -426,8 +426,8 @@ public class TestHttpDevice extends MidOSGiTest
 				).put("resourceId", "temperature"
 				).put("data", 45));
 		
-		response = (SnaMessage) midVariable.invoke(
-			getMethod, SnaMessage.class, new Object[]{ DataResource.VALUE });		
+		response = (SnaMessage) midVariable.toOSGi(
+			getMethod, new Object[]{ DataResource.VALUE });		
 
 		jsonObject = new JSONObject(response.getJSON());		
 		assertEquals(32, (int) jsonObject.getJSONObject("response").getInt("value"));

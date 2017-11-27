@@ -78,7 +78,9 @@ public class TestRestGETAccess  extends TestRestAccess
                 null, "GET");
 
         response = new JSONObject(simulated);
-
+        
+        System.out.println(response);
+        
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/cursor/position"));
         assertTrue(response.getJSONObject("response").get("value").equals(1));		
