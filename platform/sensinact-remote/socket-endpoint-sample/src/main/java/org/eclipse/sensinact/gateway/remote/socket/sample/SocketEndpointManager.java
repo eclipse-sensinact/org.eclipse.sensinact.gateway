@@ -26,7 +26,7 @@ public class SocketEndpointManager implements ManagedConfigurationListener
 	//********************************************************************//
 	//						NESTED DECLARATIONS			  			      //
 	//********************************************************************//
-
+	
 	class SocketEndpointDescriptor implements Nameable
 	{
 		private final String prefix;

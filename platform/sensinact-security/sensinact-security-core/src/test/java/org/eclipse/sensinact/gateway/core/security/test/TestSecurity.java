@@ -195,8 +195,8 @@ public class TestSecurity extends MidOSGiTest
 		Method method = mid.getContextualizedType().getDeclaredMethod(
 			"getSession", new Class<?>[]{midCredentials.getContextualizedType()});
 		
-		session = (Session) mid.invoke(method, Session.class, new Object[]{
-				midCredentials.getContextualizedInstance()});
+		session = (Session) mid.toOSGi(method, new Object[]{
+				midCredentials.getInstance()});
 		
 		assertNotNull(session);
 		

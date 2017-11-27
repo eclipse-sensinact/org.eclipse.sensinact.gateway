@@ -110,8 +110,8 @@ public class TestGenericImplementation extends MidOSGiTest
 		MidProxy midVariable = (MidProxy) Proxy.getInvocationHandler(variable);
 		MidProxy midVariation = (MidProxy) Proxy.getInvocationHandler(variation);
 				
-		SnaMessage response = (SnaMessage) midVariable.invoke(
-			getMethod, SnaMessage.class, new Object[]{ DataResource.VALUE });		
+		SnaMessage response = (SnaMessage) midVariable.toOSGi(
+			getMethod, new Object[]{ DataResource.VALUE });		
 
 		JSONObject jsonObject = new JSONObject(response.getJSON());
 		
@@ -123,13 +123,11 @@ public class TestGenericImplementation extends MidOSGiTest
 		MidProxy<ActionResource> actionProxy = new MidProxy<ActionResource>(
 			classloader,  this, ActionResource.class);
 		
-		ActionResource action = actionProxy.buildProxy(
-				midAction.getContextualizedInstance());
+		ActionResource action = actionProxy.buildProxy(midAction.getInstance());
 
-		actionProxy.invoke(actMethod, SnaMessage.class, new Object[]{new Object[0]});		
+		actionProxy.toOSGi(actMethod,new Object[]{new Object[0]});		
 
-		response = (SnaMessage) midVariable.invoke(getMethod, SnaMessage.class, 
-				new Object[]{ DataResource.VALUE });	
+		response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{ DataResource.VALUE });	
 
 		assertEquals(1, (int) jsonObject.getJSONObject("response").getInt("value"));
 		
@@ -138,16 +136,14 @@ public class TestGenericImplementation extends MidOSGiTest
 		actionProxy = new MidProxy<ActionResource>(
 				classloader,  this, ActionResource.class);
 			
-		action = actionProxy.buildProxy(midAction.getContextualizedInstance());
-		actionProxy.invoke(actMethod, SnaMessage.class, new Object[]{new Object[0]});		
+		action = actionProxy.buildProxy(midAction.getInstance());
+		actionProxy.toOSGi(actMethod, new Object[]{new Object[0]});		
 
-		response = (SnaMessage) midVariable.invoke(
-			getMethod, SnaMessage.class, new Object[]{ DataResource.VALUE });
+		response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{ DataResource.VALUE });
 		jsonObject = new JSONObject(response.getJSON());		
+		
 		assertEquals(0, (int) jsonObject.getJSONObject("response").getInt("value"));
-
-		response = (SnaMessage) midVariation.invoke(
-			getMethod, SnaMessage.class, new Object[]{ DataResource.VALUE });
+		response = (SnaMessage) midVariation.toOSGi(getMethod, new Object[]{ DataResource.VALUE });
 		
 		jsonObject = new JSONObject(response.getJSON());	
 		
@@ -180,20 +176,17 @@ public class TestGenericImplementation extends MidOSGiTest
 
 		 JSONObject jsonObject;
 		 MidProxy midTemperature = (MidProxy) Proxy.getInvocationHandler(temperature);
-		 SnaMessage response = (SnaMessage) midTemperature.invoke(
-				getMethod, SnaMessage.class, new Object[]{ DataResource.VALUE });		
+		 SnaMessage response = (SnaMessage) midTemperature.toOSGi(getMethod, new Object[]{ DataResource.VALUE });		
 
 		 jsonObject = new JSONObject(response.getJSON());		
 		 assertEquals(5.0f, (float) jsonObject.getJSONObject("response").getDouble("value"),0.0f);
 		 
-		 response = (SnaMessage) midTemperature.invoke(
-				setMethod, SnaMessage.class, new Object[]{ DataResource.VALUE,-24.5f });
+		 response = (SnaMessage) midTemperature.toOSGi(setMethod, new Object[]{ DataResource.VALUE,-24.5f });
 
 		 jsonObject = new JSONObject(response.getJSON());		
 		 assertEquals(-24.5f, (float) jsonObject.getJSONObject("response").getDouble("value"),0.0f);
 
-		 response = (SnaMessage) midTemperature.invoke(
-				setMethod, SnaMessage.class, new Object[]{ DataResource.VALUE,45.1f });
+		 response = (SnaMessage) midTemperature.toOSGi(setMethod, new Object[]{ DataResource.VALUE,45.1f });
 
 		 jsonObject = new JSONObject(response.getJSON());		
 		 assertEquals(520, (int) jsonObject.getInt("statusCode"));
@@ -222,8 +215,7 @@ public class TestGenericImplementation extends MidOSGiTest
 		 
 		 JSONObject jsonObject;
 		 MidProxy midAdmin = (MidProxy) Proxy.getInvocationHandler(service);
-		 Description response = (Description) midAdmin.invoke(
-				getDescription, Description.class, null);		
+		 Description response = (Description) midAdmin.toOSGi(getDescription, null);		
 
 		 jsonObject = new JSONObject(response.getDescription());
 	 }
@@ -257,14 +249,14 @@ public class TestGenericImplementation extends MidOSGiTest
 		 Service ldrService = provider.getService("ldr");	
 		 
 		 MidProxy midService = (MidProxy) Proxy.getInvocationHandler(ldrService);
-		 Description response = (Description) midService.invoke(
-				getDescription, Description.class, null);	
+		 Description response = (Description) midService.toOSGi(
+				getDescription, null);	
 
 		 JSONObject responseDescription = new JSONObject(response.getDescription());
 		 
 		 Resource ldrResource = ldrService.getResource("value");
 		 MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(ldrResource);
-		 response = (Description) midResource.invoke(getDescription, Description.class, null);	
+		 response = (Description) midResource.toOSGi(getDescription, null);	
 		 
 		 responseDescription = new JSONObject(response.getDescription());
 		 JSONArray attributes = responseDescription.getJSONArray("attributes");
@@ -321,8 +313,7 @@ public class TestGenericImplementation extends MidOSGiTest
 		 Resource resource = session.resource("providerTest", "measureTest", "condition");
 
 		 MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(resource);
-		 Description description = (Description) midResource.invoke(getDescription, 
-				 Description.class, null);
+		 Description description = (Description) midResource.toOSGi(getDescription,null);
 	 }
 
 	 @Test
@@ -362,12 +353,12 @@ public class TestGenericImplementation extends MidOSGiTest
 		 Resource resource = service.getResource("location");
 		 
 		 MidProxy midAdmin = (MidProxy) Proxy.getInvocationHandler(service);
-		 Description response = (Description) midAdmin.invoke(
-				getDescription, Description.class, null);		
+		 Description response = (Description) midAdmin.toOSGi(
+				getDescription, null);		
 
 		 MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(resource);
-		 SnaMessage message = (SnaMessage) midResource.invoke(
-				setMethod, SnaMessage.class, new Object[]{"value","45.5667:5.9333"});		
+		 SnaMessage message = (SnaMessage) midResource.toOSGi(
+				setMethod, new Object[]{"value","45.5667:5.9333"});		
 
 		 JSONObject jsonObject = new JSONObject(message.getJSON());
 		 
@@ -383,8 +374,7 @@ public class TestGenericImplementation extends MidOSGiTest
 		 ProcessorService processorService = processor.buildProxy();
 		 
 		 processorService.process("weather_7,null,admin,location,45.900002:6.11667");
-		 message = (SnaMessage) midResource.invoke(getMethod, SnaMessage.class, 
-				 new Object[]{"value"});		
+		 message = (SnaMessage) midResource.toOSGi(getMethod, new Object[]{"value"});		
 		 
 		 jsonObject = new JSONObject(message.getJSON());
 		 jsonObject.getJSONObject("response").remove("timestamp");		 
