@@ -1,6 +1,7 @@
 package org.eclipse.sensinact.gateway.remote.socket.sample.test;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -11,7 +12,6 @@ import java.util.Map;
 
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.Endpoint;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
@@ -155,7 +155,7 @@ public class MidOSGiTestExtended extends MidOSGiTest
 		frameworkClass = classloader.loadClass(FELIX_FRAMEWORK);		
 		if(!new File(bundleDir, "dynamicBundle.jar").exists())
 		{
-			File manifestFile = new File("./src/test/resources/MANIFEST.MF");	
+			File manifestFile = new File("./target/generated-test-sources/META-INF/MANIFEST.MF");	
 			this.createDynamicBundle(manifestFile, bundleDir, new File[]{
 					new File("./target/classes")
 			});
@@ -276,7 +276,7 @@ public class MidOSGiTestExtended extends MidOSGiTest
 		return false;
 	}
 	
-	public void moveSlider(int value) throws ClassNotFoundException
+	public void moveSlider(int value) throws ClassNotFoundException, IOException
 	{
 		MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(
 				classloader,this, SliderSetterItf.class);		
@@ -284,7 +284,7 @@ public class MidOSGiTestExtended extends MidOSGiTest
 		slider.move(value);        
 	}
 	
-	public String namespace() throws ClassNotFoundException
+	public String namespace() throws ClassNotFoundException, IOException
 	{
 		MidProxy<Core> mid = new MidProxy<Core>(classloader,this, Core.class);		
 	    Core core = mid.buildProxy();
@@ -292,19 +292,20 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	}
 
 	public String get(String provider,String service, String resource)
-	throws ClassNotFoundException
+	throws ClassNotFoundException, IOException
 	{
-		MidProxy<Core> mid = new MidProxy<Core>(classloader,this, Core.class);		
+		MidProxy<Core> mid = new MidProxy<Core>(classloader,this, Core.class);
+				
 	    Core core = mid.buildProxy();
 	    Session s = core.getAnonymousSession();
 	    MidProxy<Session> mids = (MidProxy<Session>) Proxy.getInvocationHandler(s);
 	    try
 	    {
-			Object o = mids.invoke(Session.class.getDeclaredMethod("get", 
+			Object o = mids.toOSGi(Session.class.getDeclaredMethod("get", 
 				new Class<?>[] {String.class, String.class, String.class, 
-				String.class}), JSONObject.class, new Object[] {provider, 
+				String.class}), new Object[] {provider, 
 					service, resource, DataResource.VALUE});
-			return o.toString();
+			return  (String) Object.class.getDeclaredMethod("toString").invoke(o);
 			
 		} catch (Throwable e) {
 			//e.printStackTrace();
@@ -313,7 +314,7 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	}
 
 	public String set(String provider,String service, String resource, Object value) 
-			throws ClassNotFoundException
+			throws Exception
 	{
 		MidProxy<Core> mid = new MidProxy<Core>(classloader,this, Core.class);		
 	    Core core = mid.buildProxy();
@@ -321,11 +322,11 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	    MidProxy<Session> mids = (MidProxy<Session>) Proxy.getInvocationHandler(s);
 	    try
 	    {
-			Object o = mids.invoke(Session.class.getDeclaredMethod("set", 
+			Object o = mids.toOSGi(Session.class.getDeclaredMethod("set", 
 					new Class<?>[] {String.class, String.class, String.class, 
-					String.class, Object.class}), JSONObject.class, new Object[]
+					String.class, Object.class}), new Object[]
 					{provider, service, resource, DataResource.VALUE, value});
-			return o.toString();
+			return  (String) Object.class.getDeclaredMethod("toString").invoke(o);
 			
 		} catch (Throwable e) {
 			//e.printStackTrace();
@@ -334,7 +335,7 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	}
 
 	public String act(String provider,String service, String resource, Object...args)
-			throws ClassNotFoundException
+			throws Exception
 	{
 		MidProxy<Core> mid = new MidProxy<Core>(classloader,this, Core.class);		
 	    Core core = mid.buildProxy();
@@ -342,11 +343,11 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	    MidProxy<Session> mids = (MidProxy<Session>) Proxy.getInvocationHandler(s);
 	    try
 	    {
-			Object o = mids.invoke(Session.class.getDeclaredMethod("act", 
+			Object o = mids.toOSGi(Session.class.getDeclaredMethod("act", 
 					new Class<?>[] {String.class, String.class, String.class, 
-					Object[].class}), JSONObject.class, new Object[] {provider, 
+					Object[].class}), new Object[] {provider, 
 					service, resource,args});
-			return o.toString();
+			return  (String) Object.class.getDeclaredMethod("toString").invoke(o);
 			
 		} catch (Throwable e) {
 			//e.printStackTrace();
@@ -355,8 +356,7 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	}
 
 	public String subscribe(String provider,String service, String resource,
-			Recipient recipient)
-			throws ClassNotFoundException
+			Recipient recipient)throws Exception
 	{
 		MidProxy<Core> mid = new MidProxy<Core>(classloader,this, Core.class);		
 	    Core core = mid.buildProxy();
@@ -364,21 +364,21 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	    MidProxy<Session> mids = (MidProxy<Session>) Proxy.getInvocationHandler(s);
 	    try
 	    {
-			Object o = mids.invoke(Session.class.getDeclaredMethod("subscribe", 
+			Object o = mids.toOSGi(Session.class.getDeclaredMethod("subscribe", 
 			new Class<?>[] {String.class, String.class, String.class, 
-			Recipient.class, JSONArray.class}), JSONObject.class, new Object[] 
-				{provider, service, resource, recipient, new JSONArray()});
-			return o.toString();
+			Recipient.class, JSONArray.class}), new Object[] 
+				{provider, service, resource, recipient, null});
+			return  (String) Object.class.getDeclaredMethod("toString").invoke(o);
 			
 		} catch (Throwable e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 	    return null;
 	}
  
 	public String unsubscribe(String provider,String service, String resource,
 			String subscriptionId)
-			throws ClassNotFoundException
+			throws ClassNotFoundException, IOException
 	{
 		MidProxy<Core> mid = new MidProxy<Core>(classloader,this, Core.class);		
 	    Core core = mid.buildProxy();
@@ -386,11 +386,11 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	    MidProxy<Session> mids = (MidProxy<Session>) Proxy.getInvocationHandler(s);
 	    try
 	    {
-			Object o = mids.invoke(Session.class.getDeclaredMethod("unsubscribe", 
+			Object o = mids.toOSGi(Session.class.getDeclaredMethod("unsubscribe", 
 				new Class<?>[] {String.class, String.class, String.class, 
-					String.class}), JSONObject.class, new Object[] {provider, 
+					String.class}), new Object[] {provider, 
 						service, resource, subscriptionId});
-			return o.toString();
+			return  (String) Object.class.getDeclaredMethod("toString").invoke(o);
 			
 		} catch (Throwable e) {
 			//e.printStackTrace();
@@ -398,21 +398,13 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	    return null;
 	}
 
-	public String providers() throws ClassNotFoundException 
+	public String providers() throws Throwable 
 	{
 		MidProxy<Core> mid = new MidProxy<Core>(classloader,this, Core.class);		
 	    Core core = mid.buildProxy();
 	    Session s = core.getAnonymousSession();
-	    MidProxy<Session> mids = (MidProxy<Session>) Proxy.getInvocationHandler(s);
-	    try
-	    {
-			Object o = mids.invoke(Session.class.getDeclaredMethod("getProviders"),
-					JSONObject.class, null);
-			return o.toString();
-			
-		} catch (Throwable e) {
-			//e.printStackTrace();
-		}
-	    return null;
+	    MidProxy<Session> mids = (MidProxy<Session>)Proxy.getInvocationHandler(s);
+	    Object o = mids.toOSGi(Session.class.getMethod("getProviders"),null);
+	    return (String) Object.class.getDeclaredMethod("toString").invoke(o);
 	}
 }

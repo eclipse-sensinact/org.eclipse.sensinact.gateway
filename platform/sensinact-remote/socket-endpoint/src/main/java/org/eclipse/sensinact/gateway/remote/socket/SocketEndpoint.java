@@ -203,7 +203,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 						{
 							break;
 						}
-						String callbackId = subUriELements[0];
+						String callbackId = subUriELements[1];
 						Recipient recipient = super.recipients.get(callbackId);
 						if(recipient == null)
 						{
@@ -391,7 +391,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 				).put("uri", uri
 				).put("messages", messagesArray));
 
-		if(response!=null)
+		if(!JSONObject.NULL.equals(response))
 		{
 			mediator.debug(response.toString());
 		}

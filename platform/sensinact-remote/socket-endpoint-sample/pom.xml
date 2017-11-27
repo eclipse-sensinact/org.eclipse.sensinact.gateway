@@ -60,6 +60,18 @@
 			<artifactId>org.apache.felix.main</artifactId>
 			<version>4.4.1</version>
 			<scope>test</scope>
+		</dependency>		
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.http.jetty</artifactId>
+			<version>3.0.0</version>
+			<scope>test</scope>
 		</dependency>	
 	</dependencies>
 	
@@ -265,7 +277,7 @@
 					<instructions>
 						<Bundle-Activator>org.eclipse.sensinact.gateway.remote.socket.osgi.Activator</Bundle-Activator>
 					</instructions>
-				</configuration>								
+				</configuration>
 				<executions>
 					<execution>
 						<goals>
