@@ -158,7 +158,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 						{
 							break;
 						}
-						String agentId = subUriELements[0];
+						String agentId = subUriELements[1];
 						JSONObject object = request.optJSONObject("agent");
 						if(JSONObject.NULL.equals(object))
 						{								
