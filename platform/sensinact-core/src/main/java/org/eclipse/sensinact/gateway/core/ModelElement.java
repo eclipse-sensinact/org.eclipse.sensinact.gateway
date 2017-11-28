@@ -296,9 +296,9 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 						@Override
 						public Void execute(E element) throws Exception
 						{
-							R proxy = ModelElement.this.getElementProxy(
-									accessLevelOption, element);							
-							if(proxy != null)
+							R proxy = ModelElement.this.getElementProxy(accessLevelOption, element);							
+							if(proxy != null && !UnaccessibleModelElement.class.isAssignableFrom(
+									proxy.getClass()))
 							{
 								proxies.add(proxy); 
 							}
