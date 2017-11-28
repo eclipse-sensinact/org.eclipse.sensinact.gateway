@@ -334,11 +334,12 @@ public class MidProxy<T> implements InvocationHandler
 		{
 			return o;
 		}
-		if(Proxy.isProxyClass(o.getClass()) && (type.isAssignableFrom(
-		((MidProxy)Proxy.getInvocationHandler(o)).getContextualizedType())))
+		if(Proxy.isProxyClass(o.getClass()) 
+		&& Proxy.getInvocationHandler(o).getClass() == MidProxy.class 
+		&& (type.isAssignableFrom(((MidProxy)Proxy.getInvocationHandler(o)).getContextualizedType())))
 		{
 			return ((MidProxy)Proxy.getInvocationHandler(o)).getInstance();
-		}		
+		}
 		if(type!=null && !type.isAssignableFrom(o.getClass()))
 		{
 			System.out.println("Not of the specified type");
@@ -469,9 +470,10 @@ public class MidProxy<T> implements InvocationHandler
 		{
 			return null;
 		}
-		if((type != null && (type.isPrimitive()||type==String.class))
-		|| (Proxy.isProxyClass(o.getClass()) && (type.isAssignableFrom(
-		((MidProxy)Proxy.getInvocationHandler(o)).getServiceType()))))
+		if((type != null && (type.isPrimitive()||type==String.class)) || 
+	      (Proxy.isProxyClass(o.getClass()) 
+		   && Proxy.getInvocationHandler(o).getClass() == MidProxy.class
+		   && (type.isAssignableFrom(((MidProxy)Proxy.getInvocationHandler(o)).getServiceType()))))
 		{
 			return o;
 		}		

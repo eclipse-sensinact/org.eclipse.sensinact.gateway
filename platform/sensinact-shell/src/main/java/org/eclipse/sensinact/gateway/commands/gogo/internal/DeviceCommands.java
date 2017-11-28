@@ -73,13 +73,6 @@ public class DeviceCommands {
             buffer.append("\n" + _line);
             buffer.append("\n" + _tab + "ID: " + device.getName());
 
-            System.out.println();
-            
-            buffer.append("\n" + _tab + "Location: " + mediator.getSession().resource(
-            	serviceProviderID, ServiceProvider.ADMINISTRATION_SERVICE_NAME, 
-            	LocationResource.LOCATION).get(DataResource.VALUE
-            		).getResponse().get(DataResource.VALUE));
-
             List<Service> services = device.getServices();
             
             if (services != null && !services.isEmpty()) {

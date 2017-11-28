@@ -96,7 +96,7 @@ public class CommandServiceMediator extends Mediator {
 
     /**
      * Get the current session for the user
-     * @return the session pof the user
+     * @return the session of the user
      */
     public Session getSession() {
         return session;
