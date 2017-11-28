@@ -296,12 +296,14 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 						@Override
 						public Void execute(E element) throws Exception
 						{
-							R proxy = ModelElement.this.getElementProxy(accessLevelOption, element);							
-							if(proxy != null && !UnaccessibleModelElement.class.isAssignableFrom(
-									proxy.getClass()))
+							R proxy = ModelElement.this.getElementProxy(accessLevelOption, element);	
+							if(proxy == null || (Proxy.isProxyClass(proxy.getClass()) && 
+								UnaccessibleModelElement.class.isAssignableFrom(
+										Proxy.getInvocationHandler(proxy).getClass())))
 							{
-								proxies.add(proxy); 
+								return null;
 							}
+							proxies.add(proxy);
 							return null;
 						}
 		        	});
