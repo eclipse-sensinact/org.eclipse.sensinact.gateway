@@ -100,7 +100,7 @@ public class Activator extends AbstractActivator<Mediator>
             managedServiceFactory.unregister();
 
         }finally{
-            this.registration = null;
+            this.managedServiceFactory = null;
         }
 
 
