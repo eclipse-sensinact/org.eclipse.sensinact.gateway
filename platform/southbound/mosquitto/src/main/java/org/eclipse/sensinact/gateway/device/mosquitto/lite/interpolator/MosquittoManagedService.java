@@ -14,7 +14,6 @@ import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.MQTTPropertyFi
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.device.impl.MQTTPropertyFileConfigImpl;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.interpolator.exception.InterpolationException;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
@@ -35,7 +34,7 @@ public class MosquittoManagedService implements ManagedServiceFactory {
     private static final String OSGI_PROPERTY_FOR_FILENAME="felix.fileinstall.filename";
     private static final Logger LOG = LoggerFactory.getLogger(MosquittoManagedService.class);
     private final BundleContext context;
-    private HashMap<String,ServiceRegistration<MQTTPropertyFileConfig>> registrations=new HashMap<>();
+    private HashMap<String,ServiceRegistration<MQTTPropertyFileConfig>> tablepidServiceRegistration =new HashMap<>();
 
     public MosquittoManagedService(BundleContext context){
         LOG.debug("Instantiating mosquitto managed service..");
@@ -64,13 +63,13 @@ public class MosquittoManagedService implements ManagedServiceFactory {
     @Override
     public void updated(String servicePID, Dictionary dictionary) throws ConfigurationException {
 
-        LOG.debug("Instantiating mosquitto managed service..");
+        LOG.debug("Instantiating mosquitto managed service pid {} ..",servicePID);
 
         logDictionnary(dictionary);
 
-        if(registrations.get(Constants.SERVICE_PID)==null){
+        if(tablepidServiceRegistration.get(servicePID)==null){
 
-            LOG.debug("new registration for file {}",dictionary.get("felix.fileinstall.filename").toString());
+            LOG.debug("new registration for file {}",dictionary.get(OSGI_PROPERTY_FOR_FILENAME).toString());
             register(servicePID,dictionary);
 
         }else {
@@ -92,7 +91,7 @@ public class MosquittoManagedService implements ManagedServiceFactory {
             LOG.debug("Interpolation result of service PID {} with POJO {}",config.toString(),config.getClass().getCanonicalName());
             ServiceRegistration<MQTTPropertyFileConfig> registration= (ServiceRegistration<MQTTPropertyFileConfig>) context.registerService(MQTTPropertyFileConfig.class.getCanonicalName(), config, dictionary);
             LOG.info("Service registered for id {}",config.getId());
-            registrations.put(servicePID,registration);
+            tablepidServiceRegistration.put(servicePID, registration);
         } catch (InterpolationException e) {
             LOG.error("Failed to interpolate properties in the service pid {}",servicePID,e);
         }
@@ -102,18 +101,16 @@ public class MosquittoManagedService implements ManagedServiceFactory {
     @Override
     public void deleted(String servicePID) {
 
-        ServiceRegistration sr=registrations.remove(servicePID);
+        LOG.info("removing service pid {}",servicePID);
+
+        ServiceRegistration sr = tablepidServiceRegistration.remove(servicePID);
 
         if(sr==null){
-
-            LOG.warn("The service pid {} does not exist, impossible to remove instance",servicePID);
-
+            LOG.warn("Service registration for service pid {} does not exist, impossible to remove instance",servicePID);
         }else {
-
             LOG.debug("destroying instance for servicePID {}",servicePID);
             sr.unregister();
             LOG.debug("servicePID {} destroyed",servicePID);
-
         }
 
     }
