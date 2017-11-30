@@ -18,7 +18,6 @@ import org.eclipse.sensinact.gateway.core.message.SnaCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.it.util.MosquittoTestITAbstract;
-import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Provider;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.runtime.MQTTManagerRuntime;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -53,7 +52,7 @@ public class MosquittoBridgeTest extends MosquittoTestITAbstract {
     }
 
     @Test
-    public void testProviderCreation() throws Exception {
+    public void providerCreation() throws Exception {
         Object provider=createDevicePojo("myprovider","myservice","myresource","/myresource");
         bc.registerService("org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Provider",provider,new Hashtable<String, Object>());
         final Set<String> providersSet=parseJSONArrayIntoSet(sensinactSession.getProviders().getJSONArray("providers"));
@@ -61,48 +60,38 @@ public class MosquittoBridgeTest extends MosquittoTestITAbstract {
     }
 
     @Test
-    public void testProviderRemoval() throws Exception {
-        Provider provider=createDevicePojo("myprovider","myservice","myresource","/myresource");
-        bc.registerService(Provider.class.getName(),provider,new Hashtable<String, Object>());
-        final Set<String> providersSet=parseJSONArrayIntoSet(sensinactSession.getProviders().getJSONArray("providers"));
-        Assert.assertTrue("Provider was not created, or at least is not shown via REST api",providersSet.contains("myprovider"));
-        //Make provider disappear
+    public void providerRemoval() throws Exception {
+        providerCreation();
         MQTTManagerRuntime.getInstance().processRemoval("myprovider");
         final Set<String> providersSetNo=parseJSONArrayIntoSet(sensinactSession.getProviders().getJSONArray("providers"));
-        Assert.assertTrue("Provider was not created, or at least is not shown via REST api",!providersSetNo.contains("myprovider"));
+        Assert.assertTrue("Provider was removed",!providersSetNo.contains("myprovider"));
     }
 
     @Test
-    public void testServiceCreation() throws Exception {
-        testProviderCreation();
+    public void serviceCreation() throws Exception {
+        providerCreation();
         final Set<String> servicesSet=parseJSONArrayIntoSet(sensinactSession.getServices("myprovider").getJSONArray("services"));
         Assert.assertTrue("Service was not created, or at least is not shown via REST api",servicesSet.contains("myservice"));
     }
 
     @Test
-    public void testResourceCreation() throws Exception {
-        testServiceCreation();
+    public void resourceCreation() throws Exception {
+        serviceCreation();
         final JSONArray resourcesArray=sensinactSession.getResources("myprovider", "myservice").getJSONArray("resources");
         final Set<String> resourcesSet=parseJSONArrayIntoSet(resourcesArray);
         Assert.assertTrue("Resource was not created, or at least is not shown via REST api", resourcesSet.contains("myresource"));
     }
 
     @Test
-    public void testResourceValueEmpty() throws Exception {
-        testServiceCreation();
+    public void resourceValueQuery() throws Exception {
+        resourceCreation();
         String value=sensinactSession.get("myprovider", "myservice", "myresource", "value").getJSONObject("response").getString("value");
         Assert.assertTrue("Initial Resource value should be empty ", value.equals(""));
     }
 
-    private void waitForCallbackNotification() throws InterruptedException {
-        synchronized (this){
-            wait();
-        }
-    }
-
     @Test
-    public void testResourceValueUpdateFetchRest() throws Exception {
-        testResourceValueEmpty();
+    public void resourceValueQueryViaRest() throws Exception {
+        resourceValueQuery();
         MqttClient mqttClient=getMqttConnection(MQTT_HOST, MQTT_PORT);
         final String messageString1=new Double(Math.random()).toString();
         MqttMessage message1=new MqttMessage(messageString1.getBytes());
@@ -122,9 +111,9 @@ public class MosquittoBridgeTest extends MosquittoTestITAbstract {
     }
 
     @Test(timeout = 10000)
-    public void testResourceValueUpdateSubscription() throws Exception {
+    public void resourceValueQueryViaSubscription() throws Exception {
 
-        testResourceValueEmpty();
+        resourceValueQuery();
         final RecipientCustom rtc=new RecipientCustom();
         sensinactSession.subscribe("myprovider", "myservice", "myresource", rtc, new JSONArray());
         MqttClient mqttClient=getMqttConnection(MQTT_HOST, MQTT_PORT);
@@ -143,6 +132,12 @@ public class MosquittoBridgeTest extends MosquittoTestITAbstract {
 
         Assert.assertEquals("Sensinact Core did not dispatch any notification message for the subscription", 1,rtc.getMessages().length);
         Assert.assertEquals("The notification value does not correspond to the value sent", messageString2,new JSONObject(rtc.getMessages()[0].getJSON()).getJSONObject("notification").getString("value"));
+    }
+
+    private void waitForCallbackNotification() throws InterruptedException {
+        synchronized (this){
+            wait();
+        }
     }
 
     class RecipientCustom implements Recipient {
