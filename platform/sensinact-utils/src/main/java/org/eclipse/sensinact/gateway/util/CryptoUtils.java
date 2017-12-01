@@ -76,14 +76,12 @@ public class CryptoUtils
     	 }
          try 
          {
-             System.out.println("pass: " + pass);
+            //clone the MessageDigest to avoid multithreading congestion
+            MessageDigest mydigest = (MessageDigest) MD5.clone();
+            mydigest.reset();
+            byte[] digested = mydigest.digest(pass.getBytes());
 
-        	//clone the MessageDigest to avoid multithreading congestion
-			MessageDigest mydigest = (MessageDigest) MD5.clone();
-		    mydigest.reset();
-	        byte[] digested = mydigest.digest(pass.getBytes());
-
-             return String.format("%032X", new BigInteger(1, digested)).toLowerCase();
+            return String.format("%032X", new BigInteger(1, digested)).toLowerCase();
 		 } catch (CloneNotSupportedException e) 
          {			
 			throw new InvalidKeyException(e);
