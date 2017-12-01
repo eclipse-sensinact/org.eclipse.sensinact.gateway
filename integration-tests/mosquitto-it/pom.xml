@@ -172,11 +172,13 @@
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
             <version>1.2.0</version>
         </dependency>
+<!--
         <dependency>
             <groupId>org.eclipse.sensinact.thirdparty</groupId>
             <artifactId>mqtt-server-moquette</artifactId>
             <version>0.10-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
+-->
     </dependencies>
 </project>
