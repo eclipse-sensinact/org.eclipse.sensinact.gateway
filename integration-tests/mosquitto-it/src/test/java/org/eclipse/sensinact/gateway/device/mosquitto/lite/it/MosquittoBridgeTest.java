@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -36,6 +37,7 @@ import java.util.Set;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
+@Ignore
 public class MosquittoBridgeTest extends MosquittoTestITAbstract {
 
     @Inject
