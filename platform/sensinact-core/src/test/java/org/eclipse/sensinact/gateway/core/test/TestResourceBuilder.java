@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.test;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -67,7 +66,9 @@ import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
 import org.eclipse.sensinact.gateway.core.method.trigger.Constant;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
+import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
+import org.eclipse.sensinact.gateway.core.security.AccessTree;
+import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.json.JSONArray;
@@ -78,6 +79,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -92,13 +95,20 @@ public class TestResourceBuilder<R extends ModelInstance>
 { 
 	protected TestContext testContext;
 	protected Dictionary<String,Object> props;
+	protected AccessTree tree;
 	
+
+	private final BundleContext context = Mockito.mock(BundleContext.class);
+	private final Bundle bundle = Mockito.mock(Bundle.class);
+
 	@Before
 	public void init() 
 			throws InvalidServiceProviderException, InvalidSyntaxException, 
 			SecuredAccessException, BundleException 
 	{	    
 		this.testContext = new TestContext();
+		this.tree = new AccessTreeImpl(testContext.getMediator()
+			).withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
     }
 	
     
@@ -110,7 +120,7 @@ public class TestResourceBuilder<R extends ModelInstance>
 	
 	 @Test
     public void testSessionMethods() throws Exception
-    {
+    {		
     	ServiceImpl service = 
     		this.testContext.getModelInstance().getRootElement(
     			).addService("testService");
@@ -123,16 +133,17 @@ public class TestResourceBuilder<R extends ModelInstance>
     			).getAnonymousSession();
 
         PropertyResource r1 = r1impl.<PropertyResource>getProxy(
-        		SecuredAccess.ANONYMOUS_PKEY);
+        		this.tree);
 
         //test shortcut
         Assert.assertEquals("TestProperty",r1.getName()); 
         Assert.assertEquals(Resource.Type.PROPERTY, r1.getType());
 
         String get1 = session.get("serviceProvider", "testService", 
-        	"TestProperty", DataResource.VALUE).toString();	        
+        	"TestProperty", DataResource.VALUE).toString();	
+        
         String get2 = r1.get().getJSON();
-
+        
         JSONAssert.assertEquals(get1,get2, false); 
         
 		final JSONObject changed = new JSONObject(new Changed(
@@ -386,10 +397,9 @@ public class TestResourceBuilder<R extends ModelInstance>
         org.junit.Assert.assertEquals(0, ((MyModelInstance)this.testContext.getModelInstance()
         		).getHandler().count(filter));
         
-	    Service proxy = service.<Service>getProxy(SecuredAccess.ANONYMOUS_PKEY);
-        SetResponse error = proxy.set("location","unknown");
-        assertTrue(error.getStatusCode()==403); 
-
+	    Service proxy = service.<Service>getProxy(this.tree);
+        SetResponse error = proxy.set("location","unknown");        
+        assertTrue(error.getStatusCode()==403);
         assertEquals(1, this.testContext.getLinkCallbackCount());         
     }
 	 
@@ -404,8 +414,7 @@ public class TestResourceBuilder<R extends ModelInstance>
     			PropertyResource.class, "TestProperty", 
     			String.class, "hello");  
     	
-        PropertyResource r1 = r1impl.<PropertyResource>getProxy(
-        		SecuredAccess.ANONYMOUS_PKEY);
+        PropertyResource r1 = r1impl.<PropertyResource>getProxy(this.tree);
 
         //test shortcut
         Assert.assertEquals("TestProperty",r1.getName()); 
@@ -477,9 +486,9 @@ public class TestResourceBuilder<R extends ModelInstance>
     	ResourceImpl r2impl = service.addDataResource(PropertyResource.class, 
     		"TestProperty2", String.class, null); 
     	
-        PropertyResource r2 = r2impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);        		
+        PropertyResource r2 = r2impl.<PropertyResource>getProxy(this.tree);        		
         ResourceImpl r3impl = service.addLinkedResource("LinkedProperty", r1impl);
-    	PropertyResource r3 = r3impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);
+    	PropertyResource r3 = r3impl.<PropertyResource>getProxy(this.tree);
 
     	service.addLinkedResource(LocationResource.LOCATION,
     		this.testContext.getModelInstance().getRootElement(
@@ -520,7 +529,7 @@ public class TestResourceBuilder<R extends ModelInstance>
         		AccessMethodExecutor.ExecutionPolicy.AFTER);
 
         String attributeValue = (String) r4impl.getAttribute("value").getValue();       
-   	    LocationResource r4 = r4impl.<LocationResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);    	 
+   	    LocationResource r4 = r4impl.<LocationResource>getProxy(this.tree);    	 
    	    
    	    Thread.sleep(250);
    	
@@ -645,10 +654,9 @@ public class TestResourceBuilder<R extends ModelInstance>
         ((MyModelInstance)this.testContext.getModelInstance()).getHandler(
         		).count(filter));
 
-	    Service proxy = service.<Service>getProxy(SecuredAccess.ANONYMOUS_PKEY);
-        SetResponse error = proxy.set("location","unknown");
+	    Service proxy = service.<Service>getProxy(this.tree);
+        SetResponse error = proxy.set("location","unknown");        
         assertTrue(error.getStatusCode()==403); 
-
         assertEquals(1, this.testContext.getLinkCallbackCount());         
     }
     
@@ -701,8 +709,8 @@ public class TestResourceBuilder<R extends ModelInstance>
 			public  void stop()
 	        {}
 	   },filter);
-       PropertyResource r1 = r1impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);
-       PropertyResource r2 = r2impl.<PropertyResource>getProxy(SecuredAccess.ANONYMOUS_PKEY);
+       PropertyResource r1 = r1impl.<PropertyResource>getProxy(this.tree);
+       PropertyResource r2 = r2impl.<PropertyResource>getProxy(this.tree);
 
    	   assertEquals(0, 
    	   TestResourceBuilder.this.testContext.getAgentCallbackCount());   	   
@@ -890,9 +898,8 @@ public class TestResourceBuilder<R extends ModelInstance>
     			this.testContext.getModelInstance().getRootElement(
     			).addService("testService");
     	
-    	ServiceProvider proxy = 
-    			this.testContext.getModelInstance().getRootElementProxy(
-    					SecuredAccess.ANONYMOUS_PKEY);
+    	ServiceProvider proxy = this.testContext.getModelInstance(
+    		).getRootElement().getProxy(this.tree);
     	
     	List<Service> services = proxy.getServices();
     	Assert.assertEquals(2, services.size());
@@ -905,7 +912,6 @@ public class TestResourceBuilder<R extends ModelInstance>
     	
     	service.addDataResource(PropertyResource.class, "dynamicResource", 
     			String.class, "dynamic");
-
     	assertNotNull(proxy.getService("testService").getResource(
     			"dynamicResource"));
     }    
@@ -998,8 +1004,7 @@ public class TestResourceBuilder<R extends ModelInstance>
         //instance.getServiceProvider().start();
     	
     	ServiceProvider proxy = (ServiceProvider)
-    		this.testContext.getModelInstance().getRootElement().getProxy(
-    			SecuredAccess.ANONYMOUS_PKEY);
+    		this.testContext.getModelInstance().getRootElement().getProxy(this.tree);
     	Service testService = proxy.getService("testService");    
     	
     	ActionResource resource = testService.<ActionResource>getResource("action");
@@ -1057,7 +1062,7 @@ public class TestResourceBuilder<R extends ModelInstance>
    		//instance.getServiceProvider().start();
        //test trigger
        assertEquals("untriggered", r2impl.getAttribute(DataResource.VALUE).getValue());
-       ActionResource proxy = (ActionResource) r1impl.getProxy(SecuredAccess.ANONYMOUS_PKEY);
+       ActionResource proxy = (ActionResource) r1impl.getProxy(this.tree);
        proxy.act();
        assertEquals("triggered", r2impl.getAttribute(DataResource.VALUE).getValue());    		   
     }

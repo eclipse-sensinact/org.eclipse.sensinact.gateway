@@ -23,7 +23,6 @@ import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
 import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Resource;
-import org.eclipse.sensinact.gateway.core.ResourceDescription;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 
@@ -56,7 +55,7 @@ public class AccessMethodCommands {
         Resource resource = mediator.getSession().serviceProvider(serviceProviderID).getService(serviceID).getResource(resourceID);
 
         if (resource != null) {
-            JSONArray methods = new JSONObject(resource.getDescription().getDescription()).getJSONArray("accessMethods");
+            JSONArray methods = new JSONObject(resource.getDescription().getJSONDescription()).getJSONArray("accessMethods");
 
             if(methods.length() != 0) {
                 buffer.append("\n" + _line);
@@ -139,8 +138,7 @@ public class AccessMethodCommands {
 
         if (resource != null)
         {
-            Description attribute = resource.<ResourceDescription>getDescription(
-            		).element(attributeID);
+            Description attribute = resource.element(attributeID);
 
             if (attribute != null)
             {
@@ -199,8 +197,7 @@ public class AccessMethodCommands {
 
         if (resource != null)
         {
-        	if(Modifiable.MODIFIABLE.equals(resource.<ResourceDescription>getDescription(
-        			).element(attributeID).getModifiable()))
+        	if(Modifiable.MODIFIABLE.equals(resource.element(attributeID).getModifiable()))
             {
                 if (value != null) 
                 {

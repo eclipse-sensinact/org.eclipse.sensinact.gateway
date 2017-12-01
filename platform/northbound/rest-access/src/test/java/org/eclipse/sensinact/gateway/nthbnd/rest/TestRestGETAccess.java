@@ -106,7 +106,7 @@ public class TestRestGETAccess  extends TestRestAccess
         
         response = new JSONObject(simulated).getJSONObject("response");
         array = response.getJSONArray("resources");  
-
+        
         JSONAssert.assertEquals(new JSONArray("[{\"name\":\"position\",\"type\":\"SENSOR\"}]"),array,false);
      
 		MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(

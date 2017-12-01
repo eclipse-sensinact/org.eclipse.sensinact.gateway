@@ -10,32 +10,253 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.common.primitive.Description;
+import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Localizable;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
-import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
-import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
+import org.eclipse.sensinact.gateway.common.primitive.Stateful;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
+import org.eclipse.sensinact.gateway.core.security.AccessTree;
+import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
+import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
+import org.eclipse.sensinact.gateway.util.JSONUtils;
+import org.eclipse.sensinact.gateway.util.UriUtils;
 
 /**
  * This class represents a ServiceProvider on the sensiNact gateway.
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ServiceProviderImpl extends ModelElement<ModelInstance<?>, 
+public class ServiceProviderImpl 
+extends ModelElement<ModelInstance<?>, ServiceProviderProxy,
 ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 {
+	class ServiceProviderProxyWrapper extends ModelElementProxyWrapper 
+	implements ServiceCollection, Localizable, Stateful<ServiceProvider.LifecycleStatus>
+	{
+		protected ServiceProviderProxyWrapper(ServiceProviderProxy proxy, ImmutableAccessTree tree) 
+		{
+			super(proxy, tree);
+		}
+
+		/**
+		 * @inheritDoc
+		 * 
+		 * @see org.eclipse.sensinact.gateway.core.ServiceCollection#
+		 * getServices()
+		 */
+		@Override
+		public List<Service> getServices() 
+		{
+			return super.list();
+		}
+
+		/**
+		 * @inheritDoc
+		 * 
+		 * @see org.eclipse.sensinact.gateway.core.ServiceCollection#
+		 * getService(java.lang.String)
+		 */
+		@Override
+		public Service getService(String service) 
+		{
+			return super.element(service);
+		}
+
+		/** 
+		 * @inheritDoc
+		 * 
+		 * @see org.eclipse.sensinact.gateway.common.primitive.Localizable#
+		 * getLocation()
+		 */
+		@Override
+		public String getLocation() 
+		{
+			String location = null;
+			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
+			if(admin != null)
+			{
+				location = admin.get(LocationResource.LOCATION).getResponse(
+						String.class, DataResource.VALUE);
+			}
+			return location;
+		}
+
+		/** 
+		 * @inheritDoc
+		 * 
+		 * @see org.eclipse.sensinact.gateway.common.primitive.Localizable#
+		 * setLocation(java.lang.String)
+		 */
+		@Override
+		public String setLocation(String location) 
+				throws InvalidValueException 
+		{
+			String setLocation = null;
+			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
+			if(admin != null)
+			{
+				setLocation = admin.set(LocationResource.LOCATION, 
+					location).getResponse(String.class, DataResource.VALUE);
+			}
+			return setLocation;
+		}
+	    
+		/** 
+		 * @inheritDoc
+		 * 
+		 * @see org.eclipse.sensinact.gateway.common.primitive.Stateful#getStatus()
+		 */
+		@Override
+		public ServiceProvider.LifecycleStatus getStatus() 
+		{
+			ServiceProvider.LifecycleStatus status = null;
+			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
+			if(admin != null)
+			{
+				status = admin.get(ServiceProvider.LIFECYCLE_STATUS).getResponse(
+					ServiceProvider.LifecycleStatus.class, 
+						DataResource.VALUE);
+			}
+			return status;
+		}
+		
+		/** 
+		 * @inheritDoc
+		 * 
+		 * @see org.eclipse.sensinact.gateway.common.primitive.Stateful#
+		 * setStatus(java.lang.Enum)
+		 */
+		@Override
+		public ServiceProvider.LifecycleStatus setStatus(
+			ServiceProvider.LifecycleStatus status) throws InvalidValueException 
+		{
+			ServiceProvider.LifecycleStatus setStatus = null;
+			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
+			if(admin != null)
+			{
+				setStatus = admin.set(ServiceProvider.LIFECYCLE_STATUS, 
+					status).getResponse(ServiceProvider.LifecycleStatus.class, 
+						DataResource.VALUE);
+			}
+			return setStatus;
+		}
+
+	 	/**
+	 	 * @inheritDoc
+	 	 *
+	 	 * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#isAccessible()
+	 	 */
+	 	@Override
+	 	public boolean isAccessible()
+	 	{
+	 		return true;
+	 	}
+	 	
+		/**
+		 * @inheritDoc
+		 *  
+		 * @see org.eclipse.sensinact.gateway.common.primitive.Describable#getDescription()
+		 */
+		public Description getDescription()
+		{
+			return new Description() 
+			{
+				@Override
+				public String getName()
+				{
+					return ServiceProviderImpl.this.getName();
+				}
+				
+			    @Override
+			    public String getJSON()
+			    {
+					StringBuilder buffer = new StringBuilder();
+					buffer.append(JSONUtils.OPEN_BRACE);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append("name");
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COLON);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(this.getName());
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COMMA);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append("services");
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COLON);
+					buffer.append(JSONUtils.OPEN_BRACKET);		
+					int index = 0;
+					
+		    		Enumeration<Service> enumeration = 
+		    				ServiceProviderProxyWrapper.this.elements();
+		    		
+		    		while(enumeration.hasMoreElements())
+		    		{   
+		    			buffer.append(index>0?JSONUtils.COMMA:JSONUtils.EMPTY);
+		    			buffer.append(JSONUtils.QUOTE);
+		    			buffer.append(enumeration.nextElement().getName());
+		    			buffer.append(JSONUtils.QUOTE); 
+		    			index++;
+		    		}
+					buffer.append(JSONUtils.CLOSE_BRACKET);		
+					buffer.append(JSONUtils.CLOSE_BRACE);
+					return buffer.toString();
+			    }
+
+			    @Override
+			    public String getJSONDescription()
+			    {
+					StringBuilder buffer = new StringBuilder();
+					buffer.append(JSONUtils.OPEN_BRACE);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append("name");
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COLON);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(this.getName());
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COMMA);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append("services");
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COLON);
+					buffer.append(JSONUtils.OPEN_BRACKET);		
+					int index = 0;
+					
+		    		Enumeration<Service> enumeration = 
+		    				ServiceProviderProxyWrapper.this.elements();
+		    		
+		    		while(enumeration.hasMoreElements())
+		    		{   
+		    			buffer.append(index>0?JSONUtils.COMMA:JSONUtils.EMPTY);
+		    			buffer.append(JSONUtils.QUOTE);
+		    			buffer.append(enumeration.nextElement(
+		    					).getDescription().getJSONDescription());
+		    			buffer.append(JSONUtils.QUOTE); 
+		    			index++;
+		    		}
+					buffer.append(JSONUtils.CLOSE_BRACKET);		
+					buffer.append(JSONUtils.CLOSE_BRACE);
+					return buffer.toString();
+			    }
+			};
+		}
+	}
+	
 	/**
 	 * the list of listeners of this ServiceProviderImpl's LifecycleStatus
 	 */
 	protected List<LifecycleStatusListener> listeners;
+	
 	/**
 	 * the list of pre-defined service names
 	 */
@@ -65,8 +286,7 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 			List<String> serviceNames) 
 			throws InvalidServiceProviderException
 	{	
-		super(modelInstance, null, UriUtils.getUri(
-				new String[]{name}));
+		super(modelInstance, null, UriUtils.getUri(new String[]{name}));
     	this.serviceNames = new ArrayList<String>(serviceNames);
     	try
 		{
@@ -87,17 +307,18 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 	 * process(ProcessableData)
 	 */
 	@Override
-	public void process(ServiceProviderProcessableData data) 
+	public void process(ServiceProviderProcessableData<?> data) 
 	{
 		if (data == null)
 		{
 			return;
 		}		
-		Iterator<ServiceProcessableData> iterator = data.iterator();
+		Iterator<ServiceProcessableData<?>> iterator = 
+			(Iterator<ServiceProcessableData<?>>) data.iterator();
 		
 		while(iterator.hasNext())
 		{
-			ServiceProcessableData serviceProcessableData = iterator.next();		
+			ServiceProcessableData<?> serviceProcessableData = iterator.next();		
 			String serviceId = serviceProcessableData.getServiceId();
 	
 			if (serviceId == null)
@@ -511,7 +732,7 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 	 *
 	 * @see ModelElement#getProxyType()
 	 */
-    protected Class<?> getProxyType()
+    protected Class<? extends ElementsProxy<Service>> getProxyType()
     {
 	    return ServiceProvider.class;
     }
@@ -542,8 +763,7 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 	        this.stop();
 	        return;
 		}
-        this.setStatus(ServiceProvider.LifecycleStatus.ACTIVE);
-        
+        this.setStatus(ServiceProvider.LifecycleStatus.ACTIVE);        
     	super.modelInstance.mediator().debug(
     			"ServiceProvider '%s' started", this.getName());
     }
@@ -626,32 +846,44 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 	{
 		return SnaLifecycleMessage.Lifecycle.PROVIDER_DISAPPEARING;
 	}
-	
+
 	/**
 	 * @inheritDoc
-	 *
-	 * @see ModelElement#
-	 * getElementProxy(AccessLevelOption, Nameable)
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement#
+	 * getProxy(java.util.List)
 	 */
 	@Override
-	protected Service getElementProxy(AccessLevelOption accessLevelOption,
-	        ServiceImpl element) throws ModelElementProxyBuildException
+	public ServiceProviderProxy getProxy(List<MethodAccessibility> methodAccessibilities)
 	{
-		return (Service) element.getProxy(accessLevelOption);
+		return new ServiceProviderProxy(super.modelInstance.mediator(), super.getName());
 	}
 
 	/**
 	 * @inheritDoc
-	 *
-	 * @see ModelElement#
-	 * getProxy(AccessMethod.Type[], java.util.List, int)
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.ModelElement#
+	 * getElementProxy(org.eclipse.sensinact.gateway.core.security.AccessTree, org.eclipse.sensinact.gateway.common.primitive.Nameable)
 	 */
 	@Override
-	public ModelElementProxy<Service> getProxy(
-			List<MethodAccessibility> methodAccessibilities,
-			List<Service> proxies)
+	protected Service getElementProxy(AccessTree<?> tree, ServiceImpl element)
+			throws ModelElementProxyBuildException
 	{
-		return new ServiceProviderProxy(super.modelInstance.mediator(),
-				this.getName(), proxies);
+		Service service = element.getProxy(tree);
+		return service;
 	}
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.ModelElement#
+	 * getWrapper(org.eclipse.sensinact.gateway.core.ModelElementProxy, org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree)
+	 */
+	@Override
+	protected ModelElementProxyWrapper getWrapper(
+			ServiceProviderProxy proxy, ImmutableAccessTree tree)
+	{
+		return new ServiceProviderProxyWrapper(proxy, tree);
+	}
+
 }

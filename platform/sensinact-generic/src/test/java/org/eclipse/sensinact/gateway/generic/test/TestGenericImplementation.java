@@ -195,29 +195,27 @@ public class TestGenericImplementation extends MidOSGiTest
 	 @Test
 	 public void testResourceModel() throws Throwable
 	 {		 	    	
-		 this.initializeMoke(new File("src/test/resources/genova-resource.xml"
-					).toURI().toURL(),  null,false);
+		 this.initializeMoke(
+		 new File("src/test/resources/genova-resource.xml").toURI().toURL(),
+		 null,false);
 
 		 ServiceReference reference = super.getBundleContext(
 					).getServiceReference(StarterService.class);
 			
 		 StarterService starter = (StarterService)
 					super.getBundleContext().getService(reference);
+		 
 		 starter.start("weather_5");
-
 		 Thread.sleep(2000);
+		 
          MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
 		 Core core = mid.buildProxy();
 		 Session session = core.getAnonymousSession();
-		
+
 		 ServiceProvider provider = session.serviceProvider("weather_5");
 		 Service service = provider.getService("admin");
-		 
-		 JSONObject jsonObject;
-		 MidProxy midAdmin = (MidProxy) Proxy.getInvocationHandler(service);
-		 Description response = (Description) midAdmin.toOSGi(getDescription, null);		
-
-		 jsonObject = new JSONObject(response.getDescription());
+		 Description description = service.getDescription();
+		 JSONObject jsonObject = new JSONObject(description.getJSON());
 	 }
 	
 	 @Test
@@ -236,7 +234,7 @@ public class TestGenericImplementation extends MidOSGiTest
 					).getServiceReference(ProcessorService.class);
 		 
 		 ProcessorService processor = (ProcessorService)
-					super.getBundleContext().getService(reference);
+				super.getBundleContext().getService(reference);
 		 
 		 processor.process("device1");
 
@@ -246,23 +244,15 @@ public class TestGenericImplementation extends MidOSGiTest
 		 Session session = core.getAnonymousSession();
 			
 		 ServiceProvider provider = session.serviceProvider("device1");
-		 Service ldrService = provider.getService("ldr");	
-		 
-		 MidProxy midService = (MidProxy) Proxy.getInvocationHandler(ldrService);
-		 Description response = (Description) midService.toOSGi(
-				getDescription, null);	
-
-		 JSONObject responseDescription = new JSONObject(response.getDescription());
-		 
+		 Service ldrService = provider.getService("ldr");			 
 		 Resource ldrResource = ldrService.getResource("value");
-		 MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(ldrResource);
-		 response = (Description) midResource.toOSGi(getDescription, null);	
+		 Description response = ldrResource.getDescription();		 
+		 JSONObject responseDescription = new JSONObject(response.getJSONDescription());
 		 
-		 responseDescription = new JSONObject(response.getDescription());
 		 JSONArray attributes = responseDescription.getJSONArray("attributes");
+		 
 		 int index = 0;
 		 int length = attributes.length();
-
 		 JSONObject valueDescription = null;
 		 
 		 for(;index < length; index++)

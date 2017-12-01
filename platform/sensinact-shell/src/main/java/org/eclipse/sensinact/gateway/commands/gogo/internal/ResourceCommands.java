@@ -77,7 +77,7 @@ public class ResourceCommands {
             buffer.append("\n" + _tab + "ID: " + resource.getName());
             buffer.append("\n" + _tab + "Attributes: ");
 
-            JSONArray attributes = new JSONObject(resource.getDescription().getDescription()).getJSONArray("attributes");
+            JSONArray attributes = new JSONObject(resource.getDescription().getJSONDescription()).getJSONArray("attributes");
 
             for(int i = 0; i < attributes.length(); i++) {
                 buffer.append("\n" + _tab + "   -- " + attributes.getJSONObject(i).get("name"));

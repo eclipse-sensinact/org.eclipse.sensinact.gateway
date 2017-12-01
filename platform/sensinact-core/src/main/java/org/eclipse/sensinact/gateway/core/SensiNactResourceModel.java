@@ -63,8 +63,10 @@ extends Nameable
 	 * @return this SensinactResourceModel instance's root
 	 * {@link ModelElement}
 	 */
-	 <I extends ModelInstance<?>, P extends ProcessableData, E extends Nameable, R extends Nameable> 
-	 ModelElement<I,P,E,R> getRootElement();
+	 <I extends ModelInstance<?>, M extends ModelElementProxy, 
+	 P extends ProcessableData, E extends Nameable,
+	 R extends Nameable> 
+	 ModelElement<I, M, P,E,R> getRootElement();
 	 
 	/**
 	 * Returns the String identifier of this SensiNactResourceModel

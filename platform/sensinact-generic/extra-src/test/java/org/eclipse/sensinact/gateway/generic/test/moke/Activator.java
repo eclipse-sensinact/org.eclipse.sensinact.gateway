@@ -57,7 +57,7 @@ public class Activator extends AbstractActivator<Mediator> {
 		this.manager = new ExtModelInstanceBuilder(super.mediator, MokePacket.class
     		).withDesynchronization(false
     		).withStartAtInitializationTime(startAtInitializationTime
-    		).withResourceBuildPolicy(SensiNactResourceModelConfiguration.BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy()
+    		//).withResourceBuildPolicy(SensiNactResourceModelConfiguration.BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy()
     		).<ExtModelConfiguration>buildConfiguration(
     			"resources.xml", defaults);
 		

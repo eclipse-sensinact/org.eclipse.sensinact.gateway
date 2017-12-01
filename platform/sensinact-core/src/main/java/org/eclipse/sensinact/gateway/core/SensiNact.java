@@ -39,6 +39,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.RemoteAccessMethodExecutable;
 import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
@@ -808,7 +809,7 @@ public class SensiNact implements Core
         	jsonResource.put("uri", uri);        	
         	jsonResource.put("statusCode", 200);
         	jsonResource.put("response", new JSONObject(
-        		resource.getDescription().getDescription()));
+        		resource.getDescription().getJSONDescription()));
             return jsonResource;
 		}
 	};
@@ -934,7 +935,7 @@ public class SensiNact implements Core
 						try
 						{
 							provider = (ServiceProvider) model.getRootElement().getProxy(
-									sessionKey.getPublicKey());
+									sessionKey.getAccessTree());
 							
 						}catch (ModelElementProxyBuildException e) 
 						{
@@ -2025,14 +2026,19 @@ public class SensiNact implements Core
 		
 		if(serviceProviderIdElements.length==1 || domain.length()==0)
 		{
-			 return new JSONObject(AccessMethodResponse.error(mediator, UriUtils.getUri(
-		       new String[]{serviceProviderId}), (AccessMethod.Type)null, 
-			   SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "sensiNact service provider '" + serviceProviderId + "' not found",
+			AccessMethod.Type type = RemoteAccessMethodExecutable.class.isAssignableFrom(
+				executable.getClass())?((RemoteAccessMethodExecutable)executable).getMethod()
+					:AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
+					
+			return new JSONObject(AccessMethodResponse.error(mediator, UriUtils.getUri(
+		       new String[]{serviceProviderId}), type, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
+			   "sensiNact service provider '" + serviceProviderId + "' not found",
 		            		null).getJSON());
 		}	
 		object = mediator.callService(RemoteCore.class, new StringBuilder(
 			).append("(namespace=").append(domain).append(")").toString(), 
 				executable);
+		
 		return object;
 	}
 	
@@ -2259,24 +2265,12 @@ public class SensiNact implements Core
 			new KeyExtractor<KeyExtractorType>(
 				KeyExtractorType.TOKEN,identifier));
 		
-		return remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore,JSONObject>()
-		{
-			@Override
-			public JSONObject execute(RemoteCore connector)
-					throws Exception 
-			{
-				if(connector == null)
-				{
-					return null;
-				}
-				return connector.endpoint().unsubscribe(
-					sessionKey.getPublicKey(),
-					serviceProviderId.substring(serviceProviderId.indexOf(':')+1),
-					serviceId, 
-					resourceId,
-					subscriptionId);
-			}
-		});
+		return remoteCoreInvocation(serviceProviderId, new RemoteAccessMethodExecutable(
+			AccessMethod.Type.valueOf(AccessMethod.UNSUBSCRIBE),sessionKey.getPublicKey()
+			).withServiceProvider(serviceProviderId
+			).withService(serviceId
+		    ).withResource(resourceId
+			).with(RemoteAccessMethodExecutable.SUBSCRIPTION_ID_TK, subscriptionId));
 	}
 
 	 /** 
@@ -2308,26 +2302,14 @@ public class SensiNact implements Core
 	{
 		final SessionKey sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(
 					KeyExtractorType.TOKEN,identifier));
-			
-		return remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore,JSONObject>()
-		{
-			@Override
-			public JSONObject execute(RemoteCore connector)
-					throws Exception 
-			{
-				if(connector == null)
-				{
-					return null;
-				}
-				return connector.endpoint().subscribe(
-					sessionKey.getPublicKey(),
-					serviceProviderId.substring(serviceProviderId.indexOf(':')+1),
-					serviceId, 
-					resourceId,
-					recipient,
-					conditions);
-			}
-		});
+
+		return remoteCoreInvocation(serviceProviderId, new RemoteAccessMethodExecutable(
+			AccessMethod.Type.valueOf(AccessMethod.SUBSCRIBE),sessionKey.getPublicKey()
+			).withServiceProvider(serviceProviderId
+			).withService(serviceId
+			).withResource(resourceId
+			).with(RemoteAccessMethodExecutable.RECIPIENT_TK, recipient
+			).with(RemoteAccessMethodExecutable.CONDITIONS_TK, conditions));
 	}
 
 	 /** 
@@ -2355,26 +2337,14 @@ public class SensiNact implements Core
 		    final String resourceId, final Object[] parameters) 
 	{
 		final SessionKey sessionKey =  sessions.get(new KeyExtractor<KeyExtractorType>(
-		KeyExtractorType.TOKEN,identifier));
-		
-		return remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore,JSONObject>()
-		{
-			@Override
-			public JSONObject execute(RemoteCore connector)
-					throws Exception 
-			{
-				if(connector == null)
-				{
-					return null;
-				}
-				return connector.endpoint().act(
-					sessionKey.getPublicKey(),
-					serviceProviderId.substring(serviceProviderId.indexOf(':')+1),
-					serviceId, 
-					resourceId,
-					parameters);
-			}
-		});
+		KeyExtractorType.TOKEN,identifier));		
+
+		return remoteCoreInvocation(serviceProviderId, new RemoteAccessMethodExecutable(
+			AccessMethod.Type.valueOf(AccessMethod.ACT),sessionKey.getPublicKey()
+			).withServiceProvider(serviceProviderId
+			).withService(serviceId
+			).withResource(resourceId
+			).with(RemoteAccessMethodExecutable.ARGUMENTS_TK, parameters));
 	}
 
 	/** 
@@ -2406,26 +2376,14 @@ public class SensiNact implements Core
 		final SessionKey sessionKey =  sessions.get(
 			new KeyExtractor<KeyExtractorType>(
 				KeyExtractorType.TOKEN,identifier));
-		
-		return remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore,JSONObject>()
-		{
-			@Override
-			public JSONObject execute(RemoteCore connector)
-					throws Exception 
-			{
-				if(connector == null)
-				{
-					return null;
-				}
-				return connector.endpoint().set(
-					sessionKey.getPublicKey(),
-					serviceProviderId.substring(serviceProviderId.indexOf(':')+1),
-					serviceId, 
-					resourceId,
-					attributeId,
-					parameter);
-			}
-		});
+
+		return remoteCoreInvocation(serviceProviderId, new RemoteAccessMethodExecutable(
+			AccessMethod.Type.valueOf(AccessMethod.SET),sessionKey.getPublicKey()
+			).withServiceProvider(serviceProviderId
+			).withService(serviceId
+			).withResource(resourceId
+			).withAttribute(attributeId
+			).with(RemoteAccessMethodExecutable.VALUE_TK, parameter));
 	}
 
 	/**
@@ -2453,25 +2411,13 @@ public class SensiNact implements Core
 	{
 		final SessionKey sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(
 				KeyExtractorType.TOKEN, identifier));
-		
-		return remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore,JSONObject>()
-		{
-			@Override
-			public JSONObject execute(RemoteCore connector)
-					throws Exception 
-			{
-				if(connector == null)
-				{
-					return null;
-				}
-				return connector.endpoint().get(
-					sessionKey.getPublicKey(),
-					serviceProviderId.substring(serviceProviderId.indexOf(':')+1),
-					serviceId, 
-					resourceId,
-					attributeId);
-			}
-		});
+
+		return remoteCoreInvocation(serviceProviderId, new RemoteAccessMethodExecutable(
+			AccessMethod.Type.valueOf(AccessMethod.GET), sessionKey.getPublicKey()
+			).withServiceProvider(serviceProviderId
+			).withService(serviceId
+			).withResource(resourceId
+			).withAttribute(attributeId));
 	}
 
 	/**

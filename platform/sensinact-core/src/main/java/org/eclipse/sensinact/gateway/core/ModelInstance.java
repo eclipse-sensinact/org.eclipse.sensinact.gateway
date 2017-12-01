@@ -385,15 +385,14 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 	 * @throws ModelAlreadyRegisteredException if this sensiNact 
 	 * resource model instance is already registered
 	 */
-	protected final void register() 
-			throws ModelAlreadyRegisteredException
+	protected final void register() throws ModelAlreadyRegisteredException
 	{
 		if(this.registered)
 		{
 			throw new ModelAlreadyRegisteredException(
 					this.registration.getName());
 		}
-		final String name = this.getRootElement().getName(); 
+		final String name = this.getName(); 
 		final String uri = UriUtils.getUri(new String[] {name});
 		
     	final Dictionary<String,Object> props = new Hashtable<String,Object>();
@@ -535,29 +534,6 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
     {
     	return this.provider;
     }
-
-	/**
-	 * @param userId
-	 * @return
-	 * @throws ModelElementProxyBuildException
-	 */
-	public ServiceProvider getRootElementProxy(String publicKey)
-			throws ModelElementProxyBuildException 
-	{
-		if(!registered)
-		{
-			throw new ModelElementProxyBuildException(
-				"this model instance must be registered first");
-		}
-		if(this.provider == null)
-		{
-			throw new ModelElementProxyBuildException(
-				"this model instance's root ServiceProvider is null");
-		}
-		ServiceProvider serviceProvider = this.getRootElement(
-				).getProxy(publicKey);
-		return serviceProvider;
-	}
     
     /**
 	 * @inheritedDoc
@@ -657,9 +633,9 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 	 * @return the {@link AccessLevelOption} for the specified session and 
 	 * resource
 	 */
-	public <I extends ModelInstance<?>, 
+	public <I extends ModelInstance<?>, M extends ModelElementProxy, 
 	P extends ProcessableData, E extends Nameable, R extends Nameable>
-	AccessLevelOption getAccessLevelOption(ModelElement<I, P, E, R> 
+	AccessLevelOption getAccessLevelOption(ModelElement<I, M, P, E, R> 
 	modelElement, String publicKey)
 	{
 		if(modelElement.getModelInstance() != this)
@@ -685,9 +661,10 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 	 * specified {@link ModelElement} for the specified {@link 
 	 * AccessLevelOption}
 	 */
-	public <I extends ModelInstance<?>, P extends ProcessableData, 
-	E extends Nameable, R extends Nameable> List<MethodAccessibility>
-	getAuthorizations(ModelElement<I, P, E, R> modelElement, 
+	public <I extends ModelInstance<?>, M extends ModelElementProxy,
+	P extends ProcessableData, E extends Nameable, R extends Nameable> 
+	List<MethodAccessibility> getAuthorizations(
+			ModelElement<I, M, P, E, R> modelElement, 
 			AccessLevelOption accessLevelOption)
 	{
 		if(modelElement.getModelInstance() != this)

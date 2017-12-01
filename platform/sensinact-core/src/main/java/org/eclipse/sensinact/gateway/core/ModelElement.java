@@ -12,9 +12,10 @@ package org.eclipse.sensinact.gateway.core;
 
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,7 +36,9 @@ import org.eclipse.sensinact.gateway.core.security.AccessLevel;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
+import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
+import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.SessionKey;
 import org.json.JSONObject;
 
@@ -46,9 +49,125 @@ import org.json.JSONObject;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class ModelElement<I extends ModelInstance<?>, 
-P extends ProcessableData, E extends Nameable, R extends Nameable> 
-extends Elements<E> implements SensiNactResourceModelElement<R>
-{		
+M extends ModelElementProxy, P extends ProcessableData, E extends Nameable, R extends Nameable> 
+extends Elements<E> implements SensiNactResourceModelElement<M>
+{			
+	abstract class ModelElementProxyWrapper extends ElementsProxyWrapper<M,R>
+	{
+		private final ImmutableAccessTree tree;
+
+		/**
+		 * @param proxy
+		 */
+		protected ModelElementProxyWrapper(M proxy, ImmutableAccessTree tree)
+		{
+			super(proxy);
+			this.tree = tree;
+		}
+
+		/** 
+		 * @inheritDoc
+		 * 
+		 * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#element(java.lang.String)
+		 */
+		@Override
+		public R element(String name) 
+		{	    	
+			E e = ModelElement.this.element(name);
+			if(e == null)
+			{
+				return null;
+			}
+			try
+			{
+				R r = ModelElement.this.getElementProxy(tree, e);
+				return r;
+			}
+			catch (ModelElementProxyBuildException e1)
+			{
+				e1.printStackTrace();
+			}
+			catch (Exception e1)
+			{
+				e1.printStackTrace();
+			}
+			return null;
+		}
+
+		/** 
+		 * @inheritDoc
+		 * 
+		 * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#elements()
+		 */
+		@Override
+		public Enumeration<R> elements()
+		{
+			final Object[] es;
+			
+			synchronized(ModelElement.this.elements)
+			{
+				es = ModelElement.this.elements.toArray(
+					new Object[0]);
+			}
+			
+			return new Enumeration<R>()
+			{
+				int pos = 0;
+				R r = next();
+				
+				private R next()
+				{
+					while(pos < es.length)
+					{						
+						try
+						{
+							R r = ModelElement.this.getElementProxy(tree, (E)es[pos++]);
+							if(r!= null && (!Proxy.isProxyClass(r.getClass()) ||
+							((ElementsProxyWrapper<?, ?>)Proxy.getInvocationHandler(r)
+									).isAccessible()))
+							{
+								return r;
+							}
+						}
+						catch (ModelElementProxyBuildException e1)
+						{
+							e1.printStackTrace();
+						}
+					}
+					return null;
+				}
+				
+				@Override
+				public boolean hasMoreElements()
+				{
+					return r !=null;
+				}
+
+				@Override
+				public R nextElement()
+				{
+					R current = r;
+					r = next();
+					return current;
+				}
+			};
+		}
+		
+		/**
+		 * @return
+		 */
+		protected List<R> list()
+		{
+			List<R> list = new ArrayList<R>();
+			Enumeration<R> elements = elements() ;
+			while(elements.hasMoreElements())
+			{
+				list.add(elements.nextElement());
+			}
+			return Collections.unmodifiableList(list);
+		}
+	};
+	
 	/**
 	 * Returns the {@link Lifecycle} event associated
 	 * to the registration of this ModelElement 
@@ -76,7 +195,7 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 	 * @return the interface type of a proxy instance of 
 	 * this AbstractModelElement
 	 */
-	protected abstract Class<?> getProxyType();
+	protected abstract Class<? extends ElementsProxy<R>> getProxyType();
 
 	/** 
      * Processes the {@link ProcessableData} passed as 
@@ -102,14 +221,18 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 	 * 
 	 * @throws ModelElementProxyBuildException 
 	 */
-	protected abstract R getElementProxy(
-			AccessLevelOption accessLevelOption,
-			E element) throws ModelElementProxyBuildException;
+	protected abstract R getElementProxy(AccessTree<?> tree, E element) 
+			throws ModelElementProxyBuildException;
+
+	/**
+	 * TODO
+	 */
+	protected abstract ModelElementProxyWrapper	getWrapper(M proxy, ImmutableAccessTree tree);
 	
 	/**
 	 * this ModelElement's parent 
 	 */
-	protected final ModelElement<I,?,?,?> parent;
+	protected final ModelElement<I,?,?,?,?> parent;
 	
 	/**
 	 * the {@link SensiNactResourceModel} to which this 
@@ -127,7 +250,7 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 	 * the proxies of this AbstractResourceModelElement mapped to 
 	 * the {@link AccessLevel} for which they have been created
 	 */
-	protected EnumMap<AccessLevelOption, ElementsProxy<R>> proxies; 
+	protected EnumMap<AccessLevelOption, M> proxies; 
 	
 	/**
 	 * Started status of this AbstractModelElement
@@ -145,8 +268,7 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 	 * 		the string uri path of the {@link ModelElementProxy}
 	 * 		to instantiate
 	 */
-	protected ModelElement(I modelInstance, 
-		ModelElement<I,?,?,?> parent, String uri) 
+	protected ModelElement(I modelInstance, ModelElement<I,?,?,?,?> parent, String uri) 
 	{
 		super(uri);
 		if(parent != null && parent.getModelInstance() != modelInstance)
@@ -157,8 +279,7 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 		this.modelInstance = modelInstance;
 		this.started = new AtomicBoolean(false);
 		this.sessions = new HashMap<String, AccessLevelOption>();
-		this.proxies = new EnumMap<AccessLevelOption, ElementsProxy<R>>(
-				AccessLevelOption.class);
+		this.proxies = new EnumMap<AccessLevelOption, M>(AccessLevelOption.class);
 	}
     
     /**
@@ -173,35 +294,6 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
     public I getModelInstance()
     {
     	return this.modelInstance;
-    }
-    
-    /**
-     * Creates and returns a proxy of this AbstractModelElement
-     * 
-     * @param uid
-     * 		the long unique identifier of the user for who to 
-     * 		create the appropriate proxy
-     * @return
-     * 		a new proxy object based on this ModelElement
-     * 
-     * @throws ModelElementProxyBuildException 
-     */
-	public <S extends  ElementsProxy<R>> S getProxy(final String publicKey) 
-    		throws ModelElementProxyBuildException 
-    {
-    	if(!this.started.get())
-    	{
-    		throw new ModelElementProxyBuildException(
-    				"this model element must be started first");
-    	}
-    	AccessLevelOption accessLevelOption = this.sessions.get(publicKey);
-    	if(accessLevelOption == null)
-    	{
-    		accessLevelOption = 
-    			this.modelInstance.getAccessLevelOption(this, publicKey);
-    		this.sessions.put(publicKey, accessLevelOption);
-    	}
-    	return this.getProxy(accessLevelOption);
     }
 
     /**
@@ -226,17 +318,11 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
     	AccessTree<? extends AccessNode> accessTree = key.getAccessTree();
     	if(accessTree == null || accessTree.getRoot()==null)
     	{
-    		throw new ModelElementProxyBuildException(
-    				"A valid access tree was expected");
-    	}
-		AccessNode node = accessTree.getRoot().get(super.getPath());
-		//AccessLevelOption will be the same for all methods, just check
-		//what is the one associated with the DESCRIBE one
-		AccessLevelOption accessLevelOption = 
-			node.getAccessLevelOption(AccessMethod.Type.valueOf(
-					AccessMethod.DESCRIBE));		
-    	return this.getProxy(accessLevelOption);
+    		throw new ModelElementProxyBuildException("A valid access tree was expected");
+    	}		
+    	return this.getProxy(accessTree);
     }
+	
 
     /**
      * Creates and returns a proxy of this AbstractModelElement
@@ -250,30 +336,34 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
      * @throws ModelElementProxyBuildException 
      */
 	@SuppressWarnings("unchecked")
-	protected final <S extends  ElementsProxy<R>> S getProxy(
-			final AccessLevelOption accessLevelOption) 
-    		throws ModelElementProxyBuildException 
+	public final <S extends  ElementsProxy<R>> S getProxy(
+		final AccessTree<?> tree) throws ModelElementProxyBuildException 
     {
     	if(!this.started.get())
     	{
-    		throw new ModelElementProxyBuildException(
-    				"this model element must be started first");
+    		throw new ModelElementProxyBuildException(String.format(
+    			"this model element '%s' must be started first", 
+    			this.getName()));
     	}
+    	AccessNode node = tree.getRoot().get(super.getPath());
+		
+		//AccessLevelOption will be the same for all methods, just check
+		//what is the one associated with the DESCRIBE one
+		AccessLevelOption accessLevelOption = node.getAccessLevelOption(
+			AccessMethod.Type.valueOf(AccessMethod.DESCRIBE));
+		
     	if(accessLevelOption == null)
     	{
     		throw new ModelElementProxyBuildException(
     				"Access level option expected");
     	}
-		Class<?> proxied = this.getProxyType();
-    	ElementsProxy<R> proxy = this.proxies.get(accessLevelOption);
-    	
+		Class<S> proxied = (Class<S>) this.getProxyType();
+		M proxy = this.proxies.get(accessLevelOption);    	
     	if(proxy == null)
     	{	   
+	    	int index = -1;	    	
 	    	List<MethodAccessibility> methodAccessibilities = 
-	    			this.modelInstance.getAuthorizations(
-	    			this, accessLevelOption);
-	    	
-	    	int index = -1;
+	    		this.modelInstance.getAuthorizations(this, accessLevelOption);
 	    	
 	    	//if the describe method does not exists it means 
 	    	//that the user is not allowed to access this ModelElement
@@ -281,48 +371,35 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 	    		MethodAccessibility>(AccessMethod.DESCRIBE)))==-1 || 
 	    		!methodAccessibilities.get(index).isAccessible())
 	    	{
-	    		proxy = new UnaccessibleModelElement<R>(
-	    			this.modelInstance.mediator(), proxied, 
-	    			this.getPath());
+	    		return  (S) Proxy.newProxyInstance(ModelElement.class.getClassLoader(), 
+	    			new Class<?>[]{ proxied }, new UnaccessibleModelElementProxyWrapper(
+	    		       new UnaccessibleModelElementProxy(this.modelInstance.mediator(), 
+	    				   proxied, this.getPath())));
 	    		
 	    	} else
 	    	{
-		    	//instantiate the proxy element
-	        	final List<R> proxies = new ArrayList<R>(); 
-	        	try
-	        	{
-		        	forEach(new Executable<E, Void>()
-		        	{
-						@Override
-						public Void execute(E element) throws Exception
-						{
-							R proxy = ModelElement.this.getElementProxy(accessLevelOption, element);	
-							if(proxy == null || (Proxy.isProxyClass(proxy.getClass()) && 
-								UnaccessibleModelElement.class.isAssignableFrom(
-										Proxy.getInvocationHandler(proxy).getClass())))
-							{
-								return null;
-							}
-							proxies.add(proxy);
-							return null;
-						}
-		        	});
-	        	} catch(Exception e)
-	        	{
-	        		throw new ModelElementProxyBuildException(e);
-	        	}
-	        	proxy = this.getProxy(methodAccessibilities, proxies);	
-	        	if(proxy == null)
-	        	{
-	        		return null;
-	        	}
-	        	this.proxies.put(accessLevelOption, proxy);
+	        	proxy = this.getProxy(methodAccessibilities);	
 	    	}
-    	}
-        //creates the java proxy based on the created ModelElementProxy 
-        //and returns it
+    	} 
+    	if(proxy == null)
+    	{
+    		return null;
+    	} 
+    	this.proxies.put(accessLevelOption, proxy);
+    	ImmutableAccessTree accessTree = null;
+    	if(tree.isMutable())
+    	{
+    		accessTree = ((MutableAccessTree<?>)tree).immutable();
+    		
+    	} else
+    	{
+    		accessTree = (ImmutableAccessTree)tree;
+    	}    	
+    	ModelElementProxyWrapper wrapper = getWrapper(proxy, accessTree);
+    	
+        //creates the java proxy based on the created ModelElementProxy and returns it
         return  (S) Proxy.newProxyInstance(ModelElement.class.getClassLoader(),
-        		new Class<?>[]{ proxied }, proxy);
+        		new Class<?>[]{ proxied }, wrapper);
     }
 	
     /**
@@ -370,33 +447,7 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 				ModelElement.class.isAssignableFrom(
 					element.getClass()))
 		{
-			((ModelElement<I, ?, ?, ?>)element).start();
-		}
-		synchronized (this.proxies)
-		{	
-			Iterator<Map.Entry<AccessLevelOption, ElementsProxy<R>>> 
-			iterator = this.proxies.entrySet().iterator();
-			
-			while (iterator.hasNext())
-			{
-				final Map.Entry<AccessLevelOption, ElementsProxy<R>> 
-				entry = iterator.next();
-				try 
-				{
-					R provided = this.getElementProxy(
-						entry.getKey(), element);
-					
-					if (provided != null)
-					{
-						entry.getValue().addElement(provided);
-					}					
-				} catch (Exception e) 
-				{
-					super.removeElement(element.getName());
-					this.modelInstance.mediator().error(e);
-					return false;
-				}
-			}	
+			((ModelElement<I, ?, ?, ?, ?>)element).start();
 		}
 		return true;
 	}
@@ -418,21 +469,8 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 					ModelElement.class.isAssignableFrom(
 					element.getClass()))
 		   {
-				((ModelElement<I, ?, ?, ?>)element).stop();
+				((ModelElement<I, ?, ?, ?, ?>)element).stop();
 		   }
-		   if(!this.proxies.isEmpty())
-	       {    		
-		    	synchronized(this.proxies)
-		    	{
-		    		Iterator<ElementsProxy<R>> iterator = 
-		    				this.proxies.values().iterator();
-		    		
-		    		while(iterator.hasNext())
-		    		{
-		    			iterator.next().removeElement(name);
-		    		}
-		    	}
-	       }
 		   return element;   
 	   }
 	   return null;
@@ -446,6 +484,8 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
      */
 	protected void start()
     {  	
+    	try
+		{
     	if(!this.modelInstance.isRegistered())
     	{
     		this.modelInstance.mediator().error("%s not registered", 
@@ -471,8 +511,6 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
     	notification.setNotification(notificationObject); 
     	
     	this.modelInstance.postMessage(notification);
-    	try
-		{
 			forEach(new Executable<E,Void>()
 			{
 				@SuppressWarnings("unchecked")
@@ -482,7 +520,7 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 					if(ModelElement.class.isAssignableFrom(
 							element.getClass()))
 					{
-						((ModelElement<I, ?, ?, ?>)element).start();
+						((ModelElement<I, ?, ?, ?, ?>)element).start();
 					}
 					return null;
 				}});
@@ -517,7 +555,7 @@ extends Elements<E> implements SensiNactResourceModelElement<R>
 					if(ModelElement.class.isAssignableFrom(
 							element.getClass()))
 					{
-						((ModelElement<I, ?, ?, ?>)element).stop();
+						((ModelElement<I, ?, ?, ?, ?>)element).stop();
 					}
 					return null;
 				}});

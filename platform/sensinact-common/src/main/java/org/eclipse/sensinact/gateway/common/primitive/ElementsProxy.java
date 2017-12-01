@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.common.primitive;
 
-import java.lang.reflect.InvocationHandler;
 import java.util.Enumeration;
 
 /**
@@ -19,7 +18,7 @@ import java.util.Enumeration;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface ElementsProxy<P extends Nameable> 
-extends InvocationHandler, Describable, PathElement
+extends Describable, PathElement
 {
 	/**
 	 * Returns the &lt;P&gt; typed element held by this 

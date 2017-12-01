@@ -180,4 +180,15 @@ implements MutableAccessTree<AccessNodeImpl<N>>
 		return true;
 	}
 
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.security.MutableAccessTree#immutable()
+	 */
+	@Override
+	public ImmutableAccessTree immutable()
+	{
+		return super.immutable(ImmutableAccessTree.class, ImmutableAccessNode.class);
+	}
+
 }

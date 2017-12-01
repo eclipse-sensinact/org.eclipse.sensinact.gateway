@@ -17,7 +17,6 @@ import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.PropertyResource;
 import org.eclipse.sensinact.gateway.core.Resource;
-import org.eclipse.sensinact.gateway.core.ResourceDescription;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.osgi.framework.BundleContext;
@@ -66,8 +65,9 @@ public class SetActionFunction extends ActionFunction {
                 params[i] = variables.get(i).getValue();
             }
 
-            if (Modifiable.MODIFIABLE.equals(resource.<ResourceDescription>getDescription()
-                    .element(DataResource.VALUE).getModifiable())) {
+            if (Modifiable.MODIFIABLE.equals(resource.element(DataResource.VALUE
+            		).getModifiable()))
+            {
                 ((PropertyResource) resource).set(params[0]);
                 
             } else {

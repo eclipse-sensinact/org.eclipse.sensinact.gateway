@@ -11,8 +11,6 @@
 package org.eclipse.sensinact.gateway.core;
 
 import java.util.List;
-
-import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 
 /**
@@ -20,22 +18,16 @@ import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface SensiNactResourceModelElement<R extends Nameable> 
+public interface SensiNactResourceModelElement<M extends ModelElementProxy> 
 {
 	/**
-	 * Creates and returns an {@link SensiNactResourceModelElementProxy}
-	 * of this {@link SensiNactResourceModelElement}
+	 * Creates and returns an {@link ModelElementProxy} of this {@link SensiNactResourceModelElement}
 	 * 
 	 * @param methodAccessibilities the array of {@link MethodAccessibility}s
-	 * applying on the {@link SensiNactResourceModelElementProxy} to be built	 * 
-	 * @param proxies the list of elements held by the {@link 
-	 * SensiNactResourceModelElementProxy} to be built
+	 * applying on the {@link ModelElementProxy} to be built
 	 * 
 	 * @return a new {@link SensiNactResourceModelElementProxy}
 	 */
-	SensiNactResourceModelElementProxy<R> getProxy(
-			List<MethodAccessibility> methodAccessibilities, 
-			List<R> proxies);
-	
+	M getProxy(List<MethodAccessibility> methodAccessibilities);
 	 
 }

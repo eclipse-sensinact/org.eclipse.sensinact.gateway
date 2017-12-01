@@ -30,5 +30,5 @@ public interface Description extends JSONable, Nameable
 	 * 		the complete JSON formated description string 
 	 * 		of the object described by this Description
 	 */
-	String getDescription();
+	String getJSONDescription();
 }

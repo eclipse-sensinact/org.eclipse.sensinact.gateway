@@ -114,10 +114,10 @@ public class AttributeDescription extends PrimitiveDescription
 	/**
 	 * @inheritDoc
 	 * 
-	 * @see PrimitiveDescription#getDescription()
+	 * @see PrimitiveDescription#getJSONDescription()
 	 */
 	@Override
-	public String getDescription()
+	public String getJSONDescription()
 	{
 		JSONObject description = this.getJSONObjectDescription();
 		if (description == null)

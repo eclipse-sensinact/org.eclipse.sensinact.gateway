@@ -92,7 +92,10 @@ implements Nameable, PathElement
      */
     public int length()
     {
-    	return this.elements.size();
+    	synchronized(this.elements)
+    	{
+    		return this.elements.size();
+    	}
     }
 
     /**
@@ -170,7 +173,6 @@ implements Nameable, PathElement
        	}
        	return false;
    	}
-
    	
    	/**
      * Removes <code>&lt;P&gt;</code> typed object with the

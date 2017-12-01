@@ -35,7 +35,10 @@ import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.TypeConfig;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
+import org.eclipse.sensinact.gateway.core.security.AccessNode;
+import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
+import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
@@ -173,7 +176,7 @@ public class TestSnaFunction extends TestCase {
         
        this.mediator = new AppServiceMediator(context);
     	
-        this.modelInstance = new ModelInstanceBuilder(
+       this.modelInstance = new ModelInstanceBuilder(
         	mediator, ModelInstance.class, ModelConfiguration.class
         	).withStartAtInitializationTime(true
         	).build("SimulatedLight_001", null);
@@ -181,7 +184,8 @@ public class TestSnaFunction extends TestCase {
         ServiceProviderImpl serviceProvider = modelInstance.getRootElement();        
         ServiceImpl service = serviceProvider.addService("LightService_SimulatedLight_001");        
         ResourceImpl resource = service.addDataResource(PropertyResource.class, "DIM", int.class, 0);
-        dimResource = resource.getProxy("xxxxx000000");
+        dimResource = resource.getProxy(new AccessTreeImpl<>(mediator
+        		).withAccessProfile(AccessProfileOption.ALL_ANONYMOUS));
 
         Mockito.when(session.resource(Mockito.eq("SimulatedLight_001"), 
         		Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("TURN_ON")))

@@ -23,22 +23,27 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
  */
 public class ActMethod extends AbstractAccessMethod
 {
-
 	/**
 	 * Constructor
-	 * @param accessMethodExecutor 
-	 */
+	 * 
+     * @param mediator
+     * @param uri
+     * @param preProcessingExecutor
+     */
     public ActMethod(Mediator mediator, String uri, 
 			AccessMethodExecutor preProcessingExecutor)
     {
 	    this(mediator, uri, preProcessingExecutor,null);
     }
 
-    
 	/**
 	 * Constructor
-	 * @param accessMethodExecutor 
-	 */
+	 * 
+     * @param mediator
+     * @param uri
+     * @param preProcessingExecutor
+     * @param postProcessingExecutor
+     */
     public ActMethod(Mediator mediator, String uri, 
 			AccessMethodExecutor preProcessingExecutor, 
 			AccessMethodExecutor postProcessingExecutor)
@@ -47,12 +52,12 @@ public class ActMethod extends AbstractAccessMethod
 	    		postProcessingExecutor, null);
     }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AbstractAccessMethod#
-	 * createAccessMethodResult(java.lang.Object[])
-	 */
+    /**
+     * @inheritDoc
+     *
+     * @see org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod#
+     * createAccessMethodResult(java.lang.Object[])
+     */
     @Override
     protected ActResult createAccessMethodResult(Object[] parameters)
     {

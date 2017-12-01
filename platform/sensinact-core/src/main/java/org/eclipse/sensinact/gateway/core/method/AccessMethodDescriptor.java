@@ -35,5 +35,5 @@ public interface AccessMethodDescriptor<E extends ElementsProxy<?>>
 	 * @param element
 	 * @return
 	 */
-	boolean valid(ModelElement<?, ?, ?, E> element);
+	boolean valid(ModelElement<?, ?, ?, ?, E> element);
 }

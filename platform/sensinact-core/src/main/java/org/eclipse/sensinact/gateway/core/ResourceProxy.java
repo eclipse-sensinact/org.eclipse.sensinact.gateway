@@ -12,17 +12,12 @@ package org.eclipse.sensinact.gateway.core;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
-import org.eclipse.sensinact.gateway.common.primitive.Describable;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
-import org.eclipse.sensinact.gateway.common.primitive.Typable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodDescription;
 import org.eclipse.sensinact.gateway.core.method.UnaccessibleAccessMethod;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 
@@ -31,19 +26,13 @@ import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ResourceProxy extends ModelElementProxy<AttributeDescription>
-implements ElementsProxy<AttributeDescription> ,Typable<Resource.Type>
+public class ResourceProxy extends ModelElementProxy
 {
 	/**
 	 * {@link AccessMethod}s of this ResourceProxy
 	 */
 	protected final Map<String, AccessMethod> methods;	
 	
-	/**
-	 * the {@link Resource.Type} of the {@link ResourceImpl}
-	 * this ResourceProxy is the proxy of
-	 */
-	private final Resource.Type type;
 	
 	/**
 	 * Constructor
@@ -52,13 +41,9 @@ implements ElementsProxy<AttributeDescription> ,Typable<Resource.Type>
 	 * 		the proxied resource
 	 */
 	ResourceProxy(Mediator mediator, ResourceImpl resource, 
-			List<AttributeDescription> descriptions, 
 			List<MethodAccessibility> methodAccessibilities)
 	{
 		super(mediator, Resource.class, resource.getPath());
-
-		super.elements.addAll(descriptions);
-		this.type = resource.getType();
 		
 		Map<String, AccessMethod> methods = new HashMap<String, AccessMethod>();		
 		AccessMethod.Type[] existingTypes=AccessMethod.Type.values();
@@ -80,7 +65,7 @@ implements ElementsProxy<AttributeDescription> ,Typable<Resource.Type>
 					!methodAccessibilities.get(accessIndex).isAccessible()) 
 			{
 				methods.put(existingTypes[index].name(), 
-					new UnaccessibleAccessMethod(mediator,super.uri,
+					new UnaccessibleAccessMethod(mediator,super.getPath(),
 							existingTypes[index]));
 			} else
 			{
@@ -90,45 +75,7 @@ implements ElementsProxy<AttributeDescription> ,Typable<Resource.Type>
 		this.methods = Collections.<String,AccessMethod>unmodifiableMap(
 				methods);
 	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see Typable#getType()
-	 */
-    @Override
-    public Resource.Type getType()
-    {
-	    return this.type;
-    }
-
-    /**
-     * @inheritDoc
-     *
-     * @see Describable#getDescription()
-     */
-    @SuppressWarnings("unchecked")
-	public ResourceDescription getDescription()
-    {
-    	int index= 0;
-    	
-    	Iterator<Map.Entry<String, AccessMethod>> 
-    	iterator = this.methods.entrySet().iterator();
-    	
-    	AccessMethodDescription[] descriptions =
-    			new AccessMethodDescription[this.methods.size()];
-    	
-    	while(iterator.hasNext())
-    	{
-    		Map.Entry<String, AccessMethod> 
-    		entry = iterator.next(); 
-    		descriptions[index++] = entry.getValue().getDescription();
-    	}
-	    return new ResourceDescription(super.mediator,
-	    		this.type, super.uri, super.elements, 
-	    		descriptions);
-    }
-
+	
 	/**
 	 * @inheritDoc
 	 *
