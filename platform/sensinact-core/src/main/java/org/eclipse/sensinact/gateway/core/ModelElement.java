@@ -121,11 +121,9 @@ extends Elements<E> implements SensiNactResourceModelElement<M>
 					{						
 						try
 						{
-							R r = ModelElement.this.getElementProxy(
-									tree, (E)es[pos++]);
-							
+							R r = ModelElement.this.getElementProxy(tree, (E)es[pos++]);
 							if(r!= null && (!Proxy.isProxyClass(r.getClass()) ||
-							  ((ModelElementProxyWrapper)Proxy.getInvocationHandler(r)
+							((ElementsProxyWrapper<?, ?>)Proxy.getInvocationHandler(r)
 									).isAccessible()))
 							{
 								return r;
