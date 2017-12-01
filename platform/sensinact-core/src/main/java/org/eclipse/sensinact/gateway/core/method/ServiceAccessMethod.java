@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.core.method;
 
 
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,43 +20,30 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.core.Resource;
-import org.eclipse.sensinact.gateway.core.ResourceProxy;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.primitive.Describable;
+import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
+import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
+import org.eclipse.sensinact.gateway.core.Resource;
+import org.eclipse.sensinact.gateway.core.ResourceImpl;
+import org.eclipse.sensinact.gateway.core.ResourceImpl.ResourceProxyWrapper;
+import org.eclipse.sensinact.gateway.core.ResourceProxy;
+import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 
 /**
  * Extended {@link AccessMethod} dedicated to Services
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public abstract class ServiceAccessMethod implements AccessMethod
+public class ServiceAccessMethod implements AccessMethod
 {	
-	/**
-	 * Builds and returns the objects array 
-	 * parameterizing an invocation of an 
-	 * {@link AccessMethod}
-	 * 
-	 * @param parameters 
-	 * 		the initial objects array parameters
-	 * 		from which to build the one used to
-	 * 		invoke an {@link AccessMethod}  
-	 * @return
-	 * 		the objects array parameterizing 
-	 * 		the associated {@link AccessMethod} 
-	 * 		invocation
-	 */
-	protected abstract Resource getResource(String resourceName);
-	
 	private final Mediator mediator;
 	
 	protected final String uri;
 	private final AccessMethod.Type type;
 	private final List<Signature> signatures;
+	private ErrorHandler handler;
 
 	/**
 	 * Constructor
@@ -64,12 +52,13 @@ public abstract class ServiceAccessMethod implements AccessMethod
 	 * 		the {@link AccessMethod.Type} of the extended 
 	 * 		{@link AccessMethod} type to instantiate
 	 */
-	protected ServiceAccessMethod(Mediator mediator, 
-			String uri, Type type)
+	public ServiceAccessMethod(Mediator mediator, 
+			String uri, Type type, ErrorHandler handler)
 	{
 		this.uri = uri;
 		this.type = type;
 		this.mediator = mediator;
+		this.handler = handler;
 		this.signatures = new ArrayList<Signature>();
 	}
 
@@ -151,35 +140,32 @@ public abstract class ServiceAccessMethod implements AccessMethod
 	}	
 	
 	/**
-	 * Invokes this {@link AccessMethod} using the
-	 * objects array parameter
-	 * 
-	 * @return
-	 * 		the {@link SnaMessage} resulting
-	 * 		of the {@link AccessMethod} invocation
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.method.AccessMethod#
+	 * invoke(java.lang.Object[])
 	 */
 	@Override
 	public AccessMethodResponse invoke(Object[] parameters)
 	{
 		try 
 		{
-			Resource resource = this.getResource(
-				(String) parameters[0]);
-		
-			Object[] subparameters = getParameters(
-				parameters);
-		
-			ResourceProxy resourceProxy = (ResourceProxy) 
-				Proxy.getInvocationHandler(
-				resource);
+			Resource resource = (Resource) parameters[0];		
+			Object[] subparameters = getParameters(parameters);
 			
-			return resourceProxy.invoke(this.getType().name(), subparameters);
+			ResourceImpl.ResourceProxyWrapper resourceProxy = 	
+				(ResourceProxyWrapper) Proxy.getInvocationHandler(
+						resource);
+			
+			return resourceProxy.getProxy().invoke(
+				this.getType().name(), subparameters);
 			
 		} catch (Throwable e) 
 		{
-	    	AccessMethodResponse snaMessage = AccessMethodResponse.error(this.mediator,
-	    			uri, this.getType().name(), SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, 
-					null, e);    	
+	    	AccessMethodResponse snaMessage = AccessMethodResponse.error(
+	    	    this.mediator, uri, this.getType().name(), 
+	    	    SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, 
+					null, e);  	
 			return snaMessage;
 		}
 	}
@@ -194,16 +180,6 @@ public abstract class ServiceAccessMethod implements AccessMethod
     public AccessMethod.Type getType()
     {
 	    return this.type;
-    }
-
-    /**
-     * @inheritDoc
-     * 
-     * @see Describable#getDescription()
-     */
-    public AccessMethodDescription getDescription()
-    {
-	    return new AccessMethodDescription(this);
     }
 
 	/**
@@ -278,5 +254,28 @@ public abstract class ServiceAccessMethod implements AccessMethod
     {
     	return this.uri;
     }
-	
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.method.AccessMethod#
+	 * getErrorHandler()
+	 */
+	@Override
+	public ErrorHandler getErrorHandler()
+	{
+		return this.handler;
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.common.primitive.Describable#
+	 * getDescription()
+	 */
+	@Override
+	public AccessMethodDescription getDescription()
+	{
+		return new AccessMethodDescription(this);
+	}	
 }

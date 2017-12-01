@@ -67,16 +67,16 @@ implements Description, Iterable<Signature>
 			moreThanOne = true;
 		}
 		buffer.append(JSONUtils.CLOSE_BRACKET);
-		return null;
+		return buffer.toString();
 	}
 
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see Description#getDescription()
+	 * @see Description#getJSONDescription()
 	 */
 	@Override
-	public String getDescription() 
+	public String getJSONDescription() 
 	{
 		return this.getJSON();
 	}

@@ -160,8 +160,7 @@ public interface Session
      * 
      * @return the JSON formated response of the GET access method invocation
      */
-    JSONObject get(String serviceProviderId, 
-     		String serviceId, String resourceId, 
+    JSONObject get(String serviceProviderId, String serviceId, String resourceId, 
      		String attributeId);
 
     /** 

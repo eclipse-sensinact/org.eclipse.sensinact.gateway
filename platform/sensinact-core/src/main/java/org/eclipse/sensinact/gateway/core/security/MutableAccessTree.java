@@ -99,4 +99,8 @@ extends AccessTree<A>, Cloneable
 	 */
 	MutableAccessTree<A> clone();
 	
+	
+	ImmutableAccessTree immutable();
+	
+	
 }

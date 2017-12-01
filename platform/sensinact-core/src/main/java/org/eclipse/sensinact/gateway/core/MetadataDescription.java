@@ -40,10 +40,10 @@ public class MetadataDescription extends PrimitiveDescription
 	/**
 	 * @inheritDoc
 	 * 
-	 * @see Description #getDescription()
+	 * @see Description #getJSONDescription()
 	 */
 	@Override
-	public String getDescription()
+	public String getJSONDescription()
 	{
 		JSONObject description = this.getJSONObjectDescription();
 		if(description == null)

@@ -27,7 +27,6 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 
-import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.Set;
 
@@ -137,19 +136,6 @@ class DisplayActionResource implements ActionResource {
 	{
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
-	 */
-	@Override
-	public Object invoke(Object arg0, Method arg1, Object[] arg2)
-	        throws Throwable
-	{
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	/**

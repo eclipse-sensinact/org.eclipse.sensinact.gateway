@@ -10,13 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.primitive.Nameable;
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.common.primitive.Description;
+import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
@@ -28,19 +29,196 @@ import org.eclipse.sensinact.gateway.core.method.LinkedActMethod;
 import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.core.method.legacy.ActMethod;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
-import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
+import org.eclipse.sensinact.gateway.core.security.AccessTree;
+import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
+import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.json.JSONObject;
 
 /**
  * Service implementation
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ServiceImpl extends ModelElement<ModelInstance<?>,
-ServiceProcessableData, ResourceImpl, Resource>
+public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy,
+ServiceProcessableData<?>, ResourceImpl, Resource>
 {	
-	 /**
+	class ServiceProxyWrapper extends ModelElementProxyWrapper
+	implements ResourceCollection
+	{		
+		protected ServiceProxyWrapper(ServiceProxy proxy, ImmutableAccessTree tree) 
+		{
+			super(proxy, tree);
+		}
+	    
+		/**
+		 * @inheritDoc
+		 * 
+		 * @see org.eclipse.sensinact.gateway.core.ResourceCollection#getResources()
+		 */
+		@Override
+		public List<Resource> getResources() 
+		{
+			return super.list();
+		}
+
+		/**
+		 * @inheritDoc
+		 * 
+		 * @see org.eclipse.sensinact.gateway.core.ResourceCollection#
+		 * getResource(java.lang.String)
+		 */
+		@Override
+		public <R extends Resource> R getResource(String resource) 
+		{
+			return (R) super.element(resource);
+		}
+		
+		/**
+		 * @inheritDoc
+		 *
+		 * @see java.lang.reflect.InvocationHandler#
+		 * invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
+		 */
+	    @Override
+	    public Object invoke(Object proxy, Method method, 
+	    		Object[] parameters) throws Throwable
+	    {    	
+	    	Object result = null;
+	    	if(this.proxy.getProxied().isAssignableFrom(method.getDeclaringClass()))
+	    	{
+	    		Object[] calledParameters = null;	    		
+	    		if(method.isVarArgs() 
+	    				&& parameters!=null 
+	    				&& parameters.length==1 
+	    				&& parameters[0].getClass().isArray())
+	    		{
+	    			calledParameters = (Object[]) parameters[0];
+	    			
+	    		} else
+	    		{
+	    			calledParameters = parameters;
+	    		}    
+	    		if(calledParameters.length > 0)
+	    		{
+	    		   String resourceName = (String) calledParameters[0];
+	    	 	   calledParameters[0] = getResource(resourceName);
+	    		}
+	    		result = this.proxy.invoke(method.getName().toUpperCase(), 
+	    			calledParameters);
+	    	}
+	    	else
+	     	{
+	     		result = method.invoke(this, parameters);
+	     	}
+	    	if(result == this.proxy || result==this)
+	    	{
+	    		return proxy;
+	    	}
+	    	return result;
+	    }
+	    
+	 	/**
+	 	 * @inheritDoc
+	 	 *
+	 	 * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#isAccessible()
+	 	 */
+	 	@Override
+	 	public boolean isAccessible()
+	 	{
+	 		return true;
+	 	}
+	 	
+		/**
+		 * @inheritDoc
+		 *  
+		 * @see org.eclipse.sensinact.gateway.common.primitive.Describable#getDescription()
+		 */
+		@Override
+		public Description getDescription()
+		{
+			return new Description() 
+			{
+				@Override
+				public String getName()
+				{
+					return ServiceImpl.this.getName();
+				}
+
+			    @Override
+			    public String getJSON()
+			    {
+					StringBuilder buffer = new StringBuilder();
+					buffer.append(JSONUtils.OPEN_BRACE);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append("name");
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COLON);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(this.getName());
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COMMA);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append("resources");
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COLON);
+					buffer.append(JSONUtils.OPEN_BRACKET);		
+					int index = 0;
+					
+		    		Enumeration<Resource> enumeration = 
+		    				ServiceProxyWrapper.this.elements();
+		    		
+		    		while(enumeration.hasMoreElements())
+		    		{   
+		    			buffer.append(index>0?JSONUtils.COMMA:JSONUtils.EMPTY);
+		    			buffer.append(enumeration.nextElement().getDescription().getJSON());
+		    			index++;
+		    		}
+					buffer.append(JSONUtils.CLOSE_BRACKET);		
+					buffer.append(JSONUtils.CLOSE_BRACE);
+					return buffer.toString();
+			    }
+	
+			    @Override
+			    public String getJSONDescription()
+			    {
+					StringBuilder buffer = new StringBuilder();
+					buffer.append(JSONUtils.OPEN_BRACE);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append("name");
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COLON);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(this.getName());
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COMMA);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append("resources");
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COLON);
+					buffer.append(JSONUtils.OPEN_BRACKET);		
+					int index = 0;
+					
+		    		Enumeration<Resource> enumeration = 
+		    				ServiceProxyWrapper.this.elements();
+		    		
+		    		while(enumeration.hasMoreElements())
+		    		{   
+		    			buffer.append(index>0?JSONUtils.COMMA:JSONUtils.EMPTY);
+		    			buffer.append(enumeration.nextElement(
+		    					).getDescription().getJSONDescription());
+		    			index++;
+		    		}
+					buffer.append(JSONUtils.CLOSE_BRACKET);		
+					buffer.append(JSONUtils.CLOSE_BRACE);
+					return buffer.toString();
+			    }
+			};
+		}
+	}
+	
+	/**
      * the number of subscriptions made on {@link Resource}s
      * which belong to this service
      */
@@ -72,10 +250,10 @@ ServiceProcessableData, ResourceImpl, Resource>
     /**
      * @inheritDoc
      *
-     * @see ModelElement#
-     * process(ProcessableData)
+     * @see org.eclipse.sensinact.gateway.core.ModelElement#
+     * process(org.eclipse.sensinact.gateway.common.primitive.ProcessableData)
      */
-    public void process(ServiceProcessableData data)
+    public void process(ServiceProcessableData<?> data)
     {
     	if(data == null)
     	{
@@ -159,7 +337,7 @@ ServiceProcessableData, ResourceImpl, Resource>
 			).withDataValue(value);
    		
 		ResourceBuilder builder = super.getModelInstance().getResourceBuilder(
-			descriptor, this.modelInstance.configuration().getResourceBuildPolicy());
+		descriptor, this.modelInstance.configuration().getResourceBuildPolicy());
 		
 		return this.addResource(builder);
 	}
@@ -189,7 +367,7 @@ ServiceProcessableData, ResourceImpl, Resource>
 				).withResourceType(resourceClass);	
 		
 		ResourceBuilder builder = super.getModelInstance().getResourceBuilder(
-			descriptor, this.modelInstance.configuration().getResourceBuildPolicy());
+		descriptor, this.modelInstance.configuration().getResourceBuildPolicy());
 		
 		return this.addResource(builder);
 	}
@@ -330,7 +508,7 @@ ServiceProcessableData, ResourceImpl, Resource>
 		}
 		return null;
 	}
-    
+
 	/**
 	 * @param resource
 	 * @return
@@ -417,36 +595,33 @@ ServiceProcessableData, ResourceImpl, Resource>
 			public Void execute(AccessMethodResult parameter)
 					throws Exception 
 			{ 
-//					if(!parameter.hasError())
-//					{
-					Object result = null;
-					switch(trigger.getParameters())
-					{
-						case EMPTY:
-							result = trigger.execute((P)null);	
-							break;
-						case PARAMETERS:
-							result = trigger.execute((P)parameter.getParameters());	
-							break;
-						case RESPONSE:
-							result = trigger.execute((P)parameter.createSnaResponse());
-							break;
-						case INTERMEDIATE:
-							result = trigger.execute((P)parameter);
-							break;
-						default:
-							break;						
-					}
-					if(trigger.passOn())
-					{
-						ServiceImpl.this.passOn(
-							AccessMethod.SET, target,
-							new Object[]{DataResource.VALUE, result});
-					}						
-					attribute.setValue(result);	
-					parameter.push(new JSONObject(attribute.getDescription(
-							).getJSON()));
-//					}
+				Object result = null;
+				switch(trigger.getParameters())
+				{
+					case EMPTY:
+						result = trigger.execute((P)null);	
+						break;
+					case PARAMETERS:
+						result = trigger.execute((P)parameter.getParameters());	
+						break;
+					case RESPONSE:
+						result = trigger.execute((P)parameter.createSnaResponse());
+						break;
+					case INTERMEDIATE:
+						result = trigger.execute((P)parameter);
+						break;
+					default:
+						break;						
+				}
+				if(trigger.passOn())
+				{
+					ServiceImpl.this.passOn(
+						AccessMethod.SET, target,
+						new Object[]{DataResource.VALUE, result});
+				}						
+				attribute.setValue(result);	
+				parameter.push(new JSONObject(attribute.getDescription(
+						).getJSON()));
 				return null;
 			}
 		}, policy);
@@ -588,49 +763,67 @@ ServiceProcessableData, ResourceImpl, Resource>
 		return Lifecycle.SERVICE_DISAPPEARING;
 	}
 
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.ModelElement#getProxyType()
+	 */
 	@Override
-	protected Class<?> getProxyType()
+	protected Class<? extends ElementsProxy<Resource>> getProxyType()
 	{
 		return Service.class;
 	}
 
 	/**
 	 * @inheritDoc
-	 *
-	 * @see ModelElement#getElementProxy(AccessLevelOption, Nameable)
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement#
+	 * getProxy(java.util.List)
 	 */
 	@Override
-	protected Resource getElementProxy(AccessLevelOption accessLevelOption,
-	        ResourceImpl element) throws ModelElementProxyBuildException
+	public ServiceProxy getProxy(List<MethodAccessibility> methodAccessibilities) 
+	{		
+		try 
+		{
+			ServiceProxy proxy  = new ServiceProxy(
+				super.modelInstance.mediator(), super.getPath());
+			proxy.buildMethods(null, methodAccessibilities);
+			return proxy;
+				
+		} catch (Exception e)
+		{
+			super.modelInstance.mediator().error(e);
+		}
+		return null;
+	}
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.ModelElement#
+	 * getElementProxy(org.eclipse.sensinact.gateway.core.security.AccessTree, org.eclipse.sensinact.gateway.common.primitive.Nameable)
+	 */
+	@Override
+	protected Resource getElementProxy(AccessTree<?> tree, ResourceImpl element)
+			throws ModelElementProxyBuildException 
 	{
 		if(element.isHidden())
 		{
 			return null;
 		}
-		return (Resource) element.getProxy(accessLevelOption);
+		return element.getProxy(tree);
 	}
 
 	/**
 	 * @inheritDoc
-	 *
-	 * @see ModelElement#
-	 * getProxy(AccessMethod.Type[], java.util.List, int)
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.ModelElement#
+	 * getWrapper(org.eclipse.sensinact.gateway.core.ModelElementProxy, org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree)
 	 */
 	@Override
-	public ModelElementProxy<Resource> getProxy(
-		List<MethodAccessibility> methodAccessibilities,  
-		List<Resource> proxies)
+	protected ModelElementProxyWrapper getWrapper(ServiceProxy proxy, ImmutableAccessTree tree)
 	{
-		try 
-		{
-			return new ServiceProxy(super.modelInstance.mediator(), 
-				this.getName(), this.getPath(), proxies, 
-				methodAccessibilities, null);
-			
-		} catch (InvalidServiceException e) 
-		{
-			super.modelInstance.mediator().error(e.getMessage(), e);
-		}
-		return null;
-	}
+		ServiceProxyWrapper wrapper = new ServiceProxyWrapper(proxy, tree);
+		return wrapper;
+	}	
 }

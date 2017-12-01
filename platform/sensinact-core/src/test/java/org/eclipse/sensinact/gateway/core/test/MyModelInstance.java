@@ -18,6 +18,7 @@ import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.ModelConfiguration;
 import org.eclipse.sensinact.gateway.core.ModelElement;
+import org.eclipse.sensinact.gateway.core.ModelElementProxy;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.core.message.MessageHandler;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
@@ -62,9 +63,9 @@ public class MyModelInstance extends ModelInstance<ModelConfiguration>
 	 * @return the {@link AccessLevelOption} for the specified session and 
 	 * resource
 	 */
-	public <I extends ModelInstance<?>, 
+	public <I extends ModelInstance<?>, M extends ModelElementProxy,
 	P extends ProcessableData, E extends Nameable, R extends Nameable>
-	AccessLevelOption getAccessLevelOption(ModelElement<I, P, E, R> 
+	AccessLevelOption getAccessLevelOption(ModelElement<I, M, P, E, R> 
 	modelElement, String publicKey)
 	{
 		return AccessLevelOption.ANONYMOUS;
@@ -83,9 +84,10 @@ public class MyModelInstance extends ModelInstance<ModelConfiguration>
 	 * specified {@link ModelElement} for the specified {@link 
 	 * AccessLevelOption}
 	 */
-	public <I extends ModelInstance<?>, P extends ProcessableData, 
-	E extends Nameable, R extends Nameable> List<MethodAccessibility>
-	getAuthorizations(ModelElement<I, P, E, R> modelElement, 
+	public <I extends ModelInstance<?>, M extends ModelElementProxy, 
+	P extends ProcessableData, E extends Nameable, R extends Nameable> 
+	List<MethodAccessibility> getAuthorizations(
+		ModelElement<I, M, P, E, R> modelElement, 
 			AccessLevelOption accessLevelOption)
 	{
 		final String path = modelElement.getPath();

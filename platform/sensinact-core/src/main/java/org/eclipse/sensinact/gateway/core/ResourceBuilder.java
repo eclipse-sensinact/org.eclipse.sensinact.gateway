@@ -44,7 +44,6 @@ import org.eclipse.sensinact.gateway.util.ReflectUtils;
  */
 public class ResourceBuilder
 {	    
-
 	private final AccessMethod.Type GET = AccessMethod.Type.valueOf(AccessMethod.GET);
 	private final AccessMethod.Type SET = AccessMethod.Type.valueOf(AccessMethod.SET);
 	private final AccessMethod.Type ACT = AccessMethod.Type.valueOf(AccessMethod.ACT);

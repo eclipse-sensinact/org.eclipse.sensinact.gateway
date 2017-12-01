@@ -24,9 +24,9 @@ import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefiniti
 import org.eclipse.sensinact.gateway.common.primitive.Describable;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.Elements;
+import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
 import org.eclipse.sensinact.gateway.common.primitive.Typable;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
@@ -44,10 +44,13 @@ import org.eclipse.sensinact.gateway.core.message.SubscriptionFilter;
 import org.eclipse.sensinact.gateway.core.message.UnaryCallback;
 import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodDescription;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.Signature;
-import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
+import org.eclipse.sensinact.gateway.core.security.AccessTree;
+import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
+import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONObject;
 
@@ -56,10 +59,138 @@ import org.json.JSONObject;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ResourceImpl extends ModelElement<ModelInstance<?>, 
-ResourceProcessableContainer, Attribute, AttributeDescription> 
+public class ResourceImpl extends ModelElement<ModelInstance<?>, ResourceProxy,
+ResourceProcessableContainer<?>, Attribute, AttributeDescription> 
 implements Typable<Resource.Type>
 {
+	public class ResourceProxyWrapper extends ModelElementProxyWrapper 
+	implements Typable<Resource.Type>
+	{
+		ResourceProxyWrapper(ResourceProxy proxy, ImmutableAccessTree tree) 
+		{
+			super(proxy, tree);
+		} 
+		
+		public Resource.Type getType()
+		{
+			return ResourceImpl.this.getType(); 
+		}
+
+	 	@Override
+	 	public boolean isAccessible()
+	 	{
+	 		return true;
+	 	}
+
+		public Description getDescription()
+		{
+			return new Description() 
+			{
+				@Override
+				public String getName() 
+				{
+					return ResourceImpl.this.getName();
+				}
+
+			    @Override
+			    public String getJSON()
+			    {			    	
+			    	StringBuilder buffer = new StringBuilder();
+					buffer.append(JSONUtils.OPEN_BRACE);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append("name");
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COLON);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(this.getName());
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COMMA);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append("type");
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COLON);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(ResourceProxyWrapper.this.getType().name());
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.CLOSE_BRACE);
+					return buffer.toString();
+			    }
+
+			    @Override
+			    public String getJSONDescription()
+			    {  try
+			       {
+	    			StringBuilder buffer = new StringBuilder();
+					buffer.append(JSONUtils.OPEN_BRACE);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append("name");
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COLON);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(this.getName());
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COMMA);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append("type");
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COLON);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(ResourceProxyWrapper.this.getType().name());
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COMMA);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append("attributes");
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COLON);
+					buffer.append(JSONUtils.OPEN_BRACKET);		
+					int index = 0;
+					
+		    		Enumeration<AttributeDescription> enumeration = 
+		    				ResourceProxyWrapper.this.elements();
+		    		
+		    		while(enumeration.hasMoreElements())
+		    		{   
+		    			buffer.append(index>0?JSONUtils.COMMA:JSONUtils.EMPTY);
+		    			buffer.append(enumeration.nextElement().getJSONDescription());
+		    			index++;
+		    		}
+		    		buffer.append(JSONUtils.CLOSE_BRACKET);
+
+					buffer.append(JSONUtils.COMMA);
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append("accessMethods");
+					buffer.append(JSONUtils.QUOTE);
+					buffer.append(JSONUtils.COLON);
+					buffer.append(JSONUtils.OPEN_BRACKET);
+					
+		    		index= 0;			  
+		    		int pos = 0;
+			    	AccessMethod.Type[] types = AccessMethod.Type.values();
+			    	
+			    	for(;index < types.length;index++)
+			    	{
+			    		AccessMethod m = proxy.getAccessMethod(types[index].name());
+			    		if(m!=null)
+			    		{
+			    			buffer.append(pos>0?JSONUtils.COMMA:JSONUtils.EMPTY);
+			    			buffer.append(m.getDescription().getJSONDescription());
+			    			pos++;
+			    		}
+			    	}
+					buffer.append(JSONUtils.CLOSE_BRACKET);		
+					buffer.append(JSONUtils.CLOSE_BRACE);
+					return buffer.toString();
+			       }catch(Exception e)
+			    	{
+			    	   e.printStackTrace();
+			    	}
+			    return null;
+			    }
+			};
+		}
+		
+	}
+	
 	/**
 	 * {@link AccessMethod}s of this {@link Resource}
 	 */
@@ -75,7 +206,7 @@ implements Typable<Resource.Type>
 	 * Extended {@link Resource} type of this
 	 * implementation
 	 */
-	protected final Class<?> resourceType;
+	protected final Class<? extends Resource> resourceType;
 	
 	/**
 	 * the name of the default attribute of this resource
@@ -940,7 +1071,7 @@ implements Typable<Resource.Type>
 	 * @see ModelElement#getProxyType()
 	 */
 	@Override
-	protected Class<?> getProxyType() 
+	protected Class<? extends ElementsProxy<AttributeDescription>> getProxyType() 
 	{
 		return this.resourceType;
 	}
@@ -988,40 +1119,48 @@ implements Typable<Resource.Type>
     {
     	return this.updatePolicy;
     }
-	
+
 	/**
 	 * @inheritDoc
-	 *
-	 * @see ModelElement#
-	 * getElementProxy(AccessLevelOption,
-	 * Nameable)
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement#
+	 * getProxy(java.util.List)
 	 */
 	@Override
-	protected AttributeDescription getElementProxy(
-			AccessLevelOption accessLevelOption, Attribute element)
-	        throws ModelElementProxyBuildException
-	{		
-	    return element.<AttributeDescription>getDescription();
+	public ResourceProxy getProxy(List<MethodAccessibility> methodAccessibilities)
+	{
+		 ResourceProxy proxy = new ResourceProxy(super.modelInstance.mediator(),
+				 this, methodAccessibilities);
+		 return proxy;
 	}
 
 	/**
 	 * @inheritDoc
-	 *
-	 * @see ModelElement#
-	 * getProxy(AccessMethod.Type[],
-	 * java.util.List, int)
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.ModelElement#
+	 * getElementProxy(org.eclipse.sensinact.gateway.core.security.AccessTree, org.eclipse.sensinact.gateway.common.primitive.Nameable)
 	 */
 	@Override
-	public SensiNactResourceModelElementProxy<AttributeDescription> getProxy(
-		List<MethodAccessibility> methodAccessibilities,
-		List<AttributeDescription> proxies)
+	protected AttributeDescription getElementProxy(AccessTree<?> tree, Attribute element)
+			throws ModelElementProxyBuildException 
 	{
-		if(this.isHidden())
+		if(element.isHidden())
 		{
 			return null;
 		}
-	    return new ResourceProxy(super.modelInstance.mediator(), 
-	    		this, proxies, methodAccessibilities);
+		return element.getDescription();
 	}
 
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.ModelElement#
+	 * getWrapper(org.eclipse.sensinact.gateway.core.ModelElementProxy, org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree)
+	 */
+	@Override
+	protected ModelElementProxyWrapper getWrapper(ResourceProxy proxy, ImmutableAccessTree tree)
+	{
+		ResourceProxyWrapper wrapper = new ResourceProxyWrapper(proxy,tree);
+		return wrapper;
+	}
 }

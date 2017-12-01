@@ -55,9 +55,9 @@ public class UnaccessibleAccessMethod implements AccessMethod
 	 * @see Describable#getDescription()
 	 */
 	@Override
-	public <D extends Description> D getDescription()
+	public AccessMethodDescription getDescription()
 	{
-		return null;
+		return new AccessMethodDescription(this);
 	}
 
 	/**

@@ -27,7 +27,6 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 
-import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.Set;
 
@@ -138,18 +137,6 @@ class StateActionResource implements ActionResource
 	public boolean addElement(AttributeDescription element)
 	{
 		return false;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
-	 */
-	@Override
-	public Object invoke(Object proxy, Method method, Object[] args)
-	        throws Throwable
-	{
-		return null;
 	}
 
 	/**
