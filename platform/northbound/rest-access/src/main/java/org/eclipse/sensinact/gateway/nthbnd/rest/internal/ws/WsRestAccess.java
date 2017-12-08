@@ -70,7 +70,7 @@ public class WsRestAccess extends RestAccess
 	{
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("X-Auth-Token", super.endpoint.getSessionToken());
-		jsonObject.put("stautsCode", i);
+		jsonObject.put("statusCode", i);
 		jsonObject.put("message", string);
 		this.socket.send(new String(jsonObject.toString(
 				).getBytes("UTF-8")));
