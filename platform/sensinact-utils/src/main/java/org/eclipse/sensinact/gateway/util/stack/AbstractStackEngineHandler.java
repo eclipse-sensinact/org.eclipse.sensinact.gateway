@@ -50,7 +50,8 @@ implements StackEngineHandler<E>
 	}
 
 	/**
-	 * Stops 
+	 * Stops
+	 * 
 	 * @throws InterruptedException 
 	 */
 	public void close()
