@@ -70,13 +70,11 @@ public class WsRestAccess extends NorthboundAccess
 		JSONObject jsonObject = new JSONObject();
 		if(super.endpoint!=null)
 		{
-			jsonObject.put("X-Auth-Token", 
-				super.endpoint.getSessionToken());
+			jsonObject.put("X-Auth-Token", super.endpoint.getSessionToken());
 		}
 		jsonObject.put("statusCode", i);
 		jsonObject.put("message", string);
-		this.socket.send(new String(jsonObject.toString(
-				).getBytes("UTF-8")));
+		this.socket.send(new String(jsonObject.toString().getBytes("UTF-8")));
 	}
 
 }
