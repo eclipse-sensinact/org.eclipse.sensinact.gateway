@@ -144,7 +144,9 @@ public class SensiNact implements Core
 				@Override
 				public String run()
 				{
-					SessionKey key = SensiNact.this.sessions.get(getId());
+					SessionKey key = SensiNact.this.sessions.get(
+						new KeyExtractor<KeyExtractorType>(
+								KeyExtractorType.TOKEN, getId()));
 					if(key == null || key.getPublicKey()==null)
 					{
 						return null;
@@ -155,8 +157,7 @@ public class SensiNact implements Core
 			String uri = null;
 			if(filter!=null)
 			{
-				uri = new JSONObject(filter.getJSON()
-						).getString("sender");
+				uri = new JSONObject(filter.getJSON()).getString("sender");
 			} else
 			{
 				uri = UriUtils.ROOT;
@@ -168,7 +169,8 @@ public class SensiNact implements Core
 	        if (agentId != null)
 	        {      	
 	        	json.put("statusCode", 200);
-	        	json.put("response", new JSONObject().put("subscriptionId", agentId));
+	        	json.put("response", new JSONObject().put(
+	        		"subscriptionId", agentId));
 	        	
 	        } else
 	        {
@@ -192,7 +194,10 @@ public class SensiNact implements Core
 				@Override
 				public Boolean run()
 				{
-					SessionKey key = SensiNact.this.sessions.get(getId());
+					SessionKey key = SensiNact.this.sessions.get(
+						new KeyExtractor<KeyExtractorType>(
+								KeyExtractorType.TOKEN, getId()));
+					
 					if(key != null && key.getPublicKey()!=null)
 					{
 						return key.unregisterAgent(agentId);
@@ -206,7 +211,8 @@ public class SensiNact implements Core
 	        if (unregistered)
 	        {      	
 	        	json.put("statusCode", 200);
-	        	json.put("response", new JSONObject().put("message", "The agent has been properly unregistered"));
+	        	json.put("response", new JSONObject().put("message", 
+	        			"The agent has been properly unregistered"));
 	        	
 	        } else
 	        {
@@ -361,7 +367,7 @@ public class SensiNact implements Core
 	            public JSONObject run()
 	            {
 			    	return SensiNact.this.getLocations(
-			    			SensiNactSession.this.getId());
+			    		SensiNactSession.this.getId());
 	            }
 			 });
 		}
