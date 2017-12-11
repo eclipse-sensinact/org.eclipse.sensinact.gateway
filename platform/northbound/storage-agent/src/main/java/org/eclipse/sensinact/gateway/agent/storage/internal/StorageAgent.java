@@ -29,7 +29,7 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class StorageAgent extends AbstractSnaAgentCallback {
+public class StorageAgent extends AbstractMidAgentCallback {
 
     private static final String HISTORICAL_AGENT_LOGIN_PROP = "org.eclipse.sensinact.gateway.historical.login";
     private static final String HISTORICAL_AGENT_PSSWD_PROP = "org.eclipse.sensinact.gateway.historical.password";
@@ -58,7 +58,7 @@ public class StorageAgent extends AbstractSnaAgentCallback {
     /**
      * @inheritDoc
      *
-     * @see AbstractSnaAgentCallback#doHandle(SnaUpdateMessageImpl)
+     * @see AbstractMidAgentCallback#doHandle(SnaUpdateMessageImpl)
      */
     @Override
     public void doHandle(SnaUpdateMessageImpl message) {
@@ -77,7 +77,7 @@ public class StorageAgent extends AbstractSnaAgentCallback {
     /**
      * @inheritDoc
      *
-     * @see AbstractSnaAgentCallback#doHandle(SnaLifecycleMessageImpl)
+     * @see AbstractMidAgentCallback#doHandle(SnaLifecycleMessageImpl)
      */
     @Override
     public void doHandle(SnaLifecycleMessageImpl message) {
@@ -141,21 +141,21 @@ public class StorageAgent extends AbstractSnaAgentCallback {
     /**
      * @inheritDoc
      *
-     * @see AbstractSnaAgentCallback#doHandle(SnaErrorMessageImpl)
+     * @see AbstractMidAgentCallback#doHandle(SnaErrorMessageImpl)
      */
     public void doHandle(SnaErrorMessageImpl message) {}
 
     /**
      * @inheritDoc
      *
-     * @see AbstractSnaAgentCallback#doHandle(SnaResponseMessage)
+     * @see AbstractMidAgentCallback#doHandle(SnaResponseMessage)
      */
     public synchronized void doHandle(SnaResponseMessage message) {}
 
     /**
      * @inheritDoc
      *
-     * @see AbstractSnaAgentCallback#stop()
+     * @see AbstractMidAgentCallback#stop()
      */
     public void stop() {
         this.storageConnection.close();
