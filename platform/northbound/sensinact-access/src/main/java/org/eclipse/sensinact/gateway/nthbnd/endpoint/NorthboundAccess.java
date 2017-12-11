@@ -87,9 +87,12 @@ public abstract class NorthboundAccess
 	
 	public static final String  GENERIC_METHOD_SCHEME =
 		ROOT + "(" + ELEMENT_SCHEME + ")*" + METHOD_SCHEME;
-	
+
 	public static final String  ROOT_PROPAGATED_METHOD_SCHEME =
 		ROOT + METHOD_SCHEME;
+	
+	public static final String  PROVIDERS_PROPAGATED_METHOD_SCHEME =
+		PROVIDERS_SCHEME + METHOD_SCHEME;
 
 	public static final String  PROVIDER_PROPAGATED_METHOD_SCHEME =
 		PROVIDER_SCHEME + METHOD_SCHEME;
@@ -152,6 +155,9 @@ public abstract class NorthboundAccess
 	private static final Pattern ROOT_PROPAGATED_METHOD_SCHEME_PATTERN =
 		Pattern.compile(ROOT_PROPAGATED_METHOD_SCHEME);
 
+	private static final Pattern PROVIDERS_PROPAGATED_METHOD_SCHEME_PATTERN =
+		Pattern.compile(PROVIDERS_PROPAGATED_METHOD_SCHEME);
+	
 	private static final Pattern PROVIDER_PROPAGATED_METHOD_SCHEME_PATTERN =
 		Pattern.compile(PROVIDER_PROPAGATED_METHOD_SCHEME);
 	
@@ -178,6 +184,7 @@ public abstract class NorthboundAccess
 	private String content = null;
 	private boolean isElementList = false;
 	private boolean match = false;
+	private boolean multi = false;
 	
 	protected AccessMethod.Type method = null;
 	private Map<String, List<String>> query;
@@ -212,6 +219,7 @@ public abstract class NorthboundAccess
 		this.resource = null;	
 		this.attribute = null;			
 		this.method = null;
+		this.multi = false;
 		this.match = false;
 		
 		Matcher matcher = GENERIC_METHOD_SCHEME_PATTERN.matcher(path);
@@ -222,6 +230,15 @@ public abstract class NorthboundAccess
 			{		
 				this.method = AccessMethod.Type.valueOf(matcher.group(1));
 				this.match = true;
+				this.multi = true;
+				return;
+			}
+			matcher = PROVIDERS_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
+			if(matcher.matches())
+			{		
+				this.method = AccessMethod.Type.valueOf(matcher.group(1));
+				this.match = true;
+				this.multi = true;
 				return;
 			}	
 			matcher = PROVIDER_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
@@ -230,6 +247,7 @@ public abstract class NorthboundAccess
 				this.serviceProvider = matcher.group(1);
 				this.method = AccessMethod.Type.valueOf(matcher.group(2));
 				this.match = true;
+				this.multi = true;
 				return;
 			}	
 			matcher = SIMPLIFIED_PROVIDER_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
@@ -238,6 +256,7 @@ public abstract class NorthboundAccess
 				this.serviceProvider = matcher.group(1);
 				this.method = AccessMethod.Type.valueOf(matcher.group(3));
 				this.match = true;
+				this.multi = true;
 				return;
 			}
 			matcher = SERVICE_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
@@ -247,6 +266,7 @@ public abstract class NorthboundAccess
 				this.service = matcher.group(2);
 				this.method = AccessMethod.Type.valueOf(matcher.group(3));
 				this.match = true;
+				this.multi = true;
 				return;
 			}	
 			matcher = SIMPLIFIED_SERVICE_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
@@ -256,6 +276,7 @@ public abstract class NorthboundAccess
 				this.service = matcher.group(3);
 				this.method = AccessMethod.Type.valueOf(matcher.group(4));
 				this.match = true;
+				this.multi = true;
 				return;
 			}
 			matcher = RESOURCE_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
@@ -266,6 +287,7 @@ public abstract class NorthboundAccess
 				this.resource = matcher.group(3);			
 				this.method = AccessMethod.Type.valueOf(matcher.group(4));
 				this.match = true;
+				this.multi = false;
 				return;
 			}	   
 			matcher = SIMPLIFIED_RESOURCE_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
@@ -276,6 +298,7 @@ public abstract class NorthboundAccess
 				this.resource = matcher.group(4);			
 				this.method = AccessMethod.Type.valueOf(matcher.group(5));
 				this.match = true;
+				this.multi = false;
 				return;
 			}	
 		}
@@ -287,6 +310,7 @@ public abstract class NorthboundAccess
 			this.service = matcher.group(2);
 			this.resource = matcher.group(3);		
 			this.match = true;
+			this.multi = false;
 			return;
 		}
 		matcher = SIMPLIFIED_RESOURCE_PATTERN.matcher(path);
@@ -296,6 +320,7 @@ public abstract class NorthboundAccess
 			this.service = matcher.group(3);
 			this.resource = matcher.group(4);		
 			this.match = true;
+			this.multi = false;
 			return;
 		}		
 		matcher = RESOURCES_PATTERN.matcher(path);		
@@ -305,6 +330,7 @@ public abstract class NorthboundAccess
 			this.service = matcher.group(2);		
 			this.isElementList = true;
 			this.match = true;
+			this.multi = true;
 			return;
 		}		
 		matcher = SERVICE_PATTERN.matcher(path);
@@ -313,6 +339,7 @@ public abstract class NorthboundAccess
 			this.serviceProvider = matcher.group(1);
 			this.service = matcher.group(2);
 			this.match = true;
+			this.multi = true;
 			return;
 		}		
 		matcher = SIMPLIFIED_SERVICE_PATTERN.matcher(path);	
@@ -321,6 +348,7 @@ public abstract class NorthboundAccess
 			this.serviceProvider = matcher.group(1);
 			this.service = matcher.group(3);
 			this.match = true;
+			this.multi = true;
 			return;
 		}		
 		matcher = SERVICES_PATTERN.matcher(path);
@@ -329,6 +357,7 @@ public abstract class NorthboundAccess
 			this.serviceProvider = matcher.group(1);
 			this.isElementList = true;		
 			this.match = true;
+			this.multi = true;
 			return;
 		}
 		matcher = PROVIDER_PATTERN.matcher(path);
@@ -336,6 +365,7 @@ public abstract class NorthboundAccess
 		{
 			this.serviceProvider = matcher.group(1);		
 			this.match = true;
+			this.multi = true;
 			return;
 		}
 		matcher = SIMPLIFIED_PROVIDER_PATTERN.matcher(path);
@@ -343,6 +373,7 @@ public abstract class NorthboundAccess
 		{
 			this.serviceProvider = matcher.group(1);		
 			this.match = true;
+			this.multi = true;
 			return;
 		}		
 		matcher = PROVIDERS_PATTERN.matcher(path);
@@ -350,6 +381,7 @@ public abstract class NorthboundAccess
 		{
 			this.match = true;		
 			this.isElementList = true;
+			this.multi = true;
 		}	
 	}
 	
@@ -513,7 +545,9 @@ public abstract class NorthboundAccess
 				).withService(service
 				).withResource(resource);
 		
-		if(!method.name().equals(AccessMethod.ACT))
+		if(!this.multi && 
+		   !this.method.name().equals(AccessMethod.ACT) && 
+		   !this.method.name().equals(AccessMethod.DESCRIBE))
 		{
 			this.processAttribute(builder);
 		}
