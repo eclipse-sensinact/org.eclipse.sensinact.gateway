@@ -45,9 +45,9 @@ import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.StateVariableResource;
-import org.eclipse.sensinact.gateway.core.message.AbstractSnaAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaCallback;
+import org.eclipse.sensinact.gateway.core.message.MidCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
@@ -171,30 +171,6 @@ public class TestResourceBuilder<R extends ModelInstance>
             {
 	            return null;
             }
-
-			@Override
-            public SnaCallback.Type getSnaCallBackType()
-            {
-	            return  SnaCallback.Type.UNARY;
-            }
-
-			@Override
-            public long getLifetime()
-            {
-	            return -1;
-            }
-
-			@Override
-            public int getBufferSize()
-            {
-	            return 0;
-            }
-
-			@Override
-            public int getSchedulerDelay()
-            {
-	            return 0;
-            }
 		},
    		new JSONArray()
 		{{
@@ -290,30 +266,6 @@ public class TestResourceBuilder<R extends ModelInstance>
             {
 	            return null;
             }
-
-			@Override
-            public SnaCallback.Type getSnaCallBackType()
-            {
-	            return  SnaCallback.Type.UNARY;
-            }
-
-			@Override
-            public long getLifetime()
-            {
-	            return -1;
-            }
-
-			@Override
-            public int getBufferSize()
-            {
-	            return 0;
-            }
-
-			@Override
-            public int getSchedulerDelay()
-            {
-	            return 0;
-            }
 		}, null).getJSONObject("response"
 		).getString("subscriptionId");
                 
@@ -331,30 +283,6 @@ public class TestResourceBuilder<R extends ModelInstance>
             public String getJSON()
             {
 	            return null;
-            }
-
-			@Override
-            public SnaCallback.Type getSnaCallBackType()
-            {
-	            return  SnaCallback.Type.UNARY;
-            }
-
-			@Override
-            public long getLifetime()
-            {
-	            return -1;
-            }
-
-			@Override
-            public int getBufferSize()
-            {
-	            return 0;
-            }
-
-			@Override
-            public int getSchedulerDelay()
-            {
-	            return 0;
             }
 		}, null);  
 
@@ -443,30 +371,6 @@ public class TestResourceBuilder<R extends ModelInstance>
             public String getJSON()
             {
 	            return null;
-            }
-
-			@Override
-            public SnaCallback.Type getSnaCallBackType()
-            {
-	            return  SnaCallback.Type.UNARY;
-            }
-
-			@Override
-            public long getLifetime()
-            {
-	            return -1;
-            }
-
-			@Override
-            public int getBufferSize()
-            {
-	            return 0;
-            }
-
-			@Override
-            public int getSchedulerDelay()
-            {
-	            return 0;
             }
 		},
    		new HashSet<Constraint>()
@@ -558,30 +462,6 @@ public class TestResourceBuilder<R extends ModelInstance>
 		            {
 			            return null;
 		            }
-		
-					@Override
-		            public SnaCallback.Type getSnaCallBackType()
-		            {
-			            return  SnaCallback.Type.UNARY;
-		            }
-		
-					@Override
-		            public long getLifetime()
-		            {
-			            return -1;
-		            }
-		
-					@Override
-		            public int getBufferSize()
-		            {
-			            return 0;
-		            }
-		
-					@Override
-		            public int getSchedulerDelay()
-		            {
-			            return 0;
-		            }
 			})).getResponse(String.class,"subscriptionId");
                 
          r3.subscribe(
@@ -598,30 +478,6 @@ public class TestResourceBuilder<R extends ModelInstance>
 		            public String getJSON()
 		            {
 			            return null;
-		            }
-		
-					@Override
-		            public SnaCallback.Type getSnaCallBackType()
-		            {
-			            return  SnaCallback.Type.UNARY;
-		            }
-		
-					@Override
-		            public long getLifetime()
-		            {
-			            return -1;
-		            }
-		
-					@Override
-		            public int getBufferSize()
-		            {
-			            return 0;
-		            }
-		
-					@Override
-		            public int getSchedulerDelay()
-		            {
-			            return 0;
 		            }
 			});   
         JSONObject set1 = r2.set("property3").getResponse();
@@ -685,7 +541,7 @@ public class TestResourceBuilder<R extends ModelInstance>
        
        filter.addHandledType(SnaMessage.Type.UPDATE);
        this.testContext.getSensiNact().registerAgent( 
-       this.testContext.getMediator(), new AbstractSnaAgentCallback()
+       this.testContext.getMediator(), new AbstractMidAgentCallback()
 	   {
 			@Override
 			public void doHandle(SnaLifecycleMessageImpl message){
@@ -765,7 +621,7 @@ public class TestResourceBuilder<R extends ModelInstance>
    	   TestResourceBuilder.this.testContext.agentCallbackCountReset();
    	   this.testContext.getSensiNact().registerAgent(
    			 this.testContext.getMediator(),
-   	       new AbstractSnaAgentCallback()
+   	       new AbstractMidAgentCallback()
    	       {
    			@Override
    	        public void doHandle(SnaLifecycleMessageImpl message){

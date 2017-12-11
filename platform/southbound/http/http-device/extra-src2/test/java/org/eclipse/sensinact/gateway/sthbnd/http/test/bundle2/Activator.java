@@ -24,7 +24,7 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator;
 		timeout = 10000,
 		recurrence = @HttpTaskConfiguration(
 			host = "127.0.0.1", 
-			port=8893, 
+			port="8893", 
 			path = "/get")
 		)
 })

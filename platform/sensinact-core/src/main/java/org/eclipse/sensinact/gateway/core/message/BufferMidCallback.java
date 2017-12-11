@@ -13,16 +13,16 @@ package org.eclipse.sensinact.gateway.core.message;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.eclipse.sensinact.gateway.util.stack.StackEngineHandler;
 
 /**
- * Extended {@link SnaCallback} managing a buffer to store 
+ * Extended {@link MidCallback} managing a buffer to store 
  * received events before transmission
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class BufferCallback
-extends UnaryCallback
+public class BufferMidCallback extends UnaryMidCallback
 {	
 	/**
 	 * current buffer's size
@@ -45,7 +45,7 @@ extends UnaryCallback
 	 * @param bufferSize
 	 * 		the length of the buffer to create
 	 */
-    public BufferCallback(Mediator mediator, 
+    public BufferMidCallback(Mediator mediator, 
     		String identifier, 
     		ErrorHandler errorHandler,
     		Recipient recipient, long timeout,
@@ -71,7 +71,7 @@ extends UnaryCallback
 	 * @see StackEngineHandler#doHandle(java.lang.Object)
 	 */
 	@Override
-	public void doHandle(SnaMessage<?> message)
+	public void doCallback(SnaMessage<?> message)
 	{
 		synchronized(this.buffer)
     	{
@@ -89,17 +89,12 @@ extends UnaryCallback
 	    		try
 	    		{
 					this.recipient.callback(this.getName(), msgBuffer);
-					super.status = AccessMethodResponse.Status.SUCCESS;
+					setStatus(Status.SUCCESS);
 					
 				} catch (Exception e)
 	    		{
-					super.status = AccessMethodResponse.Status.ERROR;
-				    ErrorHandler errorHandler = 
-				    		super.getCallbackErrorHandler();			    
-				    if(errorHandler!=null )
-				    {
-				    	errorHandler.register(e);
-				    }
+					setStatus(Status.ERROR);
+				    getCallbackErrorHandler().register(e);
 				}
 	    		this.length = 0;
 	    	}

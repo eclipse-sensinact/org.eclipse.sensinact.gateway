@@ -132,9 +132,9 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
     }
 
     /**
-     * @see AbstractSnaAgentCallback
+     * @see AbstractMidAgentCallback
      */
-    private class AppResourceLifeCycleSnaAgent extends AbstractSnaAgentCallback {
+    private class AppResourceLifeCycleSnaAgent extends AbstractMidAgentCallback {
 
         private AbstractAppWatchDog watchDog;
 
@@ -145,7 +145,7 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
         }
 
         /**
-         * @see AbstractSnaAgentCallback#doHandle(SnaLifecycleMessageImpl)
+         * @see AbstractMidAgentCallback#doHandle(SnaLifecycleMessageImpl)
          */
         public void doHandle(SnaLifecycleMessageImpl message) {
             try {
@@ -192,26 +192,26 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
 
         /**
          * Not used
-         * @see AbstractSnaAgentCallback#doHandle(SnaUpdateMessageImpl)
+         * @see AbstractMidAgentCallback#doHandle(SnaUpdateMessageImpl)
          */
         public void doHandle(SnaUpdateMessageImpl event) {}
 
         /**
          * Not used
-         * @see AbstractSnaAgentCallback#doHandle(SnaErrorMessageImpl)
+         * @see AbstractMidAgentCallback#doHandle(SnaErrorMessageImpl)
          */
         public void doHandle(SnaErrorMessageImpl event) {}
 
         /**
          * Not used
-         * @see AbstractSnaAgentCallback#doHandle(SnaResponseMessage)
+         * @see AbstractMidAgentCallback#doHandle(SnaResponseMessage)
          */
         public void doHandle(SnaResponseMessage event) {}
 
         /**
          * @inheritDoc
          *
-         * @see AbstractSnaAgentCallback#stop()
+         * @see AbstractMidAgentCallback#stop()
          */
         public void stop() {}
     }

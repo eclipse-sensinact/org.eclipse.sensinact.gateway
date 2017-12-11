@@ -214,8 +214,9 @@ public class Activator extends HttpActivator
 	}
 
 	/**
-	 * @param configuration
-	 * @throws InvalidProtocolStackException
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator#connect(org.eclipse.sensinact.gateway.generic.ExtModelConfiguration)
 	 */
 	protected void connect(ExtModelConfiguration configuration) 
 			throws InvalidProtocolStackException {}

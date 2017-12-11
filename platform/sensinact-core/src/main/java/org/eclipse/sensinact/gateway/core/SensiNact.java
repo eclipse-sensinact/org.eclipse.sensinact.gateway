@@ -33,7 +33,7 @@ import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefiniti
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.message.SnaAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaAgentImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
@@ -133,12 +133,12 @@ public class SensiNact implements Core
 		 * @inheritDoc
 		 *
 		 * @see org.eclipse.sensinact.gateway.core.security.Session#
-		 * registerSessionAgent(org.eclipse.sensinact.gateway.core.message.SnaAgentCallback, org.eclipse.sensinact.gateway.core.message.SnaFilter)
+		 * registerSessionAgent(org.eclipse.sensinact.gateway.core.message.MidAgentCallback, org.eclipse.sensinact.gateway.core.message.SnaFilter)
 		 */
-		public String registerSessionAgent(final SnaAgentCallback callback, 
+		public JSONObject registerSessionAgent(final MidAgentCallback callback, 
 				final SnaFilter filter)
 		{			
-			return AccessController.<String>doPrivileged(
+			String agentId = AccessController.<String>doPrivileged(
 			new PrivilegedAction<String>()
 			{
 				@Override
@@ -151,7 +151,69 @@ public class SensiNact implements Core
 					}
 					return key.registerAgent(callback, filter);
 				}
+			});			
+			String uri = null;
+			if(filter!=null)
+			{
+				uri = new JSONObject(filter.getJSON()
+						).getString("sender");
+			} else
+			{
+				uri = UriUtils.ROOT;
+			}
+	    	JSONObject json = new JSONObject();
+	    	json.put("type", "SUBSCRIBE_RESPONSE");
+	    	json.put("uri", uri);
+	    	
+	        if (agentId != null)
+	        {      	
+	        	json.put("statusCode", 200);
+	        	json.put("response", new JSONObject().put("subscriptionId", agentId));
+	        	
+	        } else
+	        {
+	        	json.put("statusCode", 520);
+	        	json.put("error" , "Internal server error");
+	        }
+	        return json;
+		}
+		
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.security.Session#
+		 * unregisterSessionAgent(java.lang.String)
+		 */
+		public JSONObject unregisterSessionAgent(final String agentId)
+		{			
+			boolean unregistered = AccessController.<Boolean>doPrivileged(
+			new PrivilegedAction<Boolean>()
+			{
+				@Override
+				public Boolean run()
+				{
+					SessionKey key = SensiNact.this.sessions.get(getId());
+					if(key != null && key.getPublicKey()!=null)
+					{
+						return key.unregisterAgent(agentId);
+					}
+					return false;
+				}
 			});
+	    	JSONObject json = new JSONObject();
+	    	json.put("type", "UNSUBSCRIBE_RESPONSE");
+	    	json.put("uri", UriUtils.ROOT);
+	        if (unregistered)
+	        {      	
+	        	json.put("statusCode", 200);
+	        	json.put("response", new JSONObject().put("message", "The agent has been properly unregistered"));
+	        	
+	        } else
+	        {
+	        	json.put("statusCode", 520);
+	        	json.put("error" , "Internal server error");
+	        }
+	        return json;
 		}
 		
 		/** 
@@ -1652,11 +1714,11 @@ public class SensiNact implements Core
 	 * @inheritDoc
 	 *
 	 * @see org.eclipse.sensinact.gateway.core.Core#
-	 * registerAgent(org.eclipse.sensinact.gateway.common.bundle.Mediator, org.eclipse.sensinact.gateway.core.message.SnaAgentCallback, org.eclipse.sensinact.gateway.core.message.SnaFilter)
+	 * registerAgent(org.eclipse.sensinact.gateway.common.bundle.Mediator, org.eclipse.sensinact.gateway.core.message.MidAgentCallback, org.eclipse.sensinact.gateway.core.message.SnaFilter)
 	 */
 	@Override
 	public String registerAgent(final Mediator mediator, 
-			final SnaAgentCallback callback, final SnaFilter filter)
+			final MidAgentCallback callback, final SnaFilter filter)
 	{			
 		final Bundle bundle = mediator.getContext().getBundle();
 

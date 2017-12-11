@@ -14,11 +14,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public abstract class AbstractSnaAgentCallback implements SnaAgentCallback
+public abstract class AbstractMidAgentCallback extends AbstractMidCallback 
+implements MidAgentCallback
 {
     private static final String[] UNLISTENED = new String[]{
     	"/sensiNact/system","/AppManager/admin"
@@ -27,7 +29,7 @@ public abstract class AbstractSnaAgentCallback implements SnaAgentCallback
 	/**
 	 * The string formated location of service providers
 	 * that have already been processed by this {@link 
-	 * SnaAgentCallback}
+	 * MidAgentCallback}
 	 */
 	private Map<String, String> locations;
 
@@ -35,16 +37,17 @@ public abstract class AbstractSnaAgentCallback implements SnaAgentCallback
 	 * Defines how many messages are currently processed
 	 */
 	protected int used;
-
+	
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
+	 * @param identifier
 	 * 		the {@link Mediator} that will be used 
 	 * 		by the AbstractSnaAgentCallback to instantiate
 	 */
-	protected AbstractSnaAgentCallback()
+	protected AbstractMidAgentCallback()
 	{
+		super(true);
 		this.locations = new HashMap<String,String>();
 		this.used = 0;
 	}
@@ -99,7 +102,7 @@ public abstract class AbstractSnaAgentCallback implements SnaAgentCallback
      * @see MessageRegisterer#register(SnaMessage)
      */
     @Override
-    public void register(SnaMessage<?> message)
+    public void doCallback(SnaMessage<?> message)
     {
 		used++;    	
     	if(message == null)
@@ -128,23 +131,32 @@ public abstract class AbstractSnaAgentCallback implements SnaAgentCallback
 	    		return;
 	    	}
 		}
-		switch(((SnaMessageSubType)message.getType()
-				).getSnaMessageType())
+		try
 		{
-			case ERROR:
-				this.doHandle((SnaErrorMessageImpl) message);
-				break;
-			case LIFECYCLE:
-				this.doHandle((SnaLifecycleMessageImpl) message);
-				break;
-			case RESPONSE:
-				this.doHandle((SnaResponseMessage) message);
-				break;
-			case UPDATE:
-				this.doHandle((SnaUpdateMessageImpl) message);
-				break;	
-			default:;
+			switch(((SnaMessageSubType)message.getType()).getSnaMessageType())
+			{
+				case ERROR:
+					this.doHandle((SnaErrorMessageImpl) message);
+					break;
+				case LIFECYCLE:
+					this.doHandle((SnaLifecycleMessageImpl) message);
+					break;
+				case RESPONSE:
+					this.doHandle((SnaResponseMessage<?>) message);
+					break;
+				case UPDATE:
+					this.doHandle((SnaUpdateMessageImpl) message);
+					break;	
+				default:;
+			}
+		} catch(Exception e)
+		{
+			super.setStatus(Status.ERROR);
+			super.getCallbackErrorHandler().register(e);
+			
+		} finally
+		{
+			used--;
 		}
-		used--;
     }    
 }

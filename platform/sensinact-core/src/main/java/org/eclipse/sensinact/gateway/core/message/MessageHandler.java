@@ -27,17 +27,17 @@ public interface MessageHandler
 	void handle(SnaMessage message);
 
 	/**
-	 * Deletes the registered {@link SnaCallback} 
+	 * Deletes the registered {@link MidCallback} 
 	 * identifiable using the callback object 
 	 * passed as parameter
 	 * 
 	 * @param callback
-	 * 		string identifier of the {@link SnaCallback} 
+	 * 		string identifier of the {@link MidCallback} 
 	 * 		to delete
 	 * @return 
-	 * 		the number of {@link SnaCallback}s
+	 * 		the number of {@link MidCallback}s
 	 * 		that are still registered for the same
-	 * 		filter than the deleted {@link SnaCallback}
+	 * 		filter than the deleted {@link MidCallback}
 	 */
     void deleteCallback(String callback);	
     
@@ -57,17 +57,17 @@ public interface MessageHandler
     public int count(String filter);
     
     /**
-     * Adds the {@link SnaCallback} passed as parameter and maps
+     * Adds the {@link MidCallback} passed as parameter and maps
      * it to the specified {@link SnaFilter} allowing to discriminate
      * {@link SnaMessage}s to transmit
      * 
 	 * @param filter 
-	 * 		the {@link SnaFilter} to map to the {@link SnaCallback}
+	 * 		the {@link SnaFilter} to map to the {@link MidCallback}
 	 * 		to add
      * @param callback
-     * 		the {@link SnaCallback} to add
+     * 		the {@link MidCallback} to add
 	 */
-    void addCallback(SnaFilter filter, SnaCallback callback);	
+    void addCallback(SnaFilter filter, MidCallback callback);	
 
     /**
      * Stops this MessageHandler.

@@ -68,7 +68,7 @@ class SimpleTaskConfigurator implements HttpTaskBuilder
 	
 	private String scheme = null;
 	private String host = null;
-	private int port = 80;		
+	private String port = null;		
 	private String path = null;
 	private String profile = null;
 	private boolean direct = false;
@@ -135,11 +135,11 @@ class SimpleTaskConfigurator implements HttpTaskBuilder
 		this.host = annotation!=null && 
 		!HttpChildTaskConfiguration.DEFAULT_HOST.equals(annotation.host())
 		?annotation.host():parent.host();
-
+		
 		this.port = annotation!=null && 
-		HttpChildTaskConfiguration.DEFAULT_PORT!=annotation.port()
+		!HttpChildTaskConfiguration.DEFAULT_PORT.equals(annotation.port())
 		?annotation.port():parent.port();
-
+			
 		this.path = annotation!=null && 
 		!HttpChildTaskConfiguration.DEFAULT_PATH.equals(annotation.path())
 		?annotation.path():parent.path();
@@ -263,11 +263,21 @@ class SimpleTaskConfigurator implements HttpTaskBuilder
 	 */
 	public <T extends HttpTask<?,?>>  void configure(T task) throws Exception
 	{		
+		String portStr = this.resolve(task, this.port);
+		int port;
+		try
+		{
+			port = Integer.parseInt(portStr);
+		} catch(NumberFormatException e)
+		{
+			port = 80;
+		}
 		String uri = new URL(
 			this.resolve(task, scheme), 
 			this.resolve(task, host), 
 			port,
-			this.resolve(task, path)).toExternalForm();
+			this.resolve(task, path)
+				).toExternalForm();
 		
 		StringBuilder queryBuilder = new StringBuilder();
 		

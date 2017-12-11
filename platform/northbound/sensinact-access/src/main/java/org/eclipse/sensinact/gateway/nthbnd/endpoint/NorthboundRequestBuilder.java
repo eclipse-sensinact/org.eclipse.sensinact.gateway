@@ -10,8 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import java.util.Set;
+
+import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.json.JSONArray;
 
 /**
  *
@@ -214,26 +218,46 @@ public class NorthboundRequestBuilder<F>
 				}
 				break;
 			case "SUBSCRIBE":
-				if(this.attribute != null && this.argument!=null &&
-				    NorthboundRecipient.class.isAssignableFrom(
-						this.argument.getClass()))
+				Object[] arguments = null;
+				if(this.argument!=null)
 				{
-					request = new AttributeSubscribeRequest<F>(
-					    mediator, serviceProvider, service, resource,
-						        attribute, (NorthboundRecipient) 
-						            argument);
+					if(this.argument.getClass().isArray())
+					{
+						arguments = (Object[]) this.argument;
+						
+					} else
+					{
+						arguments = new Object[]{this.argument};
+					}
+				}
+				if(arguments!=null && NorthboundRecipient.class.isAssignableFrom(
+							arguments[0].getClass()))
+				{					
+					if(this.attribute!=null)
+					{
+						request = new AttributeSubscribeRequest<F>( mediator,
+						    serviceProvider, service, resource, attribute, 
+						    (NorthboundRecipient) arguments[0], (JSONArray) 
+						        (arguments.length>1?arguments[1]:null));
+					} else
+					{
+						request = new RegisterAgentRequest<F>( mediator, serviceProvider, 
+							service, (NorthboundRecipient) arguments[0], 
+							(JSONArray) (arguments.length>1?arguments[1]:null));
+					}
 				}
 				break;
 			case "UNSUBSCRIBE":
+				String argument = CastUtils.cast(mediator.getClassLoader(),
+						String.class, this.argument);
 				if(this.attribute != null)
 				{
-					String argument = CastUtils.cast(
-							mediator.getClassLoader(),
-							String.class, this.argument);
-
 					request = new AttributeUnsubscribeRequest<F>(
 					    mediator, serviceProvider, service, resource,
 						        attribute, argument);
+				} else
+				{
+					request = new UnregisterAgentRequest<F>(mediator,argument);
 				}
 				break;
 			default:

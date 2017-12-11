@@ -30,7 +30,7 @@ public @interface HttpChildTaskConfiguration
 	public static final String DEFAULT_CONTENT_TYPE = "#EMPTY#";
 	public static final String DEFAULT_SCHEME = "#EMPTY#";
 	public static final String DEFAULT_HTTP_METHOD = "#EMPTY#";
-	public static final int DEFAULT_PORT = -1;
+	public static final String DEFAULT_PORT = "#EMPTY#";
 	public static final String DEFAULT_PATH = "#EMPTY#";
 	public static final String DEFAULT_HOST = "#EMPTY#";
 	
@@ -40,7 +40,7 @@ public @interface HttpChildTaskConfiguration
 	
 	String scheme() default DEFAULT_SCHEME;
 	String host() default DEFAULT_HOST;
-	int port() default DEFAULT_PORT;
+	String port() default DEFAULT_PORT;
 	String path() default DEFAULT_PATH;
 
 	boolean direct() default false;

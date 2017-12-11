@@ -25,7 +25,7 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator;
 		commands = {Task.CommandType.GET, Task.CommandType.SERVICES_ENUMERATION},
 		configuration = @HttpTaskConfiguration(
 			host = "127.0.0.1", 
-			port=8893, 
+			port="8893", 
 			path = "/get")
 			),
 //  another way to do it
@@ -40,7 +40,7 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator;
 		commands = Task.CommandType.SET,
 		configuration = @HttpTaskConfiguration(
 			host = "127.0.0.1", 
-			port=8893,
+			port="8893",
 			httpMethod = "POST",
 			path = "/set",
 			content=ContentBuilderImpl.class)

@@ -20,7 +20,7 @@ import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.message.AbstractSnaAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
@@ -49,74 +49,73 @@ public class RemoteSensiNact implements RemoteCore
 	 *
 	 * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
 	 */
-	final class RemoteSensiNactCallback extends AbstractSnaAgentCallback
+	final class RemoteSensiNactCallback extends AbstractMidAgentCallback
 	{	
-		private String agentId;
-
 		RemoteSensiNactCallback(String agentId)
 		{
-			this.agentId = agentId;
+			super();
+			super.setIdentifier(agentId);
 		}
 		
 		/**
 		 * @inheritDoc
 		 *
-		 * @see org.eclipse.sensinact.gateway.core.message.SnaAgentCallback#
+		 * @see org.eclipse.sensinact.gateway.core.message.MidAgentCallback#
 		 * doHandle(org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl)
 		 */
 		@Override
 		public void doHandle(SnaLifecycleMessageImpl message)
 		{
-			RemoteSensiNact.this.endpoint().dispatch(this.agentId, message);
+			RemoteSensiNact.this.endpoint().dispatch(super.identifier, message);
 		}
 
 		/**
 		 * @inheritDoc
 		 *
-		 * @see org.eclipse.sensinact.gateway.core.message.SnaAgentCallback#
+		 * @see org.eclipse.sensinact.gateway.core.message.MidAgentCallback#
 		 * doHandle(org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl)
 		 */
 		@Override
 		public void doHandle(SnaUpdateMessageImpl message)
 		{
-			RemoteSensiNact.this.endpoint().dispatch(this.agentId, message);
+			RemoteSensiNact.this.endpoint().dispatch(super.identifier, message);
 		}
 
 		/**
 		 * @inheritDoc
 		 *
-		 * @see org.eclipse.sensinact.gateway.core.message.SnaAgentCallback#
+		 * @see org.eclipse.sensinact.gateway.core.message.MidAgentCallback#
 		 * doHandle(org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl)
 		 */
 		@Override
 		public void doHandle(SnaErrorMessageImpl message)
 		{
-			RemoteSensiNact.this.endpoint().dispatch(this.agentId, message);
+			RemoteSensiNact.this.endpoint().dispatch(super.identifier, message);
 		}
 
 		/**
 		 * @inheritDoc
 		 *
-		 * @see org.eclipse.sensinact.gateway.core.message.SnaAgentCallback#
+		 * @see org.eclipse.sensinact.gateway.core.message.MidAgentCallback#
 		 * doHandle(org.eclipse.sensinact.gateway.core.message.SnaResponseMessage)
 		 */
 		@Override
 		public void doHandle(SnaResponseMessage<?> message)
 		{
-			RemoteSensiNact.this.endpoint().dispatch(this.agentId, message);
+			RemoteSensiNact.this.endpoint().dispatch(super.identifier, message);
 		}
 
 		/**
 		 * @inheritDoc
 		 *
-		 * @see org.eclipse.sensinact.gateway.core.message.SnaAgentCallback#
+		 * @see org.eclipse.sensinact.gateway.core.message.MidAgentCallback#
 		 * stop()
 		 */
 		@Override
 		public void stop()
 		{
 			RemoteSensiNact.this.mediator.debug(
-				"RemoteSensiNactCallback '%s' stopped", this.agentId);
+				"RemoteSensiNactCallback '%s' stopped", super.identifier);
 		}
 	}	
 	
@@ -501,11 +500,13 @@ public class RemoteSensiNact implements RemoteCore
 	public void registerAgent(final String remoteAgentId, 
 			final SnaFilter filter, final String publicKey)
 	{
-		String localAgentId = this.localEndpoint.getSession(publicKey
+		JSONObject registration = this.localEndpoint.getSession(publicKey
 			).registerSessionAgent(new RemoteSensiNactCallback(
 				remoteAgentId), filter);
-		
-		if(localAgentId!=null)
+		JSONObject response = registration.optJSONObject("response");
+		String localAgentId = null;
+		if(!JSONObject.NULL.equals(response) 
+		&& (localAgentId=(String) response.opt("subscriptionId"))!=null)
 		{
 			this.localAgents.put(remoteAgentId, localAgentId);
 		}

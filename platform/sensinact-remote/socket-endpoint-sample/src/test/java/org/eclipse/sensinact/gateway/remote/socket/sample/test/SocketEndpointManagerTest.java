@@ -5,15 +5,11 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaCallback.Type;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONArray;
@@ -98,31 +94,7 @@ public class SocketEndpointManagerTest
 			{
 				return null;
 			}
-
-			@Override
-			public Type getSnaCallBackType()
-			{
-				return SnaCallback.Type.UNARY;
-			}
-
-			@Override
-			public long getLifetime()
-			{
-				return SnaCallback.ENDLESS;
-			}
-
-			@Override
-			public int getBufferSize()
-			{
-				return 0;
-			}
-
-			@Override
-			public int getSchedulerDelay()
-			{
-				return 0;
-			}
-
+			
 			@Override
 			public void callback(String callbackId, SnaMessage[] messages)
 			        throws Exception

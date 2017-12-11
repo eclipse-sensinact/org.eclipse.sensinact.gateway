@@ -21,11 +21,11 @@ import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RequestWrapper;
 
-public class WsRestAccessRequest implements RequestWrapper 
+public class WsRestAccessRequest implements NorthboundAccessWrapper 
 {
 	private NorthboundMediator mediator;
 	private JSONObject request;
@@ -101,30 +101,12 @@ public class WsRestAccessRequest implements RequestWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see RequestWrapper#
+	 * @see NorthboundAccessWrapper#
 	 * createRecipient(Parameter[])
 	 */
 	@Override
 	public NorthboundRecipient createRecipient(Parameter[] parameters)
 	{
-		int index = 0;
-		int length = parameters==null?0:parameters.length;				
-		String callback = null;
-		JSONObject conditions = null;
-		
-		for(;index < length; index++)
-		{
-			String name = parameters[index].getName();
-			if("conditions".equals(name) && JSONArray.class.isAssignableFrom(
-					parameters[index].getType()))
-			{
-				conditions = new JSONObject();
-				conditions.put("conditions", parameters[index].getValue());
-				break;
-			}
-		}
-		return new WsCallback(mediator, socket, conditions);
-		
+		return new WebSocketRecipient(mediator, socket);
 	}
-
 }

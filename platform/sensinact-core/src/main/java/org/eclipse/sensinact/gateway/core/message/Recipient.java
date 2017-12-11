@@ -22,55 +22,11 @@ public interface Recipient extends JSONable
 	static final String RECIPIENT_JSONSCHEMA = "";
 	
 	/**
-	 * Returns the type of the {@link SnaCallBack}
-	 * associated to this recipient
-	 *  
-	 * @return
-	 * 		the type of the {@link SnaCallBack} 
-	 * 		associated to this recipient
-	 */
-	SnaCallback.Type getSnaCallBackType();
-
-	/**
-	 * Returns the lifetime of the {@link SnaCallBack}
-	 * associated to this recipient
-	 * 
-	 * @return
-	 * 		the lifetime of the {@link SnaCallBack}
-	 * 		associated to this recipient
-	 */
-	long getLifetime();	
-
-	/**
-	 * Returns the size of the buffer of the
-	 * {@link BufferCallBack} associated to this 
-	 * recipient
-	 * 
-	 * @return
-	 * 		the size of the buffer of the {@link 
-	 * 		BufferCallBack} associated to this 
-	 * 		recipient
-	 */
-	int getBufferSize();
-	
-	/**
-	 * Returns the delay of the scheduler of the
-	 * {@link ScheduledCallBack} associated to this 
-	 * recipient
-	 * 
-	 * @return
-	 * 		the delay of the scheduler of the
-	 * 		{@link ScheduledCallBack} associated 
-	 * 		to this recipient
-	 */
-	int getSchedulerDelay();
-	
-	/**
 	 * Transmits the array of recorded {@link SnaMessage}
 	 * to the recipient
 	 * 
 	 * @param callbackId 
-	 * 		the {@link SnaCallback}'s identifier from which
+	 * 		the {@link MidCallback}'s identifier from which
 	 * 		the array of {@link SnaMessage}s come		
 	 * @param messages
 	 * 		the array of recorded {@link SnaMessage}
@@ -79,7 +35,6 @@ public interface Recipient extends JSONable
 	 * 		If an error occurred while transmitting
 	 * 		the messages array
 	 */
-	void callback(String callbackId, SnaMessage[] messages) 
-			throws Exception;
+	void callback(String callbackId, SnaMessage[] messages) throws Exception;
 	
 }

@@ -3,9 +3,9 @@ package org.eclipse.sensinact.gateway.core;
 import java.security.InvalidKeyException;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.message.AbstractSnaAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.message.SnaAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
@@ -45,12 +45,12 @@ public interface Core
 	
 	/**
 	 * Instantiates and registers a new {@link SnaAgent}, build with the 
-	 * {@link AbstractSnaAgentCallback} and the {@link SnaFilter} passed as 
+	 * {@link AbstractMidAgentCallback} and the {@link SnaFilter} passed as 
 	 * parameters in the OSGi host environment
 	 * 
 	 * @param mediator the {@link Mediator} provided by the bundle to which 
 	 * the {@link SnaAgent} to be instantiated belongs to.
-	 * @param callback the {@link AbstractSnaAgentCallback} in charge of
+	 * @param callback the {@link AbstractMidAgentCallback} in charge of
 	 * handling the messages transmitted to the {@link SnaAgent} to be
 	 * instantiated
 	 * @param filter the {@link SnaFilter} helping in filtering the messages 
@@ -58,7 +58,7 @@ public interface Core
 	 *  
 	 * @return the String identifier of the new {@link SnaAgent}
 	 */
-	String registerAgent(Mediator mediator, SnaAgentCallback callback, 
+	String registerAgent(Mediator mediator, MidAgentCallback callback, 
 			SnaFilter filter);
 	
 	/**

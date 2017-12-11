@@ -10,33 +10,22 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import org.json.JSONArray;
+import org.eclipse.sensinact.gateway.util.UriUtils;
 
-public class AttributeSubscribeRequest<F> extends AttributeRequest<F> 
+public class UnregisterAgentRequest<F> extends NorthboundRequest<F> 
 {	
-	private NorthboundRecipient recipient;
-	private JSONArray constraints;
-
+	private String agentId;
+	
 	/**
+	 * Constructor
+	 * 
 	 * @param mediator
-	 * @param serviceProvider
-	 * @param service
-	 * @param resource
-	 * @param attribute
-	 * @param recipient
+	 * @param agentId
 	 */
-	public AttributeSubscribeRequest(NorthboundMediator mediator, 
-			String serviceProvider, String service, String resource, 
-			String attribute, NorthboundRecipient recipient,
-			JSONArray jsonArray)
+	public UnregisterAgentRequest(NorthboundMediator mediator, String agentId)
 	{
-		super(mediator, serviceProvider, service, resource, attribute);
-		this.recipient = recipient;
-		this.constraints = jsonArray;
-		if(this.recipient == null)
-		{
-			throw new NullPointerException("Recipient missing");
-		}
+		super(mediator);
+		this.agentId = agentId;
 	}
 
 	/**
@@ -49,13 +38,12 @@ public class AttributeSubscribeRequest<F> extends AttributeRequest<F>
 	{
 		Argument[] superArguments = super.getExecutionArguments();
 		int length = superArguments==null?0:superArguments.length;
-		Argument[] arguments = new Argument[length+2];
+		Argument[] arguments = new Argument[length+1];
 		if(length > 0)
 		{
 			System.arraycopy(superArguments, 0, arguments, 0, length);
 		}
-		arguments[length] = new Argument(NorthboundRecipient.class, this.recipient);
-		arguments[length+1] = new Argument(JSONArray.class, this.constraints);
+		arguments[length] = new Argument(String.class, this.agentId);
 	    return arguments;
 	}
 	
@@ -67,6 +55,17 @@ public class AttributeSubscribeRequest<F> extends AttributeRequest<F>
 	@Override
 	protected String getMethod()
 	{
-		return "subscribe";
+		return "unregisterAgent";
+	}
+
+	/** 
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.common.primitive.Nameable#getName()
+	 */
+	@Override
+	public String getName() 
+	{
+		return UriUtils.ROOT;
 	}
 }

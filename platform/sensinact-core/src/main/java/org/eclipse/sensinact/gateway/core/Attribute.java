@@ -15,12 +15,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
-import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
 import org.eclipse.sensinact.gateway.common.primitive.DescribablePrimitive;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
@@ -29,6 +25,8 @@ import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.Primitive;
 import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
 import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Extended {@link Primitive} defining an Attribute of a {@link Resource}

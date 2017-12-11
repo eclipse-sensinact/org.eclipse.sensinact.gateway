@@ -3,7 +3,7 @@ package org.eclipse.sensinact.gateway.app.manager.application;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Core;
-import org.eclipse.sensinact.gateway.core.message.SnaCallback;
+import org.eclipse.sensinact.gateway.core.message.MidCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 import org.eclipse.sensinact.gateway.core.security.Session;
 
@@ -140,8 +140,8 @@ public abstract class AbstractSensiNactApplication implements SensiNactApplicati
      *
      * @see org.eclipse.sensinact.gateway.core.message.Recipient#getSnaCallBackType()
      */
-    public SnaCallback.Type getSnaCallBackType() {
-        return SnaCallback.Type.UNARY;
+    public MidCallback.Type getSnaCallBackType() {
+        return MidCallback.Type.UNARY;
     }
 
     /**
@@ -151,7 +151,7 @@ public abstract class AbstractSensiNactApplication implements SensiNactApplicati
      */
     public long getLifetime() 
     {
-        return SnaCallback.ENDLESS;
+        return MidCallback.ENDLESS;
     }
 
     /**

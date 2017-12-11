@@ -11,69 +11,65 @@
 
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.common.constraint.Constraint;
-import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
-import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidCallback;
+import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 
 
 /**
  * This abstract class is a wrapper for callback subscription
  */
-public abstract class NorthboundRecipient implements Recipient 
+public abstract class NorthboundRecipient extends AbstractMidCallback 
+implements Recipient 
 {
-    protected Set<Constraint> constraints;
+	/**
+	 * the {@link Mediator} allowing to interact with the OSGi 
+	 * host environment
+	 */
 	protected Mediator mediator;
     
     /**
      * Constructor
+     * 
+     * @param mediator the {@link Mediator} that will allow the
+     * NorthboundMediator to be instantiated to interact with the
+     * OSGi host environment
      */
     public NorthboundRecipient(Mediator mediator)
     {
+    	super();
     	this.mediator = mediator;
-        this.constraints = new HashSet<Constraint>();
-    }
-    
-    /**
-     * Constructor
-     */
-    public NorthboundRecipient(Mediator mediator, JSONObject jsonObject)
-    {
-        this(mediator);
-        if(!JSONObject.NULL.equals(jsonObject))
-        {
-	        JSONArray conditions = jsonObject.optJSONArray("conditions");
-	        int index = 0;
-	        int length = conditions==null?0:conditions.length();
-	        try 
-	        {
-		        for(;index < length;index++)
-		        {
-		        	constraints.add( ConstraintFactory.Loader.load(
-						mediator.getClassLoader(), conditions.optJSONObject(
-								index)));				
-		        }
-	        } catch (InvalidConstraintDefinitionException e) 
-	        {
-				this.mediator.error(e);
-			}
-        }
     }
 
-    /**
-     * Return the constraint on the subscription
-     * @return the constraint
-     */
-    public Set<Constraint> getConstraints() 
-    {
-        return Collections.unmodifiableSet(this.constraints);
-    }
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidCallback#
+	 * doCallback(org.eclipse.sensinact.gateway.core.message.SnaMessage)
+	 */
+	@Override
+	protected void doCallback(SnaMessage<?> message)
+	{
+		try 
+		{
+			this.callback(super.getName(), new SnaMessage[] {message});
+			
+		} catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+				
+	}
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.common.primitive.JSONable#getJSON()
+	 */
+	@Override
+	public String getJSON() {
+		return null;
+	}
+
 }

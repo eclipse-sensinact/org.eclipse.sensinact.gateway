@@ -30,18 +30,18 @@ import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
 import org.eclipse.sensinact.gateway.common.primitive.Typable;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
-import org.eclipse.sensinact.gateway.core.message.BufferCallback;
+import org.eclipse.sensinact.gateway.core.message.BufferMidCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.ScheduledBufferCallback;
-import org.eclipse.sensinact.gateway.core.message.ScheduledCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaCallback;
+import org.eclipse.sensinact.gateway.core.message.ScheduledBufferMidCallback;
+import org.eclipse.sensinact.gateway.core.message.ScheduledMidCallback;
+import org.eclipse.sensinact.gateway.core.message.MidCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaNotificationMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
 import org.eclipse.sensinact.gateway.core.message.SubscriptionFilter;
-import org.eclipse.sensinact.gateway.core.message.UnaryCallback;
+import org.eclipse.sensinact.gateway.core.message.UnaryMidCallback;
 import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodDescription;
@@ -691,52 +691,60 @@ implements Typable<Resource.Type>
 	 * 		been registered properly; null otherwise  
 	 */
 	protected String listen(String attributeName, 
-			Recipient recipient, Set<Constraint> conditions)
+			Recipient recipient, Set<Constraint> conditions,
+			MidCallback.Type type, long lifetime, int buffer, 
+			int delay) 
 	{
-		StringBuilder buffer = new StringBuilder();
-		buffer = new StringBuilder();
-		buffer.append(this.getPath());
-		buffer.append(UriUtils.PATH_SEPARATOR);
-		buffer.append(attributeName);						
-		String filter = buffer.toString();
+		StringBuilder builder = new StringBuilder();
+		builder = new StringBuilder();
+		builder.append(this.getPath());
+		builder.append(UriUtils.PATH_SEPARATOR);
+		builder.append(attributeName);						
+		String filter = builder.toString();
 		
 		StringBuilder callbackIdBuffer = new StringBuilder();
 		callbackIdBuffer.append(this.getName());
 		callbackIdBuffer.append(Math.abs(filter.hashCode()));
 		callbackIdBuffer.append(System.currentTimeMillis());
 		
+		MidCallback.Type callbackType = type == null
+				?MidCallback.Type.UNARY:type;
+		long timeout = lifetime <= 10000 
+			? MidCallback.ENDLESS:System.currentTimeMillis()+lifetime;
+		int schedulerDelay = delay < 1000 
+			? 1000:delay;
+		int bufferSize = buffer < 10 
+			? 10:buffer;
+		
 		String callbackId = callbackIdBuffer.toString();
-		SnaCallback callback = null;
-
-		switch(recipient.getSnaCallBackType())
+		MidCallback callback = null;
+		
+		switch(callbackType)
 		{
 			case BUFFERERIZED_AND_SCHEDULED:
-				callback = new ScheduledBufferCallback(
-						super.modelInstance.mediator(),
-						callbackId, null,recipient,
-						recipient.getLifetime(), 
-						recipient.getSchedulerDelay(), 
-						recipient.getBufferSize());
-				break;
-			case BUFFERIZED:
-				callback = new BufferCallback(
-						super.modelInstance.mediator(),
-						callbackId, null,recipient,
-						recipient.getLifetime(), 
-						recipient.getBufferSize());
-				break;
-			case SCHEDULED:
-				callback = new ScheduledCallback(
+				callback = new ScheduledBufferMidCallback(
 						super.modelInstance.mediator(),
 						callbackId, null, recipient,
-						recipient.getLifetime(), 
-						recipient.getSchedulerDelay());
+						timeout, schedulerDelay, 
+						bufferSize);
+				break;
+			case BUFFERIZED:
+				callback = new BufferMidCallback(
+						super.modelInstance.mediator(),
+						callbackId, null,recipient,
+						timeout, bufferSize);
+				break;
+			case SCHEDULED:
+				callback = new ScheduledMidCallback(
+						super.modelInstance.mediator(),
+						callbackId, null, recipient,
+						timeout, schedulerDelay);
 				break;
 			case UNARY:
-				callback = new UnaryCallback(
+				callback = new UnaryMidCallback(
 						super.modelInstance.mediator(), 
-						callbackId, null,recipient,
-						recipient.getLifetime());
+						callbackId, null, recipient,
+						timeout);
 				break;
 			default:
 				break;
@@ -745,7 +753,7 @@ implements Typable<Resource.Type>
 		{
 			super.modelInstance.registerCallback(
 				new SubscriptionFilter(super.modelInstance.mediator(),
-						filter, conditions), callback);
+					filter, conditions), callback);
 			
 			return callbackId;
 		}

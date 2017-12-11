@@ -19,6 +19,14 @@ import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
+import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 //import org.eclipse.sensinact.gateway.core.ActionResource;
 //import org.eclipse.sensinact.gateway.core.DataResource;
 //import org.eclipse.sensinact.gateway.core.PropertyResource;
@@ -93,51 +101,28 @@ public class NorthboundEndpoint
 		}
 		return responseFormat.format(result);		
 	}
+	
+	/**
+     * Registers an {@link SnaAgent} linked to the {@link Session} of 
+     * this NorthboundEndpoint 
+     * 
+     * @return the response containing the information
+     */
+    public JSONObject registerAgent(AbstractMidAgentCallback callback, SnaFilter filter)
+    {
+    	return session.registerSessionAgent(callback, filter);
+    }
 
-//    /**
-//     * Get the information of a specific service providers and returns it
-//     * 
-//     * @param session the session of the current user
-//     * @param serviceProviderId the service provider ID
-//     * @return the response containing the information
-//     */
-//    public ServiceProvider serviceProvider(String serviceProviderId)
-//    {
-//        ServiceProvider serviceProvider = session.serviceProvider(
-//        		serviceProviderId);
-//        return serviceProvider;
-//    }
-//
-//    /**
-//     * 
-//     * Get the information of a specific service and returns it
-//     * @param session the session of the current user
-//     * @param serviceProviderId the service provider ID
-//     * @param serviceId the service ID
-//     * @return the response containing the information
-//     */
-//    public Service service(String serviceProviderId, String serviceId)
-//    {
-//    	Service service = session.service(
-//    			serviceProviderId, serviceId);
-//		return service;
-//    }
-//
-//    /**
-//     * Get the information of a specific resource and returns it
-//     * @param session the session of the current user
-//     * @param serviceProviderId the service provider ID
-//     * @param serviceId the service ID
-//     * @param resourceId the resource ID
-//     * @return the response containing the information
-//     */
-//    public Resource resource(String serviceProviderId, 
-//    		String serviceId, String resourceId)
-//    {
-//        Resource resource = session.resource(serviceProviderId, 
-//        		serviceId, resourceId);
-//        return resource;
-//    }
+	/**
+     * Unregisters the {@link SnaAgent} linke to the 
+     * current Session and whose String identifier is passed as parameter
+     * 
+     * @return the response containing the information
+     */
+    public JSONObject unregisterAgent(String agentId)
+    {
+    	return session.unregisterSessionAgent(agentId);
+    }
     
 	/**
      * Get the list of service providers and returns it
@@ -477,21 +462,10 @@ public class NorthboundEndpoint
      * @param resourceId the resource ID
      * @return the subscription ID
      */
-    public /*AccessMethodResponse*/ JSONObject subscribe(NorthboundRecipient recipient, 
-    	String serviceProviderId, String serviceId, String resourceId, 
-    	String attributeId) 
+    public /*AccessMethodResponse*/ JSONObject subscribe(String serviceProviderId, 
+    	String serviceId, String resourceId, String attributeId, 
+    	NorthboundRecipient recipient, JSONArray conditions) 
     {
-    	JSONArray conditions = null;
-    	Set<Constraint> constraints = recipient.getConstraints();
-    	if(!constraints.isEmpty())
-    	{
-    		 conditions = new JSONArray();
-    		 Iterator<Constraint> iterator = constraints.iterator();
-    		 while(iterator.hasNext())
-    		 {
-    			 conditions.put(new JSONObject(iterator.next().getJSON()));
-    		 }
-    	}
      	return session.subscribe(serviceProviderId, serviceId, resourceId,
      			recipient, conditions);
      	

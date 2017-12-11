@@ -14,6 +14,7 @@ package org.eclipse.sensinact.gateway.core.message;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -24,6 +25,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Changed;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
+import org.eclipse.sensinact.gateway.common.constraint.Expression;
 import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.common.props.TypedProperties;
@@ -192,8 +194,6 @@ public class SnaFilter implements JSONable
 	 * @param jsonCondition
 	 * 		the {@link Constraint} to add
 	 */
-    //TODO: FIX BUG when the condition is an Expression we are not able 
-	//to identify and extract the Changed constraint applying
 	public void addCondition(Constraint condition)
 	{
 		if(condition == null)
@@ -204,7 +204,25 @@ public class SnaFilter implements JSONable
 		{
 			this.changed = (Changed) condition;
 			
-		} else
+		} else if(Expression.class.isAssignableFrom(condition.getClass()))
+		{
+			ListIterator<Constraint> iterator =
+					((Expression)condition).listIterator();
+			while(iterator.hasNext())
+			{
+				Constraint constraint = iterator.next();
+				if(Changed.class.isAssignableFrom(condition.getClass()))
+				{
+					this.changed = (Changed) condition;
+					iterator.remove();
+				}
+			}
+			if(!this.conditions.isEmpty())
+			{
+				this.conditions.add(condition);
+			}
+		}	
+		else
 		{
 			this.conditions.add(condition);
 		}

@@ -15,11 +15,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.sensinact.gateway.core.message.MidCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaNotificationMessageImpl;
 import org.json.JSONObject;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
@@ -641,9 +643,37 @@ public class ResourceBuilder
 						new StringBuilder().append("unknown attribute :"
 							).append(attributeName).toString());
 				}
+				Object[]  parameters = snaResult.getParameters();
+				if(parameters == null || parameters.length < 2)
+				{
+					throw new IllegalArgumentException("Parameters expected");
+				}
+				Recipient recipient= null;
+				Set<Constraint> conditions= null;
+				MidCallback.Type type= null;
+				long lifetime = 0;
+				int buffer= 0;
+				int delay= 0;
+				
+				switch(parameters.length)
+				{					
+					case 7:
+						buffer = ((Integer) parameters[5]).intValue();
+						delay = ((Integer) parameters[6]).intValue();
+					case 5:
+						lifetime = ((Long) parameters[4]).longValue();
+					case 4:
+						type = (MidCallback.Type) parameters[3];
+					case 3:
+						conditions= (Set) parameters[2];
+					case 2:
+						 recipient= (Recipient) parameters[1];
+						 break;
+					default:
+					throw new IllegalArgumentException("Invalid parameters");
+				}
 				String callbackId = resource.listen(attributeName, 
-						(Recipient) snaResult.getParameter(1), 
-						(Set) snaResult.getParameter(2));
+				recipient, conditions, type, lifetime, buffer, delay);
 				
 				if(callbackId != null)
 				{

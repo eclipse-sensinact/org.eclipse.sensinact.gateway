@@ -247,9 +247,9 @@ implements RemoteEndpoint, SessionObserver
 	 * @inheritDoc
 	 *
 	 * @see org.eclipse.sensinact.gateway.core.security.Sessions.SessionObserver#
-	 * diseappearing(java.lang.String)
+	 * disappearing(java.lang.String)
 	 */
-	public void diseappearing(String publicKey)
+	public void disappearing(String publicKey)
 	{
 		if(this.connected)
 		{

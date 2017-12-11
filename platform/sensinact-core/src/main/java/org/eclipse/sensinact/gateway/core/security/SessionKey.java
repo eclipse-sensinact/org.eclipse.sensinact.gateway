@@ -8,7 +8,7 @@ import java.util.List;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.message.SnaAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaAgentImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 
@@ -90,7 +90,7 @@ public class SessionKey
 	 * @param filter
 	 * @return
 	 */
-	public String registerAgent(SnaAgentCallback callback, SnaFilter filter)
+	public String registerAgent(MidAgentCallback callback, SnaFilter filter)
 	{		
 		final SnaAgentImpl agent = SnaAgentImpl.createAgent(
 			mediator, callback, filter, getPublicKey());
@@ -105,6 +105,46 @@ public class SessionKey
 		agent.start(props);
 		this.agents.add(identifier);
 		return identifier;
+	}
+	
+	/**
+	 * 
+	 * @param callback
+	 * @param filter
+	 * @return
+	 */
+	public boolean unregisterAgent(String agentId)
+	{	
+		if(!this.agents.remove(agentId))
+		{
+			return false;
+		}
+		StringBuilder builder = new StringBuilder();
+		builder.append("(&(org.eclipse.sensinact.gateway.agent.local=");
+		builder.append(localID()==0);
+		builder.append(")(");
+		builder.append("org.eclipse.sensinact.gateway.agent.id=");
+		builder.append(agentId);
+		builder.append("))");
+		
+		return this.mediator.callService(SnaAgent.class, 
+		builder.toString(), new Executable<SnaAgent, Boolean>()
+		{
+			@Override
+			public Boolean execute(SnaAgent agent)
+			        throws Exception
+			{
+				try
+				{
+					agent.stop();
+					return true;
+				} catch(Exception e)
+				{
+					mediator.error(e);
+				}
+				return false;
+			}
+		});
 	}
 	
 	/**

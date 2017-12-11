@@ -19,15 +19,14 @@ import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 
 /**
- * Extended {@link BufferCallback} allowing to
+ * Extended {@link BufferMidCallback} allowing to
  * schedule the transmission of the associated 
  * buffer's content independently of its filling 
  * state
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ScheduledBufferCallback 
-extends BufferCallback 
+public class ScheduledBufferMidCallback extends BufferMidCallback 
 {
 	protected final int delay;
 	private Timer timer;
@@ -38,7 +37,7 @@ extends BufferCallback
 	 * @param delay
 	 * 		the delay between two triggered event
 	 */
-    public ScheduledBufferCallback(Mediator mediator, 
+    public ScheduledBufferMidCallback(Mediator mediator, 
     		String identifier, 
     		ErrorHandler errorHandler,
     		Recipient recipient, long timeout, 
@@ -57,7 +56,7 @@ extends BufferCallback
 	}     
 
     /**
-     * Starts this extended {@link SnaCallback}
+     * Starts this extended {@link MidCallback}
      */
     public void start()
     {
@@ -71,36 +70,31 @@ extends BufferCallback
 			@Override
             public void run()
             {
-				synchronized(ScheduledBufferCallback.this.buffer)
+				synchronized(ScheduledBufferMidCallback.this.buffer)
 				{
 					int index = 0;
-					int length = ScheduledBufferCallback.this.length;
+					int length = ScheduledBufferMidCallback.this.length;
 					if(length > 0)
 					{
 						SnaMessage[] buffer = new SnaMessage[length];
 						
 						for(;index < length; index++)
 						{
-							buffer[index] = ScheduledBufferCallback.this.buffer[index];
+							buffer[index] = ScheduledBufferMidCallback.this.buffer[index];
 						}
 						try
 			    		{
-							ScheduledBufferCallback.this.recipient.callback(
-									ScheduledBufferCallback.this.getName(),buffer);		
-							ScheduledBufferCallback.this.status = Status.SUCCESS;
+							ScheduledBufferMidCallback.this.recipient.callback(
+								getName(),buffer);
+							setStatus(Status.SUCCESS);
 							
 			    		} catch(Exception e)
 			    		{
-	
-			    			ScheduledBufferCallback.this.status = Status.ERROR;
-						    ErrorHandler errorHandler = 
-						    	ScheduledBufferCallback.this.getCallbackErrorHandler();					    
-						    if(errorHandler!=null )
-						    {
-						    	errorHandler.register(e);
-						    }
+
+							setStatus(Status.ERROR);
+							getCallbackErrorHandler().register(e);
 			    		}
-						ScheduledBufferCallback.this.length = 0;		    	
+						ScheduledBufferMidCallback.this.length = 0;		    	
 					}
 				}
             }
@@ -110,11 +104,12 @@ extends BufferCallback
     }    
     
     /**
-	 * Stops this {@link SnaCallback} and frees 
+	 * Stops this {@link MidCallback} and frees 
 	 * the associated {@link Timer}
 	 */
 	public void stop()
 	{
+		super.stop();
     	this.timer.cancel();
 		this.timer.purge();
 		this.timer = null;

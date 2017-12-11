@@ -31,8 +31,7 @@ public class Sessions
 	//********************************************************************//
 	
 	/**
-	 * A SessionObserver is informed about the disappearance 
-	 * of a {@link Session}  
+	 * A SessionObserver is informed about the disappearance of a {@link Session}  
 	 * 
 	 * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
 	 */
@@ -45,7 +44,7 @@ public class Sessions
 		 * @param publicKey the String public key of the disappearing 
 		 * Session
 		 */
-		void diseappearing(String publicKey);
+		void disappearing(String publicKey);
 	}
 	
 	/**
@@ -195,7 +194,7 @@ public class Sessions
 	        {
 	        	if(observer != null)
 	        	{
-	        		observer.diseappearing(value.getPublicKey());
+	        		observer.disappearing(value.getPublicKey());
 	        	}
 	        	value.unregisterAgents();
 	        	return true;

@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.core.message;
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface SnaAgentCallback extends MessageRegisterer
+public interface MidAgentCallback extends MidCallback
 {    
 	/**
 	 * Processes the {@link SnaLifecycleMessageImpl} passed as 
@@ -55,4 +55,5 @@ public interface SnaAgentCallback extends MessageRegisterer
 	 * Stops this {@link SnaAgent} callback
 	 */
 	void stop();
+
 }

@@ -42,14 +42,14 @@ extends AbstractStackEngineHandler<SnaMessage<?>>
 implements MessageHandler
 {
 	/**
-	 * The set of {@link SnaCallback} mapped to 
+	 * The set of {@link MidCallback} mapped to 
 	 * {@link SnaFilter}s defining whether to call
 	 * them or not
 	 */
-	protected final Map<SnaFilter, List<SnaCallback>> callbacks;
+	protected final Map<SnaFilter, List<MidCallback>> callbacks;
 	
 	/**
-	 * The set of {@link SnaCallback} mapped to 
+	 * The set of {@link MidCallback} mapped to 
 	 * {@link SnaFilter}s defining whether to call
 	 * them or not
 	 */
@@ -80,7 +80,7 @@ implements MessageHandler
 		super();
 		this.mediator = mediator;
 		this.configuration = configuration;
-		this.callbacks = new HashMap<SnaFilter, List<SnaCallback>>();	
+		this.callbacks = new HashMap<SnaFilter, List<MidCallback>>();	
 		this.agentsAccessibility = new HashMap<String, List<MethodAccessibility>>();
 	}
 	
@@ -89,10 +89,10 @@ implements MessageHandler
 	 *
 	 * @see org.eclipse.sensinact.gateway.core.message.MessageHandler#
 	 * addCallback(org.eclipse.sensinact.gateway.core.message.SnaFilter,
-	 *  org.eclipse.sensinact.gateway.core.message.SnaCallback)
+	 *  org.eclipse.sensinact.gateway.core.message.MidCallback)
 	 */
 	@Override
-	public void addCallback(SnaFilter filter, SnaCallback callback)
+	public void addCallback(SnaFilter filter, MidCallback callback)
 	{
 		if(filter == null ||callback == null)
 		{
@@ -100,10 +100,10 @@ implements MessageHandler
 		}
 		synchronized(this.callbacks)
 		{
-			List<SnaCallback> list = this.callbacks.get(filter);
+			List<MidCallback> list = this.callbacks.get(filter);
 			if(list == null)
 			{
-				list = new LinkedList<SnaCallback>();
+				list = new LinkedList<MidCallback>();
 				this.callbacks.put(filter, list);
 			}
 			list.add(callback);
@@ -121,16 +121,16 @@ implements MessageHandler
 	{		 
 		synchronized(this.callbacks)
 		{			
-			Iterator<Entry<SnaFilter, List<SnaCallback>>> 
+			Iterator<Entry<SnaFilter, List<MidCallback>>> 
 			iterator = this.callbacks.entrySet().iterator();
 			
 			while(iterator.hasNext())
 			{
-				Entry<SnaFilter,List<SnaCallback>> 
+				Entry<SnaFilter,List<MidCallback>> 
 				entry = iterator.next();
 				
-				List<SnaCallback> list = entry.getValue();				
-				if(list.remove(new Name<SnaCallback>(callback)))
+				List<MidCallback> list = entry.getValue();				
+				if(list.remove(new Name<MidCallback>(callback)))
 				{						
 					if(list.isEmpty())
 					{
@@ -170,7 +170,7 @@ implements MessageHandler
 	
 	/**
 	 * Removes the {@link SnaFilter} passed as parameter 
-	 * and all mapped {@link SnaCallback}s
+	 * and all mapped {@link MidCallback}s
 	 * 
 	 * @param filter
 	 * 		the {@link SnaFilter} to remove
@@ -203,8 +203,7 @@ implements MessageHandler
 	 */
 	@Override
 	public void doHandle(SnaMessage<?> message)
-	{		
-		doHandleSubscribers(message);		
+	{			
 		String messageMethod = null;
 		
 		switch(((SnaMessageSubType)message.getType()
@@ -250,6 +249,7 @@ implements MessageHandler
 		{
 			doHandleAgents(message, messageMethod);
 		}
+		doHandleSubscribers(message);	
 	}
 	
 	/**
@@ -263,12 +263,12 @@ implements MessageHandler
 	{			
 		synchronized(this.callbacks)
 		{
-			Iterator<Entry<SnaFilter, List<SnaCallback>>> 
+			Iterator<Entry<SnaFilter, List<MidCallback>>> 
 			iterator = this.callbacks.entrySet().iterator();
 			
 			while(iterator.hasNext())
 			{
-				Entry<SnaFilter, List<SnaCallback>> 
+				Entry<SnaFilter, List<MidCallback>> 
 				entry = iterator.next();
 				
 				SnaFilter filter = entry.getKey();				
@@ -276,15 +276,15 @@ implements MessageHandler
 				{
 					continue;
 				}
-				Iterator<SnaCallback> callbackIterator =
+				Iterator<MidCallback> callbackIterator =
 						entry.getValue().iterator();
 				
 				while(callbackIterator.hasNext())
 				{
 					ErrorHandler handler = null;
-					SnaCallback callback = callbackIterator.next();
+					MidCallback callback = callbackIterator.next();
 					
-					if((callback.getTimeout() != SnaCallback.ENDLESS 
+					if((callback.getTimeout() != MidCallback.ENDLESS 
 						&& System.currentTimeMillis() > callback.getTimeout())
 						||(AccessMethodResponse.Status.ERROR == callback.getStatus()
 						&& (handler=callback.getCallbackErrorHandler())!=null 
@@ -295,7 +295,7 @@ implements MessageHandler
 						callbackIterator.remove();
 						continue;
 					}
-					callback.register(message);
+					callback.getMessageRegisterer().register(message);
 				}
 			}
 		}

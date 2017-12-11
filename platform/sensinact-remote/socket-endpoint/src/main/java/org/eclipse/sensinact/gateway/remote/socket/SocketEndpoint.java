@@ -8,8 +8,6 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaCallback.Type;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
@@ -395,52 +393,6 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			mediator.debug(response.toString());
 		}
-	}
-	
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.Recipient#
-	 * getSnaCallBackType()
-	 */
-	@Override
-	public Type getSnaCallBackType() 
-	{
-		return SnaCallback.Type.UNARY;
-	}
-
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.Recipient#
-	 * getLifetime()
-	 */
-	@Override
-	public long getLifetime() 
-	{
-		return SnaCallback.ENDLESS;
-	}
-
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.Recipient#getBufferSize()
-	 */
-	@Override
-	public int getBufferSize() 
-	{
-		return 0;
-	}
-
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.Recipient#getSchedulerDelay()
-	 */
-	@Override
-	public int getSchedulerDelay()
-	{
-		return 0;
 	}
 
 	/**

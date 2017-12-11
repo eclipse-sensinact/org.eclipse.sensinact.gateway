@@ -25,8 +25,7 @@ import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 public abstract class AbstractSnaErrorfulMessage<S extends Enum<S> 
 & KeysCollection & SnaMessageSubType> extends AbstractSnaMessage<S> 
 implements SnaErrorfulMessage<S>
-{			
-	
+{	
 	/**
 	 * Constructor
 	 * 

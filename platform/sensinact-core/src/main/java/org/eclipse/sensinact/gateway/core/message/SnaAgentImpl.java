@@ -15,7 +15,6 @@ import java.util.Dictionary;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.RemoteCore;
-import org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.osgi.framework.ServiceRegistration;
@@ -23,22 +22,20 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class SnaAgentImpl extends AbstractStackEngineHandler<SnaMessage<?>> 
-implements SnaAgent
+public class SnaAgentImpl implements SnaAgent
 {    	
 
 	//********************************************************************//
 	//						STATIC DECLARATIONS  						  //
 	//********************************************************************//
 	
-
 	/**
      * Creates an {@link SnaAgent} with the callback and filter which are 
      * passed as parameter
      * 
      * @param mediator the {@link Mediator} allowing the {@link SnaAgent} 
      * to be created to interact with the OSGi host environment
-     * @param callback the {@link AbstractSnaAgentCallback} that will 
+     * @param callback the {@link AbstractMidAgentCallback} that will 
      * be called by the{@link SnaAgent} to be created
      * @param filter the {@link SnaFilter} that will be used by the
      * {@link SnaAgent} to be created to discriminate the handled {@link 
@@ -47,7 +44,7 @@ implements SnaAgent
      * @return the newly created {@link SnaAgent}
      */
     public static SnaAgentImpl createAgent(
-    	Mediator mediator, SnaAgentCallback callback, 
+    	Mediator mediator, MidAgentCallback callback, 
     	SnaFilter filter, String agentKey)
     {
     	String suffix = (String) mediator.getProperty(
@@ -235,14 +232,14 @@ implements SnaAgent
 	//********************************************************************//
 	
 	/**
-     * the {@link AbstractSnaAgentCallback} type 
+     * the {@link AbstractMidAgentCallback} type 
      */
-	protected final SnaAgentCallback callback;
+	protected final MidAgentCallback callback;
 	
 	/**
 	 * the {@link SnaFilter} used to validate the 
 	 * received {@link SnaMessage} before transmitting
-	 * them to the dedicated {@link AbstractSnaAgentCallback}
+	 * them to the dedicated {@link AbstractMidAgentCallback}
 	 */
 	protected SnaFilter filter;
 	
@@ -271,20 +268,13 @@ implements SnaAgent
 	 * @param publicKey
 	 */
 	protected SnaAgentImpl(Mediator mediator, 
-		SnaAgentCallback callback, SnaFilter filter, 
+		MidAgentCallback callback, SnaFilter filter, 
 		String publicKey)
 	{
-		super();
 		this.mediator = mediator;
 		this.publicKey = publicKey;
 		this.callback = callback;	
 		this.filter = filter;
-		
-		if(this.filter == null)
-		{
-			this.filter = new SnaFilter(mediator, ".*", true, false);
-			this.filter.addHandledType(SnaMessage.Type.values());
-		}
 	}
 	
     /**
@@ -293,14 +283,12 @@ implements SnaAgent
      * @see org.eclipse.sensinact.gateway.core.message.MessageRegisterer#
      * register(org.eclipse.sensinact.gateway.core.message.SnaMessage)
      */
-    @Override
-    public synchronized void register(SnaMessage message)
+    public synchronized void register(SnaMessage<?> message)
     {
-    	if(this.filter != null && !filter.matches(message))
+    	if(this.filter == null || filter.matches(message))
     	{
-    		return;
+    		this.callback.getMessageRegisterer().register(message);
     	}
-    	super.eventEngine.push(message);
     }
     
     /**
@@ -312,25 +300,7 @@ implements SnaAgent
     {
     	return this.publicKey;
     }
-    
-    /**
-     * @inheritDoc
-     *
-     * @see org.eclipse.sensinact.gateway.util.stack.StackEngineHandler#doHandle(java.lang.Object)
-     */
-    @Override
-    public void doHandle(SnaMessage message)
-    {
-    	try
-        {
-	        this.callback.register(message);
-        }
-        catch (Exception e)
-        {
-        	this.mediator.error(e);
-        }
-    }
-   
+       
 	/**
 	 * @param properties
 	 */
@@ -356,6 +326,7 @@ implements SnaAgent
 		{
 			return;
 		}
+		this.callback.setIdentifier(identifier);
 		try
 		{
 			local = ((Boolean)localProp).booleanValue();
@@ -375,8 +346,7 @@ implements SnaAgent
 			}
 		} catch(IllegalStateException e)
 		{
-			this.mediator.error(
-				"The agent is not registered ", e);
+			this.mediator.error("The agent is not registered ", e);
 		}
 	}
 	
@@ -395,8 +365,7 @@ implements SnaAgent
 			public Void execute(RemoteCore remoteCore) 
 					throws Exception
 			{
-				SnaAgentImpl.this.registerRemote(
-						remoteCore, identifier);
+				SnaAgentImpl.this.registerRemote(remoteCore, identifier);
 				return null;
 			}
 	      });
@@ -431,7 +400,6 @@ implements SnaAgent
     @Override
     public void stop()
     {
-    	super.close();
     	try
     	{
     		this.callback.stop();

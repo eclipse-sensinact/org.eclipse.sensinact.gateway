@@ -39,7 +39,7 @@ public class SnaSessionAgentImpl extends SnaAgentImpl
      * to be created to interact with the OSGi host environment
      * @param session the {@link Session} to the existence of whom the
      * {@link SnaAgent} to be created will be linked
-     * @param callback the {@link AbstractSnaAgentCallback} that will 
+     * @param callback the {@link AbstractMidAgentCallback} that will 
      * be called by the {@link SnaAgent} to be created 
      * @param filter the {@link SnaFilter} that will be used by the
      * {@link SnaAgent} to be created to discriminate the handled {@link 
@@ -48,7 +48,7 @@ public class SnaSessionAgentImpl extends SnaAgentImpl
      * @return the newly created {@link SnaAgent}
      */
     public static SnaSessionAgentImpl createAgent(
-    	Mediator mediator, Session session, SnaAgentCallback callback, 
+    	Mediator mediator, Session session, MidAgentCallback callback, 
     	SnaFilter filter, String agentKey)
     {
     	String suffix = (String) mediator.getProperty(
@@ -109,7 +109,7 @@ public class SnaSessionAgentImpl extends SnaAgentImpl
 	 * @param publicKey
 	 */
 	protected SnaSessionAgentImpl(Mediator mediator,
-		Session session, SnaAgentCallback callback, 
+		Session session, MidAgentCallback callback, 
 		SnaFilter filter, String publicKey)
 	{
 		super(mediator, callback, filter, publicKey);
@@ -122,20 +122,13 @@ public class SnaSessionAgentImpl extends SnaAgentImpl
 	 * @see StackEngineHandler#doHandle(java.lang.Object)
 	 */
     @Override
-    public void doHandle(SnaMessage message)
+    public void register(SnaMessage<?> message)
     {
     	if(this.sessionRef.get()==null)
     	{
     		super.stop();
     		return;
     	}
-    	try
-        {
-	        super.callback.register(message);
-        }
-        catch (Exception e)
-        {
-        	this.mediator.error(e);
-        }
+    	super.register(message);
     }
 }

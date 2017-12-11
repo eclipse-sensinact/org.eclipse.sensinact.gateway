@@ -9,10 +9,9 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.ServiceProvider.LifecycleStatus;
-import org.eclipse.sensinact.gateway.core.message.SnaCallback;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
@@ -20,7 +19,6 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaMessageSubType;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
 import org.eclipse.sensinact.gateway.util.UriUtils;
@@ -34,13 +32,12 @@ import org.osgi.framework.ServiceRegistration;
  *   
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ModelInstanceRegistration implements Nameable, SnaCallback
+public class ModelInstanceRegistration extends AbstractMidCallback
 {
 	private boolean registered;
 	private ServiceRegistration<?> instanceRegistration;
 	private ModelConfiguration configuration;
-	private String path;
-	
+
 	/**
 	 * Constructor
 	 * 
@@ -56,7 +53,8 @@ public class ModelInstanceRegistration implements Nameable, SnaCallback
 			String path, ServiceRegistration<?> registration, 
 			ModelConfiguration configuration)
 	{
-		this.path = path;
+		super(false);
+		super.setIdentifier(path);
 		this.instanceRegistration = registration;
 		this.configuration = configuration;
 		this.registered = true;
@@ -73,18 +71,7 @@ public class ModelInstanceRegistration implements Nameable, SnaCallback
 		{
 			this.instanceRegistration.unregister();
 		}
-	}
-	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see fr.cea.sna.gateway.util.Nameable#getName()
-	 */
-	@Override
-	public String getName()
-	{
-		return this.path;
-	}
+	}	
 
 	/**
      * @param uri
@@ -349,11 +336,11 @@ public class ModelInstanceRegistration implements Nameable, SnaCallback
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.MessageRegisterer#
-	 * register(org.eclipse.sensinact.gateway.core.message.SnaMessage)
+	 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidCallback#
+	 * doCallback(org.eclipse.sensinact.gateway.core.message.SnaMessage)
 	 */
 	@Override
-	public void register(SnaMessage<?> message)
+	public void doCallback(SnaMessage<?> message)
 	{
 		String uri = message.getPath();
 		switch(((SnaMessageSubType)message.getType()
@@ -409,24 +396,6 @@ public class ModelInstanceRegistration implements Nameable, SnaCallback
      */
     public int hashCode()
     {
-    	return this.path.hashCode();
+    	return super.getName().hashCode();
     }
-
-	@Override
-	public ErrorHandler getCallbackErrorHandler()
-	{
-		return null;
-	}
-
-	@Override
-	public Status getStatus()
-	{		
-		return Status.SUCCESS;
-	}
-
-	@Override
-	public long getTimeout()
-	{
-		return SnaCallback.ENDLESS;
-	}
 }

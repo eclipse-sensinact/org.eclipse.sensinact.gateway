@@ -14,7 +14,6 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.it.util.MosquittoTestITAbstract;
@@ -145,26 +144,6 @@ public class MosquittoBridgeTest extends MosquittoTestITAbstract {
     class RecipientCustom implements Recipient {
 
         private SnaMessage[] messages;
-
-        @Override
-        public SnaCallback.Type getSnaCallBackType() {
-            return SnaCallback.Type.UNARY;
-        }
-
-        @Override
-        public long getLifetime() {
-            return 2000;
-        }
-
-        @Override
-        public int getBufferSize() {
-            return 256;
-        }
-
-        @Override
-        public int getSchedulerDelay() {
-            return 0;
-        }
 
         @Override
         public void callback(String callbackId, SnaMessage[] messages) throws Exception {

@@ -19,7 +19,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface SnaCallback extends Nameable, MessageRegisterer
+public interface MidCallback extends Nameable
 {		
 	static final long ENDLESS = -1;
 	
@@ -37,8 +37,7 @@ public interface SnaCallback extends Nameable, MessageRegisterer
 			this.operator = operator;
 		}
 
-		public static Type fromOperator(
-				String operator)
+		public static Type fromOperator(String operator)
 		{
 			Type values[] = Type.values();
 			int index = 0;
@@ -82,10 +81,25 @@ public interface SnaCallback extends Nameable, MessageRegisterer
 	/**
 	 * Returns this callback's timeout
 	 * 
-	 * @return
-	 * 		 this callback's timeout 		
+	 * @return this callback's timeout 		
 	 */
     long getTimeout();
     
-	
+    /**
+     * Returns the {@link MessageReisterer} associated to
+     * this MidCallback
+     * 
+     * @return the {@link MessageReisterer} of this SnaCallback
+     */
+    MessageRegisterer getMessageRegisterer();
+
+	/**
+	 * Defines the String identifier of this MidCallback. if 
+	 * the String identifier has already been defined, using 
+	 * this method will produce no effect 
+	 *  
+	 * @param identifier the String identifier of this MidCallback.
+	 */
+	void setIdentifier(String identifier);
+
 }

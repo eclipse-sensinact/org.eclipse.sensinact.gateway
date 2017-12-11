@@ -12,14 +12,13 @@ package org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws;
 
 import java.io.IOException;
 
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccess;
 import org.json.JSONObject;
-
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
 
-public class WsRestAccess extends RestAccess
+public class WsRestAccess extends NorthboundAccess
 {
 	private WebSocketWrapper socket;
 
@@ -31,7 +30,7 @@ public class WsRestAccess extends RestAccess
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see RestAccess#
+	 * @see NorthboundAccess#
 	 * respond(NorthboundRequestBuilder)
 	 */
 	@Override
@@ -62,14 +61,18 @@ public class WsRestAccess extends RestAccess
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see RestAccess#
+	 * @see NorthboundAccess#
 	 * sendError(int, java.lang.String)
 	 */
 	@Override
 	protected void sendError(int i, String string) throws IOException 
 	{
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("X-Auth-Token", super.endpoint.getSessionToken());
+		if(super.endpoint!=null)
+		{
+			jsonObject.put("X-Auth-Token", 
+				super.endpoint.getSessionToken());
+		}
 		jsonObject.put("stautsCode", i);
 		jsonObject.put("message", string);
 		this.socket.send(new String(jsonObject.toString(

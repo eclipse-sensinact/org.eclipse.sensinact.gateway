@@ -9,17 +9,15 @@
  *    CEA - initial API and implementation
  */
 
-package org.eclipse.sensinact.gateway.nthbnd.rest.internal;
+package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 
-public interface RequestWrapper 
+public interface NorthboundAccessWrapper 
 {
 	/**
 	 * @return
@@ -51,5 +49,4 @@ public interface RequestWrapper
 	 * @return
 	 */
 	NorthboundRecipient createRecipient(Parameter[] parameters);
-
 }

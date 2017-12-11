@@ -32,7 +32,7 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
 import org.eclipse.sensinact.gateway.core.ServiceProvider.LifecycleStatus;
-import org.eclipse.sensinact.gateway.core.message.SnaCallback;
+import org.eclipse.sensinact.gateway.core.message.MidCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaMessageListener;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
@@ -561,7 +561,7 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
      * @param filter 
      * @param callback
      */
-    protected void registerCallback(SnaFilter filter, SnaCallback callback)
+    protected void registerCallback(SnaFilter filter, MidCallback callback)
     {
     	if(this.messageHandler == null)
     	{

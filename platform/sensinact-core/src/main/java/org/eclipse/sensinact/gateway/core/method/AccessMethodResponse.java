@@ -192,8 +192,7 @@ implements SnaResponseMessage<AccessMethodResponse.Response>
 						AccessMethodResponse.Status.ERROR, code);
 				break;
 			default:
-				snaResponse = new UnknownAccessMethodResponse(
-						mediator,uri);
+				snaResponse = new UnknownAccessMethodResponse(mediator,uri);
 				break;
 		}
 		if(snaResponse!=null && message != null)

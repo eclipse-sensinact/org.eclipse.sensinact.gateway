@@ -161,8 +161,7 @@ public class DefaultResourceConfigBuilder implements ResourceConfigBuilder
 	/**
 	 * @inheritDoc
 	 *
-	 * @see ResourceConfigBuilder#
-	 * setDefaultModifiable(Modifiable)
+	 * @see ResourceConfigBuilder#setDefaultModifiable(Modifiable)
 	 */
 	public void setDefaultModifiable(Modifiable defaultModifiable)
 	{

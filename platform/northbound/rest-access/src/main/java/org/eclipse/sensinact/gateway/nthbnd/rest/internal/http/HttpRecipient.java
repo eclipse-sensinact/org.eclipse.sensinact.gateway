@@ -11,32 +11,30 @@
 
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.Callback;
-import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfiguration;
+import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
+import org.eclipse.sensinact.gateway.util.JSONUtils;
 
 /**
  * This class is a wrapper for simple callback subscription
  */
-public class ContentCallback extends Callback 
+public class HttpRecipient extends NorthboundRecipient 
 {
     private String urlCallback;
     private ConnectionConfigurationImpl<SimpleResponse,SimpleRequest> connectionBuilder;
 
-    public ContentCallback(Mediator mediator,
-    		String callback, JSONObject jsonObject)
+    public HttpRecipient(Mediator mediator,
+    		String callback)
     {
-        super(mediator, jsonObject);        
+        super(mediator);        
         this.urlCallback = callback;
-        this.connectionBuilder = 
-        		new ConnectionConfigurationImpl<SimpleResponse,SimpleRequest>();
+        this.connectionBuilder = new ConnectionConfigurationImpl<SimpleResponse,SimpleRequest>();
         this.connectionBuilder.setContentType("application/json");
         this.connectionBuilder.setHttpMethod(ConnectionConfiguration.POST);
     }
@@ -45,9 +43,20 @@ public class ContentCallback extends Callback
      * @inheritDoc
      * @see Recipient#callback(String, SnaMessage[])
      */
-    public void doCallback(final String callbackId, final SnaMessage message) 
-    		throws Exception
+    public void callback(String callbackId, SnaMessage[] messages)
     {    	
+		int index = 0;
+		int length = messages==null?0:messages.length;
+		
+		StringBuilder builder = new StringBuilder();
+		builder.append(JSONUtils.OPEN_BRACKET);
+		for(;index < length; index++)
+		{
+			builder.append(index==0?"":",");
+			builder.append(messages[index].getJSON());
+		}
+		builder.append(JSONUtils.CLOSE_BRACKET);
+		
 		try 
 	    {
 			String separator = urlCallback.endsWith("/")?"":"/";
@@ -55,19 +64,19 @@ public class ContentCallback extends Callback
 					).append(callbackId).toString();
 			
 	    	this.connectionBuilder.setUri(uri);
-	    	this.connectionBuilder.setContent(message.getJSON());
+	    	this.connectionBuilder.setContent(builder.toString());
 	    	this.connectionBuilder.setHttpMethod("POST");
 	    	this.connectionBuilder.setContentType("application/json");
 	    	
 	    	SimpleRequest request = new SimpleRequest(
-	    			ContentCallback.this.connectionBuilder);	    	
+	    			HttpRecipient.this.connectionBuilder);	    	
 	    	//SimpleResponse response = 
 	    	request.send();	    	
 	    	//super.mediator.debug(response.toString());
 
     	} catch(Exception e)  
 	    {
-    		ContentCallback.this.mediator.error(e.getMessage(),e);
+    		super.mediator.error(e.getMessage(),e);
 	    }       
     }
 }

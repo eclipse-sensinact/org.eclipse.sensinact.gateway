@@ -34,6 +34,7 @@ public class HttpTestPacket extends HttpPacket
 			throws JSONException
     {
     	super(headers, content);
+
     	if(content != null &&  content.length>0)
     	{
 			JSONArray json = new JSONArray(new String(content));

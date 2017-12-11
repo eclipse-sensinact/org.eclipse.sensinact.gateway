@@ -17,7 +17,7 @@ import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.message.SnaAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -37,19 +37,6 @@ public interface Session
 	 */
 	String getId();
 	
-	/**
-	 * Creates and registers an {@link SnaAgent} attached to this Session
-	 * and that will be unregistered when this last one will disappear
-	 * 
-	 * @param callback the {@link SnaAgentCallback} of the {@link SnaAgent}
-	 * to be created
-	 * @param filter the {@link SnaFilter} of the {@link SnaAgent}
-	 * to be created
-	 * @return the String identifier of the newly created and registered
-	 * {@link SnaAgent}
-	 */
-	String registerSessionAgent(final SnaAgentCallback callback, 
-			final SnaFilter filter);
 	
 	/**
 	 * Returns the set of  {@link ServiceProvider}s accessible
@@ -106,6 +93,33 @@ public interface Session
      */
      Resource resource(String serviceProviderName, String serviceName,
     		 String resourceName);  
+
+ 	/**
+ 	 * Creates and registers an {@link SnaAgent} attached to this Session
+ 	 * and that will be unregistered when this last one will disappear
+ 	 * 
+ 	 * @param callback the {@link MidAgentCallback} of the {@link SnaAgent}
+ 	 * to be created
+ 	 * @param filter the {@link SnaFilter} of the {@link SnaAgent}
+ 	 * to be created
+ 	 * 
+ 	 * @return the JSON formated result of the {@link SnaAgent} 
+ 	 * registration, including its String identifier
+ 	 */
+ 	JSONObject registerSessionAgent(final MidAgentCallback callback, 
+ 			final SnaFilter filter);
+
+ 	/**
+ 	 * Unregisters the {@link SnaAgent} attached to this Session
+ 	 * and whose String identifier is passed as parameter
+ 	 * 
+ 	 * @param agentId the String identifier of the linked {@link 
+ 	 * SnaAgent} to be unregistered
+ 	 * 
+ 	 * @return the JSON formated result of the {@link SnaAgent} 
+ 	 * unregistration 
+ 	 */
+ 	JSONObject unregisterSessionAgent(String agentId);
  	
     /**
    	 * Returns the JSON formated list of all registered resource 

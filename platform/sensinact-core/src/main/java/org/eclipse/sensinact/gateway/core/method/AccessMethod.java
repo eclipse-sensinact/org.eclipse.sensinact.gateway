@@ -123,7 +123,15 @@ public interface AccessMethod extends Nameable, Describable, PathElement
 			{
 				initialize();
 			}
-			return METHODS.values().toArray(new Type[0]);
+			Collection<Type> collection = METHODS.values();
+			Type[] types = new Type[collection.size()];
+			Iterator<Type> iterator = collection.iterator();
+			while(iterator.hasNext())
+			{
+				Type t = iterator.next();
+				types[t.ordinal()] = t;
+			}
+			return types;
 		}
 		
 		private final String name;
@@ -222,7 +230,10 @@ public interface AccessMethod extends Nameable, Describable, PathElement
     ErrorHandler getErrorHandler();
     
     /**
-     * @return
+     * Returns the {@link AccessMethod.Type} of this 
+     * AccessMethod
+     * 
+     * @return this AccessMethod's {@link AccessMethod.Type}
      */
     AccessMethod.Type getType();
     

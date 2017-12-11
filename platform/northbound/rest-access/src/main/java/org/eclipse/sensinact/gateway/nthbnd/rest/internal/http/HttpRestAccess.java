@@ -15,15 +15,15 @@ import java.io.IOException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccess;
 import org.json.JSONObject;
 
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
 
-public class HttpRestAccess extends RestAccess
+public class HttpRestAccess extends NorthboundAccess
 {
 	public static String JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 	public static String TEXT_CONTENT_TYPE = "text/plain; charset=utf-8";
@@ -39,7 +39,7 @@ public class HttpRestAccess extends RestAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see RestAccess#
+	 * @see NorthboundAccess#
 	 * respond(NorthboundRequestBuilder)
 	 */
 	@Override
@@ -83,7 +83,7 @@ public class HttpRestAccess extends RestAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see RestAccess#
+	 * @see NorthboundAccess#
 	 * sendError(int, java.lang.String)
 	 */
 	@Override

@@ -30,7 +30,7 @@ public @interface HttpTaskConfiguration
 	public static final String DEFAULT_CONTENT_TYPE = "text/plain";
 	public static final String DEFAULT_SCHEME = "http";
 	public static final String DEFAULT_HTTP_METHOD = "GET";
-	public static final int DEFAULT_PORT = 80;
+	public static final String DEFAULT_PORT = "80";
 	public static final String DEFAULT_PATH = "/";
 	
 	String acceptType() default DEFAULT_ACCEPT_TYPE;
@@ -39,7 +39,7 @@ public @interface HttpTaskConfiguration
 	
 	String scheme() default "http";
 	String host();
-	int port() default 80;
+	String port() default "80";
 	String path() default "/";
 	
 	boolean direct() default false;

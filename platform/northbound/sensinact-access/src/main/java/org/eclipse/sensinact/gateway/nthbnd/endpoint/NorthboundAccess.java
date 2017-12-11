@@ -9,7 +9,7 @@
  *    CEA - initial API and implementation
  */
 
-package org.eclipse.sensinact.gateway.nthbnd.rest.internal;
+package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 
 import java.io.IOException;
@@ -27,20 +27,16 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * This class is the REST interface between each others classes 
+ * This class is the interface between each others classes 
  * that perform a task and jersey
  */
-public abstract class RestAccess
+public abstract class NorthboundAccess
 {
 	//********************************************************************//
 	//						NESTED DECLARATIONS			  			      //
@@ -73,52 +69,61 @@ public abstract class RestAccess
 	//********************************************************************//
 
 	public static String RAW_QUERY_PARAMETER = "#RAW#";
-	
 	public static final String ROOT = "\\/sensinact";
-
 	public static final String ELEMENT_SCHEME = "\\/([^\\/]+)";
+	public static final String PROVIDERS_SCHEME = ROOT + "\\/providers";
+	public static final String PROVIDER_SCHEME = PROVIDERS_SCHEME + ELEMENT_SCHEME;
+	public static final String SIMPLIFIED_PROVIDER_SCHEME = ROOT + "\\/(([^p]|p[^r]|pr[^o]|pro[^v]|prov[^i]|provi[^d]|provid[^e]|provide[^r]|provider[^s]|providers[^\\/])[^\\/]*)";
+	public static final String SERVICES_SCHEME = PROVIDER_SCHEME + "\\/services";
+	public static final String SERVICE_SCHEME = SERVICES_SCHEME + ELEMENT_SCHEME;
+	public static final String SIMPLIFIED_SERVICE_SCHEME = SIMPLIFIED_PROVIDER_SCHEME + ELEMENT_SCHEME;
+	public static final String RESOURCES_SCHEME = SERVICE_SCHEME + "\\/resources";
+	public static final String RESOURCE_SCHEME = RESOURCES_SCHEME + ELEMENT_SCHEME;
+	public static final String SIMPLIFIED_RESOURCE_SCHEME = SIMPLIFIED_SERVICE_SCHEME + ELEMENT_SCHEME;
 	
-	public static final String SERVICEPROVIDERS_SCHEME =
-		ROOT + "\\/providers";
+    //**************************************************************************
+	//**************************************************************************
+	private static final String METHOD_SCHEME = "\\/(GET|SET|ACT|SUBSCRIBE|UNSUBSCRIBE)";
 	
-	public static final String SERVICEPROVIDER_SCHEME = 
-		SERVICEPROVIDERS_SCHEME + ELEMENT_SCHEME;
+	public static final String  GENERIC_METHOD_SCHEME =
+		ROOT + "(" + ELEMENT_SCHEME + ")*" + METHOD_SCHEME;
 	
-	public static final String  SIMPLIFIED_SERVICEPROVIDER_SCHEME =
-		ROOT + "\\/(([^p]|p[^r]|pr[^o]|pro[^v]|prov[^i]|provi[^d]|provid[^e]|provide[^r]|provider[^s]|providers[^\\/])[^\\/]*)";
-	
-	public static final String SERVICES_SCHEME = 
-		SERVICEPROVIDER_SCHEME + "\\/services";
-	
-	public static final String SERVICE_SCHEME = 
-		SERVICES_SCHEME + ELEMENT_SCHEME;
+	public static final String  ROOT_PROPAGATED_METHOD_SCHEME =
+		ROOT + METHOD_SCHEME;
 
-	public static final String  SIMPLIFIED_SERVICE_SCHEME =
-		SIMPLIFIED_SERVICEPROVIDER_SCHEME + ELEMENT_SCHEME;
+	public static final String  PROVIDER_PROPAGATED_METHOD_SCHEME =
+		PROVIDER_SCHEME + METHOD_SCHEME;
 	
-	public static final String RESOURCES_SCHEME = 
-		SERVICE_SCHEME + "\\/resources";
-	
-	public static final String RESOURCE_SCHEME = 
-		RESOURCES_SCHEME + ELEMENT_SCHEME;
-	
-	public static final String  SIMPLIFIED_RESOURCE_SCHEME =
-		SIMPLIFIED_SERVICE_SCHEME + ELEMENT_SCHEME;
-	
-	public static final String METHOD_SCHEME = 
-		RESOURCE_SCHEME + "\\/(GET|SET|ACT|SUBSCRIBE|UNSUBSCRIBE)";
+	public static final String  SIMPLIFIED_PROVIDER_PROPAGATED_METHOD_SCHEME =
+		SIMPLIFIED_PROVIDER_SCHEME + METHOD_SCHEME;
 
-	public static final String  SIMPLIFIED_METHOD_SCHEME =
-		SIMPLIFIED_RESOURCE_SCHEME + "\\/(GET|SET|ACT|SUBSCRIBE|UNSUBSCRIBE)";
+	public static final String  SERVICE_PROPAGATED_METHOD_SCHEME =
+		SERVICE_SCHEME + METHOD_SCHEME;
 
-	private static final Pattern SERVICEPROVIDERS_PATTERN = 
-		Pattern.compile(SERVICEPROVIDERS_SCHEME);
+	public static final String  SIMPLIFIED_SERVICE_PROPAGATED_METHOD_SCHEME =
+		SIMPLIFIED_SERVICE_SCHEME + METHOD_SCHEME;
 
-	private static final Pattern SERVICEPROVIDER_PATTERN = 
-		Pattern.compile(SERVICEPROVIDER_SCHEME);
+	public static final String RESOURCE_PROPAGATED_METHOD_SCHEME = 
+		RESOURCE_SCHEME + METHOD_SCHEME;
+
+	public static final String  SIMPLIFIED_RESOURCE_PROPAGATED_METHOD_SCHEME =
+		SIMPLIFIED_RESOURCE_SCHEME + METHOD_SCHEME;
 	
-	private static final Pattern SIMPLIFIED_SERVICEPROVIDER_PATTERN = 
-		Pattern.compile(SIMPLIFIED_SERVICEPROVIDER_SCHEME);
+
+    //**************************************************************************
+	//**************************************************************************
+
+	private static final Pattern GENERIC_METHOD_SCHEME_PATTERN = 
+		Pattern.compile(GENERIC_METHOD_SCHEME);
+	
+	private static final Pattern PROVIDERS_PATTERN = 
+		Pattern.compile(PROVIDERS_SCHEME);
+
+	private static final Pattern PROVIDER_PATTERN = 
+		Pattern.compile(PROVIDER_SCHEME);
+	
+	private static final Pattern SIMPLIFIED_PROVIDER_PATTERN = 
+		Pattern.compile(SIMPLIFIED_PROVIDER_SCHEME);
 	
 	private static final Pattern SERVICES_PATTERN = 
 		Pattern.compile(SERVICES_SCHEME);
@@ -138,12 +143,27 @@ public abstract class RestAccess
 	private static final Pattern SIMPLIFIED_RESOURCE_PATTERN = 
 		Pattern.compile(SIMPLIFIED_RESOURCE_SCHEME);
 	
-	private static final Pattern METHOD_PATTERN = 
-		Pattern.compile(METHOD_SCHEME);
+	private static final Pattern RESOURCE_PROPAGATED_METHOD_SCHEME_PATTERN = 
+		Pattern.compile(RESOURCE_PROPAGATED_METHOD_SCHEME);
 	
-	private static final Pattern SIMPLIFIED_METHOD_PATTERN = 
-		Pattern.compile(SIMPLIFIED_METHOD_SCHEME);
+	private static final Pattern SIMPLIFIED_RESOURCE_PROPAGATED_METHOD_SCHEME_PATTERN = 
+		Pattern.compile(SIMPLIFIED_RESOURCE_PROPAGATED_METHOD_SCHEME);
 	
+	private static final Pattern ROOT_PROPAGATED_METHOD_SCHEME_PATTERN =
+		Pattern.compile(ROOT_PROPAGATED_METHOD_SCHEME);
+
+	private static final Pattern PROVIDER_PROPAGATED_METHOD_SCHEME_PATTERN =
+		Pattern.compile(PROVIDER_PROPAGATED_METHOD_SCHEME);
+	
+	private static final Pattern SIMPLIFIED_PROVIDER_PROPAGATED_METHOD_SCHEME_PATTERN =
+		Pattern.compile(SIMPLIFIED_PROVIDER_PROPAGATED_METHOD_SCHEME);
+
+	private static final Pattern SERVICE_PROPAGATED_METHOD_SCHEME_PATTERN =
+		Pattern.compile(SERVICE_PROPAGATED_METHOD_SCHEME);
+
+	private static final Pattern SIMPLIFIED_SERVICE_PROPAGATED_METHOD_SCHEME_PATTERN =
+		Pattern.compile(SIMPLIFIED_SERVICE_PROPAGATED_METHOD_SCHEME);
+		
 	//********************************************************************//
 	//						INSTANCE DECLARATIONS						  //
 	//********************************************************************//
@@ -163,12 +183,12 @@ public abstract class RestAccess
 	private Map<String, List<String>> query;
 	
 	protected NorthboundEndpoint endpoint;
-	private RequestWrapper request;
+	private NorthboundAccessWrapper request;
 	
 	/**
 	 * Constructor
 	 */
-	public RestAccess()
+	public NorthboundAccess()
 	{
 		this.query = new HashMap<String,List<String>>();
 	}
@@ -194,26 +214,71 @@ public abstract class RestAccess
 		this.method = null;
 		this.match = false;
 		
-		Matcher matcher = METHOD_PATTERN.matcher(path);
+		Matcher matcher = GENERIC_METHOD_SCHEME_PATTERN.matcher(path);
 		if(matcher.matches())
 		{
-			this.serviceProvider = matcher.group(1);
-			this.service = matcher.group(2);
-			this.resource = matcher.group(3);			
-			this.method = AccessMethod.Type.valueOf(matcher.group(4));
-			this.match = true;
-			return;
-		}	   
-		matcher = SIMPLIFIED_METHOD_PATTERN.matcher(path);
-		if(matcher.matches())
-		{
-			this.serviceProvider = matcher.group(1);
-			this.service = matcher.group(3);
-			this.resource = matcher.group(4);			
-			this.method = AccessMethod.Type.valueOf(matcher.group(5));
-			this.match = true;
-			return;
-		}	
+			matcher = ROOT_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
+			if(matcher.matches())
+			{		
+				this.method = AccessMethod.Type.valueOf(matcher.group(1));
+				this.match = true;
+				return;
+			}	
+			matcher = PROVIDER_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
+			if(matcher.matches())
+			{		
+				this.serviceProvider = matcher.group(1);
+				this.method = AccessMethod.Type.valueOf(matcher.group(2));
+				this.match = true;
+				return;
+			}	
+			matcher = SIMPLIFIED_PROVIDER_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
+			if(matcher.matches())
+			{		
+				this.serviceProvider = matcher.group(1);
+				this.method = AccessMethod.Type.valueOf(matcher.group(3));
+				this.match = true;
+				return;
+			}
+			matcher = SERVICE_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
+			if(matcher.matches())
+			{		
+				this.serviceProvider = matcher.group(1);
+				this.service = matcher.group(2);
+				this.method = AccessMethod.Type.valueOf(matcher.group(3));
+				this.match = true;
+				return;
+			}	
+			matcher = SIMPLIFIED_SERVICE_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
+			if(matcher.matches())
+			{		
+				this.serviceProvider = matcher.group(1);
+				this.service = matcher.group(3);
+				this.method = AccessMethod.Type.valueOf(matcher.group(4));
+				this.match = true;
+				return;
+			}
+			matcher = RESOURCE_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
+			if(matcher.matches())
+			{
+				this.serviceProvider = matcher.group(1);
+				this.service = matcher.group(2);
+				this.resource = matcher.group(3);			
+				this.method = AccessMethod.Type.valueOf(matcher.group(4));
+				this.match = true;
+				return;
+			}	   
+			matcher = SIMPLIFIED_RESOURCE_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
+			if(matcher.matches())
+			{
+				this.serviceProvider = matcher.group(1);
+				this.service = matcher.group(3);
+				this.resource = matcher.group(4);			
+				this.method = AccessMethod.Type.valueOf(matcher.group(5));
+				this.match = true;
+				return;
+			}	
+		}
 	    this.method = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);		    
 		matcher = RESOURCE_PATTERN.matcher(path);
 		if(matcher.matches())
@@ -266,21 +331,21 @@ public abstract class RestAccess
 			this.match = true;
 			return;
 		}
-		matcher = SERVICEPROVIDER_PATTERN.matcher(path);
+		matcher = PROVIDER_PATTERN.matcher(path);
 		if(matcher.matches())
 		{
 			this.serviceProvider = matcher.group(1);		
 			this.match = true;
 			return;
 		}
-		matcher = SIMPLIFIED_SERVICEPROVIDER_PATTERN.matcher(path);
+		matcher = SIMPLIFIED_PROVIDER_PATTERN.matcher(path);
 		if(matcher.matches())
 		{
 			this.serviceProvider = matcher.group(1);		
 			this.match = true;
 			return;
 		}		
-		matcher = SERVICEPROVIDERS_PATTERN.matcher(path);
+		matcher = PROVIDERS_PATTERN.matcher(path);
 		if(matcher.matches())
 		{
 			this.match = true;		
@@ -373,7 +438,7 @@ public abstract class RestAccess
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean init(RequestWrapper request) throws IOException
+	public boolean init(NorthboundAccessWrapper request) throws IOException
 	{
 		this.mediator = request.getMediator();
 		if(this.mediator == null)
@@ -494,16 +559,28 @@ public abstract class RestAccess
 				}
 				builder.withArgument(parameters[0].getValue());
 				break;
-			case "SUBSCRIBE":				
+			case "SUBSCRIBE":
 				NorthboundRecipient recipient = this.request.createRecipient(parameters);
 				if(recipient == null)
 				{	
-					//still handle Long Polling
-					//NorthboundRecipient recipient = new LongPollingCallback()
 					sendError(400, "Unable to create the appropriate recipient");
 					return false;
 				} 
-		    	builder.withArgument(recipient);
+				index = 0;
+				length = parameters==null?0:parameters.length;
+				JSONArray conditions = null;
+				
+				for(;index < length; index++)
+				{
+					String name = parameters[index].getName();
+					if("conditions".equals(name) && JSONArray.class.isAssignableFrom(
+							parameters[index].getType()))
+					{
+						conditions = (JSONArray) parameters[index].getValue();
+						break;
+					}
+				}
+			    builder.withArgument(new Object[] {recipient, conditions});
 				break;
 			default:
 				break;

@@ -23,8 +23,6 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RequestWrapper;
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccess;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -32,12 +30,14 @@ import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.util.IOUtils;
 
 public class HttpRestAccessRequest extends HttpServletRequestWrapper 
-implements RequestWrapper
+implements NorthboundAccessWrapper
 {
 	/**
 	 * @param queryString
@@ -88,6 +88,8 @@ implements RequestWrapper
 	}
 
 	/**
+	 * 
+	 * @param queryMap
 	 * @param name
 	 * @param value
 	 * @throws UnsupportedEncodingException
@@ -99,7 +101,7 @@ implements RequestWrapper
 	{
 		if(name == null || name.length() == 0)
 		{	
-			name = RestAccess.RAW_QUERY_PARAMETER;
+			name = NorthboundAccess.RAW_QUERY_PARAMETER;
 			
 		} else
 		{
@@ -133,8 +135,7 @@ implements RequestWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see RequestWrapper#
-	 * getMediator()
+	 * @see NorthboundAccessWrapper#getMediator()
 	 */
 	@Override
 	public NorthboundMediator getMediator() 
@@ -145,8 +146,7 @@ implements RequestWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see RequestWrapper#
-	 * getQueryMap()
+	 * @see NorthboundAccessWrapper#getQueryMap()
 	 */
 	@Override
 	public Map<String,List<String>> getQueryMap() 
@@ -171,8 +171,7 @@ implements RequestWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see RequestWrapper#
-	 * getContent()
+	 * @see NorthboundAccessWrapper#getContent()
 	 */
 	@Override
 	public String getContent() 
@@ -197,8 +196,7 @@ implements RequestWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see RequestWrapper#
-	 * getAuthentication()
+	 * @see NorthboundAccessWrapper#getAuthentication()
 	 */
 	@Override
 	public Authentication<?> getAuthentication() 
@@ -223,8 +221,7 @@ implements RequestWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see RequestWrapper#
-	 * createRecipient(Parameter[])
+	 * @see NorthboundAccessWrapper#createRecipient(Parameter[])
 	 */
 	@Override
 	public NorthboundRecipient createRecipient(Parameter[] parameters)
@@ -242,20 +239,12 @@ implements RequestWrapper
 			if("callback".equals(name))
 			{
 				callback = (String) parameters[index].getValue();
-				continue;
-			}
-			if("conditions".equals(name) && JSONArray.class.isAssignableFrom(
-					parameters[index].getType()))
-			{
-				conditions = new JSONObject();
-				conditions.put("conditions", parameters[index].getValue());
-				continue;
+				break;
 			}
 		}
 		if(callback != null)
 		{
-			recipient = new ContentCallback(
-			mediator, callback, conditions);
+			recipient = new HttpRecipient(mediator, callback);
 		}
 		return recipient;
 	}

@@ -105,9 +105,10 @@ HttpTask<SimpleHttpResponse,REQUEST>
             }
             catch (Exception e)
             {
+            	e.printStackTrace();
             	super.mediator.error(e);
             }
-			task.execute();			
+			task.execute();		
 			while (!task.isResultAvailable() && wait > 0)
 			{
 				try
