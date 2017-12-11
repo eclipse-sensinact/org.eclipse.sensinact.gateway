@@ -13,8 +13,6 @@ package org.eclipse.sensinact.gateway.core.method.legacy;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
-
 
 /**
  * Extended  {@link AccessMethodResult} dedicated to {@link UnsubscribeMethod}

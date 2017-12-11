@@ -242,8 +242,7 @@ implements JSONable, Cloneable
     	{
     		return true;
     	}
-    	Iterator<Constraint> iterator = 
-    			this.constraints.iterator();
+    	Iterator<Constraint> iterator = this.constraints.iterator();
     	
     	while(iterator.hasNext())
     	{
@@ -417,8 +416,8 @@ implements JSONable, Cloneable
 	    					this.type, this.fixedValue);
 	    		} else
 	    		{
-	    			return new Parameter(super.mediator, 
-	    					this.name, this.type);
+	    			return new Parameter(super.mediator, this.name, 
+	    					this.type);
 	    		}
 	    	} else
 	    	{

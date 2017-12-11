@@ -479,36 +479,7 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable
 	@Override
 	public String getJSON()
 	{
-        StringBuilder buffer = new StringBuilder();
-        buffer.append(JSONUtils.OPEN_BRACE);
-        buffer.append(JSONUtils.QUOTE);
-        buffer.append("name");
-        buffer.append(JSONUtils.QUOTE);
-        buffer.append(JSONUtils.COLON);
-        buffer.append(JSONUtils.QUOTE);
-        buffer.append(this.getName());
-        buffer.append(JSONUtils.QUOTE);
-        buffer.append(JSONUtils.COMMA);
-        buffer.append(JSONUtils.QUOTE);
-        buffer.append("parameters");
-        buffer.append(JSONUtils.QUOTE);
-        buffer.append(JSONUtils.COLON);
-        buffer.append(JSONUtils.OPEN_BRACKET);
-        
-        Iterator<Parameter> iterator = 
-        		this.iterator();
-        boolean moreThanOne = false;
-        
-        while(iterator.hasNext())
-        {
-            buffer.append(moreThanOne?",":"");
-            buffer.append(iterator.next().getJSON());
-            moreThanOne = true;
-        }
-        buffer.append(JSONUtils.CLOSE_BRACKET);
-        buffer.append(JSONUtils.CLOSE_BRACE);
-
-	    return buffer.toString();
+		return getJSONObjectDescription().toString();
 	}
 	
 	/**

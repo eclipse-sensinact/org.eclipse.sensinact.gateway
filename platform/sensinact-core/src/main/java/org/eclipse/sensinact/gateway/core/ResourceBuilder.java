@@ -187,8 +187,7 @@ public class ResourceBuilder
 		String name = this.getConfiguredName();
 		if(name == null)
 		{
-			throw new InvalidResourceException(
-					"Resource's name is needed");
+			throw new InvalidResourceException("Resource's name is needed");
 		}
 		TypeConfig typeConfig = this.getResourceConfig().getTypeConfig();
 
@@ -440,8 +439,7 @@ public class ResourceBuilder
 					new Class<?>[]{Object.class}, new String[]{"value"}, 
 						    fixedNameParameter);
 						
-				setMethod.addShortcut(
-					setAttributeShortcut, setSignature);			
+				setMethod.addShortcut(setAttributeShortcut, setSignature);			
 			}
 			Shortcut subscribeNameConditionsShortcut = new Shortcut(this.mediator,
 			    SUBSCRIBE, new Class<?>[]{Recipient.class}, 
@@ -461,8 +459,7 @@ public class ResourceBuilder
 			    UNSUBSCRIBE, new Class<?>[]{String.class}, 
 					new String[]{"subscriptionId"}, fixedNameParameter);
 
-			unsubscribeMethod.addShortcut(
-					unsubscribeNameShortcut, 
+			unsubscribeMethod.addShortcut(unsubscribeNameShortcut, 
 					unsubscribeSignature);
 		}	
 		if (ActionResource.class.isAssignableFrom(

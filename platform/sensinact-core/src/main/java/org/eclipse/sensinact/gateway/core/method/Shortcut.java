@@ -18,7 +18,6 @@ import java.util.Stack;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
-import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
 
 /**
  * Shortcut to a {@link Signature} of an {@link AccessMethod} 
