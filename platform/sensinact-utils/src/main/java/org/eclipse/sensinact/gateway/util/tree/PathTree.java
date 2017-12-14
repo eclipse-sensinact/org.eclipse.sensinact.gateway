@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.util.tree;
 
-import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
 /**
