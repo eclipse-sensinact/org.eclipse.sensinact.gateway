@@ -325,8 +325,9 @@ public class SecuredAccessImpl implements SecuredAccess
 					methodAccesses.add(new MethodAccessImpl(
 							option.getAccessLevel(), types[index]));
 				}
-				tree.add(objectEntities.get(0).getPath()).withAccessProfile(
-					new AccessProfileImpl(methodAccesses));				
+				tree.add(objectEntities.get(0).getPath(), 
+				objectEntities.get(0).isPattern()).withAccessProfile(
+						new AccessProfileImpl(methodAccesses));				
 			}
 			//we also have to retrieve all the objects that does not appear in the
 			//previous list (attached to the user) and for which the SAUTH field (
