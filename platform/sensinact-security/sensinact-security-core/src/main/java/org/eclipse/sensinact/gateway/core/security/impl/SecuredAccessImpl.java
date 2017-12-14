@@ -470,8 +470,9 @@ public class SecuredAccessImpl implements SecuredAccess
 					methodAccesses.add(new MethodAccessImpl(
 							option.getAccessLevel(), types[index]));
 				}
-				tree.add(objectEntities.get(0).getPath()).withAccessProfile(
-					new AccessProfileImpl(methodAccesses));				
+				tree.add(objectEntities.get(0).getPath(), 
+					objectEntities.get(0).isPattern()).withAccessProfile(
+					    new AccessProfileImpl(methodAccesses));				
 			}
 		} catch (Exception e)
 		{
@@ -517,8 +518,9 @@ public class SecuredAccessImpl implements SecuredAccess
 	 * @param object
 	 * @throws Exception
 	 */
-	private void buildNode(MutableAccessTree<? extends MutableAccessNode> tree, 
-			ObjectEntity object) throws SecuredAccessException
+	private void buildNode(
+		MutableAccessTree<? extends MutableAccessNode> tree, 
+		ObjectEntity object) throws SecuredAccessException
 	{
 
 		if (object == null || /*it means that the root has been reached*/
@@ -532,7 +534,8 @@ public class SecuredAccessImpl implements SecuredAccess
 				this.objectProfileAccessDAO.getAccessProfileOption(
 				    object.getObjectProfileEntity());
 			
-			tree.add(object.getPath()).withAccessProfile(option);
+			tree.add(object.getPath(), object.isPattern()
+					).withAccessProfile(option);
 			
 			List<ObjectEntity> children = this.objectDAO.findChildren(
 					object.getIdentifier());
