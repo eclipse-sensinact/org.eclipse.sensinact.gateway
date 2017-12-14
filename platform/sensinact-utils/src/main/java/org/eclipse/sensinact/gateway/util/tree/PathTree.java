@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.util.tree;
 
+import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
 /**
@@ -53,6 +54,16 @@ public class PathTree<P extends PathNode<P>>
 	 */
 	public P add(String uri)
 	{
+		return this.add(uri, false);
+	}
+
+	/**
+	 * @param uri
+	 * @param isPattern
+	 * @return
+	 */
+	public P add(String uri, boolean isPattern)
+	{
 		String[] uriElements = UriUtils.getUriElements(uri);
 		StringBuilder builder = new StringBuilder();
 		
@@ -64,12 +75,19 @@ public class PathTree<P extends PathNode<P>>
 		for(;index < length; index++)
 		{
 			builder.append(UriUtils.PATH_SEPARATOR);
-			node = add(builder.toString(),uriElements[index]);
+			if(length-index==1)
+			{
+				node = add(builder.toString(), uriElements[index], isPattern);
+			} else
+			{
+				node = add(builder.toString(), uriElements[index], false);
+			}
 			builder.append(uriElements[index]);	
 		}
 		return node;
 	}
 
+	
 	/**
 	 * @param uri
 	 * @param uriElement
