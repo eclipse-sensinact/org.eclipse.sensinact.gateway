@@ -52,6 +52,18 @@ extends AccessTree<A>, Cloneable
 	 * Adds an {@link AccessNode} to this MutableAccessTree at 
 	 * the path passed as parameter
 	 * 
+	 * @param uri the String path of the {@link AccessNode} to 
+	 * be added
+	 * @param isPattern defines whether the name of the {@link 
+	 * AccessNode} to be added is a regular expression 
+	 * @return the newly created {@link AccessNode}
+	 */
+	A add(String uri, boolean isPattern);
+
+	/**
+	 * Adds an {@link AccessNode} to this MutableAccessTree at 
+	 * the path passed as parameter
+	 * 
 	 * @param name the String path of the {@link AccessNode} to 
 	 * be added
 	 * @param uriElement
@@ -66,8 +78,9 @@ extends AccessTree<A>, Cloneable
 	 * 
 	 * @param name the String path of the {@link AccessNode} to 
 	 * be added
-	 * @param uriElement
-	 * @param isPattern
+	 * @param uriElement 
+	 * @param isPattern defines whether the name of the {@link 
+	 * AccessNode} to be added is a regular expression 
 	 * 
 	 * @return the newly created {@link AccessNode}
 	 */
