@@ -104,58 +104,51 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity>
     public ObjectEntity find(String path, boolean exact) 
     		throws DAOException 
     {    	
-	    ObjectEntity entity = null;
-    	if(path != null)
+    	if(path == null)
     	{
-    		List<ObjectEntity> objectEntities = 
-    			super.select("getObjectFromPath", path);
-    		
-    		if(objectEntities.size() == 1)
-    		{ 		
-				String[] uriElements = UriUtils.getUriElements(path);
-				
-				String objectPath = objectEntities.get(0).getPath();
-				String[] objectPathElements = null;
-				
-				if(objectPath != null)
-				{
-					objectPath = objectPath.replace(ANY_REGEX, ANY_REPLACEMENT);				
-					objectPathElements = UriUtils.getUriElements(objectPath);
-					
-				} else
-				{
-					objectPathElements = new String[0];
-				}
-				if(!exact)
-				{
-					entity = objectEntities.get(0);	
-					
-				} else if(uriElements.length == objectPathElements.length )
-				{
-					String lastSearched = uriElements[uriElements.length-1];
-					String lastFound = objectPathElements[uriElements.length-1];
-					
-					if(!lastFound.equals(ANY_REPLACEMENT) && 
-							!lastSearched.equals(lastFound))
-					{
-						try
-						{
-							if(Pattern.matches(lastFound, lastSearched))
-							{
-								entity = objectEntities.get(0);	
-							}
-						} catch(PatternSyntaxException e)
-						{
-							mediator.debug("exact path '%s' not found", path);
-						}	
-					} else
-					{
-						entity = objectEntities.get(0);	
-					}
-				}
-    		}
+    		return null;
     	}
-		return (entity);
+		List<ObjectEntity> objectEntities = super.select(
+			"getObjectFromPath", path);
+		
+		if(objectEntities.size() != 1)
+		{ 	
+			return null;
+		}
+		ObjectEntity tmpEntity = objectEntities.get(0);
+		
+		if(!exact || tmpEntity == null  || path.equals(tmpEntity.getPath()))
+		{ 
+		   return tmpEntity;
+		}		
+		String[] uriElements = UriUtils.getUriElements(path);
+		
+		String objectPath = tmpEntity.getPath();
+		
+		String[] objectPathElements = (objectPath != null)?
+			UriUtils.getUriElements(objectPath.replace(ANY_REGEX, 
+				ANY_REPLACEMENT)):new String[0];
+		
+		if(uriElements.length == objectPathElements.length)
+		{
+			String lastSearched = uriElements[uriElements.length-1];
+			String lastFound = objectPathElements[uriElements.length-1];
+			
+			try
+			{
+				if(lastFound.equals(ANY_REPLACEMENT) 
+					|| lastSearched.equals(lastFound) 
+					|| Pattern.matches(lastFound, lastSearched))
+				{
+					return tmpEntity;
+				} 
+			}
+			catch(PatternSyntaxException e)
+			{
+				mediator.debug("exact path '%s' not found", path);
+			}
+		}
+		return null;
     }
 
     /**

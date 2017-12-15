@@ -187,10 +187,9 @@ public class PathNode<P extends PathNode<P>> implements Iterable<P>
 		{
 			return false;
 		}
-		return !isPattern
-			?this.nodeName.equals(objectName)
-				:pattern.matcher(objectName
-						).matches();
+		return this.nodeName.equals(objectName)
+		    ?true:(isPattern?pattern.matcher(objectName
+		    		).matches():false);
 	}
 
 	/**

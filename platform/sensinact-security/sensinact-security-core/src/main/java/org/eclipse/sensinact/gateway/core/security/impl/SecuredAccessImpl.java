@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
@@ -143,9 +144,11 @@ public class SecuredAccessImpl implements SecuredAccess
 	 * @see SecuredAccess#buildAccessNodesHierarchy(String, String, AccessTree)
 	 */
 	@Override
-	public void buildAccessNodesHierarchy(String signature, 
-			String name, MutableAccessTree<? extends MutableAccessNode> tree) 
-			throws SecuredAccessException
+	public void buildAccessNodesHierarchy(
+		String signature, 
+		String name, 
+		MutableAccessTree<? extends MutableAccessNode> tree) 
+		throws SecuredAccessException
 	{
 		try 
 		{
@@ -277,8 +280,9 @@ public class SecuredAccessImpl implements SecuredAccess
 	 * @throws Exception
 	 */
 	private void buildTree(
-			 MutableAccessTree<? extends MutableAccessNode> tree, UserEntity user)
-			throws SecuredAccessException
+		MutableAccessTree<? extends MutableAccessNode> tree, 
+		UserEntity user)
+		throws SecuredAccessException
 	{
 		if (user == null 
 				|| user.getPublicKey() == null
@@ -325,9 +329,23 @@ public class SecuredAccessImpl implements SecuredAccess
 					methodAccesses.add(new MethodAccessImpl(
 							option.getAccessLevel(), types[index]));
 				}
-				tree.add(objectEntities.get(0).getPath(), 
-				objectEntities.get(0).isPattern()).withAccessProfile(
-						new AccessProfileImpl(methodAccesses));				
+				Stack<ObjectEntity> family = new Stack<ObjectEntity>();
+				ObjectEntity familyMember = objectEntities.get(0);
+				while(familyMember!=null && familyMember.getIdentifier() != 0)
+				{
+					family.push(familyMember);
+					directive.clear();					
+					directive.put("OID", familyMember.getParent());
+					objectEntities = objectDAO.select(directive);
+					familyMember = objectEntities.isEmpty()?null:objectEntities.get(0);
+				}
+				MutableAccessNode node = null;
+				while(!family.isEmpty())
+				{
+					familyMember = family.pop();
+					node = tree.add(familyMember.getPath(),familyMember.isPattern()); 
+				}
+				node.withAccessProfile(new AccessProfileImpl(methodAccesses));				
 			}
 			//we also have to retrieve all the objects that does not appear in the
 			//previous list (attached to the user) and for which the SAUTH field (
@@ -405,7 +423,7 @@ public class SecuredAccessImpl implements SecuredAccess
 				methodAccesses.add(new MethodAccessImpl(
 						option.getAccessLevel(), types[index]));
 			}
-			tree = new AccessTreeImpl(mediator);
+			tree = new AccessTreeImpl<>(mediator);
 			tree.getRoot().withAccessProfile(new AccessProfileImpl(
 					methodAccesses));
 			this.buildTree(tree, this.applicationDAO.findFromPublicKey(
@@ -471,9 +489,24 @@ public class SecuredAccessImpl implements SecuredAccess
 					methodAccesses.add(new MethodAccessImpl(
 							option.getAccessLevel(), types[index]));
 				}
-				tree.add(objectEntities.get(0).getPath(), 
-					objectEntities.get(0).isPattern()).withAccessProfile(
-					    new AccessProfileImpl(methodAccesses));				
+
+				Stack<ObjectEntity> family = new Stack<ObjectEntity>();
+				ObjectEntity familyMember = objectEntities.get(0);
+				while(familyMember!=null && familyMember.getIdentifier() != 0)
+				{
+					family.push(familyMember);
+					directive.clear();					
+					directive.put("OID", familyMember.getParent());
+					objectEntities = objectDAO.select(directive);
+					familyMember = objectEntities.isEmpty()?null:objectEntities.get(0);
+				}
+				MutableAccessNode node = null;
+				while(!family.isEmpty())
+				{
+					familyMember = family.pop();
+					node = tree.add(familyMember.getPath(),familyMember.isPattern()); 
+				}
+				node.withAccessProfile(new AccessProfileImpl(methodAccesses));
 			}
 		} catch (Exception e)
 		{

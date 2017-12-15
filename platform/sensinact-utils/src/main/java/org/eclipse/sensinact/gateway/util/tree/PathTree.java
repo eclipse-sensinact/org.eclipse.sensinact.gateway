@@ -29,7 +29,7 @@ public class PathTree<P extends PathNode<P>>
 	//********************************************************************//
 	//						STATIC DECLARATIONS							  //
 	//********************************************************************//
-		
+	
 	//********************************************************************//
 	//						INSTANCE DECLARATIONS						  //
 	//********************************************************************//
@@ -162,13 +162,13 @@ public class PathTree<P extends PathNode<P>>
 	 * @param ic
 	 * @return
 	 */
-	public <N extends ImmutablePathNode<N>, T extends ImmutablePathTree<N>> T immutable(
-			Class<T> tc, Class<N> ic)
+	public <N extends ImmutablePathNode<N>, T extends ImmutablePathTree<N>> 
+	T immutable(Class<T> tc, Class<N> ic)
 	{
 		try
 		{
-			return tc.getConstructor(new Class<?>[]{ic}).newInstance(
-					this.root.<N>immutable(ic, null));
+			return tc.getConstructor(new Class<?>[]{ic}
+			).newInstance(this.root.<N>immutable(ic, null));
 			
 		} catch (Exception e) 
 		{
