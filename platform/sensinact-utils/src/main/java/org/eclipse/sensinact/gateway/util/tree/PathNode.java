@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.util.tree;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.sensinact.gateway.util.UriUtils;
@@ -94,10 +95,47 @@ public class PathNode<P extends PathNode<P>> implements Iterable<P>
 		node = (P) this;	
 		P child = null;
 		
-		if(path.length - index > inc && (child = 
-			this.children.get(path[index+inc]))!=null)	
+		if(path.length - index > inc)
 		{
-			node = child.get(path, index+inc);
+			child = this.children.getStrictNode(
+					path[index+inc]);
+			if(child == null)
+			{
+				List<P> cs = this.children.getPatternNodes(
+						path[index+inc]);
+				switch(cs.size())
+				{
+					case 0: 
+						break;
+					case 1: 
+						child = cs.get(0);
+						break;
+					default:
+						int len = 0;
+						P deeper = null;
+						for(int i = 0;i < cs.size(); i++)
+						{
+							P n = cs.get(i).get(path, index+inc);
+							int clen = UriUtils.getUriElements(n.getPath()
+									).length;
+							if(clen == path.length)
+							{
+								deeper = n;
+								break;
+							}
+							if(clen > len)
+							{
+								deeper = n;
+								len = clen;
+							}
+						}
+						child = deeper;
+				}
+			} 
+			if(child != null)
+			{
+				node = child.get(path, index+inc);
+			}
 		}
 		return node;
 	}
@@ -112,7 +150,7 @@ public class PathNode<P extends PathNode<P>> implements Iterable<P>
 		{
 			return null;
 		}
-		P child = this.children.get(node.nodeName);
+		P child = this.children.getStrictNode(node.nodeName);
 		if(child != null)
 		{
 			return child;
