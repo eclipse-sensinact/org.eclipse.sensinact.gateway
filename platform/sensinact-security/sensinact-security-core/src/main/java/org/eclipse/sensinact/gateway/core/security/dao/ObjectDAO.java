@@ -127,6 +127,7 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity>
 			if(!exact || path.equals(tmpEntity.getPath()))
 			{ 
 				filtered.add(tmpEntity);
+				continue;
 			}		
 			String[] uriElements = UriUtils.getUriElements(path);
 			
