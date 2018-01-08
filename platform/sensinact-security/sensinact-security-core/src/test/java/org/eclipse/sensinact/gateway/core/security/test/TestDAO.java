@@ -266,8 +266,8 @@ public class TestDAO
 			String path = paths[index];		
 			Object[] object = objects[index];	
 			
-			ObjectEntity objectEntity =  objectDAO.find(path);
-			
+			List<ObjectEntity> objectEntities =  objectDAO.find(path);
+			ObjectEntity objectEntity = objectEntities.get(0);
 			assertTrue(((Integer)object[0]).longValue() == objectEntity.getIdentifier());
 			assertTrue(((Integer)object[1]).longValue() == objectEntity.getParent());
 			assertTrue(object[2].equals(objectEntity.getPath()));
@@ -298,7 +298,9 @@ public class TestDAO
 			String path = paths[index];	
 			String resultingPath = resultingPaths[index];	
 			
-			ObjectEntity objectEntity =  objectDAO.find(path, true);
+			List<ObjectEntity> objectEntities =  objectDAO.find(path,true);			
+			ObjectEntity objectEntity = objectEntities.isEmpty()
+					?null:objectEntities.get(0);
 
 			switch(index)
 			{

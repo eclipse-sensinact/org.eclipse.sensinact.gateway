@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -79,7 +80,7 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity>
      * 
      * @throws DAOException 
      */
-    public ObjectEntity find(String path) throws DAOException 
+    public List<ObjectEntity> find(String path) throws DAOException 
     {
     	return find(path, false);
     }    
@@ -101,7 +102,7 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity>
      * @throws DAOException 
      * 
      */
-    public ObjectEntity find(String path, boolean exact) 
+    public List<ObjectEntity> find(String path, boolean exact) 
     		throws DAOException 
     {    	
     	if(path == null)
@@ -115,40 +116,47 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity>
 		{ 	
 			return null;
 		}
-		ObjectEntity tmpEntity = objectEntities.get(0);
-		
-		if(!exact || tmpEntity == null  || path.equals(tmpEntity.getPath()))
-		{ 
-		   return tmpEntity;
-		}		
-		String[] uriElements = UriUtils.getUriElements(path);
-		
-		String objectPath = tmpEntity.getPath();
-		
-		String[] objectPathElements = (objectPath != null)?
-			UriUtils.getUriElements(objectPath.replace(ANY_REGEX, 
-				ANY_REPLACEMENT)):new String[0];
-		
-		if(uriElements.length == objectPathElements.length)
+		List<ObjectEntity> filtered = new ArrayList<ObjectEntity>();
+		while(!objectEntities.isEmpty())
 		{
-			String lastSearched = uriElements[uriElements.length-1];
-			String lastFound = objectPathElements[uriElements.length-1];
-			
-			try
+			ObjectEntity tmpEntity = objectEntities.remove(0);
+			if(tmpEntity == null)
 			{
-				if(lastFound.equals(ANY_REPLACEMENT) 
-					|| lastSearched.equals(lastFound) 
-					|| Pattern.matches(lastFound, lastSearched))
-				{
-					return tmpEntity;
-				} 
+				continue;
 			}
-			catch(PatternSyntaxException e)
+			if(!exact || path.equals(tmpEntity.getPath()))
+			{ 
+				filtered.add(tmpEntity);
+			}		
+			String[] uriElements = UriUtils.getUriElements(path);
+			
+			String objectPath = tmpEntity.getPath();
+			
+			String[] objectPathElements = (objectPath != null)?
+				UriUtils.getUriElements(objectPath.replace(ANY_REGEX, 
+					ANY_REPLACEMENT)):new String[0];
+			
+			if(uriElements.length == objectPathElements.length)
 			{
-				mediator.debug("exact path '%s' not found", path);
+				String lastSearched = uriElements[uriElements.length-1];
+				String lastFound = objectPathElements[uriElements.length-1];
+				
+				try
+				{
+					if(lastFound.equals(ANY_REPLACEMENT) 
+						|| lastSearched.equals(lastFound) 
+						|| Pattern.matches(lastFound, lastSearched))
+					{
+						filtered.add(tmpEntity);
+					} 
+				}
+				catch(PatternSyntaxException e)
+				{
+					mediator.debug("exact path '%s' not found", path);
+				}
 			}
 		}
-		return null;
+		return filtered;
     }
 
     /**

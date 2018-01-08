@@ -144,7 +144,7 @@ public class AuthenticatedDAO extends AbstractMutableSnaDAO<AuthenticatedEntity>
     }
     
     /**
-     * Returns the {@link ObjectEntity} from the datastore 
+     * Returns the {@link AuthenticatedEntity} from the datastore 
      * matching the given Long identifier, otherwise null.
      * 
      * @param objectProfileEntityId
@@ -159,8 +159,22 @@ public class AuthenticatedDAO extends AbstractMutableSnaDAO<AuthenticatedEntity>
     public AuthenticatedEntity find(String path, final String publicKey) 
     		throws DAOException
     {     	
-    	final ObjectEntity objectEntity = this.objectDAO.find(path); 
-    	
+    	final ObjectEntity objectEntity;    	
+    	List<ObjectEntity> objectEntities = this.objectDAO.find(path); 
+    	if(objectEntities.size()>0)
+    	{
+    		objectEntity = objectEntities.get(0);
+    		//TODO: define what we should do if the path can be mapped to more
+    		//than one ObjectEntity : should we crash ? should we select the more or
+    		//the less restrictive AuthenticatedEntity ? should we ignore it as it
+    		//is the case for now ?
+    		//Do we have to notify that the DB has not been properly configured
+//    		if(objectEntities.size() > 1)
+//    		{}
+    	}else
+    	{
+    		return null;
+    	}
     	List<AuthenticatedEntity> authenticatedEntities = 
     		super.select(new HashMap<String,Object>(){{
     		this.put("OID", objectEntity.getIdentifier());

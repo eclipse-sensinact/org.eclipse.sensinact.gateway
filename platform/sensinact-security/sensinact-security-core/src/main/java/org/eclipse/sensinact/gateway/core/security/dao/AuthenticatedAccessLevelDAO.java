@@ -130,8 +130,23 @@ public class AuthenticatedAccessLevelDAO extends AbstractImmutableSnaDAO<Authent
      */
     public AuthenticatedAccessLevelEntity find(String path, String publicKey) 
     		throws DAOException 
-    {    
-    	ObjectEntity objectEntity = this.objectDAO.find(path);
+    {       	
+    	
+    	ObjectEntity objectEntity = null;
+    	List<ObjectEntity> objectEntities = this.objectDAO.find(path); 
+    	if(objectEntities.size()>0)
+    	{
+    		objectEntity = objectEntities.get(0) ;
+    		//TODO: define what we should do if the path can be mapped to more
+    		//than one ObjectEntity : should we crash ? should we select the more or
+    		//the less restrictive AuthenticatedAccessLevelEntity ? 
+    		//should we ignore it as it is the case for now ?
+    		//Do we have to notify that the DB has not been properly configured
+    	} else
+    	{
+    		throw new DAOException(String.format("Unknown element at '%s'",
+    				path));
+    	}    	
     	return this.find(objectEntity.getIdentifier(), publicKey);
     }
     
@@ -152,7 +167,21 @@ public class AuthenticatedAccessLevelDAO extends AbstractImmutableSnaDAO<Authent
     public AuthenticatedAccessLevelEntity find(String path, long identifier) 
     		throws DAOException 
     {    
-    	final ObjectEntity objectEntity = this.objectDAO.find(path); 
+    	ObjectEntity objectEntity = null;
+    	List<ObjectEntity> objectEntities = this.objectDAO.find(path); 
+    	if(objectEntities.size()>0)
+    	{
+    		objectEntity = objectEntities.get(0) ;
+    		//TODO: define what we should do if the path can be mapped to more
+    		//than one ObjectEntity : should we crash ? should we select the more or
+    		//the less restrictive AuthenticatedAccessLevelEntity ? 
+    		//should we ignore it as it is the case for now ?
+    		//Do we have to notify that the DB has not been properly configured
+    	} else
+    	{
+    		throw new DAOException(String.format("Unknown element at '%s'",
+    				path));
+    	}    	
     	return this.find(objectEntity.getIdentifier(), identifier);
     }
 }

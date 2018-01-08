@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core.security.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -170,7 +171,7 @@ public class SecuredAccessImpl implements SecuredAccess
 				}				
 			} else if(signature != null)
 			{
-				buildNode(tree, this.objectDAO.find(
+				buildNodes(tree, this.objectDAO.find(
 						UriUtils.getUri(new String[]{name})));
 			}	
 		} catch (DAOException e)
@@ -524,22 +525,31 @@ public class SecuredAccessImpl implements SecuredAccess
 	{
 		try
 		{
-			if(name==null)
+			if(name == null)
 			{
 				return false;
 			}
-			ObjectEntity entity = this.objectDAO.find(
+			List<ObjectEntity> entities = this.objectDAO.find(
 				UriUtils.getUri(new String[]{name}), true);
 			
-			if(signature == null)
+			if(entities.size() == 0)
 			{
-				return (entity == null);
+				return true;
 			}
-			BundleEntity bundle = null;
-			
-			return (entity == null || ((bundle = this.bundleDAO.find(
-				signature))!= null) && (bundle.getIdentifier()==
-					entity.getBundleEntity()));
+			BundleEntity bundle = this.bundleDAO.find(signature);
+			if(bundle == null)
+			{
+				return false;
+			}
+			while(!entities.isEmpty())
+			{
+				ObjectEntity entity = entities.remove(0);
+				if(bundle.getIdentifier()==entity.getBundleEntity())
+				{
+					return true;
+				}
+			}
+			return false;
 		
 		} catch (Exception e)
 		{
@@ -549,41 +559,41 @@ public class SecuredAccessImpl implements SecuredAccess
 
 	/**
 	 * @param tree
-	 * @param object
+	 * @param list
 	 * @throws Exception
 	 */
-	private void buildNode(
+	private void buildNodes(
 		MutableAccessTree<? extends MutableAccessNode> tree, 
-		ObjectEntity object) throws SecuredAccessException
+		List<ObjectEntity> objectEntities) throws SecuredAccessException
 	{
 
-		if (object == null || /*it means that the root has been reached*/
-				object.getPath()==null) 
+		if (objectEntities == null || objectEntities.isEmpty()) 
 		{
 			return;
 		}
-		try
+		while(!objectEntities.isEmpty())
 		{
-			AccessProfileOption option = 
-				this.objectProfileAccessDAO.getAccessProfileOption(
-				    object.getObjectProfileEntity());
-			
-			tree.add(object.getPath(), object.isPattern()
-					).withAccessProfile(option);
-			
-			List<ObjectEntity> children = this.objectDAO.findChildren(
-					object.getIdentifier());
-	
-			Iterator<ObjectEntity> iterator = children.iterator();
-			
-			while (iterator.hasNext()) 
+			ObjectEntity objectEntity = objectEntities.remove(0);
+			if(objectEntity.getPath()==null)
 			{
-				ObjectEntity entity = iterator.next();
-				buildNode(tree, entity);
+				continue;
 			}
-		} catch (Exception e)
-		{
-			throw new SecuredAccessException(e);
+			try
+			{
+				AccessProfileOption option = 
+					this.objectProfileAccessDAO.getAccessProfileOption(
+							objectEntity.getObjectProfileEntity());
+				
+				tree.add(objectEntity.getPath(), objectEntity.isPattern()
+						).withAccessProfile(option);
+				
+				buildNodes(tree, this.objectDAO.findChildren(
+						objectEntity.getIdentifier()));
+				
+			} catch (Exception e)
+			{
+				throw new SecuredAccessException(e);
+			}
 		}
 	}
 
