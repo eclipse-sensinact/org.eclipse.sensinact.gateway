@@ -48,6 +48,8 @@ public class TestRestGETAccess  extends TestRestAccess
         simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + 
         		"/providers/slider/services", null, "GET");
 
+        System.out.println(simulated);
+        
         response = new JSONObject(simulated);
      
         JSONArray array = response.getJSONArray("services");
@@ -94,6 +96,7 @@ public class TestRestGETAccess  extends TestRestAccess
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + 
         		"/slider", null, "GET");
 
+        System.out.println(simulated);
         JSONObject response = new JSONObject(simulated).getJSONObject("response");
      
         JSONArray array = response.getJSONArray("services");

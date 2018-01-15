@@ -15,7 +15,9 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -23,10 +25,13 @@ import java.util.regex.Pattern;
 
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.DataResource;
+import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
+import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -391,7 +396,7 @@ public abstract class NorthboundAccess
 	 * @throws IOException
 	 * @throws JSONException
 	 */
-	private Parameter[] processContent(String content)
+	private Parameter[] processParameters(String content)
 	throws IOException, JSONException
 	{
 		this.content = content;
@@ -411,12 +416,11 @@ public abstract class NorthboundAccess
         	{
     			return null;
         	}
-    	}
+    	}    	
     	int index = 0;
     	int length = parameters==null?0:parameters.length();
     	
-        Parameter[] parametersArray = new Parameter[length];
-
+        List<Parameter> parametersList = new ArrayList<Parameter>();
         for(; index < length; index++) 
         {
         	Parameter parameter = null;
@@ -436,9 +440,36 @@ public abstract class NorthboundAccess
         		this.attribute = (String)parameter.getValue();
         		continue;
 			}
-			parametersArray[index] = parameter;
+			parametersList.add(parameter);
         }
-        return parametersArray;
+        Iterator<Map.Entry<String,List<String>>> iterator = 
+        		this.query.entrySet().iterator();
+        
+        while(iterator.hasNext())
+        {
+        	Map.Entry<String,List<String>> entry = iterator.next();
+        	Parameter parameter = null;
+            try
+			{
+            	parameter = new Parameter(mediator, entry.getKey(), 
+					entry.getValue().size()>1?JSONArray.class:String.class,
+					entry.getValue().size()==0?"true"
+						:(entry.getValue().size()==1?entry.getValue().get(0)
+							:new JSONArray(entry.getValue())));
+			}
+			catch (InvalidValueException e)
+			{
+        		throw new JSONException(e);
+			}
+			if("attributeName".equals(parameter.getName()) &&
+					String.class == parameter.getType())
+			{
+        		this.attribute = (String)parameter.getValue();
+        		continue;
+			}
+			parametersList.add(parameter);
+        }
+        return parametersList.toArray(new Parameter[0]);
 	}
 
 	/**
@@ -508,7 +539,7 @@ public abstract class NorthboundAccess
 		Parameter[] parameters = null;
 		try
 		{
-			parameters = processContent(request.getContent());
+			parameters = processParameters(request.getContent());
 			
 		} catch(IOException e)
 		{
@@ -531,6 +562,7 @@ public abstract class NorthboundAccess
     /**
      * @param parameters
      * @return
+     * 
      * @throws IOException
      */
     private boolean handle(Parameter[] parameters) 
@@ -559,11 +591,9 @@ public abstract class NorthboundAccess
 				break;
 			case "ACT":
 				int index = 0;
-				int length = parameters==null?
-					0:parameters.length;
+				int length = parameters==null?0:parameters.length;
 				
-				Object[] arguments = length==0
-						?null:new Object[length];
+				Object[] arguments = length==0?null:new Object[length];
 				for(;index < length; index++)
 				{
 					arguments[index] = parameters[index].getValue();
@@ -594,7 +624,8 @@ public abstract class NorthboundAccess
 				builder.withArgument(parameters[0].getValue());
 				break;
 			case "SUBSCRIBE":
-				NorthboundRecipient recipient = this.request.createRecipient(parameters);
+				NorthboundRecipient recipient = 
+				this.request.createRecipient(parameters);
 				if(recipient == null)
 				{	
 					sendError(400, "Unable to create the appropriate recipient");
@@ -602,19 +633,59 @@ public abstract class NorthboundAccess
 				} 
 				index = 0;
 				length = parameters==null?0:parameters.length;
+				
+				String sender = null;
+				boolean isPattern = false;
+				boolean isComplement = false;
+				SnaMessage.Type[] types = null;
 				JSONArray conditions = null;
+				
+				SnaFilter filter = null;
 				
 				for(;index < length; index++)
 				{
 					String name = parameters[index].getName();
-					if("conditions".equals(name) && JSONArray.class.isAssignableFrom(
-							parameters[index].getType()))
+					switch(name)
 					{
-						conditions = (JSONArray) parameters[index].getValue();
+						case "conditions":
+							conditions = CastUtils.cast(mediator.getClassLoader(),
+								JSONArray.class, parameters[index].getValue());
 						break;
+						case "sender":
+							sender = CastUtils.cast(mediator.getClassLoader(),
+								String.class, parameters[index].getValue());
+						break;
+						case "pattern":
+							isPattern = CastUtils.cast(mediator.getClassLoader(),
+								boolean.class, parameters[index].getValue());
+						break;
+						case "complement":
+							isComplement = CastUtils.cast(mediator.getClassLoader(),
+								boolean.class, parameters[index].getValue());
+						break;
+						case "types":
+							types = CastUtils.castArray(mediator.getClassLoader(),
+							    SnaMessage.Type[].class, parameters[index].getValue());
+						default:;
 					}
 				}
-			    builder.withArgument(new Object[] {recipient, conditions});
+				if(sender == null)
+				{
+					sender = "/[^/]+(/[^/]+)*";
+				}
+				if(types == null)
+				{
+					types = SnaMessage.Type.values();
+				}
+				if(conditions == null)
+				{
+					conditions = new JSONArray();
+				}
+				filter = new SnaFilter(mediator, sender, isPattern,
+						isComplement, conditions);
+				filter.addHandledType(types);
+				
+			    builder.withArgument(new Object[] {recipient, filter});
 				break;
 			default:
 				break;

@@ -26,6 +26,7 @@ public class RegisterAgentRequest<F> extends NorthboundRequest<F>
 	
 	private String serviceProvider;
 	private String service;
+	private SnaFilter filter;
 	
 	/**
 	 * Constructor
@@ -38,13 +39,13 @@ public class RegisterAgentRequest<F> extends NorthboundRequest<F>
 	 */
 	public RegisterAgentRequest(NorthboundMediator mediator, 
 		String serviceProvider, String service, NorthboundRecipient recipient, 
-		JSONArray constraints)
+		SnaFilter filter)
 	{
 		super(mediator);
 		this.serviceProvider = serviceProvider;
 		this.service = service;
 		this.recipient = recipient;
-		this.constraints = constraints;
+		this.filter = filter;
 		if(this.recipient == null)
 		{
 			throw new NullPointerException("Recipient missing");
@@ -59,22 +60,6 @@ public class RegisterAgentRequest<F> extends NorthboundRequest<F>
 	@Override
 	protected Argument[] getExecutionArguments() 
 	{
-		SnaFilter filter = null;
-		if(serviceProvider != null)
-		{
-			StringBuilder builder = new StringBuilder();
-			builder.append(UriUtils.PATH_SEPARATOR);
-			builder.append(serviceProvider);
-			
-			if(service != null)
-			{
-				builder.append(UriUtils.PATH_SEPARATOR);
-				builder.append(service);
-			}
-			builder.append("(/[^/]*)*");
-			filter = new SnaFilter(mediator, builder.toString(), 
-					true, false, this.constraints);
-		}
 		AbstractMidAgentCallback callback = new AbstractMidAgentCallback()
 		{
 			@Override

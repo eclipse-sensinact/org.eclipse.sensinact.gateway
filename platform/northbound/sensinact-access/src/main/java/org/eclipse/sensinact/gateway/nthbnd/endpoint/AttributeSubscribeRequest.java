@@ -12,10 +12,11 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import org.json.JSONArray;
 
+
 public class AttributeSubscribeRequest<F> extends AttributeRequest<F> 
 {	
 	private NorthboundRecipient recipient;
-	private JSONArray constraints;
+	private JSONArray conditions;
 
 	/**
 	 * @param mediator
@@ -28,11 +29,11 @@ public class AttributeSubscribeRequest<F> extends AttributeRequest<F>
 	public AttributeSubscribeRequest(NorthboundMediator mediator, 
 			String serviceProvider, String service, String resource, 
 			String attribute, NorthboundRecipient recipient,
-			JSONArray jsonArray)
+			JSONArray conditions)
 	{
 		super(mediator, serviceProvider, service, resource, attribute);
 		this.recipient = recipient;
-		this.constraints = jsonArray;
+		this.conditions = conditions;
 		if(this.recipient == null)
 		{
 			throw new NullPointerException("Recipient missing");
@@ -55,7 +56,7 @@ public class AttributeSubscribeRequest<F> extends AttributeRequest<F>
 			System.arraycopy(superArguments, 0, arguments, 0, length);
 		}
 		arguments[length] = new Argument(NorthboundRecipient.class, this.recipient);
-		arguments[length+1] = new Argument(JSONArray.class, this.constraints);
+		arguments[length+1] = new Argument(JSONArray.class, this.conditions);
 	    return arguments;
 	}
 	

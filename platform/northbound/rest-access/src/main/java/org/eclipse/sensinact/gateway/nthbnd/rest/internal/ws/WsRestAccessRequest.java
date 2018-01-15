@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpRestAccessRequest;
 
 public class WsRestAccessRequest implements NorthboundAccessWrapper 
 {
@@ -41,24 +43,60 @@ public class WsRestAccessRequest implements NorthboundAccessWrapper
 		this.socket = socket;
 	}
 	
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getMediator()
+	 */
 	@Override
 	public NorthboundMediator getMediator() 
 	{
 		return this.mediator;
 	}
 
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getRequestURI()
+	 */
 	@Override
 	public String getRequestURI() {
 		
-		return request.optString("uri");
+		String uri = request.optString("uri");
+		String[] uriElements = uri.split("\\?");
+		return uriElements[0];
 	}
 
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getQueryMap()
+	 */
 	@Override
 	public Map<String,List<String>> getQueryMap() 
 	{
+		String uri = request.optString("uri");
+		String[] uriElements = uri.split("\\?");
+		if(uriElements.length == 2)
+		{
+			try
+			{
+				return HttpRestAccessRequest.processRequestQuery(
+						uriElements[1]);
+			}
+			catch (UnsupportedEncodingException e)
+			{
+				this.mediator.error(e);
+			}
+		}
 		return Collections.<String,List<String>>emptyMap();
 	}
 
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getContent()
+	 */
 	@Override
 	public String getContent() 
 	{
@@ -75,6 +113,11 @@ public class WsRestAccessRequest implements NorthboundAccessWrapper
 		return this.content;
 	}
 
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getAuthentication()
+	 */
 	@Override
 	public Authentication<?> getAuthentication() 
 	{
@@ -101,8 +144,7 @@ public class WsRestAccessRequest implements NorthboundAccessWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see NorthboundAccessWrapper#
-	 * createRecipient(Parameter[])
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#createRecipient(org.eclipse.sensinact.gateway.core.method.Parameter[])
 	 */
 	@Override
 	public NorthboundRecipient createRecipient(Parameter[] parameters)

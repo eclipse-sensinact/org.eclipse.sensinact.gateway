@@ -23,9 +23,6 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
@@ -35,15 +32,21 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.util.IOUtils;
+import org.json.JSONObject;
 
 public class HttpRestAccessRequest extends HttpServletRequestWrapper 
 implements NorthboundAccessWrapper
 {
 	/**
-	 * @param queryString
+	 * Builds a map of parameters according to the query of 
+	 * the URI of an HTTP request
+	 * 
+	 * @param queryString the query String to be converted 
+	 * into a map of parameters
+	 *   
 	 * @throws UnsupportedEncodingException
 	 */
-	private static Map<String,List<String>> processRequestQuery(
+	public static Map<String,List<String>> processRequestQuery(
 			String queryString) 
 			throws UnsupportedEncodingException
 	{		
@@ -58,6 +61,7 @@ implements NorthboundAccessWrapper
 		int index = 0;
 		int length = characters.length;
 		
+		boolean escape = false;
 		String name = null;
 		String value = null;
 		StringBuilder element = new StringBuilder();
@@ -65,21 +69,30 @@ implements NorthboundAccessWrapper
 		for(;index < length;index++)
 		{
 			char c = characters[index];
+			if(escape)
+			{
+				escape = false;
+				element.append(c);
+				continue;
+			}
 			switch(c)
 			{
-				case '?':;
-					break;
+				case '\\':
+				  escape = true;
+				  break;
+				case '?':
+				  break;
 				case '=':
-					name = element.toString();
-					element = new StringBuilder();
-					break;
-				case '&':				
-					value = element.toString();
-					addQueryParameter(queryMap, name, value);
-					element = new StringBuilder();
-					break;
+				  name = element.toString();
+				  element = new StringBuilder();
+				  break;
+				case '&':	
+				  value = element.toString();
+				  addQueryParameter(queryMap, name, value);
+				  element = new StringBuilder();
+				  break;
 				default:
-					element.append(c);
+				  element.append(c);
 			}
 		}
 		value = element.toString();
@@ -88,10 +101,17 @@ implements NorthboundAccessWrapper
 	}
 
 	/**
+	 * Adds a parameter to the map argument, created using 
+	 * the name and value passed as parameters 
+	 *  
+	 * @param queryMap the map to which to add the 
+	 * parameter to be created using the name and 
+	 * value arguments
+	 * @param name the name of the parameter to be
+	 * added to the map argument
+	 * @param value the value of the parameter to be
+	 * added to the map argument 
 	 * 
-	 * @param queryMap
-	 * @param name
-	 * @param value
 	 * @throws UnsupportedEncodingException
 	 */
 	private static void addQueryParameter(

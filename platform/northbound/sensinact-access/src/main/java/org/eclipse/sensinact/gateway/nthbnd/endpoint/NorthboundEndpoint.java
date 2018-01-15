@@ -96,7 +96,6 @@ public class NorthboundEndpoint
 			
 		} catch(Exception e)
 		{
-			e.printStackTrace();
 			this.mediator.error(e);
 		}
 		return responseFormat.format(result);		

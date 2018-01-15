@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
+import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONArray;
@@ -237,13 +238,14 @@ public class NorthboundRequestBuilder<F>
 					{
 						request = new AttributeSubscribeRequest<F>( mediator,
 						    serviceProvider, service, resource, attribute, 
-						    (NorthboundRecipient) arguments[0], (JSONArray) 
-						        (arguments.length>1?arguments[1]:null));
+						    (NorthboundRecipient) arguments[0], (arguments.length>1
+						    ?((SnaFilter)arguments[1]).toJSONObject().getJSONArray(
+						    	"conditions"):new JSONArray()));
 					} else
 					{
 						request = new RegisterAgentRequest<F>( mediator, serviceProvider, 
-							service, (NorthboundRecipient) arguments[0], 
-							(JSONArray) (arguments.length>1?arguments[1]:null));
+							service, (NorthboundRecipient) arguments[0],  (SnaFilter) 
+					        (arguments.length>1?arguments[1]:null));
 					}
 				}
 				break;
