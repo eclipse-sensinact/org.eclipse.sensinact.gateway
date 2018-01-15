@@ -14,6 +14,7 @@ package org.eclipse.sensinact.gateway.simulated.slider.internal;
 import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
 
 public class SliderSetter implements SliderSetterItf {
+	
 	private final SliderAdapter listener;
 
     public SliderSetter(SliderAdapter listener) {

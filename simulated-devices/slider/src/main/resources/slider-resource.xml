@@ -18,9 +18,4 @@
     	<attribute name="value" type="int"  modifiable="UPDATABLE"/>
     </attributes>
   </resourceInfo>
-  <devices>
-  	<device identifier="slider">
-  		<service name="cursor"/>
-  	</device>
-  </devices>
   </resourceInfos>

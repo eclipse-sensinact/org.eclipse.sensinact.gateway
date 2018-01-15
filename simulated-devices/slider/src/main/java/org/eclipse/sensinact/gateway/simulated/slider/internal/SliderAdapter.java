@@ -20,14 +20,17 @@ import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 public class SliderAdapter 
 {
 	private final LocalProtocolStackEndpoint<SliderPacket> connector;
+	private final String id;
 
 	/**
 	 * @param connector 
 	 * 
 	 */
-	public SliderAdapter(LocalProtocolStackEndpoint<SliderPacket> connector)
+	public SliderAdapter(String id, 
+		LocalProtocolStackEndpoint<SliderPacket> connector)
 	{
 		this.connector = connector;
+		this.id = id;
 	}
     
     /**
@@ -37,7 +40,7 @@ public class SliderAdapter
     {
     	try
         {
-            connector.process(new SliderPacket(value));
+            connector.process(new SliderPacket(id, value));
         }
         catch (InvalidPacketException e)
         {

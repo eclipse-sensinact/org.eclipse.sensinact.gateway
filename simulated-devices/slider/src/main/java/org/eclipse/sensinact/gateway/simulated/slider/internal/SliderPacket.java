@@ -11,6 +11,7 @@
 
 package org.eclipse.sensinact.gateway.simulated.slider.internal;
 
+import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.*;
 
@@ -19,28 +20,54 @@ import org.eclipse.sensinact.gateway.generic.packet.annotation.*;
  */
 public class SliderPacket implements Packet
 {
-	private final int value;
 
 	@ServiceProviderID
-	public final String serviceProviderIdentifier = "slider";
+	public String serviceProviderIdentifier = null;
+	
 	@ServiceID
-	public final String serviceId = "cursor";
+	public String serviceId = null;
+	
 	@ResourceID
-	public final String resourceId = "position";
+	public String resourceId = null;
+
+	private final CommandType command;
+	private final Object value;
 
 	/**
 	 * @param value
 	 */
-    public SliderPacket(int value)
+    public SliderPacket(String id , int value)
     {
-    	this.value = value;
+    	this(id,  "cursor", "position", CommandType.GET,value);
     }
 
 	/**
+	 * @param value
+	 */
+    public SliderPacket(String id , String serviceId, String resourceId, 
+    		CommandType command, Object value)
+    {
+    	this.serviceProviderIdentifier = id;
+    	this.serviceId = serviceId;
+    	this.resourceId = resourceId;
+    	this.command = command;
+    	this.value = value;
+    }
+    
+    /**
+	 * @return
+	 */
+    @CommandID
+	public CommandType getCommand()
+	{
+		return this.command;
+	}
+    
+    /**
 	 * @return
 	 */
     @Data
-	public int getValue()
+	public Object getValue()
 	{
 		return this.value;
 	}
