@@ -22,6 +22,10 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  */
 public class PathNode<P extends PathNode<P>> implements Iterable<P>
 {
+	public static final String ANY_REGEX = "[^/]+";
+	
+	public static final String ANY_REPLACEMENT = "#ANY#";
+	
 	protected P parent;
 	protected final String nodeName;
 	protected final PathNodeList<P> children;
@@ -73,7 +77,8 @@ public class PathNode<P extends PathNode<P>> implements Iterable<P>
 	 */
 	public P get(String path)
 	{
-		return this.get(UriUtils.getUriElements(path), 0);
+		return this.get(UriUtils.getUriElements(
+		path.replace(PathNode.ANY_REGEX, PathNode.ANY_REPLACEMENT)), 0);
 	}
 
 	/**
@@ -85,9 +90,8 @@ public class PathNode<P extends PathNode<P>> implements Iterable<P>
 	{
 		P node = null;
 		
-		if((isRoot && index!=0) || 
-			(!isRoot && (path.length - index < 1 
-					|| !this.equals(path[index]))))
+		if((isRoot && index!=0) || (!isRoot && (path.length - index < 1 
+			|| !this.equals(path[index]))))
 		{
 			return node;
 		}
@@ -97,12 +101,15 @@ public class PathNode<P extends PathNode<P>> implements Iterable<P>
 		
 		if(path.length - index > inc)
 		{
-			child = this.children.getStrictNode(
-					path[index+inc]);
-			if(child == null)
+			int incrementedIndex = index+inc;
+			child = this.children.getStrictNode(path[incrementedIndex]);
+			if(child != null)
 			{
-				List<P> cs = this.children.getPatternNodes(
-						path[index+inc]);
+				node = child.get(path, incrementedIndex);
+				
+			} else
+			{
+				List<P> cs = this.children.getPatternNodes(path[incrementedIndex]);
 				switch(cs.size())
 				{
 					case 0: 
@@ -115,9 +122,8 @@ public class PathNode<P extends PathNode<P>> implements Iterable<P>
 						P deeper = null;
 						for(int i = 0;i < cs.size(); i++)
 						{
-							P n = cs.get(i).get(path, index+inc);
-							int clen = UriUtils.getUriElements(n.getPath()
-									).length;
+							P n = cs.get(i).get(path, incrementedIndex);
+							int clen = UriUtils.getUriElements(n.getPath()).length;
 							if(clen == path.length)
 							{
 								deeper = n;
@@ -131,10 +137,10 @@ public class PathNode<P extends PathNode<P>> implements Iterable<P>
 						}
 						child = deeper;
 				}
-			} 
-			if(child != null)
-			{
-				node = child.get(path, index+inc);
+				if(child!=null)
+				{
+					node = child;
+				}
 			}
 		}
 		return node;
@@ -225,9 +231,9 @@ public class PathNode<P extends PathNode<P>> implements Iterable<P>
 		{
 			return false;
 		}
-		return this.nodeName.equals(objectName)
-		    ?true:(isPattern?pattern.matcher(objectName
-		    		).matches():false);
+		return (PathNode.ANY_REPLACEMENT.equals(objectName)||this.nodeName.equals(
+			objectName))?true:(isPattern?pattern.matcher(objectName
+					).matches():false);
 	}
 
 	/**

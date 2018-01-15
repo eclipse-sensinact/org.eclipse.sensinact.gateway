@@ -81,12 +81,11 @@ extends ProtocolStackEndpoint<P>
 		this.buildExecutors();
 	}
 	
-	/** 
-	 * @throws InvalidProtocolStackException 
+	/**  
 	 * @inheritDoc
 	 * 
-	 * @see ProtocolStackEndpoint#
-	 * connect(ExtModelConfiguration)
+	 * @see org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint#
+	 * connect(org.eclipse.sensinact.gateway.generic.ExtModelConfiguration)
 	 */
 	public void connect(ExtModelConfiguration manager) 
 			throws InvalidProtocolStackException
@@ -101,7 +100,7 @@ extends ProtocolStackEndpoint<P>
 	/**
 	 * @inheritDoc
 	 *
-	 * @see TaskTranslator#
+	 * @see org.eclipse.sensinact.gateway.generic.TaskTranslator#
 	 * getRequestType()
 	 */
 	@Override
@@ -113,8 +112,8 @@ extends ProtocolStackEndpoint<P>
 	/**
 	 * @inheritDoc
 	 *
-	 * @see TaskTranslator#
-	 * send(Task)
+	 * @see org.eclipse.sensinact.gateway.generic.TaskTranslator#
+	 * send(org.eclipse.sensinact.gateway.generic.Task)
 	 */
 	@Override
 	public void send(Task task) 
@@ -403,11 +402,8 @@ extends ProtocolStackEndpoint<P>
 	/**
 	 * @inheritDoc
 	 *
-	 * @see TaskTranslator#
-	 * createTask(Mediator,
-	 * Task.CommandType,
-	 * java.lang.String, java.lang.String, 
-	 * ResourceConfig, java.lang.Object[])
+	 * @see org.eclipse.sensinact.gateway.generic.TaskTranslator#
+	 * createTask(org.eclipse.sensinact.gateway.common.bundle.Mediator, org.eclipse.sensinact.gateway.generic.Task.CommandType, java.lang.String, java.lang.String, org.eclipse.sensinact.gateway.core.ResourceConfig, java.lang.Object[])
 	 */
 	@Override
 	public Task createTask(Mediator mediator, CommandType command, String path,

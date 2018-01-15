@@ -317,8 +317,7 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
      * @return a new {@link ResourceBuilder} instance
      */
     private <G extends ResourceConfig> ResourceBuilder 
-    configureResourceBuilder( G resourceConfig,
-    		ResourceDescriptor descriptor)
+    configureResourceBuilder( G resourceConfig, ResourceDescriptor descriptor)
     {
     	ResourceBuilder builder = new ResourceBuilder(
     			this.mediator, resourceConfig);
@@ -621,32 +620,32 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 		return props;
 	}
 	
-	/**
-	 * Returns the {@link AccessLevelOption} for the {@link Session} whose
-	 * {@link SessionKey} is passed as parameter, and for the {@link 
-	 * ModelElement} belonging to this resource model instance whose path 
-	 * is also passed as parameter
-	 *  
-	 * @param modelElement the targeted resource model element	
-	 * @param pubicKey the requirer user's {@link Session} public key 
-	 * 
-	 * @return the {@link AccessLevelOption} for the specified session and 
-	 * resource
-	 */
-	public <I extends ModelInstance<?>, M extends ModelElementProxy, 
-	P extends ProcessableData, E extends Nameable, R extends Nameable>
-	AccessLevelOption getAccessLevelOption(ModelElement<I, M, P, E, R> 
-	modelElement, String publicKey)
-	{
-		if(modelElement.getModelInstance() != this)
-		{
-			throw new RuntimeException(
-			   "the model element argument must belong to this model instance");
-		}
-		final String path = modelElement.getPath();
-		return this.configuration().getAuthenticatedAccessLevelOption(
-				path, publicKey);
-	}
+//	/**
+//	 * Returns the {@link AccessLevelOption} for the {@link Session} whose
+//	 * {@link SessionKey} is passed as parameter, and for the {@link 
+//	 * ModelElement} belonging to this resource model instance whose path 
+//	 * is also passed as parameter
+//	 *  
+//	 * @param modelElement the targeted resource model element	
+//	 * @param pubicKey the requirer user's {@link Session} public key 
+//	 * 
+//	 * @return the {@link AccessLevelOption} for the specified session and 
+//	 * resource
+//	 */
+//	public <I extends ModelInstance<?>, M extends ModelElementProxy, 
+//	P extends ProcessableData, E extends Nameable, R extends Nameable>
+//	AccessLevelOption getAccessLevelOption(ModelElement<I, M, P, E, R> 
+//	modelElement, String publicKey)
+//	{
+//		if(modelElement.getModelInstance() != this)
+//		{
+//			throw new RuntimeException(
+//			   "the model element argument must belong to this model instance");
+//		}
+//		final String path = modelElement.getPath();
+//		return this.configuration().getAuthenticatedAccessLevelOption(
+//				path, publicKey);
+//	}
 	
 	/**
 	 * Returns the set of the specified {@link ModelElement} accessible 

@@ -19,6 +19,7 @@ import java.util.regex.PatternSyntaxException;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.eclipse.sensinact.gateway.util.tree.PathNode;
 
 /**
  * Method DAO 
@@ -38,10 +39,6 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity>
 	//********************************************************************//
 	//						STATIC DECLARATIONS  						  //
 	//********************************************************************//
-	
-	private static final String ANY_REGEX = "[^/]+";
-	
-	private static final String ANY_REPLACEMENT = "#ANY#";
 	
 	//********************************************************************//
 	//						INSTANCE DECLARATIONS						  //
@@ -105,18 +102,14 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity>
     public List<ObjectEntity> find(String path, boolean exact) 
     		throws DAOException 
     {    	
+		List<ObjectEntity> filtered = new ArrayList<ObjectEntity>();
     	if(path == null)
     	{
-    		return null;
+    		return filtered;
     	}
 		List<ObjectEntity> objectEntities = super.select(
-			"getObjectFromPath", path);
+				"getObjectFromPath", path);
 		
-		if(objectEntities.size() != 1)
-		{ 	
-			return null;
-		}
-		List<ObjectEntity> filtered = new ArrayList<ObjectEntity>();
 		while(!objectEntities.isEmpty())
 		{
 			ObjectEntity tmpEntity = objectEntities.remove(0);
@@ -134,17 +127,16 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity>
 			String objectPath = tmpEntity.getPath();
 			
 			String[] objectPathElements = (objectPath != null)?
-				UriUtils.getUriElements(objectPath.replace(ANY_REGEX, 
-					ANY_REPLACEMENT)):new String[0];
+				UriUtils.getUriElements(objectPath.replace(PathNode.ANY_REGEX, 
+					PathNode.ANY_REPLACEMENT)):new String[0];
 			
 			if(uriElements.length == objectPathElements.length)
 			{
 				String lastSearched = uriElements[uriElements.length-1];
-				String lastFound = objectPathElements[uriElements.length-1];
-				
+				String lastFound = objectPathElements[uriElements.length-1];				
 				try
 				{
-					if(lastFound.equals(ANY_REPLACEMENT) 
+					if(lastFound.equals(PathNode.ANY_REPLACEMENT) 
 						|| lastSearched.equals(lastFound) 
 						|| Pattern.matches(lastFound, lastSearched))
 					{

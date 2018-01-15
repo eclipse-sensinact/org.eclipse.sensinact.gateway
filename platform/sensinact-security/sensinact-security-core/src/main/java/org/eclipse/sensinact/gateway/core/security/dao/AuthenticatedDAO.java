@@ -173,7 +173,8 @@ public class AuthenticatedDAO extends AbstractMutableSnaDAO<AuthenticatedEntity>
 //    		{}
     	}else
     	{
-    		return null;
+    		throw new DAOException(String.format(
+    			"Unknown element at '%s'", path));
     	}
     	List<AuthenticatedEntity> authenticatedEntities = 
     		super.select(new HashMap<String,Object>(){{

@@ -84,6 +84,12 @@ public class SocketEndpointManagerTest
 		"[\"slider\",\"light\",\"sna3:slider\",\"sna3:light\",\"sna2:slider\",\"sna2:light\"]"),
 		j.getJSONArray("providers"), false);
 		
+		instances.get(1).moveSlider(0);		
+		s = instances.get(0).get("sna2:slider", "cursor", "position");
+		j = new JSONObject(s);
+		
+		assertEquals(0,j.getJSONObject("response").getInt("value"));
+		
 		final Stack<SnaMessage<?>> stack = new Stack<SnaMessage<?>>();
 		
 		s = instances.get(0).subscribe("sna2:slider", "cursor", "position", 
@@ -105,19 +111,21 @@ public class SocketEndpointManagerTest
 				}
 			}
 		});			
-		instances.get(1).moveSlider(0);		
+		Thread.sleep(2000);
+		
+		instances.get(1).moveSlider(45);		
 		s = instances.get(0).get("sna2:slider", "cursor", "position");
 		j = new JSONObject(s);
 		
-		assertEquals(0,j.getJSONObject("response").getInt("value"));
+		assertEquals(45,j.getJSONObject("response").getInt("value"));
+		JSONObject message = null;
 		
 		Thread.sleep(2000);
-		JSONObject message = null;
 		synchronized(stack)
 		{
 			assertEquals(1, stack.size());
 			message= new JSONObject(((SnaMessage)stack.peek()).getJSON());
-			assertEquals(0, message.getJSONObject("notification").getInt("value"));
+			assertEquals(45, message.getJSONObject("notification").getInt("value"));
 		}		
 		instances.get(1).moveSlider(150);		
 		s = instances.get(0).get("sna2:slider", "cursor", "position");

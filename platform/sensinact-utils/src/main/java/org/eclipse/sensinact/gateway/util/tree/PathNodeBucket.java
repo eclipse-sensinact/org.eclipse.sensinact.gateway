@@ -10,9 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.util.tree;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * {@link PathNode}s linker in a {@link PathNodeList}
  * 

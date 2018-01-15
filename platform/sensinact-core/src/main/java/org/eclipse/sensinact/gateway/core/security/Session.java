@@ -218,9 +218,8 @@ public interface Session
      * @return the JSON formated response of the ACT access method 
      * invocation
      */
-    JSONObject act(String serviceProviderId,
-             String serviceId, String resourceId, 
-             Object[] parameters );
+    JSONObject act(String serviceProviderId, String serviceId, 
+    	String resourceId, Object[] parameters );
      
     /** 
      * Invokes the SUBSCRIBE access method on the resource whose String 
@@ -242,10 +241,9 @@ public interface Session
      * @return the JSON formated response of the SUBSCRIBE access method 
      * invocation
      */
-    JSONObject subscribe(String serviceProviderId,
-             String serviceId, String resourceId, 
- 	        Recipient recipient, JSONArray conditions);
-        
+    JSONObject subscribe(String serviceProviderId, String serviceId, 
+    	String resourceId, Recipient recipient, JSONArray conditions);
+	
     /** 
      * Invokes the UNSUBSCRIBE access method on the resource whose String 
      * identifier is passed as parameter, held by the specified service 

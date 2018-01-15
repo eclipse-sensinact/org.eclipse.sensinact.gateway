@@ -227,7 +227,7 @@ public class TestDAO
 
 		String[][] users = new String[][]
 		{
-			new String[]{"anonymous", "ANONYMOUS", "294de3557d9d00b3d2d8a1e6aab028cf", "anonymous"},
+			new String[]{"anonymous", "ANONYMOUS", "294de3557d9d0b3d2d8a1e6aab028cf", "anonymous"},
 			new String[]{"christophe.munilla@cea.fr", "cea", "ac0dad7d2c39119f9d7d76d34303ec85", "73c5f1a1e7b4a75c2b5fabafca2cf51e6b0e7426"},
 			new String[]{"fake@cea.fr", "fake", "144c9defac04969c7bfad8efaa8ea194", "f92fe92b61e018be14a88ab84f2859c35d832316"},
 			new String[]{"fake2@cea.fr", "fake2", "503f7fada600da935e2851a1c7326084", "31e63e9c4a319bf313b8a6d454798e09b3e7344a"}
@@ -236,7 +236,6 @@ public class TestDAO
 		{			
 			assertTrue(index == (int)userEntity.getIdentifier());	
 			String[] user = users[index++];		
-			
 			assertTrue(userEntity.getMail().equals(user[0]));
 			assertTrue(userEntity.getLogin().equals(user[1]));
 			assertTrue(userEntity.getPassword().equals(user[2]));
@@ -359,7 +358,7 @@ public class TestDAO
 		ObjectDAO objectDAO = new ObjectDAO(mediator);
 		List<ObjectEntity> list = objectDAO.select(
 				"getObjectFromPath","/slider/cursor/position");	
-		assertEquals(11,list.size());
+		assertEquals(15,list.size());
 	}
 	
 	@Test(expected=DAOException.class)

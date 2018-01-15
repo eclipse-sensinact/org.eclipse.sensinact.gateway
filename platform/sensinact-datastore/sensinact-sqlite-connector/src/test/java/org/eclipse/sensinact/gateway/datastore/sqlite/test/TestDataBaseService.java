@@ -51,7 +51,6 @@ public class TestDataBaseService
 	@Before
 	public void init() throws Exception 
 	{
-		System.out.println("INIT\n-------------------------------");
 		context = Mockito.mock(BundleContext.class);
 		bundle = Mockito.mock(Bundle.class);
 		reference = Mockito.mock(ServiceReference.class);
@@ -67,6 +66,7 @@ public class TestDataBaseService
 		Mockito.when(mediator.getContext()).thenReturn(context);
 		dataService = new SQLiteDataStoreService(mediator,TEST_DATABASE_PATH);
 		assertNotNull(dataService);
+		
 	}
 	
 	@Test(expected=UnableToFindDataStoreException.class)
@@ -83,7 +83,6 @@ public class TestDataBaseService
 			DataStoreException
 	{
 		JSONArray json = dataService.select("SELECT * FROM person WHERE person.id=1");
-		System.out.println(json);
 		assertEquals(json.getJSONObject(0).getInt("id"), 1);
 		assertEquals(json.getJSONObject(0).getString("name"), "leo");
 	}
@@ -96,7 +95,6 @@ public class TestDataBaseService
 		int entries = dataService.delete("DELETE FROM person WHERE person.id=2");
 		assertEquals(1,entries);
 		entries = (int) dataService.insert("INSERT INTO person VALUES (2,'michel')");
-		System.out.println("Last generated ID :"+ entries);
 	}
 
 	@Test
@@ -107,9 +105,7 @@ public class TestDataBaseService
 		dataService.delete("DELETE FROM person WHERE person.id=10");
 		
 		int entries = (int) dataService.insert("INSERT INTO person VALUES (10,'robert') ");
-		System.out.println("Last generated ID :"+ entries);
 		JSONArray json = dataService.select("SELECT * FROM person WHERE person.id=10");
-		System.out.println(json);
 		assertEquals(json.getJSONObject(0).getInt("id"), 10);
 		assertEquals(json.getJSONObject(0).getString("name"), "robert");
 		entries = dataService.delete("DELETE FROM person WHERE person.id=10");
@@ -122,9 +118,7 @@ public class TestDataBaseService
 			DataStoreException
 	{	
 		long previous= dataService.insert("INSERT INTO autoperson VALUES (NULL,'autorobert') ");
-		System.out.println("Last generated ID :"+ previous);
 		long entry = dataService.insert("INSERT INTO autoperson VALUES (NULL,'autobernard') ");
-		System.out.println("Last generated ID :"+ entry);
 		
 		assertEquals(1, entry-previous);
 		int count = dataService.delete("DELETE FROM autoperson WHERE autoperson.AUTOID="+previous);
@@ -139,8 +133,6 @@ public class TestDataBaseService
 		+ " SELECT sum(n) AS TOTAL FROM t;").optJSONObject(0);
 		
 		assertEquals(5050, object.optInt("TOTAL"));
-		
-		
 	}
 	
 	protected static Mediator createMediator()

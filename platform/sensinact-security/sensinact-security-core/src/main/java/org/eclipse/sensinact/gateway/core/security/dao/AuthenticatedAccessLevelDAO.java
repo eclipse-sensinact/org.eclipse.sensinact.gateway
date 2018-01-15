@@ -179,8 +179,8 @@ public class AuthenticatedAccessLevelDAO extends AbstractImmutableSnaDAO<Authent
     		//Do we have to notify that the DB has not been properly configured
     	} else
     	{
-    		throw new DAOException(String.format("Unknown element at '%s'",
-    				path));
+    		throw new DAOException(String.format(
+    			"Unknown element at '%s'", path));
     	}    	
     	return this.find(objectEntity.getIdentifier(), identifier);
     }

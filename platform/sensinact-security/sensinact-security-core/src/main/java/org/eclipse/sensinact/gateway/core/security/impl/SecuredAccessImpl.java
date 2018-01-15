@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.security.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,40 +24,35 @@ import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileImpl;
-
-import org.osgi.framework.ServiceRegistration;
-
-
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
-
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessNode;
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccess;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessImpl;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
-
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.dao.AgentDAO;
 import org.eclipse.sensinact.gateway.core.security.dao.ApplicationDAO;
+import org.eclipse.sensinact.gateway.core.security.dao.AuthenticatedAccessLevelDAO;
 import org.eclipse.sensinact.gateway.core.security.dao.BundleDAO;
 import org.eclipse.sensinact.gateway.core.security.dao.DAOException;
 import org.eclipse.sensinact.gateway.core.security.dao.ObjectDAO;
 import org.eclipse.sensinact.gateway.core.security.dao.ObjectProfileAccessDAO;
-import org.eclipse.sensinact.gateway.core.security.dao.AuthenticatedAccessLevelDAO;
 import org.eclipse.sensinact.gateway.core.security.dao.UserDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.AgentEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ApplicationEntity;
+import org.eclipse.sensinact.gateway.core.security.entity.AuthenticatedAccessLevelEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.BundleEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
-import org.eclipse.sensinact.gateway.core.security.entity.AuthenticatedAccessLevelEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.UserEntity;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * Secured access service implementation
