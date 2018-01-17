@@ -1,0 +1,462 @@
+swagger: '2.0'
+info:
+  version: 1.0-SNAPSHOT
+  title: sensiNact REST API
+host: localhost:8080
+basePath: /sensinact
+schemes:
+  - http
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  oauth:
+    type: oauth2
+    name: Authorization
+    in: header
+    flow: password
+    authorizationUrl: 'https://localhost:8080/sensinact/providers'
+    scopes:
+      basic: >
+        To browse and perform GET, SET, ACT, SUBSCRIBE and UNSUBSCRIBE actions on the sensiNact gateway
+security:
+  - oauth:
+      - basic
+paths:
+  '/providers':
+    get:
+      description: |
+        Gets `service providers` objects.
+      security:
+        - oauth:
+            - basic
+      parameters:
+        - name: Authorization
+          in: header
+          description: the login/password of the user
+          required: false
+          type: string
+        - name: token
+          in: header
+          description: the token of the user session
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            $ref: '/schemas/providers_response.json'
+  '/providers/{providerId}':
+    get:
+      description: |
+        Gets `service provider` object.
+      security:
+        - oauth:
+            - basic
+      parameters:
+        - name: Authorization
+          in: header
+          description: the login/password of the user
+          required: false
+          type: string
+        - name: token
+          in: header
+          description: the token of the user session
+          required: false
+          type: string
+        - name: providerId
+          in: path
+          description: The ID of the desired service provider
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            $ref: '/schemas/provider_response.json'
+  '/providers/{providerId}/services':
+    get:
+      description: |
+        Gets `service` objects of the desired `service provider`.
+      security:
+        - oauth:
+            - basic
+      parameters:
+        - name: Authorization
+          in: header
+          description: the login/password of the user
+          required: false
+          type: string
+        - name: token
+          in: header
+          description: the token of the user session
+          required: false
+          type: string        
+        - name: providerId
+          in: path
+          description: The ID of the desired service provider
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            $ref: '/schemas/services_response.json'
+  '/providers/{providerId}/services/{serviceId}':
+    get:
+      description: |
+        Gets `service` object of the desired `service provider`.
+      security:
+        - oauth:
+            - basic
+      parameters:
+        - name: Authorization
+          in: header
+          description: the login/password of the user
+          required: false
+          type: string
+        - name: token
+          in: header
+          description: the token of the user session
+          required: false
+          type: string      
+        - name: providerId
+          in: path
+          description: The ID of the desired service provider
+          required: true
+          type: string
+        - name: serviceId
+          in: path
+          description: The ID of the desired service
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            $ref: '/schemas/service_response.json'
+  '/providers/{providerId}/services/{serviceId}/resources':
+    get:
+      description: |
+        Gets `resource` objects of the desired `service`.
+      security:
+        - oauth:
+            - basic
+      parameters:
+        - name: Authorization
+          in: header
+          description: the login/password of the user
+          required: false
+          type: string
+        - name: token
+          in: header
+          description: the token of the user session
+          required: false
+          type: string      
+        - name: providerId
+          in: path
+          description: The ID of the desired service provider
+          required: true
+          type: string
+        - name: serviceId
+          in: path
+          description: The ID of the desired service
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            $ref: '/schemas/resources_response.json'
+  '/providers/{providerId}/services/{serviceId}/resources/{resourceId}':
+    get:
+      description: |
+        Gets `resource` object of the desired `service`.
+      security:
+        - oauth:
+            - basic
+      parameters:
+        - name: Authorization
+          in: header
+          description: the login/password of the user
+          required: false
+          type: string
+        - name: token
+          in: header
+          description: the token of the user session
+          required: false
+          type: string      
+        - name: providerId
+          in: path
+          description: The ID of the desired service provider
+          required: true
+          type: string
+        - name: serviceId
+          in: path
+          description: The ID of the desired service
+          required: true
+          type: string
+        - name: resourceId
+          in: path
+          description: The ID of the desired resource
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            $ref: '/schemas/resource_response.json'
+  '/providers/{providerId}/services/{serviceId}/resources/{resourceId}/GET':
+    get:
+      description: |
+        Perform a sNa GET on a `resource`.
+      security:
+        - oauth:
+            - basic
+      parameters:
+        - name: Authorization
+          in: header
+          description: the login/password of the user
+          required: false
+          type: string
+        - name: token
+          in: header
+          description: the token of the user session
+          required: false
+          type: string      
+        - name: providerId
+          in: path
+          description: The ID of the desired service provider
+          required: true
+          type: string
+        - name: serviceId
+          in: path
+          description: The ID of the desired service
+          required: true
+          type: string
+        - name: resourceId
+          in: path
+          description: The ID of the desired resource
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            $ref: '/schemas/get_response.json'
+  '/providers/{providerId}/services/{serviceId}/resources/{resourceId}/SET':
+    post:
+      description: |
+        Perform a sNa SET on a `resource`.
+      security:
+        - oauth:
+            - basic
+      parameters:
+        - name: Authorization
+          in: header
+          description: the login/password of the user
+          required: false
+          type: string
+        - name: token
+          in: header
+          description: the token of the user session
+          required: false
+          type: string      
+        - name: providerId
+          in: path
+          description: The ID of the desired service provider
+          required: true
+          type: string
+        - name: serviceId
+          in: path
+          description: The ID of the desired service
+          required: true
+          type: string
+        - name: resourceId
+          in: path
+          description: The ID of the desired resource
+          required: true
+          type: string
+        - name: parameters
+          in: body
+          description: the sNa parameter object containing the value to set
+          required: true
+          schema:
+            $ref: '/schemas/set_request.json'
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            $ref: '/schemas/set_response.json'
+  '/providers/{providerId}/services/{serviceId}/resources/{resourceId}/ACT':
+    post:
+      description: |
+        Perform a sNa ACT on a `resource`.
+      security:
+        - oauth:
+            - basic
+      parameters:
+        - name: Authorization
+          in: header
+          description: the login/password of the user
+          required: false
+          type: string
+        - name: token
+          in: header
+          description: the token of the user session
+          required: false
+          type: string      
+        - name: providerId
+          in: path
+          description: The ID of the desired service provider
+          required: true
+          type: string
+        - name: serviceId
+          in: path
+          description: The ID of the desired service
+          required: true
+          type: string
+        - name: resourceId
+          in: path
+          description: The ID of the desired resource
+          required: true
+          type: string
+        - name: parameters
+          in: body
+          description: the sNa parameter objects for the action
+          required: false
+          schema:
+            $ref: '/schemas/act_request.json'
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            $ref: '/schemas/act_response.json'
+  '/providers/{providerId}/services/{serviceId}/resources/{resourceId}/SUBSCRIBE':
+    get:
+      description: |
+        Perform a sNa long polling SUBSCRIBE on a `resource`.
+      security:
+        - oauth:
+            - basic
+      parameters:
+        - name: Authorization
+          in: header
+          description: the login/password of the user
+          required: false
+          type: string
+        - name: token
+          in: header
+          description: the token of the user session
+          required: false
+          type: string      
+        - name: providerId
+          in: path
+          description: The ID of the desired service provider
+          required: true
+          type: string
+        - name: serviceId
+          in: path
+          description: The ID of the desired service
+          required: true
+          type: string
+        - name: resourceId
+          in: path
+          description: The ID of the desired resource
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            $ref: '/schemas/get_response.json'
+  '/providers/{providerId}/services/{serviceId}/resources/{resourceId}/SUBSCRIBE':
+    post:
+      description: |
+        Perform a sNa SUBSCRIBE on a `resource`.
+      security:
+        - oauth:
+            - basic
+      parameters:
+        - name: Authorization
+          in: header
+          description: the login/password of the user
+          required: false
+          type: string
+        - name: token
+          in: header
+          description: the token of the user session
+          required: false
+          type: string      
+        - name: providerId
+          in: path
+          description: The ID of the desired service provider
+          required: true
+          type: string
+        - name: serviceId
+          in: path
+          description: The ID of the desired service
+          required: true
+          type: string
+        - name: resourceId
+          in: path
+          description: The ID of the desired resource
+          required: true
+          type: string
+        - name: parameters
+          in: body
+          description: the sNa parameters object for the subscription (e.g., contraints)
+          required: true
+          schema:
+            $ref: '/schemas/subscribe_request.json'
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            $ref: '/schemas/subscribe_response.json'
+  '/providers/{providerId}/services/{serviceId}/resources/{resourceId}/UNSUBSCRIBE':
+    post:
+      description: |
+        Perform a sNa UNSUBSCRIBE on a `resource`.
+      security:
+        - oauth:
+            - basic
+      parameters:
+        - name: Authorization
+          in: header
+          description: the login/password of the user
+          required: false
+          type: string
+        - name: token
+          in: header
+          description: the token of the user session
+          required: false
+          type: string      
+        - name: providerId
+          in: path
+          description: The ID of the desired service provider
+          required: true
+          type: string
+        - name: serviceId
+          in: path
+          description: The ID of the desired service
+          required: true
+          type: string
+        - name: resourceId
+          in: path
+          description: The ID of the desired resource
+          required: true
+          type: string
+        - name: parameters
+          in: body
+          description: the subscription Id
+          required: true
+          schema:
+            $ref: '/schemas/unsubscribe_request.json'
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            $ref: '/schemas/unsubscribe_response.json'

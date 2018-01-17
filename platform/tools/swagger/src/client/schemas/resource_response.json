@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "accessMethods": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "SET",
+              "ACT",
+              "SUBSCRIBE",
+              "UNSUBSCRIBE"
+            ]
+          },
+          "parameters": {
+            "type": "array",
+            "items": [
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "fixed": {
+                    "type": "boolean"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "constraints": {
+                    "type": "array"
+                  }
+                },
+                "required": []
+              }
+            ]
+          }
+        }
+      }
+    },
+    "name": {
+      "type": "string"
+    },
+    "attributes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dynamic": {
+                  "type": "boolean"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "object"
+                },
+                "type": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "type": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "accessMethods",
+    "name",
+    "attributes",
+    "type"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "timestamp": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    },
+    "value": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "timestamp",
+    "name",
+    "value",
+    "type"
+  ]
+}

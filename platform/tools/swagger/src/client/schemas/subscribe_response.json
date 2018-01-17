@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "response": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "subscriptionId"
+      ]
+    },
+    "statusCode": {
+      "type": "integer"
+    },
+    "uri": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "response",
+    "statusCode",
+    "uri"
+  ]
+}

@@ -87,8 +87,9 @@
         <module>openhab-profile</module>
         <module>openweather-profile</module>
         <module>rest-profile</module>
+        <module>jsonpath-profile</module>
         <module>simulation-profile</module>
         <module>storage-agent-profile</module>
-        <!--<module>studio-web-profile</module>-->
+        <module>swagger-profile</module>
     </modules>
 </project>

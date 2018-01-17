@@ -20,7 +20,7 @@
         <version>1.5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>studio-web</artifactId>
+    <artifactId>swagger</artifactId>
     <packaging>pom</packaging>
 
     <name>sensiNact IoT Gateway - sensiNact Runtime (${project.artifactId} bridge dependencies)</name>
@@ -28,7 +28,7 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.tools</groupId>
-            <artifactId>studio-web</artifactId>
+            <artifactId>swagger</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
