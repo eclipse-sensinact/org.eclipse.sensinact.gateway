@@ -64,8 +64,10 @@
 		                	<outputDirectory>${project.build.directory}/swagger-api/dist/schemas</outputDirectory>
 		                	<overwrite>true</overwrite>
 		                	<resources>
-		                		<directory>src/client/schemas</directory>
-		                		<filtering>true</filtering>
+		                		<resource>
+		                			<directory>src/client/schemas</directory>
+		                			<filtering>true</filtering>
+		                		</resource>
 		                	</resources>
 		                </configuration>
                     </execution>
@@ -85,8 +87,10 @@
 		                	<outputDirectory>${project.build.directory}/swagger-api/dist/images</outputDirectory>
 		                	<overwrite>true</overwrite>
 		                	<resources>
-		                		<directory>src/client/images</directory>
-		                		<filtering>true</filtering>
+		                		<resource>
+		                			<directory>src/client/images</directory>
+		                			<filtering>true</filtering>
+		                		</resource>
 		                	</resources>
 		                </configuration>
                     </execution>
@@ -106,12 +110,14 @@
 		                	<outputDirectory>${project.build.directory}/swagger-api/dist</outputDirectory>
 		                	<overwrite>true</overwrite>
 		                	<resources>
+		                		<resource>
 		                		<directory>src/client</directory>
-		                		<inludes>
+		                		<includes>
 		                			<include>*.html</include>
 		                			<include>*.yaml</include>
-		                		</inludes>
+		                		</includes>
 		                		<filtering>true</filtering>
+		                		</resource>
 		                	</resources>
 		                </configuration>
                     </execution>
