@@ -29,16 +29,17 @@
       if (url && url.length > 1) {
         url = decodeURIComponent(url[1]);
       } else {
-        url = "http://petstore.swagger.io/v2/swagger.json";
+        url = "file:./rest-api-swagger.yaml";
       }
       // Pre load translate...
       if(window.SwaggerTranslator) {
         window.SwaggerTranslator.translate();
       }
       window.swaggerUi = new SwaggerUi({
-        url: url,
+    	url: "../rest-api-swagger.yaml",
+        validatorUrl: null,
         dom_id: "swagger-ui-container",
-        supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+        supportedSubmitMethods: ['get', 'post'],
         onComplete: function(swaggerApi, swaggerUi){
           if(typeof initOAuth == "function") {
             initOAuth({
@@ -99,7 +100,7 @@
     </div>
 </div>
 
-<div id='selector'>
+<div id='selector' style="visibility: hidden;">
     <div class="swagger-ui-wrap">
         <form id='url_selector' name="url_selector">
             <div class='input'><input placeholder="http://localhost" id="baseUrl" name="baseUrl" type="text"/></div>
