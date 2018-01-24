@@ -19,7 +19,7 @@ For Windows:
 For Linux:
 ‾‾‾‾‾‾‾‾‾‾
 1.  Open a terminal et go to the sensiNact distribution folder
-3.  Change permissions on sensinact file: chown +x sensinact
+3.  Change permissions on sensinact file: chmod +x sensinact
 3a. To launch sensiNact, run ./sensinact
 3b. To change current profiles, run ./sensinact -c
 3c. To access help, run ./sensinact -h
