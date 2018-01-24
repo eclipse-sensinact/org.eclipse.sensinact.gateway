@@ -160,7 +160,7 @@ public class SocketEndpointManager implements ManagedConfigurationListener
 			Iterator<SocketEndpointDescriptor> iterator = descriptors.iterator();
 			
 			while(iterator.hasNext())
-			{
+			{ 
 				SocketEndpointDescriptor descriptor = iterator.next();
 				if(!descriptor.complete())
 				{
@@ -169,34 +169,15 @@ public class SocketEndpointManager implements ManagedConfigurationListener
 				final SocketEndpoint endpoint = createEndpoint(descriptor);
 				if(endpoint != null)
 				{
-					this.map.put(descriptor, endpoint);
+					this.map.put(descriptor, endpoint);	
 					new Thread(new Runnable()
 					{
 						@Override
 						public void run()
-						{			
-							int tries = 5;
-							while(endpoint.namespace() == null
-									&& tries > 0)
-							{
-								endpoint.doConnect();
-								tries-=1;
-								try
-								{
-									Thread.sleep(150);
-									
-								} catch (InterruptedException e)
-								{
-									Thread.interrupted();
-									break;
-								}
-							}
-							if(endpoint.namespace()!=null)
-							{
-								registerEndpoint(endpoint);
-							}
-						}}
-					).start();
+						{
+							registerEndpoint(endpoint);
+						}
+					}).start();
 				}
 			}
 		}

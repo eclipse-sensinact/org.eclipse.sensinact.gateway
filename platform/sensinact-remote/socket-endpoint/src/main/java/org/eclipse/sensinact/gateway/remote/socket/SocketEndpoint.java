@@ -173,15 +173,15 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 							}
 						} else
 						{
-							JSONObject f = object.getJSONObject("filter");
+							JSONObject f = object.optJSONObject("filter");
 							
 							SnaFilter filter = new SnaFilter(mediator,
 							    f.getString("sender"),
-								f.getBoolean("pattern"), 
-								f.getBoolean("complement"),
-								f.getJSONArray("conditions"));
+								f.optBoolean("pattern"), 
+								f.optBoolean("complement"),
+								f.optJSONArray("conditions"));
 							
-							JSONArray t = object.getJSONArray("types");
+							JSONArray t = object.optJSONArray("types");
 							int i = 0;								
 							int l = t==null?0:t.length();
 							for(; i < l; i++)
@@ -462,6 +462,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 					}
 				} catch (Exception e)
 				{
+					e.printStackTrace();
 					if(SocketEndpoint.this.client!=null 
 							&& !SocketEndpoint.this.client.running())
 					{
@@ -470,7 +471,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 				}
 			}
 		}, 0, 1000*10);		
-		int timeout = 60*1000;
+		int timeout = 60*3000;
 		
 		while(timeout > 0 && remoteNamespace == null)
 		{
