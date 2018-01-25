@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
+ */
+
 package org.eclipse.sensinact.gateway.remote.socket;
 
 import java.io.IOException;
@@ -14,7 +25,6 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 
 /**
  * Simple RemoteEndpoint implementation using socket connection 
@@ -344,7 +354,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see fr.cea.sna.gate way.core.RemoteEndpoint#namespace()
+	 * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#namespace()
 	 */
 	@Override
 	public String namespace()
