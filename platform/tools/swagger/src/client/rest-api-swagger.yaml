@@ -3,7 +3,7 @@ info:
   version: 1.5-SNAPSHOT
   title: sensiNact REST API
 host: localhost:8080
-basePath: /internal
+basePath: /sensinact
 schemes:
   - http
   - https
@@ -17,7 +17,7 @@ securityDefinitions:
     name: Authorization
     in: header
     flow: password
-    authorizationUrl: 'https://localhost:8080/internal/providers'
+    authorizationUrl: 'https://localhost:8080/sensinact/providers'
     scopes:
       basic: >
         To browse and perform GET, SET, ACT, SUBSCRIBE and UNSUBSCRIBE actions on the sensiNact gateway

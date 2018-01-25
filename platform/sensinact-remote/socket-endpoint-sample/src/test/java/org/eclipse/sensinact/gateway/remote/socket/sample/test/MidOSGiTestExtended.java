@@ -98,7 +98,7 @@ public class MidOSGiTestExtended extends MidOSGiTest
 		configuration.put("org.osgi.framework.storage", cacheDir.getName());
 		configuration.put("org.osgi.framework.bootdelegation", "*");
 		configuration.put("org.osgi.framework.system.packages.extra",
-			  "org.eclipse.internal.gateway.test,"
+			  "org.eclipse.sensinact.gateway.test,"
 		    + "com.sun.net.httpserver," 
 			+ "javax.activation," 
 			+ "javax.net.ssl,"
@@ -150,12 +150,12 @@ public class MidOSGiTestExtended extends MidOSGiTest
 			}
 		});
 		
-		configuration.put("org.eclipse.internal.gateway.test.codeBase", getAllowedCodeBase());
+		configuration.put("org.eclipse.sensinact.gateway.test.codeBase", getAllowedCodeBase());
 		configuration.put("org.apache.felix.http.jettyEnabled", "true");
 		configuration.put("org.apache.felix.http.whiteboardEnabled", "true");
 		configuration.put("org.apache.felix.http.debug", "true");
 		configuration.put("org.osgi.service.http.port", Integer.toString((8085+count)));
-		configuration.put("org.eclipse.internal.gateway.namespace", "sna"+count);
+		configuration.put("org.eclipse.sensinact.gateway.namespace", "sna"+count);
 		
 		this.doInit(configuration);
 		
@@ -239,25 +239,25 @@ public class MidOSGiTestExtended extends MidOSGiTest
 			  + "file:target/felix/bundle/org.apache.felix.framework.security.jar ");
 
 			configuration.put("felix.auto.install.2",
-			    "file:target/felix/bundle/internal-utils.jar "
-			  + "file:target/felix/bundle/internal-common.jar "
-			  + "file:target/felix/bundle/internal-datastore-api.jar "
-			  + "file:target/felix/bundle/internal-framework-extension.jar "
-			  + "file:target/felix/bundle/internal-security-none.jar "
-			  + "file:target/felix/bundle/internal-generic.jar ");
+			    "file:target/felix/bundle/sensinact-utils.jar "
+			  + "file:target/felix/bundle/sensinact-common.jar "
+			  + "file:target/felix/bundle/sensinact-datastore-api.jar "
+			  + "file:target/felix/bundle/sensinact-framework-extension.jar "
+			  + "file:target/felix/bundle/sensinact-security-none.jar "
+			  + "file:target/felix/bundle/sensinact-generic.jar ");
 			
 			configuration.put("felix.auto.start.2",
-			 "file:target/felix/bundle/internal-test-configuration.jar "
+			 "file:target/felix/bundle/sensinact-test-configuration.jar "
 			  + "file:target/felix/bundle/org.apache.felix.fileinstall.jar "
-			  + "file:target/felix/bundle/internal-signature-validator.jar "
-			  +	"file:target/felix/bundle/internal-core.jar ");
+			  + "file:target/felix/bundle/sensinact-signature-validator.jar "
+			  +	"file:target/felix/bundle/sensinact-core.jar ");
 
 			configuration.put("felix.auto.start.3",
 			    "file:target/felix/bundle/javax.servlet-api.jar "
 			  + "file:target/felix/bundle/org.apache.felix.http.api.jar "
 			  + "file:target/felix/bundle/org.apache.felix.http.jetty.jar "
 			  + "file:target/felix/bundle/http.jar "
-			  + "file:target/felix/bundle/internal-northbound-access.jar "
+			  + "file:target/felix/bundle/sensinact-northbound-access.jar "
 			  + "file:target/felix/bundle/rest-access.jar "
 			  + "file:target/felix/bundle/socket-endpoint.jar ");
 
