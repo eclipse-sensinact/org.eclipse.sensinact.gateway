@@ -66,8 +66,7 @@ public class WsRestAccess extends NorthboundAccess
 		}
 		result.put("X-Auth-Token", super.endpoint.getSessionToken());
 		result.put("rid", super.rid);
-
-		System.out.println("RESULT: "+result);
+		
 		this.socket.send(new String(result.toString().getBytes("UTF-8")));
 		return true;
 

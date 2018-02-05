@@ -63,8 +63,7 @@ public class HttpRestAccess extends NorthboundAccess
 			return false;
 		}	
 		result.put("rid", super.rid);
-
-		System.out.println("RESULT: "+result);
+		
 		String resultStr = result.toString();
 		byte[] resultBytes = resultStr.getBytes("UTF-8");
 		int length = -1;
