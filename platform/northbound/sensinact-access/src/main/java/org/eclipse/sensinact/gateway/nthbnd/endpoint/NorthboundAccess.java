@@ -190,7 +190,8 @@ public abstract class NorthboundAccess
 	private boolean isElementList = false;
 	private boolean match = false;
 	private boolean multi = false;
-	
+
+	protected String rid;
 	protected AccessMethod.Type method = null;
 	private Map<String, List<String>> query;
 	
@@ -504,6 +505,7 @@ public abstract class NorthboundAccess
 	public boolean init(NorthboundAccessWrapper request) throws IOException
 	{
 		this.mediator = request.getMediator();
+		
 		if(this.mediator == null)
 		{
 			sendError(500, "Unable to process the request");
@@ -516,15 +518,18 @@ public abstract class NorthboundAccess
 			sendError(404, "Not found");
 			return false;
 		}
-
-		Authentication<?> authentication = request.getAuthentication();
-		try {
-			this.endpoint = new NorthboundEndpoint(mediator, authentication);
-		} catch (InvalidCredentialException e) {
+		Authentication<?> authentication = 
+				request.getAuthentication();
+		try
+		{
+			this.endpoint = new NorthboundEndpoint(
+					mediator, authentication);
+			
+		} catch (InvalidCredentialException e)
+		{
 			sendError(401, "Unauthorized");
 			return false;
 		}
-
 		this.query = request.getQueryMap();
 		this.request = request;
 		return true;
@@ -543,13 +548,13 @@ public abstract class NorthboundAccess
 			
 		} catch(IOException e)
 		{
-			mediator.error(e.getMessage(),e);
+			mediator.error(e);
 			sendError(500, "Error processing the request content");
 			return false;
 			
 		} catch(JSONException e)
 		{
-			mediator.error(e.getMessage(),e);
+			mediator.error(e);
 			if(this.content != null && !this.content.isEmpty())
 			{
 				sendError(400,"Invalid parameter(s) format");
@@ -583,6 +588,8 @@ public abstract class NorthboundAccess
 		{
 			this.processAttribute(builder);
 		}
+		this.rid = request.getRequestID(parameters);
+
 		switch(method.name())
 		{
 			case "DESCRIBE":
@@ -640,32 +647,32 @@ public abstract class NorthboundAccess
 				SnaMessage.Type[] types = null;
 				JSONArray conditions = null;
 				
-				SnaFilter filter = null;
-				
 				for(;index < length; index++)
 				{
-					String name = parameters[index].getName();
+					Parameter parameter =  parameters[index];
+					String name =parameter.getName();
+					
 					switch(name)
 					{
 						case "conditions":
 							conditions = CastUtils.cast(mediator.getClassLoader(),
-								JSONArray.class, parameters[index].getValue());
+								JSONArray.class,parameter.getValue());
 						break;
 						case "sender":
 							sender = CastUtils.cast(mediator.getClassLoader(),
-								String.class, parameters[index].getValue());
+								String.class, parameter.getValue());
 						break;
 						case "pattern":
 							isPattern = CastUtils.cast(mediator.getClassLoader(),
-								boolean.class, parameters[index].getValue());
+								boolean.class, parameter.getValue());
 						break;
 						case "complement":
 							isComplement = CastUtils.cast(mediator.getClassLoader(),
-								boolean.class, parameters[index].getValue());
+								boolean.class, parameter.getValue());
 						break;
 						case "types":
 							types = CastUtils.castArray(mediator.getClassLoader(),
-							    SnaMessage.Type[].class, parameters[index].getValue());
+							    SnaMessage.Type[].class, parameter.getValue());
 						default:;
 					}
 				}
@@ -680,12 +687,21 @@ public abstract class NorthboundAccess
 				if(conditions == null)
 				{
 					conditions = new JSONArray();
-				}
-				filter = new SnaFilter(mediator, sender, isPattern,
-						isComplement, conditions);
-				filter.addHandledType(types);
+				}			
+				Object argument = null;
 				
-			    builder.withArgument(new Object[] {recipient, filter});
+				if(this.resource==null)
+				{
+					SnaFilter filter = new SnaFilter(mediator, sender, 
+						isPattern, isComplement, conditions);
+					filter.addHandledType(types);
+					argument = filter;
+					
+				} else
+				{
+					argument = conditions;
+				}
+			    builder.withArgument(new Object[] {recipient, argument});
 				break;
 			default:
 				break;
