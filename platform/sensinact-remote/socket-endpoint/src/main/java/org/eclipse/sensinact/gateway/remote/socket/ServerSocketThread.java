@@ -51,8 +51,8 @@ class ServerSocketThread implements Runnable
 		InetAddress localAddress = InetAddress.getByName(endpoint.getLocalAddress());
 		int localPort = endpoint.getLocalPort();
 		
-		System.out.println(String.format("Binding server socket on %s:%s",
-			endpoint.getLocalAddress(),endpoint.getLocalPort()));
+		mediator.info("Binding server socket on %s:%s",
+			endpoint.getLocalAddress(),endpoint.getLocalPort());
 		
 		this.server = new ServerSocket(localPort,0,localAddress);
 	}
@@ -61,6 +61,11 @@ class ServerSocketThread implements Runnable
 	{
 		socket = server.accept();
 		return socket;	
+	}
+	
+	boolean running()
+	{
+		return this.running;
 	}
 	
 	void stop()
