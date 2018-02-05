@@ -11,22 +11,10 @@
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import java.lang.reflect.Method;
-import java.util.Iterator;
-//import java.util.List;
-import java.util.Set;
 
-import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
+import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 //import org.eclipse.sensinact.gateway.core.ActionResource;
 //import org.eclipse.sensinact.gateway.core.DataResource;
 //import org.eclipse.sensinact.gateway.core.PropertyResource;
@@ -39,9 +27,12 @@ import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 //import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
 //import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.ResponseFormat;
 //import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * 

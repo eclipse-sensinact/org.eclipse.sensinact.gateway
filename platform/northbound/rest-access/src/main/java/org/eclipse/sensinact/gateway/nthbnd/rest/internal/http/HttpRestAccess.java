@@ -62,6 +62,9 @@ public class HttpRestAccess extends NorthboundAccess
 			sendError(500, "Internal server error");
 			return false;
 		}	
+		result.put("rid", super.rid);
+
+		System.out.println("RESULT: "+result);
 		String resultStr = result.toString();
 		byte[] resultBytes = resultStr.getBytes("UTF-8");
 		int length = -1;
@@ -73,7 +76,7 @@ public class HttpRestAccess extends NorthboundAccess
 			response.setBufferSize(resultBytes.length);
 			
 			ServletOutputStream output = this.response.getOutputStream();
-			output.write(resultBytes, 0, length);	
+			output.write(resultBytes);	
 		}
 		response.setStatus(result.getInt("statusCode"));
 		return true;

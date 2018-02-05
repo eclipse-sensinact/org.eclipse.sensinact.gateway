@@ -37,7 +37,7 @@ public class WebSocketWrapper
 	protected Session session;
 	protected NorthboundMediator mediator;
 	protected WebSocketWrapperPool pool;
-
+ 
 	
 	protected WebSocketWrapper(WebSocketWrapperPool pool, NorthboundMediator mediator)
 	{
@@ -111,7 +111,6 @@ public class WebSocketWrapper
 							).toString());
 		} catch (Exception e) 
 		{
-			e.printStackTrace();
 			this.mediator.error(e);
 			this.send(new JSONObject().put("statusCode", 500
 					).put("message","Internal server error"

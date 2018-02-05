@@ -11,39 +11,55 @@
 
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 
+import java.io.IOException;
 
-import javax.servlet.*;
+import javax.servlet.AsyncContext;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.WriteListener;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 
-import java.io.IOException;
-
 /**
  * CORS Filter
  */
+@WebFilter(
+		asyncSupported=true,
+		urlPatterns = {"/*"},
+		filterName="CORS")
 public class CorsFilter implements Filter 
 {
-
-    private static final String OPTIONS = "OPTIONS".intern();
+    private static final String OPTIONS = "OPTIONS";
 
     private NorthboundMediator mediator;
 
     /**
      * Constructor
+     * 
+     * @param mediator the {@link NorthboundMediator} allowing to
+     * interact with the OSGi host environment
      */
     public CorsFilter(NorthboundMediator mediator) {
         this.mediator = mediator;
     }
-    
-    /** 
+   
+    /**
      * @inheritDoc
      *
-     * @see Filter#init(FilterConfig)
+     * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
      */
-    public void init(FilterConfig config) throws ServletException {
-        if(mediator.isDebugLoggable()) {
+    public void init(FilterConfig config) throws ServletException
+    {
+        if(mediator.isDebugLoggable())
+        {
             mediator.info("Init with config [" + config + "]");
         }
     }
@@ -51,34 +67,96 @@ public class CorsFilter implements Filter
     /**
      * @inheritDoc
      *
-     * @see Filter#
-     * doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)
+     * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)
      */
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-        throws IOException, ServletException 
-    {
-        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", "*");
-        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods", "GET,POST");
-        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers",
-                ((HttpServletRequest) request).getHeader("Access-Control-Request-Headers"));
-
-        if(OPTIONS.equals(((HttpServletRequest) request).getMethod().intern()))
+    public void doFilter(final ServletRequest req, final ServletResponse res, 
+    		final FilterChain chain) throws IOException, ServletException 
+    {	        
+    	if(res.isCommitted())
+    	{
+    		return;
+    	}
+        final AsyncContext asyncContext;
+        
+        if(req.isAsyncStarted())
         {
-            response.getWriter().flush();
-            
+        	asyncContext = req.getAsyncContext();
         } else
         {
-            chain.doFilter(request, response);
+        	asyncContext = req.startAsync();
         }
-    }
+        
+        asyncContext.start(new Runnable()
+        {
+            @Override
+            public void run() 
+            {
+            	final HttpServletRequest req = (HttpServletRequest) asyncContext.getRequest();
+            	final HttpServletResponse res = (HttpServletResponse) asyncContext.getResponse();
+            	
+            	res.setHeader("Access-Control-Allow-Origin", "*");
+                res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+                res.setHeader("Access-Control-Allow-Headers",
+                	String.format("%s, Authorization, X-Auth-Token, X-Requested-With", 
+                	    req.getHeader("Access-Control-Request-Headers")));
+                try
+                {
+                    chain.doFilter(req, res);
+                    
+                } catch (Exception e)
+                {
+                    mediator.error(e);
+                }    
+                if(OPTIONS.equals(req.getMethod()))
+                {
+					try
+					{
+						final ServletOutputStream output = res.getOutputStream();
+	                	output.setWriteListener(new WriteListener()
+	                	{
+							@Override
+							public void onWritePossible() throws IOException
+							{
+								try
+								{
+									output.println();
+									
+								} finally
+								{
+					                if(req.isAsyncStarted())
+					                {
+					                	asyncContext.complete();
+					                }
+								}
+							}	
+							@Override
+							public void onError(Throwable t) {}
+						});
+                	}
+					catch (IOException e)
+					{
+						mediator.error(e);
+					}
+                } else
+                {
+	                if(req.isAsyncStarted())
+	                {
+	                	asyncContext.complete();
+	                }
+                }
+            }
+        });       
+     }
 
     /**
      * @inheritDoc
      *
-     * @see Filter#destroy()
+     * @see javax.servlet.Filter#destroy()
      */
-    public void destroy() {
-        if(mediator.isDebugLoggable()) {
+    public void destroy() 
+    {
+        if(mediator.isDebugLoggable()) 
+        {
             mediator.info("Destroyed filter");
         }
     }
