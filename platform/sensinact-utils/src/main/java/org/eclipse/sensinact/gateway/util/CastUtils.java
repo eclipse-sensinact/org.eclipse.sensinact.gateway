@@ -527,6 +527,19 @@ public abstract class CastUtils
 			}
 			return (T) array;
 		}
+		if(JSONArray.class.isAssignableFrom(object.getClass()))
+		{
+			int length = ((JSONArray)object).length();
+			Class<?> componentType = clazz.getComponentType();
+			Object array = Array.newInstance(componentType, length);
+			
+			for(int i = 0; i<length; i++)
+			{
+				Array.set(array, i, CastUtils.cast(classloader,
+					componentType, ((JSONArray)object).get(i)));
+			}
+			return (T) array;
+		}
 		if(String.class.isAssignableFrom(object.getClass()))
 		{   
 			String objectStr = (String)object;
