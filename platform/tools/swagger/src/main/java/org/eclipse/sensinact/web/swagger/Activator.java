@@ -48,7 +48,7 @@ public class Activator implements BundleActivator {
                 HttpContext context = httpService.createDefaultHttpContext();
 
                 try {
-					httpService.registerServlet(SWAGGER_ALIAS, new ResourceServlet(SWAGGER_ALIAS), null, context);
+					httpService.registerServlet(SWAGGER_ALIAS, new ResourceServlet(), null, context);
                     httpService.registerFilter(
                             new IndexFilter(SWAGGER_ALIAS), "^\\" + SWAGGER_ALIAS + "\\/?", null, 0, context);
 				} catch (ServletException e) {
