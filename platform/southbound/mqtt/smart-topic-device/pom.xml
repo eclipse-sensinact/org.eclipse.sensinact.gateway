@@ -46,7 +46,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.sensinact.gateway.sthbnd</groupId>
+            <groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
             <artifactId>mqtt-device</artifactId>
             <version>1.5-SNAPSHOT</version>
             <scope>provided</scope>
