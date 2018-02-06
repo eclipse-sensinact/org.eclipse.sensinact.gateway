@@ -92,10 +92,11 @@ public abstract class MqttTestITAbstract {
         );
     }
 
-    protected Option[] depProfileMosquitto(){
+    protected Option[] depProfileMqtt(){
         return options(
                 mavenBundle("org.eclipse.paho", "org.eclipse.paho.api.mqttv3", "1.2.0"),
-                mavenBundle("org.eclipse.sensinact.gateway.sthbnd", "sensinact-mosquitto", SENSINACT_VERSION)
+                mavenBundle("org.eclipse.sensinact.gateway.sthbnd.mqtt", "mqtt-device", SENSINACT_VERSION),
+                mavenBundle("org.eclipse.sensinact.gateway.sthbnd.mqtt", "smart-topic-device", SENSINACT_VERSION)
         );
     }
 
@@ -153,7 +154,7 @@ public abstract class MqttTestITAbstract {
                 depProfile4(),
                 depProfileHttp(),
                 depProfileREST(),
-                depProfileMosquitto(),
+                depProfileMqtt(),
                 getBundleRequiredByURLResolvers()
         );
 
