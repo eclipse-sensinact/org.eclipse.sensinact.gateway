@@ -17,6 +17,10 @@ import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.it.util.MosquittoTestITAbstract;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Provider;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Resource;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Service;
+import org.eclipse.sensinact.gateway.device.mosquitto.lite.model.mqtt.MQTTBroker;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.runtime.MQTTManagerRuntime;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,7 +40,6 @@ import java.util.Set;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
-@Ignore
 public class MosquittoBridgeTest extends MosquittoTestITAbstract {
 
     @Inject
@@ -133,6 +136,33 @@ public class MosquittoBridgeTest extends MosquittoTestITAbstract {
 
         Assert.assertEquals("Sensinact Core did not dispatch any notification message for the subscription", 1,rtc.getMessages().length);
         Assert.assertEquals("The notification value does not correspond to the value sent", messageString2,new JSONObject(rtc.getMessages()[0].getJSON()).getJSONObject("notification").getString("value"));
+    }
+
+    @Test
+    public void createPojoSSL(){
+        MQTTBroker mb=new MQTTBroker();
+        mb.setHost("test.mosquitto.org");
+        mb.setPort(Long.parseLong("8883"));
+        mb.setProtocol(MQTTBroker.PROTOCOL.ssl);
+
+        Provider provider=new Provider();
+        provider.setName("myprovider");
+        provider.setBroker(mb);
+
+        Service service=new Service(provider);
+        service.setName("myservice");
+
+        provider.getServices().add(service);
+
+        Resource resource=new Resource(service);
+        resource.setName("myresource");
+        resource.setTopic("/myresource");
+        service.getResources().add(resource);
+
+        bc.registerService("org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Provider",provider,new Hashtable<String, Object>());
+        final Set<String> providersSet=parseJSONArrayIntoSet(sensinactSession.getProviders().getJSONArray("providers"));
+        Assert.assertTrue("Provider was not created, or at least is not shown via REST api", providersSet.contains("myprovider"));
+
     }
 
     private void waitForCallbackNotification() throws InterruptedException {

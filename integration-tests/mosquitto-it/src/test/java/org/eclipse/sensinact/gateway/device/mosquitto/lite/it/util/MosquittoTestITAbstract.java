@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.ops4j.pax.exam.*;
 import org.ops4j.pax.exam.options.FrameworkPropertyOption;
+import org.ops4j.pax.exam.options.SystemPropertyOption;
 
 import java.util.*;
 
@@ -35,7 +36,7 @@ public abstract class MosquittoTestITAbstract {
     protected static final String SENSINACT_HTTP_PORT="8097";
     protected static final String SENSINACT_VERSION="1.5-SNAPSHOT";
     protected static final String MQTT_HOST ="test.mosquitto.org";
-    protected static final String MQTT_PORT ="1883";
+    protected static final String MQTT_PORT ="8883";
 
     protected static Option[] combine(Option[]...options){
 
@@ -133,6 +134,10 @@ public abstract class MosquittoTestITAbstract {
                 new FrameworkPropertyOption("org.osgi.framework.system.packages.extra").value("com.google.common.base,javax.net.ssl,javax.smartcardio,sun.security.action,com.sun.net.httpserver,javax.mail,javax.mail.internet,javax.cache.spi,javax.cache,javax.cache.integration,javax.cache.empiry,javax.cache.expiry,javax.cache.configuration,javax.cache.processor,javax.cache.management,javax.cache.event,sun.misc")
                 ,new FrameworkPropertyOption("felix.shutdown.hook").value("false")
                 ,new FrameworkPropertyOption("org.osgi.service.http.port").value(SENSINACT_HTTP_PORT)
+                //must import certificate keytool -import -alias mosquitto.org -file mosquitto.pem -keystore /opt/jre/lib/security/cacerts
+                ,new SystemPropertyOption("javax.net.ssl.trustStore").value("/opt/jre/lib/security/cacerts")///etc/ssl/certs/java/cacerts
+                //,new SystemPropertyOption("javax.net.ssl.keyStore").value("/home/nj246216/mosquitto.jks")//mosquitto.jks
+                ,new SystemPropertyOption("javax.net.ssl.keyStorePassword").value("ceacea")
         );
     }
 
