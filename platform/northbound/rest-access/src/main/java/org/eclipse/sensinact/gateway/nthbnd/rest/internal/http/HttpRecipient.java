@@ -49,6 +49,19 @@ public class HttpRecipient extends NorthboundRecipient
 		int length = messages==null?0:messages.length;
 		
 		StringBuilder builder = new StringBuilder();
+		builder.append(JSONUtils.OPEN_BRACE);
+		builder.append("\"type\":\"CALLBACK\",");
+		builder.append("\"callbackId\":");
+		if(callbackId==null)
+		{
+			builder.append("null");			
+		} else
+		{
+			builder.append("\"");
+			builder.append(callbackId);
+			builder.append("\"");			
+		}
+		builder.append(",\"messages\":");
 		builder.append(JSONUtils.OPEN_BRACKET);
 		for(;index < length; index++)
 		{
@@ -56,12 +69,21 @@ public class HttpRecipient extends NorthboundRecipient
 			builder.append(messages[index].getJSON());
 		}
 		builder.append(JSONUtils.CLOSE_BRACKET);
+		builder.append(JSONUtils.CLOSE_BRACE);
 		
 		try 
 	    {
-			String separator = urlCallback.endsWith("/")?"":"/";
-			String uri = new StringBuilder().append(urlCallback).append(separator
-					).append(callbackId).toString();
+			String uri = null;
+			if(callbackId != null)
+			{
+				String separator = urlCallback.endsWith("/")?"":"/";
+				uri = new StringBuilder().append(urlCallback
+				).append(separator).append(callbackId
+						).toString();
+			} else
+			{
+				uri = urlCallback; 
+			}
 			
 	    	this.connectionBuilder.setUri(uri);
 	    	this.connectionBuilder.setContent(builder.toString());
@@ -76,7 +98,7 @@ public class HttpRecipient extends NorthboundRecipient
 
     	} catch(Exception e)  
 	    {
-    		super.mediator.error(e.getMessage(),e);
+    		super.mediator.error(e);
 	    }       
     }
 }

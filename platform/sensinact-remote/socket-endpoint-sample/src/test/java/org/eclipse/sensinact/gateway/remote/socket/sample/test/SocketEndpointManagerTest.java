@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
+ */
+
 package org.eclipse.sensinact.gateway.remote.socket.sample.test;
 
 import static org.junit.Assert.assertEquals;
@@ -54,6 +65,10 @@ public class SocketEndpointManagerTest
 			MidOSGiTestExtended t = new MidOSGiTestExtended(n);
 			instances.add(t);
 			t.init();
+			if(n==3)
+			{
+				t.registerAgent();
+			}
 		}		
 		for(int  n = 1;n <= INSTANCES_COUNT; n++)
 		{
@@ -139,7 +154,18 @@ public class SocketEndpointManagerTest
 			assertEquals(2, stack.size());
 			message = new JSONObject(((SnaMessage)stack.peek()).getJSON());
 			assertEquals(150, message.getJSONObject("notification").getInt("value"));
-		}		
+		}	
+		
+		int count = 0;
+		for(String ms:instances.get(2).listAgentMessages())
+		{
+			if(ms.contains("ATTRIBUTE_VALUE_UPDATED"))
+			{
+				count++;
+			}
+		}
+		assertEquals(3,count);
+		
 	    while(instances.size() > 0)
 	    {
 		   instances.remove(0).tearDown();

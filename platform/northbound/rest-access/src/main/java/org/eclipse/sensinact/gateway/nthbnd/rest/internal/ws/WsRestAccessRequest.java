@@ -25,7 +25,7 @@ import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpRestAccessRequest;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 
 public class WsRestAccessRequest implements NorthboundAccessWrapper 
 {
@@ -53,6 +53,26 @@ public class WsRestAccessRequest implements NorthboundAccessWrapper
 	{
 		return this.mediator;
 	}
+	
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getRequestID(org.eclipse.sensinact.gateway.core.method.Parameter[])
+	 */
+	@Override
+	public String getRequestID(Parameter[] parameters) 
+	{	
+		String rid = (String) request.opt("rid");
+		if(rid == null)
+		{
+			List<String> list = getQueryMap().get("rid");
+			if(list!=null && list.size()>0)
+			{
+				rid = list.get(0);
+			}
+		}
+		return rid;
+	}
 
 	/**
 	 * @inheritDoc
@@ -60,13 +80,13 @@ public class WsRestAccessRequest implements NorthboundAccessWrapper
 	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getRequestURI()
 	 */
 	@Override
-	public String getRequestURI() {
-		
+	public String getRequestURI() 
+	{
 		String uri = request.optString("uri");
 		String[] uriElements = uri.split("\\?");
 		return uriElements[0];
 	}
-
+	
 	/**
 	 * @inheritDoc
 	 *
@@ -81,7 +101,7 @@ public class WsRestAccessRequest implements NorthboundAccessWrapper
 		{
 			try
 			{
-				return HttpRestAccessRequest.processRequestQuery(
+				return NorthboundRequest.processRequestQuery(
 						uriElements[1]);
 			}
 			catch (UnsupportedEncodingException e)

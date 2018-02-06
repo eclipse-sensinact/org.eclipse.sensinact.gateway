@@ -29,7 +29,9 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
  * that perform a task and jersey
  */
 @SuppressWarnings("serial")
-@WebServlet(asyncSupported=true)
+@WebServlet(displayName="sensiNact" ,
+            urlPatterns = {"/sensinact/*"}, 
+            asyncSupported=true)
 public class HttpEndpoint extends HttpServlet
 {		
 	
@@ -82,18 +84,23 @@ public class HttpEndpoint extends HttpServlet
         if(response.isCommitted())
         {
         	return;
+        } 
+        final AsyncContext asyncContext;  
+        if(request.isAsyncStarted())
+        {
+        	asyncContext = request.getAsyncContext();
+        	
+        } else
+        {
+        	asyncContext = request.startAsync(request,response);
         }        
-        final AsyncContext asyncContext = request.startAsync(request,response);
         response.getOutputStream().setWriteListener(new WriteListener()
         {
 			@Override
 			public void onWritePossible() throws IOException 
 			{
-				 HttpServletRequest request = (HttpServletRequest) 
-		        		asyncContext.getRequest();
-		        
-				 HttpServletResponse response = (HttpServletResponse) 
-		        		asyncContext.getResponse();
+				 HttpServletRequest request = (HttpServletRequest) asyncContext.getRequest();		        
+				 HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
 		        
 			     try
 			     {
@@ -124,12 +131,14 @@ public class HttpEndpoint extends HttpServlet
 					}
 				} catch (Exception e) 
 				{
-					e.printStackTrace();
 					mediator.error(e);
 					
 				} finally
 				{
-		            asyncContext.complete();
+					if(request.isAsyncStarted())
+					{
+						asyncContext.complete();
+					}
 				}
 			}
 

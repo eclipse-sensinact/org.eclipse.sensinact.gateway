@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
+ */
+
 package org.eclipse.sensinact.gateway.remote.socket.sample.test;
 
 import java.io.File;
@@ -7,12 +18,29 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.security.AllPermission;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidCallback;
+import org.eclipse.sensinact.gateway.core.message.MessageRegisterer;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
+import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaMessageSubType;
+import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
 import org.eclipse.sensinact.gateway.test.MidOSGiTest;
@@ -35,6 +63,143 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	//						NESTED DECLARATIONS			  			      //
 	//********************************************************************//
 
+	class AgentCallback extends AbstractMidCallback  implements MidAgentCallback
+	{
+	    final String[] UNLISTENED = new String[]{
+	    	"/sensiNact/system","/AppManager/admin"
+	    };
+
+		/**
+		 * The string formated location of service providers
+		 * that have already been processed by this {@link 
+		 * MidAgentCallback}
+		 */
+		private Map<String, String> locations;
+
+		
+		/**
+		 * Constructor
+		 * 
+		 * @param identifier
+		 * 		the {@link Mediator} that will be used 
+		 * 		by the AbstractSnaAgentCallback to instantiate
+		 */
+		protected AgentCallback()
+		{
+			super(false);
+			this.locations = new HashMap<String,String>();
+		}
+		
+		/**
+		 * Returns the String location for the service provider
+		 * whose path is passed as parameter 
+		 * 
+		 * @param path
+		 * 		the path  of the service provider for which to
+		 * 		retrieve the string location
+		 * @return
+		 * 		the String location for the specified path
+		 */
+	    protected String getLocation(String serviceProvider)
+	    {
+			synchronized(this.locations)
+			{
+				return this.locations.get(serviceProvider);
+			}
+	    }
+	    
+	    /**
+		 * Sets the String location for the service provider
+		 * whose path is passed as parameter 
+		 * 
+		 * @param path
+		 * 		the path  of the service provider for which to
+		 * 		set the string location
+		 * @param location
+		 * 		the string location to set
+		 */
+	    protected void setLocation(String serviceProvider, String location)
+	    {
+			synchronized(this.locations)
+			{
+				this.locations.put(serviceProvider, location);	
+			}
+	    }
+	    
+		/**
+		 * @inheritDoc
+	     *
+	     * @see MessageRegisterer#register(SnaMessage)
+	     */
+	    @Override
+	    public void doCallback(SnaMessage<?> message)
+	    {  	
+	    	if(message == null)
+			{
+				return;
+			}	
+			String path = message.getPath();
+			if(path == null)
+			{
+			    return;
+			}	
+			int index = 0;
+			int length = UNLISTENED==null?0:UNLISTENED.length;
+			for(;index < length; index++)
+			{			
+				String unlistened = UNLISTENED[index];
+				if(unlistened == null)
+				{
+					continue;
+				}
+		    	if(path.startsWith(unlistened))
+		    	{
+		    		return;
+		    	}
+			}
+			try
+			{
+		    	handleMessage(message);
+		    	
+			} catch(Exception e)
+			{
+				super.setStatus(Status.ERROR);
+				super.getCallbackErrorHandler().register(e);
+			}
+	    } 
+	    
+		@Override
+		public void doHandle(SnaLifecycleMessageImpl message) 
+		{		
+			//handleMessage(message);
+		}
+
+		@Override
+		public void doHandle(SnaUpdateMessageImpl message) {
+
+			//handleMessage(message);
+		}
+
+		@Override
+		public void doHandle(SnaErrorMessageImpl message) {
+
+			//handleMessage(message);
+		}
+
+		@Override
+		public void doHandle(SnaResponseMessage<?> message) {
+
+			//handleMessage(message);
+		}
+
+    	private final void handleMessage(SnaMessage<?> message)
+    	{
+			String json = message.getJSON();
+			stack.push(json);
+    	}
+    	
+	}
+	
 	//********************************************************************//
 	//						ABSTRACT DECLARATIONS						  //
 	//********************************************************************//
@@ -49,6 +214,9 @@ public class MidOSGiTestExtended extends MidOSGiTest
 
 	private int count;
 	private File confDir;
+	
+	private final Stack<String> stack = new Stack<>();
+	private Session s = null;
 
 	/**
 	 * @throws Exception
@@ -139,7 +307,7 @@ public class MidOSGiTestExtended extends MidOSGiTest
 			}
 		});
 		
-		configuration.put("org.eclipse.sensinact.gateway.test.codeBase", getAllowedCodeBase());	
+		configuration.put("org.eclipse.sensinact.gateway.test.codeBase", getAllowedCodeBase());
 		configuration.put("org.apache.felix.http.jettyEnabled", "true");
 		configuration.put("org.apache.felix.http.whiteboardEnabled", "true");
 		configuration.put("org.apache.felix.http.debug", "true");
@@ -406,5 +574,28 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	    MidProxy<Session> mids = (MidProxy<Session>)Proxy.getInvocationHandler(s);
 	    Object o = mids.toOSGi(Session.class.getMethod("getProviders"),null);
 	    return (String) Object.class.getDeclaredMethod("toString").invoke(o);
+	}
+	
+	
+	public void registerAgent() throws Throwable 
+	{
+		MidProxy<Core> mid = new MidProxy<Core>(classloader,this, Core.class);		
+	    Core core = mid.buildProxy();
+	    s = core.getAnonymousSession();
+	    
+		MidProxy<Session> mids = (MidProxy<Session>)Proxy.getInvocationHandler(s);
+	    Object o = mids.toOSGi(Session.class.getMethod("registerSessionAgent",
+	    		new Class<?>[]{MidAgentCallback.class, SnaFilter.class}),
+	    		new Object[] {new AgentCallback(), null});
+	    String j = (String) Object.class.getDeclaredMethod("toString").invoke(o);
+	    System.out.println(j);
+	}
+
+	public List<String> listAgentMessages() 
+	{
+		List<String> messages = new ArrayList<>();
+		messages.addAll(this.stack);
+		return Collections.unmodifiableList(messages);
+		
 	}
 }

@@ -218,35 +218,29 @@ public class NorthboundRequestBuilder<F>
 						        attribute, argument);
 				}
 				break;
-			case "SUBSCRIBE":
-				Object[] arguments = null;
-				if(this.argument!=null)
-				{
-					if(this.argument.getClass().isArray())
-					{
-						arguments = (Object[]) this.argument;
-						
-					} else
-					{
-						arguments = new Object[]{this.argument};
-					}
-				}
-				if(arguments!=null && NorthboundRecipient.class.isAssignableFrom(
+			case "SUBSCRIBE":				
+				Object[] arguments = this.argument!=null?(this.argument.getClass(
+					).isArray()?(Object[]) this.argument:new Object[]{this.argument})
+						:null;
+					
+				if(arguments == null || arguments.length == 0 ||
+					!NorthboundRecipient.class.isAssignableFrom(
 							arguments[0].getClass()))
-				{					
-					if(this.attribute!=null)
-					{
-						request = new AttributeSubscribeRequest<F>( mediator,
-						    serviceProvider, service, resource, attribute, 
-						    (NorthboundRecipient) arguments[0], (arguments.length>1
-						    ?((SnaFilter)arguments[1]).toJSONObject().getJSONArray(
-						    	"conditions"):new JSONArray()));
-					} else
-					{
-						request = new RegisterAgentRequest<F>( mediator, serviceProvider, 
-							service, (NorthboundRecipient) arguments[0],  (SnaFilter) 
-					        (arguments.length>1?arguments[1]:null));
-					}
+				{
+					break;
+				}				
+				if(this.resource!=null)
+				{
+					request = new AttributeSubscribeRequest<F>( mediator,
+					    serviceProvider, service, resource, attribute, 
+					    (NorthboundRecipient) arguments[0], (arguments.length>1
+					    ?((JSONArray)arguments[1]):new JSONArray()));
+				} else
+				{
+					request = new RegisterAgentRequest<F>( mediator, 
+						serviceProvider, service, (NorthboundRecipient) 
+					    arguments[0],  (SnaFilter)(arguments.length>1
+					    	?arguments[1]:null));
 				}
 				break;
 			case "UNSUBSCRIBE":

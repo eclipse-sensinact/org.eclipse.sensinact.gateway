@@ -20,7 +20,12 @@ import org.eclipse.sensinact.gateway.core.security.Authentication;
 public interface NorthboundAccessWrapper 
 {
 	/**
-	 * @return
+	 * Returns the {@link NorthboundMediator} of this
+	 * NorthboundAccessWrapper, allowing to interact with
+	 * the OSGi host environment 
+	 * 
+	 * @return the {@link NorthboundMediator} of this
+	 * NorthboundAccessWrapper
 	 */
 	NorthboundMediator getMediator();
 
@@ -28,6 +33,18 @@ public interface NorthboundAccessWrapper
 	 * @return
 	 */
 	String getRequestURI();
+
+	/**
+	 * Returns the String identifier of the request wrapped
+	 * by this NorthboundAccessWrapper if it exists. Otherwise
+	 * returns null
+	 * 
+	 * @param parameters the Set of {@link Parameter}s held 
+	 * by the wrapped request
+	 * 
+	 * @return the wrapped request's String identifier
+	 */
+	String getRequestID(Parameter[] parameters);
 
 	/**
 	 * @return

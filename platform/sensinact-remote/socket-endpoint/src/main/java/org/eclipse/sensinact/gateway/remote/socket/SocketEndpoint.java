@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
+ */
+
 package org.eclipse.sensinact.gateway.remote.socket;
 
 import java.io.IOException;
@@ -14,7 +25,6 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 
 /**
  * Simple RemoteEndpoint implementation using socket connection 
@@ -173,21 +183,24 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 							}
 						} else
 						{
-							JSONObject f = object.getJSONObject("filter");
-							
-							SnaFilter filter = new SnaFilter(mediator,
-							    f.getString("sender"),
-								f.getBoolean("pattern"), 
-								f.getBoolean("complement"),
-								f.getJSONArray("conditions"));
-							
-							JSONArray t = object.getJSONArray("types");
-							int i = 0;								
-							int l = t==null?0:t.length();
-							for(; i < l; i++)
+							SnaFilter filter = null;
+							JSONObject f = object.optJSONObject("filter");
+							if(!JSONObject.NULL.equals(f))
 							{
-								filter.addHandledType(
-									SnaMessage.Type.valueOf(t.getString(i)));
+								filter = new SnaFilter(mediator,
+							    f.getString("sender"),
+								f.optBoolean("pattern"), 
+								f.optBoolean("complement"),
+								f.optJSONArray("conditions"));
+							
+								JSONArray t = object.optJSONArray("types");
+								int i = 0;								
+								int l = t==null?0:t.length();
+								for(; i < l; i++)
+								{
+									filter.addHandledType(
+										SnaMessage.Type.valueOf(t.getString(i)));
+								}
 							}
 							super.remoteCore.registerAgent(agentId, 
 							   filter, object.getString("agentKey"));
@@ -344,7 +357,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see fr.cea.sna.gate way.core.RemoteEndpoint#namespace()
+	 * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#namespace()
 	 */
 	@Override
 	public String namespace()
@@ -462,6 +475,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 					}
 				} catch (Exception e)
 				{
+					e.printStackTrace();
 					if(SocketEndpoint.this.client!=null 
 							&& !SocketEndpoint.this.client.running())
 					{
@@ -469,12 +483,23 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 					}
 				}
 			}
-		}, 0, 1000*10);		
-		int timeout = 60*1000;
+		}, 0, 1000*5);		
+		int timeout = 60*3000;
 		
-		while(timeout > 0 && remoteNamespace == null)
+		while(true)
 		{
-			this.namespace();
+			if(timeout<=0)
+			{
+				 break;
+			}
+			if(remoteNamespace == null)
+			{
+				this.namespace();
+				
+			} else if(this.server.running())
+			{
+				break;
+			}
 			try
 			{
 				timeout-=100;
@@ -488,7 +513,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		}		
 		this.connectionTimer.cancel();
 		this.connectionTimer = null;
-		if(remoteNamespace == null)
+		if(remoteNamespace == null || !this.server.running())
 		{
 			super.connected = false;
 		}
@@ -533,7 +558,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 				).put("uri", uri
 				).put("agent", new JSONObject(
 					).put("agentKey", agentKey
-				    ).put("filter", filter.toJSONObject())));
+				    ).put("filter", filter==null?null:filter.toJSONObject())));
 
 		if(response!=null)
 		{
@@ -580,10 +605,16 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		}
 		String uri = String.format("/agent?%s",agentId);
 		
+		JSONObject object = new JSONObject(message.getJSON());
+		String path = (String) object.remove("uri");
+		
+		object.put("uri", new StringBuilder().append("/"
+			).append(super.localNamespace).append(":").append(
+				path.substring(1)).toString());
+		
 		JSONObject response = this.client.request(
-			new JSONObject(
-				).put("uri", uri
-				).put("message", new JSONObject(message.getJSON())));
+			new JSONObject().put("uri", uri
+				).put("message", object));
 
 		if(response!=null)
 		{

@@ -18,20 +18,33 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
 
+/**
+ * Extended {@link NorthbundAccess} dedicated to websocket connections
+ * 
+ * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ */
 public class WsRestAccess extends NorthboundAccess
 {
+	/**
+	 * The {@link WebSocketWrapper} held by this WsRestAccess 
+	 */
 	private WebSocketWrapper socket;
 
+	/**
+	 * Constructor
+	 * 
+	 * @param socket the {@link WebSocketWrapper} held by 
+	 * the WsRestAccess to be instantiated
+	 */
 	public WsRestAccess(WebSocketWrapper socket)
 	{
 		this.socket = socket;
 	}
-	
-	/** 
+
+	/**
 	 * @inheritDoc
-	 * 
-	 * @see NorthboundAccess#
-	 * respond(NorthboundRequestBuilder)
+	 *
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess#respond(org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder)
 	 */
 	@Override
 	protected boolean respond(NorthboundRequestBuilder<JSONObject> builder) 
@@ -52,17 +65,17 @@ public class WsRestAccess extends NorthboundAccess
 			return false;
 		}
 		result.put("X-Auth-Token", super.endpoint.getSessionToken());
-		this.socket.send(new String(result.toString(
-				).getBytes("UTF-8")));
+		result.put("rid", super.rid);
+		
+		this.socket.send(new String(result.toString().getBytes("UTF-8")));
 		return true;
 
 	}
 
-	/** 
+	/**
 	 * @inheritDoc
-	 * 
-	 * @see NorthboundAccess#
-	 * sendError(int, java.lang.String)
+	 *
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess#sendError(int, java.lang.String)
 	 */
 	@Override
 	protected void sendError(int i, String string) throws IOException 

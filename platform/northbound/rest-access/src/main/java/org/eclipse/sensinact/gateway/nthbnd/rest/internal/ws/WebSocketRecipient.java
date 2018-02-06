@@ -37,12 +37,25 @@ public class WebSocketRecipient extends NorthboundRecipient
      * @see MidNorthboundRecipient#
      * doCallback(java.lang.String, SnaMessage)
      */
-    public void callback(String callbackId, SnaMessage[]  messages)
+    public void callback(String callbackId, SnaMessage[] messages)
     {  	
 		int index = 0;
 		int length = messages==null?0:messages.length;
-		
+
 		StringBuilder builder = new StringBuilder();
+		builder.append(JSONUtils.OPEN_BRACE);
+		builder.append("\"type\":\"CALLBACK\",");
+		builder.append("\"callbackId\":");
+		if(callbackId==null)
+		{
+			builder.append("null");			
+		} else
+		{
+			builder.append("\"");
+			builder.append(callbackId);
+			builder.append("\"");			
+		}
+		builder.append(",\"messages\":");
 		builder.append(JSONUtils.OPEN_BRACKET);
 		for(;index < length; index++)
 		{
@@ -50,15 +63,14 @@ public class WebSocketRecipient extends NorthboundRecipient
 			builder.append(messages[index].getJSON());
 		}
 		builder.append(JSONUtils.CLOSE_BRACKET);
-
+		builder.append(JSONUtils.CLOSE_BRACE);
 		try 
-	    {
-		      
+	    {		      
 	    	 this.socket.send(builder.toString());
 
     	} catch(Exception e)  
-	    {
-    		super.mediator.error(e.getMessage(),e);
+	    {    		
+    		super.mediator.error(e);
 	    } 
     }
     

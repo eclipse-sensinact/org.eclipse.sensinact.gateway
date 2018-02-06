@@ -35,7 +35,6 @@ public class Activator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
     private static final String STUDIO_ALIAS = "/studio-web";
-    private static final String SWAGGER_ALIAS = "/swagger-api";
 
     public void start(BundleContext context){
 
@@ -48,7 +47,7 @@ public class Activator implements BundleActivator {
 
                 HttpContext context = httpService.createDefaultHttpContext();
 
-                ResourceServlet servlet = new ResourceServlet(STUDIO_ALIAS);
+                ResourceServlet servlet = new ResourceServlet();
 
                 try {
                     httpService.registerServlet(STUDIO_ALIAS, servlet, null, context);
@@ -61,19 +60,6 @@ public class Activator implements BundleActivator {
                 }
 
                 LOG.info("Studio Web is running on " + STUDIO_ALIAS + " context");
-
-                try {
-					httpService.registerServlet(SWAGGER_ALIAS, new ResourceServlet(SWAGGER_ALIAS), null, context);
-                    httpService.registerFilter(
-                            new IndexFilter(SWAGGER_ALIAS), "^\\" + SWAGGER_ALIAS + "\\/?", null, 0, context);
-				} catch (ServletException e) {
-					e.printStackTrace();
-				} catch (NamespaceException e) {
-					e.printStackTrace();
-				}
-
-                LOG.info("Swagger API is running on " + SWAGGER_ALIAS + " context");
-
                 return httpService;
             }
 
@@ -98,7 +84,6 @@ public class Activator implements BundleActivator {
         unregisterServlets();
 
         LOG.info("Studio Web was unregistered from {} context", STUDIO_ALIAS);
-        LOG.info("Swagger API was unregistered from {} context", SWAGGER_ALIAS);
     }
 
     /**
@@ -107,7 +92,6 @@ public class Activator implements BundleActivator {
     private void unregisterServlets() {
         if (this.httpService != null) {
             httpService.unregister(STUDIO_ALIAS);
-            httpService.unregister(SWAGGER_ALIAS);
         }
     }
 }

@@ -25,16 +25,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.sensinact.gateway.util.IOUtils;
 
 @WebServlet(asyncSupported = true)
-public final class ResourceServlet extends HttpServlet {
-
-    private final String path;
-
+public final class ResourceServlet extends HttpServlet 
+{
     /**
      * @param path the alias of the servlet
      */
-    ResourceServlet(String path) {
-        this.path = path;
-    }
+    ResourceServlet() 
+    {}
 
     /**
      * @inheritDoc
@@ -43,12 +40,25 @@ public final class ResourceServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException 
+    {    	 
+    	if(response.isCommitted())
+        {
+        	return;
+        } 
+        final AsyncContext asyncContext;  
+        if(request.isAsyncStarted())
+        {
+        	asyncContext = request.getAsyncContext();
+        	
+        } else
+        {
+        	asyncContext = request.startAsync(request,response);
+        }        
 
-        if(!response.isCommitted()) {
-            final AsyncContext asyncContext = request.startAsync(request,response);
-
-            response.getOutputStream().setWriteListener(new WriteListener() {
+        ((HttpServletResponse)asyncContext.getResponse()).getOutputStream().setWriteListener(
+        	new WriteListener()
+        	{
                 private String resName;
                 private URL url;
                 private HttpServletRequest request;
@@ -69,7 +79,7 @@ public final class ResourceServlet extends HttpServlet {
                         target += "/" + target;
                     }
 
-                    this.resName = ResourceServlet.this.path + target;
+                    this.resName = target;
 
                     try  {
                         this.url = ResourceServlet.this.getServletContext().getResource(resName);
@@ -103,8 +113,12 @@ public final class ResourceServlet extends HttpServlet {
                         }
                     } catch (Exception e) {
                         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    } finally {
-                        asyncContext.complete();
+                    } finally 
+                    {
+    					if(request.isAsyncStarted())
+    					{
+    						asyncContext.complete();
+    					}
                     }
                 }
 
@@ -112,7 +126,7 @@ public final class ResourceServlet extends HttpServlet {
                 public void onError(Throwable t) {
                     t.printStackTrace();
                 }
-            });
-        }
+            }
+        );
     }
 }
