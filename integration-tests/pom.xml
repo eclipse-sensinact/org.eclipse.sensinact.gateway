@@ -25,9 +25,9 @@
 
     <packaging>pom</packaging>
 
-	<name>sensiNact IoT - Integration Tests</name>
+	<name>sensiNact IoT Gateway - Integration Tests</name>
     
 	<modules>
-        <module>mosquitto-it</module>
+        <module>mqtt-it</module>
 	</modules>
 </project>

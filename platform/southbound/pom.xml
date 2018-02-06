@@ -53,7 +53,7 @@
     </build>
 
     <modules>
-        <module>mosquitto</module>
+        <module>mqtt</module>
         <module>openhab</module>
         <module>http</module>
         <!--<module>soxfire</module>-->
