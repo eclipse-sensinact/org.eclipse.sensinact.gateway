@@ -149,7 +149,7 @@ public abstract class MqttTestITAbstract {
                 depProfile4(),
                 depProfileHttp(),
                 depProfileREST(),
-                depProfileMosquitto(),
+                depProfileMqtt(),
                 getBundleRequiredByURLResolvers()
         );
 
