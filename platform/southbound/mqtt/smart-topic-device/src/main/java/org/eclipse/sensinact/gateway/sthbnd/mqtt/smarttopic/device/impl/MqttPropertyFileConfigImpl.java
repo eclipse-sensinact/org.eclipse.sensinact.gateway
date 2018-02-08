@@ -26,25 +26,25 @@ public class MqttPropertyFileConfigImpl implements MqttPropertyFileConfig {
     @Property
     String id;
 
-    @Property
+    @Property(mandatory = false,defaultValue = "127.0.0.1")
     String host;
 
-    @Property
+    @Property(mandatory = false,defaultValue = "1883",validationRegex = Property.INTEGER)
     int port;
 
     @Property
     String topic;
 
-    @Property
+    @Property(mandatory = false)
     String protocol;
 
     @Property(name = "processor", mandatory = false)
     String payloadFormat;
 
-    @Property
+    @Property(mandatory = false)
     String username;
 
-    @Property
+    @Property(mandatory = false)
     String password;
 
     @Property(name = "location.latitude", mandatory = false)

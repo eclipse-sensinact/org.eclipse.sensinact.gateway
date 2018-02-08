@@ -10,6 +10,23 @@
  */
 package org.eclipse.sensinact.gateway.device.mqtt.lite.it.util;
 
+import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
+import org.eclipse.aether.DefaultRepositorySystemSession;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
+import org.eclipse.aether.impl.DefaultServiceLocator;
+import org.eclipse.aether.internal.impl.slf4j.Slf4jLoggerFactory;
+import org.eclipse.aether.repository.LocalRepository;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.resolution.ArtifactResult;
+import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
+import org.eclipse.aether.spi.connector.transport.TransporterFactory;
+import org.eclipse.aether.transport.file.FileTransporterFactory;
+import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttBroker;
@@ -20,6 +37,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.ops4j.pax.exam.*;
 import org.ops4j.pax.exam.options.FrameworkPropertyOption;
+import org.ops4j.pax.exam.options.MavenArtifactProvisionOption;
 import org.ops4j.pax.exam.options.SystemPropertyOption;
 
 import java.util.*;
@@ -31,10 +49,10 @@ import static org.ops4j.pax.exam.CoreOptions.*;
  */
 public abstract class MqttTestITAbstract {
 
-    protected static final String SENSINACT_HTTP_PORT= "8097";
-    protected static final String SENSINACT_VERSION= "1.5-SNAPSHOT";
-    protected static final String MQTT_HOST = "test.mosquitto.org";
-    protected static final int MQTT_PORT = 1883;
+    protected static final String SENSINACT_HTTP_PORT="8097";
+    protected static final String SENSINACT_VERSION="1.5-SNAPSHOT";
+    protected static final String MQTT_HOST ="test.mosquitto.org";
+    protected static final Integer MQTT_PORT =8883;
 
     protected static Option[] combine(Option[]...options){
 
@@ -88,13 +106,50 @@ public abstract class MqttTestITAbstract {
 
     protected Option[] depProfile4(){
         return options(
-                mavenBundle("org.apache.felix", "org.apache.felix.ipojo", "1.12.0")
+                mavenBundle("org.apache.felix", "org.apache.felix.ipojo", "1.12.0"),
+                wrappedBundle(mavenJar("org.apache.maven", "maven-aether-provider", "3.3.9")),
+                wrappedBundle(mavenJar("org.eclipse.aether", "aether-connector-basic", "1.1.0")),
+                wrappedBundle(mavenJar("org.eclipse.aether", "aether-spi", "1.1.0")),
+                wrappedBundle(mavenJar("org.eclipse.aether", "aether-transport-file", "1.1.0")),
+                wrappedBundle(mavenJar("org.eclipse.aether", "aether-transport-http", "1.1.0")),
+                wrappedBundle(mavenJar("org.eclipse.aether", "aether-util", "1.1.0")),
+                wrappedBundle(mavenJar("org.eclipse.aether", "aether-impl", "1.1.0")),
+                wrappedBundle(mavenJar("org.eclipse.aether", "aether-api", "1.1.0"))
         );
     }
 
+    private MavenArtifactProvisionOption fetch(String groupId, String artifactId, String version){
+        DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
+        locator.setService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
+        locator.setService(TransporterFactory.class, FileTransporterFactory.class);
+        locator.setService(TransporterFactory.class, HttpTransporterFactory.class);
+        locator.setService(org.eclipse.aether.spi.log.LoggerFactory.class, Slf4jLoggerFactory.class);
+        RepositorySystem system = locator.getService(RepositorySystem.class);
+        RepositorySystemSession session = MavenRepositorySystemUtils.newSession();
+
+        //String basedir = "http://central.maven.org/maven2";//singleRepositoryFromListOfDefaultRepositories;
+        ((DefaultRepositorySystemSession)session).setLocalRepositoryManager(system.newLocalRepositoryManager(session, new LocalRepository(System.getProperty("user.home")+"/.m2/repository/")));
+
+        ArtifactRequest req = new ArtifactRequest();
+        req.addRepository(new RemoteRepository.Builder("central", "default", "http://central.maven.org/maven2").build());
+        req.setArtifact(new DefaultArtifact(groupId, artifactId, "jar", version));
+        try {
+            ArtifactResult res = system.resolveArtifact(session, req);
+            System.out.println("----->"+res.getArtifact().getFile().getPath());
+        } catch (ArtifactResolutionException e) {
+            e.printStackTrace();
+        }
+
+        return mavenBundle(groupId, artifactId, version);
+    }
+
     protected Option[] depProfileMqtt(){
+
         return options(
-                mavenBundle("org.eclipse.paho", "org.eclipse.paho.api.mqttv3", "1.2.0"),
+
+                //fetch("org.eclipse.paho", "org.eclipse.paho.api.mqttv3", "1.2.0"),
+                fetch("org.eclipse.paho", "org.eclipse.paho.client.mqttv3", "1.2.0"),
+                //mavenBundle("org.eclipse.paho", "org.eclipse.paho.api.mqttv3", "1.2.0"),
                 mavenBundle("org.eclipse.sensinact.gateway.sthbnd.mqtt", "mqtt-device", SENSINACT_VERSION),
                 mavenBundle("org.eclipse.sensinact.gateway.sthbnd.mqtt", "smart-topic-device", SENSINACT_VERSION)
         );
