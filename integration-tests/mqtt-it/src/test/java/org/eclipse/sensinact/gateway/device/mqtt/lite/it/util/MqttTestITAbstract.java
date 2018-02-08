@@ -52,7 +52,7 @@ public abstract class MqttTestITAbstract {
     protected static final String SENSINACT_HTTP_PORT="8097";
     protected static final String SENSINACT_VERSION="1.5-SNAPSHOT";
     protected static final String MQTT_HOST ="test.mosquitto.org";
-    protected static final Integer MQTT_PORT =8883;
+    protected static final Integer MQTT_PORT =1883;
 
     protected static Option[] combine(Option[]...options){
 
@@ -111,13 +111,20 @@ public abstract class MqttTestITAbstract {
                 wrappedBundle(mavenJar("org.eclipse.aether", "aether-connector-basic", "1.1.0")),
                 wrappedBundle(mavenJar("org.eclipse.aether", "aether-spi", "1.1.0")),
                 wrappedBundle(mavenJar("org.eclipse.aether", "aether-transport-file", "1.1.0")),
-                wrappedBundle(mavenJar("org.eclipse.aether", "aether-transport-http", "1.1.0")),
+                //wrappedBundle(mavenJar("org.eclipse.aether", "aether-transport-http", "1.1.0")),
                 wrappedBundle(mavenJar("org.eclipse.aether", "aether-util", "1.1.0")),
                 wrappedBundle(mavenJar("org.eclipse.aether", "aether-impl", "1.1.0")),
                 wrappedBundle(mavenJar("org.eclipse.aether", "aether-api", "1.1.0"))
         );
     }
 
+    /**
+     * This method bypass the need of having the dependency declared in the pom.xml, allowing the test to declare dependencies not associated
+     * @param groupId
+     * @param artifactId
+     * @param version
+     * @return
+     */
     private MavenArtifactProvisionOption fetch(String groupId, String artifactId, String version){
         DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
         locator.setService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
@@ -127,7 +134,6 @@ public abstract class MqttTestITAbstract {
         RepositorySystem system = locator.getService(RepositorySystem.class);
         RepositorySystemSession session = MavenRepositorySystemUtils.newSession();
 
-        //String basedir = "http://central.maven.org/maven2";//singleRepositoryFromListOfDefaultRepositories;
         ((DefaultRepositorySystemSession)session).setLocalRepositoryManager(system.newLocalRepositoryManager(session, new LocalRepository(System.getProperty("user.home")+"/.m2/repository/")));
 
         ArtifactRequest req = new ArtifactRequest();
@@ -135,7 +141,6 @@ public abstract class MqttTestITAbstract {
         req.setArtifact(new DefaultArtifact(groupId, artifactId, "jar", version));
         try {
             ArtifactResult res = system.resolveArtifact(session, req);
-            System.out.println("----->"+res.getArtifact().getFile().getPath());
         } catch (ArtifactResolutionException e) {
             e.printStackTrace();
         }
@@ -146,9 +151,7 @@ public abstract class MqttTestITAbstract {
     protected Option[] depProfileMqtt(){
 
         return options(
-
-                //fetch("org.eclipse.paho", "org.eclipse.paho.api.mqttv3", "1.2.0"),
-                fetch("org.eclipse.paho", "org.eclipse.paho.client.mqttv3", "1.2.0"),
+                mavenBundle("org.eclipse.paho", "org.eclipse.paho.client.mqttv3", "1.2.0"),
                 //mavenBundle("org.eclipse.paho", "org.eclipse.paho.api.mqttv3", "1.2.0"),
                 mavenBundle("org.eclipse.sensinact.gateway.sthbnd.mqtt", "mqtt-device", SENSINACT_VERSION),
                 mavenBundle("org.eclipse.sensinact.gateway.sthbnd.mqtt", "smart-topic-device", SENSINACT_VERSION)
@@ -215,11 +218,21 @@ public abstract class MqttTestITAbstract {
 
     }
 
-    protected Provider createDevicePojo(String providerString, String serviceString, String resourceString, String topic){
+    protected Provider createDevicePojo(String providerString, String serviceString, String resourceString, String topic) throws MqttException {
         MqttBroker broker = new MqttBroker.Builder()
                 .host(MQTT_HOST)
                 .port(MQTT_PORT)
                 .build();
+
+        broker.connect();
+
+        while(broker.getClient()==null||!broker.getClient().isConnected()){
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
         Provider provider = new Provider();
         provider.setName(providerString);

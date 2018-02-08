@@ -36,6 +36,7 @@ import java.util.Set;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
+@Ignore
 public class MqttBridgeTest extends MqttTestITAbstract {
 
     @Inject
@@ -57,6 +58,31 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         bc.registerService("org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider", provider, new Hashtable<String, Object>());
         final Set<String> providersSet = parseJSONArrayIntoSet(sensinactSession.getProviders().getJSONArray("providers"));
         Assert.assertTrue("Provider was not created, or at least is not shown via REST api", providersSet.contains("myprovider"));
+    }
+
+    @Test
+    public void providerCreationViaRest() throws Exception {
+        providerCreation();
+        MqttClient mqttClient = getMqttConnection(MQTT_HOST, MQTT_PORT);
+        final String messageString1 = new Double(Math.random()).toString();
+        MqttMessage message1 = new MqttMessage(messageString1.getBytes());
+        mqttClient.publish("/myresource",message1 );
+
+        final Integer maxRetries=3;
+        Integer currentRetry=0;
+        Integer statusCode=null;
+        JSONObject jsonResponse=null;
+        while(currentRetry<maxRetries&&(statusCode==null||statusCode>299||statusCode<200)){
+            System.out.println("Sending request ..."+currentRetry);
+            jsonResponse=invokeRestAPI("sensinact/providers/myprovider/services/myservice/resources/myresource/GET");
+            statusCode=jsonResponse.getInt("statusCode");
+            currentRetry++;
+            Thread.sleep(500);
+        }
+
+        String value =jsonResponse.getJSONObject("response").getString("value");
+        Assert.assertEquals("Value should be updated on new message arrival, and was not the case", messageString1,value);
+
     }
 
     @Test
@@ -136,34 +162,6 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         Assert.assertEquals("Sensinact Core did not dispatch any notification message for the subscription", 1,rtc.getMessages().length);
         Assert.assertEquals("The notification value does not correspond to the value sent", messageString2,new JSONObject(rtc.getMessages()[0].getJSON()).getJSONObject("notification").getString("value"));
     }
-/*
-    @Test
-    public void createPojoSSL(){
-        MQTTBroker mb=new MQTTBroker();
-        mb.setHost("test.mosquitto.org");
-        mb.setPort(Long.parseLong("8883"));
-        mb.setProtocol(MQTTBroker.PROTOCOL.ssl);
-
-        Provider provider=new Provider();
-        provider.setName("myprovider");
-        provider.setBroker(mb);
-
-        Service service=new Service(provider);
-        service.setName("myservice");
-
-        provider.getServices().add(service);
-
-        Resource resource=new Resource(service);
-        resource.setName("myresource");
-        resource.setTopic("/myresource");
-        service.getResources().add(resource);
-
-        bc.registerService("org.eclipse.sensinact.gateway.device.mosquitto.lite.model.Provider",provider,new Hashtable<String, Object>());
-        final Set<String> providersSet=parseJSONArrayIntoSet(sensinactSession.getProviders().getJSONArray("providers"));
-        Assert.assertTrue("Provider was not created, or at least is not shown via REST api", providersSet.contains("myprovider"));
-
-    }
-    */
 
     private void waitForCallbackNotification() throws InterruptedException {
         synchronized (this){
