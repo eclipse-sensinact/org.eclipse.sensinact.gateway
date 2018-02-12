@@ -55,13 +55,6 @@
 						</configuration>
 					</execution>
 				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
-						<artifactId>sensinact-license</artifactId>
-						<version>1.5-SNAPSHOT</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
