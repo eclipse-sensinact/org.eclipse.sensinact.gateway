@@ -65,6 +65,6 @@
         <module>openweather-device</module>
 		<module>kodi-device</module>
         <module>live-objects</module>
+		<module>onem2m-device</module>
     </modules>
-
 </project>
