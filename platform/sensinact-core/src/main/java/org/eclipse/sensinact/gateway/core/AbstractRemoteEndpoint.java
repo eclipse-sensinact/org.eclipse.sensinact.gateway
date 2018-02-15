@@ -16,7 +16,6 @@ import java.util.Map;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.core.security.Sessions.SessionObserver;
 import org.json.JSONArray;
 import org.json.JSONObject;

@@ -18,11 +18,11 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Attribute;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
-import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.core.security.Sessions;
 import org.json.JSONObject;
 

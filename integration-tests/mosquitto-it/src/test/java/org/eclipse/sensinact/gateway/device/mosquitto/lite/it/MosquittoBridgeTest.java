@@ -15,7 +15,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.security.Session;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.it.util.MosquittoTestITAbstract;
 import org.eclipse.sensinact.gateway.device.mosquitto.lite.runtime.MQTTManagerRuntime;
 import org.json.JSONArray;

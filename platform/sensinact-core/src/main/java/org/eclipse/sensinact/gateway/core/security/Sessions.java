@@ -16,6 +16,8 @@ import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.core.Session;
+
 
 
 /**

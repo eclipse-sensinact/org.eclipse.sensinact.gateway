@@ -69,7 +69,7 @@ public class SocketEndpointManagerTest
 			{
 				t.registerAgent();
 			}
-		}		
+		}
 		for(int  n = 1;n <= INSTANCES_COUNT; n++)
 		{
 		    Thread.sleep(2*1000);
@@ -89,10 +89,9 @@ public class SocketEndpointManagerTest
 			    		n)));		    
 		    IOUtils.write(contentPlus, output);
 		}		
-		Thread.sleep(30*1000);
+		Thread.sleep(20*1000);
 
 		String s = instances.get(0).providers();
-		System.out.println(s);
 		
 		JSONObject j = new JSONObject(s);
 		JSONAssert.assertEquals(new JSONArray(

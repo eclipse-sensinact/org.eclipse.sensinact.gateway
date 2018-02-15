@@ -19,6 +19,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.Filtering;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.ModelConfiguration;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
@@ -72,6 +73,9 @@ public class TestContext<R extends ModelInstance>
 
 	private static final String AUTHORIZATION_FILTER = "("+Constants.OBJECTCLASS+"="+
 		AuthorizationService.class.getCanonicalName()+")";
+
+	private static final String FILTERING_FILTER = "("+Constants.OBJECTCLASS+"="+
+		Filtering.class.getCanonicalName()+")";
 	
 	private static final String MOCK_BUNDLE_NAME = "MockedBundle";
 	private static final long MOCK_BUNDLE_ID = 1;
@@ -82,6 +86,7 @@ public class TestContext<R extends ModelInstance>
 	private final Filter filterDataStore = Mockito.mock(Filter.class);
 	private final Filter filterAuthentication = Mockito.mock(Filter.class);
 	private final Filter filterAuthorization = Mockito.mock(Filter.class);
+	private final Filter filtering = Mockito.mock(Filter.class);
 	
 	private final BundleContext context = Mockito.mock(BundleContext.class);
 	private final Bundle bundle = Mockito.mock(Bundle.class);
@@ -106,6 +111,11 @@ public class TestContext<R extends ModelInstance>
 			Mockito.mock(ServiceRegistration.class);
 	private final ServiceReference referenceProvider = 
 			Mockito.mock(ServiceReference.class);
+	
+	private final ServiceReference filteringReference = 
+			Mockito.mock(ServiceReference.class);
+	private final ServiceRegistration registrationFiltering = 
+			Mockito.mock(ServiceRegistration.class);
 
 	private MyModelInstance instance;	
 	private SnaAgent agent;
@@ -135,43 +145,32 @@ public class TestContext<R extends ModelInstance>
 				Mockito.eq(LOG_FILTER))).thenReturn(null);		
 		Mockito.when(context.getServiceReference(LOG_FILTER)
 				).thenReturn(null);	
-
+		
 		Mockito.when(context.createFilter(AGENT_FILTER)).thenReturn(filterAgent);
 		Mockito.when(filterAgent.toString()).thenReturn(AGENT_FILTER);
 		Mockito.when(filterAgent.match(referenceAgent)).thenReturn(true);
 		
-		Mockito.when(context.createFilter(DATA_STORE_FILTER)
-				).thenReturn(filterDataStore);
-		Mockito.when(filterDataStore.toString()).thenReturn(
-				DATA_STORE_FILTER);
+		Mockito.when(context.createFilter(DATA_STORE_FILTER)).thenReturn(filterDataStore);
+		Mockito.when(filterDataStore.toString()).thenReturn(DATA_STORE_FILTER);
 		
-		Mockito.when(context.createFilter(AUTHENTICATION_FILTER)
-				).thenReturn(filterAuthentication);
-		Mockito.when(filterAuthentication.toString()).thenReturn(
-				AUTHENTICATION_FILTER);
+		Mockito.when(context.createFilter(AUTHENTICATION_FILTER)).thenReturn(filterAuthentication);
+		Mockito.when(filterAuthentication.toString()).thenReturn(AUTHENTICATION_FILTER);
 
-		Mockito.when(context.createFilter(ACCESS_FILTER)
-				).thenReturn(filterAccess);
-		Mockito.when(filterAccess.toString()).thenReturn(
-				ACCESS_FILTER);
-		Mockito.when(filterAccess.match(referenceAccess)).thenReturn(
-				true);
+		Mockito.when(context.createFilter(ACCESS_FILTER)).thenReturn(filterAccess);
+		Mockito.when(filterAccess.toString()).thenReturn(ACCESS_FILTER);
+		Mockito.when(filterAccess.match(referenceAccess)).thenReturn(true);
 
-		Mockito.when(context.createFilter(VALIDATION_FILTER)
-				).thenReturn(filterValidation);
-		Mockito.when(filterValidation.toString()).thenReturn(
-				VALIDATION_FILTER);		
-		Mockito.when(filterValidation.match(referenceValidation)).thenReturn(
-				true);
+		Mockito.when(context.createFilter(VALIDATION_FILTER)).thenReturn(filterValidation);
+		Mockito.when(filterValidation.toString()).thenReturn(VALIDATION_FILTER);		
+		Mockito.when(filterValidation.match(referenceValidation)).thenReturn(true);
 		
-		Mockito.when(context.createFilter(AUTHORIZATION_FILTER)
-				).thenReturn(filterAuthorization);
-		Mockito.when(filterAuthorization.toString()).thenReturn(
-				AUTHORIZATION_FILTER);	
-		
-		Mockito.when(filterAuthorization.match(referenceAuthorization)
-				).thenReturn(true);
+		Mockito.when(context.createFilter(AUTHORIZATION_FILTER)).thenReturn(filterAuthorization);
+		Mockito.when(filterAuthorization.toString()).thenReturn(AUTHORIZATION_FILTER);		
+		Mockito.when(filterAuthorization.match(referenceAuthorization)).thenReturn(true);
 
+		Mockito.when(context.createFilter(FILTERING_FILTER)).thenReturn(filtering);
+		Mockito.when(filtering.toString()).thenReturn(FILTERING_FILTER);
+		Mockito.when(filtering.match(filteringReference)).thenReturn(true);
         
 		Mockito.when(context.getServiceReferences(
 	    		Mockito.any(Class.class), Mockito.anyString())).then(
@@ -187,15 +186,20 @@ public class TestContext<R extends ModelInstance>
 					{
 						return Collections.singletonList(referenceAgent);
 						
-					}else if(SensiNactResourceModel.class.equals(arguments[0]))
+					} else if(SensiNactResourceModel.class.equals(arguments[0]))
 					{
 						if(initialized())
 						{
 							return Collections.singletonList(referenceProvider);
+							
 						} else
 						{
 							return Collections.emptyList();
 						}
+					} else if((Filtering.class.equals(arguments[0])))
+					{
+		                return Collections.singletonList(filteringReference);
+		                
 					} else if((AuthorizationService.class.equals(arguments[0])
 							&& arguments[1]==null)||(arguments[0]==null &&
 							arguments[1].equals(AUTHORIZATION_FILTER)))
@@ -242,6 +246,10 @@ public class TestContext<R extends ModelInstance>
 						return new ServiceReference[]{};
 					}
 					
+				} else if((Filtering.class.getCanonicalName().equals(arguments[0])))
+				{
+	                return new ServiceReference[]{filteringReference};
+	                
 				} else if((AuthorizationService.class.getCanonicalName().equals(arguments[0])
 						&& arguments[1]==null)||(arguments[0]==null &&
 						arguments[1].equals(AUTHORIZATION_FILTER)))
@@ -281,7 +289,13 @@ public class TestContext<R extends ModelInstance>
 				{
 	                return referenceAccess;
 	                
-				}if(arguments[0]!=null && arguments[0].equals(
+				}
+				if(arguments[0]!=null && arguments[0].equals(
+						Filtering.class))
+				{
+	                return filteringReference;
+				}
+				if(arguments[0]!=null && arguments[0].equals(
 						BundleValidation.class))
 				{
 	                return referenceValidation;
@@ -303,8 +317,11 @@ public class TestContext<R extends ModelInstance>
 				} 
 				else if(arguments[0]==referenceAuthorization)
 				{	
-					return new MyAuthorization<R>();	
-					
+					return new MyAuthorization<R>();
+				}
+				else if(arguments[0]==filteringReference)
+				{	
+					return new XFilter();	
 				}
 				else if(arguments[0]==referenceAgent)
 				{

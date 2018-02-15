@@ -3,9 +3,9 @@ package org.eclipse.sensinact.gateway.app.manager.application;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Core;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.MidCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
-import org.eclipse.sensinact.gateway.core.security.Session;
 
 /**
  *

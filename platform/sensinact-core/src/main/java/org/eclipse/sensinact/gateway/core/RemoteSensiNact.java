@@ -252,16 +252,16 @@ public class RemoteSensiNact implements RemoteCore
 		return this.remoteEndpoint;
 	}
 	
-  	/**
-  	 * @inheritDoc
-  	 *
-  	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getLocations(java.lang.String)
-  	 */
-	@Override
-  	public JSONObject getLocations(String publicKey)
-  	{
-  		return this.localEndpoint.getLocations(publicKey);
-  	}
+//  /**
+//   * @inheritDoc
+//   *
+//   * @see org.eclipse.sensinact.gateway.core.Endpoint#getLocations(java.lang.String)
+//   */
+//	@Override
+//  public JSONObject getLocations(String publicKey)
+//  {
+//  	return this.localEndpoint.getLocations(publicKey);
+//  }
 
   	/**
   	 * @inheritDoc

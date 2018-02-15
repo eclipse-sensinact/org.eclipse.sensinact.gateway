@@ -8,13 +8,10 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.security;
+package org.eclipse.sensinact.gateway.core;
 
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.core.Resource;
-import org.eclipse.sensinact.gateway.core.Service;
-import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
@@ -35,8 +32,7 @@ public interface Session
 	 * 
 	 * @return this Session's String identifier
 	 */
-	String getId();
-	
+	String getId();	
 	
 	/**
 	 * Returns the set of  {@link ServiceProvider}s accessible
@@ -130,6 +126,19 @@ public interface Session
    	 * this Session
    	 */
    	JSONObject getAll();
+
+    /**
+   	 * Returns the JSON formated list of all registered resource 
+   	 * model instances, accessible to this Session, from the local 
+   	 * sensiNact instance, as well as from the connected remote ones 
+   	 * 
+   	 * @param filterDefinition the definition of the filter to be 
+   	 * applied on the result of the call
+   	 * 
+   	 * @return the JSON formated and filtered list of the resource model 
+   	 * instances for this Session 
+   	 */
+   	JSONObject getAll(FilteringDefinition filterDefinition);
    	
    	/**
   	 * Returns the JSON formated list of all registered resource 
@@ -137,25 +146,44 @@ public interface Session
   	 * to the specified String LDAP formated filter, from the local 
   	 * sensiNact instance, as well as from the connected remote ones 
   	 * 
-  	 * @param filter the String LDAP formated filter 
+  	 * @param filter the String LDAP formated filter allowing to 
+  	 * discriminate the selected elements
   	 * 
-  	 * @return the JSON formated list of the resource model instances for 
-  	 * this Session and compliant to the specified filter.
+  	 * @return the JSON formated list of the resource model 
+  	 * instances for this Session and compliant to the specified 
+  	 * filter.
   	 */
    	JSONObject getAll(String filter);
-
-  	/**
-  	 * Returns the JSON formated list of locations of all registered resource 
-  	 * model instances, accessible to this Session, from the local sensiNact 
-  	 * instance as well as from the connected remote ones 
+   	
+   	/**
+  	 * Returns the JSON formated list of all registered resource 
+  	 * model instances, accessible to this Session and compliant 
+  	 * to the specified String LDAP formated filter, from the local 
+  	 * sensiNact instance, as well as from the connected remote ones 
   	 * 
-  	 * @param publicKey the String public key of the user for which to 
-  	 * retrieve the list of accessible resource model instances
+  	 * @param filter the String LDAP formated filter allowing to 
+  	 * discriminate the selected elements
+   	 * @param filterDefinition the definition of the filter to be 
+   	 * applied on the result of the call
   	 * 
-  	 * @return the JSON formated list of the location of the resource model 
-  	 * instances for this Session.
+  	 * @return the JSON formated and filtered list of the resource 
+  	 * model instances for this Session and compliant to the specified 
+  	 * LDAP formated filter.
   	 */
-  	JSONObject getLocations();
+   	JSONObject getAll(String filter, FilteringDefinition filterDefinition);
+
+//  	/**
+//  	 * Returns the JSON formated list of locations of all registered resource 
+//  	 * model instances, accessible to this Session, from the local sensiNact 
+//  	 * instance as well as from the connected remote ones 
+//  	 * 
+//  	 * @param publicKey the String public key of the user for which to 
+//  	 * retrieve the list of accessible resource model instances
+//  	 * 
+//  	 * @return the JSON formated list of the location of the resource model 
+//  	 * instances for this Session.
+//  	 */
+//  	JSONObject getLocations();
      
     /**
      * Invokes the GET access method on the resource whose String identifier
@@ -274,7 +302,19 @@ public interface Session
      * @return the JSON formated list of available service providers
      */
     JSONObject getProviders();
-
+    
+    /**
+     * Returns the JSON formated list of available service providers for
+     * the user whose public key is passed as parameter
+     *  
+   	 * @param filterDefinition the definition of the filter to be 
+   	 * applied on the result of the call
+   	 * 
+     * @return the JSON formated and filtered list of available service 
+     * providers
+     */
+    JSONObject getProviders(FilteringDefinition filterDefinition);
+    
     /**
      * Returns the JSON formated description of the service provider whose
      * String identifier is passed as parameter
@@ -297,7 +337,22 @@ public interface Session
      * specified service provider
      */
     JSONObject getServices(String serviceProviderId);
-
+    
+    /**
+     * Returns the JSON formated list of available service providers for
+     * the user whose public key is passed as parameter
+     *  
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the services     * 
+   	 * @param filterDefinition the definition of the filter to be 
+   	 * applied on the result of the call
+   	 * 
+     * @return the JSON formated and filtered list of available services
+     * for the specified service providers
+     */
+    JSONObject getServices(String serviceProviderId,
+    		FilteringDefinition filterDefinition);
+   
     /**
      * Returns the JSON formated description of the service whose String
      * identifier is passed as parameter, and held by the specified service 
@@ -326,6 +381,23 @@ public interface Session
      */
     JSONObject getResources(String serviceProviderId, String serviceId);
 
+    /**
+     * Returns the JSON formated list of available service providers for
+     * the user whose public key is passed as parameter
+     *  
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service
+     * @param serviceId the String identifier of the service providing 
+     * the resources
+   	 * @param filterDefinition the definition of the filter to be 
+   	 * applied on the result of the call
+   	 * 
+     * @return the JSON formated and filtered list of available resources 
+     * for the specified service provider and service
+     */
+    JSONObject getResources(String serviceProviderId, String serviceId, 
+    		FilteringDefinition filterDefinition);
+    
     /**
      * Returns the JSON formated description of the resource whose String
      * identifier is passed as parameter, and held by the service 

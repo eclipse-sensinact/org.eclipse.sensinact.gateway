@@ -53,7 +53,9 @@ import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
@@ -68,13 +70,13 @@ public class SensiNact implements Core
 {	
 	//********************************************************************//
 	//						NESTED DECLARATIONS		    				  //
-	//********************************************************************//
+	//********************************************************************//		
 	
 	/**
 	 * {@link Session} service implementation
 	 */
 	final class SensiNactSession implements Session
-	{	    	
+	{	    		
 		private final String identifier;
 
 		/**
@@ -120,7 +122,7 @@ public class SensiNact implements Core
 		}
 
 		private <R extends AccessMethodResponse> R invalidMethodErrorResponse(
-				AccessMethod.Type type ,String providerId, String serviceId, 
+				AccessMethod.Type type, String providerId, String serviceId, 
 				String resourceId)
 		{
 			String uri = getUri(false, providerId, serviceId, resourceId);
@@ -132,7 +134,7 @@ public class SensiNact implements Core
 		/**
 		 * @inheritDoc
 		 *
-		 * @see org.eclipse.sensinact.gateway.core.security.Session#
+		 * @see org.eclipse.sensinact.gateway.core.Session#
 		 * registerSessionAgent(org.eclipse.sensinact.gateway.core.message.MidAgentCallback, org.eclipse.sensinact.gateway.core.message.SnaFilter)
 		 */
 		public JSONObject registerSessionAgent(final MidAgentCallback callback, 
@@ -183,7 +185,7 @@ public class SensiNact implements Core
 		/**
 		 * @inheritDoc
 		 *
-		 * @see org.eclipse.sensinact.gateway.core.security.Session#
+		 * @see org.eclipse.sensinact.gateway.core.Session#
 		 * unregisterSessionAgent(java.lang.String)
 		 */
 		public JSONObject unregisterSessionAgent(final String agentId)
@@ -225,7 +227,7 @@ public class SensiNact implements Core
 		/** 
 		 * @inheritDoc
 		 * 
-		 * @see org.eclipse.sensinact.gateway.core.security.Session#
+		 * @see org.eclipse.sensinact.gateway.core.Session#
 		 * getServiceProviders()
 		 */
 		@Override
@@ -237,7 +239,7 @@ public class SensiNact implements Core
 		/** 
 		 * @inheritDoc
 		 * 
-		 * @see org.eclipse.sensinact.gateway.core.security.Session#
+		 * @see org.eclipse.sensinact.gateway.core.Session#
 		 * getServiceProviders()
 		 */
 		@Override
@@ -259,7 +261,7 @@ public class SensiNact implements Core
 		/**
 		 * @inheritDoc
 		 *
-		 * @see org.eclipse.sensinact.gateway.core.security.Session#
+		 * @see org.eclipse.sensinact.gateway.core.Session#
 		 * getServiceProvider(java.lang.String)
 		 */
 	    @Override
@@ -283,7 +285,7 @@ public class SensiNact implements Core
 		/**
 		 * @inheritDoc
 		 *
-		 * @see org.eclipse.sensinact.gateway.core.security.Session#
+		 * @see org.eclipse.sensinact.gateway.core.Session#
 		 * getService(java.lang.String, java.lang.String)
 		 */
 	    @Override
@@ -303,7 +305,7 @@ public class SensiNact implements Core
 		/**
 		 * @inheritDoc
 		 * 
-		 * @see org.eclipse.sensinact.gateway.core.security.Session#
+		 * @see org.eclipse.sensinact.gateway.core.Session#
 		 * getResource(java.lang.String, java.lang.String, java.lang.String)
 		 */
 	    @Override
@@ -329,9 +331,21 @@ public class SensiNact implements Core
 		@Override
 	    public JSONObject getAll()
 	    {
-			return this.getAll(null);
+			return this.getAll(null, null);
 	    }
-		
+
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Session#getAll(org.eclipse.sensinact.gateway.core.FilteringDefinition)
+		 */
+		@Override
+		public JSONObject getAll(FilteringDefinition 
+				filterDefinition)
+		{
+			return getAll(null, filterDefinition);
+		}
+
 		/**
 		 * @inheritDoc
 		 *
@@ -340,25 +354,18 @@ public class SensiNact implements Core
 		@Override
 	    public JSONObject getAll(final String filter)
 	    {
-			 return AccessController.doPrivileged(
-					 new PrivilegedAction<JSONObject>()
-			 {
-				@Override
-	            public JSONObject run()
-	            {
-			    	return SensiNact.this.getAll(
-			    		SensiNactSession.this.getId(), filter);
-	            }
-			 });
+			 return getAll(filter, null);
 	    }
 
 		/**
 		 * @inheritDoc
 		 *
-		 * @see org.eclipse.sensinact.gateway.core.Endpoint#jsonLocations()
+		 * @see org.eclipse.sensinact.gateway.core.Session#
+		 * getAll(java.lang.String, org.eclipse.sensinact.gateway.core.FilteringDefinition)
 		 */
 		@Override
-		public JSONObject getLocations()
+		public JSONObject getAll(final String filter,
+		        final FilteringDefinition filterDefinition)
 		{
 			 return AccessController.doPrivileged(
 					 new PrivilegedAction<JSONObject>()
@@ -366,11 +373,33 @@ public class SensiNact implements Core
 				@Override
 	            public JSONObject run()
 	            {
-			    	return SensiNact.this.getLocations(
-			    		SensiNactSession.this.getId());
+			    	return SensiNact.this.getAll(
+			    		SensiNactSession.this.getId(),
+			    		filter, filterDefinition);
 	            }
 			 });
 		}
+		
+		
+//		/**
+//		 * @inheritDoc
+//		 *
+//		 * @see org.eclipse.sensinact.gateway.core.Endpoint#jsonLocations()
+//		 */
+//		@Override
+//		public JSONObject getLocations()
+//		{
+//			 return AccessController.doPrivileged(
+//					 new PrivilegedAction<JSONObject>()
+//			 {
+//				@Override
+//	            public JSONObject run()
+//	            {
+//			    	return SensiNact.this.getLocations(
+//			    		SensiNactSession.this.getId());
+//	            }
+//			 });
+//		}
 		
 	    /**
 	     * @inheritDoc
@@ -668,15 +697,28 @@ public class SensiNact implements Core
 		@Override
 		public JSONObject getProviders()
 		{
-			 return AccessController.doPrivileged(
-					 new PrivilegedAction<JSONObject>()
+			return this.getProviders(null);
+		}
+
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Session#getProviders(org.eclipse.sensinact.gateway.core.FilteringDefinition)
+		 */
+		@Override
+		public JSONObject getProviders(final FilteringDefinition 
+				filterDefinition)
+		{ 
+			return AccessController.doPrivileged(
+				 new PrivilegedAction<JSONObject>()
 			 {
 				@Override
-	            public JSONObject run()
-	            {
+	           public JSONObject run()
+	           {
 			    	return SensiNact.this.getProviders(
-			    		SensiNactSession.this.getId());
-	            }
+			    		SensiNactSession.this.getId(), 
+			    		filterDefinition);
+	           }
 			 });
 		}
 
@@ -727,10 +769,24 @@ public class SensiNact implements Core
 		@Override
 		public JSONObject getServices(final String serviceProviderId)
 		{	
+			return this.getServices(serviceProviderId, null);
+		}
+
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Session#getServices(java.lang.String, org.eclipse.sensinact.gateway.core.FilteringDefinition)
+		 */
+		@Override
+		public JSONObject getServices(final String serviceProviderId,
+		        FilteringDefinition filterDefinition)
+		{
+			JSONObject object = null;
 			ServiceProvider provider = this.serviceProvider(serviceProviderId);
 			if(provider == null)
 			{
-    			 return AccessController.doPrivileged(new PrivilegedAction<JSONObject>()
+    			 object =  AccessController.doPrivileged(
+    					 new PrivilegedAction<JSONObject>()
     			 {
     				@Override
     	            public JSONObject run()
@@ -740,32 +796,66 @@ public class SensiNact implements Core
     			    		serviceProviderId);
     	            }
     			 });
-			}
-    		SessionKey sessionKey = SensiNact.this.sessions.get(
-    				new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
-    						this.getId()));
-    		String uri = getUri((sessionKey.localID()!=0),serviceProviderId);
-			List<Service> services = provider.getServices();
- 	        JSONArray servicesJson = new JSONArray();
-            for (Service service : services)
-            {
-                servicesJson.put(service.getName());
-            }
-            JSONObject jsonDevice = new JSONObject();
-        	jsonDevice.put("type", "SERVICES_LIST");
-        	jsonDevice.put("uri", uri);
-        	jsonDevice.put("statusCode", 200);
-        	jsonDevice.put("services", servicesJson);        	
-            return jsonDevice;
+			} else 
+			{
+	    		SessionKey sessionKey = SensiNact.this.sessions.get(
+	    			new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
+	    				this.getId()));
+	    		
+	    		String uri = getUri((sessionKey.localID()!=0),serviceProviderId);
+	            
+	            object = new JSONObject();
+	        	object.put("type", "SERVICES_LIST");
+	        	object.put("uri", uri);
+	        	object.put("statusCode", 200); 
+	        	 
+	        	JSONArray services  = new JSONArray();
+	        	object.put("services", services);
+	        	List<Service> servicesList = provider.getServices();
+	        	int index = 0;
+	        	int length = servicesList==null?0:servicesList.size();
+	        	for(;index < length;index++)
+	        	{
+	        		services.put(servicesList.get(index).getName());
+	        	}
+			}			
+        	if(filterDefinition != null)
+    		{
+        		JSONArray jsonArray = (JSONArray) object.remove("services");
+        		
+    			JSONObject jf = new JSONObject();
+    			jf.put("type", filterDefinition.type);
+    			jf.put("definition", filterDefinition.filter);				
+    			object.put("filter", jf);
+    			
+    			String result = SensiNact.this.<String>callPostFilter(
+    				filterDefinition.type, filterDefinition.filter, 
+    				jsonArray.toString());
+    				
+    			Object filtered = null;
+    			try
+    			{
+    				filtered = new JSONTokener(result).nextValue();
+    				
+    			} catch(JSONException e)
+    			{
+    				mediator.error(e);
+    				filtered = new JSONArray();
+    			}
+    			object.put("services", filtered);
+    		}     
+            return object;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 *
 		 * @see org.eclipse.sensinact.gateway.core.Endpoint#jsonService(java.lang.String, java.lang.String)
 		 */
 		@Override
-		public JSONObject getService(final String serviceProviderId, final String serviceId)
+		public JSONObject getService(
+				final String serviceProviderId,
+				final String serviceId)
 		{     		
 			Service service = this.service(serviceProviderId, serviceId);
 			if(service == null)
@@ -803,13 +893,25 @@ public class SensiNact implements Core
 		 */
 		@Override
 		public JSONObject getResources(
-				final String serviceProviderId, 
-				final String serviceId)
-		{     		 
+				String serviceProviderId, String serviceId)
+		{    
+			return getResources(serviceProviderId, serviceId, null);
+		}
+		
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Session#getResources(java.lang.String, java.lang.String, org.eclipse.sensinact.gateway.core.FilteringDefinition)
+		 */
+		@Override
+		public JSONObject getResources(final String serviceProviderId,
+		        final String serviceId, FilteringDefinition filterDefinition)
+		{ 		 
+			JSONObject object = null;
 			Service service = this.service(serviceProviderId, serviceId);
 			if(service == null)
 			{
-    			 return AccessController.doPrivileged(
+    			 object  = AccessController.doPrivileged(
     			 new PrivilegedAction<JSONObject>()
     			 {
     				@Override
@@ -821,24 +923,59 @@ public class SensiNact implements Core
     			    		serviceId);
     	            }
     			 });
-			}
-    		SessionKey sessionKey = SensiNact.this.sessions.get(
-    				new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
-    						this.getId()));
-    		String uri = getUri((sessionKey.localID()!=0),serviceProviderId, serviceId);
-			JSONArray resourcesJson = new JSONArray();
-	        List<Resource> resources = service.getResources();
-            for (Resource resource : resources)
-            {
-                resourcesJson.put(resource.getName());
-            }
-            JSONObject jsonResources = new JSONObject();
-        	jsonResources.put("type", "RESOURCES_LIST");
-        	jsonResources.put("uri",uri);        	
-        	jsonResources.put("statusCode", 200);
-        	jsonResources.put("resources", resourcesJson);	        	
-	        return jsonResources;
+			} else
+			{
+	    		SessionKey sessionKey = SensiNact.this.sessions.get(
+	    				new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
+	    						this.getId()));
+	    		
+	    		String uri = getUri((sessionKey.localID()!=0), serviceProviderId, 
+	    				serviceId);
+					
+	            object = new JSONObject();
+	        	object.put("type", "RESOURCES_LIST");
+	        	object.put("uri",uri);        	
+	        	object.put("statusCode", 200);
+
+	        	JSONArray resources  = new JSONArray();
+	        	object.put("resources", resources);
+	        	List<Resource> resourcesList = service.getResources();
+	        	int index = 0;
+	        	int length = resourcesList==null?0:resourcesList.size();
+	        	for(;index < length;index++)
+	        	{
+	        		resources.put(resourcesList.get(index).getName());
+	        	}
+			}        	
+        	if(filterDefinition != null)
+    		{
+        		JSONArray jsonArray = (JSONArray) object.remove("resources");
+        		
+    			JSONObject jf = new JSONObject();
+    			jf.put("type", filterDefinition.type);
+    			jf.put("definition", filterDefinition.filter);				
+    			object.put("filter", jf);
+    			
+    			String result = SensiNact.this.<String>callPostFilter(
+    				filterDefinition.type, filterDefinition.filter, 
+    				jsonArray.toString());
+    				
+    			Object filtered = null;
+    			try
+    			{
+    				filtered = new JSONTokener(result
+    						).nextValue();
+    				
+    			} catch(JSONException e)
+    			{
+    				mediator.error(e);
+    				filtered = new JSONArray();
+    			}
+    			object.put("resources", filtered);
+    		}  	
+	        return object;
 		}
+		
 
 		/**
 		 * @inheritDoc
@@ -1084,102 +1221,101 @@ public class SensiNact implements Core
 		    return resource;
 	    }
 
-		/**
-		 * @param publicKey
-		 * @param resolveNamespace
-		 * @return
-		 */
-		private JSONObject getLocations(SessionKey sessionKey,  
-				boolean resolveNamespace)
-		{
-			StringBuilder builder = new StringBuilder();
-			builder.append('{');
-			builder.append("\"type\": \"GET_RESPONSE\"");
-			builder.append(",\"statusCode\": 200");
-			builder.append(",\"uri\": \"/dev/var\"");
-			builder.append(",\"response\":");
-			builder.append('{');
-			builder.append("\"timestamp\": 0L");
-			builder.append(",\"name\": \"No\"");
-			builder.append(",\"value\":");
-			builder.append('[');
-
-	        String prefix = resolveNamespace?new StringBuilder().append(
-	        	SensiNact.this.namespace()).append(":").toString():"";
-	        	
-        	int index=-1;
-        	Collection<ServiceReference<SensiNactResourceModel>> references = 
-					RegistryEndpoint.this.getReferences(sessionKey, null);
-        	
-			Iterator<ServiceReference<SensiNactResourceModel>> iterator = 
-					references.iterator();
-
-			AccessTree<? extends AccessNode> tree = sessionKey.getAccessTree();
-			AccessMethod.Type get = AccessMethod.Type.valueOf(AccessMethod.GET);
-			
-			while(iterator.hasNext())
-			{
-	        	index++;
-	        	ServiceReference<SensiNactResourceModel> reference = iterator.next();
-	        	String name = (String) reference.getProperty("name");
-	        	Integer level = (Integer) reference.getProperty(
-	        			"admin.location.GET");
-				if(level == null)
-				{
-					level = new Integer(
-						AccessLevelOption.OWNER.getAccessLevel().getLevel());
-				}
-				String uri = UriUtils.getUri(new String[] {name});
-				AccessNode node = sessionKey.getAccessTree().getRoot().get(
-					uri);
-				
-				if(node == null)
-				{
-					node = tree.getRoot();
-				}
-				if(node.getAccessLevelOption(get
-					).getAccessLevel().getLevel() < level.intValue())
-				{
-					continue;
-				}				
-	        	String provider = new StringBuilder().append(prefix
-	        		).append(uri.substring(1)).toString();	        	
-	        	String location =(String) reference.getProperty(
-	        			LocationResource.LOCATION);
-
-	        	location = (location==null||location.length()==0)
-        		    ?defaultLocation:location;
-	        	builder.append(index>0?',':"");
-				builder.append('{');
-				builder.append("\"provider\":");
-				builder.append('"');
-				builder.append(provider);
-				builder.append('"');
-				builder.append(",\"location\":");
-				builder.append('"');
-				builder.append(location);
-				builder.append('"');			
-				builder.append('}');
-	        }
-			builder.append(']');			
-			builder.append('}');			
-			builder.append('}');
-			JSONObject object = new JSONObject(builder.toString());
-			return object;
-		}
+//		/**
+//		 * @param publicKey
+//		 * @param resolveNamespace
+//		 * @return
+//		 */
+//		private JSONObject getLocations(SessionKey sessionKey,  
+//				boolean resolveNamespace)
+//		{
+//			StringBuilder builder = new StringBuilder();
+//			builder.append('{');
+//			builder.append("\"type\": \"GET_RESPONSE\"");
+//			builder.append(",\"statusCode\": 200");
+//			builder.append(",\"uri\": \"/dev/var\"");
+//			builder.append(",\"response\":");
+//			builder.append('{');
+//			builder.append("\"timestamp\": 0L");
+//			builder.append(",\"name\": \"No\"");
+//			builder.append(",\"value\":");
+//			builder.append('[');
+//
+//	        String prefix = resolveNamespace?new StringBuilder().append(
+//	        	SensiNact.this.namespace()).append(":").toString():"";
+//	        	
+//        	int index=-1;
+//        	Collection<ServiceReference<SensiNactResourceModel>> references = 
+//					RegistryEndpoint.this.getReferences(sessionKey, null);
+//        	
+//			Iterator<ServiceReference<SensiNactResourceModel>> iterator = 
+//					references.iterator();
+//
+//			AccessTree<? extends AccessNode> tree = sessionKey.getAccessTree();
+//			AccessMethod.Type get = AccessMethod.Type.valueOf(AccessMethod.GET);
+//			
+//			while(iterator.hasNext())
+//			{
+//	        	index++;
+//	        	ServiceReference<SensiNactResourceModel> reference = iterator.next();
+//	        	String name = (String) reference.getProperty("name");
+//	        	Integer level = (Integer) reference.getProperty(
+//	        			"admin.location.GET");
+//				if(level == null)
+//				{
+//					level = new Integer(
+//						AccessLevelOption.OWNER.getAccessLevel().getLevel());
+//				}
+//				String uri = UriUtils.getUri(new String[] {name});
+//				AccessNode node = sessionKey.getAccessTree().getRoot().get(
+//					uri);
+//				
+//				if(node == null)
+//				{
+//					node = tree.getRoot();
+//				}
+//				if(node.getAccessLevelOption(get
+//					).getAccessLevel().getLevel() < level.intValue())
+//				{
+//					continue;
+//				}				
+//	        	String provider = new StringBuilder().append(prefix
+//	        		).append(uri.substring(1)).toString();	        	
+//	        	String location =(String) reference.getProperty(
+//	        			LocationResource.LOCATION);
+//
+//	        	location = (location==null||location.length()==0)
+//        		    ?defaultLocation:location;
+//	        	builder.append(index>0?',':"");
+//				builder.append('{');
+//				builder.append("\"provider\":");
+//				builder.append('"');
+//				builder.append(provider);
+//				builder.append('"');
+//				builder.append(",\"location\":");
+//				builder.append('"');
+//				builder.append(location);
+//				builder.append('"');			
+//				builder.append('}');
+//	        }
+//			builder.append(']');			
+//			builder.append('}');			
+//			builder.append('}');
+//			JSONObject object = new JSONObject(builder.toString());
+//			return object;
+//		}
 		
 		/**
 		 * @param publicKey
 		 * @param resolveNamespace
 		 * @param filter
+		 * @param filterDefinition 
 		 * @return
 		 */
 		private JSONObject getAll(SessionKey sessionKey, 
 			boolean resolveNamespace, String filter)
 	    {
 			StringBuilder builder = new StringBuilder();
-			builder.append('{');
-			builder.append("\"providers\":");
 			builder.append('[');
 
 	        String prefix = resolveNamespace?new StringBuilder().append(
@@ -1318,9 +1454,19 @@ public class SensiNact implements Core
 				builder.append('}');
 	        }
 			builder.append(']');
-			builder.append('}');
-			JSONObject object = new JSONObject(builder.toString());
-			return object;
+			
+			JSONObject object = new JSONObject();
+			JSONArray providers = null;
+			try
+			{
+				providers = new JSONArray(builder.toString());
+				
+			} catch(JSONException e)
+			{
+				providers = new JSONArray();
+			}
+			object.put("providers", providers);
+		    return object;
 	    }
 		
 	    /**
@@ -1332,10 +1478,8 @@ public class SensiNact implements Core
 	    private JSONObject getProviders(SessionKey sessionKey, 
 	    		boolean resolveNamespace, String filter)
 	    {
-			JSONObject object = new JSONObject();			
-			JSONArray jproviders = new JSONArray();
-			object.put("providers", jproviders);
-
+			JSONObject object = new JSONObject();
+			
 	        String prefix = resolveNamespace?new StringBuilder().append(
 	        	SensiNact.this.namespace()).append(":").toString():"";
 
@@ -1343,18 +1487,39 @@ public class SensiNact implements Core
 					this.getReferences(sessionKey, filter);	
 			Iterator<ServiceReference<SensiNactResourceModel>> iterator = 
 					references.iterator();
-			
+
+			StringBuilder builder = new StringBuilder();
+			builder.append("[");
+			int index=0;
 			while(iterator.hasNext())
 			{
 				ServiceReference<SensiNactResourceModel> reference = iterator.next();
 	        	String name = (String)reference.getProperty("name");	        	
-	        	String provider = new StringBuilder().append(prefix
-	        		).append(name).toString();	        	
-	            jproviders.put(provider);
+	        	String provider = new StringBuilder().append(prefix).append(
+	        			name).toString();
+	        	if(index > 0)
+	        	{
+		            builder.append(",");
+	        	}
+	        	builder.append('"');
+	            builder.append(provider);
+	        	builder.append('"');
+	            index++;
 	        }
+			builder.append("]");
+			JSONArray providers = null;
+			try
+			{
+				providers = new JSONArray(builder.toString());
+				
+			} catch(JSONException e)
+			{
+				providers = new JSONArray();
+			}
 	        object.put("type", "PROVIDERS_LIST");
 	    	object.put("uri", UriUtils.PATH_SEPARATOR);
-	    	object.put("statusCode", 200);	    	
+	    	object.put("statusCode", 200);
+	    	object.put("providers", providers);
 	        return object;
 	    }
 	}; 
@@ -1471,6 +1636,27 @@ public class SensiNact implements Core
 		});
         this.mediator = mediator;
         this.registry = new RegistryEndpoint();
+    }
+    
+    protected final <F> F callPostFilter(final String filterType, 
+    	final String filter, final F result)
+    {
+    	return SensiNact.this.mediator.callService(
+    		Filtering.class, String.format("(type=%s)", 
+    		filterType), new Executable<Filtering, F>()
+			{
+				@Override
+				public F execute(Filtering postFilter)
+				        throws Exception
+				{
+					if(postFilter.handle(filterType))
+					{
+						return postFilter.apply(filter, result);
+					}
+					return null;
+				}
+			}
+    	);
     }
     
     /**
@@ -1615,7 +1801,6 @@ public class SensiNact implements Core
 			session = this.getSession(((AuthenticationToken) authentication
 					).getAuthenticationMaterial());
 		}
-
 		return session;
 	}
 	
@@ -1698,8 +1883,7 @@ public class SensiNact implements Core
 				return sessionKey;
 			}
 		});		
-		Session session = new SensiNactSession(skey.getToken());
-		
+		Session session = new SensiNactSession(skey.getToken());		
 		sessions.put(skey, session);
 		return session;
 	}
@@ -2147,10 +2331,9 @@ public class SensiNact implements Core
 					return null;
 				}
 				return connector.endpoint().getResource(
-					sessionKey.getPublicKey(),
-					serviceProviderId.substring(serviceProviderId.indexOf(':')+1),
-					serviceId, 
-					resourceId);
+					sessionKey.getPublicKey(), serviceProviderId.substring(
+						serviceProviderId.indexOf(':')+1), serviceId, 
+					        resourceId);
 			}
 		});
 	}
@@ -2188,9 +2371,8 @@ public class SensiNact implements Core
 					return null;
 				}
 				return connector.endpoint().getResources(
-					sessionKey.getPublicKey(),
-					serviceProviderId.substring(serviceProviderId.indexOf(':')+1),
-					serviceId);
+					sessionKey.getPublicKey(), serviceProviderId.substring(
+						serviceProviderId.indexOf(':')+1), serviceId);
 			}
 		});
 	}
@@ -2227,9 +2409,8 @@ public class SensiNact implements Core
 					return null;
 				}
 				return connector.endpoint().getService(
-					sessionKey.getPublicKey(),
-					serviceProviderId.substring(serviceProviderId.indexOf(':')+1),
-					serviceId);
+					sessionKey.getPublicKey(), serviceProviderId.substring(
+						serviceProviderId.indexOf(':')+1), serviceId);
 			}
 		});
 	}
@@ -2253,21 +2434,22 @@ public class SensiNact implements Core
 				new KeyExtractor<KeyExtractorType>(
 					KeyExtractorType.TOKEN,identifier));
 			
-		return remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore,JSONObject>()
-		{
-			@Override
-			public JSONObject execute(RemoteCore connector)
-					throws Exception 
+		return remoteCoreInvocation(serviceProviderId, 
+			new Executable<RemoteCore,JSONObject>()
 			{
-				if(connector == null)
+				@Override
+				public JSONObject execute(RemoteCore connector)
+						throws Exception 
 				{
-					return null;
+					if(connector == null)
+					{
+						return null;
+					}
+					return connector.endpoint().getServices(
+						sessionKey.getPublicKey(), serviceProviderId.substring(
+							serviceProviderId.indexOf(':')+1));
 				}
-				return connector.endpoint().getServices(
-					sessionKey.getPublicKey(),
-					serviceProviderId.substring(serviceProviderId.indexOf(':')+1));
-			}
-		});
+			});
 	}
 
 	/**
@@ -2488,72 +2670,72 @@ public class SensiNact implements Core
 			).withAttribute(attributeId));
 	}
 
-	/**
-  	 * Returns the JSON formated list of locations of all registered resource model 
-  	 * instances, accessible by the {@link Session} whose String identifier is passed 
-  	 * as parameter
-  	 * 
-  	 * @param identifier the String identifier of the {@link Session} for which to 
-  	 * retrieve the list of accessible resource model instances
-  	 * 
-  	 * @return the JSON formated list of the location of the resource model 
-  	 * instances for the specified {@link Session}.
-  	 */
-	protected JSONObject getLocations(String identifier) 
-	{		
-		final SessionKey sessionKey =  sessions.get(
-			new KeyExtractor<KeyExtractorType>(
-				KeyExtractorType.TOKEN, identifier));
-		
-		JSONObject object = this.registry.getLocations(sessionKey,
-				sessionKey.localID()!=0);
-		
-		if(object == null)
-		{
-			object=new JSONObject();
-		    object.put("type","GET_RESPONSE");
-		    object.put("statusCode",AccessMethodResponse.SUCCESS_CODE);
-		    object.put("uri","/dev/var");
-		        			
-			JSONArray jproviders = new JSONArray();
-			
-			JSONObject responseContent= new JSONObject();
-			responseContent.put("timestamp",0L);
-		    responseContent.put("name","No");
-		    responseContent.put("value",jproviders);
-		    responseContent.put("type","GET_RESPONSE");			
-		    object.put("response", responseContent);
-		}
-		//propagate only if local instance call
-		if(sessionKey.localID() == 0)
-		{
-			final JSONArray array = object.optJSONObject("response"
-				).optJSONArray("value");
-		
-			mediator.callServices(RemoteCore.class, 
-					new Executable<RemoteCore,Void>()
-			{
-				@Override
-				public Void execute(RemoteCore core) throws Exception
-				{
-					JSONObject o = core.endpoint().getLocations(
-							sessionKey.getPublicKey());
-					if(!JSONObject.NULL.equals(o))
-					{
-						JSONArray a = o.optJSONArray("providers");
-						int index = 0;
-						int length = a==null?0:a.length();
-						for(;index < length; index++)
-						{
-							array.put(a.get(index));
-						}
-					}
-					return null;
-				}	
-			});
-		}
-		return object;
-	}
+//	/**
+//  	 * Returns the JSON formated list of locations of all registered resource model 
+//  	 * instances, accessible by the {@link Session} whose String identifier is passed 
+//  	 * as parameter
+//  	 * 
+//  	 * @param identifier the String identifier of the {@link Session} for which to 
+//  	 * retrieve the list of accessible resource model instances
+//  	 * 
+//  	 * @return the JSON formated list of the location of the resource model 
+//  	 * instances for the specified {@link Session}.
+//  	 */
+//	protected JSONObject getLocations(String identifier) 
+//	{		
+//		final SessionKey sessionKey =  sessions.get(
+//			new KeyExtractor<KeyExtractorType>(
+//				KeyExtractorType.TOKEN, identifier));
+//		
+//		JSONObject object = this.registry.getLocations(sessionKey,
+//				sessionKey.localID()!=0);
+//		
+//		if(object == null)
+//		{
+//			object=new JSONObject();
+//		    object.put("type","GET_RESPONSE");
+//		    object.put("statusCode",AccessMethodResponse.SUCCESS_CODE);
+//		    object.put("uri","/dev/var");
+//		        			
+//			JSONArray jproviders = new JSONArray();
+//			
+//			JSONObject responseContent= new JSONObject();
+//			responseContent.put("timestamp",0L);
+//		    responseContent.put("name","No");
+//		    responseContent.put("value",jproviders);
+//		    responseContent.put("type","GET_RESPONSE");			
+//		    object.put("response", responseContent);
+//		}
+//		//propagate only if local instance call
+//		if(sessionKey.localID() == 0)
+//		{
+//			final JSONArray array = object.optJSONObject("response"
+//				).optJSONArray("value");
+//		
+//			mediator.callServices(RemoteCore.class, 
+//					new Executable<RemoteCore,Void>()
+//			{
+//				@Override
+//				public Void execute(RemoteCore core) throws Exception
+//				{
+//					JSONObject o = core.endpoint().getLocations(
+//							sessionKey.getPublicKey());
+//					if(!JSONObject.NULL.equals(o))
+//					{
+//						JSONArray a = o.optJSONArray("providers");
+//						int index = 0;
+//						int length = a==null?0:a.length();
+//						for(;index < length; index++)
+//						{
+//							array.put(a.get(index));
+//						}
+//					}
+//					return null;
+//				}	
+//			});
+//		}
+//		return object;
+//	}
 	
 	/**
      * Returns the JSON formated list of available service providers for
@@ -2561,17 +2743,21 @@ public class SensiNact implements Core
      * 
      * @param identifier the String  identifier of the {@link Session} 
      * requiring the list of available service providers
+	 * @param filterDefinition 
      * 
      * @return the JSON formated list of available service providers
      */
-	protected JSONObject getProviders(String identifier) 
+	protected JSONObject getProviders(String identifier, 
+			FilteringDefinition filterDefinition) 
 	{		
 		final SessionKey sessionKey =  sessions.get(
 			new KeyExtractor<KeyExtractorType>(
 			KeyExtractorType.TOKEN, identifier));
 		
-		JSONObject object = this.registry.getProviders(sessionKey,
-				sessionKey.localID()!=0, null);
+		JSONObject object = this.registry.getProviders(
+		    sessionKey, sessionKey.localID()!=0, null);
+		
+		JSONArray array = null;
 		
 		if(object == null)
 		{
@@ -2579,18 +2765,22 @@ public class SensiNact implements Core
 	    	object.put("type", "PROVIDERS_LIST");
 	    	object.put("uri", UriUtils.PATH_SEPARATOR);
 	    	object.put("statusCode", 200);
-	    	object.put("providers", new JSONArray());
-		}
-		JSONArray jsonArray = object.optJSONArray("providers");
-		if(jsonArray == null)
+	    	array = new JSONArray();
+	    	object.put("providers", array);
+	    	
+		} else
 		{
-			jsonArray = new JSONArray();
-			object.put("providers", jsonArray);
+			array = object.optJSONArray("providers");
+			if(array == null)
+			{
+				array = new JSONArray();
+				object.put("providers", array);
+			}
 		}
 		//propagate only if local instance call
 		if(sessionKey.localID() == 0)
 		{
-			final JSONArray array = jsonArray;
+			final JSONArray jsonArray = array;
 			
 			SensiNact.this.doPrivilegedVoidServices(RemoteCore.class, null,
 					new Executable<RemoteCore,Void>()
@@ -2608,13 +2798,38 @@ public class SensiNact implements Core
 						int length = a==null?0:a.length();
 						for(;index < length; index++)
 						{
-							array.put(a.get(index));
+							jsonArray.put(a.get(index));
 						}
 					}
 					return null;
 				}	
 			});
 		}
+		if(filterDefinition != null)
+		{
+			JSONObject jf = new JSONObject();
+			jf.put("type", filterDefinition.type);
+			jf.put("definition", filterDefinition.filter);				
+			object.put("filter", jf);
+			
+			String result = SensiNact.this.<String>callPostFilter(
+				filterDefinition.type, filterDefinition.filter, 
+				array.toString());
+				
+			Object filtered = null;
+			try
+			{
+				filtered = new JSONTokener(result
+						).nextValue();
+				
+			} catch(JSONException e)
+			{
+				mediator.error(e);
+				filtered = new JSONArray();
+			}
+			object.remove("providers");
+			object.put("providers", filtered);
+		}		
 		return object;
 	}
 
@@ -2627,74 +2842,86 @@ public class SensiNact implements Core
   	 * @param identifier the String identifier of the {@link Session} for 
   	 * which to retrieve the list of accessible resource model instances
   	 * @param filter the String LDAP formated filter 
+	 * @param filterDefinition 
   	 * 
   	 * @return the JSON formated list of the resource model instances for 
   	 * the specified {@link Session} and compliant to the specified filter.
   	 */
-	protected JSONObject getAll(String identifier, String filter)
+	protected JSONObject getAll(String identifier, final String filter,
+			FilteringDefinition filterDefinition)
 	{
 		final SessionKey sessionKey =  sessions.get(
 			new KeyExtractor<KeyExtractorType>(
 				KeyExtractorType.TOKEN, identifier));
 		
 		JSONObject object = this.registry.getAll(sessionKey,
-				sessionKey.localID()!=0,filter);
-		
+				sessionKey.localID()!=0, filter);
+		JSONArray array = null;
 		if(object == null)
 		{
 	        object = new JSONObject();
-	    	object.put("providers", new JSONArray());
-		}
-		JSONArray array = object.optJSONArray("providers");
-		if(array == null)
+	        array = new JSONArray();
+	    	object.put("providers", array);
+	    	
+		} else
 		{
-			array = new JSONArray();
-			object.put("providers", array);
+			array = object.optJSONArray("providers");
+			if(array == null)
+			{
+				array = new JSONArray();
+				object.put("providers", array);
+			}	
 		}		
 		//propagate only if local instance call
 		if(sessionKey.localID() == 0)
 		{
-			Collection<ServiceReference<RemoteCore>> references = null;
-			try 
+			final JSONArray jsonArray = array;
+			
+			SensiNact.this.doPrivilegedVoidServices(RemoteCore.class, null,
+					new Executable<RemoteCore,Void>()
 			{
-				references = mediator.getContext(
-						).getServiceReferences(RemoteCore.class,null);
-				
-			} catch (InvalidSyntaxException e) 
-			{
-				mediator.error(e.getMessage(), e);
-			}
-			if(references != null)
-			{
-				Iterator<ServiceReference<RemoteCore>> iterator = 
-						references.iterator();
-				
-				while(iterator.hasNext())
+				@Override
+				public Void execute(RemoteCore core) throws Exception
 				{
-					RemoteCore connector = null;
-					ServiceReference<RemoteCore> ref = iterator.next();
-					if(ref == null ||
-						(connector=mediator.getContext().getService(ref))==null)
+					JSONObject o = core.endpoint().getAll(
+						sessionKey.getPublicKey(), filter);
+						
+					if(!JSONObject.NULL.equals(o))
 					{
-						continue;
+						JSONArray a = o.optJSONArray("providers");
+						int index = 0;
+						int length = a==null?0:a.length();
+						for(;index < length; index++)
+						{
+							jsonArray.put(a.get(index));
+						}
 					}
-					JSONObject o = connector.endpoint().getAll(
-							sessionKey.getPublicKey(), filter);
-					mediator.getContext().ungetService(ref);
-					if(o == null)
-					{
-						continue;
-					}
-					JSONArray a = o.optJSONArray("providers");
-					int index = 0;
-					int length = a==null?0:a.length();
-					for(;index < length; index++)
-					{
-						array.put(a.get(index));
-					}
-				}
-			}
+					return null;
+				}	
+			});
 		}
+		if(filterDefinition != null)
+		{
+			JSONObject jf = new JSONObject();
+			jf.put("type", filterDefinition.type);
+			jf.put("definition", filterDefinition.filter);				
+			object.put("filter", jf);
+			String result = SensiNact.this.<String>callPostFilter(
+				filterDefinition.type, filterDefinition.filter, 
+				array.toString());
+			Object filtered = null;
+			try
+			{
+				filtered = new JSONTokener(result).nextValue();
+				
+			} catch(JSONException e)
+			{
+				mediator.error(e);
+				filtered = new JSONArray();
+			}
+			object.remove("providers");
+			object.put("providers", filtered);
+		}		
 		return object;
 	}
 

@@ -12,8 +12,8 @@ package org.eclipse.sensinact.gateway.app.manager.watchdog;
 
 import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
-import org.eclipse.sensinact.gateway.core.security.Session;
 
 /**
  * This class triggers an alert that stops the application when an exception is throw

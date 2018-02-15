@@ -26,7 +26,6 @@ import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.*;
 import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
-import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import junit.framework.TestCase;
 

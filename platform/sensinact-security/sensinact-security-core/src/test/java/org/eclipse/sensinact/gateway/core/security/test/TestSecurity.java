@@ -23,9 +23,9 @@ import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
-import org.eclipse.sensinact.gateway.core.security.Session;
 import org.junit.Test;
 
 import org.eclipse.sensinact.gateway.common.primitive.Describable;

@@ -70,9 +70,6 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	
 	private Timer connectionTimer;
 	//TimerTask connectionTask  = 
-			
-	
-	
 
 	/**
 	 * @param mediator
@@ -238,10 +235,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 							mediator.error(e.getMessage(),e);
 						}			
 					break;
-					case "locations":
-						response  = super.remoteCore.getLocations(publicKey);
-					break;
-					case "model":
+					case "all":
 						if(subUriELements.length > 2)
 						{
 							break;
@@ -655,10 +649,6 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	@Override
 	public JSONObject getAll(String publicKey)
 	{
-		if(!super.connected)
-		{
-			return null;
-		}
 		return this.getAll(publicKey, null);
 	}
 
@@ -675,38 +665,12 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			return null;
 		}
-		String uri = String.format("/model?%s",filter);
+		String uri = String.format("/all?%s",filter);
 
 		JSONObject response = this.client.request(
 			new JSONObject(
 					).put("uri", uri
 					).put("pkey", publicKey));
-
-		if(response!=null)
-		{
-			mediator.debug(response.toString());
-		}
-		return response;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getLocations(java.lang.String)
-	 */
-	@Override
-	public JSONObject getLocations(String publicKey)
-	{		
-		if(!super.connected)
-		{
-			return null;
-		}
-		String uri ="/locations";
-
-		JSONObject response = this.client.request(
-			new JSONObject(
-				).put("uri", uri
-				).put("pkey", publicKey));
 
 		if(response!=null)
 		{

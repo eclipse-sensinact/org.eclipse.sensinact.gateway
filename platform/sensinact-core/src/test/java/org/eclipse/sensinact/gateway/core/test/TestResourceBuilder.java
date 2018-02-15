@@ -33,7 +33,9 @@ import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.props.TypedProperties;
 import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.Attribute;
+import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
+import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.LocationResource;
 import org.eclipse.sensinact.gateway.core.Metadata;
@@ -41,13 +43,14 @@ import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.core.PropertyResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
+import org.eclipse.sensinact.gateway.core.SensiNact;
 import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.StateVariableResource;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.MidCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
@@ -70,7 +73,6 @@ import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
-import org.eclipse.sensinact.gateway.core.security.Session;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -83,6 +85,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import junit.framework.Assert;
@@ -921,5 +924,42 @@ public class TestResourceBuilder<R extends ModelInstance>
        ActionResource proxy = (ActionResource) r1impl.getProxy(this.tree);
        proxy.act();
        assertEquals("triggered", r2impl.getAttribute(DataResource.VALUE).getValue());    		   
+    }
+
+    @Test
+    public void testFiltering() throws Throwable
+    {
+    	ServiceImpl service =  
+    		this.testContext.getModelInstance().getRootElement(
+    			).addService("testService");
+
+    	ResourceImpl r1impl = service.addActionResource(
+    			"TestAction", ActionResource.class); 	
+    	
+    	ResourceImpl r2impl = service.addDataResource(
+    			StateVariableResource.class, "TestVariable", 
+    			String.class, "untriggered"); 	
+    	
+    	Session s = testContext.getSensiNact().getAnonymousSession();
+    	Thread.sleep(1000);
+    	JSONObject obj = s.getAll(new FilteringDefinition("xfilter","a"));
+    	System.out.println(obj);
+    	JSONAssert.assertEquals(new JSONObject("{\"providers\":[{\"services\":[{\"resources\":"
+		+ "[{\"pXth\":\"/serviceProvider/Xdmin/friendlyNXme\",\"fromService\":\"Xdmin\",\"type\":"
+		+ "\"PROPERTY\",\"nXme\":\"friendlyNXme\",\"fromProvider\":\"serviceProvider\"},"
+		+ "{\"pXth\":\"/serviceProvider/Xdmin/locXtion\",\"fromService\":\"Xdmin\",\"type\":"
+		+ "\"PROPERTY\",\"nXme\":\"locXtion\",\"fromProvider\":\"serviceProvider\"},"
+		+ "{\"pXth\":\"/serviceProvider/Xdmin/bridge\",\"fromService\":\"Xdmin\",\"type\":"
+		+ "\"PROPERTY\",\"nXme\":\"bridge\",\"fromProvider\":\"serviceProvider\"},"
+		+ "{\"pXth\":\"/serviceProvider/Xdmin/icon\",\"fromService\":\"Xdmin\",\"type\":"
+		+ "\"PROPERTY\",\"nXme\":\"icon\",\"fromProvider\":\"serviceProvider\"}],"
+		+ "\"locXtion\":\"45.19334890078532:5.706474781036377\",\"nXme\":\"Xdmin\"},"
+		+ "{\"resources\":[{\"pXth\":\"/serviceProvider/testService/TestAction\",\"fromService\":"
+		+ "\"testService\",\"type\":\"ACTION\",\"nXme\":\"TestAction\",\"fromProvider\":"
+		+ "\"serviceProvider\"},{\"pXth\":\"/serviceProvider/testService/TestVXriXble\","
+		+ "\"fromService\":\"testService\",\"type\":\"STATE_VARIABLE\",\"nXme\":\"TestVXriXble\","
+		+ "\"fromProvider\":\"serviceProvider\"}],\"locXtion\":\"45.19334890078532:5.706474781036377\","
+		+ "\"nXme\":\"testService\"}],\"nXme\":\"serviceProvider\"}],\"filter\":"
+		+ "{\"definition\":\"a\",\"type\":\"xfilter\"}}") , obj, false);
     }
 }

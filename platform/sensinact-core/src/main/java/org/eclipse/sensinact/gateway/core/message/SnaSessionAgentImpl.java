@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.core.message;
 import java.lang.ref.WeakReference;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.Session;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.util.stack.StackEngineHandler;
 import org.json.JSONArray;
 

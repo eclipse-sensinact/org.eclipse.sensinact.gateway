@@ -21,9 +21,9 @@ import org.eclipse.sensinact.gateway.core.Attribute;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Resource;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.*;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
-import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
 import java.util.ArrayList;

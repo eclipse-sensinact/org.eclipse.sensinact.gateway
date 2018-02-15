@@ -14,7 +14,7 @@ import org.eclipse.sensinact.gateway.app.api.function.DataItf;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Metadata;
 import org.eclipse.sensinact.gateway.core.Resource;
-import org.eclipse.sensinact.gateway.core.security.Session;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 

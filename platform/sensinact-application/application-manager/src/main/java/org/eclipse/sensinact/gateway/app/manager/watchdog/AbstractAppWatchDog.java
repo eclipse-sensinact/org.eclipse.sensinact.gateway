@@ -14,8 +14,8 @@ import org.eclipse.sensinact.gateway.app.manager.AppConstant;
 import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
-import org.eclipse.sensinact.gateway.core.security.Session;
 
 /**
  * This abstract class is implemented by the watchdogs of the AppManager

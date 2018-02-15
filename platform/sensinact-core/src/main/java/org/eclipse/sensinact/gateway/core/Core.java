@@ -9,7 +9,6 @@ import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
-import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 
 /**

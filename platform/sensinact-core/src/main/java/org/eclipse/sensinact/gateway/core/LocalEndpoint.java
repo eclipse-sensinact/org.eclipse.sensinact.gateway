@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.core;
 
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.security.Session;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -91,16 +90,16 @@ abstract class LocalEndpoint implements Endpoint
 		return this.getSession(publicKey).getAll(filter);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getLocations(java.lang.String)
-	 */
-	@Override
-	public JSONObject getLocations(String publicKey)
-	{
-		return this.getSession(publicKey).getLocations();
-	}
+//	/**
+//	 * @inheritDoc
+//	 *
+//	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getLocations(java.lang.String)
+//	 */
+//	@Override
+//	public JSONObject getLocations(String publicKey)
+//	{
+//		return this.getSession(publicKey).getLocations();
+//	}
 
 	/**
 	 * @inheritDoc

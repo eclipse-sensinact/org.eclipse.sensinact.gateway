@@ -33,6 +33,7 @@ import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
 import org.eclipse.sensinact.gateway.core.ServiceBuilder;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.TypeConfig;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
@@ -42,7 +43,6 @@ import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
-import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.security.signature.exception.BundleValidationException;
 

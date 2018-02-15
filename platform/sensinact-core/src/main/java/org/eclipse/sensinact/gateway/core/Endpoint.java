@@ -53,19 +53,19 @@ public interface Endpoint
   	 */
   	JSONObject getAll(String publicKey, String filter);
 
-  	/**
-  	 * Returns the JSON formated list of locations of all registered, and 
-  	 * accessible by the user whose String public key is passed as parameter, 
-  	 * resource model instances from the local sensiNact instance, as well as 
-  	 * from the connected remote ones 
-  	 * 
-  	 * @param publicKey the String public key of the user for which to 
-  	 * retrieve the list of accessible resource model instances
-  	 * 
-  	 * @return the JSON formated list of the location of the resource model 
-  	 * instances for the specified user.
-  	 */
-  	JSONObject getLocations(String publicKey);
+//  	/**
+//  	 * Returns the JSON formated list of locations of all registered, and 
+//  	 * accessible by the user whose String public key is passed as parameter, 
+//  	 * resource model instances from the local sensiNact instance, as well as 
+//  	 * from the connected remote ones 
+//  	 * 
+//  	 * @param publicKey the String public key of the user for which to 
+//  	 * retrieve the list of accessible resource model instances
+//  	 * 
+//  	 * @return the JSON formated list of the location of the resource model 
+//  	 * instances for the specified user.
+//  	 */
+//  	JSONObject getLocations(String publicKey);
 
     /**
      * Returns the JSON formated list of available service providers for
