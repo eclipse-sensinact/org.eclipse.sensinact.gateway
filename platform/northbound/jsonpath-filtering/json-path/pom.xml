@@ -27,8 +27,7 @@
 	<name>sensiNact IoT Gateway - JsonPath</name>
 
 	<properties>
-		<!--<tmp.repository>${project.build.directory}</tmp.repository>-->
-		<tmp.repository>${project.basedir}</tmp.repository>
+		<tmp.repository>${project.build.directory}</tmp.repository>
 	</properties>
 	
     <scm>
@@ -36,8 +35,7 @@
     </scm>
 	
     <build>
-        <plugins>  
-        	<!--
+        <plugins> 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-plugin</artifactId>
@@ -62,8 +60,7 @@
                     	json-path-assert
                     </excludes>
                 </configuration>
-            </plugin>  
-            -->
+            </plugin> 
             <plugin>
             	<groupId>org.fortasoft</groupId>
 				<artifactId>gradle-maven-plugin</artifactId>
