@@ -429,7 +429,7 @@
                     <configuration>
                         <excludePackageNames>*.internal:*.internal.*</excludePackageNames>
                         <links>
-                            <link>http://docs.oracle.com/javase/6/docs/api/</link>
+                            <link>http://docs.oracle.com/javase/7/docs/api/</link>
                         </links>
                         <version>true</version>
                         <show>protected</show>
