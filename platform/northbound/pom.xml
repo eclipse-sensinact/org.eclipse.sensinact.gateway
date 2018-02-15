@@ -26,10 +26,9 @@
 	<name>sensiNact IoT Gateway - Northbound parent module</name>
 
 	<modules>
+        <module>jsonpath-filtering</module>
 		<module>rest-access</module>
         <module>mqtt-agent</module>
         <module>storage-agent</module>
-        <module>json-path</module>
-        <module>json-provider-minimal</module>
 	</modules>
 </project>
