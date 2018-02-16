@@ -23,7 +23,8 @@ import java.util.UUID;
 /**
  * AE = sNa Provider
  * Container = sNa Service
- * Instance = sNa Resource
+ * Container = sNa Resource
+ * Instance = sNa Attribute
  */
 public class SnaEventOneM2MMqttHandler extends AbstractMqttHandler {
 
@@ -47,10 +48,11 @@ public class SnaEventOneM2MMqttHandler extends AbstractMqttHandler {
         JSONObject eventJson = new JSONObject(event.getJSON()).getJSONObject("notification");
 
         String aeName = event.getPath().split("/")[1];
-        String containerName = event.getPath().split("/")[2];
+        String containerServiceName = event.getPath().split("/")[2];
+        String containerResourceName = event.getPath().split("/")[2];
 
         JSONObject request = new JSONObject().put("fr", aeName)
-                .put("to", "/" + cseBase + "/" + aeName + "/" + containerName)
+                .put("to", "/" + cseBase + "/" + aeName + "/" + containerServiceName + "/" + containerResourceName)
                 .put("rqi", UUID.randomUUID().toString());
 
         JSONObject content = new JSONObject();
@@ -82,7 +84,8 @@ public class SnaEventOneM2MMqttHandler extends AbstractMqttHandler {
 
         String aeName = event.getPath().split("/")[1];
 
-        JSONObject request = new JSONObject().put("fr", aeName)
+        JSONObject request = new JSONObject()
+                .put("fr", aeName)
                 .put("rqi", UUID.randomUUID().toString());
 
         JSONObject content = new JSONObject();
@@ -129,6 +132,27 @@ public class SnaEventOneM2MMqttHandler extends AbstractMqttHandler {
                 request.put("to", "/" + cseBase + "/" + aeName);
 
                 content.put("rn", event.getPath().split("/")[2]);
+
+                request.put("pc", new JSONObject().put("m2m:cnt", content));
+                break;
+            // Create container
+            case RESOURCE_APPEARING:
+                request.put("op", 1);
+                request.put("ty", 3);
+                request.put("to", "/" + cseBase + "/" + aeName + "/" + event.getPath().split("/")[2]);
+
+                content.put("rn", event.getPath().split("/")[3]);
+                content.put("lbl", new JSONArray().put(aeName));
+
+                request.put("pc", new JSONObject().put("m2m:cnt", content));
+                break;
+            // Delete container
+            case RESOURCE_DISAPPEARING:
+                request.put("op", 4);
+                request.put("ty", 3);
+                request.put("to", "/" + cseBase + "/" + aeName + "/" + event.getPath().split("/")[2]);
+
+                content.put("rn", event.getPath().split("/")[3]);
 
                 request.put("pc", new JSONObject().put("m2m:cnt", content));
                 break;

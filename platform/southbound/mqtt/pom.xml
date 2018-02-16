@@ -19,11 +19,11 @@
         <version>1.5-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
+    <groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
     <artifactId>parent</artifactId>
 	<packaging>pom</packaging>
 
-	<name>sensiNact IoT Gateway - HTTP Protocol Devices parent</name>
+	<name>sensiNact IoT Gateway - MQTT Protocol Devices parent</name>
 
 	<dependencies>
 		<dependency>
@@ -59,12 +59,8 @@
 	</dependencies>
 	
     <modules>
-        <module>http-device</module>
-        <module>android-http</module>
-        <module>free-sms</module>
-        <module>openweather-device</module>
-		<module>kodi-device</module>
-        <module>live-objects</module>
-		<module>onem2m-device</module>
+        <module>mqtt-device</module>
+		<module>smart-topic-device</module>
     </modules>
+
 </project>

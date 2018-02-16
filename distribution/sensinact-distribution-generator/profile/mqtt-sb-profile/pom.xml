@@ -28,8 +28,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.sensinact.gateway.sthbnd</groupId>
-	        <artifactId>sensinact-mosquitto</artifactId>
+            <groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
+	        <artifactId>mqtt-device</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
+            <artifactId>smart-topic-device</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
