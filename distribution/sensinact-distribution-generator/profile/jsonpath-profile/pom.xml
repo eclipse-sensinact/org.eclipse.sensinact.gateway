@@ -26,14 +26,6 @@
 
     <name>sensiNact IoT Gateway - sensiNact Runtime (${project.artifactId} bridge dependencies)</name>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-            <artifactId>json-provider-minimal</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
-
 	<profiles>
 		<profile>
 			<id>withJsonPath</id>
@@ -49,7 +41,17 @@
 		    		<version>2.4.0</version>
 		            <scope>system</scope>
 		            <systemPath>${basedir}/../../../../platform/northbound/json-path/target/json-path-2.4.0.jar</systemPath>
-		    	</dependency>
+		    	</dependency>		    	
+		        <dependency>
+		            <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+		            <artifactId>json-provider-minimal</artifactId>
+		            <version>${project.version}</version>
+		        </dependency>
+		        <dependency>
+		            <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+		            <artifactId>jsonpath-filter</artifactId>
+		            <version>${project.version}</version>
+		        </dependency>
 			</dependencies>
 		</profile>
 	</profiles>
