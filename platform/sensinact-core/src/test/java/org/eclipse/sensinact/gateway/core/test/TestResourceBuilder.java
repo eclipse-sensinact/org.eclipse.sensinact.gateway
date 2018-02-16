@@ -943,7 +943,6 @@ public class TestResourceBuilder<R extends ModelInstance>
     	Session s = testContext.getSensiNact().getAnonymousSession();
     	Thread.sleep(1000);
     	JSONObject obj = s.getAll(new FilteringDefinition("xfilter","a"));
-    	System.out.println(obj);
     	JSONAssert.assertEquals(new JSONObject("{\"providers\":[{\"services\":[{\"resources\":"
 		+ "[{\"pXth\":\"/serviceProvider/Xdmin/friendlyNXme\",\"fromService\":\"Xdmin\",\"type\":"
 		+ "\"PROPERTY\",\"nXme\":\"friendlyNXme\",\"fromProvider\":\"serviceProvider\"},"

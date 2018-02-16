@@ -837,7 +837,7 @@ public class SensiNact implements Core
     			{
     				filtered = new JSONTokener(result).nextValue();
     				
-    			} catch(JSONException e)
+    			} catch(Exception e)
     			{
     				mediator.error(e);
     				filtered = new JSONArray();
@@ -963,10 +963,9 @@ public class SensiNact implements Core
     			Object filtered = null;
     			try
     			{
-    				filtered = new JSONTokener(result
-    						).nextValue();
+    				filtered = new JSONTokener(result).nextValue();
     				
-    			} catch(JSONException e)
+    			} catch(Exception e)
     			{
     				mediator.error(e);
     				filtered = new JSONArray();
@@ -2819,10 +2818,9 @@ public class SensiNact implements Core
 			Object filtered = null;
 			try
 			{
-				filtered = new JSONTokener(result
-						).nextValue();
+				filtered = new JSONTokener(result).nextValue();
 				
-			} catch(JSONException e)
+			} catch(Exception e)
 			{
 				mediator.error(e);
 				filtered = new JSONArray();
@@ -2914,7 +2912,7 @@ public class SensiNact implements Core
 			{
 				filtered = new JSONTokener(result).nextValue();
 				
-			} catch(JSONException e)
+			} catch(Exception e)
 			{
 				mediator.error(e);
 				filtered = new JSONArray();
