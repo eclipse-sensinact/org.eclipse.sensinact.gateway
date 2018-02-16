@@ -10,11 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import java.util.Set;
-
-import org.eclipse.sensinact.gateway.common.constraint.Constraint;
+import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONArray;
 
@@ -24,7 +21,6 @@ import org.json.JSONArray;
  */
 public class NorthboundRequestBuilder<F>
 {
-
 	//********************************************************************//
 	//						NESTED DECLARATIONS			  			      //
 	//********************************************************************//
@@ -47,16 +43,19 @@ public class NorthboundRequestBuilder<F>
 	protected String service;
 	protected String resource;
 	protected String attribute;
+	protected String rid;
 
-	protected AccessMethod.Type method;
+	protected String method;
 	protected boolean listElements;
 
 	private Object argument;
-	
+
+	private FilteringDefinition filterDefinition;
 	
 	/**
+	 * Constructor
+	 * 
 	 * @param mediator
-	 * @param responseFormat
 	 */
 	public NorthboundRequestBuilder(NorthboundMediator mediator)
 	{
@@ -68,8 +67,13 @@ public class NorthboundRequestBuilder<F>
 	}
 	
 	/**
-	 * @param serviceProvider
-	 * @return
+	 * Defines the String identifier of the service provider 
+	 * targeted by the request to be built
+	 * 
+	 * @param serviceProvider the String identifier of the 
+	 * targeted service provider
+	 * 
+	 * @return this NorthboundRequestBuilder
 	 */
 	public NorthboundRequestBuilder<F> withServiceProvider(
 			String serviceProvider)
@@ -77,10 +81,15 @@ public class NorthboundRequestBuilder<F>
 		this.serviceProvider = serviceProvider;
 		return this;
 	}
-	
+
 	/**
-	 * @param service
-	 * @return
+	 * Defines the String identifier of the service targeted 
+	 * by the request to be built
+	 * 
+	 * @param service the String identifier of the targeted 
+	 * service 
+	 * 
+	 * @return this NorthboundRequestBuilder
 	 */
 	public NorthboundRequestBuilder<F> withService(String service)
 	{
@@ -89,8 +98,13 @@ public class NorthboundRequestBuilder<F>
 	}
 	
 	/**
-	 * @param resource
-	 * @return
+	 * Defines the String identifier of the resource targeted 
+	 * by the request to be built
+	 * 
+	 * @param resource the String identifier of the 
+	 * targeted resource
+	 * 
+	 * @return this NorthboundRequestBuilder
 	 */
 	public NorthboundRequestBuilder<F> withResource(String resource)
 	{
@@ -99,8 +113,13 @@ public class NorthboundRequestBuilder<F>
 	}
 	
 	/**
-	 * @param attribute
-	 * @return
+	 * Defines the String identifier of the attribute targeted 
+	 * by the request to be built
+	 * 
+	 * @param attribute the String identifier of the 
+	 * targeted attribute
+	 * 
+	 * @return this NorthboundRequestBuilder
 	 */
 	public NorthboundRequestBuilder<F> withAttribute(String attribute)
 	{
@@ -109,13 +128,30 @@ public class NorthboundRequestBuilder<F>
 	}
 
 	/**
-	 * @param method
-	 * @return
+	 * Defines the String identifier of the method to be executed
+	 * by the request to be built
+	 * 
+	 * @param method the String identifier of the method to be 
+	 * executed
+	 * 
+	 * @return this NorthboundRequestBuilder
 	 */
-	public NorthboundRequestBuilder<F> withMethod(AccessMethod.Type method)
+	public NorthboundRequestBuilder<F> withMethod(String method)
 	{
 		this.method = method;
 		return this;
+	}
+
+	/**
+	 * Returns the String identifier of the method to be executed
+	 * by the request to be built
+	 * 
+	 * @return the String identifier of the method to be 
+	 * executed
+	 */
+	public String getMethod()
+	{
+		return this.method;
 	}
 	
 	/**
@@ -126,6 +162,23 @@ public class NorthboundRequestBuilder<F>
 	{
 		this.argument = argument;
 		return this;
+	}
+
+	/**
+	 * @param rid
+	 */
+	public NorthboundRequestBuilder<F> withRequestId(String rid)
+	{
+		this.rid = rid;
+		return this;
+	}
+	
+	/**
+	 * @return
+	 */
+	public String getRequestId()
+	{
+		return this.rid;
 	}
 	
 	/**
@@ -138,15 +191,30 @@ public class NorthboundRequestBuilder<F>
 		return this;
 	}
 	
-	public NorthboundRequest<F> build()
+	/**
+	 * @param filterDefinition
+	 */
+	public void withFilter(
+	     FilteringDefinition filterDefinition)
 	{
-		NorthboundRequest<F> request = null;
+		this.filterDefinition = filterDefinition;
+	}
+	
+	/**
+	 * @return
+	 */
+	public NorthboundRequest build()
+	{
+		NorthboundRequest request = null;
 		if(this.method == null)
 		{
 			return request;
 		}
-		switch(this.method.name())
+		switch(this.method)
 		{
+			case "ALL":
+				request = new AllRequest(mediator, this.filterDefinition);
+				break;
 			case "ACT":
 				if(this.resource != null)
 				{
@@ -162,7 +230,7 @@ public class NorthboundRequestBuilder<F>
 							arguments = new Object[]{this.argument};
 						}
 					}
-					request = new ResourceActRequest<F>(
+					request = new ResourceActRequest(
 					    mediator, serviceProvider, service, resource,
 						        arguments);
 				}
@@ -170,42 +238,43 @@ public class NorthboundRequestBuilder<F>
 			case "DESCRIBE":
 				if(this.resource != null)
 				{
-					request = new ResourceRequest<F>(
+					request = new ResourceRequest(
 					    mediator, serviceProvider, service, resource);
 					
 				} else if(service != null)
 				{
 					if(this.listElements)
 					{
-						request = new ResourcesRequest<F>(
-							mediator, serviceProvider, service);
+						request = new ResourcesRequest( mediator, 
+							serviceProvider, service, this.filterDefinition);
 						
 					} else
 					{
-						request = new ServiceRequest<F>(
-							mediator, serviceProvider, service);
+						request = new ServiceRequest(
+							mediator, serviceProvider, service, null);
 					}
 				} else if(serviceProvider != null)
 				{
 					if(this.listElements)
 					{
-						request = new ServicesRequest<F>(
-							mediator, serviceProvider);
+						request = new ServicesRequest(
+							mediator, serviceProvider, this.filterDefinition);
 						
 					} else
 					{
-						request = new ServiceProviderRequest<F>(
-							mediator, serviceProvider);
+						request = new ServiceProviderRequest(
+							mediator, serviceProvider, null);
 					}
 				} else
 				{
-					request = new ServiceProvidersRequest<F>(mediator);
+					request = new ServiceProvidersRequest(mediator, 
+							this.filterDefinition);
 				}
 				break;
 			case "GET":
 				if(this.attribute != null)
 				{
-					request = new AttributeGetRequest<F>(
+					request = new AttributeGetRequest(
 					    mediator, serviceProvider, service, resource,
 						        attribute);
 				}
@@ -213,14 +282,15 @@ public class NorthboundRequestBuilder<F>
 			case "SET":
 				if(this.attribute != null)
 				{
-					request = new AttributeSetRequest<F>(
+					request = new AttributeSetRequest(
 					    mediator, serviceProvider, service, resource,
 						        attribute, argument);
 				}
 				break;
 			case "SUBSCRIBE":				
-				Object[] arguments = this.argument!=null?(this.argument.getClass(
-					).isArray()?(Object[]) this.argument:new Object[]{this.argument})
+				Object[] arguments = this.argument!=null
+				?(this.argument.getClass().isArray()?(Object[]) 
+					this.argument:new Object[]{this.argument})
 						:null;
 					
 				if(arguments == null || arguments.length == 0 ||
@@ -231,29 +301,29 @@ public class NorthboundRequestBuilder<F>
 				}				
 				if(this.resource!=null)
 				{
-					request = new AttributeSubscribeRequest<F>( mediator,
+					request = new AttributeSubscribeRequest( mediator,
 					    serviceProvider, service, resource, attribute, 
 					    (NorthboundRecipient) arguments[0], (arguments.length>1
 					    ?((JSONArray)arguments[1]):new JSONArray()));
 				} else
 				{
-					request = new RegisterAgentRequest<F>( mediator, 
+					request = new RegisterAgentRequest( mediator, 
 						serviceProvider, service, (NorthboundRecipient) 
 					    arguments[0],  (SnaFilter)(arguments.length>1
 					    	?arguments[1]:null));
 				}
 				break;
 			case "UNSUBSCRIBE":
-				String argument = CastUtils.cast(mediator.getClassLoader(),
+				String arg = CastUtils.cast(mediator.getClassLoader(),
 						String.class, this.argument);
-				if(this.attribute != null)
+				if(this.resource != null)
 				{
-					request = new AttributeUnsubscribeRequest<F>(
+					request = new AttributeUnsubscribeRequest(
 					    mediator, serviceProvider, service, resource,
-						        attribute, argument);
+						        attribute, arg);
 				} else
 				{
-					request = new UnregisterAgentRequest<F>(mediator,argument);
+					request = new UnregisterAgentRequest(mediator, arg);
 				}
 				break;
 			default:

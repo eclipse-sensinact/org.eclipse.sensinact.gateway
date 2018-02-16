@@ -17,7 +17,13 @@ import java.util.Map;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 
-public interface NorthboundAccessWrapper 
+/**
+ * Northbound request wrapper service.
+ *  
+ * It defines the methods allowing to retrieve the relevant 
+ * characteristics of the request, allowing to treat it 
+ */
+public interface NorthboundRequestWrapper 
 {
 	/**
 	 * Returns the {@link NorthboundMediator} of this
@@ -28,9 +34,12 @@ public interface NorthboundAccessWrapper
 	 * NorthboundAccessWrapper
 	 */
 	NorthboundMediator getMediator();
-
+	
 	/**
-	 * @return
+	 * Returns the String uri of the request wrapped
+	 * by this NorthboundAccessWrapper.
+	 * 
+	 * @return the wrapped request's String uri
 	 */
 	String getRequestURI();
 
@@ -47,23 +56,40 @@ public interface NorthboundAccessWrapper
 	String getRequestID(Parameter[] parameters);
 
 	/**
-	 * @return
+	 * Returns the map of parameters built using the query String
+	 * (HTML query string formated) of the wrapped request if 
+	 * it exists
+	 * 
+	 * @return the query String of the wrapped request as a
+	 * map
 	 */
 	Map<String,List<String>> getQueryMap();
 
 	/**
-	 * @return
+	 * Returns the String content the wrapped request
+	 * 
+	 * @return the content of the request
 	 */
 	String getContent();
 
 	/**
-	 * @return
+	 * Returns a new {@link NorthboundRecipient} created using the
+	 * array of {@link Parameter}s passed as parameter
+	 *  
+	 * @param parameters the array of {@link Parameter}s used to
+	 * parameterized the recipient to be returned
+	 * 
+	 * @return a newly created {@link NorthboundRecipient}
+	 */
+	NorthboundRecipient createRecipient(Parameter[] parameters);
+	
+	/**
+	 * Returns the {@link Authentication} containing the identification
+	 * material to be associated with the wrapped request
+	 * 
+	 * @return the {@link Authentication} associated with the 
+	 * wrapped request
 	 */
 	Authentication<?> getAuthentication();
 
-	/**
-	 * @param parameters
-	 * @return
-	 */
-	NorthboundRecipient createRecipient(Parameter[] parameters);
 }

@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 import org.json.JSONArray;
 
 
-public class AttributeSubscribeRequest<F> extends AttributeRequest<F> 
+public class AttributeSubscribeRequest extends AttributeRequest
 {	
 	private NorthboundRecipient recipient;
 	private JSONArray conditions;

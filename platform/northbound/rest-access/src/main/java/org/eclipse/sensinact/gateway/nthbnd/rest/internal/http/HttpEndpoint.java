@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 
 /**
@@ -29,9 +28,7 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
  * that perform a task and jersey
  */
 @SuppressWarnings("serial")
-@WebServlet(displayName="sensiNact" ,
-            urlPatterns = {"/sensinact/*"}, 
-            asyncSupported=true)
+@WebServlet(asyncSupported=true)
 public class HttpEndpoint extends HttpServlet
 {		
 	
@@ -48,38 +45,46 @@ public class HttpEndpoint extends HttpServlet
 	}
 
 	/**
-	 * @throws IOException 
 	 * @inheritDoc
 	 *
 	 * @see javax.servlet.http.HttpServlet#
 	 * doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
 	 */
 	@Override
-    public void doGet(HttpServletRequest request, 
-    		HttpServletResponse response) 
+    public void doGet(HttpServletRequest request, HttpServletResponse response) 
     		throws IOException
 	{
-        this.doExecute(request, response, true);
+		if(!JSON_CONTENT_TYPE.equals(request.getHeader("Accept")))
+		{
+			response.sendError(406, "Not Acceptable");
+		}
+        this.doExecute(request, response);
 	}
 	
 	/**
-	 * @throws IOException 
 	 * @inheritDoc
 	 *
 	 * @see javax.servlet.http.HttpServlet#
-	 * doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+	 * doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
 	 */
 	@Override
-    public void doPost(HttpServletRequest request, 
-    		HttpServletResponse response) throws IOException
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+    		throws IOException
 	{
-		this.doExecute(request, response, false);
+		if(!JSON_CONTENT_TYPE.equals(request.getContentType()))
+		{
+			response.sendError(415, "Unsupported Media Type");
+		}
+		if(!JSON_CONTENT_TYPE.equals(request.getHeader("Accept")))
+		{
+			response.sendError(406, "Not Acceptable");
+		}
+		this.doExecute(request, response);
 	}
 	
 
 	private final void doExecute(HttpServletRequest request, 
-    		HttpServletResponse response, final boolean doGet) 
-    				throws IOException
+    		HttpServletResponse response) throws IOException
 	{
         if(response.isCommitted())
         {
@@ -99,36 +104,19 @@ public class HttpEndpoint extends HttpServlet
 			@Override
 			public void onWritePossible() throws IOException 
 			{
-				 HttpServletRequest request = (HttpServletRequest) asyncContext.getRequest();		        
-				 HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
+				 HttpServletRequest request = 
+				     (HttpServletRequest) asyncContext.getRequest();		        
+				 HttpServletResponse response = 
+				    (HttpServletResponse) asyncContext.getResponse();
 		        
 			     try
 			     {
 					HttpRestAccess restAccess = new HttpRestAccess(
-							new HttpServletResponseWrapper(
-							response));	
+					    new HttpRestAccessRequest(mediator, request),
+					    new HttpServletResponseWrapper(response));	
+
+					restAccess.proceed();
 					
-					HttpRestAccessRequest wrapper = new HttpRestAccessRequest(
-							mediator, request);
-					if(restAccess.init(wrapper))
-					{
-				        AccessMethod.Type method  = restAccess.getMethod();			        
-				        boolean getOrDescribe = method.name().equals(AccessMethod.GET)
-				        		|| method.name().equals(AccessMethod.DESCRIBE);
-				        
-				        if((doGet && !getOrDescribe) || (!doGet && getOrDescribe))
-						{
-							restAccess.sendError(400, "Bad Request");						
-						}
-				        else if(!doGet && !JSON_CONTENT_TYPE.equals(request.getContentType()))
-				        {
-				    		restAccess.sendError(415, "Unsupported Media Type");
-				    		
-				    	} else
-				        {
-				        	restAccess.handle();
-				        }
-					}
 				} catch (Exception e) 
 				{
 					mediator.error(e);

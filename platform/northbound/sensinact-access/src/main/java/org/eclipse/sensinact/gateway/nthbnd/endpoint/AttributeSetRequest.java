@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-public class AttributeSetRequest<F> extends AttributeRequest<F> 
+public class AttributeSetRequest extends AttributeRequest
 {	
 	private Object argument;
 

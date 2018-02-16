@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-public class AttributeUnsubscribeRequest<F> extends AttributeRequest<F> 
+public class AttributeUnsubscribeRequest extends AttributeRequest
 {	
 	private String subscriptionId;
 

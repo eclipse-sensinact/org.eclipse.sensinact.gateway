@@ -12,6 +12,9 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import java.lang.reflect.Method;
 
+import org.eclipse.sensinact.gateway.core.Filtering;
+import org.eclipse.sensinact.gateway.core.FilteringDefinition;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
@@ -28,7 +31,6 @@ import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 //import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
-import org.eclipse.sensinact.gateway.core.security.Session;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.ResponseFormat;
 //import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
@@ -39,7 +41,7 @@ import org.json.JSONObject;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class NorthboundEndpoint
-{
+{		
 	private Session session;
 	private NorthboundMediator mediator;
 
@@ -70,7 +72,7 @@ public class NorthboundEndpoint
 	 * 		the execution of this request in the appropriate
 	 * 		format
 	 */	
-	public <F> F execute(NorthboundRequest<F> request, 
+	public <F> F execute(NorthboundRequest request,
 			ResponseFormat<F> responseFormat)
 	{		
 		Object result = null;
@@ -82,14 +84,16 @@ public class NorthboundEndpoint
 		{
 			Method method = getClass().getDeclaredMethod(
 			    request.getMethod(), parameterTypes);
+			
 			result = method.invoke(this, Argument.getParameters(
 					arguments));
 			
 		} catch(Exception e)
 		{
+			e.printStackTrace();
 			this.mediator.error(e);
 		}
-		return responseFormat.format(result);		
+		return responseFormat.format(result);
 	}
 	
 	/**
@@ -98,14 +102,16 @@ public class NorthboundEndpoint
      * 
      * @return the response containing the information
      */
-    public JSONObject registerAgent(AbstractMidAgentCallback callback, SnaFilter filter)
+    public JSONObject registerAgent(AbstractMidAgentCallback callback, 
+    		SnaFilter filter)
     {
     	return session.registerSessionAgent(callback, filter);
     }
 
 	/**
-     * Unregisters the {@link SnaAgent} linke to the 
-     * current Session and whose String identifier is passed as parameter
+     * Unregisters the {@link SnaAgent} linked to the 
+     * current Session and whose String identifier is 
+     * passed as parameter
      * 
      * @return the response containing the information
      */
@@ -113,29 +119,82 @@ public class NorthboundEndpoint
     {
     	return session.unregisterSessionAgent(agentId);
     }
-    
+
 	/**
+     * Gets the all JSONObject formated list of service 
+     * providers, services and resources, including their
+     * location 
+     * 
+     * @return the JSONObject formated list of all the 
+     * model instances' hierarchies
+     */
+    public JSONObject all()
+    {
+    	return this.all(null,null);
+    }
+
+	/**
+     * Gets the all JSONObject formated list of service 
+     * providers, services and resources, as well as 
+     * their location, and compliant with the String 
+     * filter passed as parameter
+     * 
+     * @return the JSONObject formated list of all the 
+     * model instances' hierarchies according to the 
+     * specified filter
+     */
+    public JSONObject all(String filter)
+    {
+    	return this.all(filter, null);
+    }
+
+	/**
+     * Gets the all JSONObject formated list of service 
+     * providers, services and resources, as well as 
+     * their location, and compliant with the String 
+     * filter passed as parameter
+     * 
+     * @return the JSONObject formated list of all the 
+     * model instances' hierarchies according to the 
+     * specified filter
+     */
+    public JSONObject all(String filter, FilteringDefinition 
+    		filterDefinition)
+    {
+    	return session.getAll(filter, filterDefinition);
+    }
+
+//	/**
+//     * Gets the all JSONObject formated list of service 
+//     * providers with their location
+//     * 
+//     * @return the JSONObject formated list of service 
+//     * providers and their location
+//     */
+//    public JSONObject locations()
+//    {
+//    	return session.getLocations();
+//    }
+    
+   	/**
      * Get the list of service providers and returns it
      * 
      * @return the response containing the information
      */
     public JSONObject serviceProvidersList()
     {
-    	return session.getProviders();
-//        JSONArray serviceProvidersJson = new JSONArray();
-//        Set<ServiceProvider> serviceProviders = session.serviceProviders();
-//
-//        for (ServiceProvider provider : serviceProviders) 
-//        {
-//            serviceProvidersJson.put(provider.getName());
-//        }
-//        JSONObject jsonDevice = new JSONObject();
-//    	jsonDevice.put("type", "PROVIDERS_LIST");
-//    	jsonDevice.put("uri", UriUtils.PATH_SEPARATOR);
-//    	jsonDevice.put("statusCode", 200);
-//    	jsonDevice.put("providers", serviceProvidersJson);
-//    	
-//        return jsonDevice;
+   	    return this.serviceProvidersList(null);
+    }
+    
+	/**
+     * Get the list of service providers and returns it
+     * 
+     * @return the response containing the information
+     */
+    public JSONObject serviceProvidersList(FilteringDefinition 
+    		filterDefinition)
+    {
+    	return session.getProviders(filterDefinition);
     }
 
     /**
@@ -147,29 +206,6 @@ public class NorthboundEndpoint
     public JSONObject serviceProviderDescription(String serviceProviderId)
     {
     	return session.getProvider(serviceProviderId);
-    	
-//        ServiceProvider serviceProvider = serviceProvider(
-//        		serviceProviderId);
-//
-//    	JSONObject jsonServiceProvider = new JSONObject();
-//    	jsonServiceProvider.put("type", "DESCRIBE_RESPONSE");
-//    	jsonServiceProvider.put("uri", new StringBuilder().append(
-//    			UriUtils.PATH_SEPARATOR).append(
-//    				serviceProviderId).toString());
-//    	
-//        if (serviceProvider != null)
-//        {
-//        	jsonServiceProvider.put("statusCode", 200);
-//        	jsonServiceProvider.put("response", new JSONObject(
-//        			serviceProvider.getDescription().getJSON()));
-//
-//        } else
-//        {
-//        	jsonServiceProvider.put("statusCode", 404);
-//        	jsonServiceProvider.put("message",  "sensiNact service provider '" + 
-//        	serviceProviderId + "' not found");
-//        }
-//        return jsonServiceProvider;
     }
     
     /**
@@ -180,39 +216,22 @@ public class NorthboundEndpoint
      */
     public JSONObject servicesList(String serviceProviderId) 
     {
-    	return session.getServices(serviceProviderId);
-    	
-//    	String uri = UriUtils.getUri(new String[]{ serviceProviderId });
-//        ServiceProvider serviceProvider = serviceProvider(serviceProviderId);
-//        
-//        JSONObject jsonServiceProvider = new JSONObject();
-//	        	jsonServiceProvider.put("type", "SERVICES_LIST");
-//	        	jsonServiceProvider.put("uri", uri); 
-//	        	
-//        if(serviceProvider != null)
-//        {
-//        	JSONArray servicesArray = new JSONArray();
-//	        List<Service> services = serviceProvider.getServices();
-//	        
-//	        int index = 0;
-//	        int length = services==null?0:services.size();
-//	        
-//	        for(;index < length;index++)
-//	        {
-//	        	servicesArray.put(services.get(index).getName());
-//	        }    	
-//	        jsonServiceProvider.put("statusCode", 200);
-//	        jsonServiceProvider.put("services", servicesArray);
-//	        
-//        } else
-//        {
-//        	jsonServiceProvider.put("statusCode", 404);
-//        	registerError(jsonServiceProvider,"sensiNact service provider '" 
-//        	+ uri + "' not found");
-//        }
-//        return jsonServiceProvider;
+    	return this.servicesList(serviceProviderId,null);
     }
 
+    /**
+     * Get the list of services of a service provider and returns it
+     *
+     * @param serviceProviderId the service provider ID
+     * @return the response containing the information
+     */
+    public JSONObject servicesList(String serviceProviderId, 
+    		FilteringDefinition filterDefinition) 
+    {
+    	return session.getServices(serviceProviderId, 
+    			filterDefinition);
+    }
+    
     /**
      * Get the information of a specific service and returns it
      *
@@ -224,28 +243,6 @@ public class NorthboundEndpoint
     		String serviceProviderId, String serviceId)
     {
     	return session.getService(serviceProviderId, serviceId);
-    	
-//    	String uri = UriUtils.getUri(new String[]{
-//    			serviceProviderId, serviceId });
-//		Service service = service(
-//				serviceProviderId, serviceId);
-//		
-//		JSONObject jsonService = new JSONObject();
-//		jsonService.put("type", "DESCRIBE_RESPONSE");
-//		jsonService.put("uri", uri); 
-//
-//        if (service != null) 
-//        {
-//        	jsonService.put("statusCode", 200);
-//        	jsonService.put("response", new JSONObject(
-//        			service.getDescription().getJSON()));
-//        } else
-//        {
-//        	jsonService.put("statusCode", 404);
-//        	registerError(jsonService,"sensiNact service '" 
-//        	+ uri + "' not found");
-//        }
-//        return jsonService;
     }
     
     /**
@@ -257,40 +254,22 @@ public class NorthboundEndpoint
     public JSONObject resourcesList(String serviceProviderId, 
     		String serviceId)
     {
-    	return session.getResources(serviceProviderId, serviceId);
-    	
-//    	String uri = UriUtils.getUri(new String[]{ 
-//    			serviceProviderId, serviceId });
-//        Service service = service(serviceProviderId, serviceId);
-//        
-//        JSONObject jsonService = new JSONObject();
-//	        	jsonService.put("type", "RESOURCES_LIST");
-//	        	jsonService.put("uri", uri); 
-//	        	
-//        if(service != null)
-//        {
-//        	JSONArray resourcesArray = new JSONArray();
-//	        List<Resource> resources = service.getResources();
-//	        
-//	        int index = 0;
-//	        int length = resources==null?0:resources.size();
-//	        
-//	        for(;index < length;index++)
-//	        {
-//	        	resourcesArray.put(resources.get(index).getName());
-//	        }    	
-//	        jsonService.put("statusCode", 200);
-//	        jsonService.put("resources", resourcesArray);
-//	        
-//        } else
-//        {
-//        	jsonService.put("statusCode", 404);
-//        	registerError(jsonService,"sensiNact service '" 
-//        	+ uri + "' not found");
-//        }
-//        return jsonService;
+    	return this.resourcesList(serviceProviderId, serviceId, null);
     }
 
+    /**
+     * Get the list of resources of a service and returns it
+     *
+     * @param serviceProviderId the service provider ID
+     * @return the response containing the information
+     */
+    public JSONObject resourcesList(String serviceProviderId, 
+    	String serviceId, FilteringDefinition filterDefinition) 
+    {
+    	return session.getResources(serviceProviderId, serviceId, 
+    			filterDefinition);
+    }
+    
     /**
      * Get the information of a specific resource and returns it
      *
@@ -305,40 +284,8 @@ public class NorthboundEndpoint
     {
     	return session.getResource(serviceProviderId, 
     			serviceId, resourceId);
-    	
-//        Resource resource = resource(serviceProviderId, 
-//        		serviceId, resourceId);
-//    	JSONObject jsonResource = new JSONObject();
-//    	jsonResource.put("type", "DESCRIBE_RESPONSE");
-//    	jsonResource.put("uri", UriUtils.getUri(new String[]{
-//    			serviceProviderId, serviceId, resourceId }));
-//    	
-//        if (resource != null)
-//        {      	
-//        	jsonResource.put("statusCode", 200);
-//        	jsonResource.put("response", new JSONObject(
-//        		resource.getDescription().getDescription()));
-//        } else
-//        {
-//        	jsonResource.put("statusCode", 404);
-//        	registerError(jsonResource,"sensiNact resource '" 
-//        	+ resourceId + "' not found");
-//        }
-//        return jsonResource;
     }
         
-//    public void registerError(JSONObject jsonObject, String message)
-//    {
-//    	JSONArray errors = jsonObject.optJSONArray("errors");
-//    	if(errors == null)
-//    	{
-//    		errors = new JSONArray();
-//    		jsonObject.put("errors", errors);
-//    	}
-//    	JSONObject error = new JSONObject();
-//    	error.put("message", message);
-//    	errors.put(error);
-//    }
 
     /**
      * Perform a sNa GET on a resource
@@ -349,28 +296,11 @@ public class NorthboundEndpoint
      * @param attributeId GET URL parameter with json format
      * @return the response containing the value of the resource
      */
-    public /*AccessMethodResponse*/ JSONObject get(String serviceProviderId, 
+    public JSONObject get(String serviceProviderId, 
     	String serviceId, String resourceId, String attributeId)
     {  	
     	return session.get(serviceProviderId, serviceId, 
     			resourceId, attributeId);
-    	
-//        Resource resource = this.resource(serviceProviderId, 
-//        		serviceId, resourceId);
-//
-//        if(resource == null)
-//        {
-//            return AccessMethodResponse.error(mediator, UriUtils.getUri(
-//            	new String[]{serviceProviderId, serviceId, resourceId}), 
-//            	AccessMethod.Type.valueOf(AccessMethod.GET), 
-//            	SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
-//            		"sensinact Resource '" + resourceId + "' not found",
-//            		null);
-//        }
-//        String attribute = attributeId==null
-//        		?DataResource.VALUE:attributeId;
-//        
-//        return resource.get(attribute);
     }
 
     /**
@@ -382,26 +312,12 @@ public class NorthboundEndpoint
      * @param attributeId the value to set
      * @return the response containing the value of the resource
      */
-    public /*AccessMethodResponse*/ JSONObject set(String serviceProviderId,
+    public JSONObject set(String serviceProviderId,
        String serviceId, String resourceId, String attributeId,
               Object value) 
     {  	
     	return session.set(serviceProviderId, serviceId, resourceId, 
     			attributeId, value);
-    	
-//        Resource resource = this.resource(serviceProviderId, 
-//        		serviceId, resourceId);
-//
-//        if(resource == null)
-//        {
-//            return AccessMethodResponse.error(mediator, UriUtils.getUri(
-//            	new String[]{serviceProviderId, serviceId, resourceId}), 
-//            	AccessMethod.Type.valueOf(AccessMethod.SET), 
-//            	SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
-//            		"sensinact Resource '" + resourceId + "' not found",
-//            		null);
-//        } 
-//        return ((PropertyResource) resource).set(attributeId, value);
     }
 
     /**
@@ -413,35 +329,10 @@ public class NorthboundEndpoint
      * @param arguments the parameters of the act (can be empty)
      * @return the response containing the value of the resource
      */
-    public /*AccessMethodResponse*/ JSONObject act(String serviceProviderId,
+    public JSONObject act(String serviceProviderId,
           String serviceId, String resourceId, Object[] arguments)
     { 	
     	return session.act(serviceProviderId, serviceId, resourceId, arguments);
-    	
-//        Resource resource = this.resource(serviceProviderId, 
-//        		serviceId, resourceId);
-//        
-//        if(resource == null)
-//        {
-//            return AccessMethodResponse.error(mediator, UriUtils.getUri(
-//            	new String[]{serviceProviderId, serviceId, resourceId}), 
-//            	AccessMethod.Type.valueOf(AccessMethod.ACT), SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
-//            		"sensinact Resource '" + resourceId + "' not found",
-//            		null);
-//        }
-//        if(!(resource instanceof ActionResource))
-//        {
-//            return AccessMethodResponse.error(mediator, UriUtils.getUri(
-//            	new String[]{serviceProviderId, serviceId, resourceId}), 
-//            		AccessMethod.Type.valueOf(AccessMethod.ACT), SnaErrorfulMessage.BAD_REQUEST_ERROR_CODE,
-//            	"Resource '" + resource.getPath() +  "' is not an ActionResource",
-//            		null);
-//        }
-//        if (arguments != null && arguments.length > 0) 
-//        {
-//           return ((ActionResource) resource).act(arguments);            
-//        }        
-//        return ((ActionResource) resource).act();
     }
 
     /**
@@ -452,31 +343,12 @@ public class NorthboundEndpoint
      * @param resourceId the resource ID
      * @return the subscription ID
      */
-    public /*AccessMethodResponse*/ JSONObject subscribe(String serviceProviderId, 
+    public JSONObject subscribe(String serviceProviderId, 
     	String serviceId, String resourceId, String attributeId, 
     	NorthboundRecipient recipient, JSONArray conditions) 
     {
      	return session.subscribe(serviceProviderId, serviceId, resourceId,
      			recipient, conditions);
-     	
-//        Resource resource = this.resource(serviceProviderId, 
-//        		serviceId, resourceId);
-//
-//        if (resource == null) 
-//        {
-//            AccessMethodResponse errorResponse = AccessMethodResponse.error(
-//                this.mediator,UriUtils.getUri(new String[]{serviceProviderId,
-//                  serviceId,resourceId}), AccessMethod.Type.valueOf(
-//                    AccessMethod.SUBSCRIBE),  SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
-//                    "Cannot create the instance: resource doesn't exist",
-//                       null);
-//            
-//            return errorResponse;
-//        }
-//        SubscribeResponse response = resource.subscribe(attributeId,
-//                recipient, recipient.getConstraints());
-//
-//        return response;
     }
 
     /**
@@ -488,30 +360,11 @@ public class NorthboundEndpoint
      * @param attributeId the value to unsubscribe
      * @return success or error response
      */
-    public /*AccessMethodResponse*/ JSONObject unsubscribe(String serviceProviderId, 
+    public JSONObject unsubscribe(String serviceProviderId, 
     		String serviceId, String resourceId, String attributeId,
     		String subscriptionId) 
     {  	
-
      	return session.unsubscribe(serviceProviderId, serviceId, resourceId,
      			subscriptionId);
-     	
-//        Resource resource = this.resource(serviceProviderId, 
-//        		serviceId, resourceId);
-//
-//        if (resource == null) 
-//        {
-//            AccessMethodResponse errorResponse = AccessMethodResponse.error(
-//               this.mediator, UriUtils.getUri(new String[]{serviceProviderId,
-//                 serviceId,resourceId}),AccessMethod.Type.valueOf(
-//                	AccessMethod.UNSUBSCRIBE), SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
-//                    "Cannot create the instance: resource doesn't exist", 
-//                      null);
-//            
-//            return errorResponse;
-//        }
-//        UnsubscribeResponse response = resource.unsubscribe(
-//        		DataResource.VALUE, subscriptionId);
-//        return response;
     }
 }

@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-public class AttributeGetRequest<F> extends AttributeRequest<F> 
+public class AttributeGetRequest extends AttributeRequest
 {	
 	/**
 	 * @param mediator

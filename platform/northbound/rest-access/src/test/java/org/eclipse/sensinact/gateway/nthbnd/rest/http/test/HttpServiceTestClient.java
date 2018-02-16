@@ -20,7 +20,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.eclipse.sensinact.gateway.util.crypto.Base64;
+//import org.eclipse.sensinact.gateway.util.crypto.Base64;
 
 public class HttpServiceTestClient {
 
@@ -31,6 +31,7 @@ public class HttpServiceTestClient {
         ConnectionConfigurationImpl<SimpleResponse,SimpleRequest> builder = 
         		new ConnectionConfigurationImpl<SimpleResponse,SimpleRequest>();
         builder.setUri(url);
+        builder.setAccept("application/json");
         /*builder.addHeader("Authorization",
         		"Basic " + Base64.encodeBytes(
                 	"cea:sensiNact_team".getBytes()));*/

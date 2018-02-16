@@ -10,16 +10,17 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
-public class ServiceProviderRequest<F> extends ServiceProvidersRequest<F>
+public class ServiceProviderRequest extends ServiceProvidersRequest
 {	
 	private String serviceProvider;
 	
 	public ServiceProviderRequest(NorthboundMediator mediator,
-			String serviceProvider)
+			String serviceProvider, FilteringDefinition filterDefinition)
 	{
-		super(mediator);
+		super(mediator, filterDefinition);
     	this.serviceProvider = serviceProvider;
 		if(this.serviceProvider == null)
 		{

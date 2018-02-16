@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-public abstract class AttributeRequest<F> extends ResourceRequest<F> 
+public abstract class AttributeRequest extends ResourceRequest
 {	
 	private String attribute;
 

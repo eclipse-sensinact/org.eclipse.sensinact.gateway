@@ -15,59 +15,105 @@ import java.io.IOException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.json.JSONObject;
-
-import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
+import org.json.JSONObject;
 
-public class HttpRestAccess extends NorthboundAccess
+/**
+ *
+ * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ */
+public class HttpRestAccess extends NorthboundAccess<JSONObject, HttpRestAccessRequest>
 {
 	public static String JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 	public static String TEXT_CONTENT_TYPE = "text/plain; charset=utf-8";
-	
+
 	private HttpServletResponseWrapper response;
 
-	public HttpRestAccess(HttpServletResponseWrapper response)
+	/**
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 */
+	public HttpRestAccess(
+		HttpRestAccessRequest request, 
+		HttpServletResponseWrapper response)
 			throws IOException
 	{
+		super(request);
 		this.response = response;
 	}
 	
 	/**
 	 * @inheritDoc
 	 *
-	 * @see NorthboundAccess#
-	 * respond(NorthboundRequestBuilder)
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess#
+	 * respond(org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator, org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder)
 	 */
 	@Override
-	protected boolean respond(NorthboundRequestBuilder<JSONObject> builder) 
-			throws IOException 
+	protected boolean respond(NorthboundMediator mediator,
+	        NorthboundRequestBuilder<JSONObject> builder) 
+	        		throws IOException 
 	{	
+		String httpMethod = super.request.getMethod();
+		String snaMethod = builder.getMethod();
+		
+		switch(snaMethod)
+		{
+			case "DESCRIBE":
+			case "GET":
+				if(!"GET".equals(httpMethod))
+				{
+					sendError(400, "Invalid HTTP method");
+					return false;
+				}
+				break;
+			case "ACT":
+			case "UNSUBSCRIBE":
+			case "SET":
+			case "SUBSCRIBE":
+				if(!"POST".equals(httpMethod))
+				{
+					sendError(400, "Invalid HTTP method");
+					return false;
+				}
+				break;
+			default:
+				break;
+		}
 		response.addHeader("X-Auth-Token", super.endpoint.getSessionToken());
 		
-		NorthboundRequest<JSONObject> nthbndRequest = builder.build();	
+		NorthboundRequest nthbndRequest = builder.build();
 		if(nthbndRequest == null)
 		{
 			sendError(500, "Internal server error");
 			return false;
 		}
-		JSONObject result = super.endpoint.execute(nthbndRequest, 
+		JSONObject result = super.endpoint.execute(nthbndRequest,
 				new JSONResponseFormat(mediator));
-
 		if(result == null)
 		{
 			sendError(500, "Internal server error");
 			return false;
 		}	
-		result.put("rid", super.rid);
-		
+		result.put("rid", builder.getRequestId());
 		String resultStr = result.toString();
-		byte[] resultBytes = resultStr.getBytes("UTF-8");
-		int length = -1;
-		
+		byte[] resultBytes;
+
+		String acceptEncoding = super.request.getHeader("Accept-Encoding");
+        if(acceptEncoding != null && acceptEncoding.contains("gzip")) 
+        {
+            resultBytes = NorthboundAccess.compress(resultStr);
+            response.setHeader("Content-Encoding", "gzip");
+            
+        }  else
+        {
+        	resultBytes = resultStr.getBytes("UTF-8");
+        }
+		int length = -1;		
 		if((length = resultBytes==null?0:resultBytes.length) > 0)
 		{
 			response.setContentType(JSON_CONTENT_TYPE);
@@ -85,7 +131,7 @@ public class HttpRestAccess extends NorthboundAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see NorthboundAccess#
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess#
 	 * sendError(int, java.lang.String)
 	 */
 	@Override
@@ -94,15 +140,5 @@ public class HttpRestAccess extends NorthboundAccess
 			throws IOException 
 	{
 		this.response.setStatus(statusCode, message);
-	}
-
-	/**
-	 * Returns the called {@link AccessMethod.Type}
-	 * 
-	 * @return the called {@link AccessMethod.Type}
-	 */
-	public AccessMethod.Type getMethod() 
-	{
-		return super.method;
 	}
 }

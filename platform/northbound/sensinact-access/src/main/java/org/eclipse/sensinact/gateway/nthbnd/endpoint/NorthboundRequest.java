@@ -20,8 +20,9 @@ import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
+import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 
-public abstract class NorthboundRequest<F> implements PathElement, Nameable
+public abstract class NorthboundRequest implements PathElement, Nameable
 {		
 	public static final String ROOT = "/sensinact";
 
@@ -110,7 +111,7 @@ public abstract class NorthboundRequest<F> implements PathElement, Nameable
 	{
 		if(name == null || name.length() == 0)
 		{	
-			name = NorthboundAccess.RAW_QUERY_PARAMETER;
+			name = DefaultNorthboundRequestHandler.RAW_QUERY_PARAMETER;
 			
 		} else
 		{
@@ -130,6 +131,7 @@ public abstract class NorthboundRequest<F> implements PathElement, Nameable
 	 */
 	protected abstract String getMethod();
 
+	protected FilteringDefinition filterDefinition;
 	protected NorthboundMediator mediator;
 
 	/**
@@ -137,9 +139,11 @@ public abstract class NorthboundRequest<F> implements PathElement, Nameable
 	 * @param responseFormat
 	 * @param authentication
 	 */
-	public NorthboundRequest(NorthboundMediator mediator)
+	public NorthboundRequest(NorthboundMediator mediator, 
+		FilteringDefinition filterDefinition)
 	{
 		this.mediator = mediator;
+		this.filterDefinition = filterDefinition;
 	}
 	
 	/** 
@@ -154,9 +158,11 @@ public abstract class NorthboundRequest<F> implements PathElement, Nameable
 	}
 	
 	/**
-	 * @return
+	 * @inheritDoc
+	 *
+	 * @see NorthboundRequest#getExecutionArguments()
 	 */
-	protected Argument[] getExecutionArguments()
+	protected Argument[] getExecutionArguments() 
 	{
 		return null;
 	}

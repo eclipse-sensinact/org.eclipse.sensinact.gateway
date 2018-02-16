@@ -68,7 +68,8 @@ implements Recipient
 	 * @see org.eclipse.sensinact.gateway.common.primitive.JSONable#getJSON()
 	 */
 	@Override
-	public String getJSON() {
+	public String getJSON() 
+	{
 		return null;
 	}
 

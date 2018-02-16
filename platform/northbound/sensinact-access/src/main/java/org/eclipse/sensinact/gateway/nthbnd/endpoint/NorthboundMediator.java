@@ -13,11 +13,10 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Core;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
-import org.eclipse.sensinact.gateway.core.security.Session;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
 /**
  *
@@ -91,30 +90,16 @@ public class NorthboundMediator extends Mediator
 	 * @param authentication
 	 * @return the session associated to the credentials
 	 */
-	public Session getSession(Authentication<?> authentication) throws InvalidCredentialException {
-		ServiceReference<Core> reference = super.getContext().getServiceReference(Core.class);
-
-		Core core;
-
-		if(reference != null && (core = super.getContext().getService(reference)) != null) {
-			try {
-				return new SessionExecutor(authentication).execute(core);
-			} catch (InvalidCredentialException e) {
-				throw e;
-			} catch (Exception e) {
-				super.error(e);
-			} finally {
-				 super.getContext().ungetService(reference);
-			}
-		}
-
-		return null;
+	public Session getSession(Authentication<?> authentication) throws InvalidCredentialException 
+	{	
+		return super.callService(Core.class, new SessionExecutor(authentication));
 	}
 
 	/**
 	 * @return
 	 */
-	public Session getSession() throws InvalidCredentialException {
+	public Session getSession() throws InvalidCredentialException 
+	{
 		return getSession(null);
 	}
 }

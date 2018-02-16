@@ -86,6 +86,8 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
 		 "/providers/slider/services/cursor/resources/position/SUBSCRIBE",
 		 "{\"parameters\" : [{\"name\":\"callback\", \"type\":\"string\",\"value\":\"http://127.0.0.1:54460\"}]}",
 		 "POST");
+
+		System.out.println(simulated);
 		
         response = new JSONObject(simulated);
         
@@ -100,7 +102,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
 		
         callback.setAvailable(false);
         slider.move(2);        
-		String message = waitForAvailableMessage(5000);
+		String message = waitForAvailableMessage(10000);
 		Assert.assertNotNull(message);
 
         response = new JSONObject(message);        
@@ -109,7 +111,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
 
         callback.setAvailable(false);
         slider.move(0);
-		message = waitForAvailableMessage(5000);
+		message = waitForAvailableMessage(10000);
 		Assert.assertNotNull(message);
 		
         response = new JSONObject(message);        
@@ -118,7 +120,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
 
         callback.setAvailable(false);
         slider.move(125);
-		message = waitForAvailableMessage(5000);
+		message = waitForAvailableMessage(10000);
 		Assert.assertNotNull(message);
 
         response = new JSONObject(message);        
@@ -130,7 +132,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
 	     "{\"parameters\" : [{\"name\":\"subscriptionId\", \"type\":\"string\", \"value\":\""+subscriptionId+"\"}]}",
 	     "POST");
 		
-        //System.out.println(simulated);
+        System.out.println(simulated);
 
         response = new JSONObject(simulated);        
         assertTrue(response.get("statusCode").equals(200));
@@ -138,7 +140,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
 
         callback.setAvailable(false);
         slider.move(150);
-		message = waitForAvailableMessage(5000);
+		message = waitForAvailableMessage(10000);
 
         Assert.assertNull(message); 
 	}	
@@ -161,7 +163,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
         	+ "[{\"operator\":\"<\",\"operand\":200, \"type\":\"int\", \"complement\":false}]}]}",
         	"POST");
         
-        //System.out.println(simulated);
+        System.out.println(simulated);
         
         response = new JSONObject(simulated);
         
@@ -209,7 +211,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
         	"{\"parameters\" : [{\"name\":\"subscriptionId\", \"type\":\"string\", \"value\":\""+subscriptionId+"\"}]}",
         	"POST");
         
-        //System.out.println(simulated);
+        System.out.println(simulated);
 
         response = new JSONObject(simulated);
         
@@ -275,7 +277,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
         	"/providers/slider/services/cursor/resources/position/UNSUBSCRIBE",
         	"[{\"name\":\"subscriptionId\", \"type\":\"string\", \"value\":\""+subscriptionId+"\"}]");
         
-        //System.out.println(simulated);
+        System.out.println(simulated);
 
         response =new JSONObject(simulated);
         
@@ -307,7 +309,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
         	"[{\"name\":\"conditions\",\"type\":\"array\",\"value\":"
         	+ "[{\"operator\":\"<\",\"operand\":200, \"type\":\"int\", \"complement\":false}]}]");
         
-        //System.out.println(simulated);
+        System.out.println(simulated);
         
         response = new JSONObject(simulated);
         
@@ -356,7 +358,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
         	"/providers/slider/services/cursor/resources/position/UNSUBSCRIBE",
         	"[{\"name\":\"subscriptionId\", \"type\":\"string\", \"value\":\""+subscriptionId+"\"}]");
         
-        //System.out.println(simulated);
+        System.out.println(simulated);
 
         response = new JSONObject(simulated);
         

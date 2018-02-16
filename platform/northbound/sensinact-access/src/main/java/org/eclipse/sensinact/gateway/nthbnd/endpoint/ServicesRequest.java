@@ -10,14 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
-public class ServicesRequest<F> extends ServiceProviderRequest<F>
+public class ServicesRequest extends ServiceProviderRequest
 {
-	public ServicesRequest(NorthboundMediator mediator,
-			String serviceProvider) 
+	public ServicesRequest(NorthboundMediator mediator, String serviceProvider, 
+			FilteringDefinition filterDefinition) 
 	{
-		super(mediator, serviceProvider);
+		super(mediator, serviceProvider, filterDefinition);
 	}
 
 	/**
@@ -52,6 +53,31 @@ public class ServicesRequest<F> extends ServiceProviderRequest<F>
 	protected String getMethod()
 	{
 		return "servicesList";
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see NorthboundRequest#getExecutionArguments()
+	 */
+	@Override
+	protected Argument[] getExecutionArguments() 
+	{
+		if(this.getClass() == ServicesRequest.class 
+				&& super.filterDefinition!=null)
+		{
+			Argument[] superArguments = super.getExecutionArguments();
+			int length = superArguments==null?0:superArguments.length;
+			Argument[] arguments = new Argument[length+1];
+			if(length > 0)
+			{
+				System.arraycopy(superArguments, 0, arguments, 0, length);
+			}
+			arguments[length] = new Argument(FilteringDefinition.class, 
+					this.filterDefinition);
+			return arguments;
+		}
+		return super.getExecutionArguments();
 	}
 
 }

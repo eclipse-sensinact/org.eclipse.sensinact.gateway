@@ -36,8 +36,8 @@ import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.CorsFilter;
  */
 public class Activator extends AbstractActivator<NorthboundMediator>
 {
-	private static final String HTTP_ROOT = "/sensinact";
-	private static final String WS_ROOT = "/ws/sensinact";
+	private static final String HTTP_ROOT = "/";
+	private static final String WS_ROOT = "/ws";
 	private static final String CORS_HEADER = "org.eclipse.sensinact.http.corsheader";
 
 

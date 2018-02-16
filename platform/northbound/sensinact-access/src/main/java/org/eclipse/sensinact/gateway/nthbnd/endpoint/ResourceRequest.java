@@ -12,7 +12,7 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
-public class ResourceRequest<F> extends ResourcesRequest<F>
+public class ResourceRequest extends ResourcesRequest
 {
 	private String resource;
 
@@ -26,7 +26,7 @@ public class ResourceRequest<F> extends ResourcesRequest<F>
 			String serviceProvider,
 	        String service, String resource)
 	{
-		super(mediator, serviceProvider, service);
+		super(mediator, serviceProvider, service, null);
 		this.resource = resource;
 		if(this.resource == null)
 		{

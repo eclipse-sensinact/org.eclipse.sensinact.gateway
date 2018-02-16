@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-public class ResourceActRequest<F> extends ResourceRequest<F>
+public class ResourceActRequest extends ResourceRequest
 {
 	private Object[] arguments;
 

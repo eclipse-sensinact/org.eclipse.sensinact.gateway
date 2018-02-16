@@ -31,10 +31,7 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 /**
  * CORS Filter
  */
-@WebFilter(
-		asyncSupported=true,
-		urlPatterns = {"/*"},
-		filterName="CORS")
+@WebFilter(asyncSupported=true)
 public class CorsFilter implements Filter 
 {
     private static final String OPTIONS = "OPTIONS";

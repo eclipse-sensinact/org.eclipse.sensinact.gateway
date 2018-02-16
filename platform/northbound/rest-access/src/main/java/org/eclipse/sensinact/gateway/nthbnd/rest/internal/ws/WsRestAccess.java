@@ -12,18 +12,20 @@ package org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws;
 
 import java.io.IOException;
 
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.core.Filtering;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
+import org.json.JSONObject;
 
 /**
  * Extended {@link NorthbundAccess} dedicated to websocket connections
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class WsRestAccess extends NorthboundAccess
+public class WsRestAccess extends NorthboundAccess<JSONObject, WsRestAccessRequest>
 {
 	/**
 	 * The {@link WebSocketWrapper} held by this WsRestAccess 
@@ -36,27 +38,29 @@ public class WsRestAccess extends NorthboundAccess
 	 * @param socket the {@link WebSocketWrapper} held by 
 	 * the WsRestAccess to be instantiated
 	 */
-	public WsRestAccess(WebSocketWrapper socket)
+	public WsRestAccess(WsRestAccessRequest request, WebSocketWrapper socket)
 	{
+		super(request);
 		this.socket = socket;
 	}
 
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess#respond(org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder)
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.AbstractNorthboundRequestHandler#respond(org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder)
 	 */
 	@Override
-	protected boolean respond(NorthboundRequestBuilder<JSONObject> builder) 
+	protected boolean respond(NorthboundMediator mediator, 
+			NorthboundRequestBuilder<JSONObject> builder) 
 			throws IOException 
 	{
-		NorthboundRequest<JSONObject> nthbndRequest = builder.build();
+		NorthboundRequest nthbndRequest = builder.build();
 		if(nthbndRequest == null)
 		{
 			sendError(500, "Internal server error");
 			return false;
 		}
-		JSONObject result = this.endpoint.execute(nthbndRequest, 
+		JSONObject result = this.endpoint.execute(nthbndRequest,
 				new JSONResponseFormat(mediator));
 		
 		if(result == null)
@@ -65,7 +69,32 @@ public class WsRestAccess extends NorthboundAccess
 			return false;
 		}
 		result.put("X-Auth-Token", super.endpoint.getSessionToken());
-		result.put("rid", super.rid);
+		result.put("rid", builder.getRequestId());
+		
+//		byte[] resultBytes;
+//
+//		String acceptEncoding = super.request.getHeader("Accept-Encoding");
+//        if(acceptEncoding != null && acceptEncoding.contains("gzip")) 
+//        {
+//            resultBytes = NorthboundAccess.compress(resultStr);
+//            response.setHeader("Content-Encoding", "gzip");
+//            
+//        }  else
+//        {
+//        	resultBytes = resultStr.getBytes("UTF-8");
+//        }
+//		int length = -1;
+//		
+//		if((length = resultBytes==null?0:resultBytes.length) > 0)
+//		{
+//			response.setContentType(JSON_CONTENT_TYPE);
+//			response.setContentLength(resultBytes.length);
+//			response.setBufferSize(resultBytes.length);
+//			
+//			ServletOutputStream output = this.response.getOutputStream();
+//			output.write(resultBytes);	
+//		}
+//		response.setStatus(result.getInt("statusCode"));
 		
 		this.socket.send(new String(result.toString().getBytes("UTF-8")));
 		return true;
@@ -75,7 +104,7 @@ public class WsRestAccess extends NorthboundAccess
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess#sendError(int, java.lang.String)
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.AbstractNorthboundRequestHandler#sendError(int, java.lang.String)
 	 */
 	@Override
 	protected void sendError(int i, String string) throws IOException 

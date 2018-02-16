@@ -31,8 +31,7 @@ import org.json.JSONObject;
 @WebSocket(maxTextMessageSize = 64 * 1024)
 public class WsServiceTestClient implements Runnable
 {
-
-	String destUri = "ws://localhost:8093/ws/sensinact";
+	String destUri = "ws://localhost:8093/ws";
 	WebSocketClient client = null;
 	Session session;
 	AtomicBoolean available;

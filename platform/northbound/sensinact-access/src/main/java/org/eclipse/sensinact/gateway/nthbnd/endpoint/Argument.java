@@ -16,7 +16,6 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
  */
 public class Argument
 {
-
 	//********************************************************************//
 	//						NESTED DECLARATIONS			  			      //
 	//********************************************************************//

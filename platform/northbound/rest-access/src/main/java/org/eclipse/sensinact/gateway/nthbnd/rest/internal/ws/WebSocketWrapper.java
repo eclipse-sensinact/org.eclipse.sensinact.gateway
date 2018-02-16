@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -33,7 +34,6 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 @WebSocket(maxTextMessageSize = 64 * 1024)
 public class WebSocketWrapper
 {
-
 	protected Session session;
 	protected NorthboundMediator mediator;
 	protected WebSocketWrapperPool pool;
@@ -93,9 +93,8 @@ public class WebSocketWrapper
 			WsRestAccessRequest wrapper = new WsRestAccessRequest(
 					mediator, this, jsonObject);
 			
-			WsRestAccess restAccess = new WsRestAccess(this);
-			restAccess.init(wrapper);
-			restAccess.handle();
+			WsRestAccess restAccess = new WsRestAccess(wrapper, this);
+			restAccess.proceed();
 			
 		} catch(JSONException e)
 		{
@@ -111,6 +110,7 @@ public class WebSocketWrapper
 							).toString());
 		} catch (Exception e) 
 		{
+			e.printStackTrace();
 			this.mediator.error(e);
 			this.send(new JSONObject().put("statusCode", 500
 					).put("message","Internal server error"
@@ -156,6 +156,31 @@ public class WebSocketWrapper
         }
 	}
 
+	/**
+	 * @param message
+	 */
+	protected void send(byte[] message)
+	{
+		if(this.session == null)
+		{
+			return;
+		}
+		try 
+		{
+           Future<Void> future = this.session.getRemote(
+        	).sendBytesByFuture(ByteBuffer.wrap(message));
+           
+           future.get(1, TimeUnit.SECONDS);
+            
+        } catch (Exception e) 
+        {
+            this.mediator.error(new StringBuilder().append(
+            	"Session ").append(session.getLocalAddress()).append(
+            	"seems to be invalid, removing from the pool."
+            		).toString(),e);      	
+        }
+	}
+	
 	/**
 	 * @return
 	 */

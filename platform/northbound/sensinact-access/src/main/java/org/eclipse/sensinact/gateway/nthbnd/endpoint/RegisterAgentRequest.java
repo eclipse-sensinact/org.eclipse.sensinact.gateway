@@ -19,7 +19,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 
-public class RegisterAgentRequest<F> extends NorthboundRequest<F> 
+public class RegisterAgentRequest extends NorthboundRequest
 {	
 	private NorthboundRecipient recipient;
 	private JSONArray constraints;
@@ -41,7 +41,7 @@ public class RegisterAgentRequest<F> extends NorthboundRequest<F>
 		String serviceProvider, String service, NorthboundRecipient recipient, 
 		SnaFilter filter)
 	{
-		super(mediator);
+		super(mediator, null);
 		this.serviceProvider = serviceProvider;
 		this.service = service;
 		this.recipient = recipient;

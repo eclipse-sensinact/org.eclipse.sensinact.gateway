@@ -24,7 +24,7 @@ import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
@@ -32,9 +32,8 @@ import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONObject;
 
 public class HttpRestAccessRequest extends HttpServletRequestWrapper 
-implements NorthboundAccessWrapper
-{
-	
+implements NorthboundRequestWrapper
+{	
 	private NorthboundMediator mediator;
 	private Map<String,List<String>> queryMap;
 	private Authentication<?> authentication;
@@ -63,7 +62,8 @@ implements NorthboundAccessWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getMediator()
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#
+	 * getMediator()
 	 */
 	@Override
 	public NorthboundMediator getMediator() 
@@ -74,7 +74,8 @@ implements NorthboundAccessWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getQueryMap()
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#
+	 * getQueryMap()
 	 */
 	@Override
 	public Map<String,List<String>> getQueryMap() 
@@ -99,7 +100,8 @@ implements NorthboundAccessWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getContent()
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#
+	 * getContent()
 	 */
 	@Override
 	public String getContent() 
@@ -124,7 +126,8 @@ implements NorthboundAccessWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getAuthentication()
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#
+	 * getAuthentication()
 	 */
 	@Override
 	public Authentication<?> getAuthentication() 
@@ -149,32 +152,35 @@ implements NorthboundAccessWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getRequestID(org.eclipse.sensinact.gateway.core.method.Parameter[])
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#
+	 * getRequestID(org.eclipse.sensinact.gateway.core.method.Parameter[])
 	 */
 	@Override
 	public String getRequestID(Parameter[] parameters)
 	{
+		String rid = null;
+		
 		int index = 0;
 		int length = parameters==null?0:parameters.length;
 		for(;index < length; index++)
 		{
 			if("rid".equals(parameters[index].getName()))
 			{
-				return (String) parameters[index].getValue();
+				rid = (String) parameters[index].getValue();
 			}
 		}
-		List<String> list = getQueryMap().get("rid");
-		if(list!=null && list.size()>0)
+		if(rid == null)
 		{
-			return list.get(0);
+			rid = super.getHeader("rid");
 		}
-		return null;
+		return rid;
 	}
 	
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#createRecipient(org.eclipse.sensinact.gateway.core.method.Parameter[])
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#
+	 * createRecipient(org.eclipse.sensinact.gateway.core.method.Parameter[])
 	 */
 	@Override
 	public NorthboundRecipient createRecipient(Parameter[] parameters)

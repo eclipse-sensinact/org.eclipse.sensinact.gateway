@@ -10,9 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
-public class UnregisterAgentRequest<F> extends NorthboundRequest<F> 
+public class UnregisterAgentRequest extends NorthboundRequest 
 {	
 	private String agentId;
 	
@@ -22,9 +23,10 @@ public class UnregisterAgentRequest<F> extends NorthboundRequest<F>
 	 * @param mediator
 	 * @param agentId
 	 */
-	public UnregisterAgentRequest(NorthboundMediator mediator, String agentId)
+	public UnregisterAgentRequest(NorthboundMediator mediator, 
+			String agentId)
 	{
-		super(mediator);
+		super(mediator, null);
 		this.agentId = agentId;
 	}
 

@@ -22,12 +22,12 @@ import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 
-public class WsRestAccessRequest implements NorthboundAccessWrapper 
+public class WsRestAccessRequest implements NorthboundRequestWrapper 
 {
 	private NorthboundMediator mediator;
 	private JSONObject request;
@@ -46,7 +46,7 @@ public class WsRestAccessRequest implements NorthboundAccessWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getMediator()
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getMediator()
 	 */
 	@Override
 	public NorthboundMediator getMediator() 
@@ -57,7 +57,7 @@ public class WsRestAccessRequest implements NorthboundAccessWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getRequestID(org.eclipse.sensinact.gateway.core.method.Parameter[])
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getRequestID(org.eclipse.sensinact.gateway.core.method.Parameter[])
 	 */
 	@Override
 	public String getRequestID(Parameter[] parameters) 
@@ -65,10 +65,14 @@ public class WsRestAccessRequest implements NorthboundAccessWrapper
 		String rid = (String) request.opt("rid");
 		if(rid == null)
 		{
-			List<String> list = getQueryMap().get("rid");
-			if(list!=null && list.size()>0)
+			int index = 0;
+			int length = parameters==null?0:parameters.length;
+			for(;index < length; index++)
 			{
-				rid = list.get(0);
+				if("rid".equals(parameters[index].getName()))
+				{
+					rid = (String) parameters[index].getValue();
+				}
 			}
 		}
 		return rid;
@@ -77,7 +81,7 @@ public class WsRestAccessRequest implements NorthboundAccessWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getRequestURI()
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getRequestURI()
 	 */
 	@Override
 	public String getRequestURI() 
@@ -90,7 +94,7 @@ public class WsRestAccessRequest implements NorthboundAccessWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getQueryMap()
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getQueryMap()
 	 */
 	@Override
 	public Map<String,List<String>> getQueryMap() 
@@ -115,7 +119,7 @@ public class WsRestAccessRequest implements NorthboundAccessWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getContent()
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getContent()
 	 */
 	@Override
 	public String getContent() 
@@ -136,7 +140,7 @@ public class WsRestAccessRequest implements NorthboundAccessWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#getAuthentication()
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getAuthentication()
 	 */
 	@Override
 	public Authentication<?> getAuthentication() 
@@ -164,7 +168,7 @@ public class WsRestAccessRequest implements NorthboundAccessWrapper
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccessWrapper#createRecipient(org.eclipse.sensinact.gateway.core.method.Parameter[])
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#createRecipient(org.eclipse.sensinact.gateway.core.method.Parameter[])
 	 */
 	@Override
 	public NorthboundRecipient createRecipient(Parameter[] parameters)
