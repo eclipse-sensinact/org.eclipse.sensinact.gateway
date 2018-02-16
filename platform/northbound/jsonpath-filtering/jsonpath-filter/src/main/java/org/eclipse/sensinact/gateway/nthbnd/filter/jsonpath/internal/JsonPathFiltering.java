@@ -5,8 +5,8 @@ import java.util.Deque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Filtering;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONObject;
 
@@ -19,7 +19,6 @@ import com.jayway.jsonpath.JsonPath;
  */
 public class JsonPathFiltering implements Filtering
 {
-
 	//********************************************************************//
 	//						NESTED DECLARATIONS			  			      //
 	//********************************************************************//
@@ -40,12 +39,12 @@ public class JsonPathFiltering implements Filtering
 
     private final ExecutorService ex = Executors.newFixedThreadPool(1);
 
-	private NorthboundMediator mediator;
+	private Mediator mediator;
 
 	/**
 	 * @param mediator
 	 */
-	public JsonPathFiltering(NorthboundMediator mediator)
+	public JsonPathFiltering(Mediator mediator)
 	{
 		this.mediator = mediator;
 	}
