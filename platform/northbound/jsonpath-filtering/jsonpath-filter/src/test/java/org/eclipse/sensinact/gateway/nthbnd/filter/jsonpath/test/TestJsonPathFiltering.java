@@ -40,7 +40,7 @@ public class TestJsonPathFiltering extends MidOSGiTest
 	//						STATIC DECLARATIONS							  //
 	//********************************************************************//
 	
-	protected static final String HTTP_ROOTURL = "http://localhost:8093";
+	protected static final String HTTP_ROOTURL = "http://localhost:8095";
 	protected static final String WS_ROOTURL = "/sensinact";
 	
 
@@ -120,7 +120,7 @@ public class TestJsonPathFiltering extends MidOSGiTest
 		configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
 		configuration.put("org.eclipse.sensinact.gateway.security.jks.password","sensiNact_team");
 
-		configuration.put("org.osgi.service.http.port", "8093");
+		configuration.put("org.osgi.service.http.port", "8095");
 		configuration.put("org.apache.felix.http.jettyEnabled", "true");
 		configuration.put("org.apache.felix.http.whiteboardEnabled", "true");
 	}
