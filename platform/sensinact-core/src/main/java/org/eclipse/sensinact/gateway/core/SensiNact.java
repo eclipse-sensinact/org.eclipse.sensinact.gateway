@@ -1582,10 +1582,6 @@ public class SensiNact implements Core
 	//						STATIC DECLARATIONS		      				  //
 	//********************************************************************//
 
-	private static final String TARGET_NOT_FOUND= "##UNFOUND##";
-
-	private static final String TARGET_UNREACHABLE= "##UNAUTHORIZED##";
-	
 	/**
 	 * Retrieves or creates a namespace for the instance of sensiNact whose 
 	 * {@link Mediator} is passed as parameter
@@ -2967,7 +2963,7 @@ public class SensiNact implements Core
 			builder.append(filterDefinition.filter);
 			builder.append("\"},");
 			
-			result = SensiNact.this.<String>callPostFilter(
+			result = SensiNact.this.callPostFilter(
 				filterDefinition.type, filterDefinition.filter, 
 				new StringBuilder().append("[").append(
 				content.toString()).append("]"
@@ -2983,6 +2979,7 @@ public class SensiNact implements Core
 			builder.append(content.toString());
 			builder.append("]");
 		}
+		builder.append(",\"statusCode\":200");
 		builder.append("}");
 		return builder.toString();
 	}
