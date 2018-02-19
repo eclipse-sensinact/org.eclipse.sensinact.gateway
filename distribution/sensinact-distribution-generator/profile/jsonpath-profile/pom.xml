@@ -25,36 +25,6 @@
     <packaging>pom</packaging>
 
     <name>sensiNact IoT Gateway - sensiNact Runtime (${project.artifactId} bridge dependencies)</name>
-
-	<profiles>
-		<profile>
-			<id>withJsonPath</id>
-			<activation>
-				<file>
-				<exists>${basedir}/../../../../platform/northbound/json-path/target/json-path-2.4.0.jar</exists>
-				</file>
-			</activation>
-			<dependencies>			
-		    	<dependency>
-		    		<groupId>com.jayway.jsonpath</groupId>
-		    		<artifactId>json-path</artifactId>
-		    		<version>2.4.0</version>
-		            <scope>system</scope>
-		            <systemPath>${basedir}/../../../../platform/northbound/json-path/target/json-path-2.4.0.jar</systemPath>
-		    	</dependency>		    	
-		        <dependency>
-		            <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-		            <artifactId>json-provider-minimal</artifactId>
-		            <version>${project.version}</version>
-		        </dependency>
-		        <dependency>
-		            <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-		            <artifactId>jsonpath-filter</artifactId>
-		            <version>${project.version}</version>
-		        </dependency>
-			</dependencies>
-		</profile>
-	</profiles>
 	
     <build>
         <plugins>
@@ -78,7 +48,70 @@
                         <inherited>false</inherited>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>            		
+	        <plugin>
+	          <groupId>org.codehaus.gmaven</groupId>
+	          <artifactId>groovy-maven-plugin</artifactId>
+	          <executions>
+	            <execution>
+	              <id>search-dependency</id>	              
+	              <phase>generate-resources</phase>
+	              <goals>
+	                <goal>execute</goal>
+	              </goals>
+	              <configuration>
+	                <defaults>
+	                  <name>search-dependency</name>
+	                </defaults>
+	                <source>	              
+			            String basedir = project.basedir.absolutePath.replace('\\','/');  
+		                File parent = new File(basedir).getParentFile().getParentFile().getParentFile().getParentFile();
+		                		                                
+		                File a = new File(parent, "platform/northbound/jsonpath-filtering/json-path/target/json-path-2.4.0.jar");	
+		                File b = new File(parent, "platform/northbound/jsonpath-filtering/json-provider-minimal/target/json-provider-minimal-1.5-SNAPSHOT.jar");
+		                File c = new File(parent, "platform/northbound/jsonpath-filtering/jsonpath-filter/target/jsonpath-filter-1.5-SNAPSHOT.jar");
+                            
+		                if((!a.exists())||(!b.exists())||(!c.exists()))
+		                {	              	
+		                	project.getCompileSourceRoots().clear();
+		                	project.getTestCompileSourceRoots().clear();
+		                	
+		                } else
+		                {   		                
+			                File dir = new File(new File(basedir),'target/sensinact/load/json-path');
+			                if(!dir.exists())
+			                {
+			                	dir.mkdirs();		                	
+			                }						             
+			                def newFile = new File(dir,'json-path-2.4.0.jar');
+						    newFile.createNewFile(); 
+	                             
+	                        output = newFile.newOutputStream();
+							a.newInputStream().eachByte(1024, 
+					         {data, lenth -> output.write(data, 0, lenth)});
+							output.close();
+							
+							newFile = new File(dir,'json-provider-minimal-1.5-SNAPSHOT.jar');
+						    newFile.createNewFile();
+							  
+	                        output = newFile.newOutputStream();
+							b.newInputStream().eachByte(1024, 
+					         {data, lenth -> output.write(data, 0, lenth)});
+							output.close();
+							
+							newFile = new File(dir,'jsonpath-filter-1.5-SNAPSHOT.jar');
+						    newFile.createNewFile();
+							  
+	                        output = newFile.newOutputStream();
+							c.newInputStream().eachByte(1024, 
+					         {data, lenth -> output.write(data, 0, lenth)});
+							output.close();
+		                }
+	                </source>
+	              </configuration>
+	            </execution>
+	          </executions>
+	        </plugin>
         </plugins>
     </build>
 </project>
