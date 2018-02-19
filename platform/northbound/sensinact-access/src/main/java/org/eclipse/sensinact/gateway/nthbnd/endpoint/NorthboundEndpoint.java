@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import java.lang.reflect.Method;
 
-import org.eclipse.sensinact.gateway.core.Filtering;
 import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
@@ -60,7 +59,7 @@ public class NorthboundEndpoint
 	 */
 	public String getSessionToken()
 	{
-		return this.session.getId();
+		return this.session.getSessionId();
 	}
 	
 	/**
@@ -128,7 +127,7 @@ public class NorthboundEndpoint
      * @return the JSONObject formated list of all the 
      * model instances' hierarchies
      */
-    public JSONObject all()
+    public String all()
     {
     	return this.all(null,null);
     }
@@ -143,7 +142,7 @@ public class NorthboundEndpoint
      * model instances' hierarchies according to the 
      * specified filter
      */
-    public JSONObject all(String filter)
+    public String all(String filter)
     {
     	return this.all(filter, null);
     }
@@ -158,30 +157,18 @@ public class NorthboundEndpoint
      * model instances' hierarchies according to the 
      * specified filter
      */
-    public JSONObject all(String filter, FilteringDefinition 
+    public String all(String filter, FilteringDefinition 
     		filterDefinition)
     {
     	return session.getAll(filter, filterDefinition);
     }
 
-//	/**
-//     * Gets the all JSONObject formated list of service 
-//     * providers with their location
-//     * 
-//     * @return the JSONObject formated list of service 
-//     * providers and their location
-//     */
-//    public JSONObject locations()
-//    {
-//    	return session.getLocations();
-//    }
-    
    	/**
      * Get the list of service providers and returns it
      * 
      * @return the response containing the information
      */
-    public JSONObject serviceProvidersList()
+    public String serviceProvidersList()
     {
    	    return this.serviceProvidersList(null);
     }
@@ -191,7 +178,7 @@ public class NorthboundEndpoint
      * 
      * @return the response containing the information
      */
-    public JSONObject serviceProvidersList(FilteringDefinition 
+    public String serviceProvidersList(FilteringDefinition 
     		filterDefinition)
     {
     	return session.getProviders(filterDefinition);
@@ -203,7 +190,7 @@ public class NorthboundEndpoint
      * @param serviceProviderId the service provider ID
      * @return the response containing the information
      */
-    public JSONObject serviceProviderDescription(String serviceProviderId)
+    public String serviceProviderDescription(String serviceProviderId)
     {
     	return session.getProvider(serviceProviderId);
     }
@@ -214,7 +201,7 @@ public class NorthboundEndpoint
      * @param serviceProviderId the service provider ID
      * @return the response containing the information
      */
-    public JSONObject servicesList(String serviceProviderId) 
+    public String servicesList(String serviceProviderId) 
     {
     	return this.servicesList(serviceProviderId,null);
     }
@@ -225,7 +212,7 @@ public class NorthboundEndpoint
      * @param serviceProviderId the service provider ID
      * @return the response containing the information
      */
-    public JSONObject servicesList(String serviceProviderId, 
+    public String servicesList(String serviceProviderId, 
     		FilteringDefinition filterDefinition) 
     {
     	return session.getServices(serviceProviderId, 
@@ -239,7 +226,7 @@ public class NorthboundEndpoint
      * @param serviceId the service ID
      * @return the response containing the information
      */
-    public JSONObject serviceDescription(
+    public String serviceDescription(
     		String serviceProviderId, String serviceId)
     {
     	return session.getService(serviceProviderId, serviceId);
@@ -251,7 +238,7 @@ public class NorthboundEndpoint
      * @param serviceProviderId the service provider ID
      * @return the response containing the information
      */
-    public JSONObject resourcesList(String serviceProviderId, 
+    public String resourcesList(String serviceProviderId, 
     		String serviceId)
     {
     	return this.resourcesList(serviceProviderId, serviceId, null);
@@ -263,7 +250,7 @@ public class NorthboundEndpoint
      * @param serviceProviderId the service provider ID
      * @return the response containing the information
      */
-    public JSONObject resourcesList(String serviceProviderId, 
+    public String resourcesList(String serviceProviderId, 
     	String serviceId, FilteringDefinition filterDefinition) 
     {
     	return session.getResources(serviceProviderId, serviceId, 
@@ -278,7 +265,7 @@ public class NorthboundEndpoint
      * @param resourceId the resource ID
      * @return the response containing the information
      */
-    public JSONObject resourceDescription(
+    public String resourceDescription(
     		String serviceProviderId, String serviceId, 
     		String resourceId)
     {

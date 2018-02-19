@@ -559,8 +559,8 @@ public class Sessions
 		    int i = indexFor(h, tab.length);
 		    for (Entry e = tab[i]; e != null; e = e.next) 
 		    {
-		        if (h == e.hash && eq(value.getId(), 
-		        		e.getKey().getId())) 
+		        if (h == e.hash && eq(value.getSessionId(), 
+		        		e.getKey().getSessionId())) 
 		        {
 		            e.value = key;
 		            e.observer = observer;

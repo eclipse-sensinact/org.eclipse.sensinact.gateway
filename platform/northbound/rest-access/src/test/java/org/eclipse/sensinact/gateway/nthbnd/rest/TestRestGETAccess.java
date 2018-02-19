@@ -36,9 +36,11 @@ public class TestRestGETAccess  extends TestRestAccess
 	{
 		 Mediator mediator = new Mediator(context);
     	
-        String simulated  = HttpServiceTestClient.newRequest(mediator, 
-        		HTTP_ROOTURL + "/providers", null, "GET");
-
+        String simulated  = HttpServiceTestClient.newRequest(mediator,
+             	HTTP_ROOTURL + "/providers", null, "GET");
+        
+        System.out.println(simulated);
+        
         JSONObject response = new JSONObject(
         	"{\"statusCode\":200,\"providers\":[\"slider\",\"light\"],"
         	+ "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");

@@ -36,16 +36,14 @@ public interface Filtering
 	
 	/**
 	 * Applies the String filter passed as parameter on the 
-	 * &lt;F&gt; typed result Object also passed as parameter 
-	 * and  returned the &lt;F&gt; typed filtered result, in 
-	 * the same format 
+	 * Object also passed as parameter and  returned the String
+	 * filtered result, in the same format 
 	 * 
 	 * @param filter the String filter to apply on the 
 	 * specified Object
-	 * @param result &lt;F&gt; typed result Object to be
-	 * filtered 
+	 * @param obj the Object to be filtered 
 	 * 
-	 * @return the &lt;F&gt; typed result
+	 * @return the String filtered result
 	 */
-	<F> F apply(String filter, F result);
+	String apply(String filter, Object obj);
 }

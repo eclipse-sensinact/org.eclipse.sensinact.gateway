@@ -35,7 +35,7 @@ public interface Endpoint
   	 * @return the JSON formated list of the resource model instances for 
   	 * the specified user.
   	 */
-  	JSONObject getAll(String publicKey);
+  	String getAll(String publicKey);
   	
   	/**
   	 * Returns the JSON formated list of all registered, accessible 
@@ -51,21 +51,7 @@ public interface Endpoint
   	 * @return the JSON formated list of the resource model instances for 
   	 * the specified user and compliant to the specified filter.
   	 */
-  	JSONObject getAll(String publicKey, String filter);
-
-//  	/**
-//  	 * Returns the JSON formated list of locations of all registered, and 
-//  	 * accessible by the user whose String public key is passed as parameter, 
-//  	 * resource model instances from the local sensiNact instance, as well as 
-//  	 * from the connected remote ones 
-//  	 * 
-//  	 * @param publicKey the String public key of the user for which to 
-//  	 * retrieve the list of accessible resource model instances
-//  	 * 
-//  	 * @return the JSON formated list of the location of the resource model 
-//  	 * instances for the specified user.
-//  	 */
-//  	JSONObject getLocations(String publicKey);
+  	String getAll(String publicKey, String filter);
 
     /**
      * Returns the JSON formated list of available service providers for
@@ -76,7 +62,7 @@ public interface Endpoint
      * 
      * @return the JSON formated list of available service providers
      */
-    JSONObject getProviders(String publicKey);
+    String getProviders(String publicKey);
 
     /**
      * Returns the JSON formated description of the service provider whose
@@ -89,7 +75,7 @@ public interface Endpoint
      * 
      * @return the JSON formated description of the specified service provider
      */
-    JSONObject getProvider(String publicKey, String serviceProviderId);
+    String getProvider(String publicKey, String serviceProviderId);
 
     /**
      * Returns the JSON formated list of available services for the service 
@@ -103,7 +89,7 @@ public interface Endpoint
      * @return the JSON formated list of available services for the 
      * specified service provider
      */
-    JSONObject getServices(String publicKey, String serviceProviderId);
+    String getServices(String publicKey, String serviceProviderId);
 
     /**
      * Returns the JSON formated description of the service whose String
@@ -119,7 +105,7 @@ public interface Endpoint
      * 
      * @return the JSON formated description of the specified service
      */
-    JSONObject getService(String publicKey, String serviceProviderId,String serviceId);
+    String getService(String publicKey, String serviceProviderId,String serviceId);
 
     /**
      * Returns the JSON formated list of available resources, for the service 
@@ -135,7 +121,7 @@ public interface Endpoint
      * @return the JSON formated list of available resources for the 
      * specified service and service provider
      */
-    JSONObject getResources(String publicKey, String serviceProviderId, String serviceId);
+   String getResources(String publicKey, String serviceProviderId, String serviceId);
 
     /**
      * Returns the JSON formated description of the resource whose String
@@ -154,7 +140,7 @@ public interface Endpoint
      * 
      * @return the JSON formated description of the specified resource
      */
-    JSONObject getResource(String publicKey, String serviceProviderId, 
+    String getResource(String publicKey, String serviceProviderId, 
     		String serviceId, String resourceId);
 
     /**

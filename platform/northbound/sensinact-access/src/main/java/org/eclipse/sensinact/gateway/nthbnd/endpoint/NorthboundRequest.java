@@ -70,15 +70,22 @@ public abstract class NorthboundRequest implements PathElement, Nameable
 				case '\\':
 				  escape = true;
 				  break;
-				case '?':
-				  break;
 				case '=':
-				  name = element.toString();
-				  element = new StringBuilder();
+				  if(name == null)
+				  {
+					  name = element.toString();
+					  element = new StringBuilder();
+					  
+				  } else
+				  {
+					  element.append(c);
+				  }
 				  break;
 				case '&':	
 				  value = element.toString();
 				  addQueryParameter(queryMap, name, value);
+				  name = null;
+				  value = null;
 				  element = new StringBuilder();
 				  break;
 				default:

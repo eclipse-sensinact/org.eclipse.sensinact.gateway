@@ -38,7 +38,7 @@ class ClientSocketThread implements Runnable
 	private OutputStream output;
 	private InputStream input;
 	
-	private Map<String, JSONObject> requests;
+	private Map<String, String> requests;
 	protected Mediator mediator;
 	
 	private InetAddress remoteAddress;
@@ -48,7 +48,7 @@ class ClientSocketThread implements Runnable
 			throws IOException
 	{
 		this.mediator = mediator;
-		this.requests = new HashMap<String, JSONObject>();
+		this.requests = new HashMap<String, String>();
 
 		this.remoteAddress = InetAddress.getByName(address);
 		this.remotePort = port;
@@ -70,7 +70,7 @@ class ClientSocketThread implements Runnable
 		return this.running;
 	}	
 	
-	JSONObject request(JSONObject object)
+	String request(JSONObject object)
 	{
 		if(!running)
 		{
@@ -106,14 +106,15 @@ class ClientSocketThread implements Runnable
 		{
 			this.mediator.error(e.getMessage(),e);
 		} 
-		JSONObject result = null;
+		String result = null;
 		long wait = 5000;
 		while(wait > 0)
 		{
-			synchronized( this.requests)
+			synchronized(this.requests)
 			{
-				if((result = this.requests.get(uuid))!=null)
+				if(this.requests.containsKey(uuid))
 				{
+					result = this.requests.get(uuid);
 					break;
 				}
 			}
@@ -201,9 +202,11 @@ class ClientSocketThread implements Runnable
 				String uuid = null;
 				synchronized( this.requests)
 				{
-					if((uuid = (String) object.remove("uuid"))!=null)
+					if((uuid = (String) object.remove("uuid"
+							))!=null)
 					{
-						this.requests.put(uuid, object);
+						this.requests.put(uuid, 
+							object.optString("response"));
 					}
 				}
 			}

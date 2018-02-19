@@ -31,13 +31,9 @@ public class JsonPathFiltering implements Filtering
 	//						STATIC DECLARATIONS							  //
 	//********************************************************************//
 
-    private static final Deque<DocumentContext> stack = new ArrayDeque<DocumentContext>();
-
 	//********************************************************************//
 	//						INSTANCE DECLARATIONS						  //
 	//********************************************************************//
-
-    private final ExecutorService ex = Executors.newFixedThreadPool(1);
 
 	private Mediator mediator;
 
@@ -66,41 +62,27 @@ public class JsonPathFiltering implements Filtering
 	 * @see org.eclipse.sensinact.gateway.core.Filtering#apply(java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <F> F apply(String filter, F result)
+	public String apply(String filter, Object result)
 	{
 		if(filter == null)
 		{
-			return result;
+			return String.valueOf(result);
 		}
-		final String json = String.valueOf(result);
+		
 	    try
-	    {
-	    	DocumentContext dc = null;
-	        mediator.debug("Looking up for JsonPath string %s", filter);
-	
-	        if(stack.size() == 0)
+	    { 
+	    	DocumentContext dc = JsonPath.parse(
+	    			String.valueOf(result));
+	        Object object = dc.read(filter);
+	        
+	        if(object.getClass() == String.class)
 	        {
-	        	dc = JsonPath.parse(json);
-	            stack.addFirst(dc);
-	            
+	        	return new StringBuilder().append("\"").append(
+	        		object).append("\"").toString();
 	        } else
 	        {
-	            ex.submit(new Runnable()
-	            {
-	                @Override
-	                public void run() 
-	                {
-	                    DocumentContext dc = JsonPath.parse(json);
-	                    stack.addFirst(dc);
-	                    stack.removeLast();
-	                }
-	            });
+	        	return String.valueOf(object);
 	        }
-	        dc = stack.getFirst();
-	        Object object = dc.read(filter);
-	        return CastUtils.cast(mediator.getClassLoader(),
-	        	(Class<F>)result.getClass(), object);
-	        
 	    } catch(Exception e)
 	    {
 	        mediator.error("Failed to process JsonPath", e);

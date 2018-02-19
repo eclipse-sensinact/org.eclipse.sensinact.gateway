@@ -50,13 +50,10 @@ public class XFilter implements Filtering
 	 * @see org.eclipse.sensinact.gateway.core.Filtering#apply(java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <F> F apply(String filter, F result)
+	public String apply(String filter, Object result)
 	{
 		String str = String.valueOf(result);
-		char flt = filter.charAt(0);
-				
-		F f = CastUtils.cast(Thread.currentThread().getContextClassLoader(), 
-		 (Class<F>) result.getClass(), str.replace(flt, 'X'));
-		return f;
+		char flt = filter.charAt(0);				
+		return str.replace(flt, 'X');
 	}
 }

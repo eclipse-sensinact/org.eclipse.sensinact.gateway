@@ -101,6 +101,9 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
     //**************************************************************************
 	//**************************************************************************
 
+	private static final Pattern ROOT_PATTERN = 
+		Pattern.compile(ROOT);
+	
 	private static final Pattern GENERIC_METHOD_SCHEME_PATTERN = 
 		Pattern.compile(GENERIC_METHOD_SCHEME);
 	
@@ -217,6 +220,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 	{
 		String path = null;
 		String requestURI = request.getRequestURI();
+
 		try
 		{
 			path = UriUtils.formatUri(URLDecoder.decode(requestURI, "UTF-8"));
@@ -403,6 +407,13 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 			this.multi = true;
 			return true;
 		}
+		matcher = ROOT_PATTERN.matcher(path);
+		if(matcher.matches())
+		{
+		    this.method = "ALL";
+			this.filtered = matcher.group(2);
+			return true;
+		}
 		return false;
 	}
 	
@@ -475,6 +486,12 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 			}
 			catch (InvalidValueException e)
 			{
+				e.printStackTrace();
+        		throw new JSONException(e);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
         		throw new JSONException(e);
 			}
 			if("attributeName".equals(parameter.getName()) &&
@@ -485,6 +502,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 			}
 			parametersList.add(parameter);
         }
+        
         return parametersList.toArray(new Parameter[0]);
 	}
 
@@ -572,14 +590,9 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 					break;
 				}
 			}	
-			builder.withFilter(new FilteringDefinition(this.filtered,filter));
-
-			if(this.serviceProvider==null && this.method==null)
-			{
-				this.method = "ALL";	
-			}		
-		}
-		
+			builder.withFilter(new FilteringDefinition(
+					this.filtered,filter));
+		}		
 		builder.withMethod(this.method
 				).withServiceProvider(this.serviceProvider
 				).withService(this.service

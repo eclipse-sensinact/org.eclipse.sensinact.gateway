@@ -44,4 +44,20 @@ public class AllRequest extends NorthboundRequest
 	{
 		return this.getName();
 	}
+	
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see NorthboundRequest#getExecutionArguments()
+	 */
+	@Override
+	protected Argument[] getExecutionArguments() 
+	{
+		Argument[] arguments = new Argument[2];
+		arguments[0] = new Argument(String.class, null);
+		arguments[1] = new Argument(FilteringDefinition.class, 
+			super.filterDefinition);
+		return arguments;
+	}
 }

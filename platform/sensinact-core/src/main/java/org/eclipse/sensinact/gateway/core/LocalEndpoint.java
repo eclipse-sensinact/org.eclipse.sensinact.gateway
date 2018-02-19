@@ -74,7 +74,7 @@ abstract class LocalEndpoint implements Endpoint
 	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getAll(java.lang.String)
 	 */
 	@Override
-	public JSONObject getAll(String publicKey)
+	public String getAll(String publicKey)
 	{
 		return this.getSession(publicKey).getAll();
 	}
@@ -85,21 +85,10 @@ abstract class LocalEndpoint implements Endpoint
 	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getAll(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public JSONObject getAll(String publicKey, String filter)
+	public String getAll(String publicKey, String filter)
 	{
 		return this.getSession(publicKey).getAll(filter);
 	}
-
-//	/**
-//	 * @inheritDoc
-//	 *
-//	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getLocations(java.lang.String)
-//	 */
-//	@Override
-//	public JSONObject getLocations(String publicKey)
-//	{
-//		return this.getSession(publicKey).getLocations();
-//	}
 
 	/**
 	 * @inheritDoc
@@ -107,7 +96,7 @@ abstract class LocalEndpoint implements Endpoint
 	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getProviders(java.lang.String)
 	 */
 	@Override
-	public JSONObject getProviders(String publicKey)
+	public String getProviders(String publicKey)
 	{
 		return this.getSession(publicKey).getProviders();
 	}
@@ -118,7 +107,7 @@ abstract class LocalEndpoint implements Endpoint
 	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getProvider(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public JSONObject getProvider(String publicKey,
+	public String getProvider(String publicKey,
 	        String serviceProviderId)
 	{
 		return this.getSession(publicKey).getProvider(serviceProviderId);
@@ -130,7 +119,7 @@ abstract class LocalEndpoint implements Endpoint
 	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getServices(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public JSONObject getServices(String publicKey,
+	public String getServices(String publicKey,
 	        String serviceProviderId)
 	{
 		return this.getSession(publicKey).getServices(serviceProviderId);
@@ -142,7 +131,7 @@ abstract class LocalEndpoint implements Endpoint
 	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getService(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public JSONObject getService(String publicKey, String serviceProviderId,
+	public String getService(String publicKey, String serviceProviderId,
 	        String serviceId)
 	{
 		return this.getSession(publicKey).getService(serviceProviderId,
@@ -155,7 +144,7 @@ abstract class LocalEndpoint implements Endpoint
 	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getResources(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public JSONObject getResources(String publicKey,
+	public String getResources(String publicKey,
 	        String serviceProviderId, String serviceId)
 	{
 		return this.getSession(publicKey).getResources(serviceProviderId,
@@ -168,7 +157,7 @@ abstract class LocalEndpoint implements Endpoint
 	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getResource(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public JSONObject getResource(String publicKey,
+	public String getResource(String publicKey,
 	        String serviceProviderId, String serviceId, String resourceId)
 	{
 		return this.getSession(publicKey).getResource(serviceProviderId,

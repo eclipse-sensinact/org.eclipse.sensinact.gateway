@@ -251,17 +251,6 @@ public class RemoteSensiNact implements RemoteCore
 	{
 		return this.remoteEndpoint;
 	}
-	
-//  /**
-//   * @inheritDoc
-//   *
-//   * @see org.eclipse.sensinact.gateway.core.Endpoint#getLocations(java.lang.String)
-//   */
-//	@Override
-//  public JSONObject getLocations(String publicKey)
-//  {
-//  	return this.localEndpoint.getLocations(publicKey);
-//  }
 
   	/**
   	 * @inheritDoc
@@ -269,7 +258,7 @@ public class RemoteSensiNact implements RemoteCore
   	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getAll(java.lang.String)
   	 */
 	@Override
-  	public JSONObject getAll(String publicKey)
+  	public String getAll(String publicKey)
   	{
   		return this.getAll(publicKey, null);
   	}
@@ -281,7 +270,7 @@ public class RemoteSensiNact implements RemoteCore
   	 * getAll(java.lang.String, java.lang.String)
   	 */
 	@Override
-  	public JSONObject getAll(String publicKey, String filter)
+  	public String getAll(String publicKey, String filter)
   	{
   		return this.localEndpoint.getAll(publicKey, filter);
   	}
@@ -292,7 +281,7 @@ public class RemoteSensiNact implements RemoteCore
   	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getProviders(java.lang.String)
   	 */
 	@Override
-  	public JSONObject getProviders(String publicKey)
+  	public String getProviders(String publicKey)
     {
   		return this.localEndpoint.getProviders(publicKey);
     }
@@ -304,7 +293,7 @@ public class RemoteSensiNact implements RemoteCore
   	 * getProvider(java.lang.String, java.lang.String)
   	 */
 	@Override
-  	public JSONObject getProvider(String publicKey, String serviceProviderId)
+  	public String getProvider(String publicKey, String serviceProviderId)
     {
   		return this.localEndpoint.getProvider(publicKey, serviceProviderId);
     }
@@ -316,7 +305,7 @@ public class RemoteSensiNact implements RemoteCore
   	 * getServices(java.lang.String, java.lang.String)
   	 */
 	@Override
-  	public JSONObject getServices(String publicKey, String serviceProviderId)
+  	public String getServices(String publicKey, String serviceProviderId)
     {
   		return this.localEndpoint.getServices(publicKey, serviceProviderId);
     }
@@ -328,7 +317,7 @@ public class RemoteSensiNact implements RemoteCore
   	 * getService(java.lang.String, java.lang.String, java.lang.String)
   	 */
 	@Override
-  	public JSONObject getService(String publicKey, 
+  	public String getService(String publicKey, 
   			String serviceProviderId,String serviceId)
     {
   		return this.localEndpoint.getService(publicKey, 
@@ -342,7 +331,7 @@ public class RemoteSensiNact implements RemoteCore
   	 * getResources(java.lang.String, java.lang.String, java.lang.String)
   	 */
 	@Override
-  	public JSONObject getResources(String publicKey, 
+  	public String getResources(String publicKey, 
   			String serviceProviderId, String serviceId)
     {
   		return this.localEndpoint.getResources(publicKey, 
@@ -356,7 +345,7 @@ public class RemoteSensiNact implements RemoteCore
   	 * getResource(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
   	 */
 	@Override
-  	public JSONObject getResource(String publicKey, 
+  	public String getResource(String publicKey, 
   			String serviceProviderId, String serviceId, String resourceId)
     {
   		return this.localEndpoint.getResource(publicKey, serviceProviderId, 
@@ -501,8 +490,8 @@ public class RemoteSensiNact implements RemoteCore
 			final SnaFilter filter, final String publicKey)
 	{
 		JSONObject registration = this.localEndpoint.getSession(publicKey
-			).registerSessionAgent(new RemoteSensiNactCallback(
-				remoteAgentId), filter);
+				).registerSessionAgent(new RemoteSensiNactCallback(
+					remoteAgentId), filter);
 		JSONObject response = registration.optJSONObject("response");
 		String localAgentId = null;
 		if(!JSONObject.NULL.equals(response) 

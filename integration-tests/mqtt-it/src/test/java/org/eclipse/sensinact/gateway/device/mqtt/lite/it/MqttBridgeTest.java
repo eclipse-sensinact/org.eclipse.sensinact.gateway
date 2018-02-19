@@ -56,7 +56,9 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     public void providerCreation() throws Exception {
         Object provider = createDevicePojo("myprovider","myservice","myresource","/myresource");
         bc.registerService("org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider", provider, new Hashtable<String, Object>());
-        final Set<String> providersSet = parseJSONArrayIntoSet(sensinactSession.getProviders().getJSONArray("providers"));
+        JSONObject obj = new JSONObject(sensinactSession.getProviders());
+        JSONArray providers = obj.getJSONArray("providers");
+        final Set<String> providersSet = parseJSONArrayIntoSet(providers);
         Assert.assertTrue("Provider was not created, or at least is not shown via REST api", providersSet.contains("myprovider"));
     }
 
@@ -91,22 +93,28 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         providerCreation();
         SmartTopicPacket packet = new SmartTopicPacket("myprovider");
         packet.setGoodbyeMessage(true);
-        final Set<String> providersSetNo = parseJSONArrayIntoSet(sensinactSession.getProviders().getJSONArray("providers"));
+        JSONObject obj = new JSONObject(sensinactSession.getProviders());
+        JSONArray providers = obj.getJSONArray("providers");
+        final Set<String> providersSetNo = parseJSONArrayIntoSet(providers);
         Assert.assertTrue("Provider was removed",!providersSetNo.contains("myprovider"));
     }
 
     @Test
     public void serviceCreation() throws Exception {
         providerCreation();
-        final Set<String> servicesSet = parseJSONArrayIntoSet(sensinactSession.getServices("myprovider").getJSONArray("services"));
+
+        JSONObject obj = new JSONObject(sensinactSession.getServices("myprovider"));
+        JSONArray services = obj.getJSONArray("services");        
+        final Set<String> servicesSet = parseJSONArrayIntoSet(services);
         Assert.assertTrue("Service was not created, or at least is not shown via REST api",servicesSet.contains("myservice"));
     }
 
     @Test
     public void resourceCreation() throws Exception {
         serviceCreation();
-        final JSONArray resourcesArray = sensinactSession.getResources("myprovider", "myservice").getJSONArray("resources");
-        final Set<String> resourcesSet = parseJSONArrayIntoSet(resourcesArray);
+        JSONObject obj = new JSONObject(sensinactSession.getResources("myprovider", "myservice"));
+        JSONArray resources = obj.getJSONArray("resources");
+        final Set<String> resourcesSet = parseJSONArrayIntoSet(resources);
         Assert.assertTrue("Resource was not created, or at least is not shown via REST api", resourcesSet.contains("myresource"));
     }
 

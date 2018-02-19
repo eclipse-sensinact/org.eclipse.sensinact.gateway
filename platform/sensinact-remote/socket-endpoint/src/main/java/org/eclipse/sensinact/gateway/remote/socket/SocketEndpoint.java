@@ -24,6 +24,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -136,7 +137,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	 */
 	protected JSONObject incomingRequest(JSONObject request)
 	{
-		JSONObject response  = null;
+		String response  = null;
+		JSONObject accessMethodResponse = null;
 		if(request == null)
 		{
 			return null;
@@ -155,8 +157,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 				switch(subUriELements[0])
 				{
 					case "namespace":
-						response  = new JSONObject().put("response", 
-					        new JSONObject().put("value", super.localNamespace));
+						response  = super.localNamespace; 
 					break;
 					case "agent":
 						if(subUriELements.length != 2)
@@ -225,14 +226,15 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 						{
 							for(;index < arrayLength;index++)
 							{
-								messages[index]= AbstractSnaMessage.fromJSON(mediator,
-									messagesArray.getJSONObject(index).toString());
+								messages[index]= AbstractSnaMessage.fromJSON(
+									mediator, messagesArray.getJSONObject(
+										index).toString());
 							}
 							recipient.callback(callbackId, messages);
 							
 						} catch (Exception e) 
 						{
-							mediator.error(e.getMessage(),e);
+							mediator.error(e);
 						}			
 					break;
 					case "all":
@@ -240,7 +242,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 						{
 							break;
 						}
-						response  = (subUriELements.length == 1)?
+						response = (subUriELements.length == 1)?
 							super.remoteCore.getAll(publicKey)
 					       :super.remoteCore.getAll(publicKey,subUriELements[1]);						
 					break;
@@ -273,7 +275,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 				switch(uriElements[6])
 				{
 					case "GET":				
-					    response = super.remoteCore.get(publicKey, 
+						accessMethodResponse = super.remoteCore.get(publicKey, 
 							uriElements[1],uriElements[3],uriElements[5], 
 							null);
 					break;				
@@ -291,7 +293,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 						{
 						 data = attr.opt("value");
 						}
-						response = super.remoteCore.set(publicKey,
+						accessMethodResponse = super.remoteCore.set(publicKey,
 							uriElements[1],uriElements[3],uriElements[5],
 								attributeId,data);
 					break;				
@@ -305,7 +307,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 						{
 							args[index]=parameters.getJSONObject(index).opt("value");
 						}
-						response = super.remoteCore.act(publicKey, 
+						accessMethodResponse = super.remoteCore.act(publicKey, 
 							uriElements[1],uriElements[3],uriElements[5], 
 								args);
 					break;
@@ -318,7 +320,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 							conditions = parameters.getJSONObject(0
 									).optJSONArray("value");
 						}
-						response = super.remoteCore.subscribe(publicKey,
+						accessMethodResponse = super.remoteCore.subscribe(publicKey,
 							uriElements[1],uriElements[3],uriElements[5], 
 							    conditions);
 					break;
@@ -331,7 +333,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 							subscriptionId = parameters.getJSONObject(0
 									).optString("value");
 						}
-						response = super.remoteCore.unsubscribe(publicKey, 
+						accessMethodResponse = super.remoteCore.unsubscribe(publicKey, 
 							uriElements[1],uriElements[3],uriElements[5], 
 							   subscriptionId);
 					break;
@@ -340,12 +342,12 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 			default:
 				break;
 		}
-		if(response == null)
+		if(accessMethodResponse != null)
 		{
-			response = new JSONObject();
+			response = accessMethodResponse.toString();
 		}
-		response.put("uuid", uuid);
-		return response;
+		return new JSONObject().put("uuid",
+				uuid).put("response", response);
 	}
 	
 	/** 
@@ -358,13 +360,11 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	{
 		if(this.remoteNamespace == null && this.client != null)
 		{
-			JSONObject content = null;
-			JSONObject response = this.client.request(
+			String response = this.client.request(
 					new JSONObject().put("uri", "/namespace"));
-			if(response != null && 
-				(content = response.optJSONObject("response"))!=null)
+			if(response != null && response.length() > 0)
 			{
-				this.remoteNamespace = (String) content.opt("value");
+				this.remoteNamespace = response;
 			}
 		}
 		return this.remoteNamespace;
@@ -391,7 +391,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			messagesArray.put(new JSONObject(messages[index].getJSON()));
 		}
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 			new JSONObject(
 				).put("uri", uri
 				).put("messages", messagesArray));
@@ -547,7 +547,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		}
 		String uri = String.format("/agent?%s", identifier);
 		
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 			new JSONObject(
 				).put("uri", uri
 				).put("agent", new JSONObject(
@@ -575,7 +575,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		}
 		String uri = String.format("/agent?%s",identifier);
 		
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 			new JSONObject().put("uri", uri));
 
 		if(response!=null)
@@ -606,7 +606,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 			).append(super.localNamespace).append(":").append(
 				path.substring(1)).toString());
 		
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 			new JSONObject().put("uri", uri
 				).put("message", object));
 
@@ -629,7 +629,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			return;
 		}
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 			new JSONObject(
 			    ).put("uri", "/session"
 			    ).put("pkey", publicKey));
@@ -643,11 +643,10 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	/**
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#
-	 * getAll(java.lang.String)
+	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getAll(java.lang.String)
 	 */
 	@Override
-	public JSONObject getAll(String publicKey)
+	public String getAll(String publicKey)
 	{
 		return this.getAll(publicKey, null);
 	}
@@ -659,7 +658,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	 * getAll(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public JSONObject getAll(String publicKey,String filter) 
+	public String getAll(String publicKey,String filter) 
 	{
 		if(!super.connected)
 		{
@@ -667,7 +666,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		}
 		String uri = String.format("/all?%s",filter);
 
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 			new JSONObject(
 					).put("uri", uri
 					).put("pkey", publicKey));
@@ -685,13 +684,13 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getProviders(java.lang.String)
 	 */
 	@Override
-	public JSONObject getProviders(String publicKey)
+	public String getProviders(String publicKey)
 	{
 		if(!super.connected)
 		{
 			return null;
 		}
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 			new JSONObject(
 					).put("uri", "/providers"
 					).put("pkey", publicKey));
@@ -710,7 +709,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	 * getProvider(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public JSONObject getProvider(String publicKey, 
+	public String getProvider(String publicKey, 
 			String serviceProviderId)
 	{
 		if(!super.connected)
@@ -719,7 +718,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		}
 		String uri = String.format("/providers/%s",serviceProviderId);
 
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 			new JSONObject(
 					).put("uri", uri
 					).put("pkey", publicKey));
@@ -738,7 +737,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	 * getServices(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public JSONObject getServices(String publicKey, 
+	public String getServices(String publicKey, 
 			String serviceProviderId)
 	{
 		if(!super.connected)
@@ -747,7 +746,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		}
 		String uri =String.format("/providers/%s/services", serviceProviderId);
 
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 			new JSONObject(
 					).put("uri", uri
 					).put("pkey", publicKey));
@@ -766,7 +765,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	 * getService(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public JSONObject getService(String publicKey, 
+	public String getService(String publicKey, 
 			String serviceProviderId, String serviceId)
 	{
 		if(!super.connected)
@@ -776,7 +775,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		String uri =String.format("/providers/%s/services/%s", 
 				serviceProviderId,serviceId);
 
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 			new JSONObject(
 					).put("uri", uri
 					).put("pkey", publicKey));
@@ -795,7 +794,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	 * getResources(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public JSONObject getResources(String publicKey, 
+	public String getResources(String publicKey, 
 			String serviceProviderId, String serviceId) 
 	{
 		if(!super.connected)
@@ -805,7 +804,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		String uri =String.format("/providers/%s/services/%s/resources", 
 				serviceProviderId,serviceId);
 
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 			new JSONObject(
 					).put("uri", uri
 					).put("pkey", publicKey));
@@ -824,7 +823,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	 * getResource(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public JSONObject getResource(String publicKey, 
+	public String getResource(String publicKey, 
 			String serviceProviderId, String serviceId, 
 			String resourceId) 
 	{
@@ -835,7 +834,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		String uri =String.format("/providers/%s/services/%s/resources/%s", 
 				serviceProviderId,serviceId,resourceId);
 
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 			new JSONObject(
 					).put("uri", uri
 					).put("pkey", publicKey));
@@ -865,16 +864,24 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		String uri =String.format("/providers/%s/services/%s/resources/%s/GET", 
 				serviceProviderId,serviceId,resourceId);
 
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 			new JSONObject(
 					).put("uri", uri
 					).put("pkey", publicKey));
-
+		
+		JSONObject result = null;
 		if(response!=null)
 		{
 			mediator.debug(response.toString());
+			try
+			{
+				result = new JSONObject(response);
+			} catch(JSONException | NullPointerException e)
+			{
+				mediator.error(e);
+			}
 		}
-		return response;
+		return result;
 	}
 
 	/**
@@ -909,17 +916,25 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		object.put("value", value);
 		parameters.put(object);
 		
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 			new JSONObject(
 			).put("uri", uri
 			).put("pkey", publicKey
 			).put("parameters", parameters));
 
+		JSONObject result = null;
 		if(response!=null)
 		{
 			mediator.debug(response.toString());
+			try
+			{
+				result = new JSONObject(response);
+			} catch(JSONException | NullPointerException e)
+			{
+				mediator.error(e);
+			}
 		}
-		return response;
+		return result;
 	}
 
 	/**
@@ -952,17 +967,25 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 			object.put("value", value);
 			parametersArray.put(object);
 		}		
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 				new JSONObject(
 				).put("uri", uri
 			    ).put("pkey", publicKey
 				).put("parameters", parametersArray));
 
+		JSONObject result = null;
 		if(response!=null)
 		{
 			mediator.debug(response.toString());
+			try
+			{
+				result = new JSONObject(response);
+			} catch(JSONException | NullPointerException e)
+			{
+				mediator.error(e);
+			}
 		}
-		return response;
+		return result;
 	}
 
 	/**
@@ -990,17 +1013,25 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		object.put("value", subscriptionId);
 		parametersArray.put(object);
 
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 				new JSONObject(
 			    ).put("uri", uri
 			    ).put("pkey", publicKey
 				).put("parameters", parametersArray));
 
+		JSONObject result = null;
 		if(response!=null)
 		{
 			mediator.debug(response.toString());
+			try
+			{
+				result = new JSONObject(response);
+			} catch(JSONException | NullPointerException e)
+			{
+				mediator.error(e);
+			}
 		}
-		return response;
+		return result;
 	}
 
 	/**
@@ -1028,16 +1059,24 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		object.put("value", conditions);
 		parametersArray.put(object);
 
-		JSONObject response = this.client.request(
+		String response = this.client.request(
 				new JSONObject(
 			    ).put("uri", uri
 				).put("pkey", publicKey
 				).put("parameters", parametersArray));
 
+		JSONObject result = null;
 		if(response!=null)
 		{
 			mediator.debug(response.toString());
+			try
+			{
+				result = new JSONObject(response);
+			} catch(JSONException | NullPointerException e)
+			{
+				mediator.error(e);
+			}
 		}
-		return response;
+		return result;
 	}
 }

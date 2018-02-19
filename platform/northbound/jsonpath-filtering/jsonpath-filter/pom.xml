@@ -385,20 +385,20 @@
 		                String basedir = project.basedir.absolutePath.replace('\\','/');	                
 		                File dependencyFile = new File(new File(basedir).getParentFile(), "json-path/target/json-path-2.4.0.jar");	
 		                
-		                File dir = new File(new File(basedir),'target');
+<!-- 		                File dir = new File(new File(basedir),'target'); -->
+<!-- 		                if(!dir.exists()) -->
+<!-- 		                { -->
+<!-- 		                	dir.mkdir();		                	 -->
+<!-- 		                } -->
+<!-- 		                dir = new File(new File(basedir),'target/felix'); -->
+<!-- 		                if(!dir.exists()) -->
+<!-- 		                { -->
+<!-- 		                	dir.mkdir();		                	 -->
+<!-- 		                } -->
+		                File dir = new File(new File(basedir),'target/felix/bundle');
 		                if(!dir.exists())
 		                {
-		                	dir.mkdir();		                	
-		                }
-		                dir = new File(new File(basedir),'target/felix');
-		                if(!dir.exists())
-		                {
-		                	dir.mkdir();		                	
-		                }
-		                dir = new File(new File(basedir),'target/felix/bundle');
-		                if(!dir.exists())
-		                {
-		                	dir.mkdir();		                	
+		                	dir.mkdirs();		                	
 		                }
 		                
 		                def newFile = new File(new File(basedir),'target/felix/bundle/json-path.jar');
