@@ -202,7 +202,7 @@ public class SocketEndpointManager implements ManagedConfigurationListener
 			public SocketEndpoint execute(final Core core) throws Exception
 			{
 				final SocketEndpoint endpoint = new SocketEndpoint(
-						mediator, core.namespace(),						
+						mediator,					
 						descriptor.localAddress,
 						descriptor.localPort,
 						descriptor.remoteAddress,

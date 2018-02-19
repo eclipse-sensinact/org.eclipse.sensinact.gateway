@@ -80,11 +80,11 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	 * @param remoteAddress
 	 * @param remotePort
 	 */
-	public SocketEndpoint(Mediator mediator, String localNamespace, 
+	public SocketEndpoint(Mediator mediator, 
 			String localAddress, int localPort, 
 			String remoteAddress, int remotePort) 
 	{
-		super(mediator, localNamespace);
+		super(mediator);
 		if(localAddress == null || remoteAddress == null)
 		{
 			throw new NullPointerException("Local and remote addresses are needed");

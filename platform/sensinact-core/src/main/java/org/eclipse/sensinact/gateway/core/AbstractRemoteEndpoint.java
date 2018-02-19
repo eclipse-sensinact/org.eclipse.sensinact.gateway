@@ -105,12 +105,25 @@ implements RemoteEndpoint, SessionObserver
 	 * @param localNamespace the String namespace of the local sensiNact
 	 * gateway instance
 	 */
-	public AbstractRemoteEndpoint(Mediator mediator, String localNamespace)
+	public AbstractRemoteEndpoint(Mediator mediator)
 	{
 		this.mediator = mediator;
 		this.recipients = new HashMap<String,Recipient>();
 		this.connected = false;
-		this.localNamespace = localNamespace;
+		this.localNamespace = mediator.callService(Core.class, 
+				new Executable<Core,String>()
+		{
+			@Override
+			public String execute(Core core) throws Exception
+			{
+				return core.namespace();
+			}
+		});		
+		if(this.localNamespace == null)
+		{
+			throw new NullPointerException(
+			"the namespace of the local instance of sensiNact is required");
+		}
 	}
 	
 	/**
