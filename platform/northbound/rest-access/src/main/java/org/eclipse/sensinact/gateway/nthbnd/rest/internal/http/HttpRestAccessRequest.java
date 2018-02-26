@@ -24,7 +24,11 @@ import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoints;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
@@ -38,7 +42,7 @@ implements NorthboundRequestWrapper
 	private Map<String,List<String>> queryMap;
 	private Authentication<?> authentication;
 	private String content;
-
+	
 	/**
 	 * Constructor
 	 * 
@@ -47,15 +51,13 @@ implements NorthboundRequestWrapper
 	 * 
 	 * @param request the {@link HttpServletRequest} to be wrapped by
 	 * the HttpRestAccessRequest to be instantiated
+	 * 
+	 * @throws InvalidCredentialException 
 	 */
 	public HttpRestAccessRequest(NorthboundMediator mediator, 
-			HttpServletRequest request)
+		HttpServletRequest request) throws InvalidCredentialException
 	{
 		super(request);
-		if(mediator == null)
-		{
-			throw new NullPointerException("Mediator needed");
-		}
 		this.mediator = mediator;
 	}
 	

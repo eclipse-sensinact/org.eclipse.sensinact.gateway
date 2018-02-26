@@ -17,19 +17,20 @@ import java.util.Hashtable;
 import org.apache.felix.http.api.ExtHttpService;
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
+import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoints;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.CorsFilter;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws.WebSocketWrapperPool;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.HttpContext;
-import org.osgi.util.tracker.ServiceTracker;
 
-import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.CorsFilter;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 
 /**
  * @see AbstractActivator
@@ -38,9 +39,7 @@ public class Activator extends AbstractActivator<NorthboundMediator>
 {
 	private static final String HTTP_ROOT = "/";
 	private static final String WS_ROOT = "/ws";
-	private static final String CORS_HEADER = "org.eclipse.sensinact.http.corsheader";
-
-
+	
 	/**
 	 * @param context
 	 * @return
@@ -72,19 +71,22 @@ public class Activator extends AbstractActivator<NorthboundMediator>
 	
 	/**
 	 * @inheritDoc
-	 * @see AbstractActivator#doStart()
+	 *
+	 * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#
+	 * doStart()
 	 */
 	public void doStart() throws Exception
 	{
 	    this.corsHeader = Boolean.valueOf((String)
-	    		 super.mediator.getProperty(CORS_HEADER));
+	    		 super.mediator.getProperty(RestAccessConstants.CORS_HEADER));
 	    
 	    mediator.onServiceAppearing(ExtHttpService.class, null, 
 	    new Executable<ExtHttpService,Void>()
 	    {
             /**
-             * @see ServiceTracker#
-             * addingService(org.osgi.framework.ServiceReference)
+             * @inheritDoc
+             *
+             * @see org.eclipse.sensinact.gateway.common.execution.Executable#execute(java.lang.Object)
              */
             public Void execute( ExtHttpService service)
             {	        	
@@ -151,11 +153,12 @@ public class Activator extends AbstractActivator<NorthboundMediator>
             }
 	    });
 	}
-
+	
 	/**
 	 * @inheritDoc
 	 *
-	 * @see AbstractActivator#doStop()
+	 * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#
+	 * doStop()
 	 */
 	public void doStop() throws Exception
 	{
@@ -203,6 +206,9 @@ public class Activator extends AbstractActivator<NorthboundMediator>
 	@Override
 	public NorthboundMediator doInstantiate(BundleContext context)
 	{
-		return new NorthboundMediator(context);
+		NorthboundMediator mediator = new NorthboundMediator(context);
+		mediator.setProperty(RestAccessConstants.NORTHBOUND_ENDPOINTS, 
+				new NorthboundEndpoints(mediator));
+		return mediator;
 	}
 }

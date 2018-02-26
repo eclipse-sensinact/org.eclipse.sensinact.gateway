@@ -12,12 +12,15 @@ package org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws;
 
 import java.io.IOException;
 
-import org.eclipse.sensinact.gateway.core.Filtering;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoints;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 import org.json.JSONObject;
 
 /**
@@ -31,17 +34,25 @@ public class WsRestAccess extends NorthboundAccess<JSONObject, WsRestAccessReque
 	 * The {@link WebSocketWrapper} held by this WsRestAccess 
 	 */
 	private WebSocketWrapper socket;
+	private NorthboundEndpoint endpoint;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param socket the {@link WebSocketWrapper} held by 
 	 * the WsRestAccess to be instantiated
+	 * 
+	 * @throws IOException 
+	 * @throws InvalidCredentialException 
 	 */
-	public WsRestAccess(WsRestAccessRequest request, WebSocketWrapper socket)
+	public WsRestAccess(WsRestAccessRequest request, WebSocketWrapper socket) 
+		throws IOException, InvalidCredentialException
 	{
 		super(request);
 		this.socket = socket;
+		this.endpoint = ((NorthboundEndpoints) super.mediator.getProperty(
+			RestAccessConstants.NORTHBOUND_ENDPOINTS)).getEndpoint(
+			    request.getAuthentication());
 	}
 
 	/**
@@ -68,12 +79,13 @@ public class WsRestAccess extends NorthboundAccess<JSONObject, WsRestAccessReque
 			sendError(500, "Internal server error");
 			return false;
 		}
-		result.put("X-Auth-Token", super.endpoint.getSessionToken());
+		result.put("X-Auth-Token", this.endpoint.getSessionToken());
 		result.put("rid", builder.getRequestId());
 		
-//		byte[] resultBytes;
-//
-//		String acceptEncoding = super.request.getHeader("Accept-Encoding");
+		byte[] resultBytes;
+
+//		String acceptEncoding = super.request.getQueryMap(
+//				).get("Accept-Encoding");
 //        if(acceptEncoding != null && acceptEncoding.contains("gzip")) 
 //        {
 //            resultBytes = NorthboundAccess.compress(resultStr);
@@ -110,9 +122,9 @@ public class WsRestAccess extends NorthboundAccess<JSONObject, WsRestAccessReque
 	protected void sendError(int i, String string) throws IOException 
 	{
 		JSONObject jsonObject = new JSONObject();
-		if(super.endpoint!=null)
+		if(this.endpoint!=null)
 		{
-			jsonObject.put("X-Auth-Token", super.endpoint.getSessionToken());
+			jsonObject.put("X-Auth-Token", this.endpoint.getSessionToken());
 		}
 		jsonObject.put("statusCode", i);
 		jsonObject.put("message", string);

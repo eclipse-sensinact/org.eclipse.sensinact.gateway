@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 
 /**
  * This class is the REST interface between each others classes 
@@ -32,8 +33,6 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 public class HttpEndpoint extends HttpServlet
 {		
 	
-	private static final String JSON_CONTENT_TYPE = "application/json";
-
 	private NorthboundMediator mediator;
 
 	/**
@@ -54,7 +53,8 @@ public class HttpEndpoint extends HttpServlet
     public void doGet(HttpServletRequest request, HttpServletResponse response) 
     		throws IOException
 	{
-		if(!JSON_CONTENT_TYPE.equals(request.getHeader("Accept")))
+		if(request.getHeader("Accept")==null 
+		||!request.getHeader("Accept").contains(RestAccessConstants.PARTIAL_JSON_CONTENT_TYPE))
 		{
 			response.sendError(406, "Not Acceptable");
 		}
@@ -71,11 +71,13 @@ public class HttpEndpoint extends HttpServlet
     public void doPost(HttpServletRequest request, HttpServletResponse response)
     		throws IOException
 	{
-		if(!JSON_CONTENT_TYPE.equals(request.getContentType()))
+		if(request.getContentType()==null 
+		|| !request.getContentType().contains(RestAccessConstants.PARTIAL_JSON_CONTENT_TYPE))
 		{
 			response.sendError(415, "Unsupported Media Type");
 		}
-		if(!JSON_CONTENT_TYPE.equals(request.getHeader("Accept")))
+		if(request.getHeader("Accept")==null 
+		||!request.getHeader("Accept").contains(RestAccessConstants.PARTIAL_JSON_CONTENT_TYPE))
 		{
 			response.sendError(406, "Not Acceptable");
 		}

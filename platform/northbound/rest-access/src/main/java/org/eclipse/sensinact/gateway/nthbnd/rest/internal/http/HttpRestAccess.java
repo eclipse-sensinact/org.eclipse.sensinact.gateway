@@ -15,11 +15,15 @@ import java.io.IOException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoints;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 import org.json.JSONObject;
 
 /**
@@ -28,23 +32,26 @@ import org.json.JSONObject;
  */
 public class HttpRestAccess extends NorthboundAccess<JSONObject, HttpRestAccessRequest>
 {
-	public static String JSON_CONTENT_TYPE = "application/json; charset=utf-8";
-	public static String TEXT_CONTENT_TYPE = "text/plain; charset=utf-8";
-
 	private HttpServletResponseWrapper response;
+	private NorthboundEndpoint endpoint;
+
 
 	/**
 	 * @param request
 	 * @param response
 	 * @throws IOException
+	 * @throws InvalidCredentialException 
 	 */
 	public HttpRestAccess(
 		HttpRestAccessRequest request, 
 		HttpServletResponseWrapper response)
-			throws IOException
+			throws IOException, InvalidCredentialException
 	{
 		super(request);
 		this.response = response;
+		this.endpoint = ((NorthboundEndpoints) super.mediator.getProperty(
+			RestAccessConstants.NORTHBOUND_ENDPOINTS)).getEndpoint(
+			    request.getAuthentication());
 	}
 	
 	/**
@@ -84,7 +91,8 @@ public class HttpRestAccess extends NorthboundAccess<JSONObject, HttpRestAccessR
 			default:
 				break;
 		}
-		response.addHeader("X-Auth-Token", super.endpoint.getSessionToken());
+		
+		response.addHeader("X-Auth-Token", this.endpoint.getSessionToken());
 		
 		NorthboundRequest nthbndRequest = builder.build();
 		if(nthbndRequest == null)
@@ -92,7 +100,7 @@ public class HttpRestAccess extends NorthboundAccess<JSONObject, HttpRestAccessR
 			sendError(500, "Internal server error");
 			return false;
 		}
-		JSONObject result = super.endpoint.execute(nthbndRequest,
+		JSONObject result = this.endpoint.execute(nthbndRequest,
 				new JSONResponseFormat(mediator));
 		if(result == null)
 		{
@@ -116,7 +124,7 @@ public class HttpRestAccess extends NorthboundAccess<JSONObject, HttpRestAccessR
 		int length = -1;		
 		if((length = resultBytes==null?0:resultBytes.length) > 0)
 		{
-			response.setContentType(JSON_CONTENT_TYPE);
+			response.setContentType(RestAccessConstants.JSON_CONTENT_TYPE);
 			response.setContentLength(resultBytes.length);
 			response.setBufferSize(resultBytes.length);
 			
