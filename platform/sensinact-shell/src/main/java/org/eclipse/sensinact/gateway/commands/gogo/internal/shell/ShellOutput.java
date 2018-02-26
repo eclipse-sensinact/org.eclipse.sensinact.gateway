@@ -14,8 +14,21 @@ import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+/**
+ * Output writer of the response to shell requests 
+ * 
+ * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ */
 public class ShellOutput 
 {
+	/**
+	 * Prints out the {@link JSONObject} passed as 
+	 * parameter with the specified offset
+	 * 
+	 * @param object the {@link JSONObject} to be 
+	 * written
+	 * @param offset the output offset
+	 */
 	public void output(JSONObject object, int offset)
 	{
 		String[] names = JSONObject.getNames(object); 
@@ -46,7 +59,15 @@ public class ShellOutput
 			}
 		}	
 	}
-	
+
+	/**
+	 * Prints out the {@link JSONArray} passed as 
+	 * parameter with the specified offset
+	 * 
+	 * @param object the {@link JSONArray} to be 
+	 * written
+	 * @param offset the output offset
+	 */
 	public void output(JSONArray object, int offset)
 	{		 
 		int index = 0;
@@ -69,7 +90,14 @@ public class ShellOutput
 		}
 		
 	}
-	
+
+	/**
+	 * Prints out the String passed as 
+	 * parameter with the specified offset
+	 * 
+	 * @param s the String to be written
+	 * @param offset the output offset
+	 */
 	public void output(String s, int offset)
 	{
 		StringBuilder builder = new StringBuilder();
@@ -81,7 +109,15 @@ public class ShellOutput
 		builder.append(s);
 		System.out.println(builder.toString());
 	}
-	
+
+	/**
+	 * Prints out the String passed as 
+	 * parameter, underlined and with the 
+	 * specified offset
+	 * 
+	 * @param s the String to be written underlined
+	 * @param offset the output offset
+	 */
 	public void outputUnderlined(String s, int offset)
 	{
 		StringBuilder builder = new StringBuilder();
@@ -94,6 +130,14 @@ public class ShellOutput
 		output(builder.toString(),offset);
 	}
 
+	/**
+	 * Prints out the String passed as 
+	 * parameter, quoted and with the 
+	 * specified offset
+	 * 
+	 * @param s the String to be written quoted
+	 * @param offset the output offset
+	 */
 	public void outputQuoted(String s, int offset)
 	{
 		StringBuilder builder = new StringBuilder();
@@ -103,6 +147,13 @@ public class ShellOutput
 		output(builder.toString(),offset);
 	}
 
+	/**
+	 * Prints out the error String message passed as 
+	 * parameter and the associated integer status code
+	 * 
+	 * @param statusCode the integer error status code
+	 * @param s the String error message
+	 */
 	public void outputError(int statusCode, String s)
 	{
 		StringBuilder builder = new StringBuilder();

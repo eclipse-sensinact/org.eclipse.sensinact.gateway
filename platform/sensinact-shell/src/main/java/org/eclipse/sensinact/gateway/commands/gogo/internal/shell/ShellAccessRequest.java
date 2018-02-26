@@ -15,20 +15,24 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
-import org.eclipse.sensinact.gateway.common.constraint.Expression;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+/**
+ * Extended {@link NorthboundRequestWrapper} dedicated to shell access
+ * request wrapper
+ * 
+ * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ */
 public class ShellAccessRequest implements NorthboundRequestWrapper 
 {
 	private NorthboundMediator mediator;

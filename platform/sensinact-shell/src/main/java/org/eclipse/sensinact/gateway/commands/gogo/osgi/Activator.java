@@ -70,7 +70,7 @@ public class Activator extends AbstractActivator<CommandServiceMediator> {
 
         propsAccessMethodCommands.put("osgi.command.scope", "sna");
         propsAccessMethodCommands.put("osgi.command.function", new String[]{
-                "method", "get", "set", "act", "unsubscribe"});
+                "method", "get", "set", "act", "subscribe", "unsubscribe"});
 
         mediator.getContext().registerService(AccessMethodCommands.class.getName(),
                 new AccessMethodCommands(mediator), propsAccessMethodCommands);

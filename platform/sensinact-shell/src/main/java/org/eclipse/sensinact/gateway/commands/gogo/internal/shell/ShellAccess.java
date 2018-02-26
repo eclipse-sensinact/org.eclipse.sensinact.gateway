@@ -22,6 +22,12 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
 import org.json.JSONObject;
 
+/**
+ * Extended {@link NorthboundAccess} dedicated to shell access request
+ * processing
+ * 
+ * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ */
 public class ShellAccess extends NorthboundAccess<JSONObject, ShellAccessRequest>
 {	
 	public static void proceed(CommandServiceMediator mediator, 
@@ -37,8 +43,7 @@ public class ShellAccess extends NorthboundAccess<JSONObject, ShellAccessRequest
     	{
 			mediator.getOutput().outputError(
 					520, e.getMessage());
-		}
-    	
+		}    	
 	}
 	
 	protected NorthboundEndpoint endpoint;

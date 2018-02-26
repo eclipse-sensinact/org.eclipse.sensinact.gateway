@@ -12,22 +12,24 @@
 package org.eclipse.sensinact.gateway.commands.gogo.internal.shell;
 
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
-//import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfiguration;
-//import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
-//import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
-//import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.json.JSONObject;
 
 /**
- * This class is a wrapper for simple callback subscription
+ * {@link NorthboundRecipient} dedicated to subscribe access method
+ * using the shell
  */
 public class ShellRecipient extends NorthboundRecipient
-{
-	
+{	
+    /**
+     * Constructor 
+     * 
+     * @param mediator the {@link CommandServiceMediator} allowing
+     * the ShellRecipient to be instantiated to interact with the
+     * OSGi host environment
+     */
     public ShellRecipient(CommandServiceMediator mediator)
     {
         super(mediator);  
@@ -36,8 +38,8 @@ public class ShellRecipient extends NorthboundRecipient
     /**
      * @inheritDoc
      *
-     * @see MidNorthboundRecipient#
-     * doCallback(java.lang.String, SnaMessage)
+     * @see org.eclipse.sensinact.gateway.core.message.Recipient#
+     * callback(java.lang.String, org.eclipse.sensinact.gateway.core.message.SnaMessage[])
      */
     public void callback(String callbackId, SnaMessage[]  messages)
     {  	
@@ -63,6 +65,5 @@ public class ShellRecipient extends NorthboundRecipient
 				).outputUnderlined("Callback", 2);
 		((CommandServiceMediator)super.mediator).getOutput(
 				).output(new JSONObject(builder.toString()), 2);
-    }
-    
+    }    
 }
