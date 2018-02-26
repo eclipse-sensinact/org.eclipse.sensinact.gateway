@@ -943,22 +943,19 @@ public class TestResourceBuilder<R extends ModelInstance>
     	Session s = testContext.getSensiNact().getAnonymousSession();
     	Thread.sleep(1000);
     	String obj = s.getAll(new FilteringDefinition("xfilter","a"));
-    	JSONAssert.assertEquals(new JSONObject("{\"providers\":[{\"services\":[{\"resources\":"
-		+ "[{\"pXth\":\"/serviceProvider/Xdmin/friendlyNXme\",\"fromService\":\"Xdmin\",\"type\":"
-		+ "\"PROPERTY\",\"nXme\":\"friendlyNXme\",\"fromProvider\":\"serviceProvider\"},"
-		+ "{\"pXth\":\"/serviceProvider/Xdmin/locXtion\",\"fromService\":\"Xdmin\",\"type\":"
-		+ "\"PROPERTY\",\"nXme\":\"locXtion\",\"fromProvider\":\"serviceProvider\"},"
-		+ "{\"pXth\":\"/serviceProvider/Xdmin/bridge\",\"fromService\":\"Xdmin\",\"type\":"
-		+ "\"PROPERTY\",\"nXme\":\"bridge\",\"fromProvider\":\"serviceProvider\"},"
-		+ "{\"pXth\":\"/serviceProvider/Xdmin/icon\",\"fromService\":\"Xdmin\",\"type\":"
-		+ "\"PROPERTY\",\"nXme\":\"icon\",\"fromProvider\":\"serviceProvider\"}],"
-		+ "\"locXtion\":\"45.19334890078532:5.706474781036377\",\"nXme\":\"Xdmin\"},"
-		+ "{\"resources\":[{\"pXth\":\"/serviceProvider/testService/TestAction\",\"fromService\":"
-		+ "\"testService\",\"type\":\"ACTION\",\"nXme\":\"TestAction\",\"fromProvider\":"
-		+ "\"serviceProvider\"},{\"pXth\":\"/serviceProvider/testService/TestVXriXble\","
-		+ "\"fromService\":\"testService\",\"type\":\"STATE_VARIABLE\",\"nXme\":\"TestVXriXble\","
-		+ "\"fromProvider\":\"serviceProvider\"}],\"locXtion\":\"45.19334890078532:5.706474781036377\","
-		+ "\"nXme\":\"testService\"}],\"nXme\":\"serviceProvider\"}],\"filter\":"
-		+ "{\"definition\":\"a\",\"type\":\"xfilter\"}}") , new JSONObject(obj), false);
+    	JSONAssert.assertEquals(new JSONObject("{\"providers\":"
+    	+ "[{\"locXtion\":\"45.19334890078532:5.706474781036377\","
+    	+ "\"services\":[{\"resources\":"
+		+ "[{\"type\":\"PROPERTY\",\"nXme\":\"friendlyNXme\"},"
+		+ "{\"type\":\"PROPERTY\",\"nXme\":\"locXtion\"},"
+		+ "{\"type\":\"PROPERTY\",\"nXme\":\"bridge\"},"
+		+ "{\"type\":\"PROPERTY\",\"nXme\":\"icon\"}],"
+		+ "\"nXme\":\"Xdmin\"},"
+		+ "{\"resources\":"
+		+ "[{\"type\":\"ACTION\",\"nXme\":\"TestAction\"},"
+		+ "{\"type\":\"STATE_VARIABLE\",\"nXme\":\"TestVXriXble\"}],"
+		+ "\"nXme\":\"testService\"}],\"nXme\":\"serviceProvider\"}],"
+		+ "\"filter\":{\"definition\":\"a\",\"type\":\"xfilter\"}}") , 
+    	new JSONObject(obj), false);
     }
 }

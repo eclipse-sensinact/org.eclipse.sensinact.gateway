@@ -1301,90 +1301,6 @@ public class SensiNact implements Core
 		    return resource;
 	    }
 
-//		/**
-//		 * @param publicKey
-//		 * @param resolveNamespace
-//		 * @return
-//		 */
-//		private JSONObject getLocations(SessionKey sessionKey,  
-//				boolean resolveNamespace)
-//		{
-//			StringBuilder builder = new StringBuilder();
-//			builder.append('{');
-//			builder.append("\"type\": \"GET_RESPONSE\"");
-//			builder.append(",\"statusCode\": 200");
-//			builder.append(",\"uri\": \"/dev/var\"");
-//			builder.append(",\"response\":");
-//			builder.append('{');
-//			builder.append("\"timestamp\": 0L");
-//			builder.append(",\"name\": \"No\"");
-//			builder.append(",\"value\":");
-//			builder.append('[');
-//
-//	        String prefix = resolveNamespace?new StringBuilder().append(
-//	        	SensiNact.this.namespace()).append(":").toString():"";
-//	        	
-//        	int index=-1;
-//        	Collection<ServiceReference<SensiNactResourceModel>> references = 
-//					RegistryEndpoint.this.getReferences(sessionKey, null);
-//        	
-//			Iterator<ServiceReference<SensiNactResourceModel>> iterator = 
-//					references.iterator();
-//
-//			AccessTree<? extends AccessNode> tree = sessionKey.getAccessTree();
-//			AccessMethod.Type get = AccessMethod.Type.valueOf(AccessMethod.GET);
-//			
-//			while(iterator.hasNext())
-//			{
-//	        	index++;
-//	        	ServiceReference<SensiNactResourceModel> reference = iterator.next();
-//	        	String name = (String) reference.getProperty("name");
-//	        	Integer level = (Integer) reference.getProperty(
-//	        			"admin.location.GET");
-//				if(level == null)
-//				{
-//					level = new Integer(
-//						AccessLevelOption.OWNER.getAccessLevel().getLevel());
-//				}
-//				String uri = UriUtils.getUri(new String[] {name});
-//				AccessNode node = sessionKey.getAccessTree().getRoot().get(
-//					uri);
-//				
-//				if(node == null)
-//				{
-//					node = tree.getRoot();
-//				}
-//				if(node.getAccessLevelOption(get
-//					).getAccessLevel().getLevel() < level.intValue())
-//				{
-//					continue;
-//				}				
-//	        	String provider = new StringBuilder().append(prefix
-//	        		).append(uri.substring(1)).toString();	        	
-//	        	String location =(String) reference.getProperty(
-//	        			LocationResource.LOCATION);
-//
-//	        	location = (location==null||location.length()==0)
-//        		    ?defaultLocation:location;
-//	        	builder.append(index>0?',':"");
-//				builder.append('{');
-//				builder.append("\"provider\":");
-//				builder.append('"');
-//				builder.append(provider);
-//				builder.append('"');
-//				builder.append(",\"location\":");
-//				builder.append('"');
-//				builder.append(location);
-//				builder.append('"');			
-//				builder.append('}');
-//	        }
-//			builder.append(']');			
-//			builder.append('}');			
-//			builder.append('}');
-//			JSONObject object = new JSONObject(builder.toString());
-//			return object;
-//		}
-		
 		/**
 		 * @param publicKey
 		 * @param resolveNamespace
@@ -1426,6 +1342,10 @@ public class SensiNact implements Core
 				builder.append('"');
 				builder.append(provider);
 				builder.append('"');
+				builder.append(",\"location\":");
+				builder.append('"');
+				builder.append(location);
+				builder.append('"');
 				builder.append(",\"services\":");
 				builder.append('[');
 
@@ -1465,10 +1385,6 @@ public class SensiNact implements Core
 					builder.append("\"name\":");
 					builder.append('"');
 					builder.append(service);
-					builder.append('"');
-					builder.append(",\"location\":");
-					builder.append('"');
-					builder.append(location);
 					builder.append('"');
 					builder.append(",\"resources\":");
 					builder.append('[');
@@ -1510,19 +1426,7 @@ public class SensiNact implements Core
 						builder.append(",\"type\":");
 						builder.append('"');
 						builder.append(type);
-						builder.append('"');
-						builder.append(",\"path\":");
-						builder.append('"');
-						builder.append(resourceUri);
-						builder.append('"');
-						builder.append(",\"fromService\":");
-						builder.append('"');
-						builder.append(service);
-						builder.append('"');
-						builder.append(",\"fromProvider\":");
-						builder.append('"');
-						builder.append(provider);
-						builder.append('"');						
+						builder.append('"');			
 						builder.append('}');
 	                }      
 					builder.append(']');
