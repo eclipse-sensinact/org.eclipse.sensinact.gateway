@@ -99,7 +99,8 @@ public class PropertyTest
 	@Test
 	public void testProperty() throws Exception
 	{
-		String result = PropertyUtils.getProperty(context, null, PROPERTY);
+		String result = (String) PropertyUtils.getProperty(
+				context, null, PROPERTY);
 		assertEquals(MATCH, result);
 	}
 }

@@ -41,16 +41,17 @@ public class PropertyUtils
 	 * @return
 	 * 		the searched property's value 
 	 */
-	public static String getProperty(BundleContext context, 
+	public static Object getProperty(BundleContext context, 
 			Properties properties, String key)
 	{	    	
 		if(key == null)
 		{
 			return null;
-		}	
+		}
+		String builtKey = key;
 		while(true)
 	    {
-	    	Matcher matcher = PATTERN.matcher(key);
+	    	Matcher matcher = PATTERN.matcher(builtKey);
 	    	if(!matcher.find())
 	    	{
 	    		break;
@@ -63,24 +64,24 @@ public class PropertyUtils
 	    	{
 	    		builder.append(key.substring(0, start));
 	    	}
-	    	String property = getProperty(context, properties, matcher.group(1));
+	    	Object property = getProperty(context, properties, matcher.group(1));
 	    	if(property == null)
 	    	{
 	    		return null;
 	    	}
 	    	builder.append(property);		    	
-	    	if(end < key.length())
+	    	if(end < builtKey.length())
 	    	{
-	    		builder.append(key.substring(end, key.length()));
+	    		builder.append(builtKey.substring(end, builtKey.length()));
 	    	}
-	    	key = builder.toString();
-	    }		
-		String value = null;
+	    	builtKey = builder.toString();
+	    }
+		Object value = null;
 		
-		if((value =(properties==null?null:properties.getProperty(key)))==null
-				&& (value=context.getProperty(key))==null)
+		if((value =(properties==null?null:properties.get(builtKey)))==null
+				&& (value=context.getProperty(builtKey))==null)
 		{	
-			value = System.getProperty(key);
+			value = System.getProperty(builtKey);
 		}
 		return value;
 	}
