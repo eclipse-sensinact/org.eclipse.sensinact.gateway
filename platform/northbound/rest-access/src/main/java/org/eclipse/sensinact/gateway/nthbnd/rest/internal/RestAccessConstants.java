@@ -24,6 +24,8 @@ public abstract class RestAccessConstants
 	public static final String OPTIONS = "OPTIONS";
 
 	public static final String PARTIAL_JSON_CONTENT_TYPE = "application/json";
+	
+	public static final String ANY_CONTENT_TYPE = "*/*";
 
 	public static String JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 

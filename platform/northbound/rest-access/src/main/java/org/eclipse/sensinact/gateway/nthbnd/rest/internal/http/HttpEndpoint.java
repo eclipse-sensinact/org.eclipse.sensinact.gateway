@@ -54,7 +54,8 @@ public class HttpEndpoint extends HttpServlet
     		throws IOException
 	{
 		if(request.getHeader("Accept")==null 
-		||!request.getHeader("Accept").contains(RestAccessConstants.PARTIAL_JSON_CONTENT_TYPE))
+		||(!request.getHeader("Accept").contains(RestAccessConstants.PARTIAL_JSON_CONTENT_TYPE)
+		&& !request.getHeader("Accept").contains(RestAccessConstants.ANY_CONTENT_TYPE)))
 		{
 			response.sendError(406, "Not Acceptable");
 		}
@@ -77,7 +78,8 @@ public class HttpEndpoint extends HttpServlet
 			response.sendError(415, "Unsupported Media Type");
 		}
 		if(request.getHeader("Accept")==null 
-		||!request.getHeader("Accept").contains(RestAccessConstants.PARTIAL_JSON_CONTENT_TYPE))
+		||(!request.getHeader("Accept").contains(RestAccessConstants.PARTIAL_JSON_CONTENT_TYPE)
+		&& !request.getHeader("Accept").contains(RestAccessConstants.ANY_CONTENT_TYPE)))
 		{
 			response.sendError(406, "Not Acceptable");
 		}
