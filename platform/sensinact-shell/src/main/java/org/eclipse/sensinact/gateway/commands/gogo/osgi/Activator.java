@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.commands.gogo.osgi;
 
 import org.eclipse.sensinact.gateway.commands.gogo.internal.*;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.osgi.framework.BundleContext;
 
 
@@ -96,6 +97,14 @@ public class Activator extends AbstractActivator<CommandServiceMediator> {
      */
     public CommandServiceMediator doInstantiate(BundleContext context)
     {
-        return new CommandServiceMediator(context);
+        try
+        {
+			return new CommandServiceMediator(context);
+			
+		} catch (InvalidCredentialException e)
+        {
+			e.printStackTrace();
+		}
+        return null;
     }
 }

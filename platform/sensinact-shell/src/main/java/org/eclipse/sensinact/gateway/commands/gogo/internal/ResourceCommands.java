@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.commands.gogo.internal;
 
+import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccess;
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.Service;
@@ -22,13 +23,9 @@ public class ResourceCommands {
 
     private CommandServiceMediator mediator;
 
-    private final String _line;
-    private final String _tab;
 
     public ResourceCommands(CommandServiceMediator mediator) {
         this.mediator = mediator;
-        this._line = ShellUtils.lineSeparator(100);
-        this._tab = ShellUtils.tabSeparator(3);
     }
 
     /**
@@ -38,25 +35,12 @@ public class ResourceCommands {
      */
     @Descriptor("display the existing sensiNact service instances")
     public void resources(@Descriptor("the service provider ID") String serviceProviderID,
-                          @Descriptor("the service ID") String serviceID) {
-        StringBuilder buffer = new StringBuilder();
-        Service service = mediator.getSession().service(serviceProviderID, serviceID);
+                          @Descriptor("the service ID") String serviceID) 
+    {
 
-        if (service != null) {
-            buffer.append("\nsensiNact resource instances for " + service.getPath() +":\n");
-            buffer.append(_line + "\n");
-
-            for (Resource resource : service.getResources()) {
-                buffer.append(_tab + "-- ID: " + resource.getName() + "\n");
-            }
-
-            buffer.append(_line + "\n");
-        } else {
-            buffer.append("No existing sensiNact resource instances for service provider " +
-                    "/" + serviceProviderID + "/" + serviceID);
-        }
-
-        System.out.println(buffer.toString());
+    	ShellAccess.proceed(mediator, new JSONObject().put("uri", 
+    			CommandServiceMediator.uri(serviceProviderID,
+    					serviceID, null, true)));
     }
 
     /**
@@ -69,26 +53,9 @@ public class ResourceCommands {
     public void resource(@Descriptor("the service provider ID") String serviceProviderID,
                          @Descriptor("the service ID") String serviceID,
                          @Descriptor("the resource IS") String resourceID) {
-        StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().resource(serviceProviderID, serviceID, resourceID);
 
-        if (resource != null) {
-            buffer.append("\n" + _line);
-            buffer.append("\n" + _tab + "ID: " + resource.getName());
-            buffer.append("\n" + _tab + "Attributes: ");
-
-            JSONArray attributes = new JSONObject(resource.getDescription().getJSONDescription()).getJSONArray("attributes");
-
-            for(int i = 0; i < attributes.length(); i++) {
-                buffer.append("\n" + _tab + "   -- " + attributes.getJSONObject(i).get("name"));
-            }
-
-            buffer.append("\n" + _line + "\n");
-        } else {
-            buffer.append("sensiNact resource instance /" + serviceProviderID +
-                    "/" + serviceID + "/" + resourceID + " not found");
-        }
-
-        System.out.println(buffer.toString());
+    	ShellAccess.proceed(mediator, new JSONObject().put("uri", 
+    			CommandServiceMediator.uri(serviceProviderID,
+    					serviceID, resourceID, false)));
     }
 }
