@@ -664,10 +664,8 @@ public class Mediator
 	 */
 	public Object getProperty(final String property)
 	{
-		return PropertyUtils.getProperty(
-				Mediator.this.context,
-				Mediator.this.properties, 
-				property);
+		return PropertyUtils.getProperty(this.context, 
+				this.properties, property);
 	}
 	
 	/**

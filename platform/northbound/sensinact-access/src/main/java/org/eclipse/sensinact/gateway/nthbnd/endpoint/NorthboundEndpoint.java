@@ -36,6 +36,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
+ * A NorthboundEndpoint is a connection point to a sensiNact 
+ * instance for an northbound access service
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
@@ -45,17 +47,35 @@ public class NorthboundEndpoint
 	private NorthboundMediator mediator;
 
 	/**
-	 * @param mediator
+	 * Constructor
+	 * 
+	 * @param mediator the {@link NorthboundMediator} that will allow
+	 * the NothboundEndpoint to be instantiated to interact with the
+	 * OSGi host environment
+	 * 
+	 * @param authentication the {@link Authentication}  that will allow
+	 * the NothboundEndpoint to be instantiated to build the appropriate
+	 * {@link Session}
+	 * 
+	 * @throws InvalidCredentialException
 	 */
-	public NorthboundEndpoint(NorthboundMediator mediator, Authentication<?> authentication)
-			throws InvalidCredentialException
+	public NorthboundEndpoint(NorthboundMediator mediator, 
+		Authentication<?> authentication) throws InvalidCredentialException
 	{
 		this.mediator = mediator;
 		this.session = this.mediator.getSession(authentication);
+		if(this.session == null)
+		{
+			throw new NullPointerException("null sensiNact session");
+		}
 	}	
 	
 	/**
-	 * @return
+	 * Returns the String identifier of the {@link Session} of this
+	 * NorthboundEndpoint
+	 * 
+	 * @return the String identifier of this NorthboundEndpoint's 
+	 * {@link Session}
 	 */
 	public String getSessionToken()
 	{
@@ -67,10 +87,13 @@ public class NorthboundEndpoint
 	 * and returns the execution result in the <code>&lt;F&gt;</code>
 	 * typed format 
 	 * 
-	 * @return
-	 * 		the execution of this request in the appropriate
-	 * 		format
-	 */	
+	 * @param request the {@link NorthboundRequest} to be executed
+	 * @param responseFormat the {@link ResponseFormat} allowing to
+	 * format the execution result Object inn the expected format
+	 * 
+	 * @return the execution result Object of this request in
+	 * the appropriate format
+	 */
 	public <F> F execute(NorthboundRequest request,
 			ResponseFormat<F> responseFormat)
 	{		
@@ -96,10 +119,10 @@ public class NorthboundEndpoint
 	}
 	
 	/**
-     * Registers an {@link SnaAgent} linked to the {@link Session} of 
-     * this NorthboundEndpoint 
+     * Registers an {@link SnaAgent} whose lifetime will be linked 
+     * to the {@link Session} of this NorthboundEndpoint 
      * 
-     * @return the response containing the information
+     * @return the {@link SnaAgent} registration response
      */
     public JSONObject registerAgent(AbstractMidAgentCallback callback, 
     		SnaFilter filter)
@@ -108,11 +131,10 @@ public class NorthboundEndpoint
     }
 
 	/**
-     * Unregisters the {@link SnaAgent} linked to the 
-     * current Session and whose String identifier is 
-     * passed as parameter
+     * Unregisters the {@link SnaAgent} whose String 
+     * identifier is passed as parameter
      * 
-     * @return the response containing the information
+     * @return the {@link SnaAgent} unregistration response
      */
     public JSONObject unregisterAgent(String agentId)
     {

@@ -18,7 +18,8 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 
 
 /**
- * This abstract class is a wrapper for callback subscription
+ * Abstract {@link Recipient} type implementation to be extended to
+ * parameterize calls to subscribe access methods
  */
 public abstract class NorthboundRecipient extends AbstractMidCallback 
 implements Recipient 
@@ -33,7 +34,7 @@ implements Recipient
      * Constructor
      * 
      * @param mediator the {@link Mediator} that will allow the
-     * NorthboundMediator to be instantiated to interact with the
+     * NorthboundRecipient to be instantiated to interact with the
      * OSGi host environment
      */
     public NorthboundRecipient(Mediator mediator)

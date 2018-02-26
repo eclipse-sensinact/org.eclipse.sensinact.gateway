@@ -17,9 +17,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.zip.GZIPOutputStream;
 
-import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestHandler.NorthboundResponseBuildError;
+
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
@@ -83,15 +82,23 @@ public abstract class NorthboundAccess<F, W extends NorthboundRequestWrapper>
 	//						INSTANCE DECLARATIONS						  //
 	//********************************************************************//
     
-	protected NorthboundEndpoint endpoint;
-	public W request;
+	protected W request;
+	protected NorthboundMediator mediator;
 	
 	/**
 	 * @param request
+	 * 
+	 * @throws IOException 
 	 */
-	public NorthboundAccess(W request)
+	public NorthboundAccess(W request) throws IOException
 	{
 		this.request = request;
+		this.mediator = request.getMediator();
+		if(mediator == null)
+		{
+			sendError(500, "Unable to process the request");
+			return;
+		}
 	}
 
 	/**
@@ -99,22 +106,6 @@ public abstract class NorthboundAccess<F, W extends NorthboundRequestWrapper>
 	 */
 	public void proceed() throws IOException
 	{
-		NorthboundMediator mediator = request.getMediator();
-		if(mediator == null)
-		{
-			sendError(500, "Unable to process the request");
-			return;
-		}
-		Authentication<?> authentication = request.getAuthentication();
-		try
-		{
-			this.endpoint = new NorthboundEndpoint(mediator, authentication);
-			
-		} catch (InvalidCredentialException e)
-		{
-			sendError(401, "Unauthorized");
-			return;
-		}	
 		NorthboundResponseBuildError buildError = null;
 		NorthboundRequestBuilder<F> builder = null;
 		
@@ -196,6 +187,7 @@ public abstract class NorthboundAccess<F, W extends NorthboundRequestWrapper>
 	 */
 	public void destroy()
 	{	
-		this.endpoint = null;
+		mediator.debug("Destroying NorthboundAccess '%s'", 
+				request.getRequestURI());
 	}
 }

@@ -19,7 +19,9 @@ import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.osgi.framework.BundleContext;
 
 /**
- *
+ * Extended {@link Mediator} type allowing to easily instantiate a
+ * {@link Session}
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class NorthboundMediator extends Mediator
@@ -57,11 +59,10 @@ public class NorthboundMediator extends Mediator
 				{
                     session = core.getAnonymousSession();
 				}
-			} catch (InvalidCredentialException e) {
+			} catch (InvalidCredentialException e) 
+			{
 				throw e;
-            } catch (Exception e) {
-				e.printStackTrace();
-			}
+            }
 			return session;
 		 }
 	}
@@ -79,7 +80,11 @@ public class NorthboundMediator extends Mediator
 	//********************************************************************//
 
 	/**
-	 * @param context
+	 * Constructor
+	 * 
+	 * @param context the {@link BundleContext} allowing 
+	 * the NorthboundMediator to be instantiated to interact with
+	 * the OSGi host environment 
 	 */
 	public NorthboundMediator(BundleContext context)
 	{
@@ -87,16 +92,24 @@ public class NorthboundMediator extends Mediator
 	}
 	
 	/**
-	 * @param authentication
-	 * @return the session associated to the credentials
+	 * Returns a {@link Session} for the user whose authentication
+	 * material is passed as parameter
+	 * 
+	 * @param authentication the {@link Authentication} of a user for
+	 * who to return a {@link Session}
+	 * 
+	 * @return the {@link Session} for the specified {@link Authentication}
 	 */
 	public Session getSession(Authentication<?> authentication) throws InvalidCredentialException 
 	{	
 		return super.callService(Core.class, new SessionExecutor(authentication));
 	}
 
+	
 	/**
-	 * @return
+	 * Returns a {@link Session} for an anonymous user
+	 * 
+	 * @return the {@link Session} for an anonymous user
 	 */
 	public Session getSession() throws InvalidCredentialException 
 	{
