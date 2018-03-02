@@ -68,7 +68,7 @@ public class NorthboundEndpoint
 		{
 			throw new NullPointerException("null sensiNact session");
 		}
-	}	
+	}
 	
 	/**
 	 * Returns the String identifier of the {@link Session} of this
@@ -112,7 +112,6 @@ public class NorthboundEndpoint
 			
 		} catch(Exception e)
 		{
-			e.printStackTrace();
 			this.mediator.error(e);
 		}
 		return responseFormat.format(result);
@@ -293,8 +292,7 @@ public class NorthboundEndpoint
     {
     	return session.getResource(serviceProviderId, 
     			serviceId, resourceId);
-    }
-        
+    }        
 
     /**
      * Perform a sNa GET on a resource
@@ -350,6 +348,8 @@ public class NorthboundEndpoint
      * @param serviceProviderId the service provider ID
      * @param serviceId the service ID
      * @param resourceId the resource ID
+     * @param recipient the notifications recipient 
+     * @param conditions the set of applying conditions
      * @return the subscription ID
      */
     public JSONObject subscribe(String serviceProviderId, 
@@ -366,7 +366,8 @@ public class NorthboundEndpoint
      * @param serviceProviderId the service provider ID
      * @param serviceId the service ID
      * @param resourceId the resource ID
-     * @param attributeId the value to unsubscribe
+     * @param attributeId the attribute ID
+     * @param subscriptionId the subscription string identifier
      * @return success or error response
      */
     public JSONObject unsubscribe(String serviceProviderId, 

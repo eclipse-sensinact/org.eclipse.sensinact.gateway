@@ -16,9 +16,8 @@ import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.Authentication;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
-import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 
@@ -247,42 +246,6 @@ public final class NorthboundEndpoints
 	}
 
 	/**
-	 * Returns the {@link NorthboundEndpoint} whose {@link 
-	 * Session} will be created using the authentication material 
-	 * wrapped by the {@link Authentication} instance passed as 
-	 * parameter. Returns an anonymous {@link Session} if the 
-	 * {@link Authentication} argument is null
-	 * 
-	 * @param authentication the {@link Authentication} wrapping 
-	 * the authentication material
-	 * 
-	 * @return the {@link NorthboundEndpoint} for the specified
-	 * authentication material
-	 * 
-	 * @throws InvalidCredentialException 
-	 */
-	public NorthboundEndpoint getEndpoint(Authentication<?> authentication)
-		throws InvalidCredentialException
-	{
-		if(authentication == null)
-		{
-			return getEndpoint();
-		}
-		if(AuthenticationToken.class.isAssignableFrom(
-				authentication.getClass()))
-		{
-			return getEndpoint((AuthenticationToken) 
-					authentication);
-		}
-		if(Credentials.class.isAssignableFrom(
-				authentication.getClass()))
-		{
-			return getEndpoint((Credentials)authentication);
-		}
-		return null;
-	}
-
-	/**
 	 * Returns the {@link NorthboundEndpoint} for an anonymous 
 	 * access
 	 * 
@@ -301,38 +264,6 @@ public final class NorthboundEndpoints
 		this.schedule.add(term);
 		return endpoint;
 	}
-
-	/**
-	 * Returns the {@link NorthboundEndpoint} whose {@link 
-	 * Session} will be created using the authentication material 
-	 * wrapped by the {@link Credentials} instance passed as 
-	 * parameter. Returns an anonymous {@link Session} if the 
-	 * {@link Credentials} argument is null
-	 * 
-	 * @param credentials the {@link Credentials} wrapping the
-	 * authentication material
-	 * 
-	 * @return the {@link NorthboundEndpoint} for the specified
-	 * authentication material
-	 * 
-	 * @throws InvalidCredentialException 
-	 */
-	public NorthboundEndpoint getEndpoint(Credentials credentials)
-			throws InvalidCredentialException
-	{
-		if(credentials == null)
-		{
-			return getEndpoint();
-		}
-		NorthboundEndpoint endpoint = new NorthboundEndpoint(mediator, 
-					credentials);
-		Term term = new Term(endpoint.getSessionToken());
-		term.reactivate();
-		this.endpoints.put(term,endpoint);		
-		this.schedule.add(term);
-		return endpoint;
-	}
-
 
 	/**
 	 * Returns the already existing {@link NorthboundEndpoint} 
@@ -366,6 +297,41 @@ public final class NorthboundEndpoints
 			return this.endpoints.get(t);
 		}
 		return null;
+	}
+
+	/**
+	 * Adds the {@link NorthboundEndpoint} passed as parameter if
+	 * its attached {@link Session}'s identifier is not null and
+	 * if an existing {@link NorthboundEndpoint} linked to the
+	 * same {@link Session} already exists.
+	 * 
+	 * @param nothboundEndpoint the {@link NorthboundEndpoint} to be
+	 * added
+	 * 
+	 * @return the added {@link NorthboundEndpoint} or the existing 
+	 * one linked to the same {@link Session}
+	 */
+	public NorthboundEndpoint add(NorthboundEndpoint northboundEndpoint)
+	{
+		String sessionToken = northboundEndpoint == null
+				?null:northboundEndpoint.getSessionToken();
+		if(sessionToken==null)
+		{
+			return null;
+		}
+		//search for an already existing endpoint for the
+		//specified session identifier
+		if(this.schedule.update(northboundEndpoint.getSessionToken()))
+		{
+			Term t = this.schedule.getTerm(
+				northboundEndpoint.getSessionToken());
+			return this.endpoints.get(t);
+		}
+		Term term = new Term(sessionToken);
+		term.reactivate();
+		this.endpoints.put(term,northboundEndpoint);		
+		this.schedule.add(term);
+		return northboundEndpoint;		
 	}
 	
 	/**
