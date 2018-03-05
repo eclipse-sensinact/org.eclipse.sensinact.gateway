@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.application;
 
+import java.util.Collection;
+
 import org.eclipse.sensinact.gateway.app.api.exception.ResourceNotFoundException;
 import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
@@ -22,9 +24,6 @@ import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
-import org.eclipse.sensinact.gateway.core.security.Sessions;
-
-import java.util.Collection;
 
 class AppWatchdogExecutor implements AccessMethodExecutor {
 
