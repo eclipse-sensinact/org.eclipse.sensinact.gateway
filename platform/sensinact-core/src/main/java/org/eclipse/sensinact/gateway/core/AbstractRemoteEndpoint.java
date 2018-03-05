@@ -15,8 +15,8 @@ import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.core.Sessions.SessionObserver;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.security.Sessions.SessionObserver;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -258,7 +258,7 @@ implements RemoteEndpoint, SessionObserver
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.security.Sessions.SessionObserver#
+	 * @see org.eclipse.sensinact.gateway.core.Sessions.SessionObserver#
 	 * disappearing(java.lang.String)
 	 */
 	public void disappearing(String publicKey)

@@ -33,12 +33,14 @@ import org.eclipse.sensinact.gateway.common.primitive.PathElement;
  */
 public interface AccessMethod extends Nameable, Describable, PathElement
 {       
-	public static final String GET          = "GET".intern();
-	public static final String SET          = "SET".intern();
-	public static final String ACT          = "ACT".intern();
-	public static final String SUBSCRIBE    = "SUBSCRIBE".intern();
-	public static final String UNSUBSCRIBE  = "UNSUBSCRIBE".intern();
-	public static final String DESCRIBE     = "DESCRIBE".intern();
+	public static final String REQUEST_ID_KEY = "rid";
+	
+	public static final String GET            = "GET".intern();
+	public static final String SET            = "SET".intern();
+	public static final String ACT            = "ACT".intern();
+	public static final String SUBSCRIBE      = "SUBSCRIBE".intern();
+	public static final String UNSUBSCRIBE    = "UNSUBSCRIBE".intern();
+	public static final String DESCRIBE       = "DESCRIBE".intern();
 	
 	public static class Type
 	{		

@@ -39,7 +39,6 @@ import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
-import org.eclipse.sensinact.gateway.core.security.SessionKey;
 import org.json.JSONObject;
 
 /**

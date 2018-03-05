@@ -31,9 +31,11 @@ import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
 import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractor;
+import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractorType;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaAgentImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
@@ -45,18 +47,25 @@ import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
-import org.eclipse.sensinact.gateway.core.security.*;
-import org.eclipse.sensinact.gateway.core.security.Sessions.KeyExtractor;
-import org.eclipse.sensinact.gateway.core.security.Sessions.KeyExtractorType;
+import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
+import org.eclipse.sensinact.gateway.core.security.AccessNode;
+import org.eclipse.sensinact.gateway.core.security.AccessTree;
+import org.eclipse.sensinact.gateway.core.security.Authentication;
+import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
+import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
+import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
+import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
+import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
+import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
+import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
+import org.eclipse.sensinact.gateway.core.security.UserKey;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.omg.CORBA.ObjectHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
@@ -129,100 +138,7 @@ public class SensiNact implements Core
 					"Unknown method", null);			
 			return response;
 		}
-		
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.core.Session#
-		 * registerSessionAgent(org.eclipse.sensinact.gateway.core.message.MidAgentCallback, org.eclipse.sensinact.gateway.core.message.SnaFilter)
-		 */
-		public JSONObject registerSessionAgent(final MidAgentCallback callback, 
-				final SnaFilter filter)
-		{			
-			String agentId = AccessController.<String>doPrivileged(
-			new PrivilegedAction<String>()
-			{
-				@Override
-				public String run()
-				{
-					SessionKey key = SensiNact.this.sessions.get(
-						new KeyExtractor<KeyExtractorType>(
-								KeyExtractorType.TOKEN, getSessionId()));
-					if(key == null || key.getPublicKey()==null)
-					{
-						return null;
-					}
-					return key.registerAgent(callback, filter);
-				}
-			});			
-			String uri = null;
-			if(filter!=null)
-			{
-				uri = new JSONObject(filter.getJSON()).getString("sender");
-			} else
-			{
-				uri = UriUtils.ROOT;
-			}
-	    	JSONObject json = new JSONObject();
-	    	json.put("type", "SUBSCRIBE_RESPONSE");
-	    	json.put("uri", uri);
-	    	
-	        if (agentId != null)
-	        {      	
-	        	json.put("statusCode", 200);
-	        	json.put("response", new JSONObject().put(
-	        		"subscriptionId", agentId));
-	        	
-	        } else
-	        {
-	        	json.put("statusCode", 520);
-	        	json.put("error" , "Internal server error");
-	        }
-	        return json;
-		}
-		
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.core.Session#
-		 * unregisterSessionAgent(java.lang.String)
-		 */
-		public JSONObject unregisterSessionAgent(final String agentId)
-		{			
-			boolean unregistered = AccessController.<Boolean>doPrivileged(
-			new PrivilegedAction<Boolean>()
-			{
-				@Override
-				public Boolean run()
-				{
-					SessionKey key = SensiNact.this.sessions.get(
-						new KeyExtractor<KeyExtractorType>(
-								KeyExtractorType.TOKEN, getSessionId()));
-					
-					if(key != null && key.getPublicKey()!=null)
-					{
-						return key.unregisterAgent(agentId);
-					}
-					return false;
-				}
-			});
-	    	JSONObject json = new JSONObject();
-	    	json.put("type", "UNSUBSCRIBE_RESPONSE");
-	    	json.put("uri", UriUtils.ROOT);
-	        if (unregistered)
-	        {      	
-	        	json.put("statusCode", 200);
-	        	json.put("response", new JSONObject().put("message", 
-	        			"The agent has been properly unregistered"));
-	        	
-	        } else
-	        {
-	        	json.put("statusCode", 520);
-	        	json.put("error" , "Internal server error");
-	        }
-	        return json;
-		}
-		
+				
 		/** 
 		 * @inheritDoc
 		 * 
@@ -321,6 +237,137 @@ public class SensiNact implements Core
 	    	}
 	    	return resource;
 	    }
+
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Session#
+		 * registerSessionAgent(org.eclipse.sensinact.gateway.core.message.MidAgentCallback, org.eclipse.sensinact.gateway.core.message.SnaFilter)
+		 */
+	    @Override
+		public JSONObject registerSessionAgent(MidAgentCallback callback, 
+				SnaFilter filter)
+		{	
+	    	return registerSessionAgent(null,callback,filter);
+		}
+
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Session#
+		 * registerSessionAgent(org.eclipse.sensinact.gateway.core.message.MidAgentCallback, org.eclipse.sensinact.gateway.core.message.SnaFilter)
+		 */
+	    @Override
+		public JSONObject registerSessionAgent(
+				String requestId, 
+				final MidAgentCallback callback, 
+				final SnaFilter filter)
+		{			
+			String agentId = AccessController.<String>doPrivileged(
+			new PrivilegedAction<String>()
+			{
+				@Override
+				public String run()
+				{
+					SessionKey key = SensiNact.this.sessions.get(
+						new KeyExtractor<KeyExtractorType>(
+								KeyExtractorType.TOKEN, getSessionId()));
+					if(key == null || key.getPublicKey()==null)
+					{
+						return null;
+					}
+					return key.registerAgent(callback, filter);
+				}
+			});			
+			String uri = null;
+			if(filter!=null)
+			{
+				uri = new JSONObject(filter.getJSON()).getString("sender");
+			} else
+			{
+				uri = UriUtils.ROOT;
+			}
+	    	JSONObject json = new JSONObject();
+    		if(requestId != null)
+    		{
+    			json.put(AccessMethod.REQUEST_ID_KEY,requestId);
+    		}
+	    	json.put("type", "SUBSCRIBE_RESPONSE");
+	    	json.put("uri", uri);
+	    	
+	        if (agentId != null)
+	        {      	
+	        	json.put("statusCode", 200);
+	        	json.put("response", new JSONObject().put(
+	        		"subscriptionId", agentId));
+	        	
+	        } else
+	        {
+	        	json.put("statusCode", 520);
+	        	json.put("error" , "Internal server error");
+	        }
+	        return json;
+		}
+		
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Session#
+		 * unregisterSessionAgent(java.lang.String)
+		 */
+		@Override
+		public JSONObject unregisterSessionAgent(String agentId)
+		{			
+			return unregisterSessionAgent(null,agentId);
+		}
+
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Session#
+		 * unregisterSessionAgent(java.lang.String)
+		 */
+		@Override
+		public JSONObject unregisterSessionAgent(
+				String requestId, final String agentId)
+		{			
+			boolean unregistered = AccessController.<Boolean>doPrivileged(
+			new PrivilegedAction<Boolean>()
+			{
+				@Override
+				public Boolean run()
+				{
+					SessionKey key = SensiNact.this.sessions.get(
+						new KeyExtractor<KeyExtractorType>(
+								KeyExtractorType.TOKEN, getSessionId()));
+					
+					if(key != null && key.getPublicKey()!=null)
+					{
+						return key.unregisterAgent(agentId);
+					}
+					return false;
+				}
+			});
+	    	JSONObject json = new JSONObject();
+    		if(requestId != null)
+    		{
+    			json.put(AccessMethod.REQUEST_ID_KEY,requestId);
+    		}
+	    	json.put("type", "UNSUBSCRIBE_RESPONSE");
+	    	json.put("uri", UriUtils.ROOT);
+	        if (unregistered)
+	        {      	
+	        	json.put("statusCode", 200);
+	        	json.put("response", new JSONObject().put("message", 
+	        			"The agent has been properly unregistered"));
+	        	
+	        } else
+	        {
+	        	json.put("statusCode", 520);
+	        	json.put("error" , "Internal server error");
+	        }
+	        return json;
+		}
 		
 		/**
 		 * @inheritDoc
@@ -352,7 +399,7 @@ public class SensiNact implements Core
 		 * @see org.eclipse.sensinact.gateway.core.Endpoint#jsonAll(java.lang.String)
 		 */
 		@Override
-	    public String getAll(final String filter)
+	    public String getAll(String filter)
 	    {
 			 return getAll(filter, null);
 	    }
@@ -364,7 +411,23 @@ public class SensiNact implements Core
 		 * getAll(java.lang.String, org.eclipse.sensinact.gateway.core.FilteringDefinition)
 		 */
 		@Override
-		public String getAll(final String filter,
+		public String getAll(
+				final String filter,
+		        final FilteringDefinition filterDefinition)
+		{
+			return getAll(null, filter, filterDefinition);
+		}
+		
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Session#
+		 * getAll(java.lang.String, org.eclipse.sensinact.gateway.core.FilteringDefinition)
+		 */
+		@Override
+		public String getAll(
+				final String requestId,
+				final String filter,
 		        final FilteringDefinition filterDefinition)
 		{
 			 return AccessController.doPrivileged(
@@ -375,7 +438,7 @@ public class SensiNact implements Core
 	            {
 			    	return SensiNact.this.getAll(
 			    		SensiNactSession.this.getSessionId(),
-			    		filter, filterDefinition);
+			    		requestId, filter, filterDefinition);
 	            }
 			 });
 		}
@@ -386,9 +449,24 @@ public class SensiNact implements Core
 	     * @see org.eclipse.sensinact.gateway.core.Session#
 	     * get(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	     */
-	    public JSONObject get(final String serviceProviderId, 
-	    	final String serviceId, final String resourceId,
-	    	    final String attributeId)
+		@Override
+	    public JSONObject get(String serviceProviderId, 
+	    	String serviceId, String resourceId, String attributeId)
+	    {	
+	    	return get(null, serviceProviderId ,serviceId, 
+	    			resourceId, attributeId);
+	    }	    
+
+	    /**
+	     * @inheritDoc
+	     *
+	     * @see org.eclipse.sensinact.gateway.core.Session#
+	     * get(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	     */
+	    @Override
+	    public JSONObject get(String requestId, 
+	    	final String serviceProviderId, final String serviceId, 
+	    	final String resourceId, final String attributeId)
 	    {	
 	    	SessionKey sessionKey = SensiNact.this.sessions.get(
 	    			new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
@@ -404,12 +482,18 @@ public class SensiNact implements Core
 	        {
 	        	if(sessionKey.localID()!=0)
 	        	{
-	        		return new JSONObject(AccessMethodResponse.error(mediator, 
+	        		AccessMethodResponse response = AccessMethodResponse.error(mediator, 
 	        			uri, AccessMethod.GET, 404, new StringBuilder().append(
 	        			"Resource ").append(uri).append("not found"
-	        				).toString(), null).getJSON());
+	        				).toString(), null);
+	        		if(requestId != null)
+	        		{
+	        			response.put(AccessMethod.REQUEST_ID_KEY, requestId);
+	        		}
+	        		return new JSONObject(response.getJSON());
 	        	}
-	        	return AccessController.doPrivileged(new PrivilegedAction<JSONObject>()
+	        	JSONObject object =  AccessController.doPrivileged(
+	        	new PrivilegedAction<JSONObject>()
 				{
 					@Override
 		            public JSONObject run()
@@ -419,6 +503,11 @@ public class SensiNact implements Core
 				    		    attributeId);
 		            }
 				});
+        		if(requestId != null)
+        		{
+        			object.put(AccessMethod.REQUEST_ID_KEY, requestId);
+        		}
+        		return object;
 	        }
 	        GetResponse response = null;     	        
 	        if(attributeId==null)
@@ -438,7 +527,10 @@ public class SensiNact implements Core
 	        	response = resource.get(attributeId);
 	        }
 	        JSONObject object = new JSONObject(response.getJSON());
-    		    		
+    		if(requestId != null)
+    		{
+    			object.put(AccessMethod.REQUEST_ID_KEY, requestId);
+    		}
         	if(sessionKey.localID()!=0)
         	{				
         		object.remove("uri");
@@ -454,7 +546,23 @@ public class SensiNact implements Core
 	     * set(java.lang.String, java.lang.String, java.lang.String, java.lang.String, 
 	     * java.lang.Object)
 	     */
+	    @Override
 	    public JSONObject set(final String serviceProviderId, final String serviceId,
+        final String resourceId, final String attributeId, final Object parameter)
+		{	 
+	    	return set(null, serviceProviderId, serviceId, resourceId, 
+	    			attributeId, parameter);
+	    }
+
+	    /**
+	     * @inheritDoc
+	     *
+	     * @see org.eclipse.sensinact.gateway.core.Session#
+	     * set(java.lang.String, java.lang.String, java.lang.String, java.lang.String, 
+	     * java.lang.Object)
+	     */
+	    @Override
+	    public JSONObject set(String requestId, final String serviceProviderId, final String serviceId,
         final String resourceId, final String attributeId, final Object parameter)
 		{	 
 	    	SessionKey sessionKey = SensiNact.this.sessions.get(
@@ -471,12 +579,19 @@ public class SensiNact implements Core
 	        {
 	        	if(sessionKey.localID()!=0)
 	        	{
-	        		return new JSONObject(AccessMethodResponse.error(mediator, 
+	        		AccessMethodResponse response = AccessMethodResponse.error(mediator, 
 	        			uri, AccessMethod.SET, 404, new StringBuilder().append(
 	        			"Resource ").append(uri).append("not found"
-	        				).toString(), null).getJSON());
+	        				).toString(), null);
+
+	        		if(requestId != null)
+	        		{
+	        			response.put(AccessMethod.REQUEST_ID_KEY, requestId);
+	        		}
+	        		return new JSONObject(response.getJSON());
 	        	}
-	        	return AccessController.doPrivileged(new PrivilegedAction<JSONObject>()
+	        	JSONObject object = AccessController.doPrivileged(
+	        		new PrivilegedAction<JSONObject>()
 				{
 					@Override
 		            public JSONObject run()
@@ -486,6 +601,11 @@ public class SensiNact implements Core
 				    		    attributeId, parameter);
 		            }
 				});
+	    		if(requestId != null)
+	    		{
+	    			object.put(AccessMethod.REQUEST_ID_KEY, requestId);
+	    		}
+	    		return object;
 	        }			 
 	        SetResponse response = null;
 	        if(attributeId==null)
@@ -504,7 +624,10 @@ public class SensiNact implements Core
 	        	response = resource.set(attributeId,parameter);
 	        }        
 	        JSONObject object= new JSONObject(response.getJSON());
-
+    		if(requestId != null)
+    		{
+    			object.put(AccessMethod.REQUEST_ID_KEY, requestId);
+    		}
         	if(sessionKey.localID()!=0)
         	{
         		object.remove("uri");
@@ -519,8 +642,22 @@ public class SensiNact implements Core
 	     * @see org.eclipse.sensinact.gateway.core.Session#
 	     * act(java.lang.String, java.lang.String, java.lang.String, java.lang.Object[])
 	     */
-	    public JSONObject act(final String serviceProviderId, final String serviceId,
-		        final String resourceId, final Object[] parameters)
+	    public JSONObject act(String serviceProviderId, String serviceId,
+		     String resourceId, Object[] parameters)
+		{ 
+	    	return act(null,serviceProviderId, serviceId, resourceId, 
+	    		parameters);
+	    }
+
+	    /**
+	     * @inheritDoc
+	     *
+	     * @see org.eclipse.sensinact.gateway.core.Session#
+	     * act(java.lang.String, java.lang.String, java.lang.String, java.lang.Object[])
+	     */
+	    @Override
+	    public JSONObject act(String requestId, final String serviceProviderId,
+	    	final String serviceId, final String resourceId, final Object[] parameters)
 		{ 
 	    	SessionKey sessionKey = SensiNact.this.sessions.get(
 	    			new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
@@ -536,12 +673,17 @@ public class SensiNact implements Core
 	        {
 	        	if(sessionKey.localID()!=0)
 	        	{
-	        		return new JSONObject(AccessMethodResponse.error(mediator, 
+	        		AccessMethodResponse response = AccessMethodResponse.error(mediator, 
 	        			uri, AccessMethod.ACT, 404, new StringBuilder().append(
 	        			"Resource ").append(uri).append("not found"
-	        				).toString(), null).getJSON());
+	        				).toString(), null);
+	        		if(requestId != null)
+	        		{
+	        			response.put(AccessMethod.REQUEST_ID_KEY, requestId);
+	        		}
+	        		return new JSONObject(response.getJSON());
 	        	}
-	        	return AccessController.doPrivileged(new PrivilegedAction<JSONObject>()
+	        	JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>()
 				{
 					@Override
 		            public JSONObject run()
@@ -550,6 +692,11 @@ public class SensiNact implements Core
 				    		serviceProviderId, serviceId, resourceId, parameters);
 		            }
 				});
+        		if(requestId != null)
+        		{
+        			object.put(AccessMethod.REQUEST_ID_KEY, requestId);
+        		}
+        		return object;
 	        }
 			ActResponse response = null;
 			if(!resource.getType().equals(Resource.Type.ACTION))
@@ -571,7 +718,10 @@ public class SensiNact implements Core
 			    }
 			}
 	        JSONObject object= new JSONObject(response.getJSON());
-
+    		if(requestId != null)
+    		{
+    			object.put(AccessMethod.REQUEST_ID_KEY, requestId);
+    		}
         	if(sessionKey.localID()!=0)
         	{
         		object.remove("uri");
@@ -579,6 +729,22 @@ public class SensiNact implements Core
         	}
         	return object;
 	    }
+	    
+		/**
+		 * @inheritDoc
+		 * 
+		 * @see org.eclipse.sensinact.gateway.core.Session#
+		 * subscribe(java.lang.String, java.lang.String, java.lang.String, 
+		 * org.eclipse.sensinact.gateway.core.message.Recipient, org.json.JSONArray)
+		 */
+	    @Override
+		public JSONObject subscribe(final String serviceProviderId,
+		    final String serviceId, final String resourceId, 
+		    final Recipient recipient, final JSONArray conditions)
+		{  	
+			return subscribe(null, serviceProviderId, serviceId, resourceId, 
+				recipient, conditions);
+		}
 
 		/**
 		 * @inheritDoc
@@ -587,9 +753,12 @@ public class SensiNact implements Core
 		 * subscribe(java.lang.String, java.lang.String, java.lang.String, 
 		 * org.eclipse.sensinact.gateway.core.message.Recipient, org.json.JSONArray)
 		 */
-		public JSONObject subscribe(final String serviceProviderId,
+	    @Override
+		public JSONObject subscribe(String requestId, 
+			final String serviceProviderId,
 		    final String serviceId, final String resourceId, 
-		    final Recipient recipient, final JSONArray conditions)
+		    final Recipient recipient, 
+		    final JSONArray conditions)
 		{  	
 	    	SessionKey sessionKey = SensiNact.this.sessions.get(
 	    			new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
@@ -605,12 +774,18 @@ public class SensiNact implements Core
 	        {
 	        	if(sessionKey.localID()!=0)
 	        	{
-	        		return new JSONObject(AccessMethodResponse.error(mediator, 
+	        		AccessMethodResponse response = AccessMethodResponse.error(mediator, 
 	        			uri, AccessMethod.SUBSCRIBE, 404, new StringBuilder().append(
 	        			"Resource ").append(uri).append("not found"
-	        				).toString(), null).getJSON());
+	        				).toString(), null);
+	        		
+			        if(requestId != null)
+			        {
+			        	response.put(AccessMethod.REQUEST_ID_KEY, requestId);
+			        }
+			        return new JSONObject(response.getJSON());
 	        	}
-	        	return AccessController.doPrivileged(new PrivilegedAction<JSONObject>()
+	        	JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>()
 				{
 					@Override
 		            public JSONObject run()
@@ -620,6 +795,11 @@ public class SensiNact implements Core
 				    		conditions);
 		            }
 				});
+		        if(requestId != null)
+		        {
+		        	object.put(AccessMethod.REQUEST_ID_KEY, requestId);
+		        }
+		        return object;
 	        }	
 			SubscribeResponse response = null;
         	if(!resource.getType().equals(Resource.Type.ACTION))
@@ -648,7 +828,10 @@ public class SensiNact implements Core
 						resourceId);
 			}
 	        JSONObject object= new JSONObject(response.getJSON());
-
+	        if(requestId != null)
+	        {
+	        	object.put(AccessMethod.REQUEST_ID_KEY, requestId);
+	        }
         	if(sessionKey.localID()!=0)
         	{
         		object.remove("uri");
@@ -663,7 +846,22 @@ public class SensiNact implements Core
 		 * @see org.eclipse.sensinact.gateway.core.Session#
 		 * unsubscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 		 */
-		public JSONObject unsubscribe(final String serviceProviderId,
+	    @Override
+		public JSONObject unsubscribe(String serviceProviderId,
+		     String serviceId, final String resourceId,  String subscriptionId)
+		{ 
+	    	return  unsubscribe(null, serviceProviderId, serviceId, 
+	    			resourceId,  subscriptionId);
+		}
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Session#
+		 * unsubscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+		 */
+	    @Override
+		public JSONObject unsubscribe(String requestId, 
+				final String serviceProviderId,
 		        final String serviceId, final String resourceId, 
 		        final String subscriptionId)
 		{ 
@@ -681,12 +879,19 @@ public class SensiNact implements Core
 	        {
 	        	if(sessionKey.localID()!=0)
 	        	{
-	        		return new JSONObject(AccessMethodResponse.error(mediator, 
+	        		AccessMethodResponse response = AccessMethodResponse.error(mediator, 
 	        			uri, AccessMethod.UNSUBSCRIBE, 404, new StringBuilder().append(
 	        			"Resource ").append(uri).append("not found"
-	        				).toString(), null).getJSON());
+	        				).toString(), null);
+
+			        if(requestId != null)
+			        {
+			        	response.put(AccessMethod.REQUEST_ID_KEY, requestId);
+			        }
+			        return new JSONObject(response.getJSON());
 	        	}
-	        	return AccessController.doPrivileged(new PrivilegedAction<JSONObject>()
+	        	JSONObject object = AccessController.doPrivileged(
+	        	new PrivilegedAction<JSONObject>()
 				{
 					@Override
 		            public JSONObject run()
@@ -695,6 +900,11 @@ public class SensiNact implements Core
 				    		serviceProviderId, serviceId, resourceId, subscriptionId);
 		            }
 				});
+		        if(requestId != null)
+		        {
+		        	object.put(AccessMethod.REQUEST_ID_KEY, requestId);
+		        }
+		        return object;
 	        }
 			UnsubscribeResponse response =null;
         	if(!resource.getType().equals(Resource.Type.ACTION))
@@ -706,7 +916,10 @@ public class SensiNact implements Core
 					AccessMethod.UNSUBSCRIBE), serviceProviderId,serviceId, resourceId);
 			}
 	        JSONObject object= new JSONObject(response.getJSON());
-
+	        if(requestId != null)
+	        {
+	        	object.put(AccessMethod.REQUEST_ID_KEY, requestId);
+	        }
         	if(sessionKey.localID()!=0)
         	{
         		object.remove("uri");
@@ -718,22 +931,37 @@ public class SensiNact implements Core
 		/**
 		 * @inheritDoc
 		 *
-		 * @see org.eclipse.sensinact.gateway.core.Endpoint#jsonProviders()
+		 * @see org.eclipse.sensinact.gateway.core.Session#
+		 * getProviders()
 		 */
 		@Override
 		public String getProviders()
 		{
-			return this.getProviders(null);
+			return this.getProviders(null,null);
 		}
 
 		/**
 		 * @inheritDoc
 		 *
-		 * @see org.eclipse.sensinact.gateway.core.Session#getProviders(org.eclipse.sensinact.gateway.core.FilteringDefinition)
+		 * @see org.eclipse.sensinact.gateway.core.Session#
+		 * getProviders(org.eclipse.sensinact.gateway.core.FilteringDefinition)
 		 */
 		@Override
 		public String getProviders(final FilteringDefinition 
 				filterDefinition)
+		{ 
+			return getProviders(null,filterDefinition);
+		}
+		
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Session#
+		 * getProviders(java.lang.String, org.eclipse.sensinact.gateway.core.FilteringDefinition)
+		 */
+		@Override
+		public String getProviders(final String requestId, 
+				final FilteringDefinition filterDefinition)
 		{ 
 			return AccessController.doPrivileged(
 				 new PrivilegedAction<String>()
@@ -743,9 +971,20 @@ public class SensiNact implements Core
 	           {
 			    	return SensiNact.this.getProviders(
 			    		SensiNactSession.this.getSessionId(), 
-			    		filterDefinition);
+			    		requestId, filterDefinition);
 	           }
 			 });
+		}
+		
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Endpoint#jsonProvider(java.lang.String)
+		 */
+		@Override
+		public String getProvider(String serviceProviderId)
+		{	 
+	    	return getProvider(null, serviceProviderId);
 		}
 
 		/**
@@ -754,7 +993,8 @@ public class SensiNact implements Core
 		 * @see org.eclipse.sensinact.gateway.core.Endpoint#jsonProvider(java.lang.String)
 		 */
 		@Override
-		public String getProvider(final String serviceProviderId)
+		public String getProvider(final String requestId, 
+				final String serviceProviderId)
 		{	 
 	    	SessionKey sessionKey = SensiNact.this.sessions.get(
 	    			new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
@@ -768,10 +1008,16 @@ public class SensiNact implements Core
 	        {
 	        	if(sessionKey.localID()!=0)
 	        	{
-	        		return AccessMethodResponse.error(mediator, 
+	        		AccessMethodResponse response = AccessMethodResponse.error(mediator, 
 	        			uri, AccessMethod.DESCRIBE, 404, new StringBuilder(
 	        			).append("Service provider ").append(uri).append(
-	        				"not found").toString(), null).getJSON();
+	        				"not found").toString(), null);
+	        		
+	        		if(requestId != null)
+	        		{
+	        			response.put(AccessMethod.REQUEST_ID_KEY, requestId);
+	        		}
+	        		return response.getJSON();
 	        	}
 	        	return AccessController.doPrivileged(
 	        		new PrivilegedAction<String>()
@@ -787,6 +1033,14 @@ public class SensiNact implements Core
 	        }
 	        StringBuilder builder = new StringBuilder();
 	        builder.append("{");
+    		if(requestId != null)
+    		{
+    			builder.append("\"");
+    			builder.append(AccessMethod.REQUEST_ID_KEY);
+    			builder.append("\" : \"");
+    			builder.append(requestId);
+    			builder.append("\",");
+    		}
 	        builder.append("\"type\": \"DESCRIBE_RESPONSE\", \"uri\":\"");
 	        builder.append(uri);
 	        builder.append("\",\"statusCode\": 200, \"response\":");
@@ -805,7 +1059,7 @@ public class SensiNact implements Core
 		{	
 			return this.getServices(serviceProviderId, null);
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 *
@@ -814,6 +1068,20 @@ public class SensiNact implements Core
 		 */
 		@Override
 		public String getServices(final String serviceProviderId,
+		        FilteringDefinition filterDefinition)
+		{	    	
+            return getServices(null,serviceProviderId, filterDefinition);
+		}
+		
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Session#
+		 * getServices(java.lang.String, org.eclipse.sensinact.gateway.core.FilteringDefinition)
+		 */
+		@Override
+		public String getServices(final String requestId,
+				final String serviceProviderId,
 		        FilteringDefinition filterDefinition)
 		{
 	    	SessionKey sessionKey = SensiNact.this.sessions.get(
@@ -829,10 +1097,16 @@ public class SensiNact implements Core
 	        {
 	        	if(sessionKey.localID()!=0)
 	        	{
-	        		return AccessMethodResponse.error(mediator, 
+	        		AccessMethodResponse response = AccessMethodResponse.error(mediator, 
 	        			uri, AccessMethod.DESCRIBE, 404, new StringBuilder(
 	        			).append("Service provider ").append(uri).append(
-	        				"not found").toString(), null).getJSON();
+	        				"not found").toString(), null);
+	        		
+	        		if(requestId != null)
+	        		{
+	        			response.put(AccessMethod.REQUEST_ID_KEY, requestId);
+	        		}
+	        		return response.getJSON();
 	        	}
 	        	services = AccessController.doPrivileged(
 	        		new PrivilegedAction<String>()
@@ -870,7 +1144,14 @@ public class SensiNact implements Core
 	        String result = null;
 	        StringBuilder builder = new StringBuilder();
 	        builder.append("{");
-	        
+    		if(requestId != null)
+    		{
+    			builder.append("\"");
+    			builder.append(AccessMethod.REQUEST_ID_KEY);
+    			builder.append("\" : \"");
+    			builder.append(requestId);
+    			builder.append("\",");
+    		}
         	if(filterDefinition != null)
     		{
         		builder.append("\"filter\":{");
@@ -906,6 +1187,19 @@ public class SensiNact implements Core
 		public String getService(final String serviceProviderId,
 				final String serviceId)
 		{   
+	        return getService(null,serviceProviderId, serviceId);
+		}
+		
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Endpoint#jsonService(java.lang.String, java.lang.String)
+		 */
+		@Override
+		public String getService(final String requestId,
+				final String serviceProviderId,
+				final String serviceId)
+		{   
 	    	SessionKey sessionKey = SensiNact.this.sessions.get(
 	    			new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
 	    				this.getSessionId()));
@@ -919,10 +1213,16 @@ public class SensiNact implements Core
 	        {
 	        	if(sessionKey.localID()!=0)
 	        	{
-	        		return AccessMethodResponse.error(mediator, 
+	        		AccessMethodResponse response = AccessMethodResponse.error(mediator, 
 	        			uri, AccessMethod.DESCRIBE, 404, new StringBuilder(
 	        			).append("Service ").append(uri).append(
-	        				"not found").toString(), null).getJSON();
+	        				"not found").toString(), null);
+	        		
+	        		if(requestId != null)
+	        		{
+	        			response.put(AccessMethod.REQUEST_ID_KEY, requestId);
+	        		}
+	        		return response.getJSON();
 	        	}
 	        	return AccessController.doPrivileged(
 	        		new PrivilegedAction<String>()
@@ -938,6 +1238,23 @@ public class SensiNact implements Core
 	        }
 	        StringBuilder builder = new StringBuilder();
 	        builder.append("{");
+    		if(requestId != null)
+    		{
+    			builder.append("\"");
+    			builder.append(AccessMethod.REQUEST_ID_KEY);
+    			builder.append("\"");
+    			builder.append(": \"");
+    			builder.append(requestId);
+    			builder.append("\",");
+    		}
+    		if(requestId != null)
+    		{
+    			builder.append("\"");
+    			builder.append(AccessMethod.REQUEST_ID_KEY);
+    			builder.append("\" : \"");
+    			builder.append(requestId);
+    			builder.append("\",");
+    		}	        
 	        builder.append("\"type\": \"DESCRIBE_RESPONSE\", \"uri\":\"");
 	        builder.append(uri);
 	        builder.append("\",\"statusCode\": 200, \"response\":");
@@ -970,6 +1287,22 @@ public class SensiNact implements Core
 		public String getResources(final String serviceProviderId,
 		        final String serviceId, FilteringDefinition filterDefinition)
 		{ 		 
+            return getResources(null, serviceProviderId, serviceId,
+            		filterDefinition);
+		}		
+
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Session#
+		 * getResources(java.lang.String, java.lang.String, 
+		 * org.eclipse.sensinact.gateway.core.FilteringDefinition)
+		 */
+		@Override
+		public String getResources(String requestId, 
+			final String serviceProviderId, final String serviceId, 
+			FilteringDefinition filterDefinition)
+		{ 		 
 	    	SessionKey sessionKey = SensiNact.this.sessions.get(
 	    		new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
 	    			this.getSessionId()));
@@ -984,10 +1317,16 @@ public class SensiNact implements Core
 	        {
 	        	if(sessionKey.localID()!=0)
 	        	{
-	        		return AccessMethodResponse.error(mediator, 
+	        		AccessMethodResponse response = AccessMethodResponse.error(mediator, 
 	        			uri, AccessMethod.DESCRIBE, 404, new StringBuilder(
 	        			).append("Service ").append(uri).append(
-	        				"not found").toString(), null).getJSON();
+	        				"not found").toString(), null);
+	        		
+	        		if(requestId != null)
+	        		{
+	        			response.put(AccessMethod.REQUEST_ID_KEY, requestId);
+	        		}
+	        		return response.getJSON();
 	        	}
 	        	resources = AccessController.doPrivileged(
 	        		new PrivilegedAction<String>()
@@ -1025,7 +1364,16 @@ public class SensiNact implements Core
 	        String result = null;
 	        StringBuilder builder = new StringBuilder();
 	        builder.append("{");
-	        
+
+    		if(requestId != null)
+    		{
+    			builder.append("\"");
+    			builder.append(AccessMethod.REQUEST_ID_KEY);
+    			builder.append("\"");
+    			builder.append(": \"");
+    			builder.append(requestId);
+    			builder.append("\",");
+    		}
         	if(filterDefinition != null)
     		{
         		builder.append("\"filter\":{");
@@ -1050,8 +1398,8 @@ public class SensiNact implements Core
 	        builder.append(result);
 	        builder.append("}");
             return builder.toString();
-		}		
-
+		}
+		
 		/**
 		 * @inheritDoc
 		 *
@@ -1063,10 +1411,47 @@ public class SensiNact implements Core
 				final String serviceProviderId,
 				final String serviceId,
 		        final String resourceId)
+		{   	
+            return getResource(null,serviceProviderId, serviceId, resourceId);
+		}
+		
+		/**
+		 * @inheritDoc
+		 *
+		 * @see org.eclipse.sensinact.gateway.core.Session#
+		 * getResource(java.lang.String, java.lang.String, java.lang.String)
+		 */
+		@Override
+		public String getResource(
+				final String requestId,
+				final String serviceProviderId,
+				final String serviceId,
+		        final String resourceId)
 		{      		 
-			Resource resource = this.resource(serviceProviderId,serviceId,resourceId);
-			if(resource == null)
+    		SessionKey sessionKey = SensiNact.this.sessions.get(
+    				new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
+    						this.getSessionId()));
+    		
+    		String uri = getUri((sessionKey.localID()!=0), serviceProviderId,
+    				serviceId, resourceId);
+    		
+			Resource resource = this.resource(serviceProviderId, serviceId, resourceId);
+    		
+    		if(resource == null)
 			{
+	        	if(sessionKey.localID()!=0)
+	        	{
+	        		AccessMethodResponse response = AccessMethodResponse.error(mediator, 
+	        			uri, AccessMethod.DESCRIBE, 404, new StringBuilder(
+	        			).append("Resource ").append(uri).append(
+	        				"not found").toString(), null);
+	        		
+	        		if(requestId != null)
+	        		{
+	        			response.put(AccessMethod.REQUEST_ID_KEY, requestId);
+	        		}
+	        		return response.getJSON();
+	        	 }
     			 return AccessController.doPrivileged(
     					 new PrivilegedAction<String>()
     			 {
@@ -1081,15 +1466,16 @@ public class SensiNact implements Core
     	            }
     			 });
 			}
-    		SessionKey sessionKey = SensiNact.this.sessions.get(
-    				new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
-    						this.getSessionId()));
-    		
-    		String uri = getUri((sessionKey.localID()!=0), 
-    			serviceProviderId, serviceId, resourceId);
-    		
         	StringBuilder builder = new StringBuilder();
         	builder.append("{");
+    		if(requestId != null)
+    		{
+    			builder.append("\"");
+    			builder.append(AccessMethod.REQUEST_ID_KEY);
+    			builder.append("\" : \"");
+    			builder.append(requestId);
+    			builder.append("\",");
+    		}
         	builder.append("\"type\":\"DESCRIBE_RESPONSE\",\"uri\":\"");
         	builder.append(uri);
         	builder.append("\",\"statusCode\":200,\"response\":");
@@ -2722,8 +3108,8 @@ public class SensiNact implements Core
      * 
      * @return the JSON formated list of available service providers
      */
-	protected String getProviders(String identifier, 
-			FilteringDefinition filterDefinition) 
+	protected String getProviders(String identifier,
+			 String requestId, FilteringDefinition filterDefinition) 
 	{		
 		final SessionKey sessionKey =  sessions.get(
 			new KeyExtractor<KeyExtractorType>(
@@ -2761,10 +3147,17 @@ public class SensiNact implements Core
 				return null;
 			}	
 		});
+		String result = null;
 		StringBuilder builder = new StringBuilder();
 		builder.append("{");
-		String result = null;
-		
+		if(requestId != null)
+		{
+			builder.append("\"");
+			builder.append(AccessMethod.REQUEST_ID_KEY);
+			builder.append("\" : \"");
+			builder.append(requestId);
+			builder.append("\",");
+		}		
 		if(filterDefinition != null)
 		{
 			builder.append("\"filter\":{");
@@ -2775,7 +3168,7 @@ public class SensiNact implements Core
 			builder.append(filterDefinition.filter);
 			builder.append("\"},");
 			
-			result = SensiNact.this.<String>callPostFilter(
+			result = SensiNact.this.callPostFilter(
 				filterDefinition.type, filterDefinition.filter, 
 				new StringBuilder().append("[").append(
 				content.toString()).append("]"
@@ -2814,8 +3207,8 @@ public class SensiNact implements Core
   	 * @return the JSON formated list of the resource model instances for 
   	 * the specified {@link Session} and compliant to the specified filter.
   	 */
-	protected String getAll(String identifier, final String filter,
-			FilteringDefinition filterDefinition)
+	protected String getAll(String identifier, String requestId, 
+		final String filter, FilteringDefinition filterDefinition)
 	{
 		final SessionKey sessionKey =  sessions.get(
 			new KeyExtractor<KeyExtractorType>(
@@ -2853,10 +3246,17 @@ public class SensiNact implements Core
 				return null;
 			}	
 		});
+		String result = null;
 		StringBuilder builder = new StringBuilder();
 		builder.append("{");
-		String result = null;
-		
+		if(requestId != null)
+		{
+			builder.append("\"");
+			builder.append(AccessMethod.REQUEST_ID_KEY);
+			builder.append("\" : \"");
+			builder.append(requestId);
+			builder.append("\",");
+		}
 		if(filterDefinition != null)
 		{
 			builder.append("\"filter\":{");

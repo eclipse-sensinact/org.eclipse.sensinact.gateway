@@ -22,7 +22,6 @@ import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
-import org.eclipse.sensinact.gateway.core.security.SessionKey;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.osgi.framework.ServiceRegistration;
 

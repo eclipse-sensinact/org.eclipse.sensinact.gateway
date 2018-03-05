@@ -109,7 +109,30 @@ public interface Session
      */
     JSONObject get(String serviceProviderId, String serviceId, String resourceId, 
      		String attributeId);
-
+    
+    /**
+     * Invokes the GET access method on the resource whose String identifier
+     * is passed as parameter, held by the specified service provider and 
+     * service
+     * 
+   	 * @param requestId the String identifier of the request, and to be
+   	 * reported into the response
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service providing the resource
+     * on which applies the access method call
+     * @param serviceId the String identifier of the service providing
+     * the resource on which applies the access method call
+     * @param resourceId the String identifier  of the resource 
+     * on which applies the access method call
+     * @param attributeId the String identifier of the resource's attribute 
+     * targeted by the access method call 
+     * 
+     * @return the JSON formated response of the GET access method 
+     * invocation, tagged by the specified request identifier
+     */
+    JSONObject get(String requestId, String serviceProviderId, String serviceId, String resourceId, 
+     		String attributeId);
+    
     /** 
      * Invokes the SET access method on the resource whose String identifier
      * is passed as parameter, held by the specified service provider and 
@@ -134,6 +157,31 @@ public interface Session
             String attributeId, Object parameter);
 
     /** 
+     * Invokes the SET access method on the resource whose String identifier
+     * is passed as parameter, held by the specified service provider and 
+     * service
+     * 
+   	 * @param requestId the String identifier of the request, and to be
+   	 * reported into the response
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service providing the resource
+     * on which applies the access method call
+     * @param serviceId the String identifier of the service providing
+     * the resource on which applies the access method call
+     * @param resourceId the String identifier  of the resource 
+     * on which applies the access method call
+     * @param attributeId the String identifier of the resource's attribute 
+     * targeted by the access method call 
+     * @param parameter the value object to be set
+     * 
+     * @return the JSON formated response of the SET access method 
+     * invocation, tagged by the specified request identifier
+     */
+    JSONObject set(String requestId, String serviceProviderId,
+            String serviceId, String resourceId, 
+            String attributeId, Object parameter);
+    
+    /** 
      * Invokes the ACT access method on the resource whose String identifier
      * is passed as parameter, held by the specified service provider and 
      * service
@@ -153,7 +201,30 @@ public interface Session
      */
     JSONObject act(String serviceProviderId, String serviceId, 
     	String resourceId, Object[] parameters );
-     
+    
+    /** 
+     * Invokes the ACT access method on the resource whose String identifier
+     * is passed as parameter, held by the specified service provider and 
+     * service
+     * 
+   	 * @param requestId the String identifier of the request, and to be
+   	 * reported into the response
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service providing the resource
+     * on which applies the access method call
+     * @param serviceId the String identifier of the service providing
+     * the resource on which applies the access method call
+     * @param resourceId the String identifier  of the resource 
+     * on which applies the access method call
+     * @param parameters the Objects array parameterizing the 
+     * call 
+     * 
+     * @return the JSON formated response of the ACT access method 
+     * invocation, tagged by the specified request identifier
+     */
+    JSONObject act(String requestId, String serviceProviderId, String serviceId, 
+    	String resourceId, Object[] parameters );
+    
     /** 
      * Invokes the SUBSCRIBE access method on the resource whose String 
      * identifier is passed as parameter, held by the specified service 
@@ -176,7 +247,32 @@ public interface Session
      */
     JSONObject subscribe(String serviceProviderId, String serviceId, 
     	String resourceId, Recipient recipient, JSONArray conditions);
-	
+
+    /** 
+     * Invokes the SUBSCRIBE access method on the resource whose String 
+     * identifier is passed as parameter, held by the specified service 
+     * provider and service
+     * 
+   	 * @param requestId the String identifier of the request, and to be
+   	 * reported into the response
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service providing the resource
+     * on which applies the access method call
+     * @param serviceId the String identifier of the service providing
+     * the resource on which applies the access method call
+     * @param resourceId the String identifier  of the resource 
+     * on which applies the access method call
+     * @param recipient the {@link Recipient} to which the update events
+     * generated by the subscription will be transmitted
+     * @param conditions the JSON formated set of constraints applying
+     * on the subscription to be created
+     * 
+     * @return the JSON formated response of the SUBSCRIBE access method 
+     * invocation, tagged by the specified request identifier
+     */
+    JSONObject subscribe(String requestId, String serviceProviderId, String serviceId, 
+    	String resourceId, Recipient recipient, JSONArray conditions);
+    
     /** 
      * Invokes the UNSUBSCRIBE access method on the resource whose String 
      * identifier is passed as parameter, held by the specified service 
@@ -199,6 +295,30 @@ public interface Session
              String serviceId, String resourceId, 
             String subscriptionId );
 
+    /** 
+     * Invokes the UNSUBSCRIBE access method on the resource whose String 
+     * identifier is passed as parameter, held by the specified service 
+     * provider and service
+     * 
+   	 * @param requestId the String identifier of the request, and to be
+   	 * reported into the response
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service providing the resource
+     * on which applies the access method call
+     * @param serviceId the String identifier of the service providing
+     * the resource on which applies the access method call
+     * @param resourceId the String identifier  of the resource 
+     * on which applies the access method call
+     * @param subscriptionId the String identifier of the subscription
+     * to be deleted
+     * 
+     * @return the JSON formated response of the UNSUBSCRIBE access method 
+     * invocation, tagged by the specified request identifier
+     */
+    JSONObject unsubscribe(String requestId, String serviceProviderId,
+             String serviceId, String resourceId, 
+            String subscriptionId );
+    
  	/**
  	 * Creates and registers an {@link SnaAgent} attached to this Session
  	 * and that will be unregistered when this last one will disappear
@@ -213,7 +333,24 @@ public interface Session
  	 */
  	JSONObject registerSessionAgent(final MidAgentCallback callback, 
  			final SnaFilter filter);
-
+ 	/**
+ 	 * Creates and registers an {@link SnaAgent} attached to this Session
+ 	 * and that will be unregistered when this last one will disappear
+ 	 * 
+   	 * @param requestId the String identifier of the request, and to be
+   	 * reported into the response
+ 	 * @param callback the {@link MidAgentCallback} of the {@link SnaAgent}
+ 	 * to be created
+ 	 * @param filter the {@link SnaFilter} of the {@link SnaAgent}
+ 	 * to be created
+ 	 * 
+ 	 * @return the JSON formated result of the {@link SnaAgent} 
+ 	 * registration, including its String identifier, tagged by 
+ 	 * the specified request identifier
+ 	 */
+ 	JSONObject registerSessionAgent(String requestId, final MidAgentCallback callback, 
+ 			final SnaFilter filter);
+ 	
  	/**
  	 * Unregisters the {@link SnaAgent} attached to this Session
  	 * and whose String identifier is passed as parameter
@@ -225,6 +362,20 @@ public interface Session
  	 * unregistration 
  	 */
  	JSONObject unregisterSessionAgent(String agentId);
+
+ 	/**
+ 	 * Unregisters the {@link SnaAgent} attached to this Session
+ 	 * and whose String identifier is passed as parameter
+ 	 * 
+   	 * @param requestId the String identifier of the request, and to be
+   	 * reported into the response
+ 	 * @param agentId the String identifier of the linked {@link 
+ 	 * SnaAgent} to be unregistered
+ 	 * 
+ 	 * @return the JSON formated result of the {@link SnaAgent} 
+ 	 * unregistration, tagged by the specified request identifier.
+ 	 */
+ 	JSONObject unregisterSessionAgent(String requestId, String agentId);
  	
     /**
    	 * Returns the JSON formated list of all registered resource 
@@ -280,7 +431,26 @@ public interface Session
   	 * LDAP formated filter.
   	 */
    	String getAll(String filter, FilteringDefinition filterDefinition);
-     
+
+   	/**
+  	 * Returns the JSON formated list of all registered resource 
+  	 * model instances, accessible to this Session and compliant 
+  	 * to the specified String LDAP formated filter, from the local 
+  	 * sensiNact instance, as well as from the connected remote ones 
+  	 * 
+   	 * @param requestId the String identifier of the request, and to be
+   	 * reported into the response
+  	 * @param filter the String LDAP formated filter allowing to 
+  	 * discriminate the selected elements
+   	 * @param filterDefinition the definition of the filter to be 
+   	 * applied on the result of the call
+  	 * 
+  	 * @return the JSON formated and filtered list of the resource 
+  	 * model instances for this Session and compliant to the specified 
+  	 * LDAP formated filter, tagged by the specified request identifier.
+  	 */
+   	String getAll(String requestId, String filter, 
+   			FilteringDefinition filterDefinition);
 
     /**
      * Returns the JSON formated list of available service providers for
@@ -301,8 +471,22 @@ public interface Session
      * providers
      */
     String getProviders(FilteringDefinition filterDefinition);
-    
+
     /**
+     * Returns the JSON formated list of available service providers for
+     * the user whose public key is passed as parameter
+     *  
+   	 * @param requestId the String identifier of the request, and to be
+   	 * reported into the response
+   	 * @param filterDefinition the definition of the filter to be 
+   	 * applied on the result of the call
+   	 * 
+     * @return the JSON formated and filtered list of available service 
+     * providers, tagged by the specified request identifier
+     */
+	String getProviders(String requestId, FilteringDefinition filterDefinition); 	
+    
+	/**
      * Returns the JSON formated description of the service provider whose
      * String identifier is passed as parameter
      * 
@@ -312,6 +496,20 @@ public interface Session
      * @return the JSON formated description of the specified service provider
      */
     String getProvider(String serviceProviderId);
+
+    /**
+     * Returns the JSON formated description of the service provider 
+     * whose String identifier is passed as parameter
+     *  
+   	 * @param requestId the String identifier of the request, and to be
+   	 * reported into the response
+     * @param serviceProviderId the String identifier of the 
+     * service provider
+   	 * 
+     * @return the JSON formated description of the specified service 
+     * provider, tagged by the specified request identifier
+     */
+	String getProvider(String requestId, String serviceProviderId); 	
 
     /**
      * Returns the JSON formated list of available services for the service 
@@ -339,7 +537,25 @@ public interface Session
      */
     String getServices(String serviceProviderId,
     		FilteringDefinition filterDefinition);
-   
+
+    /**
+     * Returns the JSON formated list of available service providers for
+     * the user whose public key is passed as parameter
+     *  
+   	 * @param requestId the String identifier of the request, and to be
+   	 * reported into the response
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the services     * 
+   	 * @param filterDefinition the definition of the filter to be 
+   	 * applied on the result of the call
+   	 * 
+     * @return the JSON formated and filtered list of available services
+     * for the specified service providers, tagged by the specified 
+     * request identifier
+     */
+    String getServices(String requestId, String serviceProviderId,
+    		FilteringDefinition filterDefinition);
+    
     /**
      * Returns the JSON formated description of the service whose String
      * identifier is passed as parameter, and held by the specified service 
@@ -354,6 +570,23 @@ public interface Session
      */
     String getService(String serviceProviderId,String serviceId);
 
+    /**
+     * Returns the JSON formated description of the service whose String
+     * identifier is passed as parameter, and held by the specified service 
+     * provider
+     * 
+   	 * @param requestId the String identifier of the request, and to be
+   	 * reported into the response
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service
+     * @param serviceId the String identifier of the service to return the 
+     * description of
+     * 
+     * @return the JSON formated description of the specified 
+     * service, tagged by the specified request identifier
+     */
+	String getService(String requestId, String serviceProviderId, String serviceId);
+	
     /**
      * Returns the JSON formated list of available resources, for the service 
      * and service provider whose String identifiers are passed as parameter
@@ -386,6 +619,26 @@ public interface Session
     		FilteringDefinition filterDefinition);
     
     /**
+     * Returns the JSON formated list of available service providers for
+     * the user whose public key is passed as parameter
+     *  
+   	 * @param requestId the String identifier of the request, and to be
+   	 * reported into the response
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service
+     * @param serviceId the String identifier of the service providing 
+     * the resources
+   	 * @param filterDefinition the definition of the filter to be 
+   	 * applied on the result of the call
+   	 * 
+     * @return the JSON formated and filtered list of available resources 
+     * for the specified service provider and service, tagged by the 
+     * specified request identifier
+     */
+	String getResources(String requestId, String serviceProviderId, String serviceId,
+			FilteringDefinition filterDefinition);
+	
+    /**
      * Returns the JSON formated description of the resource whose String
      * identifier is passed as parameter, and held by the service 
      * provider and service whose String identifiers are also passed as 
@@ -400,5 +653,25 @@ public interface Session
      * 
      * @return the JSON formated description of the specified resource
      */
-    String getResource(String serviceProviderId, String serviceId, String resourceId); 	
+    String getResource(String serviceProviderId, String serviceId, String resourceId);
+    
+    /**
+     * Returns the JSON formated description of the resource whose String
+     * identifier is passed as parameter, and held by the service 
+     * provider and service whose String identifiers are also passed as 
+     * parameter
+     * 
+   	 * @param requestId the String identifier of the request, and to be
+   	 * reported into the response
+     * @param serviceProviderId the String identifier of the 
+     * service provider holding the service, providing the resource
+     * @param serviceId the String identifier of the service providing
+     * the resource
+     * @param resourceId the String identifier  of the resource 
+     * to return the description of
+     * 
+     * @return the JSON formated description of the specified 
+     * resource, tagged by the specified request identifier
+     */
+	String getResource(String requestId, String serviceProviderId, String serviceId, String resourceId);
 }
