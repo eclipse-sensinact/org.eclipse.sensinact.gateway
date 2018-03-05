@@ -78,7 +78,11 @@ public class NorthboundMediator extends Mediator
 	//********************************************************************//
 	//						INSTANCE DECLARATIONS						  //
 	//********************************************************************//
-
+	
+	NorthboundEndpoints northboundEndpoints ;
+	
+	LoginEndpoint loginEndpoint ;
+	
 	/**
 	 * Constructor
 	 * 
@@ -89,8 +93,10 @@ public class NorthboundMediator extends Mediator
 	public NorthboundMediator(BundleContext context)
 	{
 		super(context);
+		this.northboundEndpoints = new NorthboundEndpoints(this);
+		this.loginEndpoint = new LoginEndpoint(this);
 	}
-	
+
 	/**
 	 * Returns a {@link Session} for the user whose authentication
 	 * material is passed as parameter
@@ -104,7 +110,6 @@ public class NorthboundMediator extends Mediator
 	{	
 		return super.callService(Core.class, new SessionExecutor(authentication));
 	}
-
 	
 	/**
 	 * Returns a {@link Session} for an anonymous user
@@ -114,5 +119,27 @@ public class NorthboundMediator extends Mediator
 	public Session getSession() throws InvalidCredentialException 
 	{
 		return getSession(null);
+	}
+
+	/**
+	 * Returns the {@link NorthboundEndpoints} attached to this
+	 * NorthboundMediator
+	 * 
+	 * @return this NorthboundMediator's {@link NorthboundEndpoints}
+	 */
+	public NorthboundEndpoints getNorthboundEndpoints()
+	{
+		return this.northboundEndpoints;
+	}
+	
+	/**
+	 * Returns the {@link LoginEndpoint} attached to this
+	 * NorthboundMediator
+	 * 
+	 * @return this NorthboundMediator's {@link LoginEndpoint}
+	 */
+	public LoginEndpoint getLoginEndpoint()
+	{
+		return this.loginEndpoint;
 	}
 }

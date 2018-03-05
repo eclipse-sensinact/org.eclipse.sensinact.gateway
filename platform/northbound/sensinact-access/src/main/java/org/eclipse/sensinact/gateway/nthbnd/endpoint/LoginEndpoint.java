@@ -16,16 +16,15 @@ import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 
 /**
- * A LoginEndpoint is a connection point to a sensiNact 
- * allowing to create an {@link NorthboundEndpoint} for a 
- * specific user or to reactivate an existing one
+ * A LoginEndpoint is a connection point to a sensiNact instance
+ * allowing to create an {@link NorthboundEndpoint} for a specific 
+ * user or to reactivate an existing one
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class LoginEndpoint
 {		
 	private NorthboundMediator mediator;
-	private NorthboundEndpoints endpoints;
 
 	/**
 	 * Constructor
@@ -33,17 +32,12 @@ public class LoginEndpoint
 	 * @param mediator the {@link NorthboundMediator} that will allow
 	 * the LoginEndpoint to be instantiated to interact with the
 	 * OSGi host environment
-	 * @param endpoints the {@link NorthboundEndpoints} that will allow
-	 * the LoginEndpoint to be instantiated to interact with the collection
-	 * of already existing {@link NorthboundEndpoint}s
 	 * 
 	 * @throws InvalidCredentialException
 	 */
-	public LoginEndpoint(NorthboundMediator mediator,
-			NorthboundEndpoints endpoints) 
+	public LoginEndpoint(NorthboundMediator mediator) 
 	{
 		this.mediator = mediator;
-		this.endpoints = endpoints;
 	}	
 
 	/**
@@ -64,8 +58,8 @@ public class LoginEndpoint
 		{
 			try 
 			{
-				northboundEndpoint = this.endpoints.add(
-					new NorthboundEndpoint(this.mediator, 
+				northboundEndpoint = this.mediator.getNorthboundEndpoints(
+					).add(new NorthboundEndpoint(this.mediator, 
 						credentials));
 
 			} catch (InvalidCredentialException e) 
@@ -84,7 +78,7 @@ public class LoginEndpoint
 	 * @param token the String identifier of the {@link Session} attached
 	 * to the {@link NorthboundEndpoint} to be reactivated
 	 * 
-	 * @return true if the appropiate the {@link NorthboundEndpoint} has 
+	 * @return true if the appropriate the {@link NorthboundEndpoint} has 
 	 * been reactivated; false otherwise
 	 */
 	public boolean reactivateEndpoint(AuthenticationToken token) 
@@ -98,7 +92,8 @@ public class LoginEndpoint
 		{
 			try
 			{			
-				northboundEndpoint = endpoints.getEndpoint(token);
+				northboundEndpoint = this.mediator.getNorthboundEndpoints(
+					).getEndpoint(token);
 				
 			} catch(InvalidCredentialException | NullPointerException e)
 			{
