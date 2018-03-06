@@ -50,7 +50,7 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
 
     private Provider buildProvider(MqttPropertyFileConfig configFile) throws Exception{
 
-        Provider provider = new Provider();
+        final Provider provider = new Provider();
         provider.setName(configFile.getId());
         Service serviceAdmin = new Service(provider);
         serviceAdmin.setName("admin");
@@ -126,14 +126,13 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
 
         LOG.debug("Updating MQTT Bus service {}", configFile.getId());
 
-        Provider provider = null;
         try {
-            provider = buildProvider(configFile);
+            Provider provider = buildProvider(configFile);
             Dictionary<String,String> properties = new Hashtable<String,String>();
 
             if(provider != null) {
                 registration.put(serviceReference.getProperty("service.pid").toString(),
-                        bundleContext.registerService(Provider.class, provider, properties));
+                        bundleContext.registerService(Provider.class.getName(), provider, properties));
             }
 
         } catch (Exception e) {

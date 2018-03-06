@@ -17,7 +17,7 @@ import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.device.mqtt.lite.it.util.MqttTestITAbstract;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.SmartTopicPacket;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttPacket;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -91,7 +91,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     @Ignore
     public void providerRemoval() throws Exception {
         providerCreation();
-        SmartTopicPacket packet = new SmartTopicPacket("myprovider");
+        MqttPacket packet = new MqttPacket("myprovider");
         packet.setGoodbyeMessage(true);
         JSONObject obj = new JSONObject(sensinactSession.getProviders());
         JSONArray providers = obj.getJSONArray("providers");

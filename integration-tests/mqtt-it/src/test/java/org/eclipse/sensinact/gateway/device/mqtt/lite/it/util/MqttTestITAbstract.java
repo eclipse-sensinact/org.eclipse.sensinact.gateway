@@ -51,7 +51,7 @@ public abstract class MqttTestITAbstract {
 
     protected static final String SENSINACT_HTTP_PORT="8097";
     protected static final String SENSINACT_VERSION="1.5-SNAPSHOT";
-    protected static final String MQTT_HOST ="test.mosquitto.org";
+    protected static final String MQTT_HOST ="127.0.0.1";
     protected static final Integer MQTT_PORT =1883;
 
     protected static Option[] combine(Option[]...options){

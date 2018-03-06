@@ -31,6 +31,12 @@ public class MqttPacket implements Packet {
     @Data
     protected String payload;
 
+    @HelloMessage
+    private boolean helloMessage;
+
+    @GoodbyeMessage
+    private boolean goodbyeMessage;
+
     public MqttPacket(String providerId) {
         this.providerId = providerId;
     }
@@ -63,5 +69,13 @@ public class MqttPacket implements Packet {
         //return payload.getBytes();
 
         return null;
+    }
+
+    public void setHelloMessage(boolean helloMessage) {
+        this.helloMessage = helloMessage;
+    }
+
+    public void setGoodbyeMessage(boolean goodbyeMessage) {
+        this.goodbyeMessage = goodbyeMessage;
     }
 }

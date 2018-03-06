@@ -15,12 +15,12 @@ import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttActivator;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttBroker;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttPacket;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttTopic;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.listener.MqttTopicMessage;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Resource;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Service;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.SmartTopicPacket;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -50,8 +50,6 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
 
         final Provider provider = (Provider) bundleContext.getService(serviceReference);
 
-        SmartTopicPacket packet = new SmartTopicPacket(provider.getName());
-
         LOG.debug("Loading POJO device configuration {}", provider.getName());
 
         try {
@@ -64,7 +62,13 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
                     MqttTopicMessage listener = new MqttTopicMessage() {
                         @Override
                         public void messageReceived(String s, String s1) {
+                            MqttPacket packet = new MqttPacket(provider.getName(), service.getName(), resource.getName(), s1);
 
+                            try {
+                                endpoint.process(packet);
+                            } catch (InvalidPacketException e) {
+                                e.printStackTrace();
+                            }
                         }
                     };
 
@@ -80,6 +84,8 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
 
                     if(!provider.isDiscoveryOnFirstMessage()) {
                         LOG.info("Initiating {}/{}/{} with empty value", provider.getName(), service.getName(), resource.getName());
+                        MqttPacket packet = new MqttPacket(provider.getName(), service.getName(),
+                                resource.getName(), resource.getValue());
                         packet.setHelloMessage(true);
                         endpoint.process(packet);
                         //runtime.updateValue(provider.getName(), service.getName(), resource.getName(), "");
@@ -120,7 +126,7 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
         try {
             Provider provider = (Provider) o;
 
-            SmartTopicPacket packet = new SmartTopicPacket(provider.getName());
+            MqttPacket packet = new MqttPacket(provider.getName());
             packet.setGoodbyeMessage(true);
 
             endpoint.process(packet);
