@@ -23,7 +23,7 @@
 
     <packaging>bundle</packaging>
 
-    <name>sensiNact IoT Gateway - Smart Topic Device</name>
+    <name>sensiNact IoT Gateway - MQTT Smart Topic Device</name>
 
     <build>
         <plugins>

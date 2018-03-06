@@ -113,6 +113,8 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
             LOG.info("SmartTopic service started.");
 
             provider.setIsDiscoveryOnFirstMessage(true);
+
+            return null;
         }
 
         return provider;
@@ -138,47 +140,6 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
         } catch (Exception e) {
             LOG.error("Failed to create MQTT device for file {}", configFile.getId(), e);
         }
-
-        /*
-        try {
-
-            String instanceFileName=serviceReference.getProperty("service.pid").toString();
-            final MqttClient api=ServerConnectionCache.getInstance(instanceFileName,busClient.getHost(),busClient.getPort());
-            LOG.info("Subscribing to topic: {}", busClient.getTopic());
-            api.getConnection().subscribe(busClient.getTopic(),new IMqttMessageListener(){
-                @Override
-                public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-                    LOG.info("message received: {}", new String(mqttMessage.getPayload()));
-                    try {
-                        String payload=new String(mqttMessage.getPayload());
-                        MqttPacket packet = null;
-                        if(busClient.getProcessor()!=null){
-                            List<SelectorIface> selectors= ProcessorUtil.transformProcessorListInSelector(busClient.getProcessor());
-                            ProcessorExecutor processor=new ProcessorExecutor(supportedProcessorFormat);
-                            payload=processor.execute(payload, selectors);
-                            processData(busClient, busClient.getId(), payload);
-                        }else {
-                            processData(busClient, busClient.getId(), payload);
-                        }
-                    }catch (Exception e){
-                        LOG.error("Failed to process MQTT message",e);
-                    }
-
-                }
-            });
-            LOG.info("Subscribed to topic: {}", busClient.getTopic());
-
-            if(!busClient.getDiscoveryOnFirstMessage()){
-                processData(busClient, busClient.getId(),null);
-            }else {
-                LOG.info("Device {} ({}) will appear as soon as the topic associated received the first message",busClient.getId(),busClient.getTopic());
-            }
-
-            LOG.info("Sensinact Device created with the id {}",generateID(busClient));
-        } catch (Exception e) {
-            LOG.warn("Failed to create device {}, ignoring device",generateID(busClient),e);
-        }
-         */
 
         return bundleContext.getService(serviceReference);
     }

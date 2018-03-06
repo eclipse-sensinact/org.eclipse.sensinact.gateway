@@ -30,7 +30,7 @@ import java.util.HashMap;
  */
 public class MqttManagedService implements ManagedServiceFactory {
 
-    public static final String MANAGER_NAME ="mosquitto";
+    public static final String MANAGER_NAME ="mqtt";
     private static final String OSGI_PROPERTY_FOR_FILENAME="felix.fileinstall.filename";
     private static final Logger LOG = LoggerFactory.getLogger(MqttManagedService.class);
     private final BundleContext context;

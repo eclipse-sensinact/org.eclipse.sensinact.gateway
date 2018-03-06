@@ -36,7 +36,7 @@ public class MqttPropertyFileConfigImpl implements MqttPropertyFileConfig {
     @Property
     String topic;
 
-    @Property(mandatory = false)
+    @Property(mandatory = false,defaultValue = "TCP")
     String protocol;
 
     @Property(name = "processor", mandatory = false)
