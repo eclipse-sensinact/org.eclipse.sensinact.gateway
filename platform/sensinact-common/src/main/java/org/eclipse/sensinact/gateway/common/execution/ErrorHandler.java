@@ -192,11 +192,11 @@ public interface ErrorHandler
 		
 	/**
 	 * Returns the alternative execution as a list
-	 * of {@link Executors}
+	 * of {@link Executable}s
 	 *  
 	 * @return
 	 * 		the alternative execution as a list
-	 * 		of {@link Executors}
+	 * 		of {@link Executable}s
 	 */
 	<E extends Executable<?,?>> List<E> getAlternative();
 }

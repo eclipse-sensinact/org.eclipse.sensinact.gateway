@@ -138,18 +138,22 @@ public abstract class NorthboundRequest implements PathElement, Nameable
 	 */
 	protected abstract String getMethod();
 
+
 	protected FilteringDefinition filterDefinition;
 	protected NorthboundMediator mediator;
+	private String requestIdentifier;
 
 	/**
 	 * @param mediator
+	 * @param requestIdentifier 
 	 * @param responseFormat
 	 * @param authentication
 	 */
 	public NorthboundRequest(NorthboundMediator mediator, 
-		FilteringDefinition filterDefinition)
+		String requestIdentifier, FilteringDefinition filterDefinition)
 	{
 		this.mediator = mediator;
+		this.requestIdentifier = requestIdentifier;
 		this.filterDefinition = filterDefinition;
 	}
 	
@@ -171,6 +175,8 @@ public abstract class NorthboundRequest implements PathElement, Nameable
 	 */
 	protected Argument[] getExecutionArguments() 
 	{
-		return null;
+		Argument[] arguments = new Argument[1];
+		arguments[0] = new Argument(String.class, this.requestIdentifier);
+	    return arguments;
 	}
 }

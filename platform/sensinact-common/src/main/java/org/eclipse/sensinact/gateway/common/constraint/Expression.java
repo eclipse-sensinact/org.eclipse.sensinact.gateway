@@ -14,6 +14,7 @@ package org.eclipse.sensinact.gateway.common.constraint;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
@@ -23,8 +24,7 @@ import org.eclipse.sensinact.gateway.common.primitive.JSONable;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class Expression extends LinkedList<Constraint> 
-implements Constraint
+public class Expression extends LinkedList<Constraint> implements Constraint
 {
 	static enum LogicalOperator
 	{
@@ -32,6 +32,7 @@ implements Constraint
 		OR;
 	}
 
+	private final boolean complement;
 	private final LogicalOperator operator;
 	
 	/**
@@ -43,7 +44,21 @@ implements Constraint
 	 */
 	public Expression(LogicalOperator operator)
 	{
+		this(operator,false);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param operator
+	 * 		the {@link LogicalOperator} of the
+	 * 		{@link Constraint} Expression to instantiate
+	 * @param complement
+	 */
+	public Expression(LogicalOperator operator, boolean complement)
+	{
 		this.operator = operator;
+		this.complement = complement;
 	}
 	
 	/** 
@@ -63,6 +78,7 @@ implements Constraint
 	 */
 	public boolean complies(Object value)
 	{
+		Boolean result = null;
 		Iterator<Constraint> iterator = super.iterator();
 		while(iterator.hasNext())
 		{
@@ -73,19 +89,25 @@ implements Constraint
 			{
 				if(this.operator.equals(LogicalOperator.OR))
 				{
-					return true;
+					result = new Boolean(true);
+					break;
 				}
 			} else
 			{
 				if(this.operator.equals(LogicalOperator.AND))
 				{
-					return false;
+					result = new Boolean(false);
+					break;
 				}
 			}
 		}
-		return !this.operator.equals(LogicalOperator.OR);
+		if(result == null)
+		{
+			result = new Boolean(!this.operator.equals(LogicalOperator.OR));
+		}
+		return result.booleanValue()^complement;
 	}
-
+	
 	/** 
 	 * @inheritDoc
 	 * 
@@ -94,8 +116,9 @@ implements Constraint
 	public Constraint getComplement()
 	{
 		Expression complement = new Expression(
-				this.operator.equals(LogicalOperator.AND)
-				?LogicalOperator.OR:LogicalOperator.AND);
+		    this.operator.equals(LogicalOperator.AND)
+		        ?LogicalOperator.OR:LogicalOperator.AND
+				    /*, !this.isComplement()*/);
 		
 		Iterator<Constraint> iterator = super.iterator();
 		while(iterator.hasNext())
@@ -117,12 +140,27 @@ implements Constraint
 	{
 		int index = 0;		
 		StringBuilder builder = new StringBuilder();
-		builder.append(JSONUtils.OPEN_BRACKET);
+//		builder.append(JSONUtils.OPEN_BRACE);
+		builder.append(JSONUtils.OPEN_BRACKET);	
+//		builder.append(JSONUtils.QUOTE);
+//		builder.append("operator");
+//		builder.append(JSONUtils.QUOTE);
+//		builder.append(JSONUtils.COLON);
 		builder.append(JSONUtils.QUOTE);
 		builder.append(this.operator.name());
-		builder.append(JSONUtils.QUOTE);
+		builder.append(JSONUtils.QUOTE);		
 		builder.append(JSONUtils.COMMA);
-		
+//		builder.append(JSONUtils.QUOTE);
+//		builder.append("complement");
+//		builder.append(JSONUtils.QUOTE);
+//		builder.append(JSONUtils.COLON);
+//		builder.append(this.isComplement());
+//		builder.append(JSONUtils.COMMA);
+//		builder.append(JSONUtils.QUOTE);
+//		builder.append("constraints");
+//		builder.append(JSONUtils.QUOTE);
+//		builder.append(JSONUtils.COLON);
+//		builder.append(JSONUtils.OPEN_BRACKET);		
 		Iterator<Constraint> iterator = super.iterator();
 		while(iterator.hasNext())
 		{
@@ -131,6 +169,7 @@ implements Constraint
 			index++;
 		}
 		builder.append(JSONUtils.CLOSE_BRACKET);
+//		builder.append(JSONUtils.CLOSE_BRACE);
 	    return builder.toString();
 	}
 
@@ -142,6 +181,6 @@ implements Constraint
 	@Override
 	public boolean isComplement() 
 	{
-		return false;
+		return this.complement;
 	}
 }

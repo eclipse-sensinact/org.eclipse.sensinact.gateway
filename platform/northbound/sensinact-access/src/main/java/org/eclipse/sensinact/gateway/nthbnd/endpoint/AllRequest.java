@@ -16,12 +16,13 @@ public class AllRequest extends NorthboundRequest
 {	
 	/**
 	 * @param mediator
+	 * @param requestIdentifier 
 	 * @param filterDefinition 
 	 */
 	public AllRequest(NorthboundMediator mediator, 
-			FilteringDefinition filterDefinition)
+			String requestIdentifier, FilteringDefinition filterDefinition)
 	{
-		super(mediator, filterDefinition);
+		super(mediator, requestIdentifier, filterDefinition);
 	}
 
 	/**
@@ -54,10 +55,16 @@ public class AllRequest extends NorthboundRequest
 	@Override
 	protected Argument[] getExecutionArguments() 
 	{
-		Argument[] arguments = new Argument[2];
-		arguments[0] = new Argument(String.class, null);
-		arguments[1] = new Argument(FilteringDefinition.class, 
+		Argument[] superArguments = super.getExecutionArguments();
+		int length = superArguments==null?0:superArguments.length;
+		Argument[] arguments = new Argument[length+2];
+		if(length > 0)
+		{
+			System.arraycopy(superArguments, 0, arguments, 0, length);
+		}
+		arguments[length] = new Argument(String.class, null);
+		arguments[length + 1] = new Argument(FilteringDefinition.class, 
 			super.filterDefinition);
-		return arguments;
+	    return arguments;
 	}
 }

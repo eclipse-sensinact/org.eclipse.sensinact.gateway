@@ -8,15 +8,13 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.security;
+package org.eclipse.sensinact.gateway.core;
 
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Map;
-
-import org.eclipse.sensinact.gateway.core.Session;
 
 
 

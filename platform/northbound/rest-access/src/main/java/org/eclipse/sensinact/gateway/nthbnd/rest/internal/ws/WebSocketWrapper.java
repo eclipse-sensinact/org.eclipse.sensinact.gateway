@@ -24,7 +24,10 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import org.eclipse.sensinact.gateway.core.security.Authentication;
+import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
+import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 
 /**
@@ -34,6 +37,9 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 @WebSocket(maxTextMessageSize = 64 * 1024)
 public class WebSocketWrapper
 {
+	protected static final String LOGIN_PATH = "login";
+	protected static final String LOGIN_URI = "/" + LOGIN_PATH;
+	
 	protected Session session;
 	protected NorthboundMediator mediator;
 	protected WebSocketWrapperPool pool;
@@ -93,6 +99,13 @@ public class WebSocketWrapper
 			WsRestAccessRequest wrapper = new WsRestAccessRequest(
 					mediator, this, jsonObject);
 			
+			String uri = jsonObject.getString("uri");
+			
+			if(uri.equals(LOGIN_PATH)||uri.equals(LOGIN_URI))
+			{
+				onLogin(wrapper);
+				return;
+			}
 			WsRestAccess restAccess = new WsRestAccess(wrapper, this);
 			restAccess.proceed();
 			
@@ -128,6 +141,49 @@ public class WebSocketWrapper
 	public void handleError(Throwable error)
 	{
 		error.printStackTrace();
+	}
+
+	private void onLogin(WsRestAccessRequest wrapper)
+	{
+		Authentication<?> authentication = wrapper.getAuthentication();
+		NorthboundEndpoint endpoint = null;
+		
+		if(AuthenticationToken.class.isAssignableFrom(
+				authentication.getClass()))
+		{
+			if(mediator.getLoginEndpoint().reactivateEndpoint(
+					(AuthenticationToken) authentication))
+			{
+				this.send(new JSONObject().put("statusCode", 200
+					).put("X-Auth-Token", ((AuthenticationToken) 
+					authentication).getAuthenticationMaterial()
+					    ).toString());
+				
+			} else
+			{
+				this.send(new JSONObject().put("statusCode", 403
+					    ).put("message","Authentication failed"
+						    ).toString());
+			}						
+		} else if(Credentials.class.isAssignableFrom(
+				authentication.getClass()))
+		{
+			endpoint = mediator.getLoginEndpoint().createNorthboundEndpoint(
+				   (Credentials)authentication);
+		
+			if(endpoint != null)
+			{
+				this.send(new JSONObject().put("statusCode", 200
+						).put("X-Auth-Token",endpoint.getSessionToken()
+						    ).toString());
+				
+			} else
+			{
+				this.send(new JSONObject().put("statusCode", 403
+				    ).put("message", "Authentication failed"
+					    ).toString());
+			}
+		}
 	}
 	
 	/**
@@ -165,6 +221,7 @@ public class WebSocketWrapper
 		{
 			return;
 		}
+	
 		try 
 		{
            Future<Void> future = this.session.getRemote(

@@ -1,4 +1,4 @@
-package org.eclipse.sensinact.gateway.core.security;
+package org.eclipse.sensinact.gateway.core;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -11,6 +11,9 @@ import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaAgentImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.security.AccessNode;
+import org.eclipse.sensinact.gateway.core.security.AccessTree;
+import org.eclipse.sensinact.gateway.core.security.UserKey;
 
 /**
  *

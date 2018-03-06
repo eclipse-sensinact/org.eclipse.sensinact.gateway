@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 
 /**
  * CORS Filter
@@ -34,8 +35,6 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 @WebFilter(asyncSupported=true)
 public class CorsFilter implements Filter 
 {
-    private static final String OPTIONS = "OPTIONS";
-
     private NorthboundMediator mediator;
 
     /**
@@ -104,7 +103,7 @@ public class CorsFilter implements Filter
                 {
                     mediator.error(e);
                 }    
-                if(OPTIONS.equals(req.getMethod()))
+                if(RestAccessConstants.OPTIONS.equals(req.getMethod()))
                 {
 					try
 					{

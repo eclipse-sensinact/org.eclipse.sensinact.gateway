@@ -143,7 +143,8 @@ public class TestResourceBuilder<R extends ModelInstance>
         Assert.assertEquals(Resource.Type.PROPERTY, r1.getType());
 
         String get1 = session.get("serviceProvider", "testService", 
-        	"TestProperty", DataResource.VALUE).toString();	
+        	"TestProperty", DataResource.VALUE).getResult(
+        			).toString();	
         
         String get2 = r1.get().getJSON();
         
@@ -179,7 +180,7 @@ public class TestResourceBuilder<R extends ModelInstance>
 		{{
 			this.put(changed);
 		}}
-		);
+		).getResult();
 
         session.set("serviceProvider", "testService", 
             "TestProperty", DataResource.VALUE, "hello");
@@ -196,19 +197,21 @@ public class TestResourceBuilder<R extends ModelInstance>
         //test linked resource
         JSONAssert.assertEquals(
         	session.get("serviceProvider", "testService",
-            "TestProperty", null).getJSONObject("response"),
+            "TestProperty", null).getResult().getJSONObject("response"),        	
         	session.get("serviceProvider", "testService",
-        	"LinkedProperty", DataResource.VALUE).getJSONObject("response"),
-        	false);
+        	"LinkedProperty", DataResource.VALUE).getResult(
+        		).getJSONObject("response"), false);
         
         session.set("serviceProvider", "testService", 
             "LinkedProperty", DataResource.VALUE, "testLink");
 
         JSONAssert.assertEquals(
             	session.get("serviceProvider", "testService",
-                "TestProperty", DataResource.VALUE).getJSONObject("response"),
+                "TestProperty", DataResource.VALUE).getResult(
+                		).getJSONObject("response"),
             	session.get("serviceProvider", "testService",
-            	"LinkedProperty", null).getJSONObject("response"),
+            	"LinkedProperty", null).getResult(
+            			).getJSONObject("response"),
             	false);
         
     	service.addLinkedResource(LocationResource.LOCATION,
@@ -248,7 +251,7 @@ public class TestResourceBuilder<R extends ModelInstance>
         buffer.append("_suffix");
         
         JSONObject message = session.get("serviceProvider", "testService",
-        		"location", DataResource.VALUE);
+        		"location", DataResource.VALUE).getResult();
         
         assertEquals(buffer.toString(), message.getJSONObject("response"
         		).getString(DataResource.VALUE));
@@ -269,7 +272,7 @@ public class TestResourceBuilder<R extends ModelInstance>
             {
 	            return null;
             }
-		}, null).getJSONObject("response"
+		}, null).getResult().getJSONObject("response"
 		).getString("subscriptionId");
                 
         session.subscribe("serviceProvider", "testService", 
@@ -291,19 +294,19 @@ public class TestResourceBuilder<R extends ModelInstance>
 
         JSONObject set1 = session.set("serviceProvider", "testService", 
             	"TestProperty2", null, "property3"
-            	).getJSONObject("response");
+            	).getResult().getJSONObject("response");
         
         Thread.sleep(250); 
 
         JSONObject set2 = session.set("serviceProvider", "testService", 
             	"TestProperty2", DataResource.VALUE, "property3"
-            	).getJSONObject("response");
+            	).getResult().getJSONObject("response");
         
         Assert.assertEquals(set1.get(DataResource.VALUE),set2.get(DataResource.VALUE)); 
         
         JSONObject set3 = session.set("serviceProvider", "testService", 
             	"TestProperty", DataResource.VALUE, "TEST LINKED SUBSCRIPTION"
-            	).getJSONObject("response");
+            	).getResult().getJSONObject("response");
         
         Thread.sleep(250);
         
@@ -315,7 +318,8 @@ public class TestResourceBuilder<R extends ModelInstance>
         assertEquals(1, this.testContext.getCallbackCount()); 
         
         session.set("serviceProvider", "testService", 
-        "TestProperty2", null, "property5").getJSONObject("response");
+        "TestProperty2", null, "property5").getResult(
+        		).getJSONObject("response");
         Thread.sleep(500);
         assertEquals(2, this.testContext.getCallbackCount()); 
         
@@ -942,23 +946,21 @@ public class TestResourceBuilder<R extends ModelInstance>
     	
     	Session s = testContext.getSensiNact().getAnonymousSession();
     	Thread.sleep(1000);
-    	String obj = s.getAll(new FilteringDefinition("xfilter","a"));
-    	JSONAssert.assertEquals(new JSONObject("{\"providers\":[{\"services\":[{\"resources\":"
-		+ "[{\"pXth\":\"/serviceProvider/Xdmin/friendlyNXme\",\"fromService\":\"Xdmin\",\"type\":"
-		+ "\"PROPERTY\",\"nXme\":\"friendlyNXme\",\"fromProvider\":\"serviceProvider\"},"
-		+ "{\"pXth\":\"/serviceProvider/Xdmin/locXtion\",\"fromService\":\"Xdmin\",\"type\":"
-		+ "\"PROPERTY\",\"nXme\":\"locXtion\",\"fromProvider\":\"serviceProvider\"},"
-		+ "{\"pXth\":\"/serviceProvider/Xdmin/bridge\",\"fromService\":\"Xdmin\",\"type\":"
-		+ "\"PROPERTY\",\"nXme\":\"bridge\",\"fromProvider\":\"serviceProvider\"},"
-		+ "{\"pXth\":\"/serviceProvider/Xdmin/icon\",\"fromService\":\"Xdmin\",\"type\":"
-		+ "\"PROPERTY\",\"nXme\":\"icon\",\"fromProvider\":\"serviceProvider\"}],"
-		+ "\"locXtion\":\"45.19334890078532:5.706474781036377\",\"nXme\":\"Xdmin\"},"
-		+ "{\"resources\":[{\"pXth\":\"/serviceProvider/testService/TestAction\",\"fromService\":"
-		+ "\"testService\",\"type\":\"ACTION\",\"nXme\":\"TestAction\",\"fromProvider\":"
-		+ "\"serviceProvider\"},{\"pXth\":\"/serviceProvider/testService/TestVXriXble\","
-		+ "\"fromService\":\"testService\",\"type\":\"STATE_VARIABLE\",\"nXme\":\"TestVXriXble\","
-		+ "\"fromProvider\":\"serviceProvider\"}],\"locXtion\":\"45.19334890078532:5.706474781036377\","
-		+ "\"nXme\":\"testService\"}],\"nXme\":\"serviceProvider\"}],\"filter\":"
-		+ "{\"definition\":\"a\",\"type\":\"xfilter\"}}") , new JSONObject(obj), false);
+    	String obj = s.getAll(new FilteringDefinition("xfilter","a")
+    			).getResult();
+    	 JSONAssert.assertEquals(new JSONObject("{\"providers\":"
+		+ "[{\"locXtion\":\"45.19334890078532:5.706474781036377\","
+		+ "\"services\":[{\"resources\":"
+        + "[{\"type\":\"PROPERTY\",\"nXme\":\"friendlyNXme\"},"
+        + "{\"type\":\"PROPERTY\",\"nXme\":\"locXtion\"},"
+        + "{\"type\":\"PROPERTY\",\"nXme\":\"bridge\"},"
+        + "{\"type\":\"PROPERTY\",\"nXme\":\"icon\"}],"
+        + "\"nXme\":\"Xdmin\"},"
+        + "{\"resources\":"
+        + "[{\"type\":\"ACTION\",\"nXme\":\"TestAction\"},"
+        + "{\"type\":\"STATE_VARIABLE\",\"nXme\":\"TestVXriXble\"}],"
+        + "\"nXme\":\"testService\"}],\"nXme\":\"serviceProvider\"}],"
+        + "\"filter\":{\"definition\":\"a\",\"type\":\"xfilter\"}}") ,
+    	new JSONObject(obj), false);
     }
 }

@@ -32,7 +32,6 @@ import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
-import org.eclipse.sensinact.gateway.core.security.Sessions;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import junit.framework.TestCase;
 

@@ -121,7 +121,8 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     @Test
     public void resourceValueQuery() throws Exception {
         resourceCreation();
-        String value=sensinactSession.get("myprovider", "myservice", "myresource", "value").getJSONObject("response").getString("value");
+        String value=sensinactSession.get("myprovider", "myservice", "myresource", "value"
+        		).getResult().getJSONObject("response").getString("value");
         Assert.assertTrue("Initial Resource value should be empty ", value.equals(""));
     }
 
@@ -143,7 +144,8 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         MqttMessage message2=new MqttMessage(messageString2.getBytes());
         mqttClient.publish("/myresource",message2 );
         waitForCallbackNotification();
-        String value2=sensinactSession.get("myprovider", "myservice", "myresource", "value").getJSONObject("response").getString("value");
+        String value2=sensinactSession.get("myprovider", "myservice", "myresource", "value").getResult(
+        		).getJSONObject("response").getString("value");
         Assert.assertEquals("Value should be updated on new message arrival, and was not the case", messageString2,value2);
     }
 

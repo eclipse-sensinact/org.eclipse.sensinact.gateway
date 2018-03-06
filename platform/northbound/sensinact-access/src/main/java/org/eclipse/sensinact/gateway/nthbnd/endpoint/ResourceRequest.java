@@ -23,10 +23,10 @@ public class ResourceRequest extends ResourcesRequest
 	 * @param service
 	 */
 	public ResourceRequest(NorthboundMediator mediator, 
-			String serviceProvider,
+		String requestIdentifier, String serviceProvider,
 	        String service, String resource)
 	{
-		super(mediator, serviceProvider, service, null);
+		super(mediator, requestIdentifier, serviceProvider, service, null);
 		this.resource = resource;
 		if(this.resource == null)
 		{

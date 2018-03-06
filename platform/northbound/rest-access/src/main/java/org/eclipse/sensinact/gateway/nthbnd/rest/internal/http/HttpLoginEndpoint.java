@@ -19,10 +19,12 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.eclipse.sensinact.gateway.core.security.Authentication;
+import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
+import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 
 /**
  * This class is the REST interface between each others classes 
@@ -30,15 +32,14 @@ import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
  */
 @SuppressWarnings("serial")
 @WebServlet(asyncSupported=true)
-public class HttpEndpoint extends HttpServlet
+public class HttpLoginEndpoint extends HttpServlet
 {		
-	
 	private NorthboundMediator mediator;
 
 	/**
 	 * Constructor
 	 */
-	public HttpEndpoint(NorthboundMediator mediator)
+	public HttpLoginEndpoint(NorthboundMediator mediator)
 	{
 		this.mediator = mediator;
 	}
@@ -53,12 +54,6 @@ public class HttpEndpoint extends HttpServlet
     public void doGet(HttpServletRequest request, HttpServletResponse response) 
     		throws IOException
 	{
-		if(request.getHeader("Accept")==null 
-		||(!request.getHeader("Accept").contains(RestAccessConstants.PARTIAL_JSON_CONTENT_TYPE)
-		&& !request.getHeader("Accept").contains(RestAccessConstants.ANY_CONTENT_TYPE)))
-		{
-			response.sendError(406, "Not Acceptable");
-		}
         this.doExecute(request, response);
 	}
 	
@@ -72,17 +67,6 @@ public class HttpEndpoint extends HttpServlet
     public void doPost(HttpServletRequest request, HttpServletResponse response)
     		throws IOException
 	{
-		if(request.getContentType()==null 
-		|| !request.getContentType().contains(RestAccessConstants.PARTIAL_JSON_CONTENT_TYPE))
-		{
-			response.sendError(415, "Unsupported Media Type");
-		}
-		if(request.getHeader("Accept")==null 
-		||(!request.getHeader("Accept").contains(RestAccessConstants.PARTIAL_JSON_CONTENT_TYPE)
-		&& !request.getHeader("Accept").contains(RestAccessConstants.ANY_CONTENT_TYPE)))
-		{
-			response.sendError(406, "Not Acceptable");
-		}
 		this.doExecute(request, response);
 	}
 	
@@ -112,15 +96,44 @@ public class HttpEndpoint extends HttpServlet
 				     (HttpServletRequest) asyncContext.getRequest();		        
 				 HttpServletResponse response = 
 				    (HttpServletResponse) asyncContext.getResponse();
-		        
-			     try
+				 Authentication<?> authentication = null;
+				 try
 			     {
-					HttpRestAccess restAccess = new HttpRestAccess(
-					    new HttpRestAccessRequest(mediator, request),
-					    new HttpServletResponseWrapper(response));	
-
-					restAccess.proceed();
+			    	String tokenHeader = request.getHeader("X-Auth-Token");
+					String authorizationHeader = request.getHeader("Authorization");
+				
+					NorthboundEndpoint endpoint = null;
 					
+					if(tokenHeader != null)
+					{
+						authentication = new AuthenticationToken(tokenHeader);
+
+						if(mediator.getLoginEndpoint().reactivateEndpoint(
+								(AuthenticationToken) authentication))
+						{
+							response.setHeader("X-Auth-Token", ((AuthenticationToken) 
+									authentication).getAuthenticationMaterial());
+							response.setStatus(200);
+							
+						} else
+						{
+							response.sendError(403, "Authentication failed");
+						}						
+					} else if(authorizationHeader != null)
+					{
+						endpoint = mediator.getLoginEndpoint().createNorthboundEndpoint(
+							    new Credentials(authorizationHeader));
+					
+						if(endpoint != null)
+						{
+							response.setHeader("X-Auth-Token", endpoint.getSessionToken());
+							response.setStatus(200);
+							
+						} else
+						{
+							response.sendError(403, "Authentication failed");
+						}
+					}
 				} catch (Exception e) 
 				{
 					mediator.error(e);
@@ -137,8 +150,7 @@ public class HttpEndpoint extends HttpServlet
 			@Override
 			public void onError(Throwable t) {
 				mediator.error(t);
-			}
-        	
+			}        	
         });
 	}
 }

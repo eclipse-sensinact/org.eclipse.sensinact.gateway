@@ -23,10 +23,11 @@ public class ResourcesRequest extends ServiceRequest
 	 * @param filterDefinition 
 	 */
 	public ResourcesRequest(NorthboundMediator mediator,
-			String serviceProvider, String service, 
-			FilteringDefinition filterDefinition)
+		String requestIdentifier, String serviceProvider, 
+		String service, FilteringDefinition filterDefinition)
 	{
-		super(mediator, serviceProvider, service, filterDefinition);
+		super(mediator, requestIdentifier, serviceProvider, 
+				service, filterDefinition);
 	}
 	
 	/**

@@ -18,9 +18,10 @@ public class ServiceProviderRequest extends ServiceProvidersRequest
 	private String serviceProvider;
 	
 	public ServiceProviderRequest(NorthboundMediator mediator,
-			String serviceProvider, FilteringDefinition filterDefinition)
+		String requestIdentifier, String serviceProvider, 
+		FilteringDefinition filterDefinition)
 	{
-		super(mediator, filterDefinition);
+		super(mediator, requestIdentifier, filterDefinition);
     	this.serviceProvider = serviceProvider;
 		if(this.serviceProvider == null)
 		{

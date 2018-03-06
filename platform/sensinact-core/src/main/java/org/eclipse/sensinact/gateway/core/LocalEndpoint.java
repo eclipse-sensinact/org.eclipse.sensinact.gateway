@@ -76,7 +76,8 @@ abstract class LocalEndpoint implements Endpoint
 	@Override
 	public String getAll(String publicKey)
 	{
-		return this.getSession(publicKey).getAll();
+		return this.getSession(publicKey).getAll(
+				).getResult();
 	}
 
 	/**
@@ -87,7 +88,8 @@ abstract class LocalEndpoint implements Endpoint
 	@Override
 	public String getAll(String publicKey, String filter)
 	{
-		return this.getSession(publicKey).getAll(filter);
+		return this.getSession(publicKey).getAll(
+				filter).getResult();
 	}
 
 	/**
@@ -98,7 +100,8 @@ abstract class LocalEndpoint implements Endpoint
 	@Override
 	public String getProviders(String publicKey)
 	{
-		return this.getSession(publicKey).getProviders();
+		return this.getSession(publicKey
+				).getProviders().getResult();
 	}
 
 	/**
@@ -110,7 +113,8 @@ abstract class LocalEndpoint implements Endpoint
 	public String getProvider(String publicKey,
 	        String serviceProviderId)
 	{
-		return this.getSession(publicKey).getProvider(serviceProviderId);
+		return this.getSession(publicKey).getProvider(
+				serviceProviderId).getResult();
 	}
 
 	/**
@@ -122,7 +126,8 @@ abstract class LocalEndpoint implements Endpoint
 	public String getServices(String publicKey,
 	        String serviceProviderId)
 	{
-		return this.getSession(publicKey).getServices(serviceProviderId);
+		return this.getSession(publicKey).getServices(
+				serviceProviderId).getResult();
 	}
 
 	/**
@@ -134,8 +139,8 @@ abstract class LocalEndpoint implements Endpoint
 	public String getService(String publicKey, String serviceProviderId,
 	        String serviceId)
 	{
-		return this.getSession(publicKey).getService(serviceProviderId,
-				serviceId);
+		return this.getSession(publicKey).getService(
+			serviceProviderId, serviceId).getResult();
 	}
 
 	/**
@@ -147,8 +152,8 @@ abstract class LocalEndpoint implements Endpoint
 	public String getResources(String publicKey,
 	        String serviceProviderId, String serviceId)
 	{
-		return this.getSession(publicKey).getResources(serviceProviderId,
-				serviceId);
+		return this.getSession(publicKey).getResources(
+			serviceProviderId, serviceId).getResult();
 	}
 
 	/**
@@ -160,8 +165,9 @@ abstract class LocalEndpoint implements Endpoint
 	public String getResource(String publicKey,
 	        String serviceProviderId, String serviceId, String resourceId)
 	{
-		return this.getSession(publicKey).getResource(serviceProviderId,
-				serviceId, resourceId);
+		return this.getSession(publicKey).getResource(
+			serviceProviderId, serviceId, resourceId
+			).getResult();
 	}
 
 	/**
@@ -174,7 +180,7 @@ abstract class LocalEndpoint implements Endpoint
 	        String serviceId, String resourceId, String attributeId)
 	{
 		return this.getSession(publicKey).get(serviceProviderId,
-				serviceId, resourceId, attributeId);
+				serviceId, resourceId, attributeId).getResult();
 	}
 
 	/**
@@ -188,7 +194,8 @@ abstract class LocalEndpoint implements Endpoint
 	        Object parameter)
 	{
 		return this.getSession(publicKey).set(serviceProviderId,
-				serviceId, resourceId, attributeId, parameter);
+				serviceId, resourceId, attributeId, 
+				parameter).getResult();
 	}
 
 	/**
@@ -201,7 +208,7 @@ abstract class LocalEndpoint implements Endpoint
 	        String serviceId, String resourceId, Object[] parameters)
 	{
 		return this.getSession(publicKey).act(serviceProviderId,
-				serviceId, resourceId, parameters);
+				serviceId, resourceId, parameters).getResult();
 	}
 
 	/**
@@ -215,7 +222,8 @@ abstract class LocalEndpoint implements Endpoint
 	        JSONArray conditions)
 	{
 		return this.getSession(publicKey).subscribe(serviceProviderId,
-				serviceId, resourceId, recipient, conditions);
+				serviceId, resourceId, recipient, conditions
+				).getResult();
 	}
 
 	/**
@@ -229,6 +237,7 @@ abstract class LocalEndpoint implements Endpoint
 	        String subscriptionId)
 	{
 		return this.getSession(publicKey).unsubscribe(serviceProviderId,
-				serviceId, resourceId, subscriptionId);
+				serviceId, resourceId, subscriptionId
+				).getResult();
 	}
 }

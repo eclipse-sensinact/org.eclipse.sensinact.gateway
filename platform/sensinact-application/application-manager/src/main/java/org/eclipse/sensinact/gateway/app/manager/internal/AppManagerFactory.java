@@ -19,7 +19,6 @@ import org.eclipse.sensinact.gateway.core.*;
 import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
-import org.eclipse.sensinact.gateway.core.security.Sessions;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

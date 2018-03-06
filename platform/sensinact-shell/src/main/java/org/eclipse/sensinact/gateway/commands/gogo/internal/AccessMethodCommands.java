@@ -10,33 +10,31 @@
  */
 package org.eclipse.sensinact.gateway.commands.gogo.internal;
 
-import org.apache.felix.service.command.Descriptor;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.io.IOException;
 
+import org.apache.felix.service.command.Descriptor;
+import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccess;
+import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccessRequest;
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
-import org.eclipse.sensinact.gateway.common.primitive.Description;
-import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
-import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.Resource;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
+import org.eclipse.sensinact.gateway.core.ResultHolder;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class AccessMethodCommands {
 
     private CommandServiceMediator mediator;
 
-    private final String _line;
-    private final String _tab;
 
-    public AccessMethodCommands(CommandServiceMediator mediator) {
+    public AccessMethodCommands(CommandServiceMediator mediator) 
+    {
         this.mediator = mediator;
-        this._line = ShellUtils.lineSeparator(100);
-        this._tab = ShellUtils.tabSeparator(3);
     }
 
     /**
@@ -45,47 +43,63 @@ public class AccessMethodCommands {
      * @param serviceID the ID of the service
      * @param resourceID the ID of the resource
      * @param methodType
+     * 
+     * @throws IOException 
+     * @throws JSONException 
+     * @throws InvalidCredentialException 
      */
     @Descriptor("get the description of a specific method of a resource of a sensiNact service")
     public void method(@Descriptor("the service provider ID") String serviceProviderID,
                        @Descriptor("the service ID") String serviceID,
                        @Descriptor("the resource ID") String resourceID,
-                       @Descriptor("the method type") String methodType) {
-        StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().serviceProvider(serviceProviderID).getService(serviceID).getResource(resourceID);
-
-        if (resource != null) {
-            JSONArray methods = new JSONObject(resource.getDescription().getJSONDescription()).getJSONArray("accessMethods");
-
-            if(methods.length() != 0) {
-                buffer.append("\n" + _line);
-
-                for(int i = 0; i < methods.length(); i++) {
-                    if(methods.getJSONObject(i).getString("name").equalsIgnoreCase(methodType)){
-                        JSONArray parameters = methods.getJSONObject(i).getJSONArray("parameters");
-
-                        buffer.append("\n" + _tab + methodType.toUpperCase() + ": [");
-
-                        for(int j = 0; j < parameters.length(); j++) {
-                            buffer.append("(name: " + parameters.getJSONObject(j).getString("name"));
-                            buffer.append(" | type: " + parameters.getJSONObject(j).getString("type") + ")");
-                        }
-
-                        buffer.append("]");
-                    }
-                }
-
-                buffer.append("\n" + _line + "\n");
-            } else {
-                buffer.append("Method '" + methodType + "' for the resource '" + resource.getName()
-                        + "' of the sensiNact service instance '" + serviceID + "' not found");
-            }
-        } else {
-            buffer.append("sensiNact resource instance /" + serviceProviderID +
-                    "/" + serviceID + "/" + resourceID + " not found");
-        }
-
-        System.out.println(buffer.toString());
+                       @Descriptor("the method type") final String methodType) throws InvalidCredentialException, JSONException, IOException {
+        
+		new ShellAccess(new ShellAccessRequest( mediator, new JSONObject(
+			).put("uri", CommandServiceMediator.uri(serviceProviderID, 
+					serviceID, resourceID, false))))
+		{
+			/** 
+			 * @inheritDoc
+			 * 
+			 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess#
+			 * respond(org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator, org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder)
+			 */
+			@Override
+			protected boolean respond( NorthboundMediator mediator,
+					NorthboundRequestBuilder builder) 
+					throws IOException 
+			{
+				NorthboundRequest nthbndRequest = builder.build();
+				if(nthbndRequest == null)
+				{
+					this.sendError(500, "Internal server error");
+					return false;
+				}
+				ResultHolder<?> cap = super.endpoint.execute(nthbndRequest);
+				JSONObject result = new JSONResponseFormat(mediator
+						).format(cap.getResult());
+				if(result == null)
+				{
+					this.sendError(500, "Internal server error");
+					return false;
+				}
+				JSONArray methods = result.optJSONArray("accessMethods");
+		        if(!JSONObject.NULL.equals(methods) && methods.length() > 0) 
+		        {
+		            for(int i = 0; i < methods.length(); i++) 
+		            { 
+		            	JSONObject m = methods.getJSONObject(i);
+		            	if(m.getString("name").equalsIgnoreCase(methodType))
+		                {
+		                    ((CommandServiceMediator)mediator
+		                    		).getOutput().output(m,0);
+		                }
+		            }
+		        }
+				return true;
+			}
+			
+		}.proceed();
     }
 
     /**
@@ -99,25 +113,9 @@ public class AccessMethodCommands {
                     @Descriptor("the service ID") String serviceID,
                     @Descriptor("the resource ID") String resourceID)
     {
-        StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().resource(serviceProviderID, serviceID, resourceID);
-
-        if(resource != null)
-        {
-        	GetResponse response = resource.get(DataResource.VALUE);
-        	
-            buffer.append("\n" + _line);
-            buffer.append("\n" + _tab + "Value: " + response.getResponse(DataResource.VALUE));
-            buffer.append("\n" + _tab + "Type: " + response.getResponse(DataResource.TYPE));
-            buffer.append("\n" + _line + "\n");
-            
-        } else
-        {
-            buffer.append("sensiNact resource instance /" + serviceProviderID +
-                    "/" + serviceID + "/" + resourceID + " not found");
-        }
-
-        System.out.println(buffer.toString());
+    	ShellAccess.proceed(mediator, new JSONObject().put("uri", 
+    		CommandServiceMediator.uri(serviceProviderID, serviceID, 
+    			resourceID, "GET")));    	
     }
 
     /**
@@ -133,32 +131,15 @@ public class AccessMethodCommands {
                     @Descriptor("the resource ID") String resourceID,
                     @Descriptor("the attribute ID") String attributeID)
     {
-        StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().resource(serviceProviderID, serviceID, resourceID);
-
-        if (resource != null)
-        {
-            Description attribute = resource.element(attributeID);
-
-            if (attribute != null)
-            {
-            	GetResponse response = resource.get(attributeID);            	
-                buffer.append("\n" + _line);
-                buffer.append("\n" + _tab + "Name: " + response.getResponse(DataResource.NAME));
-                buffer.append("\n" + _tab + "Value: " + response.getResponse(DataResource.VALUE));
-                buffer.append("\n" + _tab + "Type: " + response.getResponse(DataResource.TYPE));
-                buffer.append("\n" + _line + "\n");
-                
-            } else {
-                buffer.append("Attribute '" + attributeID + "' of resource '" + resourceID
-                        + "' for the sensiNact service instance '" + serviceID + "' not found");
-            }
-        } else {
-            buffer.append("sensiNact resource instance /" + serviceProviderID +
-                    "/" + serviceID + "/" + resourceID + " not found");
-        }
-
-        System.out.println(buffer.toString());
+    	JSONArray params = new JSONArray();
+    	if(attributeID!=null)
+    	{
+    	    params.put(new JSONObject().put("name", "attributeName"
+    	    	).put("type", "string").put("value", attributeID));
+    	}
+    	ShellAccess.proceed(mediator, new JSONObject().put("uri", 
+    		CommandServiceMediator.uri(serviceProviderID, serviceID, 
+    			resourceID, "GET")).put("parameters",params));    	
     }
 
     /**
@@ -192,35 +173,18 @@ public class AccessMethodCommands {
                     @Descriptor("the attribute ID") String attributeID,
                     @Descriptor("the resource value") Object value) 
     {
-        StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().resource(serviceProviderID, serviceID, resourceID);
+    	JSONArray params = new JSONArray();
+    	if(attributeID!=null)
+    	{
+    	    params.put(new JSONObject().put("name", "attributeName"
+    	    	).put("type", "string").put("value", attributeID));
+    	}
+    	params.put(new JSONObject().put("name", "argument").put(
+		       	"type", "string").put("value", String.valueOf(value)));
 
-        if (resource != null)
-        {
-        	if(Modifiable.MODIFIABLE.equals(resource.element(attributeID).getModifiable()))
-            {
-                if (value != null) 
-                {
-                    SetResponse response = resource.set(attributeID, value);
-                    buffer.append("\n" + _line);
-                    buffer.append("\n" + _tab + "Name: " + response.getResponse(DataResource.NAME));
-                    buffer.append("\n" + _tab + "Value: " + response.getResponse(DataResource.VALUE));
-                    buffer.append("\n" + _tab + "Type: " + response.getResponse(DataResource.TYPE));
-                    buffer.append("\n" + _line + "\n");
-                    
-                } else 
-                {
-                    buffer.append("Wrong parameters");
-                }
-            } else {
-                buffer.append("Attribute '" + attributeID + "' is not modifiable");
-            }
-        } else 
-        {
-            buffer.append("sensiNact resource instance /" + serviceProviderID +
-                    "/" + serviceID + "/" + resourceID + " not found");
-        }
-        System.out.println(buffer.toString());
+    	ShellAccess.proceed(mediator, new JSONObject().put("uri", 
+        	CommandServiceMediator.uri(serviceProviderID, serviceID, 
+        		resourceID, "SET")).put("parameters", params));
     }
 
     /**
@@ -234,37 +198,9 @@ public class AccessMethodCommands {
                     @Descriptor("the service ID") String serviceID,
                     @Descriptor("the resource ID") String resourceID) 
     {
-        StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().resource(serviceProviderID, serviceID, resourceID);
-
-        if(resource != null)
-        {
-            if (resource instanceof ActionResource) 
-            {
-                ActResponse response = ((ActionResource) resource).act();
-
-                if(AccessMethodResponse.Status.SUCCESS.equals(response.getStatus()))
-                {
-                    buffer.append("Action success");
-                    
-                } else
-                {
-                    buffer.append("Action error");
-                }
-                if(response.getResponse("message") != null) 
-                {
-                    buffer.append(": " + response.getResponse("message"));
-                }
-            } else 
-            {
-                buffer.append("Resource '" + resource.getName() + "' is not an ActionResource\n");
-            }
-        } else 
-        {
-            buffer.append("sensiNact resource instance /" + serviceProviderID +
-                    "/" + serviceID + "/" + resourceID + " not found");
-        }
-        System.out.println(buffer.toString());
+    	ShellAccess.proceed(mediator, new JSONObject().put("uri", 
+            	CommandServiceMediator.uri(serviceProviderID, serviceID, 
+            		resourceID, "ACT")));
     }
 
     /**
@@ -280,47 +216,58 @@ public class AccessMethodCommands {
                     @Descriptor("the resource ID") String resourceID,
                     Object... parameters)
     {
-        StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().resource(serviceProviderID, serviceID, resourceID);
-
-        if(resource != null)
-        {
-            if (resource instanceof ActionResource)
-            {
-                if (parameters != null)
-                {
-                    ActResponse response = ((ActionResource) resource).act(parameters);
-
-                    if(AccessMethodResponse.Status.SUCCESS.equals(response.getStatus())) 
-                    {
-                        buffer.append("Action success");
-                        
-                    } else 
-                    {
-                        buffer.append("Action error");
-                    }
-
-                    if(response.getResponse("message") != null)
-                    {
-                        buffer.append(": " + response.getResponse("message"));
-                    }
-                } else 
-                {
-                    buffer.append("Wrong parameters");
-                }
-            } else 
-            {
-                buffer.append("Resource '" + resource.getName() + "' is not an ActionResource\n");
-            }
-        } else
-        {
-            buffer.append("sensiNact resource instance /" + serviceProviderID +
-                    "/" + serviceID + "/" + resourceID + " not found");
-        }
-
-        System.out.println(buffer.toString());
+    	JSONArray params = new JSONArray();
+    	int index = 0;
+    	int length = parameters==null?0:parameters.length;
+    	for(;index < length;index++)
+    	{
+    		params.put(new JSONObject().put("name", "arg"+index
+    			).put("type", "string").put("value",String.valueOf(
+    					parameters[index])));
+    	}
+    	ShellAccess.proceed(mediator, new JSONObject().put("uri", 
+        	CommandServiceMediator.uri(serviceProviderID, serviceID, 
+        		resourceID, "ACT")).put("parameters", params));
     }
 
+    /**
+     * Set a specific value to an attribute of a resource of a sensiNact service
+     * @param serviceProviderID the ID of the service provider
+     * @param serviceID the ID of the service
+     * @param resourceID the ID of the resource
+     * @param attributeID the ID of the attribute
+     * @param value the value to set
+     */
+    @Descriptor("subscribe to a specific attribute of a resource of a sensiNact service")
+    public void subscribe(
+    		@Descriptor("the service provider ID") String serviceProviderID,
+            @Descriptor("the service ID") String serviceID,
+            @Descriptor("the resource ID") String resourceID,
+            @Descriptor("the attribute ID") String attributeID,
+            @Descriptor("the applying JSON formated conditions") 
+    		String conditions) 
+    {
+    	JSONArray params = new JSONArray();
+    	if(attributeID!=null)
+    	{
+    	    params.put(new JSONObject().put("name", "attributeName"
+    	    	).put("type", "string").put("value", attributeID));
+    	}
+    	try
+    	{
+    		params.put(new JSONObject().put("name", "conditions").put(
+		       	"type", "object").put("value", new JSONObject(
+		       			conditions)));
+    		
+    	} catch(JSONException e)
+    	{
+    		mediator.error("Unable to parse the conditions", e);
+    		
+    	}
+    	ShellAccess.proceed(mediator, new JSONObject().put("uri", 
+        	CommandServiceMediator.uri(serviceProviderID, serviceID, 
+        		resourceID, "SUBSCRIBE")).put("parameters", params));
+    }
     /**
      * Cancel a specific subscription to a resource of a sensiNact service
      * @param serviceProviderID the ID of the service provider
@@ -334,29 +281,12 @@ public class AccessMethodCommands {
                             @Descriptor("the resource ID") String resourceID,
                             @Descriptor("the subscription ID") String subscriptionID) 
     {
-        StringBuilder buffer = new StringBuilder();
-        Resource resource = mediator.getSession().resource(serviceProviderID, serviceID, resourceID);
-
-        if (resource != null) 
-        {
-            UnsubscribeResponse response = resource.unsubscribe(DataResource.VALUE, subscriptionID);
-
-            if (response.getStatus().equals(AccessMethodResponse.Status.SUCCESS)) 
-            {
-                buffer.append("\n");
-                buffer.append(_line);
-                buffer.append(response.get("Unsubscription done"));
-                buffer.append("\n" + _line + "\n");
-                
-            } else
-            {
-                buffer.append("\nUnable to unsubscribe to resource '" + resourceID + "'\n");
-            }
-        } else
-        {
-            buffer.append("sensiNact resource instance /" + serviceProviderID +
-                    "/" + serviceID + "/" + resourceID + " not found");
-        }
-        System.out.println(buffer.toString());
+    	JSONArray params = new JSONArray();
+    	params.put(new JSONObject().put("name", "subscriptionId").put(
+		       	"type", "string").put("value", subscriptionID));
+    	
+    	ShellAccess.proceed(mediator, new JSONObject().put("uri", 
+        	CommandServiceMediator.uri(serviceProviderID, serviceID, 
+        		resourceID, "UNSUBSCRIBE")).put("parameters", params));
     }
 }

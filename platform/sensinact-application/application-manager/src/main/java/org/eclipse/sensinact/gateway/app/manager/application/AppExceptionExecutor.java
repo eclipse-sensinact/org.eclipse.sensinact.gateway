@@ -10,11 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.application;
 
-import org.eclipse.sensinact.gateway.core.Session;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.security.Sessions;
 import org.json.JSONObject;
 
 /**

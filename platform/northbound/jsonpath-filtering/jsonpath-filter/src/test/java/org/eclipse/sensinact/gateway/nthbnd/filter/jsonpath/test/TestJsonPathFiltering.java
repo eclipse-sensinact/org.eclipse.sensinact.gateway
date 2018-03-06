@@ -138,19 +138,16 @@ public class TestJsonPathFiltering extends MidOSGiTest
 	    JSONObject response = new JSONObject(
 	    "{\"filter\":{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"},"
 	    + "\"providers\":"
-	    + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\",\"resources\":"
-	    + "[{\"path\":\"/slider/admin/friendlyName\",\"fromProvider\":\"slider\","
-	    + "\"fromService\":\"admin\",\"name\":\"friendlyName\",\"type\":\"PROPERTY\"},"
-	    + "{\"path\":\"/slider/admin/location\",\"fromProvider\":\"slider\","
-	    + "\"fromService\":\"admin\",\"name\":\"location\",\"type\":\"PROPERTY\"},"
-	    + "{\"path\":\"/slider/admin/bridge\",\"fromProvider\":\"slider\","
-	    + "\"fromService\":\"admin\",\"name\":\"bridge\",\"type\":\"PROPERTY\"},"
-	    + "{\"path\":\"/slider/admin/icon\",\"fromProvider\":\"slider\","
-	    + "\"fromService\":\"admin\",\"name\":\"icon\",\"type\":\"PROPERTY\"}],"
-	    + "\"location\":\"45.19334890078532:5.706474781036377\"},"
-	    + "{\"name\":\"cursor\",\"resources\":[{\"path\":\"/slider/cursor/position\","
-	    + "\"fromProvider\":\"slider\",\"fromService\":\"cursor\",\"name\":\"position\","
-	    + "\"type\":\"SENSOR\"}],\"location\":\"45.19334890078532:5.706474781036377\"}]}]}");
+	    + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\","
+	    + "\"resources\":"
+	    + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"},"
+	    + "{\"name\":\"location\",\"type\":\"PROPERTY\"},"
+	    + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"},"
+	    + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]},"
+	    + "{\"name\":\"cursor\",\"resources\":"
+	    + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]"
+	    + "}]"
+	    + ",\"location\":\"45.19334890078532:5.706474781036377\"}]}");
 
 	    JSONAssert.assertEquals(response, new JSONObject(simulated3), false);
 	        
@@ -194,22 +191,18 @@ public class TestJsonPathFiltering extends MidOSGiTest
 	    response = new JSONObject(
 	    "{\"filter\":{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"},"
 	    + "\"providers\":"
-	    + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\",\"resources\":"
-	    + "[{\"path\":\"/slider/admin/friendlyName\",\"fromProvider\":\"slider\","
-	    + "\"fromService\":\"admin\",\"name\":\"friendlyName\",\"type\":\"PROPERTY\"},"
-	    + "{\"path\":\"/slider/admin/location\",\"fromProvider\":\"slider\","
-	    + "\"fromService\":\"admin\",\"name\":\"location\",\"type\":\"PROPERTY\"},"
-	    + "{\"path\":\"/slider/admin/bridge\",\"fromProvider\":\"slider\","
-	    + "\"fromService\":\"admin\",\"name\":\"bridge\",\"type\":\"PROPERTY\"},"
-	    + "{\"path\":\"/slider/admin/icon\",\"fromProvider\":\"slider\","
-	    + "\"fromService\":\"admin\",\"name\":\"icon\",\"type\":\"PROPERTY\"}],"
-	    + "\"location\":\"45.19334890078532:5.706474781036377\"},"
-	    + "{\"name\":\"cursor\",\"resources\":[{\"path\":\"/slider/cursor/position\","
-	    + "\"fromProvider\":\"slider\",\"fromService\":\"cursor\",\"name\":\"position\","
-	    + "\"type\":\"SENSOR\"}],\"location\":\"45.19334890078532:5.706474781036377\"}]}]}");
+	    + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\","
+	    + "\"resources\":"
+	    + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"},"
+	    + "{\"name\":\"location\",\"type\":\"PROPERTY\"},"
+	    + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"},"
+	    + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]},"
+	    + "{\"name\":\"cursor\","
+	    + "\"resources\":"
+	    + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]}]"
+	    + ",\"location\":\"45.19334890078532:5.706474781036377\"}]}");
 
         JSONObject obj = new JSONObject(simulated3);
-        obj.remove("X-Auth-Token");
 	    JSONAssert.assertEquals(response, obj, false);
 	    
         String simulated1 = this.synchronizedRequest(client,"/sensinact/providers", null);       
