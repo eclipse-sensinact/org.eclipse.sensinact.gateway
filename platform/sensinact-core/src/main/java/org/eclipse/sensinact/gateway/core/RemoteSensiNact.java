@@ -490,8 +490,9 @@ public class RemoteSensiNact implements RemoteCore
 			final SnaFilter filter, final String publicKey)
 	{
 		JSONObject registration = this.localEndpoint.getSession(publicKey
-				).registerSessionAgent(new RemoteSensiNactCallback(
-					remoteAgentId), filter);
+			).registerSessionAgent(new RemoteSensiNactCallback(
+				remoteAgentId), filter).getResult();
+		
 		JSONObject response = registration.optJSONObject("response");
 		String localAgentId = null;
 		if(!JSONObject.NULL.equals(response) 

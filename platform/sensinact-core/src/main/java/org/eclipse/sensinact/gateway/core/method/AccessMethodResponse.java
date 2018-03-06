@@ -147,7 +147,7 @@ implements SnaResponseMessage<AccessMethodResponse.Response>
 	}
 
 	/**
-	 * Error SnaMessages factory
+	 * Error {@link AccessMethodResponse}s factory
 	 * 
 	 * @param mediator
 	 * @param uri
