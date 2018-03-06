@@ -509,7 +509,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 	/**
 	 * @param builder
 	 */
-	private void processAttribute(NorthboundRequestBuilder<?> builder)
+	private void processAttribute(NorthboundRequestBuilder builder)
 	{
 		String attribute = this.attribute;
 		if(attribute == null)
@@ -533,7 +533,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 	/**
 	 * @return
 	 */
-	public <F> NorthboundRequestBuilder<F> handle() throws IOException
+	public NorthboundRequestBuilder handle() throws IOException
 	{		
 		Parameter[] parameters = null;
 		try
@@ -567,11 +567,11 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
      * 
      * @throws IOException
      */
-    private <F> NorthboundRequestBuilder<F> handle(Parameter[] parameters) 
+    private NorthboundRequestBuilder handle(Parameter[] parameters) 
     		throws IOException
     {
-		NorthboundRequestBuilder<F> builder = 
-				new NorthboundRequestBuilder<F>(mediator);
+		NorthboundRequestBuilder builder = 
+				new NorthboundRequestBuilder(mediator);
 
 		if(this.filtered!=null)
 		{

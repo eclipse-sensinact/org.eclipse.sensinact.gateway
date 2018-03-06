@@ -13,28 +13,19 @@ package org.eclipse.sensinact.gateway.commands.gogo.internal;
 import java.io.IOException;
 
 import org.apache.felix.service.command.Descriptor;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccess;
 import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccessRequest;
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
-import org.eclipse.sensinact.gateway.common.primitive.Description;
-import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
-import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResultHolder;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class AccessMethodCommands {
 
@@ -74,9 +65,8 @@ public class AccessMethodCommands {
 			 * respond(org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator, org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder)
 			 */
 			@Override
-			protected boolean respond(
-					NorthboundMediator mediator,
-					NorthboundRequestBuilder<JSONObject> builder) 
+			protected boolean respond( NorthboundMediator mediator,
+					NorthboundRequestBuilder builder) 
 					throws IOException 
 			{
 				NorthboundRequest nthbndRequest = builder.build();

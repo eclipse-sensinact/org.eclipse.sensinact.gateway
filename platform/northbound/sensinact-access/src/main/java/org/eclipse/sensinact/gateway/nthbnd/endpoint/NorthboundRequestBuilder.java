@@ -19,7 +19,7 @@ import org.json.JSONArray;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class NorthboundRequestBuilder<F>
+public class NorthboundRequestBuilder
 {
 	//********************************************************************//
 	//						NESTED DECLARATIONS			  			      //
@@ -75,7 +75,7 @@ public class NorthboundRequestBuilder<F>
 	 * 
 	 * @return this NorthboundRequestBuilder
 	 */
-	public NorthboundRequestBuilder<F> withServiceProvider(
+	public NorthboundRequestBuilder withServiceProvider(
 			String serviceProvider)
 	{
 		this.serviceProvider = serviceProvider;
@@ -91,7 +91,7 @@ public class NorthboundRequestBuilder<F>
 	 * 
 	 * @return this NorthboundRequestBuilder
 	 */
-	public NorthboundRequestBuilder<F> withService(String service)
+	public NorthboundRequestBuilder withService(String service)
 	{
 		this.service = service;
 		return this;
@@ -106,7 +106,7 @@ public class NorthboundRequestBuilder<F>
 	 * 
 	 * @return this NorthboundRequestBuilder
 	 */
-	public NorthboundRequestBuilder<F> withResource(String resource)
+	public NorthboundRequestBuilder withResource(String resource)
 	{
 		this.resource = resource;
 		return this;
@@ -121,7 +121,7 @@ public class NorthboundRequestBuilder<F>
 	 * 
 	 * @return this NorthboundRequestBuilder
 	 */
-	public NorthboundRequestBuilder<F> withAttribute(String attribute)
+	public NorthboundRequestBuilder withAttribute(String attribute)
 	{
 		this.attribute = attribute;
 		return this;
@@ -136,7 +136,7 @@ public class NorthboundRequestBuilder<F>
 	 * 
 	 * @return this NorthboundRequestBuilder
 	 */
-	public NorthboundRequestBuilder<F> withMethod(String method)
+	public NorthboundRequestBuilder withMethod(String method)
 	{
 		this.method = method;
 		return this;
@@ -158,7 +158,7 @@ public class NorthboundRequestBuilder<F>
 	 * @param argument
 	 * @return
 	 */
-	public NorthboundRequestBuilder<F> withArgument(Object argument)
+	public NorthboundRequestBuilder withArgument(Object argument)
 	{
 		this.argument = argument;
 		return this;
@@ -167,7 +167,7 @@ public class NorthboundRequestBuilder<F>
 	/**
 	 * @param rid
 	 */
-	public NorthboundRequestBuilder<F> withRequestId(String rid)
+	public NorthboundRequestBuilder withRequestId(String rid)
 	{
 		this.requestIdentifier = rid;
 		return this;
@@ -185,7 +185,7 @@ public class NorthboundRequestBuilder<F>
 	 * @param listElements
 	 * @return
 	 */
-	public NorthboundRequestBuilder<F> isElementsList(boolean listElements)
+	public NorthboundRequestBuilder isElementsList(boolean listElements)
 	{
 		this.listElements = listElements;
 		return this;

@@ -28,11 +28,11 @@ import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 import org.json.JSONObject;
 
 /**
- * Extended {@link NorthbundAccess} dedicated to websocket connections
+ * Extended {@link NorthboundAccess} dedicated to websocket connections
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class WsRestAccess extends NorthboundAccess<JSONObject, WsRestAccessRequest>
+public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest>
 {
 	/**
 	 * The {@link WebSocketWrapper} held by this WsRestAccess 
@@ -81,7 +81,7 @@ public class WsRestAccess extends NorthboundAccess<JSONObject, WsRestAccessReque
 	 */
 	@Override
 	protected boolean respond(NorthboundMediator mediator, 
-			NorthboundRequestBuilder<JSONObject> builder) 
+			NorthboundRequestBuilder builder) 
 			throws IOException 
 	{
 		NorthboundRequest nthbndRequest = builder.build();

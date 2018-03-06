@@ -71,7 +71,7 @@ public interface NorthboundRequestHandler
 	 * 
 	 * @throws IOException
 	 */
-	<F> NorthboundRequestBuilder<F> handle() throws IOException;
+	NorthboundRequestBuilder handle() throws IOException;
 	
 	/**
 	 * Returns the {@link NorthboundResponseBuildError} resulting from

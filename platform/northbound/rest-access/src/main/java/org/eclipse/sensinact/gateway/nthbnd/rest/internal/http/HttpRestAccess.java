@@ -36,7 +36,7 @@ import org.json.JSONObject;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class HttpRestAccess extends NorthboundAccess<JSONObject, HttpRestAccessRequest>
+public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest>
 {
 	private HttpServletResponseWrapper response;
 	private NorthboundEndpoint endpoint;
@@ -83,7 +83,7 @@ public class HttpRestAccess extends NorthboundAccess<JSONObject, HttpRestAccessR
 	 */
 	@Override
 	protected boolean respond(NorthboundMediator mediator,
-	        NorthboundRequestBuilder<JSONObject> builder) 
+	        NorthboundRequestBuilder builder) 
 	        		throws IOException 
 	{	
 		String httpMethod = super.request.getMethod();

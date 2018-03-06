@@ -25,7 +25,7 @@ import org.osgi.framework.ServiceReference;
 /**
  * 
  */
-public abstract class NorthboundAccess<F, W extends NorthboundRequestWrapper>
+public abstract class NorthboundAccess<W extends NorthboundRequestWrapper>
 {
 	//********************************************************************//
 	//						NESTED DECLARATIONS			  			      //
@@ -42,7 +42,7 @@ public abstract class NorthboundAccess<F, W extends NorthboundRequestWrapper>
      * @throws IOException
      */
     protected abstract boolean respond(
-    	NorthboundMediator mediator, NorthboundRequestBuilder<F> builder) 
+    	NorthboundMediator mediator, NorthboundRequestBuilder builder) 
     	throws IOException;
 
 	/**
@@ -107,14 +107,14 @@ public abstract class NorthboundAccess<F, W extends NorthboundRequestWrapper>
 	public void proceed() throws IOException
 	{
 		NorthboundResponseBuildError buildError = null;
-		NorthboundRequestBuilder<F> builder = null;
+		NorthboundRequestBuilder builder = null;
 		
 		DefaultNorthboundRequestHandler dnrh = new DefaultNorthboundRequestHandler();
 		dnrh.init(request);
 
 		if(dnrh.processRequestURI())
 		{
-			builder = dnrh.<F>handle();			
+			builder = dnrh.handle();			
 			if(builder == null)
 			{
 				buildError = dnrh.getBuildError();
@@ -141,7 +141,7 @@ public abstract class NorthboundAccess<F, W extends NorthboundRequestWrapper>
 							handler.init(request);
 							if(handler.processRequestURI())
 							{
-								builder = handler.<F>handle();
+								builder = handler.handle();
 								if(builder == null)
 								{
 									buildError = handler.getBuildError();
