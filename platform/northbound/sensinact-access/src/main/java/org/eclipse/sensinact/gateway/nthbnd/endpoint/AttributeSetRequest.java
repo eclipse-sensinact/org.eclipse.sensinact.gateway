@@ -23,10 +23,12 @@ public class AttributeSetRequest extends AttributeRequest
 	 * @param argument
 	 */
 	public AttributeSetRequest(NorthboundMediator mediator,
-			String serviceProvider, String service, String resource, 
-			String attribute, Object argument)
+			String requestIdentifier, String serviceProvider, 
+			String service, String resource, String attribute, 
+			Object argument)
 	{
-		super(mediator, serviceProvider, service, resource, attribute);
+		super(mediator, requestIdentifier, serviceProvider, 
+				service, resource, attribute);
 		this.argument = argument;
 	}
 

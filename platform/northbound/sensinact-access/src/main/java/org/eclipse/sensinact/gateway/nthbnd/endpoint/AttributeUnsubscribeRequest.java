@@ -22,10 +22,12 @@ public class AttributeUnsubscribeRequest extends AttributeRequest
 	 * @param resource
 	 */
 	public AttributeUnsubscribeRequest(NorthboundMediator mediator,
-			String serviceProvider, String service, String resource, 
-			String attribute, String subscriptionId)
+			String requestIdentifier, String serviceProvider, 
+			String service, String resource, String attribute, 
+			String subscriptionId)
 	{
-		super(mediator, serviceProvider, service, resource, attribute);
+		super(mediator, requestIdentifier, serviceProvider, 
+				service, resource, attribute);
 		
 		this.subscriptionId = subscriptionId;
 		if(this.subscriptionId == null)

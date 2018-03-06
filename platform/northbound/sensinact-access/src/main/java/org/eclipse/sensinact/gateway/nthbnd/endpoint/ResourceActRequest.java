@@ -20,13 +20,15 @@ public class ResourceActRequest extends ResourceRequest
 	 * @param serviceProvider
 	 * @param service
 	 * @param resource
+	 * @param requestIdentifier 
 	 * @param arguments
 	 */
 	public ResourceActRequest(NorthboundMediator mediator,
-			String serviceProvider,  String service, String resource,
-			Object[] arguments)
+		String requestIdentifier, String serviceProvider, 
+		String service, String resource, Object[] arguments)
 	{
-		super(mediator, serviceProvider, service, resource);		
+		super(mediator, requestIdentifier, serviceProvider, 
+				service, resource);		
 		this.arguments = arguments;
 	}
 	

@@ -43,7 +43,7 @@ public class NorthboundRequestBuilder<F>
 	protected String service;
 	protected String resource;
 	protected String attribute;
-	protected String rid;
+	protected String requestIdentifier;
 
 	protected String method;
 	protected boolean listElements;
@@ -169,16 +169,16 @@ public class NorthboundRequestBuilder<F>
 	 */
 	public NorthboundRequestBuilder<F> withRequestId(String rid)
 	{
-		this.rid = rid;
+		this.requestIdentifier = rid;
 		return this;
 	}
 	
 	/**
 	 * @return
 	 */
-	public String getRequestId()
+	public String getRequestIdentifier()
 	{
-		return this.rid;
+		return this.requestIdentifier;
 	}
 	
 	/**
@@ -213,7 +213,7 @@ public class NorthboundRequestBuilder<F>
 		switch(this.method)
 		{
 			case "ALL":
-				request = new AllRequest(mediator, this.filterDefinition);
+				request = new AllRequest(mediator, getRequestIdentifier(), this.filterDefinition);
 				break;
 			case "ACT":
 				if(this.resource != null)
@@ -230,61 +230,65 @@ public class NorthboundRequestBuilder<F>
 							arguments = new Object[]{this.argument};
 						}
 					}
-					request = new ResourceActRequest(
-					    mediator, serviceProvider, service, resource,
-						        arguments);
+					request = new ResourceActRequest(mediator, 
+						getRequestIdentifier(), serviceProvider, service, 
+						    resource, arguments);
 				}
 				break;
 			case "DESCRIBE":
 				if(this.resource != null)
 				{
 					request = new ResourceRequest(
-					    mediator, serviceProvider, service, resource);
+					    mediator, getRequestIdentifier(), serviceProvider, 
+					    service, resource);
 					
 				} else if(service != null)
 				{
 					if(this.listElements)
 					{
 						request = new ResourcesRequest( mediator, 
-							serviceProvider, service, this.filterDefinition);
+							getRequestIdentifier(), serviceProvider, service, 
+							    this.filterDefinition);
 						
 					} else
 					{
 						request = new ServiceRequest(
-							mediator, serviceProvider, service, null);
+							mediator, getRequestIdentifier(), serviceProvider, 
+							    service, null);
 					}
 				} else if(serviceProvider != null)
 				{
 					if(this.listElements)
 					{
-						request = new ServicesRequest(
-							mediator, serviceProvider, this.filterDefinition);
+						request = new ServicesRequest( mediator, 
+							getRequestIdentifier(), serviceProvider, this.filterDefinition);
 						
 					} else
 					{
 						request = new ServiceProviderRequest(
-							mediator, serviceProvider, null);
+							mediator, getRequestIdentifier(), 
+							    serviceProvider, null);
 					}
 				} else
 				{
 					request = new ServiceProvidersRequest(mediator, 
-							this.filterDefinition);
+						getRequestIdentifier(), this.filterDefinition);
 				}
 				break;
 			case "GET":
 				if(this.attribute != null)
 				{
-					request = new AttributeGetRequest(
-					    mediator, serviceProvider, service, resource,
-						        attribute);
+					request = new AttributeGetRequest( mediator, 
+						getRequestIdentifier(), serviceProvider, service, 
+						    resource, attribute);
 				}
 				break;
 			case "SET":
 				if(this.attribute != null)
 				{
-					request = new AttributeSetRequest(
-					    mediator, serviceProvider, service, resource,
-						        attribute, argument);
+					request = new AttributeSetRequest(mediator, 
+						getRequestIdentifier(), serviceProvider, service, 
+						    resource, attribute, argument);
 				}
 				break;
 			case "SUBSCRIBE":				
@@ -301,16 +305,16 @@ public class NorthboundRequestBuilder<F>
 				}				
 				if(this.resource!=null)
 				{
-					request = new AttributeSubscribeRequest( mediator,
-					    serviceProvider, service, resource, attribute, 
-					    (NorthboundRecipient) arguments[0], (arguments.length>1
-					    ?((JSONArray)arguments[1]):new JSONArray()));
+					request = new AttributeSubscribeRequest( mediator, 
+						getRequestIdentifier(), serviceProvider, service, 
+						resource, attribute, (NorthboundRecipient) arguments[0],
+					    (arguments.length>1?((JSONArray)arguments[1]):new JSONArray()));
 				} else
 				{
 					request = new RegisterAgentRequest( mediator, 
-						serviceProvider, service, (NorthboundRecipient) 
-					    arguments[0],  (SnaFilter)(arguments.length>1
-					    	?arguments[1]:null));
+						getRequestIdentifier(), serviceProvider, service, 
+						(NorthboundRecipient) arguments[0],  (SnaFilter)(
+							arguments.length>1?arguments[1]:null));
 				}
 				break;
 			case "UNSUBSCRIBE":
@@ -318,12 +322,13 @@ public class NorthboundRequestBuilder<F>
 						String.class, this.argument);
 				if(this.resource != null)
 				{
-					request = new AttributeUnsubscribeRequest(
-					    mediator, serviceProvider, service, resource,
-						        attribute, arg);
+					request = new AttributeUnsubscribeRequest(mediator,
+						getRequestIdentifier(), serviceProvider, service, 
+						    resource, attribute, arg);
 				} else
 				{
-					request = new UnregisterAgentRequest(mediator, arg);
+					request = new UnregisterAgentRequest(mediator, 
+							getRequestIdentifier(), arg);
 				}
 				break;
 			default:

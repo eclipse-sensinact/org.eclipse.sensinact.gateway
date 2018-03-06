@@ -15,10 +15,12 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 
 public class ServicesRequest extends ServiceProviderRequest
 {
-	public ServicesRequest(NorthboundMediator mediator, String serviceProvider, 
+	public ServicesRequest(NorthboundMediator mediator, 
+		String requestIdentifier, String serviceProvider, 
 			FilteringDefinition filterDefinition) 
 	{
-		super(mediator, serviceProvider, filterDefinition);
+		super(mediator, requestIdentifier, serviceProvider, 
+				filterDefinition);
 	}
 
 	/**

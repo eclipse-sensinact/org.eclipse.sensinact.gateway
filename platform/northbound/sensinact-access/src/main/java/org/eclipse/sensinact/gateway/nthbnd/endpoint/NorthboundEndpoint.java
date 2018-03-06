@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 import java.lang.reflect.Method;
 
 import org.eclipse.sensinact.gateway.core.FilteringDefinition;
+import org.eclipse.sensinact.gateway.core.ResultHolder;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
@@ -94,10 +95,9 @@ public class NorthboundEndpoint
 	 * @return the execution result Object of this request in
 	 * the appropriate format
 	 */
-	public <F> F execute(NorthboundRequest request,
-			ResponseFormat<F> responseFormat)
+	public ResultHolder<?> execute(NorthboundRequest request)
 	{		
-		Object result = null;
+		ResultHolder<?> result = null;
 	
 		Argument[] arguments = request.getExecutionArguments();
 		Class<?>[] parameterTypes = Argument.getParameterTypes(
@@ -107,37 +107,49 @@ public class NorthboundEndpoint
 			Method method = getClass().getDeclaredMethod(
 			    request.getMethod(), parameterTypes);
 			
-			result = method.invoke(this, Argument.getParameters(
-					arguments));
+			result = (ResultHolder<?>) method.invoke(
+				this, Argument.getParameters(arguments));
 			
 		} catch(Exception e)
 		{
 			this.mediator.error(e);
 		}
-		return responseFormat.format(result);
+		return result;
 	}
 	
 	/**
      * Registers an {@link SnaAgent} whose lifetime will be linked 
      * to the {@link Session} of this NorthboundEndpoint 
      * 
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * @param callback
+     * @param filter
+     * 
      * @return the {@link SnaAgent} registration response
      */
-    public JSONObject registerAgent(AbstractMidAgentCallback callback, 
-    		SnaFilter filter)
+    public ResultHolder<JSONObject> registerAgent(String requestIdentifier, 
+    	AbstractMidAgentCallback callback, SnaFilter filter)
     {
-    	return session.registerSessionAgent(callback, filter);
+    	return session.registerSessionAgent(requestIdentifier, 
+    			callback, filter);
     }
 
 	/**
      * Unregisters the {@link SnaAgent} whose String 
      * identifier is passed as parameter
      * 
+     * @param requestIdentifier the String identifier of the 
+     * request calling this method
+     * @param agentId
+     * 
      * @return the {@link SnaAgent} unregistration response
      */
-    public JSONObject unregisterAgent(String agentId)
+    public JSONObject unregisterAgent(String requestIdentifier, 
+        	String agentId)
     {
-    	return session.unregisterSessionAgent(agentId);
+    	return session.unregisterSessionAgent(requestIdentifier, 
+    			agentId).getResult();
     }
 
 	/**
@@ -145,12 +157,15 @@ public class NorthboundEndpoint
      * providers, services and resources, including their
      * location 
      * 
+     * @param requestIdentifier the String identifier of 
+     * the request calling this method
+     * 
      * @return the JSONObject formated list of all the 
      * model instances' hierarchies
      */
-    public String all()
+    public ResultHolder<String> all(String requestIdentifier)
     {
-    	return this.all(null,null);
+    	return this.all(requestIdentifier, null,null);
     }
 
 	/**
@@ -159,13 +174,20 @@ public class NorthboundEndpoint
      * their location, and compliant with the String 
      * filter passed as parameter
      * 
+     * @param requestIdentifier the String identifier of 
+     * the request calling this method
+     * @param filter the LDAP formated String filter allowing 
+     * to discriminate the targeted service providers, services, 
+     * and/or resources
+     * 
      * @return the JSONObject formated list of all the 
      * model instances' hierarchies according to the 
      * specified filter
      */
-    public String all(String filter)
+    public ResultHolder<String> all(String requestIdentifier, 
+    		String filter)
     {
-    	return this.all(filter, null);
+    	return this.all(requestIdentifier, filter, null);
     }
 
 	/**
@@ -174,207 +196,265 @@ public class NorthboundEndpoint
      * their location, and compliant with the String 
      * filter passed as parameter
      * 
-     * @return the JSONObject formated list of all the 
-     * model instances' hierarchies according to the 
-     * specified filter
+     * @param requestIdentifier the String identifier of the 
+     * request calling this method
+     * @param filter the LDAP formated String filter allowing 
+     * to discriminate the targeted service providers, services, 
+     * and/or resources
+     * @param filterDefinition the {@link FilteringDefinition} 
+     * specifying the filter to be applied on the result
+     * 
+     * @return the JSONObject formated list of all the model 
+     * instances' hierarchies according to the specified filter
      */
-    public String all(String filter, FilteringDefinition 
+    public ResultHolder<String> all(String requestIdentifier, 
+    		String filter, FilteringDefinition 
     		filterDefinition)
     {
-    	return session.getAll(filter, filterDefinition);
+    	return session.getAll(requestIdentifier, 
+    			filter, filterDefinition);
     }
 
    	/**
      * Get the list of service providers and returns it
      * 
-     * @return the response containing the information
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * @return
      */
-    public String serviceProvidersList()
+    public ResultHolder<String> serviceProvidersList(String requestIdentifier)
     {
-   	    return this.serviceProvidersList(null);
+   	    return this.serviceProvidersList(requestIdentifier,null);
     }
     
 	/**
      * Get the list of service providers and returns it
      * 
-     * @return the response containing the information
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * @param filterDefinition the {@link FilteringDefinition} specifying 
+     * the filter to be applied on the result
+     * @return
      */
-    public String serviceProvidersList(FilteringDefinition 
-    		filterDefinition)
+    public ResultHolder<String> serviceProvidersList(String requestIdentifier,
+    	FilteringDefinition filterDefinition)
     {
-    	return session.getProviders(filterDefinition);
+    	return session.getProviders(requestIdentifier, 
+    			filterDefinition);
     }
 
     /**
      * Get the information of a specific service providers and returns it
      * 
-     * @param serviceProviderId the service provider ID
-     * @return the response containing the information
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * @param serviceProviderId the String identifier of the service provider
+     * @return
      */
-    public String serviceProviderDescription(String serviceProviderId)
+    public ResultHolder<String> serviceProviderDescription(String requestIdentifier,
+    		String serviceProviderId)
     {
-    	return session.getProvider(serviceProviderId);
+    	return session.getProvider(requestIdentifier,
+    			serviceProviderId);
     }
     
     /**
      * Get the list of services of a service provider and returns it
      *
-     * @param serviceProviderId the service provider ID
-     * @return the response containing the information
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * @param serviceProviderId the String identifier of the service provider
+     * @return
      */
-    public String servicesList(String serviceProviderId) 
+    public ResultHolder<String> servicesList(String requestIdentifier, String serviceProviderId) 
     {
-    	return this.servicesList(serviceProviderId,null);
+    	return this.servicesList(requestIdentifier, serviceProviderId,null);
     }
 
     /**
      * Get the list of services of a service provider and returns it
      *
-     * @param serviceProviderId the service provider ID
-     * @return the response containing the information
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * @param serviceProviderId the String identifier of the service provider
+     * @param filterDefinition the {@link FilteringDefinition} specifying 
+     * the filter to be applied on the result
+     * @return
      */
-    public String servicesList(String serviceProviderId, 
-    		FilteringDefinition filterDefinition) 
+    public ResultHolder<String> servicesList(String requestIdentifier, 
+    	String serviceProviderId, FilteringDefinition filterDefinition) 
     {
-    	return session.getServices(serviceProviderId, 
-    			filterDefinition);
+    	return session.getServices(requestIdentifier, 
+    		serviceProviderId, filterDefinition);
     }
     
     /**
      * Get the information of a specific service and returns it
      *
-     * @param serviceProviderId the service provider ID
-     * @param serviceId the service ID
-     * @return the response containing the information
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * @param serviceProviderId the String identifier of the service provider
+     * @param serviceId the String identifier of the service
+     * @return
      */
-    public String serviceDescription(
+    public ResultHolder<String> serviceDescription(String requestIdentifier,
     		String serviceProviderId, String serviceId)
     {
-    	return session.getService(serviceProviderId, serviceId);
+    	return session.getService(requestIdentifier, 
+    		serviceProviderId, serviceId);
     }
     
     /**
      * Get the list of resources of a service and returns it
      *
-     * @param serviceProviderId the service provider ID
-     * @return the response containing the information
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * @param serviceProviderId the String identifier of the service provider
+     * @param serviceId the String identifier of the service
+     * @return
      */
-    public String resourcesList(String serviceProviderId, 
-    		String serviceId)
+    public ResultHolder<String> resourcesList(String requestIdentifier, 
+    	String serviceProviderId, String serviceId)
     {
-    	return this.resourcesList(serviceProviderId, serviceId, null);
+    	return this.resourcesList(requestIdentifier, 
+    		serviceProviderId, serviceId, null);
     }
 
     /**
      * Get the list of resources of a service and returns it
      *
-     * @param serviceProviderId the service provider ID
-     * @return the response containing the information
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * @param serviceProviderId the String identifier of the service provider
+     * @param serviceId the String identifier of the service
+     * @param filterDefinition the {@link FilteringDefinition} specifying 
+     * the filter to be applied on the result
+     * @return
      */
-    public String resourcesList(String serviceProviderId, 
-    	String serviceId, FilteringDefinition filterDefinition) 
+    public ResultHolder<String> resourcesList(String requestIdentifier, 
+    	String serviceProviderId, String serviceId, 
+    	    FilteringDefinition filterDefinition) 
     {
-    	return session.getResources(serviceProviderId, serviceId, 
-    			filterDefinition);
+    	return session.getResources(requestIdentifier, 
+    		serviceProviderId, serviceId, filterDefinition);
     }
     
     /**
      * Get the information of a specific resource and returns it
      *
-     * @param serviceProviderId the service provider ID
-     * @param serviceId the service ID
-     * @param resourceId the resource ID
-     * @return the response containing the information
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * @param serviceProviderId the String identifier of the service provider
+     * @param serviceId the String identifier of the service
+     * @param resourceId the String identifier of the resource
+     * @return
      */
-    public String resourceDescription(
+    public ResultHolder<String> resourceDescription(String requestIdentifier,
     		String serviceProviderId, String serviceId, 
     		String resourceId)
     {
-    	return session.getResource(serviceProviderId, 
-    			serviceId, resourceId);
+    	return session.getResource(requestIdentifier, 
+    		serviceProviderId, serviceId, resourceId);
     }        
 
     /**
      * Perform a sNa GET on a resource
      *
-     * @param serviceProviderId the service provider ID
-     * @param serviceId the service ID
-     * @param resourceId the resource ID
-     * @param attributeId GET URL parameter with json format
-     * @return the response containing the value of the resource
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * @param serviceProviderId the String identifier of the service provider
+     * @param serviceId the String identifier of the service
+     * @param resourceId the String identifier of the resource
+     * @param attributeId the String identifier of the attribute
+     * @return
      */
-    public JSONObject get(String serviceProviderId, 
-    	String serviceId, String resourceId, String attributeId)
+    public ResultHolder<JSONObject> get(String requestIdentifier, 
+    	String serviceProviderId, String serviceId, 
+    	    String resourceId, String attributeId)
     {  	
-    	return session.get(serviceProviderId, serviceId, 
-    			resourceId, attributeId);
+    	return session.get(requestIdentifier, serviceProviderId, 
+    		serviceId, resourceId, attributeId);
     }
 
     /**
      * Perform a sNa SET on a resource
      *
-     * @param serviceProviderId the service provider ID
-     * @param serviceId the service ID
-     * @param resourceId the resource ID
-     * @param attributeId the value to set
-     * @return the response containing the value of the resource
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * @param serviceProviderId the String identifier of the service provider
+     * @param serviceId the String identifier of the service
+     * @param resourceId the String identifier of the resource
+     * @param attributeId the String identifier of the attribute
+     * @param value
+     * @return
      */
-    public JSONObject set(String serviceProviderId,
+    public ResultHolder<JSONObject> set(String requestIdentifier, String serviceProviderId,
        String serviceId, String resourceId, String attributeId,
               Object value) 
     {  	
-    	return session.set(serviceProviderId, serviceId, resourceId, 
-    			attributeId, value);
+    	return session.set(requestIdentifier, serviceProviderId, 
+    		serviceId, resourceId, attributeId, value);
     }
 
     /**
      * Perform a sNa ACT on a resource
      * 
-     * @param serviceProviderId the service provider ID
-     * @param serviceId the service ID
-     * @param resourceId the resource ID
-     * @param arguments the parameters of the act (can be empty)
-     * @return the response containing the value of the resource
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * @param serviceProviderId the String identifier of the service provider
+     * @param serviceId the String identifier of the service
+     * @param resourceId the String identifier of the resource
+     * @param arguments
+     * @return
      */
-    public JSONObject act(String serviceProviderId,
+    public ResultHolder<JSONObject> act(String requestIdentifier, String serviceProviderId,
           String serviceId, String resourceId, Object[] arguments)
     { 	
-    	return session.act(serviceProviderId, serviceId, resourceId, arguments);
+    	return session.act(requestIdentifier, serviceProviderId, 
+    		serviceId, resourceId, arguments);
     }
 
     /**
      * Perform a subscription to a resource
      *
-     * @param serviceProviderId the service provider ID
-     * @param serviceId the service ID
-     * @param resourceId the resource ID
-     * @param recipient the notifications recipient 
-     * @param conditions the set of applying conditions
-     * @return the subscription ID
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * @param serviceProviderId the String identifier of the service provider
+     * @param serviceId the String identifier of the service
+     * @param resourceId the String identifier of the resource
+     * @param attributeId the String identifier of the attribute
+     * @param recipient
+     * @param conditions
+     * @return
      */
-    public JSONObject subscribe(String serviceProviderId, 
-    	String serviceId, String resourceId, String attributeId, 
+    public ResultHolder<JSONObject> subscribe(String requestIdentifier, 
+    	String serviceProviderId, String serviceId, 
+    	String resourceId, String attributeId, 
     	NorthboundRecipient recipient, JSONArray conditions) 
     {
-     	return session.subscribe(serviceProviderId, serviceId, resourceId,
+     	return session.subscribe(requestIdentifier, 
+     		serviceProviderId, serviceId, resourceId,
      			recipient, conditions);
     }
 
     /**
      * Perform an unsubscription to a resource
      *
-     * @param serviceProviderId the service provider ID
-     * @param serviceId the service ID
-     * @param resourceId the resource ID
-     * @param attributeId the attribute ID
-     * @param subscriptionId the subscription string identifier
-     * @return success or error response
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * @param serviceProviderId the String identifier of the service provider
+     * @param serviceId the String identifier of the service
+     * @param resourceId the String identifier of the resource
+     * @param attributeId the String identifier of the attribute
+     * @param subscriptionId
+     * @return
      */
-    public JSONObject unsubscribe(String serviceProviderId, 
-    		String serviceId, String resourceId, String attributeId,
-    		String subscriptionId) 
+    public ResultHolder<JSONObject> unsubscribe(String requestIdentifier, 
+    	String serviceProviderId, String serviceId, 
+    	String resourceId, String attributeId, String subscriptionId) 
     {  	
-     	return session.unsubscribe(serviceProviderId, serviceId, resourceId,
+     	return session.unsubscribe(requestIdentifier, 
+     		serviceProviderId, serviceId, resourceId,
      			subscriptionId);
     }
 }

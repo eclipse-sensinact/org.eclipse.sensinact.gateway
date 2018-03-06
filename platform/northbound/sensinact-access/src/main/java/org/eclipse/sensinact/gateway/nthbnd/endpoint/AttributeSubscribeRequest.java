@@ -26,12 +26,13 @@ public class AttributeSubscribeRequest extends AttributeRequest
 	 * @param attribute
 	 * @param recipient
 	 */
-	public AttributeSubscribeRequest(NorthboundMediator mediator, 
-			String serviceProvider, String service, String resource, 
-			String attribute, NorthboundRecipient recipient,
-			JSONArray conditions)
+	public AttributeSubscribeRequest(NorthboundMediator mediator,
+			String requestIdentifier, String serviceProvider, 
+			String service, String resource, String attribute, 
+			NorthboundRecipient recipient, JSONArray conditions)
 	{
-		super(mediator, serviceProvider, service, resource, attribute);
+		super(mediator, requestIdentifier, serviceProvider, 
+				service, resource, attribute);
 		this.recipient = recipient;
 		this.conditions = conditions;
 		if(this.recipient == null)

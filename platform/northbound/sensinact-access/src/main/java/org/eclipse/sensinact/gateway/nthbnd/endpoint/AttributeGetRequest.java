@@ -20,11 +20,11 @@ public class AttributeGetRequest extends AttributeRequest
 	 * @param attribute
 	 */
 	public AttributeGetRequest(NorthboundMediator mediator,
-			String serviceProvider, String service, String resource, 
-			String attribute)
+			String requestIdentifier, String serviceProvider, 
+			String service, String resource, String attribute)
 	{
-		super(mediator, serviceProvider, service, 
-				resource, attribute);
+		super(mediator,requestIdentifier, serviceProvider, 
+			service, resource, attribute);
 	}
 
 	/**

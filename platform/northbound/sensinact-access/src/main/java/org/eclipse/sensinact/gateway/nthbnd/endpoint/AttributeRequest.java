@@ -22,10 +22,11 @@ public abstract class AttributeRequest extends ResourceRequest
 	 * @param attribute
 	 */
 	public AttributeRequest(NorthboundMediator mediator,
-			String serviceProvider, String service, String resource, 
-			String attribute)
+			String requestIdentifier, String serviceProvider, 
+			String service, String resource, String attribute)
 	{
-		super(mediator, serviceProvider, service, resource);
+		super(mediator, requestIdentifier, serviceProvider, 
+				service, resource);
 		
 		this.attribute = attribute;
 		if(this.attribute == null)

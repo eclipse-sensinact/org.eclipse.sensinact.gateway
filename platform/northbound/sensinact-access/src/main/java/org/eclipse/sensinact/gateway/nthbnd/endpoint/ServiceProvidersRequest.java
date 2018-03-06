@@ -17,9 +17,9 @@ public class ServiceProvidersRequest extends NorthboundRequest
 {
 
 	public ServiceProvidersRequest(NorthboundMediator mediator, 
-			FilteringDefinition filterDefinition) 
+		String requestIdentifier, FilteringDefinition filterDefinition) 
 	{
-		super(mediator, filterDefinition);
+		super(mediator, requestIdentifier, filterDefinition);
 	}
 
 	/** 
@@ -55,15 +55,22 @@ public class ServiceProvidersRequest extends NorthboundRequest
 	@Override
 	protected Argument[] getExecutionArguments() 
 	{
+		Argument[] superArguments = super.getExecutionArguments();
+		int length = superArguments==null?0:superArguments.length;
+
 		if(this.getClass() == ServiceProvidersRequest.class 
 				&& super.filterDefinition!=null)
 		{
-			Argument[] arguments = new Argument[1];
-			arguments[0] = new Argument(FilteringDefinition.class, 
+			Argument[] arguments = new Argument[length+1];
+			if(length > 0)
+			{
+				System.arraycopy(superArguments, 0, arguments, 0, length);
+			}
+			arguments[length] = new Argument(FilteringDefinition.class, 
 					super.filterDefinition);
 		    return arguments;
 		}
-		return super.getExecutionArguments();
+		return superArguments;
 	}
 	
 	/** 

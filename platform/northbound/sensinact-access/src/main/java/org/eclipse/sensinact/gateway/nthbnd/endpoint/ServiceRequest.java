@@ -19,10 +19,11 @@ public class ServiceRequest extends ServicesRequest
 	private String service;
 	
 	public ServiceRequest(NorthboundMediator mediator,
-			String serviceProvider, String service, 
-			FilteringDefinition filterDefinition) 
+		String requestIdentifier, String serviceProvider, 
+		String service, FilteringDefinition filterDefinition) 
 	{
-		super(mediator, serviceProvider, filterDefinition);
+		super(mediator, requestIdentifier, serviceProvider, 
+				filterDefinition);
 		this.service = service;
 		if(this.service == null)
 		{
