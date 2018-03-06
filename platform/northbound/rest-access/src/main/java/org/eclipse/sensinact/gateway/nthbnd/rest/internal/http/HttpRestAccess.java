@@ -15,6 +15,10 @@ import java.io.IOException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.eclipse.sensinact.gateway.core.ResultHolder;
+import org.eclipse.sensinact.gateway.core.security.Authentication;
+import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
+import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
@@ -23,11 +27,13 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.StringResponseFormat;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 import org.json.JSONObject;
 
 /**
- *
+ * 
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class HttpRestAccess extends NorthboundAccess<JSONObject, HttpRestAccessRequest>
@@ -49,9 +55,24 @@ public class HttpRestAccess extends NorthboundAccess<JSONObject, HttpRestAccessR
 	{
 		super(request);
 		this.response = response;
-		this.endpoint = ((NorthboundEndpoints) super.mediator.getProperty(
-			RestAccessConstants.NORTHBOUND_ENDPOINTS)).getEndpoint(
-			    request.getAuthentication());
+
+		Authentication<?> authentication = request.getAuthentication();
+		if(authentication == null)
+		{
+			this.endpoint = request.getMediator(
+				).getNorthboundEndpoints().getEndpoint();
+			
+		} else if(AuthenticationToken.class.isAssignableFrom(
+				authentication.getClass()))
+		{
+			this.endpoint = request.getMediator(
+				).getNorthboundEndpoints().getEndpoint(
+					(AuthenticationToken)authentication);
+		} else
+		{
+			throw new InvalidCredentialException(
+				"Authentication token was expected");
+		}
 	}
 	
 	/**
@@ -91,23 +112,20 @@ public class HttpRestAccess extends NorthboundAccess<JSONObject, HttpRestAccessR
 			default:
 				break;
 		}
-		
-		response.addHeader("X-Auth-Token", this.endpoint.getSessionToken());
-		
 		NorthboundRequest nthbndRequest = builder.build();
 		if(nthbndRequest == null)
 		{
 			sendError(500, "Internal server error");
 			return false;
 		}
-		JSONObject result = this.endpoint.execute(nthbndRequest,
-				new JSONResponseFormat(mediator));
+		ResultHolder<?> cap = this.endpoint.execute(nthbndRequest);
+		String result = new StringResponseFormat().format(
+				cap.getResult());
 		if(result == null)
 		{
 			sendError(500, "Internal server error");
 			return false;
-		}	
-		result.put("rid", builder.getRequestId());
+		}
 		String resultStr = result.toString();
 		byte[] resultBytes;
 
@@ -131,7 +149,7 @@ public class HttpRestAccess extends NorthboundAccess<JSONObject, HttpRestAccessR
 			ServletOutputStream output = this.response.getOutputStream();
 			output.write(resultBytes);	
 		}
-		response.setStatus(result.getInt("statusCode"));
+		response.setStatus(cap.getStatusCode());
 		return true;
 		
 	}

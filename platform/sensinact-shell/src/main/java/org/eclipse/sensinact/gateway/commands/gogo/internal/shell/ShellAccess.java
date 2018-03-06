@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.commands.gogo.internal.shell;
 import java.io.IOException;
 
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
+import org.eclipse.sensinact.gateway.core.ResultHolder;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
@@ -20,6 +21,7 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.StringResponseFormat;
 import org.json.JSONObject;
 
 /**
@@ -83,8 +85,9 @@ public class ShellAccess extends NorthboundAccess<JSONObject, ShellAccessRequest
 			this.sendError(500, "Internal server error");
 			return false;
 		}
-		JSONObject result = this.endpoint.execute(nthbndRequest, 
-				new JSONResponseFormat(mediator));
+		ResultHolder<?> cap = this.endpoint.execute(nthbndRequest);
+		JSONObject result = new JSONResponseFormat(mediator
+			).format(cap.getResult());
 		
 		if(result == null)
 		{

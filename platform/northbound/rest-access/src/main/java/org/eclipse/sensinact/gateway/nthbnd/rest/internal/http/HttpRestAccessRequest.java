@@ -25,13 +25,10 @@ import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoints;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
 import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONObject;
 

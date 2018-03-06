@@ -27,6 +27,7 @@ import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
 import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Resource;
+import org.eclipse.sensinact.gateway.core.ResultHolder;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
@@ -84,9 +85,9 @@ public class AccessMethodCommands {
 					this.sendError(500, "Internal server error");
 					return false;
 				}
-				JSONObject result = super.endpoint.execute(nthbndRequest, 
-						new JSONResponseFormat(mediator));
-				
+				ResultHolder<?> cap = super.endpoint.execute(nthbndRequest);
+				JSONObject result = new JSONResponseFormat(mediator
+						).format(cap.getResult());
 				if(result == null)
 				{
 					this.sendError(500, "Internal server error");

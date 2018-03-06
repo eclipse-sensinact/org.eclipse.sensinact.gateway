@@ -222,7 +222,7 @@ public class JettyTestServer implements Runnable
 
 		/**
 		 * @param request
-		 * @param response
+		 * @param result
 		 * @param callbackList
 		 */
 		private void doHandle(

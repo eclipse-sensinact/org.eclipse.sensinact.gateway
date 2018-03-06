@@ -30,4 +30,11 @@ public abstract class RestAccessConstants
 	public static String JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 
 	public static final String TEXT_CONTENT_TYPE = "text/plain; charset=utf-8";
+
+	public static final String HTTP_ROOT = "/";
+
+	public static final String WS_ROOT = "/ws";
+
+	public static final String LOGIN_ENDPOINT = "/login";
+	
 }

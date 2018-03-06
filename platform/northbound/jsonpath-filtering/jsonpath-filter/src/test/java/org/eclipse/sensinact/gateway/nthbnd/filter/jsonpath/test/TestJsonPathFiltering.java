@@ -203,7 +203,6 @@ public class TestJsonPathFiltering extends MidOSGiTest
 	    + ",\"location\":\"45.19334890078532:5.706474781036377\"}]}");
 
         JSONObject obj = new JSONObject(simulated3);
-        obj.remove("X-Auth-Token");
 	    JSONAssert.assertEquals(response, obj, false);
 	    
         String simulated1 = this.synchronizedRequest(client,"/sensinact/providers", null);       

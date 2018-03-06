@@ -37,6 +37,11 @@ public class ShellOutput
 		for(;index < length;index++)
 		{
 			String name = names[index];
+			if(offset == 0 && (name.equals("type")
+					|| name.equals("statusCode")))
+			{
+				continue;
+			}
 			Object value = object.get(name);
 			
 			if(CastUtils.isPrimitive(value.getClass()))

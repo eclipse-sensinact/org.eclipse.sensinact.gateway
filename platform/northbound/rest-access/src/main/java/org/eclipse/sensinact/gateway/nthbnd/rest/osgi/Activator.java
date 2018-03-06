@@ -20,10 +20,12 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.LoginEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoints;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.CorsFilter;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpEndpoint;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpLoginEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws.WebSocketWrapperPool;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -37,13 +39,6 @@ import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
  */
 public class Activator extends AbstractActivator<NorthboundMediator>
 {
-	private static final String HTTP_ROOT = "/";
-	private static final String WS_ROOT = "/ws";
-	
-	/**
-	 * @param context
-	 * @return
-	 */
 	private static final ClassLoader getJettyBundleClassLoader(
 			BundleContext context)
 	{
@@ -106,10 +101,18 @@ public class Activator extends AbstractActivator<NorthboundMediator>
 				Dictionary<String, Object> params = new Hashtable<String, Object>();
 		        params.put(Mediator.class.getCanonicalName(), Activator.this.mediator);
 		        try
-		        {					
-					HttpContext context = service.createDefaultHttpContext();
-			        service.registerServlet(HTTP_ROOT, new HttpEndpoint(mediator),params, context);
-					Activator.this.mediator.info(String.format("%s servlet registered", HTTP_ROOT));
+		        {	
+		        	HttpContext context = service.createDefaultHttpContext();
+		        	service.registerServlet(RestAccessConstants.LOGIN_ENDPOINT, 
+		        		new HttpLoginEndpoint(mediator), params, context);
+					Activator.this.mediator.info(String.format("%s servlet registered", RestAccessConstants.LOGIN_ENDPOINT));
+
+					params = new Hashtable<String, Object>();
+			        params.put(Mediator.class.getCanonicalName(), Activator.this.mediator);
+			        
+					context = service.createDefaultHttpContext();
+			        service.registerServlet(RestAccessConstants.HTTP_ROOT, new HttpEndpoint(mediator),params, context);
+					Activator.this.mediator.info(String.format("%s servlet registered", RestAccessConstants.HTTP_ROOT));
 					
 					params = new Hashtable<String, Object>();
 			        params.put(Mediator.class.getCanonicalName(), Activator.this.mediator);
@@ -123,7 +126,7 @@ public class Activator extends AbstractActivator<NorthboundMediator>
 			        				mediator.getContext()));
 			        try
 			        {				        
-				        service.registerServlet(WS_ROOT, new WebSocketServlet() 
+				        service.registerServlet(RestAccessConstants.WS_ROOT, new WebSocketServlet() 
 				        {				            
 				            /** 
 				             * @inheritDoc
@@ -143,7 +146,7 @@ public class Activator extends AbstractActivator<NorthboundMediator>
 			        {
 			        	Thread.currentThread().setContextClassLoader(current);
 			        }
-					mediator.info(String.format("%s servlet registered", WS_ROOT));
+					mediator.info(String.format("%s servlet registered", RestAccessConstants.WS_ROOT));
 		        }
 		        catch (Exception e)
 		        {
@@ -170,7 +173,7 @@ public class Activator extends AbstractActivator<NorthboundMediator>
 			{
             	try
             	{
-            		service.unregister(HTTP_ROOT);
+            		service.unregister(RestAccessConstants.HTTP_ROOT);
             	
             	} catch(Exception e)
             	{
@@ -178,7 +181,7 @@ public class Activator extends AbstractActivator<NorthboundMediator>
             	}
             	try
             	{
-            		service.unregister(WS_ROOT);
+            		service.unregister(RestAccessConstants.WS_ROOT);
             	
             	} catch(Exception e)
             	{
@@ -207,8 +210,6 @@ public class Activator extends AbstractActivator<NorthboundMediator>
 	public NorthboundMediator doInstantiate(BundleContext context)
 	{
 		NorthboundMediator mediator = new NorthboundMediator(context);
-		mediator.setProperty(RestAccessConstants.NORTHBOUND_ENDPOINTS, 
-				new NorthboundEndpoints(mediator));
 		return mediator;
 	}
 }
