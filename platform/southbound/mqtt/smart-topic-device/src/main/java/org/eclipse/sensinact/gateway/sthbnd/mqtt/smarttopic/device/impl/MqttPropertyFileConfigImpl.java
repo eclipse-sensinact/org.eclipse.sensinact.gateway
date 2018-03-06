@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.device.impl;
 
 import org.eclipse.sensinact.gateway.common.annotation.Property;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttBroker;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.device.MqttPropertyFileConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class MqttPropertyFileConfigImpl implements MqttPropertyFileConfig {
     String host;
 
     @Property(mandatory = false,defaultValue = "1883",validationRegex = Property.INTEGER)
-    int port;
+    Integer port;
 
     @Property
     String topic;
@@ -63,7 +64,7 @@ public class MqttPropertyFileConfigImpl implements MqttPropertyFileConfig {
         return host;
     }
 
-    public int getPort() {
+    public Integer getPort() {
         return port;
     }
 

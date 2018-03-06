@@ -16,6 +16,7 @@ import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttActivator;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttPacket;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.device.MqttPropertyFileConfig;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.interpolator.MqttManagedService;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider;
 import org.osgi.framework.ServiceRegistration;
@@ -61,7 +62,7 @@ public class Activator extends MqttActivator {
 
         // Monitors the deployment of the file "mqtt-*.cfg" file to create
         mqttBusConfigFileServiceTracker = new ServiceTracker(super.mediator.getContext(),
-                MqttPropertyFileConfigTracker.class.getName(),
+                MqttPropertyFileConfig.class.getName(),
                 new MqttPropertyFileConfigTracker(super.mediator.getContext(), endPoint));
 
         mqttBusConfigFileServiceTracker.open(true);

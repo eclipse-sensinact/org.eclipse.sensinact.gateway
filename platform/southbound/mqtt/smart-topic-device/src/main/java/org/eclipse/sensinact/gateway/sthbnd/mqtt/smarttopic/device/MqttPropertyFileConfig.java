@@ -18,7 +18,7 @@ public interface MqttPropertyFileConfig {
 
     String getHost();
 
-    int getPort();
+    Integer getPort();
 
     String getId();
 

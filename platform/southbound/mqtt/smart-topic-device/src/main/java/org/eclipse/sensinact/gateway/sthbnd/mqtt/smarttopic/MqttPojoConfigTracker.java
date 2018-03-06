@@ -56,6 +56,7 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
 
         try {
             final MqttBroker broker = provider.getBroker();
+            broker.connect();
 
             for(final Service service : provider.getServices()) {
                 for(final Resource resource : service.getResources()) {
