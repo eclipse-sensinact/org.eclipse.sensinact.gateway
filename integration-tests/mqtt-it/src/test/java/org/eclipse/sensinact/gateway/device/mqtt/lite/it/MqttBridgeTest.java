@@ -29,6 +29,7 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 
 import javax.inject.Inject;
 import java.util.Hashtable;
@@ -36,7 +37,6 @@ import java.util.Set;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
-@Ignore
 public class MqttBridgeTest extends MqttTestITAbstract {
 
     @Inject
@@ -55,8 +55,8 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     @Test
     public void providerCreation() throws Exception {
         Object provider = createDevicePojo("myprovider","myservice","myresource","/myresource");
-        bc.registerService("org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider", provider, new Hashtable<String, Object>());
-        JSONObject obj = new JSONObject(sensinactSession.getProviders());
+        ServiceRegistration sr=bc.registerService("org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider", provider, new Hashtable<String, Object>());
+        JSONObject obj = new JSONObject(sensinactSession.getProviders().getResult());
         JSONArray providers = obj.getJSONArray("providers");
         final Set<String> providersSet = parseJSONArrayIntoSet(providers);
         Assert.assertTrue("Provider was not created, or at least is not shown via REST api", providersSet.contains("myprovider"));
@@ -88,12 +88,11 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     }
 
     @Test
-    @Ignore
     public void providerRemoval() throws Exception {
-        providerCreation();
-        MqttPacket packet = new MqttPacket("myprovider");
-        packet.setGoodbyeMessage(true);
-        JSONObject obj = new JSONObject(sensinactSession.getProviders());
+        Object provider = createDevicePojo("myprovider","myservice","myresource","/myresource");
+        ServiceRegistration sr=bc.registerService("org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider", provider, new Hashtable<String, Object>());
+        sr.unregister();
+        JSONObject obj = new JSONObject(sensinactSession.getProviders().getResult());
         JSONArray providers = obj.getJSONArray("providers");
         final Set<String> providersSetNo = parseJSONArrayIntoSet(providers);
         Assert.assertTrue("Provider was removed",!providersSetNo.contains("myprovider"));
@@ -102,9 +101,8 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     @Test
     public void serviceCreation() throws Exception {
         providerCreation();
-
-        JSONObject obj = new JSONObject(sensinactSession.getServices("myprovider"));
-        JSONArray services = obj.getJSONArray("services");        
+        JSONObject obj = new JSONObject(sensinactSession.getServices("myprovider").getResult());
+        JSONArray services = obj.getJSONArray("services");
         final Set<String> servicesSet = parseJSONArrayIntoSet(services);
         Assert.assertTrue("Service was not created, or at least is not shown via REST api",servicesSet.contains("myservice"));
     }
@@ -112,7 +110,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     @Test
     public void resourceCreation() throws Exception {
         serviceCreation();
-        JSONObject obj = new JSONObject(sensinactSession.getResources("myprovider", "myservice"));
+        JSONObject obj = new JSONObject(sensinactSession.getResources("myprovider", "myservice").getResult());
         JSONArray resources = obj.getJSONArray("resources");
         final Set<String> resourcesSet = parseJSONArrayIntoSet(resources);
         Assert.assertTrue("Resource was not created, or at least is not shown via REST api", resourcesSet.contains("myresource"));
@@ -149,7 +147,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         Assert.assertEquals("Value should be updated on new message arrival, and was not the case", messageString2,value2);
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = 20000)
     public void resourceValueQueryViaSubscription() throws Exception {
 
         resourceValueQuery();

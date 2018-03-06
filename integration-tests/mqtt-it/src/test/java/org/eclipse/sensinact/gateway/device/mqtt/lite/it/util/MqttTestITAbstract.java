@@ -51,7 +51,7 @@ public abstract class MqttTestITAbstract {
 
     protected static final String SENSINACT_HTTP_PORT="8097";
     protected static final String SENSINACT_VERSION="1.5-SNAPSHOT";
-    protected static final String MQTT_HOST ="127.0.0.1";
+    protected static final String MQTT_HOST ="test.mosquitto.org";
     protected static final Integer MQTT_PORT =1883;
 
     protected static Option[] combine(Option[]...options){
@@ -191,6 +191,9 @@ public abstract class MqttTestITAbstract {
                 new FrameworkPropertyOption("org.osgi.framework.system.packages.extra").value("com.google.common.base,javax.net.ssl,javax.smartcardio,sun.security.action,com.sun.net.httpserver,javax.mail,javax.mail.internet,javax.cache.spi,javax.cache,javax.cache.integration,javax.cache.empiry,javax.cache.expiry,javax.cache.configuration,javax.cache.processor,javax.cache.management,javax.cache.event,sun.misc")
                 ,new FrameworkPropertyOption("felix.shutdown.hook").value("false")
                 ,new FrameworkPropertyOption("org.osgi.service.http.port").value(SENSINACT_HTTP_PORT)
+                //,new FrameworkPropertyOption("org.eclipse.sensinact.gateway.security.jks.filename").value("/home/nj246216/projects/sensinact-eclipse/distribution/sensinact-distribution-generator/target/sensinact/datastore/keystore/keystore.jks")
+                //,new FrameworkPropertyOption("org.eclipse.sensinact.gateway.security.jks.filename").value("/keystore/keystore.jks")
+                //,new FrameworkPropertyOption("org.eclipse.sensinact.gateway.security.jks.password").value("sensiNact_team")
                 //must import certificate keytool -import -alias mosquitto.org -file mosquitto.pem -keystore /opt/jre/lib/security/cacerts
                 ,new SystemPropertyOption("javax.net.ssl.trustStore").value("/opt/jre/lib/security/cacerts")///etc/ssl/certs/java/cacerts
                 //,new SystemPropertyOption("javax.net.ssl.keyStore").value("/home/nj246216/mosquitto.jks")//mosquitto.jks
