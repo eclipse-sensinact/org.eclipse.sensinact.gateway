@@ -62,7 +62,7 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
                     MqttTopicMessage listener = new MqttTopicMessage() {
                         @Override
                         public void messageReceived(String s, String s1) {
-                            MqttPacket packet = new MqttPacket(provider.getName(), service.getName(), resource.getName(), s1);
+                            MqttPacket packet = new MqttPacket(provider.getName(), service.getName(), resource.getName(), s1==null?"":s1);
 
                             try {
                                 endpoint.process(packet);
@@ -85,7 +85,7 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
                     if(!provider.isDiscoveryOnFirstMessage()) {
                         LOG.info("Initiating {}/{}/{} with empty value", provider.getName(), service.getName(), resource.getName());
                         MqttPacket packet = new MqttPacket(provider.getName(), service.getName(),
-                                resource.getName(), resource.getValue());
+                                resource.getName(), resource.getValue()==null?"":resource.getValue());
                         packet.setHelloMessage(true);
                         endpoint.process(packet);
                         //runtime.updateValue(provider.getName(), service.getName(), resource.getName(), "");
