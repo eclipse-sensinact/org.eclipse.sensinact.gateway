@@ -10,19 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.device.mqtt.lite.it;
 
+import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.sensinact.gateway.core.Core;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.device.mqtt.lite.it.util.MqttTestITAbstract;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttPacket;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -30,6 +31,8 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.sensinact.mqtt.server.MQTTException;
+import org.sensinact.mqtt.server.MQTTServerService;
 
 import javax.inject.Inject;
 import java.util.Hashtable;
@@ -45,11 +48,29 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     @Inject
     Core sensinactCore;
 
+    @Inject
+    MQTTServerService mqtt;
+
     private Session sensinactSession;
 
     @Before
-    public void prepare(){
+    public void before() {
         sensinactSession = sensinactCore.getAnonymousSession();
+
+        try{
+            mqtt.startService(MQTT_HOST,MQTT_PORT.toString());
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @After
+    public void after(){
+        try {
+            mqtt.stopServer();
+        } catch (MQTTException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test

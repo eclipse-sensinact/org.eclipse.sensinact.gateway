@@ -51,7 +51,7 @@ public abstract class MqttTestITAbstract {
 
     protected static final String SENSINACT_HTTP_PORT="8097";
     protected static final String SENSINACT_VERSION="1.5-SNAPSHOT";
-    protected static final String MQTT_HOST ="test.mosquitto.org";
+    protected static final String MQTT_HOST ="127.0.0.1";
     protected static final Integer MQTT_PORT =1883;
 
     protected static Option[] combine(Option[]...options){
@@ -153,6 +153,7 @@ public abstract class MqttTestITAbstract {
         return options(
                 mavenBundle("org.eclipse.paho", "org.eclipse.paho.client.mqttv3", "1.2.0"),
                 //mavenBundle("org.eclipse.paho", "org.eclipse.paho.api.mqttv3", "1.2.0"),
+                mavenBundle("org.eclipse.sensinact.gateway.tools", "mqtt-server", SENSINACT_VERSION),
                 mavenBundle("org.eclipse.sensinact.gateway.sthbnd.mqtt", "mqtt-device", SENSINACT_VERSION),
                 mavenBundle("org.eclipse.sensinact.gateway.sthbnd.mqtt", "smart-topic-device", SENSINACT_VERSION)
         );
