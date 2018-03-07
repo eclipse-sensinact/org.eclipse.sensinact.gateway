@@ -11,10 +11,10 @@
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttActivator;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttBroker;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttActivator;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttProtocolStackEndpoint;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttBroker;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttPacket;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttTopic;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.listener.MqttTopicMessage;
@@ -55,7 +55,6 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
         try {
             final MqttBroker broker = provider.getBroker();
             broker.connect();
-
             for(final Service service : provider.getServices()) {
                 for(final Resource resource : service.getResources()) {
 

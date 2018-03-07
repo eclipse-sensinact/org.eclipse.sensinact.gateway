@@ -87,6 +87,7 @@ public class MqttBroker {
 
     public void subscribeToTopic(MqttTopic topic) {
         try {
+
             client.subscribe(topic.getTopic(), topic.getListener());
 
             topics.add(topic);
@@ -120,7 +121,7 @@ public class MqttBroker {
     public void connect() throws MqttException {
         final String brokerUrl = String.format("%s://%s:%d", protocol, host, port);
 
-        client = new MqttClient(brokerUrl, clientId, new MemoryPersistence());
+        client = new MqttClient(brokerUrl, UUID.randomUUID().toString(), new MemoryPersistence());
 
         MqttConnectOptions connectOptions = new MqttConnectOptions();
 
@@ -217,6 +218,10 @@ public class MqttBroker {
 
     public MqttClient getClient() {
         return client;
+    }
+
+    public void setSession(MqttSession session) {
+        this.session = session;
     }
 
     /**
