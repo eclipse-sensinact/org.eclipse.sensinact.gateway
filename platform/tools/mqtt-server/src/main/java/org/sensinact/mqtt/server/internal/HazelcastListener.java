@@ -26,10 +26,6 @@ public class HazelcastListener implements MessageListener<HazelcastMsg> {
         try {
             if (!msg.getPublishingMember().equals(server.getHazelcastInstance().getCluster().getLocalMember())) {
                 HazelcastMsg hzMsg = msg.getMessageObject();
-                /*
-                LOG.info("{} received from hazelcast for topic {} message: {}", hzMsg.getClientId(),
-                        hzMsg.getTopic(), hzMsg.getPayload());
-                        */
                 PublishMessage publishMessage = new PublishMessage();
                 publishMessage.setTopicName(hzMsg.getTopic());
                 publishMessage.setQos(AbstractMessage.QOSType.valueOf(hzMsg.getQos()));

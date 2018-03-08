@@ -17,7 +17,6 @@ import io.moquette.server.config.MemoryConfig;
 import org.osgi.framework.BundleContext;
 import org.sensinact.mqtt.server.MQTTException;
 import org.sensinact.mqtt.server.MQTTServerService;
-import org.sensinact.mqtt.server.internal.SensiNactMqttBrokerCallback;
 import org.sensinact.mqtt.server.internal.SensiNactServer;
 
 import java.util.Collections;

@@ -17,7 +17,6 @@
 
     <properties>
         <netty.version>4.1.6.Final</netty.version>
-        <sensinact.version>1.5-SNAPSHOT</sensinact.version>
     </properties>
 
     <repositories>
@@ -33,6 +32,16 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>5.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.moquette</groupId>
+            <artifactId>moquette-broker</artifactId>
+            <version>0.9</version>
+        </dependency>
+        <dependency>
             <groupId>io.moquette</groupId>
             <artifactId>moquette-netty-parser</artifactId>
             <version>0.9</version>
@@ -43,57 +52,14 @@
             <version>${netty.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-transport-native-epoll</artifactId>
-            <version>${netty.version}</version>
-            <classifier>linux-x86_64</classifier>
-        </dependency>
-        <!--
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-transport-native-unix-common</artifactId>
-            <version>4.1.16.Final</version>
-        </dependency>
-        -->
-        <dependency>
-            <groupId>org.rxtx</groupId>
-            <artifactId>rxtx</artifactId>
-            <version>2.1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>io.moquette</groupId>
-            <artifactId>moquette-broker</artifactId>
-            <version>0.9</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.10</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.paho</groupId>
-            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-            <version>1.2.0</version>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast</artifactId>
+            <version>3.5.4</version>
         </dependency>
         <dependency>
             <groupId>org.mapdb</groupId>
             <artifactId>mapdb</artifactId>
             <version>1.0.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hdrhistogram</groupId>
-            <artifactId>HdrHistogram</artifactId>
-            <version>2.1.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <version>5.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast</artifactId>
-            <version>3.5.4</version>
         </dependency>
     </dependencies>
 
@@ -105,7 +71,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Embed-Dependency>*;inline=true;artifactId=!org.osgi.core</Embed-Dependency>
+                        <Embed-Dependency>*;inline=false;artifactId=!org.osgi.core</Embed-Dependency>
                         <Bundle-Activator>org.sensinact.mqtt.server.osgi.Activator</Bundle-Activator>
                         <Export-Package>org.sensinact.mqtt.server</Export-Package>
                         <Import-Package>org.osgi.framework.wiring,javax.net.ssl,javax.net,org.osgi.framework,org.slf4j,javax.security.cert</Import-Package>
