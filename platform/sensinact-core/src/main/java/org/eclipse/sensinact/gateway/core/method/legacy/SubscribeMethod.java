@@ -14,13 +14,14 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
+import org.json.JSONObject;
 
 /**
  * Subscription {@link AccessMethod} 
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class SubscribeMethod  extends AbstractAccessMethod
+public class SubscribeMethod  extends AbstractAccessMethod<JSONObject,SubscribeResponse>
 {
 	/**
 	 * Constructor
@@ -31,16 +32,15 @@ public class SubscribeMethod  extends AbstractAccessMethod
 	    super(mediator, uri, AccessMethod.SUBSCRIBE, preProcessingExecutor);
     }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AbstractAccessMethod#
-	 * createAccessMethodResult(java.lang.Object[])
-	 */
+    /**
+     * @inheritDoc
+     *
+     * @see org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod#
+     * createAccessMethodResponseBuilder(java.lang.Object[])
+     */
     @Override
-    protected  SubscribeResult createAccessMethodResult(
-    		Object[] parameters)
+    protected SubscribeResponseBuilder createAccessMethodResponseBuilder(Object[] parameters)
     {
-	    return new SubscribeResult(super.mediator, uri,parameters);
+	    return new SubscribeResponseBuilder(super.mediator, uri,parameters);
     }
 }

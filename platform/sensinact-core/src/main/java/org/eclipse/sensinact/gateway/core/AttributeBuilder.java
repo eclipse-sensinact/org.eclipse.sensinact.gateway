@@ -319,7 +319,7 @@ public final class AttributeBuilder implements Nameable, Cloneable
 	/**
 	 * Defines the type of the {@link Attribute} to build
 	 * 
-	 * @param type
+	 * @param typeName
 	 *      the type of the {@link Attribute} to build
 	 * @return 
 	 * 		this AttributeBuilder

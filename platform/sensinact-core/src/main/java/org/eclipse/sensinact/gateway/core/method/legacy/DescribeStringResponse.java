@@ -12,43 +12,46 @@ package org.eclipse.sensinact.gateway.core.method.legacy;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodJSONResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.json.JSONObject;
 
 /**
- * Extended {@link AccessMethodJSONResponse} returned by an
- * {@link GetMethod} invocation
+ * Extended {@link AccessMethodResponse} returned by an 
+ * {@link DescribeMethod} invocation and holding a String as
+ * result object
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class GetResponse extends AccessMethodJSONResponse
+public class DescribeStringResponse extends DescribeResponse<String>
 {
 	/**
 	 * Constructor 
 	 * 
-	 * @param status
-	 * 		the associated {@link Status}
-	 */
-    public GetResponse(Mediator mediator, 
-    		String uri, Status status)
+     * @param mediator
+     * @param uri
+     * @param status
+     * @param describeType
+     */
+    public DescribeStringResponse(Mediator mediator, 
+    		String uri, Status status, DescribeMethod.DescribeType describeType)
     {
 	    this(mediator, uri, status, Status.SUCCESS.equals(status)
-	    	? SnaErrorfulMessage.NO_ERROR:SnaErrorfulMessage.UNKNOWN_ERROR_CODE);
+	    	?SnaErrorfulMessage.NO_ERROR:SnaErrorfulMessage.UNKNOWN_ERROR_CODE,
+	    	     describeType);
     }	
     
     /**
 	 * Constructor 
 	 * 
-	 * @param status
-	 * 		the associated {@link Status}
-	 * @param code
-	 * 		the associated status code 
-	 */
-    public GetResponse(Mediator mediator, 
-    		String uri, Status status, int code)
+     * @param mediator
+     * @param uri
+     * @param status
+     * @param code
+     * @param describeType
+     */
+    public DescribeStringResponse(Mediator mediator, String uri, 
+    	Status status, int code, DescribeMethod.DescribeType describeType)
     {
-    	super(mediator, uri, AccessMethodResponse.Response.GET_RESPONSE, 
-    		status, code);
+    	super(mediator, uri,  status, code, describeType);
     }
+
 }

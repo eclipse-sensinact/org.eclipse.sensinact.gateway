@@ -17,24 +17,24 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.props.KeysCollection;
+import org.eclipse.sensinact.gateway.common.props.TypedKey;
+import org.eclipse.sensinact.gateway.core.message.AbstractSnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
+import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaMessageSubType;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeJSONResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeStringResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
-import org.json.JSONObject;
-
-import org.eclipse.sensinact.gateway.core.message.AbstractSnaErrorfulMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.props.KeysCollection;
-import org.eclipse.sensinact.gateway.common.props.TypedKey;
 
 /**
  * Extended {@link SnaMessage} dedicated to the responses 
@@ -42,9 +42,9 @@ import org.eclipse.sensinact.gateway.common.props.TypedKey;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public abstract class AccessMethodResponse 
+public abstract class AccessMethodResponse<T> 
 extends AbstractSnaErrorfulMessage<AccessMethodResponse.Response>
-implements SnaResponseMessage<AccessMethodResponse.Response>
+implements SnaResponseMessage<T, AccessMethodResponse.Response>
 {
 	public static final int SUCCESS_CODE = SnaErrorfulMessage.NO_ERROR;
 	
@@ -62,8 +62,10 @@ implements SnaResponseMessage<AccessMethodResponse.Response>
 		
 		Response()
 		{
-			List<TypedKey<?>> list = Arrays.asList(new SnaMessage.KeysBuilder(
-						AccessMethodResponse.class).keys());
+			List<TypedKey<?>> list = Arrays.asList(
+				new SnaMessage.KeysBuilder(
+					AccessMethodResponse.class
+					).keys());
 			
 			Set<TypedKey<?>> tmpKeys = new HashSet<TypedKey<?>>();
 			tmpKeys.addAll(list);
@@ -126,7 +128,6 @@ implements SnaResponseMessage<AccessMethodResponse.Response>
 		SUCCESS;
 	}
 
-
 	/**
 	 * Error SnaMessages factory
 	 * 
@@ -138,16 +139,16 @@ implements SnaResponseMessage<AccessMethodResponse.Response>
 	 * @param throwable
 	 * @return
 	 */
-	public static final AccessMethodResponse error(Mediator mediator, 
-			String uri, AccessMethod.Type method, int statusCode, 
-			String message, Throwable throwable)
+	public static final <T, R extends AccessMethodResponse<T>> R 
+	error(Mediator mediator, String uri, AccessMethod.Type type, 
+	int statusCode, String message, Throwable throwable)
 	{
-		return AccessMethodResponse.error(mediator, uri, method.name(), 
-			statusCode, message, throwable);
+		return AccessMethodResponse.<T,R>error(mediator, uri, 
+			type.name(), statusCode, message, throwable);
 	}
 
 	/**
-	 * Error {@link AccessMethodResponse}s factory
+	 * Error {@link AccessMethodJSONResponse}s factory
 	 * 
 	 * @param mediator
 	 * @param uri
@@ -157,55 +158,100 @@ implements SnaResponseMessage<AccessMethodResponse.Response>
 	 * @param throwable
 	 * @return
 	 */
-	public static final AccessMethodResponse error(Mediator mediator, 
-			String uri, String method, int statusCode, 
-			String message, Throwable throwable)
+	private static final <T, R extends AccessMethodResponse<T>> R 
+	error(Mediator mediator, String uri, String method, 
+	int statusCode, String message, Throwable throwable)
 	{
 		int code = statusCode==AccessMethodResponse.SUCCESS_CODE
 				?SnaErrorfulMessage.UNKNOWN_ERROR_CODE:statusCode;	
 
-		AccessMethodResponse snaResponse = null;
+		AccessMethodResponse<?> response = null;
 		switch(method)
 		{
 			case "ACT":
-				snaResponse = new ActResponse(mediator, uri,
-						AccessMethodResponse.Status.ERROR, code);
-				break;
-			case "DESCRIBE":
-				snaResponse = new DescribeResponse(mediator, uri,
+				response = new ActResponse(mediator, uri,
 						AccessMethodResponse.Status.ERROR, code);
 				break;
 			case "GET":
-				snaResponse = new GetResponse(mediator, uri,
+				response = new GetResponse(mediator, uri,
 						AccessMethodResponse.Status.ERROR, code);
 				break;
 			case "SET":
-				snaResponse = new SetResponse(mediator, uri,
+				response = new SetResponse(mediator, uri,
 						AccessMethodResponse.Status.ERROR, code);
 				break;
 			case "SUBSCRIBE":
-				snaResponse = new SubscribeResponse(mediator, uri,
+				response = new SubscribeResponse(mediator, uri,
 						AccessMethodResponse.Status.ERROR, code);
 				break;
 			case "UNSUBSCRIBE":
-				snaResponse = new UnsubscribeResponse(mediator, uri,
+				response = new UnsubscribeResponse(mediator, uri,
 						AccessMethodResponse.Status.ERROR, code);
 				break;
 			default:
-				snaResponse = new UnknownAccessMethodResponse(mediator,uri);
+				response = new UnknownAccessMethodResponse(
+						mediator,uri);
 				break;
 		}
-		if(snaResponse!=null && message != null)
+		if(response!=null && message != null)
 		{
-			snaResponse.setErrors(message, throwable);
+			response.setErrors(message, throwable);
 		}
-		return snaResponse;
+		return (R) response;
+	}
+	
+	/**
+	 * Error SnaMessages factory
+	 * 
+	 * @param mediator
+	 * @param uri
+	 * @param method
+	 * @param statusCode
+	 * @param message
+	 * @param throwable
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static final <T, R extends DescribeResponse<T>> R 
+	error(Mediator mediator, String uri, DescribeMethod.DescribeType 
+		describeType, int statusCode, String message, Throwable throwable)
+	{
+		int code = statusCode==AccessMethodResponse.SUCCESS_CODE
+				?SnaErrorfulMessage.UNKNOWN_ERROR_CODE:statusCode;	
+		
+		DescribeMethod.DescribeType type = describeType==null
+			?DescribeMethod.DescribeType.COMPLETE_LIST:describeType;
+				
+		DescribeResponse<?> response = null;		
+		switch(type)
+		{
+			case COMPLETE_LIST:
+			case PROVIDERS_LIST:
+			case SERVICES_LIST:
+			case RESOURCES_LIST:
+				response = new DescribeStringResponse(mediator, uri, 
+						Status.ERROR, code, type);
+				break;
+			case PROVIDER:
+			case SERVICE:
+			case RESOURCE:
+				response = new DescribeJSONResponse(mediator, uri, 
+						Status.ERROR, code, type);
+				break;
+			default:
+				break;
+		}	
+		if(response!=null && message != null)
+		{
+			response.setErrors(message, throwable);
+		}	
+		return (R) response;
 	}
 	
 	/**
 	 * this SnaMessage status
 	 */
-	private final Status status;
+	protected final Status status;
 	
 	/**
 	 * @param uri
@@ -232,54 +278,26 @@ implements SnaResponseMessage<AccessMethodResponse.Response>
 		super.putValue(SnaConstants.STATUS_CODE_KEY, statusCode);
     }
     
-    /**
-     * @param jsonObject
+	/**
+     * @param resultObject
      */
-    public void setResponse(JSONObject jsonObject)
+    public void setResponse(T resultObject)
     {
-    	if(JSONObject.NULL.equals(jsonObject))
+    	if(resultObject == null)
     	{
     		return;
     	}
-    	super.putValue(SnaConstants.RESPONSE_KEY, jsonObject);
+    	super.putValue(SnaConstants.RESPONSE_KEY, resultObject);
     }
     
     /**
-     * @return
+     * 
+     * @see org.eclipse.sensinact.gateway.core.message.SnaResponseMessage#getResponse()
      */
-    public JSONObject getResponse()
+    public T getResponse()
     {
-    	JSONObject jsonObject = super.<JSONObject>get(
-    			SnaConstants.RESPONSE_KEY);
-    	return jsonObject;
+    	return super.<T>get(SnaConstants.RESPONSE_KEY);
     }    
-
-    /**
-     * @param key
-     * @return
-     */
-    public Object getResponse(String key)
-    {
-    	Object value = null;
-    	JSONObject jsonObject = getResponse();
-    	
-    	if(jsonObject != null)
-    	{
-    		value = jsonObject.opt(key);
-    	}
-    	return value;
-    }
-
-    /**
-     * @param type
-     * @param key
-     * @return
-     */
-    public <T> T getResponse(Class<T> type , String key)
-    {   	
-    	return CastUtils.cast(super.mediator.getClassLoader(), 
-    			type, getResponse(key));
-    }
 
 	/**
 	 * Returns the state of this message 

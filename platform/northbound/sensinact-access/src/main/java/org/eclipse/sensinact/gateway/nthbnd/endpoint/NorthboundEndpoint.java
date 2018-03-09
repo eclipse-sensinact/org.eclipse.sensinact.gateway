@@ -13,26 +13,20 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 import java.lang.reflect.Method;
 
 import org.eclipse.sensinact.gateway.core.FilteringDefinition;
-import org.eclipse.sensinact.gateway.core.ResultHolder;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-//import org.eclipse.sensinact.gateway.core.ActionResource;
-//import org.eclipse.sensinact.gateway.core.DataResource;
-//import org.eclipse.sensinact.gateway.core.PropertyResource;
-//import org.eclipse.sensinact.gateway.core.Resource;
-//import org.eclipse.sensinact.gateway.core.Service;
-//import org.eclipse.sensinact.gateway.core.ServiceProvider;
-//import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
-//import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-//import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-//import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
-//import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.ResponseFormat;
-//import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -95,9 +89,9 @@ public class NorthboundEndpoint
 	 * @return the execution result Object of this request in
 	 * the appropriate format
 	 */
-	public ResultHolder<?> execute(NorthboundRequest request)
+	public AccessMethodResponse<?> execute(NorthboundRequest request)
 	{		
-		ResultHolder<?> result = null;
+		AccessMethodResponse<?> result = null;
 	
 		Argument[] arguments = request.getExecutionArguments();
 		Class<?>[] parameterTypes = Argument.getParameterTypes(
@@ -107,7 +101,7 @@ public class NorthboundEndpoint
 			Method method = getClass().getDeclaredMethod(
 			    request.getMethod(), parameterTypes);
 			
-			result = (ResultHolder<?>) method.invoke(
+			result = (AccessMethodResponse<?>) method.invoke(
 				this, Argument.getParameters(arguments));
 			
 		} catch(Exception e)
@@ -128,7 +122,7 @@ public class NorthboundEndpoint
      * 
      * @return the {@link SnaAgent} registration response
      */
-    public ResultHolder<JSONObject> registerAgent(String requestIdentifier, 
+    public SubscribeResponse registerAgent(String requestIdentifier, 
     	AbstractMidAgentCallback callback, SnaFilter filter)
     {
     	return session.registerSessionAgent(requestIdentifier, 
@@ -145,11 +139,11 @@ public class NorthboundEndpoint
      * 
      * @return the {@link SnaAgent} unregistration response
      */
-    public JSONObject unregisterAgent(String requestIdentifier, 
+    public UnsubscribeResponse unregisterAgent(String requestIdentifier, 
         	String agentId)
     {
     	return session.unregisterSessionAgent(requestIdentifier, 
-    			agentId).getResult();
+    			agentId);
     }
 
 	/**
@@ -163,7 +157,7 @@ public class NorthboundEndpoint
      * @return the JSONObject formated list of all the 
      * model instances' hierarchies
      */
-    public ResultHolder<String> all(String requestIdentifier)
+    public DescribeResponse<String> all(String requestIdentifier)
     {
     	return this.all(requestIdentifier, null,null);
     }
@@ -184,7 +178,7 @@ public class NorthboundEndpoint
      * model instances' hierarchies according to the 
      * specified filter
      */
-    public ResultHolder<String> all(String requestIdentifier, 
+    public DescribeResponse<String> all(String requestIdentifier, 
     		String filter)
     {
     	return this.all(requestIdentifier, filter, null);
@@ -207,12 +201,12 @@ public class NorthboundEndpoint
      * @return the JSONObject formated list of all the model 
      * instances' hierarchies according to the specified filter
      */
-    public ResultHolder<String> all(String requestIdentifier, 
+    public DescribeResponse<String> all(String requestIdentifier, 
     		String filter, FilteringDefinition 
     		filterDefinition)
     {
-    	return session.getAll(requestIdentifier, 
-    			filter, filterDefinition);
+    	return session.getAll(requestIdentifier, filter, 
+    			filterDefinition);
     }
 
    	/**
@@ -222,7 +216,7 @@ public class NorthboundEndpoint
      * calling this method
      * @return
      */
-    public ResultHolder<String> serviceProvidersList(String requestIdentifier)
+    public DescribeResponse<String> serviceProvidersList(String requestIdentifier)
     {
    	    return this.serviceProvidersList(requestIdentifier,null);
     }
@@ -236,7 +230,7 @@ public class NorthboundEndpoint
      * the filter to be applied on the result
      * @return
      */
-    public ResultHolder<String> serviceProvidersList(String requestIdentifier,
+    public DescribeResponse<String> serviceProvidersList(String requestIdentifier,
     	FilteringDefinition filterDefinition)
     {
     	return session.getProviders(requestIdentifier, 
@@ -251,7 +245,7 @@ public class NorthboundEndpoint
      * @param serviceProviderId the String identifier of the service provider
      * @return
      */
-    public ResultHolder<String> serviceProviderDescription(String requestIdentifier,
+    public DescribeResponse<JSONObject> serviceProviderDescription(String requestIdentifier,
     		String serviceProviderId)
     {
     	return session.getProvider(requestIdentifier,
@@ -266,7 +260,7 @@ public class NorthboundEndpoint
      * @param serviceProviderId the String identifier of the service provider
      * @return
      */
-    public ResultHolder<String> servicesList(String requestIdentifier, String serviceProviderId) 
+    public DescribeResponse<String> servicesList(String requestIdentifier, String serviceProviderId) 
     {
     	return this.servicesList(requestIdentifier, serviceProviderId,null);
     }
@@ -281,7 +275,7 @@ public class NorthboundEndpoint
      * the filter to be applied on the result
      * @return
      */
-    public ResultHolder<String> servicesList(String requestIdentifier, 
+    public DescribeResponse<String> servicesList(String requestIdentifier, 
     	String serviceProviderId, FilteringDefinition filterDefinition) 
     {
     	return session.getServices(requestIdentifier, 
@@ -297,7 +291,7 @@ public class NorthboundEndpoint
      * @param serviceId the String identifier of the service
      * @return
      */
-    public ResultHolder<String> serviceDescription(String requestIdentifier,
+    public DescribeResponse<JSONObject> serviceDescription(String requestIdentifier,
     		String serviceProviderId, String serviceId)
     {
     	return session.getService(requestIdentifier, 
@@ -313,7 +307,7 @@ public class NorthboundEndpoint
      * @param serviceId the String identifier of the service
      * @return
      */
-    public ResultHolder<String> resourcesList(String requestIdentifier, 
+    public DescribeResponse<String> resourcesList(String requestIdentifier, 
     	String serviceProviderId, String serviceId)
     {
     	return this.resourcesList(requestIdentifier, 
@@ -331,7 +325,7 @@ public class NorthboundEndpoint
      * the filter to be applied on the result
      * @return
      */
-    public ResultHolder<String> resourcesList(String requestIdentifier, 
+    public DescribeResponse<String> resourcesList(String requestIdentifier, 
     	String serviceProviderId, String serviceId, 
     	    FilteringDefinition filterDefinition) 
     {
@@ -349,7 +343,7 @@ public class NorthboundEndpoint
      * @param resourceId the String identifier of the resource
      * @return
      */
-    public ResultHolder<String> resourceDescription(String requestIdentifier,
+    public DescribeResponse<JSONObject> resourceDescription(String requestIdentifier,
     		String serviceProviderId, String serviceId, 
     		String resourceId)
     {
@@ -368,7 +362,7 @@ public class NorthboundEndpoint
      * @param attributeId the String identifier of the attribute
      * @return
      */
-    public ResultHolder<JSONObject> get(String requestIdentifier, 
+    public GetResponse get(String requestIdentifier, 
     	String serviceProviderId, String serviceId, 
     	    String resourceId, String attributeId)
     {  	
@@ -388,7 +382,7 @@ public class NorthboundEndpoint
      * @param value
      * @return
      */
-    public ResultHolder<JSONObject> set(String requestIdentifier, String serviceProviderId,
+    public SetResponse set(String requestIdentifier, String serviceProviderId,
        String serviceId, String resourceId, String attributeId,
               Object value) 
     {  	
@@ -407,7 +401,7 @@ public class NorthboundEndpoint
      * @param arguments
      * @return
      */
-    public ResultHolder<JSONObject> act(String requestIdentifier, String serviceProviderId,
+    public ActResponse act(String requestIdentifier, String serviceProviderId,
           String serviceId, String resourceId, Object[] arguments)
     { 	
     	return session.act(requestIdentifier, serviceProviderId, 
@@ -427,7 +421,7 @@ public class NorthboundEndpoint
      * @param conditions
      * @return
      */
-    public ResultHolder<JSONObject> subscribe(String requestIdentifier, 
+    public SubscribeResponse subscribe(String requestIdentifier, 
     	String serviceProviderId, String serviceId, 
     	String resourceId, String attributeId, 
     	NorthboundRecipient recipient, JSONArray conditions) 
@@ -449,7 +443,7 @@ public class NorthboundEndpoint
      * @param subscriptionId
      * @return
      */
-    public ResultHolder<JSONObject> unsubscribe(String requestIdentifier, 
+    public UnsubscribeResponse unsubscribe(String requestIdentifier, 
     	String serviceProviderId, String serviceId, 
     	String resourceId, String attributeId, String subscriptionId) 
     {  	

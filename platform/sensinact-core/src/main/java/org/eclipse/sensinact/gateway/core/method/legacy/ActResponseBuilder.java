@@ -12,22 +12,24 @@ package org.eclipse.sensinact.gateway.core.method.legacy;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
+import org.json.JSONObject;
 
 /**
- * Extended  {@link AccessMethodResult} dedicated to {@link ActMethod}
+ * Extended  {@link AccessMethodResponseBuilder} dedicated to {@link ActMethod}
  * execution
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ActResult extends AccessMethodResult
+@SuppressWarnings("serial")
+public class ActResponseBuilder extends 
+AccessMethodResponseBuilder<JSONObject, ActResponse>
 {
 	/**
 	 * @param uri 
 	 * @param parameters
 	 */
-    protected ActResult(Mediator mediator, 
+    protected ActResponseBuilder(Mediator mediator, 
     		String uri, Object[] parameters)
     {
 	    super(mediator, uri, parameters);
@@ -36,11 +38,12 @@ public class ActResult extends AccessMethodResult
 	/**
 	 * @inheritDoc
 	 *
-	 * @see AccessMethodResult#
-	 * createSnaResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
+	 * @see AccessMethodResponseBuilder#
+	 * createAccessMethodResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
 	 */
     @Override
-    protected AccessMethodResponse createSnaResponse(Status status)
+	public ActResponse createAccessMethodResponse(
+    		AccessMethodResponse.Status status)
     {
     	ActResponse response = new ActResponse(
     			super.mediator, super.getPath(), status);
@@ -51,4 +54,15 @@ public class ActResult extends AccessMethodResult
     	}
 		return response;
     }
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder#getComponentType()
+	 */
+	@Override
+	public Class<JSONObject> getComponentType() 
+	{
+		return JSONObject.class;
+	}
 }

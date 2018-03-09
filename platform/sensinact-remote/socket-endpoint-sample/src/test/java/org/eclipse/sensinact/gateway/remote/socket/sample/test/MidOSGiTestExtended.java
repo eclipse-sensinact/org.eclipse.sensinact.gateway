@@ -184,7 +184,7 @@ public class MidOSGiTestExtended extends MidOSGiTest
 		}
 
 		@Override
-		public void doHandle(SnaResponseMessage<?> message) {
+		public void doHandle(SnaResponseMessage<?,?> message) {
 
 			//handleMessage(message);
 		}
@@ -470,10 +470,9 @@ public class MidOSGiTestExtended extends MidOSGiTest
 				new Class<?>[] {String.class, String.class, String.class, 
 				String.class}), new Object[] {provider, 
 					service, resource, DataResource.VALUE});
-			Object j = o.getClass().getDeclaredMethod("getResult").invoke(o);
-		    String t = (String) Object.class.getDeclaredMethod("toString").invoke(j);
-		    System.out.println(t);
-		    return t;
+			Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
+		    System.out.println(j);
+		    return (String) j;
 			
 		} catch (Throwable e) {
 			//e.printStackTrace();
@@ -494,10 +493,9 @@ public class MidOSGiTestExtended extends MidOSGiTest
 					new Class<?>[] {String.class, String.class, String.class, 
 					String.class, Object.class}), new Object[]
 					{provider, service, resource, DataResource.VALUE, value});
-			Object j = o.getClass().getDeclaredMethod("getResult").invoke(o);
-		    String t = (String) Object.class.getDeclaredMethod("toString").invoke(j);
-		    System.out.println(t);
-		    return t;
+			Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
+		    System.out.println(j);
+		    return (String) j;
 			
 		} catch (Throwable e) {
 			//e.printStackTrace();
@@ -518,10 +516,9 @@ public class MidOSGiTestExtended extends MidOSGiTest
 					new Class<?>[] {String.class, String.class, String.class, 
 					Object[].class}), new Object[] {provider, 
 					service, resource,args});
-			Object j = o.getClass().getDeclaredMethod("getResult").invoke(o);
-		    String t = (String) Object.class.getDeclaredMethod("toString").invoke(j);
-		    System.out.println(t);
-		    return t;
+			Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
+		    System.out.println(j);
+		    return (String) j;
 			
 		} catch (Throwable e) {
 			//e.printStackTrace();
@@ -542,10 +539,9 @@ public class MidOSGiTestExtended extends MidOSGiTest
 			new Class<?>[] {String.class, String.class, String.class, 
 			Recipient.class, JSONArray.class}), new Object[] 
 				{provider, service, resource, recipient, null});
-			Object j = o.getClass().getDeclaredMethod("getResult").invoke(o);
-		    String t = (String) Object.class.getDeclaredMethod("toString").invoke(j);
-		    System.out.println(t);
-		    return t;
+			Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
+		    System.out.println(j);
+		    return (String) j;
 			
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -567,10 +563,9 @@ public class MidOSGiTestExtended extends MidOSGiTest
 				new Class<?>[] {String.class, String.class, String.class, 
 					String.class}), new Object[] {provider, 
 						service, resource, subscriptionId});
-			Object j = o.getClass().getDeclaredMethod("getResult").invoke(o);
-		    String t = (String) Object.class.getDeclaredMethod("toString").invoke(j);
-		    System.out.println(t);
-		    return t;
+			Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
+		    System.out.println(j);
+		    return (String) j;
 			
 		} catch (Throwable e) {
 			//e.printStackTrace();
@@ -585,10 +580,9 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	    Session s = core.getAnonymousSession();
 	    MidProxy<Session> mids = (MidProxy<Session>)Proxy.getInvocationHandler(s);
 	    Object o = mids.toOSGi(Session.class.getMethod("getProviders"),null);
-	    Object j = o.getClass().getDeclaredMethod("getResult").invoke(o);
-	    String t = (String) Object.class.getDeclaredMethod("toString").invoke(j);
-	    System.out.println(t);
-	    return t;
+	    Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
+	    System.out.println(j);
+	    return (String) j;
 	}
 	
 	
@@ -602,9 +596,8 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	    Object o = mids.toOSGi(Session.class.getMethod("registerSessionAgent",
 	    		new Class<?>[]{MidAgentCallback.class, SnaFilter.class}),
 	    		new Object[] {new AgentCallback(), null});
-	    Object j = o.getClass().getDeclaredMethod("getResult").invoke(o);
-	    String s = (String) Object.class.getDeclaredMethod("toString").invoke(j);
-	    System.out.println(s);
+	    Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
+	    System.out.println(j);
 	}
 
 	public List<String> listAgentMessages() 

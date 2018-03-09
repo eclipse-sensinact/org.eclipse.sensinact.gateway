@@ -509,7 +509,7 @@ public abstract class TaskImpl implements Task
             builder.append("result");
             builder.append(JSONUtils.QUOTE);
             builder.append(JSONUtils.COLON);
-            builder.append(JSONUtils.toJSON(this.result));
+            builder.append(JSONUtils.toJSONFormat(this.result));
         }        
         builder.append(JSONUtils.CLOSE_BRACE);
         return builder.toString();

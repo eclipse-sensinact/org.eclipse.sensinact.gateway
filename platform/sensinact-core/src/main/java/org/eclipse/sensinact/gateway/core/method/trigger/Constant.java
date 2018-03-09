@@ -81,7 +81,7 @@ public class Constant implements AccessMethodTrigger<Void>
 		buffer.append(TRIGGER_CONSTANT_KEY);
 		buffer.append(JSONUtils.QUOTE);
 		buffer.append(JSONUtils.COLON);
-		buffer.append(JSONUtils.toJSON(this.constant));	
+		buffer.append(JSONUtils.toJSONFormat(this.constant));	
 		buffer.append(JSONUtils.CLOSE_BRACE);
 		return buffer.toString();
 	}

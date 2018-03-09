@@ -206,7 +206,7 @@ public class TestGenericImplementation extends MidOSGiTest
 					super.getBundleContext().getService(reference);
 		 
 		 starter.start("weather_5");
-		 Thread.sleep(2000);
+		 Thread.sleep(3000);
 		 
          MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
 		 Core core = mid.buildProxy();

@@ -33,7 +33,6 @@ import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.props.TypedProperties;
 import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.Attribute;
-import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
@@ -43,7 +42,6 @@ import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.core.PropertyResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
-import org.eclipse.sensinact.gateway.core.SensiNact;
 import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
@@ -60,7 +58,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.eclipse.sensinact.gateway.core.method.LinkedActMethod;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.method.Shortcut;
@@ -85,7 +83,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import junit.framework.Assert;
@@ -143,8 +140,7 @@ public class TestResourceBuilder<R extends ModelInstance>
         Assert.assertEquals(Resource.Type.PROPERTY, r1.getType());
 
         String get1 = session.get("serviceProvider", "testService", 
-        	"TestProperty", DataResource.VALUE).getResult(
-        			).toString();	
+        	"TestProperty", DataResource.VALUE).getJSON();	
         
         String get2 = r1.get().getJSON();
         
@@ -180,7 +176,7 @@ public class TestResourceBuilder<R extends ModelInstance>
 		{{
 			this.put(changed);
 		}}
-		).getResult();
+		).getResponse();
 
         session.set("serviceProvider", "testService", 
             "TestProperty", DataResource.VALUE, "hello");
@@ -197,21 +193,19 @@ public class TestResourceBuilder<R extends ModelInstance>
         //test linked resource
         JSONAssert.assertEquals(
         	session.get("serviceProvider", "testService",
-            "TestProperty", null).getResult().getJSONObject("response"),        	
+            "TestProperty", null).getResponse(),        	
         	session.get("serviceProvider", "testService",
-        	"LinkedProperty", DataResource.VALUE).getResult(
-        		).getJSONObject("response"), false);
+        	"LinkedProperty", DataResource.VALUE
+        	).getResponse(), false);
         
         session.set("serviceProvider", "testService", 
             "LinkedProperty", DataResource.VALUE, "testLink");
 
         JSONAssert.assertEquals(
             	session.get("serviceProvider", "testService",
-                "TestProperty", DataResource.VALUE).getResult(
-                		).getJSONObject("response"),
+                "TestProperty", DataResource.VALUE).getResponse(),
             	session.get("serviceProvider", "testService",
-            	"LinkedProperty", null).getResult(
-            			).getJSONObject("response"),
+            	"LinkedProperty", null).getResponse(),
             	false);
         
     	service.addLinkedResource(LocationResource.LOCATION,
@@ -228,10 +222,10 @@ public class TestResourceBuilder<R extends ModelInstance>
         		new AccessMethodExecutor()
         		{
 					@Override
-                    public Void execute(AccessMethodResult result)
+                    public Void execute(AccessMethodResponseBuilder result)
                             throws Exception
                     {
-						JSONObject jsonObject = result.getAccessMethodObjectResult();
+						JSONObject jsonObject = (JSONObject) result.getAccessMethodObjectResult();
 						
 						jsonObject.put("value", new StringBuilder().append(
 							jsonObject.get("value")).append(
@@ -250,8 +244,8 @@ public class TestResourceBuilder<R extends ModelInstance>
         buffer.append(attributeValue);
         buffer.append("_suffix");
         
-        JSONObject message = session.get("serviceProvider", "testService",
-        		"location", DataResource.VALUE).getResult();
+        JSONObject message = new JSONObject(session.get("serviceProvider", "testService",
+        		"location", DataResource.VALUE).getJSON());
         
         assertEquals(buffer.toString(), message.getJSONObject("response"
         		).getString(DataResource.VALUE));
@@ -272,8 +266,7 @@ public class TestResourceBuilder<R extends ModelInstance>
             {
 	            return null;
             }
-		}, null).getResult().getJSONObject("response"
-		).getString("subscriptionId");
+		}, null).getResponse().getString("subscriptionId");
                 
         session.subscribe("serviceProvider", "testService", 
     	"LinkedProperty",  new Recipient()
@@ -294,19 +287,19 @@ public class TestResourceBuilder<R extends ModelInstance>
 
         JSONObject set1 = session.set("serviceProvider", "testService", 
             	"TestProperty2", null, "property3"
-            	).getResult().getJSONObject("response");
+            	).getResponse();
         
         Thread.sleep(250); 
 
         JSONObject set2 = session.set("serviceProvider", "testService", 
             	"TestProperty2", DataResource.VALUE, "property3"
-            	).getResult().getJSONObject("response");
+            	).getResponse();
         
         Assert.assertEquals(set1.get(DataResource.VALUE),set2.get(DataResource.VALUE)); 
         
         JSONObject set3 = session.set("serviceProvider", "testService", 
             	"TestProperty", DataResource.VALUE, "TEST LINKED SUBSCRIPTION"
-            	).getResult().getJSONObject("response");
+            	).getResponse();
         
         Thread.sleep(250);
         
@@ -318,8 +311,7 @@ public class TestResourceBuilder<R extends ModelInstance>
         assertEquals(1, this.testContext.getCallbackCount()); 
         
         session.set("serviceProvider", "testService", 
-        "TestProperty2", null, "property5").getResult(
-        		).getJSONObject("response");
+        "TestProperty2", null, "property5");
         Thread.sleep(500);
         assertEquals(2, this.testContext.getCallbackCount()); 
         
@@ -425,10 +417,10 @@ public class TestResourceBuilder<R extends ModelInstance>
         		new AccessMethodExecutor()
         		{
 					@Override
-                    public Void execute(AccessMethodResult result)
+                    public Void execute(AccessMethodResponseBuilder result)
                             throws Exception
                     {
-						JSONObject jsonObject = result.getAccessMethodObjectResult();
+						JSONObject jsonObject = (JSONObject) result.getAccessMethodObjectResult();
 						
 						jsonObject.put("value", new StringBuilder().append(
 							jsonObject.get("value")).append(
@@ -469,7 +461,7 @@ public class TestResourceBuilder<R extends ModelInstance>
 		            {
 			            return null;
 		            }
-			})).getResponse(String.class,"subscriptionId");
+			})).getSubscriptionId();
                 
          r3.subscribe(
         		new Recipient()
@@ -685,10 +677,10 @@ public class TestResourceBuilder<R extends ModelInstance>
 		new AccessMethodExecutor()
 		{
 			@Override
-            public Void execute(AccessMethodResult result)
+            public Void execute(AccessMethodResponseBuilder result)
                     throws Exception
             {
-				JSONObject jsonObject = result.getAccessMethodObjectResult();
+				JSONObject jsonObject = (JSONObject) result.getAccessMethodObjectResult();
 				
 				jsonObject.put("value", new StringBuilder().append(
 					jsonObject.get("value")).append(
@@ -711,12 +703,12 @@ public class TestResourceBuilder<R extends ModelInstance>
         buffer.append("_suffix");
         
         GetResponse response =  r4.get(DataResource.VALUE);
-        String value =  response.getResponse(String.class,DataResource.VALUE);
+        String value =  (String) response.getResponse().opt(DataResource.VALUE);
         assertEquals(buffer.toString(), value);
         
         r4 = session.resource("serviceProvider", "admin", "location");
         response =  r4.get(DataResource.VALUE);
-        value =  response.getResponse(String.class,DataResource.VALUE);
+        value =  (String) response.getResponse().opt(DataResource.VALUE);
         assertFalse(buffer.toString().equals(value));        
     }
     
@@ -798,7 +790,7 @@ public class TestResourceBuilder<R extends ModelInstance>
     			new AccessMethodExecutor(){
 
 					@Override
-                    public Void execute(AccessMethodResult parameter)
+                    public Void execute(AccessMethodResponseBuilder parameter)
                             throws Exception
                     {
 						int count = (Integer) parameter.getParameter(0);
@@ -817,7 +809,7 @@ public class TestResourceBuilder<R extends ModelInstance>
     			new AccessMethodExecutor(){
 
 					@Override
-                    public Void execute(AccessMethodResult parameter)
+                    public Void execute(AccessMethodResponseBuilder parameter)
                             throws Exception
                     {
 						int count = (Integer) parameter.getParameter(0);
@@ -946,9 +938,9 @@ public class TestResourceBuilder<R extends ModelInstance>
     	
     	Session s = testContext.getSensiNact().getAnonymousSession();
     	Thread.sleep(1000);
-    	String obj = s.getAll(new FilteringDefinition("xfilter","a")
-    			).getResult();
-    	 JSONAssert.assertEquals(new JSONObject("{\"providers\":"
+    	String obj = s.getAll(new FilteringDefinition("xfilter","a")).getJSON();
+    	
+    	JSONAssert.assertEquals(new JSONObject("{\"providers\":"
 		+ "[{\"locXtion\":\"45.19334890078532:5.706474781036377\","
 		+ "\"services\":[{\"resources\":"
         + "[{\"type\":\"PROPERTY\",\"nXme\":\"friendlyNXme\"},"
@@ -960,7 +952,8 @@ public class TestResourceBuilder<R extends ModelInstance>
         + "[{\"type\":\"ACTION\",\"nXme\":\"TestAction\"},"
         + "{\"type\":\"STATE_VARIABLE\",\"nXme\":\"TestVXriXble\"}],"
         + "\"nXme\":\"testService\"}],\"nXme\":\"serviceProvider\"}],"
-        + "\"filter\":{\"definition\":\"a\",\"type\":\"xfilter\"}}") ,
+        + "\"filter\":{\"definition\":\"a\",\"type\":\"xfilter\"}"
+        + ",\"statusCode\":200,\"type\":\"COMPLETE_LIST\"}") ,
     	new JSONObject(obj), false);
     }
 }

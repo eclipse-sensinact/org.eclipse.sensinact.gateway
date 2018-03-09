@@ -13,22 +13,14 @@ package org.eclipse.sensinact.gateway.core.message;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 import org.eclipse.sensinact.gateway.common.props.TypedProperties;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage.Update;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Response;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
-import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 
 /**
  * Abstract implementation of an {@link AbstractSnaMessage}
@@ -85,31 +77,9 @@ implements SnaMessage<S>
 			new Executable<Void,AccessMethodResponse>()
 			{
 				@Override
-				public AccessMethodResponse execute(Void v) 
+				public AccessMethodResponse<?> execute(Void v) 
 						throws Exception
 				{
-					Response r = Response.valueOf(typeStr);
-					Integer icode = (Integer) jsonMessage.remove("statusCode");
-					int code = icode == null?520:icode.intValue();
-					Status status = code!=200?Status.ERROR:Status.SUCCESS;
-
-					switch(r)
-					{
-						case ACT_RESPONSE:
-							return new ActResponse(mediator, uri, status, code);
-						case DESCRIBE_RESPONSE:
-							return new DescribeResponse(mediator, uri,status,  code);
-						case GET_RESPONSE:
-							return new GetResponse(mediator, uri, status, code);
-						case SET_RESPONSE:
-							return new SetResponse(mediator, uri, status, code);
-						case SUBSCRIBE_RESPONSE:
-							return new SubscribeResponse(mediator, uri,status, code);
-						case UNSUBSCRIBE_RESPONSE:
-							return new UnsubscribeResponse(mediator, uri,status, code);
-						default:
-							break;
-					}
 					return null;
 				}
 			}

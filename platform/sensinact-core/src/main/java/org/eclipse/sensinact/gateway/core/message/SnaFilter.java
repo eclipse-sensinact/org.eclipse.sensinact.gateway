@@ -160,7 +160,18 @@ public class SnaFilter implements JSONable
     		this.addCondition(constraints.getJSONObject(index));
     	}
     }
-    
+
+	/**
+	 * Returns the String sender this SnaFilter is 
+	 * targeting
+	 * 
+ 	 * @return this SnaFilter's targeted sender
+	 */
+	public String getSender()
+	{
+		return this.sender;
+	}
+	
 	/**
 	 * Adds a new {@link Constraint} to this filter,
 	 * formated as a JSON object
@@ -550,5 +561,4 @@ public class SnaFilter implements JSONable
 	{
 		return toJSONObject().toString();
 	}
-
 }

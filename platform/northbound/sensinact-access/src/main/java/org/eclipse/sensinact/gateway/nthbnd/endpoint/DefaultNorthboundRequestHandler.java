@@ -486,12 +486,6 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 			}
 			catch (InvalidValueException e)
 			{
-				e.printStackTrace();
-        		throw new JSONException(e);
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
         		throw new JSONException(e);
 			}
 			if("attributeName".equals(parameter.getName()) &&
@@ -501,8 +495,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
         		continue;
 			}
 			parametersList.add(parameter);
-        }
-        
+        }        
         return parametersList.toArray(new Parameter[0]);
 	}
 
@@ -576,6 +569,8 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		if(this.filtered!=null)
 		{
 			String filter = null;
+			boolean hidden = false;
+			
 			int index = 0;
 			int length = parameters==null?0:parameters.length;
 
@@ -585,13 +580,17 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 				String name =parameter.getName();
 				if(this.filtered.equals(name))
 				{ 
-					filter = CastUtils.cast(mediator.getClassLoader(),
+					filter = CastUtils.castPrimitive(
 					String.class, parameter.getValue());
-					break;
+				}
+				if("hideFilter".equals(name))
+				{
+					hidden = CastUtils.castPrimitive(
+					boolean.class, parameter.getValue());
 				}
 			}	
 			builder.withFilter(new FilteringDefinition(
-					this.filtered,filter));
+					this.filtered,filter, hidden));
 		}		
 		builder.withMethod(this.method
 				).withServiceProvider(this.serviceProvider

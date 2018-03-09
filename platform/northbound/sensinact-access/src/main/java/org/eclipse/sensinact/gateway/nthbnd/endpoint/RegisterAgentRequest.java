@@ -79,7 +79,7 @@ public class RegisterAgentRequest extends NorthboundRequest
 			}
 
 			@Override
-			public void doHandle(SnaResponseMessage<?> message) {
+			public void doHandle(SnaResponseMessage<?,?> message) {
 				 RegisterAgentRequest.this.recipient.doCallback(message);
 			}};		
 		Argument[] superArguments = super.getExecutionArguments();
@@ -113,6 +113,6 @@ public class RegisterAgentRequest extends NorthboundRequest
 	@Override
 	public String getName() 
 	{
-		return UriUtils.ROOT;
+		return UriUtils.PATH_SEPARATOR;
 	}
 }

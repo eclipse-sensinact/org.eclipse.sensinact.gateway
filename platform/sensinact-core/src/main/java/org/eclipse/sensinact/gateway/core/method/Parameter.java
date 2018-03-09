@@ -323,7 +323,7 @@ implements JSONable, Cloneable
 		} else
 		{
 			description.put(PrimitiveDescription.VALUE_KEY, 
-				JSONUtils.toJSON(this.getValue()));
+				JSONUtils.toJSONFormat(this.getValue()));
 		}
 		return description.toString();
 	}

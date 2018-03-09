@@ -15,21 +15,17 @@ import java.io.IOException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.eclipse.sensinact.gateway.core.ResultHolder;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
-import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoints;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.StringResponseFormat;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
-import org.json.JSONObject;
 
 /**
  * 
@@ -118,26 +114,24 @@ public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest>
 			sendError(500, "Internal server error");
 			return false;
 		}
-		ResultHolder<?> cap = this.endpoint.execute(nthbndRequest);
-		String result = new StringResponseFormat().format(
-				cap.getResult());
-		if(result == null)
+		AccessMethodResponse<?> cap = this.endpoint.execute(nthbndRequest);
+		if(cap == null)
 		{
 			sendError(500, "Internal server error");
 			return false;
 		}
-		String resultStr = result.toString();
+		String result = cap.getJSON();
 		byte[] resultBytes;
 
 		String acceptEncoding = super.request.getHeader("Accept-Encoding");
         if(acceptEncoding != null && acceptEncoding.contains("gzip")) 
         {
-            resultBytes = NorthboundAccess.compress(resultStr);
+            resultBytes = NorthboundAccess.compress(result);
             response.setHeader("Content-Encoding", "gzip");
             
         }  else
         {
-        	resultBytes = resultStr.getBytes("UTF-8");
+        	resultBytes = result.getBytes("UTF-8");
         }
 		int length = -1;		
 		if((length = resultBytes==null?0:resultBytes.length) > 0)

@@ -166,14 +166,14 @@ public class ConstraintDefinition extends XmlDefinition implements JSONable
 	    if(this.reference !=null)
 	    {
 	    	builder.append(JSONUtils.OPEN_BRACKET);
-	    	builder.append(JSONUtils.toJSON(this.value));
+	    	builder.append(JSONUtils.toJSONFormat(this.value));
 		    builder.append(JSONUtils.COMMA);
-		    builder.append(JSONUtils.toJSON(this.reference));
+		    builder.append(JSONUtils.toJSONFormat(this.reference));
 	    	builder.append(JSONUtils.CLOSE_BRACKET);
 	    	
 	    } else
 	    {
-	    	builder.append(JSONUtils.toJSON(this.value));
+	    	builder.append(JSONUtils.toJSONFormat(this.value));
 	    }	    
 	    builder.append(JSONUtils.COMMA);
 	    builder.append(JSONUtils.QUOTE);

@@ -27,7 +27,7 @@ import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.eclipse.sensinact.gateway.core.method.LinkedActMethod;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.method.Shortcut;
@@ -495,7 +495,7 @@ public class ResourceBuilder
 	    return new AccessMethodExecutor()
 	   {
 			@Override
-	        public Void execute(AccessMethodResult parameter) 
+	        public Void execute(AccessMethodResponseBuilder parameter) 
 	        		throws Exception
 	        {
 				Object resultObject = resource.passOn(
@@ -531,7 +531,7 @@ public class ResourceBuilder
 	    return new AccessMethodExecutor()
 	   {
 			@Override
-	        public Void execute(AccessMethodResult parameter) 
+	        public Void execute(AccessMethodResponseBuilder parameter) 
 	        		throws Exception
 	        {
 				SnaUpdateMessage message = SnaNotificationMessageImpl.Builder.<
@@ -566,7 +566,7 @@ public class ResourceBuilder
 			 * execute(java.lang.Object[])
 			 */
 			@Override
-            public Void execute(AccessMethodResult snaResult)
+            public Void execute(AccessMethodResponseBuilder snaResult)
                     throws Exception
             {
 				JSONObject result = null;
@@ -599,7 +599,7 @@ public class ResourceBuilder
 			 * execute(java.lang.Object[])
 			 */
 			@Override
-            public Void execute(AccessMethodResult snaResult)
+            public Void execute(AccessMethodResponseBuilder snaResult)
                     throws Exception
             {
 				JSONObject result = new JSONObject(
@@ -628,7 +628,7 @@ public class ResourceBuilder
 			 * execute(java.lang.Object[])
 			 */
 			@Override
-	        public Void execute(AccessMethodResult snaResult)
+	        public Void execute(AccessMethodResponseBuilder snaResult)
 	                throws Exception
 	        {
 				String attributeName = (String) snaResult.getParameter(0);					
@@ -695,7 +695,7 @@ public class ResourceBuilder
     	return new AccessMethodExecutor()
 		{
 			@Override
-			public Void execute(AccessMethodResult result)
+			public Void execute(AccessMethodResponseBuilder result)
 					throws Exception
 			{  
 				String attributeName = (String) result.getParameter(0);					

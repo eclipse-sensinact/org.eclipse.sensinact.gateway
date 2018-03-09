@@ -172,8 +172,7 @@ public class Application extends AbstractSensiNactApplication
                         }
                     }
                     String subscriptionId = resource.subscribe(DataResource.VALUE, 
-                    	this, constraints).getResponse(String.class, 
-                    			SnaConstants.SUBSCRIBE_ID_KEY);
+                    	this, constraints).getSubscriptionId();
 
                     resourceSubscription.setSubscriptionId(subscriptionId);
                 }

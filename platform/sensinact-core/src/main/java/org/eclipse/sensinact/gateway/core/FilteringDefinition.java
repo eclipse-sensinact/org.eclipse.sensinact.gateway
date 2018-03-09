@@ -11,7 +11,8 @@
 package org.eclipse.sensinact.gateway.core;
 
 /**
- * Gather the type and the String representation of an filter
+ * Gather the type and the String representation of an {@link Filtering}
+ * service
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
@@ -41,18 +42,41 @@ public class FilteringDefinition
 	 * the String formated filter
 	 */
 	public final String filter;
+	
+	/**
+	 * the hidden status of this {@link Filtering} 
+	 * service definition 
+	 */
+	public final boolean hideDefinition;
 
 	/**
 	 * Constructor
 	 * 
-	 * @param type the type of filter defined by the FilterDefinition
-	 * to be instantiated
-	 * @param filter the String filter defined by the FilterDefinition
-	 * to be instantiated
+	 * @param type the type of filter defined by the 
+	 * FilterDefinition to be instantiated
+	 * @param filter the String filter defined by the 
+	 * FilterDefinition to be instantiated
 	 */
 	public FilteringDefinition(String type, String filter)
 	{
+		this(type,filter,false);
+	}
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param type the type of filter defined by the 
+	 * FilterDefinition to be instantiated
+	 * @param filter the String filter defined by the 
+	 * FilterDefinition to be instantiated
+	 * @param hideDefinition the boolean hidden status of 
+	 * the FilterDefinition to be instantiated
+	 */
+	public FilteringDefinition(String type, String filter,
+			boolean hideDefinition)
+	{
 		this.type = type;
 		this.filter = filter;
+		this.hideDefinition = hideDefinition;
 	}
 }

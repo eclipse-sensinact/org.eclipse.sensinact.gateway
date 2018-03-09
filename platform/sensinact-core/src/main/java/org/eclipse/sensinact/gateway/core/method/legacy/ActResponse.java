@@ -11,30 +11,27 @@
 package org.eclipse.sensinact.gateway.core.method.legacy;
 
 
-
 import java.util.ArrayList;
 import java.util.List;
-
-import org.eclipse.sensinact.gateway.core.message.SnaConstants;
-import org.json.JSONArray;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.core.StateVariableResource;
-import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodJSONResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Response;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
- * Extended {@link AbstractSnaMessage} returned by an 
+ * Extended {@link AccessMethodJSONResponse} returned by an 
  * {@link ActMethod} invocation
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ActResponse extends AccessMethodResponse
+public class ActResponse extends AccessMethodJSONResponse
 {
 	/**
 	 * @param status
@@ -76,7 +73,7 @@ public class ActResponse extends AccessMethodResponse
 		{
 			triggered = new ArrayList<String>();			
 		}
-		return new JSONArray(JSONUtils.toJSON(triggered));
+		return new JSONArray(JSONUtils.toJSONFormat(triggered));
 	}
 
 	/**

@@ -17,7 +17,7 @@ import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 
 import org.json.JSONObject;
 
@@ -43,7 +43,7 @@ class AppUninstallExecutor implements AccessMethodExecutor {
     /**
      * @see Executable#execute(java.lang.Object)
      */
-    public Void execute(AccessMethodResult jsonObjects) throws Exception {
+    public Void execute(AccessMethodResponseBuilder jsonObjects) throws Exception {
         String name = (String) jsonObjects.getParameter(0);
 
         if(name != null) {

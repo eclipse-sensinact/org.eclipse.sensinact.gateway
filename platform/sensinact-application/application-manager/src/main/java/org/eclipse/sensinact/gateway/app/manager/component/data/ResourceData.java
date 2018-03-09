@@ -61,7 +61,8 @@ public class ResourceData implements DataItf {
      */
     public Object getValue() 
     {
-        return getResource().get(DataResource.VALUE).getResponse(DataResource.VALUE);
+        return getResource().get(DataResource.VALUE
+        	).getResponse(DataResource.VALUE);
     }
 
     /**
@@ -70,8 +71,8 @@ public class ResourceData implements DataItf {
      */
     public Class<?> getType() 
     {
-        return CastUtils.jsonTypeToJavaType((String) getResource().get(DataResource.VALUE)
-                .getResponse(DataResource.TYPE));
+        return CastUtils.jsonTypeToJavaType((String) getResource(
+        ).get(DataResource.VALUE).getResponse(DataResource.TYPE));
     }
 
     /**
@@ -80,7 +81,7 @@ public class ResourceData implements DataItf {
      */
     public long getTimestamp()
     {
-        return getResource().get(DataResource.VALUE).getResponse(
-        		Long.class, Metadata.TIMESTAMP);
+        return getResource().get(DataResource.VALUE
+        	).getResponse(Long.class,Metadata.TIMESTAMP);
     }
 }

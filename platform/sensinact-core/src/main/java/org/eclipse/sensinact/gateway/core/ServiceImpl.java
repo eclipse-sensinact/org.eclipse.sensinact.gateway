@@ -23,7 +23,7 @@ import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.eclipse.sensinact.gateway.core.method.InvalidTriggerException;
 import org.eclipse.sensinact.gateway.core.method.LinkedActMethod;
 import org.eclipse.sensinact.gateway.core.method.Signature;
@@ -592,7 +592,7 @@ ServiceProcessableData<?>, ResourceImpl, Resource>
 			 */
 			@SuppressWarnings("unchecked")
 			@Override
-			public Void execute(AccessMethodResult parameter)
+			public Void execute(AccessMethodResponseBuilder parameter)
 					throws Exception 
 			{ 
 				Object result = null;
@@ -605,7 +605,7 @@ ServiceProcessableData<?>, ResourceImpl, Resource>
 						result = trigger.execute((P)parameter.getParameters());	
 						break;
 					case RESPONSE:
-						result = trigger.execute((P)parameter.createSnaResponse());
+						result = trigger.execute((P)parameter.createAccessMethodResponse());
 						break;
 					case INTERMEDIATE:
 						result = trigger.execute((P)parameter);

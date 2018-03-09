@@ -13,18 +13,15 @@ package org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws;
 import java.io.IOException;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.core.ResultHolder;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoints;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.StringResponseFormat;
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 import org.json.JSONObject;
 
 /**
@@ -90,13 +87,13 @@ public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest>
 			sendError(500, "Internal server error");
 			return false;
 		}
-		ResultHolder<?> cap = this.endpoint.execute(nthbndRequest);
-		String result = new StringResponseFormat().format(cap.getResult());
-		if(result == null)
+		AccessMethodResponse<?> cap = this.endpoint.execute(nthbndRequest);
+		if(cap == null)
 		{
 			sendError(500, "Internal server error");
 			return false;
 		}
+		String result = cap.getJSON();
 		byte[] resultBytes;
 		List<String> acceptEncoding = super.request.getQueryMap(
 				).get("Accept-Encoding");

@@ -16,6 +16,12 @@ import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -108,7 +114,7 @@ public interface Session
      * @return the JSON formated response of the GET access method 
      * invocation, wrapped into a {@link ResultHolder}
      */
-    ResultHolder<JSONObject> get(String serviceProviderId, 
+    GetResponse get(String serviceProviderId, 
     	String serviceId, String resourceId, String attributeId);
     
     /**
@@ -132,7 +138,7 @@ public interface Session
      * invocation, tagged by the specified request identifier, and wrapped 
      * into a {@link ResultHolder}
      */
-    ResultHolder<JSONObject> get(String requestId, String serviceProviderId, String serviceId, String resourceId, 
+    GetResponse get(String requestId, String serviceProviderId, String serviceId, String resourceId, 
      		String attributeId);
     
     /** 
@@ -154,7 +160,7 @@ public interface Session
      * @return the JSON formated response of the SET access method 
      * invocation, wrapped into a {@link ResultHolder}
      */
-    ResultHolder<JSONObject> set(String serviceProviderId,
+    SetResponse set(String serviceProviderId,
         String serviceId, String resourceId, String attributeId, 
             Object parameter);
 
@@ -180,7 +186,7 @@ public interface Session
      * invocation, tagged by the specified request identifier and , wrapped 
      * into a {@link ResultHolder}
      */
-    ResultHolder<JSONObject> set(String requestId, String serviceProviderId,
+    SetResponse set(String requestId, String serviceProviderId,
         String serviceId, String resourceId, String attributeId, 
             Object parameter);
     
@@ -202,7 +208,7 @@ public interface Session
      * @return the JSON formated response of the ACT access method 
      * invocation, wrapped into a {@link ResultHolder}
      */
-    ResultHolder<JSONObject> act(String serviceProviderId, 
+    ActResponse act(String serviceProviderId, 
     	String serviceId, String resourceId, Object[] parameters );
     
     /** 
@@ -226,7 +232,7 @@ public interface Session
      * invocation, tagged by the specified request identifier, and 
      * wrapped into a {@link ResultHolder}
      */
-    ResultHolder<JSONObject> act(String requestId, String serviceProviderId, 
+    ActResponse act(String requestId, String serviceProviderId, 
     	String serviceId, String resourceId, Object[] parameters );
     
     /** 
@@ -249,7 +255,7 @@ public interface Session
      * @return the JSON formated response of the SUBSCRIBE access method 
      * invocation, wrapped into a {@link ResultHolder}
      */
-    ResultHolder<JSONObject> subscribe(String serviceProviderId, 
+    SubscribeResponse subscribe(String serviceProviderId, 
     	String serviceId, String resourceId, Recipient recipient, 
     	    JSONArray conditions);
 
@@ -276,7 +282,7 @@ public interface Session
      * invocation, tagged by the specified request identifier, and 
      * wrapped into a {@link ResultHolder}
      */
-    ResultHolder<JSONObject> subscribe(String requestId, String serviceProviderId, String serviceId, 
+    SubscribeResponse subscribe(String requestId, String serviceProviderId, String serviceId, 
     	String resourceId, Recipient recipient, JSONArray conditions);
     
     /** 
@@ -297,7 +303,7 @@ public interface Session
      * @return the JSON formated response of the UNSUBSCRIBE access method 
      * invocation, wrapped into a {@link ResultHolder}
      */
-    ResultHolder<JSONObject> unsubscribe(String serviceProviderId,
+    UnsubscribeResponse unsubscribe(String serviceProviderId,
        String serviceId, String resourceId, String subscriptionId );
 
     /** 
@@ -321,7 +327,7 @@ public interface Session
      * invocation, tagged by the specified request identifier, and wrapped 
      * into a {@link ResultHolder}
      */
-    ResultHolder<JSONObject> unsubscribe(String requestId, 
+    UnsubscribeResponse unsubscribe(String requestId, 
     	String serviceProviderId, String serviceId, 
     	    String resourceId, String subscriptionId );
     
@@ -338,7 +344,7 @@ public interface Session
  	 * registration, including its String identifier, wrapped into 
  	 * a {@link ResultHolder}
  	 */
-    ResultHolder<JSONObject> registerSessionAgent(
+    SubscribeResponse registerSessionAgent(
     	final MidAgentCallback callback, final SnaFilter filter);
     
  	/**
@@ -357,7 +363,7 @@ public interface Session
  	 * the specified request identifier, wrapped into a {@link 
  	 * ResultHolder}
  	 */
-    ResultHolder<JSONObject> registerSessionAgent(
+    SubscribeResponse registerSessionAgent(
     	String requestId, final MidAgentCallback callback, 
  			final SnaFilter filter);
  	
@@ -371,7 +377,7 @@ public interface Session
  	 * @return the JSON formated result of the {@link SnaAgent} 
  	 * unregistration, wrapped into a {@link ResultHolder}
  	 */
-    ResultHolder<JSONObject> unregisterSessionAgent(
+    UnsubscribeResponse unregisterSessionAgent(
     		String agentId);
 
  	/**
@@ -387,7 +393,7 @@ public interface Session
  	 * unregistration, tagged by the specified request identifier, 
  	 * and wrapped into a {@link ResultHolder}.
  	 */
-    ResultHolder<JSONObject> unregisterSessionAgent(String requestId, String agentId);
+    UnsubscribeResponse unregisterSessionAgent(String requestId, String agentId);
  	
     /**
    	 * Returns the JSON formated list of all registered resource 
@@ -397,7 +403,7 @@ public interface Session
    	 * @return the JSON formated list of the resource model instances for 
    	 * this Session, and wrapped into a {@link ResultHolder}
    	 */
- 	ResultHolder<String> getAll();
+ 	DescribeResponse<String> getAll();
 
     /**
    	 * Returns the JSON formated list of all registered resource 
@@ -410,7 +416,7 @@ public interface Session
    	 * @return the JSON formated and filtered list of the resource model 
    	 * instances for this Session, and wrapped into a {@link ResultHolder} 
    	 */
-   	ResultHolder<String> getAll(FilteringDefinition filterDefinition);
+   	DescribeResponse<String> getAll(FilteringDefinition filterDefinition);
    	
    	/**
   	 * Returns the JSON formated list of all registered resource 
@@ -425,7 +431,7 @@ public interface Session
   	 * instances for this Session, compliant to the specified 
   	 * filter, and wrapped into a {@link ResultHolder}.
   	 */
-   	ResultHolder<String> getAll(String filter);
+   	DescribeResponse<String> getAll(String filter);
    	
    	/**
   	 * Returns the JSON formated list of all registered resource 
@@ -442,7 +448,7 @@ public interface Session
   	 * model instances for this Session, compliant to the specified 
   	 * LDAP formated filter, and wrapped into a {@link ResultHolder}.
   	 */
-   	ResultHolder<String> getAll(String filter, FilteringDefinition filterDefinition);
+   	DescribeResponse<String> getAll(String filter, FilteringDefinition filterDefinition);
 
    	/**
   	 * Returns the JSON formated list of all registered resource 
@@ -462,7 +468,7 @@ public interface Session
   	 * LDAP formated filter, tagged by the specified request 
   	 * identifier, and wrapped into a {@link ResultHolder}.
   	 */
-   	ResultHolder<String> getAll(String requestId, String filter, 
+   	DescribeResponse<String> getAll(String requestId, String filter, 
    			FilteringDefinition filterDefinition);
 
     /**
@@ -472,7 +478,7 @@ public interface Session
      * @return the JSON formated list of available service 
      * providers, wrapped into a {@link ResultHolder}.
      */
-   	ResultHolder<String> getProviders();
+   	DescribeResponse<String> getProviders();
     
     /**
      * Returns the JSON formated list of available service providers for
@@ -484,7 +490,7 @@ public interface Session
      * @return the JSON formated and filtered list of available service 
      * providers, wrapped into a {@link ResultHolder}
      */
-   	ResultHolder<String> getProviders(FilteringDefinition filterDefinition);
+   	DescribeResponse<String> getProviders(FilteringDefinition filterDefinition);
 
     /**
      * Returns the JSON formated list of available service providers for
@@ -499,7 +505,7 @@ public interface Session
      * providers, tagged by the specified request identifier, and wrapped 
      * into a {@link ResultHolder}
      */
-   	ResultHolder<String> getProviders(String requestId, FilteringDefinition filterDefinition); 	
+   	DescribeResponse<String> getProviders(String requestId, FilteringDefinition filterDefinition); 	
     
 	/**
      * Returns the JSON formated description of the service provider whose
@@ -511,7 +517,7 @@ public interface Session
      * @return the JSON formated description of the specified 
      * service provider, wrapped into a {@link ResultHolder}
      */
-   	ResultHolder<String> getProvider(String serviceProviderId);
+   	DescribeResponse<JSONObject> getProvider(String serviceProviderId);
 
     /**
      * Returns the JSON formated description of the service provider 
@@ -526,7 +532,7 @@ public interface Session
      * provider, tagged by the specified request identifier, and 
      * wrapped into a {@link ResultHolder}
      */
-   	ResultHolder<String> getProvider(String requestId, String serviceProviderId); 	
+   	DescribeResponse<JSONObject> getProvider(String requestId, String serviceProviderId); 	
 
     /**
      * Returns the JSON formated list of available services for the service 
@@ -538,7 +544,7 @@ public interface Session
      * @return the JSON formated list of available services for the 
      * specified service provider, wrapped into a {@link ResultHolder}
      */
-   	ResultHolder<String> getServices(String serviceProviderId);
+   	DescribeResponse<String> getServices(String serviceProviderId);
     
     /**
      * Returns the JSON formated list of available service providers for
@@ -553,7 +559,7 @@ public interface Session
      * available services for the specified service providers, 
      * wrapped into a {@link ResultHolder}
      */
-   	ResultHolder<String> getServices(String serviceProviderId,
+   	DescribeResponse<String> getServices(String serviceProviderId,
     		FilteringDefinition filterDefinition);
 
     /**
@@ -571,7 +577,7 @@ public interface Session
      * for the specified service providers, tagged by the specified 
      * request identifier, and wrapped into a {@link ResultHolder}
      */
-   	ResultHolder<String> getServices(String requestId, String serviceProviderId,
+   	DescribeResponse<String> getServices(String requestId, String serviceProviderId,
     		FilteringDefinition filterDefinition);
     
     /**
@@ -587,7 +593,7 @@ public interface Session
      * @return the JSON formated description of the specified 
      * service, wrapped into a {@link ResultHolder}
      */
-   	ResultHolder<String> getService(String serviceProviderId,String serviceId);
+   	DescribeResponse<JSONObject> getService(String serviceProviderId,String serviceId);
 
     /**
      * Returns the JSON formated description of the service whose String
@@ -605,7 +611,7 @@ public interface Session
      * service, tagged by the specified request identifier, and 
      * wrapped into a {@link ResultHolder}
      */
-   	ResultHolder<String> getService(String requestId, String serviceProviderId, String serviceId);
+   	DescribeResponse<JSONObject> getService(String requestId, String serviceProviderId, String serviceId);
 	
     /**
      * Returns the JSON formated list of available resources, for the service 
@@ -620,7 +626,7 @@ public interface Session
      * specified service and service provider, wrapped into a {@link 
      * ResultHolder}
      */
-   	ResultHolder<String> getResources(String serviceProviderId, String serviceId);
+   	DescribeResponse<String> getResources(String serviceProviderId, String serviceId);
 
     /**
      * Returns the JSON formated list of available service providers for
@@ -637,7 +643,7 @@ public interface Session
      * for the specified service provider and service, wrapped into a 
      * {@link ResultHolder}
      */
-   	ResultHolder<String> getResources(String serviceProviderId, String serviceId, 
+   	DescribeResponse<String> getResources(String serviceProviderId, String serviceId, 
     		FilteringDefinition filterDefinition);
     
     /**
@@ -657,7 +663,7 @@ public interface Session
      * for the specified service provider and service, tagged by the 
      * specified request identifier, and wrapped into a {@link ResultHolder}
      */
-   	ResultHolder<String> getResources(String requestId, String serviceProviderId, String serviceId,
+   	DescribeResponse<String> getResources(String requestId, String serviceProviderId, String serviceId,
 			FilteringDefinition filterDefinition);
 	
     /**
@@ -676,7 +682,7 @@ public interface Session
      * @return the JSON formated description of the specified 
      * resource, wrapped into a {@link ResultHolder}
      */
-   	ResultHolder<String> getResource(String serviceProviderId, String serviceId, String resourceId);
+   	DescribeResponse<JSONObject> getResource(String serviceProviderId, String serviceId, String resourceId);
     
     /**
      * Returns the JSON formated description of the resource whose String
@@ -697,5 +703,5 @@ public interface Session
      * resource, tagged by the specified request identifier, and 
      * wrapped into a {@link ResultHolder}
      */
-   	ResultHolder<String> getResource(String requestId, String serviceProviderId, String serviceId, String resourceId);
+   	DescribeResponse<JSONObject> getResource(String requestId, String serviceProviderId, String serviceId, String resourceId);
 }

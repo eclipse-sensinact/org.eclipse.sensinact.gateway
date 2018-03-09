@@ -31,7 +31,8 @@ import org.eclipse.sensinact.gateway.common.primitive.PathElement;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface AccessMethod extends Nameable, Describable, PathElement
+public interface AccessMethod<T, R extends AccessMethodResponse<T>> 
+extends Nameable, Describable, PathElement
 {       
 	public static final String REQUEST_ID_KEY = "rid";
 	
@@ -249,7 +250,7 @@ public interface AccessMethod extends Nameable, Describable, PathElement
      * 		the {@link AccessMethodResponse} result of the
      * 		invocation
      */
-    AccessMethodResponse invoke(Object[] parameters);
+    R invoke(Object[] parameters);
     
     
 }

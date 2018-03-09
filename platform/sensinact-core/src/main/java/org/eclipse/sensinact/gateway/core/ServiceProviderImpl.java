@@ -29,6 +29,7 @@ import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.json.JSONObject;
 
 /**
  * This class represents a ServiceProvider on the sensiNact gateway.
@@ -84,8 +85,8 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 			if(admin != null)
 			{
-				location = admin.get(LocationResource.LOCATION).getResponse(
-						String.class, DataResource.VALUE);
+				JSONObject response = admin.get(LocationResource.LOCATION).getResponse();
+				location = String.valueOf(response.opt(DataResource.VALUE));
 			}
 			return location;
 		}
@@ -104,8 +105,9 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 			if(admin != null)
 			{
-				setLocation = admin.set(LocationResource.LOCATION, 
-					location).getResponse(String.class, DataResource.VALUE);
+				JSONObject response = admin.set(LocationResource.LOCATION, 
+						location).getResponse();
+				setLocation = String.valueOf(response.opt(DataResource.VALUE));
 			}
 			return setLocation;
 		}
@@ -122,9 +124,9 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 			if(admin != null)
 			{
-				status = admin.get(ServiceProvider.LIFECYCLE_STATUS).getResponse(
-					ServiceProvider.LifecycleStatus.class, 
-						DataResource.VALUE);
+				JSONObject response = admin.get(ServiceProvider.LIFECYCLE_STATUS).getResponse();
+				status = ServiceProvider.LifecycleStatus.valueOf(
+						String.valueOf(response.opt(DataResource.VALUE)));
 			}
 			return status;
 		}
@@ -143,9 +145,10 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 			if(admin != null)
 			{
-				setStatus = admin.set(ServiceProvider.LIFECYCLE_STATUS, 
-					status).getResponse(ServiceProvider.LifecycleStatus.class, 
-						DataResource.VALUE);
+				JSONObject response = admin.set(ServiceProvider.LIFECYCLE_STATUS,status
+						).getResponse();
+				setStatus = ServiceProvider.LifecycleStatus.valueOf(
+						String.valueOf(response.opt(DataResource.VALUE)));
 			}
 			return setStatus;
 		}

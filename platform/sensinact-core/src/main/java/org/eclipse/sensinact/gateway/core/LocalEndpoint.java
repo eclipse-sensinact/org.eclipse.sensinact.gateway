@@ -77,7 +77,7 @@ abstract class LocalEndpoint implements Endpoint
 	public String getAll(String publicKey)
 	{
 		return this.getSession(publicKey).getAll(
-				).getResult();
+				).getResponse();
 	}
 
 	/**
@@ -89,7 +89,7 @@ abstract class LocalEndpoint implements Endpoint
 	public String getAll(String publicKey, String filter)
 	{
 		return this.getSession(publicKey).getAll(
-				filter).getResult();
+				filter).getResponse();
 	}
 
 	/**
@@ -101,7 +101,7 @@ abstract class LocalEndpoint implements Endpoint
 	public String getProviders(String publicKey)
 	{
 		return this.getSession(publicKey
-				).getProviders().getResult();
+		    ).getProviders().getResponse();
 	}
 
 	/**
@@ -114,7 +114,7 @@ abstract class LocalEndpoint implements Endpoint
 	        String serviceProviderId)
 	{
 		return this.getSession(publicKey).getProvider(
-				serviceProviderId).getResult();
+				serviceProviderId).getJSON();
 	}
 
 	/**
@@ -127,7 +127,7 @@ abstract class LocalEndpoint implements Endpoint
 	        String serviceProviderId)
 	{
 		return this.getSession(publicKey).getServices(
-				serviceProviderId).getResult();
+				serviceProviderId).getResponse();
 	}
 
 	/**
@@ -140,7 +140,7 @@ abstract class LocalEndpoint implements Endpoint
 	        String serviceId)
 	{
 		return this.getSession(publicKey).getService(
-			serviceProviderId, serviceId).getResult();
+			serviceProviderId, serviceId).getJSON();
 	}
 
 	/**
@@ -153,7 +153,7 @@ abstract class LocalEndpoint implements Endpoint
 	        String serviceProviderId, String serviceId)
 	{
 		return this.getSession(publicKey).getResources(
-			serviceProviderId, serviceId).getResult();
+			serviceProviderId, serviceId).getResponse();
 	}
 
 	/**
@@ -167,7 +167,7 @@ abstract class LocalEndpoint implements Endpoint
 	{
 		return this.getSession(publicKey).getResource(
 			serviceProviderId, serviceId, resourceId
-			).getResult();
+			).getJSON();
 	}
 
 	/**
@@ -179,8 +179,9 @@ abstract class LocalEndpoint implements Endpoint
 	public JSONObject get(String publicKey, String serviceProviderId,
 	        String serviceId, String resourceId, String attributeId)
 	{
-		return this.getSession(publicKey).get(serviceProviderId,
-				serviceId, resourceId, attributeId).getResult();
+		return new JSONObject(
+			this.getSession(publicKey).get(serviceProviderId,
+			serviceId, resourceId, attributeId).getJSON());
 	}
 
 	/**
@@ -193,9 +194,10 @@ abstract class LocalEndpoint implements Endpoint
 	        String serviceId, String resourceId, String attributeId,
 	        Object parameter)
 	{
-		return this.getSession(publicKey).set(serviceProviderId,
-				serviceId, resourceId, attributeId, 
-				parameter).getResult();
+		return new JSONObject(
+			this.getSession(publicKey).set(serviceProviderId,
+			serviceId, resourceId, attributeId, 
+			parameter).getJSON());
 	}
 
 	/**
@@ -207,8 +209,9 @@ abstract class LocalEndpoint implements Endpoint
 	public JSONObject act(String publicKey, String serviceProviderId,
 	        String serviceId, String resourceId, Object[] parameters)
 	{
-		return this.getSession(publicKey).act(serviceProviderId,
-				serviceId, resourceId, parameters).getResult();
+		return new JSONObject(
+			this.getSession(publicKey).act(serviceProviderId,
+			serviceId, resourceId, parameters).getJSON());
 	}
 
 	/**
@@ -221,9 +224,10 @@ abstract class LocalEndpoint implements Endpoint
 	        String serviceId, String resourceId, Recipient recipient,
 	        JSONArray conditions)
 	{
-		return this.getSession(publicKey).subscribe(serviceProviderId,
-				serviceId, resourceId, recipient, conditions
-				).getResult();
+		return new JSONObject(
+			this.getSession(publicKey).subscribe(serviceProviderId,
+			serviceId, resourceId, recipient, conditions
+			).getJSON());
 	}
 
 	/**
@@ -236,8 +240,9 @@ abstract class LocalEndpoint implements Endpoint
 	        String serviceProviderId, String serviceId, String resourceId,
 	        String subscriptionId)
 	{
-		return this.getSession(publicKey).unsubscribe(serviceProviderId,
-				serviceId, resourceId, subscriptionId
-				).getResult();
+		return new JSONObject(
+			this.getSession(publicKey).unsubscribe(serviceProviderId,
+			serviceId, resourceId, subscriptionId
+			).getJSON());
 	}
 }

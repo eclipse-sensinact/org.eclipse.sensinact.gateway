@@ -12,21 +12,24 @@ package org.eclipse.sensinact.gateway.core.method.legacy;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
+import org.json.JSONObject;
 
 /**
- * Extended  {@link AccessMethodResult} dedicated to {@link UnsubscribeMethod}
+ * Extended {@link AccessMethodResponseBuilder} dedicated to {@link UnsubscribeMethod}
  * execution
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class UnsubscribeResult extends AccessMethodResult
+@SuppressWarnings("serial")
+public class UnsubscribeResponseBuilder extends 
+AccessMethodResponseBuilder<JSONObject, UnsubscribeResponse>
 {
 	/**
 	 * @param uri 
 	 * @param parameters
 	 */
-    protected UnsubscribeResult(Mediator mediator, 
+    protected UnsubscribeResponseBuilder(Mediator mediator, 
     		String uri, Object[] parameters)
     {
 	    super(mediator, uri, parameters);
@@ -35,13 +38,26 @@ public class UnsubscribeResult extends AccessMethodResult
 	/**
 	 * @inheritDoc
 	 *
-	 * @see AccessMethodResult#
-	 * createSnaResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
+	 * @see AccessMethodResponseBuilder#
+	 * createAccessMethodResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
 	 */
     @Override
-    protected AccessMethodResponse createSnaResponse(AccessMethodResponse.Status status)
+	public UnsubscribeResponse createAccessMethodResponse(
+    		AccessMethodResponse.Status status)
     {
 		return new UnsubscribeResponse(super.mediator, 
 				super.getPath(), status);
     }
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder#getComponentType()
+	 */
+	@Override
+	public Class<JSONObject> getComponentType() 
+	{
+		return JSONObject.class;
+	}
+    
 }

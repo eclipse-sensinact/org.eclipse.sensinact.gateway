@@ -23,7 +23,7 @@ import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 
 class AppWatchdogExecutor implements AccessMethodExecutor {
 
@@ -41,7 +41,7 @@ class AppWatchdogExecutor implements AccessMethodExecutor {
     /**
      * @see Executable#execute(java.lang.Object)
      */
-    public Void execute(AccessMethodResult snaResult) throws Exception {
+    public Void execute(AccessMethodResponseBuilder snaResult) throws Exception {
 
         String uri = snaResult.getPath();
 

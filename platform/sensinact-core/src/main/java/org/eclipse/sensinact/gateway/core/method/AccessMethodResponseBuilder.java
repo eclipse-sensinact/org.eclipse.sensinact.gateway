@@ -17,12 +17,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.primitive.PathElement;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.common.primitive.PathElement;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 
 /**
  * Intermediate {@link AccessMethodExecutor}'s execution result
@@ -32,50 +31,63 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public abstract class AccessMethodResult extends Stack<JSONObject> 
-implements PathElement
+@SuppressWarnings("serial")
+public abstract class AccessMethodResponseBuilder<T,A extends AccessMethodResponse<T>>
+extends Stack<T> implements PathElement
 {	
 	/**
-	 * Creates and returns an extended {@link AbstractSnaMessage}
+	 * Creates and returns an extended {@link AccessMethodResponse}
 	 * whose {@link SnaMessage.Status} is passed as 
 	 * parameter
 	 * 
 	 * @param status
 	 * 		the {@link SnaMessage.Status} of the extended 
-	 * 		 {@link AbstractSnaMessage} to create
+	 * 		 {@link AccessMethodResponse} to be created
 	 * @param accessLevel
 	 * 		the integer access level of the extended 
-	 * 		 {@link AbstractSnaMessage} to create
+	 * 		 {@link AccessMethodResponse} to be created
 	 * @return
-	 * 		the created extended {@link AbstractSnaMessage}
+	 * 		the created {@link AccessMethodResponse}
 	 */
-	protected abstract AccessMethodResponse createSnaResponse(
+	public abstract A createAccessMethodResponse(
 			AccessMethodResponse.Status status);
 
+	/**
+	 * Returns the type handled by this AccessMethodResponseBuilder
+	 *  
+	 * @return this AccessMethodResponseBuilder's handled
+	 * type
+	 */
+	public abstract Class<T> getComponentType();
+	
 	/**
 	 * Mediator used to interact with the OSGi host
 	 * environment 
 	 */
 	protected final Mediator mediator;
 	
-	private final Object[] parameters;
+	protected final Object[] parameters;
 	
-	private boolean exitOnError;  
+	protected boolean exitOnError;  
 	
-	private Deque<Exception> exceptions = null;
+	protected Deque<Exception> exceptions = null;
 
-	private final String uri;
+	protected final String uri;
 
-	private JSONObject resultObject;
+	protected T resultObject;
 	
 	/**
 	 * Constructor
 	 * 
-	 * @param parameters
-	 * 		the parameter objects array of this 
-	 * 		AccessMethodResult
+	 * @param mediator the {@link Mediator} allowing the 
+	 * AccessMethodResponseBuilder to be instantiated to 
+	 * interact with the OSGi host environment
+	 * @param uri the String uri of the target on which the
+	 * related {@link AccessMethod} is called 
+	 * @param parameters the parameter objects array of 
+	 * parameterizing the related {@link AccessMethod} call
 	 */
-	protected AccessMethodResult(Mediator mediator, 
+	protected AccessMethodResponseBuilder(Mediator mediator, 
 			String uri,	Object[] parameters)
 	{
 		this(mediator, uri, parameters, true);
@@ -84,11 +96,18 @@ implements PathElement
 	/**
 	 * Constructor
 	 * 
-	 * @param parameters
-	 * 		the parameter objects array of this 
-	 * 		AccessMethodResult
+	 * @param mediator the {@link Mediator} allowing the 
+	 * AccessMethodResponseBuilder to be instantiated to 
+	 * interact with the OSGi host environment
+	 * @param uri the String uri of the target on which the
+	 * related {@link AccessMethod} is called 
+	 * @param parameters the parameter objects array of 
+	 * parameterizing the related {@link AccessMethod} call
+	 * @param exitOnError defines whether the {@link 
+	 * AccessMethodResponse} build process will have to be 
+	 * interrupted if an error occurred 
 	 */
-	protected AccessMethodResult(Mediator mediator, 
+	protected AccessMethodResponseBuilder(Mediator mediator, 
 	String uri,	Object[] parameters, boolean exitOnError)
 	{
 		super();
@@ -170,12 +189,13 @@ implements PathElement
 	 * Creates and returns this AccessMethodResult's 
 	 * {@link AccessMethodResponse} 
 	 */
-	public AccessMethodResponse createSnaResponse() 
+	public A createAccessMethodResponse() 
 	{ 
-		AccessMethodResponse.Status status = (exceptions!=null && exceptions.size()>0)
-				? AccessMethodResponse.Status.ERROR: AccessMethodResponse.Status.SUCCESS;
+		AccessMethodResponse.Status status = (exceptions!=null 
+			&& exceptions.size()>0)?AccessMethodResponse.Status.ERROR
+				:AccessMethodResponse.Status.SUCCESS;
 		
-		AccessMethodResponse response = this.createSnaResponse(status);
+		A response = this.createAccessMethodResponse(status);
 		
 		if(exceptions!=null && exceptions.size()>0)
 		{
@@ -213,7 +233,7 @@ implements PathElement
 	 * 
 	 * @param resultObject the JSONObject value to be set
 	 */
-	public void setAccessMethodObjectResult(JSONObject resultObject)
+	public void setAccessMethodObjectResult(T resultObject)
 	{
 	     this.resultObject = resultObject;
 	}
@@ -223,7 +243,7 @@ implements PathElement
 	 * 
 	 * @return this result value
 	 */
-	 public JSONObject getAccessMethodObjectResult()
+	 public T getAccessMethodObjectResult()
 	 {
 		 return this.resultObject;
 	 }
