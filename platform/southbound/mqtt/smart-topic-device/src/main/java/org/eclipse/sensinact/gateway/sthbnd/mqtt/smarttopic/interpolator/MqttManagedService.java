@@ -86,8 +86,7 @@ public class MqttManagedService implements ManagedServiceFactory {
     private void register(String servicePID, Dictionary dictionary){
 
         try {
-            Interpolator mit=new Interpolator(MqttPropertyFileConfigImpl.class,dictionary);
-            MqttPropertyFileConfig config=(MqttPropertyFileConfig)mit.getInstance();
+            MqttPropertyFileConfig config=new Interpolator(dictionary).getNewInstance(MqttPropertyFileConfigImpl.class);
             LOG.debug("Interpolation result of service PID {} with POJO {}",config.toString(),config.getClass().getCanonicalName());
             ServiceRegistration<MqttPropertyFileConfig> registration= (ServiceRegistration<MqttPropertyFileConfig>) context.registerService(MqttPropertyFileConfig.class.getCanonicalName(), config, dictionary);
             LOG.info("Service registered for id {}",config.getId());
