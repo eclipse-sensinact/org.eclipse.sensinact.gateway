@@ -94,7 +94,7 @@ implements JSONable
 				builder.append(typedKey.getName());
 				builder.append(JSONUtils.QUOTE);
 				builder.append(JSONUtils.COLON);
-				builder.append(JSONUtils.toJSON(entry.getValue()));
+				builder.append(JSONUtils.toJSONFormat(entry.getValue()));
 				index++;
 			}
 			builder.append(JSONUtils.CLOSE_BRACE);
