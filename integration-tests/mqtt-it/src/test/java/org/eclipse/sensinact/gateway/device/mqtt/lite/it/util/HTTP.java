@@ -10,9 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.device.mqtt.lite.it.util;
 
+import org.eclipse.sensinact.gateway.util.crypto.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.BASE64Encoder;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -86,7 +86,9 @@ public class HTTP {
     private void configAuthenticationHeaders() throws Exception {
 
         if(authenticationMethod==AuthenticationMethod.BASIC){
-            final String usernamePasswordBase64=new BASE64Encoder().encode(String.format("%s:%s",getUsername(),getPassword()).getBytes());
+            final String usernamePasswordBase64=Base64.encodeBytes(
+            	String.format("%s:%s",getUsername(),
+            			getPassword()).getBytes());
             String encoded=" Basic "+usernamePasswordBase64;
             getHeaders().put("Authorization",encoded);
         }else if (authenticationMethod==AuthenticationMethod.NONE){

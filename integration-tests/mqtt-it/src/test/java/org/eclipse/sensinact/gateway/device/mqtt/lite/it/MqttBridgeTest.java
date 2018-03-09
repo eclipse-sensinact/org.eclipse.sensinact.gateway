@@ -77,7 +77,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     public void providerCreation() throws Exception {
         Object provider = createDevicePojo("myprovider","myservice","myresource","/myresource");
         ServiceRegistration sr=bc.registerService("org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider", provider, new Hashtable<String, Object>());
-        JSONObject obj = new JSONObject(sensinactSession.getProviders().getResult());
+        JSONObject obj = new JSONObject(sensinactSession.getProviders().getJSON());
         JSONArray providers = obj.getJSONArray("providers");
         final Set<String> providersSet = parseJSONArrayIntoSet(providers);
         Assert.assertTrue("Provider was not created, or at least is not shown via REST api", providersSet.contains("myprovider"));
@@ -113,7 +113,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         Object provider = createDevicePojo("myprovider","myservice","myresource","/myresource");
         ServiceRegistration sr=bc.registerService("org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider", provider, new Hashtable<String, Object>());
         sr.unregister();
-        JSONObject obj = new JSONObject(sensinactSession.getProviders().getResult());
+        JSONObject obj = new JSONObject(sensinactSession.getProviders().getJSON());
         JSONArray providers = obj.getJSONArray("providers");
         final Set<String> providersSetNo = parseJSONArrayIntoSet(providers);
         Assert.assertTrue("Provider was removed",!providersSetNo.contains("myprovider"));
@@ -122,7 +122,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     @Test
     public void serviceCreation() throws Exception {
         providerCreation();
-        JSONObject obj = new JSONObject(sensinactSession.getServices("myprovider").getResult());
+        JSONObject obj = new JSONObject(sensinactSession.getServices("myprovider").getJSON());
         JSONArray services = obj.getJSONArray("services");
         final Set<String> servicesSet = parseJSONArrayIntoSet(services);
         Assert.assertTrue("Service was not created, or at least is not shown via REST api",servicesSet.contains("myservice"));
@@ -131,7 +131,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     @Test
     public void resourceCreation() throws Exception {
         serviceCreation();
-        JSONObject obj = new JSONObject(sensinactSession.getResources("myprovider", "myservice").getResult());
+        JSONObject obj = new JSONObject(sensinactSession.getResources("myprovider", "myservice").getJSON());
         JSONArray resources = obj.getJSONArray("resources");
         final Set<String> resourcesSet = parseJSONArrayIntoSet(resources);
         Assert.assertTrue("Resource was not created, or at least is not shown via REST api", resourcesSet.contains("myresource"));
@@ -141,7 +141,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     public void resourceValueQuery() throws Exception {
         resourceCreation();
         String value=sensinactSession.get("myprovider", "myservice", "myresource", "value"
-        		).getResult().getJSONObject("response").getString("value");
+        		).getResponse(String.class,"value");
         Assert.assertTrue("Initial Resource value should be empty ", value.equals(""));
     }
 
@@ -163,8 +163,9 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         MqttMessage message2=new MqttMessage(messageString2.getBytes());
         mqttClient.publish("/myresource",message2 );
         waitForCallbackNotification();
-        String value2=sensinactSession.get("myprovider", "myservice", "myresource", "value").getResult(
-        		).getJSONObject("response").getString("value");
+        String value2=sensinactSession.get(
+        "myprovider", "myservice", "myresource", "value"
+        ).getResponse(String.class,"value");
         Assert.assertEquals("Value should be updated on new message arrival, and was not the case", messageString2,value2);
     }
 

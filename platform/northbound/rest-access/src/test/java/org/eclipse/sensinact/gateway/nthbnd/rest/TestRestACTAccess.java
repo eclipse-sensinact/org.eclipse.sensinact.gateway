@@ -155,7 +155,7 @@ public class TestRestACTAccess  extends TestRestAccess
    }
 
    @Test
-   public void testWspACTWithParameters() throws Exception
+   public void testWsACTWithParameters() throws Exception
    {
        JSONObject response;
        String simulated;
@@ -166,7 +166,7 @@ public class TestRestACTAccess  extends TestRestAccess
        
        simulated = this.synchronizedRequest(client, WS_ROOTURL + 
     	       "/providers/light/services/switch/resources/brightness/GET", null);
-       
+       System.out.println(simulated);
        response = new JSONObject(simulated);
 
        assertTrue(response.get("statusCode").equals(200));
