@@ -11,6 +11,7 @@
 
 package org.eclipse.sensinact.gateway.simulated.temperature.generator.osgi;
 
+import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacket;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.parser.DataParser;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.reader.TemperaturesGeneratorPacket;
@@ -29,7 +30,8 @@ import java.util.Collections;
 
 public class Activator extends AbstractActivator<Mediator> {
 
-    private static final String DEVICES_NUMBER = "org.eclipse.sensinact.simulated.generator.amount";
+    @Property(name = "org.eclipse.sensinact.simulated.generator.amount",defaultValue = "10",validationRegex = Property.INTEGER)
+    String DEVICES_NUMBER;
 
     private LocalProtocolStackEndpoint<TemperaturesGeneratorAbstractPacket> connector;
     private ExtModelConfiguration manager;
@@ -63,8 +65,7 @@ public class Activator extends AbstractActivator<Mediator> {
         DataParser dataParser = new DataParser(mediator);
 
         this.threadManager = new TemperaturesGeneratorThreadManager(connector,
-                dataParser.createDeviceInfosSet(Integer.parseInt(
-                mediator.getContext().getProperty(DEVICES_NUMBER))));
+                dataParser.createDeviceInfosSet(Integer.parseInt(DEVICES_NUMBER)));
 
         this.threadManager.startThreads();
     }
