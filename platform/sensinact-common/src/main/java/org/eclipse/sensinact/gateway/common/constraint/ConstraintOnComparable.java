@@ -194,7 +194,7 @@ public abstract class ConstraintOnComparable<T> implements Constraint
 		builder.append(OPERAND_KEY);
 		builder.append(JSONUtils.QUOTE);
 		builder.append(JSONUtils.COLON);
-		builder.append(JSONUtils.toJSON(this.operand));
+		builder.append(JSONUtils.toJSONFormat(this.operand));
 		builder.append(JSONUtils.CLOSE_BRACE);
 	    return builder.toString();
     }

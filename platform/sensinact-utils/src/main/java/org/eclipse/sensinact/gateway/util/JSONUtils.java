@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.sensinact.gateway.util.json.JSONValidator;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -49,9 +49,9 @@ public class JSONUtils
 	 * @return
 	 * 		the JSON formated string representation
 	 */
-	public static String toJSON(Object object)
+	public static String toJSONFormat(Object object)
 	{
-		return JSONUtils.toJSON(object,new JSONUtils.JSONWriterContext(
+		return JSONUtils.toJSONFormat(object,new JSONUtils.JSONWriterContext(
 				DEFAULT_MAX_DEEP,object));
 	}
 	
@@ -70,9 +70,9 @@ public class JSONUtils
 	 * @return
 	 * 		the JSON formated string representation
 	 */
-	public static String toJSON(Object object, int deep)
+	public static String toJSONFormat(Object object, int deep)
 	{
-		return JSONUtils.toJSON(object,new JSONUtils.JSONWriterContext(
+		return JSONUtils.toJSONFormat(object,new JSONUtils.JSONWriterContext(
 				deep,object));
 	}
 	
@@ -88,7 +88,7 @@ public class JSONUtils
 	 * @return
 	 * 		the JSON formated string representation
 	 */
-	public static String toJSON(Object object, 
+	public static String toJSONFormat(Object object, 
 			JSONUtils.JSONWriterContext context)
 	{
 		if(object == null)
@@ -105,11 +105,11 @@ public class JSONUtils
 		}
 		if(object.getClass().isArray())
 		{
-			return JSONUtils.arrayToJSON(object,context);		
+			return JSONUtils.arrayToJSONFormat(object,context);		
 		} 
 		if(List.class.isAssignableFrom(object.getClass()))
 		{
-			return toJSON(((List)object).toArray(new Object[0]), 
+			return toJSONFormat(((List)object).toArray(new Object[0]), 
 					context);
 		}  
 		if(Map.class.isAssignableFrom(object.getClass()))
@@ -122,7 +122,7 @@ public class JSONUtils
 			while(iterator.hasNext())
 			{
 				Map.Entry entry = iterator.next();
-				String key = toJSON(entry.getKey());
+				String key = toJSONFormat(entry.getKey());
 				if(key == null)
 				{
 					continue;
@@ -139,42 +139,25 @@ public class JSONUtils
 					builder.append(key);
 				}
 				builder.append(JSONUtils.COLON);
-				builder.append(toJSON(entry.getValue()));
+				builder.append(toJSONFormat(entry.getValue()));
 				index++;
 			}
 			builder.append(JSONUtils.CLOSE_BRACE);
 			return builder.toString();
 		} 
-		if(String.class == object.getClass())
+		if(String.class == object.getClass() && 
+			new JSONValidator((String)object).valid())
 		{
-			try
-			{
-				new JSONObject((String)object);
-				return (String)object;
-				
-			} catch(JSONException e)
-			{
-				try
-				{
-					new JSONArray((String)object);
-					return (String)object;
-					
-				} catch(JSONException e2)
-				{
-					LOGGER.log(Level.CONFIG, 
-					"Object to cast is neither a JSONObject nor a JSONArray");
-				}
-			}
-		}
-		
+			return  (String)object;
+		}		
 		if(CastUtils.isPrimitive(object.getClass()))
 		{
-			return JSONUtils.primitiveToJSON(object);		
+			return JSONUtils.primitiveToJSONFormat(object);		
 		
 		} else if(object.getClass().isEnum())
 		{
-			return JSONUtils.primitiveToJSON(((Enum)object).name());
-			
+			return JSONUtils.primitiveToJSONFormat(
+					((Enum)object).name());
 		} else
 		{
 			try
@@ -190,8 +173,7 @@ public class JSONUtils
 			{
 				LOGGER.log(Level.CONFIG, 
 				"Object to cast is not a JSONable instance");
-			}
-						
+			}						
 		}
 		if(context.tooDeep() ||context.circularReference())
 		{
@@ -208,7 +190,7 @@ public class JSONUtils
 				try 
 				{
 					context.decrementAndGet();
-					fieldJSON = toJSON(field.get(object),context);
+					fieldJSON = toJSONFormat(field.get(object),context);
 					
 				} catch (Exception e) 
 				{
@@ -240,7 +222,7 @@ public class JSONUtils
 	 * @return
 	 * 		the JSON formated string representation
 	 */
-	private static String arrayToJSON(Object array, JSONWriterContext context)
+	private static String arrayToJSONFormat(Object array, JSONWriterContext context)
 	{
 		StringBuilder builder = new StringBuilder();
 		builder.append(OPEN_BRACKET);
@@ -249,7 +231,7 @@ public class JSONUtils
 		for(int i=0;i < length ;i++)
 		{
 			context.decrementAndGet();
-			String json = JSONUtils.toJSON(Array.get(array,i), context);
+			String json = JSONUtils.toJSONFormat(Array.get(array,i), context);
 			
 			if(json!= null && json.length() > 0)
 			{
@@ -273,7 +255,7 @@ public class JSONUtils
 	 * 		the JSON formated string representation of
 	 * 		the Primitive object passed as parameter
 	 */
-	private static String primitiveToJSON(Object primitive)
+	private static String primitiveToJSONFormat(Object primitive)
 	{
 		StringBuilder builder = new StringBuilder();
 		Class<?> argClass = primitive.getClass();

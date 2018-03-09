@@ -207,7 +207,7 @@ public abstract class ConstraintOnCollectionSize implements Constraint
 		builder.append(OPERAND_KEY);
 		builder.append(JSONUtils.QUOTE);
 		builder.append(JSONUtils.COLON);
-		builder.append(JSONUtils.toJSON(this.length));
+		builder.append(JSONUtils.toJSONFormat(this.length));
 		builder.append(JSONUtils.CLOSE_BRACE);
 	    return builder.toString();
     }

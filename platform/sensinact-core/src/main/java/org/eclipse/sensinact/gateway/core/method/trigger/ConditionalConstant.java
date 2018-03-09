@@ -145,7 +145,7 @@ implements AccessMethodTrigger<Object[]>
 				buffer.append(TRIGGER_CONSTANT_KEY);
 				buffer.append(JSONUtils.QUOTE);
 				buffer.append(JSONUtils.COLON);
-				buffer.append(JSONUtils.toJSON(entry.constant));
+				buffer.append(JSONUtils.toJSONFormat(entry.constant));
 				buffer.append(JSONUtils.COMMA);
 				buffer.append(JSONUtils.QUOTE);
 				buffer.append(TRIGGER_CONSTRAINT_KEY);
