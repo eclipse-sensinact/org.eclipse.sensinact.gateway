@@ -23,7 +23,6 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodJSONResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 /**
  * Extended {@link AccessMethodJSONResponse} returned by an 

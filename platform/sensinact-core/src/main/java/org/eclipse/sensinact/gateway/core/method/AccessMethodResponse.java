@@ -29,6 +29,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeJSONResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod.DescribeType;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeStringResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
@@ -189,8 +190,17 @@ implements SnaResponseMessage<T, AccessMethodResponse.Response>
 						AccessMethodResponse.Status.ERROR, code);
 				break;
 			default:
-				response = new UnknownAccessMethodResponse(
+				try
+				{
+					DescribeType t = DescribeType.valueOf(method);
+					response = error(mediator, uri, t, statusCode, 
+						message, throwable);
+					
+				} catch(Exception e)
+				{
+					response = new UnknownAccessMethodResponse(
 						mediator,uri);
+				}
 				break;
 		}
 		if(response!=null && message != null)
@@ -213,8 +223,9 @@ implements SnaResponseMessage<T, AccessMethodResponse.Response>
 	 */
 	@SuppressWarnings("unchecked")
 	public static final <T, R extends DescribeResponse<T>> R 
-	error(Mediator mediator, String uri, DescribeMethod.DescribeType 
-		describeType, int statusCode, String message, Throwable throwable)
+	error(Mediator mediator, String uri, DescribeType 
+		describeType, int statusCode, String message, 
+		Throwable throwable)
 	{
 		int code = statusCode==AccessMethodResponse.SUCCESS_CODE
 				?SnaErrorfulMessage.UNKNOWN_ERROR_CODE:statusCode;	
