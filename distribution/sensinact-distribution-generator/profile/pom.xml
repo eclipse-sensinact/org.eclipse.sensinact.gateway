@@ -84,6 +84,7 @@
         <module>kodi-profile</module>
         <module>mqtt-sb-profile</module>
         <module>mqtt-agent-profile</module>
+        <module>mqtt-server</module>
         <module>openhab-profile</module>
         <module>openweather-profile</module>
         <module>rest-profile</module>
