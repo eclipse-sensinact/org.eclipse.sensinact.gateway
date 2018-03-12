@@ -100,10 +100,12 @@ extends ElementsProxyWrapper<UnaccessibleModelElementProxy,Nameable>
 			@Override
 			public String getJSONDescription()
 			{
-				return AccessMethodResponse.error(
-					proxy.mediator, proxy.getPath(), "DESCRIBE", 
-					SnaErrorfulMessage.FORBIDDEN_ERROR_CODE, 
-	     			"Unaccessible object", null).getJSON();
+				StringBuilder builder = new StringBuilder();
+				builder.append("{\"type\":\"DESCRIBE_ERROR\",\"statusCode\":");
+				builder.append(SnaErrorfulMessage.FORBIDDEN_ERROR_CODE);
+				builder.append(",\"errors\":[");
+				builder.append("{\"message\":\"Unaccessible object\",\"trace\":[]}]}");
+				return builder.toString();
 			}
 		};
 	}

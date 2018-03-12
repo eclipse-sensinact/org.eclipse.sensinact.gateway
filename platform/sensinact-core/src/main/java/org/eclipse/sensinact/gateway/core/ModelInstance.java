@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.core;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -23,6 +24,8 @@ import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -390,6 +393,33 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 					this.registration.getName());
 		}
 		final String name = this.getName(); 
+
+		boolean exists = AccessController.<Boolean>doPrivileged(
+			new PrivilegedAction<Boolean>()
+	    {
+			@Override
+			public Boolean run()
+			{				
+				Collection<ServiceReference<SensiNactResourceModel>> 
+				references = null;
+				try
+				{
+					references = ModelInstance.this.mediator.getContext(
+					).getServiceReferences(SensiNactResourceModel.class, 
+						new StringBuilder().append("(name=").append(name
+								).append(")").toString());
+				}
+				catch (InvalidSyntaxException e)
+				{
+					ModelInstance.this.mediator.error(e);
+				}
+				return (references!=null && references.size()>0);
+			}
+		});    	
+		if(exists)
+		{
+		    throw new ModelAlreadyRegisteredException(name);
+		}
 		final String uri = UriUtils.getUri(new String[] {name});
 		
     	final Dictionary<String,Object> props = new Hashtable<String,Object>();

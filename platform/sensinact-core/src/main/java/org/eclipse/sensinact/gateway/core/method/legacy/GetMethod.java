@@ -15,6 +15,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
+import org.json.JSONObject;
 
 
 /**
@@ -22,7 +23,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class GetMethod extends AbstractAccessMethod
+public class GetMethod extends AbstractAccessMethod<JSONObject,GetResponse>
 {
 	/**
 	 * Constructor
@@ -33,15 +34,15 @@ public class GetMethod extends AbstractAccessMethod
 	    super(mediator, uri, AccessMethod.GET, preProcessingExecutor);
     }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AbstractAccessMethod#
-	 * createAccessMethodResult(java.lang.Object[])
-	 */
+    /**
+     * @inheritDoc
+     *
+     * @see org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod#
+     * createAccessMethodResponseBuilder(java.lang.Object[])
+     */
     @Override
-    protected GetResult createAccessMethodResult(Object[] parameters) 
+    protected GetResponseBuilder createAccessMethodResponseBuilder(Object[] parameters)
     {
-	    return new GetResult(super.mediator, uri, parameters);
+	    return new GetResponseBuilder(super.mediator, uri, parameters);
     }
 }

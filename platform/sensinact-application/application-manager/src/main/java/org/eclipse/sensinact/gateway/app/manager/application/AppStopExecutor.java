@@ -20,7 +20,7 @@ import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.json.JSONObject;
 
 /**
@@ -40,7 +40,7 @@ class AppStopExecutor implements AccessMethodExecutor {
     /**
      * @see Executable#execute(java.lang.Object)
      */
-    public Void execute(AccessMethodResult jsonObjects) throws Exception 
+    public Void execute(AccessMethodResponseBuilder jsonObjects) throws Exception 
     {
         ApplicationStatus status = getApplicationState(service.getResource(AppConstant.STATUS));
 

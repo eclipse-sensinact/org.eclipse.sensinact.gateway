@@ -10,14 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.core.method;
 
-
 import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.common.primitive.Describable;
-import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 
@@ -26,7 +24,8 @@ import org.eclipse.sensinact.gateway.common.primitive.PathElement;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class UnaccessibleAccessMethod implements AccessMethod
+public class UnaccessibleAccessMethod 
+implements AccessMethod<String, AccessMethodResponse<String>>
 {	
 	private final AccessMethod.Type method;
 	private final String uri;
@@ -88,14 +87,11 @@ public class UnaccessibleAccessMethod implements AccessMethod
 	 * @see AccessMethod#invoke(java.lang.Object[])
 	 */
 	@Override
-	public AccessMethodResponse invoke(Object[] parameters)
+	public AccessMethodResponse<String> invoke(Object[] parameters)
 	{
-    	AccessMethodResponse response = 
-    		AccessMethodResponse.error(this.mediator, uri, 
-    		this.method, AccessMethodResponse.FORBIDDEN_ERROR_CODE, 
-    		"Unaccessible method", null);  
-    	
-		return response;
+    	return AccessMethodResponse.<String,AccessMethodResponse<String>>error(
+    	this.mediator, uri, this.method, AccessMethodResponse.FORBIDDEN_ERROR_CODE, 
+    		"Unaccessible method", null); 
 	}
 
 	/**

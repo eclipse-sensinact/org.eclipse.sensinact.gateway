@@ -6,7 +6,8 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class UnknownAccessMethodResponse extends AccessMethodResponse
+public class UnknownAccessMethodResponse
+extends AccessMethodResponse<String>
 {
 
 	//********************************************************************//
@@ -28,7 +29,7 @@ public class UnknownAccessMethodResponse extends AccessMethodResponse
 	/**
 	 * @param mediator
 	 * @param uri
-	 * @param type
+	 * @param typeName
 	 * @param status
 	 */
 	public UnknownAccessMethodResponse(Mediator mediator, String uri)

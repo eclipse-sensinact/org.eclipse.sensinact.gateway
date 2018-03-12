@@ -22,7 +22,7 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface AccessMethodExecutor 
-extends Executable<AccessMethodResult, Void>
+extends Executable<AccessMethodResponseBuilder<?,?>, Void>
 {
 	enum ExecutionPolicy
 	{

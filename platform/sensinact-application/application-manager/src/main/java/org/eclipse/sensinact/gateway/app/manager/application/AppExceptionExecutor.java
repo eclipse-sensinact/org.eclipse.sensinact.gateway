@@ -12,7 +12,7 @@ package org.eclipse.sensinact.gateway.app.manager.application;
 
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.json.JSONObject;
 
 /**
@@ -32,7 +32,7 @@ class AppExceptionExecutor implements AccessMethodExecutor {
     /**
      * @see Executable#execute(java.lang.Object)
      */
-    public Void execute(AccessMethodResult jsonObjects) throws Exception 
+    public Void execute(AccessMethodResponseBuilder jsonObjects) throws Exception 
     {
         service.getApplication().stop();
         jsonObjects.push(new JSONObject().put("message", "The application " + service.getName()

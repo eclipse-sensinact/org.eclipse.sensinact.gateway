@@ -34,7 +34,8 @@ public abstract class ModelElementProxy implements Nameable, PathElement
 	 * @return the method of this ModelElementProxy with 
 	 * the specified type
 	 */
-	protected abstract AccessMethod getAccessMethod(String type); 
+	protected abstract AccessMethod<?, ?> getAccessMethod(
+			String type); 
 	
 	/**
 	 * the proxied class
@@ -69,8 +70,8 @@ public abstract class ModelElementProxy implements Nameable, PathElement
 	 * @param path the string path of the ModelElementProxy 
 	 * to instantiate
 	 */
-	protected ModelElementProxy(
-			Mediator mediator, Class<?> proxied, String path) 
+	protected ModelElementProxy(Mediator mediator, 
+		Class<?> proxied, String path) 
 	{
 		this.path = path;
 		this.name = UriUtils.getLeaf(path);
@@ -121,18 +122,17 @@ public abstract class ModelElementProxy implements Nameable, PathElement
      * 
      * @return the resulting {@link AccessMethodResponse} 
    	 */
-     public AccessMethodResponse invoke(String type,
+     public AccessMethodResponse<?> invoke(String type,
 				Object[] parameters) throws Throwable
      {    	       		 		
-		AccessMethod accessMethod = this.getAccessMethod(type);
-		
+		AccessMethod<?,?> accessMethod = this.getAccessMethod(type);		
 		if (accessMethod == null) 
 		{
-	    	AccessMethodResponse message = AccessMethodResponse.error(this.mediator, 
-	    		path, type, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
-	    		new StringBuilder().append(type).append(" method not found"
-	    				).toString(), null);
-	    	
+	    	AccessMethodResponse<?> message = AccessMethodResponse.error(
+	    		this.mediator, path, AccessMethod.Type.valueOf(type), 
+	    		SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+	    		new StringBuilder().append(type).append(
+	    			" method not found").toString(), null);	    	
 			return message;			
 		}
 		return accessMethod.invoke(parameters);

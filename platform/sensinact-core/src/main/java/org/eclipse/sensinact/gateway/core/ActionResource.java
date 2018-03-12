@@ -21,7 +21,7 @@ import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
 public interface ActionResource extends Resource
 {
 	/**
-	 * The action resource type.
+	 * The action resource's type attribute value.
 	 */
 	public static final Resource.Type TYPE_VALUE = Resource.Type.ACTION;
 	

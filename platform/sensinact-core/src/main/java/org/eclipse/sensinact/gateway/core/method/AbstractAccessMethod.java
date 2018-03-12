@@ -37,18 +37,19 @@ import org.eclipse.sensinact.gateway.common.primitive.PathElement;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public abstract class AbstractAccessMethod implements AccessMethod
+public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>> 
+implements AccessMethod<T,R>
 {			
 	/**
-	 * Creates and returns an extended {@link AccessMethodResult}
+	 * Creates and returns an extended {@link AccessMethodResponseBuilder}
 	 * of the appropriate type
 	 * 
 	 * @param parameters
 	 * 
-	 * @return	the extended {@link AccessMethodResult} type instance
+	 * @return	the extended {@link AccessMethodResponseBuilder} type instance
 	 */
-	protected abstract AccessMethodResult createAccessMethodResult(
-			Object[] parameters);
+	protected abstract <A extends AccessMethodResponseBuilder<T,R>> 
+	A createAccessMethodResponseBuilder(Object[] parameters);
 
 	protected final AccessMethodExecutor preProcessingExecutor;
 	protected final AccessMethodExecutor postProcessingExecutor;
@@ -450,14 +451,13 @@ public abstract class AbstractAccessMethod implements AccessMethod
     	return this.map.size()+this.shortcuts.size();
     }
     
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AccessMethod#
-	 * invoke(java.lang.Object[])
-	 */
+    /**
+     * @inheritDoc
+     *
+     * @see org.eclipse.sensinact.gateway.core.method.AccessMethod#invoke(java.lang.Object[])
+     */
     @Override
-    public AccessMethodResponse invoke(Object[] parameters)
+    public R invoke(Object[] parameters)
     {
     	Iterator<Signature> iterator = 
     			this.getSignatures().iterator();
@@ -467,12 +467,12 @@ public abstract class AbstractAccessMethod implements AccessMethod
     		Signature signature = iterator.next();
 			if(signature.validParameters(parameters))
 			{
-				return (AccessMethodResponse) this.invoke(signature);
+				return this.invoke(signature);
 			}
     	}
-		return (AccessMethodResponse) error(
-				AccessMethodResponse.NOT_FOUND_ERROR_CODE,
-				"Unknown signature");
+		return this.error(
+		    AccessMethodResponse.NOT_FOUND_ERROR_CODE,
+			    "Unknown signature");
     }
     
     /**
@@ -486,17 +486,18 @@ public abstract class AbstractAccessMethod implements AccessMethod
      * @return
      * 		the invocation resulting {@link SnaMessage}
      */
-    public synchronized AccessMethodResponse invoke(Signature signature)
+    public synchronized <A extends AccessMethodResponseBuilder<T,R>>
+    R invoke(Signature signature)
     {
     	if(signature == null)
     	{
-			return error(SnaErrorfulMessage.BAD_REQUEST_ERROR_CODE, 
-        			"Null signature");
+			return this.error(
+			    SnaErrorfulMessage.BAD_REQUEST_ERROR_CODE, 
+        	        "Null signature");
     	}
     	Deque<AccessMethodExecutor> executors = null;
 		Signature current = signature;  
-		Signature previous = null;
-	
+		Signature previous = null;	
 		while(true)
 		{
 			previous = current;
@@ -518,14 +519,13 @@ public abstract class AbstractAccessMethod implements AccessMethod
 		}
 		if(executors == null)
 		{
-			return error(
-					SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+			return this.error(
+			    SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
 					"Unknown signature");
 		} 
 		Object[] parameters = signature.values();
-
-    	AccessMethodResult result = 
-    			this.createAccessMethodResult(parameters);
+    	A result = this.createAccessMethodResponseBuilder(
+    					parameters);
 
     	if(preProcessingExecutor!=null)
     	{
@@ -566,9 +566,17 @@ public abstract class AbstractAccessMethod implements AccessMethod
     	{
     		executors.removeLast();
     	}
-    	return result.createSnaResponse();
+    	return result.createAccessMethodResponse();
     }  
 	
+    
+	private R error(int errorCode, String message) 
+	{
+		return AccessMethodResponse.<T,R>error(
+		mediator, this.getPath(), this.getType(), 
+		errorCode, message, null);
+	}
+
 	/**
 	 * @inheritDoc
 	 *
@@ -592,20 +600,6 @@ public abstract class AbstractAccessMethod implements AccessMethod
     public AccessMethod.Type getType()
     {
 	    return this.type;
-    }
-    
-    /**
-     * 
-     * @param statusCode
-     * @param message
-     * 
-     * @return
-     */
-    private final AccessMethodResponse error( int statusCode, String message)
-    {
-    	AccessMethodResponse snaMessage = AccessMethodResponse.error(this.mediator, 
-    			uri, this.getType().name(), statusCode, message, null);
-		return snaMessage;
     }
 
 	/**

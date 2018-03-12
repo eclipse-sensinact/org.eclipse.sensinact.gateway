@@ -231,7 +231,7 @@ public abstract class PrimitiveDescription implements Description, Nameable
 			
 		} else
 		{
-			return JSONUtils.toJSON(value);
+			return JSONUtils.toJSONFormat(value);
 		}
 	}
 }

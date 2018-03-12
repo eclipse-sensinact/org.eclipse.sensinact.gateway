@@ -142,7 +142,7 @@ implements MidAgentCallback
 					this.doHandle((SnaLifecycleMessageImpl) message);
 					break;
 				case RESPONSE:
-					this.doHandle((SnaResponseMessage<?>) message);
+					this.doHandle((SnaResponseMessage<?,?>) message);
 					break;
 				case UPDATE:
 					this.doHandle((SnaUpdateMessageImpl) message);

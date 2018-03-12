@@ -49,7 +49,7 @@ public interface MidAgentCallback extends MidCallback
 	 * @param message the {@link SnaResponseMessage} to be 
 	 * processed
 	 */
-	void doHandle(SnaResponseMessage<?> message);
+	void doHandle(SnaResponseMessage<?,?> message);
 	
 	/**
 	 * Stops this {@link SnaAgent} callback

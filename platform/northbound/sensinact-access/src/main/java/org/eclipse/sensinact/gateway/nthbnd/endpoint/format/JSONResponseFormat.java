@@ -41,7 +41,7 @@ public class JSONResponseFormat implements ResponseFormat<JSONObject> {
 		{
 			return new JSONObject(((JSONable)object).getJSON());
 		}
-		String json = JSONUtils.toJSON(object);
+		String json = JSONUtils.toJSONFormat(object);
 		try
 		{
 			return CastUtils.cast(

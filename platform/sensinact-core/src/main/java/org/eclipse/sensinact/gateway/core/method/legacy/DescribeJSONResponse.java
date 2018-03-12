@@ -12,17 +12,17 @@ package org.eclipse.sensinact.gateway.core.method.legacy;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodJSONResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.json.JSONObject;
 
 /**
- * Extended {@link AccessMethodJSONResponse} returned by an 
- * {@link SubscribeMethod} invocation
+ * Extended {@link AccessMethodResponse} returned by an 
+ * {@link DescribeMethod} invocation and holding a JSONObject
+ * as result object
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class SubscribeResponse extends AccessMethodJSONResponse
+public class DescribeJSONResponse extends DescribeResponse<JSONObject>
 {
 	/**
 	 * Constructor 
@@ -30,11 +30,12 @@ public class SubscribeResponse extends AccessMethodJSONResponse
 	 * @param status
 	 * 		the associated {@link Status}
 	 */
-    public SubscribeResponse(Mediator mediator, 
-    		String uri, Status status)
+    protected DescribeJSONResponse(Mediator mediator, 
+    		String uri, Status status, DescribeMethod.DescribeType describeType)
     {
 	    this(mediator, uri, status, Status.SUCCESS.equals(status)
-	    	?SnaErrorfulMessage.NO_ERROR:SnaErrorfulMessage.UNKNOWN_ERROR_CODE);
+	    	?SnaErrorfulMessage.NO_ERROR:SnaErrorfulMessage.UNKNOWN_ERROR_CODE,
+	    	     describeType);
     }	
     
     /**
@@ -45,22 +46,10 @@ public class SubscribeResponse extends AccessMethodJSONResponse
 	 * @param code
 	 * 		the associated status code 
 	 */
-    public SubscribeResponse(Mediator mediator, 
-    		String uri, Status status, int code)
+    public DescribeJSONResponse(Mediator mediator, String uri, 
+    	Status status, int code, DescribeMethod.DescribeType describeType)
     {
-    	super(mediator, uri, AccessMethodResponse.Response.SUBSCRIBE_RESPONSE, 
-    		status, code);
+    	super(mediator, uri,  status, code, describeType);
     }
-    
-    /**
-     * Returns the subscription identifier
-     * 
-     * @return
-     * 		the subscription identifier
-     */
-    public String getSubscriptionId()
-    {
-    	JSONObject response =  super.getResponse();
-    	return String.valueOf(response.opt("subscriptionId"));
-    }
+
 }

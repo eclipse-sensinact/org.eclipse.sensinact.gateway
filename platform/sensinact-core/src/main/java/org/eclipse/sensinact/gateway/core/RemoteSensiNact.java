@@ -100,7 +100,7 @@ public class RemoteSensiNact implements RemoteCore
 		 * doHandle(org.eclipse.sensinact.gateway.core.message.SnaResponseMessage)
 		 */
 		@Override
-		public void doHandle(SnaResponseMessage<?> message)
+		public void doHandle(SnaResponseMessage<?,?> message)
 		{
 			RemoteSensiNact.this.endpoint().dispatch(super.identifier, message);
 		}
@@ -295,7 +295,8 @@ public class RemoteSensiNact implements RemoteCore
 	@Override
   	public String getProvider(String publicKey, String serviceProviderId)
     {
-  		return this.localEndpoint.getProvider(publicKey, serviceProviderId);
+  		return this.localEndpoint.getProvider(publicKey, 
+  				serviceProviderId);
     }
 
   	/**
@@ -307,7 +308,8 @@ public class RemoteSensiNact implements RemoteCore
 	@Override
   	public String getServices(String publicKey, String serviceProviderId)
     {
-  		return this.localEndpoint.getServices(publicKey, serviceProviderId);
+  		return this.localEndpoint.getServices(publicKey, 
+  				serviceProviderId);
     }
 
   	/**
@@ -348,8 +350,8 @@ public class RemoteSensiNact implements RemoteCore
   	public String getResource(String publicKey, 
   			String serviceProviderId, String serviceId, String resourceId)
     {
-  		return this.localEndpoint.getResource(publicKey, serviceProviderId, 
-  				serviceId, resourceId);
+  		return this.localEndpoint.getResource(publicKey, 
+  			serviceProviderId, serviceId, resourceId);
     }
   	
   	/**
@@ -491,7 +493,7 @@ public class RemoteSensiNact implements RemoteCore
 	{
 		JSONObject registration = this.localEndpoint.getSession(publicKey
 			).registerSessionAgent(new RemoteSensiNactCallback(
-				remoteAgentId), filter).getResult();
+				remoteAgentId), filter).getResponse();
 		
 		JSONObject response = registration.optJSONObject("response");
 		String localAgentId = null;

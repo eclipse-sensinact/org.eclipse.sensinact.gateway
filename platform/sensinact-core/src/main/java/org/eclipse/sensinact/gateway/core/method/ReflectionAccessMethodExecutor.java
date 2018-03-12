@@ -58,26 +58,26 @@ extends AbstractAccessMethodExecutor
 
 	/**
 	 * Executes this extended {@link Executable} if the 
-	 * parameters wrapped by the {@link AccessMethodResult}
+	 * parameters wrapped by the {@link AccessMethodResponseBuilder}
 	 * argument comply the registered constraints
 	 * 
 	 * @param parameter
-	 * 		the {@link AccessMethodResult} parameterizing the
+	 * 		the {@link AccessMethodResponseBuilder} parameterizing the
 	 * 		execution, in which to stack the JSON formated
 	 * 		result object of the execution
 	 * 
 	 * @throws Exception 
 	 */
-	protected void doExecute(AccessMethodResult parameter) 
-			throws Exception
+	protected void doExecute(AccessMethodResponseBuilder 
+	responseBuilder) throws Exception
 	{
 		Object result = method.invoke(target, 
-				parameter.getParameters());
+				responseBuilder.getParameters());
 		
-		if(result!= null && JSONObject.class.isAssignableFrom(
-				result.getClass()))
+		if(result!= null && responseBuilder.getComponentType(
+			).isAssignableFrom(result.getClass()))
 		{
-			parameter.push((JSONObject) result);
+			responseBuilder.push(result);
 		}
 	}
 }

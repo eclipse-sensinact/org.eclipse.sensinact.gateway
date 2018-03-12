@@ -174,7 +174,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
 
         callback.setAvailable(false);
         slider.move(2);
-		String message = waitForAvailableMessage(5000);
+		String message = waitForAvailableMessage(10000);
 		
         response = new JSONObject(message);        
         response = response.getJSONArray("messages").getJSONObject(0);
@@ -182,12 +182,12 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
 
         callback.setAvailable(false);
         slider.move(200);
-		message = waitForAvailableMessage(5000);
+		message = waitForAvailableMessage(10000);
         Assert.assertNull(message);
        
         callback.setAvailable(false);
         slider.move(199);
-		message = waitForAvailableMessage(5000);
+		message = waitForAvailableMessage(10000);
 
         response = new JSONObject(message);        
         response = response.getJSONArray("messages").getJSONObject(0);
@@ -195,12 +195,12 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
 
         callback.setAvailable(false);
         slider.move(201);
-		message = waitForAvailableMessage(5000);
+		message = waitForAvailableMessage(10000);
         Assert.assertNull(message);
 
         callback.setAvailable(false);
         slider.move(185);
-		message = waitForAvailableMessage(5000);
+		message = waitForAvailableMessage(10000);
 
         response = new JSONObject(message);        
         response = response.getJSONArray("messages").getJSONObject(0);
@@ -220,7 +220,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
 
         callback.setAvailable(false);
         slider.move(150);
-		message = waitForAvailableMessage(5000);
+		message = waitForAvailableMessage(10000);
 
         Assert.assertNull(message); 
 	}

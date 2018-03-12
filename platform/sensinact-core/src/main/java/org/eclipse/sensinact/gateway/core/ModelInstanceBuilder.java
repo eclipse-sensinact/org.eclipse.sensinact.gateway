@@ -520,6 +520,7 @@ public class ModelInstanceBuilder
 	 * 
 	 * @return the new created {@link SensiNactResourceModel} 
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <C extends ModelConfiguration,I extends ModelInstance<C>>
 	I build(final String name, String profileId, Object...parameters)
 	{	
@@ -530,44 +531,24 @@ public class ModelInstanceBuilder
 		}					
 		if(this.modelConfiguration != null)
 		{ 			
-			boolean exists= AccessController.<Boolean>doPrivileged(
-						new PrivilegedAction<Boolean>()
+			this.buildAccessNode(
+				this.modelConfiguration.getAccessTree(), name);
+			
+			instance = (I) ReflectUtils.<ModelInstance,I>
+			    getInstance(ModelInstance.class, (Class<I>) 
+				    this.resourceModelType, this.mediator, 
+				        this.modelConfiguration, name, 
+				            profileId);
+			try
 			{
-				@Override
-				public Boolean run()
-				{				
-					Collection<ServiceReference<SensiNactResourceModel>> 
-					references = null;
-					try
-					{
-						references = ModelInstanceBuilder.this.mediator.getContext(
-						).getServiceReferences(SensiNactResourceModel.class, 
-							new StringBuilder().append("(name=").append(name
-									).append(")").toString());
-					}
-					catch (InvalidSyntaxException e)
-					{
-						ModelInstanceBuilder.this.mediator.error(e);
-					}
-					return (references!=null && references.size()>0);
-				}
-			});    	
-			if(!exists)
-			{
-				this.buildAccessNode(this.modelConfiguration.getAccessTree(),
-						name);
+				this.register(instance);
 				
-				instance = (I) ReflectUtils.<ModelInstance,I>getInstance(
-					ModelInstance.class, (Class<I>) this.resourceModelType,
-					this.mediator, this.modelConfiguration, name, 
-					profileId);
-	
-				this.register(instance);				
-			}else
+			} catch(ModelAlreadyRegisteredException e)
 			{
 				mediator.error(
-				"Unable to register the model instance '%s', it already exists", 
+				"Model instance '%s' already exists", 
 				 name);
+				instance = null;
 			}
 		}			
 		return instance;

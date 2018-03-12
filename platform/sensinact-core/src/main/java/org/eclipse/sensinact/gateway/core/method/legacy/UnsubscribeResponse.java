@@ -11,19 +11,19 @@
 package org.eclipse.sensinact.gateway.core.method.legacy;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodJSONResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
+import org.json.JSONObject;
 
 
 /**
- * Extended {@link AbstractSnaMessage} returned by an
+ * Extended {@link AccessMethodJSONResponse} returned by an
  * {@link UnsubscribeMethod} invocation
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class UnsubscribeResponse extends AccessMethodResponse
+public class UnsubscribeResponse extends AccessMethodJSONResponse
 {
 	/**
 	 * Constructor 

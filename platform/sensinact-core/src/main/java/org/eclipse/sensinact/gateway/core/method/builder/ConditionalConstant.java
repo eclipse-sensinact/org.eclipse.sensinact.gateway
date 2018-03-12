@@ -113,7 +113,7 @@ public class ConditionalConstant extends AbstractDynamicParameterValue
 				buffer.append(DynamicParameterValue.BUILDER_CONSTANT_KEY);
 				buffer.append(JSONUtils.QUOTE);
 				buffer.append(JSONUtils.COLON);
-				buffer.append(JSONUtils.toJSON(entry.constant));
+				buffer.append(JSONUtils.toJSONFormat(entry.constant));
 				buffer.append(JSONUtils.COMMA);
 				buffer.append(JSONUtils.QUOTE);
 				buffer.append(ConditionalConstant.BUILDER_CONSTRAINT_KEY);

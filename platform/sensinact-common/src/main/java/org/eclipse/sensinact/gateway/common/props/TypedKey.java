@@ -104,7 +104,7 @@ public class TypedKey<T> implements Nameable
 	 * 			<li>false otherwise</li>
 	 * 		</ul>
 	 */
-	protected boolean isHidden()
+	public boolean isHidden()
 	{
 		return this.hidden;
 	}

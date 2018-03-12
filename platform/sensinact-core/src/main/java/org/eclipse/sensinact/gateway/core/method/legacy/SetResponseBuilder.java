@@ -11,23 +11,25 @@
 package org.eclipse.sensinact.gateway.core.method.legacy;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
+import org.json.JSONObject;
 
 /**
- * Extended  {@link AccessMethodResult} dedicated to {@link SetMethod}
+ * Extended  {@link AccessMethodResponseBuilder} dedicated to {@link SetMethod}
  * execution
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class SetResult extends AccessMethodResult
+@SuppressWarnings("serial")
+public class SetResponseBuilder extends 
+AccessMethodResponseBuilder<JSONObject, SetResponse>
 {
 	/**
 	 * @param uri 
 	 * @param parameters
 	 */
-    protected SetResult(Mediator mediator, 
+    protected SetResponseBuilder(Mediator mediator, 
     		String uri, Object[] parameters)
     {
 	    super(mediator, uri, parameters);
@@ -36,12 +38,23 @@ public class SetResult extends AccessMethodResult
 	/**
 	 * @inheritDoc
 	 *
-	 * @see AccessMethodResult#
-	 * createSnaResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
+	 * @see AccessMethodResponseBuilder#
+	 * createAccessMethodResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
 	 */
     @Override
-    protected AccessMethodResponse createSnaResponse(Status status)
+	public SetResponse createAccessMethodResponse(Status status)
     {
 		return new SetResponse(super.mediator, super.getPath(), status);
     }
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder#getComponentType()
+	 */
+	@Override
+	public Class<JSONObject> getComponentType() 
+	{
+		return JSONObject.class;
+	}
 }

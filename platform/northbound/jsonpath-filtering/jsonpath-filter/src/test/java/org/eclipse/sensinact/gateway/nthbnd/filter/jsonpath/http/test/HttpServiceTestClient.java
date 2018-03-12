@@ -20,7 +20,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-//import org.eclipse.sensinact.gateway.util.crypto.Base64;
+import org.eclipse.sensinact.gateway.util.json.JSONValidator;
 
 public class HttpServiceTestClient {
 
@@ -48,8 +48,10 @@ public class HttpServiceTestClient {
 
                 if(content != null && content.length() > 0)
                 {
-                    JSONObject jsonData = new JSONObject(content);
-                    builder.setContent(jsonData.toString());
+                	if(new JSONValidator(content).valid())
+                	{
+                		builder.setContent(content);
+                	}
                 }
             } else 
             {

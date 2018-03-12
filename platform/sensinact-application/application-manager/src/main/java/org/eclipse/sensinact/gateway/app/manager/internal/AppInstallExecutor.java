@@ -25,7 +25,7 @@ import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 
 import org.eclipse.sensinact.gateway.app.manager.json.AppContainer;
 import org.json.JSONObject;
@@ -53,7 +53,7 @@ class AppInstallExecutor implements AccessMethodExecutor {
     /**
      * @see Executable#execute(java.lang.Object)
      */
-    public Void execute(AccessMethodResult jsonObjects) throws Exception {
+    public Void execute(AccessMethodResponseBuilder jsonObjects) throws Exception {
         String name = (String) jsonObjects.getParameter(0);
         JSONObject content = (JSONObject) jsonObjects.getParameter(1);
 

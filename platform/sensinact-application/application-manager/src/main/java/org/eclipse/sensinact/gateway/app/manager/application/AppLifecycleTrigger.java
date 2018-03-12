@@ -16,7 +16,7 @@ import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 
@@ -25,7 +25,7 @@ import org.eclipse.sensinact.gateway.common.primitive.JSONable;
  *
  * @author Remi Druilhe
  */
-public class AppLifecycleTrigger implements AccessMethodTrigger<AccessMethodResult> 
+public class AppLifecycleTrigger implements AccessMethodTrigger<AccessMethodResponseBuilder> 
 {
 
     private static final String APP_LIFECYCLE_TRIGGER = "AppLifecycleTrigger";
@@ -56,7 +56,7 @@ public class AppLifecycleTrigger implements AccessMethodTrigger<AccessMethodResu
     /**
      * @see Executable#execute(java.lang.Object)
      */
-    public Object execute(AccessMethodResult snaResult) throws Exception
+    public Object execute(AccessMethodResponseBuilder snaResult) throws Exception
     {
         String uri = snaResult.getPath();
 

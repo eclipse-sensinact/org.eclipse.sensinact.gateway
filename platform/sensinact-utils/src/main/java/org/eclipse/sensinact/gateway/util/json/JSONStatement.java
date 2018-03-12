@@ -116,7 +116,7 @@ public interface JSONStatement
         {        	
 	        return value==UNSET
 	        	?JSONObject.NULL.toString()
-	        		:JSONUtils.toJSON(value);
+	        		:JSONUtils.toJSONFormat(value);
         }    	
     }
 }

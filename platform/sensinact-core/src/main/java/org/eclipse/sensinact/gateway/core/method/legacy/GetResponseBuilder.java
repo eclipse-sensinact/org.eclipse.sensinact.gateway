@@ -11,23 +11,25 @@
 package org.eclipse.sensinact.gateway.core.method.legacy;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
+import org.json.JSONObject;
 
 /**
- * Extended  {@link AccessMethodResult} dedicated to {@link DescribeMethod}
+ * Extended  {@link AccessMethodResponseBuilder} dedicated to {@link GetMethod}
  * execution
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class DescribeResult extends AccessMethodResult
+@SuppressWarnings("serial")
+public class GetResponseBuilder extends 
+AccessMethodResponseBuilder<JSONObject, GetResponse>
 {
 	/**
 	 * @param uri 
 	 * @param parameters
 	 */
-    protected DescribeResult(Mediator mediator, 
+    public GetResponseBuilder(Mediator mediator, 
     		String uri, Object[] parameters)
     {
 	    super(mediator, uri, parameters);
@@ -36,12 +38,23 @@ public class DescribeResult extends AccessMethodResult
 	/**
 	 * @inheritDoc
 	 *
-	 * @see AccessMethodResult#
-	 * createSnaResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
+	 * @see AccessMethodResponseBuilder#
+	 * createAccessMethodResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
 	 */
     @Override
-    protected AccessMethodResponse createSnaResponse(AccessMethodResponse.Status status)
+	public GetResponse createAccessMethodResponse(Status status)
     {
-		return new DescribeResponse(super.mediator, super.getPath(), status);
+		return new GetResponse(super.mediator, super.getPath(), status);
     }
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder#getComponentType()
+	 */
+	@Override
+	public Class<JSONObject> getComponentType() 
+	{
+		return JSONObject.class;
+	}
 }

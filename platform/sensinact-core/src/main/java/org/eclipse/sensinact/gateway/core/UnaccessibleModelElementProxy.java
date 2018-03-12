@@ -48,14 +48,14 @@ public class UnaccessibleModelElementProxy extends ModelElementProxy
      * @return the resulting {@link AccessMethodResponse} 
    	 */
 	 @Override
-     public AccessMethodResponse invoke(String type,
+     public AccessMethodResponse<?> invoke(String type,
 				Object[] parameters) throws Throwable
      {    	       		 		
-    	 return AccessMethodResponse.error(super.mediator,  super.path, 
-    		type.toUpperCase(), SnaErrorfulMessage.FORBIDDEN_ERROR_CODE, 
+    	 return AccessMethodResponse.error(super.mediator,  
+    		super.path, AccessMethod.Type.valueOf(type.toUpperCase()), 
+    		SnaErrorfulMessage.FORBIDDEN_ERROR_CODE, 
      			"Unaccessible object", null);
-     }
-	
+     }	
 
 	/**
 	 * @inheritDoc

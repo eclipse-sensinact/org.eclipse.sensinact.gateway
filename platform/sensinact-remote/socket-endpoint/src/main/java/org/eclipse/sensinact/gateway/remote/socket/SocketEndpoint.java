@@ -909,7 +909,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		object.put("value", attributeId==null?"value":attributeId);
 		parameters.put(object);
 		
-		Object value = JSONUtils.toJSON(parameter);
+		Object value = JSONUtils.toJSONFormat(parameter);
 		object = new JSONObject();		
 		object.put("name", "arg0");
 		object.put("type", value.getClass().getName());
@@ -960,7 +960,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		int length = parameters==null?0:parameters.length;
 		for(;index < length;index++)
 		{
-			Object value = JSONUtils.toJSON(parameters[index]);
+			Object value = JSONUtils.toJSONFormat(parameters[index]);
 			JSONObject object = new JSONObject();		
 			object.put("name", "arg"+index);
 			object.put("type", value.getClass().getName());

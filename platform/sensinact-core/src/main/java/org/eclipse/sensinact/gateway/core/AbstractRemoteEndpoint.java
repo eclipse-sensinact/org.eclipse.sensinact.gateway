@@ -100,10 +100,6 @@ implements RemoteEndpoint, SessionObserver
 	 * @param mediator the {@link Mediator} allowing the {@link 
 	 * RemoteEndpoint} to be instantiated to interact with the 
 	 * OSGi host environment
-	 * @param remoteCore the {@link RemoteCore} connected to the local 
-	 * sensiNact gateway instance
-	 * @param localNamespace the String namespace of the local sensiNact
-	 * gateway instance
 	 */
 	public AbstractRemoteEndpoint(Mediator mediator)
 	{

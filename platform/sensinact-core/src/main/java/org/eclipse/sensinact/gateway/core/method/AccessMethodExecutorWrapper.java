@@ -34,17 +34,16 @@ extends AbstractAccessMethodExecutor
 		this.executor = executor;
 	}
 	
-	/**
-	 * @throws Exception 
-	 * 
-	 * @inheritDoc
-	 *
-	 * @see AbstractAccessMethodExecutor#
-	 * doExecute(AccessMethodResult)
-	 */
+    /**
+     * @inheritDoc
+     *
+     * @see org.eclipse.sensinact.gateway.core.method.AbstractAccessMethodExecutor#
+     * doExecute(org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder)
+     */
     @Override
-    void doExecute(AccessMethodResult parameter) throws Exception
+    void doExecute(AccessMethodResponseBuilder<?,?> responseBuilder)
+    		throws Exception
     {
-	    this.executor.execute(parameter);
+	    this.executor.execute(responseBuilder);
     }
 }

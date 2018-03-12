@@ -15,6 +15,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
+import org.json.JSONObject;
 
 
 /**
@@ -22,7 +23,8 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class UnsubscribeMethod  extends AbstractAccessMethod
+public class UnsubscribeMethod 
+extends AbstractAccessMethod<JSONObject,UnsubscribeResponse>
 {
 	/**
 	 * Constructor
@@ -33,15 +35,15 @@ public class UnsubscribeMethod  extends AbstractAccessMethod
 	    super(mediator, uri, AccessMethod.UNSUBSCRIBE, preProcessingExecutor);
     }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AbstractAccessMethod#
-	 * createAccessMethodResult(java.lang.Object[])
-	 */
+    /**
+     * @inheritDoc
+     *
+     * @see org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod#
+     * createAccessMethodResponseBuilder(java.lang.Object[])
+     */
     @Override
-    protected UnsubscribeResult createAccessMethodResult(Object[] parameters)
+    protected UnsubscribeResponseBuilder createAccessMethodResponseBuilder(Object[] parameters)
     {
-	    return new UnsubscribeResult(super.mediator, uri,parameters);
+	    return new UnsubscribeResponseBuilder(super.mediator, uri,parameters);
     }	
 }

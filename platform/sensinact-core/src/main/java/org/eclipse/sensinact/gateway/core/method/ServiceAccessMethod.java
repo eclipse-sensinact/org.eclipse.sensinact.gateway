@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.core.method;
 
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,13 +21,11 @@ import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
-import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.ResourceImpl.ResourceProxyWrapper;
-import org.eclipse.sensinact.gateway.core.ResourceProxy;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 
 /**
@@ -137,16 +134,15 @@ public class ServiceAccessMethod implements AccessMethod
 			return;
 		}		
 		this.signatures.add(signature);
-	}	
-	
+	}
+
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.method.AccessMethod#
-	 * invoke(java.lang.Object[])
+	 * @see org.eclipse.sensinact.gateway.core.method.AccessMethod#invoke(java.lang.Object[])
 	 */
 	@Override
-	public AccessMethodResponse invoke(Object[] parameters)
+	public AccessMethodResponse<?> invoke(Object[] parameters)
 	{
 		try 
 		{
@@ -162,14 +158,13 @@ public class ServiceAccessMethod implements AccessMethod
 			
 		} catch (Throwable e) 
 		{
-	    	AccessMethodResponse snaMessage = AccessMethodResponse.error(
-	    	    this.mediator, uri, this.getType().name(), 
-	    	    SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, 
-					null, e);  	
-			return snaMessage;
+	    	return AccessMethodResponse.error(
+	    	   this.mediator, uri, this.getType(), 
+	    	   SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, 
+			   e.getMessage(), e);
 		}
-	}
-
+	}	
+	
 	/**
 	 * Returns the type of this ServiceAccessMethod's
 	 * associated {@link AccessMethod}
@@ -277,5 +272,5 @@ public class ServiceAccessMethod implements AccessMethod
 	public AccessMethodDescription getDescription()
 	{
 		return new AccessMethodDescription(this);
-	}	
+	}
 }

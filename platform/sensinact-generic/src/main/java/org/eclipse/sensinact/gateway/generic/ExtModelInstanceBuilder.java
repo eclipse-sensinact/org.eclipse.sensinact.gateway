@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.generic;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
+import org.eclipse.sensinact.gateway.core.ModelAlreadyRegisteredException;
 import org.eclipse.sensinact.gateway.core.ModelConfiguration;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.core.ModelInstanceBuilder;
@@ -415,8 +416,16 @@ public class ExtModelInstanceBuilder extends ModelInstanceBuilder
 				ModelInstance.class, (Class<I>) this.resourceModelType,
 				this.mediator, this.modelConfiguration, name, 
 				profileId, this.connector);
-
-			super.register(instance);
+			try
+			{
+				super.register(instance);
+				
+			} catch(ModelAlreadyRegisteredException e)
+			{
+				mediator.error("Model instance '%s' already exists", 
+				name);
+				instance = null;
+			}
 		}			
 		return instance;
 	}

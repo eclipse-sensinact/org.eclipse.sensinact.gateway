@@ -11,13 +11,13 @@
 
 package org.eclipse.sensinact.gateway.generic.test.moke;
 
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 
 /** 
  * 
  */
-public class MokeTrigger implements AccessMethodTrigger<AccessMethodResult>
+public class MokeTrigger implements AccessMethodTrigger<AccessMethodResponseBuilder>
 {
 	/**
 	 * @InheritedDoc
@@ -25,7 +25,7 @@ public class MokeTrigger implements AccessMethodTrigger<AccessMethodResult>
 	 * @see org.eclipse.sensinact.gateway.common.execution.Executable#execute(java.lang.Object)
 	 */
     @Override
-    public Object execute(AccessMethodResult parameter) throws Exception
+    public Object execute(AccessMethodResponseBuilder parameter) throws Exception
     {
 	    return 0.2f;
     }

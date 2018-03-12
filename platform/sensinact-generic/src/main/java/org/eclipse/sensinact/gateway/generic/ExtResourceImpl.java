@@ -33,7 +33,7 @@ import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
 import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResult;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor.ExecutionPolicy;
 import org.eclipse.sensinact.gateway.core.method.legacy.ActMethod;
 import org.eclipse.sensinact.gateway.generic.parser.SignatureDefinition;
@@ -192,7 +192,7 @@ public class ExtResourceImpl extends ResourceImpl
 	     			executor  = new AccessMethodExecutor()
 					{
 						@Override
-						public Void execute(AccessMethodResult parameter)
+						public Void execute(AccessMethodResponseBuilder parameter)
 								throws Exception 
 						{
 							JSONObject jsonObject = (JSONObject) 

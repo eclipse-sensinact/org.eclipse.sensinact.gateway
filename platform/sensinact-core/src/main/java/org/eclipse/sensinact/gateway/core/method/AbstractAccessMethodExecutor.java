@@ -30,17 +30,18 @@ implements AccessMethodExecutor
 {
 	/**
 	 * Executes this extended {@link Executor} if the 
-	 * parameters wrapped by the {@link AccessMethodResult}
+	 * parameters wrapped by the {@link AccessMethodResponseBuilder}
 	 * argument comply the registered constraints
 	 * 
-	 * @param parameter
-	 * 		the {@link AccessMethodResult} parameterizing the
+	 * @param responseBuilder
+	 * 		the {@link AccessMethodResponseBuilder} parameterizing the
 	 * 		execution, in which to stack the <code>&lt;V&gt;</code>
 	 * 		typed result object of the execution
 	 * 
 	 * @throws Exception 
 	 */
-	abstract void doExecute(AccessMethodResult parameter) 
+	abstract void doExecute(
+		AccessMethodResponseBuilder<?,?> responseBuilder) 
 			throws Exception;
 	
 	final Map<Integer, Fixed> executionConditions;
@@ -50,7 +51,8 @@ implements AccessMethodExecutor
 	 */
 	public AbstractAccessMethodExecutor()
 	{
-		this.executionConditions = new HashMap<Integer,Fixed>();
+		this.executionConditions = 
+				new HashMap<Integer,Fixed>();
 	}
 	
 	/**
@@ -63,7 +65,7 @@ implements AccessMethodExecutor
 	 * @param constraint
 	 * 		the {@link Fixed} constraint to apply
 	 */
-	public void put(int index, Fixed constraint)
+	public void put(int index, Fixed<?> constraint)
 	{
 		this.executionConditions.put(index, constraint);
 	}
@@ -74,8 +76,8 @@ implements AccessMethodExecutor
 	 * @see Executable#execute(java.lang.Object)
 	 */
     @Override
-    public Void execute(AccessMethodResult parameter) 
-    		throws Exception
+    public Void execute(AccessMethodResponseBuilder<?,?> 
+    responseBuilder) throws Exception
     {
     	Iterator<Map.Entry<Integer,Fixed>> iterator = 
     			this.executionConditions.entrySet().iterator();
@@ -84,12 +86,12 @@ implements AccessMethodExecutor
     	{
     		Map.Entry<Integer,Fixed> entry = iterator.next();
     		if(!entry.getValue().complies(
-    				parameter.getParameter(entry.getKey())))
+    				responseBuilder.getParameter(entry.getKey())))
     		{
     			return null;
     		}
     	}
-	    this.doExecute(parameter);
+	    this.doExecute(responseBuilder);
 	    return null;
     }
 

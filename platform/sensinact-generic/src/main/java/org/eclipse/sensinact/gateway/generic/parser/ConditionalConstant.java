@@ -84,7 +84,7 @@ implements ConstrainableDefinition, JSONable
 	@Override
 	public String getJSON() 
 	{
-		String constant = JSONUtils.toJSON(super.getTypeValuePair().value);
+		String constant = JSONUtils.toJSONFormat(super.getTypeValuePair().value);
 		
 		StringBuilder builder = new StringBuilder();
 		

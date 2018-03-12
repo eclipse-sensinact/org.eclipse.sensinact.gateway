@@ -17,12 +17,12 @@ import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccess;
 import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccessRequest;
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
 import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.ResultHolder;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,9 +75,9 @@ public class AccessMethodCommands {
 					this.sendError(500, "Internal server error");
 					return false;
 				}
-				ResultHolder<?> cap = super.endpoint.execute(nthbndRequest);
+				AccessMethodResponse<?> cap = super.endpoint.execute(nthbndRequest);
 				JSONObject result = new JSONResponseFormat(mediator
-						).format(cap.getResult());
+						).format(cap.getJSON());
 				if(result == null)
 				{
 					this.sendError(500, "Internal server error");
