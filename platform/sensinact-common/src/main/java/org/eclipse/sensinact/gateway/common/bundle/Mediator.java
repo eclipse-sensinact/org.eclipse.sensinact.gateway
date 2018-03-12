@@ -901,4 +901,8 @@ public class Mediator
     	}
     	callService(LogService.class, new LogExecutor(level, message, throwable));
     }
+
+	public Map getProperties() {
+		return Collections.unmodifiableMap(properties);
+	}
 }
