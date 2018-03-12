@@ -30,8 +30,8 @@ import java.util.Collections;
 
 public class Activator extends AbstractActivator<Mediator> {
 
-    @Property(name = "org.eclipse.sensinact.simulated.generator.amount",defaultValue = "10",validationRegex = Property.INTEGER)
-    String DEVICES_NUMBER;
+    @Property(name = "org.eclipse.sensinact.simulated.generator.amount",defaultValue = "10")
+    Integer DEVICES_NUMBER;
 
     private LocalProtocolStackEndpoint<TemperaturesGeneratorAbstractPacket> connector;
     private ExtModelConfiguration manager;
@@ -65,7 +65,7 @@ public class Activator extends AbstractActivator<Mediator> {
         DataParser dataParser = new DataParser(mediator);
 
         this.threadManager = new TemperaturesGeneratorThreadManager(connector,
-                dataParser.createDeviceInfosSet(Integer.parseInt(DEVICES_NUMBER)));
+                dataParser.createDeviceInfosSet(DEVICES_NUMBER));
 
         this.threadManager.startThreads();
     }
