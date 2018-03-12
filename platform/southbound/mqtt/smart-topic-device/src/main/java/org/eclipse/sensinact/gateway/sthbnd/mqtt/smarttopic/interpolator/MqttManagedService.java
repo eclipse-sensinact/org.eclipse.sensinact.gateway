@@ -10,9 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.interpolator;
 
+import org.eclipse.sensinact.gateway.common.interpolator.Interpolator;
+import org.eclipse.sensinact.gateway.common.interpolator.exception.InterpolationException;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.device.MqttPropertyFileConfig;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.device.impl.MqttPropertyFileConfigImpl;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.interpolator.exception.InterpolationException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
