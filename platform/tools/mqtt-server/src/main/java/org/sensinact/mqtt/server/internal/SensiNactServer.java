@@ -14,6 +14,7 @@ import io.moquette.interception.InterceptHandler;
 import io.moquette.parser.proto.messages.PublishMessage;
 import io.moquette.server.ServerAcceptor;
 import io.moquette.server.config.IConfig;
+import io.moquette.server.netty.SensinactNettyAcceptor;
 import io.moquette.spi.impl.ProtocolProcessor;
 import io.moquette.spi.impl.SensiNactProtocolProcessorBootstrapper;
 import io.moquette.spi.impl.subscriptions.Subscription;
@@ -21,6 +22,8 @@ import io.moquette.spi.security.IAuthenticator;
 import io.moquette.spi.security.IAuthorizator;
 import io.moquette.spi.security.ISslContextCreator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.wiring.BundleWiring;
+import org.sensinact.mqtt.server.osgi.Activator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,8 +77,18 @@ public class SensiNactServer {
             sslCtxCreator = new SensiNactDefaultMoquetteSslContextCreator(config);
         }
 
-        m_acceptor = new io.moquette.server.netty.NettyAcceptor();
-        m_acceptor.initialize(processor, config, sslCtxCreator);
+        m_acceptor = new SensinactNettyAcceptor(bundleContext);
+        //m_acceptor = new io.moquette.server.netty.NettyAcceptor();
+
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(((BundleWiring)bundleContext.getBundle().adapt(BundleWiring.class)).getClassLoader());
+            //Thread.currentThread().setContextClassLoader(Activator.class.getClassLoader());
+            m_acceptor.initialize(processor, config, sslCtxCreator);
+        } finally {
+            Thread.currentThread().setContextClassLoader(tccl);
+        }
+
         m_processor = processor;
         m_initialized = true;
     }

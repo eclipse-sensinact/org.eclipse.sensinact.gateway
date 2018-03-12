@@ -63,6 +63,11 @@
             <artifactId>mapdb</artifactId>
             <version>1.0.8</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.sensinact.gateway</groupId>
+            <artifactId>sensinact-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -76,7 +81,8 @@
                         <Embed-Dependency>*;inline=false;artifactId=!org.osgi.core</Embed-Dependency>
                         <Bundle-Activator>org.sensinact.mqtt.server.osgi.Activator</Bundle-Activator>
                         <Export-Package>org.sensinact.mqtt.server</Export-Package>
-                        <Import-Package>org.osgi.framework.wiring,javax.net.ssl,javax.net,org.osgi.framework,org.slf4j,javax.security.cert</Import-Package>
+                        <Import-Package>sun.misc,org.eclipse.sensinact.*,org.osgi.util.tracker,org.osgi.framework.wiring,javax.net.ssl,javax.net,org.osgi.framework,org.slf4j,javax.security.cert</Import-Package>
+                        <_nouses>false</_nouses>
                     </instructions>
                 </configuration>
             </plugin>
