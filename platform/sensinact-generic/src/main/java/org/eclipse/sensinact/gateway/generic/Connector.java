@@ -213,10 +213,15 @@ public class Connector<P extends Packet> extends TaskManager
 			    try 
 	            {	
 					instance = this.addModelInstance(
-						subPacket.getProfileId(), serviceProviderName);
-		            super.mediator.debug("Service provider discovered : %s",
-		            		serviceProviderName);
-		        	            
+						subPacket.getProfileId(), 
+						serviceProviderName);		            
+					if(instance == null)
+					{
+						continue;
+					}
+					super.mediator.debug(
+						"Service provider discovered : %s",
+		            	serviceProviderName);		        	            
 				} catch (InvalidServiceProviderException e) 
 	            {
 					throw new InvalidPacketException(e);
@@ -305,8 +310,10 @@ public class Connector<P extends Packet> extends TaskManager
 			).withConfiguration(this.ExtModelConfiguration
 			).<ExtModelConfiguration,ExtModelInstance>build(
 					serviceProviderName, profileId);
-		
-		this.instances.add(instance);
+		if(instance != null)
+		{
+			this.instances.add(instance);
+		}
 		return instance;
 	}
 
@@ -323,8 +330,8 @@ public class Connector<P extends Packet> extends TaskManager
 	 */
 	public ExtModelInstance<?> getModelInstance(String instanceName) 
 	{
-		int index = this.instances.indexOf(new Name<ExtModelInstance<?>>(
-				instanceName));
+		int index = this.instances.indexOf(
+			new Name<ExtModelInstance<?>>(instanceName));
 		
 		if(index < 0)
 		{

@@ -40,10 +40,8 @@ public class Attribute extends DescribablePrimitive
 	/**
 	 * This Attribute's metadata.
 	 */
-	protected final List<Metadata> metadata;
-	
+	protected final List<Metadata> metadata;	
 	private final ResourceImpl resource;
-
 	private int recipient;
 	
 	/**
@@ -134,8 +132,9 @@ public class Attribute extends DescribablePrimitive
 	}
 
 	/**
-	 * Constructs an attribute with the given {@link JSONObject}
-	 * 
+	 * Constructs an attribute from the given {@link JSONObject}
+	 * for the ResourceImpl passed as parameter
+	 *  
 	 * @param mediator the {@link Mediator} allowing the 
 	 * Attribute to be instantiated to interact with the OSGi host
 	 * environment 
