@@ -18,7 +18,7 @@ import java.util.Hashtable;
 
 public class Activator extends AbstractActivator {
 
-    @Property
+    @Property(defaultValue = "true")
     private Boolean autoStart;
 
     @Property(defaultValue = "1883")
