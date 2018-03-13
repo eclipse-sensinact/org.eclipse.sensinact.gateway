@@ -40,6 +40,7 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
     private final BundleContext bundleContext;
     private final MqttProtocolStackEndpoint endpoint;
     private Map<String,ServiceRegistration> registration=new HashMap<>();
+    private Map<String,SmartTopic> smartTopicService=new HashMap<String,SmartTopic>();
     /**
      * This is the list that will contains the processor formats supported by the MQTT bridge.
      */
@@ -103,7 +104,7 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
             LOG.info("This topic config {} is a SmartTopic", configFile.getId());
 
             SmartTopic smartTopic = new SmartTopic(this.endpoint, broker, configFile.getTopic());
-
+            smartTopicService.put(configFile.getId(),smartTopic);
             if(configFile.getProcessor() != null) {
                 smartTopic.setProcessor(configFile.getProcessor());
             }
@@ -114,7 +115,9 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
 
             provider.setIsDiscoveryOnFirstMessage(true);
 
-            return null;
+            smartTopicService.put(configFile.getId(),smartTopic);
+
+            return provider;
         }
 
         return provider;
@@ -132,7 +135,7 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
             Provider provider = buildProvider(configFile);
             Dictionary<String,String> properties = new Hashtable<String,String>();
 
-            if(provider != null) {
+            if(provider != null && !configFile.getTopicType().equals("smarttopic")) {
                 registration.put(serviceReference.getProperty("service.pid").toString(),
                         bundleContext.registerService(Provider.class.getName(), provider, properties));
             }
@@ -169,6 +172,12 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
                 LOG.error("Failed to read internal package", e);
             }
 
+        }
+
+        SmartTopic smartTopicSer=smartTopicService.get(((MqttPropertyFileConfig) o).getId());
+
+        if(smartTopicSer!=null){
+            smartTopicSer.desactivate();
         }
     }
 }
