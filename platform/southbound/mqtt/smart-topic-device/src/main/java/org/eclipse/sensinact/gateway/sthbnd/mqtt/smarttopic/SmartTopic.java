@@ -19,6 +19,7 @@ import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttPacket;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.exception.MessageInvalidSmartTopicException;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.SmartTopicInterpolator;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.ProcessorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +78,10 @@ public class SmartTopic extends MqttTopicMessage {
                 value = message;
             }
 
-            MqttPacket packet = new MqttPacket(provider, service, resource, value);
+            String valueProcessed=MqttPojoConfigTracker.processorExecutor.execute(value, ProcessorUtil.transformProcessorListInSelector(processor==null?"":processor));
+            MqttPacket packet = new MqttPacket(provider, service, resource, valueProcessed);
+
+
 
             endpoint.process(packet);
 
