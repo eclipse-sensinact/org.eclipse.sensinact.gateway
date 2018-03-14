@@ -11,11 +11,13 @@
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
@@ -120,9 +122,20 @@ public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest>
 			sendError(500, "Internal server error");
 			return false;
 		}
-		String result = cap.getJSON();
-		byte[] resultBytes;
-
+		String result = null;
+		List<String> rawList = super.request.getQueryMap(
+	    		).get("rawDescribe");
+		
+	    if(rawList!= null && (rawList.contains("true") 
+	       ||rawList.contains("True") ||rawList.contains("yes") ||rawList.contains("Yes")) 
+	       && DescribeResponse.class.isAssignableFrom(cap.getClass()))
+	    {
+	    	result = ((DescribeResponse<?>)cap).getJSON(true);
+	    } else
+	    {
+	    	result = cap.getJSON();
+	    }
+	    byte[] resultBytes;
 		String acceptEncoding = super.request.getHeader("Accept-Encoding");
         if(acceptEncoding != null && acceptEncoding.contains("gzip")) 
         {

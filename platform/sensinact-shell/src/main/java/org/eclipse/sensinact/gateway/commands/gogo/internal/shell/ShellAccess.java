@@ -11,9 +11,11 @@
 package org.eclipse.sensinact.gateway.commands.gogo.internal.shell;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
@@ -85,9 +87,22 @@ public class ShellAccess extends NorthboundAccess<ShellAccessRequest>
 			return false;
 		}
 		AccessMethodResponse<?> cap = this.endpoint.execute(nthbndRequest);
-		JSONObject result = new JSONResponseFormat(mediator
-			).format(cap.getJSON());
+
+		String resultStr = null;
+		List<String> rawList = super.request.getQueryMap(
+	    		).get("rawDescribe");
 		
+	    if(rawList!= null && (rawList.contains("true") 
+	       ||rawList.contains("True") ||rawList.contains("yes") ||rawList.contains("Yes")) 
+	       && DescribeResponse.class.isAssignableFrom(cap.getClass()))
+	    {
+	    	resultStr = ((DescribeResponse<?>)cap).getJSON(true);
+	    } else
+	    {
+	    	resultStr = cap.getJSON();
+	    }	    
+		JSONObject result = new JSONResponseFormat(mediator
+			).format(resultStr);		
 		if(result == null)
 		{
 			this.sendError(500, "Internal server error");

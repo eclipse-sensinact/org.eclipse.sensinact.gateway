@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
@@ -93,7 +94,19 @@ public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest>
 			sendError(500, "Internal server error");
 			return false;
 		}
-		String result = cap.getJSON();
+		String result = null;
+		List<String> rawList = super.request.getQueryMap(
+				).get("rawDescribe");
+		
+	    if(rawList!= null && (rawList.contains("true") 
+	       ||rawList.contains("True") ||rawList.contains("yes") ||rawList.contains("Yes")) 
+	       && DescribeResponse.class.isAssignableFrom(cap.getClass()))
+	    {
+	    	result = ((DescribeResponse<?>)cap).getJSON(true);
+	    } else
+	    {
+	    	result = cap.getJSON();
+	    }
 		byte[] resultBytes;
 		List<String> acceptEncoding = super.request.getQueryMap(
 				).get("Accept-Encoding");

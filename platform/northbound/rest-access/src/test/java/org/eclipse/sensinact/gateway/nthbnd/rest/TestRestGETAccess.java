@@ -32,6 +32,21 @@ public class TestRestGETAccess  extends TestRestAccess
 	}
 	
 	@Test
+	public void testHttpAccessMethodRawDescription() throws Exception
+	{
+		 Mediator mediator = new Mediator(context);
+    	
+        String simulated  = HttpServiceTestClient.newRequest(mediator,
+             	HTTP_ROOTURL + "/providers?rawDescribe=true", null, "GET");
+        
+        System.out.println(simulated);
+        
+        JSONArray response = new JSONArray("[\"slider\",\"light\"]");
+        
+        JSONAssert.assertEquals(response, new JSONArray(simulated), false);
+	}
+	
+	@Test
 	public void testHttpAccessMethodGET() throws Exception
 	{
 		 Mediator mediator = new Mediator(context);
@@ -136,6 +151,22 @@ public class TestRestGETAccess  extends TestRestAccess
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/cursor/position"));
         assertTrue(response.getJSONObject("response").get("value").equals(1));		
+	}
+
+	@Test
+	public void testWsAccessMethodRawDescription() throws Exception
+	{
+        String simulated;
+        WsServiceTestClient client = new WsServiceTestClient();
+                
+		new Thread(client).start();
+
+        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers?rawDescribe=true", 
+        null);       
+        
+        System.out.println(simulated);
+        JSONArray response = new JSONArray("[\"slider\",\"light\"]");
+        JSONAssert.assertEquals(response, new JSONArray(simulated), false);
 	}
 	
 	@Test
