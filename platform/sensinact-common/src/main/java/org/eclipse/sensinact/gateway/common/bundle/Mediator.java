@@ -140,7 +140,7 @@ public class Mediator
 		try
 		{
 			bundleProperties.load(new FileInputStream(bundlePropertyFileName));
-			warn("File %s loaded successfully",bundlePropertyFileName);
+			debug("File %s loaded successfully",bundlePropertyFileName);
 			logBundleProperties(symbolicName,bundlePropertyFileName,
 					bundleProperties);
 		
@@ -154,8 +154,8 @@ public class Mediator
 				bundleProperties.load(new FileInputStream(bundlePropertyFileNameFallback));
 				logBundleProperties(symbolicName, bundlePropertyFileNameFallback, 
 					bundleProperties);
-				
-				warn("File %s loaded successfully",bundlePropertyFileNameFallback);
+
+				debug("File %s loaded successfully",bundlePropertyFileNameFallback);
 				
 			} catch(IOException ex)
 			{
@@ -189,7 +189,7 @@ public class Mediator
 	private void logBundleProperties(String bundleName, 
 			String propertyFile,Properties properties)
 	{
-		info("Loading properties for bundle %s located in %s", 
+		debug("Loading properties for bundle %s located in %s",
 				bundleName, propertyFile);
 		for(Map.Entry<Object,Object> entry:properties.entrySet())
 		{

@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -240,7 +241,7 @@ public class MqttBroker {
         public Builder() {
             this.session = (new MqttSession.Builder()).build();
             this.authentication = (new MqttAuthentication.Builder()).build();
-            this.topics = new ArrayList<>();
+            this.topics = Collections.synchronizedList(new ArrayList<MqttTopic>());
         }
 
         public Builder host(String host) {

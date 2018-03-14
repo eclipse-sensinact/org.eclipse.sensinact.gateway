@@ -21,11 +21,18 @@ import org.eclipse.sensinact.gateway.sthbnd.mqtt.listener.MqttTopicMessage;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Resource;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Service;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.ProcessorExecutor;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.ProcessorUtil;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.exception.ProcessorException;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.*;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.iface.ProcessorFormatIface;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
 
 /**
  * Tracker responsible for detecting when new OSGi Service instance that configures an MQTT topic monitoring
@@ -44,6 +51,15 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
         this.endpoint = endpoint;
     }
 
+    public static final ProcessorExecutor processorExecutor=new ProcessorExecutor(new ArrayList<ProcessorFormatIface>(){{
+        add(new ProcessorFormatArray());
+        add(new ProcessorFormatBase64());
+        add(new ProcessorFormatJSON());
+        add(new ProcessorFormatString());
+        add(new ProcessorFormatURLEncode());
+        add(new ProcessorFormatPlus());
+    }});
+
     @Override
     public Object addingService(ServiceReference serviceReference) {
         LOG.info("Loading POJO device configuration");
@@ -61,13 +77,15 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
                     MqttTopicMessage listener = new MqttTopicMessage() {
                         @Override
                         public void messageReceived(String s, String s1) {
-                            MqttPacket packet = new MqttPacket(provider.getName(), service.getName(), resource.getName(), s1==null?"":s1);
 
                             try {
+                                String value=processorExecutor.execute(s1, ProcessorUtil.transformProcessorListInSelector(resource.getProcessor()==null?"":resource.getProcessor()));
+                                MqttPacket packet = new MqttPacket(provider.getName(), service.getName(), resource.getName(), value);
                                 endpoint.process(packet);
-                            } catch (InvalidPacketException e) {
-                                e.printStackTrace();
+                            } catch (Exception e){
+                                LOG.error("Failed to process MQTT package",e);
                             }
+
                         }
                     };
 

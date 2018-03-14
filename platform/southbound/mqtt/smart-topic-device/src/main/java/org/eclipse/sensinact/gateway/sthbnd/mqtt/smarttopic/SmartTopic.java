@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttBroker;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttTopic;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.listener.MqttTopicMessage;
@@ -19,8 +20,13 @@ import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttPacket;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.exception.MessageInvalidSmartTopicException;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.SmartTopicInterpolator;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.ProcessorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SmartTopic extends MqttTopicMessage {
 
@@ -30,17 +36,12 @@ public class SmartTopic extends MqttTopicMessage {
     private final MqttProtocolStackEndpoint endpoint;
     private final SmartTopicInterpolator smartTopicInterpolator;
     private String processor;
+    private final Set<String> providers=new HashSet<String>();
 
     public SmartTopic(MqttProtocolStackEndpoint endpoint, MqttBroker broker, String topic) {
         this.endpoint = endpoint;
         this.broker = broker;
         this.smartTopicInterpolator = new SmartTopicInterpolator(topic);
-
-        try {
-            broker.connect();
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -58,7 +59,7 @@ public class SmartTopic extends MqttTopicMessage {
 
         try {
             String provider = smartTopicInterpolator.getGroup(topic, "provider");
-
+            providers.add(provider);
             try {
                 service = smartTopicInterpolator.getGroup(topic, "service");
             } catch(MessageInvalidSmartTopicException e1) {
@@ -77,7 +78,10 @@ public class SmartTopic extends MqttTopicMessage {
                 value = message;
             }
 
-            MqttPacket packet = new MqttPacket(provider, service, resource, value);
+            String valueProcessed=MqttPojoConfigTracker.processorExecutor.execute(value, ProcessorUtil.transformProcessorListInSelector(processor==null?"":processor));
+            MqttPacket packet = new MqttPacket(provider, service, resource, valueProcessed);
+
+
 
             endpoint.process(packet);
 
@@ -90,16 +94,35 @@ public class SmartTopic extends MqttTopicMessage {
     public void activate() throws MqttException {
         LOG.info("Subscribing smarttopic {} from topic {}", smartTopicInterpolator.getSmartTopic(), smartTopicInterpolator.getTopic());
 
+        try {
+            this.broker.connect();
+        } catch (MqttException e) {
+            LOG.error("Failed to connect broker {}",broker.toString(),e);
+            e.printStackTrace();
+        }
+
         MqttTopic topic = new MqttTopic(smartTopicInterpolator.getTopic(), this);
 
-        broker.subscribeToTopic(topic);
+        this.broker.subscribeToTopic(topic);
     }
 
     public void desactivate() {
+
+
+        for(String provider:providers){
+            try {
+                MqttPacket packet = new MqttPacket(provider);
+                packet.setGoodbyeMessage(true);
+                endpoint.process(packet);
+            } catch (Exception e) {
+                LOG.error("Unable to remove provider {}",provider,e);
+            }
+        }
+
         try {
             broker.disconnect();
         } catch (MqttException e) {
-            e.printStackTrace();
+            LOG.error("Failed to disconnect broker {}",broker.toString(),e);
         }
     }
 
