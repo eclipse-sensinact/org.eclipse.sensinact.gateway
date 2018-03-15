@@ -21,13 +21,13 @@ import org.slf4j.LoggerFactory;
  * Stateless class that is capable of interprete a given format.
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
-public class ProcessorFormatPlus implements ProcessorFormatIface {
+public class ProcessorFormatDivide implements ProcessorFormatIface {
 
     private static final Logger LOG = LoggerFactory.getLogger(MqttActivator.class);
 
     @Override
     public String getName() {
-        return "plus";
+        return "divide";
     }
 
     @Override
@@ -38,7 +38,7 @@ public class ProcessorFormatPlus implements ProcessorFormatIface {
             try {
                 Float inDataValue=new Float(inData);
                 Float value=new Float(expression);
-                return Float.valueOf(inDataValue+value).toString();
+                return Float.valueOf(inDataValue/value).toString();
             }catch (NumberFormatException e){
                 return inData.concat(selector.getExpression());
             }

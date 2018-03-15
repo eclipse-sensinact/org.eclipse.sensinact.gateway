@@ -20,6 +20,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URLDecoder;
 
+/**
+ * Stateless class that is capable of interprete a given format.
+ * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
+ */
 public class ProcessorFormatURLEncode implements ProcessorFormatIface {
 
     private static final Logger LOG = LoggerFactory.getLogger(MqttActivator.class);

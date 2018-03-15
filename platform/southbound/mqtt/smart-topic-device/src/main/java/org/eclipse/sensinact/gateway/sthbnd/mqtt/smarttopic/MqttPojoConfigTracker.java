@@ -23,7 +23,6 @@ import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Resource;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Service;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.ProcessorExecutor;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.ProcessorUtil;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.exception.ProcessorException;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.*;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.iface.ProcessorFormatIface;
 import org.osgi.framework.BundleContext;
@@ -55,9 +54,14 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
         add(new ProcessorFormatArray());
         add(new ProcessorFormatBase64());
         add(new ProcessorFormatJSON());
-        add(new ProcessorFormatString());
+        add(new ProcessorFormatToString());
         add(new ProcessorFormatURLEncode());
         add(new ProcessorFormatPlus());
+        add(new ProcessorFormatMinus());
+        add(new ProcessorFormatMultiply());
+        add(new ProcessorFormatDivide());
+        add(new ProcessorFormatToFloat());
+        add(new ProcessorFormatToInteger());
     }});
 
     @Override
