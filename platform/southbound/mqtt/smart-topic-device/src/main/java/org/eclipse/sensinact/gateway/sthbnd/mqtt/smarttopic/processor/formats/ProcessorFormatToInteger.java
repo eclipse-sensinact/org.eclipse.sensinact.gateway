@@ -16,6 +16,8 @@ import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.selector.S
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.DecimalFormat;
+
 /**
  * Stateless class that is capable of interprete a given format.
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
@@ -32,8 +34,11 @@ public class ProcessorFormatToInteger implements ProcessorFormatIface {
     @Override
     public String process(String inData,SelectorIface selector) throws ProcessorFormatException {
         try {
-            Integer value=new Integer(inData);
-            return value.toString();
+            Float value=Float.parseFloat(inData);
+
+            String pattern=selector.getExpression().equals("")?"0":selector.getExpression();
+
+            return new DecimalFormat(pattern).format(value).toString();
         } catch (Exception e) {
             LOG.error("Failed to apply {} filter. Bypassing filter",getName(),e);
             return inData;
