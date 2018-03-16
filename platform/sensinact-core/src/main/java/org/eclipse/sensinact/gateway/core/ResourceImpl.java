@@ -1041,7 +1041,7 @@ implements Typable<Resource.Type>
 	protected <TASK> TASK passOn(String type, String uri, Object[] parameters) 
 			throws Exception 
 	{
-    	if (type.equals(AccessMethod.GET) ||
+    	if (!type.equals(AccessMethod.GET) ||
     			this.getUpdatePolicy() == Resource.UpdatePolicy.NONE ||
     			this.getUpdatePolicy() == Resource.UpdatePolicy.INIT)
     	{	
