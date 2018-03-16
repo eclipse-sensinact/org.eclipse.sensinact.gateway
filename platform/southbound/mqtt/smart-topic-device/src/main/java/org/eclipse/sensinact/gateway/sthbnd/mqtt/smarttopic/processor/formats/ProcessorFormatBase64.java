@@ -21,9 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 /**
- * Stateless class that is capable of interprete a given format. e.g.
- * using inData [1,7,16] and the selector expression '1' will return 7
- * using inData [1,7,16] and the selector expression '0' will return 1
+ * Stateless class that is capable of interprete a given format.
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class ProcessorFormatBase64 implements ProcessorFormatIface {

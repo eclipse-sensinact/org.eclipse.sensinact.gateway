@@ -10,25 +10,42 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats;
 
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttActivator;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.exception.ProcessorFormatException;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.iface.ProcessorFormatIface;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.selector.SelectorIface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Stateless class that is capable of interprete a given format. e.g.
- * using inData [1,7,16] and the selector expression '1' will return 7
- * using inData [1,7,16] and the selector expression '0' will return 1
+ * Stateless class that is capable of interprete a given format.
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
-public class ProcessorFormatString implements ProcessorFormatIface {
+public class ProcessorFormatMultiply implements ProcessorFormatIface {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MqttActivator.class);
 
     @Override
     public String getName() {
-        return "string";
+        return "multiply";
     }
 
     @Override
     public String process(String inData,SelectorIface selector) throws ProcessorFormatException {
-        return inData;
+        try {
+            final String expression=selector.getExpression();
+
+            try {
+                Float inDataValue=new Float(inData);
+                Float value=new Float(expression);
+                return Float.valueOf(inDataValue*value).toString();
+            }catch (NumberFormatException e){
+                return inData.concat(selector.getExpression());
+            }
+
+        } catch (Exception e) {
+            LOG.error("Failed to apply {} filter. Bypassing filter",getName(),e);
+            return inData;
+        }
     }
 }
