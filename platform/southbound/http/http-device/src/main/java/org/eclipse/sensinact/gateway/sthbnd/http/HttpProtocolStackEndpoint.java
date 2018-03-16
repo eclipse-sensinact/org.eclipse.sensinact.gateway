@@ -124,7 +124,7 @@ public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<Ht
 	            
 			} else
 			{
-				task.setResult(response.getContent());
+				task.setResult(new String(response.getContent()));
 			}
 		} catch (Exception e) 
 		{
