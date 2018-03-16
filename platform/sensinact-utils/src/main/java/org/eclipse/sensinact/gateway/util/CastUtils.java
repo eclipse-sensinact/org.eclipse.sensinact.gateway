@@ -653,8 +653,7 @@ public abstract class CastUtils
             primitive = CastUtils.<T>getPrimitiveFromString(clazz, 
             		Boolean.toString((Boolean) object));
             
-        } else if(Number.class.isAssignableFrom(object.getClass())
-        	||object.getClass().isPrimitive())
+        } else if(Number.class.isAssignableFrom(object.getClass()))
         {
             primitive = CastUtils.<T>getPrimitiveFromNumber(clazz,(Number)object);
             
