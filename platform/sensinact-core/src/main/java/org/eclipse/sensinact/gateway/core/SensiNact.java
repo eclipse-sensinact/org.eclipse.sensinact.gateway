@@ -32,7 +32,6 @@ import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
 import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.common.primitive.Elements;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractor;
@@ -47,8 +46,8 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.eclipse.sensinact.gateway.core.method.RemoteAccessMethodExecutable;
+import org.eclipse.sensinact.gateway.core.method.UnknownAccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.DescribeJSONResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod.DescribeType;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
@@ -128,6 +127,71 @@ public class SensiNact implements Core
 	    	return response;
 	    }
 
+		private <A extends AccessMethodResponse<JSONObject>> A
+		responseFromJSONObject(String uri, String method, JSONObject object) 
+		throws Exception
+		{
+			A response = null;
+			if(object == null)
+			{
+        		response = SensiNact.<JSONObject,A>
+        		createErrorResponse( mediator,method , uri, 
+        		SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Not found",
+        		null);
+        		
+			} else
+			{
+				object.remove("type");
+				object.remove("uri");
+				Integer statusCode = (Integer) object.remove("statusCode");
+								
+				Class<A> clazz = null;
+				switch(method)
+				{
+					case "ACT":
+						clazz = (Class<A>) ActResponse.class;
+						break;
+					case "GET":
+						clazz = (Class<A>) GetResponse.class;
+						break;
+					case "SET":
+						clazz = (Class<A>) SetResponse.class;
+						break;
+					case "SUBSCRIBE":
+						clazz = (Class<A>) SubscribeResponse.class;
+						break;
+					case "UNSUBSCRIBE":
+						clazz = (Class<A>) UnsubscribeResponse.class;
+						break;
+					default:
+						break;
+				}
+				if(clazz != null)
+				{
+					response = clazz.getConstructor(new Class<?>[] {
+						Mediator.class, String.class, Status.class,
+						int.class}).newInstance(mediator, uri, 
+						statusCode.intValue()==200?Status.SUCCESS:Status.ERROR, 
+						statusCode.intValue());
+					
+			        response.setResponse((JSONObject)object.remove(
+			        		"response"));
+			        response.setErrors((JSONArray)object.remove(
+			        		"errors"));
+			        
+					String[] names = JSONObject.getNames(object);
+					int index = 0;
+					int length = names==null?0:names.length;
+					for(;index < length;index++)
+					{
+						String  name = names[index];
+						response.put(name, object.get(name)); 
+					}
+				}
+			}
+			return response;
+		}
+
 		private DescribeResponse<JSONObject> describeFromJSONObject(
 				DescribeResponseBuilder<JSONObject> builder,
 				DescribeType describeType,
@@ -144,15 +208,29 @@ public class SensiNact implements Core
 	    		createErrorResponse(mediator, describeType, 
 	    		builder.getPath(), SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
 	    		new StringBuilder().append(first).append(suite).append(
-	    			" not found").toString());			 
+	    			" not found").toString(), null);			 
 		 	} else
 		 	{
-		 		int statusCode = object.getInt("statusCode");
-		 		builder.setAccessMethodObjectResult(object.optJSONObject(
-		 				"response"));
+				object.remove("type");
+				object.remove("uri");
+		 				
+		 		builder.setAccessMethodObjectResult((JSONObject)
+		 				object.remove("response"));
+		 		
 		 		response = builder.createAccessMethodResponse(
-		 			statusCode==200?Status.SUCCESS:Status.ERROR);
-		 		response.setErrors(object.optJSONArray("errors"));
+		 			object.optInt("statusCode")==200?
+		 				Status.SUCCESS:Status.ERROR);
+
+		        response.setErrors((JSONArray)object.remove("errors"));
+
+				String[] names = JSONObject.getNames(object);
+				int index = 0;
+				int length = names==null?0:names.length;
+				for(;index < length;index++)
+				{
+					String  name = names[index];
+					response.put(name, object.get(name)); 
+				}
 		 	}
 			return response;
 		}
@@ -339,7 +417,7 @@ public class SensiNact implements Core
 	        {	
 	        	response = SensiNact.<JSONObject,SubscribeResponse>
 	        	createErrorResponse(mediator, AccessMethod.SUBSCRIBE, 
-	        		uri, 520, "Unable to subscribe");
+	        		uri, 520, "Unable to subscribe", null);
 	        }
 	        return tatooRequestId(requestId, response);
 		}
@@ -396,7 +474,8 @@ public class SensiNact implements Core
 	        {	
 	        	response = SensiNact.<JSONObject, UnsubscribeResponse>
 	        	createErrorResponse(mediator, AccessMethod.UNSUBSCRIBE, 
-	        	UriUtils.PATH_SEPARATOR, 520, "Unable to unsubscribe");
+	        	UriUtils.PATH_SEPARATOR, 520, "Unable to unsubscribe",
+	        	null);
 	        }
 		    return tatooRequestId(requestId, response);
 		}
@@ -450,7 +529,7 @@ public class SensiNact implements Core
 					{
 						response = SensiNact.<JSONObject,GetResponse>
 						createErrorResponse(mediator, AccessMethod.GET, 
-							uri, 404, "Unknown Method");
+							uri, 404, "Unknown Method", null);
 					}
 		        } else
 		        {
@@ -462,7 +541,8 @@ public class SensiNact implements Core
         	{
         		response = SensiNact.<JSONObject,GetResponse>
         		createErrorResponse( mediator, AccessMethod.GET, uri, 
-        		SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found");
+        		SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
+        		"Resource not found", null);
         		
         		return tatooRequestId(requestId, response);        		
         	} 
@@ -477,20 +557,18 @@ public class SensiNact implements Core
 			    		    attributeId);
 	            }
 			});
-    		if(object == null)
-		 	{
-			 	response = SensiNact.<JSONObject,GetResponse>
-        		createErrorResponse(mediator, AccessMethod.GET, 
-        		uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-        		"Resource not found");		 
-		 	} else
-		 	{
-		        int statusCode = object.getInt("statusCode");
-		        response = new GetResponse(mediator, uri, statusCode >=400
-		        ?Status.ERROR:Status.SUCCESS, statusCode);
-		        response.setResponse(object.optJSONObject("response"));
-		        response.setErrors(object.optJSONArray("errors"));
-		 	}
+    		try
+			{
+				response = this.<GetResponse>responseFromJSONObject(
+					uri, AccessMethod.GET, object);
+			}
+			catch (Exception e)
+			{
+				response = SensiNact.<JSONObject,GetResponse>
+        		createErrorResponse( mediator, AccessMethod.GET, uri, 
+        		SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, 
+        		"Internal server error", e);
+			}    		
     		return tatooRequestId(requestId, response);
 	    }
 
@@ -549,7 +627,7 @@ public class SensiNact implements Core
 					{
 						response = SensiNact.<JSONObject,SetResponse>
 						createErrorResponse(mediator, AccessMethod.SET, 
-						uri, 404, "Unknown Method");
+						uri, 404, "Unknown Method", null);
 					}
 		       } else
 		       {
@@ -562,7 +640,7 @@ public class SensiNact implements Core
         		response = SensiNact.<JSONObject, SetResponse>
         		createErrorResponse( mediator, AccessMethod.SET, uri, 
         		SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-	        	"Resource not found");
+	        	"Resource not found", null);
         		return tatooRequestId(requestId, response);
         	}
     		JSONObject object =  AccessController.doPrivileged(
@@ -576,21 +654,18 @@ public class SensiNact implements Core
 			    		    attributeId, parameter);
 	            }
 			});
-    		if(object == null)
-		 	{
-			 	response = SensiNact.<JSONObject,SetResponse>
-        		createErrorResponse(mediator, AccessMethod.SET, 
-        		uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-        		"Resource not found");
-			 
-		 	} else
-		 	{
-		 		int statusCode = object.getInt("statusCode");
-    		    response = new SetResponse(mediator, uri, statusCode >=400
-    		    ?Status.ERROR:Status.SUCCESS, statusCode);
-    		    response.setResponse(object.optJSONObject("response"));
-    		    response.setErrors(object.optJSONArray("errors"));
-		 	}
+    		try
+			{
+				response = this.<SetResponse>responseFromJSONObject(
+					uri, AccessMethod.SET, object);
+			}
+			catch (Exception e)
+			{
+				response = SensiNact.<JSONObject,SetResponse>
+        		createErrorResponse( mediator, AccessMethod.SET, uri, 
+        		SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, 
+        		"Internal server error", e);
+			} 
     		return tatooRequestId(requestId, response);
 	    }
 
@@ -636,7 +711,7 @@ public class SensiNact implements Core
 				{
 					response = SensiNact.<JSONObject, ActResponse>
 					createErrorResponse(mediator, AccessMethod.ACT, 
-						uri, 404, "Unknown Method");
+						uri, 404, "Unknown Method", null);
 				} 
 				else
 				{
@@ -657,9 +732,8 @@ public class SensiNact implements Core
         		response = SensiNact.<JSONObject, ActResponse>
         		createErrorResponse(mediator, AccessMethod.ACT, uri, 
         		SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-   			    "Resource not found");
+   			    "Resource not found", null);
     	        return tatooRequestId(requestId, response);
-        		
         	} 
     		JSONObject object =  AccessController.doPrivileged(
         	new PrivilegedAction<JSONObject>()
@@ -670,22 +744,19 @@ public class SensiNact implements Core
 			    	return SensiNact.this.act(SensiNactSession.this.getSessionId(),
 			    	serviceProviderId, serviceId, resourceId, parameters);
 	            }
-			});	
-    		if(object == null)
-		 	{
-			 	response = SensiNact.<JSONObject,ActResponse>
-        		createErrorResponse(mediator, AccessMethod.ACT, 
-        		uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-        		"Resource not found");
-			 
-		 	} else
-		 	{
-    		    int statusCode = object.getInt("statusCode");
-    		    response = new ActResponse(mediator, uri, statusCode >=400
-    		    ?Status.ERROR:Status.SUCCESS, statusCode);
-    		    response.setResponse(object.optJSONObject("response"));
-    		    response.setErrors(object.optJSONArray("errors"));
-		 	}
+			});
+    		try
+			{
+				response = this.<ActResponse>responseFromJSONObject(
+					uri, AccessMethod.ACT, object);
+			}
+			catch (Exception e)
+			{
+				response = SensiNact.<JSONObject,ActResponse>
+        		createErrorResponse( mediator, AccessMethod.ACT, uri, 
+        		SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, 
+        		"Internal server error", e);
+			}  
 	        return tatooRequestId(requestId, response);
 	    }
 	    
@@ -756,7 +827,8 @@ public class SensiNact implements Core
 				{
 					response = SensiNact.<JSONObject, 
 					SubscribeResponse>createErrorResponse( mediator, 
-					AccessMethod.SUBSCRIBE,	uri, 404, "Unknown Method");
+					AccessMethod.SUBSCRIBE,	uri, 404, "Unknown Method",
+					null);
 				}
 		        return tatooRequestId(requestId, response);
 	        }
@@ -765,7 +837,7 @@ public class SensiNact implements Core
         		response = SensiNact.<JSONObject, SubscribeResponse>
         		createErrorResponse(mediator, AccessMethod.SUBSCRIBE, 
         		uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-        		"Resource not found");
+        		"Resource not found", null);
 		        return tatooRequestId(requestId, response);        		
         	}
     		JSONObject object =  AccessController.doPrivileged(
@@ -780,21 +852,18 @@ public class SensiNact implements Core
 			    		recipient, conditions);
 	            }
 			});
-    		if(object == null)
-		 	{
-			 	response = SensiNact.<JSONObject,SubscribeResponse>
-        		createErrorResponse(mediator, AccessMethod.SUBSCRIBE, 
-        		uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-        		"Resource not found");
-			 
-		 	} else
-		 	{
-		 		int statusCode = object.getInt("statusCode");
-		 		response = new SubscribeResponse(mediator, uri, 
-		 		statusCode >=400?Status.ERROR:Status.SUCCESS, statusCode);
-		 		response.setResponse(object.optJSONObject("response"));
-		 		response.setErrors(object.optJSONArray("errors"));
-		 	}
+    		try
+			{
+				response = this.<SubscribeResponse>responseFromJSONObject(
+					uri, AccessMethod.SUBSCRIBE, object);
+			}
+			catch (Exception e)
+			{
+				response = SensiNact.<JSONObject,SubscribeResponse>
+        		createErrorResponse( mediator, AccessMethod.SUBSCRIBE, uri, 
+        		SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, 
+        		"Internal server error", e);
+			}
 	        return tatooRequestId(requestId, response);
 		}
 
@@ -848,7 +917,8 @@ public class SensiNact implements Core
 				{
 					response = SensiNact.<JSONObject, 
 					UnsubscribeResponse>createErrorResponse(mediator, 
-					AccessMethod.UNSUBSCRIBE, uri, 404, "Unknown Method");
+					AccessMethod.UNSUBSCRIBE, uri, 404, "Unknown Method",
+					null);
 				}
 		        return tatooRequestId(requestId, response);
 	        }
@@ -857,7 +927,7 @@ public class SensiNact implements Core
         		response = SensiNact.<JSONObject, UnsubscribeResponse>
         		createErrorResponse(mediator, AccessMethod.UNSUBSCRIBE, 
         		uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-        		"Resource not found");
+        		"Resource not found", null);
     	        return tatooRequestId(requestId, response);        		
         	} 
     		JSONObject object =  AccessController.doPrivileged(
@@ -872,21 +942,18 @@ public class SensiNact implements Core
 			    	subscriptionId);
 	            }
 			});
-    		if(object == null)
-		 	{
-			 	response = SensiNact.<JSONObject,UnsubscribeResponse>
-        		createErrorResponse(mediator, AccessMethod.UNSUBSCRIBE, 
-        		uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-        		"Resource not found");
-			 
-		 	} else
-		 	{
-		 		int statusCode = object.getInt("statusCode");
-		 		response = new UnsubscribeResponse(mediator, uri, 
-		 		statusCode >=400?Status.ERROR:Status.SUCCESS, statusCode);
-		 		response.setResponse(object.optJSONObject("response"));
-		 		response.setErrors(object.optJSONArray("errors"));
-		 	}
+    		try
+			{
+				response = this.<UnsubscribeResponse>responseFromJSONObject(
+					uri, AccessMethod.UNSUBSCRIBE, object);
+			}
+			catch (Exception e)
+			{
+				response = SensiNact.<JSONObject,UnsubscribeResponse>
+        		createErrorResponse( mediator, AccessMethod.UNSUBSCRIBE, uri, 
+        		SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, 
+        		"Internal server error", e);
+			}
 	        return tatooRequestId(requestId, response);
 		}
 	    
@@ -975,7 +1042,8 @@ public class SensiNact implements Core
 			 {
 				 response = SensiNact.<String,DescribeResponse<String>>
 				 createErrorResponse(mediator, DescribeType.COMPLETE_LIST, 
-				 UriUtils.PATH_SEPARATOR, 520, "Internal Server Error");
+				 UriUtils.PATH_SEPARATOR, 520, "Internal Server Error",
+				 null);
 				 
 			 } else
 			 {
@@ -1054,11 +1122,12 @@ public class SensiNact implements Core
 				 response = SensiNact.<String,DescribeResponse<String>>
 	        		createErrorResponse(mediator, DescribeType.PROVIDERS_LIST, 
 	        		UriUtils.PATH_SEPARATOR, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-	        		"Internal error");
+	        		"Internal error", null);
 			 } else
 			 {
 				 builder.setAccessMethodObjectResult(result);
-				 response = builder.createAccessMethodResponse(Status.SUCCESS);
+				 response = builder.createAccessMethodResponse(
+						 Status.SUCCESS);
 			 }
 			 if(filterDefinition!=null)
 			 {
@@ -1087,7 +1156,8 @@ public class SensiNact implements Core
 		 * @see org.eclipse.sensinact.gateway.core.Endpoint#jsonProvider(java.lang.String)
 		 */
 		@Override
-		public DescribeResponse<JSONObject> getProvider(final String requestId, 
+		public DescribeResponse<JSONObject> getProvider(
+				final String requestId, 
 				final String serviceProviderId)
 		{	 
 	    	SessionKey sessionKey = SensiNact.this.sessions.get(
@@ -1112,8 +1182,8 @@ public class SensiNact implements Core
 			
 	        if(provider != null)
 	        { 
-	        	builder.setAccessMethodObjectResult(
-	        		new JSONObject(provider.getDescription().getJSON()));
+	        	builder.setAccessMethodObjectResult(new JSONObject(
+	        		provider.getDescription().getJSONDescription()));
 	        	return tatooRequestId(requestId, builder.createAccessMethodResponse());
 	        }	        
         	if(sessionKey.localID()!=0)
@@ -1121,7 +1191,7 @@ public class SensiNact implements Core
         		response = SensiNact.<JSONObject,DescribeResponse<JSONObject>>
         		createErrorResponse(mediator, DescribeType.PROVIDER, 
         		uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-        		"Service provider not found");
+        		"Service provider not found", null);
         		
         		return tatooRequestId(requestId, response);        		
         	} 
@@ -1203,7 +1273,7 @@ public class SensiNact implements Core
 	        		response = SensiNact.<String,DescribeResponse<String>>
 	        		createErrorResponse(mediator, DescribeType.SERVICES_LIST, 
 	        		uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-	        		"Service provider not found");
+	        		"Service provider not found", null);
 	        		
 	        	} else
 	        	{
@@ -1228,7 +1298,7 @@ public class SensiNact implements Core
         		response = SensiNact.<String,DescribeResponse<String>>
         		createErrorResponse(mediator, DescribeType.SERVICES_LIST, 
         		uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-        		"Service provider not found");
+        		"Service provider not found", null);
 			}	
     		if(response == null)
     		{
@@ -1305,7 +1375,7 @@ public class SensiNact implements Core
 	        if(service != null)
 	        { 
 	        	builder.setAccessMethodObjectResult(new JSONObject(
-	        		service.getDescription().getJSON()));
+	        		service.getDescription().getJSONDescription()));
 	        	return tatooRequestId(requestId, builder.createAccessMethodResponse());
 	        }
         	if(sessionKey.localID()!=0)
@@ -1313,7 +1383,7 @@ public class SensiNact implements Core
         		response = SensiNact.<JSONObject,DescribeResponse<JSONObject>>
         		createErrorResponse(mediator, DescribeType.SERVICE, 
         		uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-        		"Service not found");
+        		"Service not found", null);
         		return tatooRequestId(requestId, response);        		
         	}
         	JSONObject object =  AccessController.doPrivileged(
@@ -1397,7 +1467,7 @@ public class SensiNact implements Core
 	        		response = SensiNact.<String,DescribeResponse<String>>
 	        		createErrorResponse(mediator, DescribeType.RESOURCES_LIST, 
 	        		uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-	        		"Service not found");
+	        		"Service not found", null);
 	        		
 	        	} else
 	        	{
@@ -1422,7 +1492,7 @@ public class SensiNact implements Core
         		response = SensiNact.<String,DescribeResponse<String>>
         		createErrorResponse(mediator, DescribeType.RESOURCES_LIST, 
         		uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-        		"Service not found");        		
+        		"Service not found", null);        		
 			}	
     		if(response == null)
     		{
@@ -1506,7 +1576,7 @@ public class SensiNact implements Core
 	        if(resource != null)
 	        {
 	        	builder.setAccessMethodObjectResult(new JSONObject(
-	        		resource.getDescription().getJSON()));
+	        		resource.getDescription().getJSONDescription()));
 	        	return tatooRequestId(requestId, builder.createAccessMethodResponse());
 	        }
 	        if(sessionKey.localID()!=0)
@@ -1514,7 +1584,7 @@ public class SensiNact implements Core
         		response = SensiNact.<JSONObject,DescribeResponse<JSONObject>>
         		createErrorResponse(mediator, DescribeType.RESOURCE, 
         		uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-        		"Resource not found");
+        		"Resource not found", null);
 	        	return tatooRequestId(requestId, response);        		
         	} 
         	JSONObject object =  AccessController.doPrivileged(
@@ -1956,19 +2026,19 @@ public class SensiNact implements Core
 
 	private static <T,R extends AccessMethodResponse<T>> R 
 	createErrorResponse(Mediator mediator, String type, String uri, 
-			int statusCode, String message)
+			int statusCode, String message, Exception e)
 	{
 		R response = AccessMethodResponse.<T,R>error(mediator, uri, 
-			AccessMethod.Type.valueOf(type), statusCode, message, null);			
+			AccessMethod.Type.valueOf(type), statusCode, message, e);			
 		return response;
 	}
 
 	private static <T,R extends DescribeResponse<T>> R 
 	createErrorResponse(Mediator mediator, DescribeMethod.DescribeType type, 
-		String uri, int statusCode, String message)
+		String uri, int statusCode, String message, Exception e)
 	{
 		R response = AccessMethodResponse.<T,R>error(mediator, uri, 
-			type, statusCode, message, null);			
+			type, statusCode, message, e);			
 		return response;
 	}
 	
