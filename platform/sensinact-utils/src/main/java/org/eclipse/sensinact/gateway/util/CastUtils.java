@@ -637,24 +637,32 @@ public abstract class CastUtils
     	}
 		Object primitive = null;
 		
-		if(String.class.isAssignableFrom(object.getClass()))
+		if(String.class == object.getClass())
 		{
 			primitive = CastUtils.<T>getPrimitiveFromString(clazz,(String)object);
-		
-		} else if(Number.class.isAssignableFrom(object.getClass()))
-        {
-            primitive = CastUtils.<T>getPrimitiveFromNumber(clazz,(Number)object);
-        } 
-		else if(Character.class.isAssignableFrom(object.getClass()))
+		}
+		else if(Character.class.isAssignableFrom(object.getClass())
+			|| char.class.isAssignableFrom(object.getClass()))
         {
             primitive = CastUtils.<T>getPrimitiveFromString(clazz,
             		new String(new char[]{((Character)object).charValue()}));
         } 
-        else if(Boolean.class.isAssignableFrom(object.getClass()))
+        else if(Boolean.class.isAssignableFrom(object.getClass())
+        	|| boolean.class.isAssignableFrom(object.getClass()))
         {
             primitive = CastUtils.<T>getPrimitiveFromString(clazz, 
             		Boolean.toString((Boolean) object));
-        } 
+            
+        } else if(Number.class.isAssignableFrom(object.getClass())
+        	||object.getClass().isPrimitive())
+        {
+            primitive = CastUtils.<T>getPrimitiveFromNumber(clazz,(Number)object);
+            
+        } else if(object.getClass().isPrimitive())
+        {
+            primitive = CastUtils.<T>getPrimitiveFromNumber(clazz,Double.valueOf(
+            		String.valueOf(object)));
+        }  
         else if(Enum.class.isAssignableFrom(object.getClass()))
         {
         	if(String.class == clazz)
