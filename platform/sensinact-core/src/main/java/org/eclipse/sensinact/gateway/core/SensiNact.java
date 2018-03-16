@@ -221,7 +221,8 @@ public class SensiNact implements Core
 		 			object.optInt("statusCode")==200?
 		 				Status.SUCCESS:Status.ERROR);
 
-		        response.setErrors((JSONArray)object.remove("errors"));
+		        response.setErrors((JSONArray)object.remove(
+		        		"errors"));
 
 				String[] names = JSONObject.getNames(object);
 				int index = 0;
@@ -1183,8 +1184,10 @@ public class SensiNact implements Core
 	        if(provider != null)
 	        { 
 	        	builder.setAccessMethodObjectResult(new JSONObject(
-	        		provider.getDescription().getJSONDescription()));
-	        	return tatooRequestId(requestId, builder.createAccessMethodResponse());
+	        		provider.getDescription().getJSON()));
+	        	
+	        	return tatooRequestId(requestId, 
+	        			builder.createAccessMethodResponse());
 	        }	        
         	if(sessionKey.localID()!=0)
         	{
@@ -1206,8 +1209,9 @@ public class SensiNact implements Core
 			    		serviceProviderId);
 	            }
 			});
-    		return tatooRequestId(requestId, describeFromJSONObject(
-    			builder, DescribeType.PROVIDER, object));
+        	response = describeFromJSONObject(builder, 
+        			DescribeType.PROVIDER, object);
+    		return tatooRequestId(requestId, response);
 	        	
 		}
 
@@ -1375,8 +1379,10 @@ public class SensiNact implements Core
 	        if(service != null)
 	        { 
 	        	builder.setAccessMethodObjectResult(new JSONObject(
-	        		service.getDescription().getJSONDescription()));
-	        	return tatooRequestId(requestId, builder.createAccessMethodResponse());
+	        		service.getDescription().getJSON()));
+	        	
+	        	return tatooRequestId(requestId, 
+	        			builder.createAccessMethodResponse());
 	        }
         	if(sessionKey.localID()!=0)
         	{
