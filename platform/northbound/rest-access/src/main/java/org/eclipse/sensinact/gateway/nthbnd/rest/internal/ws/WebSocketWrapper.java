@@ -16,6 +16,8 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.ServletOutputStream;
+
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -27,8 +29,10 @@ import org.json.JSONObject;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.LoginResponse;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 
 /**
  * Session wrapper
@@ -126,7 +130,7 @@ public class WebSocketWrapper
 			e.printStackTrace();
 			this.mediator.error(e);
 			this.send(new JSONObject().put("statusCode", 500
-					).put("message","Internal server error"
+					).put("message","Exception - Internal server error"
 							).toString());
 		}
 	}
@@ -146,44 +150,21 @@ public class WebSocketWrapper
 	private void onLogin(WsRestAccessRequest wrapper)
 	{
 		Authentication<?> authentication = wrapper.getAuthentication();
-		NorthboundEndpoint endpoint = null;
-		
+		LoginResponse loginResponse = null;	
+
 		if(AuthenticationToken.class.isAssignableFrom(
 				authentication.getClass()))
-		{
-			if(mediator.getLoginEndpoint().reactivateEndpoint(
-					(AuthenticationToken) authentication))
-			{
-				this.send(new JSONObject().put("statusCode", 200
-					).put("X-Auth-Token", ((AuthenticationToken) 
-					authentication).getAuthenticationMaterial()
-					    ).toString());
-				
-			} else
-			{
-				this.send(new JSONObject().put("statusCode", 403
-					    ).put("message","Authentication failed"
-						    ).toString());
-			}						
+		{			
+			loginResponse = mediator.getLoginEndpoint(
+			).reactivateEndpoint((AuthenticationToken) authentication);
+										
 		} else if(Credentials.class.isAssignableFrom(
 				authentication.getClass()))
 		{
-			endpoint = mediator.getLoginEndpoint().createNorthboundEndpoint(
-				   (Credentials)authentication);
-		
-			if(endpoint != null)
-			{
-				this.send(new JSONObject().put("statusCode", 200
-						).put("X-Auth-Token",endpoint.getSessionToken()
-						    ).toString());
-				
-			} else
-			{
-				this.send(new JSONObject().put("statusCode", 403
-				    ).put("message", "Authentication failed"
-					    ).toString());
-			}
+			loginResponse = mediator.getLoginEndpoint(
+			).createNorthboundEndpoint((Credentials)authentication);
 		}
+		this.send(loginResponse.getJSON());		
 	}
 	
 	/**

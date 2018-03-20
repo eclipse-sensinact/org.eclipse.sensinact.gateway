@@ -12,7 +12,7 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import java.lang.reflect.Method;
 
-import org.eclipse.sensinact.gateway.core.FilteringDefinition;
+import org.eclipse.sensinact.gateway.core.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
@@ -31,8 +31,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
- * A NorthboundEndpoint is a connection point to a sensiNact 
- * instance for an northbound access service
+ * A NorthboundEndpoint is a connection point to a sensiNact instance 
+ * for an northbound access service
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
@@ -130,12 +130,13 @@ public class NorthboundEndpoint
     }
 
 	/**
-     * Unregisters the {@link SnaAgent} whose String 
-     * identifier is passed as parameter
+     * Unregisters the {@link SnaAgent} whose String identifier is 
+     * passed as parameter
      * 
-     * @param requestIdentifier the String identifier of the 
-     * request calling this method
-     * @param agentId
+     * @param requestIdentifier the String identifier of the request 
+     * calling this method
+     * 
+     * @param agentId 
      * 
      * @return the {@link SnaAgent} unregistration response
      */
@@ -154,8 +155,9 @@ public class NorthboundEndpoint
      * @param requestIdentifier the String identifier of 
      * the request calling this method
      * 
-     * @return the JSONObject formated list of all the 
-     * model instances' hierarchies
+     * @return the JSON formated list of all the 
+     * model instances' hierarchies and wrapped into a {@link 
+     * DescribeResponse}
      */
     public DescribeResponse<String> all(String requestIdentifier)
     {
@@ -174,9 +176,9 @@ public class NorthboundEndpoint
      * to discriminate the targeted service providers, services, 
      * and/or resources
      * 
-     * @return the JSONObject formated list of all the 
-     * model instances' hierarchies according to the 
-     * specified filter
+     * @return the JSON formated list of all the model instances' 
+     * hierarchies according to the specified LDAP filter and 
+     * wrapped into {@link DescribeResponse}
      */
     public DescribeResponse<String> all(String requestIdentifier, 
     		String filter)
@@ -195,18 +197,18 @@ public class NorthboundEndpoint
      * @param filter the LDAP formated String filter allowing 
      * to discriminate the targeted service providers, services, 
      * and/or resources
-     * @param filterDefinition the {@link FilteringDefinition} 
-     * specifying the filter to be applied on the result
+     * @param filterCollection the {@link FilteringCollection} 
+     * specifying the set of filters to be applied on the result
      * 
-     * @return the JSONObject formated list of all the model 
-     * instances' hierarchies according to the specified filter
+     * @return the JSON formated list of all the model 
+     * instances' hierarchies filtered according to the specified 
+     * filters collection and wrapped into a {@link DescribeResponse}
      */
     public DescribeResponse<String> all(String requestIdentifier, 
-    		String filter, FilteringDefinition 
-    		filterDefinition)
+    	String filter, FilteringCollection filterCollection)
     {
     	return session.getAll(requestIdentifier, filter, 
-    			filterDefinition);
+    			filterCollection);
     }
 
    	/**
@@ -214,11 +216,14 @@ public class NorthboundEndpoint
      * 
      * @param requestIdentifier the String identifier of the request 
      * calling this method
-     * @return
+     * 
+     * @return the JSON formated list of the registered
+     * service providers wrapped into a {@link DescribeResponse}
      */
-    public DescribeResponse<String> serviceProvidersList(String requestIdentifier)
+    public DescribeResponse<String> serviceProvidersList(
+    		String requestIdentifier)
     {
-   	    return this.serviceProvidersList(requestIdentifier,null);
+   	    return this.serviceProvidersList(requestIdentifier, null);
     }
     
 	/**
@@ -226,15 +231,17 @@ public class NorthboundEndpoint
      * 
      * @param requestIdentifier the String identifier of the request 
      * calling this method
-     * @param filterDefinition the {@link FilteringDefinition} specifying 
-     * the filter to be applied on the result
-     * @return
+     * @param filterCollection the {@link FilteringCollection} specifying 
+     * the set of filters to be applied on the result
+     * 
+     * @return the JSON formated list of the service
+     * providers list filtered according to the specified 
+     * filters collection and wrapped into {@link DescribeResponse}
      */
     public DescribeResponse<String> serviceProvidersList(String requestIdentifier,
-    	FilteringDefinition filterDefinition)
+    	FilteringCollection filterCollection)
     {
-    	return session.getProviders(requestIdentifier, 
-    			filterDefinition);
+    	return session.getProviders(requestIdentifier, filterCollection);
     }
 
     /**
@@ -243,13 +250,14 @@ public class NorthboundEndpoint
      * @param requestIdentifier the String identifier of the request 
      * calling this method
      * @param serviceProviderId the String identifier of the service provider
-     * @return
+     * 
+     * @return the JSON formated description of the specified 
+     * service provider wrapped into a {@link DescribeResponse}
      */
     public DescribeResponse<JSONObject> serviceProviderDescription(String requestIdentifier,
     		String serviceProviderId)
     {
-    	return session.getProvider(requestIdentifier,
-    			serviceProviderId);
+    	return session.getProvider(requestIdentifier, serviceProviderId);
     }
     
     /**
@@ -258,9 +266,12 @@ public class NorthboundEndpoint
      * @param requestIdentifier the String identifier of the request 
      * calling this method
      * @param serviceProviderId the String identifier of the service provider
-     * @return
+     * 
+     * @return the JSON formated list of the services belonging to 
+     * the specified service provider wrapped into a {@link DescribeResponse}
      */
-    public DescribeResponse<String> servicesList(String requestIdentifier, String serviceProviderId) 
+    public DescribeResponse<String> servicesList(String requestIdentifier, 
+    		String serviceProviderId) 
     {
     	return this.servicesList(requestIdentifier, serviceProviderId,null);
     }
@@ -271,15 +282,18 @@ public class NorthboundEndpoint
      * @param requestIdentifier the String identifier of the request 
      * calling this method
      * @param serviceProviderId the String identifier of the service provider
-     * @param filterDefinition the {@link FilteringDefinition} specifying 
-     * the filter to be applied on the result
-     * @return
+     * @param filterCollection the {@link FilteringCollection} specifying 
+     * the set of filters to be applied on the result
+     * 
+     * @return the JSON formated list of the services belonging to 
+     * the specified service provider, filtered using the filters 
+     * collection and wrapped into a {@link DescribeResponse}
      */
     public DescribeResponse<String> servicesList(String requestIdentifier, 
-    	String serviceProviderId, FilteringDefinition filterDefinition) 
+    	String serviceProviderId, FilteringCollection filterCollection) 
     {
-    	return session.getServices(requestIdentifier, 
-    		serviceProviderId, filterDefinition);
+    	return session.getServices(requestIdentifier, serviceProviderId, 
+    			filterCollection);
     }
     
     /**
@@ -289,7 +303,9 @@ public class NorthboundEndpoint
      * calling this method
      * @param serviceProviderId the String identifier of the service provider
      * @param serviceId the String identifier of the service
-     * @return
+     * 
+     * @return the JSON formated description of the specified 
+     * service wrapped into a {@link DescribeResponse}
      */
     public DescribeResponse<JSONObject> serviceDescription(String requestIdentifier,
     		String serviceProviderId, String serviceId)
@@ -305,7 +321,9 @@ public class NorthboundEndpoint
      * calling this method
      * @param serviceProviderId the String identifier of the service provider
      * @param serviceId the String identifier of the service
-     * @return
+     * 
+     * @return the JSON formated list of the resources belonging 
+     * to the specified service, wrapped into a {@link DescribeResponse}
      */
     public DescribeResponse<String> resourcesList(String requestIdentifier, 
     	String serviceProviderId, String serviceId)
@@ -321,16 +339,19 @@ public class NorthboundEndpoint
      * calling this method
      * @param serviceProviderId the String identifier of the service provider
      * @param serviceId the String identifier of the service
-     * @param filterDefinition the {@link FilteringDefinition} specifying 
-     * the filter to be applied on the result
-     * @return
+     * @param filterCollection the {@link FilteringCollection} 
+     * specifying the set of filters to be applied on the result
+     *
+     * @return the JSON formated list of the resources
+     * belonging to the specified service, filtered using the
+     * filters collection and wrapped into a {@link DescribeResponse}
      */
     public DescribeResponse<String> resourcesList(String requestIdentifier, 
     	String serviceProviderId, String serviceId, 
-    	    FilteringDefinition filterDefinition) 
+    	    FilteringCollection filterCollection) 
     {
     	return session.getResources(requestIdentifier, 
-    		serviceProviderId, serviceId, filterDefinition);
+    		serviceProviderId, serviceId, filterCollection);
     }
     
     /**
@@ -341,7 +362,9 @@ public class NorthboundEndpoint
      * @param serviceProviderId the String identifier of the service provider
      * @param serviceId the String identifier of the service
      * @param resourceId the String identifier of the resource
-     * @return
+     * 
+     * @return the JSON formated description of the specified
+     * resource wrapped into a {@link DescribeResponse}
      */
     public DescribeResponse<JSONObject> resourceDescription(String requestIdentifier,
     		String serviceProviderId, String serviceId, 

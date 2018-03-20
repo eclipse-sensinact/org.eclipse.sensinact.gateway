@@ -14,6 +14,7 @@ package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 import java.io.IOException;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -23,8 +24,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.LoginResponse;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 
 /**
  * This class is the REST interface between each others classes 
@@ -71,6 +75,11 @@ public class HttpLoginEndpoint extends HttpServlet
 	}
 	
 
+	/**
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 */
 	private final void doExecute(HttpServletRequest request, 
     		HttpServletResponse response) throws IOException
 	{
@@ -89,6 +98,11 @@ public class HttpLoginEndpoint extends HttpServlet
         }        
         response.getOutputStream().setWriteListener(new WriteListener()
         {
+			/** 
+			 * @inheritDoc
+			 * 
+			 * @see javax.servlet.WriteListener#onWritePossible()
+			 */
 			@Override
 			public void onWritePossible() throws IOException 
 			{
@@ -96,47 +110,36 @@ public class HttpLoginEndpoint extends HttpServlet
 				     (HttpServletRequest) asyncContext.getRequest();		        
 				 HttpServletResponse response = 
 				    (HttpServletResponse) asyncContext.getResponse();
-				 Authentication<?> authentication = null;
 				 try
 			     {
+					LoginResponse loginResponse = null;
 			    	String tokenHeader = request.getHeader("X-Auth-Token");
 					String authorizationHeader = request.getHeader("Authorization");
 				
-					NorthboundEndpoint endpoint = null;
-					
 					if(tokenHeader != null)
 					{
-						authentication = new AuthenticationToken(tokenHeader);
-
-						if(mediator.getLoginEndpoint().reactivateEndpoint(
-								(AuthenticationToken) authentication))
-						{
-							response.setHeader("X-Auth-Token", ((AuthenticationToken) 
-									authentication).getAuthenticationMaterial());
-							response.setStatus(200);
-							
-						} else
-						{
-							response.sendError(403, "Authentication failed");
-						}						
+						loginResponse = mediator.getLoginEndpoint(
+						).reactivateEndpoint(new AuthenticationToken(tokenHeader));
+										
 					} else if(authorizationHeader != null)
 					{
-						endpoint = mediator.getLoginEndpoint().createNorthboundEndpoint(
-							    new Credentials(authorizationHeader));
-					
-						if(endpoint != null)
-						{
-							response.setHeader("X-Auth-Token", endpoint.getSessionToken());
-							response.setStatus(200);
-							
-						} else
-						{
-							response.sendError(403, "Authentication failed");
-						}
+						loginResponse = mediator.getLoginEndpoint(
+						).createNorthboundEndpoint(new Credentials(authorizationHeader));
 					}
+			        byte[] resultBytes = loginResponse.getJSON().getBytes();
+			        response.setContentType(RestAccessConstants.JSON_CONTENT_TYPE);
+					response.setContentLength(resultBytes.length);
+					response.setBufferSize(resultBytes.length);
+						
+					ServletOutputStream output = response.getOutputStream();
+					output.write(resultBytes);	
+					
+					response.setStatus(200);
+					
 				} catch (Exception e) 
 				{
 					mediator.error(e);
+					response.sendError(520,"Internal Server Error!");
 					
 				} finally
 				{
@@ -147,8 +150,15 @@ public class HttpLoginEndpoint extends HttpServlet
 				}
 			}
 
+			/** 
+			 * @inheritDoc
+			 * 
+			 * @see javax.servlet.WriteListener#
+			 * onError(java.lang.Throwable)
+			 */
 			@Override
-			public void onError(Throwable t) {
+			public void onError(Throwable t) 
+			{
 				mediator.error(t);
 			}        	
         });

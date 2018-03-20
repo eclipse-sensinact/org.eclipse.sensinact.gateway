@@ -333,6 +333,36 @@ public final class NorthboundEndpoints
 		this.schedule.add(term);
 		return northboundEndpoint;		
 	}
+
+	/**
+	 * Returns the defined timeout for the {@link NorthboundEndpoint}
+	 * linked to the {@link Session} whose String identifier is
+	 * passed as parameter
+	 * 
+	 * @return the defined timeout for the {@link NorthboundEndpoint}
+	 * of the specified {@link Session}
+	 */
+	public long getTimeout(String sessionToken)
+	{
+		long timeout = -1;
+		Term t = this.schedule.getTerm(sessionToken);
+		if(t!=null)
+		{
+			timeout = t.timeout.get();
+		}
+		return timeout;
+	}
+	
+	/**
+	 * Returns the lifetime long value that is assigned to
+	 * newly created (or renewed) {@link NorthboundEndpoint}s
+	 * 
+	 * @return the lifetime long value 
+	 */
+	public long getLifetime()
+	{
+		return this.lifetime;
+	}
 	
 	/**
 	 * Closes this {@link NorthboundEndpoint}s collection
