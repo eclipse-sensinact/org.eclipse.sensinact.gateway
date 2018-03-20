@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.agent.storage.osgi;
 
+import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
@@ -21,6 +22,13 @@ import org.eclipse.sensinact.gateway.core.Core;
  * Extended {@link AbstractActivator}
  */
 public class Activator extends AbstractActivator<Mediator> {
+
+    @Property
+    private String login;
+    @Property
+    private String password;
+    @Property(validationRegex = "^http[s]*://.*/write/measure$")
+    private String broker;
 
     private StorageAgent handler;
     private String registration;
@@ -37,7 +45,7 @@ public class Activator extends AbstractActivator<Mediator> {
                 super.mediator.debug("Starting storage agent.");
             }
 
-            this.handler = new StorageAgent(super.mediator);
+            this.handler = new StorageAgent(login,password,broker,super.mediator);
 
             this.registration = mediator.callService(Core.class,
                     new Executable<Core,String>()

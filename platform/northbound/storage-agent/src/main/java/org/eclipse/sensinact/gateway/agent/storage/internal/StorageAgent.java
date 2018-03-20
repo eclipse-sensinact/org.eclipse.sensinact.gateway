@@ -45,13 +45,8 @@ public class StorageAgent extends AbstractMidAgentCallback {
      * 		the associated {@link Mediator}
      * @throws IOException Exception on connection problem
      */
-    public StorageAgent(Mediator mediator) throws IOException {
+    public StorageAgent(String login,String password,String broker,Mediator mediator) throws IOException {
         super();
-
-        String broker = (String) mediator.getProperty(HISTORICAL_STORAGE_PROP);
-        String login = (String) mediator.getProperty(HISTORICAL_AGENT_LOGIN_PROP);
-        String password = (String) mediator.getProperty(HISTORICAL_AGENT_PSSWD_PROP);
-
         this.storageConnection = new StorageConnection(mediator, broker, login, password);
     }
 
