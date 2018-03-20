@@ -31,10 +31,6 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  */
 public class StorageAgent extends AbstractMidAgentCallback {
 
-    private static final String HISTORICAL_AGENT_LOGIN_PROP = "org.eclipse.sensinact.gateway.historical.login";
-    private static final String HISTORICAL_AGENT_PSSWD_PROP = "org.eclipse.sensinact.gateway.historical.password";
-    private static final String HISTORICAL_STORAGE_PROP = "org.eclipse.sensinact.gateway.historical.broker";
-
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private final StorageConnection storageConnection;
 
