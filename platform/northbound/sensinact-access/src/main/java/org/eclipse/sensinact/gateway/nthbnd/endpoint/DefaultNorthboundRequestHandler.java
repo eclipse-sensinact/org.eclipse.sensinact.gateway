@@ -17,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -54,7 +55,8 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 
 	public static String RAW_QUERY_PARAMETER = "#RAW#";
 
-	public static final String ROOT = "\\/(([^\\/]+):)?sensinact";
+	public static final String FILTER = "([^\\/:]+):";
+	public static final String ROOT = "\\/(("+FILTER+")*)sensinact";
 	public static final String ELEMENT_SCHEME = "\\/([^\\/]+)";	
 	public static final String PROVIDERS_SCHEME = ROOT + "\\/providers";
 	public static final String PROVIDER_SCHEME = PROVIDERS_SCHEME + ELEMENT_SCHEME;
@@ -103,6 +105,9 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 
 	private static final Pattern ROOT_PATTERN = 
 		Pattern.compile(ROOT);
+
+	private static final Pattern FILTER_PATTERN = 
+		Pattern.compile(FILTER);
 	
 	private static final Pattern GENERIC_METHOD_SCHEME_PATTERN = 
 		Pattern.compile(GENERIC_METHOD_SCHEME);
@@ -236,82 +241,83 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		this.attribute = null;			
 		this.method = null;
 		this.multi = false;
+		this.filtered = null;
 		Matcher matcher = GENERIC_METHOD_SCHEME_PATTERN.matcher(path);
 		if(matcher.matches())
 		{
 			matcher = ROOT_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
 			if(matcher.matches())
 			{		
-				this.filtered = matcher.group(2);
-				this.method = matcher.group(3);
+				this.filtered = matcher.group(1);
+				this.method = matcher.group(4);
 				this.multi = true;
 				return true;
 			}
 			matcher = PROVIDERS_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
 			if(matcher.matches())
 			{		
-				this.filtered = matcher.group(2);
-				this.method = matcher.group(3);
+				this.filtered = matcher.group(1);
+				this.method = matcher.group(4);
 				this.multi = true;
 				return true;
 			}	
 			matcher = PROVIDER_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
 			if(matcher.matches())
 			{		
-				this.filtered = matcher.group(2);
-				this.serviceProvider = matcher.group(3);
-				this.method = matcher.group(4);
+				this.filtered = matcher.group(1);
+				this.serviceProvider = matcher.group(4);
+				this.method = matcher.group(5);
 				this.multi = true;
 				return true;
 			}	
 			matcher = SIMPLIFIED_PROVIDER_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
 			if(matcher.matches())
 			{		
-				this.filtered = matcher.group(2);
-				this.serviceProvider = matcher.group(3);
-				this.method = matcher.group(5);
+				this.filtered = matcher.group(1);
+				this.serviceProvider = matcher.group(4);
+				this.method = matcher.group(6);
 				this.multi = true;
 				return true;
 			}
 			matcher = SERVICE_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
 			if(matcher.matches())
 			{		
-				this.filtered = matcher.group(2);
-				this.serviceProvider = matcher.group(3);
-				this.service = matcher.group(5);
-				this.method = matcher.group(6);
+				this.filtered = matcher.group(1);
+				this.serviceProvider = matcher.group(4);
+				this.service = matcher.group(6);
+				this.method = matcher.group(7);
 				this.multi = true;
 				return true;
 			}	
 			matcher = SIMPLIFIED_SERVICE_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
 			if(matcher.matches())
 			{		
-				this.filtered = matcher.group(2);
-				this.serviceProvider = matcher.group(3);
-				this.service = matcher.group(5);
-				this.method = matcher.group(6);
+				this.filtered = matcher.group(1);
+				this.serviceProvider = matcher.group(4);
+				this.service = matcher.group(6);
+				this.method = matcher.group(7);
 				this.multi = true;
 				return true;
 			}
 			matcher = RESOURCE_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
 			if(matcher.matches())
 			{
-				this.filtered = matcher.group(2);
-				this.serviceProvider = matcher.group(3);
-				this.service = matcher.group(4);
-				this.resource = matcher.group(5);			
-				this.method = matcher.group(6);
+				this.filtered = matcher.group(1);
+				this.serviceProvider = matcher.group(4);
+				this.service = matcher.group(5);
+				this.resource = matcher.group(6);			
+				this.method = matcher.group(7);
 				this.multi = false;
 				return true;
 			}	   
 			matcher = SIMPLIFIED_RESOURCE_PROPAGATED_METHOD_SCHEME_PATTERN.matcher(path);
 			if(matcher.matches())
 			{
-				this.filtered = matcher.group(2);
-				this.serviceProvider = matcher.group(3);
-				this.service = matcher.group(5);
-				this.resource = matcher.group(6);			
-				this.method = matcher.group(7);
+				this.filtered = matcher.group(1);
+				this.serviceProvider = matcher.group(4);
+				this.service = matcher.group(6);
+				this.resource = matcher.group(7);			
+				this.method = matcher.group(8);
 				this.multi = false;
 				return true;
 			}	
@@ -321,10 +327,10 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		if(matcher.matches())
 		{
 		    this.method = AccessMethod.DESCRIBE;
-			this.filtered = matcher.group(2);
-			this.serviceProvider = matcher.group(3);
-			this.service = matcher.group(4);
-			this.resource = matcher.group(5);
+			this.filtered = matcher.group(1);
+			this.serviceProvider = matcher.group(4);
+			this.service = matcher.group(5);
+			this.resource = matcher.group(6);
 			this.multi = false;
 			return true;
 		}
@@ -332,10 +338,10 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		if(matcher.matches())
 		{
 		    this.method = AccessMethod.DESCRIBE;
-			this.filtered = matcher.group(2);
-			this.serviceProvider = matcher.group(3);
-			this.service = matcher.group(5);
-			this.resource = matcher.group(6);
+			this.filtered = matcher.group(1);
+			this.serviceProvider = matcher.group(4);
+			this.service = matcher.group(6);
+			this.resource = matcher.group(7);
 			this.multi = false;
 			return true;
 		}		
@@ -343,9 +349,9 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		if(matcher.matches())
 		{
 		    this.method = AccessMethod.DESCRIBE;
-			this.filtered = matcher.group(2);
-			this.serviceProvider = matcher.group(3);
-			this.service = matcher.group(4);		
+			this.filtered = matcher.group(1);
+			this.serviceProvider = matcher.group(4);
+			this.service = matcher.group(5);		
 			this.isElementList = true;
 			this.multi = true;
 			return true;
@@ -354,9 +360,9 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		if(matcher.matches())
 		{
 		    this.method = AccessMethod.DESCRIBE;
-			this.filtered = matcher.group(2);
-			this.serviceProvider = matcher.group(3);
-			this.service = matcher.group(4);
+			this.filtered = matcher.group(1);
+			this.serviceProvider = matcher.group(4);
+			this.service = matcher.group(5);
 			this.multi = true;
 			return true;
 		}		
@@ -364,9 +370,9 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		if(matcher.matches())
 		{
 		    this.method = AccessMethod.DESCRIBE;
-			this.filtered = matcher.group(2);
-			this.serviceProvider = matcher.group(3);
-			this.service = matcher.group(5);
+			this.filtered = matcher.group(1);
+			this.serviceProvider = matcher.group(4);
+			this.service = matcher.group(6);
 			this.multi = true;
 			return true;
 		}		
@@ -374,8 +380,8 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		if(matcher.matches())
 		{
 		    this.method = AccessMethod.DESCRIBE;
-			this.filtered = matcher.group(2);
-			this.serviceProvider = matcher.group(3);
+			this.filtered = matcher.group(1);
+			this.serviceProvider = matcher.group(4);
 			this.isElementList = true;	
 			this.multi = true;
 			return true;
@@ -384,8 +390,8 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		if(matcher.matches())
 		{
 		    this.method = AccessMethod.DESCRIBE;
-			this.filtered = matcher.group(2);
-			this.serviceProvider = matcher.group(3);
+			this.filtered = matcher.group(1);
+			this.serviceProvider = matcher.group(4);
 			this.multi = true;
 			return true;
 		}
@@ -393,8 +399,8 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		if(matcher.matches())
 		{
 		    this.method = AccessMethod.DESCRIBE;
-			this.filtered = matcher.group(2);
-			this.serviceProvider = matcher.group(3);
+			this.filtered = matcher.group(1);
+			this.serviceProvider = matcher.group(4);
 			this.multi = true;
 			return true;
 		}		
@@ -402,7 +408,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		if(matcher.matches())
 		{		
 		    this.method = AccessMethod.DESCRIBE;
-			this.filtered = matcher.group(2);
+			this.filtered = matcher.group(1);
 			this.isElementList = true;
 			this.multi = true;
 			return true;
@@ -411,7 +417,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		if(matcher.matches())
 		{
 		    this.method = "ALL";
-			this.filtered = matcher.group(2);
+			this.filtered = matcher.group(1);
 			return true;
 		}
 		return false;
@@ -522,6 +528,54 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 			builder.withAttribute(DataResource.VALUE);
 		}
 	}
+
+	/**
+	 * @param builder
+	 * @param parameters
+	 * @return
+	 * @throws IOException
+	 */
+	private void processFilters(NorthboundRequestBuilder builder,
+		    Parameter[] parameters) throws IOException
+	{		
+		if(filtered==null || filtered.length()==0)
+		{
+			return;
+		}
+		LinkedList<String> engines = new LinkedList<String>();
+		Matcher matcher = FILTER_PATTERN.matcher(this.filtered);
+		while(matcher.find())
+		{
+			engines.addLast(matcher.group(1));
+		}			
+		builder.withFilter(engines.size());
+		
+		String filter = null;
+		boolean hidden = false;
+		
+		int index = 0;
+		int length = parameters==null?0:parameters.length;
+
+		for(;index < length; index++)
+		{
+			Parameter parameter =  parameters[index];
+			String name = parameter.getName();
+			int filterIndex = -1;
+			if((filterIndex = engines.indexOf(name))>-1)
+			{ 
+				filter = CastUtils.castPrimitive(
+				String.class, parameter.getValue());
+				builder.withFilter(new FilteringDefinition(
+					name, filter), filterIndex);
+			}				
+			if("hideFilter".equals(name))
+			{
+				hidden = CastUtils.castPrimitive(
+				boolean.class, parameter.getValue());
+			}
+		}	
+		builder.withHiddenFilter(hidden);
+	}
 	
 	/**
 	 * @return
@@ -554,6 +608,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		return handle(parameters);
 	}
 
+	
     /**
      * @param parameters
      * @return
@@ -565,33 +620,9 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
     {
 		NorthboundRequestBuilder builder = 
 				new NorthboundRequestBuilder(mediator);
-
-		if(this.filtered!=null)
-		{
-			String filter = null;
-			boolean hidden = false;
-			
-			int index = 0;
-			int length = parameters==null?0:parameters.length;
-
-			for(;index < length; index++)
-			{
-				Parameter parameter =  parameters[index];
-				String name =parameter.getName();
-				if(this.filtered.equals(name))
-				{ 
-					filter = CastUtils.castPrimitive(
-					String.class, parameter.getValue());
-				}
-				if("hideFilter".equals(name))
-				{
-					hidden = CastUtils.castPrimitive(
-					boolean.class, parameter.getValue());
-				}
-			}	
-			builder.withFilter(new FilteringDefinition(
-					this.filtered,filter, hidden));
-		}		
+		
+		processFilters(builder, parameters);
+		
 		builder.withMethod(this.method
 				).withServiceProvider(this.serviceProvider
 				).withService(this.service

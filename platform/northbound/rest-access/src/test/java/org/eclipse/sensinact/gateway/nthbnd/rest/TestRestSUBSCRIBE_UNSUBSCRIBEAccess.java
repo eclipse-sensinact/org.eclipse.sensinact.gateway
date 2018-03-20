@@ -87,7 +87,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
 		 "{\"parameters\" : [{\"name\":\"callback\", \"type\":\"string\",\"value\":\"http://127.0.0.1:54460\"}]}",
 		 "POST");
 
-		System.out.println(simulated);
+		//System.out.println(simulated);
 		
         response = new JSONObject(simulated);
         
@@ -132,7 +132,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
 	     "{\"parameters\" : [{\"name\":\"subscriptionId\", \"type\":\"string\", \"value\":\""+subscriptionId+"\"}]}",
 	     "POST");
 		
-        System.out.println(simulated);
+        //System.out.println(simulated);
 
         response = new JSONObject(simulated);        
         assertTrue(response.get("statusCode").equals(200));
@@ -163,7 +163,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
         	+ "[{\"operator\":\"<\",\"operand\":200, \"type\":\"int\", \"complement\":false}]}]}",
         	"POST");
         
-        System.out.println(simulated);
+        //System.out.println(simulated);
         
         response = new JSONObject(simulated);
         
@@ -211,7 +211,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
         	"{\"parameters\" : [{\"name\":\"subscriptionId\", \"type\":\"string\", \"value\":\""+subscriptionId+"\"}]}",
         	"POST");
         
-        System.out.println(simulated);
+        //System.out.println(simulated);
 
         response = new JSONObject(simulated);
         
@@ -277,7 +277,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
         	"/providers/slider/services/cursor/resources/position/UNSUBSCRIBE",
         	"[{\"name\":\"subscriptionId\", \"type\":\"string\", \"value\":\""+subscriptionId+"\"}]");
         
-        System.out.println(simulated);
+        //System.out.println(simulated);
 
         response =new JSONObject(simulated);
         
@@ -309,7 +309,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
         	"[{\"name\":\"conditions\",\"type\":\"array\",\"value\":"
         	+ "[{\"operator\":\"<\",\"operand\":200, \"type\":\"int\", \"complement\":false}]}]");
         
-        System.out.println(simulated);
+        //System.out.println(simulated);
         
         response = new JSONObject(simulated);
         
@@ -358,7 +358,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess  extends TestRestAccess
         	"/providers/slider/services/cursor/resources/position/UNSUBSCRIBE",
         	"[{\"name\":\"subscriptionId\", \"type\":\"string\", \"value\":\""+subscriptionId+"\"}]");
         
-        System.out.println(simulated);
+        //System.out.println(simulated);
 
         response = new JSONObject(simulated);
         

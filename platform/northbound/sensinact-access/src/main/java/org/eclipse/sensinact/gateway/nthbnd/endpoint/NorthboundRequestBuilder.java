@@ -10,6 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.sensinact.gateway.core.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.util.CastUtils;
@@ -50,12 +54,16 @@ public class NorthboundRequestBuilder
 
 	private Object argument;
 
-	private FilteringDefinition filterDefinition;
+	private List<FilteringDefinition> filterDefinitions;
+
+	private boolean hiddenFilter;
 	
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
+	 * @param mediator the {@link NorthboundMediator} allowing
+	 * the NorthboundRequestBuilder to be instantiated to interact
+	 * with the OSGi host environment
 	 */
 	public NorthboundRequestBuilder(NorthboundMediator mediator)
 	{
@@ -155,8 +163,13 @@ public class NorthboundRequestBuilder
 	}
 	
 	/**
+	 * Define the argument that will be used to parameterize
+	 * the call to the method the request to be built is 
+	 * targeting
+	 * 
 	 * @param argument
-	 * @return
+	 * 
+	 * @return this NorthboundRequestBuilder
 	 */
 	public NorthboundRequestBuilder withArgument(Object argument)
 	{
@@ -166,6 +179,8 @@ public class NorthboundRequestBuilder
 
 	/**
 	 * @param rid
+	 * 
+	 * @return this NorthboundRequestBuilder
 	 */
 	public NorthboundRequestBuilder withRequestId(String rid)
 	{
@@ -190,14 +205,36 @@ public class NorthboundRequestBuilder
 		this.listElements = listElements;
 		return this;
 	}
+
+	/**
+	 * @param size
+	 */
+	public void withFilter(int size)
+	{
+		this.filterDefinitions = new ArrayList<FilteringDefinition>(
+				size);
+	}
 	
 	/**
 	 * @param filterDefinition
+	 * @param f 
 	 */
 	public void withFilter(
-	     FilteringDefinition filterDefinition)
+	     FilteringDefinition filterDefinition, int index)
 	{
-		this.filterDefinition = filterDefinition;
+		if(filterDefinition == null || this.filterDefinitions==null)
+		{
+			return;
+		}
+		this.filterDefinitions.add(index, filterDefinition);
+	}
+	
+	/**
+	 * @param hiddenFilter
+	 */
+	public void withHiddenFilter(boolean hiddenFilter)
+	{
+		this.hiddenFilter = hiddenFilter;
 	}
 	
 	/**
@@ -213,7 +250,10 @@ public class NorthboundRequestBuilder
 		switch(this.method)
 		{
 			case "ALL":
-				request = new AllRequest(mediator, getRequestIdentifier(), this.filterDefinition);
+				request = new AllRequest(mediator, 
+				    getRequestIdentifier(), this.filterDefinitions==null?null:
+					new FilteringCollection(mediator, this.hiddenFilter, 
+					this.filterDefinitions.toArray(new FilteringDefinition[0])));
 				break;
 			case "ACT":
 				if(this.resource != null)
@@ -240,15 +280,16 @@ public class NorthboundRequestBuilder
 				{
 					request = new ResourceRequest(
 					    mediator, getRequestIdentifier(), serviceProvider, 
-					    service, resource);
+					        service, resource);
 					
 				} else if(service != null)
 				{
 					if(this.listElements)
 					{
-						request = new ResourcesRequest( mediator, 
-							getRequestIdentifier(), serviceProvider, service, 
-							    this.filterDefinition);
+						request = new ResourcesRequest( mediator, getRequestIdentifier(), 
+						    serviceProvider, service,  this.filterDefinitions==null?null:
+							    new FilteringCollection(mediator, this.hiddenFilter, 
+							    this.filterDefinitions.toArray(new FilteringDefinition[0])));
 						
 					} else
 					{
@@ -260,8 +301,10 @@ public class NorthboundRequestBuilder
 				{
 					if(this.listElements)
 					{
-						request = new ServicesRequest( mediator, 
-							getRequestIdentifier(), serviceProvider, this.filterDefinition);
+						request = new ServicesRequest( mediator, getRequestIdentifier(), 
+						    serviceProvider, this.filterDefinitions==null?null:
+						    new FilteringCollection(mediator, this.hiddenFilter,  
+						    this.filterDefinitions.toArray(new FilteringDefinition[0])));
 						
 					} else
 					{
@@ -272,7 +315,9 @@ public class NorthboundRequestBuilder
 				} else
 				{
 					request = new ServiceProvidersRequest(mediator, 
-						getRequestIdentifier(), this.filterDefinition);
+					    getRequestIdentifier(), this.filterDefinitions==null?null:
+						    new FilteringCollection(mediator, this.hiddenFilter,  
+						    this.filterDefinitions.toArray(new FilteringDefinition[0])));
 				}
 				break;
 			case "GET":
@@ -307,14 +352,14 @@ public class NorthboundRequestBuilder
 				{
 					request = new AttributeSubscribeRequest( mediator, 
 						getRequestIdentifier(), serviceProvider, service, 
-						resource, attribute, (NorthboundRecipient) arguments[0],
-					    (arguments.length>1?((JSONArray)arguments[1]):new JSONArray()));
+						    resource, attribute, (NorthboundRecipient) arguments[0],
+					             (arguments.length>1?((JSONArray)arguments[1]):new JSONArray()));
 				} else
 				{
 					request = new RegisterAgentRequest( mediator, 
 						getRequestIdentifier(), serviceProvider, service, 
-						(NorthboundRecipient) arguments[0],  (SnaFilter)(
-							arguments.length>1?arguments[1]:null));
+						    (NorthboundRecipient) arguments[0],  (SnaFilter)(
+							    arguments.length>1?arguments[1]:null));
 				}
 				break;
 			case "UNSUBSCRIBE":
@@ -336,4 +381,5 @@ public class NorthboundRequestBuilder
 		}
 		return request;
 	}
+
 }

@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import org.eclipse.sensinact.gateway.core.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
@@ -17,9 +18,9 @@ public class ServiceProvidersRequest extends NorthboundRequest
 {
 
 	public ServiceProvidersRequest(NorthboundMediator mediator, 
-		String requestIdentifier, FilteringDefinition filterDefinition) 
+		String requestIdentifier, FilteringCollection filteringCollection) 
 	{
-		super(mediator, requestIdentifier, filterDefinition);
+		super(mediator, requestIdentifier, filteringCollection);
 	}
 
 	/** 
@@ -59,15 +60,15 @@ public class ServiceProvidersRequest extends NorthboundRequest
 		int length = superArguments==null?0:superArguments.length;
 
 		if(this.getClass() == ServiceProvidersRequest.class 
-				&& super.filterDefinition!=null)
+				&& super.filteringCollection!=null)
 		{
 			Argument[] arguments = new Argument[length+1];
 			if(length > 0)
 			{
 				System.arraycopy(superArguments, 0, arguments, 0, length);
 			}
-			arguments[length] = new Argument(FilteringDefinition.class, 
-					super.filterDefinition);
+			arguments[length] = new Argument(FilteringCollection.class, 
+				super.filteringCollection);
 		    return arguments;
 		}
 		return superArguments;

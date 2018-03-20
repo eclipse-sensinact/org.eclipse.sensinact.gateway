@@ -20,7 +20,7 @@ import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
-import org.eclipse.sensinact.gateway.core.FilteringDefinition;
+import org.eclipse.sensinact.gateway.core.FilteringCollection;
 
 public abstract class NorthboundRequest implements PathElement, Nameable
 {		
@@ -37,8 +37,7 @@ public abstract class NorthboundRequest implements PathElement, Nameable
 	 * @throws UnsupportedEncodingException
 	 */
 	public static Map<String,List<String>> processRequestQuery(
-			String queryString) 
-			throws UnsupportedEncodingException
+		String queryString) throws UnsupportedEncodingException
 	{		
 		if(queryString == null)
 		{
@@ -139,7 +138,7 @@ public abstract class NorthboundRequest implements PathElement, Nameable
 	protected abstract String getMethod();
 
 
-	protected FilteringDefinition filterDefinition;
+	protected FilteringCollection filteringCollection;
 	protected NorthboundMediator mediator;
 	private String requestIdentifier;
 
@@ -150,11 +149,11 @@ public abstract class NorthboundRequest implements PathElement, Nameable
 	 * @param authentication
 	 */
 	public NorthboundRequest(NorthboundMediator mediator, 
-		String requestIdentifier, FilteringDefinition filterDefinition)
+		String requestIdentifier, FilteringCollection filteringCollection)
 	{
 		this.mediator = mediator;
 		this.requestIdentifier = requestIdentifier;
-		this.filterDefinition = filterDefinition;
+		this.filteringCollection = filteringCollection;
 	}
 	
 	/** 

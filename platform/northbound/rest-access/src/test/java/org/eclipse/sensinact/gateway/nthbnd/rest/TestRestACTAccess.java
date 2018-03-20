@@ -32,7 +32,8 @@ public class TestRestACTAccess  extends TestRestAccess
 		Mediator mediator = new Mediator(context);
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL  +
         		"/providers/light/services/switch/resources/status/GET", null, "GET");
-        
+
+        //System.out.println(simulated);
         JSONObject response = new JSONObject(simulated);
 
         assertTrue(response.get("statusCode").equals(200));
@@ -64,6 +65,7 @@ public class TestRestACTAccess  extends TestRestAccess
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL  +
         		"/light/switch/status/GET", null, "GET");
         
+        //System.out.println(simulated);
         JSONObject response = new JSONObject(simulated);
 
         assertTrue(response.get("statusCode").equals(200));
@@ -166,7 +168,7 @@ public class TestRestACTAccess  extends TestRestAccess
        
        simulated = this.synchronizedRequest(client, WS_ROOTURL + 
     	       "/providers/light/services/switch/resources/brightness/GET", null);
-       System.out.println(simulated);
+       //System.out.println(simulated);
        response = new JSONObject(simulated);
 
        assertTrue(response.get("statusCode").equals(200));
