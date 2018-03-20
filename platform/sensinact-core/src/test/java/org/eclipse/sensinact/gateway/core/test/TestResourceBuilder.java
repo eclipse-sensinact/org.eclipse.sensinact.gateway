@@ -34,6 +34,7 @@ import org.eclipse.sensinact.gateway.common.props.TypedProperties;
 import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.Attribute;
 import org.eclipse.sensinact.gateway.core.DataResource;
+import org.eclipse.sensinact.gateway.core.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.LocationResource;
@@ -938,7 +939,8 @@ public class TestResourceBuilder<R extends ModelInstance>
     	
     	Session s = testContext.getSensiNact().getAnonymousSession();
     	Thread.sleep(1000);
-    	String obj = s.getAll(new FilteringDefinition("xfilter","a")).getJSON();
+    	String obj = s.getAll(new FilteringCollection(this.testContext.getMediator(
+    		), false, new FilteringDefinition("xfilter","a"))).getJSON();
     	
     	JSONAssert.assertEquals(new JSONObject("{\"providers\":"
 		+ "[{\"locXtion\":\"45.19334890078532:5.706474781036377\","
@@ -952,7 +954,7 @@ public class TestResourceBuilder<R extends ModelInstance>
         + "[{\"type\":\"ACTION\",\"nXme\":\"TestAction\"},"
         + "{\"type\":\"STATE_VARIABLE\",\"nXme\":\"TestVXriXble\"}],"
         + "\"nXme\":\"testService\"}],\"nXme\":\"serviceProvider\"}],"
-        + "\"filter\":{\"definition\":\"a\",\"type\":\"xfilter\"}"
+        + "\"filters\":[{\"definition\":\"a\",\"type\":\"xfilter\"}]"
         + ",\"statusCode\":200,\"type\":\"COMPLETE_LIST\"}") ,
     	new JSONObject(obj), false);
     }

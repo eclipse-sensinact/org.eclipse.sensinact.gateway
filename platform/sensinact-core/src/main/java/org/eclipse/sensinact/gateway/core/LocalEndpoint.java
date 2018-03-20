@@ -89,7 +89,7 @@ abstract class LocalEndpoint implements Endpoint
 	public String getAll(String publicKey, String filter)
 	{
 		return this.getSession(publicKey).getAll(
-				filter).getResponse();
+				filter, null).getResponse();
 	}
 
 	/**
@@ -100,8 +100,8 @@ abstract class LocalEndpoint implements Endpoint
 	@Override
 	public String getProviders(String publicKey)
 	{
-		return this.getSession(publicKey
-		    ).getProviders().getResponse();
+		return this.getSession(publicKey).getProviders(
+				).getResponse();
 	}
 
 	/**
