@@ -28,6 +28,7 @@ import java.util.Stack;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
+import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidCallback;
 import org.eclipse.sensinact.gateway.core.message.MessageRegisterer;
@@ -578,10 +579,15 @@ public class MidOSGiTestExtended extends MidOSGiTest
 		MidProxy<Core> mid = new MidProxy<Core>(classloader,this, Core.class);		
 	    Core core = mid.buildProxy();
 	    Session s = core.getAnonymousSession();
-	    MidProxy<Session> mids = (MidProxy<Session>)Proxy.getInvocationHandler(s);
-	    Object o = mids.toOSGi(Session.class.getMethod("getProviders"),null);
-	    Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
-	    System.out.println(j);
+	    
+	    MidProxy<Session> mids = (MidProxy<Session>)
+	    Proxy.getInvocationHandler(s);
+	    
+	    Method m = Session.class.getMethod("getProviders");	    	
+	    Object o = mids.toOSGi(m,null);
+	    Object j = o.getClass().getDeclaredMethod(
+	    		"getJSON").invoke(o);
+
 	    return (String) j;
 	}
 	

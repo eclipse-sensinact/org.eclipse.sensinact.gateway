@@ -68,13 +68,12 @@ public class JsonPathFiltering implements Filtering
 		{
 			return String.valueOf(result);
 		}
-		
 	    try
 	    { 
 	    	DocumentContext dc = JsonPath.parse(
 	    			String.valueOf(result));
 	        Object object = dc.read(filter);
-	        
+
 	        if(object.getClass() == String.class)
 	        {
 	        	return new StringBuilder().append("\"").append(
@@ -88,5 +87,16 @@ public class JsonPathFiltering implements Filtering
 	        mediator.error("Failed to process JsonPath", e);
 	        throw e;
 	    }
+	}
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.Filtering#getLDAPComponent()
+	 */
+	@Override
+	public String getLDAPComponent() 
+	{
+		return null;
 	}
 }
