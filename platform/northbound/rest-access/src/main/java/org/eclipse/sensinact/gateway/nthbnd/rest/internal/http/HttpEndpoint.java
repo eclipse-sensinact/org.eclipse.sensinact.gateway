@@ -125,7 +125,7 @@ public class HttpEndpoint extends HttpServlet
 				} catch (InvalidCredentialException e) 
 				{
 					mediator.error(e);
-					response.sendError(403, "Invalid HTTP method");
+					response.sendError(403, e.getMessage());
 					
 				} catch (Exception e) 
 				{
