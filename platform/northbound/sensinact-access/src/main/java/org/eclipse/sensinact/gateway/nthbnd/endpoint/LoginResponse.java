@@ -183,12 +183,6 @@ implements LoginMessage
 		{
 			Map.Entry<TypedKey<?>,Object> entry = iterator.next();
 			TypedKey<?> typedKey = entry.getKey();
-			
-			if(typedKey.isHidden() || 
-				"uri".equals(typedKey.getName()))
-			{
-				continue;
-			}		
 			builder.append(index > 0?JSONUtils.COMMA:"");
 			builder.append(JSONUtils.QUOTE);
 			builder.append(typedKey.getName());
