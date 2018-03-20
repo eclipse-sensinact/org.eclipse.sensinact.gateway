@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 
@@ -121,9 +122,15 @@ public class HttpEndpoint extends HttpServlet
 
 					restAccess.proceed();
 					
+				} catch (InvalidCredentialException e) 
+				{
+					mediator.error(e);
+					response.sendError(403, e.getMessage());
+					
 				} catch (Exception e) 
 				{
 					mediator.error(e);
+					response.sendError(520, "Internal server error");
 					
 				} finally
 				{

@@ -10,8 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Stack;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
@@ -91,8 +95,8 @@ implements RemoteEndpoint, SessionObserver
 	protected RemoteCore remoteCore;
 	protected boolean connected;	
 	protected Map<String, Recipient> recipients;
-	protected Executable<String, Void> onConnectedCallback;
-	protected Executable<String, Void> onDisconnectedCallback;
+	protected Deque<Executable<String, Void>> onConnectedCallback;
+	protected Deque<Executable<String, Void>> onDisconnectedCallback;
 	 
 	/**
 	 * Constructor
@@ -130,7 +134,15 @@ implements RemoteEndpoint, SessionObserver
 	 */
 	public void onConnected(Executable<String, Void> onConnectedCallback)
 	{
-		this.onConnectedCallback = onConnectedCallback;
+		if(onConnectedCallback == null)
+		{
+			return;
+		}
+		if(this.onConnectedCallback == null)
+		{
+			this.onConnectedCallback = new LinkedList<Executable<String, Void>>();
+		}
+		this.onConnectedCallback.addLast(onConnectedCallback);
 	}
 
 	/**
@@ -141,7 +153,15 @@ implements RemoteEndpoint, SessionObserver
 	 */
 	public void onDisconnected(Executable<String, Void> onDisconnectedCallback)
 	{
-		this.onDisconnectedCallback = onDisconnectedCallback;
+		if(onDisconnectedCallback == null)
+		{
+			return;
+		}
+		if(this.onDisconnectedCallback == null)
+		{
+			this.onDisconnectedCallback = new LinkedList<Executable<String, Void>>();
+		}
+		this.onDisconnectedCallback.addLast(onDisconnectedCallback);
 	}	
 
 	/**
@@ -160,14 +180,18 @@ implements RemoteEndpoint, SessionObserver
 		this.doDisconnect();
 		if(this.onDisconnectedCallback!=null)
 		{
-			try 
+			Iterator<Executable<String, Void>> it = 
+				onDisconnectedCallback.iterator();
+			while(it.hasNext())
 			{
-				this.onDisconnectedCallback.execute(
-						this.namespace());
-				
-			} catch (Exception e)
-			{
-				mediator.error(e.getMessage(),e);
+				try 
+				{
+					it.next().execute(this.namespace());
+					
+				} catch (Exception e)
+				{
+					mediator.error(e.getMessage(),e);
+				}
 			}
 		}
 	}
@@ -196,13 +220,18 @@ implements RemoteEndpoint, SessionObserver
 		}
 		if(this.onConnectedCallback!=null)
 		{
-			try 
+			Iterator<Executable<String, Void>> it = 
+					onConnectedCallback.iterator();
+			while(it.hasNext())
 			{
-				this.onConnectedCallback.execute(this.namespace());
-				
-			} catch (Exception e)
-			{
-				mediator.error(e.getMessage(),e);
+				try 
+				{
+					it.next().execute(this.namespace());
+					
+				} catch (Exception e)
+				{
+					mediator.error(e.getMessage(),e);
+				}
 			}
 		}
 		return true;

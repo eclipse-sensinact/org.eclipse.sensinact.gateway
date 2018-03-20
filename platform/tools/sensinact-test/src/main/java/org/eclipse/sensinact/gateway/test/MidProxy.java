@@ -451,8 +451,22 @@ public class MidProxy<T> implements InvocationHandler
 				for(int i = 0;i  < parameterTypes.length;i++)
 				{
 					Class c = parameterTypes[i];
-					pts[i] = c.isPrimitive()?c:omnipotentclassloader.loadClass(
-					c.isArray()?"[L"+c.getComponentType().getName()+";":c.getName());
+					if(c.isPrimitive())
+					{
+						pts[i] = c;
+						
+					} else if(c.isArray())
+					{
+						pts[i] = Array.newInstance(
+						omnipotentclassloader.loadClass(
+						c.getComponentType().getName()),0
+						).getClass();
+						
+					} else
+					{
+						pts[i] = omnipotentclassloader.loadClass(
+								c.getName());
+					}
 				}
 				Method cm = cl.getMethod(m.getName(), pts);
 				return cm;

@@ -26,7 +26,6 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.StringResponseFormat;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 
 /**
@@ -168,10 +167,9 @@ public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest>
 	 * sendError(int, java.lang.String)
 	 */
 	@Override
-	@SuppressWarnings("deprecation")
 	protected void sendError(int statusCode, String message) 
 			throws IOException 
 	{
-		this.response.setStatus(statusCode, message);
+		this.response.sendError(statusCode, message);
 	}
 }

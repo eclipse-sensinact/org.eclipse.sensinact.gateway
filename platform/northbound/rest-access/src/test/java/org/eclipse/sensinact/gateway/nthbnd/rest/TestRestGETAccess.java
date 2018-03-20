@@ -39,7 +39,7 @@ public class TestRestGETAccess  extends TestRestAccess
         String simulated  = HttpServiceTestClient.newRequest(mediator,
              	HTTP_ROOTURL + "/providers?rawDescribe=true", null, "GET");
         
-        System.out.println(simulated);
+        //System.out.println(simulated);
         
         JSONArray response = new JSONArray("[\"slider\",\"light\"]");
         
@@ -54,7 +54,7 @@ public class TestRestGETAccess  extends TestRestAccess
         String simulated  = HttpServiceTestClient.newRequest(mediator,
              	HTTP_ROOTURL + "/providers", null, "GET");
         
-        System.out.println(simulated);
+        //System.out.println(simulated);
         
         JSONObject response = new JSONObject(
         	"{\"statusCode\":200,\"providers\":[\"slider\",\"light\"],"
@@ -65,7 +65,7 @@ public class TestRestGETAccess  extends TestRestAccess
         simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + 
         		"/providers/slider/services", null, "GET");
 
-        System.out.println(simulated);
+        //System.out.println(simulated);
         
         response = new JSONObject(simulated);
      
@@ -98,7 +98,7 @@ public class TestRestGETAccess  extends TestRestAccess
 
         response = new JSONObject(simulated);
         
-        System.out.println(response);
+        //System.out.println(response);
         
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/cursor/position"));
@@ -113,7 +113,7 @@ public class TestRestGETAccess  extends TestRestAccess
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + 
         		"/slider", null, "GET");
 
-        System.out.println(simulated);
+        //System.out.println(simulated);
         JSONObject response = new JSONObject(simulated).getJSONObject("response");
      
         JSONArray array = response.getJSONArray("services");
@@ -164,7 +164,7 @@ public class TestRestGETAccess  extends TestRestAccess
         simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers?rawDescribe=true", 
         null);       
         
-        System.out.println(simulated);
+        //System.out.println(simulated);
         JSONArray response = new JSONArray("[\"slider\",\"light\"]");
         JSONAssert.assertEquals(response, new JSONArray(simulated), false);
 	}
@@ -179,9 +179,11 @@ public class TestRestGETAccess  extends TestRestAccess
 		new Thread(client).start();
 
         simulated = this.synchronizedRequest(client, WS_ROOTURL + 
-        		"/providers", null);       
+        		"/providers", null); 
         
-		response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"],"
+        //System.out.println(simulated);
+		
+        response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"],"
 				+ "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
 
 		JSONAssert.assertEquals(response, new JSONObject(simulated), false);

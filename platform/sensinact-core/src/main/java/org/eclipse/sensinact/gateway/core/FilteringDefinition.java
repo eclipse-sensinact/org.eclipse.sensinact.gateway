@@ -44,12 +44,6 @@ public class FilteringDefinition
 	public final String filter;
 	
 	/**
-	 * the hidden status of this {@link Filtering} 
-	 * service definition 
-	 */
-	public final boolean hideDefinition;
-
-	/**
 	 * Constructor
 	 * 
 	 * @param type the type of filter defined by the 
@@ -59,24 +53,7 @@ public class FilteringDefinition
 	 */
 	public FilteringDefinition(String type, String filter)
 	{
-		this(type,filter,false);
-	}
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param type the type of filter defined by the 
-	 * FilterDefinition to be instantiated
-	 * @param filter the String filter defined by the 
-	 * FilterDefinition to be instantiated
-	 * @param hideDefinition the boolean hidden status of 
-	 * the FilterDefinition to be instantiated
-	 */
-	public FilteringDefinition(String type, String filter,
-			boolean hideDefinition)
-	{
 		this.type = type;
 		this.filter = filter;
-		this.hideDefinition = hideDefinition;
 	}
 }

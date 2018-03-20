@@ -133,10 +133,8 @@ public class TestJsonPathFiltering extends MidOSGiTest
 	    String simulated3  = HttpServiceTestClient.newRequest(mediator, 
 	    HTTP_ROOTURL + "/jsonpath:sensinact?jsonpath=$.[?(@.name=='slider')]",null, "GET");
 
-	    System.out.println(simulated3);
-	       
 	    JSONObject response = new JSONObject(
-	    "{\"filter\":{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"},"
+	    "{\"filters\":[{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"}],"
 	    + "\"providers\":"
 	    + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\","
 	    + "\"resources\":"
@@ -158,7 +156,6 @@ public class TestJsonPathFiltering extends MidOSGiTest
         	"{\"statusCode\":200,\"providers\":[\"slider\",\"light\"],"
         	+ "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
 
-        System.out.println(simulated1);
         JSONAssert.assertEquals(response, new JSONObject(simulated1), false);
         
         String simulated2  = HttpServiceTestClient.newRequest(mediator, 
@@ -167,10 +164,9 @@ public class TestJsonPathFiltering extends MidOSGiTest
         response = new JSONObject(
         	"{\"statusCode\":200,\"providers\":[\""+new JSONObject(
         			simulated1).getJSONArray("providers").getString(0)+"\"],"
-        	+ "\"filter\":{\"type\":\"jsonpath\", \"definition\":\"$.[:1]\"} , "
+        	+ "\"filters\":[{\"type\":\"jsonpath\", \"definition\":\"$.[:1]\"}], "
         	+ "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
 
-        System.out.println(simulated2);
         JSONAssert.assertEquals(response, new JSONObject(simulated2), false);
 
 	}
@@ -186,10 +182,10 @@ public class TestJsonPathFiltering extends MidOSGiTest
 	    String simulated3  = this.synchronizedRequest(client,"/jsonpath:sensinact", 
 	    "[{\"name\":\"jsonpath\",\"type\":\"string\",\"value\":\"$.[?(@.name=='slider')]\"}]");
 	    
-	    System.out.println(simulated3);
+	    //System.out.println(simulated3);
 	       
 	    response = new JSONObject(
-	    "{\"filter\":{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"},"
+	    "{\"filters\":[{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"}],"
 	    + "\"providers\":"
 	    + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\","
 	    + "\"resources\":"
@@ -210,25 +206,26 @@ public class TestJsonPathFiltering extends MidOSGiTest
 		response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"],"
 		+ "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
 
-        System.out.println(simulated1);
+        //System.out.println(simulated1);
 
         obj = new JSONObject(simulated1);
         obj.remove("X-Auth-Token");
         JSONAssert.assertEquals(response, obj, false);
 
-        String simulated2  = this.synchronizedRequest(client, "/jsonpath:sensinact/providers", 
+        String simulated2  = this.synchronizedRequest(client, 
+        "/jsonpath:sensinact/providers", 
         "[{\"name\":\"jsonpath\",\"type\":\"string\",\"value\":\"$.[:1]\"}]");
 
         response = new JSONObject(
         "{\"statusCode\":200,\"providers\":[\""+new JSONObject(
         simulated1).getJSONArray("providers").getString(0)+"\"],"
-        + "\"filter\":{\"type\":\"jsonpath\", \"definition\":\"$.[:1]\"} , "
+        + "\"filters\":[{\"type\":\"jsonpath\", \"definition\":\"$.[:1]\"}], "
         + "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
         
         obj = new JSONObject(simulated2);
         obj.remove("X-Auth-Token");
         
-        System.out.println(simulated2);
+        //System.out.println(simulated2);
         JSONAssert.assertEquals(response, obj, false);
           
         client.close();

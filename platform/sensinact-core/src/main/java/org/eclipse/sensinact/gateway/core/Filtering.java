@@ -35,6 +35,17 @@ public interface Filtering
 	boolean handle(String type);
 	
 	/**
+	 * Returns the String formated LDAP component part 
+	 * of this Filtering service. This filter is used to
+	 * discriminate the elements on which this Filtering
+	 * service will be applied on 
+	 * 
+	 * @return the String formated LDAP component part 
+	 * of this Filtering service
+	 */
+	String getLDAPComponent();
+	
+	/**
 	 * Applies the String filter passed as parameter on the 
 	 * Object also passed as parameter and  returned the String
 	 * filtered result, in the same format 

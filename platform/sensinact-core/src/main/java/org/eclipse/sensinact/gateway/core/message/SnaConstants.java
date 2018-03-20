@@ -31,5 +31,8 @@ public abstract class SnaConstants
 	public static final String UPDATED_VALUE_KEY = "update";
 	public static final String TIMESTAMP_KEY = "timestamp";
 	public static final String ACCESS_LEVEL = "level";
+	public static final String GENERATED_KEY = "generated";
+	public static final String TIMEOUT_KEY = "validUntil";
+	public static final String TOKEN_KEY = "token";
 	
 }

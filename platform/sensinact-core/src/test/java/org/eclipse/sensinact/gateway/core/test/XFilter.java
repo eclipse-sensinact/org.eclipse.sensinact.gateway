@@ -56,4 +56,15 @@ public class XFilter implements Filtering
 		char flt = filter.charAt(0);				
 		return str.replace(flt, 'X');
 	}
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.Filtering#getLDAPComponent()
+	 */
+	@Override
+	public String getLDAPComponent() 
+	{
+		return null;
+	}
 }
