@@ -29,6 +29,7 @@ import org.json.JSONObject;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.LoginResponse;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
@@ -115,23 +116,28 @@ public class WebSocketWrapper
 			
 		} catch(JSONException e)
 		{
-			this.mediator.error(e.getMessage(),e);
+			this.mediator.error(e);
 			this.send(new JSONObject().put("statusCode", 400
-					).put("message","Bad request"
-							).toString());
+				).put("message","Bad request"
+					).toString());
 		} catch (IOException e) 
 		{
-			this.mediator.error(e.getMessage(),e);
+			this.mediator.error(e);
 			this.send(new JSONObject().put("statusCode", 400
-					).put("message","Bad request"
-							).toString());
+				).put("message","Bad request"
+					).toString());			
+		} catch (InvalidCredentialException e) 
+		{
+			this.mediator.error(e);
+			this.send(new JSONObject().put("statusCode", 403
+				).put("message",e.getMessage()
+					).toString());
 		} catch (Exception e) 
 		{
-			e.printStackTrace();
 			this.mediator.error(e);
 			this.send(new JSONObject().put("statusCode", 500
-					).put("message","Exception - Internal server error"
-							).toString());
+			).put("message","Exception - Internal server error"
+					).toString());
 		}
 	}
 	
@@ -147,7 +153,8 @@ public class WebSocketWrapper
 		error.printStackTrace();
 	}
 
-	private void onLogin(WsRestAccessRequest wrapper)
+	private void onLogin(WsRestAccessRequest wrapper) 
+			throws InvalidCredentialException
 	{
 		Authentication<?> authentication = wrapper.getAuthentication();
 		LoginResponse loginResponse = null;	

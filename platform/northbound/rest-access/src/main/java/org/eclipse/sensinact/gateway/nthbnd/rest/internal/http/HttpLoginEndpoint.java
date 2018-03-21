@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.LoginResponse;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
@@ -136,10 +137,15 @@ public class HttpLoginEndpoint extends HttpServlet
 					
 					response.setStatus(200);
 					
-				} catch (Exception e) 
+				} catch (InvalidCredentialException e) 
 				{
 					mediator.error(e);
-					response.sendError(520,"Internal Server Error!");
+					response.sendError(403, e.getMessage());
+					
+				}catch (Exception e) 
+				{
+					mediator.error(e);
+					response.sendError(520,"Internal server error");
 					
 				} finally
 				{
