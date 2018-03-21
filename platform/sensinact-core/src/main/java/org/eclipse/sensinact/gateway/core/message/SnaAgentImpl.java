@@ -342,7 +342,7 @@ public class SnaAgentImpl implements SnaAgent
 						properties);	
 			if(local)
 			{
-				registerRemote(identifier);
+				registerRemote();
 			}
 		} catch(IllegalStateException e)
 		{
@@ -356,7 +356,7 @@ public class SnaAgentImpl implements SnaAgent
      * 
      * @param identifier this SnaAgent's identifier
      */
-    protected void registerRemote(final String identifier)
+    protected void registerRemote()
     {
     	SnaAgentImpl.this.mediator.callServices(
 		RemoteCore.class, new Executable<RemoteCore,Void>()
@@ -365,7 +365,7 @@ public class SnaAgentImpl implements SnaAgent
 			public Void execute(RemoteCore remoteCore) 
 					throws Exception
 			{
-				SnaAgentImpl.this.registerRemote(remoteCore, identifier);
+				SnaAgentImpl.this.registerRemote(remoteCore);
 				return null;
 			}
 	      });
@@ -379,9 +379,12 @@ public class SnaAgentImpl implements SnaAgent
      * register this SnaAgent
      * @param identifier this SnaAgent's identifier
      */
-    public void registerRemote(RemoteCore remoteCore, 
-    		String identifier)
+    public void registerRemote(RemoteCore remoteCore)
     {
+    	final String identifier = (String) 
+        		this.registration.getReference().getProperty(
+        		"org.eclipse.sensinact.gateway.agent.id");
+        	
     	if(remoteCore == null 
     			|| identifier == null 
     			|| identifier.length()==0)

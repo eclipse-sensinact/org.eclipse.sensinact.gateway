@@ -2507,11 +2507,28 @@ public class SensiNact implements Core
 	 * createRemoteCore(org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint)
 	 */
 	@Override
-	public void createRemoteCore(final AbstractRemoteEndpoint remoteEndpoint)
+	public void createRemoteCore(AbstractRemoteEndpoint remoteEndpoint)
 	{   
-		count++;
+		this.createRemoteCore(remoteEndpoint, 
+				Collections.<Executable<String,Void>>emptyList(), 
+				Collections.<Executable<String,Void>>emptyList());
+	}	
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.Core#
+	 * createRemoteCore(org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint)
+	 */
+	@Override
+	public void createRemoteCore(
+		final AbstractRemoteEndpoint remoteEndpoint,
+		Collection<Executable<String,Void>> onConnectedCallbacks,
+		Collection<Executable<String,Void>> onDisconnectedCallbacks)
+	{   
+		count++;		
 		final RemoteSensiNact remoteCore = new RemoteSensiNact(
-    	mediator, remoteEndpoint, new LocalEndpoint(count)
+    	mediator, new LocalEndpoint(count)
 		{
     		private Map<String, Session> remoteSessions = 
     				new HashMap<String, Session>();
@@ -2569,82 +2586,27 @@ public class SensiNact implements Core
 			{
 				this.remoteSessions.clear();
 			}
-		}); 
+		});    
+		remoteCore.onConnected(onConnectedCallbacks);
+		remoteCore.onDisconnected(onDisconnectedCallbacks);
 		
-    	remoteCore.endpoint().onConnected(new Executable<String,Void>()
-		{
-			@Override
-			public Void execute(String namespace) throws Exception
-			{
-		    	remoteCore.open(namespace);
-				return null;
-			}
-		});  
-    	
-    	remoteCore.endpoint().onDisconnected(new Executable<String,Void>()
-		{
-			@Override
-			public Void execute(String namespace) throws Exception
-			{
-		    	remoteCore.close();
-				return null;
-			}
-		}); 
-    	
-		if(!remoteCore.connect())
+		if(!remoteCore.connect(remoteEndpoint))
 		{
 			return;
 		}
-    
-    	Collection<ServiceReference<SnaAgent>> serviceReferences = null;
-		try
+		mediator.callServices(SnaAgent.class, 
+		"(org.eclipse.sensinact.gateway.agent.local=true)",
+		new Executable<SnaAgent,Void>()
 		{
-			serviceReferences = this.mediator.getContext(
-			).getServiceReferences(SnaAgent.class, 
-			"(org.eclipse.sensinact.gateway.agent.local=true)");
-		}
-		catch (InvalidSyntaxException e)
-		{
-			this.mediator.error(e);
-		}
-    	if(serviceReferences== null || serviceReferences.isEmpty())
-    	{
-    		return;
-    	}
-		Iterator<ServiceReference<SnaAgent>> iterator = 
-				serviceReferences.iterator();
-		SnaAgent agent = null;
-		
-		while(iterator.hasNext())
-		{
-			ServiceReference<SnaAgent> serviceReference = iterator.next();
-			if((agent =  this.mediator.getContext().getService(
-					serviceReference))!=null)
-	    	{
-	    		try
-	    		{
-	    			String identifierProp = (String)
-	    				serviceReference.getProperty(
-	    				"org.eclipse.sensinact.gateway.agent.id");
-	    			
-	    			((SnaAgentImpl)agent).registerRemote(
-	    				remoteCore, identifierProp);
-	    			
-	    		}catch(Exception e)
-	    		{
-	    			continue;
-	    			
-	    		} finally
-	    		{
-	    			if(agent != null)
-	    			{
-	    				agent = null;
-	    				this.mediator.getContext().ungetService(
-	    						serviceReference);
-	    			}
-	    		}
-	    	}
-		}
+			@Override
+			public Void execute(SnaAgent agent) 
+					throws Exception
+			{
+	    		((SnaAgentImpl)agent).registerRemote(
+	    			remoteCore);
+				return null;
+			}			
+		});		
 	}	
 
 	/**

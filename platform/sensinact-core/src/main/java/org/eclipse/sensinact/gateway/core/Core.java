@@ -1,8 +1,10 @@
 package org.eclipse.sensinact.gateway.core;
 
 import java.security.InvalidKeyException;
+import java.util.Collection;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
@@ -31,7 +33,7 @@ public interface Core
 	 * @return this Core's String namespace
 	 */
 	String namespace();
-	
+
 	/**
 	 * Instantiates a new {@link RemoteCore} that will be connected to a 
 	 * remote instance of the sensiNact gateway by the way of the 
@@ -41,6 +43,22 @@ public interface Core
 	 * to attach to the {@link RemoteCore} to be instantiated
 	 */
 	void createRemoteCore(AbstractRemoteEndpoint remoteEndpoint);
+	
+	/**
+	 * Instantiates a new {@link RemoteCore} that will be connected to a 
+	 * remote instance of the sensiNact gateway by the way of the 
+	 * extended {@link AbstractRemoteEndpoint} passed as parameter
+	 * 
+	 * @param remoteEndpoint the extended {@link AbstractRemoteEndpoint} 
+	 * to attach to the {@link RemoteCore} to be instantiated
+	 * @param onConnectedCallbacks the collection of {@link Executable}s
+	 * to be executed after the connection of the specified {@link RemoteEndpoint}
+	 * @param onDisconnectedCallbacks the collection of {@link Executable}s
+	 * to be executed after the disconnection of the specified {@link RemoteEndpoint}
+	 */
+	void createRemoteCore(AbstractRemoteEndpoint remoteEndpoint,
+	Collection<Executable<String,Void>> onConnectedCallbacks,
+	Collection<Executable<String,Void>> onDisconnectedCallbacks);
 	
 	/**
 	 * Instantiates and registers a new {@link SnaAgent}, build with the 

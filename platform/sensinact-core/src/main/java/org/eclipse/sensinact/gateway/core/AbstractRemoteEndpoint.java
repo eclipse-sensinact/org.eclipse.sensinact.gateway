@@ -33,7 +33,6 @@ import org.json.JSONObject;
 public abstract class AbstractRemoteEndpoint 
 implements RemoteEndpoint, SessionObserver
 {
-
 	//********************************************************************//
 	//						NESTED DECLARATIONS			  			      //
 	//********************************************************************//
@@ -70,14 +69,17 @@ implements RemoteEndpoint, SessionObserver
 	protected abstract void closeSession(String publicKey);
 
 	/**
-	 * Connects this {@link RemoteEndpoint} with the one held by 
-	 * the remote sensiNact gateway instance to be connected to 
+	 * Connects this {@link RemoteEndpoint} to a remote sensiNact 
+	 * gateway instance 
+	 *  
+	 * @return true if the connection has been made properly; false
+	 * otherwise
 	 */
-	protected abstract void doConnect();
+	protected abstract boolean doConnect();
 	
 	/**
-	 * Disconnects this {@link RemoteEndpoint} from the one held by 
-	 * the remote sensiNact gateway instance it is connected to
+	 * Disconnects the {@link RemoteCore} previously connected from 
+	 * a remote sensiNact gateway instance it is connected to
 	 */
 	protected abstract void doDisconnect();
 
@@ -93,11 +95,10 @@ implements RemoteEndpoint, SessionObserver
 	protected final String localNamespace;
 	
 	protected RemoteCore remoteCore;
-	protected boolean connected;	
+	protected boolean connected;
+	
 	protected Map<String, Recipient> recipients;
-	protected Deque<Executable<String, Void>> onConnectedCallback;
-	protected Deque<Executable<String, Void>> onDisconnectedCallback;
-	 
+	
 	/**
 	 * Constructor
 	 * 
@@ -124,44 +125,6 @@ implements RemoteEndpoint, SessionObserver
 			throw new NullPointerException(
 			"the namespace of the local instance of sensiNact is required");
 		}
-	}
-	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#
-	 * onConnected(org.eclipse.sensinact.gateway.common.execution.Executable)
-	 */
-	public void onConnected(Executable<String, Void> onConnectedCallback)
-	{
-		if(onConnectedCallback == null)
-		{
-			return;
-		}
-		if(this.onConnectedCallback == null)
-		{
-			this.onConnectedCallback = new LinkedList<Executable<String, Void>>();
-		}
-		this.onConnectedCallback.addLast(onConnectedCallback);
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#
-	 * onDisconnected(org.eclipse.sensinact.gateway.common.execution.Executable)
-	 */
-	public void onDisconnected(Executable<String, Void> onDisconnectedCallback)
-	{
-		if(onDisconnectedCallback == null)
-		{
-			return;
-		}
-		if(this.onDisconnectedCallback == null)
-		{
-			this.onDisconnectedCallback = new LinkedList<Executable<String, Void>>();
-		}
-		this.onDisconnectedCallback.addLast(onDisconnectedCallback);
 	}	
 
 	/**
@@ -178,22 +141,7 @@ implements RemoteEndpoint, SessionObserver
 		}
 		this.connected = false;
 		this.doDisconnect();
-		if(this.onDisconnectedCallback!=null)
-		{
-			Iterator<Executable<String, Void>> it = 
-				onDisconnectedCallback.iterator();
-			while(it.hasNext())
-			{
-				try 
-				{
-					it.next().execute(this.namespace());
-					
-				} catch (Exception e)
-				{
-					mediator.error(e.getMessage(),e);
-				}
-			}
-		}
+		this.remoteCore.close();
 	}
 
 	/**
@@ -209,34 +157,15 @@ implements RemoteEndpoint, SessionObserver
 			mediator.debug("Endpoint already connected");
 			return true;
 		}
-		this.connected = true;
 		this.remoteCore = remoteCore;
-		this.doConnect();
-		
-		if(!this.connected)
+		if(!(this.connected = this.doConnect()))
 		{
 			mediator.debug("Endpoint is not connected");
 			return false;
 		}
-		if(this.onConnectedCallback!=null)
-		{
-			Iterator<Executable<String, Void>> it = 
-					onConnectedCallback.iterator();
-			while(it.hasNext())
-			{
-				try 
-				{
-					it.next().execute(this.namespace());
-					
-				} catch (Exception e)
-				{
-					mediator.error(e.getMessage(),e);
-				}
-			}
-		}
 		return true;
-	}   
-
+	} 
+	
 	/**
 	 * @inheritDoc
 	 *
@@ -288,10 +217,11 @@ implements RemoteEndpoint, SessionObserver
 	 */
 	public void disappearing(String publicKey)
 	{
-		if(this.connected)
+		if(!this.connected)
 		{
-			this.closeSession(publicKey);
+			return;
 		}
+		this.closeSession(publicKey);
 	}
 }
 

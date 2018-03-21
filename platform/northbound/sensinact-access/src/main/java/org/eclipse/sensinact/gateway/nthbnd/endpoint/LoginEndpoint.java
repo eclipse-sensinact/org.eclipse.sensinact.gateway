@@ -53,7 +53,7 @@ public class LoginEndpoint
 	 * Credentials}
 	 */
 	public LoginResponse createNorthboundEndpoint(
-			Credentials credentials)
+			Credentials credentials) throws InvalidCredentialException
 	{
 		LoginResponse response = new LoginResponse(mediator, 
 						TokenMode.TOKEN_CREATION);
@@ -61,28 +61,21 @@ public class LoginEndpoint
 		{
 			NorthboundEndpoints endpoints = 
 					this.mediator.getNorthboundEndpoints();
-			try 
-			{
-				NorthboundEndpoint endpoint = endpoints.add(
-				new NorthboundEndpoint(this.mediator, credentials));
+			
+			NorthboundEndpoint endpoint = endpoints.add(
+			new NorthboundEndpoint(this.mediator, credentials));
 				
-				long lifetime = endpoints.getLifetime();
-				long timeout = endpoints.getTimeout(
+			long lifetime = endpoints.getLifetime();
+			long timeout = endpoints.getTimeout(
 						endpoint.getSessionToken());
 				
-				response.setTimeout(timeout); 
-				response.setGenerated(timeout - lifetime);
-				response.setToken(endpoint.getSessionToken());
+			response.setTimeout(timeout); 
+			response.setGenerated(timeout - lifetime);
+			response.setToken(endpoint.getSessionToken());
 				
-			} catch (InvalidCredentialException e) 
-			{
-				this.mediator.error(e);
-				response.setErrors(e);
-			}
 		} else
 		{
-			response.setErrors(new NullPointerException(
-					"Null credentials"));
+			throw new InvalidCredentialException("Null credentials");
 		}
 		return response;
 	}

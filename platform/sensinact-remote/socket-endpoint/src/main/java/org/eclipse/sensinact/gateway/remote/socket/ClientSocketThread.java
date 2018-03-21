@@ -43,38 +43,41 @@ class ClientSocketThread implements Runnable
 	
 	private InetAddress remoteAddress;
 	private int remotePort;
+	private SocketEndpoint endpoint;
 	
-	ClientSocketThread(Mediator mediator, String address, int port)
-			throws IOException
+	ClientSocketThread(Mediator mediator, SocketEndpoint endpoint, 
+		String address, int port) throws IOException
 	{
 		this.mediator = mediator;
+		this.endpoint = endpoint;
+		
 		this.requests = new HashMap<String, String>();
-
 		this.remoteAddress = InetAddress.getByName(address);
 		this.remotePort = port;
 	}
 	
-	Socket createSocket() throws IOException
+	private Socket createSocket() throws IOException
 	{
 		socket = new Socket(remoteAddress,remotePort);
 		return socket;
 	}
 	
-	void stop()
+	protected void stop()
 	{
 		this.running = false;
 	}
 
-	public boolean running()
+	protected boolean running()
 	{
 		return this.running;
 	}	
 	
-	String request(JSONObject object)
+	protected String request(JSONObject object)
 	{
+		String result = null;
 		if(!running)
 		{
-			return null;
+			return result;
 		}
 		long timestamp = System.currentTimeMillis() 
 			+ this.hashCode();
@@ -104,9 +107,12 @@ class ClientSocketThread implements Runnable
 			
 		} catch(IOException e)
 		{
-			this.mediator.error(e.getMessage(),e);
-		} 
-		String result = null;
+			this.mediator.error(e);
+			if(!checkSocketStatus())
+			{
+				return result;
+			}
+		}
 		long wait = 5000;
 		while(wait > 0)
 		{
@@ -143,10 +149,15 @@ class ClientSocketThread implements Runnable
 			
 		} catch (IOException e)
 		{
-		    mediator.error(e.getMessage());
-		    return;
-		}
-		this.running = true;
+		   mediator.error(e);
+		   
+		} finally
+		{
+		   if(this.checkSocketStatus())
+		   {
+			   this.running = true;
+		   }
+		}		
 		while(running)
 		{
 			JSONObject object = null;
@@ -177,55 +188,59 @@ class ClientSocketThread implements Runnable
 				if(content.length > 0)
 				{
 					object = new JSONObject(new String(content));
-					
-				} else if(!socket.isConnected())
-				{
-					break;
-				}
-			} catch(SocketException e)
-			{
-				if("Broken pipe".equals(e.getMessage()))
-				{
-					break;
-				}
-			} catch(IOException e)
-			{
-			    this.mediator.error(e.getMessage(),e);
-
-			} catch(JSONException e)
-			{
-			    this.mediator.error("Unable to parse JSON formated data :"
-			    		+ new String(content));
-			}
-			if(object != null)
-			{
-				String uuid = null;
-				synchronized( this.requests)
-				{
-					if((uuid = (String) object.remove("uuid"
-							))!=null)
+					if(JSONObject.NULL.equals(object))
 					{
-						this.requests.put(uuid, 
-							object.optString("response"));
+						continue;
 					}
+					String uuid = (String) object.remove("uuid");
+					synchronized( this.requests)
+					{
+						if(uuid !=null)
+						{
+							this.requests.put(uuid, 
+								object.optString("response"));
+						}
+					}
+				} 
+			} catch(IOException | JSONException e)
+			{
+			   mediator.error(e);
+			   
+			} finally
+			{
+				if(!this.checkSocketStatus())
+				{
+					break;
 				}
 			}
 		} 
-		if(this.running)
+		closeSocket();
+		this.running = false;
+		this.endpoint.clientDisconnected();
+	}
+
+	private boolean checkSocketStatus()
+	{
+		if(socket==null || !socket.isConnected())
 		{
-			this.running = false;
+			return false;
 		}
+		return (!socket.isClosed() && 
+				!socket.isInputShutdown() && 
+				!socket.isOutputShutdown());
+	}
+
+	private void closeSocket()
+	{
 		if(socket!=null && socket.isConnected())
 		{
 			try 
 			{
-				socket.shutdownInput();
-				socket.shutdownOutput();
 				socket.close();
 				
 			} catch (IOException e)
 			{
-				mediator.error(e.getMessage(),e);
+				mediator.error(e);
 			}
 		}
 	}

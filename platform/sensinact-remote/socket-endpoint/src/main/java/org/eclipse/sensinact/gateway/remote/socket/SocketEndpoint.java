@@ -17,6 +17,7 @@ import java.util.TimerTask;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint;
+import org.eclipse.sensinact.gateway.core.RemoteCore;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
@@ -70,7 +71,6 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	private final int remotePort;
 	
 	private Timer connectionTimer;
-	//TimerTask connectionTask  = 
 
 	/**
 	 * @param mediator
@@ -411,8 +411,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	public String getJSON()
 	{
 		return String.format("{\"local\":\"%s\",\"remote\":\"%s\"}",
-				super.getLocalNamespace(),
-				this.namespace());
+			super.getLocalNamespace(), this.namespace());
 	}
 
 	/**
@@ -421,11 +420,11 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	 * @see org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint#doConnect()
 	 */
 	@Override
-	public void doConnect() 
+	public boolean doConnect() 
 	{
 		if(this.remoteNamespace!=null)
 		{
-			return;
+			return true;
 		}
 		if(this.server==null)
 		{
@@ -437,8 +436,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 			catch (IOException e)
 			{
 				mediator.error(e);
-				super.connected = false;
-				return;
+				return false;
 			}
 		}
 		this.connectionTimer = new Timer();
@@ -451,9 +449,10 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 				{
 					if(SocketEndpoint.this.client == null)
 					{
-						SocketEndpoint.this.client = new ClientSocketThread(mediator,
-								SocketEndpoint.this.getRemoteAddress(), 
-								SocketEndpoint.this.getRemotePort());
+						SocketEndpoint.this.client =
+						new ClientSocketThread(mediator, SocketEndpoint.this,
+						SocketEndpoint.this.getRemoteAddress(), 
+						SocketEndpoint.this.getRemotePort());
 					}
 					if(!SocketEndpoint.this.client.running())
 					{
@@ -469,7 +468,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 					}
 				} catch (Exception e)
 				{
-					e.printStackTrace();
+					mediator.error(e);
 					if(SocketEndpoint.this.client!=null 
 							&& !SocketEndpoint.this.client.running())
 					{
@@ -482,18 +481,11 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		
 		while(true)
 		{
-			if(timeout<=0)
-			{
-				 break;
-			}
-			if(remoteNamespace == null)
-			{
-				this.namespace();
-				
-			} else if(this.server.running())
+			if(timeout<=0 || remoteNamespace != null)
 			{
 				break;
 			}
+			this.namespace();	
 			try
 			{
 				timeout-=100;
@@ -507,15 +499,45 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		}		
 		this.connectionTimer.cancel();
 		this.connectionTimer = null;
-		if(remoteNamespace == null || !this.server.running())
+		if(remoteNamespace == null)
 		{
-			super.connected = false;
+			return false;
 		}
-		mediator.info("%s is%sconnected%s%s", 
-			super.localNamespace, (super.connected?" ":" not "),
-			(super.connected?" to ":""),(super.connected?remoteNamespace:""));
+		return true;
 	}
 
+	/**
+	 * 
+	 */
+	protected void serverStopped()
+	{
+		if(super.connected)
+		{
+			super.disconnect();
+			
+		} else
+		{
+			mediator.warn(
+			"An error occurred that impeded the server start");
+		}
+	}
+
+	/**
+	 * 
+	 */
+	public void clientDisconnected()
+	{
+		if(super.connected)
+		{
+			super.disconnect();
+			
+		} else
+		{
+			mediator.warn(
+			"An error occurred that impeded the client connection");
+		}
+	}
+	
 	/**
 	 * @inheritDoc
 	 * 
@@ -531,7 +553,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		this.client.stop();
 		this.client = null;
 	}
-	
+
 	/**
 	 * @inheritDoc
 	 * 
