@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
@@ -40,22 +39,6 @@ public interface RemoteEndpoint extends Endpoint, Recipient
 	 */
 	void disconnect();
 	
-	/**
-	 * Registers the {@link Executable} to be triggered when this 
-	 * RemoteEndpoint is connected 
-	 *  
-	 * @param onConnectedCallback the {@link Executable} to be registered
-	 */
-	void onConnected(Executable<String, Void> onConnectedCallback);
-
-	/**
-	 * Registers the {@link Executable} to be triggered when this 
-	 * RemoteEndpoint is disconnected 
-	 *  
-	 * @param onDisconnectedCallback the {@link Executable} to be registered
-	 */
-	void onDisconnected(Executable<String, Void> onDisconnectedCallback);
-    
 	/**
 	 * Returns the namespace of the remotely connected sensiNact
 	 * instance

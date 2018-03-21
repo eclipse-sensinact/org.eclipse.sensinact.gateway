@@ -10,6 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import java.util.Collection;
+
+import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
@@ -77,7 +80,27 @@ public interface RemoteCore extends Endpoint
 	 * namespace 
 	 */
 	String namespace();
-	
+
+	/**
+	 * Registers the Collection of {@link Executable}s to be 
+	 * triggered when the {@link RemoteEndpoint} of this RemoteCore 
+	 * is connected 
+	 *  
+	 * @param onConnectedCallbacks the Collection of {@link 
+	 * Executables} to be registered
+	 */
+	void onConnected(Collection<Executable<String, Void>> onConnectedCallbacks);
+
+	/**
+	 * Registers the Collection of {@link Executable}s to be 
+	 * triggered when the {@link RemoteEndpoint} of this RemoteCore 
+	 * is disconnected 
+	 *  
+	 * @param onDisconnectedCallbacks the Collection of {@link 
+	 * Executable}s to be unregistered
+	 */
+	void onDisconnected(Collection<Executable<String, Void>> onDisconnectedCallbacks);
+    
 	/**
 	 * Relays a subscription called from the remote connected instance
 	 * of sensiNact

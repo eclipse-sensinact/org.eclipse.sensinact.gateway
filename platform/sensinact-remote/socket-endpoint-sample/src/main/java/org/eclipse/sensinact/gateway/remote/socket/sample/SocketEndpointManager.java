@@ -117,7 +117,7 @@ public class SocketEndpointManager implements ManagedConfigurationListener
 				    int index = -1;
 				    
 				    if((index = descriptors.indexOf(
-				    		new Name<SocketEndpointDescriptor>(prefix)))>-1)
+				    	new Name<SocketEndpointDescriptor>(prefix)))>-1)
 				    {
 				    	descriptor = descriptors.get(index);
 				    	
@@ -177,7 +177,11 @@ public class SocketEndpointManager implements ManagedConfigurationListener
 				{
 					continue;
 				}
-				final SocketEndpoint endpoint = createEndpoint(descriptor);
+				final SocketEndpoint endpoint = new SocketEndpoint(
+					mediator, descriptor.localAddress,
+					descriptor.localPort, descriptor.remoteAddress,
+					descriptor.remotePort);	
+
 				if(endpoint != null)
 				{
 					this.map.put(descriptor, endpoint);	
@@ -192,24 +196,6 @@ public class SocketEndpointManager implements ManagedConfigurationListener
 				}
 			}
 		}
-	}
-
-	private SocketEndpoint createEndpoint(final SocketEndpointDescriptor descriptor)
-	{
-		return mediator.callService(Core.class, new Executable<Core,SocketEndpoint>()
-		{
-			@Override
-			public SocketEndpoint execute(final Core core) throws Exception
-			{
-				final SocketEndpoint endpoint = new SocketEndpoint(
-						mediator,					
-						descriptor.localAddress,
-						descriptor.localPort,
-						descriptor.remoteAddress,
-						descriptor.remotePort);	
-				return endpoint;
-			}
-		});
 	}
 
 	private void registerEndpoint(final SocketEndpoint endpoint)

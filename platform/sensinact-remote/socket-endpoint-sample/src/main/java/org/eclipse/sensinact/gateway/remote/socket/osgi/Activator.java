@@ -48,7 +48,8 @@ public class Activator extends AbstractActivator<Mediator>
 	@Override
 	public void doStart() throws Exception
 	{		
-		this.manager = new SocketEndpointManager(super.mediator);
+		this.manager = new SocketEndpointManager(
+				super.mediator);
 		super.mediator.addListener(this.manager);
 	}
 
