@@ -10,9 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.device.mqtt.lite.it;
 
-import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.Session;
@@ -56,21 +54,6 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     @Before
     public void before() {
         sensinactSession = sensinactCore.getAnonymousSession();
-
-        try{
-            mqtt.startService(MQTT_HOST,MQTT_PORT.toString());
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    @After
-    public void after(){
-        try {
-            mqtt.stopServer();
-        } catch (MQTTException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test

@@ -31,10 +31,6 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  */
 public class StorageAgent extends AbstractMidAgentCallback {
 
-    private static final String HISTORICAL_AGENT_LOGIN_PROP = "org.eclipse.sensinact.gateway.historical.login";
-    private static final String HISTORICAL_AGENT_PSSWD_PROP = "org.eclipse.sensinact.gateway.historical.password";
-    private static final String HISTORICAL_STORAGE_PROP = "org.eclipse.sensinact.gateway.historical.broker";
-
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private final StorageConnection storageConnection;
 
@@ -45,13 +41,8 @@ public class StorageAgent extends AbstractMidAgentCallback {
      * 		the associated {@link Mediator}
      * @throws IOException Exception on connection problem
      */
-    public StorageAgent(Mediator mediator) throws IOException {
+    public StorageAgent(String login,String password,String broker,Mediator mediator) throws IOException {
         super();
-
-        String broker = (String) mediator.getProperty(HISTORICAL_STORAGE_PROP);
-        String login = (String) mediator.getProperty(HISTORICAL_AGENT_LOGIN_PROP);
-        String password = (String) mediator.getProperty(HISTORICAL_AGENT_PSSWD_PROP);
-
         this.storageConnection = new StorageConnection(mediator, broker, login, password);
     }
 
