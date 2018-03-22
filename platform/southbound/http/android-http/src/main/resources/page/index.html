@@ -75,10 +75,7 @@ window.addEventListener("deviceorientation", function(event) {
   document.getElementById("accelerationA").innerHTML = "Yaw "+(360-event.alpha);
   document.getElementById("accelerationB").innerHTML = "Pitch "+event.beta;
   document.getElementById("accelerationG").innerHTML = "Roll "+event.gamma;
-  sendData("/sensinact/providers/android/services/accelerometer/resources/beta/SET","{\"parameters\":[{name:\"beta\",value:\""+event.beta+"\",type:\"float\"}]}");
-  sendData("/sensinact/providers/android/services/accelerometer/resources/alpha/SET","{\"parameters\":[{name:\"alpha\",value:\""+(360-event.alpha)+"\",type:\"float\"}]}");
-sendData("/sensinact/providers/android/services/accelerometer/resources/epsilon/SET","{\"parameters\":[{name:\"epsilon\",value:\""+event.gamma+"\",type:\"float\"}]}");
-
+  sendData("/android/","{\"alpha\":"+(360-event.alpha)+",\"beta\":"+event.beta+",\"epsilon\":"+event.gamma+"}");
   } else {
     this.counter=this.counter+1;
   }
