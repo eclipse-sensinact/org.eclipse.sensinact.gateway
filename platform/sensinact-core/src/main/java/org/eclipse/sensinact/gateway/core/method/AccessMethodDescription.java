@@ -55,7 +55,7 @@ implements Description, Iterable<Signature>
 	public String getJSON() 
 	{		
 		StringBuilder buffer = new StringBuilder();
-		buffer.append(JSONUtils.OPEN_BRACKET);
+		//buffer.append(JSONUtils.OPEN_BRACKET);
 		
 		boolean moreThanOne = false;
 		
@@ -66,7 +66,7 @@ implements Description, Iterable<Signature>
 			buffer.append(iterator.next().getJSON());
 			moreThanOne = true;
 		}
-		buffer.append(JSONUtils.CLOSE_BRACKET);
+		//buffer.append(JSONUtils.CLOSE_BRACKET);
 		return buffer.toString();
 	}
 
