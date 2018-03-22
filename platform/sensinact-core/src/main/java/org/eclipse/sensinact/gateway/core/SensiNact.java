@@ -46,7 +46,6 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.eclipse.sensinact.gateway.core.method.RemoteAccessMethodExecutable;
-import org.eclipse.sensinact.gateway.core.method.UnknownAccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod.DescribeType;
@@ -77,7 +76,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 

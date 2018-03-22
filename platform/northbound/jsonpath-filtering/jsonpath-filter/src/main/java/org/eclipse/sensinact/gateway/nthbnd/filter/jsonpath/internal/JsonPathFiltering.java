@@ -62,9 +62,9 @@ public class JsonPathFiltering implements Filtering
 	 * @see org.eclipse.sensinact.gateway.core.Filtering#apply(java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public String apply(String filter, Object result)
+	public String apply(String definition, Object result)
 	{
-		if(filter == null)
+		if(definition == null)
 		{
 			return String.valueOf(result);
 		}
@@ -72,7 +72,7 @@ public class JsonPathFiltering implements Filtering
 	    { 
 	    	DocumentContext dc = JsonPath.parse(
 	    			String.valueOf(result));
-	        Object object = dc.read(filter);
+	        Object object = dc.read(definition);
 
 	        if(object.getClass() == String.class)
 	        {
@@ -95,7 +95,7 @@ public class JsonPathFiltering implements Filtering
 	 * @see org.eclipse.sensinact.gateway.core.Filtering#getLDAPComponent()
 	 */
 	@Override
-	public String getLDAPComponent() 
+	public String getLDAPComponent(String definition) 
 	{
 		return null;
 	}

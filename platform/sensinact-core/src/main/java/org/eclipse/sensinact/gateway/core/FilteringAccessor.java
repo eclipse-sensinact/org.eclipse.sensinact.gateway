@@ -23,8 +23,7 @@ import org.osgi.framework.ServiceReference;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class FilteringAccessor extends FilteringDefinition 
-implements Filtering {
-
+{
 	private ServiceReference<Filtering> reference;
 	private Mediator mediator;
 	
@@ -65,12 +64,21 @@ implements Filtering {
 	}
 
 	/**
-	 * @inheritDoc
+	 * Returns true if the {@link Filtering} service 
+	 * wrapped by this FilteringAccessor is able
+	 * to handle the String type of filter passed as 
+	 * parameter; returns false otherwise
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.Filtering#
-	 * handle(java.lang.String)
+	 * @param type the String type of filter
+	 * 
+	 * @return 
+	 * <ul>
+	 * 		<li>true if the specified type of filter is 
+	 * 			handled by the wrapped {@link Filtering}
+	 * 			service</li>
+	 * 		<li> false otherwise</li>
+	 * </ul> 
 	 */
-	@Override
 	public boolean handle(String type) 
 	{
 		Filtering filtering = this.mediator.getContext(
@@ -88,13 +96,16 @@ implements Filtering {
 		return handle;
 	}
 
+
 	/**
-	 * @inheritDoc
+	 * Returns the String formated LDAP component part of the 
+	 * {@link Filtering} service wrapped by this FilteringAccessor.
+	 * The returned filter is used to discriminate the elements on 
+	 * which the wrapped {@link Filtering} service will be applied on 
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.Filtering#
-	 * getLDAPComponent()
+	 * @return the String formated LDAP component part 
+	 * of the wrapped Filtering service
 	 */
-	@Override
 	public String getLDAPComponent() 
 	{
 		Filtering filtering = this.mediator.getContext(
@@ -105,29 +116,16 @@ implements Filtering {
 			"Unable to retrieve the appropriate Filtering service");
 			return null;
 		}	
-		String ldap  = filtering.getLDAPComponent();
+		String ldap  = filtering.getLDAPComponent(super.filter);
 		this.mediator.getContext().ungetService(
 				this.reference);
 		return ldap;
 	}
-	
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.Filtering#
-	 * apply(java.lang.String, java.lang.Object)
-	 */
-	@Override
-	public String apply(String filter, Object obj) 
-	{
-		this.mediator.warn(
-		"You should use the single argument implementation");
-		return null;
-	}
 
 	/**
-	 * Applies this FilteringAccessor's filter on the specified
-	 * object argument and returns the String result
+	 * Applies the {@link Filtering} service wrapped by this 
+	 * FilteringAccessor on the specified object argument and 
+	 * returns the String result
 	 * 
 	 * @param obj the Object value to be filtered
 	 * 

@@ -11,16 +11,16 @@
 package org.eclipse.sensinact.gateway.core;
 
 /**
- * Filter to be applied on the response of an sensiNact's 
- * access method call
+ * Filter to be applied on the response of an sensiNact's access 
+ * method call
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface Filtering
 {	
 	/**
-	 * Returns true if this ResponseFilter is able
-	 * to handle the String type of filter passed as 
+	 * Returns true if this Filtering service is 
+	 * able to handle the String type of filter passed as 
 	 * parameter; returns false otherwise
 	 * 
 	 * @param type the String type of filter
@@ -28,7 +28,7 @@ public interface Filtering
 	 * @return 
 	 * <ul>
 	 * 		<li>true if the specified type of filter is 
-	 * 			handled by this ResponseFilter</li>
+	 * 		handled by this {@link Filtering} service</li>
 	 * 		<li> false otherwise</li>
 	 * </ul> 
 	 */
@@ -40,21 +40,24 @@ public interface Filtering
 	 * discriminate the elements on which this Filtering
 	 * service will be applied on 
 	 * 
+	 * @param definition the String definition describing 
+	 * the Filtering service's parameters
+	 * 
 	 * @return the String formated LDAP component part 
 	 * of this Filtering service
 	 */
-	String getLDAPComponent();
+	String getLDAPComponent(String definition);
 	
 	/**
 	 * Applies the String filter passed as parameter on the 
 	 * Object also passed as parameter and  returned the String
 	 * filtered result, in the same format 
 	 * 
-	 * @param filter the String filter to apply on the 
-	 * specified Object
+	 * @param definition the String definition describing 
+	 * the Filtering service's parameters 
 	 * @param obj the Object to be filtered 
 	 * 
 	 * @return the String filtered result
 	 */
-	String apply(String filter, Object obj);
+	String apply(String definition, Object obj);
 }
