@@ -14,7 +14,9 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
 /**
- *
+ * {@link Filtering} implementation allowing to apply a JsonPath expression to
+ * the result object to be filtered
+ *  
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class JsonPathFiltering implements Filtering

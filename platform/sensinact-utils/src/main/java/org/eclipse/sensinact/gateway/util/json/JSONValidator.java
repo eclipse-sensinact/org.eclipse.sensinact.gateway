@@ -29,6 +29,20 @@ import org.json.JSONObject;
 //item's [key and] value, when relevant
 public class JSONValidator 
 {
+	public static class TokenContext
+	{
+		public final String path;
+		public final String key;
+		public final Object value;
+		
+		TokenContext(String path,String key,Object value)
+		{
+			this.path = path;
+			this.key = key;
+			this.value = value;
+		}
+	}
+	
     public static enum JSONToken
     {
     	JSON_OBJECT_OPENING,
@@ -36,7 +50,26 @@ public class JSONValidator
     	JSON_OBJECT_ITEM,
     	JSON_ARRAY_OPENING,
     	JSON_ARRAY_CLOSING,
-    	JSON_ARRAY_ITEM,
+    	JSON_ARRAY_ITEM;
+    	
+    	private TokenContext context;
+    	
+    	JSONToken(){}
+
+    	public void clear()
+    	{
+    		this.context = null;
+    	}
+    	
+    	public TokenContext getContext()
+    	{
+    		return this.context;
+    	}
+    	
+    	public void setContext(TokenContext context)
+    	{
+    		this.context = context;
+    	}
     }
     
     private int index;
@@ -207,14 +240,20 @@ public class JSONValidator
 	                default:
 	                	back();
 	            }   	        
-    	        return JSONToken.JSON_OBJECT_ITEM;
+    	        JSONToken t = JSONToken.JSON_OBJECT_ITEM;
+    	        t.clear();
+    	        t.setContext(new TokenContext(null,key,value));
+    	        return t;
 			case JSON_ARRAY_OPENING: 
 				value = null;
 				switch (c) 
 	            {				    
 	                case ';':
 	                case ',':
-	        	        return JSONToken.JSON_ARRAY_ITEM;
+	        	        t = JSONToken.JSON_ARRAY_ITEM;
+	        	        t.clear();
+	        	        t.setContext(new TokenContext(null, null, null));
+	        	        return t;
 	                default:
 	                	break;
 	            }
@@ -260,7 +299,10 @@ public class JSONValidator
 	                default:
 	                	back();
 	            }    	        
-    	        return JSONToken.JSON_ARRAY_ITEM; 
+    	        t = JSONToken.JSON_ARRAY_ITEM;
+    	        t.clear();
+    	        t.setContext(new TokenContext(null, null, value));
+    	        return t; 
 			case JSON_OBJECT_CLOSING:
 			case JSON_OBJECT_ITEM:
 			case JSON_ARRAY_CLOSING:
