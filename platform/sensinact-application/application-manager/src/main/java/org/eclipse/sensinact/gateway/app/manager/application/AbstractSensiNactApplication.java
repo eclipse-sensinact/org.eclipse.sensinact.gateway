@@ -71,10 +71,20 @@ public abstract class AbstractSensiNactApplication implements SensiNactApplicati
 	 * {@link SensiNactApplication} to be built
 	 */
 	protected AbstractSensiNactApplication(
-			Mediator mediator, 
+			final Mediator mediator, 
 			String name, 
-			String privateKey)
+			final String privateKey)
 	{
+		this.session = mediator.callService(Core.class, 
+				new Executable<Core,Session>() 
+		{
+			@Override
+			public Session execute(Core core) throws Exception
+			{
+				return core.getApplicationSession(mediator, 
+						privateKey);
+			}
+		});
 		this.mediator = mediator;
 		this.name = name;
 		this.privateKey = privateKey;
@@ -89,16 +99,16 @@ public abstract class AbstractSensiNactApplication implements SensiNactApplicati
 	@Override
 	public SnaErrorMessage start()
 	{
-		this.session = mediator.callService(Core.class, 
-				new Executable<Core,Session>() 
-		{
-			@Override
-			public Session execute(Core core) throws Exception
-			{
-				return core.getApplicationSession(mediator, 
-						privateKey);
-			}
-		});
+		//this.session = mediator.callService(Core.class, 
+		//		new Executable<Core,Session>() 
+		//{
+		//	@Override
+		//	public Session execute(Core core) throws Exception
+		//	{
+		//		return core.getApplicationSession(mediator, 
+		//				privateKey);
+		//	}
+		//});
 		return doStart();
 	}
 	/**
@@ -110,7 +120,7 @@ public abstract class AbstractSensiNactApplication implements SensiNactApplicati
 	public SnaErrorMessage stop()
 	{
 		SnaErrorMessage message = this.doStop();
-		this.session = null;
+		//this.session = null;
 		return message;
 	}	
 	
