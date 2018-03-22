@@ -362,7 +362,11 @@ public class ApplicationFactory {
             List<List<String>> routesList = new ArrayList<List<String>>();
 
             for (Node node : providerNodes) {
+
+                if(node==null) continue;
+
                 List<List<String>> routes = node.getRoutes();
+
 
                 for (List<String> route : routes) {
                     route.add(uri);
