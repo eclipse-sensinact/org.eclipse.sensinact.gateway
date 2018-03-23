@@ -81,7 +81,16 @@ public class RegisterAgentRequest extends NorthboundRequest
 			@Override
 			public void doHandle(SnaResponseMessage<?,?> message) {
 				 RegisterAgentRequest.this.recipient.doCallback(message);
-			}};		
+			}
+			
+			@Override
+			public void setIdentifier(String identifier)
+			{
+				super.setIdentifier(identifier);
+				RegisterAgentRequest.this.recipient.setIdentifier(
+						super.identifier);
+			}
+		};		
 		Argument[] superArguments = super.getExecutionArguments();
 		int length = superArguments==null?0:superArguments.length;
 		Argument[] arguments = new Argument[length+2];
