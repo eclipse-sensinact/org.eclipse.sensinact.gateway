@@ -62,8 +62,13 @@ implements Description, Iterable<Signature>
 		Iterator<Signature> iterator = this.signatures.iterator();
 		while(iterator.hasNext())
 		{	
+			String json = iterator.next().getJSON();
+			if(json == null)
+			{
+				continue;
+			}
 			buffer.append(moreThanOne?JSONUtils.COMMA:JSONUtils.EMPTY);
-			buffer.append(iterator.next().getJSON());
+			buffer.append(json);
 			moreThanOne = true;
 		}
 		//buffer.append(JSONUtils.CLOSE_BRACKET);
