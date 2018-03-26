@@ -10,6 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.protocol.http.client.mid;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.logging.Logger;
 
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
@@ -268,7 +271,7 @@ AbstractStackEngineHandler<REQUEST>
         catch (Exception e)
         {
         	handleError(e, element);
-        	
+               	
         } finally 
         {
 			this.listener.respond(response);
@@ -287,7 +290,7 @@ AbstractStackEngineHandler<REQUEST>
     /**
      * @param element
      */ 
-    private void handleError(Exception e, REQUEST element)
+    protected void handleError(Exception e, REQUEST element)
     {
 		this.updateDelay();		
 		this.reactivate = true;
