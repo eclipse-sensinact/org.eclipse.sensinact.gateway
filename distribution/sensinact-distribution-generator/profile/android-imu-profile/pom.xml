@@ -29,7 +29,7 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
-            <artifactId>android-http</artifactId>
+            <artifactId>http-android</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

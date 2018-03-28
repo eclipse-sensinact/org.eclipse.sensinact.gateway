@@ -1,0 +1,183 @@
+<html>
+<head>
+
+    <style>
+.myDiv { display:none; }
+</style>
+</head>
+<body>
+
+<table>
+    <tr>
+        <td>
+            Alias:
+        </td>
+        <td>
+            <input id="userId" name="user" type="text"></input>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Connection Status:
+        </td>
+        <td>
+            <div id="state">Disconnected</div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" align="center">
+            <input id="conButton" type="button" name="mainbutton" onclick="return userDisconnectConnect()" value="Connect"></input>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            State:
+        </td>
+        <td>
+            <select id="stateOptionId" name="stateOption" size="2" disabled>
+                <option value="true">True</option>
+                <option value="false">False</option>
+            </select>
+            <input type="button" name="stateButton" id="stateButtonId" disabled onclick="sendStateButton()" value="Send State"></input>
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="2" align="center">
+            <div id="messageDiv"></div>
+        </td>
+    </tr>
+
+
+</table>
+
+<div id="androidDiv" style="display:none;">
+    <table>
+        <tr>
+            <td>
+                Yaw
+            </td>
+            <td>
+                <p class="valueStyle" id="accelerationA" /><br/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Pitch
+            </td>
+            <td>
+                <p class="valueStyle" id="accelerationB" /><br/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Roll
+            </td>
+            <td>
+                <p class="valueStyle" id="accelerationG" /><br/>
+            </td>
+        </tr>
+</div>
+
+<script>
+
+var isConnected=false;
+
+function sendStateButton(){
+	userConfig=new Object();
+	userConfig.provider=document.getElementById("userId").value;
+	userConfig.service="info";
+	userConfig.resource="state";
+	userConfig.value=document.getElementById("stateOptionId").value;
+	ws.send(JSON.stringify(userConfig));
+
+}
+
+function showMessage(msg){
+	state=document.getElementById("messageDiv")
+	state.innerHTML=msg;
+}
+
+function connectionState(newState){
+  document.getElementById("androidDiv").style.display=newState && navigator.userAgent.toLowerCase().indexOf("android")>-1?"inline":"none";
+  document.getElementById("state").innerHTML=newState?"CONNECTED":"DISCONNECTED";
+  document.getElementById("conButton").value=newState?"Disconnect":"Connect";
+  document.getElementById("userId").disabled=newState;
+  document.getElementById("stateOptionId").disabled=!newState;
+  document.getElementById("stateButtonId").disabled=!newState;
+  isConnected=newState;
+
+}
+
+function userDisconnectConnect(){
+	if(!isConnected){
+
+		if(document.getElementById("userId").value == "")
+                {
+			showMessage("Alias cannot be empty");
+			return false;
+                }else {
+			showMessage("");
+		}
+
+		 this.serverAddr=document.URL.replace(/http:\/\//i, "").replace(/\/.*/i, "");
+		 ws= new WebSocket("ws://"+this.serverAddr+"/androidws");
+		 ws.onopen = function(evt) {
+			userConfig=new Object();
+			userConfig.provider=document.getElementById("userId").value;
+			userConfig.service="info";
+			userConfig.resource="value";
+			ws.send(JSON.stringify(userConfig));
+			userConfig.resource="state";
+			userConfig.value="false";
+			ws.send(JSON.stringify(userConfig));
+			connectionState(true);
+		 };
+		 ws.onmessage = function(evt) {
+			 console.log( "Received Message: " + evt.data);
+		 };
+		 ws.onclose = function(evt) {
+			 var state=document.getElementById("state")
+			connectionState(false);
+
+		 };
+		 ws.onerror = function(evt) {
+			connectionState(false);
+			showMessage("disconnected with error")
+		 };
+
+	}else {
+		ws.close();
+	}
+
+}
+
+
+var ua = navigator.userAgent.toLowerCase();
+var isAndroid = ua.indexOf("android") > -1;
+if(isAndroid) {
+	window.addEventListener("deviceorientation", function(event) {
+	  if(event.alpha!=null) {
+	  document.getElementById("accelerationA").innerHTML = (360-event.alpha);
+	  document.getElementById("accelerationB").innerHTML = event.beta;
+	  document.getElementById("accelerationG").innerHTML = event.gamma;
+		userConfig=new Object();
+		userConfig.provider=document.getElementById("userId").value;
+		userConfig.service="info";
+		userConfig.resource="yaw";
+		userConfig.value=(360-event.alpha);
+		ws.send(JSON.stringify(userConfig));
+		userConfig.resource="Pitch";
+		userConfig.value=(event.beta);
+		ws.send(JSON.stringify(userConfig));
+		userConfig.resource="Roll";
+		userConfig.value=(event.gamma);
+		ws.send(JSON.stringify(userConfig));
+	  }
+	}, true);
+}
+
+</script>
+
+</body>
+</html>
