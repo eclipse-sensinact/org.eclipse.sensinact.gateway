@@ -31,10 +31,10 @@ import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
 import org.eclipse.sensinact.gateway.common.primitive.Typable;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.BufferMidCallback;
+import org.eclipse.sensinact.gateway.core.message.MidCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.ScheduledBufferMidCallback;
 import org.eclipse.sensinact.gateway.core.message.ScheduledMidCallback;
-import org.eclipse.sensinact.gateway.core.message.MidCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
@@ -44,7 +44,6 @@ import org.eclipse.sensinact.gateway.core.message.SubscriptionFilter;
 import org.eclipse.sensinact.gateway.core.message.UnaryMidCallback;
 import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodDescription;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
@@ -188,7 +187,6 @@ implements Typable<Resource.Type>
 			    }
 			};
 		}
-		
 	}
 	
 	/**
