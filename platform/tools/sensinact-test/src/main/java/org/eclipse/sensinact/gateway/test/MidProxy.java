@@ -390,6 +390,7 @@ public class MidProxy<T> implements InvocationHandler
 			return null;
 		}
 		Object result = null;
+		contextualizedMethod.setAccessible(true);
 		if(args == null ||args.length == 0)
 		{
 			result = contextualizedMethod.invoke(this.instance);
@@ -444,7 +445,7 @@ public class MidProxy<T> implements InvocationHandler
 				Class[] parameterTypes = m.getParameterTypes();
 				if(parameterTypes==null || parameterTypes.length==0)
 				{
-					return cl.getMethod(m.getName());
+					return cl.getDeclaredMethod(m.getName());
 				}
 				
 				Class[] pts = new Class[parameterTypes.length];
@@ -468,11 +469,12 @@ public class MidProxy<T> implements InvocationHandler
 								c.getName());
 					}
 				}
-				Method cm = cl.getMethod(m.getName(), pts);
+				Method cm = cl.getDeclaredMethod(m.getName(), pts);
 				return cm;
 			}			
 		} catch (Exception e) 
 		{
+			e.printStackTrace();
 			return null;			
 		}
 		return m;	
