@@ -197,6 +197,7 @@ public class Sessions
 	        		observer.disappearing(value.getPublicKey());
 	        	}
 	        	value.unregisterAgents();
+	        	value = null;
 	        	return true;
 	        }
 	        return false;
