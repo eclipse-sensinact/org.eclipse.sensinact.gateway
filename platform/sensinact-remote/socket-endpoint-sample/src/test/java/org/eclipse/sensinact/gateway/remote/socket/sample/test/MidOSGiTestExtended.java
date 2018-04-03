@@ -25,12 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.FilteringDefinition;
+import org.eclipse.sensinact.gateway.core.SensiNact;
 import org.eclipse.sensinact.gateway.core.Session;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidCallback;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.MessageRegisterer;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
@@ -61,69 +60,16 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	//						NESTED DECLARATIONS			  			      //
 	//********************************************************************//
 
-	class AgentCallback extends AbstractMidCallback  implements MidAgentCallback
+	class AgentCallback extends AbstractMidAgentCallback 
 	{
-	    final String[] UNLISTENED = new String[]{
-	    	"/sensiNact/system","/AppManager/admin"
-	    };
-
-		/**
-		 * The string formated location of service providers
-		 * that have already been processed by this {@link 
-		 * MidAgentCallback}
-		 */
-		private Map<String, String> locations;
-
-		
+	   
 		/**
 		 * Constructor
-		 * 
-		 * @param identifier
-		 * 		the {@link Mediator} that will be used 
-		 * 		by the AbstractSnaAgentCallback to instantiate
 		 */
 		protected AgentCallback()
 		{
-			super(false);
-			this.locations = new HashMap<String,String>();
+			super();
 		}
-		
-		/**
-		 * Returns the String location for the service provider
-		 * whose path is passed as parameter 
-		 * 
-		 * @param path
-		 * 		the path  of the service provider for which to
-		 * 		retrieve the string location
-		 * @return
-		 * 		the String location for the specified path
-		 */
-	    protected String getLocation(String serviceProvider)
-	    {
-			synchronized(this.locations)
-			{
-				return this.locations.get(serviceProvider);
-			}
-	    }
-	    
-	    /**
-		 * Sets the String location for the service provider
-		 * whose path is passed as parameter 
-		 * 
-		 * @param path
-		 * 		the path  of the service provider for which to
-		 * 		set the string location
-		 * @param location
-		 * 		the string location to set
-		 */
-	    protected void setLocation(String serviceProvider, String location)
-	    {
-			synchronized(this.locations)
-			{
-				this.locations.put(serviceProvider, location);	
-			}
-	    }
-	    
 		/**
 		 * @inheritDoc
 	     *
@@ -131,14 +77,17 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	     */
 	    @Override
 	    public void doCallback(SnaMessage<?> message)
-	    {  	
+	    {
+			used++;    	
 	    	if(message == null)
 			{
+				used--;
 				return;
 			}	
 			String path = message.getPath();
 			if(path == null)
 			{
+				used--;
 			    return;
 			}	
 			int index = 0;
@@ -152,45 +101,39 @@ public class MidOSGiTestExtended extends MidOSGiTest
 				}
 		    	if(path.startsWith(unlistened))
 		    	{
+					used--;
 		    		return;
 		    	}
 			}
 			try
 			{
-		    	handleMessage(message);
-		    	
+				treat(message);
+				
 			} catch(Exception e)
 			{
+				e.printStackTrace();
 				super.setStatus(Status.ERROR);
 				super.getCallbackErrorHandler().register(e);
+				
+			} finally
+			{
+				used--;
 			}
-	    } 
+	    }
 	    
 		@Override
-		public void doHandle(SnaLifecycleMessageImpl message) 
-		{		
-			//handleMessage(message);
-		}
+		public void doHandle(SnaLifecycleMessageImpl message) {}
 
 		@Override
-		public void doHandle(SnaUpdateMessageImpl message) {
-
-			//handleMessage(message);
-		}
+		public void doHandle(SnaUpdateMessageImpl message) {}
 
 		@Override
-		public void doHandle(SnaErrorMessageImpl message) {
-
-			//handleMessage(message);
-		}
+		public void doHandle(SnaErrorMessageImpl message) {}
 
 		@Override
-		public void doHandle(SnaResponseMessage<?,?> message) {
+		public void doHandle(SnaResponseMessage<?,?> message) {}
 
-			//handleMessage(message);
-		}
-
-    	private final void handleMessage(SnaMessage<?> message)
+    	private final void treat(SnaMessage<?> message)
     	{
 			String json = message.getJSON();
 			stack.push(json);
@@ -587,10 +530,8 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	    Object o = mids.toOSGi(m,null);
 	    Object j = o.getClass().getDeclaredMethod(
 	    		"getJSON").invoke(o);
-
 	    return (String) j;
 	}
-	
 	
 	public void registerAgent() throws Throwable 
 	{
@@ -606,11 +547,21 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	    System.out.println(j);
 	}
 
+	public void stop() throws Throwable 
+	{
+		MidProxy<Core> mid = new MidProxy<Core>(classloader,this, Core.class);		
+	    Core core = mid.buildProxy();
+	    mid.toOSGi(SensiNact.class.getDeclaredMethod("unregisterEndpoint", 
+	    	String.class), new Object[] {"sna2"});
+	    mid.toOSGi(SensiNact.class.getDeclaredMethod("unregisterEndpoint", 
+		    	String.class), new Object[] {"sna1"});
+	    this.stack.clear();
+	}
+	
 	public List<String> listAgentMessages() 
 	{
 		List<String> messages = new ArrayList<>();
 		messages.addAll(this.stack);
 		return Collections.unmodifiableList(messages);
-		
 	}
 }

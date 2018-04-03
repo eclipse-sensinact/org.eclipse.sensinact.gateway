@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.remote.socket;
 
 import java.io.IOException;
@@ -17,7 +16,6 @@ import java.util.TimerTask;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint;
-import org.eclipse.sensinact.gateway.core.RemoteCore;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
@@ -73,8 +71,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	private Timer connectionTimer;
 
 	/**
+	 * 
 	 * @param mediator
-	 * @param localNamespace
 	 * @param localAddress
 	 * @param localPort
 	 * @param remoteAddress
@@ -157,7 +155,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 				switch(subUriELements[0])
 				{
 					case "namespace":
-						response  = super.localNamespace; 
+						response  = super.getLocalNamespace();
 					break;
 					case "agent":
 						if(subUriELements.length != 2)
@@ -346,8 +344,9 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			response = accessMethodResponse.toString();
 		}
-		return new JSONObject().put("uuid",
-				uuid).put("response", response);
+		return new JSONObject(
+			).put("uuid",uuid
+			).put("response", response);
 	}
 	
 	/** 
@@ -361,7 +360,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		if(this.remoteNamespace == null && this.client != null)
 		{
 			String response = this.client.request(
-					new JSONObject().put("uri", "/namespace"));
+				new JSONObject().put("uri", "/namespace"));
+			
 			if(response != null && response.length() > 0)
 			{
 				this.remoteNamespace = response;
@@ -417,28 +417,62 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	/**
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint#doConnect()
+	 * @see org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint#doOpen()
 	 */
 	@Override
-	public boolean doConnect() 
+	public void doOpen() 
 	{
 		if(this.remoteNamespace!=null)
 		{
-			return true;
+			return;
 		}
 		if(this.server==null)
 		{
 			try
 			{
-				this.server = new ServerSocketThread(mediator, this);				
-				new Thread(server).start();
+				this.server = new ServerSocketThread(
+						mediator, this);	
 			}
 			catch (IOException e)
 			{
 				mediator.error(e);
-				return false;
+				return;
 			}
 		}
+		if(!this.server.running())
+		{
+			new Thread(server).start();
+		}
+		connectionTimer();
+		int timeout = 60*3000;
+		while(true)
+		{
+			if(timeout<=0 || remoteNamespace != null)
+			{
+				break;
+			}
+			this.namespace();	
+			try
+			{
+				timeout-=100;
+				Thread.sleep(100);
+			}
+			catch (InterruptedException e)
+			{
+				Thread.interrupted();
+				break;
+			}
+		}
+		this.connectionTimer.cancel();
+		this.connectionTimer = null;
+		if(remoteNamespace != null)
+		{
+			super.connected();
+		}
+	}
+	
+	private void connectionTimer()
+	{
 		this.connectionTimer = new Timer();
 		this.connectionTimer.schedule(new TimerTask()
 		{
@@ -449,15 +483,16 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 				{
 					if(SocketEndpoint.this.client == null)
 					{
-						SocketEndpoint.this.client =
-						new ClientSocketThread(mediator, SocketEndpoint.this,
-						SocketEndpoint.this.getRemoteAddress(), 
-						SocketEndpoint.this.getRemotePort());
+						SocketEndpoint.this.client = new ClientSocketThread(
+							mediator, SocketEndpoint.this,
+						    SocketEndpoint.this.getRemoteAddress(), 
+						    SocketEndpoint.this.getRemotePort());
 					}
 					if(!SocketEndpoint.this.client.running())
 					{
 						new Thread(SocketEndpoint.this.client).start();					
-						SocketEndpoint.this.mediator.debug("Client socket thread started");	
+						SocketEndpoint.this.mediator.debug(
+							"Client socket thread started");	
 					}
 					if(SocketEndpoint.this.namespace()!=null)
 					{ 
@@ -476,44 +511,23 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 					}
 				}
 			}
-		}, 0, 1000*5);		
-		int timeout = 60*3000;
-		
-		while(true)
-		{
-			if(timeout<=0 || remoteNamespace != null)
-			{
-				break;
-			}
-			this.namespace();	
-			try
-			{
-				timeout-=100;
-				Thread.sleep(100);
-			}
-			catch (InterruptedException e)
-			{
-				Thread.interrupted();
-				break;
-			}
-		}		
-		this.connectionTimer.cancel();
-		this.connectionTimer = null;
-		if(remoteNamespace == null)
-		{
-			return false;
-		}
-		return true;
+		}, 0, 1000*5);	
 	}
 
+	
 	/**
-	 * 
+	 * The ServerSocketThread attached to this SocketEndpoint
+	 * stopped
 	 */
 	protected void serverStopped()
 	{
 		if(super.connected)
 		{
-			super.disconnect();
+			super.disconnected();
+			this.client.stop();
+			
+			this.client = null;
+			this.remoteNamespace = null;
 			
 		} else
 		{
@@ -523,13 +537,15 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	}
 
 	/**
-	 * 
+	 * The ClientSocketThread attached to this SocketEndpoint
+	 * stopped
 	 */
 	public void clientDisconnected()
 	{
 		if(super.connected)
 		{
-			super.disconnect();
+			super.disconnected();
+			this.remoteNamespace = null;
 			
 		} else
 		{
@@ -542,16 +558,22 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	 * @inheritDoc
 	 * 
 	 * @see org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint#
-	 * doDisconnect()
+	 * doClose()
 	 */
 	@Override
-	protected void doDisconnect() 
+	protected void doClose() 
 	{
-		this.server.stop();
-		this.server = null;
-		
-		this.client.stop();
-		this.client = null;
+		if(this.server  != null)
+		{
+			this.server.stop();
+			this.server = null;
+		}
+		if(this.client != null)
+		{
+			this.client.stop();
+			this.client = null;
+		}
+		this.remoteNamespace = null;
 	}
 
 	/**
@@ -561,7 +583,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	 * registerAgent(java.lang.String, org.eclipse.sensinact.gateway.core.message.SnaFilter, java.lang.String)
 	 */
 	@Override
-	public void registerAgent(String identifier, SnaFilter filter, String agentKey)
+	public void registerAgent(String identifier, 
+			SnaFilter filter, String agentKey)
 	{
 		if(!super.connected)
 		{
@@ -569,12 +592,12 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		}
 		String uri = String.format("/agent?%s", identifier);
 		
-		String response = this.client.request(
-			new JSONObject(
-				).put("uri", uri
-				).put("agent", new JSONObject(
-					).put("agentKey", agentKey
-				    ).put("filter", filter==null?null:filter.toJSONObject())));
+		String response = this.client.request(new JSONObject(
+			).put("uri", uri
+			).put("agent", new JSONObject(
+				).put("agentKey", agentKey
+			    ).put("filter", filter==null
+			    ?null:filter.toJSONObject())));
 
 		if(response!=null)
 		{
@@ -625,8 +648,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		String path = (String) object.remove("uri");
 		
 		object.put("uri", new StringBuilder().append("/"
-			).append(super.localNamespace).append(":").append(
-				path.substring(1)).toString());
+			).append(super.getLocalNamespace()).append(":"
+			    ).append(path.substring(1)).toString());
 		
 		String response = this.client.request(
 			new JSONObject().put("uri", uri
@@ -1071,8 +1094,9 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		{
 			return null;
 		}
-		String uri =String.format("/providers/%s/services/%s/resources/%s/SUBSCRIBE", 
-				serviceProviderId,serviceId,resourceId);
+		String uri =String.format(
+		"/providers/%s/services/%s/resources/%s/SUBSCRIBE", 
+		serviceProviderId,serviceId,resourceId);
 
 		JSONArray parametersArray = new JSONArray();
 		JSONObject object = new JSONObject();		

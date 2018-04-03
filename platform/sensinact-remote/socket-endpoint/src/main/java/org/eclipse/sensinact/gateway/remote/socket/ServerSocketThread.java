@@ -8,18 +8,17 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.remote.socket;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -31,34 +30,16 @@ import org.json.JSONObject;
  */
 class ServerSocketThread implements Runnable
 {
-	private static boolean checkSocketStatus(
-			Socket socket)
-	{
-		if(socket==null || !socket.isConnected())
-		{
-			return false;
-		}
-		return (!socket.isClosed() && 
-				!socket.isInputShutdown() && 
-				!socket.isOutputShutdown());
-	}
-
-	private static boolean checkServerStatus(ServerSocket server)
-	{
-		if(server==null || !server.isBound() || server.isClosed())
-		{
-			return false;
-		}
-		return true;
-	}
-	
 	private volatile boolean running;
-	
+
+	private ServerSocket server = null;
 	protected Mediator mediator;
 	private SocketEndpoint endpoint;
 	
 	private InetAddress localAddress;
 	private int localPort;
+
+	private SocketHolder holder;
 
 	
 	ServerSocketThread(Mediator mediator, SocketEndpoint endpoint)
@@ -69,17 +50,15 @@ class ServerSocketThread implements Runnable
 		
 		this.localAddress = InetAddress.getByName(
 				endpoint.getLocalAddress());
-		this.localPort = endpoint.getLocalPort();
-		
+		this.localPort = endpoint.getLocalPort();		
 	}
 
 	@Override
 	public void run() 
 	{
-		ServerSocket server = null;
 		try 
 		{
-			server = this.createServer();
+			this.server = this.createServer();
 			mediator.debug("ServerSocket initialized... wait for socket connection");
 			
 		} catch (IOException e)
@@ -88,7 +67,7 @@ class ServerSocketThread implements Runnable
 			
 		} finally
 		{
-			if(checkServerStatus(server))
+			if(checkServerStatus())
 			{
 				run(server);
 			}
@@ -97,113 +76,74 @@ class ServerSocketThread implements Runnable
 	
 	private void run(ServerSocket server) 
 	{
-		Socket socket = null; 
-		InputStream input = null;
-		OutputStream output = null;		
 		try 
 		{
-			socket = server.accept();
-			output = socket.getOutputStream();
-			input = socket.getInputStream();
+			Socket socket = server.accept();
+			this.holder = new SocketHolder(mediator,socket);
 			mediator.debug("%s: Socket initialized", this);
 			
-		} catch (NullPointerException |IOException e)
+		} catch (IOException e)
 		{
-			mediator.error(e);
-			
+		   mediator.error(e);
+		   
 		} finally
 		{
-			if(checkSocketStatus(socket))
-			{
-				this.running = true;
-			}
+		   if(checkStatus())
+		   {
+			   this.running = true;
+		   }
 		}
 		while(running)
 		{
-			JSONObject object = null;
-			int read = 0;
-			int length = 0;
-			byte[] content = new byte[length];
-			byte[] buffer = new byte[SocketEndpoint.BUFFER_SIZE];			
+			JSONObject request = null;
 			try
 			{
-				boolean eof = false;				
-				while((read = input.read(buffer))>-1)
+				request = this.holder.read();			
+				JSONObject response = null;
+				if(request != null)
 				{
-					eof = (buffer[read-1]=='\0');
-					byte[] newContent = new byte[length+read];
-					if(length > 0)
-					{
-						System.arraycopy(content, 0, newContent, 0, length);
-					}
-					System.arraycopy(buffer, 0, newContent, length, eof?read-1:read);					
-					content = newContent;
-					newContent = null;
-					length+=(eof?read-1:read);
-					if(eof)
-					{
-						break;
-					}
-				}	
-				String strContent = new String(content);
-				object = new JSONObject(strContent);
-				
-			} catch(Exception e)
-			{
-				mediator.error(e);
-				if(!checkSocketStatus(socket))
-				{
-					break;
+					response = this.endpoint.incomingRequest(request);	
 				}
-			} 
-			JSONObject response = null;
-			if(object != null)
-			{
-				response = this.endpoint.incomingRequest(object);	
-			}
-			if(response == null)
-			{
-				response = new JSONObject();
-				response.put("statusCode", 520);
-				response.put("response" , new JSONObject().put("message",
-					"Unable to process the request"));
-			}
-			int block = SocketEndpoint.BUFFER_SIZE;
-			byte[] data = response.toString().getBytes();
-			int written = 0;
-			length = data==null?0:data.length;			
-			try
-			{
-				while(written < length)
+				if(response == null)
 				{
-					if((written+block) > length)
-					{
-						block = length-written;
-					}
-					output.write(data, written, block);
-					written+=block;
-				}	
-				output.write(new byte[]{'\0'});
-				output.flush();
+					response = new JSONObject();
+					response.put("statusCode", 520);
+					response.put("response" , 
+						new JSONObject().put("message",
+						"Unable to process the request"));
+				}
+				this.holder.write(response);
 				
-			} catch(IOException e)
+			} catch(SocketException e)
 			{
 				mediator.error(e);
-				if(!checkSocketStatus(socket))
+				//the broken pipe exception does not conduct
+				//into an invalid socket status - So we enforce
+				//the loop exit
+				break;
+				   
+			} catch(IOException | JSONException e)
+			{
+				mediator.error(e);
+				   
+			} finally
+			{
+				if(!this.checkStatus())
 				{
 					break;
 				}
 			}
 		}
-		closeSocket(socket);
-		if(!this.running || !checkServerStatus(server))
+		this.close();
+		boolean currentlyRunning = this.running;
+		this.running = false;
+		if(!checkServerStatus()||!currentlyRunning)
 		{
 			closeServer(server);
-			this.running = false;
 			this.endpoint.serverStopped();
 			return;
 		}
-		this.running = false;
+		this.endpoint.serverStopped();
 		run(server);
 	}
 	
@@ -221,24 +161,36 @@ class ServerSocketThread implements Runnable
 	{
 		return this.running;
 	}
-	
-	protected void stop()
+
+	public void stop()
 	{
 		this.running = false;
+		if(this.holder!=null)
+		{
+			this.holder.close();
+		}
+	}
+
+	private boolean checkServerStatus()
+	{
+		if(server==null || !server.isBound() || server.isClosed())
+		{
+			return false;
+		}
+		return true;
 	}
 	
-	private void closeSocket(Socket socket)
+	private boolean checkStatus()
 	{
-		if(socket!=null && socket.isConnected())
+		return this.holder!=null && 
+			this.holder.checkSocketStatus();
+	}
+
+	private void close()
+	{
+		if(this.holder != null)
 		{
-			try 
-			{
-				socket.close();
-				
-			} catch (IOException e)
-			{
-				mediator.error(e);
-			}
+			this.holder.close();
 		}
 	}
 	
