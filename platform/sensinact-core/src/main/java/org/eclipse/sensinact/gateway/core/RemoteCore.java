@@ -40,29 +40,45 @@ import org.json.JSONObject;
 public interface RemoteCore extends Endpoint
 {		
 	/**
-	 * Returns the {@link RemoteEndpoint} allowing this
-	 * RemoteCore to interact to the remote connected 
-	 * sensiNact instance
+	 * Returns the {@link RemoteEndpoint} attached to
+	 * this RemoteCore
 	 * 
 	 * @return this RemoteCore's {@link RemoteEndpoint}
 	 */
 	RemoteEndpoint endpoint();
 
 	/**
-	 * Opens the connection with the remote sensiNact 
-	 * instance using the String namespace of the 
-	 * local sensiNact instance
-	 *  
-	 * @param namespace the local sensiNact instance's
-	 * String namespace
+	 * Opens a connection with a remote sensiNact instance
+	 * by the way of the {@link RemoteEndpoint} passed as 
+	 * parameter
+	 * 
+	 * @param endpoint the {@link RemoteEndpoint} allowing 
+	 * this RemoteCore to connect to a remote sensiNact 
+	 * instance
 	 */
-	void open(String namespace);
+	void open(RemoteEndpoint endpoint);
 	
 	/**
 	 * Closes the connection with the remote sensiNact
-	 * instance 
+	 * instance
 	 */
 	void close();
+
+	/**
+	 * Registers this RemoteCore to the local instance
+	 * of sensiNact and associates it with the specified 
+	 * namespace
+	 *  
+	 * @param namespace the connected remote sensiNact 
+	 * instance's String namespace
+	 */
+	void connect(String namespace);
+	
+	/**
+	 * Unregisters this RemoteCore from the local instance
+	 * of sensiNact
+	 */
+	void disconnect();
 	
 	/**
 	 * Returns the unique integer identifier of this 
@@ -87,9 +103,10 @@ public interface RemoteCore extends Endpoint
 	 * is connected 
 	 *  
 	 * @param onConnectedCallbacks the Collection of {@link 
-	 * Executables} to be registered
+	 * Executables} to be executed at connection time
 	 */
-	void onConnected(Collection<Executable<String, Void>> onConnectedCallbacks);
+	void onConnected(Collection<Executable<String, Void>> 
+	onConnectedCallbacks);
 
 	/**
 	 * Registers the Collection of {@link Executable}s to be 
@@ -97,9 +114,10 @@ public interface RemoteCore extends Endpoint
 	 * is disconnected 
 	 *  
 	 * @param onDisconnectedCallbacks the Collection of {@link 
-	 * Executable}s to be unregistered
+	 * Executable}s to be executed at disconnection time 
 	 */
-	void onDisconnected(Collection<Executable<String, Void>> onDisconnectedCallbacks);
+	void onDisconnected(Collection<Executable<String, Void>> 
+	onDisconnectedCallbacks);
     
 	/**
 	 * Relays a subscription called from the remote connected instance

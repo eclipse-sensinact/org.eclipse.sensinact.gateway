@@ -360,8 +360,7 @@ implements JSONable, Cloneable
 	/**
 	 * Validates the type of this Primitive
 	 * 
-	 * @param type
-	 *            the type to validate
+	 * @param type the type to be validated
 	 */
 	@Override
 	protected final void checkType(Class<?> type) 

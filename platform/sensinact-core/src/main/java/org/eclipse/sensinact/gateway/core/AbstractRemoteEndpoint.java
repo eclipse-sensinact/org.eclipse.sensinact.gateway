@@ -10,15 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
-import java.util.Deque;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Stack;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Sessions.SessionObserver;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.json.JSONArray;
@@ -37,6 +32,54 @@ implements RemoteEndpoint, SessionObserver
 	//						NESTED DECLARATIONS			  			      //
 	//********************************************************************//
 
+	/**
+	 * Runnable in charge of maintaining the connection of
+	 * the {@link RemoteEndpoint} to which it belongs to and 
+	 * the one held by a remote sensiNact instance
+	 */
+	class ConnectionThread implements Runnable
+	{
+		boolean running = false;
+		
+		/**
+		 * Stops this Runnable process
+		 */
+		void stop()
+		{
+			this.running = false;
+		}
+		
+		/**
+		 * @inheritDoc
+		 *
+		 * @see java.lang.Runnable#run()
+		 */
+		@Override
+		public void run()
+		{
+			running = true;
+			while(running)
+			{
+				if(AbstractRemoteEndpoint.this.connected)
+				{
+					try
+					{
+						Thread.sleep(5000);
+					}
+					catch (InterruptedException e)
+					{
+						Thread.interrupted();
+						break;
+					}
+				} else
+				{
+					AbstractRemoteEndpoint.this.doOpen();
+				}
+				
+			}
+		}
+		
+	}
 	//********************************************************************//
 	//						ABSTRACT DECLARATIONS						  //
 	//********************************************************************//
@@ -75,13 +118,13 @@ implements RemoteEndpoint, SessionObserver
 	 * @return true if the connection has been made properly; false
 	 * otherwise
 	 */
-	protected abstract boolean doConnect();
+	protected abstract void doOpen();
 	
 	/**
 	 * Disconnects the {@link RemoteCore} previously connected from 
 	 * a remote sensiNact gateway instance it is connected to
 	 */
-	protected abstract void doDisconnect();
+	protected abstract void doClose();
 
 	//********************************************************************//
 	//						STATIC DECLARATIONS							  //
@@ -91,13 +134,14 @@ implements RemoteEndpoint, SessionObserver
 	//						INSTANCE DECLARATIONS						  //
 	//********************************************************************//
 	
+	protected final boolean automaticReconnection;
 	protected final Mediator mediator;
-	protected final String localNamespace;
 	
 	protected RemoteCore remoteCore;
 	protected boolean connected;
 	
 	protected Map<String, Recipient> recipients;
+	private ConnectionThread connectionThread;
 	
 	/**
 	 * Constructor
@@ -108,63 +152,94 @@ implements RemoteEndpoint, SessionObserver
 	 */
 	public AbstractRemoteEndpoint(Mediator mediator)
 	{
+		this(mediator,true); 
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param mediator the {@link Mediator} allowing the {@link 
+	 * RemoteEndpoint} to be instantiated to interact with the 
+	 * OSGi host environment
+	 * @param automaticReconnection defines whether the  {@link 
+	 * RemoteEndpoint} to be instantiated will try to reconnect 
+	 * when the connection is closed unexpectedly
+	 */
+	public AbstractRemoteEndpoint(Mediator mediator, boolean automaticReconnection)
+	{
 		this.mediator = mediator;
 		this.recipients = new HashMap<String,Recipient>();
 		this.connected = false;
-		this.localNamespace = mediator.callService(Core.class, 
-				new Executable<Core,String>()
-		{
-			@Override
-			public String execute(Core core) throws Exception
-			{
-				return core.namespace();
-			}
-		});		
-		if(this.localNamespace == null)
-		{
-			throw new NullPointerException(
-			"the namespace of the local instance of sensiNact is required");
-		}
-	}	
-
+		this.connectionThread = null; 
+		this.automaticReconnection = automaticReconnection;
+	}
+	
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#disconnect()
+	 * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#
+	 * open(org.eclipse.sensinact.gateway.core.RemoteCore)
 	 */
 	@Override
-	public void disconnect()
+	public void open(RemoteCore remoteCore) 
 	{
-		if(!this.connected)
+		if(this.connected)
+		{
+			mediator.debug("Endpoint already connected");
+			return;
+		}
+		this.remoteCore = remoteCore;
+		if(this.automaticReconnection)
+		{
+			this.connectionThread = new ConnectionThread();
+			new Thread(connectionThread).start();
+			
+		} else
+		{
+			this.doOpen();
+		}
+	} 	
+
+	/**
+	 * This method is called when this {@link RemoteEndpoint}
+	 * is connected to the remote one
+	 */
+	protected void connected()
+	{
+		if(this.connected)
 		{
 			return;
 		}
-		this.connected = false;
-		this.doDisconnect();
-		this.remoteCore.close();
+		this.connected = true;
+		this.remoteCore.connect(this.namespace());
 	}
 
 	/**
 	 * @inheritDoc
 	 *
-	 * @see fr.cea.sna.gateway.core.RemoteEndpoint#connect()
+	 * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#close()
 	 */
 	@Override
-	public boolean connect(RemoteCore remoteCore) 
+	public void close()
 	{
-		if(this.connected)
+		this.connectionThread.stop();
+		this.doClose();
+		this.connected = false;
+	}
+
+	/**
+	 * This method is called when this AbstractRemoteEndpoint 
+	 * is disconnected from the remote one
+	 */
+	protected void disconnected()
+	{
+		if(!this.connected)
 		{
-			mediator.debug("Endpoint already connected");
-			return true;
+			return;
 		}
-		this.remoteCore = remoteCore;
-		if(!(this.connected = this.doConnect()))
-		{
-			mediator.debug("Endpoint is not connected");
-			return false;
-		}
-		return true;
-	} 
+		this.remoteCore.disconnect();
+		this.connected = false;
+	}
 	
 	/**
 	 * @inheritDoc
@@ -204,9 +279,13 @@ implements RemoteEndpoint, SessionObserver
 	 * 
 	 * @return the local sensiNact gateway's String namespace 
 	 */
-	protected String getLocalNamespace()
+	public String getLocalNamespace()
 	{
-		return this.localNamespace;
+		if(this.remoteCore == null)
+		{
+			return null;
+		}
+		return this.remoteCore.namespace();
 	}
 	
 	/**
@@ -215,6 +294,7 @@ implements RemoteEndpoint, SessionObserver
 	 * @see org.eclipse.sensinact.gateway.core.Sessions.SessionObserver#
 	 * disappearing(java.lang.String)
 	 */
+	@Override
 	public void disappearing(String publicKey)
 	{
 		if(!this.connected)
