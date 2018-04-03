@@ -1,8 +1,8 @@
 <!-- This is a basic html in order to test websocket communication -->
 <html>
 <script>
- this.serverAddr=document.URL.replace(/http:\/\//i, "").replace(/\/.*/i, "");
- ws= new WebSocket("ws://"+this.serverAddr+"/ws");
+ this.serverAddr=document.URL.replace(/http[s]{1}:\/\//i, "").replace(/\/.*/i, "");
+ ws= new WebSocket("ws"+(document.URL.indexOf("https")>-1?"s":"")+"://"+this.serverAddr+"/ws");
  ws.onopen = function(evt) {
 	 var state=document.getElementById("state")
 	 state.innerHTML="CONNECTED";

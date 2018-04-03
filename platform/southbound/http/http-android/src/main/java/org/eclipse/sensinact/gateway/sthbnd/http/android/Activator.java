@@ -19,7 +19,6 @@ import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.wiring.BundleWiring;
@@ -33,7 +32,6 @@ import java.util.Collections;
 import java.util.Hashtable;
 
 public class Activator extends AbstractActivator {
-    //private final BundleContext bc;
     public LocalProtocolStackEndpoint<DevGenPacket> connector;
     public AndroidWebSocketPool pool;
     private BundleContext context;
@@ -61,10 +59,12 @@ public class Activator extends AbstractActivator {
                     new ServiceTrackerCustomizer() {
                         @Override
                         public Object addingService(ServiceReference serviceReference) {
+                            BundleContext useContext=mediator.getContext();
                             ClassLoader current = Thread.currentThread().getContextClassLoader();
-                            Thread.currentThread().setContextClassLoader(getJettyBundleClassLoader(mediator.getContext()));
+                            ClassLoader targetClassloader=useContext.getBundle().adapt(BundleWiring.class).getClassLoader();
+                            Thread.currentThread().setContextClassLoader(targetClassloader);
                             //ExtHttpService service= (ExtHttpService) mediator.getContext().getService(serviceReference);
-                            ExtHttpService service= (ExtHttpService) mediator.getContext().getService(serviceReference);
+                            ExtHttpService service= (ExtHttpService) useContext.getService(serviceReference);
 
                             HttpContext httpContext = service.createDefaultHttpContext();
                             Hashtable params = new Hashtable<String, Object>();
@@ -105,44 +105,9 @@ public class Activator extends AbstractActivator {
             st.open(false);
 
         }catch(Exception e){
-            e.printStackTrace();
+            mediator.error(e);
         }
 
-/*
-
-
-        mediator.onServiceAppearing(ExtHttpService.class, null, new Executable<ExtHttpService, Void>() {
-            @Override
-            public Void execute(ExtHttpService service) throws Exception {
-
-
-            }
-        });
-        */
-
-
-    }
-
-    private static final ClassLoader getJettyBundleClassLoader(
-            BundleContext context)
-    {
-        Bundle[] bundles = context.getBundles();
-        int index=0;
-        int length = bundles==null?0:bundles.length;
-
-        ClassLoader loader = null;
-
-        for(;index < length; index++)
-        {
-            if("org.apache.felix.http.jetty".equals(
-                    bundles[index].getSymbolicName()))
-            {
-                BundleWiring wiring = bundles[index].adapt(BundleWiring.class);
-                loader = wiring.getClassLoader();
-                break;
-            }
-        }
-        return loader;
     }
 
     @Override

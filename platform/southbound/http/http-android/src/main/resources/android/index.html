@@ -77,6 +77,23 @@
                 <p class="valueStyle" id="accelerationG" /><br/>
             </td>
         </tr>
+        <tr>
+            <td>
+                Latitude
+            </td>
+            <td>
+                <p class="valueStyle" id="latitude" /><br/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Longitude
+            </td>
+            <td>
+                <p class="valueStyle" id="longitude" /><br/>
+            </td>
+        </tr>
+    </table>
 </div>
 
 <script>
@@ -120,8 +137,8 @@ function userDisconnectConnect(){
 			showMessage("");
 		}
 
-		 this.serverAddr=document.URL.replace(/http:\/\//i, "").replace(/\/.*/i, "");
-		 ws= new WebSocket("ws://"+this.serverAddr+"/androidws");
+		 this.serverAddr=document.URL.replace(/http[s]{1}:\/\//i, "").replace(/\/.*/i, "");
+		 ws= new WebSocket("ws"+(document.URL.indexOf("https")>-1?"s":"")+"://"+this.serverAddr+"/androidws");
 		 ws.onopen = function(evt) {
 			userConfig=new Object();
 			userConfig.provider=document.getElementById("userId").value;
@@ -131,6 +148,25 @@ function userDisconnectConnect(){
 			userConfig.resource="state";
 			userConfig.value="false";
 			ws.send(JSON.stringify(userConfig));
+
+            try{
+                navigator.geolocation.getCurrentPosition(function(location) {
+                    console.log(location.coords.latitude);
+                    console.log(location.coords.longitude);
+                    console.log(location.coords.accuracy);
+                    document.getElementById("latitude").innerHTML = location.coords.latitude;
+                    document.getElementById("longitude").innerHTML = location.coords.longitude;
+                    userConfig=new Object();
+                    userConfig.provider=document.getElementById("userId").value;
+                    userConfig.service="admin";
+                    userConfig.resource="location";
+                    userConfig.value=location.coords.latitude+":"+location.coords.longitude;
+                    ws.send(JSON.stringify(userConfig));
+                });
+            }catch(error){
+            console.log(error);
+            }
+
 			connectionState(true);
 		 };
 		 ws.onmessage = function(evt) {
@@ -152,7 +188,6 @@ function userDisconnectConnect(){
 
 }
 
-
 var ua = navigator.userAgent.toLowerCase();
 var isAndroid = ua.indexOf("android") > -1;
 if(isAndroid) {
@@ -167,14 +202,27 @@ if(isAndroid) {
 		userConfig.resource="yaw";
 		userConfig.value=(360-event.alpha);
 		ws.send(JSON.stringify(userConfig));
-		userConfig.resource="Pitch";
+		userConfig.resource="pitch";
 		userConfig.value=(event.beta);
 		ws.send(JSON.stringify(userConfig));
-		userConfig.resource="Roll";
+		userConfig.resource="roll";
 		userConfig.value=(event.gamma);
 		ws.send(JSON.stringify(userConfig));
 	  }
 	}, true);
+	navigator.geolocation.getCurrentPosition(function(location) {
+      console.log(location.coords.latitude);
+      console.log(location.coords.longitude);
+      console.log(location.coords.accuracy);
+      	document.getElementById("latitude").innerHTML = location.coords.latitude;
+      	document.getElementById("longitude").innerHTML = location.coords.longitude;
+		userConfig=new Object();
+		userConfig.provider=document.getElementById("userId").value;
+		userConfig.service="admin";
+		userConfig.resource="location";
+		userConfig.value=location.coords.latitude+":"+location.coords.longitude;
+		ws.send(JSON.stringify(userConfig));
+    });
 }
 
 </script>

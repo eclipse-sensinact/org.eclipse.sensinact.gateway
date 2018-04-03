@@ -34,7 +34,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-Activator>org.eclipse.sensinact.gateway.sthbnd.http.android.Activator</Bundle-Activator>
-                        <Import-Package>*,org.eclipse.jetty.websocket.server.*</Import-Package>
+                        <Import-Package>*,org.eclipse.jetty.websocket.server</Import-Package>
                         <Include-Resource>
                             about.html,
                             src/main/resources/
