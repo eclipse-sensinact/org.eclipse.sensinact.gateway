@@ -81,6 +81,7 @@
         <module>android-imu-profile</module>
         <module>application-profile</module>
         <module>http-profile</module>
+        <module>free-sms</module>
         <module>kodi-profile</module>
         <module>mqtt-sb-profile</module>
         <module>mqtt-agent-profile</module>
