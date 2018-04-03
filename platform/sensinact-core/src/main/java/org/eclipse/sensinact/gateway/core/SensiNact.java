@@ -2574,10 +2574,15 @@ public class SensiNact implements Core
 				while(index < keys.length)
 				{
 					Session s = this.remoteSessions.remove(keys[index]);
-					SessionKey k = SensiNact.this.sessions.get(s);
+					SessionKey k = SensiNact.this.sessions.get(
+					new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
+							s.getSessionId()));
+					if(k == null)
+					{
+						continue;
+					}
 					k.unregisterAgents();
 				}
-				System.gc();
 			}
 
 			@Override

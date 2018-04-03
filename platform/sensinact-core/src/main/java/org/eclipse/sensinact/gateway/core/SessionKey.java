@@ -16,6 +16,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.UserKey;
+import org.osgi.framework.InvalidSyntaxException;
 
 /**
  *
@@ -240,8 +241,7 @@ public class SessionKey
 		filter, new Executable<SnaAgent, Void>()
 		{
 			@Override
-			public Void execute(SnaAgent agent)
-			        throws Exception
+			public Void execute(SnaAgent agent) throws Exception
 			{
 				agent.stop();
 				return null;

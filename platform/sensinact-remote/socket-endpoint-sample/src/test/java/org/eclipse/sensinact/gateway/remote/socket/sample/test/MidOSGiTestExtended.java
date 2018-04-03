@@ -25,11 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.SensiNact;
 import org.eclipse.sensinact.gateway.core.Session;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidCallback;
 import org.eclipse.sensinact.gateway.core.message.MessageRegisterer;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
@@ -60,16 +61,25 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	//						NESTED DECLARATIONS			  			      //
 	//********************************************************************//
 
-	class AgentCallback extends AbstractMidAgentCallback 
+	class AgentCallback extends AbstractMidCallback 
+	implements MidAgentCallback
 	{
-	   
+	    final String[] UNLISTENED = new String[]{
+	    	"/sensiNact/system","/AppManager/admin"
+	    };
+
 		/**
 		 * Constructor
+		 * 
+		 * @param identifier
+		 * 		the {@link Mediator} that will be used 
+		 * 		by the AbstractSnaAgentCallback to instantiate
 		 */
 		protected AgentCallback()
 		{
-			super();
+			super(false);
 		}
+		
 		/**
 		 * @inheritDoc
 	     *
@@ -77,17 +87,14 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	     */
 	    @Override
 	    public void doCallback(SnaMessage<?> message)
-	    {
-			used++;    	
+	    { 	
 	    	if(message == null)
 			{
-				used--;
 				return;
 			}	
 			String path = message.getPath();
 			if(path == null)
 			{
-				used--;
 			    return;
 			}	
 			int index = 0;
@@ -101,7 +108,6 @@ public class MidOSGiTestExtended extends MidOSGiTest
 				}
 		    	if(path.startsWith(unlistened))
 		    	{
-					used--;
 		    		return;
 		    	}
 			}
@@ -114,10 +120,6 @@ public class MidOSGiTestExtended extends MidOSGiTest
 				e.printStackTrace();
 				super.setStatus(Status.ERROR);
 				super.getCallbackErrorHandler().register(e);
-				
-			} finally
-			{
-				used--;
 			}
 	    }
 	    
@@ -138,7 +140,6 @@ public class MidOSGiTestExtended extends MidOSGiTest
 			String json = message.getJSON();
 			stack.push(json);
     	}
-    	
 	}
 	
 	//********************************************************************//
@@ -544,7 +545,6 @@ public class MidOSGiTestExtended extends MidOSGiTest
 	    		new Class<?>[]{MidAgentCallback.class, SnaFilter.class}),
 	    		new Object[] {new AgentCallback(), null});
 	    Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
-	    System.out.println(j);
 	}
 
 	public void stop() throws Throwable 

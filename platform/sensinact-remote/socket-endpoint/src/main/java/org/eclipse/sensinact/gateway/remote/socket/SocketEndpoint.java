@@ -389,12 +389,18 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 		int length = messages==null?0:messages.length;
 		for(;index < length;index++)
 		{
-			messagesArray.put(new JSONObject(messages[index].getJSON()));
+			JSONObject object = new JSONObject(messages[index].getJSON());
+			String path = (String) object.remove("uri");
+			
+			object.put("uri", new StringBuilder().append("/"
+				).append(super.getLocalNamespace()).append(":"
+				    ).append(path.substring(1)).toString());
+			
+			messagesArray.put(object);
 		}
-		String response = this.client.request(
-			new JSONObject(
-				).put("uri", uri
-				).put("messages", messagesArray));
+		String response = this.client.request(new JSONObject(
+			).put("uri", uri
+			).put("messages", messagesArray));
 
 		if(!JSONObject.NULL.equals(response))
 		{
@@ -651,10 +657,10 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 			).append(super.getLocalNamespace()).append(":"
 			    ).append(path.substring(1)).toString());
 		
-		String response = this.client.request(
-			new JSONObject().put("uri", uri
-				).put("message", object));
-
+		String response = this.client.request(new JSONObject(
+			).put("uri", uri
+			).put("message", object));
+		
 		if(response!=null)
 		{
 			mediator.debug(response.toString());
