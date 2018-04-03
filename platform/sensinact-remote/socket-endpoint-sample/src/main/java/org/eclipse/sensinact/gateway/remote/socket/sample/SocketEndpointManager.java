@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.remote.socket.sample;
 
 import java.util.ArrayList;
@@ -164,7 +163,7 @@ public class SocketEndpointManager implements ManagedConfigurationListener
 				if((index = descriptors.indexOf(new Name<SocketEndpointDescriptor>(
 					descriptor.prefix)))==-1 || !descriptors.remove(index).complete())
 				{
-					entry.getValue().disconnect();
+					entry.getValue().close();
 					entryIterator.remove();
 				}
 			}
@@ -227,7 +226,7 @@ public class SocketEndpointManager implements ManagedConfigurationListener
 				Entry<SocketEndpointDescriptor, SocketEndpoint> entry =
 						iterator.next();
 				SocketEndpoint endpoint = entry.getValue();
-				endpoint.disconnect();
+				endpoint.close();
 			}
 			this.map.clear();
 		}

@@ -92,9 +92,17 @@ public class CorsFilter implements Filter
             	
             	res.setHeader("Access-Control-Allow-Origin", "*");
                 res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-                res.setHeader("Access-Control-Allow-Headers",
-                	String.format("%s, Authorization, X-Auth-Token, X-Requested-With", 
-                	    req.getHeader("Access-Control-Request-Headers")));
+            
+                StringBuilder builder = new StringBuilder();
+                String controlRequestHeaders = req.getHeader("Access-Control-Request-Headers");
+                
+                if(controlRequestHeaders != null && controlRequestHeaders.length()>0)
+                {
+                	builder.append(controlRequestHeaders);
+                	builder.append(",");
+                }
+                builder.append("Authorization, X-Auth-Token, X-Requested-With");
+                res.setHeader("Access-Control-Allow-Headers", builder.toString());
                 try
                 {
                     chain.doFilter(req, res);

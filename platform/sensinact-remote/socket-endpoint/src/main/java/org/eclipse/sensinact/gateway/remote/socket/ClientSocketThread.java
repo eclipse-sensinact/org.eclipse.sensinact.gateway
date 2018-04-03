@@ -8,13 +8,11 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.remote.socket;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.HashMap;
@@ -34,9 +32,7 @@ import org.json.JSONObject;
 class ClientSocketThread implements Runnable
 {
 	private boolean running;
-	private Socket socket = null;
-	private OutputStream output;
-	private InputStream input;
+	private SocketHolder holder = null;
 	
 	private Map<String, String> requests;
 	protected Mediator mediator;
@@ -56,21 +52,30 @@ class ClientSocketThread implements Runnable
 		this.remotePort = port;
 	}
 	
-	private Socket createSocket() throws IOException
-	{
-		socket = new Socket(remoteAddress,remotePort);
-		return socket;
-	}
-	
 	protected void stop()
 	{
 		this.running = false;
+		this.close();
 	}
 
 	protected boolean running()
 	{
 		return this.running;
 	}	
+
+	private boolean checkStatus()
+	{
+		return this.holder!=null && 
+			this.holder.checkSocketStatus();
+	}
+
+	private void close()
+	{
+		if(this.holder != null)
+		{
+			this.holder.close();
+		}
+	}
 	
 	protected String request(JSONObject object)
 	{
@@ -80,35 +85,20 @@ class ClientSocketThread implements Runnable
 			return result;
 		}
 		long timestamp = System.currentTimeMillis() 
-			+ this.hashCode();
-		
+			+ this.hashCode();		
 		String uuid = new StringBuilder().append(
 				"edpnt").append(timestamp
 					).toString();
 		
-		object.put("uuid",uuid);
-		byte[] data = object.toString().getBytes();
-		int written = 0;
-		int length = data==null?0:data.length;
-		int block = SocketEndpoint.BUFFER_SIZE;
+		object.put("uuid",uuid);	
 		try
 		{
-			while(written < length)
-			{
-				if((written+block) > length)
-				{
-					block = length-written;
-				}
-				output.write(data, written, block);
-				written+=block;
-			}
-			output.write(new byte[]{'\0'});
-			output.flush();
+			this.holder.write(object);
 			
 		} catch(IOException e)
 		{
 			this.mediator.error(e);
-			if(!checkSocketStatus())
+			if(!this.holder.checkSocketStatus())
 			{
 				return result;
 			}
@@ -143,9 +133,10 @@ class ClientSocketThread implements Runnable
 	{
 		try 
 		{
-			this.socket = createSocket();
-			this.output = this.socket.getOutputStream();
-			this.input = this.socket.getInputStream();
+			Socket s = new Socket();
+			s.setReuseAddress(true);
+			s.connect(new InetSocketAddress(remoteAddress,remotePort));
+			this.holder = new SocketHolder(mediator,s);
 			
 		} catch (IOException e)
 		{
@@ -153,95 +144,51 @@ class ClientSocketThread implements Runnable
 		   
 		} finally
 		{
-		   if(this.checkSocketStatus())
+		   if(checkStatus())
 		   {
 			   this.running = true;
 		   }
-		}		
+		}
 		while(running)
 		{
-			JSONObject object = null;
-			int read = 0;
-			int length = 0;
-			byte[] content = new byte[length];
-			byte[] buffer = new byte[SocketEndpoint.BUFFER_SIZE];			
+			JSONObject object = null;				
 			try
 			{
-				boolean eof = false;
-				while((read = input.read(buffer))>-1)
+				object = this.holder.read();
+				if(!JSONObject.NULL.equals(object))
 				{
-					eof = (buffer[read-1]=='\0');
-					byte[] newContent = new byte[length+read];
-					if(length > 0)
-					{
-						System.arraycopy(content, 0, newContent, 0, length);
-					}
-					System.arraycopy(buffer, 0, newContent, length, eof?read-1:read);					
-					content = newContent;
-					newContent = null;
-					length+=(eof?read-1:read);
-					if(eof)
-					{
-						break;
-					}
-				}
-				if(content.length > 0)
-				{
-					object = new JSONObject(new String(content));
-					if(JSONObject.NULL.equals(object))
-					{
-						continue;
-					}
 					String uuid = (String) object.remove("uuid");
-					synchronized( this.requests)
+					synchronized(this.requests)
 					{
 						if(uuid !=null)
 						{
 							this.requests.put(uuid, 
 								object.optString("response"));
 						}
-					}
-				} 
+					} 
+				}
+			} catch(SocketException e)
+			{
+				mediator.error(e);
+				break;
+				   
 			} catch(IOException | JSONException e)
 			{
-			   mediator.error(e);
-			   
+				mediator.error(e);
+				   
 			} finally
 			{
-				if(!this.checkSocketStatus())
+				if(!this.checkStatus())
 				{
 					break;
 				}
 			}
 		} 
-		closeSocket();
-		this.running = false;
-		this.endpoint.clientDisconnected();
-	}
-
-	private boolean checkSocketStatus()
-	{
-		if(socket==null || !socket.isConnected())
+		this.close();
+		if(running)
 		{
-			return false;
-		}
-		return (!socket.isClosed() && 
-				!socket.isInputShutdown() && 
-				!socket.isOutputShutdown());
-	}
-
-	private void closeSocket()
-	{
-		if(socket!=null && socket.isConnected())
-		{
-			try 
-			{
-				socket.close();
-				
-			} catch (IOException e)
-			{
-				mediator.error(e);
-			}
+			this.running = false;
+			this.endpoint.clientDisconnected();
 		}
 	}
 }

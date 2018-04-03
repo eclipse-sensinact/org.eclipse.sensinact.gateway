@@ -24,7 +24,6 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws.WebSocketWrapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -120,7 +119,7 @@ public class WsServiceTestClient implements Runnable
 	/**
 	 * @inheritDoc
 	 * 
-	 * @see WebSocketWrapper#onClose(int, java.lang.String)
+	 * @see WebSocketEndpoint#onClose(int, java.lang.String)
 	 */
 	@OnWebSocketClose
 	public void onClose(int statusCode, String reason)
@@ -137,7 +136,7 @@ public class WsServiceTestClient implements Runnable
 	/**
 	 * @inheritDoc
 	 * 
-	 * @see WebSocketWrapper#onMessage(java.lang.String)
+	 * @see WebSocketEndpoint#onMessage(java.lang.String)
 	 */
 	@OnWebSocketMessage
 	public void onMessage(String message) 

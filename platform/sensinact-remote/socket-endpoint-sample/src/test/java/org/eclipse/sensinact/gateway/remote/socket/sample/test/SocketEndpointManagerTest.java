@@ -92,6 +92,7 @@ public class SocketEndpointManagerTest
 		Thread.sleep(20*1000);
 
 		String s = instances.get(0).providers();
+		System.out.println(s);
 		
 		JSONObject j = new JSONObject(s);
 		JSONAssert.assertEquals(new JSONArray(
@@ -116,8 +117,8 @@ public class SocketEndpointManagerTest
 			}
 			
 			@Override
-			public void callback(String callbackId, SnaMessage[] messages)
-			        throws Exception
+			public void callback(String callbackId, 
+				SnaMessage[] messages) throws Exception
 			{
 				synchronized(stack)
 				{
@@ -153,8 +154,7 @@ public class SocketEndpointManagerTest
 			assertEquals(2, stack.size());
 			message = new JSONObject(((SnaMessage)stack.peek()).getJSON());
 			assertEquals(150, message.getJSONObject("notification").getInt("value"));
-		}	
-		
+		}		
 		int count = 0;
 		for(String ms:instances.get(2).listAgentMessages())
 		{
@@ -164,6 +164,81 @@ public class SocketEndpointManagerTest
 			}
 		}
 		assertEquals(3,count);
+		instances.get(2).stop();
+		
+		//check that the remote core is no more registered
+		s = instances.get(0).providers();
+		System.out.println(s);
+		
+		j = new JSONObject(s);
+		JSONAssert.assertEquals(new JSONArray(
+		"[\"slider\",\"light\",\"sna2:slider\",\"sna2:light\"]"),
+		j.getJSONArray("providers"), false);
+		
+		//check that the agent is unregistered
+		instances.get(1).moveSlider(375);		
+		s = instances.get(0).get("sna2:slider", "cursor", "position");	
+		
+		j = new JSONObject(s);		
+		assertEquals(375,j.getJSONObject("response").getInt("value"));
+		
+		Thread.sleep(5000);		
+		count = 0;
+		for(String ms:instances.get(2).listAgentMessages())
+		{
+			if(ms.contains("ATTRIBUTE_VALUE_UPDATED"))
+			{
+				count++;
+			}
+		}
+		assertEquals(0,count);
+		
+		
+		File f = new File(String.format(
+			"target/felix/conf%s/socket.endpoint.sample.config",3));
+		
+		f.delete();
+	    Thread.sleep(2000);
+	    
+	    //now lets try to reconnect
+	    FileInputStream input = new FileInputStream(new File(
+	    String.format("src/test/resources/conf%s/socket.endpoint.sample.cfg",3)));
+	    
+	    byte[] content = IOUtils.read(input);
+	    byte[] contentPlus = new byte[content.length+1];
+	    
+	    System.arraycopy(content, 0, contentPlus, 0, content.length);
+	    contentPlus[content.length] = '\n';
+	    
+	    FileOutputStream output = new FileOutputStream(f);		    
+	    IOUtils.write(contentPlus, output);
+
+		Thread.sleep(20*1000);
+				
+		s = instances.get(0).providers();
+		System.out.println(s);
+		
+		j = new JSONObject(s);
+		JSONAssert.assertEquals(new JSONArray(
+		"[\"slider\",\"light\",\"sna2:slider\",\"sna2:light\",\"sna3:slider\",\"sna3:light\"]"),
+		j.getJSONArray("providers"), false);
+
+		instances.get(1).moveSlider(350);		
+		s = instances.get(0).get("sna2:slider", "cursor", "position");	
+		
+		j = new JSONObject(s);		
+		assertEquals(350,j.getJSONObject("response").getInt("value"));
+		
+		Thread.sleep(5000);		
+		count = 0;
+		for(String ms:instances.get(2).listAgentMessages())
+		{
+			if(ms.contains("ATTRIBUTE_VALUE_UPDATED"))
+			{
+				count++;
+			}
+		}
+		assertEquals(1,count);
 		
 	    while(instances.size() > 0)
 	    {

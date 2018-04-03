@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.core;
 
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -379,10 +380,22 @@ public class ResourceBuilder
 				getSignature, getExecutor(resource), 
 				AccessMethodExecutor.ExecutionPolicy.BEFORE);
 		
-		// Set method
-		setMethod.addSignature(
-			setSignature, setExecutor(resource), 
-			AccessMethodExecutor.ExecutionPolicy.BEFORE);
+		//check that at least one attribute is modifiable before to 
+		//register the set method signature
+		Enumeration<Attribute> attrs = resource.attributes();
+		
+		while(attrs.hasMoreElements())
+		{
+			if(Modifiable.MODIFIABLE.equals(
+					attrs.nextElement().getModifiable()))
+			{				
+				// Set method
+				setMethod.addSignature(
+					setSignature, setExecutor(resource), 
+					AccessMethodExecutor.ExecutionPolicy.BEFORE);
+				break;
+			}
+		}
 
 		// Subscribe method		
 		subscribeMethod.addSignature(
@@ -432,7 +445,7 @@ public class ResourceBuilder
 			//if the default attribute is modifiable
 			Attribute defaultAttribute = resource.getAttribute(resource.getDefault());
 			
-			if(defaultAttribute!=null && !Modifiable.FIXED.equals(
+			if(defaultAttribute!=null && Modifiable.MODIFIABLE.equals(
 					defaultAttribute.getModifiable()))
 			{
 				Shortcut setAttributeShortcut = new Shortcut(this.mediator, SET,

@@ -22,7 +22,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 public abstract class AbstractMidAgentCallback extends AbstractMidCallback 
 implements MidAgentCallback
 {
-    private static final String[] UNLISTENED = new String[]{
+    protected static final String[] UNLISTENED = new String[]{
     	"/sensiNact/system","/AppManager/admin"
     };
 
@@ -133,7 +133,8 @@ implements MidAgentCallback
 		}
 		try
 		{
-			switch(((SnaMessageSubType)message.getType()).getSnaMessageType())
+			switch(((SnaMessageSubType)message.getType()
+					).getSnaMessageType())
 			{
 				case ERROR:
 					this.doHandle((SnaErrorMessageImpl) message);

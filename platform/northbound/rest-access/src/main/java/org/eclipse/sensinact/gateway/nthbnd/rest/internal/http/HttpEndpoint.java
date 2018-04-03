@@ -12,6 +12,8 @@
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.WriteListener;
@@ -21,6 +23,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.eclipse.sensinact.gateway.core.security.Authentication;
+import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
@@ -35,6 +39,7 @@ public class HttpEndpoint extends HttpServlet
 {		
 	
 	private NorthboundMediator mediator;
+	private Map<String,String> anonymous; 
 
 	/**
 	 * Constructor
@@ -42,6 +47,7 @@ public class HttpEndpoint extends HttpServlet
 	public HttpEndpoint(NorthboundMediator mediator)
 	{
 		this.mediator = mediator;
+		this.anonymous = new HashMap<String,String>();
 	}
 
 	/**
@@ -114,12 +120,37 @@ public class HttpEndpoint extends HttpServlet
 				 HttpServletResponse response = 
 				    (HttpServletResponse) asyncContext.getResponse();
 		        
+				 Authentication<?> authentication = null;
+				 String client = null;
+				 
 			     try
 			     {
-					HttpRestAccess restAccess = new HttpRestAccess(
-					    new HttpRestAccessRequest(mediator, request),
-					    new HttpServletResponseWrapper(response));	
+			    	HttpRestAccessRequest rar = new HttpRestAccessRequest(
+			    			mediator, request);			    	
+			    	authentication = rar.getAuthentication();
 
+			    	if(authentication == null)
+			    	{
+			    		String clientAddress = rar.getRemoteAddr();
+			    		int clientPort = rar.getRemotePort();
+			    		
+			    		client = new StringBuilder().append(clientAddress
+			    			).append(":").append(clientPort).toString();
+			    		
+			    		String sid = HttpEndpoint.this.anonymous.get(client);
+			    		if(sid != null)
+			    		{
+			    			authentication = new AuthenticationToken(sid);
+				    		if(HttpEndpoint.this.mediator.getNorthboundEndpoints(
+				    			).getEndpoint(new AuthenticationToken(sid))!=null)
+				    		{
+				    			rar.setAuthentication(authentication);
+				    		}		
+			    		}
+			    	}
+					HttpRestAccess restAccess = new HttpRestAccess(rar,
+					    new HttpServletResponseWrapper(response));	
+					
 					restAccess.proceed();
 					
 				} catch (InvalidCredentialException e) 
@@ -134,6 +165,12 @@ public class HttpEndpoint extends HttpServlet
 					
 				} finally
 				{
+					String token = null;
+					if(authentication == null && client!=null 
+						&& (token = response.getHeader("X-Auth-Token"))!=null)
+					{
+						HttpEndpoint.this.anonymous.put(client, token);
+					}
 					if(request.isAsyncStarted())
 					{
 						asyncContext.complete();
@@ -142,7 +179,8 @@ public class HttpEndpoint extends HttpServlet
 			}
 
 			@Override
-			public void onError(Throwable t) {
+			public void onError(Throwable t) 
+			{
 				mediator.error(t);
 			}
         	

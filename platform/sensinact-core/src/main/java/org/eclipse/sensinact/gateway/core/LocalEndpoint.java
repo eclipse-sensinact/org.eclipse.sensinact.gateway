@@ -23,6 +23,15 @@ import org.json.JSONObject;
 abstract class LocalEndpoint implements Endpoint
 {
 	/**
+	 * Returns the String namespace of the local sensiNact 
+	 * instance this LocalEndpoint is connected to 
+	 * 
+	 * @return the connected local sensiNact's String 
+	 * namespace
+	 */
+	abstract String localNamespace();
+	
+	/**
 	 * Returns the {@link Session} for the user's String public 
 	 * key passed as parameter
 	 *  

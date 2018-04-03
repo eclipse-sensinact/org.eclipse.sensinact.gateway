@@ -3,12 +3,14 @@ package org.eclipse.sensinact.gateway.core;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaAgentImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
@@ -112,8 +114,7 @@ public class SessionKey
 	
 	/**
 	 * 
-	 * @param callback
-	 * @param filter
+	 * @param agentId
 	 * @return
 	 */
 	public boolean unregisterAgent(String agentId)
@@ -149,27 +150,94 @@ public class SessionKey
 			}
 		});
 	}
-	
-	/**
-	 * 
-	 */
-	void unregisterAgents()
+
+	public boolean waitUntilClosed() 
 	{		
+		return waitUntilClosed(60*1000);
+	}
+	
+	public boolean waitUntilClosed(long timeout)
+	{
+		if(this.agents.size() == 0)
+		{
+			return true;
+		}
+		final AtomicInteger c = new AtomicInteger();
+		String filter = getAgentsFilter();
+		long t = timeout;
+		while(t > 0)
+		{
+			c.set(0);
+			this.mediator.callServices(SnaAgent.class, 
+			filter, new Executable<SnaAgent, Void>()
+			{
+				@Override
+				public Void execute(SnaAgent agent)
+				        throws Exception
+				{
+					if(agent!=null)
+					{
+						c.incrementAndGet();
+					}
+					return null;
+				}
+			});
+			if(c.get() == 0)
+			{
+				break;
+			}
+			try
+			{
+				Thread.sleep(2000);
+				t-=2000;
+				
+			} catch (InterruptedException e)
+			{
+				Thread.interrupted();
+			}
+		}
+		return c.get()==0;
+	}
+	
+	private String getAgentsFilter() 
+	{
+		if(this.agents.size() == 0)
+		{
+			return null;
+		}
 		StringBuilder builder = new StringBuilder();
 		builder.append("(&(org.eclipse.sensinact.gateway.agent.local=");
 		builder.append(localID()==0);
-		builder.append(")(|");
-		
-		while(!this.agents.isEmpty())
+		builder.append(")");		
+		if(this.agents.size()>1)
+		{
+			builder.append("(|");
+		}
+		Iterator<String> it = this.agents.iterator();
+		while(it.hasNext())
 		{
 			builder.append("(");
 			builder.append("org.eclipse.sensinact.gateway.agent.id=");
-			builder.append(this.agents.remove(0));
+			builder.append(it.next());
 			builder.append(")");
 		}
-		builder.append("))");
+		if(this.agents.size()>1)
+		{
+			builder.append(")");
+		}
+		builder.append(")");		
+		return builder.toString();
+	} 
+	
+	void unregisterAgents()
+	{	
+		if(this.agents.size() == 0)
+		{
+			return;
+		}
+		String filter = getAgentsFilter();
 		this.mediator.callServices(SnaAgent.class, 
-		builder.toString(), new Executable<SnaAgent, Void>()
+		filter, new Executable<SnaAgent, Void>()
 		{
 			@Override
 			public Void execute(SnaAgent agent)
@@ -180,4 +248,5 @@ public class SessionKey
 			}
 		});
 	}
+
 }

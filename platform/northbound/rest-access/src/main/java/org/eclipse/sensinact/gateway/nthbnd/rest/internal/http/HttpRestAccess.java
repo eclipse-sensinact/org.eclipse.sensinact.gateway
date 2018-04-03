@@ -38,7 +38,6 @@ public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest>
 	private HttpServletResponseWrapper response;
 	private NorthboundEndpoint endpoint;
 
-
 	/**
 	 * @param request
 	 * @param response
@@ -48,7 +47,7 @@ public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest>
 	public HttpRestAccess(
 		HttpRestAccessRequest request, 
 		HttpServletResponseWrapper response)
-			throws IOException, InvalidCredentialException
+		throws IOException, InvalidCredentialException
 	{
 		super(request);
 		this.response = response;
@@ -59,6 +58,9 @@ public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest>
 			this.endpoint = request.getMediator(
 				).getNorthboundEndpoints().getEndpoint();
 			
+			response.setHeader("X-Auth-Token", 
+					this.endpoint.getSessionToken());
+
 		} else if(AuthenticationToken.class.isAssignableFrom(
 				authentication.getClass()))
 		{
@@ -76,12 +78,12 @@ public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest>
 	 * @inheritDoc
 	 *
 	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess#
-	 * respond(org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator, org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder)
+	 * respond(org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator, 
+	 * org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder)
 	 */
 	@Override
 	protected boolean respond(NorthboundMediator mediator,
-	        NorthboundRequestBuilder builder) 
-	        		throws IOException 
+	    NorthboundRequestBuilder builder) throws IOException 
 	{	
 		String httpMethod = super.request.getMethod();
 		String snaMethod = builder.getMethod();

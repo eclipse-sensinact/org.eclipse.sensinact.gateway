@@ -36,7 +36,6 @@ import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
@@ -148,6 +147,7 @@ public class RemoteSensiNact implements RemoteCore
 	protected Deque<Executable<String, Void>> onConnectedCallback;
 	protected Deque<Executable<String, Void>> onDisconnectedCallback;
 
+
 	/**
 	 * Constructor
 	 * 
@@ -166,47 +166,6 @@ public class RemoteSensiNact implements RemoteCore
 		this.mediator = mediator;
 		this.localAgents = new HashMap<String,String>();		
 		this.localEndpoint = localEndpoint;
-	}
-
-	/**
-	 * Connects this {@link RemoteCore} to the {@link RemoteEndpoint} 
-	 * passed as parameter
-	 * @return
-	 * <ul>
-	 * 		<li>true if this {@link RemoteCore} connected properly to
-	 * 		the specified {@link RemoteEndpoint}</li>
-	 * 		<li>false otherwise</li>	
-	 * </ul>
-	 */
-	boolean connect(AbstractRemoteEndpoint remoteEndpoint) 
-	{
-		if(remoteEndpoint == null)
-		{
-			throw new NullPointerException("A remote endpoint is needed");
-		}
-		this.remoteEndpoint = remoteEndpoint;
-		if(remoteEndpoint.connect(this))
-		{
-			final String namespace = this.remoteEndpoint.namespace();
-			if(this.onConnectedCallback!=null)
-			{
-				Iterator<Executable<String,Void>> it= 
-					this.onConnectedCallback.iterator();
-				while(it.hasNext())
-				{
-					try 
-					{
-						it.next().execute(namespace);
-					} catch (Exception e) 
-					{
-						mediator.error(e);
-					}
-				}
-			}
-			this.open(namespace);
-			return true;
-		}
-		return false;
 	}
 
 	/**
@@ -254,27 +213,72 @@ public class RemoteSensiNact implements RemoteCore
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.RemoteCore#open(java.lang.String)
+	 * @see org.eclipse.sensinact.gateway.core.RemoteCore#
+	 * open(org.eclipse.sensinact.gateway.core.RemoteEndpoint)
 	 */
 	@Override
-	public void open(final String namespace)
+	public void open(RemoteEndpoint remoteEndpoint) 
 	{
-		AccessController.<Void>doPrivileged(new PrivilegedAction<Void>()
+		if(remoteEndpoint == null)
+		{
+			throw new NullPointerException("A remote endpoint is needed");
+		}
+		this.remoteEndpoint = remoteEndpoint;
+		this.remoteEndpoint.open(this);
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.RemoteCore#
+	 * connect(java.lang.String)
+	 */
+	@Override
+	public void connect(final String namespace)
+	{
+		if(namespace == null)
+		{
+			mediator.debug("Unable to register because of null namespace");
+			return;
+		}
+		this.registration = AccessController.<ServiceRegistration<RemoteCore>>doPrivileged(
+		new PrivilegedAction<ServiceRegistration<RemoteCore>>()
 		{
 			@Override
-			public Void run()
+			public ServiceRegistration<RemoteCore> run()
 			{		
 				Dictionary<String,Object> props = new Hashtable<String,Object>();
-		    	props.put(NAMESPACE_PROP, namespace);		    	
-				RemoteSensiNact.this.registration = mediator.getContext(
+		    	props.put(NAMESPACE_PROP, namespace);	
+		    	
+		    	ServiceRegistration<RemoteCore> reg = mediator.getContext(
 					).registerService(RemoteCore.class, RemoteSensiNact.this, 
 						   props);
 				mediator.debug("RemoteCore '%s' registration done", namespace);
-				return null;
+				return reg;
 			}
 		});
+		if(this.registration == null)
+		{
+			mediator.debug("Registration error");
+			return;
+		}
+		if(this.onConnectedCallback!=null)
+		{
+			Iterator<Executable<String,Void>> it= 
+				this.onConnectedCallback.iterator();
+			while(it.hasNext())
+			{
+				try 
+				{
+					it.next().execute(namespace);
+				} catch (Exception e) 
+				{
+					mediator.error(e);
+				}
+			}
+		}
 	}
-	
+
 	/**
 	 * @inheritDoc
 	 *
@@ -283,10 +287,24 @@ public class RemoteSensiNact implements RemoteCore
 	@Override
 	public void close()
 	{
+		this.disconnect();
+		this.localAgents.clear();
+		this.remoteEndpoint.close();
+	}
+	
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.RemoteCore#disconnect()
+	 */
+	@Override
+	public void disconnect()
+	{
 		if(this.registration!=null)
-		{
+		{	
+			final String namespace = this.remoteEndpoint.namespace();
 			AccessController.<Void>doPrivileged(
-					    new PrivilegedAction<Void>()
+			new PrivilegedAction<Void>()
 			{
 				@Override
 				public Void run()
@@ -298,14 +316,14 @@ public class RemoteSensiNact implements RemoteCore
 					} catch(IllegalStateException e)
 					{
 						RemoteSensiNact.this.mediator.error(e);
+						
+					} finally
+					{
+						RemoteSensiNact.this.registration = null;
 					}
 					return null;
 				}
 			});
-		}
-		if(this.remoteEndpoint!=null)
-		{
-			final String namespace = this.remoteEndpoint.namespace();
 			if(this.onDisconnectedCallback!=null)
 			{
 				Iterator<Executable<String,Void>> it= 
@@ -323,9 +341,6 @@ public class RemoteSensiNact implements RemoteCore
 				}
 			}
 		}
-		this.localAgents.clear();
-		this.localEndpoint.close();
-		this.localEndpoint = null;
 	}
 	
 	/**
@@ -545,15 +560,7 @@ public class RemoteSensiNact implements RemoteCore
 	@Override
 	public String namespace() 
 	{
-		ServiceReference<Core> ref = mediator.getContext(
-				).getServiceReference(Core.class);
-		
-		if(ref!=null )
-		{
-			Core core = mediator.getContext().getService(ref);
-			return core.namespace();
-		}
-		return null;
+		return this.localEndpoint.localNamespace();
 	}
 
 	/**
@@ -582,7 +589,7 @@ public class RemoteSensiNact implements RemoteCore
 		SubscribeResponse resp =session.registerSessionAgent(
 			new RemoteSensiNactCallback(remoteAgentId), filter);
 		JSONObject registration = resp.getResponse();
-		
+
 		JSONObject response = registration.optJSONObject("response");
 		String localAgentId = null;
 		if(!JSONObject.NULL.equals(response) 
@@ -654,7 +661,7 @@ public class RemoteSensiNact implements RemoteCore
 	{
 		this.localEndpoint.closeSession(publicKey);
 	}
-	
+
 	/**
 	 * @param agentId
 	 * @param local

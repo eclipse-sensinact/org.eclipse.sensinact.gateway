@@ -123,6 +123,18 @@ implements NorthboundRequestWrapper
 	}
 
 	/**
+	 * Define the {@link Authentication} attached to this 
+	 * HttpRestAccessRequest
+	 * 
+	 * @param authentication the {@link Authentication} of this
+	 * HttpRestAccessRequest
+	 */
+	void setAuthentication(Authentication<?> authentication) 
+	{
+		this.authentication = authentication;
+	}
+
+	/**
 	 * @inheritDoc
 	 *
 	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#

@@ -21,14 +21,14 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
  */
 public class WebSocketRecipient extends NorthboundRecipient
 {
-	private WebSocketWrapper socket;
+	private WebSocketConnection wsConnection;
 
     public WebSocketRecipient(
     		Mediator mediator,
-    		WebSocketWrapper socket)
+    		WebSocketConnection wsConnection)
     {
         super(mediator);
-        this.socket = socket;    
+        this.wsConnection = wsConnection;    
     }
 
     /**
@@ -66,7 +66,7 @@ public class WebSocketRecipient extends NorthboundRecipient
 		builder.append(JSONUtils.CLOSE_BRACE);
 		try 
 	    {		      
-	    	 this.socket.send(builder.toString());
+	    	 this.wsConnection.send(builder.toString());
 
     	} catch(Exception e)  
 	    {    		
