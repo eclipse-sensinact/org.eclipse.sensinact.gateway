@@ -20,19 +20,16 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.LoginEndpoint;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoints;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.CorsFilter;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpLoginEndpoint;
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws.WebSocketWrapperPool;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws.WebSocketConnectionFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.HttpContext;
-
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 
 /**
  * @see AbstractActivator
@@ -117,23 +114,16 @@ public class Activator extends AbstractActivator<NorthboundMediator>
 					params = new Hashtable<String, Object>();
 			        params.put(Mediator.class.getCanonicalName(), Activator.this.mediator);
 			        
-			        final WebSocketWrapperPool sessionPool = new WebSocketWrapperPool(
+			        final WebSocketConnectionFactory sessionPool = new WebSocketConnectionFactory(
 			        		Activator.this.mediator);
-			        			
 			        //define the current thread classloader to avoid ServiceLoader error
 			        ClassLoader current = Thread.currentThread().getContextClassLoader();			        
 			        Thread.currentThread().setContextClassLoader(Activator.getJettyBundleClassLoader(
 			        				mediator.getContext()));
 			        try
-			        {				        
+			        {	        
 				        service.registerServlet(RestAccessConstants.WS_ROOT, new WebSocketServlet() 
-				        {				            
-				            /** 
-				             * @inheritDoc
-				             * 
-				             * @see org.eclipse.jetty.websocket.servlet.WebSocketServlet#
-				             * configure(org.eclipse.jetty.websocket.servlet.WebSocketServletFactory)
-				             */
+				        {	
 				            @Override
 				            public void configure(WebSocketServletFactory factory)
 				            {

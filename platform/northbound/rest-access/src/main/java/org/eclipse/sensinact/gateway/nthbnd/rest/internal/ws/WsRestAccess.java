@@ -15,11 +15,8 @@ import java.util.List;
 
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
-import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
@@ -33,43 +30,25 @@ import org.json.JSONObject;
 public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest>
 {
 	/**
-	 * The {@link WebSocketWrapper} held by this WsRestAccess 
+	 * The {@link WebSocketConnection} held by this WsRestAccess 
 	 */
-	private WebSocketWrapper socket;
-	private NorthboundEndpoint endpoint;
+	private WebSocketConnection wsConnection;
 
 	/**
 	 * Constructor
 	 * 
-	 * @param socket the {@link WebSocketWrapper} held by 
+	 * @param wsConnection the {@link WebSocketConnection} held by 
 	 * the WsRestAccess to be instantiated
 	 * 
 	 * @throws IOException 
 	 * @throws InvalidCredentialException 
 	 */
-	public WsRestAccess(WsRestAccessRequest request, WebSocketWrapper socket) 
+	public WsRestAccess(WsRestAccessRequest request, 
+		WebSocketConnection wsConnection) 
 		throws IOException, InvalidCredentialException
 	{
 		super(request);
-		this.socket = socket;
-		
-		Authentication<?> authentication = request.getAuthentication();
-		if(authentication == null)
-		{
-			this.endpoint = request.getMediator(
-				).getNorthboundEndpoints().getEndpoint();
-			
-		} else if(AuthenticationToken.class.isAssignableFrom(
-				authentication.getClass()))
-		{
-			this.endpoint = request.getMediator(
-			).getNorthboundEndpoints().getEndpoint(
-				(AuthenticationToken)authentication);
-		} else
-		{
-			throw new InvalidCredentialException(
-				"Authentication token was expected");
-		}
+		this.wsConnection = wsConnection;
 	}
 
 	/**
@@ -88,7 +67,8 @@ public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest>
 			sendError(500, "Internal server error");
 			return false;
 		}
-		AccessMethodResponse<?> cap = this.endpoint.execute(nthbndRequest);
+		AccessMethodResponse<?> cap = this.wsConnection.getEndpoint(
+				).execute(nthbndRequest);
 		if(cap == null)
 		{
 			sendError(500, "Internal server error");
@@ -113,12 +93,12 @@ public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest>
         if(acceptEncoding != null && acceptEncoding.contains("gzip")) 
         {
             resultBytes = NorthboundAccess.compress(result);
-    		this.socket.send(resultBytes);
+    		this.wsConnection.send(resultBytes);
             
         }  else
         {
         	resultBytes = result.getBytes("UTF-8");
-    		this.socket.send(new String(resultBytes));
+    		this.wsConnection.send(new String(resultBytes));
         }
 		return true;
 	}
@@ -129,12 +109,13 @@ public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest>
 	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.AbstractNorthboundRequestHandler#sendError(int, java.lang.String)
 	 */
 	@Override
-	protected void sendError(int i, String string) throws IOException 
+	protected void sendError(int i, String message) throws IOException 
 	{
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("statusCode", i);
-		jsonObject.put("message", string);
-		this.socket.send(new String(jsonObject.toString().getBytes("UTF-8")));
+		jsonObject.put("message", message);
+		this.wsConnection.send(new String(jsonObject.toString(
+				).getBytes("UTF-8")));
 	}
 
 }

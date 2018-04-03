@@ -11,12 +11,9 @@
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
-import javax.servlet.ServletOutputStream;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -24,54 +21,61 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
-import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.LoginResponse;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
- * Session wrapper
- * 
+ * WebSocket connection endpoint
  */
 @WebSocket(maxTextMessageSize = 64 * 1024)
-public class WebSocketWrapper
+public class WebSocketConnection
 {
 	protected static final String LOGIN_PATH = "login";
 	protected static final String LOGIN_URI = "/" + LOGIN_PATH;
 	
 	protected Session session;
 	protected NorthboundMediator mediator;
-	protected WebSocketWrapperPool pool;
+	protected WebSocketConnectionFactory pool;
+	protected NorthboundEndpoint endpoint;
  
-	
-	protected WebSocketWrapper(WebSocketWrapperPool pool, NorthboundMediator mediator)
+	/**
+	 * @param pool
+	 * @param endpoint
+	 * @param mediator
+	 */
+	protected WebSocketConnection(
+			WebSocketConnectionFactory pool, 
+			NorthboundEndpoint endpoint,
+			NorthboundMediator mediator)
 	{
+		this.endpoint = endpoint;
 		this.mediator = mediator;
 		this.pool = pool;
 	}
 	
+	/**
+	 * @param session
+	 */
 	@OnWebSocketConnect
 	public void onConnect(Session session)
 	{ 			
 		this.session = session;	
 	}
 	
+	
 	/** 
 	 * @inheritedDoc
 	 * 
-	 * @see WebSocketWrapper#
+	 * @see WebSocketConnection#
 	 * onClose(int, java.lang.String)
 	 */
 	@OnWebSocketClose
 	public void onClose(int statusCode, String reason)
 	{
-		this.pool.removeSensinactSocket(this);
+		this.pool.deleteSocketEndpoint(this);
 	}
 
 	/**
@@ -89,6 +93,16 @@ public class WebSocketWrapper
 		}
 		this.session = null;
 	}
+
+	/**
+	 * @return
+	 */
+	NorthboundEndpoint getEndpoint()
+	{
+		return this.endpoint;
+	}
+	
+	
 	
 	/** 
 	 * Receives Text Message events
@@ -104,29 +118,16 @@ public class WebSocketWrapper
 			WsRestAccessRequest wrapper = new WsRestAccessRequest(
 					mediator, this, jsonObject);
 			
-			String uri = jsonObject.getString("uri");
-			
-			if(uri.equals(LOGIN_PATH)||uri.equals(LOGIN_URI))
-			{
-				onLogin(wrapper);
-				return;
-			}
 			WsRestAccess restAccess = new WsRestAccess(wrapper, this);
 			restAccess.proceed();
 			
-		} catch(JSONException e)
+		} catch(IOException | JSONException e)
 		{
 			this.mediator.error(e);
 			this.send(new JSONObject().put("statusCode", 400
 				).put("message","Bad request"
 					).toString());
-		} catch (IOException e) 
-		{
-			this.mediator.error(e);
-			this.send(new JSONObject().put("statusCode", 400
-				).put("message","Bad request"
-					).toString());			
-		} catch (InvalidCredentialException e) 
+		}catch (InvalidCredentialException e) 
 		{
 			this.mediator.error(e);
 			this.send(new JSONObject().put("statusCode", 403
@@ -151,27 +152,6 @@ public class WebSocketWrapper
 	public void handleError(Throwable error)
 	{
 		error.printStackTrace();
-	}
-
-	private void onLogin(WsRestAccessRequest wrapper) 
-			throws InvalidCredentialException
-	{
-		Authentication<?> authentication = wrapper.getAuthentication();
-		LoginResponse loginResponse = null;	
-
-		if(AuthenticationToken.class.isAssignableFrom(
-				authentication.getClass()))
-		{			
-			loginResponse = mediator.getLoginEndpoint(
-			).reactivateEndpoint((AuthenticationToken) authentication);
-										
-		} else if(Credentials.class.isAssignableFrom(
-				authentication.getClass()))
-		{
-			loginResponse = mediator.getLoginEndpoint(
-			).createNorthboundEndpoint((Credentials)authentication);
-		}
-		this.send(loginResponse.getJSON());		
 	}
 	
 	/**
@@ -224,13 +204,5 @@ public class WebSocketWrapper
             	"seems to be invalid, removing from the pool."
             		).toString(),e);      	
         }
-	}
-	
-	/**
-	 * @return
-	 */
-	public InetSocketAddress getClientAddress()
-	{
-		return this.session.getRemoteAddress();
 	}
 }

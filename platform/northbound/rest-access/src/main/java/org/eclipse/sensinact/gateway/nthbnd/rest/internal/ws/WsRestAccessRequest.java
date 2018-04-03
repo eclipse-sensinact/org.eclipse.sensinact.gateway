@@ -15,32 +15,28 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
-import org.eclipse.sensinact.gateway.core.security.Credentials;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class WsRestAccessRequest implements NorthboundRequestWrapper 
 {
 	private NorthboundMediator mediator;
 	private JSONObject request;
-	private Authentication<?> authentication;
 	private String content;
-	private WebSocketWrapper socket;
+	private WebSocketConnection wsConnection;
 
 	public WsRestAccessRequest(NorthboundMediator mediator, 
-			WebSocketWrapper socket, JSONObject request)
+			WebSocketConnection wsConnection, JSONObject request)
 	{
 		this.request = request;
 		this.mediator = mediator;
-		this.socket = socket;
+		this.wsConnection = wsConnection;
 	}
 	
 	/**
@@ -145,24 +141,7 @@ public class WsRestAccessRequest implements NorthboundRequestWrapper
 	@Override
 	public Authentication<?> getAuthentication() 
 	{
-		if(this.authentication == null)
-		{
-			String tokenHeader = (String) request.opt("token");
-			String login = (String) request.opt("login");
-			String password = (String) request.opt("password");
-			
-			if(tokenHeader != null)
-			{
-				this.authentication = new AuthenticationToken(
-						tokenHeader);
-		
-			} else if(login != null && password != null)
-			{
-				this.authentication =  new Credentials(
-						login, password);
-			}
-		}
-		return this.authentication;
+		return null;
 	}
 
 	/**
@@ -173,6 +152,6 @@ public class WsRestAccessRequest implements NorthboundRequestWrapper
 	@Override
 	public NorthboundRecipient createRecipient(Parameter[] parameters)
 	{
-		return new WebSocketRecipient(mediator, socket);
+		return new WebSocketRecipient(mediator, wsConnection);
 	}
 }
