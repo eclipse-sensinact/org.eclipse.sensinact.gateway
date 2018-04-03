@@ -439,8 +439,8 @@ public abstract class CastUtils
             return (T) CastUtils.castArray(classloader, clazz,object);
         } 
     	String message = new StringBuilder("Unable to cast "
-                ).append(object.getClass().getSimpleName()).append(" into "
-                        ).append(clazz.getSimpleName()).toString();
+            ).append(object.getClass().getSimpleName()).append(" into "
+                  ).append(clazz.getSimpleName()).toString();
 
 		if(String.class.isAssignableFrom(object.getClass()))
 		{
@@ -507,7 +507,8 @@ public abstract class CastUtils
 	{
 		if(!clazz.isArray())
 		{
-			throw new ClassCastException("Destination Class is not an Array one");
+			throw new ClassCastException(
+				"Destination Class is not an Array one");
 		}
     	if(clazz.isAssignableFrom(object.getClass()))
     	{
@@ -522,8 +523,7 @@ public abstract class CastUtils
 			for(int i = 0; i<length; i++)
 			{
 				Array.set(array, i, CastUtils.cast(classloader,
-						componentType, 
-						Array.get(object,i)));
+					componentType, Array.get(object,i)));
 			}
 			return (T) array;
 		}
@@ -564,12 +564,13 @@ public abstract class CastUtils
 				}
 				return (T) characters;
 			}
-			objectStr = objectStr.replace('[', ' ').replace(']', ' ').trim();
+			objectStr = objectStr.replace('[', ' ').replace(
+					']', ' ').trim();
 			return (T) CastUtils.<T>castArray(classloader, 
 					clazz, objectStr, CastUtils.COMMA_DELIMITER);
 		}
-		throw new ClassCastException("the object to cast is neither an instance "
-				+ "of an Array class nor a String one");
+		throw new ClassCastException(
+		"the object to cast is neither an instance of an Array class nor a String one");
 	}
 	
 	/**
@@ -598,7 +599,8 @@ public abstract class CastUtils
 	{
 		if(!clazz.isArray())
 		{
-			throw new ClassCastException("Destination Class is not an Array one");
+			throw new ClassCastException(
+				"Destination Class is not an Array one");
 		}
 		if(objectStr.indexOf(delimiter) == -1)
 		{
@@ -624,7 +626,7 @@ public abstract class CastUtils
 	 * 		if the cast is not possible
 	 */
 	public static <T> T castPrimitive(Class<T> clazz, Object object)
-			throws ClassCastException
+		throws ClassCastException
 	{
 		if(!CastUtils.isPrimitive(clazz))
 		{
@@ -639,45 +641,48 @@ public abstract class CastUtils
 		
 		if(String.class == object.getClass())
 		{
-			primitive = CastUtils.<T>getPrimitiveFromString(clazz,(String)object);
+			primitive = CastUtils.<T>getPrimitiveFromString(
+				clazz, (String)object);
 		}
 		else if(Character.class.isAssignableFrom(object.getClass())
 			|| char.class.isAssignableFrom(object.getClass()))
         {
             primitive = CastUtils.<T>getPrimitiveFromString(clazz,
-            		new String(new char[]{((Character)object).charValue()}));
+            	new String(new char[]{((Character)object).charValue()}));
         } 
         else if(Boolean.class.isAssignableFrom(object.getClass())
         	|| boolean.class.isAssignableFrom(object.getClass()))
         {
             primitive = CastUtils.<T>getPrimitiveFromString(clazz, 
-            		Boolean.toString((Boolean) object));
+            	Boolean.toString((Boolean) object));
             
         } else if(Number.class.isAssignableFrom(object.getClass()))
         {
-            primitive = CastUtils.<T>getPrimitiveFromNumber(clazz,(Number)object);
+            primitive = CastUtils.<T>getPrimitiveFromNumber(
+            	clazz,(Number)object);
             
         } else if(object.getClass().isPrimitive())
         {
-            primitive = CastUtils.<T>getPrimitiveFromNumber(clazz,Double.valueOf(
-            		String.valueOf(object)));
+            primitive = CastUtils.<T>getPrimitiveFromNumber(
+            	clazz, Double.valueOf(String.valueOf(object)));
         }  
         else if(Enum.class.isAssignableFrom(object.getClass()))
         {
         	if(String.class == clazz)
         	{
-        		primitive = CastUtils.<T>getPrimitiveFromString(clazz, 
-            		((Enum) object).name());
+        		primitive = CastUtils.<T>getPrimitiveFromString(
+        			clazz, ((Enum) object).name());
         	} else
         	{
-        		primitive = CastUtils.<T>getPrimitiveFromNumber(clazz, 
-                		((Enum) object).ordinal());
+        		primitive = CastUtils.<T>getPrimitiveFromNumber(
+        			clazz, ((Enum) object).ordinal());
         	}
         } 
 		if(primitive == null)
 		{
-			throw new ClassCastException("The object cannot be cast into "
-			        + "neither a String nor a Number");
+			throw new ClassCastException(String.format(
+			" [%s as %s] The object cannot be cast into neither a String nor a Number",
+			String.valueOf(object),clazz.getName()));
 		}
 		return (T) primitive;
 	}
