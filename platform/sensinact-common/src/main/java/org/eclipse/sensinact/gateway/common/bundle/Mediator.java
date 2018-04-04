@@ -131,7 +131,7 @@ public class Mediator
 				"%s/%s.properties",fileInstallDir,symbolicName);
 		final String bundlePropertyFileNameFallback=String.format(
 				"%s/%s.property",fileInstallDir,symbolicName);
-
+		Boolean propertiesLoaded=Boolean.FALSE;
 		Properties bundleProperties = new Properties();
 		
 		/**
@@ -143,26 +143,31 @@ public class Mediator
 			debug("File %s loaded successfully",bundlePropertyFileName);
 			logBundleProperties(symbolicName,bundlePropertyFileName,
 					bundleProperties);
-		
+			propertiesLoaded=true;
 		} catch(IOException e)
 		{
-			warn("Failed to load bundle property file %s, trying %s.",
-					bundlePropertyFileName, 
-					bundlePropertyFileNameFallback);
-			try
-			{
-				bundleProperties.load(new FileInputStream(bundlePropertyFileNameFallback));
-				logBundleProperties(symbolicName, bundlePropertyFileNameFallback, 
-					bundleProperties);
+			//Log message will be aggregated with the fallback result and given later
+		}
 
-				debug("File %s loaded successfully",bundlePropertyFileNameFallback);
-				
-			} catch(IOException ex)
-			{
-				error("Failed to load bundle property file %s.",
-						bundlePropertyFileNameFallback);
+		if(!propertiesLoaded) {
+			try {
+				bundleProperties.load(new FileInputStream(bundlePropertyFileNameFallback));
+				logBundleProperties(symbolicName, bundlePropertyFileNameFallback,
+						bundleProperties);
+				debug("File %s loaded successfully", bundlePropertyFileNameFallback);
+				propertiesLoaded = true;
+			} catch (IOException ex) {
+				//Log message will be aggregated with the fallback result and given later
 			}
 		}
+		//If not even the fallback didnt manage to get loaded, display message in the log
+		if(!propertiesLoaded){
+			warn("%s bundle failed to load property file (either %s or %s respectively).",
+					symbolicName,
+					bundlePropertyFileName,
+					bundlePropertyFileNameFallback);
+		}
+
 		for (Map.Entry<Object,Object> name: bundleProperties.entrySet()){
 			this.properties.put(name.getKey().toString(), name.getValue().toString());
 		}
