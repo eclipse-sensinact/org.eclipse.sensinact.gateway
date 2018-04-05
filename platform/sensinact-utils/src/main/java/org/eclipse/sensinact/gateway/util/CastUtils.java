@@ -1474,7 +1474,7 @@ public abstract class CastUtils
 				return null;
 			}
 			String[] names = JSONObject.getNames((JSONObject) value);
-			if(names == null || names.length == 0)
+			if(names == null ||names.length == 0)
 			{
 				return new JSONObject();
 			}
