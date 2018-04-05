@@ -1469,8 +1469,16 @@ public abstract class CastUtils
 		}
 		if (JSONObject.class.isAssignableFrom(type))
 		{
-			return new JSONObject(((JSONObject) value),
-			        JSONObject.getNames(((JSONObject) value)));
+			if(JSONObject.NULL.equals(value))
+			{
+				return null;
+			}
+			String[] names = JSONObject.getNames((JSONObject) value);
+			if(names == null || names.length == 0)
+			{
+				return new JSONObject();
+			}
+			return new JSONObject(((JSONObject) value),names);
 		}
 		if (JSONArray.class.isAssignableFrom(type))
 		{
