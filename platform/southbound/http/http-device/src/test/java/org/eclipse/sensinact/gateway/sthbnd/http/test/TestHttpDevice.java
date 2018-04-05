@@ -509,6 +509,6 @@ public class TestHttpDevice extends MidOSGiTest
 		{
 			Thread.currentThread().setContextClassLoader(current);
 		}
-		Thread.sleep(7000);
+		Thread.sleep(10*1000);
 	}
 }
