@@ -21,6 +21,7 @@ import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Localizable;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
+import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
 import org.eclipse.sensinact.gateway.common.primitive.Stateful;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
@@ -497,10 +498,17 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 		byte buildPolicy = (byte) 
 				(SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy()
 				| SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy());
+
+		List<ResourceConfig> resourceConfigs = super.getModelInstance(
+			).configuration().getResourceConfigs(
+				ServiceProvider.ADMINISTRATION_SERVICE_NAME);
+		
+		int index = -1;
 		
 		if(admin.getResource(ServiceProvider.LIFECYCLE_STATUS)==null)
 		{
-			ResourceBuilder statusResourceBuilder = super.getModelInstance(
+			ResourceBuilder statusResourceBuilder = 
+			super.getModelInstance(
 				).getResourceBuilder(super.getModelInstance().configuration(
 				).getResourceDescriptor(
 				).withResourceType(PropertyResource.class
@@ -509,35 +517,58 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 				).withDataValue(ServiceProvider.LifecycleStatus.INACTIVE
 				).withHidden(true
 				).withModifiable(Modifiable.UPDATABLE), buildPolicy);
-		
 			admin.addResource(statusResourceBuilder);
 		}
 		if(admin.getResource(ServiceProvider.FRIENDLY_NAME)==null)
 		{
-			ResourceBuilder friendlyNameResourceBuilder = 
-			super.getModelInstance().getResourceBuilder(
-			super.getModelInstance().configuration(
-				).getResourceDescriptor(
-				).withResourceType(PropertyResource.class
-				).withResourceName(ServiceProvider.FRIENDLY_NAME
-				).withDataType(String.class
-				).withHidden(false
-				).withModifiable(Modifiable.MODIFIABLE),buildPolicy);
+			ResourceBuilder friendlyNameResourceBuilder = null;
+			ResourceConfig rc = null;
+			if((index = resourceConfigs.indexOf(new Name<ResourceConfig>(
+					ServiceProvider.FRIENDLY_NAME)))>-1)
+			{
+				rc = resourceConfigs.get(index);
+				friendlyNameResourceBuilder = super.getModelInstance(
+					).getResourceBuilder(rc);				
+				index = -1;				
+			} else
+			{
+			    friendlyNameResourceBuilder = 
+				super.getModelInstance(
+				    ).getResourceBuilder(super.getModelInstance().configuration(
+					).getResourceDescriptor(
+					).withResourceType(PropertyResource.class
+					).withResourceName(ServiceProvider.FRIENDLY_NAME
+					).withDataType(String.class
+					).withHidden(false
+					).withModifiable(Modifiable.MODIFIABLE),buildPolicy);
+			}
 			admin.addResource(friendlyNameResourceBuilder);
 		}
 		if(admin.getResource(LocationResource.LOCATION) == null)
 		{
-			ResourceBuilder locationResourceBuilder = 
-			super.getModelInstance().getResourceBuilder(
-			super.getModelInstance().configuration(
-				).getResourceDescriptor(
-				).withResourceType(LocationResource.class
-				).withResourceName(LocationResource.LOCATION
-				).withDataType(String.class
-				).withDataValue(ModelInstance.defaultLocation(
-					super.modelInstance.mediator())
-				).withHidden(false
-				).withModifiable(Modifiable.MODIFIABLE),buildPolicy);
+			ResourceBuilder locationResourceBuilder = null;
+			ResourceConfig rc = null;
+			if((index = resourceConfigs.indexOf(new Name<ResourceConfig>(
+					LocationResource.LOCATION)))>-1)
+			{
+				rc = resourceConfigs.get(index);
+				locationResourceBuilder = super.getModelInstance(
+					).getResourceBuilder(rc);				
+				index = -1;				
+			} else
+			{
+				locationResourceBuilder = 
+				super.getModelInstance().getResourceBuilder(
+				super.getModelInstance().configuration(
+					).getResourceDescriptor(
+					).withResourceType(LocationResource.class
+					).withResourceName(LocationResource.LOCATION
+					).withDataType(String.class
+					).withDataValue(ModelInstance.defaultLocation(
+						super.modelInstance.mediator())
+					).withHidden(false
+					).withModifiable(Modifiable.MODIFIABLE),buildPolicy);
+			}
 			admin.addResource(locationResourceBuilder);
 		}
 		if(admin.getResource(ServiceProvider.BRIDGE) == null)
@@ -555,8 +586,10 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 					).withDataValue(super.modelInstance.mediator().getContext(
 						).getBundle().getSymbolicName()
 					).withHidden(false
-					).withModifiable(Modifiable.FIXED),buildPolicy);
+					).withModifiable(Modifiable.FIXED),buildPolicy); 
+				
 				admin.addResource(bridgeResourceBuilder);
+				
 			} catch(Exception e)
 			{
 				super.modelInstance.mediator().debug(
@@ -566,15 +599,27 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 		}
 		if(admin.getResource(ServiceProvider.ICON) == null)
 		{
-			ResourceBuilder iconResourceBuilder = 
-			super.getModelInstance().getResourceBuilder(
-			super.getModelInstance().configuration(
-					).getResourceDescriptor(
-					).withResourceType(PropertyResource.class
-					).withResourceName(ServiceProvider.ICON
-					).withDataType(String.class
-					).withHidden(false
-					).withModifiable(Modifiable.MODIFIABLE),buildPolicy);
+			ResourceBuilder iconResourceBuilder = null;
+			ResourceConfig rc = null;
+			if((index = resourceConfigs.indexOf(new Name<ResourceConfig>(
+					ServiceProvider.ICON)))>-1)
+			{
+				rc = resourceConfigs.get(index);
+				iconResourceBuilder = super.getModelInstance(
+					).getResourceBuilder(rc);				
+				index = -1;				
+			} else
+			{
+				iconResourceBuilder = 
+				super.getModelInstance().getResourceBuilder(
+				super.getModelInstance().configuration(
+						).getResourceDescriptor(
+						).withResourceType(PropertyResource.class
+						).withResourceName(ServiceProvider.ICON
+						).withDataType(String.class
+						).withHidden(false
+						).withModifiable(Modifiable.MODIFIABLE),buildPolicy);
+			}
 			admin.addResource(iconResourceBuilder);
 		}
 		return admin;
