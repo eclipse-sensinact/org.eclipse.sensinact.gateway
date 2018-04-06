@@ -373,7 +373,6 @@ public class TestHttpDevice extends MidOSGiTest
 				new File("./extra-src2/test/resources/meta"),
 				new File("./target/extra-test-classes2"));
 
-
 		MidProxy<Core> mid = new MidProxy<Core>(classloader, 
 				this, Core.class);
 		Core core = mid.buildProxy();
@@ -389,19 +388,19 @@ public class TestHttpDevice extends MidOSGiTest
 
 		JSONObject jsonObject = new JSONObject(response.getJSON());		
 		assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
-
+		
 		callback.setRemoteEntity(new JSONObject(
 				).put("serviceProviderId", "TestForSensiNactGateway2"
 				).put("serviceId", "service1"
 				).put("resourceId", "temperature"
 				).put("data", 25));
 		
-		Thread.sleep(1500);
-		
+		Thread.sleep(2000);
 		response = (SnaMessage) midVariable.toOSGi(
 			getMethod, new Object[]{ DataResource.VALUE });		
 
 		jsonObject = new JSONObject(response.getJSON());
+		System.out.println(jsonObject);
 		assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
 
 		callback.setRemoteEntity(new JSONObject(
@@ -409,16 +408,15 @@ public class TestHttpDevice extends MidOSGiTest
 				).put("serviceId", "service1"
 				).put("resourceId", "temperature"
 				).put("data", 32));
-		
-		Thread.sleep(1500);
-		
+
+		Thread.sleep(2000);
 		response = (SnaMessage) midVariable.toOSGi(
 			getMethod, new Object[]{ DataResource.VALUE });		
 
 		jsonObject = new JSONObject(response.getJSON());		
 		assertEquals(32, (int) jsonObject.getJSONObject("response").getInt("value"));
-		
-		Thread.sleep(10000);
+
+		Thread.sleep(15*1000);
 		
 		callback.setRemoteEntity(new JSONObject(
 				).put("serviceProviderId", "TestForSensiNactGateway2"
