@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.util.UriUtils;
@@ -201,8 +202,7 @@ public abstract class TaskManager
      */
     private void add(String serviceProviderIdentifier, Task task)
     {
-    	List<Task> tasks = null;
-      
+    	List<Task> tasks = null;      
     	synchronized(this.executedTasks)
     	{
 	        tasks = this.executedTasks.get(serviceProviderIdentifier);
@@ -211,7 +211,21 @@ public abstract class TaskManager
 	    		tasks = new ArrayList<Task>();
 	    		this.executedTasks.put(serviceProviderIdentifier, tasks);
 	    	}
-	        tasks.add(task);
+	        tasks.add(task);	        
+	        task.registerCallBack(new TaskCallBack(
+				new Executable<Task,Void>()
+				{
+					@Override
+					public Void execute(Task task) throws Exception
+					{
+						TaskManager.this.remove(task.getTaskIdentifier());
+						return null;
+					}
+				}));
+	        if(task.isResultAvailable())
+	        {
+	        	remove(task.getTaskIdentifier());
+	        }
     	}
     }    
     
