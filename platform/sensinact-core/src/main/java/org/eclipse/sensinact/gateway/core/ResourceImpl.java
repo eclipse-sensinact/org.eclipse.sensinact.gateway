@@ -169,7 +169,7 @@ implements Typable<Resource.Type>
 			    	for(;index < types.length;index++)
 			    	{
 			    		AccessMethod m = proxy.getAccessMethod(types[index].name());
-			    		if(m!=null)
+			    		if(m!=null && m.size()>0)
 			    		{
 			    			buffer.append(pos>0?JSONUtils.COMMA:JSONUtils.EMPTY);
 			    			buffer.append(m.getDescription().getJSONDescription());
