@@ -542,6 +542,7 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 					).withHidden(false
 					).withModifiable(Modifiable.MODIFIABLE),buildPolicy);
 			}
+			friendlyNameResourceBuilder.configureName(ServiceProvider.FRIENDLY_NAME);
 			admin.addResource(friendlyNameResourceBuilder);
 		}
 		if(admin.getResource(LocationResource.LOCATION) == null)
@@ -569,6 +570,7 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 					).withHidden(false
 					).withModifiable(Modifiable.MODIFIABLE),buildPolicy);
 			}
+			locationResourceBuilder.configureName(LocationResource.LOCATION);
 			admin.addResource(locationResourceBuilder);
 		}
 		if(admin.getResource(ServiceProvider.BRIDGE) == null)
@@ -620,6 +622,7 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 						).withHidden(false
 						).withModifiable(Modifiable.MODIFIABLE),buildPolicy);
 			}
+			iconResourceBuilder.configureName(ServiceProvider.ICON);
 			admin.addResource(iconResourceBuilder);
 		}
 		return admin;
