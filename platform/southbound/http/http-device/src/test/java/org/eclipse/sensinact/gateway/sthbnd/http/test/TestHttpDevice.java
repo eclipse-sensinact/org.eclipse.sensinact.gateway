@@ -416,14 +416,15 @@ public class TestHttpDevice extends MidOSGiTest
 		jsonObject = new JSONObject(response.getJSON());		
 		assertEquals(32, (int) jsonObject.getJSONObject("response").getInt("value"));
 
-		Thread.sleep(15*1000);
+		Thread.sleep(16*1000);
 		
 		callback.setRemoteEntity(new JSONObject(
 				).put("serviceProviderId", "TestForSensiNactGateway2"
 				).put("serviceId", "service1"
 				).put("resourceId", "temperature"
 				).put("data", 45));
-		
+
+		Thread.sleep(2000);
 		response = (SnaMessage) midVariable.toOSGi(
 			getMethod, new Object[]{ DataResource.VALUE });		
 
