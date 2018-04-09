@@ -222,10 +222,6 @@ public abstract class TaskManager
 						return null;
 					}
 				}));
-	        if(task.isResultAvailable())
-	        {
-	        	remove(task.getTaskIdentifier());
-	        }
     	}
     }    
     
