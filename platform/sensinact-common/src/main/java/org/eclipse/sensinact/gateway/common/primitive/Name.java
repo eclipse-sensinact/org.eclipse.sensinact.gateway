@@ -20,6 +20,7 @@ package org.eclipse.sensinact.gateway.common.primitive;
 public class Name<N extends Nameable>
 {
 	private final String name;
+	private final boolean ignoreCase;
 
 	/**
 	 * Constructor
@@ -29,7 +30,19 @@ public class Name<N extends Nameable>
 	 */
 	public Name(String name)
 	{
+		this(name,false); 
+	}
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param name
+	 * 		the wrapped string name 
+	 */
+	public Name(String name, boolean ignoreCase)
+	{
 		this.name = name; 
+		this.ignoreCase = ignoreCase;
 	}
 	
 	/**
@@ -48,14 +61,27 @@ public class Name<N extends Nameable>
 		{
 		    @SuppressWarnings("unchecked")
             String name = ((N)object).getName();
-			equals = this.name.equals(name);	
+		    if(ignoreCase)
+		    {
+		    	equals = this.name.equalsIgnoreCase(name);
+			}else 
+			{
+		    	equals = this.name.equals(name);
+			}	
 			
 		} catch(ClassCastException e)
 		{
     		if(object.getClass()==String.class)
     		{
-    			equals = this.name.equals(
-    			        ((String)object));
+    		    if(ignoreCase)
+    		    {
+    		    	equals = this.name.equalsIgnoreCase(
+    		    			((String)object));
+    			} else 
+    			{
+    		    	equals = this.name.equals(
+    		    			((String)object));
+    			}	
     		}
 		}
 		return equals;
