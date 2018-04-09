@@ -524,7 +524,7 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 			ResourceBuilder friendlyNameResourceBuilder = null;
 			ResourceConfig rc = null;
 			if((index = resourceConfigs.indexOf(new Name<ResourceConfig>(
-					ServiceProvider.FRIENDLY_NAME)))>-1)
+					ServiceProvider.FRIENDLY_NAME,true)))>-1)
 			{
 				rc = resourceConfigs.get(index);
 				friendlyNameResourceBuilder = super.getModelInstance(
@@ -549,7 +549,7 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 			ResourceBuilder locationResourceBuilder = null;
 			ResourceConfig rc = null;
 			if((index = resourceConfigs.indexOf(new Name<ResourceConfig>(
-					LocationResource.LOCATION)))>-1)
+					LocationResource.LOCATION,true)))>-1)
 			{
 				rc = resourceConfigs.get(index);
 				locationResourceBuilder = super.getModelInstance(
@@ -602,7 +602,7 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 			ResourceBuilder iconResourceBuilder = null;
 			ResourceConfig rc = null;
 			if((index = resourceConfigs.indexOf(new Name<ResourceConfig>(
-					ServiceProvider.ICON)))>-1)
+					ServiceProvider.ICON,true)))>-1)
 			{
 				rc = resourceConfigs.get(index);
 				iconResourceBuilder = super.getModelInstance(
