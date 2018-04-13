@@ -137,10 +137,6 @@ public class FilteringAccessor extends FilteringDefinition
 	 */
 	public String apply(Object obj) 
 	{
-		if(obj==null)
-		{
-			return null;
-		}
 		Filtering filtering = this.mediator.getContext(
 			).getService(reference);
 		if(filtering == null)
