@@ -548,6 +548,10 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		{
 			engines.addLast(matcher.group(1));
 		}			
+		if(engines.isEmpty())
+		{
+			return;
+		}
 		builder.withFilter(engines.size());
 		
 		String filter = null;

@@ -81,6 +81,10 @@ public class FilteringAccessor extends FilteringDefinition
 	 */
 	public boolean handle(String type) 
 	{
+		if(type == null)
+		{
+			return false;
+		}
 		Filtering filtering = this.mediator.getContext(
 			).getService(reference);
 		
@@ -133,6 +137,10 @@ public class FilteringAccessor extends FilteringDefinition
 	 */
 	public String apply(Object obj) 
 	{
+		if(obj==null)
+		{
+			return null;
+		}
 		Filtering filtering = this.mediator.getContext(
 			).getService(reference);
 		if(filtering == null)
