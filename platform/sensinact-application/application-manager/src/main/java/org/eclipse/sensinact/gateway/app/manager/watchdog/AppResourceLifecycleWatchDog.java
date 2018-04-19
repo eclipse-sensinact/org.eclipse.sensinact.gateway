@@ -23,6 +23,7 @@ import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.*;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
@@ -157,12 +158,13 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
                     case RESOURCE_APPEARING:
                         // TODO: there is a problem of session when a resource appears because the session of the user
                         // TODO: does not exist anymore (need a brainstorming with Christophe about it)
-                        /*if ((Boolean) service.getResource(AppConstant.AUTORESTART).getAttribute(DataResource.VALUE).getValue()
+                        /*
+                        if ((Boolean) service.getResource(AppConstant.AUTORESTART).getAttribute(DataResource.VALUE).getValue()
                                 && ApplicationStatus.UNRESOLVED.equals(status)) {
-
-                            service.getResource(AppConstant.START).getAccessMethod(AccessMethod.Type.ACT)
-                                    .invoke(null, AccessLevelOption.AUTHENTICATED.getAccessLevel().getLevel());
-                        }*/
+                            service.getResource(AppConstant.START).getAccessMethod(AccessMethod.Type.valueOf(AccessMethod.ACT))
+                                    .invoke(null);//null, AccessLevelOption.AUTHENTICATED.getAccessLevel().getLevel()
+                        }
+                        */
                         break;
                     case RESOURCE_DISAPPEARING:
                         switch(status) {
