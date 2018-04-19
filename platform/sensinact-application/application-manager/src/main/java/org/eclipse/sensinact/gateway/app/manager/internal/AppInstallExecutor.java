@@ -25,6 +25,7 @@ import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 
 import org.eclipse.sensinact.gateway.app.manager.json.AppContainer;
@@ -142,8 +143,8 @@ class AppInstallExecutor implements AccessMethodExecutor {
         if(mediator.isInfoLoggable()) {
             mediator.info("Application " + name + " successfully installed.");
         }
-
-        jsonObjects.push(new JSONObject().put("message", "Application " + name + " successfully installed."));
+        jsonObjects.setAccessMethodObjectResult(new JSONObject().put(
+        		"message", "Application " + name + " successfully installed."));
 
         return null;
     }

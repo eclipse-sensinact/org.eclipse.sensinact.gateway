@@ -59,9 +59,10 @@ class AppUninstallExecutor implements AccessMethodExecutor {
                             if (mediator.isInfoLoggable()) {
                                 mediator.info("Application " + name + " successfully installed.");
                             }
+                            
+                            jsonObjects.setAccessMethodObjectResult(new JSONObject().put(
+                            		"message", "The application " + name +" has been uninstalled"));
 
-                            jsonObjects.push(new JSONObject().put("message", "The application " + name +
-                                    " has been uninstalled"));
                         } else {
                             throw new InvalidApplicationException("Unable to uninstall the application.");
                         }
