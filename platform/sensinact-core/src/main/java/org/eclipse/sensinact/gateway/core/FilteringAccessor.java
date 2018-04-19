@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.core;
 
 import java.util.Collection;
+import java.util.NoSuchElementException;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.osgi.framework.InvalidSyntaxException;
@@ -52,12 +53,12 @@ public class FilteringAccessor extends FilteringDefinition
 		
 			if(references == null ||references.size()!=1)
 			{
-				new RuntimeException(
+				throw new RuntimeException(
 				"Unable to retrieve the appropriate Filtering service reference");
 			}
 			this.reference = references.iterator().next();
-				
-		} catch (InvalidSyntaxException e) {
+			
+		} catch (NoSuchElementException | InvalidSyntaxException e) {
 			
 			throw new RuntimeException(e);
 		}

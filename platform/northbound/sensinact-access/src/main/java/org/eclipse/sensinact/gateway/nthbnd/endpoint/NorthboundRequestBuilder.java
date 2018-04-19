@@ -10,9 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.sensinact.gateway.core.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
@@ -54,7 +51,7 @@ public class NorthboundRequestBuilder
 
 	private Object argument;
 
-	private List<FilteringDefinition> filterDefinitions;
+	private FilteringDefinition[] filterDefinitions;
 
 	private boolean hiddenFilter;
 	
@@ -211,8 +208,7 @@ public class NorthboundRequestBuilder
 	 */
 	public void withFilter(int size)
 	{
-		this.filterDefinitions = new ArrayList<FilteringDefinition>(
-				size);
+		this.filterDefinitions = new FilteringDefinition[size];
 	}
 	
 	/**
@@ -226,7 +222,7 @@ public class NorthboundRequestBuilder
 		{
 			return;
 		}
-		this.filterDefinitions.add(index, filterDefinition);
+		this.filterDefinitions[index]= filterDefinition;
 	}
 	
 	/**
@@ -250,10 +246,13 @@ public class NorthboundRequestBuilder
 		switch(this.method)
 		{
 			case "ALL":
-				request = new AllRequest(mediator, 
-				    getRequestIdentifier(), this.filterDefinitions==null?null:
-					new FilteringCollection(mediator, this.hiddenFilter, 
-					this.filterDefinitions.toArray(new FilteringDefinition[0])));
+				FilteringCollection collection = null;
+				if(this.filterDefinitions!=null)
+				{
+					collection = new FilteringCollection(mediator, this.hiddenFilter, 
+						this.filterDefinitions);
+				}
+				request = new AllRequest(mediator, getRequestIdentifier(),collection);
 				break;
 			case "ACT":
 				if(this.resource != null)
@@ -289,7 +288,7 @@ public class NorthboundRequestBuilder
 						request = new ResourcesRequest( mediator, getRequestIdentifier(), 
 						    serviceProvider, service,  this.filterDefinitions==null?null:
 							    new FilteringCollection(mediator, this.hiddenFilter, 
-							    this.filterDefinitions.toArray(new FilteringDefinition[0])));
+							    		this.filterDefinitions));
 						
 					} else
 					{
@@ -304,7 +303,7 @@ public class NorthboundRequestBuilder
 						request = new ServicesRequest( mediator, getRequestIdentifier(), 
 						    serviceProvider, this.filterDefinitions==null?null:
 						    new FilteringCollection(mediator, this.hiddenFilter,  
-						    this.filterDefinitions.toArray(new FilteringDefinition[0])));
+						    this.filterDefinitions));
 						
 					} else
 					{
@@ -317,7 +316,7 @@ public class NorthboundRequestBuilder
 					request = new ServiceProvidersRequest(mediator, 
 					    getRequestIdentifier(), this.filterDefinitions==null?null:
 						    new FilteringCollection(mediator, this.hiddenFilter,  
-						    this.filterDefinitions.toArray(new FilteringDefinition[0])));
+						    this.filterDefinitions));
 				}
 				break;
 			case "GET":

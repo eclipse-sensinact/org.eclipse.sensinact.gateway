@@ -64,11 +64,17 @@ public class FilteringCollection
 	    
     	List<FilteringAccessor> accessors = new 
     			ArrayList<FilteringAccessor>();
-    	try
+    	
+    	int pos=0;
+    	
+    	for(;index < length;index++)
     	{
-	    	for(;index < length;index++)
-	    	{
-    			if(index > 0)
+    		try
+    		{
+	    		accessors.add(new FilteringAccessor(
+	    		mediator,filterDefinition[index]));
+
+    			if(pos > 0)
     			{
     				jsonFormatedFilterBuilder.append(",");
     			}
@@ -76,13 +82,13 @@ public class FilteringCollection
     			"{\"type\":\"%s\",\"definition\":\"%s\"}",
     			filterDefinition[index].type,filterDefinition[index].filter));
     			
-	    		accessors.add(new FilteringAccessor(
-	    		mediator,filterDefinition[index]));
-	    	}
-    	}catch(RuntimeException e)
-    	{
-    		mediator.error(e);
-    	}
+    			pos++;
+    			
+    		}catch(RuntimeException e)
+        	{
+        		mediator.error(e);
+        	}
+    	}    	
     	if(index!=length)
     	{
     		this.filterJsonDefinition = "[]";

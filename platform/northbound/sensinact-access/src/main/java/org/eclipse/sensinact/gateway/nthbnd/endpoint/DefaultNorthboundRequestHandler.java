@@ -418,6 +418,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		{
 		    this.method = "ALL";
 			this.filtered = matcher.group(1);
+			this.multi = true;
 			return true;
 		}
 		return false;
@@ -433,22 +434,28 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 	{
 		String content = this.request.getContent();
     	JSONArray parameters = null;
-    	try
-    	{
-    		JSONObject jsonObject = new JSONObject(content);
-    		parameters = jsonObject.optJSONArray("parameters");
-    		
-    	} catch(JSONException e)
-    	{    		
-    		try
-    		{
-    			parameters = new JSONArray(content);
-    			
-    		} catch(JSONException je)
-        	{
-    			mediator.debug("No JSON formated content in %s",content);
-        	}
-    	}    	
+		if(content == null)
+		{
+			parameters = new JSONArray();
+		} else
+		{
+	    	try
+	    	{
+	    		JSONObject jsonObject = new JSONObject(content);
+	    		parameters = jsonObject.optJSONArray("parameters");
+	    		
+	    	} catch(JSONException e)
+	    	{    		
+	    		try
+	    		{
+	    			parameters = new JSONArray(content);
+	    			
+	    		} catch(JSONException je)
+	        	{
+	    			mediator.debug("No JSON formated content in %s",content);
+	        	}
+	    	}    	
+		}
     	int index = 0;
     	int length = parameters==null?0:parameters.length();
     	
@@ -546,7 +553,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 		Matcher matcher = FILTER_PATTERN.matcher(this.filtered);
 		while(matcher.find())
 		{
-			engines.addLast(matcher.group(1));
+			engines.addFirst(matcher.group(1));
 		}			
 		if(engines.isEmpty())
 		{
@@ -569,6 +576,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 			{ 
 				filter = CastUtils.castPrimitive(
 				String.class, parameter.getValue());
+				
 				builder.withFilter(new FilteringDefinition(
 					name, filter), filterIndex);
 			}				
