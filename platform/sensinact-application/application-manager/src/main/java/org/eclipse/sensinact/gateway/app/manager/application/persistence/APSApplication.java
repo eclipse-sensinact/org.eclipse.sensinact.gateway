@@ -24,6 +24,7 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
     private final Long readingDelay;
     private final String fileExtention;
     private Boolean active=Boolean.TRUE;
+    private static final Object lock=new Object();
 
     public APSApplication(File directoryMonitor, Long readingDelay,String fileExtention){
         this.directoryMonitor=directoryMonitor;
@@ -35,27 +36,39 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
     public void persist(Application application) throws ApplicationPersistenceException {
 
         final String filename=directoryMonitor+File.separator+application.getName()+"."+fileExtention;
-        File file=new File(filename);
-        try {
-            file.createNewFile();
-            FileOutputStream fos=new FileOutputStream(file);
-            fos.write(application.getContent().toString().getBytes());
-            fos.close();
-        } catch (IOException e) {
-            LOG.error("Failed to create application file {} into the disk.",filename);
+
+        synchronized (lock) {
+
+            File file = new File(filename);
+            try {
+                file.createNewFile();
+                FileOutputStream fos = new FileOutputStream(file);
+                fos.write(application.getContent().toString().getBytes());
+                fos.close();
+                filesPath.put(filename,application);
+                files.add(filename);
+            } catch (IOException e) {
+                LOG.error("Failed to create application file {} into the disk.", filename);
+            }
+
         }
     }
 
     @Override
     public void delete(String applicationName) throws ApplicationPersistenceException {
+
         final String filename=directoryMonitor+File.separator+applicationName+"."+fileExtention;
 
-        File file=new File(filename);
-        try {
-            file.delete();
-            notifyRemoval(filename);
-        } catch (Exception e) {
-            LOG.error("Failed to remove application file {} from the disk.",filename);
+        synchronized (lock) {
+
+            File file = new File(filename);
+            try {
+                file.delete();
+                notifyRemoval(filename);
+            } catch (Exception e) {
+                LOG.error("Failed to remove application file {} from the disk.", filename);
+            }
+
         }
     }
 
@@ -87,52 +100,54 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
 
                 Thread.sleep(readingDelay);
 
-                List<String> filesToBeProcessed=new ArrayList<>();
+                synchronized (lock) {
 
-                for(File applicationFile:directoryMonitor.listFiles(new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String name) {
-                        return name.endsWith("."+fileExtention);
+                    List<String> filesToBeProcessed = new ArrayList<>();
+
+                    for (File applicationFile : directoryMonitor.listFiles(new FilenameFilter() {
+                        @Override
+                        public boolean accept(File dir, String name) {
+                            return name.endsWith("." + fileExtention);
+                        }
+                    })) {
+                        filesToBeProcessed.add(applicationFile.getAbsolutePath());
                     }
-                })){
-                    filesToBeProcessed.add(applicationFile.getAbsolutePath());
-                }
 
-                List<String> filesRemoved=new ArrayList<>(files);
-                filesRemoved.removeAll(filesToBeProcessed);
+                    List<String> filesRemoved = new ArrayList<>(files);
+                    filesRemoved.removeAll(filesToBeProcessed);
 
-                //Remove old application files
-                for(String fileRemoved:filesRemoved){
-                    notifyRemoval(fileRemoved);
-                }
+                    //Remove old application files
+                    for (String fileRemoved : filesRemoved) {
+                        notifyRemoval(fileRemoved);
+                    }
 
-                //Process (new files or already installed) files
-                for(String toprocess:filesToBeProcessed){
-                    try{
-                        Boolean fileManaged=filesPath.containsKey(toprocess);
-                        if(!fileManaged){ //new file
-                            LOG.info("Application file {} will be loaded.",toprocess);
-                            notifyInclusion(toprocess);
-                        }else {
-                            Application applicationManaged=filesPath.get(toprocess);
-                            Application applicationInFs=FileToApplicationParser.parse(toprocess);
-                            //taken into account modified files
-                            if(!applicationManaged.getDiggest().equals(applicationInFs.getDiggest())){
-                                LOG.info("Application file {} was already loaded but its content changed, dispatching update.",toprocess);
-                                notifyRemoval(toprocess);
+                    //Process (new files or already installed) files
+                    for (String toprocess : filesToBeProcessed) {
+                        try {
+                            Boolean fileManaged = filesPath.containsKey(toprocess);
+                            if (!fileManaged) { //new file
+                                LOG.info("Application file {} will be loaded.", toprocess);
                                 notifyInclusion(toprocess);
-                                LOG.info("Application file {}, update procedure finished.",toprocess);
-                            }else {
-                                //Dont do anything, file already taken into account
+                            } else {
+                                Application applicationManaged = filesPath.get(toprocess);
+                                Application applicationInFs = FileToApplicationParser.parse(toprocess);
+                                //taken into account modified files
+                                if (!applicationManaged.getDiggest().equals(applicationInFs.getDiggest())) {
+                                    LOG.info("Application file {} was already loaded but its content changed, dispatching update.", toprocess);
+                                    notifyRemoval(toprocess);
+                                    notifyInclusion(toprocess);
+                                    LOG.info("Application file {}, update procedure finished.", toprocess);
+                                } else {
+                                    //Dont do anything, file already taken into account
+                                }
                             }
+
+                        } catch (Exception e) {
+                            LOG.warn("Failed to process application description file {}", toprocess, e);
                         }
 
-                    }catch(Exception e){
-                        LOG.warn("Failed to process application description file {}",toprocess,e);
                     }
-
                 }
-
                 Thread.sleep(readingDelay);
 
             } catch (InterruptedException e) {

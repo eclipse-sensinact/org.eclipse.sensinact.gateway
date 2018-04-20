@@ -72,7 +72,8 @@ public class AppUninstallExecutor extends ApplicationAvailabilityListenerAbstrac
             throw new InvalidApplicationException("Wrong parameters. Unable to uninstall the application");
         else {
 
-            if(persist){
+            if (device.getService(name) != null) {
+
                 try {
                     persistenceService.delete(name);
                 } catch (ApplicationPersistenceException e) {
@@ -80,29 +81,28 @@ public class AppUninstallExecutor extends ApplicationAvailabilityListenerAbstrac
                     throw new InvalidApplicationException("Unable to uninstall the application." +
                             "Application " + name + " does not exist");
                 }
-            }else {
-                if (device.getService(name) != null) {
-                    ApplicationService applicationService = (ApplicationService) device.getService(name);
 
-                    if (applicationService != null && applicationService.getApplication() != null) {
-                        applicationService.getApplication().uninstall();
+                ApplicationService applicationService = (ApplicationService) device.getService(name);
 
-                        if (device.removeService(applicationService.getName())) {
-                            if (mediator.isInfoLoggable()) {
-                                mediator.info("Application " + name + " successfully uninstalled.");
-                            }
-                        } else {
-                            throw new InvalidApplicationException("Unable to uninstall the application.");
+                if (applicationService != null && applicationService.getApplication() != null) {
+                    applicationService.getApplication().uninstall();
+
+                    if (device.removeService(applicationService.getName())) {
+                        if (mediator.isInfoLoggable()) {
+                            mediator.info("Application " + name + " successfully uninstalled.");
                         }
-
                     } else {
                         throw new InvalidApplicationException("Unable to uninstall the application.");
                     }
+
                 } else {
-                    throw new InvalidApplicationException("Unable to uninstall the application." +
-                            "Application " + name + " does not exist");
+                    throw new InvalidApplicationException("Unable to uninstall the application.");
                 }
+            } else {
+                throw new InvalidApplicationException("Unable to uninstall the application." +
+                        "Application " + name + " does not exist");
             }
+
 
 
         }
