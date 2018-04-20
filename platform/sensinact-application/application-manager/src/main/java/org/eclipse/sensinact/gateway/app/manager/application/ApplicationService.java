@@ -13,15 +13,20 @@ package org.eclipse.sensinact.gateway.app.manager.application;
 
 import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
+import org.eclipse.sensinact.gateway.app.manager.application.persistence.DependencyManager;
+import org.eclipse.sensinact.gateway.app.manager.application.persistence.DependencyManagerCallback;
 import org.eclipse.sensinact.gateway.app.manager.json.AppContainer;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-
 import org.eclipse.sensinact.gateway.core.*;
 import org.eclipse.sensinact.gateway.core.method.*;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -34,7 +39,7 @@ import java.util.HashMap;
  */
 public class ApplicationService extends ServiceImpl 
 {
-
+    private static Logger LOG= LoggerFactory.getLogger(ApplicationService.class);
     private Application application;
 
     /**
@@ -58,20 +63,20 @@ public class ApplicationService extends ServiceImpl
      * @throws InvalidResourceException
      * @throws InvalidValueException
      */
-    public final void createSnaService(AppContainer appContainer, Application application)
+    public final void createSnaService(AppContainer appContainer, final Application application)
             throws InvalidResourceException, InvalidValueException
     {
     	AccessMethod.Type act = AccessMethod.Type.valueOf(AccessMethod.ACT);
         this.application = application;
 
-        ResourceImpl startResource = this.addActionResource(AppConstant.START, 
+        final ResourceImpl startResource = this.addActionResource(AppConstant.START,
         		ActionResource.class);
         
         startResource.registerExecutor(new Signature(super.modelInstance.mediator(),
         		act, null, null), new AppStartExecutor(this),
                 AccessMethodExecutor.ExecutionPolicy.AFTER);
 
-        ResourceImpl stopResource = this.addActionResource(AppConstant.STOP, 
+        final ResourceImpl stopResource = this.addActionResource(AppConstant.STOP,
         		ActionResource.class);
         
         stopResource.registerExecutor(new Signature(super.modelInstance.mediator(), act,
@@ -166,6 +171,58 @@ public class ApplicationService extends ServiceImpl
         stopResource.registerExecutor(new Signature(super.modelInstance.mediator(), 
         		act, null, null), appWatchdogExecutor,
                 AccessMethodExecutor.ExecutionPolicy.AFTER);
+
+        final Collection<String> dependenciesURI=new ArrayList<String>(appContainer.getResourceUris());
+
+        if(appContainer.getInitialize().getOptions().getAutorestart()){
+
+            LOG.debug("Application autostart option is activated, instantiating dependency manager");
+
+            DependencyManager dm=new DependencyManager(application.getName(), modelInstance.mediator(), dependenciesURI, new DependencyManagerCallback() {
+                @Override
+                public void ready(String applicationName) {
+                    application.doStart();
+                }
+
+                @Override
+                public void unready(String applicationName) {
+                    try {
+                        application.doStop();
+                    }catch(Exception e){
+                        //We can ignore an error here, the application might have been stop by the watch doc mechanism
+                    }
+
+                }
+            });
+
+            dm.start();
+
+        }else {
+            LOG.debug("Application autostart option is NOT activated");
+        }
+
+        /*
+        super.modelInstance.mediator().callService(Core.class,
+                new Executable<Core,Void>()
+                {
+                    @Override
+                    public Void execute(Core service)
+                            throws Exception
+                    {
+                        for(String resourceUri :dependenciesURI)
+                        {
+                            Mediator mediator=ApplicationService.this.modelInstance.mediator();
+                            final SnaFilter filter = new SnaFilter(mediator, resourceUri);
+                            filter.addHandledType(SnaMessage.Type.LIFECYCLE);
+
+                            AppResourceLifecycleWatchDog.this.registrations.add(
+                            service.registerAgent(mediator, new AppResourceLifecycleWatchDog.AppResourceLifeCycleSnaAgent(mediator, AppResourceLifecycleWatchDog.this), filter)
+                            );
+                        }
+                        return null;
+                    }
+                });*/
+
     }
 
     /**
