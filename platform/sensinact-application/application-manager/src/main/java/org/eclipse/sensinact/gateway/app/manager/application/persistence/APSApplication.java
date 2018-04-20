@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.*;
 
 public class APSApplication implements ApplicationPersistenceService,Runnable {
@@ -19,11 +20,13 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
     private final Map<String,Application> filesPath=new HashMap<>();
     private final List<ApplicationAvailabilityListener> listener=new ArrayList<ApplicationAvailabilityListener>();
     private final Long readingDelay;
+    private final String fileExtention;
     private Boolean active=Boolean.TRUE;
 
-    public APSApplication(File directoryMonitor, Long readingDelay){
+    public APSApplication(File directoryMonitor, Long readingDelay,String fileExtention){
         this.directoryMonitor=directoryMonitor;
         this.readingDelay=readingDelay;
+        this.fileExtention=fileExtention;
     }
 
     @Override
@@ -66,7 +69,12 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
 
                 List<String> filesToBeProcessed=new ArrayList<>();
 
-                for(File applicationFile:directoryMonitor.listFiles()){
+                for(File applicationFile:directoryMonitor.listFiles(new FilenameFilter() {
+                    @Override
+                    public boolean accept(File dir, String name) {
+                        return name.endsWith("."+fileExtention);
+                    }
+                })){
                     filesToBeProcessed.add(applicationFile.getAbsolutePath());
                 }
 

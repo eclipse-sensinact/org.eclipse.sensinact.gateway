@@ -12,13 +12,14 @@
 package org.eclipse.sensinact.gateway.app.manager.osgi;
 
 import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAvailabilityListenerAbstract;
-import org.eclipse.sensinact.gateway.app.manager.internal.AppManagerFactory;
 import org.eclipse.sensinact.gateway.app.manager.application.persistence.APSApplication;
+import org.eclipse.sensinact.gateway.app.manager.internal.AppManagerFactory;
 import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
-import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
@@ -29,6 +30,8 @@ import java.io.File;
  * @author Remi Druilhe
  */
 public class Activator extends AbstractActivator<AppServiceMediator> {
+
+    private static Logger LOG= LoggerFactory.getLogger(Activator.class);
 
     private AppManagerFactory appManagerFactory;
 
@@ -43,6 +46,9 @@ public class Activator extends AbstractActivator<AppServiceMediator> {
     @Property
     private Boolean applicationPersist;
 
+    @Property(defaultValue = "json",validationRegex = Property.ALPHANUMERIC)
+    private String applicationFileExtension;
+
     /**
      * @see AbstractActivator#doStart()
      */
@@ -51,7 +57,7 @@ public class Activator extends AbstractActivator<AppServiceMediator> {
 
         if(applicationPersist){
             File directoryToMonitor=new File(directory);
-            APSApplication directoryMonitor=new APSApplication(directoryToMonitor,updateFileCheck);
+            APSApplication directoryMonitor=new APSApplication(directoryToMonitor,updateFileCheck, applicationFileExtension);
             persistenceThread=new Thread(directoryMonitor);
             directoryMonitor.registerServiceAvailabilityListener(new ApplicationAvailabilityListenerAbstract() {
                 @Override
@@ -61,7 +67,7 @@ public class Activator extends AbstractActivator<AppServiceMediator> {
                         //appManagerFactory.getInstallResource().getAccessMethod(AccessMethod.Type.valueOf(AccessMethod.ACT)).invoke(new Object[]{applicationName,new JSONObject(content)});
                         //appManagerFactory.getServiceProvider().getService(applicationName).getResource("START").getAccessMethod(AccessMethod.Type.valueOf(AccessMethod.ACT)).invoke(new Object[]{});
                     }catch(Exception e){
-                        e.printStackTrace();
+                        LOG.error("Failed to install application '{}'",applicationName,e);
                     }
 
                 }
@@ -73,7 +79,7 @@ public class Activator extends AbstractActivator<AppServiceMediator> {
                         //appManagerFactory.getUninstallResource().getAccessMethod(AccessMethod.Type.valueOf(AccessMethod.ACT)).invoke(new Object[]{applicationName});
                         appManagerFactory.getUninstallResource().uninstall(applicationName);
                     }catch(Exception e){
-                        e.printStackTrace();
+                        LOG.error("Failed to uninstall application",applicationName,e);
                     }
 
                 }
