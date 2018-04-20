@@ -10,7 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.*;
 
 public class APSApplication implements ApplicationPersistenceService,Runnable {
@@ -31,12 +33,30 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
 
     @Override
     public void persist(Application application) throws ApplicationPersistenceException {
-        throw new UnsupportedOperationException("Persistence to the disk is not available");
+
+        final String filename=directoryMonitor+File.separator+application.getName()+"."+fileExtention;
+        File file=new File(filename);
+        try {
+            file.createNewFile();
+            FileOutputStream fos=new FileOutputStream(file);
+            fos.write(application.getContent().toString().getBytes());
+            fos.close();
+        } catch (IOException e) {
+            LOG.error("Failed to create application file {} into the disk.",filename);
+        }
     }
 
     @Override
     public void delete(String applicationName) throws ApplicationPersistenceException {
-        throw new UnsupportedOperationException("Persistence to the disk is not available");
+        final String filename=directoryMonitor+File.separator+applicationName+"."+fileExtention;
+
+        File file=new File(filename);
+        try {
+            file.delete();
+            notifyRemoval(filename);
+        } catch (Exception e) {
+            LOG.error("Failed to remove application file {} from the disk.",filename);
+        }
     }
 
     @Override
@@ -60,7 +80,7 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
     }
 
     public void run(){
-
+        notifyServiceAvailable();
         while(active){
 
             try {
@@ -120,15 +140,16 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
             }
 
         }
-
+        notifyServiceUnavailable();
         LOG.error("Application persistency system is exiting");
 
     }
 
     private void notifyInclusion(String filepath){
-
         try {
             Application application=FileToApplicationParser.parse(filepath);
+
+            LOG.info("Notifying application '{}' deployment ",filepath);
 
             for(ApplicationAvailabilityListener list:listener){
                 try {
@@ -150,14 +171,45 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
     }
 
     private void notifyRemoval(String filepath){
-        Application application=filesPath.get(filepath);
-        filesPath.remove(filepath);
-        files.remove(filepath);
+        LOG.info("Notifying application '{}' removal",filepath);
+        Application application=filesPath.remove(filepath);
+
+        if(application!=null){
+            files.remove(filepath);
+            for(ApplicationAvailabilityListener list:listener){
+                try {
+                    list.applicationRemoved(application.getName());
+                }catch(Exception e){
+                    LOG.error("Failed to remove application from the platform",e);
+                }
+
+            }
+        }else {
+            LOG.warn("The application file '{}' was already notified by the system",filepath);
+        }
+
+
+    }
+
+    private void notifyServiceUnavailable(){
+        LOG.debug("Persistence service is going offline");
         for(ApplicationAvailabilityListener list:listener){
             try {
-                list.applicationRemoved(application.getName());
+                list.serviceOffline();
             }catch(Exception e){
-                LOG.error("Failed to remove application from the platform",e);
+                LOG.error("Persistence service is going offline",e);
+            }
+
+        }
+    }
+
+    private void notifyServiceAvailable(){
+        LOG.debug("Persistence service is going online");
+        for(ApplicationAvailabilityListener list:listener){
+            try {
+                list.serviceOnline();
+            }catch(Exception e){
+                LOG.error("Persistence service is going online",e);
             }
 
         }

@@ -12,6 +12,9 @@
 package org.eclipse.sensinact.gateway.app.manager.internal;
 
 import org.eclipse.sensinact.gateway.app.api.exception.InvalidApplicationException;
+import org.eclipse.sensinact.gateway.app.api.persistence.ApplicationPersistenceService;
+import org.eclipse.sensinact.gateway.app.api.persistence.exception.ApplicationPersistenceException;
+import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAvailabilityListenerAbstract;
 import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
@@ -19,24 +22,29 @@ import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @see AccessMethodExecutor
  *
  * @author Remi Druilhe
  */
-public class AppUninstallExecutor implements AccessMethodExecutor {
-
+public class AppUninstallExecutor extends ApplicationAvailabilityListenerAbstract implements AccessMethodExecutor {
+    private static Logger LOG= LoggerFactory.getLogger(AppUninstallExecutor.class);
     private final AppServiceMediator mediator;
     private final ServiceProviderImpl device;
+    private final ApplicationPersistenceService persistenceService;
+    private Boolean persist=false;
 
     /**
      * Constructor
      * @param device the AppManager service provider
      */
-    AppUninstallExecutor(AppServiceMediator mediator, ServiceProviderImpl device) {
+    AppUninstallExecutor(AppServiceMediator mediator, ServiceProviderImpl device, ApplicationPersistenceService persistenceService) {
         this.mediator = mediator;
         this.device = device;
+        this.persistenceService=persistenceService;
     }
 
     /**
@@ -47,6 +55,7 @@ public class AppUninstallExecutor implements AccessMethodExecutor {
 
         try{
             uninstall(name);
+
             jsonObjects.push(new JSONObject().put("message", "The application " + name +
                     " has been uninstalled"));
         }catch (Exception e){
@@ -62,27 +71,47 @@ public class AppUninstallExecutor implements AccessMethodExecutor {
         if (name == null)
             throw new InvalidApplicationException("Wrong parameters. Unable to uninstall the application");
         else {
-            if (device.getService(name) != null) {
-                ApplicationService applicationService = (ApplicationService) device.getService(name);
-                if (applicationService != null && applicationService.getApplication() != null) {
-                    applicationService.getApplication().uninstall();
-                    if (device.removeService(applicationService.getName())) {
-                        if (mediator.isInfoLoggable()) {
-                            mediator.info("Application " + name + " successfully uninstalled.");
+
+            if(persist){
+                try {
+                    persistenceService.delete(name);
+                } catch (ApplicationPersistenceException e) {
+                    LOG.warn("Impossible to remove application '{}' from persistence system");
+                    throw new InvalidApplicationException("Unable to uninstall the application." +
+                            "Application " + name + " does not exist");
+                }
+            }else {
+                if (device.getService(name) != null) {
+                    ApplicationService applicationService = (ApplicationService) device.getService(name);
+
+                    if (applicationService != null && applicationService.getApplication() != null) {
+                        applicationService.getApplication().uninstall();
+
+                        if (device.removeService(applicationService.getName())) {
+                            if (mediator.isInfoLoggable()) {
+                                mediator.info("Application " + name + " successfully uninstalled.");
+                            }
+                        } else {
+                            throw new InvalidApplicationException("Unable to uninstall the application.");
                         }
+
                     } else {
                         throw new InvalidApplicationException("Unable to uninstall the application.");
                     }
-
                 } else {
-                    throw new InvalidApplicationException("Unable to uninstall the application.");
+                    throw new InvalidApplicationException("Unable to uninstall the application." +
+                            "Application " + name + " does not exist");
                 }
-            } else {
-                throw new InvalidApplicationException("Unable to uninstall the application." +
-                        "Application " + name + " does not exist");
             }
+
+
         }
 
+    }
+
+    @Override
+    public void serviceOnline() {
+        persist=true;
     }
 
 }

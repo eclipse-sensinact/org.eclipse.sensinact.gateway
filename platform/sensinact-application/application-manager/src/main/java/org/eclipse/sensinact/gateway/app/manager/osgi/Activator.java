@@ -54,39 +54,18 @@ public class Activator extends AbstractActivator<AppServiceMediator> {
      * @see AbstractActivator#doStart()
      */
     public void doStart() throws Exception {
-        this.appManagerFactory = new AppManagerFactory(mediator);
+
+        APSApplication directoryMonitor=new APSApplication(new File(directory),updateFileCheck, applicationFileExtension);
+
+        this.appManagerFactory = new AppManagerFactory(mediator,directoryMonitor);
 
         if(applicationPersist){
-            File directoryToMonitor=new File(directory);
-            APSApplication directoryMonitor=new APSApplication(directoryToMonitor,updateFileCheck, applicationFileExtension);
+            LOG.info("Persistence mechanism is ON");
+            directoryMonitor.registerServiceAvailabilityListener(appManagerFactory);
             persistenceThread=new Thread(directoryMonitor);
-            directoryMonitor.registerServiceAvailabilityListener(new ApplicationAvailabilityListenerAbstract() {
-                @Override
-                public void applicationFound(String applicationName, String content) {
-                    try {
-                        appManagerFactory.getInstallResource().install(applicationName,new JSONObject(content));
-                        //appManagerFactory.getInstallResource().getAccessMethod(AccessMethod.Type.valueOf(AccessMethod.ACT)).invoke(new Object[]{applicationName,new JSONObject(content)});
-                        //appManagerFactory.getServiceProvider().getService(applicationName).getResource("START").getAccessMethod(AccessMethod.Type.valueOf(AccessMethod.ACT)).invoke(new Object[]{});
-                    }catch(Exception e){
-                        LOG.error("Failed to install application '{}'",applicationName,e);
-                    }
-
-                }
-
-                @Override
-                public void applicationRemoved(String applicationName) {
-                    try {
-                        appManagerFactory.deleteApplication(applicationName);
-                        //appManagerFactory.getServiceProvider().getService(applicationName).getResource("STOP").getAccessMethod(AccessMethod.Type.valueOf(AccessMethod.ACT)).invoke(new Object[]{});
-                        //appManagerFactory.getUninstallResource().getAccessMethod(AccessMethod.Type.valueOf(AccessMethod.ACT)).invoke(new Object[]{applicationName});
-                        //appManagerFactory.getUninstallResource().uninstall(applicationName);
-                    }catch(Exception e){
-                        LOG.error("Failed to uninstall application",applicationName,e);
-                    }
-
-                }
-            });
             persistenceThread.start();
+        }else {
+            LOG.info("Persistence mechanism is OFF");
         }
 
     }

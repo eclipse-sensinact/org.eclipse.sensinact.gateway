@@ -11,6 +11,8 @@
 
 package org.eclipse.sensinact.gateway.app.manager.internal;
 
+import org.eclipse.sensinact.gateway.app.api.persistence.ApplicationPersistenceService;
+import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAvailabilityListenerAbstract;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
 import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
@@ -21,17 +23,20 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This factory create the AppManager service provider and its resources in the admin service.
  *
  * @author Remi Druilhe
  */
-public class AppManagerFactory {
-
+public class AppManagerFactory extends ApplicationAvailabilityListenerAbstract {
+    private static Logger LOG= LoggerFactory.getLogger(AppManagerFactory.class);
     private final ModelInstance<ModelConfiguration> modelInstance;
     private final ServiceProviderImpl serviceProvider;
     private final AppJsonSchemaListener jsonSchemaListener;
+    private final ApplicationPersistenceService persistenceService;
     private AppInstallExecutor installExecutor;
     private AppUninstallExecutor uninstallExecutor;
 
@@ -44,11 +49,13 @@ public class AppManagerFactory {
      * @throws InvalidServiceException
      * @throws InvalidValueException
      */
-    public AppManagerFactory(AppServiceMediator mediator) 
+    public AppManagerFactory(AppServiceMediator mediator, ApplicationPersistenceService persistenceService)
     		throws InvalidResourceException,
             InvalidServiceProviderException,
             InvalidServiceException, InvalidValueException
     {
+        this.persistenceService=persistenceService;
+
         this.modelInstance = new ModelInstanceBuilder(
                 mediator, ModelInstance.class, ModelConfiguration.class)
                 .withStartAtInitializationTime(true)
@@ -62,8 +69,11 @@ public class AppManagerFactory {
         ServiceImpl adminService =  this.serviceProvider.getAdminService();
 
         ResourceImpl installResource = adminService.addActionResource(AppConstant.INSTALL, ActionResource.class);
+
         AccessMethod.Type act = AccessMethod.Type.valueOf(AccessMethod.ACT);
-        installExecutor=new AppInstallExecutor(mediator, this.serviceProvider);
+        installExecutor=new AppInstallExecutor(mediator, this.serviceProvider,persistenceService);
+
+
         installResource.registerExecutor(
                 new Signature(mediator, act, 
                 new Class[]{String.class, JSONObject.class}, null),
@@ -72,7 +82,7 @@ public class AppManagerFactory {
         //installResource.getAccessMethod(act).invoke()
         ResourceImpl uninstallResource = adminService.addActionResource(AppConstant.UNINSTALL, ActionResource.class);
 
-        uninstallExecutor=new AppUninstallExecutor(mediator, this.serviceProvider);
+        uninstallExecutor=new AppUninstallExecutor(mediator, this.serviceProvider,persistenceService);
 
         uninstallResource.registerExecutor(
                 new Signature(mediator, act, new Class[]{String.class}, null),
@@ -83,6 +93,10 @@ public class AppManagerFactory {
                 AppConstant.KEYWORDS, JSONArray.class, null);
 
         this.jsonSchemaListener = new AppJsonSchemaListener(mediator, resource);
+
+        persistenceService.registerServiceAvailabilityListener(uninstallExecutor);
+        persistenceService.registerServiceAvailabilityListener(installExecutor);
+
     }
 
     /**
@@ -114,15 +128,26 @@ public class AppManagerFactory {
         }
     }
 
-    public AppInstallExecutor getInstallResource() {
-        return installExecutor;
+    @Override
+    public void applicationFound(String applicationName, String content) {
+        try {
+            LOG.info("Installing new application '{}'",applicationName);
+            installExecutor.install(applicationName,new JSONObject(content));
+        }catch(Exception e){
+            LOG.error("Failed to install application '{}'",applicationName,e);
+        }
+
     }
 
-    public AppUninstallExecutor getUninstallResource() {
-        return uninstallExecutor;
+    @Override
+    public void applicationRemoved(String applicationName) {
+        try {
+            LOG.info("Removing application '{}'",applicationName);
+            deleteApplication(applicationName);
+        }catch(Exception e){
+            LOG.error("Failed to uninstall application",applicationName,e);
+        }
+
     }
 
-    public ServiceProviderImpl getServiceProvider() {
-        return serviceProvider;
-    }
 }

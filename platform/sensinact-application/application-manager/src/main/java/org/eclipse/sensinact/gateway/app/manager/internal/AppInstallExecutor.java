@@ -14,6 +14,8 @@ package org.eclipse.sensinact.gateway.app.manager.internal;
 import org.eclipse.sensinact.gateway.app.api.exception.ApplicationFactoryException;
 import org.eclipse.sensinact.gateway.app.api.exception.InvalidApplicationException;
 import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
+import org.eclipse.sensinact.gateway.app.api.persistence.ApplicationPersistenceService;
+import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAvailabilityListenerAbstract;
 import org.eclipse.sensinact.gateway.app.api.plugin.PluginInstaller;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
 import org.eclipse.sensinact.gateway.app.manager.application.Application;
@@ -33,6 +35,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 
 import org.eclipse.sensinact.gateway.app.manager.json.AppContainer;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -43,19 +46,22 @@ import org.osgi.framework.ServiceReference;
  *
  * @author Remi Druilhe
  */
-public class AppInstallExecutor implements AccessMethodExecutor {
+public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract implements AccessMethodExecutor {
 
     private final AppServiceMediator mediator;
     private final ServiceProviderImpl device;
+    private final ApplicationPersistenceService persistenceService;
+    private Boolean persist=false;
 
     /**
      * Constructor
      * @param mediator the mediator
      * @param device the AppManager service provider
      */
-    AppInstallExecutor(AppServiceMediator mediator, ServiceProviderImpl device) {
+    AppInstallExecutor(AppServiceMediator mediator, ServiceProviderImpl device, ApplicationPersistenceService persistenceService) {
         this.mediator = mediator;
         this.device = device;
+        this.persistenceService=persistenceService;
     }
 
     /**
@@ -65,6 +71,26 @@ public class AppInstallExecutor implements AccessMethodExecutor {
         String name = (String) jsonObjects.getParameter(0);
         JSONObject content = (JSONObject) jsonObjects.getParameter(1);
         install(name,content);
+        if(persist){
+            JSONObject httpJSONObject=new JSONObject();
+            JSONArray parametersArray=new JSONArray();
+
+            JSONObject appName=new JSONObject();
+            appName.put("name","name");
+            appName.put("type","string");
+            appName.put("value",name);
+
+            JSONObject appContent=new JSONObject();
+            appContent.put("name","name");
+            appContent.put("type","object");
+            appContent.put("value",content);
+
+            parametersArray.put(appName);
+            parametersArray.put(appContent);
+            httpJSONObject.put("parameters",parametersArray);
+
+            persistenceService.persist(new org.eclipse.sensinact.gateway.app.api.persistence.dao.Application(name,httpJSONObject));
+        }
 
         jsonObjects.push(new JSONObject().put("message", "Application " + name + " successfully installed."));
         jsonObjects.setAccessMethodObjectResult(new JSONObject().put(
@@ -189,5 +215,10 @@ public class AppInstallExecutor implements AccessMethodExecutor {
             mediator.info("Application " + name + " successfully installed.");
         }
 
+    }
+
+    @Override
+    public void serviceOnline() {
+        persist=true;
     }
 }
