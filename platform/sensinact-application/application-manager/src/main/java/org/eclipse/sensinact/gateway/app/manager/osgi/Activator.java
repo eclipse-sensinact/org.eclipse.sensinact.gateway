@@ -16,6 +16,7 @@ import org.eclipse.sensinact.gateway.app.manager.application.persistence.APSAppl
 import org.eclipse.sensinact.gateway.app.manager.internal.AppManagerFactory;
 import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -75,9 +76,10 @@ public class Activator extends AbstractActivator<AppServiceMediator> {
                 @Override
                 public void applicationRemoved(String applicationName) {
                     try {
+                        appManagerFactory.deleteApplication(applicationName);
                         //appManagerFactory.getServiceProvider().getService(applicationName).getResource("STOP").getAccessMethod(AccessMethod.Type.valueOf(AccessMethod.ACT)).invoke(new Object[]{});
                         //appManagerFactory.getUninstallResource().getAccessMethod(AccessMethod.Type.valueOf(AccessMethod.ACT)).invoke(new Object[]{applicationName});
-                        appManagerFactory.getUninstallResource().uninstall(applicationName);
+                        //appManagerFactory.getUninstallResource().uninstall(applicationName);
                     }catch(Exception e){
                         LOG.error("Failed to uninstall application",applicationName,e);
                     }

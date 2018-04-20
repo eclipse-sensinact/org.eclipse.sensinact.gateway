@@ -90,15 +90,28 @@ public class AppManagerFactory {
      */
     public void deleteAppManager() throws Exception 
     {
-        for(ServiceImpl service : serviceProvider.getServices())
-        {
-            if (service instanceof ApplicationService) 
-            {
-                ((ApplicationService) service).getApplication().stop();
-            }
-        }
+        deleteApplication(null);
         modelInstance.unregister();
         jsonSchemaListener.stop();
+    }
+
+    /**
+     * stop and delete application container
+     * @param name name of application to be deleted , or all of them if null
+     * @throws Exception
+     */
+    public void deleteApplication(String name) throws Exception
+    {
+        for(ServiceImpl service : serviceProvider.getServices())
+        {
+            if (service instanceof ApplicationService)
+            {
+                ApplicationService applicationContainer=((ApplicationService) service);
+                if(name==null || applicationContainer.getApplication().getName().equals(name)){
+                    applicationContainer.getApplication().stop();
+                }
+            }
+        }
     }
 
     public AppInstallExecutor getInstallResource() {
