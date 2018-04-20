@@ -1,4 +1,4 @@
-package org.eclipse.sensinact.gateway.app.manager.application.persistence;
+package org.eclipse.sensinact.gateway.app.manager.application.dependency;
 
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;

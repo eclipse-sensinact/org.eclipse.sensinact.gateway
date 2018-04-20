@@ -1,4 +1,4 @@
-package org.eclipse.sensinact.gateway.app.manager.application.persistence;
+package org.eclipse.sensinact.gateway.app.manager.application.dependency;
 
 /**
  * Callback used to indicate if the all the dependencies all a given application were all satisfied

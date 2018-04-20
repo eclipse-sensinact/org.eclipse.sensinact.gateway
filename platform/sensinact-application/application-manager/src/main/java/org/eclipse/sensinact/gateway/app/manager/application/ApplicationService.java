@@ -13,8 +13,8 @@ package org.eclipse.sensinact.gateway.app.manager.application;
 
 import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
-import org.eclipse.sensinact.gateway.app.manager.application.persistence.DependencyManager;
-import org.eclipse.sensinact.gateway.app.manager.application.persistence.DependencyManagerCallback;
+import org.eclipse.sensinact.gateway.app.manager.application.dependency.DependencyManager;
+import org.eclipse.sensinact.gateway.app.manager.application.dependency.DependencyManagerCallback;
 import org.eclipse.sensinact.gateway.app.manager.json.AppContainer;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
