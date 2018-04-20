@@ -102,7 +102,7 @@ public class AppConstant {
      * will be restarted when the resource re-appears.
      * Default is "false".
      */
-    public static final String AUTORESTART = "autorestart";
+    public static final String AUTORESTART = "autostart";
 
     /**
      *

@@ -159,7 +159,7 @@ public class ApplicationService extends ServiceImpl
         this.addDataResource(PropertyResource.class,
                 AppConstant.AUTORESTART,
                 boolean.class,
-                appContainer.getInitialize().getOptions().getAutorestart());
+                appContainer.getInitialize().getOptions().getAutoStart());
 
         // Creation of the AppResourceLifecycleWatchdog
         AppWatchdogExecutor appWatchdogExecutor = new AppWatchdogExecutor(
@@ -174,7 +174,7 @@ public class ApplicationService extends ServiceImpl
 
         final Collection<String> dependenciesURI=new ArrayList<String>(appContainer.getResourceUris());
 
-        if(appContainer.getInitialize().getOptions().getAutorestart()){
+        if(appContainer.getInitialize().getOptions().getAutoStart()){
 
             LOG.debug("Application autostart option is activated, instantiating dependency manager");
 

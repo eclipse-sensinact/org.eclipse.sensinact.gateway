@@ -24,7 +24,7 @@ public class AppOptions implements JSONable {
     private static final boolean DEFAULT_AUTORESTART_VALUE = false;
     private static final boolean DEFAULT_RESET_ON_STOP_VALUE = true;
 
-    private final boolean autorestart;
+    private final boolean autostart;
     private final boolean resetOnStop;
 
     /**
@@ -32,16 +32,16 @@ public class AppOptions implements JSONable {
      * @param builder the builder from which the AppOptions object is created
      */
     private AppOptions(Builder builder) {
-        this.autorestart = builder.autorestart;
+        this.autostart = builder.autorestart;
         this.resetOnStop = builder.resetOnStop;
     }
 
     /**
-     * Get the autorestart value
-     * @return the autorestart value
+     * Get the autostart value
+     * @return the autostart value
      */
-    public boolean getAutorestart() {
-        return autorestart;
+    public boolean getAutoStart() {
+        return autostart;
     }
 
     /**
@@ -63,7 +63,7 @@ public class AppOptions implements JSONable {
         /**
          * An application stops when a resource disappears. If "true", the application
          * will be restarted when the resource re-appears.
-         * @param autorestart the autorestart value
+         * @param autorestart the autostart value
          * @return the builder
          */
         Builder autorestart(boolean autorestart) {
@@ -93,7 +93,7 @@ public class AppOptions implements JSONable {
      * @see JSONable#getJSON()
      */
     public String getJSON() {
-        return new JSONObject().put(AppJsonConstant.INIT_OPTIONS_AUTORESTART, autorestart)
+        return new JSONObject().put(AppJsonConstant.INIT_OPTIONS_AUTORESTART, autostart)
                 .put(AppJsonConstant.INIT_OPTIONS_RESETONSTOP, resetOnStop)
                 .toString();
     }

@@ -40,7 +40,7 @@ public class AppJsonConstant {
 
     public static final String INIT_OPTIONS = "options";
 
-    public static final String INIT_OPTIONS_AUTORESTART = "autorestart";
+    public static final String INIT_OPTIONS_AUTORESTART = "autostart";
 
     public static final String INIT_OPTIONS_MAXINSTANCES = "maxinstances";
 

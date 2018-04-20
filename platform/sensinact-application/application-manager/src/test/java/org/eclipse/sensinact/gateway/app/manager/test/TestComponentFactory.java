@@ -213,7 +213,7 @@ public class TestComponentFactory extends TestCase {
                 assertNotNull(container.getResourceUris());
                 assertTrue(container.getResourceUris().size() == 2);
 
-                assertTrue(container.getInitialize().getOptions().getAutorestart());
+                assertTrue(container.getInitialize().getOptions().getAutoStart());
                 assertTrue(container.getInitialize().getOptions().getResetOnStop());
             } catch (Exception e) {
                 e.printStackTrace();
