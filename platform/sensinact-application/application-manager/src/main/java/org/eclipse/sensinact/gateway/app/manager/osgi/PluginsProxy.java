@@ -21,7 +21,7 @@ import org.osgi.framework.ServiceReference;
 
 public class PluginsProxy {
 
-    private static final String APP_INSTALL_HOOK_FILTER = "(objectClass=" + PluginInstaller.class.getCanonicalName() + ")";
+    public static final String APP_INSTALL_HOOK_FILTER = "(objectClass=" + PluginInstaller.class.getCanonicalName() + ")";
 
     /**
      * Search in the plugins for the JSON schema of the specified function
@@ -64,15 +64,15 @@ public class PluginsProxy {
 
         ServiceReference[] serviceReferences = mediator.getServiceReferences(APP_INSTALL_HOOK_FILTER);
 
-        for (ServiceReference serviceReference : serviceReferences) {
-            functionBlock = ((PluginInstaller) mediator.getService(serviceReference)).getFunction(function);
+        if(serviceReferences!=null){
+            for (ServiceReference serviceReference : serviceReferences) {
+                functionBlock = ((PluginInstaller) mediator.getService(serviceReference)).getFunction(function);
 
-            if(functionBlock != null) {
-                break;
+                if(functionBlock != null) {
+                    break;
+                }
             }
-        }
-
-        if (functionBlock == null) {
+        }else {
             throw new FunctionNotFoundException("Function " + function.getName() + " not found");
         }
 

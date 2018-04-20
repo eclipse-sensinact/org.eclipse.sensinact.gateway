@@ -20,6 +20,7 @@ import org.osgi.framework.ServiceReference;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * This class aims at creating a queue where actions are stored and
@@ -32,7 +33,7 @@ class ActionHookQueue implements DataListenerItf {
 
     ActionHookQueue(AppServiceMediator mediator) {
         this.mediator = mediator;
-        this.actionQueue = new LinkedList<PluginHook>();
+        this.actionQueue = new ConcurrentLinkedQueue<PluginHook>();//new LinkedList<PluginHook>();
     }
 
     public void instantiate() throws LifeCycleException {

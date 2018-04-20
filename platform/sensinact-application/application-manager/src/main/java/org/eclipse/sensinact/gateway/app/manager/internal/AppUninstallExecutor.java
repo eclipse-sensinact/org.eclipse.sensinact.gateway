@@ -18,7 +18,6 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
-
 import org.json.JSONObject;
 
 /**
@@ -26,7 +25,7 @@ import org.json.JSONObject;
  *
  * @author Remi Druilhe
  */
-class AppUninstallExecutor implements AccessMethodExecutor {
+public class AppUninstallExecutor implements AccessMethodExecutor {
 
     private final AppServiceMediator mediator;
     private final ServiceProviderImpl device;
@@ -43,42 +42,47 @@ class AppUninstallExecutor implements AccessMethodExecutor {
     /**
      * @see Executable#execute(java.lang.Object)
      */
-    public Void execute(AccessMethodResponseBuilder jsonObjects) throws Exception {
+    public Void execute(AccessMethodResponseBuilder jsonObjects) {
         String name = (String) jsonObjects.getParameter(0);
 
-        if(name != null) {
-            if(device.getService(name) != null) {
+        try{
+            uninstall(name);
+            jsonObjects.push(new JSONObject().put("message", "The application " + name +
+                    " has been uninstalled"));
+        }catch (Exception e){
+            jsonObjects.setAccessMethodObjectResult(new JSONObject().put(
+                    "message", "The application " + name +" has failed to be uninstalled"));
+        }
+
+        return null;
+    }
+
+    public void uninstall(String name) throws InvalidApplicationException {
+
+        if (name == null)
+            throw new InvalidApplicationException("Wrong parameters. Unable to uninstall the application");
+        else {
+            if (device.getService(name) != null) {
                 ApplicationService applicationService = (ApplicationService) device.getService(name);
-
-                if (applicationService != null) {
-                    if (!jsonObjects.hasError()) {
-                        //TODO: stop the application first
-                        applicationService.getApplication().uninstall();
-
-                        if(device.removeService(applicationService.getName())) {
-                            if (mediator.isInfoLoggable()) {
-                                mediator.info("Application " + name + " successfully installed.");
-                            }
-                            
-                            jsonObjects.setAccessMethodObjectResult(new JSONObject().put(
-                            		"message", "The application " + name +" has been uninstalled"));
-
-                        } else {
-                            throw new InvalidApplicationException("Unable to uninstall the application.");
+                if (applicationService != null && applicationService.getApplication() != null) {
+                    applicationService.getApplication().uninstall();
+                    if (device.removeService(applicationService.getName())) {
+                        if (mediator.isInfoLoggable()) {
+                            mediator.info("Application " + name + " successfully uninstalled.");
                         }
+                    } else {
+                        throw new InvalidApplicationException("Unable to uninstall the application.");
                     }
+
                 } else {
-                    throw new InvalidApplicationException("Unable to uninstall the application." +
-                            "Application " + name + " does not exist");
+                    throw new InvalidApplicationException("Unable to uninstall the application.");
                 }
             } else {
                 throw new InvalidApplicationException("Unable to uninstall the application." +
                         "Application " + name + " does not exist");
             }
-        } else {
-            throw new InvalidApplicationException("Wrong parameters. Unable to uninstall the application");
         }
 
-        return null;
     }
+
 }

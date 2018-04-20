@@ -16,9 +16,9 @@ import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.*;
-import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
+import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -32,6 +32,9 @@ public class AppManagerFactory {
     private final ModelInstance<ModelConfiguration> modelInstance;
     private final ServiceProviderImpl serviceProvider;
     private final AppJsonSchemaListener jsonSchemaListener;
+    private AppInstallExecutor installExecutor;
+    private AppUninstallExecutor uninstallExecutor;
+
 
     /**
      * Constructor of the AppManager
@@ -60,17 +63,20 @@ public class AppManagerFactory {
 
         ResourceImpl installResource = adminService.addActionResource(AppConstant.INSTALL, ActionResource.class);
         AccessMethod.Type act = AccessMethod.Type.valueOf(AccessMethod.ACT);
+        installExecutor=new AppInstallExecutor(mediator, this.serviceProvider);
         installResource.registerExecutor(
                 new Signature(mediator, act, 
                 new Class[]{String.class, JSONObject.class}, null),
-                new AppInstallExecutor(mediator, this.serviceProvider),
+                installExecutor,
                 AccessMethodExecutor.ExecutionPolicy.AFTER);
-
+        //installResource.getAccessMethod(act).invoke()
         ResourceImpl uninstallResource = adminService.addActionResource(AppConstant.UNINSTALL, ActionResource.class);
-        
+
+        uninstallExecutor=new AppUninstallExecutor(mediator, this.serviceProvider);
+
         uninstallResource.registerExecutor(
                 new Signature(mediator, act, new Class[]{String.class}, null),
-                new AppUninstallExecutor(mediator, this.serviceProvider),
+                uninstallExecutor,
                 AccessMethodExecutor.ExecutionPolicy.AFTER);
 
         ResourceImpl resource = adminService.addDataResource(PropertyResource.class,
@@ -93,5 +99,17 @@ public class AppManagerFactory {
         }
         modelInstance.unregister();
         jsonSchemaListener.stop();
+    }
+
+    public AppInstallExecutor getInstallResource() {
+        return installExecutor;
+    }
+
+    public AppUninstallExecutor getUninstallResource() {
+        return uninstallExecutor;
+    }
+
+    public ServiceProviderImpl getServiceProvider() {
+        return serviceProvider;
     }
 }
