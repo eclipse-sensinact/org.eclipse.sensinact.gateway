@@ -1,5 +1,6 @@
 package org.eclipse.sensinact.gateway.app.manager.application.dependency;
 
+import org.eclipse.sensinact.gateway.app.manager.application.Application;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Core;
@@ -20,7 +21,7 @@ import java.util.Map;
 public class DependencyManager extends DependencyManagerAbstract {
 
     private static Logger LOG= LoggerFactory.getLogger(DependencyManager.class);
-    private final String applicationName;
+    private final Application application;
     private final Mediator mediator;
     private final Map<String,Boolean> dependenciesURIMap=new HashMap<String,Boolean>();
     private final Map<String,String> agentsIdDependency=new HashMap<String,String>();
@@ -28,9 +29,9 @@ public class DependencyManager extends DependencyManagerAbstract {
     private Boolean active=true;
     protected Core core;
 
-    public DependencyManager(String applicationName, Mediator mediator, Collection<String> dependenciesURI, DependencyManagerCallback callback){
-        super(String.format("%s-dependencies",applicationName));
-        this.applicationName=applicationName;
+    public DependencyManager(Application application, Mediator mediator, Collection<String> dependenciesURI, DependencyManagerCallback callback){
+        super(String.format("%s-dependencies",application.getName()));
+        this.application=application;
         this.mediator=mediator;
         this.callback=callback;
         for(final String resourceUri :dependenciesURI)
@@ -47,7 +48,7 @@ public class DependencyManager extends DependencyManagerAbstract {
                             final String service=uriSplit[2];
                             final String resource=uriSplit[3];
 
-                            final DescribeResponse response=core.getAnonymousSession().getResource(provider,service,resource);
+                            final DescribeResponse response=DependencyManager.this.application.getSession().getResource(provider,service,resource);
 
                             dependenciesURIMap.put(resourceUri,response.getStatus()== AccessMethodResponse.Status.SUCCESS);
 
@@ -72,15 +73,15 @@ public class DependencyManager extends DependencyManagerAbstract {
         if(active){
             if(isAllDependenciesAvailable()){
                 try{
-                    LOG.debug("Application '{}', all dependencies satisfied, notifying manager to start Application",applicationName);
-                    callback.ready(this.applicationName);
+                    LOG.debug("Application '{}', all dependencies satisfied, notifying manager to start Application", application.getName());
+                    callback.ready(this.application.getName());
                 }catch(Exception e){
                     LOG.warn("Application dependencies satistied, notification reception failed.",e);
                 }
             }else {
                 try{
-                    LOG.debug("Application '{}', some dependencies are missing, notifying manager to stop Application",applicationName);
-                    callback.unready(this.applicationName);
+                    LOG.debug("Application '{}', some dependencies are missing, notifying manager to stop Application", application.getName());
+                    callback.unready(this.application.getName());
                 }catch(Exception e){
                     LOG.warn("Application dependencies NOT satistied any longer, notification reception failed.",e);
                 }
@@ -93,18 +94,18 @@ public class DependencyManager extends DependencyManagerAbstract {
     @Override
     public void doHandle(SnaLifecycleMessageImpl message) {
 
-        LOG.debug("Application deployed '{}' reading event {}",applicationName,message.getJSON());
+        LOG.debug("Application deployed '{}' reading event {}", application.getName(),message.getJSON());
 
         JSONObject messageJson=new JSONObject(message.getJSON());
 
         final String messageType=messageJson.getString("type");
 
         if(messageType.equals(SnaLifecycleMessage.Lifecycle.RESOURCE_APPEARING.toString())){
-            LOG.debug("Application '{}' taking into account the availability of resource '{}'",applicationName,message.getPath());
+            LOG.debug("Application '{}' taking into account the availability of resource '{}'", application.getName(),message.getPath());
             dependenciesURIMap.put(message.getPath(),true);
             evaluateDependencySatisfied();
         }else if(messageType.equals(SnaLifecycleMessage.Lifecycle.RESOURCE_DISAPPEARING.toString())){
-            LOG.debug("Application '{}' taking into account the unavailability of resource '{}'",applicationName,message.getPath());
+            LOG.debug("Application '{}' taking into account the unavailability of resource '{}'", application.getName(),message.getPath());
             dependenciesURIMap.put(message.getPath(),false);
             evaluateDependencySatisfied();
         }
@@ -114,7 +115,7 @@ public class DependencyManager extends DependencyManagerAbstract {
 
     public void stop(){
         active=false;
-        LOG.debug("Stopping Application Dependency Manager for application '{}'",applicationName);
+        LOG.debug("Stopping Application Dependency Manager for application '{}'", application.getName());
 
         /*
         //The correct would be to remove the agents on stop, but the core does not allow does from perspective point of view,
@@ -137,7 +138,7 @@ public class DependencyManager extends DependencyManagerAbstract {
 
         active=true;
 
-        LOG.debug("Starting to Application Dependency Manager for application '{}'",applicationName);
+        LOG.debug("Starting to Application Dependency Manager for application '{}'", application.getName());
 
         for(String resourceUri :dependenciesURIMap.keySet()){
             final SnaFilter filter = new SnaFilter(mediator, resourceUri,false,false);
@@ -147,11 +148,11 @@ public class DependencyManager extends DependencyManagerAbstract {
 
             if(agentsIdDependency.get(resourceUri)==null){
                 //If the agents to monitor this dependency does not exist, create one
-                LOG.debug("Application '{}' creating agent to monitor resource {} availability",applicationName,resourceUri);
+                LOG.debug("Application '{}' creating agent to monitor resource {} availability", application.getName(),resourceUri);
                 final String agentId=core.registerAgent(mediator, DependencyManager.this, filter);
                 agentsIdDependency.put(resourceUri,agentId);
             }else {
-                LOG.debug("Application '{}' agent to monitor resource {} availability already exist, skipping creation",applicationName,resourceUri);
+                LOG.debug("Application '{}' agent to monitor resource {} availability already exist, skipping creation", application.getName(),resourceUri);
             }
         }
 
