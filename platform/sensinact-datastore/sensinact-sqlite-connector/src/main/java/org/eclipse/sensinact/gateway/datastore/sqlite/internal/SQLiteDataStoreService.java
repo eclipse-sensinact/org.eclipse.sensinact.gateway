@@ -58,7 +58,7 @@ public class SQLiteDataStoreService extends JdbcDataStoreService
 	        throws UnableToFindDataStoreException, 
 	        UnableToConnectToDataStoreException
 	{
-		super(mediator, dbName);
+		super(mediator);
 	    this.provider = new SQLiteConnectionProvider(
 					 mediator, dbName);    
 	}
@@ -99,7 +99,6 @@ public class SQLiteDataStoreService extends JdbcDataStoreService
 			}
 		}	
 		provider = null;
-		super.stop();
 	}
 
 	/**
