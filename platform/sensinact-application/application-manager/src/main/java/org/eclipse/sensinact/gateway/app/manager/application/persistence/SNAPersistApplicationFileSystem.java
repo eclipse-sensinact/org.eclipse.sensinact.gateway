@@ -102,7 +102,7 @@ public class SNAPersistApplicationFileSystem implements ApplicationPersistenceSe
 
             try {
 
-                Thread.sleep(readingDelay);
+                //Thread.sleep(readingDelay);
 
                 synchronized (lock) {
 
