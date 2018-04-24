@@ -25,6 +25,7 @@ public class DependencyManager extends DependencyManagerAbstract {
     private final Map<String,Boolean> dependenciesURIMap=new HashMap<String,Boolean>();
     private final Map<String,String> agentsIdDependency=new HashMap<String,String>();
     private final DependencyManagerCallback callback;
+    private Boolean active=true;
     protected Core core;
 
     public DependencyManager(String applicationName, Mediator mediator, Collection<String> dependenciesURI, DependencyManagerCallback callback){
@@ -68,22 +69,25 @@ public class DependencyManager extends DependencyManagerAbstract {
     }
 
     protected void evaluateDependencySatisfied(){
-        if(isAllDependenciesAvailable()){
-            try{
-                LOG.debug("Application '{}', all dependencies satisfied, notifying manager to start Application",applicationName);
-                callback.ready(this.applicationName);
-            }catch(Exception e){
-                LOG.warn("Application dependencies satistied, notification reception failed.",e);
-            }
-        }else {
-            try{
-                LOG.debug("Application '{}', some dependencies are missing, notifying manager to stop Application",applicationName);
-                callback.unready(this.applicationName);
-            }catch(Exception e){
-                LOG.warn("Application dependencies NOT satistied any longer, notification reception failed.",e);
-            }
+        if(active){
+            if(isAllDependenciesAvailable()){
+                try{
+                    LOG.debug("Application '{}', all dependencies satisfied, notifying manager to start Application",applicationName);
+                    callback.ready(this.applicationName);
+                }catch(Exception e){
+                    LOG.warn("Application dependencies satistied, notification reception failed.",e);
+                }
+            }else {
+                try{
+                    LOG.debug("Application '{}', some dependencies are missing, notifying manager to stop Application",applicationName);
+                    callback.unready(this.applicationName);
+                }catch(Exception e){
+                    LOG.warn("Application dependencies NOT satistied any longer, notification reception failed.",e);
+                }
 
+            }
         }
+
     }
 
     @Override
@@ -109,8 +113,8 @@ public class DependencyManager extends DependencyManagerAbstract {
     }
 
     public void stop(){
-
-        LOG.debug("Stopping to Application Dependency Manager for application '{}'",applicationName);
+        active=false;
+        LOG.debug("Stopping Application Dependency Manager for application '{}'",applicationName);
 
         /*
         //The correct would be to remove the agents on stop, but the core does not allow does from perspective point of view,
@@ -130,6 +134,8 @@ public class DependencyManager extends DependencyManagerAbstract {
     }
 
     public void start(){
+
+        active=true;
 
         LOG.debug("Starting to Application Dependency Manager for application '{}'",applicationName);
 

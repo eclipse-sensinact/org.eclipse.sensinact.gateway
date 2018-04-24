@@ -11,13 +11,10 @@
 
 package org.eclipse.sensinact.gateway.app.manager.osgi;
 
-import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAvailabilityListenerAbstract;
 import org.eclipse.sensinact.gateway.app.manager.application.persistence.APSApplication;
 import org.eclipse.sensinact.gateway.app.manager.internal.AppManagerFactory;
 import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
-import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

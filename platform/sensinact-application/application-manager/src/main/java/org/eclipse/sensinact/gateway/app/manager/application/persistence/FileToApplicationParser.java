@@ -49,7 +49,7 @@ public class FileToApplicationParser {
             }
 
             final String diggest=new String(MessageDigest.getInstance("MD5").digest(content.getBytes()));
-            Application application=new Application(applicationName,diggest,jsonApplicationContent);
+            Application application=new Application(applicationName,diggest,jsonFileContent);//jsonApplicationContent
 
             return application;
 

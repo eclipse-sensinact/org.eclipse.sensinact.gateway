@@ -19,17 +19,18 @@ import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAva
 import org.eclipse.sensinact.gateway.app.api.plugin.PluginInstaller;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
 import org.eclipse.sensinact.gateway.app.manager.application.Application;
+import org.eclipse.sensinact.gateway.app.manager.application.dependency.DependencyManager;
+import org.eclipse.sensinact.gateway.app.manager.application.dependency.DependencyManagerCallback;
 import org.eclipse.sensinact.gateway.app.manager.checker.ArchitectureChecker;
+import org.eclipse.sensinact.gateway.app.manager.component.ResourceDataProvider;
 import org.eclipse.sensinact.gateway.app.manager.factory.ApplicationFactory;
 import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.app.manager.osgi.PluginsProxy;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
-import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.InvalidResourceException;
-import org.eclipse.sensinact.gateway.core.InvalidServiceException;
-import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
+import org.eclipse.sensinact.gateway.core.*;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
@@ -40,6 +41,12 @@ import org.json.JSONObject;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * @see AccessMethodExecutor
@@ -47,7 +54,7 @@ import org.osgi.framework.ServiceReference;
  * @author Remi Druilhe
  */
 public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract implements AccessMethodExecutor {
-
+    private static Logger LOG= LoggerFactory.getLogger(AppInstallExecutor.class);
     private final AppServiceMediator mediator;
     private final ServiceProviderImpl device;
     private final ApplicationPersistenceService persistenceService;
@@ -70,7 +77,7 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
     public Void execute(AccessMethodResponseBuilder jsonObjects) throws Exception {
         String name = (String) jsonObjects.getParameter(0);
         JSONObject content = (JSONObject) jsonObjects.getParameter(1);
-        install(name,content);
+        //install(name,content); this will pass directly by the persistence mechanism
         if(persist){
             JSONObject httpJSONObject=new JSONObject();
             JSONArray parametersArray=new JSONArray();
@@ -81,7 +88,7 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
             appName.put("value",name);
 
             JSONObject appContent=new JSONObject();
-            appContent.put("name","name");
+            appContent.put("name","content");
             appContent.put("type","object");
             appContent.put("value",content);
 
@@ -181,12 +188,52 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
 
     }
 
-    private void startApplication(String name,AppContainer appContainer, AppServiceMediator mediator){
-        ApplicationService applicationService=null;
-        Application application=null;
+    private void startApplication(String name, final AppContainer appContainer, AppServiceMediator mediator){
         try {
-            applicationService = (ApplicationService) device.addService(name);
-            application = ApplicationFactory.createApplication(mediator, appContainer, applicationService);
+            final ApplicationService applicationService= (ApplicationService) device.addService(name);
+            final Application application = ApplicationFactory.createApplication(mediator, appContainer, applicationService);
+            applicationService.createSnaService(appContainer, application);
+
+            if(appContainer.getInitialize().getOptions().getAutoStart()){
+                LOG.warn("Application {} activated the SAR service",name);
+                final Collection<ResourceDataProvider> dependenciesURI=new HashSet<ResourceDataProvider>(application.getResourceSubscriptions().keySet());
+
+                final Collection<String> dependenciesURIString=new ArrayList<String>();
+                for(ResourceDataProvider dp:dependenciesURI){
+                    dependenciesURIString.add(dp.getUri());
+                }
+                DependencyManager dependencyManager =new DependencyManager(name, mediator, dependenciesURIString, new DependencyManagerCallback() {
+                    @Override
+                    public void ready(String applicationName) {
+                        try {
+                            LOG.info("Application {} is valid, resource all present",applicationName);
+                            application.start();
+                            Attribute attribute = applicationService.getResource(AppConstant.STATUS).getAttribute(DataResource.VALUE);
+                            attribute.setValue(ApplicationStatus.ACTIVE);
+                        }catch(Exception e){
+                            LOG.warn("Failed to start application {}",applicationName,e);
+                        }
+                    }
+
+                    @Override
+                    public void unready(String applicationName) {
+                        LOG.info("Application {} is NO longer valid, resource are missing",applicationName);
+                        try {
+                            Attribute attribute = applicationService.getResource(AppConstant.STATUS).getAttribute(DataResource.VALUE);
+                            attribute.setValue(ApplicationStatus.INSTALLED);
+                            application.stop();
+                            applicationService.stop();
+                        }catch(Exception e){
+                            //We can ignore an error here, the application might have been stop by the watch doc mechanism
+                        }
+
+                    }
+                });
+                dependencyManager.start();
+            }else {
+                LOG.warn("Application {} did not activate SAR service",name);
+            }
+
         } catch (ApplicationFactoryException e) {
             if(mediator.isErrorLoggable()) {
                 mediator.error("Unable to create the application " + name + " > " + e.getMessage());
@@ -203,14 +250,6 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
             e.printStackTrace();
         }
 
-        try {
-            applicationService.createSnaService(appContainer, application);
-        } catch (InvalidValueException e) {
-            e.printStackTrace();
-        } catch (InvalidResourceException e) {
-            e.printStackTrace();
-        }
-
         if(mediator.isInfoLoggable()) {
             mediator.info("Application " + name + " successfully installed.");
         }
@@ -221,4 +260,5 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
     public void serviceOnline() {
         persist=true;
     }
+
 }

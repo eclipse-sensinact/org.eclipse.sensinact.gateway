@@ -20,7 +20,7 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
     private final File directoryMonitor;
     private final List<String> files=new ArrayList<>();
     private final Map<String,Application> filesPath=new HashMap<>();
-    private final List<ApplicationAvailabilityListener> listener=new ArrayList<ApplicationAvailabilityListener>();
+    private final Set<ApplicationAvailabilityListener> listener=new HashSet<ApplicationAvailabilityListener>();
     private final Long readingDelay;
     private final String fileExtention;
     private Boolean active=Boolean.TRUE;
@@ -45,8 +45,8 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
                 FileOutputStream fos = new FileOutputStream(file);
                 fos.write(application.getContent().toString().getBytes());
                 fos.close();
-                filesPath.put(filename,application);
-                files.add(filename);
+                //filesPath.put(filename,application);
+                //files.add(file.getAbsolutePath());
             } catch (IOException e) {
                 LOG.error("Failed to create application file {} into the disk.", filename);
             }
@@ -64,7 +64,6 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
             File file = new File(filename);
             try {
                 file.delete();
-                notifyRemoval(filename);
             } catch (Exception e) {
                 LOG.error("Failed to remove application file {} from the disk.", filename);
             }
@@ -84,12 +83,17 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
 
     @Override
     public void registerServiceAvailabilityListener(ApplicationAvailabilityListener listenerClient) {
-        this.listener.add(listenerClient);
+        synchronized (this.listener){
+            this.listener.add(listenerClient);
+        }
+
     }
 
     @Override
     public void unregisterServiceAvailabilityListener(ApplicationAvailabilityListener listenerClient) {
-        this.listener.remove(listenerClient);
+        synchronized (this.listener) {
+            this.listener.remove(listenerClient);
+        }
     }
 
     public void run(){
@@ -134,8 +138,7 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
                                 //taken into account modified files
                                 if (!applicationManaged.getDiggest().equals(applicationInFs.getDiggest())) {
                                     LOG.info("Application file {} was already loaded but its content changed, dispatching update.", toprocess);
-                                    notifyRemoval(toprocess);
-                                    notifyInclusion(toprocess);
+                                    notifyModification(toprocess);
                                     LOG.info("Application file {}, update procedure finished.", toprocess);
                                 } else {
                                     //Dont do anything, file already taken into account
@@ -150,7 +153,7 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
                 }
                 Thread.sleep(readingDelay);
 
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 LOG.error("Application persistency system failed",e);
             }
 
@@ -166,17 +169,18 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
 
             LOG.info("Notifying application '{}' deployment ",filepath);
 
-            for(ApplicationAvailabilityListener list:listener){
+            for(ApplicationAvailabilityListener list:new HashSet<ApplicationAvailabilityListener>(listener)){
                 try {
-                    list.applicationFound(application.getName(),application.getContent().toString());
+                    synchronized (list) {
+                        list.applicationFound(application.getName(), application.getContent().toString());
+                    }
                 }catch(Exception e){
                     LOG.error("Failed to add application {} into the platform, is ApplicationManager running?",application.getName(),e);
                 }
 
             }
 
-            filesPath.put(filepath,application);
-            files.add(filepath);
+            manageFile(filepath);
 
         } catch (ApplicationParseException e) {
             LOG.error("Failed to read application file",e);
@@ -185,30 +189,68 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
 
     }
 
+    private void unmanageFile(String filepath){
+        files.remove(filepath);
+        filesPath.remove(filepath);
+    }
+
+    private void manageFile(String filepath){
+        try {
+            Application application= FileToApplicationParser.parse(filepath);
+            files.add(filepath);
+            filesPath.put(filepath,application);
+        } catch (ApplicationParseException e) {
+            files.remove(filepath);
+            filesPath.remove(filepath);
+            LOG.error("Error processing file.",e);
+        }
+    }
+
+    private void notifyModification(String filepath){
+        LOG.info("Notifying application '{}' changed",filepath);
+
+        try {
+            Application application=FileToApplicationParser.parse(filepath);
+            if(application!=null){
+                for(ApplicationAvailabilityListener list:new HashSet<ApplicationAvailabilityListener>(listener)){
+                    try {
+
+                        list.applicationChanged(application.getName(),application.getContent().toString());
+
+                    }catch(Exception e){
+                        LOG.error("Failed to remove application from the platform",e);
+                    }
+
+                }
+                manageFile(filepath);
+            }else {
+                LOG.warn("The application file '{}' was already notified by the system",filepath);
+            }
+        } catch (ApplicationParseException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void notifyRemoval(String filepath){
         LOG.info("Notifying application '{}' removal",filepath);
-        Application application=filesPath.remove(filepath);
-
+        Application application=filesPath.get(filepath);
+        unmanageFile(filepath);
         if(application!=null){
-            files.remove(filepath);
-            for(ApplicationAvailabilityListener list:listener){
+            for(ApplicationAvailabilityListener list:new HashSet<ApplicationAvailabilityListener>(listener)){
                 try {
-                    list.applicationRemoved(application.getName());
+                        list.applicationRemoved(application.getName());
                 }catch(Exception e){
                     LOG.error("Failed to remove application from the platform",e);
                 }
-
             }
         }else {
             LOG.warn("The application file '{}' was already notified by the system",filepath);
         }
-
-
     }
 
     private void notifyServiceUnavailable(){
         LOG.debug("Persistence service is going offline");
-        for(ApplicationAvailabilityListener list:listener){
+        for(ApplicationAvailabilityListener list:new HashSet<ApplicationAvailabilityListener>(listener)){
             try {
                 list.serviceOffline();
             }catch(Exception e){
@@ -220,7 +262,7 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
 
     private void notifyServiceAvailable(){
         LOG.debug("Persistence service is going online");
-        for(ApplicationAvailabilityListener list:listener){
+        for(ApplicationAvailabilityListener list:new HashSet<ApplicationAvailabilityListener>(listener)){
             try {
                 list.serviceOnline();
             }catch(Exception e){
