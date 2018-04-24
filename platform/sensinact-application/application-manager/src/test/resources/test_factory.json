@@ -11,7 +11,7 @@
       "value": {
         "initialize": {
           "options": {
-            "autorestart": true,
+            "autostart": true,
             "resetonstop": true,
             "maxinstances": 2
           }

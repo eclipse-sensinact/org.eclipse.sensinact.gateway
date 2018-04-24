@@ -50,11 +50,15 @@ public abstract class JdbcDataStoreService implements DataStoreService
 	protected abstract DataStoreConnectionProvider<Connection>
 	getDataBaseConnectionProvider();
 	
+	/**
+	 * Stops this JdbcDataStoreService
+	 */
+	protected abstract void stop();
 	
 	/**
 	 * the name of the data base
 	 */
-	protected String simpleDbName;	
+	//protected String simpleDbName;	
 	
 	/**
 	 * Lock use for synchronization
@@ -73,22 +77,10 @@ public abstract class JdbcDataStoreService implements DataStoreService
 	 * 
 	 * @throws UnableToFindDataStoreException
 	 */
-	public JdbcDataStoreService(Mediator mediator, String dbName) 
+	public JdbcDataStoreService(Mediator mediator) 
 			throws UnableToFindDataStoreException  
 	{
 		this.mediator = mediator;
-		 // retrieve the data base file 
-	    File dbFile = new File(dbName).getAbsoluteFile();
-	    // if the data base file doesn't exist...
-	    if(!dbFile.exists())
-	    {
-	    	//...throw an exception
-	    	throw new UnableToFindDataStoreException(
-	    			"Unable to find data base file : " 
-	    					+ dbFile.getAbsolutePath());
-	    }
-		this.simpleDbName = dbName.substring(
-				dbName.lastIndexOf(File.separatorChar)+1);
 	}
 	
 	/**
@@ -276,11 +268,5 @@ public abstract class JdbcDataStoreService implements DataStoreService
 					return updateCounts[0];
 				}
 			});
-	}
-	
-	
-	public void stop()
-	{
-		this.simpleDbName  = null;
 	}
 }
