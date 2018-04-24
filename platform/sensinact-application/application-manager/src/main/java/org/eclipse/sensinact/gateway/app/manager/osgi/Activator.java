@@ -69,6 +69,8 @@ public class Activator extends AbstractActivator<AppServiceMediator> {
         directoryMonitor.registerServiceAvailabilityListener(appManagerFactory);
 
         persistenceThread=new Thread(directoryMonitor);
+        persistenceThread.setDaemon(true);
+        persistenceThread.setPriority(Thread.MIN_PRIORITY);
         persistenceThread.start();
 
     }
