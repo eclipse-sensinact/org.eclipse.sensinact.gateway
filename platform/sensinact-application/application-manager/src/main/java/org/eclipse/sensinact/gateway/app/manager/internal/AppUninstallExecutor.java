@@ -35,7 +35,6 @@ public class AppUninstallExecutor extends ApplicationAvailabilityListenerAbstrac
     private final AppServiceMediator mediator;
     private final ServiceProviderImpl device;
     private final ApplicationPersistenceService persistenceService;
-    private Boolean persist=false;
 
     /**
      * Constructor
@@ -72,29 +71,25 @@ public class AppUninstallExecutor extends ApplicationAvailabilityListenerAbstrac
             throw new InvalidApplicationException("Wrong parameters. Unable to uninstall the application");
         else {
 
+            try {
+                persistenceService.delete(name);
+            } catch (ApplicationPersistenceException e) {
+                LOG.warn("Impossible to remove application '{}' from persistence system");
+            }
+
+/*
             if (device.getService(name) != null) {
 
-                try {
-                    persistenceService.delete(name);
-                } catch (ApplicationPersistenceException e) {
-                    LOG.warn("Impossible to remove application '{}' from persistence system");
-                    throw new InvalidApplicationException("Unable to uninstall the application." +
-                            "Application " + name + " does not exist");
-                }
-
                 ApplicationService applicationService = (ApplicationService) device.getService(name);
-
                 if (applicationService != null && applicationService.getApplication() != null) {
+
+                    applicationService.getApplication().stop();
                     applicationService.getApplication().uninstall();
-
                     if (device.removeService(applicationService.getName())) {
-                        if (mediator.isInfoLoggable()) {
-                            mediator.info("Application " + name + " successfully uninstalled.");
-                        }
+                        LOG.info("Application " + name + " successfully uninstalled.");
                     } else {
-                        throw new InvalidApplicationException("Unable to uninstall the application.");
+                        LOG.warn("Failed to remove application '{}'",name);
                     }
-
                 } else {
                     throw new InvalidApplicationException("Unable to uninstall the application.");
                 }
@@ -102,16 +97,11 @@ public class AppUninstallExecutor extends ApplicationAvailabilityListenerAbstrac
                 throw new InvalidApplicationException("Unable to uninstall the application." +
                         "Application " + name + " does not exist");
             }
-
+*/
 
 
         }
 
-    }
-
-    @Override
-    public void serviceOnline() {
-        persist=true;
     }
 
 }

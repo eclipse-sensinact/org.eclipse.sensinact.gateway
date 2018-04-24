@@ -11,6 +11,7 @@
 
 package org.eclipse.sensinact.gateway.app.manager.internal;
 
+import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
 import org.eclipse.sensinact.gateway.app.api.persistence.ApplicationPersistenceService;
 import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAvailabilityListenerAbstract;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
@@ -94,8 +95,8 @@ public class AppManagerFactory extends ApplicationAvailabilityListenerAbstract {
 
         this.jsonSchemaListener = new AppJsonSchemaListener(mediator, resource);
 
-        persistenceService.registerServiceAvailabilityListener(uninstallExecutor);
-        persistenceService.registerServiceAvailabilityListener(installExecutor);
+        this.persistenceService.registerServiceAvailabilityListener(uninstallExecutor);
+        this.persistenceService.registerServiceAvailabilityListener(installExecutor);
 
     }
 
@@ -128,11 +129,25 @@ public class AppManagerFactory extends ApplicationAvailabilityListenerAbstract {
         }
     }
 
+    private ApplicationService getApplicationService(String name){
+        for(ServiceImpl service : serviceProvider.getServices())
+        {
+            if (service instanceof ApplicationService)
+            {
+                ApplicationService applicationContainer=((ApplicationService) service);
+                if(name!=null && applicationContainer.getApplication().getName().equals(name)){
+                    return applicationContainer;
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
     public void applicationFound(String applicationName, String content) {
         try {
             LOG.info("Installing new application '{}'",applicationName);
-            installExecutor.install(applicationName,new JSONObject(content));
+            installExecutor.install(applicationName,new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject("value"));
         }catch(Exception e){
             LOG.error("Failed to install application '{}'",applicationName,e);
         }
@@ -140,10 +155,31 @@ public class AppManagerFactory extends ApplicationAvailabilityListenerAbstract {
     }
 
     @Override
+    public void applicationChanged(String applicationName, String content) {
+        try {
+            LOG.info("Updating application content '{}'",applicationName);
+            ApplicationService as=getApplicationService(applicationName);
+            as.getApplication().stop();
+            as.getResource(AppConstant.STATUS).getAttribute(DataResource.VALUE).setValue(ApplicationStatus.INSTALLED);
+            as.stop();
+            installExecutor.install(applicationName,new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject("value"));
+        }catch(Exception e){
+            LOG.error("Failed to uninstall application {}",applicationName,e);
+        }
+    }
+
+    @Override
     public void applicationRemoved(String applicationName) {
         try {
             LOG.info("Removing application '{}'",applicationName);
-            deleteApplication(applicationName);
+            //deleteApplication(applicationName);
+            //uninstallExecutor.uninstall(applicationName);
+            ApplicationService as=getApplicationService(applicationName);
+            as.getResource(AppConstant.STATUS).getAttribute(DataResource.VALUE).setValue(ApplicationStatus.UNINSTALLED);
+            as.getApplication().stop();
+            as.getApplication().uninstall();
+            as.stop();
+
         }catch(Exception e){
             LOG.error("Failed to uninstall application",applicationName,e);
         }

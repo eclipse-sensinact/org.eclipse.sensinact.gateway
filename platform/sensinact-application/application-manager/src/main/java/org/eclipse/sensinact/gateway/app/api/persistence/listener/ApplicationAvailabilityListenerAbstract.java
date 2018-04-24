@@ -21,4 +21,9 @@ public abstract class ApplicationAvailabilityListenerAbstract implements Applica
     public void applicationRemoved(String applicationName) {
 
     }
+
+    @Override
+    public void applicationChanged(String applicationName, String content) {
+
+    }
 }

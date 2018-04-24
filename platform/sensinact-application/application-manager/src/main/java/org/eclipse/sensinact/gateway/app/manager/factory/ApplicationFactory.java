@@ -307,6 +307,7 @@ public class ApplicationFactory {
 
         // Create the Application
         return new Application(mediator,
+                container,
                 container.getApplicationName(),
                 dataProvidersRegistration,
                 resourceSubscriptions,

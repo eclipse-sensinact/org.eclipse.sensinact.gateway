@@ -42,6 +42,7 @@ public class ApplicationService extends ServiceImpl
     private static Logger LOG= LoggerFactory.getLogger(ApplicationService.class);
     private Application application;
 
+
     /**
      * The constructor creates the components and the resources in the sNa json.
      * @param modelInstance the json instance of the AppManager
@@ -63,7 +64,7 @@ public class ApplicationService extends ServiceImpl
      * @throws InvalidResourceException
      * @throws InvalidValueException
      */
-    public final void createSnaService(AppContainer appContainer, final Application application)
+    public final void createSnaService(final AppContainer appContainer, final Application application)
             throws InvalidResourceException, InvalidValueException
     {
     	AccessMethod.Type act = AccessMethod.Type.valueOf(AccessMethod.ACT);
@@ -172,56 +173,13 @@ public class ApplicationService extends ServiceImpl
         		act, null, null), appWatchdogExecutor,
                 AccessMethodExecutor.ExecutionPolicy.AFTER);
 
-        final Collection<String> dependenciesURI=new ArrayList<String>(appContainer.getResourceUris());
-
         if(appContainer.getInitialize().getOptions().getAutoStart()){
 
             LOG.debug("Application autostart option is activated, instantiating dependency manager");
 
-            DependencyManager dm=new DependencyManager(application.getName(), modelInstance.mediator(), dependenciesURI, new DependencyManagerCallback() {
-                @Override
-                public void ready(String applicationName) {
-                    application.doStart();
-                }
-
-                @Override
-                public void unready(String applicationName) {
-                    try {
-                        application.doStop();
-                    }catch(Exception e){
-                        //We can ignore an error here, the application might have been stop by the watch doc mechanism
-                    }
-
-                }
-            });
-
-            dm.start();
-
         }else {
             LOG.debug("Application autostart option is NOT activated");
         }
-
-        /*
-        super.modelInstance.mediator().callService(Core.class,
-                new Executable<Core,Void>()
-                {
-                    @Override
-                    public Void execute(Core service)
-                            throws Exception
-                    {
-                        for(String resourceUri :dependenciesURI)
-                        {
-                            Mediator mediator=ApplicationService.this.modelInstance.mediator();
-                            final SnaFilter filter = new SnaFilter(mediator, resourceUri);
-                            filter.addHandledType(SnaMessage.Type.LIFECYCLE);
-
-                            AppResourceLifecycleWatchDog.this.registrations.add(
-                            service.registerAgent(mediator, new AppResourceLifecycleWatchDog.AppResourceLifeCycleSnaAgent(mediator, AppResourceLifecycleWatchDog.this), filter)
-                            );
-                        }
-                        return null;
-                    }
-                });*/
 
     }
 
@@ -231,5 +189,11 @@ public class ApplicationService extends ServiceImpl
      */
     public Application getApplication() {
         return application;
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        application.stop();
     }
 }

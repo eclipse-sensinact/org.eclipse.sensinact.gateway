@@ -14,6 +14,8 @@ import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class triggers an alert that stops the application when an exception is throw
@@ -24,6 +26,8 @@ import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
  * @author Remi Druilhe
  */
 public class AppExceptionWatchDog extends AbstractAppWatchDog implements Thread.UncaughtExceptionHandler {
+
+    private static Logger LOG= LoggerFactory.getLogger(AppExceptionWatchDog.class);
 
     /**
      * Constructor
@@ -51,10 +55,10 @@ public class AppExceptionWatchDog extends AbstractAppWatchDog implements Thread.
      * @see Thread.UncaughtExceptionHandler#uncaughtException(java.lang.Thread, java.lang.Throwable)
      */
     public void uncaughtException(Thread thread, Throwable exception) {
-        if(mediator.isErrorLoggable()) {
-            mediator.error(exception.getMessage(), exception);
-        }
+
+        LOG.error("Watch dog exception",exception);
 
         super.alert(exception.getMessage());
+
     }
 }
