@@ -15,8 +15,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.*;
 
-public class APSApplication implements ApplicationPersistenceService,Runnable {
-    private final Logger LOG=LoggerFactory.getLogger(APSApplication.class);
+public class SNAPersistApplicationFileSystem implements ApplicationPersistenceService {
+    private final Logger LOG=LoggerFactory.getLogger(SNAPersistApplicationFileSystem.class);
     private final File directoryMonitor;
     private final List<String> files=new ArrayList<>();
     private final Map<String,Application> filesPath=new HashMap<>();
@@ -26,7 +26,7 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
     private Boolean active=Boolean.TRUE;
     private static final Object lock=new Object();
 
-    public APSApplication(File directoryMonitor, Long readingDelay,String fileExtention){
+    public SNAPersistApplicationFileSystem(File directoryMonitor, Long readingDelay, String fileExtention){
         this.directoryMonitor=directoryMonitor;
         this.readingDelay=readingDelay;
         this.fileExtention=fileExtention;
