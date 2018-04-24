@@ -77,22 +77,10 @@ public abstract class JdbcDataStoreService implements DataStoreService
 	 * 
 	 * @throws UnableToFindDataStoreException
 	 */
-	public JdbcDataStoreService(Mediator mediator/*, String dbName*/) 
+	public JdbcDataStoreService(Mediator mediator) 
 			throws UnableToFindDataStoreException  
 	{
 		this.mediator = mediator;
-		 // retrieve the data base file 
-//	    File dbFile = new File(dbName).getAbsoluteFile();
-//	    // if the data base file doesn't exist...
-//	    if(!dbFile.exists())
-//	    {
-//	    	//...throw an exception
-//	    	throw new UnableToFindDataStoreException(
-//	    			"Unable to find data base file : " 
-//	    					+ dbFile.getAbsolutePath());
-//	    }
-//		this.simpleDbName = dbName;//.substring(
-		//		dbName.lastIndexOf(File.separatorChar)+1);
 	}
 	
 	/**
@@ -281,10 +269,4 @@ public abstract class JdbcDataStoreService implements DataStoreService
 				}
 			});
 	}
-	
-	
-//	public void stop()
-//	{
-//		this.simpleDbName  = null;
-//	}
 }

@@ -59,8 +59,7 @@ public class SQLiteDataStoreService extends JdbcDataStoreService
 	        UnableToConnectToDataStoreException
 	{
 		super(mediator);
-	    this.provider = new SQLiteConnectionProvider(
-					 mediator, dbName);    
+	    this.provider = new SQLiteConnectionProvider(mediator, dbName);    
 	}
 
 	/**
