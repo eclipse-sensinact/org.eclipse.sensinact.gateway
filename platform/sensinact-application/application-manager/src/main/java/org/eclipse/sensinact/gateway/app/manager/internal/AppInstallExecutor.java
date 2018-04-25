@@ -202,7 +202,7 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
                 for(ResourceDataProvider dp:dependenciesURI){
                     dependenciesURIString.add(dp.getUri());
                 }
-                DependencyManager dependencyManager =new DependencyManager(name, mediator, dependenciesURIString, new DependencyManagerCallback() {
+                DependencyManager dependencyManager =new DependencyManager(application, mediator, dependenciesURIString, new DependencyManagerCallback() {
                     @Override
                     public void ready(String applicationName) {
                         try {

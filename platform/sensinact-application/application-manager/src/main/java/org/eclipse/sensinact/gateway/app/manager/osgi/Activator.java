@@ -11,7 +11,9 @@
 
 package org.eclipse.sensinact.gateway.app.manager.osgi;
 
-import org.eclipse.sensinact.gateway.app.manager.application.persistence.APSApplication;
+import org.eclipse.sensinact.gateway.app.api.persistence.ApplicationPersistenceService;
+import org.eclipse.sensinact.gateway.app.manager.application.persistence.SNAPersistApplicationFileSystem;
+import org.eclipse.sensinact.gateway.app.manager.application.persistence.SNAPersistApplicationInMemory;
 import org.eclipse.sensinact.gateway.app.manager.internal.AppManagerFactory;
 import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
@@ -52,18 +54,24 @@ public class Activator extends AbstractActivator<AppServiceMediator> {
      */
     public void doStart() throws Exception {
 
-        APSApplication directoryMonitor=new APSApplication(new File(directory),updateFileCheck, applicationFileExtension);
+        ApplicationPersistenceService directoryMonitor=null;
+        if(applicationPersist){
+            LOG.info("Filesystem Persistence mechanism is ON");
+            directoryMonitor=new SNAPersistApplicationFileSystem(new File(directory),updateFileCheck, applicationFileExtension);;
+        }else {
+            LOG.info("Filesystem Persistence mechanism is OFF");
+            directoryMonitor=new SNAPersistApplicationInMemory();
+        }
+
 
         this.appManagerFactory = new AppManagerFactory(mediator,directoryMonitor);
 
-        if(applicationPersist){
-            LOG.info("Persistence mechanism is ON");
-            directoryMonitor.registerServiceAvailabilityListener(appManagerFactory);
-            persistenceThread=new Thread(directoryMonitor);
-            persistenceThread.start();
-        }else {
-            LOG.info("Persistence mechanism is OFF");
-        }
+        directoryMonitor.registerServiceAvailabilityListener(appManagerFactory);
+
+        persistenceThread=new Thread(directoryMonitor);
+        persistenceThread.setDaemon(true);
+        persistenceThread.setPriority(Thread.MIN_PRIORITY);
+        persistenceThread.start();
 
     }
 
