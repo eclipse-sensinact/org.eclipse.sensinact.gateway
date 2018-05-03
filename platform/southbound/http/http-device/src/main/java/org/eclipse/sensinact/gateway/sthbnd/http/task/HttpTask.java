@@ -480,10 +480,10 @@ implements HttpConnectionConfiguration<RESPONSE, REQUEST>, URITask
 		return this.getHeaders();
 	}
 
-    /**
-     * @inheritDoc
-     * 
-	 * @see ConnectionConfiguration#setProxyPort(int)
+	/**
+	 * 
+	 * @param direct
+	 * @return
 	 */
 	public HttpTask<RESPONSE,REQUEST> setDirect(boolean direct)
 	{
@@ -495,7 +495,7 @@ implements HttpConnectionConfiguration<RESPONSE, REQUEST>, URITask
 	/**
 	 * @inheritDoc
 	 *
-	 * @see HttpConnectionConfiguration#isDirect()
+	 * @see org.eclipse.sensinact.gateway.generic.TaskImpl#isDirect()
 	 */
 	@Override
 	public boolean isDirect()

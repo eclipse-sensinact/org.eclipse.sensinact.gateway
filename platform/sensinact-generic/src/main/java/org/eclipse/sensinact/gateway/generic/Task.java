@@ -61,9 +61,6 @@ public interface Task extends JSONable
 	    SUBSCRIBE,
 	    UNSUBSCRIBE,
 	    SERVICES_ENUMERATION
-//	    , 
-//	    HELLO, 
-//	    GOODBYE
 	    ;
 	}
     
@@ -84,6 +81,25 @@ public interface Task extends JSONable
      *      executes
      */
     CommandType getCommand();
+
+    /**
+     * Returns true if the result of the execution of 
+     * this task has to be set as being its result without 
+     * creating a {@link Packet} to be processed to retrieve 
+     * it; otherwise returns false
+     * 
+     * @return 
+     *     <ul>
+     *     		<li>true if this task execution's result is
+     *     			the effective result of this task</li>
+     *     		<li>false if this task execution's result must
+     *     			be processed by the intermediate of 
+     *     			a dedicated {@link Packet} before to be
+     *     			set as the result of this task
+     *     		</li>
+     *     </ul>
+     */
+    boolean isDirect();
     
     /**
      * Returns the {@link LifecycleStatus} of this task

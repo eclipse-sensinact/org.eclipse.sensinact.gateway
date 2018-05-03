@@ -20,7 +20,6 @@ import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 
 /**
  * A generic {@link Task} implementation
@@ -139,7 +138,7 @@ public abstract class TaskImpl implements Task
     /** 
      * @inheritDoc
      *
-     * @see Task#getCommand()
+     * @see org.eclipse.sensinact.gateway.generic.Task#getCommand()
      */
     @Override
     public CommandType getCommand()
@@ -147,11 +146,21 @@ public abstract class TaskImpl implements Task
         return this.command;
     }    
     
+    /** 
+     * @inheritDoc
+     *
+     * @see org.eclipse.sensinact.gateway.generic.Task#isDirect()
+     */
+    @Override
+    public boolean isDirect()
+    {        
+        return false;
+    }    
+    
     /**
      * @inheritDoc
      * 
-     * @see Task#
-     * getResourceConfig()
+     * @see org.eclipse.sensinact.gateway.generic.Task#getResourceConfig()
      */
     @Override
     public ResourceConfig getResourceConfig()
@@ -162,8 +171,7 @@ public abstract class TaskImpl implements Task
     /**
      * @inheritDoc
      * 
-     * @see Task#
-     * getParameters()
+     * @see org.eclipse.sensinact.gateway.generic.Task#getParameters()
      */
     @Override
     public Object[] getParameters()
@@ -175,7 +183,7 @@ public abstract class TaskImpl implements Task
     /**
      * @inheritDoc
      *
-     * @see Task#getPath()
+     * @see org.eclipse.sensinact.gateway.generic.Task#getPath()
      */
     @Override
     public String getPath()
@@ -186,7 +194,7 @@ public abstract class TaskImpl implements Task
     /**
      * @inheritDoc
      *
-     * @see Task#getProfile()
+     * @see org.eclipse.sensinact.gateway.generic.Task#getProfile()
      */
     @Override
     public String getProfile()
@@ -197,7 +205,7 @@ public abstract class TaskImpl implements Task
     /** 
      * @inheritDoc
      *
-     * @see Task#getLifecycleStatus()
+     * @see org.eclipse.sensinact.gateway.generic.Task#getLifecycleStatus()
      */
     @Override
     public LifecycleStatus getLifecycleStatus()
@@ -234,8 +242,7 @@ public abstract class TaskImpl implements Task
     /** 
      * @inheritDoc
      *
-     * @see Task#
-     * setTaskIdentifier(java.lang.String)
+     * @see org.eclipse.sensinact.gateway.generic.Task#setTaskIdentifier(java.lang.String)
      */
     public void setTaskIdentifier(String taskIdentifier)
     {
@@ -245,8 +252,7 @@ public abstract class TaskImpl implements Task
     /** 
      * @inheritDoc
      *
-     * @see Task#
-     * getTaskIdentifier()
+     * @see org.eclipse.sensinact.gateway.generic.Task#getTaskIdentifier()
      */
     public String getTaskIdentifier()
     {
@@ -256,8 +262,7 @@ public abstract class TaskImpl implements Task
     /**
      * @InheriDoc
      *
-     * @see Task#
-     * setResult(java.lang.Object)
+     * @see org.eclipse.sensinact.gateway.generic.Task#setResult(java.lang.Object)
      */
     @Override
     public void setResult(Object result)
@@ -268,8 +273,7 @@ public abstract class TaskImpl implements Task
     /**
      * @InheriDoc
      *
-     * @see Task#
-     * setResult(java.lang.Object)
+     * @see org.eclipse.sensinact.gateway.generic.Task#setResult(java.lang.Object, long)
      */
     @Override
     public void setResult(Object result, long timestamp)
@@ -304,7 +308,7 @@ public abstract class TaskImpl implements Task
     /** 
      * @inheritDoc
      *
-     * @see Task#abort(java.lang.Object)
+     * @see org.eclipse.sensinact.gateway.generic.Task#abort(java.lang.Object)
      */
     public void abort(Object result)
     {
@@ -325,8 +329,7 @@ public abstract class TaskImpl implements Task
     /**
      * @InheriDoc
      * 
-     * @see Task#
-     * getResult()
+     * @see org.eclipse.sensinact.gateway.generic.Task#getResult()
      */
     @Override
     public Object getResult()
@@ -345,8 +348,7 @@ public abstract class TaskImpl implements Task
     /**
      * @InheriDoc
      * 
-     * @see Task#
-     * getResult()
+     * @see org.eclipse.sensinact.gateway.generic.Task#getTimestamp()
      */
     @Override
     public long getTimestamp()
@@ -365,8 +367,7 @@ public abstract class TaskImpl implements Task
     /** 
      * @inheritDoc
      *
-     * @see Task#
-     * isResultAvailable()
+     * @see org.eclipse.sensinact.gateway.generic.Task#isResultAvailable()
      */
     @Override
     public boolean isResultAvailable()
@@ -399,7 +400,7 @@ public abstract class TaskImpl implements Task
     /** 
      * @inheritDoc
      *
-     * @see Task#getTimeout()
+     * @see org.eclipse.sensinact.gateway.generic.Task#getTimeout()
      */
     public long getTimeout()
     { 
@@ -409,7 +410,7 @@ public abstract class TaskImpl implements Task
     /** 
      * @inheritDoc
      *
-     * @see Task#setTimeout(long)
+     * @see org.eclipse.sensinact.gateway.generic.Task#setTimeout(long)
      */
     public void setTimeout(long timeout)
     { 
@@ -419,8 +420,7 @@ public abstract class TaskImpl implements Task
     /** 
      * @inheritDoc
      *
-     * @see Task#
-     * registerCallBack(TaskCallBack)
+     * @see org.eclipse.sensinact.gateway.generic.Task#registerCallBack(org.eclipse.sensinact.gateway.generic.TaskCallBack)
      */
     public void registerCallBack(TaskCallBack callback)
     {
@@ -444,7 +444,7 @@ public abstract class TaskImpl implements Task
     /** 
      * @inheritDoc
      *
-     * @see Task#execute()
+     * @see org.eclipse.sensinact.gateway.generic.Task#execute()
      */
     @Override
     public void execute()
@@ -457,7 +457,7 @@ public abstract class TaskImpl implements Task
     /** 
      * @InheritDoc
      *
-     * @see JSONable#getJSON()
+     * @see org.eclipse.sensinact.gateway.common.primitive.JSONable#getJSON()
      */
     public String getJSON()
     {
