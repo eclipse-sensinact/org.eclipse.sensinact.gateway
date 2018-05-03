@@ -254,8 +254,9 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E>
 	 */
 	public static <T> T execute(Mediator mediator, StatementExecutor<T> executor) 
 	{
-		T result = mediator.callService(
-			DataStoreService.class, executor);
+		T result = mediator.callService( DataStoreService.class, 
+			"(&(data.store.provider=jdbc)(data.store.sgbd=sqlite))", 
+			executor);
 		return result;
 	}
 
