@@ -2274,17 +2274,17 @@ public class SensiNact implements Core
                 throw new InvalidCredentialException("Invalid credentials");
             }
             String pkey = userKey.getPublicKey();
-            session = this.sessions.getSessionFromPublicKey(pkey);
-			
-			if (session == null)
-			{
+//          session = this.sessions.getSessionFromPublicKey(pkey);
+//			
+//			if (session == null)
+//			{
 			    AccessTree<? extends AccessNode> tree = this.getUserAccessTree(pkey);
 				SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, 
 						SensiNact.this.nextToken(), tree);
 				sessionKey.setUserKey(userKey);
 				session = new SensiNactSession(sessionKey.getToken());
 				sessions.put(sessionKey, session);	
-			}
+//			}
 		} else if(AuthenticationToken.class.isAssignableFrom(authentication.getClass())) 
 		{
 			session = this.getSession(((AuthenticationToken) authentication
@@ -2517,7 +2517,8 @@ public class SensiNact implements Core
 				if(publicKey.startsWith(SecuredAccess.ANONYMOUS_PKEY))
 				{
 					filteredKey = new StringBuilder().append(
-						publicKey).append("_remote").toString();
+						publicKey).append("_remote").append(super.localID(
+								)).toString();
 				}
 				AccessTree<? extends AccessNode> tree = 
 					SensiNact.this.getUserAccessTree(filteredKey);
@@ -2540,7 +2541,8 @@ public class SensiNact implements Core
 				if(publicKey.startsWith(SecuredAccess.ANONYMOUS_PKEY))
 				{
 					filteredKey = new StringBuilder().append(
-						publicKey).append("_remote").toString();
+						publicKey).append("_remote").append(super.localID(
+							)).toString();
 				}
 				Session session = this.remoteSessions.get(filteredKey);				
 				if(session == null)
@@ -2557,7 +2559,8 @@ public class SensiNact implements Core
 				if(publicKey.startsWith(SecuredAccess.ANONYMOUS_PKEY))
 				{
 					filteredKey = new StringBuilder().append(
-						publicKey).append("_remote").toString();
+						publicKey).append("_remote").append(super.localID(
+								)).toString();
 				}
 				Session s = this.remoteSessions.remove(filteredKey);
 				SessionKey k = SensiNact.this.sessions.get(s);
