@@ -243,8 +243,7 @@ public class Mediator
 	 * @param properties the set of properties associated to the 
 	 * service registration
 	 */
-	public <S> void register(S service, Class<S> serviceType, 
-			Dictionary properties)
+	public <S> void register(S service, Class<S> serviceType, Dictionary properties)
 	{
 		synchronized(this.registrations)
 		{
@@ -256,29 +255,28 @@ public class Mediator
 	
     /**
      * @param serviceType
-     * @param executor
+     * @param executable
      * @return
      */
-    public <S, R> R callService(Class<S> serviceType, 
-    	Executable<S,R> executor)
+    public <S, R> R callService(Class<S> serviceType, Executable<S,R> executable)
     {
-        return this.callService(serviceType, null, executor);
+        return this.callService(serviceType, null, executable);
     }
 
     /**
      * @param serviceType
      * @param filter
-     * @param executor
+     * @param executable
      * @return
      */
     public <S, R> R callService(Class<S> serviceType,
-    	String filter, Executable<S,R> executor) 
+    	String filter, Executable<S,R> executable) 
     {
     	ServiceCaller caller = CALLERS.get();
     	caller.attach();
     	try
     	{
-    		return caller.callService(serviceType, filter, executor);
+    		return caller.callService(serviceType, filter, executable);
     		
     	} catch(Exception e)
     	{
@@ -296,27 +294,27 @@ public class Mediator
     
     /**
      * @param serviceType
-     * @param executor
+     * @param executable
      */
     public <S> void callServices(Class<S> serviceType, 
-    	Executable<S,Void> executor) 
+    	Executable<S,Void> executable) 
     {
-        this.callServices(serviceType, null, executor);
+        this.callServices(serviceType, null, executable);
     }
 
     /**
      * @param serviceType
      * @param filter
-     * @param executor
+     * @param executable
      */
     public <S> void callServices(Class<S> serviceType, 
-    		String filter, Executable<S,Void> executor) 
+    		String filter, Executable<S,Void> executable) 
     {	        
     	ServiceCaller caller = CALLERS.get();
     	caller.attach();
     	try
     	{
-    		caller.callServices(serviceType, filter, executor);
+    		caller.callServices(serviceType, filter, executable);
     		
     	} catch(Exception e)
     	{
@@ -335,12 +333,12 @@ public class Mediator
      * @param serviceType
      * @param returnType
      * @param filter
-     * @param executor
+     * @param executable
      * @return
      */
     public <S, R> Collection<R> callServices(Class<S> serviceType, 
     		Class<R> returnType, String filter, 
-    		Executable<S,R> executor)
+    		Executable<S,R> executable)
     {	
     	ServiceCaller caller = CALLERS.get();
     	caller.attach();
@@ -348,7 +346,7 @@ public class Mediator
     	{
     		return caller.callServices(
     				serviceType, returnType, 
-    				filter, executor);
+    				filter, executable);
     		
     	} catch(Exception e)
     	{
@@ -364,26 +362,39 @@ public class Mediator
     	return Collections.<R>emptyList();
     }
 
+
 	/**
-	 * @param serviceType
-	 * @param filter
-	 * @param executors
+	 * Attaches the {@link Executable} passed as parameter to the 
+	 * event of a service appearance if this last one is of the 
+	 * specified Type, and compliant with the specified String filter
+	 * 
+	 * @param serviceType the Type of service for which to execute 
+	 * the specified {@link Executable}
+	 * @param filter the String filter defining the properties of the 
+	 * service for which to execute the specified {@link Executable}
+	 * @param executables the list of {@link Executable}s to be executed 
+	 * when the appropriate service appears
+	 * 
+	 * @return the String identifier of the created attachment, that can
+	 * be used later to delete it
 	 */
-	public <S> void onServiceAppearing(Class<S> serviceType, 
-			String filter, List<Executable<S,Void>> executors)
+	public <S> String attachOnServiceAppearing(Class<S> serviceType, 
+			String filter, List<Executable<S,Void>> executables)
 	{
+		String key = null;
 		String trackingFilter = createFilter(serviceType, filter);
+		
+		@SuppressWarnings("unchecked")
 		TrackerCustomizer<S> customizer = (TrackerCustomizer<S>) 
 				this.customizers.get(trackingFilter);
-		ServiceTracker<S,S> tracker = null;
-		
+
 		if(customizer == null)
 		{
 			customizer = new TrackerCustomizer<S>(this);
 			this.customizers.put(trackingFilter, customizer);
 			
-			customizer.onAdding(executors);
-			tracker = new ServiceTracker<S,S>(context, 
+			key = customizer.attachOnAdding(executables);
+			ServiceTracker<S,S> tracker = new ServiceTracker<S,S>(context, 
 					serviceType.getCanonicalName(), customizer);
 			
 			synchronized(this.trackers)
@@ -393,44 +404,81 @@ public class Mediator
 			tracker.open();
 		} else
 		{
-			customizer.onAdding(executors);
+			key = customizer.attachOnAdding(executables);
 		}
+		return key;
 	}
 
 	/**
-	 * @param serviceType
-	 * @param filter
-	 * @param executor
+	 * Attaches the {@link Executable} passed as parameter to the 
+	 * event of a service appearance if this last one is of the 
+	 * specified Type, and compliant with the specified String filter
+	 * 
+	 * @param serviceType the Type of service for which to execute 
+	 * the specified {@link Executable}
+	 * @param filter the String filter defining the properties of the 
+	 * service for which to execute the specified {@link Executable}
+	 * @param executable the {@link Executable} to be executed when the
+	 * appropriate service appears
+	 * 
+	 * @return the String identifier of the created attachment, that can
+	 * be used later to delete it
 	 */
-	public <S> void onServiceAppearing(Class<S> serviceType, 
-			String filter, Executable<S,Void> executor)
+	public <S> String attachOnServiceAppearing(Class<S> serviceType, 
+			String filter, Executable<S,Void> executable)
 	{
-		this.onServiceAppearing(serviceType, filter, 
+		return this.attachOnServiceAppearing(serviceType, filter, 
 				Collections.singletonList(
-				executor));
+				executable));
 	}
-
+	
 	/**
 	 * @param serviceType
 	 * @param filter
-	 * @param executors
+	 * @param key
 	 */
-	public <S> void onServiceDisappearing(Class<S> serviceType, 
-			String filter, List<Executable<S,Void>> executors)
+	public <S> void detachOnServiceAppearing(Class<S> serviceType, String filter, String key)
 	{
-		String trackingFilter = createFilter(serviceType, filter);
+		String trackingFilter = createFilter(serviceType, filter);	
+		@SuppressWarnings("unchecked")
 		TrackerCustomizer<S> customizer = (TrackerCustomizer<S>) 
 				this.customizers.get(trackingFilter);
-		ServiceTracker<S,S> tracker = null;
+		customizer.detachOnAdding(key);
+	}
+
+	/**
+	 * Attaches the {@link Executable} passed as parameter to the 
+	 * event of a service disappearance if this last one is of the 
+	 * specified Type, and compliant with the specified String filter
+	 * 
+	 * @param serviceType the Type of service for which to execute 
+	 * the specified {@link Executable}
+	 * @param filter the String filter defining the properties of the 
+	 * service for which to execute the specified {@link Executable}
+	 * @param executables the list of {@link Executable}s to be executed 
+	 * when the appropriate service disappears
+	 * 
+	 * @return the String identifier of the created attachment, that can
+	 * be used later to delete it
+	 */
+	public <S> String attachOnServiceDisappearing(Class<S> serviceType, 
+			String filter, List<Executable<S,Void>> executables)
+	{
+		String key = null;
+		String trackingFilter = createFilter(serviceType, filter);
+		@SuppressWarnings("unchecked")
+		TrackerCustomizer<S> customizer = (TrackerCustomizer<S>) 
+				this.customizers.get(trackingFilter);
 		
 		if(customizer == null)
 		{
 			customizer = new TrackerCustomizer<S>(this);
 			this.customizers.put(trackingFilter, customizer);
-			customizer.onRemoving(executors);
+			key = customizer.attachOnRemoving(executables);
 			
-			tracker = new ServiceTracker<S,S>(context, trackingFilter, 
-					customizer);
+			ServiceTracker<S,S> tracker = new ServiceTracker<S,S>(context, 
+					trackingFilter,  customizer);
+			
 			synchronized(this.trackers)
 			{
 				trackers.add(tracker);
@@ -438,45 +486,81 @@ public class Mediator
 			tracker.open();
 		} else
 		{
-			customizer.onRemoving(executors);
+			key = customizer.attachOnRemoving(executables);
 		}
+		return key;
+	}
+
+	/**
+	 * Attaches the {@link Executable} passed as parameter to the 
+	 * event of a service disappearance if this last one is of the 
+	 * specified Type, and compliant with the specified String filter
+	 * 
+	 * @param serviceType the Type of service for which to execute 
+	 * the specified {@link Executable}
+	 * @param filter the String filter defining the properties of the 
+	 * service for which to execute the specified {@link Executable}
+	 * @param executable the {@link Executable}s to be executed 
+	 * when the appropriate service disappears
+	 * 
+	 * @return the String identifier of the created attachment, that can
+	 * be used later to delete it
+	 */
+	public <S> String attachOnServiceDisappearing(Class<S> serviceType, 
+			String filter, Executable<S,Void> executable)
+	{
+		return this.attachOnServiceDisappearing(serviceType, filter,
+				Collections.singletonList(executable));
 	}
 
 	/**
 	 * @param serviceType
 	 * @param filter
-	 * @param executor
+	 * @param key
 	 */
-	public <S> void onServiceDisappearing(Class<S> serviceType, 
-			String filter, Executable<S,Void> executor)
+	public <S> void detachOnServiceDisappearing(Class<S> serviceType, 
+			String filter, String key)
 	{
-		this.onServiceDisappearing(serviceType, filter,
-				Collections.singletonList(executor));
-	}
-
-	/**
-	 * @param serviceType
-	 * @param filter
-	 * @param executors
-	 */
-	public <S> void onServiceUpdating(Class<S> serviceType, 
-			String filter, List<Executable<S,Void>> executors)
-	{
-		String trackingFilter = createFilter(serviceType, filter);
-		
+		String trackingFilter = createFilter(serviceType, filter);	
+		@SuppressWarnings("unchecked")
 		TrackerCustomizer<S> customizer = (TrackerCustomizer<S>) 
 				this.customizers.get(trackingFilter);
+		customizer.detachOnRemoving(key);
+	}
 	
-		ServiceTracker<S,S> tracker = null;
+	/**
+	 * Attaches the {@link Executable} passed as parameter to the 
+	 * event of a service modification if this last one is of the 
+	 * specified Type, and compliant with the specified String filter
+	 * 
+	 * @param serviceType the Type of service for which to execute 
+	 * the specified {@link Executable}
+	 * @param filter the String filter defining the properties of the 
+	 * service for which to execute the specified {@link Executable}
+	 * @param executables the list of {@link Executable}s to be executed 
+	 * when the appropriate service is modified
+	 * 
+	 * @return the String identifier of the created attachment, that can
+	 * be used later to delete it
+	 */
+	public <S> String attachOnServiceUpdating(Class<S> serviceType, 
+			String filter, List<Executable<S,Void>> executables)
+	{
+		String key = null;
+		String trackingFilter = createFilter(serviceType, filter);
+		
+		@SuppressWarnings("unchecked")
+		TrackerCustomizer<S> customizer = (TrackerCustomizer<S>) 
+				this.customizers.get(trackingFilter);
 		
 		if(customizer == null)
 		{
 			customizer = new TrackerCustomizer<S>(this);
 			this.customizers.put(trackingFilter, customizer);
 			
-			customizer.onModifying(executors);
-			tracker = new ServiceTracker<S,S>(context, trackingFilter, 
-					customizer);
+			key = customizer.attachOnModifying(executables);
+			ServiceTracker<S,S> tracker = new ServiceTracker<S,S>(context, 
+				trackingFilter, customizer);
 			synchronized(this.trackers)
 			{
 				trackers.add(tracker);
@@ -484,21 +568,47 @@ public class Mediator
 			tracker.open();
 		} else
 		{
-			customizer.onModifying(executors);
+			key = customizer.attachOnModifying(executables);
 		}
+		return key;
 	}	
 	
 	/**
+	 * Attaches the {@link Executable} passed as parameter to the 
+	 * event of a service modification if this last one is of the 
+	 * specified Type, and compliant with the specified String filter
+	 * 
+	 * @param serviceType the Type of service for which to execute 
+	 * the specified {@link Executable}
+	 * @param filter the String filter defining the properties of the 
+	 * service for which to execute the specified {@link Executable}
+	 * @param executable the {@link Executable} to be executed 
+	 * when the appropriate service is modified
+	 * 
+	 * @return the String identifier of the created attachment, that can
+	 * be used later to delete it
+	 */
+	public <S> String attachOnServiceUpdating(Class<S> serviceType, 
+			String filter, Executable<S,Void> executable)
+	{
+		return this.attachOnServiceUpdating(serviceType, filter, 
+				Collections.singletonList(executable));
+	}	
+
+	/**
 	 * @param serviceType
 	 * @param filter
-	 * @param executor
+	 * @param key
 	 */
-	public <S> void onServiceUpdating(Class<S> serviceType, 
-			String filter, Executable<S,Void> executor)
+	public <S> void detachOnServiceUpdating(Class<S> serviceType, 
+			String filter, String key)
 	{
-		this.onServiceUpdating(serviceType, filter, 
-				Collections.singletonList(executor));
-	}	
+		String trackingFilter = createFilter(serviceType, filter);	
+		@SuppressWarnings("unchecked")
+		TrackerCustomizer<S> customizer = (TrackerCustomizer<S>) 
+				this.customizers.get(trackingFilter);
+		customizer.detachOnModifying(key);
+	}
 	
 	/**
 	 * @param serviceType

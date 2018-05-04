@@ -70,7 +70,7 @@ public class Activator extends HttpActivator
     	devicesDiscovery = new KodiDevicesDiscovery(mediator, super.endpoint,
                (String) mediator.getProperty("kodi.regex"));
         
-    	super.mediator.onServiceAppearing(HttpService.class, null,
+    	super.mediator.attachOnServiceAppearing(HttpService.class, null,
     		new Executable<HttpService,Void>()
 			{
 				@Override
@@ -87,7 +87,7 @@ public class Activator extends HttpActivator
 				}
 			}
     	);
-    	super.mediator.onServiceDisappearing(HttpService.class, null,
+    	super.mediator.attachOnServiceDisappearing(HttpService.class, null,
     		new Executable<HttpService,Void>()
 			{
 				@Override
