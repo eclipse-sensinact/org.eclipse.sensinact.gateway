@@ -93,7 +93,7 @@ public class SocketEndpointManagerTest
 		Thread.sleep(20*1000);
 
 		String s = instances.get(0).providers();
-		System.out.println(s);
+		//System.out.println(s);
 		
 		JSONObject j = new JSONObject(s);
 		JSONAssert.assertEquals(new JSONArray(
@@ -108,7 +108,7 @@ public class SocketEndpointManagerTest
 		
 		final Stack<SnaMessage<?>> stack = new Stack<SnaMessage<?>>();
 		
-		s = instances.get(0).subscribe("sna2:slider", "cursor", "position", 
+		s = instances.get(2).subscribe("sna2:slider", "cursor", "position", 
 		new Recipient()
 		{
 			@Override
@@ -157,6 +157,7 @@ public class SocketEndpointManagerTest
 			assertEquals(150, message.getJSONObject("notification").getInt("value"));
 		}		
 		int count = 0;
+		Thread.sleep(2000);
 		for(String ms:instances.get(2).listAgentMessages())
 		{
 			if(ms.contains("ATTRIBUTE_VALUE_UPDATED"))
@@ -193,7 +194,6 @@ public class SocketEndpointManagerTest
 			}
 		}
 		assertEquals(0,count);
-		
 		
 		File f = new File(String.format(
 			"target/felix/conf%s/socket.endpoint.sample.config",3));
