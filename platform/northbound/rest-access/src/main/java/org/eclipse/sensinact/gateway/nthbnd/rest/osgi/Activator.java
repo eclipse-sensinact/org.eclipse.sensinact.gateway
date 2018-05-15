@@ -72,7 +72,7 @@ public class Activator extends AbstractActivator<NorthboundMediator>
 	    this.corsHeader = Boolean.valueOf((String)
 	    		 super.mediator.getProperty(RestAccessConstants.CORS_HEADER));
 	    
-	    mediator.onServiceAppearing(ExtHttpService.class, null, 
+	    mediator.attachOnServiceAppearing(ExtHttpService.class, null, 
 	    new Executable<ExtHttpService,Void>()
 	    {
             /**

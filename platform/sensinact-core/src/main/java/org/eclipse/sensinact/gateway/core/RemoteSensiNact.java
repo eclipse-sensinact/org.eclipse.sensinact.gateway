@@ -34,7 +34,9 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
+import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.ServiceRegistration;
 
@@ -123,6 +125,27 @@ public class RemoteSensiNact implements RemoteCore
 		}
 	}	
 	
+	/**
+	 *
+	 * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+	 */
+	final class SubscriptionReference 
+	{	
+		public final String publicKey;	
+		public final String serviceProviderId;
+		public final String serviceId;
+		public final String resourceId;
+		
+		SubscriptionReference(String publicKey, String serviceProviderId, 
+				String serviceId, String resourceId)
+		{
+			this.publicKey = publicKey;
+			this.serviceProviderId = serviceProviderId;
+			this.serviceId = serviceId;
+			this.resourceId = resourceId;
+		}
+	}	
+	
 	//********************************************************************//
 	//						ABSTRACT DECLARATIONS						  //
 	//********************************************************************//
@@ -143,9 +166,11 @@ public class RemoteSensiNact implements RemoteCore
 
 	protected Map<String, String> localAgents;	
 	protected ServiceRegistration<RemoteCore> registration;
+	protected Map<String,SubscriptionReference> subscriptionIds;
 
 	protected Deque<Executable<String, Void>> onConnectedCallback;
 	protected Deque<Executable<String, Void>> onDisconnectedCallback;
+
 
 
 	/**
@@ -164,7 +189,8 @@ public class RemoteSensiNact implements RemoteCore
 		LocalEndpoint localEndpoint)
 	{
 		this.mediator = mediator;
-		this.localAgents = new HashMap<String,String>();		
+		this.localAgents = new HashMap<String,String>();
+		this.subscriptionIds =  new HashMap<String,SubscriptionReference>();
 		this.localEndpoint = localEndpoint;
 	}
 
@@ -241,22 +267,23 @@ public class RemoteSensiNact implements RemoteCore
 			mediator.debug("Unable to register because of null namespace");
 			return;
 		}
-		this.registration = AccessController.<ServiceRegistration<RemoteCore>>doPrivileged(
-		new PrivilegedAction<ServiceRegistration<RemoteCore>>()
-		{
-			@Override
-			public ServiceRegistration<RemoteCore> run()
-			{		
-				Dictionary<String,Object> props = new Hashtable<String,Object>();
-		    	props.put(NAMESPACE_PROP, namespace);	
-		    	
-		    	ServiceRegistration<RemoteCore> reg = mediator.getContext(
-					).registerService(RemoteCore.class, RemoteSensiNact.this, 
-						   props);
-				mediator.debug("RemoteCore '%s' registration done", namespace);
-				return reg;
-			}
-		});
+		this.registration = 
+			AccessController.<ServiceRegistration<RemoteCore>>doPrivileged(
+			new PrivilegedAction<ServiceRegistration<RemoteCore>>()
+			{
+				@Override
+				public ServiceRegistration<RemoteCore> run()
+				{		
+					Dictionary<String,Object> props = new Hashtable<String,Object>();
+			    	props.put(NAMESPACE_PROP, namespace);	
+			    	
+			    	ServiceRegistration<RemoteCore> reg = mediator.getContext(
+						).registerService(RemoteCore.class, RemoteSensiNact.this, 
+							   props);
+					mediator.debug("RemoteCore '%s' registration done", namespace);
+					return reg;
+				}
+			});
 		if(this.registration == null)
 		{
 			mediator.debug("Registration error");
@@ -289,6 +316,7 @@ public class RemoteSensiNact implements RemoteCore
 	{
 		this.disconnect();
 		this.localAgents.clear();
+		this.subscriptionIds.clear();
 		this.remoteEndpoint.close();
 	}
 	
@@ -300,6 +328,7 @@ public class RemoteSensiNact implements RemoteCore
 	@Override
 	public void disconnect()
 	{
+		System.out.println("----------->>> DISCONNECTION");
 		if(this.registration!=null)
 		{	
 			final String namespace = this.remoteEndpoint.namespace();
@@ -324,10 +353,36 @@ public class RemoteSensiNact implements RemoteCore
 					return null;
 				}
 			});
+			if(!this.subscriptionIds.isEmpty())
+			{
+				String[] keys = null;
+				synchronized(this.subscriptionIds)
+				{
+					keys = new String[this.subscriptionIds.size()];
+					this.subscriptionIds.keySet().toArray(keys);
+				}
+				int index=0;
+				int length=keys==null?0:keys.length;
+				for(;index < length;index++)
+				{
+					SubscriptionReference ref = this.subscriptionIds.remove(
+							keys[index]);
+					if(ref==null)
+					{
+						continue;
+					}
+					JSONObject response = this.localEndpoint.unsubscribe(
+						ref.publicKey, ref.serviceProviderId, ref.serviceId, 
+						ref.resourceId,  keys[index]);
+			  		System.out.println("DISCONNECTION [" + this.localID() + "]" + 
+						response);
+				}
+			}
 			if(this.onDisconnectedCallback!=null)
 			{
 				Iterator<Executable<String,Void>> it= 
-					this.onDisconnectedCallback.iterator();
+						this.onDisconnectedCallback.iterator();
+				
 				while(it.hasNext())
 				{
 					try 
@@ -515,8 +570,10 @@ public class RemoteSensiNact implements RemoteCore
   	public JSONObject subscribe(String publicKey, String serviceProviderId,
             String serviceId, String resourceId, JSONArray conditions)
     {  	
-  		return this.subscribe(publicKey, serviceProviderId, serviceId,
-  				resourceId, this.remoteEndpoint, conditions);  
+  		JSONObject response = this.subscribe(publicKey, serviceProviderId, 
+  			serviceId, resourceId, this.remoteEndpoint, conditions);  
+  		System.out.println("[" + this.localID() + "]" + response);
+  		return response;
     }
 
 	/**
@@ -532,8 +589,26 @@ public class RemoteSensiNact implements RemoteCore
 	        String serviceId, String resourceId, Recipient recipient,
 	        JSONArray conditions)
 	{
-  		return this.localEndpoint.subscribe(publicKey, serviceProviderId, serviceId,
-  				resourceId, recipient, conditions);  
+  		JSONObject response = this.localEndpoint.subscribe(publicKey, 
+  			serviceProviderId, serviceId, resourceId, recipient, 
+  			conditions);
+  		
+  		if(response.optInt("statusCode")==200) 
+  		{
+  			try
+  			{
+  				String subscriptionId = response.getJSONObject(
+  					"response").getString("subscriptionId");
+  				
+  				this.subscriptionIds.put(subscriptionId, new SubscriptionReference(
+  				publicKey, serviceProviderId, serviceId, resourceId));
+  				
+  			} catch(JSONException e)
+  			{
+  				mediator.error(e);
+  			}
+  		} 
+  		return response;
 	}
 	
   	/**
@@ -545,11 +620,15 @@ public class RemoteSensiNact implements RemoteCore
   	 */
 	@Override
   	public JSONObject unsubscribe(String publicKey, String serviceProviderId,
-            String serviceId, String resourceId, 
-           String subscriptionId )
+            String serviceId, String resourceId, String subscriptionId )
     {
-  		return this.localEndpoint.unsubscribe(publicKey, 
+		this.subscriptionIds.remove(subscriptionId);
+		
+  		JSONObject response = this.localEndpoint.unsubscribe(publicKey, 
   			serviceProviderId, serviceId, resourceId, subscriptionId);   
+  		 
+  		System.out.println("[" + this.localID() + "]" + response);
+  		return response;
     }
 
 	/**

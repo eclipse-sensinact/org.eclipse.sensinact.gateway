@@ -34,7 +34,7 @@ public class KodiDevicesDiscovery implements SSDPDiscoveryListenerItf {
         this.mediator = mediator;
         this.connector = connector;
 
-    	mediator.onServiceAppearing(SSDPDiscoveryNotifierItf.class, null, 
+    	mediator.attachOnServiceAppearing(SSDPDiscoveryNotifierItf.class, null, 
     		new Executable<SSDPDiscoveryNotifierItf,Void>()
 		{
 			@Override

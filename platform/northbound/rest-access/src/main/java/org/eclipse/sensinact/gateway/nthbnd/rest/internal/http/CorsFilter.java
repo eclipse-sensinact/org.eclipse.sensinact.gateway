@@ -90,29 +90,22 @@ public class CorsFilter implements Filter
             	final HttpServletRequest req = (HttpServletRequest) asyncContext.getRequest();
             	final HttpServletResponse res = (HttpServletResponse) asyncContext.getResponse();
             	
-            	res.setHeader("Access-Control-Allow-Origin", "*");
-                res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-            
-                StringBuilder builder = new StringBuilder();
-                String controlRequestHeaders = req.getHeader("Access-Control-Request-Headers");
-                
-                if(controlRequestHeaders != null && controlRequestHeaders.length()>0)
-                {
-                	builder.append(controlRequestHeaders);
-                	builder.append(",");
-                }
-                builder.append("Authorization, X-Auth-Token, X-Requested-With");
-                res.setHeader("Access-Control-Allow-Headers", builder.toString());
-                try
-                {
-                    chain.doFilter(req, res);
-                    
-                } catch (Exception e)
-                {
-                    mediator.error(e);
-                }    
                 if(RestAccessConstants.OPTIONS.equals(req.getMethod()))
                 {
+	            	res.setHeader("Access-Control-Allow-Origin", "*");
+	                res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+	            
+	                StringBuilder builder = new StringBuilder();
+	                String controlRequestHeaders = req.getHeader("Access-Control-Request-Headers");
+	                
+	                if(controlRequestHeaders != null && controlRequestHeaders.length()>0)
+	                {
+	                	builder.append(controlRequestHeaders);
+	                	builder.append(",");
+	                }
+	                builder.append("Authorization, X-Auth-Token, X-Requested-With");
+	                res.setHeader("Access-Control-Allow-Headers", builder.toString());
+	                
 					try
 					{
 						final ServletOutputStream output = res.getOutputStream();
@@ -143,6 +136,14 @@ public class CorsFilter implements Filter
 					}
                 } else
                 {
+                    try
+                    {
+                        chain.doFilter(req, res);
+                        
+                    } catch (Exception e)
+                    {
+                        mediator.error(e);
+                    }    
 	                if(req.isAsyncStarted())
 	                {
 	                	asyncContext.complete();

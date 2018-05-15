@@ -11,6 +11,9 @@
 
 package org.eclipse.sensinact.gateway.datastore.sqlite.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -39,6 +42,10 @@ public class Activator extends AbstractActivator<Mediator>
     {
     	try
     	{
+    		Dictionary  props = new Hashtable();
+    		props.put("data.store.provider",(String) mediator.getProperty("data.store.provider"));
+    		props.put("data.store.sgbd",(String) mediator.getProperty("data.store.sgbd"));
+    				
 	        dataBaseService = new SQLiteDataStoreService(mediator, 
 	        (String) mediator.getProperty(
 	        "org.eclipse.sensinact.gateway.security.database"));
@@ -46,7 +53,7 @@ public class Activator extends AbstractActivator<Mediator>
 	        this.dataServiceRegistration = 
 	                super.mediator.getContext().registerService(
 	                DataStoreService.class.getCanonicalName(),
-	                dataBaseService,null);
+	                dataBaseService, props);
 	        
     	} catch(Exception e)
     	{
