@@ -302,4 +302,8 @@ public class Component implements DataListenerItf, FunctionUpdateListener {
     public AbstractPropertyBlock getProperty(String property) {
         return propertyBlocks.get(property);
     }
+
+    public List<AppParameter> getFunctionParameters() {
+        return functionParameters;
+    }
 }
