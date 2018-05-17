@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
@@ -38,11 +40,10 @@ extends ModelInstance<C>
 	 * @param processor the {@link TaskManager} making the link
 	 * between model element and remote connected counterpart
 	 * @throws InvalidServiceProviderException if an error occurred
-	 * whil instantiating the new {@link ModelInstance}
+	 * while instantiating the new {@link ModelInstance}
 	 */
 	public ExtModelInstance(Mediator mediator,C modelConfiguration, 
-		String name, TaskManager processor) 
-		throws InvalidServiceProviderException
+		String name, TaskManager processor) throws InvalidServiceProviderException
 	{
 		this(mediator, modelConfiguration, name, null, processor);
 	}
@@ -65,7 +66,7 @@ extends ModelInstance<C>
 	 */
 	public ExtModelInstance(Mediator mediator, C modelConfiguration, 
 		String name, String profileId, TaskManager processor) 
-			throws InvalidServiceProviderException
+				throws InvalidServiceProviderException
 	{
 		super(mediator, modelConfiguration, name, profileId);
 		this.taskManager = processor;

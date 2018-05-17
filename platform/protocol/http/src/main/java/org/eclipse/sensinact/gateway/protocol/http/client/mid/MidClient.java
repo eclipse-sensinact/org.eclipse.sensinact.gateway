@@ -22,12 +22,11 @@ import org.eclipse.sensinact.gateway.util.stack.StackEngineHandler;
 
 
 /**
- * Intermediate client to manage execution errors. A recurrent IntermediateClientRequest 
- * can be defined as well as, after an error being occurred, a specific reactivation
- * one. If nothing disallowed to use a recurrent IntermediateClientRequest with punctual ones, 
- * this class has not be defined for that use and the resulting behavior is difficult
- * to predict. For a recurrent IntermediateClientRequest, the execution is scheduled according 
- * to the defined initial delay.
+ * Intermediate client to manage execution errors. A recurrent request can be defined as well 
+ * as, after an error being occurred, a specific reactivation one. If nothing disallowed to use 
+ * a recurrent IntermediateClientRequest with punctual ones, this class has not be defined for 
+ * that use and the resulting behavior is difficult to predict. For a recurrent request, the 
+ * execution is scheduled according to the defined initial delay.
  */
 public class MidClient<RESPONSE extends Response, 
 REQUEST extends Request<RESPONSE> & Reusable> extends 

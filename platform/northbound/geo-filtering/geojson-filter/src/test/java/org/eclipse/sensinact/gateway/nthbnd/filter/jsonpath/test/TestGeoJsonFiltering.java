@@ -125,11 +125,13 @@ public class TestGeoJsonFiltering extends MidOSGiTest
 		configuration.put("org.osgi.service.http.port", "8095");
 		configuration.put("org.apache.felix.http.jettyEnabled", "true");
 		configuration.put("org.apache.felix.http.whiteboardEnabled", "true");
+		
 	}
 
 	@Test
 	public void testHttpFiltered() throws Exception
 	{
+		Thread.sleep(3000);
 		Mediator mediator = new Mediator(context);
 
 		//(&(latitude <= 45.20899800276024)(latitude >= 45.191001997239766)(longitude <= 5.712727172127145)(longitude >= 5.687272827872856))
@@ -183,7 +185,7 @@ public class TestGeoJsonFiltering extends MidOSGiTest
 	    	    
 	    simulated3  = HttpServiceTestClient.newRequest(mediator, 
 	    HTTP_ROOTURL + "/sensinact/slider/admin/location/SET",
-	    "[{\"name\":\"value\",\"type\":\"string\",\"value\":\"44.8:5.7\"}]", "POST");
+	    "[{\"name\":\"value\",\"type\":\"string\",\"value\":\"44.0:5.7\"}]", "POST");
 
 	    Thread.sleep(1000);
 	    
@@ -212,6 +214,7 @@ public class TestGeoJsonFiltering extends MidOSGiTest
 	@Test
 	public void testWsFiltered() throws Exception
 	{	
+		Thread.sleep(3000);
 		WsServiceTestClient client = new WsServiceTestClient();                
 		new Thread(client).start();
 
@@ -261,7 +264,7 @@ public class TestGeoJsonFiltering extends MidOSGiTest
 	    JSONAssert.assertEquals(response, new JSONObject(simulated3), false);
 
 	    simulated3  = this.synchronizedRequest(client, "/sensinact/slider/admin/location/SET",
-	    "[{\"name\":\"value\",\"type\":\"string\",\"value\":\"44.8:5.7\"}]");
+	    "[{\"name\":\"value\",\"type\":\"string\",\"value\":\"44.0:5.7\"}]");
 
 	    Thread.sleep(1000);
 	    
