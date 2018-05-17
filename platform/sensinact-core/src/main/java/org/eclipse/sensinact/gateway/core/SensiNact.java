@@ -1881,7 +1881,7 @@ public class SensiNact implements Core
 	        	
 	        	String provider = new StringBuilder().append(prefix).append(name).toString();
 	        	String location =(String)reference.getProperty(
-	        			ModelInstanceRegistration.LOCATION_PROPERTY.concat("value"));	        	
+	        			ModelInstanceRegistration.LOCATION_PROPERTY.concat(".value"));	        	
 	        	location = (location==null||location.length()==0)?defaultLocation:location;	        	
 	            List<String> serviceList = (List<String>)reference.getProperty("services");
 
