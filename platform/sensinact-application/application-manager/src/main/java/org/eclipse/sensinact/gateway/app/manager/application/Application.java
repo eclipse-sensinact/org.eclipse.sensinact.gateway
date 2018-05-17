@@ -345,4 +345,8 @@ public class Application extends AbstractSensiNactApplication
     public Map<ResourceDataProvider, Collection<ResourceSubscription>> getResourceSubscriptions() {
         return resourceSubscriptions;
     }
+
+    public Map<String, Component> getComponents() {
+        return Collections.unmodifiableMap(components);
+    }
 }

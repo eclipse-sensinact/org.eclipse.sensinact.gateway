@@ -22,9 +22,12 @@ import org.eclipse.sensinact.gateway.app.manager.application.Application;
 import org.eclipse.sensinact.gateway.app.manager.application.dependency.DependencyManager;
 import org.eclipse.sensinact.gateway.app.manager.application.dependency.DependencyManagerCallback;
 import org.eclipse.sensinact.gateway.app.manager.checker.ArchitectureChecker;
+import org.eclipse.sensinact.gateway.app.manager.component.Component;
 import org.eclipse.sensinact.gateway.app.manager.component.ResourceDataProvider;
 import org.eclipse.sensinact.gateway.app.manager.factory.ApplicationFactory;
 import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
+import org.eclipse.sensinact.gateway.app.manager.json.AppComponent;
+import org.eclipse.sensinact.gateway.app.manager.json.AppParameter;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.app.manager.osgi.PluginsProxy;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
@@ -47,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 
 /**
  * @see AccessMethodExecutor
@@ -202,6 +206,15 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
                 for(ResourceDataProvider dp:dependenciesURI){
                     dependenciesURIString.add(dp.getUri());
                 }
+
+                for(Map.Entry<String, Component> ac:application.getComponents().entrySet()){
+                    for(AppParameter param:ac.getValue().getFunctionParameters()){
+                        if(param.getType().equals("resource")){
+                            dependenciesURIString.add(param.getValue().toString());
+                        }
+                    }
+                }
+
                 DependencyManager dependencyManager =new DependencyManager(application, mediator, dependenciesURIString, new DependencyManagerCallback() {
                     @Override
                     public void ready(String applicationName) {
@@ -222,7 +235,7 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
                             Attribute attribute = applicationService.getResource(AppConstant.STATUS).getAttribute(DataResource.VALUE);
                             attribute.setValue(ApplicationStatus.INSTALLED);
                             application.stop();
-                            applicationService.stop();
+                            //applicationService.stop();
                         }catch(Exception e){
                             //We can ignore an error here, the application might have been stop by the watch doc mechanism
                         }

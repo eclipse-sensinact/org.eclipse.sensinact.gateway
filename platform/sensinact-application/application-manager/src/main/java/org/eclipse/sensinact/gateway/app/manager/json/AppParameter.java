@@ -14,6 +14,8 @@ package org.eclipse.sensinact.gateway.app.manager.json;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.json.JSONObject;
 
+import java.util.Objects;
+
 /**
  * Wrapper of a parameter
  *
@@ -82,13 +84,10 @@ public class AppParameter implements JSONable {
 
     }
 
-    /**
-     * @see Object#hashCode()
-     */
+    @Override
     public int hashCode() {
-        int result = value.hashCode();
-        result = 31 * result + type.hashCode();
-        return result;
+
+        return Objects.hash(value, type);
     }
 
     /**
