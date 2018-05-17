@@ -207,7 +207,7 @@ elementFormDefault="qualified" attributeFormDefault="unqualified">
 					<element name="builder" type="sensinact:builder" minOccurs="0" maxOccurs="1"/>
 				</choice>
 				<attribute name="name" type="string" use="required"/> 
-				<attribute name="type" type="QName" use="required" />
+				<attribute name="type" type="string" use="required" />
 			</extension>
 		</complexContent>
 	</complexType>
@@ -262,7 +262,7 @@ elementFormDefault="qualified" attributeFormDefault="unqualified">
 			<element name="value" type="sensinact:restrictedValueType" minOccurs="1" maxOccurs="1"/>
 			<element name="contraints" type="sensinact:constraints" minOccurs="0" maxOccurs="1"/>
 		</sequence>
-				<attribute name="type" use="required" type="QName" />
+				<attribute name="type" use="required" type="string" />
 	</complexType>
 	
 	<complexType name="conditionalConstantFixed" >
@@ -272,7 +272,7 @@ elementFormDefault="qualified" attributeFormDefault="unqualified">
 					<element name="value" type="sensinact:restrictedValueType" minOccurs="1" maxOccurs="1"/>
 					<element name="contraints" type="sensinact:constraints"  minOccurs="0" maxOccurs="0"/>
 				</sequence>
-				<attribute name="type" use="required" type="QName" />
+				<attribute name="type" use="required" type="string" />
 			</restriction>
 		</complexContent>
 	</complexType>
@@ -407,7 +407,7 @@ elementFormDefault="qualified" attributeFormDefault="unqualified">
 					<element name="value" type="sensinact:restrictedValueType" minOccurs="0" maxOccurs="1"/>
 				</sequence>
 				<attribute name="name" use="required" type="sensinact:modifiableHiddenKeyWordsExcludedString"/>
-				<attribute name="type" use="required" type="QName" />
+				<attribute name="type" use="required" type="string" />
 			</extension>
 		</complexContent>
 	</complexType>
@@ -427,7 +427,7 @@ elementFormDefault="qualified" attributeFormDefault="unqualified">
 					<element name="constraints" type="sensinact:constraints" minOccurs="0" maxOccurs="1"/>
 				</sequence>
 				<attribute name="name" use="required" type="sensinact:nameTypeKeyWordsExcludedString"/>
-				<attribute name="type" use="required" type="QName" />
+				<attribute name="type" use="required" type="string" />
 				<attribute name="target" use="optional" type="string" default="ANY_TARGET" />
 				<attribute name="modifiable" type="sensinact:modifiable_enum" use="optional"/>
 				<attribute name="hidden" type="boolean" default="false" use="optional"/>
@@ -444,7 +444,7 @@ elementFormDefault="qualified" attributeFormDefault="unqualified">
 					<element name="constraints" type="sensinact:constraints" minOccurs="0" maxOccurs="1"/>
 				</sequence>
 				<attribute name="name" use="required" type="sensinact:nameTypeValueKeyWordsExcludedString"/>
-				<attribute name="type" use="required" type="QName" />
+				<attribute name="type" use="required" type="string" />
 				<attribute name="target" use="optional" type="string" default="ANY_TARGET"/>
 				<attribute name="modifiable" type="sensinact:modifiable_enum" use="optional"/>
 				<attribute name="hidden" type="boolean" default="false" use="optional"/>
