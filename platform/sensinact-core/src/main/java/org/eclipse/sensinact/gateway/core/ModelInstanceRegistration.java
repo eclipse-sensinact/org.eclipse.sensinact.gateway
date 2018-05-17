@@ -5,11 +5,12 @@ import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.ServiceProvider.LifecycleStatus;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
@@ -18,6 +19,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaMessageSubType;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage.Update;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
@@ -34,15 +36,19 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class ModelInstanceRegistration extends AbstractMidCallback
 {
+	public static final String LOCATION_PROPERTY = "admin.".concat(LocationResource.LOCATION);
+	
 	private boolean registered;
 	private ServiceRegistration<?> instanceRegistration;
 	private ModelConfiguration configuration;
+	private Map<String,List<String>> observed;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param path the String uri of the {@link SensiNactResourceModel} 
 	 * registered
+	 * @param observed the list of observed String paths 
 	 * @param registration the {@link ServiceRegistration} of the {@link 
 	 * SensiNactResourceModel} 
 	 * @param configuration the {@link ModelConfiguration} of the {@link 
@@ -50,11 +56,66 @@ public class ModelInstanceRegistration extends AbstractMidCallback
 	 * ModelInstanceRegistration to be instantiated
 	 */
 	public ModelInstanceRegistration(
-			String path, ServiceRegistration<?> registration, 
+			String path,
+			List<String> observed,
+			ServiceRegistration<?> registration, 
 			ModelConfiguration configuration)
-	{
+	{	
 		super(false);
 		super.setIdentifier(path);
+		this.observed = new HashMap<String,List<String>>();
+		
+		if(observed != null && !observed.isEmpty())
+		{
+			Iterator<String> it = observed.iterator();
+			while(it.hasNext())
+			{
+				String obs = it.next();	
+				//System.out.println("["+this.identifier+"] OBSERVED TO BE ADDED " + obs + " ...");
+				String[] obsEls = UriUtils.getUriElements(obs);
+				int length = obsEls==null?0:obsEls.length;
+				
+				String attribute = null;
+				switch(length)
+				{
+					case 0:
+					case 1: 
+						continue;
+					case 2:	
+						attribute = DataResource.VALUE;
+						break;
+					case 3:
+						attribute = obsEls[2];
+						break;
+					default:
+						continue;
+				}
+				String key = new StringBuilder().append(
+				    obsEls[0]).append(".").append(obsEls[1]
+								).toString();					
+				List<String> list = this.observed.get(key);
+				if(list == null)
+				{
+					list = new ArrayList<String>();
+					this.observed.put(key, list);
+				}
+				if(!list.contains(attribute))
+				{
+					list.add(attribute);
+				}
+			}
+		}
+		List<String> list = this.observed.get(LOCATION_PROPERTY);
+		if(list == null)
+		{
+			list = new ArrayList<String>();
+			this.observed.put(LOCATION_PROPERTY, list);
+		}
+		if(!list.contains(DataResource.VALUE))
+		{
+			list.add(DataResource.VALUE);
+		}
+		//System.out.println(" ["+this.identifier+"] OBSERVED " + this.observed + " ...");
 		this.instanceRegistration = registration;
 		this.configuration = configuration;
 		this.registered = true;
@@ -178,52 +239,59 @@ public class ModelInstanceRegistration extends AbstractMidCallback
     	properties.put("lifecycle.status", status.name());
     	this.update(properties);
     }
-	
-	/**
-     * @param uri
-     * @param location
-     */
-	public void updateLocation(String location)
+
+	private final void updateObserved(String observed, Object value)
     {
-    	if(!registered)
+    	if(!registered ||observed==null)
     	{
     		return;
     	}
+//		System.out.println("______________________________");
+//		System.out.println(
+//		new StringBuilder().append(observed).append(" = ").append(value).toString());
+//		System.out.println("______________________________");
+		
     	Dictionary<String, Object> properties = properties();
-    	properties.remove(LocationResource.LOCATION);
-		properties.remove("latitude");
-		properties.remove("longitude");		
-    	if(location==null)
-    	{ 
-    		location = "0:0";
-    	}
-    	properties.put(LocationResource.LOCATION, location);
-		String[] latlon = location.split(":");
-		if(latlon.length == 2)
-		{
-			try
-			{
-	        	properties.put("latitude",
-	        			Double.parseDouble(latlon[0]));
-	        	properties.put("longitude",
-	        			Double.parseDouble(latlon[1]));
-			} catch(NumberFormatException e)
+		properties.remove(observed);
+		if(observed.startsWith(LOCATION_PROPERTY))
+		{			
+			if(value == null)
 			{
 				return;
 			}
+			properties.remove("latitude");
+			properties.remove("longitude");
+			
+	    	double latitude = 0d;
+	    	double longitude = 0d;
+	    				    	
+			String[] latlon = String.valueOf(value).split(":");
+			
+			if(latlon.length == 2)
+			{
+				try
+				{
+		        	latitude = Double.parseDouble(latlon[0]);
+		        	longitude = Double.parseDouble(latlon[1]);
+		        	
+				} catch(NumberFormatException e)
+				{					    	
+			    	return;
+				}
+			}
+	        properties.put("latitude", latitude);
+	        properties.put("longitude", longitude);
 		}
+		properties.put(observed, value);		
     	this.update(properties);
     }
-		
+	
     /**
-     * @param uri
-     * @param object 
-     * @param content
      */
-    @SuppressWarnings("unchecked")
     public void updateContent(
-    	String uri,
     	SnaLifecycleMessage.Lifecycle lifecycle, 
+    	String uri,
+    	JSONObject initial,
     	String type)
     {
     	if(!registered)
@@ -238,10 +306,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback
 			return;
 		}		
 		MutableAccessNode node = null;
-		MutableAccessNode root = this.configuration.getAccessTree().getRoot();
-		AccessMethod.Type[] accessMethodTypes = AccessMethod.Type.values();
-		int typesLength = accessMethodTypes==null?0:accessMethodTypes.length;
-		
+		MutableAccessNode root = this.configuration.getAccessTree().getRoot();		
 		if((node = (MutableAccessNode) root.get(uri)) == null)
 		{
 			node = root;
@@ -254,85 +319,203 @@ public class ModelInstanceRegistration extends AbstractMidCallback
     	
 		if(resource != null)
 		{
-			String serviceKey = service.concat(".resources");
-			String resourceKey = new StringBuilder().append(service).append(
-					".").append(resource).toString();
-			List<String> resources = (List<String>) properties.get(serviceKey);		
-		    if(resources == null)
-		    {
-		    	resources = new ArrayList<String>();	
-		    	properties.put(serviceKey, resources);
-		    }
 	    	if(added)
-	    	{  		
-	    		resources.add(resource);
-	    		properties.put(resourceKey.concat(".type"),type);
-				int index = 0;		
-				for(;index < typesLength; index++)
-				{
-					AccessLevelOption accessLevelOption = node.getAccessLevelOption(
-						accessMethodTypes[index]);
-					
-					properties.put(new StringBuilder().append(resourceKey).append(
-						".").append(accessMethodTypes[index].name()).toString(),
-							accessLevelOption.getAccessLevel().getLevel());
-				}
+	    	{  				
+    			updateResourceAppearing(service, resource, type, initial, 
+    					node, properties);
 	    	} else
 	    	{
-	    		resources.remove(resource);
-	    		properties.remove(resourceKey.concat(".type"));
-				int index = 0;				
-				for(;index < typesLength; index++)
-				{
-					properties.remove(new StringBuilder().append(resourceKey).append(
-						".").append(accessMethodTypes[index].name()).toString());
-				}
+    			updateResourceDisappearing(service, resource, node, 
+    					properties);
 	    	}
 		} else
 		{
-			List<String> services = (List<String>) properties.get("services");			
-		    if(services==null)
-		    {
-		    	services = new ArrayList<String>();	
-		    	properties.put("services", services);
-		    }		    
-	    	if(added)
-	    	{
-				int index = 0;		
-				for(;index < typesLength; index++)
-				{
-					AccessLevelOption accessLevelOption = node.getAccessLevelOption(
-						accessMethodTypes[index]);
-					
-					properties.put(new StringBuilder().append(service).append(
-						".").append(accessMethodTypes[index].name()).toString(),
-							accessLevelOption.getAccessLevel().getLevel());
-				}
-	    		services.add(service);
-	    		
-	    	} else
-	    	{
-	    		services.remove(service);
-	    		List<String> tobeRemoved = new ArrayList<String>();
-	    		Enumeration enumeration = properties.keys();
-	    		while(enumeration.hasMoreElements())
-	    		{
-	    			String key = (String) enumeration.nextElement();
-	    			if(key!=null && key.startsWith(service.concat(".")))
-	    			{
-	    				tobeRemoved.add(key);
-	    			}
-	    		}
-	    		Iterator<String> iterator = tobeRemoved.iterator();
-	    		while(iterator.hasNext())
-	    		{
-	    			properties.remove(iterator.next());
-	    		}  		
-	    	}
+			updateService(service,node,added,properties);
 		}
     	this.update(properties);
     }	
-
+    
+    private final void updateResourceAppearing(
+    	String service,
+    	String resource,
+    	String type,
+    	JSONObject initial,
+    	MutableAccessNode node,
+    	Dictionary<String,Object> properties)
+    {
+    	if(!registered ||service==null ||resource==null)
+    	{
+    		return;
+    	}
+		AccessMethod.Type[] accessMethodTypes = AccessMethod.Type.values();
+		int typesLength = accessMethodTypes==null?0:accessMethodTypes.length;
+		
+		String serviceKey = service.concat(".resources");
+		String resourceKey = new StringBuilder().append(service).append(
+				".").append(resource).toString();
+		
+		List<String> resources = (List<String>) properties.get(serviceKey);		
+	    if(resources == null)
+	    {
+	    	resources = new ArrayList<String>();	
+	    	properties.put(serviceKey, resources);
+	    }  				
+		List<String> attributes = this.observed.get(resourceKey); 
+		if(attributes!=null && !attributes.isEmpty())
+		{
+			Iterator<String> it = attributes.iterator();
+			String name = initial==null?null:initial.optString(Resource.NAME);
+			
+			while(it.hasNext())
+			{
+				Object value = null;
+				String attribute = it.next();
+				
+				if(attribute.equals(name) || (attribute.equals(
+						DataResource.VALUE) && resource.equals(name)))
+				{
+					value = initial.opt(DataResource.VALUE);
+				}				
+				if(LOCATION_PROPERTY.equals(resourceKey))
+				{				    	
+			    	double latitude = 0d;
+			    	double longitude = 0d;
+			    	
+					String location = value==null?"0:0":String.valueOf(value);				    	
+					String[] latlon = location.split(":");
+					
+					if(latlon.length == 2)
+					{
+						try
+						{
+				        	latitude = Double.parseDouble(latlon[0]);
+				        	longitude = Double.parseDouble(latlon[1]);
+				        	
+						} catch(NumberFormatException e)
+						{					    	
+					    	latitude = 0d;
+					    	longitude = 0d;
+						}
+					}
+					location = new StringBuilder().append(latitude).append(":"
+							).append(longitude).toString();
+			        properties.put("latitude", latitude);
+			        properties.put("longitude", longitude);
+			        value = location;
+				}
+				if(value!= null)
+				{
+//					System.out.println("______________________________");
+//					System.out.println(
+//					new StringBuilder().append(resourceKey).append("."
+//					).append(attribute).append(" = ").append(value).toString());
+//					System.out.println("______________________________");
+					
+					properties.put(new StringBuilder().append(resourceKey
+						).append(".").append(attribute).toString(),value);
+				}
+			}
+		}	
+		resources.add(resource);
+		properties.put(resourceKey.concat(".type"),type);
+		    		
+		int index = 0;		
+		for(;index < typesLength; index++)
+		{
+			AccessLevelOption accessLevelOption = node.getAccessLevelOption(
+				accessMethodTypes[index]);
+			
+			properties.put(new StringBuilder().append(resourceKey).append(
+				".").append(accessMethodTypes[index].name()).toString(),
+					accessLevelOption.getAccessLevel().getLevel());
+		}
+    }
+    
+    private final void updateResourceDisappearing(
+    	String service,
+    	String resource,
+    	MutableAccessNode node,
+    	Dictionary<String,Object> properties)
+    {
+    	if(!registered ||service==null ||resource==null)
+    	{
+    		return;
+    	}
+		AccessMethod.Type[] accessMethodTypes = AccessMethod.Type.values();
+		int typesLength = accessMethodTypes==null?0:accessMethodTypes.length;
+		
+		String serviceKey = service.concat(".resources");
+		String resourceKey = new StringBuilder().append(service).append(
+				".").append(resource).toString();
+		
+		List<String> resources = (List<String>) properties.get(serviceKey);		
+	    if(resources != null)
+	    {
+	    	resources.remove(resource);
+	    }    	
+		properties.remove(resourceKey.concat(".type"));
+		int index = 0;				
+		for(;index < typesLength; index++)
+		{
+			properties.remove(new StringBuilder().append(resourceKey).append(
+				".").append(accessMethodTypes[index].name()).toString());
+		}
+    }
+    
+    private final void updateService(
+    	String service,
+    	MutableAccessNode node,
+    	boolean added,
+    	Dictionary<String,Object> properties)
+    {
+    	if(!registered ||service == null)
+		{
+			return;
+		}
+		List<String> services = (List<String>) properties.get("services");			
+	    if(services==null)
+	    {
+	    	services = new ArrayList<String>();	
+	    	properties.put("services", services);
+	    }		    
+    	if(added)
+    	{
+    		AccessMethod.Type[] accessMethodTypes = AccessMethod.Type.values();
+    		int typesLength = accessMethodTypes==null?0:accessMethodTypes.length;
+    		
+			int index = 0;		
+			for(;index < typesLength; index++)
+			{
+				AccessLevelOption accessLevelOption = node.getAccessLevelOption(
+					accessMethodTypes[index]);
+				
+				properties.put(new StringBuilder().append(service).append(
+					".").append(accessMethodTypes[index].name()).toString(),
+						accessLevelOption.getAccessLevel().getLevel());
+			}
+    		services.add(service);
+    		
+    	} else
+    	{
+    		services.remove(service);
+    		List<String> tobeRemoved = new ArrayList<String>();
+    		Enumeration enumeration = properties.keys();
+    		while(enumeration.hasMoreElements())
+    		{
+    			String key = (String) enumeration.nextElement();
+    			if(key!=null && key.startsWith(service.concat(".")))
+    			{
+    				tobeRemoved.add(key);
+    			}
+    		}
+    		Iterator<String> iterator = tobeRemoved.iterator();
+    		while(iterator.hasNext())
+    		{
+    			properties.remove(iterator.next());
+    		}  		
+    	}
+    }
+    
 	/**
 	 * @inheritDoc
 	 *
@@ -342,41 +525,54 @@ public class ModelInstanceRegistration extends AbstractMidCallback
 	@Override
 	public void doCallback(SnaMessage<?> message)
 	{
+//		System.out.println("MESSAGE : " + message.getJSON());
+//		System.out.println();
+		
 		String uri = message.getPath();
 		switch(((SnaMessageSubType)message.getType()
 				).getSnaMessageType())
 		{
 			case UPDATE:
-					SnaUpdateMessage m = (SnaUpdateMessage) message;
-					JSONObject notification = m.getNotification();
-					String location = (String) notification.opt("value");
-					if(location != null)
+					if(!Update.ATTRIBUTE_VALUE_UPDATED.equals(message.getType()))
 					{
-						this.updateLocation(location);
+						break;
+					}
+					SnaUpdateMessage m = (SnaUpdateMessage) message;
+					String path = m .getPath();
+					JSONObject notification = m.getNotification();
+					
+					String[] uriElements = UriUtils.getUriElements(path);
+					
+					String key = new StringBuilder().append(uriElements[1]
+						).append(".").append(uriElements[2]).toString();
+					
+					List<String> obs = this.observed.get(key);
+//					System.out.println("=============================>");
+//					System.out.println("UPDATING... ");
+//					System.out.println(obs);
+					
+					if(obs!=null && !obs.isEmpty() && obs.contains(uriElements[3]))
+					{
+						Object value =  notification.opt(DataResource.VALUE);
+						this.updateObserved(new StringBuilder().append(key).append(
+							".").append(uriElements[3]).toString(), value);
 					}
 				break;
 			case LIFECYCLE:
 					SnaLifecycleMessage l = (SnaLifecycleMessage) message;
 					String type = null;
+					JSONObject initial = null;
+					
 				    switch(l.getType())
 				    {
 						case RESOURCE_APPEARING:
-						    Object initial = null;
-						    Object loc = null;
-							if(uri.endsWith("/admin/location") 
-							&& (initial =((SnaLifecycleMessageImpl)l).get("initial"))!=null
-							&& (!JSONObject.NULL.equals((loc = ((JSONObject)initial
-									).opt("value")))))
-							{
-								this.updateLocation((String) loc);									
-							} 
-							type = ((SnaLifecycleMessageImpl)l).getNotification(
-									).optString("type");
+							initial = (JSONObject)((SnaLifecycleMessageImpl)l).get("initial");
+							type = ((SnaLifecycleMessageImpl)l).getNotification().optString("type");
 						case SERVICE_APPEARING:
 						case PROVIDER_DISAPPEARING:
 						case RESOURCE_DISAPPEARING:
 						case SERVICE_DISAPPEARING:
-							this.updateContent(uri, l.getType(), type);
+							this.updateContent(l.getType(), uri, initial,  type);
 						case PROVIDER_APPEARING:
 						default:
 							break;

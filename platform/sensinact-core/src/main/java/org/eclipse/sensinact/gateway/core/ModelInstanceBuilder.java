@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.core;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 /**
- * Allows to build in a simple way a {@link ModelInstance}
+ * Allows to build  a {@link ModelInstance} in a simple way
  * 
  * @param <C> the extended {@link ModelConfiguration}
  * type in use
@@ -78,6 +79,7 @@ public class ModelInstanceBuilder
 	protected Map<String,AccessLevel> users;
 	protected ModelConfiguration modelConfiguration;
 	protected ResourceConfigBuilder defaultResourceConfigBuilder;
+	protected ArrayList<String> observed;
 	
 	/**
 	 * @param resourceModelType
@@ -307,6 +309,40 @@ public class ModelInstanceBuilder
      }
 
     /**
+     * Attaches a new String path, starting from the service definition, of 
+     * an attribute to be observed by the {@link ModelInstanceRegistration} 
+     * of a {@link ModelInstance} built by this ModelInstanceBuilder
+     * 
+     * @param observed the String path of an attribute to be observed 
+     */
+     public ModelInstanceBuilder withObserved(String observed)
+     {
+   	    if(this.observed == null)
+   	    {
+   	    	this.observed= new ArrayList<String>();
+   	    }
+   	    this.observed.add(observed);
+   	    return this;
+     }
+
+    /**
+     * Attaches a the collection of String paths, starting from services definition, 
+     * of attributes to be observed by the {@link ModelInstanceRegistration} 
+     * of a {@link ModelInstance} built by this ModelInstanceBuilder
+     * 
+     * @param observed the collection of String paths of attributes to be observed 
+     */
+     public ModelInstanceBuilder withObserved(Collection<String> observed)
+     {
+ 	    if(this.observed == null)
+ 	    {
+ 	    	this.observed= new ArrayList<String>();
+ 	    }
+ 	    this.observed.addAll(observed);
+ 	    return this;
+     }
+       
+    /**
 	 * Defines the {@link ModelConfiguration} which applies
      * on new created {@link ModelInstance}s
      * 
@@ -359,6 +395,10 @@ public class ModelInstanceBuilder
     	 if(this.defaultUpdatePolicy!=null)
     	 {
     		 configuration.setDefaultUpdatePolicy(this.defaultUpdatePolicy);
+    	 }
+    	 if(this.observed!=null)
+    	 {
+    		 configuration.setObserved(this.observed);
     	 }
      }
 
@@ -501,8 +541,8 @@ public class ModelInstanceBuilder
 	   		arguments[2] = defaultResourceConfigBuilder;
 	   	}
 		configuration =  ReflectUtils.<ModelConfiguration,C>getInstance(
-			ModelConfiguration.class, (Class<C>)
-			this.resourceModelConfigurationType, arguments);
+			ModelConfiguration.class, (Class<C>)this.resourceModelConfigurationType, 
+			arguments);
 		
 		if(configuration != null)
 		{
@@ -534,11 +574,9 @@ public class ModelInstanceBuilder
 			this.buildAccessNode(
 				this.modelConfiguration.getAccessTree(), name);
 			
-			instance = (I) ReflectUtils.<ModelInstance,I>
-			    getInstance(ModelInstance.class, (Class<I>) 
-				    this.resourceModelType, this.mediator, 
-				        this.modelConfiguration, name, 
-				            profileId);
+			instance = (I) ReflectUtils.<ModelInstance,I>getInstance(
+				ModelInstance.class, (Class<I>) this.resourceModelType, 
+				    this.mediator, this.modelConfiguration, name, profileId);
 			try
 			{
 				this.register(instance);

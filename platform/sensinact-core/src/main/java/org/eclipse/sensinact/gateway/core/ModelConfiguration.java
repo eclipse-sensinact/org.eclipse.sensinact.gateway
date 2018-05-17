@@ -58,6 +58,7 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 
 	protected Map<String, List<String>> profiles;
 	protected Map<String, List<String>> fixed;
+	protected List<String> observed;
 	
 	/**
 	 * the {@link  AccessTree} of the {@link AccessProfile}s
@@ -576,6 +577,39 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration
 		return this.resourceConfigType;
 	}
 	
+   /**
+    * Returns the list of String paths, starting from the service definition, 
+    * of the attributes to be observed by the {@link ModelInstanceRegistration} 
+    * of a {@link ModelInstance} configured by this ModelConfiguration
+    * 
+    * @return the list of String paths of the observed attributes
+    */
+	public List<String> getObserved()
+	{
+		if(this.observed != null)
+		{
+			return Collections.unmodifiableList(observed);
+		} 
+		return Collections.emptyList();
+	}
+
+	 /**
+     * Attaches the specified list of String paths, starting from the service definition, 
+     * of the attributes to be observed by the {@link ModelInstanceRegistration} 
+     * of a {@link ModelInstance} configured by this ModelConfiguration
+     * 
+     * @param observed the list of String paths of attributes to be observed 
+     */
+	public void setObserved(List<String> observed)
+	{
+		if(observed != null)
+		{
+			this.observed = Collections.unmodifiableList(observed);
+		} else
+		{
+			this.observed = Collections.emptyList();
+		}
+	}
 	
  	/**
  	 * @inheritDoc

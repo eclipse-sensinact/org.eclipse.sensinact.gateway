@@ -41,8 +41,8 @@ public class MyModelInstance extends ModelInstance<ModelConfiguration>
 	 * @throws InvalidServiceProviderException
 	 */
 	public MyModelInstance(Mediator mediator,
-	        ModelConfiguration modelConfiguration, String name, String profile)
-	        throws InvalidServiceProviderException
+	    ModelConfiguration modelConfiguration, String name, String profile)
+	    		throws InvalidServiceProviderException
 	{
 		super(mediator, modelConfiguration, name, profile);
 	}

@@ -13,8 +13,10 @@ package org.eclipse.sensinact.gateway.core;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.core.message.MessageHandler;
@@ -148,7 +150,7 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 	 */
 	public ModelInstance(final Mediator mediator,
 	    C resourceModelConfig, String name, String profileId) 
-			throws InvalidServiceProviderException
+	    throws InvalidServiceProviderException
 	{
 		this.mediator = mediator;
 		this.profileId = profileId;
@@ -469,15 +471,47 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 		if(instanceRegistration != null)
 		{
 			this.registered = true;
+			List<String> observed = this.configuration.getObserved();
 			
-			this.registration = new ModelInstanceRegistration(uri, 
+			this.registration = new ModelInstanceRegistration(uri, observed,
 				instanceRegistration, this.configuration);
+			
 			this.messageHandler = new SnaMessageListener(mediator,
 				this.configuration());
-
-			SnaFilter filter = new SnaFilter(mediator, new StringBuilder(
-				).append(uri).append("/admin/location/value"
-						).toString());
+			
+			boolean pattern = false;
+			
+			StringBuilder observedBuilder = new StringBuilder().append(uri);
+			if(observed!=null && !observed.isEmpty())
+			{
+				observedBuilder.append("(/admin/location/value");
+				Iterator<String> it = observed.iterator();
+				while(it.hasNext())
+				{
+					String obs = null;
+					String[] uriElements = UriUtils.getUriElements(it.next());
+					switch(uriElements.length)
+					{
+						case 0:
+						case 1: continue;
+						case 2:obs = UriUtils.getUri(uriElements).concat("/value");
+							break;
+						case 3:obs = UriUtils.getUri(uriElements);
+							break;
+						default: continue;
+					}
+					observedBuilder.append("|");
+					observedBuilder.append(obs);
+				}
+				observedBuilder.append(")");
+				pattern = true;
+			} else
+			{
+				observedBuilder.append("/admin/location/value");
+			}
+			//System.out.println("OBSERVED : "+observedBuilder.toString());
+			SnaFilter filter = new SnaFilter(mediator, observedBuilder.toString(),pattern,false);
+			
 			filter.addHandledType(SnaMessage.Type.UPDATE);    		
 			this.messageHandler.addCallback(filter,registration);
 			
@@ -647,33 +681,6 @@ implements SensiNactResourceModel<C>, LifecycleStatusListener
 		props.put("lifecycle.status", this.getRootElement().getStatus().name());
 		return props;
 	}
-	
-//	/**
-//	 * Returns the {@link AccessLevelOption} for the {@link Session} whose
-//	 * {@link SessionKey} is passed as parameter, and for the {@link 
-//	 * ModelElement} belonging to this resource model instance whose path 
-//	 * is also passed as parameter
-//	 *  
-//	 * @param modelElement the targeted resource model element	
-//	 * @param pubicKey the requirer user's {@link Session} public key 
-//	 * 
-//	 * @return the {@link AccessLevelOption} for the specified session and 
-//	 * resource
-//	 */
-//	public <I extends ModelInstance<?>, M extends ModelElementProxy, 
-//	P extends ProcessableData, E extends Nameable, R extends Nameable>
-//	AccessLevelOption getAccessLevelOption(ModelElement<I, M, P, E, R> 
-//	modelElement, String publicKey)
-//	{
-//		if(modelElement.getModelInstance() != this)
-//		{
-//			throw new RuntimeException(
-//			   "the model element argument must belong to this model instance");
-//		}
-//		final String path = modelElement.getPath();
-//		return this.configuration().getAuthenticatedAccessLevelOption(
-//				path, publicKey);
-//	}
 	
 	/**
 	 * Returns the set of the specified {@link ModelElement} accessible 

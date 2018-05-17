@@ -328,7 +328,6 @@ public class RemoteSensiNact implements RemoteCore
 	@Override
 	public void disconnect()
 	{
-		System.out.println("----------->>> DISCONNECTION");
 		if(this.registration!=null)
 		{	
 			final String namespace = this.remoteEndpoint.namespace();
@@ -374,8 +373,6 @@ public class RemoteSensiNact implements RemoteCore
 					JSONObject response = this.localEndpoint.unsubscribe(
 						ref.publicKey, ref.serviceProviderId, ref.serviceId, 
 						ref.resourceId,  keys[index]);
-			  		System.out.println("DISCONNECTION [" + this.localID() + "]" + 
-						response);
 				}
 			}
 			if(this.onDisconnectedCallback!=null)
@@ -571,8 +568,7 @@ public class RemoteSensiNact implements RemoteCore
             String serviceId, String resourceId, JSONArray conditions)
     {  	
   		JSONObject response = this.subscribe(publicKey, serviceProviderId, 
-  			serviceId, resourceId, this.remoteEndpoint, conditions);  
-  		System.out.println("[" + this.localID() + "]" + response);
+  			serviceId, resourceId, this.remoteEndpoint, conditions);
   		return response;
     }
 
@@ -626,8 +622,6 @@ public class RemoteSensiNact implements RemoteCore
 		
   		JSONObject response = this.localEndpoint.unsubscribe(publicKey, 
   			serviceProviderId, serviceId, resourceId, subscriptionId);   
-  		 
-  		System.out.println("[" + this.localID() + "]" + response);
   		return response;
     }
 

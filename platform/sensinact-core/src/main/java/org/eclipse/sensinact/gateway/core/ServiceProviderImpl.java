@@ -24,6 +24,7 @@ import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
 import org.eclipse.sensinact.gateway.common.primitive.Stateful;
+import org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
@@ -516,6 +517,7 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 				).withDataType(ServiceProvider.LifecycleStatus.class
 				).withDataValue(ServiceProvider.LifecycleStatus.INACTIVE
 				).withHidden(true
+				).withUpdatePolicy(UpdatePolicy.AUTO
 				).withModifiable(Modifiable.UPDATABLE), buildPolicy);
 			admin.addResource(statusResourceBuilder);
 		}
@@ -529,7 +531,8 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 				rc = resourceConfigs.get(index);
 				friendlyNameResourceBuilder = super.getModelInstance(
 					).getResourceBuilder(rc);				
-				index = -1;				
+				index = -1;
+				
 			} else
 			{
 			    friendlyNameResourceBuilder = 
@@ -540,7 +543,8 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 					).withResourceName(ServiceProvider.FRIENDLY_NAME
 					).withDataType(String.class
 					).withHidden(false
-					).withModifiable(Modifiable.MODIFIABLE),buildPolicy);
+					).withUpdatePolicy(UpdatePolicy.AUTO
+				    ).withModifiable(Modifiable.MODIFIABLE),buildPolicy);
 			}
 			friendlyNameResourceBuilder.configureName(ServiceProvider.FRIENDLY_NAME);
 			admin.addResource(friendlyNameResourceBuilder);
@@ -586,8 +590,9 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 					).withResourceName(ServiceProvider.BRIDGE
 					).withDataType(String.class
 					).withDataValue(super.modelInstance.mediator().getContext(
-						).getBundle().getSymbolicName()
+							).getBundle().getSymbolicName()
 					).withHidden(false
+					).withUpdatePolicy(UpdatePolicy.AUTO
 					).withModifiable(Modifiable.FIXED),buildPolicy); 
 				
 				admin.addResource(bridgeResourceBuilder);
@@ -620,6 +625,7 @@ ServiceProviderProcessableData<?>, ServiceImpl, Service> implements Localizable
 						).withResourceName(ServiceProvider.ICON
 						).withDataType(String.class
 						).withHidden(false
+						).withUpdatePolicy(UpdatePolicy.AUTO
 						).withModifiable(Modifiable.MODIFIABLE),buildPolicy);
 			}
 			iconResourceBuilder.configureName(ServiceProvider.ICON);
