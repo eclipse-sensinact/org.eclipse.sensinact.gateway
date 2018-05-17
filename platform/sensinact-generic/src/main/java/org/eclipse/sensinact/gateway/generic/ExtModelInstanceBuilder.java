@@ -10,12 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.ModelAlreadyRegisteredException;
 import org.eclipse.sensinact.gateway.core.ModelConfiguration;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.core.ModelInstanceBuilder;
+import org.eclipse.sensinact.gateway.core.ModelInstanceRegistration;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy;
 import org.eclipse.sensinact.gateway.core.ResourceConfigBuilder;
@@ -324,6 +328,33 @@ public class ExtModelInstanceBuilder extends ModelInstanceBuilder
 		return this;
 	}
 	
+
+    /**
+     * Attaches a new String path, starting from the service definition, of 
+     * an attribute to be observed by the {@link ModelInstanceRegistration} 
+     * of a {@link ExtModelInstance} built by this ExtModelInstanceBuilder
+     * 
+     * @param observed the String path of an attribute to be observed 
+     */
+     public ExtModelInstanceBuilder withObserved(String observed)
+     {
+  	    super.withObserved(observed);
+  	    return this;
+     }
+
+    /**
+     * Attaches a the collection of String paths, starting from services definition, 
+     * of attributes to be observed by the {@link ModelInstanceRegistration} 
+     * of a {@link ExtModelInstance} built by this ExtModelInstanceBuilder
+     * 
+     * @param observed the collection of String paths of attributes to be observed 
+     */
+     public ExtModelInstanceBuilder withObserved(Collection<String> observed)
+     {
+ 	    super.withObserved(observed);
+ 	    return this;
+     }
+     
     /**
      * Configures the {@link ExtModelConfiguration} passed as parameter
      * 
