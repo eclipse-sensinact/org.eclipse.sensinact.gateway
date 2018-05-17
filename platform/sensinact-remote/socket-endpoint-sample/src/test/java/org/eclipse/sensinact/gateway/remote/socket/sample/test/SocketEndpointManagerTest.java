@@ -136,7 +136,7 @@ public class SocketEndpointManagerTest
 		assertEquals(45,j.getJSONObject("response").getInt("value"));
 		JSONObject message = null;
 		
-		Thread.sleep(2000);
+		Thread.sleep(5000);
 		synchronized(stack)
 		{
 			assertEquals(1, stack.size());
@@ -149,7 +149,7 @@ public class SocketEndpointManagerTest
 		
 		assertEquals(150,j.getJSONObject("response").getInt("value"));
 
-		Thread.sleep(2000);
+		Thread.sleep(3000);
 		synchronized(stack)
 		{
 			assertEquals(2, stack.size());
@@ -157,7 +157,7 @@ public class SocketEndpointManagerTest
 			assertEquals(150, message.getJSONObject("notification").getInt("value"));
 		}		
 		int count = 0;
-		Thread.sleep(2000);
+		Thread.sleep(5000);
 		for(String ms:instances.get(2).listAgentMessages())
 		{
 			if(ms.contains("ATTRIBUTE_VALUE_UPDATED"))
@@ -199,7 +199,7 @@ public class SocketEndpointManagerTest
 			"target/felix/conf%s/socket.endpoint.sample.config",3));
 		
 		f.delete();
-	    Thread.sleep(2000);
+	    Thread.sleep(3000);
 	    
 	    //now lets try to reconnect
 	    FileInputStream input = new FileInputStream(new File(

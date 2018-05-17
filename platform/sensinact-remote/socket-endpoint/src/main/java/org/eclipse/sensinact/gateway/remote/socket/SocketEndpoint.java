@@ -379,7 +379,6 @@ public class SocketEndpoint extends AbstractRemoteEndpoint
 	@Override
 	public void callback(String callbackId, SnaMessage[] messages) 
 	{
-		System.out.println("REMOTE ENDPOINT CALLBACK ["+callbackId+"]");
 		if(!super.connected)
 		{
 			return;
