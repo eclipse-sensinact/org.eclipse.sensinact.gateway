@@ -253,19 +253,17 @@ public class ModelInstanceRegistration extends AbstractMidCallback
 		
     	Dictionary<String, Object> properties = properties();
 		properties.remove(observed);
+		
 		if(observed.startsWith(LOCATION_PROPERTY))
-		{			
-			if(value == null)
-			{
-				return;
-			}
+		{	
 			properties.remove("latitude");
 			properties.remove("longitude");
 			
 	    	double latitude = 0d;
 	    	double longitude = 0d;
 	    				    	
-			String[] latlon = String.valueOf(value).split(":");
+			String[] latlon = value==null
+			?new String[] {}:String.valueOf(value).split(":");
 			
 			if(latlon.length == 2)
 			{
@@ -274,13 +272,18 @@ public class ModelInstanceRegistration extends AbstractMidCallback
 		        	latitude = Double.parseDouble(latlon[0]);
 		        	longitude = Double.parseDouble(latlon[1]);
 		        	
+		        	properties.put("latitude", latitude);
+		        	properties.put("longitude", longitude);
+		        	
 				} catch(NumberFormatException e)
-				{					    	
-			    	return;
+				{	
+					this.configuration.mediator.debug(e.getMessage());
 				}
 			}
-	        properties.put("latitude", latitude);
-	        properties.put("longitude", longitude);
+		}
+		if(value == null)
+		{
+			return;
 		}
 		properties.put(observed, value);		
     	this.update(properties);
@@ -375,14 +378,14 @@ public class ModelInstanceRegistration extends AbstractMidCallback
 						DataResource.VALUE) && resource.equals(name)))
 				{
 					value = initial.opt(DataResource.VALUE);
-				}				
+				}
 				if(LOCATION_PROPERTY.equals(resourceKey))
 				{				    	
 			    	double latitude = 0d;
 			    	double longitude = 0d;
-			    	
-					String location = value==null?"0:0":String.valueOf(value);				    	
-					String[] latlon = location.split(":");
+			    				    	
+					String[] latlon = value==null
+					?new String[] {}:String.valueOf(value).split(":");
 					
 					if(latlon.length == 2)
 					{
@@ -391,17 +394,14 @@ public class ModelInstanceRegistration extends AbstractMidCallback
 				        	latitude = Double.parseDouble(latlon[0]);
 				        	longitude = Double.parseDouble(latlon[1]);
 				        	
+				        	properties.put("latitude", latitude);
+				        	properties.put("longitude", longitude);
+				        	
 						} catch(NumberFormatException e)
-						{					    	
-					    	latitude = 0d;
-					    	longitude = 0d;
+						{			
+							configuration.mediator.debug(e.getMessage());
 						}
 					}
-					location = new StringBuilder().append(latitude).append(":"
-							).append(longitude).toString();
-			        properties.put("latitude", latitude);
-			        properties.put("longitude", longitude);
-			        value = location;
 				}
 				if(value!= null)
 				{
