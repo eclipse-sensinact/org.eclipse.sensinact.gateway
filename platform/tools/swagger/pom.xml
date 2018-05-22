@@ -23,7 +23,7 @@
     <packaging>bundle</packaging>
 
     <properties>
-        <swagger.url>https://github.com/swagger-api/swagger-ui/archive/v2.1.4.zip</swagger.url>
+        <swagger.url>https://codeload.github.com/swagger-api/swagger-ui/zip/v2.1.4</swagger.url>
     </properties>
 
     <build>
