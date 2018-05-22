@@ -88,6 +88,7 @@
         <module>mqtt-server</module>
         <module>openhab-profile</module>
         <module>openweather-profile</module>
+        <module>onem2m</module>
         <module>rest-profile</module>
         <module>jsonpath-profile</module>
         <module>simulation-profile</module>

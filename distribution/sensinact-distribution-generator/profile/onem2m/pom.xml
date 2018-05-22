@@ -21,7 +21,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>ZprofileSkeleton</artifactId>
+    <artifactId>onem2m</artifactId>
     <packaging>pom</packaging>
 
     <name>sensiNact IoT Gateway - sensiNact Runtime (${project.artifactId} bridge dependencies)</name>
@@ -56,12 +56,7 @@
         <!-- This is an example of the dependency to provide to generate the profile -->
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
-            <artifactId>http-device</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.protocol</groupId>
-            <artifactId>http</artifactId>
+            <artifactId>onem2m-device</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
