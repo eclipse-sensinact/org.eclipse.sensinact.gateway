@@ -50,8 +50,7 @@ public class ShellRecipient extends NorthboundRecipient
 		builder.append(JSONUtils.OPEN_BRACE);
 		builder.append("\"callbackId\" : \"");
 		builder.append(callbackId);
-		builder.append("\"");
-		builder.append("\"messages\" :");
+		builder.append("\",\"messages\" :");
 		builder.append(JSONUtils.OPEN_BRACKET);
 		for(;index < length; index++)
 		{
@@ -63,6 +62,7 @@ public class ShellRecipient extends NorthboundRecipient
 		
 		((CommandServiceMediator)super.mediator).getOutput(
 				).outputUnderlined("Callback", 2);
+		
 		((CommandServiceMediator)super.mediator).getOutput(
 				).output(new JSONObject(builder.toString()), 2);
     }    
