@@ -137,7 +137,7 @@ function userDisconnectConnect(){
 			showMessage("");
 		}
 
-		 this.serverAddr=document.URL.replace(/http[s]{1}:\/\//i, "").replace(/\/.*/i, "");
+		 this.serverAddr=document.URL.replace(/http[s]{0,1}:\/\//i, "").replace(/\/.*/i, "");
 		 ws= new WebSocket("ws"+(document.URL.indexOf("https")>-1?"s":"")+"://"+this.serverAddr+"/androidws");
 		 ws.onopen = function(evt) {
 			userConfig=new Object();
