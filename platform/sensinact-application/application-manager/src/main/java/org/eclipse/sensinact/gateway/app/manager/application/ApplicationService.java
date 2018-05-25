@@ -13,8 +13,6 @@ package org.eclipse.sensinact.gateway.app.manager.application;
 
 import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
-import org.eclipse.sensinact.gateway.app.manager.application.dependency.DependencyManager;
-import org.eclipse.sensinact.gateway.app.manager.application.dependency.DependencyManagerCallback;
 import org.eclipse.sensinact.gateway.app.manager.json.AppContainer;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
@@ -25,8 +23,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 
 /**

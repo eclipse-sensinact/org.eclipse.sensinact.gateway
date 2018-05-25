@@ -13,8 +13,6 @@ package org.eclipse.sensinact.gateway.app.manager.application;
 import org.eclipse.sensinact.gateway.app.api.exception.ApplicationRuntimeException;
 import org.eclipse.sensinact.gateway.app.api.exception.LifeCycleException;
 import org.eclipse.sensinact.gateway.app.api.exception.ResourceNotFoundException;
-import org.eclipse.sensinact.gateway.app.manager.application.dependency.DependencyManager;
-import org.eclipse.sensinact.gateway.app.manager.application.dependency.DependencyManagerCallback;
 import org.eclipse.sensinact.gateway.app.manager.component.Component;
 import org.eclipse.sensinact.gateway.app.manager.component.ResourceDataProvider;
 import org.eclipse.sensinact.gateway.app.manager.json.AppCondition;
@@ -45,6 +43,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Application extends AbstractSensiNactApplication
 {
     private static Logger LOG= LoggerFactory.getLogger(Application.class);
+    private static Logger LOG4J=LoggerFactory.getLogger(Application.class.getCanonicalName());
     private final List<ServiceRegistration> serviceRegistrations;
     private final Map<ResourceDataProvider, Collection<ResourceSubscription>> resourceSubscriptions;
     private final Map<String, Component> components;
@@ -290,6 +289,8 @@ public class Application extends AbstractSensiNactApplication
             {
                 SnaMessage message = waitingEvents.poll();
                 JSONObject messageJson = new JSONObject(message.getJSON());
+
+                LOG4J.debug("Processing message {}",message.getJSON());
 
                 String[] uri = message.getPath().split("/");
                 String resourceUri = "/" + uri[1] + "/" + uri[2] + "/" + uri[3];
