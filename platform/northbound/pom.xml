@@ -33,5 +33,7 @@
             <module>mqtt-agent</module>
             <module>storage-agent</module>
             <module>http-tools</module>
+            <module>http-onem2m-agent</module>
+
 	</modules>
 </project>
