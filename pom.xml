@@ -20,6 +20,46 @@
     <packaging>pom</packaging>
     <name>sensiNact IoT Gateway - Gateway Project</name>
 
+    <distributionManagement>
+        <repository>
+            <id>repo.eclipse.org</id>
+            <name>sensiNact Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/sensinact-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo.eclipse.org</id>
+            <name>sensiNact Repository - Snapshots</name>
+            <url>https://repo.eclipse.org/content/repositories/sensinact-snapshots/</url>
+            <uniqueVersion>true</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>main</id>
+            <url>http://central.maven.org/maven2/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>main</id>
+            <url>http://central.maven.org/maven2/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
     <developers>
         <developer>
             <name>Levent Gürgen</name>
@@ -111,20 +151,6 @@
         <sonar.jacoco.itReportPath>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
 		<signer.path>${java.home}/../bin/jarsigner</signer.path>
     </properties>
-
-    <distributionManagement>
-        <repository>
-            <id>repo.eclipse.org</id>
-            <name>sensiNact Repository - Releases</name>
-            <url>https://repo.eclipse.org/content/repositories/sensinact-releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>repo.eclipse.org</id>
-            <name>sensiNact Repository - Snapshots</name>
-            <url>https://repo.eclipse.org/content/repositories/sensinact-snapshots/</url>
-            <uniqueVersion>true</uniqueVersion>
-        </snapshotRepository>
-    </distributionManagement>
 
     <dependencyManagement>
         <dependencies>
@@ -382,7 +408,7 @@
                     <version>3.0</version>
                     <configuration>
                         <source>1.7</source>
-                        <target>1.7</target>
+                        <target>1.8</target>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -442,12 +468,16 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-        <plugins>
-        	<plugin>
-			    <groupId>org.codehaus.gmaven</groupId>
-		        <artifactId>groovy-maven-plugin</artifactId>
-		   	</plugin>        	
-        </plugins>
+<plugins>
+    <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+    </plugin>
+    <plugin>
+        <groupId>org.codehaus.gmaven</groupId>
+        <artifactId>groovy-maven-plugin</artifactId>
+    </plugin>
+</plugins>
     </build>
 
     <modules>
