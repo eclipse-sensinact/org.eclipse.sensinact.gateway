@@ -505,67 +505,78 @@ public class SensiNact implements Core
 	    	SessionKey sessionKey = SensiNact.this.sessions.get(
 	    		new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
 	    			this.getSessionId()));
-	    	String uri =  getUri((sessionKey.localID()!=0),
-				SensiNact.this.namespace(), serviceProviderId, 
-					serviceId, resourceId);			
-	        
-	    	Resource resource = this.resource(serviceProviderId, 
-	    		serviceId, resourceId);	        
-	    	
-	        GetResponse response = null;
-	    	
-	        if(resource != null)
-	        {
-		        if(attributeId==null)
-		        {
-		        	if(!resource.getType().equals(Resource.Type.ACTION))
-					{
-						response = ((DataResource) resource).get();
-						
-					} else
-					{
-						response = SensiNact.<JSONObject,GetResponse>
-						createErrorResponse(mediator, AccessMethod.GET, 
-							uri, 404, "Unknown Method", null);
-					}
-		        } else
-		        {
-		        	response = resource.get(attributeId);
-		        }
-		        return tatooRequestId(requestId, response);
-	        }
-        	if(sessionKey.localID()!=0)
-        	{
-        		response = SensiNact.<JSONObject,GetResponse>
-        		createErrorResponse( mediator, AccessMethod.GET, uri, 
-        		SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
-        		"Resource not found", null);
-        		
-        		return tatooRequestId(requestId, response);        		
-        	} 
-    		JSONObject object =  AccessController.doPrivileged(
-        	new PrivilegedAction<JSONObject>()
-			{
-				@Override
-	            public JSONObject run()
-	            {
-			    	return SensiNact.this.get(SensiNactSession.this.getSessionId(),
-			    		serviceProviderId, serviceId, resourceId, 
-			    		    attributeId);
-	            }
-			});
-    		try
-			{
-				response = this.<GetResponse>responseFromJSONObject(
-					uri, AccessMethod.GET, object);
-			}
-			catch (Exception e)
-			{
-				response = SensiNact.<JSONObject,GetResponse>
+                GetResponse response = null;
+                //FIX: protection from null sessionKey
+                if (sessionKey == null) {
+                    final String errorMessage = "unexpected null session key for session id " + getSessionId();
+                    final Exception e = new Exception(errorMessage);
+                    final String uri = serviceProviderId + "/" + serviceId + "/" + resourceId + "/" + attributeId;
+                    mediator.error(errorMessage);
+                    response = SensiNact.<JSONObject,GetResponse>
         		createErrorResponse( mediator, AccessMethod.GET, uri, 
         		SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, 
-        		"Internal server error", e);
-			}    		
+        		"Internal server error: " + errorMessage, e);
+                } else {
+                    String uri =  getUri((sessionKey.localID()!=0),
+                                    SensiNact.this.namespace(), serviceProviderId, 
+                                            serviceId, resourceId);			
+
+                    Resource resource = this.resource(serviceProviderId, 
+                            serviceId, resourceId);	        
+
+                    if(resource != null)
+                    {
+                            if(attributeId==null)
+                            {
+                                    if(!resource.getType().equals(Resource.Type.ACTION))
+                                            {
+                                                    response = ((DataResource) resource).get();
+
+                                            } else
+                                            {
+                                                    response = SensiNact.<JSONObject,GetResponse>
+                                                    createErrorResponse(mediator, AccessMethod.GET, 
+                                                            uri, 404, "Unknown Method", null);
+                                            }
+                            } else
+                            {
+                                    response = resource.get(attributeId);
+                            }
+                            return tatooRequestId(requestId, response);
+                    }
+                    if(sessionKey.localID()!=0)
+                    {
+                            response = SensiNact.<JSONObject,GetResponse>
+                            createErrorResponse( mediator, AccessMethod.GET, uri, 
+                            SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, 
+                            "Resource not found", null);
+
+                            return tatooRequestId(requestId, response);        		
+                    } 
+                    JSONObject object =  AccessController.doPrivileged(
+                    new PrivilegedAction<JSONObject>()
+                            {
+                                    @Override
+                        public JSONObject run()
+                        {
+                                    return SensiNact.this.get(SensiNactSession.this.getSessionId(),
+                                            serviceProviderId, serviceId, resourceId, 
+                                                attributeId);
+                        }
+                            });
+                    try
+                            {
+                                    response = this.<GetResponse>responseFromJSONObject(
+                                            uri, AccessMethod.GET, object);
+                            }
+                            catch (Exception e)
+                            {
+                                    response = SensiNact.<JSONObject,GetResponse>
+                            createErrorResponse( mediator, AccessMethod.GET, uri, 
+                            SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, 
+                            "Internal server error", e);
+                            }
+                }
     		return tatooRequestId(requestId, response);
 	    }
 
@@ -2578,6 +2589,11 @@ public class SensiNact implements Core
 				while(index < keys.length)
 				{
 					Session s = this.remoteSessions.remove(keys[index]);
+                                        //FIX: protection from null session
+                                        if (s == null) {
+                                            mediator.error("unexpected null session at key " + keys[index]);
+                                            continue;
+                                        }
 					SessionKey k = SensiNact.this.sessions.get(
 					new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, 
 							s.getSessionId()));
@@ -2959,29 +2975,46 @@ public class SensiNact implements Core
      * 
      * @return the JSON formated description of the specified service provider
      */
-	protected JSONObject getProvider(String identifier,  
+	protected JSONObject getProvider(final String identifier,  
 			final String serviceProviderId)
 	{
 		final SessionKey sessionKey = sessions.get(
 			new KeyExtractor<KeyExtractorType>(
 				KeyExtractorType.TOKEN,identifier));
-			
-		JSONObject object = remoteCoreInvocation(serviceProviderId,
-		new Executable<RemoteCore, JSONObject>()
-		{
-			@Override
-			public JSONObject execute(RemoteCore connector)
-					throws Exception 
-			{
-				if(connector == null)
-				{
-					return null;
-				}
-				return new JSONObject(connector.endpoint().getProvider(
-				sessionKey.getPublicKey(), serviceProviderId.substring(
-					serviceProviderId.indexOf(':')+1)));
-			}
-		});
+		JSONObject object = null;
+                try {
+                    object = remoteCoreInvocation(serviceProviderId,
+                    new Executable<RemoteCore, JSONObject>()
+                    {
+                            @Override
+                            public JSONObject execute(RemoteCore connector)
+                                            throws Exception {
+                                    JSONObject object = null;
+                                    //FIX: protection from null connector
+                                    if(connector == null)
+                                    {
+                                        mediator.error("unexpected null connector when trying to retrieve {} provider from {} session", serviceProviderId, identifier);
+                                    } else {
+                                        final RemoteEndpoint endpoint = connector.endpoint();
+                                        if (endpoint != null) {
+                                            final String publicKey = sessionKey.getPublicKey();
+                                            final String unnamespacedProviderId = serviceProviderId.substring(serviceProviderId.indexOf(':')+1);
+                                            final String jsonProviderResponse = endpoint.getProvider(publicKey, unnamespacedProviderId);
+                                            if (jsonProviderResponse == null) {
+                                                mediator.error("unexpected null json response when trying to retrieve {} provider from {} session with {} public key and {} provider id", serviceProviderId, identifier, publicKey, unnamespacedProviderId);
+                                            } else {
+                                                object = new JSONObject(jsonProviderResponse);
+                                            }
+                                        } else {
+                                            mediator.error("unexpected null remote endpoint when trying to retrieve {} provider from {} session", serviceProviderId, identifier);
+                                        }
+                                    }
+                                    return object;
+                            }
+                    });
+                } catch (Throwable t) {
+                    mediator.error(t, "unexpected error when trying to retrieve {} provider from {} session", serviceProviderId, identifier);
+                }
 		return object;
 	}
 
@@ -3187,58 +3220,66 @@ public class SensiNact implements Core
 	protected String getProviders(String identifier,
 			String filter) 
 	{		
-		final SessionKey sessionKey =  sessions.get(
-			new KeyExtractor<KeyExtractorType>(
-			KeyExtractorType.TOKEN, identifier));
-
-		String effectiveFilter = null;
-		if(filter!=null && filter.length()>0)
-		{
-			try 
-			{
-				mediator.getContext().createFilter(filter);
-				effectiveFilter = filter;
-				
-			} catch (InvalidSyntaxException e) 
-			{
-				effectiveFilter = null;
-			}
-		}
-		String local = this.registry.getProviders(
-		    sessionKey, sessionKey.localID()!=0, 
-		    effectiveFilter);
-		
-		if(sessionKey.localID()!=0)
-		{
-			return local;
-		}
 		final StringBuilder content = new StringBuilder();
-		if(local != null && local.length() > 0)
-		{
-			content.append(local);
-		}
-		SensiNact.this.doPrivilegedVoidServices(
-			RemoteCore.class, null, 
-			new Executable<RemoteCore,Void>()
-		{
-			@Override
-			public Void execute(RemoteCore core) 
-					throws Exception
-			{
-				String o = core.endpoint().getProviders(
-					sessionKey.getPublicKey());
-				
-				if(o!=null && o.length()>0)
-				{
-					if(content.length() > 0)
-					{
-						content.append(",");
-					}
-					content.append(o);
-				}
-				return null;
-			}	
-		});
+                try {
+                    final SessionKey sessionKey =  sessions.get(
+                            new KeyExtractor<KeyExtractorType>(
+                            KeyExtractorType.TOKEN, identifier));
+                    if (sessionKey == null) {
+                        mediator.error("unexpected null session key in sensiNact.getProviders for {} session identifier", identifier);
+                    } else {
+                        String effectiveFilter = null;
+                        if(filter!=null && filter.length()>0)
+                        {
+                                try 
+                                {
+                                        mediator.getContext().createFilter(filter);
+                                        effectiveFilter = filter;
+
+                                } catch (InvalidSyntaxException e) 
+                                {
+                                        effectiveFilter = null;
+                                }
+                        }
+                        String local = this.registry.getProviders(
+                            sessionKey, sessionKey.localID()!=0, 
+                            effectiveFilter);
+
+                        if(sessionKey.localID()!=0)
+                        {
+                                return local;
+                        }
+//                        final StringBuilder content = new StringBuilder();
+                        if(local != null && local.length() > 0)
+                        {
+                                content.append(local);
+                        }
+                        SensiNact.this.doPrivilegedVoidServices(
+                                RemoteCore.class, null, 
+                                new Executable<RemoteCore,Void>()
+                        {
+                                @Override
+                                public Void execute(RemoteCore core) 
+                                                throws Exception
+                                {
+                                        String o = core.endpoint().getProviders(
+                                                sessionKey.getPublicKey());
+
+                                        if(o!=null && o.length()>0)
+                                        {
+                                                if(content.length() > 0)
+                                                {
+                                                        content.append(",");
+                                                }
+                                                content.append(o);
+                                        }
+                                        return null;
+                                }	
+                        });
+                    }
+                } catch (Throwable t) {
+                    mediator.error(t, "unexpected error in sensiNact getProviders for {} session");
+                }
 		return content.toString();
 	}
 
