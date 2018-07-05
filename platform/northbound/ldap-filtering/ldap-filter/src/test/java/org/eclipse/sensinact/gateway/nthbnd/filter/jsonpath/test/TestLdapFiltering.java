@@ -23,6 +23,7 @@ import java.util.Map;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -132,6 +133,7 @@ public class TestLdapFiltering extends MidOSGiTest
 	}
 
 	@Test
+	@Ignore
 	public void testLdapFilter() throws Exception
 	{
 		File tmpDirectory = new File("./target/felix/tmp");
