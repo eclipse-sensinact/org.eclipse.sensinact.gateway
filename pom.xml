@@ -150,6 +150,7 @@
         <maven.build.timestamp.format>yyyyMMd</maven.build.timestamp.format>
         <sonar.jacoco.itReportPath>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
 		<signer.path>${java.home}/../bin/jarsigner</signer.path>
+        <timestamp>${maven.build.timestamp}</timestamp>
     </properties>
 
     <dependencyManagement>

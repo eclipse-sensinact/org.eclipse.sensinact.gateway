@@ -284,16 +284,16 @@
                                 <resource>
                                     <directory>${project.build.directory}/sensinact-distribution-template-${project.version}/</directory>
                                     <filtering>false</filtering>
-                                    <excludes>
-                                        <exclude>sensinact</exclude>
-                                        <exclude>conf/config.properties</exclude>
-                                    </excludes>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
                                 </resource>
                                 <resource>
                                     <directory>${project.build.directory}/sensinact-distribution-template-${project.version}/</directory>
                                     <filtering>true</filtering>
                                     <includes>
                                         <include>sensinact</include>
+                                        <include>info.txt</include>
                                         <include>conf/config.properties</include>
                                     </includes>
                                 </resource>
