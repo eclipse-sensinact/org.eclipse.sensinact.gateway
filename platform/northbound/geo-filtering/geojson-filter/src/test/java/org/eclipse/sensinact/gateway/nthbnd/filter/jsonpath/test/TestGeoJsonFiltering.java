@@ -19,6 +19,7 @@ import org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.http.test.HttpServic
 import org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.ws.test.WsServiceTestClient;
 import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -129,6 +130,7 @@ public class TestGeoJsonFiltering extends MidOSGiTest
 	}
 
 	@Test
+	@Ignore
 	public void testHttpFiltered() throws Exception
 	{
 		Thread.sleep(3000);

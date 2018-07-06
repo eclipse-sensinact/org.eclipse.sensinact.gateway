@@ -26,6 +26,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -57,6 +58,7 @@ public class SocketEndpointManagerTest
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore
 	public void socketEndpointManagerTest() throws Throwable
 	{
 		List<MidOSGiTestExtended> instances = new ArrayList<MidOSGiTestExtended>();

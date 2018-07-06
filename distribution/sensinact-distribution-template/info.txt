@@ -1,0 +1,3 @@
+Compilation Information:
+Project version: ${project.version}
+Compilation date: ${timestamp}

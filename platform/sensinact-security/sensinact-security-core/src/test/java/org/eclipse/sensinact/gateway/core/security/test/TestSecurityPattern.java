@@ -167,6 +167,7 @@ public class TestSecurityPattern extends MidOSGiTest
 	}
 	
 	@Test
+	@Ignore
 	public void testSecurityAccessWithPattern() throws Throwable
 	{	
 		//slider[0-9]{2} - authenticated access level
