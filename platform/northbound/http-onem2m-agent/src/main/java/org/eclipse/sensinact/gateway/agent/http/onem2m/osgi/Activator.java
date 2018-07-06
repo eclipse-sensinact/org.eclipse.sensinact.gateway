@@ -6,12 +6,9 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    CEA - initial API and implementation
+ *    CEA - initial implementation
  */
-
 package org.eclipse.sensinact.gateway.agent.http.onem2m.osgi;
-
-import java.awt.Window.Type;
 
 import org.eclipse.sensinact.gateway.agent.http.onem2m.internal.SnaEventOneM2MHttpHandler;
 import org.eclipse.sensinact.gateway.common.annotation.Property;
@@ -48,10 +45,10 @@ public class Activator extends AbstractActivator<Mediator> {
 		{
 			@Override
 			public String execute(Core core) throws Exception {
-
-				SnaFilter filter = new SnaFilter(mediator,"(\\/slider\\/cursor\\/position(\\/[^\\/]+)*)|(\\/(slider|(lora\\-tracker\\-[0-9]+))\\/admin\\/location(\\/[^\\/]+)*)",true,false);
-				filter.addHandledType(SnaMessage.Type.values());
-				return core.registerAgent(mediator, handler, filter);
+				//Expression used in tests: "(\\/slider\\/cursor\\/position(\\/[^\\/]+)*)|(\\/(slider|(lora\\-tracker\\-[0-9]+))\\/admin\\/location(\\/[^\\/]+)*)"
+			SnaFilter filter = new SnaFilter(mediator,".*",true,false);
+			filter.addHandledType(SnaMessage.Type.values());
+			return core.registerAgent(mediator, handler, filter);
 			}
 		});
     }
