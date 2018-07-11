@@ -10,7 +10,8 @@
   ~    CEA - initial API and implementation
   -->
 
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.eclipse.sensinact</groupId>
@@ -315,14 +316,13 @@
                                     <name>find-root</name>
                                 </defaults>
                                 <source>
-                                    String basedir = project.basedir.absolutePath.replace('\\','/');
+                                    String basedir = project.basedir.absolutePath.replace('\\', '/');
                                     File projectFile = new File(basedir)
                                     File pomFile = null
-                                    while((pomFile = new File(projectFile.getParentFile(),"pom.xml")).exists())
-                                    {
+                                    while ((pomFile = new File(projectFile.getParentFile(), "pom.xml")).exists()) {
                                         projectFile = projectFile.getParentFile()
                                     }
-                                    project.properties.setProperty('sensinact.rootdir',projectFile.getAbsolutePath())
+                                    project.properties.setProperty('sensinact.rootdir', projectFile.getAbsolutePath())
                                     log.info('PATH: {}', projectFile.getAbsolutePath())
                                 </source>
                             </configuration>
@@ -338,14 +338,13 @@
                                     <name>find-root</name>
                                 </defaults>
                                 <source>
-                                    String basedir = project.basedir.absolutePath.replace('\\','/');
+                                    String basedir = project.basedir.absolutePath.replace('\\', '/');
                                     File projectFile = new File(basedir)
                                     File pomFile = null
-                                    while((pomFile = new File(projectFile.getParentFile(),"pom.xml")).exists())
-                                    {
+                                    while ((pomFile = new File(projectFile.getParentFile(), "pom.xml")).exists()) {
                                         projectFile = projectFile.getParentFile()
                                     }
-                                    project.properties.setProperty('sensinact.rootdir',projectFile.getAbsolutePath())
+                                    project.properties.setProperty('sensinact.rootdir', projectFile.getAbsolutePath())
                                     log.info('PATH: {}', projectFile.getAbsolutePath())
                                 </source>
                             </configuration>
@@ -361,17 +360,16 @@
                                     <name>extract-sha</name>
                                 </defaults>
                                 <source>
-                                    File basedir = new File(project.basedir.absolutePath.replace('\\','/'));
+                                    File basedir = new File(project.basedir.absolutePath.replace('\\', '/'));
                                     File signature = new File(basedir, "/target/classes/META-INF/SELFSIGN.SF")
 
-                                    if(signature.exists())
-                                    {
+                                    if (signature.exists()) {
                                         String fileContents = signature.getText('UTF-8')
                                         matcher = (fileContents =~ /(?s)SHA(1|-256)-Digest-Manifest\s*:\s*([^\s]+)\s*$?/)
 
                                         String sha = matcher.getAt(0).getAt(2)
                                         log.info('SHA: {}', sha)
-                                        project.properties.setProperty('sha',sha)
+                                        project.properties.setProperty('sha', sha)
                                     }
                                 </source>
                             </configuration>
@@ -391,7 +389,9 @@
                     </dependencies>
                     <configuration>
                         <driver>org.sqlite.JDBC</driver>
-                        <url>jdbc:sqlite:${sensinact.rootdir}/platform/sensinact-security/sensinact-security-core/src/test/resources/sensinact.sqlite</url>
+                        <url>
+                            jdbc:sqlite:${sensinact.rootdir}/platform/sensinact-security/sensinact-security-core/src/test/resources/sensinact.sqlite
+                        </url>
                         <autocommit>true</autocommit>
                         <printResultSet>true</printResultSet>
                         <delimiter>;</delimiter>
@@ -427,7 +427,9 @@
                             <Bundle-Description>${project.name}</Bundle-Description>
                             <_nouses>true</_nouses>
                             <_snapshot>${maven.build.timestamp}</_snapshot>
-                            <_plugin>aQute.bnd.signing.JartoolSigner;alias="selfsigned";path="${signer.path}";keystore="${sensinact.rootdir}/platform/sensinact-security/cert/keystore.jks";storepass="sensiNact_team"</_plugin>
+                            <_plugin>
+                                aQute.bnd.signing.JartoolSigner;alias="selfsigned";path="${signer.path}";keystore="${sensinact.rootdir}/platform/sensinact-security/cert/keystore.jks";storepass="sensiNact_team"
+                            </_plugin>
                             <_sign>selfsigned</_sign>
                             <_failok>true</_failok>
                             <!--
@@ -478,9 +480,11 @@
                             <configuration>
                                 <configLocation>checkstyle-sun.xml</configLocation>
                                 <encoding>UTF-8</encoding>
-                                <consoleOutput>true</consoleOutput>
-                                <failsOnError>true</failsOnError>
+                                <consoleOutput>false</consoleOutput>
+                                <failsOnError>false</failsOnError>
+                                <!--
                                 <linkXRef>false</linkXRef>
+                                -->
                             </configuration>
                             <goals>
                                 <goal>check</goal>
@@ -499,10 +503,11 @@
                 <groupId>org.codehaus.gmaven</groupId>
                 <artifactId>groovy-maven-plugin</artifactId>
             </plugin>
+            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-            </plugin>
+            </plugin>-->
         </plugins>
     </build>
 
