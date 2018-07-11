@@ -10,7 +10,7 @@
   ~    CEA - initial API and implementation
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.eclipse.sensinact</groupId>
@@ -149,7 +149,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyyMMd</maven.build.timestamp.format>
         <sonar.jacoco.itReportPath>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-		<signer.path>${java.home}/../bin/jarsigner</signer.path>
+        <signer.path>${java.home}/../bin/jarsigner</signer.path>
         <timestamp>${maven.build.timestamp}</timestamp>
     </properties>
 
@@ -298,106 +298,106 @@
 
     <build>
         <pluginManagement>
-            <plugins>               
-				<plugin>
-				    <groupId>org.codehaus.gmaven</groupId>
-				    <artifactId>groovy-maven-plugin</artifactId>
-				    <version>2.0</version>
-				    <executions>
-				        <execution>
-				            <id>search-root-clean</id>				            
-				            <phase>pre-clean</phase>
-				            <goals>
-				                <goal>execute</goal>
-				            </goals>
-				            <configuration>
-				                <defaults>
-				                    <name>find-root</name>
-				                </defaults>				                
-				                <source>
-				                	String basedir = project.basedir.absolutePath.replace('\\','/');
-				                    File projectFile = new File(basedir)
-				                    File pomFile = null
-				                    while((pomFile = new File(projectFile.getParentFile(),"pom.xml")).exists())
-				                    {
-				                    	projectFile = projectFile.getParentFile()
-				                    }
-				                    project.properties.setProperty('sensinact.rootdir',projectFile.getAbsolutePath())
-				                    log.info('PATH: {}', projectFile.getAbsolutePath())
-				                </source>
-				            </configuration>
-				        </execution>
-				        <execution>
-				            <id>search-root-validate</id>
-				            <phase>validate</phase>
-				            <goals>
-				                <goal>execute</goal>
-				            </goals>
-				            <configuration>
-				                <defaults>
-				                    <name>find-root</name>
-				                </defaults>
-				                <source>
-				                	String basedir = project.basedir.absolutePath.replace('\\','/');
-				                    File projectFile = new File(basedir)
-				                    File pomFile = null
-				                    while((pomFile = new File(projectFile.getParentFile(),"pom.xml")).exists())
-				                    {
-				                    	projectFile = projectFile.getParentFile()
-				                    }
-				                    project.properties.setProperty('sensinact.rootdir',projectFile.getAbsolutePath())
-				                    log.info('PATH: {}', projectFile.getAbsolutePath())
-				                </source>
-				            </configuration>
-				        </execution>
-						<execution>
-				            <id>search-sha</id>
-				            <phase>install</phase>
-				            <goals>
-				                <goal>execute</goal>
-				            </goals>
-				            <configuration>
-				                <defaults>
-				                    <name>extract-sha</name>
-				                </defaults>
-				                <source>				                            
-				                	File basedir = new File(project.basedir.absolutePath.replace('\\','/'));    				                	
-				                    File signature = new File(basedir, "/target/classes/META-INF/SELFSIGN.SF")
-				                			
-				                    if(signature.exists())
-				                    {
-				                    	String fileContents = signature.getText('UTF-8')
-				                    	matcher = (fileContents =~ /(?s)SHA(1|-256)-Digest-Manifest\s*:\s*([^\s]+)\s*$?/)
-				                    	
-				                    	String sha = matcher.getAt(0).getAt(2)
-				                    	log.info('SHA: {}', sha)
-				                    	project.properties.setProperty('sha',sha)
-				                    }
-				                </source>
-				            </configuration>
-				        </execution>
-				    </executions>
-				</plugin>
-            	<plugin>
-		            <groupId>org.codehaus.mojo</groupId>
-		            <artifactId>sql-maven-plugin</artifactId>
-		            <version>1.5</version>
-		            <dependencies>
-		            	<dependency>
-   							<groupId>org.xerial</groupId>
-   							<artifactId>sqlite-jdbc</artifactId>
-   							<version>3.8.10.1</version>
-						</dependency>
-		            </dependencies>
-		            <configuration>
-		                <driver>org.sqlite.JDBC</driver>
-		                <url>jdbc:sqlite:${sensinact.rootdir}/platform/sensinact-security/sensinact-security-core/src/test/resources/sensinact.sqlite</url>
-		            	<autocommit>true</autocommit>
-		            	<printResultSet>true</printResultSet>
-		            	<delimiter>;</delimiter>
-		            	<escapeProcessing>false</escapeProcessing>
-		            </configuration>
-        		</plugin>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.gmaven</groupId>
+                    <artifactId>groovy-maven-plugin</artifactId>
+                    <version>2.0</version>
+                    <executions>
+                        <execution>
+                            <id>search-root-clean</id>
+                            <phase>pre-clean</phase>
+                            <goals>
+                                <goal>execute</goal>
+                            </goals>
+                            <configuration>
+                                <defaults>
+                                    <name>find-root</name>
+                                </defaults>
+                                <source>
+                                    String basedir = project.basedir.absolutePath.replace('\\','/');
+                                    File projectFile = new File(basedir)
+                                    File pomFile = null
+                                    while((pomFile = new File(projectFile.getParentFile(),"pom.xml")).exists())
+                                    {
+                                        projectFile = projectFile.getParentFile()
+                                    }
+                                    project.properties.setProperty('sensinact.rootdir',projectFile.getAbsolutePath())
+                                    log.info('PATH: {}', projectFile.getAbsolutePath())
+                                </source>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>search-root-validate</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>execute</goal>
+                            </goals>
+                            <configuration>
+                                <defaults>
+                                    <name>find-root</name>
+                                </defaults>
+                                <source>
+                                    String basedir = project.basedir.absolutePath.replace('\\','/');
+                                    File projectFile = new File(basedir)
+                                    File pomFile = null
+                                    while((pomFile = new File(projectFile.getParentFile(),"pom.xml")).exists())
+                                    {
+                                        projectFile = projectFile.getParentFile()
+                                    }
+                                    project.properties.setProperty('sensinact.rootdir',projectFile.getAbsolutePath())
+                                    log.info('PATH: {}', projectFile.getAbsolutePath())
+                                </source>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>search-sha</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>execute</goal>
+                            </goals>
+                            <configuration>
+                                <defaults>
+                                    <name>extract-sha</name>
+                                </defaults>
+                                <source>
+                                    File basedir = new File(project.basedir.absolutePath.replace('\\','/'));
+                                    File signature = new File(basedir, "/target/classes/META-INF/SELFSIGN.SF")
+
+                                    if(signature.exists())
+                                    {
+                                        String fileContents = signature.getText('UTF-8')
+                                        matcher = (fileContents =~ /(?s)SHA(1|-256)-Digest-Manifest\s*:\s*([^\s]+)\s*$?/)
+
+                                        String sha = matcher.getAt(0).getAt(2)
+                                        log.info('SHA: {}', sha)
+                                        project.properties.setProperty('sha',sha)
+                                    }
+                                </source>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>sql-maven-plugin</artifactId>
+                    <version>1.5</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.xerial</groupId>
+                            <artifactId>sqlite-jdbc</artifactId>
+                            <version>3.8.10.1</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <driver>org.sqlite.JDBC</driver>
+                        <url>jdbc:sqlite:${sensinact.rootdir}/platform/sensinact-security/sensinact-security-core/src/test/resources/sensinact.sqlite</url>
+                        <autocommit>true</autocommit>
+                        <printResultSet>true</printResultSet>
+                        <delimiter>;</delimiter>
+                        <escapeProcessing>false</escapeProcessing>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
@@ -428,9 +428,9 @@
                             <_nouses>true</_nouses>
                             <_snapshot>${maven.build.timestamp}</_snapshot>
                             <_plugin>aQute.bnd.signing.JartoolSigner;alias="selfsigned";path="${signer.path}";keystore="${sensinact.rootdir}/platform/sensinact-security/cert/keystore.jks";storepass="sensiNact_team"</_plugin>
-                    		<_sign>selfsigned</_sign>
-                    		<_failok>true</_failok>
-                    		<!--
+                            <_sign>selfsigned</_sign>
+                            <_failok>true</_failok>
+                            <!--
                             <_exportcontents>
                                 *,
                                 !*.internal,
@@ -467,23 +467,66 @@
                     <artifactId>license-maven-plugin</artifactId>
                     <version>1.8</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>3.0.0</version>
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <phase>validate</phase>
+                            <configuration>
+                                <configLocation>checkstyle-sun.xml</configLocation>
+                                <encoding>UTF-8</encoding>
+                                <consoleOutput>true</consoleOutput>
+                                <failsOnError>true</failsOnError>
+                                <linkXRef>false</linkXRef>
+                            </configuration>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
-<plugins>
-    <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-    </plugin>
-    <plugin>
-        <groupId>org.codehaus.gmaven</groupId>
-        <artifactId>groovy-maven-plugin</artifactId>
-    </plugin>
-</plugins>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>groovy-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
 
     <modules>
         <module>platform</module>
         <module>distribution</module>
         <module>integration-tests</module>
-  </modules>
+    </modules>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.0.0</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>checkstyle</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
+
 </project>
