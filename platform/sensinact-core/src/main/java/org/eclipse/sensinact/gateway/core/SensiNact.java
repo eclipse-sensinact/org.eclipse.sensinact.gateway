@@ -81,7 +81,8 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * {@link Core} service implementation
- * 
+ * TODO: This class is too long (> 3000 lines) 
+ * => to be splitted in more specialized classes
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class SensiNact implements Core
@@ -2528,9 +2529,12 @@ public class SensiNact implements Core
 				String filteredKey = publicKey;				
 				if(publicKey.startsWith(SecuredAccess.ANONYMOUS_PKEY))
 				{
-					filteredKey = new StringBuilder().append(
-						publicKey).append("_remote").append(super.localID(
-								)).toString();
+					filteredKey = new StringBuilder()
+                                                .append(publicKey)
+                                                //TODO: avoid appending localID that produces thousands of session instances created
+                                                .append("_remote")
+                                                .append(super.localID())
+                                                .toString();
 				}
 				AccessTree<? extends AccessNode> tree = 
 					SensiNact.this.getUserAccessTree(filteredKey);
@@ -2552,9 +2556,12 @@ public class SensiNact implements Core
 				String filteredKey = publicKey;				
 				if(publicKey.startsWith(SecuredAccess.ANONYMOUS_PKEY))
 				{
-					filteredKey = new StringBuilder().append(
-						publicKey).append("_remote").append(super.localID(
-							)).toString();
+					filteredKey = new StringBuilder()
+                                                .append(publicKey)
+                                                //TODO: avoid appending localID that produces thousands of session instances created
+                                                .append("_remote")
+                                                .append(super.localID())
+                                                .toString();
 				}
 				Session session = this.remoteSessions.get(filteredKey);				
 				if(session == null)
@@ -2570,9 +2577,12 @@ public class SensiNact implements Core
 				String filteredKey = publicKey;				
 				if(publicKey.startsWith(SecuredAccess.ANONYMOUS_PKEY))
 				{
-					filteredKey = new StringBuilder().append(
-						publicKey).append("_remote").append(super.localID(
-								)).toString();
+					filteredKey = new StringBuilder()
+                                                .append(publicKey)
+                                                //TODO: avoid appending localID that produces thousands of session instances created
+                                                .append("_remote")
+                                                .append(super.localID())
+                                                .toString();
 				}
 				Session s = this.remoteSessions.remove(filteredKey);
 				SessionKey k = SensiNact.this.sessions.get(s);
@@ -2584,14 +2594,12 @@ public class SensiNact implements Core
 			{
 				String[] keys = this.remoteSessions.keySet(
 						).toArray(new String[]{});
-				int index = 0;
-				
-				while(index < keys.length)
-				{
-					Session s = this.remoteSessions.remove(keys[index]);
+				//FIX: iterate on keys to avoid infinite loop (previously iterate on index 0)
+				for (String key : keys) {
+					Session s = this.remoteSessions.remove(key);
                                         //FIX: protection from null session
                                         if (s == null) {
-                                            mediator.error("unexpected null session at key " + keys[index]);
+                                            mediator.error("unexpected null session at key " + key);
                                             continue;
                                         }
 					SessionKey k = SensiNact.this.sessions.get(
