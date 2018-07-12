@@ -12,29 +12,20 @@ package org.eclipse.sensinact.gateway.nthbnd.rest.internal;
 
 /**
  * The set of constants used in the restful access module
- *  
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public abstract class RestAccessConstants
-{
-	public static final String NORTHBOUND_ENDPOINTS = "org.eclipse.sensiNact.rest.northbound.endpoints";
+public abstract class RestAccessConstants {
+    public static final String NORTHBOUND_ENDPOINTS = "org.eclipse.sensiNact.rest.northbound.endpoints";
+    public static final String CORS_HEADER = "org.eclipse.sensinact.http.corsheader";
+    public static final String OPTIONS = "OPTIONS";
+    public static final String PARTIAL_JSON_CONTENT_TYPE = "application/json";
 
-	public static final String CORS_HEADER = "org.eclipse.sensinact.http.corsheader";
+    public static final String ANY_CONTENT_TYPE = "*/*";
+    public static String JSON_CONTENT_TYPE = "application/json; charset=utf-8";
+    public static final String TEXT_CONTENT_TYPE = "text/plain; charset=utf-8";
+    public static final String HTTP_ROOT = "/";
+    public static final String WS_ROOT = "/ws";
+    public static final String LOGIN_ENDPOINT = "/login";
 
-	public static final String OPTIONS = "OPTIONS";
-
-	public static final String PARTIAL_JSON_CONTENT_TYPE = "application/json";
-	
-	public static final String ANY_CONTENT_TYPE = "*/*";
-
-	public static String JSON_CONTENT_TYPE = "application/json; charset=utf-8";
-
-	public static final String TEXT_CONTENT_TYPE = "text/plain; charset=utf-8";
-
-	public static final String HTTP_ROOT = "/";
-
-	public static final String WS_ROOT = "/ws";
-
-	public static final String LOGIN_ENDPOINT = "/login";
-	
 }

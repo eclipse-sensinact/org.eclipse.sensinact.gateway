@@ -8,11 +8,9 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.slider.api;
 
 public interface SliderSetterItf {
-
     void move(int value);
 
     void stop();

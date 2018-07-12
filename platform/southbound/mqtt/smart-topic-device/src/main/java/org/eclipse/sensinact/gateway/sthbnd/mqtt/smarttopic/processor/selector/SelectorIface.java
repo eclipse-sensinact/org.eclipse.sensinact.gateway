@@ -12,12 +12,11 @@ package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.selector;
 
 /**
  * This interface define the name of the processor and the expression that to interporlate.
+ *
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public interface SelectorIface {
-
     String getName();
 
     String getExpression();
-
 }

@@ -17,11 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Provider implements MqttProvider {
-
     private String name;
     private MqttBroker broker;
-    private List<Service> services=new ArrayList<>();
-    private Boolean discoveryOnFirstMessage=Boolean.FALSE;
+    private List<Service> services = new ArrayList<>();
+    private Boolean discoveryOnFirstMessage = Boolean.FALSE;
 
     @Override
     public String getName() {

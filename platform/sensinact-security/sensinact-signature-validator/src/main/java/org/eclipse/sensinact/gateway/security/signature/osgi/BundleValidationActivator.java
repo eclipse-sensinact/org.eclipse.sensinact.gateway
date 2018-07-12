@@ -10,42 +10,31 @@
  */
 package org.eclipse.sensinact.gateway.security.signature.osgi;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
+import org.eclipse.sensinact.gateway.security.signature.internal.BundleValidationImpl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import org.eclipse.sensinact.gateway.security.signature.internal.BundleValidationImpl;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
+public class BundleValidationActivator implements BundleActivator {
+    private ServiceRegistration<BundleValidation> serviceRegistration;
 
-public class BundleValidationActivator implements BundleActivator
-{
-	private ServiceRegistration<BundleValidation> serviceRegistration;
+    public void start(final BundleContext context) {
+        try {
+            this.serviceRegistration = context.registerService(BundleValidation.class, new BundleValidationImpl(new Mediator(context)), null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	public void start(final BundleContext context)
-	{
-		try
-		{
-			this.serviceRegistration = context.registerService(
-			    BundleValidation.class, new BundleValidationImpl(
-			    		new Mediator(context)), null);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
+    public void stop(final BundleContext context) {
+        try {
+            this.serviceRegistration.unregister();
+            this.serviceRegistration = null;
 
-	public void stop(final BundleContext context)
-	{
-		try
-		{
-			this.serviceRegistration.unregister();
-			this.serviceRegistration = null;
-			
-		}catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

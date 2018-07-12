@@ -10,27 +10,24 @@
  */
 package org.eclipse.sensinact.gateway.security.signature.exception;
 
-public class BundleValidationException extends Exception 
-{
-	/**
-	 * Constructor
-	 * 
-	 * @param message the message of the hire exception
-	 */
-	public BundleValidationException(String message)
-	{
-		super(message);
-	}
+public class BundleValidationException extends Exception {
+    /**
+     * Constructor
+     *
+     * @param message the message of the hire exception
+     */
+    public BundleValidationException(String message) {
+        super(message);
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param e the cause Exception of this one 
-	 */
-	public BundleValidationException(Exception e)
-	{
-		super(e);
-	}
+    /**
+     * Constructor
+     *
+     * @param e the cause Exception of this one
+     */
+    public BundleValidationException(Exception e) {
+        super(e);
+    }
 
-	public static final long serialVersionUID = 110;
+    public static final long serialVersionUID = 110;
 }

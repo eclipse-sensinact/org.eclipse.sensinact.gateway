@@ -17,18 +17,14 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface SecuredAccessFactory
-{
-	/**
-	 * Creates and returns a {@link SecuredAccess} service
-	 * 
-	 * @param mediator the {@link Mediator} allowing to
-	 * interact with the OSGi host environment
-	 * 
-	 * @return
-	 * 		a new created {@link SecuredAccess} 
-	 * @throws SecuredAccessException 
-	 */
-	SecuredAccess newInstance(Mediator mediator) 
-			throws SecuredAccessException;
+public interface SecuredAccessFactory {
+    /**
+     * Creates and returns a {@link SecuredAccess} service
+     *
+     * @param mediator the {@link Mediator} allowing to
+     *                 interact with the OSGi host environment
+     * @return a new created {@link SecuredAccess}
+     * @throws SecuredAccessException
+     */
+    SecuredAccess newInstance(Mediator mediator) throws SecuredAccessException;
 }

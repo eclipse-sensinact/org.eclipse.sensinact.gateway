@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.temperature.generator.thread;
 
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
@@ -19,18 +18,14 @@ import org.eclipse.sensinact.gateway.simulated.temperature.generator.parser.Devi
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.reader.TemperaturesGeneratorPacket;
 
 public class TemperaturesGeneratorThread extends Thread implements Runnable {
-
     private LocalProtocolStackEndpoint<TemperaturesGeneratorAbstractPacket> connector;
     private DeviceInfo deviceInfo;
 
-    public TemperaturesGeneratorThread(LocalProtocolStackEndpoint<TemperaturesGeneratorAbstractPacket> connector,
-                                       DeviceInfo deviceInfo) {
+    public TemperaturesGeneratorThread(LocalProtocolStackEndpoint<TemperaturesGeneratorAbstractPacket> connector, DeviceInfo deviceInfo) {
         this.connector = connector;
         this.deviceInfo = deviceInfo;
-
         try {
-            this.connector.process(new TemperaturesGeneratorDiscoveryPacket(deviceInfo.getServiceProviderId(),
-                    deviceInfo.getLocation(), deviceInfo.getTemperatures()[0]));
+            this.connector.process(new TemperaturesGeneratorDiscoveryPacket(deviceInfo.getServiceProviderId(), deviceInfo.getLocation(), deviceInfo.getTemperatures()[0]));
         } catch (InvalidPacketException e) {
             e.printStackTrace();
         }
@@ -39,16 +34,13 @@ public class TemperaturesGeneratorThread extends Thread implements Runnable {
     @Override
     public void run() {
         int index = 1;
-
-        while(true) {
+        while (true) {
             try {
-                this.connector.process(new TemperaturesGeneratorPacket(deviceInfo.getServiceProviderId(),
-                        deviceInfo.getTemperatures()[index]));
+                this.connector.process(new TemperaturesGeneratorPacket(deviceInfo.getServiceProviderId(), deviceInfo.getTemperatures()[index]));
                 index = (index + 1) % 12;
             } catch (InvalidPacketException e) {
                 e.printStackTrace();
             }
-
             try {
                 Thread.sleep(deviceInfo.getSleepTime());
             } catch (InterruptedException e) {

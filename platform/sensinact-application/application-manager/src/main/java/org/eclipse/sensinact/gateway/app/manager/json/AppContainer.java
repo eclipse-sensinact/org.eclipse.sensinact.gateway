@@ -27,7 +27,6 @@ import java.util.List;
  * @author Rémi Druilhe
  */
 public class AppContainer implements JSONable {
-
     private final String applicationName;
     private final AppInitialize initialize;
     private final List<AppComponent> components;
@@ -35,37 +34,34 @@ public class AppContainer implements JSONable {
 
     /**
      * JSON constructor of an application
-     * @param mediator the mediator
+     *
+     * @param mediator        the mediator
      * @param applicationName the name of the application
-     * @param content the application as a JSON object
+     * @param content         the application as a JSON object
      */
     public AppContainer(AppServiceMediator mediator, String applicationName, JSONObject content) {
         this.applicationName = applicationName;
         this.initialize = new AppInitialize(content.getJSONObject(AppJsonConstant.INITIALIZE));
         this.components = new ArrayList<AppComponent>();
         this.finalize = new AppFinalize(content.getJSONObject(AppJsonConstant.FINALIZE));
-
         JSONArray componentArray = content.getJSONArray("application");
-
-        for(int i = 0; i < componentArray.length(); i++) {
+        for (int i = 0; i < componentArray.length(); i++) {
             AppComponent component;
-
             try {
                 component = new AppComponent(mediator, componentArray.getJSONObject(i));
             } catch (FunctionNotFoundException e) {
-                if(mediator.isErrorLoggable()) {
+                if (mediator.isErrorLoggable()) {
                     mediator.error("Unable to create the component", e);
                 }
-
                 return;
             }
-
             components.add(component);
         }
     }
 
     /**
      * Get the name of the application
+     *
      * @return the name of the application
      */
     public String getApplicationName() {
@@ -74,6 +70,7 @@ public class AppContainer implements JSONable {
 
     /**
      * Get the initialize object from the container
+     *
      * @return the initialize object
      */
     public AppInitialize getInitialize() {
@@ -82,6 +79,7 @@ public class AppContainer implements JSONable {
 
     /**
      * Get the components list from the container
+     *
      * @return the components list
      */
     public List<AppComponent> getComponents() {
@@ -90,6 +88,7 @@ public class AppContainer implements JSONable {
 
     /**
      * Get the finalize object from the container
+     *
      * @return the initialize object
      */
     public AppFinalize getFinalize() {
@@ -98,25 +97,23 @@ public class AppContainer implements JSONable {
 
     /**
      * Extract all the resources from the AppContainer
+     *
      * @return the collection of the URI of the resources
      */
     public Collection<String> getResourceUris() {
         Collection<String> resourceUris = new HashSet<String>();
-
-        for(AppComponent component : this.getComponents()) {
-            for(AppEvent event : component.getEvents()) {
-                if(AppEvent.EventType.RESOURCE.equals(event.getType())) {
+        for (AppComponent component : this.getComponents()) {
+            for (AppEvent event : component.getEvents()) {
+                if (AppEvent.EventType.RESOURCE.equals(event.getType())) {
                     resourceUris.add(event.getUri());
                 }
             }
-
-            for(AppParameter parameter : component.getFunction().getRunParameters()) {
-                if(AppJsonConstant.TYPE_RESOURCE.equals(parameter.getType())) {
+            for (AppParameter parameter : component.getFunction().getRunParameters()) {
+                if (AppJsonConstant.TYPE_RESOURCE.equals(parameter.getType())) {
                     resourceUris.add((String) parameter.getValue());
                 }
             }
         }
-
         return resourceUris;
     }
 
@@ -125,18 +122,13 @@ public class AppContainer implements JSONable {
      */
     public String getJSON() {
         JSONObject application = new JSONObject();
-
         application.put(AppJsonConstant.INITIALIZE, initialize.getJSON());
-
         JSONArray componentArray = new JSONArray();
-
-        for(AppComponent component: components) {
+        for (AppComponent component : components) {
             componentArray.put(component.getJSON());
         }
-
         application.put(AppJsonConstant.APPLICATION, componentArray);
         application.put(AppJsonConstant.FINALIZE, finalize.getJSON());
-
         return application.toString();
     }
 }

@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.manager.component;
 
 /**
@@ -17,9 +16,9 @@ package org.eclipse.sensinact.gateway.app.manager.component;
  * @author Remi Druilhe
  */
 public interface DataListenerItf {
-
     /**
      * Send a new data from a component output/property to the listeners
+     *
      * @param event the event
      */
     void eventNotification(Event event);

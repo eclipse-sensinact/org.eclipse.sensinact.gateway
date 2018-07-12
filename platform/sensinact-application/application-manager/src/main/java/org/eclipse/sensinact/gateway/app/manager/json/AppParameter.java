@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.manager.json;
 
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
@@ -22,15 +21,15 @@ import java.util.Objects;
  * @author Remi Druilhe
  */
 public class AppParameter implements JSONable {
-
     protected Object value;
     protected String type;
 
     /**
      * Java constructor of a parameter.
+     *
      * @param value the value of the parameter
-     * @param type the string type of the parameter. It include AppManager specifics types
-     *             (resource, variable, event, operator).
+     * @param type  the string type of the parameter. It include AppManager specifics types
+     *              (resource, variable, event, operator).
      */
     public AppParameter(Object value, String type) {
         this.value = value;
@@ -39,6 +38,7 @@ public class AppParameter implements JSONable {
 
     /**
      * JSON constructor of a parameter
+     *
      * @param json the json value of the parameter
      */
     public AppParameter(JSONObject json) {
@@ -48,6 +48,7 @@ public class AppParameter implements JSONable {
 
     /**
      * Get the value of the parameter
+     *
      * @return the value
      */
     public Object getValue() {
@@ -56,6 +57,7 @@ public class AppParameter implements JSONable {
 
     /**
      * Get the type of the parameter
+     *
      * @return the type
      */
     public String getType() {
@@ -69,24 +71,18 @@ public class AppParameter implements JSONable {
         if (this == o) {
             return true;
         }
-
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         AppParameter parameter = (AppParameter) o;
-
         if (!value.equals(parameter.value)) {
             return false;
         }
-
         return type.equals(parameter.type);
-
     }
 
     @Override
     public int hashCode() {
-
         return Objects.hash(value, type);
     }
 
@@ -94,9 +90,6 @@ public class AppParameter implements JSONable {
      * @see JSONable#getJSON()
      */
     public String getJSON() {
-        return new JSONObject()
-                .put(AppJsonConstant.VALUE, value)
-                .put(AppJsonConstant.TYPE, type)
-                .toString();
+        return new JSONObject().put(AppJsonConstant.VALUE, value).put(AppJsonConstant.TYPE, type).toString();
     }
 }

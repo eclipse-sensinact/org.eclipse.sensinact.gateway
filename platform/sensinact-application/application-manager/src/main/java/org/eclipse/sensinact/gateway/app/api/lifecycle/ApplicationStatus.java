@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.api.lifecycle;
 
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
@@ -16,29 +15,23 @@ import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 
 /**
  * This class represents the lifecycle of the application. The lifecycle works as follow:
- *
- *   ------> INSTALLED ------uninstall-----> UNINSTALLED
- *   |           |                               ^
- *   |           |<------------------------      |
- *   |         start                      |      |
- *   |           |                        |      |
+ * <p>
+ * ------> INSTALLED ------uninstall-----> UNINSTALLED
+ * |           |                               ^
+ * |           |<------------------------      |
+ * |         start                      |      |
+ * |           |                        |      |
  * stop          v                        |      |
- *   |       RESOLVING -------            |   uninstall
- *   |           |           |            |      |
- *   |           |           |            |      |
- *   |           v           v            |      |
- *   -------- ACTIVE -----exception----> UNRESOLVED
+ * |       RESOLVING -------            |   uninstall
+ * |           |           |            |      |
+ * |           |           |            |      |
+ * |           v           v            |      |
+ * -------- ACTIVE -----exception----> UNRESOLVED
  *
  * @author Remi Druilhe
  */
 public enum ApplicationStatus implements JSONable {
-
-    INSTALLED("INSTALLED"),
-    RESOLVING("RESOLVING"),
-    UNRESOLVED("UNRESOLVED"),
-    ACTIVE("ACTIVE"),
-    UNINSTALLED("UNINSTALLED");
-
+    INSTALLED("INSTALLED"), RESOLVING("RESOLVING"), UNRESOLVED("UNRESOLVED"), ACTIVE("ACTIVE"), UNINSTALLED("UNINSTALLED");
     private String value;
 
     ApplicationStatus(String value) {
@@ -69,7 +62,6 @@ public enum ApplicationStatus implements JSONable {
                 return ApplicationStatus.UNRESOLVED;
             }
         }
-
         return currentStatus;
     }
 

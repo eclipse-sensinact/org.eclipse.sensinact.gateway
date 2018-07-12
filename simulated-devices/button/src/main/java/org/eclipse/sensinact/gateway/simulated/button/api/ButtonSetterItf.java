@@ -8,11 +8,9 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.button.api;
 
 public interface ButtonSetterItf {
-
     void move(boolean value);
 
     void stop();

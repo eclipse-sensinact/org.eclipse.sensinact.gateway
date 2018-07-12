@@ -14,20 +14,18 @@ import org.eclipse.sensinact.gateway.generic.Task;
 
 /**
  * Extended {@link Task} dedicated to STREAM typed tasks
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface StreamTask extends Task
-{   
+public interface StreamTask extends Task {
     public static final Task.RequestType REQUEST_TYPE = Task.RequestType.STREAM;
-    
+
     /**
-     * Returns the payload of the frame command to send as 
-     * a bytes array  
-     * 
-     * @return
-     *      the payload of the frame command to send as 
-     *      a bytes array  
+     * Returns the payload of the frame command to send as
+     * a bytes array
+     *
+     * @return the payload of the frame command to send as
+     * a bytes array
      */
     byte[] getPayloadBytesArray();
 }

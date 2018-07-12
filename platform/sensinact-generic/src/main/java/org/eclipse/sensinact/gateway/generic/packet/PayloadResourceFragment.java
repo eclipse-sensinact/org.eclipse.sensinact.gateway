@@ -15,35 +15,31 @@ import org.eclipse.sensinact.gateway.core.ResourceProcessableData;
 
 /**
  * A semantic unit of a {@link Packet}
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface PayloadResourceFragment extends ResourceProcessableData
-{    	     
+public interface PayloadResourceFragment extends ResourceProcessableData {
     /**
-     * Returns this {@link PayloadResourceFragment} as a 
+     * Returns this {@link PayloadResourceFragment} as a
      * {@link TaskIdValuePair} for the string taskIdentifier
-     * passed as parameter. If the {@link Attribute}'s identifier 
-     * of this PayloadAttributeFragment is not null the returned 
+     * passed as parameter. If the {@link Attribute}'s identifier
+     * of this PayloadAttributeFragment is not null the returned
      * {@link TaskIdValuePair}  is
      *
-     * @param taskIdentifier
-     * 		the string {@link Task}'s identifier for which to 
-     * 		return the {@link TaskIdValuePair} data structure
-     * @return
-     * 		this {@link PayloadResourceFragment} as a 
-     * 		{@link TaskIdValuePair}
+     * @param taskIdentifier the string {@link Task}'s identifier for which to
+     *                       return the {@link TaskIdValuePair} data structure
+     * @return this {@link PayloadResourceFragment} as a
+     * {@link TaskIdValuePair}
      */
     TaskIdValuePair AsTaskIdValuePair(String taskIdentifier);
 
-	/**
-	 * Returns the task string identifier of the {@link 
-	 * PayloadServiceFragment} holding this PayloadAttributeFragment, 
-	 * completed by attribute and metadata identifiers if they 
-	 * exist
-	 * 
-	 * @return
-	 * 		the completed task string identifier
-	 */
+    /**
+     * Returns the task string identifier of the {@link
+     * PayloadServiceFragment} holding this PayloadAttributeFragment,
+     * completed by attribute and metadata identifiers if they
+     * exist
+     *
+     * @return the completed task string identifier
+     */
     String getTaskIdentifier();
 }

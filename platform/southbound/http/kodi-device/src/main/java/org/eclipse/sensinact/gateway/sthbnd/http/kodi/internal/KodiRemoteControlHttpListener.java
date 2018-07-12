@@ -18,63 +18,40 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 
-public class KodiRemoteControlHttpListener extends HttpServlet
-{
+public class KodiRemoteControlHttpListener extends HttpServlet {
     SimpleHttpProtocolStackEndpoint connector;
     KodiServiceMediator mediator;
 
-    public KodiRemoteControlHttpListener(
-    		SimpleHttpProtocolStackEndpoint connector, 
-    		KodiServiceMediator mediator)
-    {
+    public KodiRemoteControlHttpListener(SimpleHttpProtocolStackEndpoint connector, KodiServiceMediator mediator) {
         this.connector = connector;
         this.mediator = mediator;
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-    		throws ServletException, IOException
-    {
-        if(mediator.isDebugLoggable())
-        {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        if (mediator.isDebugLoggable()) {
             mediator.debug(resp.toString());
         }
         String key = req.getParameter("key");
-
-        if(key == null)
-        {
+        if (key == null) {
             resp.sendError(400, "Missing parameter 'key'");
             return;
         }
-        String serviceProvider = mediator.getKodiFriendlyName(
-        		req.getRemoteAddr());
-
-        if(serviceProvider == null)
-        {
+        String serviceProvider = mediator.getKodiFriendlyName(req.getRemoteAddr());
+        if (serviceProvider == null) {
             resp.sendError(400, "Wrong service provider");
             return;
         }
-        try 
-        {
-        	long timestamp = System.currentTimeMillis();
-        	
-            connector.process(new KodiRequestPacket(
-            		serviceProvider , 
-            		"buttonpressed", 
-            		"remote-control",
-            		key));
-            
-            connector.process(new KodiRequestPacket(
-            		serviceProvider , 
-            		"buttonpressed", 
-            		"lastevent",
-            		timestamp));
-            
-        } catch (InvalidPacketException e)
-        {
+        try {
+            long timestamp = System.currentTimeMillis();
+
+            connector.process(new KodiRequestPacket(serviceProvider, "buttonpressed", "remote-control", key));
+
+            connector.process(new KodiRequestPacket(serviceProvider, "buttonpressed", "lastevent", timestamp));
+
+        } catch (InvalidPacketException e) {
             mediator.error(e);
         }
     }

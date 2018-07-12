@@ -10,24 +10,25 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.annotation;
 
+import org.eclipse.sensinact.gateway.generic.Task.CommandType;
+
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
-import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RecurrentHttpTask
-{	
-	CommandType command() default CommandType.GET;	
-	
-	long period() default 60*1000;
-	long delay() default 1000;
-	long timeout() default -1;
+public @interface RecurrentHttpTask {
+    CommandType command() default CommandType.GET;
 
-	HttpTaskConfiguration recurrence();
+    long period() default 60 * 1000;
+
+    long delay() default 1000;
+
+    long timeout() default -1;
+
+    HttpTaskConfiguration recurrence();
 }

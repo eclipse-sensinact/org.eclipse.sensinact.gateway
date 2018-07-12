@@ -10,30 +10,25 @@
  */
 package org.eclipse.sensinact.gateway.common.automata;
 
-
 /**
  * Extended {@link PacketFrame} defining a generic communication packet
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class PacketFrame extends AbstractFrame
-{
+public class PacketFrame extends AbstractFrame {
     /**
      * Constructor
      */
-    public PacketFrame()
-    {
+    public PacketFrame() {
         super();
     }
 
     /**
      * @inheritDoc
-     * 
      * @see AbstractFrame#isComplete()
      */
     @Override
-    public boolean isComplete()
-    {
+    public boolean isComplete() {
         return true;
     }
 }

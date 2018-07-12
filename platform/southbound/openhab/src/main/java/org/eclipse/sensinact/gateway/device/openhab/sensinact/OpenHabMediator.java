@@ -10,12 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.device.openhab.sensinact;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.DefaultHttpTaskProcessingContext;
@@ -27,8 +21,13 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskProcessingContextF
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 import org.osgi.framework.BundleContext;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 /**
- *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class OpenHabMediator extends HttpMediator {
@@ -71,18 +70,14 @@ public class OpenHabMediator extends HttpMediator {
 
     /**
      * @inheritDoc
-     *
      * @see org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpMediator#getTaskProcessingContextFactory()
      */
     @Override
     public HttpTaskProcessingContextFactory getTaskProcessingContextFactory() {
         return new DefaultHttpTaskProcessingContextFactory(this) {
             @Override
-            public HttpTaskProcessingContext newInstance(
-                    HttpTaskConfigurator httpTaskConfigurator, String endpointId,
-                    HttpTask<?, ?> task) {
-                return new OpenHabTaskProcessingContext(
-                        OpenHabMediator.this, httpTaskConfigurator, endpointId, task);
+            public HttpTaskProcessingContext newInstance(HttpTaskConfigurator httpTaskConfigurator, String endpointId, HttpTask<?, ?> task) {
+                return new OpenHabTaskProcessingContext(OpenHabMediator.this, httpTaskConfigurator, endpointId, task);
             }
 
         };
@@ -90,9 +85,7 @@ public class OpenHabMediator extends HttpMediator {
 
     class OpenHabTaskProcessingContext extends DefaultHttpTaskProcessingContext {
 
-        public OpenHabTaskProcessingContext(Mediator mediator,
-                HttpTaskConfigurator httpTaskConfigurator,
-                final String endpointId, final HttpTask<?, ?> task) {
+        public OpenHabTaskProcessingContext(Mediator mediator, HttpTaskConfigurator httpTaskConfigurator, final String endpointId, final HttpTask<?, ?> task) {
             super(mediator, httpTaskConfigurator, endpointId, task);
             super.properties.put("openhab.host", new Executable<Void, String>() {
                 @Override

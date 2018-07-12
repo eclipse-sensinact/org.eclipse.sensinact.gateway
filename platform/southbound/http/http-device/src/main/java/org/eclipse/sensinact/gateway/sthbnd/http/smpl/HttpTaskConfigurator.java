@@ -14,18 +14,16 @@ import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 
 /**
  * Configuration applying on an {@link HttpTask}s
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface HttpTaskConfigurator
-{		
-	/**
-	 * Configures the {@link HttpTask} passed as parameter
-	 * @param <T>
-	 * 
-	 * @param task the {@link HttpTask} to be configured
-	 * @return 
-	 */
-	<T extends HttpTask<?,?>> void configure(T task) throws Exception;
-
+public interface HttpTaskConfigurator {
+    /**
+     * Configures the {@link HttpTask} passed as parameter
+     *
+     * @param <T>
+     * @param task the {@link HttpTask} to be configured
+     * @return
+     */
+    <T extends HttpTask<?, ?>> void configure(T task) throws Exception;
 }

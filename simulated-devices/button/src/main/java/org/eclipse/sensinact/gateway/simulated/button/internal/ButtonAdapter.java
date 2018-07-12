@@ -8,32 +8,29 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.button.internal;
 
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 
 /**
- * 
+ *
  */
 public class ButtonAdapter {
+    private final LocalProtocolStackEndpoint<ButtonPacket> connector;
 
-	private final LocalProtocolStackEndpoint<ButtonPacket> connector;
+    /**
+     * @param connector
+     */
+    public ButtonAdapter(LocalProtocolStackEndpoint<ButtonPacket> connector) {
+        this.connector = connector;
+    }
 
-	/**
-	 * @param connector 
-	 */
-	public ButtonAdapter(LocalProtocolStackEndpoint<ButtonPacket> connector)
-	{
-		this.connector = connector;
-	}
-    
     /**
      * @param value
      */
     public void mouseReleased(boolean value) {
-    	try {
+        try {
             connector.process(new ButtonPacket(value));
         } catch (InvalidPacketException e) {
             e.printStackTrace();

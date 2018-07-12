@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.datastore.api;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -16,13 +15,11 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 /**
  * Factory of {@link DataStoreService}
  */
-public interface DataStoreServiceFactory 
-{		
-	/**
-	 * @param mediator
-	 * @return
-	 * @throws UnableToFindDataStoreException 
-	 */
-	DataStoreService newInstance(Mediator mediator) 
-			throws UnableToFindDataStoreException;	
+public interface DataStoreServiceFactory {
+    /**
+     * @param mediator
+     * @return
+     * @throws UnableToFindDataStoreException
+     */
+    DataStoreService newInstance(Mediator mediator) throws UnableToFindDataStoreException;
 }

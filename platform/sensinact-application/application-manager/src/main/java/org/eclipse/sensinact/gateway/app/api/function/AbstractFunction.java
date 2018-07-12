@@ -15,36 +15,41 @@ import org.eclipse.sensinact.gateway.app.api.exception.LifeCycleException;
 import java.util.List;
 
 public abstract class AbstractFunction<T> {
-
     private FunctionUpdateListener updateListener;
 
     /**
      * This method is called when the application is about to be started.
      * This method should be override when the function needs to perform some operations before any processing.
+     *
      * @throws LifeCycleException when a problem occurs in the instantiation of the function
      */
-    public void instantiate() throws LifeCycleException {}
+    public void instantiate() throws LifeCycleException {
+    }
 
     /**
      * This method is called when the application is about to be stopped.
      * This method should be override when the function needs to be perform some operations before its stop.
+     *
      * @throws LifeCycleException when a problem occurs in the uninstantiation of the function
      */
-    public void uninstantiate() throws LifeCycleException {}
+    public void uninstantiate() throws LifeCycleException {
+    }
 
     /**
      * Register a {@link FunctionUpdateListener} associated to the function
+     *
      * @param listener the {@link FunctionUpdateListener}
      */
     public void setListener(FunctionUpdateListener listener) {
         //TODO: should we test also that updateListener is null ?
-        if(listener != null) {
+        if (listener != null) {
             this.updateListener = listener;
         }
     }
 
     /**
      * Remove the {@link FunctionUpdateListener} associated to the function
+     *
      * @param listener the {@link FunctionUpdateListener}
      */
     public void removeListener(FunctionUpdateListener listener) {
@@ -55,6 +60,7 @@ public abstract class AbstractFunction<T> {
 
     /**
      * Trigger the processing of the function.
+     *
      * @param dataList the parameters of the function
      * @throws Exception
      */
@@ -62,6 +68,7 @@ public abstract class AbstractFunction<T> {
 
     /**
      * Notify the listener about a new result from the function.
+     *
      * @param result the result of the function
      */
     protected void update(T result) {

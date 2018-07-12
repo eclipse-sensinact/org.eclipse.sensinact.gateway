@@ -10,11 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.protocol.http.server;
 
-
 /**
- * 
+ *
  */
-public interface RequestHandler
-{
-	ResponseContent handle(RequestContent request);
+public interface RequestHandler {
+    ResponseContent handle(RequestContent request);
 }

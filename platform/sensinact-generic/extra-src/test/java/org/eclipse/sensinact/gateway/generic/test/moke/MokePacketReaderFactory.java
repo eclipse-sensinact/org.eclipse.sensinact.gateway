@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.generic.test.moke;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -19,59 +18,47 @@ import org.eclipse.sensinact.gateway.generic.packet.PacketReader;
 import org.eclipse.sensinact.gateway.generic.packet.PacketReaderFactory;
 
 /**
- *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class MokePacketReaderFactory implements PacketReaderFactory
-{
+public class MokePacketReaderFactory implements PacketReaderFactory {
+    //********************************************************************//
+    //						NESTED DECLARATIONS			  			      //
+    //********************************************************************//
+    //********************************************************************//
+    //						ABSTRACT DECLARATIONS						  //
+    //********************************************************************//
+    //********************************************************************//
+    //						STATIC DECLARATIONS							  //
+    //********************************************************************//
+    //********************************************************************//
+    //						INSTANCE DECLARATIONS						  //
+    //********************************************************************//
 
-	//********************************************************************//
-	//						NESTED DECLARATIONS			  			      //
-	//********************************************************************//
+    /**
+     *
+     */
+    public MokePacketReaderFactory() {
+        // TODO Auto-generated constructor stub
+    }
 
-	//********************************************************************//
-	//						ABSTRACT DECLARATIONS						  //
-	//********************************************************************//
+    /**
+     * @inheritDoc
+     * @see PacketReaderFactory#handle(java.lang.Class)
+     */
+    @Override
+    public boolean handle(Class<? extends Packet> packetType) {
+        return MokePacket.class.isAssignableFrom(packetType);
+    }
 
-	//********************************************************************//
-	//						STATIC DECLARATIONS							  //
-	//********************************************************************//
-
-	//********************************************************************//
-	//						INSTANCE DECLARATIONS						  //
-	//********************************************************************//
-	/**
-	 * 
-	 */
-	public MokePacketReaderFactory()
-	{
-		// TODO Auto-generated constructor stub
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see PacketReaderFactory#handle(java.lang.Class)
-	 */
-	@Override
-	public boolean handle(Class<? extends Packet> packetType)
-	{
-		return MokePacket.class.isAssignableFrom(packetType);
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see PacketReaderFactory#newInstance(Mediator, ExtModelConfiguration, Packet)
-	 */	
-	@Override
-	public <P extends Packet> PacketReader<P> newInstance(
-			Mediator mediator, ExtModelConfiguration manager, P packet)
-	        throws InvalidPacketException
-	{
-		MokePacket mokePacket = (MokePacket) packet;
-		MokePacketReader reader = new MokePacketReader(mediator);
-		reader.parse(mokePacket);
-		return (PacketReader<P>) reader;
-	}
+    /**
+     * @inheritDoc
+     * @see PacketReaderFactory#newInstance(Mediator, ExtModelConfiguration, Packet)
+     */
+    @Override
+    public <P extends Packet> PacketReader<P> newInstance(Mediator mediator, ExtModelConfiguration manager, P packet) throws InvalidPacketException {
+        MokePacket mokePacket = (MokePacket) packet;
+        MokePacketReader reader = new MokePacketReader(mediator);
+        reader.parse(mokePacket);
+        return (PacketReader<P>) reader;
+    }
 }

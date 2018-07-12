@@ -11,55 +11,46 @@
 package org.eclipse.sensinact.gateway.generic;
 
 /**
- * Exception thrown by a resource at initialization time if an error 
+ * Exception thrown by a resource at initialization time if an error
  * occurred
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class InvalidConnectorException extends Exception
-{
+public class InvalidConnectorException extends Exception {
     /**
      * Constructor
      */
-    public InvalidConnectorException()
-    {
+    public InvalidConnectorException() {
         super();
     }
 
     /**
      * Constructor
-     * 
-     * @param message
-     *            the exception message
+     *
+     * @param message the exception message
      */
-    public InvalidConnectorException(String message)
-    {
+    public InvalidConnectorException(String message) {
         super(message);
     }
 
     /**
      * Constructor
-     * 
-     * @param cause
-     *            the {@link Throwable} object which has caused the current
-     *            exception
+     *
+     * @param cause the {@link Throwable} object which has caused the current
+     *              exception
      */
-    public InvalidConnectorException(Throwable cause)
-    {
+    public InvalidConnectorException(Throwable cause) {
         super(cause);
     }
 
     /**
      * Constructor
-     * 
-     * @param message
-     *            the exception message
-     * @param cause
-     *            the {@link Throwable} object which has caused the current
-     *            exception
+     *
+     * @param message the exception message
+     * @param cause   the {@link Throwable} object which has caused the current
+     *                exception
      */
-    public InvalidConnectorException(String message, Throwable cause)
-    {
+    public InvalidConnectorException(String message, Throwable cause) {
         super(message, cause);
     }
 }

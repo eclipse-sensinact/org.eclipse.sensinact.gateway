@@ -8,13 +8,12 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.basic.math;
 
-import org.eclipse.sensinact.gateway.app.api.function.DataItf;
-import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
+import org.eclipse.sensinact.gateway.app.api.function.DataItf;
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.osgi.framework.BundleContext;
@@ -26,12 +25,10 @@ import java.util.List;
 /**
  * This class implements the division function
  *
- * @see MathFunction
- *
  * @author Remi Druilhe
+ * @see MathFunction
  */
 public class DivisionFunction extends MathFunction<Double> {
-
     private static final String JSON_SCHEMA = "division.json";
 
     public DivisionFunction(Mediator mediator) {
@@ -40,17 +37,16 @@ public class DivisionFunction extends MathFunction<Double> {
 
     /**
      * Gets the JSON schema of the function from the plugin
+     *
      * @param context the context of the bundle
      * @return the JSON schema of the function
      */
     public static JSONObject getJSONSchemaFunction(BundleContext context) {
         try {
-            return new JSONObject(new JSONTokener(
-                    new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
+            return new JSONObject(new JSONTokener(new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
@@ -59,25 +55,21 @@ public class DivisionFunction extends MathFunction<Double> {
      */
     public void process(List<DataItf> datas) {
         double result;
-
         try {
             double numerator = CastUtils.cast(mediator.getClassLoader(), double.class, datas.get(0).getValue());
             double divisor = CastUtils.cast(mediator.getClassLoader(), double.class, datas.get(1).getValue());
-
-            if(divisor != 0) {
+            if (divisor != 0) {
                 result = numerator / divisor;
-
-                if(mediator.isDebugLoggable()) {
+                if (mediator.isDebugLoggable()) {
                     mediator.debug(numerator + " / " + divisor + " = " + result);
                 }
             } else {
                 result = Double.NaN;
             }
-        } catch(ClassCastException e) {
+        } catch (ClassCastException e) {
             result = Double.NaN;
             mediator.error(e.getMessage(), e);
         }
-
         super.update(result);
     }
 }

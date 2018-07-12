@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.basic.logic;
 
 import org.eclipse.sensinact.gateway.app.api.exception.NotAReadableResourceException;
@@ -32,12 +31,10 @@ import java.util.List;
 /**
  * A component that tests if the simple condition is satisfied.
  *
- * @see ConditionFunction
- *
  * @author Remi Druilhe
+ * @see ConditionFunction
  */
 public class SimpleConditionFunction extends ConditionFunction {
-
     private final Mediator mediator;
     private final String function;
     private static final String JSON_SCHEMA = "simple_condition.json";
@@ -49,50 +46,41 @@ public class SimpleConditionFunction extends ConditionFunction {
 
     /**
      * Gets the JSON schema of the function from the plugin
+     *
      * @param context the context of the bundle
      * @return the JSON schema of the function
      */
     public static JSONObject getJSONSchemaFunction(BundleContext context) {
         try {
-            return new JSONObject(new JSONTokener(
-                    new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
+            return new JSONObject(new JSONTokener(new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
     /**
-     * @see ConditionFunction#testCondition(List)
      * @param datas the variables to tests
      * @throws NotAReadableResourceException
      * @throws ResourceNotFoundException
      * @throws ServiceNotFoundException
+     * @see ConditionFunction#testCondition(List)
      */
-    public Boolean testCondition(List<DataItf> datas) throws NotAReadableResourceException,
-            ResourceNotFoundException, ServiceNotFoundException {
-
+    public Boolean testCondition(List<DataItf> datas) throws NotAReadableResourceException, ResourceNotFoundException, ServiceNotFoundException {
         DataItf variable = datas.get(0);
         DataItf value = datas.get(1);
         boolean complement = false;
-
-        if(datas.size() > 2) {
+        if (datas.size() > 2) {
             complement = CastUtils.castPrimitive(boolean.class, datas.get(2).getValue());
         }
-
         try {
             /*System.out.println(variable.getValue() + " (" + variable.getType().getCanonicalName() + ") "
                     + function + " " + value.getValue() + " (" + value.getType().getCanonicalName() + ")");*/
-
-            Constraint constraint = ConstraintFactory.Loader.load(mediator.getClassLoader(), AppOperator.getOperator(function),
-                    value.getType(), value.getValue(), complement);
-
+            Constraint constraint = ConstraintFactory.Loader.load(mediator.getClassLoader(), AppOperator.getOperator(function), value.getType(), value.getValue(), complement);
             return constraint.complies(variable.getValue());
         } catch (InvalidConstraintDefinitionException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 }

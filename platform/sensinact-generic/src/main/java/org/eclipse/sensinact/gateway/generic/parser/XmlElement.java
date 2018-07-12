@@ -19,17 +19,17 @@ import java.lang.annotation.Target;
 
 /**
  * A XmlElement annotation associates an xml tag and a field name
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @Inherited
 @Target(value = ElementType.TYPE)
 @Retention(value = RetentionPolicy.RUNTIME)
 @Documented
-public @interface XmlElement
-{      
-    public static final String DEFAULT_ELEMENT_VALUE= "#DEFAULT_ELEMENT#"; 
-    
+public @interface XmlElement {
+    public static final String DEFAULT_ELEMENT_VALUE = "#DEFAULT_ELEMENT#";
+
     public String tag() default DEFAULT_ELEMENT_VALUE;
+
     public String field() default DEFAULT_ELEMENT_VALUE;
 }

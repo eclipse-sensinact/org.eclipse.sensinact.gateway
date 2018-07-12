@@ -8,13 +8,12 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.basic.time;
 
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.api.function.DataItf;
-import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.osgi.framework.BundleContext;
@@ -29,7 +28,6 @@ import java.util.List;
  * @author Remi Druilhe
  */
 public class SleepFunction extends TimeFunction<Boolean> {
-
     private final Mediator mediator;
     private static final String JSON_SCHEMA = "sleep.json";
 
@@ -42,12 +40,10 @@ public class SleepFunction extends TimeFunction<Boolean> {
      */
     public static JSONObject getJSONSchemaFunction(BundleContext context) {
         try {
-            return new JSONObject(new JSONTokener(
-                    new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
+            return new JSONObject(new JSONTokener(new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
@@ -56,13 +52,11 @@ public class SleepFunction extends TimeFunction<Boolean> {
      */
     public void process(List<DataItf> datas) {
         long duration = CastUtils.cast(this.mediator.getClassLoader(), long.class, datas.get(0).getValue());
-
         try {
             Thread.sleep(duration);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
         super.update(true);
     }
 }

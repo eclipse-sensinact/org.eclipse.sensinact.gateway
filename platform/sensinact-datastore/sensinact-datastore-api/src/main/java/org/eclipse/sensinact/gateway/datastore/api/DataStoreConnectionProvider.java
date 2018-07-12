@@ -8,35 +8,30 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.datastore.api;
 
 /**
  * Service providing a connection to a data store
  */
-public interface DataStoreConnectionProvider<C> 
-{
-	/**
-	 * Return a connection object to a data store or null 
-	 * if an error occurred
-	 * 
-	 * @return
-	 * 		a connection object to a data store
-	 * 
-	 * @throws UnableToConnectToDataStoreException 
-	 */
-	C openConnection() throws UnableToConnectToDataStoreException;
+public interface DataStoreConnectionProvider<C> {
+    /**
+     * Return a connection object to a data store or null
+     * if an error occurred
+     *
+     * @return a connection object to a data store
+     * @throws UnableToConnectToDataStoreException
+     */
+    C openConnection() throws UnableToConnectToDataStoreException;
 
-	/**
-	 * Close the previously opened connection
-	 */
-	void closeConnection();		
+    /**
+     * Close the previously opened connection
+     */
+    void closeConnection();
 
-	/**
-	 * Return the data store's name
-	 * 
-	 * @return
-	 * 		the data store's name
-	 */
-	String getDataStoreName();
+    /**
+     * Return the data store's name
+     *
+     * @return the data store's name
+     */
+    String getDataStoreName();
 }

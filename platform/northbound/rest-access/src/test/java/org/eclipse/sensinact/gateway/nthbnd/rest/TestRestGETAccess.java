@@ -10,288 +10,212 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.rest;
 
-import static org.junit.Assert.assertTrue;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.junit.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.rest.ws.test.WsServiceTestClient;
 import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
 import org.eclipse.sensinact.gateway.test.MidProxy;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
-public class TestRestGETAccess  extends TestRestAccess
-{
+import static org.junit.Assert.assertTrue;
 
-	public TestRestGETAccess() throws Exception
-	{
-		super();
-	}
-	
-	@Test
-	public void testHttpAccessMethodRawDescription() throws Exception
-	{
-		 Mediator mediator = new Mediator(context);
-    	
-        String simulated  = HttpServiceTestClient.newRequest(mediator,
-             	HTTP_ROOTURL + "/providers?rawDescribe=true", null, "GET");
-        
+public class TestRestGETAccess extends TestRestAccess {
+    public TestRestGETAccess() throws Exception {
+        super();
+    }
+
+    @Test
+    public void testHttpAccessMethodRawDescription() throws Exception {
+        Mediator mediator = new Mediator(context);
+
+        String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers?rawDescribe=true", null, "GET");
+
         //System.out.println(simulated);
-        
+
         JSONArray response = new JSONArray("[\"slider\",\"light\"]");
-        
+
         JSONAssert.assertEquals(response, new JSONArray(simulated), false);
-	}
-	
-	@Test
-	public void testHttpAccessMethodGET() throws Exception
-	{
-		 Mediator mediator = new Mediator(context);
-    	
-        String simulated  = HttpServiceTestClient.newRequest(mediator,
-             	HTTP_ROOTURL + "/providers", null, "GET");
-        
-        //System.out.println(simulated);
-        
-        JSONObject response = new JSONObject(
-        	"{\"statusCode\":200,\"providers\":[\"slider\",\"light\"],"
-        	+ "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
-        
-        JSONAssert.assertEquals(response, new JSONObject(simulated), false);
-        
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + 
-        		"/providers/slider/services", null, "GET");
+    }
+
+    @Test
+    public void testHttpAccessMethodGET() throws Exception {
+        Mediator mediator = new Mediator(context);
+
+        String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers", null, "GET");
 
         //System.out.println(simulated);
-        
+
+        JSONObject response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"]," + "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
+
+        JSONAssert.assertEquals(response, new JSONObject(simulated), false);
+
+        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services", null, "GET");
+        //System.out.println(simulated);
+
         response = new JSONObject(simulated);
-     
+
         JSONArray array = response.getJSONArray("services");
         assertTrue(array.length() == 2);
+        JSONAssert.assertEquals(new JSONArray("[\"admin\",\"cursor\"]"), array, false);
 
-        JSONAssert.assertEquals(new JSONArray("[\"admin\",\"cursor\"]"),array,false);
-        
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + 
-        		"/providers/slider/services/cursor/resources", null, "GET");
-        
+        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/cursor/resources", null, "GET");
+
         response = new JSONObject(simulated);
-        array = response.getJSONArray("resources");  
-
+        array = response.getJSONArray("resources");
         //JSONAssert.assertEquals(new JSONArray("[\"location\",\"position\"]"),array,false);
-        JSONAssert.assertEquals(new JSONArray("[\"position\"]"),array,false);
-     
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + 
-        		"/providers/slider/services/cursor/resources/position", null, "GET");
+        JSONAssert.assertEquals(new JSONArray("[\"position\"]"), array, false);
 
-		MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(
-				classloader,this, SliderSetterItf.class);
-		SliderSetterItf slider = sliderProxy.buildProxy();
-		slider.move(1);
-
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL 
-        		+ "/providers/slider/services/"
-                + "cursor/resources/position/GET", 
-                null, "GET");
-
+        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/cursor/resources/position", null, "GET");
+        MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
+        SliderSetterItf slider = sliderProxy.buildProxy();
+        slider.move(1);
+        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/" + "cursor/resources/position/GET", null, "GET");
         response = new JSONObject(simulated);
-        
+
         //System.out.println(response);
-        
+
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/cursor/position"));
-        assertTrue(response.getJSONObject("response").get("value").equals(1));		
-	}
-	
-	@Test
-	public void testSimplifiedHttpAccessMethodGET() throws Exception
-	{
-		Mediator mediator = new Mediator(context);
-    	
-        String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + 
-        		"/slider", null, "GET");
+        assertTrue(response.getJSONObject("response").get("value").equals(1));
+    }
 
+    @Test
+    public void testSimplifiedHttpAccessMethodGET() throws Exception {
+        Mediator mediator = new Mediator(context);
+
+        String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/slider", null, "GET");
         //System.out.println(simulated);
         JSONObject response = new JSONObject(simulated).getJSONObject("response");
-     
+
         JSONArray array = response.getJSONArray("services");
         assertTrue(array.length() == 2);
+        JSONAssert.assertEquals(new JSONArray("[\"admin\",\"cursor\"]"), array, false);
 
-        JSONAssert.assertEquals(new JSONArray("[\"admin\",\"cursor\"]"),array,false);
-        
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + 
-        		"/slider/cursor", null, "GET");
-        
+        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/slider/cursor", null, "GET");
+
         response = new JSONObject(simulated).getJSONObject("response");
-        array = response.getJSONArray("resources");  
-        
-        JSONAssert.assertEquals(new JSONArray("[{\"name\":\"position\",\"type\":\"SENSOR\"}]"),array,false);
-     
-		MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(
-				classloader,this, SliderSetterItf.class);
-		SliderSetterItf slider = sliderProxy.buildProxy();
-		slider.move(0);
+        array = response.getJSONArray("resources");
 
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + 
-        		"/slider/cursor/position/GET", null, "GET");
+        JSONAssert.assertEquals(new JSONArray("[{\"name\":\"position\",\"type\":\"SENSOR\"}]"), array, false);
 
-		response = new JSONObject(simulated);
-        assertTrue(response.get("statusCode").equals(200));
-        assertTrue(response.getString("uri").equals("/slider/cursor/position"));
-        assertTrue(response.getJSONObject("response").get("value").equals(0));	
-
-		slider.move(1);
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL 
-        		+ "/slider/cursor/position/GET", null, "GET");
-
+        MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
+        SliderSetterItf slider = sliderProxy.buildProxy();
+        slider.move(0);
+        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/slider/cursor/position/GET", null, "GET");
         response = new JSONObject(simulated);
-
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/cursor/position"));
-        assertTrue(response.getJSONObject("response").get("value").equals(1));		
-	}
+        assertTrue(response.getJSONObject("response").get("value").equals(0));
+        slider.move(1);
+        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/slider/cursor/position/GET", null, "GET");
+        response = new JSONObject(simulated);
+        assertTrue(response.get("statusCode").equals(200));
+        assertTrue(response.getString("uri").equals("/slider/cursor/position"));
+        assertTrue(response.getJSONObject("response").get("value").equals(1));
+    }
 
-	@Test
-	public void testWsAccessMethodRawDescription() throws Exception
-	{
+    @Test
+    public void testWsAccessMethodRawDescription() throws Exception {
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
-                
-		new Thread(client).start();
 
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers?rawDescribe=true", 
-        null);       
-        
+        new Thread(client).start();
+        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers?rawDescribe=true", null);
+
         //System.out.println(simulated);
         JSONArray response = new JSONArray("[\"slider\",\"light\"]");
         JSONAssert.assertEquals(response, new JSONArray(simulated), false);
-	}
-	
-	@Test
-	public void testWsAccessMethodGET() throws Exception
-	{	
+    }
+
+    @Test
+    public void testWsAccessMethodGET() throws Exception {
         JSONObject response;
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
-                
-		new Thread(client).start();
 
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + 
-        		"/providers", null); 
-        
+        new Thread(client).start();
+        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers", null);
+
         //System.out.println(simulated);
-		
-        response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"],"
-				+ "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
 
-		JSONAssert.assertEquals(response, new JSONObject(simulated), false);
+        response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"]," + "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
+        JSONAssert.assertEquals(response, new JSONObject(simulated), false);
+        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/slider/services", null);
 
-        simulated = this.synchronizedRequest(client, WS_ROOTURL +
-        		"/providers/slider/services", null); 
-        
-		response = new JSONObject(simulated);
+        response = new JSONObject(simulated);
+        JSONArray array = response.getJSONArray("services");
+        assertTrue(array.length() == 2);
+        JSONAssert.assertEquals(new JSONArray("[\"admin\",\"cursor\"]"), array, false);
+        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/slider/services/cursor/resources", null);
+        response = new JSONObject(simulated);
+        array = response.getJSONArray("resources");
+        //JSONAssert.assertEquals(new JSONArray("[\"location\",\"position\"]"), array, false);
+        JSONAssert.assertEquals(new JSONArray("[\"position\"]"), array, false);
+        MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
+        SliderSetterItf slider = sliderProxy.buildProxy();
+        slider.move(1);
+        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/slider/services/cursor/resources/position/GET", null);
+        response = new JSONObject(simulated);
+        assertTrue(response.get("statusCode").equals(200));
+        assertTrue(response.getString("uri").equals("/slider/cursor/position"));
+        assertTrue(response.getJSONObject("response").get("value").equals(1));
 
-		JSONArray array = response.getJSONArray("services");
-		assertTrue(array.length() == 2);
-
-		JSONAssert.assertEquals(new JSONArray("[\"admin\",\"cursor\"]"), array, false);
-
-		simulated = this.synchronizedRequest(client, WS_ROOTURL + 
-			"/providers/slider/services/cursor/resources", null);
-
-		response = new JSONObject(simulated);
-		array = response.getJSONArray("resources");
-
-		//JSONAssert.assertEquals(new JSONArray("[\"location\",\"position\"]"), array, false);
-		JSONAssert.assertEquals(new JSONArray("[\"position\"]"), array, false);
-
-		MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(
-				classloader,this, SliderSetterItf.class);		
-		SliderSetterItf slider = sliderProxy.buildProxy();
-		slider.move(1);
-
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + 
-        	"/providers/slider/services/cursor/resources/position/GET", null);
-	    response = new JSONObject(simulated);
-
-	    assertTrue(response.get("statusCode").equals(200));
-	    assertTrue(response.getString("uri").equals("/slider/cursor/position"));
-	    assertTrue(response.getJSONObject("response").get("value").equals(1));
-		
         client.close();
-	}	
+    }
 
-	@Test
-	public void testSimplifiedWsAccessMethodGET() throws Exception
-	{	
+    @Test
+    public void testSimplifiedWsAccessMethodGET() throws Exception {
         JSONObject response;
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
-                
-		new Thread(client).start();
 
-        simulated = this.synchronizedRequest(client, WS_ROOTURL +
-        		"/slider", null); 
-        
-		response = new JSONObject(simulated).getJSONObject("response");
+        new Thread(client).start();
+        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/slider", null);
 
-		JSONArray array = response.getJSONArray("services");
-		assertTrue(array.length() == 2);
-
-		JSONAssert.assertEquals(new JSONArray("[\"admin\",\"cursor\"]"), array, false);
-
-		simulated = this.synchronizedRequest(client, WS_ROOTURL + 
-			"/slider/cursor", null);
-
-		response = new JSONObject(simulated).getJSONObject("response");
-		array = response.getJSONArray("resources");
-
-		JSONAssert.assertEquals(new JSONArray("[{\"name\":\"position\",\"type\":\"SENSOR\"}]"), array, false);
-
-		MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(
-				classloader,this, SliderSetterItf.class);		
-		SliderSetterItf slider = sliderProxy.buildProxy();
-		slider.move(1);
-
+        response = new JSONObject(simulated).getJSONObject("response");
+        JSONArray array = response.getJSONArray("services");
+        assertTrue(array.length() == 2);
+        JSONAssert.assertEquals(new JSONArray("[\"admin\",\"cursor\"]"), array, false);
+        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/slider/cursor", null);
+        response = new JSONObject(simulated).getJSONObject("response");
+        array = response.getJSONArray("resources");
+        JSONAssert.assertEquals(new JSONArray("[{\"name\":\"position\",\"type\":\"SENSOR\"}]"), array, false);
+        MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
+        SliderSetterItf slider = sliderProxy.buildProxy();
+        slider.move(1);
         simulated = this.synchronizedRequest(client, WS_ROOTURL + "/slider/cursor/position/GET", null);
-	    response = new JSONObject(simulated);
+        response = new JSONObject(simulated);
+        assertTrue(response.get("statusCode").equals(200));
+        assertTrue(response.getString("uri").equals("/slider/cursor/position"));
+        assertTrue(response.getJSONObject("response").get("value").equals(1));
 
-	    assertTrue(response.get("statusCode").equals(200));
-	    assertTrue(response.getString("uri").equals("/slider/cursor/position"));
-	    assertTrue(response.getJSONObject("response").get("value").equals(1));
-		
         client.close();
-	}
-	
-	private String synchronizedRequest(WsServiceTestClient client, 
-			String url, String content)
-	{
-		String simulated = null; 
-		long wait = 1000;
+    }
+
+    private String synchronizedRequest(WsServiceTestClient client, String url, String content) {
+        String simulated = null;
+        long wait = 1000;
 //		long start = System.currentTimeMillis();
-		
+
         client.newRequest(url, content);
-        
-        while(!client.isAvailable() && wait > 0)
-        {
-        	try
-        	{
-        	Thread.sleep(100);
-        	} catch (InterruptedException e)
-        	{
-        		Thread.interrupted();
-        	}
+
+        while (!client.isAvailable() && wait > 0) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.interrupted();
+            }
         }
-        if(client.isAvailable())
-        {
-        	simulated = client.getResponseMessage();
+        if (client.isAvailable()) {
+            simulated = client.getResponseMessage();
         }
 //        System.out.println(String.format(
 //        		"Response returned in %s ms",
 //        		(System.currentTimeMillis()-start)));
-        
+
         return simulated;
-	}
+    }
 }

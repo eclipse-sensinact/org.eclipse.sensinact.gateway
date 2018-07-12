@@ -8,44 +8,35 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.sthbnd.http;
 
 import java.util.List;
 import java.util.Map;
 
-
-
 /**
  * Extended {@link HttpPacket} wrapping an HTTP request message (
- * resulting of CallbackServer incoming request for example) 
- * 
+ * resulting of CallbackServer incoming request for example)
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class HttpRequestPacket extends HttpPacket
-{
-	 /**
-     * Constructor
-     * 
-     * @param content	
-	 * 		the bytes array content of the wrapped
-	 * 		HTTP message
-     */
-    public HttpRequestPacket (Map<String,List<String>> headers, 
-    		byte[] content)
-    {
-    	super(headers, content);
-    }
-    
+public class HttpRequestPacket extends HttpPacket {
     /**
      * Constructor
-     * 
-     * @param content	
-	 * 		the bytes array content of the wrapped
-	 * 		HTTP message
+     *
+     * @param content the bytes array content of the wrapped
+     *                HTTP message
      */
-    public HttpRequestPacket (byte[] content)
-    {
-    	super(content);
+    public HttpRequestPacket(Map<String, List<String>> headers, byte[] content) {
+        super(headers, content);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param content the bytes array content of the wrapped
+     *                HTTP message
+     */
+    public HttpRequestPacket(byte[] content) {
+        super(content);
     }
 }

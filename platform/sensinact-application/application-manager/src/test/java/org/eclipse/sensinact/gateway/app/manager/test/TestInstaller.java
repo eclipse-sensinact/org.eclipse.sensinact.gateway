@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.manager.test;
 
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
@@ -18,7 +17,6 @@ import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.json.JSONObject;
 
 class TestInstaller extends AbstractPlugin {
-
     private TestResult test;
     private AppServiceMediator mediator;
 
@@ -28,22 +26,20 @@ class TestInstaller extends AbstractPlugin {
     }
 
     public JSONObject getComponentJSONSchema(String function) {
-        if(function.equals("mock_addition")) {
+        if (function.equals("mock_addition")) {
             return MockComponentAddition.getJSONSchemaFunction(mediator.getContext());
-        } else if(function.equals("mock_set")) {
+        } else if (function.equals("mock_set")) {
             return MockComponentSetter.getJSONSchemaFunction(mediator.getContext());
         }
-
         return null;
     }
 
     public AbstractFunction getFunction(AppFunction function) {
-        if(function.getName().equals("mock_addition")) {
+        if (function.getName().equals("mock_addition")) {
             return new MockComponentAddition(mediator);
-        } else if(function.getName().equals("mock_set")) {
+        } else if (function.getName().equals("mock_set")) {
             return new MockComponentSetter(mediator, test);
         }
-
         return null;
     }
 }

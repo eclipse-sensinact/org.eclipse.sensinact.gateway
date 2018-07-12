@@ -10,34 +10,29 @@
  */
 package org.eclipse.sensinact.gateway.common.primitive;
 
-
 /**
- * A localizable service 
- * 
+ * A localizable service
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface Localizable
-{
-	/**
+public interface Localizable {
+    /**
      * Returns the string location value of this
      * localizable service
-     * 
-     * @return
-     * 		the string value of this localizable
-     * 		service
+     *
+     * @return the string value of this localizable
+     * service
      */
     String getLocation();
-    
+
     /**
      * Sets the string location value of this localizable
      * service
-     * 
-     * @param location
-     * 		the string location value to set
-     * @return
-     * 		the string location value of this localizable
-     * 		service
-     * @throws InvalidValueException 
+     *
+     * @param location the string location value to set
+     * @return the string location value of this localizable
+     * service
+     * @throws InvalidValueException
      */
     String setLocation(String location) throws InvalidValueException;
 }

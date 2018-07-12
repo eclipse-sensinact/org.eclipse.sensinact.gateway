@@ -15,26 +15,23 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 /**
- * BundleValidation defines a service for checking the 
+ * BundleValidation defines a service for checking the
  * validity of cryptographic signature of a Bundle.
  */
 public interface BundleValidation {
+    String SHA1_DIGEST_TYPE = "SHA1-Digest";
+    String SHA1_DIGEST_MF_MAIN = "SHA1-Digest-Manifest-Main-Attributes";
 
-	String SHA1_DIGEST_TYPE = "SHA1-Digest";
-	String SHA1_DIGEST_MF_MAIN = "SHA1-Digest-Manifest-Main-Attributes";
-
-	/**
-	 * Check whether the {@link Bundle} whose {@link BundleContext} 
-	 * is passed as parameter is valid, and returns its manifest
-	 * file signature if it is the case; otherwise returns null
-	 * 
-	 * @param bundle the OSGi {@link BundleContext} of the {@link 
-	 * Bundle} to validate 
-	 * 
-	 * @return the bundle's manifest signature if valid;
-	 * null otherwise
+    /**
+     * Check whether the {@link Bundle} whose {@link BundleContext}
+     * is passed as parameter is valid, and returns its manifest
+     * file signature if it is the case; otherwise returns null
      *
-	 * @throws BundleValidationException
-	 */
-	String check(Bundle bundle) throws BundleValidationException;
+     * @param bundle the OSGi {@link BundleContext} of the {@link
+     *               Bundle} to validate
+     * @return the bundle's manifest signature if valid;
+     * null otherwise
+     * @throws BundleValidationException
+     */
+    String check(Bundle bundle) throws BundleValidationException;
 }

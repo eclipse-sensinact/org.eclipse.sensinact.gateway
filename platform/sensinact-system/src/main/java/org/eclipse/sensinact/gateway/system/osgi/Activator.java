@@ -8,27 +8,22 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.system.osgi;
-
-import java.io.IOException;
-import java.util.Collections;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.eclipse.sensinact.gateway.generic.packet.Packet;
-import org.osgi.framework.BundleContext;
-
-import org.xml.sax.SAXException;
 
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
+import org.eclipse.sensinact.gateway.generic.packet.Packet;
+import org.osgi.framework.BundleContext;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.Collections;
 
 public class Activator extends AbstractActivator<Mediator> {
-
     private ExtModelConfiguration manager = null;
     private LocalProtocolStackEndpoint<Packet> connector = null;
 
@@ -37,49 +32,36 @@ public class Activator extends AbstractActivator<Mediator> {
      * @throws SAXException
      * @throws ParserConfigurationException
      * @inheritDoc
-     *
      * @see AbstractActivator#doStart()
      */
-    public void doStart() throws Exception 
-    {        
-        if(manager == null)
-        {
-        	manager = new ExtModelInstanceBuilder(
-        	super.mediator, Packet.class
-            	).withStartAtInitializationTime(true
-                ).buildConfiguration("system-resource.xml", 
-                Collections.<String,String>emptyMap());
+    public void doStart() throws Exception {
+        if (manager == null) {
+            manager = new ExtModelInstanceBuilder(super.mediator, Packet.class).withStartAtInitializationTime(true).buildConfiguration("system-resource.xml", Collections.<String, String>emptyMap());
         }
-        if(this.connector == null)
-        {
-        	this.connector = new LocalProtocolStackEndpoint<Packet>(mediator);
+        if (this.connector == null) {
+            this.connector = new LocalProtocolStackEndpoint<Packet>(mediator);
         }
         this.connector.connect(manager);
     }
 
     /**
      * @inheritDoc
-     *
      * @see AbstractActivator#doStop()
      */
-    public void doStop() 
-    {
-    	if(this.connector != null)
-    	{
-    		this.connector.stop();
-    		this.connector = null;
-    	}
+    public void doStop() {
+        if (this.connector != null) {
+            this.connector.stop();
+            this.connector = null;
+        }
         this.manager = null;
     }
 
     /**
      * @inheritDoc
-     *
      * @see AbstractActivator#
      * doInstantiate(org.osgi.framework.BundleContext, int, java.io.FileOutputStream)
      */
-    public Mediator doInstantiate(BundleContext context)
-    {
+    public Mediator doInstantiate(BundleContext context) {
         return new Mediator(context);
     }
 }

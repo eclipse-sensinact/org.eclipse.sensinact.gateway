@@ -10,20 +10,17 @@
  */
 package org.eclipse.sensinact.gateway.common.primitive;
 
-
 /**
  * A service providing its own {@link Description}
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface Describable extends Nameable
-{
-	/**
-	 * Returns {@link Description} of this 
-	 * Describable service
-	 * 
-	 * @return
-	 * 		this Describable {@link Description}
-	 */
-	<D extends Description> D getDescription();
+public interface Describable extends Nameable {
+    /**
+     * Returns {@link Description} of this
+     * Describable service
+     *
+     * @return this Describable {@link Description}
+     */
+    <D extends Description> D getDescription();
 }

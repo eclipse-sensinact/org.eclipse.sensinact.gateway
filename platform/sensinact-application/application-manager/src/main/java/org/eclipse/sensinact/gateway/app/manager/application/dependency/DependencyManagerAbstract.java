@@ -9,12 +9,11 @@ import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
  * Class that avoid the DependencyManager to implement empty methods that may create some noisy to understand its real role
  */
 public abstract class DependencyManagerAbstract extends AbstractMidAgentCallback {
-
     private String id;
 
-    public DependencyManagerAbstract(String id){
+    public DependencyManagerAbstract(String id) {
         super();
-        this.id=id;
+        this.id = id;
     }
 
     @Override
@@ -31,5 +30,4 @@ public abstract class DependencyManagerAbstract extends AbstractMidAgentCallback
     public void doHandle(SnaUpdateMessageImpl message) {
         //Handle not used
     }
-
 }

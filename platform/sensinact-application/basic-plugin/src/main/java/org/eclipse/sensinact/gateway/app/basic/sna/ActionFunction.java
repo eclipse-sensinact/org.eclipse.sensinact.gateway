@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.basic.sna;
 
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
@@ -20,21 +19,17 @@ import java.util.List;
 /**
  * The component that add an act/set action to the hook stack of the application
  *
- * @see AbstractFunction
- *
  * @author Remi Druilhe
+ * @see AbstractFunction
  */
 public abstract class ActionFunction extends AbstractFunction<PluginHook> implements PluginHook {
-
     protected List<DataItf> variables;
 
     /**
      * The list of supported operators
      */
     public enum SnaOperator {
-        ACT("act"),
-        SET("set");
-
+        ACT("act"), SET("set");
         private String type;
 
         SnaOperator(String type) {
@@ -51,7 +46,6 @@ public abstract class ActionFunction extends AbstractFunction<PluginHook> implem
      */
     public void process(List<DataItf> datas) {
         this.variables = datas;
-
         super.update(this);
     }
 }

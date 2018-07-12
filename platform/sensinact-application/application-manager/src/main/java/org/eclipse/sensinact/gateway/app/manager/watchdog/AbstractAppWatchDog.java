@@ -13,9 +13,9 @@ package org.eclipse.sensinact.gateway.app.manager.watchdog;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
 import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
-import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 
 /**
  * This abstract class is implemented by the watchdogs of the AppManager
@@ -23,12 +23,12 @@ import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
  * @author Remi Druilhe
  */
 abstract class AbstractAppWatchDog {
-
     protected AppServiceMediator mediator;
     protected ApplicationService service;
 
     /**
      * Abstract constructor
+     *
      * @param service the application to watch
      */
     AbstractAppWatchDog(AppServiceMediator mediator, ApplicationService service) {
@@ -38,12 +38,14 @@ abstract class AbstractAppWatchDog {
 
     /**
      * Start the watchdog
+     *
      * @param session the session used to start the application
      */
     public abstract SnaErrorMessage start(Session session);
 
     /**
      * Stop the watchdog
+     *
      * @param session the session used to stop the application
      */
     public abstract SnaErrorMessage stop(Session session);
@@ -51,15 +53,13 @@ abstract class AbstractAppWatchDog {
     /**
      * This function is used byt the various watchdogs in order to
      * trigger the UNRESOLVED status of the application when a problem occurs
+     *
      * @param message the message that triggered this alert
      */
     void alert(String message) {
-        if(mediator.isDebugLoggable()) {
+        if (mediator.isDebugLoggable()) {
             mediator.debug("Application exception: " + message);
         }
-
-        service.getResource(AppConstant.EXCEPTION).getAccessMethod(
-        	AccessMethod.Type.valueOf(AccessMethod.ACT)
-        		).invoke(null);
+        service.getResource(AppConstant.EXCEPTION).getAccessMethod(AccessMethod.Type.valueOf(AccessMethod.ACT)).invoke(null);
     }
 }

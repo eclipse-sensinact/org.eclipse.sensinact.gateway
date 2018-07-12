@@ -8,14 +8,12 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.billboard.internal;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BillboardConfig {
-
     private List<BillboardConfigListener> listeners;
     private String message;
 
@@ -33,7 +31,7 @@ public class BillboardConfig {
     }
 
     private void updateMessage(String message) {
-        for(BillboardConfigListener listener : listeners) {
+        for (BillboardConfigListener listener : listeners) {
             listener.messageChanged(message);
         }
     }

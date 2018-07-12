@@ -21,22 +21,18 @@ import org.json.JSONObject;
  * @author Rémi Druilhe
  */
 class AppExceptionExecutor implements AccessMethodExecutor {
-
     private final ApplicationService service;
 
-    AppExceptionExecutor(ApplicationService service)
-    {
+    AppExceptionExecutor(ApplicationService service) {
         this.service = service;
     }
 
     /**
      * @see Executable#execute(java.lang.Object)
      */
-    public Void execute(AccessMethodResponseBuilder jsonObjects) throws Exception 
-    {
+    public Void execute(AccessMethodResponseBuilder jsonObjects) throws Exception {
         service.getApplication().stop();
-        jsonObjects.push(new JSONObject().put("message", "The application " + service.getName()
-                + " has throw an exception. Stopping it."));
+        jsonObjects.push(new JSONObject().put("message", "The application " + service.getName() + " has throw an exception. Stopping it."));
         return null;
     }
 }

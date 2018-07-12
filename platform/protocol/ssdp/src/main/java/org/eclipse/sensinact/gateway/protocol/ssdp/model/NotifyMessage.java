@@ -16,10 +16,10 @@ import org.eclipse.sensinact.gateway.protocol.ssdp.api.SSDPEvent;
  * Message received on multicast interface to get some new information about a device
  */
 public class NotifyMessage extends SSDPReceivedMessage {
-
     private String notificationType;
 
-    public NotifyMessage() {}
+    public NotifyMessage() {
+    }
 
     public String getNotificationType() {
         return notificationType;
@@ -30,11 +30,11 @@ public class NotifyMessage extends SSDPReceivedMessage {
     }
 
     public void setEvent(String nts) {
-        if(nts.equalsIgnoreCase("ssdp:alive")) {
+        if (nts.equalsIgnoreCase("ssdp:alive")) {
             super.event = SSDPEvent.ALIVE;
-        } else if(nts.equalsIgnoreCase("ssdp:update")) {
+        } else if (nts.equalsIgnoreCase("ssdp:update")) {
             super.event = SSDPEvent.UPDATE;
-        } else if(nts.equalsIgnoreCase("ssdp:byebye")) {
+        } else if (nts.equalsIgnoreCase("ssdp:byebye")) {
             super.event = SSDPEvent.GOODBYE;
         }
     }

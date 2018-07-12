@@ -10,103 +10,84 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao;
 
-import java.util.HashMap;
-import java.util.List;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectProfileAccessEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectProfileEntity;
 
+import java.util.HashMap;
+import java.util.List;
+
 /**
- * Method DAO 
- * 
+ * Method DAO
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ObjectProfileAccessDAO extends AbstractImmutableSnaDAO<ObjectProfileAccessEntity>
-{
-	//********************************************************************//
-	//						NESTED DECLARATIONS	     					  //
-	//********************************************************************//
+public class ObjectProfileAccessDAO extends AbstractImmutableSnaDAO<ObjectProfileAccessEntity> {
+    //********************************************************************//
+    //						NESTED DECLARATIONS	     					  //
+    //********************************************************************//
+    //********************************************************************//
+    //						ABSTRACT DECLARATIONS						  //
+    //********************************************************************//
+    //********************************************************************//
+    //						STATIC DECLARATIONS  						  //
+    //********************************************************************//
 
-	//********************************************************************//
-	//						ABSTRACT DECLARATIONS						  //
-	//********************************************************************//
+    //********************************************************************//
+    //						INSTANCE DECLARATIONS						  //
+    //********************************************************************//
+    private ObjectProfileDAO objectProfileDAO;
 
-	//********************************************************************//
-	//						STATIC DECLARATIONS  						  //
-	//********************************************************************//
-	
-	//********************************************************************//
-	//						INSTANCE DECLARATIONS						  //
-	//********************************************************************//
-
-	private ObjectProfileDAO objectProfileDAO;
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param mediator
-	 * 		the {@link Mediator} allowing to
-	 * 		interact with the OSGi host environment
-	 */
-    public ObjectProfileAccessDAO(Mediator mediator)
-    {
-	    super(mediator, ObjectProfileAccessEntity.class);
-	    this.objectProfileDAO = new ObjectProfileDAO(mediator);
+    /**
+     * Constructor
+     *
+     * @param mediator the {@link Mediator} allowing to
+     *                 interact with the OSGi host environment
+     */
+    public ObjectProfileAccessDAO(Mediator mediator) {
+        super(mediator, ObjectProfileAccessEntity.class);
+        this.objectProfileDAO = new ObjectProfileDAO(mediator);
     }
 
+    /**
+     * @param objectProfile
+     * @return
+     * @throws DAOException
+     */
+    public AccessProfileOption getAccessProfileOption(long objectProfile) throws DAOException {
+        ObjectProfileEntity entity = this.objectProfileDAO.find(objectProfile);
+        return AccessProfileOption.valueOf(entity.getName());
+    }
 
-	/**
-	 * @param objectProfile
-	 * @return
-	 * @throws DAOException
-	 */
-	public AccessProfileOption getAccessProfileOption(long objectProfile)
-			throws DAOException
-	{
-		ObjectProfileEntity entity = this.objectProfileDAO.find(objectProfile);
-		return AccessProfileOption.valueOf(entity.getName());
-	}
-	
     /**
      * Returns the {@link ObjectEntity} from the datastore
      * matching the given Long identifier, otherwise null.
-     * 
+     *
      * @param objectProfileEntity
-     * 		
-     * @return 
-     * 		the {@link ObjectEntity} from the datastore matching 
-     * 		the given Long identifier, otherwise null.
-     * 
+     * @return the {@link ObjectEntity} from the datastore matching
+     * the given Long identifier, otherwise null.
      * @throws DAOException If something fails at datastore level.
      */
-    public List<ObjectProfileAccessEntity> getObjectProfileAccesses(
-    	ObjectProfileEntity objectProfileEntity)
-    		throws DAOException
-    {
-    	return getObjectProfileAccesses(objectProfileEntity.getIdentifier());
+    public List<ObjectProfileAccessEntity> getObjectProfileAccesses(ObjectProfileEntity objectProfileEntity) throws DAOException {
+        return getObjectProfileAccesses(objectProfileEntity.getIdentifier());
     }
-    
+
     /**
-     * Returns the {@link ObjectEntity} from the datastore 
+     * Returns the {@link ObjectEntity} from the datastore
      * matching the given Long identifier, otherwise null.
-     * 
-     * @param objectProfileEntityId
-     * 		The Long identifier specifying the primary key of 
-     * 		the {@link ObjectProfileEntity} to be returned.
-     * @return 
-     * 		the {@link ObjectProfileEntity} from the datastore matching 
-     * 		the given Long identifier, otherwise null.
-     * 
+     *
+     * @param objectProfileEntityId The Long identifier specifying the primary key of
+     *                              the {@link ObjectProfileEntity} to be returned.
+     * @return the {@link ObjectProfileEntity} from the datastore matching
+     * the given Long identifier, otherwise null.
      * @throws DAOException If something fails at datastore level.
      */
-    public List<ObjectProfileAccessEntity> getObjectProfileAccesses(
-        final long identifier) throws DAOException
-    {
-    	return super.select(new HashMap<String,Object>(){{
-    			this.put("OPID", identifier);}});
+    public List<ObjectProfileAccessEntity> getObjectProfileAccesses(final long identifier) throws DAOException {
+        return super.select(new HashMap<String, Object>() {{
+            this.put("OPID", identifier);
+        }});
     }
-    
+
 }

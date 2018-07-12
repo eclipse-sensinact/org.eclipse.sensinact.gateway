@@ -21,10 +21,7 @@ import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 import org.json.JSONObject;
 
 public class OneM2MGetTask extends HttpTask<SimpleHttpResponse, SimpleHttpRequest> {
-
-    public OneM2MGetTask(Mediator mediator, CommandType command, TaskTranslator transmitter,
-                         Class<SimpleHttpRequest> requestType, String path, String profileId,
-                         ResourceConfig resourceConfig, Object[] parameters) {
+    public OneM2MGetTask(Mediator mediator, CommandType command, TaskTranslator transmitter, Class<SimpleHttpRequest> requestType, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
         super(mediator, command, transmitter, requestType, path, profileId, resourceConfig, parameters);
     }
 
@@ -33,25 +30,20 @@ public class OneM2MGetTask extends HttpTask<SimpleHttpResponse, SimpleHttpReques
         String host = (String) mediator.getProperty("http.onem2m.host");
         String port = (String) mediator.getProperty("http.onem2m.port");
         String cseBase = (String) mediator.getProperty("http.onem2m.cse.base");
-
         String[] path = super.getPath().split("/");
-
         String uri;
-
-        if(OneM2MHttpPacketReader.DEFAULT_SERVICE_NAME.equalsIgnoreCase(path[2])) {
-            uri = "http://" + host + ":" + port +"/" + cseBase + "/" + path[1] + "/" + path[3] + "/latest";
+        if (OneM2MHttpPacketReader.DEFAULT_SERVICE_NAME.equalsIgnoreCase(path[2])) {
+            uri = "http://" + host + ":" + port + "/" + cseBase + "/" + path[1] + "/" + path[3] + "/latest";
         } else {
-            uri = "http://" + host + ":" + port +"/" + cseBase + "/" + path[1] + "/" + path[2] + "/" + path[3] + "/latest";
+            uri = "http://" + host + ":" + port + "/" + cseBase + "/" + path[1] + "/" + path[2] + "/" + path[3] + "/latest";
         }
-
         return uri;
     }
 
     @Override
     public void setResult(Object result) {
         JSONObject content = new JSONObject(new String((byte[]) result));
-
-        if(content.has("m2m:cin")) {
+        if (content.has("m2m:cin")) {
             super.setResult(content.getJSONObject("m2m:cin").getString("con"));
         } else {
             super.setResult(AccessMethod.EMPTY);

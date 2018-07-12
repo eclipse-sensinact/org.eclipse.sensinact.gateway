@@ -18,27 +18,30 @@ import org.eclipse.sensinact.gateway.app.manager.component.data.Data;
  * @author Rémi Druilhe
  */
 public interface DataItf {
-
     /**
      * Get the source URI of this data
+     *
      * @return the source URI
      */
     String getSourceUri();
 
     /**
      * Get the value of the {@link Data}
+     *
      * @return the value
      */
     Object getValue();
 
     /**
      * Get the Java type of the {@link Data}
+     *
      * @return the Java type
      */
     Class<?> getType();
 
     /**
      * Get the timestamp of the data
+     *
      * @return the timestamp
      */
     long getTimestamp();

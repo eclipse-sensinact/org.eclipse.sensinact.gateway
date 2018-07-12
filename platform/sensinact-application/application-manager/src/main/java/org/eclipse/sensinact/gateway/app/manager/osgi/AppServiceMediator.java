@@ -8,60 +8,56 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.manager.osgi;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Core;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 
 import java.util.Dictionary;
 
 /**
- * @see Mediator
- *
  * @author Remi Druilhe
+ * @see Mediator
  */
 public class AppServiceMediator extends Mediator {
-
     /**
      * @see Mediator#Mediator(BundleContext)
      */
-    public AppServiceMediator(BundleContext context)  {
+    public AppServiceMediator(BundleContext context) {
         super(context);
     }
 
     /**
      * Get the secured access from the OSGi registry
+     *
      * @return the secured access object
      */
-    public Core getCore()
-    {
-        ServiceReference<Core> reference = 
-            reference = super.getContext().getServiceReference(Core.class);
-        
-        if(reference != null)
-        {
-           return super.getContext().getService(reference); 
-        }
+    public Core getCore() {
+        ServiceReference<Core> reference = reference = super.getContext().getServiceReference(Core.class);
 
+        if (reference != null) {
+            return super.getContext().getService(reference);
+        }
         return null;
     }
 
     /**
      * Get the array of serviceReference of a class currently started in OSGi
+     *
      * @param filter the filter
      * @return the array of service references
      */
     public ServiceReference[] getServiceReferences(String filter) {
         /*try {
             Collection<ServiceReference<DataProviderItf>> serv = super.getContext().getServiceReferences(DataProviderItf.class, null);
-
             for(ServiceReference<DataProviderItf> toto : serv) {
                 System.out.println("----");
-
                 String[] properties =  toto.getPropertyKeys();
-
                 for(String prop : properties) {
                     System.out.println(prop + ": " + toto.getProperty(prop));
                 }
@@ -69,18 +65,17 @@ public class AppServiceMediator extends Mediator {
         } catch (InvalidSyntaxException e) {
             e.printStackTrace();
         }*/
-
         try {
             return super.getContext().getAllServiceReferences(null, filter);
         } catch (InvalidSyntaxException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
     /**
      * Get the service from the registry using the service reference
+     *
      * @param serviceReference the service reference
      * @return the OSGi service
      */
@@ -97,8 +92,9 @@ public class AppServiceMediator extends Mediator {
 
     /**
      * Register a service listener
+     *
      * @param serviceListener the class that is going to listen
-     * @param filter the filter
+     * @param filter          the filter
      */
     public void addServiceListener(ServiceListener serviceListener, String filter) {
         try {
@@ -110,6 +106,7 @@ public class AppServiceMediator extends Mediator {
 
     /**
      * Remove a service listener
+     *
      * @param serviceListener the class that was listening
      */
     public void removeServiceListener(ServiceListener serviceListener) {

@@ -10,13 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.device.openhab.internal;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.device.openhab.sensinact.OpenHabMediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
@@ -26,6 +19,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * OpenHab2 Packet
  *
@@ -33,7 +33,6 @@ import org.json.JSONObject;
  * @author sb252289
  */
 public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
-
     private static final Map<String, Provider> providers = new HashMap<String, Provider>();
 
     /**
@@ -45,21 +44,17 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
 
     /**
      * @inheritDoc
-     *
      * @see org.eclipse.sensinact.gateway.generic.packet.PacketReader#parse(org.eclipse.sensinact.gateway.generic.packet.Packet)
      */
     @Override
     public void parse(HttpPacket packet) throws InvalidPacketException {
         byte[] content = packet.getBytes();
         String sb = new String(content);
-
         Set<String> devices = new HashSet<String>();
-
         //mediator.debug("Response from server: %s", sb);    	
         try {
             String openHabId = null;
             JSONArray itemsArray = new JSONArray(sb);
-
             for (int x = 0; x < itemsArray.length(); x++) {
                 String serviceId = null;
                 String resourceId = null;
@@ -72,15 +67,11 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
                     if (openHabId == null) {
                         try {
                             URL url = new URL(link);
-                            openHabId = "openHab".concat(
-                                    String.valueOf((url.getHost() + url.getPort()).hashCode()));
-
+                            openHabId = "openHab".concat(String.valueOf((url.getHost() + url.getPort()).hashCode()));
                         } catch (MalformedURLException e) {
                         }
                     }
-
                     devices.add(providerId);
-
                     switch (type) {
                         case "SwitchItem":
                         case "Switch":
@@ -99,8 +90,7 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
                             resourceId = "value";
                             break;
                         default:
-                            String msg = String.format(
-                                    "Type %s is not supported by this Openhab2 parser", type);
+                            String msg = String.format("Type %s is not supported by this Openhab2 parser", type);
                             throw new InvalidPacketException(msg);
                     }
 //                        mediator.debug("Processing item %s", jo.toString());
@@ -153,7 +143,6 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
     }
 
     private static class Provider extends HashMap<String, Service> {
-
         private final String name;
 
         private Provider(String name) {
@@ -176,7 +165,6 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
         private Object getValue(String serviceId, String resourceId) {
             Object value = null;
             Service service = this.getService(serviceId);
-
             if (service != null) {
                 Resource resource = service.getResource(resourceId);
                 if (resource != null) {
@@ -199,7 +187,6 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
     }
 
     private static class Service extends HashMap<String, Resource> {
-
         private final String name;
 
         Service(String name) {
@@ -225,7 +212,6 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
     }
 
     private static class Resource {
-
         private final String name;
         private Object value;
 

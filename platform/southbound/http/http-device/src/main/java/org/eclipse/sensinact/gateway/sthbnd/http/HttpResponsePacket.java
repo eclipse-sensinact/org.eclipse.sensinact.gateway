@@ -8,29 +8,26 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.sthbnd.http;
 
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 
 /**
  * Extended {@link HttpPacket} wrapping an HTTP response message
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class HttpResponsePacket extends HttpPacket
-{
-	protected int statusCode = -1;
-	protected String path ;
-	protected CommandType command;
-	
+public class HttpResponsePacket extends HttpPacket {
+    protected int statusCode = -1;
+    protected String path;
+    protected CommandType command;
+
     /**
      * @param topic
      * @param mqttMessage
      */
-    public HttpResponsePacket (HttpResponse response)
-    {
-        super(response!=null?response.getContent():new byte[0]);
+    public HttpResponsePacket(HttpResponse response) {
+        super(response != null ? response.getContent() : new byte[0]);
         this.setStatusCode(statusCode);
         this.path = response.getPath();
         this.command = response.getCommand();
@@ -40,40 +37,34 @@ public class HttpResponsePacket extends HttpPacket
     /**
      * @return
      */
-    public CommandType getCommand()
-    {        
+    public CommandType getCommand() {
         return this.command;
-    }  
+    }
 
     /**
      * @return
      */
-    public String getPath()
-    {
-    	return this.path;
+    public String getPath() {
+        return this.path;
     }
-    
+
     /**
      * Defines the integer status of the wrapped HTTP message
-     * 
-     * @param statusCode
-     * 		the integer status of the wrapped HTTP message
+     *
+     * @param statusCode the integer status of the wrapped HTTP message
      */
-    public void setStatusCode(int statusCode)
-    {
-    	this.statusCode = statusCode;
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
     }
 
     /**
-     * Returns the integer status of the wrapped 
+     * Returns the integer status of the wrapped
      * HTTP message
-     * 
-     * @return
-     * 		the integer status of the wrapped 
-     * 		HTTP message
+     *
+     * @return the integer status of the wrapped
+     * HTTP message
      */
-    public int getStatusCode()
-    {
-    	return this.statusCode;
+    public int getStatusCode() {
+        return this.statusCode;
     }
 }

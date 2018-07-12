@@ -21,7 +21,6 @@ import java.util.Set;
  * @author Rémi Druilhe
  */
 public class DataProviderSubscription {
-
     private final String dataProviderUri;
     private final Set<AppCondition> conditions;
     private final List<List<String>> routes;
@@ -49,16 +48,13 @@ public class DataProviderSubscription {
     }
 
     public Set<Constraint> getConstraints() {
-        if(conditions.isEmpty()) {
+        if (conditions.isEmpty()) {
             return null;
         }
-
         Set<Constraint> constraints = new HashSet<Constraint>();
-
-        for(AppCondition condition : conditions) {
+        for (AppCondition condition : conditions) {
             constraints.add(condition.getConstraint());
         }
-
         return constraints;
     }
 

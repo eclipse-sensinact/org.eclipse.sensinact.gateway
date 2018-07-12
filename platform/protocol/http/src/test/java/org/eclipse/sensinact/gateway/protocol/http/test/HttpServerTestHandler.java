@@ -10,81 +10,65 @@
  */
 package org.eclipse.sensinact.gateway.protocol.http.test;
 
-import java.util.List;
-
 import org.eclipse.sensinact.gateway.protocol.http.server.RequestContent;
 import org.eclipse.sensinact.gateway.protocol.http.server.RequestHandler;
 import org.eclipse.sensinact.gateway.protocol.http.server.ResponseContent;
 
+import java.util.List;
+
 /**
- *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class HttpServerTestHandler implements RequestHandler
-{
-	//********************************************************************//
-	//						NESTED DECLARATIONS			  			      //
-	//********************************************************************//
+public class HttpServerTestHandler implements RequestHandler {
+    //********************************************************************//
+    //						NESTED DECLARATIONS			  			      //
+    //********************************************************************//
+    //********************************************************************//
+    //						ABSTRACT DECLARATIONS						  //
+    //********************************************************************//
+    //********************************************************************//
+    //						STATIC DECLARATIONS							  //
+    //********************************************************************//
+    //********************************************************************//
+    //						INSTANCE DECLARATIONS						  //
+    //********************************************************************//
+    private CallbackCollection callbacks;
 
-	//********************************************************************//
-	//						ABSTRACT DECLARATIONS						  //
-	//********************************************************************//
+    /**
+     *
+     */
+    public HttpServerTestHandler(CallbackCollection callbacks) {
+        this.callbacks = callbacks;
+    }
 
-	//********************************************************************//
-	//						STATIC DECLARATIONS							  //
-	//********************************************************************//
+    /**
+     * @inheritDoc
+     * @see RequestHandler#handle(RequestContent)
+     */
+    @Override
+    public ResponseContent handle(RequestContent request) {
+        List<Callback> callbackList = null;
 
-	//********************************************************************//
-	//						INSTANCE DECLARATIONS						  //
-	//********************************************************************//
+        if (request.getHttpMethod().equals("GET")) {
+            callbackList = this.callbacks.getdoGetCallbacks();
+        } else if (request.getHttpMethod().equals("POST")) {
+            callbackList = this.callbacks.getdoPostCallbacks();
+        }
 
-	private CallbackCollection callbacks;
+        int index = 0;
+        int length = callbackList == null ? 0 : callbackList.size();
 
-	/**
-	 * 
-	 */
-	public HttpServerTestHandler(CallbackCollection callbacks)
-	{
-		this.callbacks = callbacks;
-	}
+        for (; index < length; index++) {
+            Callback callback = callbackList.get(index);
+            try {
+                return (ResponseContent) callback.invoke(new Object[]{request});
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see RequestHandler#handle(RequestContent)
-	 */
-	@Override
-	public ResponseContent handle(RequestContent request)
-	{
-		List<Callback> callbackList = null;
-		
-		if(request.getHttpMethod().equals("GET"))
-		{
-			callbackList = this.callbacks.getdoGetCallbacks();
-		}
-		else if(request.getHttpMethod().equals("POST"))
-		{
-			callbackList = this.callbacks.getdoPostCallbacks();
-		}
-		
-		int index = 0;
-		int length =  callbackList==null?0:callbackList.size();
-			
-		for(;index < length; index ++)
-		{
-			Callback callback = callbackList.get(index);
-			try 
-			{
-				return (ResponseContent) callback.invoke(new Object[]{request});
-				
-			} catch (Exception e)
-			{
-				e.printStackTrace();
-				continue;
-			} 
-			
-		}
-		return null;
-	}
+            } catch (Exception e) {
+                e.printStackTrace();
+                continue;
+            }
 
+        }
+        return null;
+    }
 }

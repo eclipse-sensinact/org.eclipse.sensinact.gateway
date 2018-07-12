@@ -14,7 +14,6 @@ package org.eclipse.sensinact.gateway.protocol.ssdp.exception;
  * Exception used when a parameter is not in the ranges described in the specification
  */
 public class InvalidParameterException extends Exception {
-
     public InvalidParameterException() {
     }
 

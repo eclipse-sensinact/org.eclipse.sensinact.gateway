@@ -8,21 +8,17 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.generic.test.bundle;
 
 /**
- * 
+ *
  */
-public class Calculator
-{
-	public Calculator()
-	{
-		
-	}
-	
-	int plus(int operand1, int operand2)
-	{
-		return operand1+operand2;
-	}
+public class Calculator {
+    public Calculator() {
+
+    }
+
+    int plus(int operand1, int operand2) {
+        return operand1 + operand2;
+    }
 }

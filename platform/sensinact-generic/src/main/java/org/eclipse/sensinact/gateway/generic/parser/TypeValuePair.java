@@ -10,14 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.generic.parser;
 
-final class TypeValuePair
-{
-	public final Class<?> type;
-	public final Object value;
-	
-	TypeValuePair(Class<?> type, Object value)
-	{
-		this.type = type;
-		this.value = value;
-	}
+final class TypeValuePair {
+    public final Class<?> type;
+    public final Object value;
+
+    TypeValuePair(Class<?> type, Object value) {
+        this.type = type;
+        this.value = value;
+    }
 }

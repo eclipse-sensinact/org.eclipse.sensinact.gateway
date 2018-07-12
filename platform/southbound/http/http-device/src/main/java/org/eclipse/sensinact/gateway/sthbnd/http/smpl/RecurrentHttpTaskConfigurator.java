@@ -13,29 +13,26 @@ package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 
 /**
- *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface RecurrentHttpTaskConfigurator extends HttpTaskBuilder
-{
-	/**
-	 * @return the period
-	 */
-	long getPeriod();
+public interface RecurrentHttpTaskConfigurator extends HttpTaskBuilder {
+    /**
+     * @return the period
+     */
+    long getPeriod();
 
-	/**
-	 * @return the delay
-	 */
-	long getDelay();
+    /**
+     * @return the delay
+     */
+    long getDelay();
 
-	/**
-	 * @return the timeout
-	 */
-	long getTimeout();
-	
-	/**
-	 * @return 
-	 *     the taskType
-	 */
-	Class<? extends HttpTask> getTaskType();
+    /**
+     * @return the timeout
+     */
+    long getTimeout();
+
+    /**
+     * @return the taskType
+     */
+    Class<? extends HttpTask> getTaskType();
 }

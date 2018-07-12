@@ -10,9 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.commands.gogo.internal.shell;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
@@ -25,105 +22,78 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.util.List;
+
 /**
  * Extended {@link NorthboundAccess} dedicated to shell access request
  * processing
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ShellAccess extends NorthboundAccess<ShellAccessRequest>
-{	
-	public static void proceed(CommandServiceMediator mediator, 
-			JSONObject object) 
-	{
-    	try 
-    	{
-    		ShellAccessRequest request = new ShellAccessRequest(
-    				mediator, object);
-			new ShellAccess(request).proceed();
-			
-		} catch (InvalidCredentialException | IOException e) 
-    	{
-			mediator.getOutput().outputError(
-					520, e.getMessage());
-		}    	
-	}
-	
-	protected NorthboundEndpoint endpoint;
+public class ShellAccess extends NorthboundAccess<ShellAccessRequest> {
+    public static void proceed(CommandServiceMediator mediator, JSONObject object) {
+        try {
+            ShellAccessRequest request = new ShellAccessRequest(mediator, object);
+            new ShellAccess(request).proceed();
 
-	/**
-	 * Constructor
-	 * 
-	 * @param request the {@link ShellAccessRequest} that will be treated
-	 * by the ShellAccess to be instantiated
-	 * 
-	 * @throws IOException
-	 * @throws InvalidCredentialException
-	 */
-	public ShellAccess(ShellAccessRequest request)
-		throws IOException, InvalidCredentialException
-	{
-		super(request);
-		this.endpoint = ((CommandServiceMediator)super.mediator
-				).getEndpoint();
-	}
-	
-	/** 
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess#
-	 * respond(org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator, org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder)
-	 */
-	@Override
-	protected boolean respond(
-			NorthboundMediator mediator,
-			NorthboundRequestBuilder builder) 
-			throws IOException 
-	{
-		NorthboundRequest nthbndRequest = builder.build();
-		if(nthbndRequest == null)
-		{
-			this.sendError(500, "Internal server error");
-			return false;
-		}
-		AccessMethodResponse<?> cap = this.endpoint.execute(nthbndRequest);
+        } catch (InvalidCredentialException | IOException e) {
+            mediator.getOutput().outputError(520, e.getMessage());
+        }
+    }
 
-		String resultStr = null;
-		List<String> rawList = super.request.getQueryMap(
-	    		).get("rawDescribe");
-		
-	    if(rawList!= null && (rawList.contains("true") 
-	       ||rawList.contains("True") ||rawList.contains("yes") ||rawList.contains("Yes")) 
-	       && DescribeResponse.class.isAssignableFrom(cap.getClass()))
-	    {
-	    	resultStr = ((DescribeResponse<?>)cap).getJSON(true);
-	    } else
-	    {
-	    	resultStr = cap.getJSON();
-	    }	    
-		JSONObject result = new JSONResponseFormat(mediator
-			).format(resultStr);		
-		if(result == null)
-		{
-			this.sendError(500, "Internal server error");
-			return false;
-		}
-		((CommandServiceMediator)super.mediator
-				).getOutput().output(result,0);
-		return true;
-	}
+    protected NorthboundEndpoint endpoint;
 
-	/** 
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess#
-	 * sendError(int, java.lang.String)
-	 */
-	@Override
-	protected void sendError(int i, String message)
-			throws IOException
-	{
-		((CommandServiceMediator)super.mediator
-				).getOutput().outputError(i, message);
-	}
+    /**
+     * Constructor
+     *
+     * @param request the {@link ShellAccessRequest} that will be treated
+     *                by the ShellAccess to be instantiated
+     * @throws IOException
+     * @throws InvalidCredentialException
+     */
+    public ShellAccess(ShellAccessRequest request) throws IOException, InvalidCredentialException {
+        super(request);
+        this.endpoint = ((CommandServiceMediator) super.mediator).getEndpoint();
+    }
+
+    /**
+     * @inheritDoc
+     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess#
+     * respond(org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator, org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder)
+     */
+    @Override
+    protected boolean respond(NorthboundMediator mediator, NorthboundRequestBuilder builder) throws IOException {
+        NorthboundRequest nthbndRequest = builder.build();
+        if (nthbndRequest == null) {
+            this.sendError(500, "Internal server error");
+            return false;
+        }
+        AccessMethodResponse<?> cap = this.endpoint.execute(nthbndRequest);
+        String resultStr = null;
+        List<String> rawList = super.request.getQueryMap().get("rawDescribe");
+
+        if (rawList != null && (rawList.contains("true") || rawList.contains("True") || rawList.contains("yes") || rawList.contains("Yes")) && DescribeResponse.class.isAssignableFrom(cap.getClass())) {
+            resultStr = ((DescribeResponse<?>) cap).getJSON(true);
+        } else {
+            resultStr = cap.getJSON();
+        }
+        JSONObject result = new JSONResponseFormat(mediator).format(resultStr);
+        if (result == null) {
+            this.sendError(500, "Internal server error");
+            return false;
+        }
+        ((CommandServiceMediator) super.mediator).getOutput().output(result, 0);
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess#
+     * sendError(int, java.lang.String)
+     */
+    @Override
+    protected void sendError(int i, String message) throws IOException {
+        ((CommandServiceMediator) super.mediator).getOutput().outputError(i, message);
+    }
 }

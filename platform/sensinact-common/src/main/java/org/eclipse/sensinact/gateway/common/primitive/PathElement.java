@@ -10,21 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.common.primitive;
 
-
 /**
  * A PathElement service belongs to a hierarchy
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface PathElement
-{
-	/**
-	 * Returns the string uri path of this 
-	 * PathElement service
-	 * 
-	 * @return
-	 *     the uri path of this PathElement 
-	 *     service
-	 */
-	 String getPath();
+public interface PathElement {
+    /**
+     * Returns the string uri path of this
+     * PathElement service
+     *
+     * @return the uri path of this PathElement
+     * service
+     */
+    String getPath();
 }

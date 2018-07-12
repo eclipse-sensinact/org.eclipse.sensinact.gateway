@@ -13,54 +13,44 @@ package org.eclipse.sensinact.gateway.generic.stream;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.Task;
+import org.eclipse.sensinact.gateway.generic.TaskTranslator;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.eclipse.sensinact.gateway.generic.TaskTranslator;
 
 /**
  * @param <P>
- * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public abstract class StreamProtocolStackEndpoint<P extends Packet>
-extends ProtocolStackEndpoint<P> implements StreamTaskTranslator
-{
-	/**
-	 * Constructor
-	 * 
-	 * @param mediator
-	 * 		the {@link Mediator} that will be used 
-	 * 		by the StreamProtocolStackConnector to instantiate 
-	 * 		to interact with the OSGi host environment
-	 */
-	public StreamProtocolStackEndpoint(Mediator mediator) 
-	{
-		super(mediator);
-	}
+public abstract class StreamProtocolStackEndpoint<P extends Packet> extends ProtocolStackEndpoint<P> implements StreamTaskTranslator {
+    /**
+     * Constructor
+     *
+     * @param mediator the {@link Mediator} that will be used
+     *                 by the StreamProtocolStackConnector to instantiate
+     *                 to interact with the OSGi host environment
+     */
+    public StreamProtocolStackEndpoint(Mediator mediator) {
+        super(mediator);
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see TaskTranslator#
-	 * getRequestType()
-	 */
-	@Override
-	public Task.RequestType getRequestType()
-	{
-		return  REQUEST_TYPE;
-	}
+    /**
+     * @inheritDoc
+     * @see TaskTranslator#
+     * getRequestType()
+     */
+    @Override
+    public Task.RequestType getRequestType() {
+        return REQUEST_TYPE;
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see TaskTranslator#
-	 * send(Task)
-	 */
-	@Override
-	public void send(Task task) 
-	{	
-		StreamTask streamTask = (StreamTask)task;		
-		send(UriUtils.getRoot(task.getPath()).substring(1), 
-				streamTask.getPayloadBytesArray());
-	}
+    /**
+     * @inheritDoc
+     * @see TaskTranslator#
+     * send(Task)
+     */
+    @Override
+    public void send(Task task) {
+        StreamTask streamTask = (StreamTask) task;
+        send(UriUtils.getRoot(task.getPath()).substring(1), streamTask.getPayloadBytesArray());
+    }
 }

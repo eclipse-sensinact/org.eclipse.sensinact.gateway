@@ -8,91 +8,68 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.common.constraint;
-
-import java.util.logging.Level;
 
 import org.eclipse.sensinact.gateway.util.CastUtils;
 
+import java.util.logging.Level;
 
 /**
  * Constraint on the presence of an object in a set of data
- * 
- * @param <T>
- * 		the handled data set type
- * 
+ *
+ * @param <T> the handled data set type
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class Contains<T> extends ConstraintOnCollection<T>
-{
-	public static final String OPERATOR = "in";
+public class Contains<T> extends ConstraintOnCollection<T> {
+    public static final String OPERATOR = "in";
 
-	/**
-	 * Constructor
-	 * 
-	 * @param operator
-	 * @param operandClass
-	 * @param operand
-	 * @throws InvalidConstraintDefinitionException
-	 */
-	public Contains(ClassLoader classloader, 
-			Class<T> operandClass, Object operand, boolean complement)
-	        throws InvalidConstraintDefinitionException
-	{
-		super(classloader, OPERATOR, operandClass, operand, complement);
-	}
+    /**
+     * Constructor
+     *
+     * @param operator
+     * @param operandClass
+     * @param operand
+     * @throws InvalidConstraintDefinitionException
+     */
+    public Contains(ClassLoader classloader, Class<T> operandClass, Object operand, boolean complement) throws InvalidConstraintDefinitionException {
+        super(classloader, OPERATOR, operandClass, operand, complement);
+    }
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see Constraint#complies(java.lang.Object)
-	 */
-	@Override
-	public boolean complies(Object value)
-	{
-		boolean complies = false;
-		T castedValue = null;
-		try
-		{
-			castedValue = CastUtils.cast(
-			classloader, super.operandClass, value);
+    /**
+     * @inheritDoc
+     * @see Constraint#complies(java.lang.Object)
+     */
+    @Override
+    public boolean complies(Object value) {
+        boolean complies = false;
+        T castedValue = null;
+        try {
+            castedValue = CastUtils.cast(classloader, super.operandClass, value);
+        } catch (ClassCastException e) {
+            return complies;
+        }
+        int index = 0;
+        for (; index < super.operand.length; index++) {
+            if (castedValue.equals(super.operand[index])) {
+                complies = true;
+                break;
+            }
+        }
+        return (complies ^ isComplement());
+    }
 
-		} catch (ClassCastException e)
-		{
-			return complies;
-		}
-		int index = 0;
-		for (; index < super.operand.length; index++)
-		{
-			if (castedValue.equals(super.operand[index]))
-			{
-				complies = true;
-				break;
-			}
-		}
-		return (complies^isComplement());
-	}
-	
-	/** 
-	 * @inheritDoc
-	 * 
-	 * @see Constraint#getComplement()
-	 */
-	@Override
-	public Constraint getComplement() 
-	{
-		Contains complement = null;
-		try 
-		{
-			complement = new Contains( super.classloader, 
-					super.operandClass, 
-					super.operand, !super.complement);			
-		}
-        catch (InvalidConstraintDefinitionException e)
-        {
-        	LOGGER.log(Level.SEVERE, e.getMessage(),e);
-        }			
-		return complement;
-	}
+    /**
+     * @inheritDoc
+     * @see Constraint#getComplement()
+     */
+    @Override
+    public Constraint getComplement() {
+        Contains complement = null;
+        try {
+            complement = new Contains(super.classloader, super.operandClass, super.operand, !super.complement);
+        } catch (InvalidConstraintDefinitionException e) {
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+        }
+        return complement;
+    }
 }

@@ -14,8 +14,7 @@ package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.i
  * Created by nj246216 on 15/06/17.
  */
 public interface ProcessorFormatIface {
-
     String getName();
-    String process(String inData, org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.selector.SelectorIface selector) throws org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.exception.ProcessorFormatException;
 
+    String process(String inData, org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.selector.SelectorIface selector) throws org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.exception.ProcessorFormatException;
 }

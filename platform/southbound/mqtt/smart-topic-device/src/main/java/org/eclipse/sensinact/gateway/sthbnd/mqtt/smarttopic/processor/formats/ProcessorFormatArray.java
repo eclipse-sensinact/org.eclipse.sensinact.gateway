@@ -17,6 +17,7 @@ import org.json.JSONArray;
 
 /**
  * This processor will receive a JSON Array (e.g. ["alpha","bravo"]) and enables to select one of the element based on its index.
+ *
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class ProcessorFormatArray implements ProcessorFormatIface {
@@ -27,11 +28,11 @@ public class ProcessorFormatArray implements ProcessorFormatIface {
 
     @Override
     public String process(String inData, SelectorIface selector) throws ProcessorFormatException {
-        JSONArray array=new JSONArray(inData);
-        if(selector.getExpression().equals("last")){
-            return array.get(array.length()-1).toString();
-        }else {
-            Integer index=Integer.valueOf(selector.getExpression());
+        JSONArray array = new JSONArray(inData);
+        if (selector.getExpression().equals("last")) {
+            return array.get(array.length() - 1).toString();
+        } else {
+            Integer index = Integer.valueOf(selector.getExpression());
             return array.get(index).toString();
         }
     }

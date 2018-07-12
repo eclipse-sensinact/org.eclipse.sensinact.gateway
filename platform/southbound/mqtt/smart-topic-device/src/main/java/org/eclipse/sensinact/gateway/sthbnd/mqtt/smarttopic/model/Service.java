@@ -14,15 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Service {
-
     private final Provider provider;
     private String name;
 
-    public Service(Provider provider){
-        this.provider=provider;
+    public Service(Provider provider) {
+        this.provider = provider;
     }
 
-    private List<Resource> resources=new ArrayList<Resource>();
+    private List<Resource> resources = new ArrayList<Resource>();
 
     public String getName() {
         return name;

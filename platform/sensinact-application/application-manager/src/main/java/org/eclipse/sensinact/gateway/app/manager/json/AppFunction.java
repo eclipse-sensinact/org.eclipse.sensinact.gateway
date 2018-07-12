@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AppFunction implements JSONable {
-
     private final String name;
     private final List<AppParameter> buildParameters;
     private final List<AppParameter> runParameters;
@@ -31,22 +30,16 @@ public class AppFunction implements JSONable {
 
     public AppFunction(JSONObject json) {
         this.name = json.getString(AppJsonConstant.APP_FUNCTION_NAME);
-
         this.buildParameters = new ArrayList<AppParameter>();
-
-        if(json.has(AppJsonConstant.APP_FUNCTION_BUILD_PARAMETERS)) {
+        if (json.has(AppJsonConstant.APP_FUNCTION_BUILD_PARAMETERS)) {
             JSONArray parameterArray = json.getJSONArray(AppJsonConstant.APP_FUNCTION_BUILD_PARAMETERS);
-
             for (int i = 0; i < parameterArray.length(); i++) {
                 buildParameters.add(new AppParameter(parameterArray.getJSONObject(i)));
             }
         }
-
         this.runParameters = new ArrayList<AppParameter>();
-
-        if(json.has(AppJsonConstant.APP_FUNCTION_RUN_PARAMETERS)) {
+        if (json.has(AppJsonConstant.APP_FUNCTION_RUN_PARAMETERS)) {
             JSONArray parameterArray = json.getJSONArray(AppJsonConstant.APP_FUNCTION_RUN_PARAMETERS);
-
             for (int i = 0; i < parameterArray.length(); i++) {
                 runParameters.add(new AppParameter(parameterArray.getJSONObject(i)));
             }
@@ -70,29 +63,21 @@ public class AppFunction implements JSONable {
      */
     public String getJSON() {
         JSONObject function = new JSONObject();
-
         function.put(AppJsonConstant.APP_FUNCTION_NAME, name);
-
-        if(!buildParameters.isEmpty()) {
+        if (!buildParameters.isEmpty()) {
             JSONArray parametersArray = new JSONArray();
-
             for (AppParameter parameter : buildParameters) {
                 parametersArray.put(parameter.getJSON());
             }
-
             function.put(AppJsonConstant.APP_FUNCTION_BUILD_PARAMETERS, parametersArray);
         }
-
-        if(!runParameters.isEmpty()) {
+        if (!runParameters.isEmpty()) {
             JSONArray parametersArray = new JSONArray();
-
             for (AppParameter parameter : runParameters) {
                 parametersArray.put(parameter.getJSON());
             }
-
             function.put(AppJsonConstant.APP_FUNCTION_RUN_PARAMETERS, parametersArray);
         }
-
         return function.toString();
     }
 }

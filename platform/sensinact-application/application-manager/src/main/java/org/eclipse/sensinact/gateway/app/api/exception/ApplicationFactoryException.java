@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.app.api.exception;
 
 public class ApplicationFactoryException extends Exception {
-
     public ApplicationFactoryException() {
         super();
     }

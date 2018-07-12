@@ -8,16 +8,14 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.manager.json;
 
-import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
 import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-
+import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONObject;
 
 /**
@@ -26,7 +24,6 @@ import org.json.JSONObject;
  * @author Remi Druilhe
  */
 public class AppCondition implements JSONable {
-
     private final Mediator mediator;
     private final String operator;
     private final AppParameter parameter;
@@ -34,9 +31,10 @@ public class AppCondition implements JSONable {
 
     /**
      * Creates a condition
-     * @param mediator the mediator
-     * @param operator the operator of the constraint
-     * @param parameter the parameter of the constraint
+     *
+     * @param mediator   the mediator
+     * @param operator   the operator of the constraint
+     * @param parameter  the parameter of the constraint
      * @param complement the complement of the constraint
      */
     public AppCondition(Mediator mediator, String operator, AppParameter parameter, boolean complement) {
@@ -48,24 +46,22 @@ public class AppCondition implements JSONable {
 
     /**
      * JSON constructor to create an application
-     * @param mediator the mediator
+     *
+     * @param mediator  the mediator
      * @param condition the JSON version of the condition
      */
     public AppCondition(Mediator mediator, JSONObject condition) {
-        this(mediator,
-                condition.getString(AppJsonConstant.APP_EVENTS_CONDITION_OPERATOR),
-                new AppParameter(condition.get(AppJsonConstant.VALUE), condition.getString(AppJsonConstant.TYPE)),
-                condition.optBoolean(AppJsonConstant.APP_EVENTS_CONDITION_COMPLEMENT));
+        this(mediator, condition.getString(AppJsonConstant.APP_EVENTS_CONDITION_OPERATOR), new AppParameter(condition.get(AppJsonConstant.VALUE), condition.getString(AppJsonConstant.TYPE)), condition.optBoolean(AppJsonConstant.APP_EVENTS_CONDITION_COMPLEMENT));
     }
 
     /**
      * Get the constraint
+     *
      * @return the constraint
      */
     public Constraint getConstraint() {
         try {
-            return ConstraintFactory.Loader.load(mediator.getClassLoader(), AppOperator.getOperator(operator),
-                    CastUtils.jsonTypeToJavaType(parameter.getType()), parameter.getValue(), complement);
+            return ConstraintFactory.Loader.load(mediator.getClassLoader(), AppOperator.getOperator(operator), CastUtils.jsonTypeToJavaType(parameter.getType()), parameter.getValue(), complement);
         } catch (InvalidConstraintDefinitionException e) {
             e.printStackTrace();
             return null;
@@ -79,23 +75,17 @@ public class AppCondition implements JSONable {
         if (this == o) {
             return true;
         }
-
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         AppCondition that = (AppCondition) o;
-
         if (complement != that.complement) {
             return false;
         }
-
         if (!operator.equals(that.operator)) {
             return false;
         }
-
         return parameter.equals(that.parameter);
-
     }
 
     /**
@@ -112,11 +102,6 @@ public class AppCondition implements JSONable {
      * @see JSONable#getJSON()
      */
     public String getJSON() {
-        return new JSONObject()
-                .put(AppJsonConstant.APP_EVENTS_CONDITION_OPERATOR, operator)
-                .put(AppJsonConstant.VALUE, parameter.getValue())
-                .put(AppJsonConstant.TYPE, parameter.getType())
-                .put(AppJsonConstant.APP_EVENTS_CONDITION_COMPLEMENT, complement)
-                .toString();
+        return new JSONObject().put(AppJsonConstant.APP_EVENTS_CONDITION_OPERATOR, operator).put(AppJsonConstant.VALUE, parameter.getValue()).put(AppJsonConstant.TYPE, parameter.getType()).put(AppJsonConstant.APP_EVENTS_CONDITION_COMPLEMENT, complement).toString();
     }
 }

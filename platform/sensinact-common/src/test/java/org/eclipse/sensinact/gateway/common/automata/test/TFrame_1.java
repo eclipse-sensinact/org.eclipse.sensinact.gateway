@@ -12,10 +12,8 @@ package org.eclipse.sensinact.gateway.common.automata.test;
 
 import org.eclipse.sensinact.gateway.common.automata.AbstractFrame;
 
-public class TFrame_1 extends AbstractFrame
-{
-	public TFrame_1() 
-	{
-		super();
-	}
+public class TFrame_1 extends AbstractFrame {
+    public TFrame_1() {
+        super();
+    }
 }

@@ -23,30 +23,12 @@ import org.eclipse.sensinact.gateway.sthbnd.http.annotation.SimpleHttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.onem2m.internal.OneM2MHttpGetConfigurator;
 import org.eclipse.sensinact.gateway.sthbnd.http.onem2m.task.OneM2MDiscoveryTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.onem2m.task.OneM2MGetTask;
-import org.eclipse.sensinact.gateway.sthbnd.http.smpl.*;
+import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator;
 
-@HttpTasks(tasks = {
-    @SimpleHttpTask(
-        commands = { Task.CommandType.GET },
-        configuration = @HttpTaskConfiguration(
-            host = "$(http.onem2m.host)",
-            port = "$(http.onem2m.port)",
-            path = "/$(http.onem2m.cse.base)",
-            acceptType = "application/json",
-            contentType = "application/json",
-            headers = {
-                @KeyValuePair(key = "X-M2M-Origin", value = "SOrigin")
-            },
-            content = OneM2MHttpGetConfigurator.class,
-            direct = true
-        )
-    )
-})
+@HttpTasks(tasks = {@SimpleHttpTask(commands = {Task.CommandType.GET}, configuration = @HttpTaskConfiguration(host = "$(http.onem2m.host)", port = "$(http.onem2m.port)", path = "/$(http.onem2m.cse.base)", acceptType = "application/json", contentType = "application/json", headers = {@KeyValuePair(key = "X-M2M-Origin", value = "SOrigin")}, content = OneM2MHttpGetConfigurator.class, direct = true))})
 public class Activator extends HttpActivator {
-
     /**
      * @inheritDoc
-     *
      * @see AbstractActivator#doStart()
      */
     @Override
@@ -54,29 +36,19 @@ public class Activator extends HttpActivator {
         super.mediator.setTaskProcessingContextHandler(this.getProcessingContextHandler());
         this.mediator.setTaskProcessingContextFactory(this.getTaskProcessingContextFactory());
         this.mediator.setChainedTaskProcessingContextFactory(this.getChainedTaskProcessingContextFactory());
-
-        ExtModelConfiguration configuration = new ExtModelInstanceBuilder(mediator, getPacketType())
-                .withStartAtInitializationTime(isStartingAtInitializationTime())
-                .withServiceBuildPolicy(BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
-                .withResourceBuildPolicy(BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
-                .withDesynchronization(true)
-                .buildConfiguration(getResourceDescriptionFile(), getDefaults());
-
+        ExtModelConfiguration configuration = new ExtModelInstanceBuilder(mediator, getPacketType()).withStartAtInitializationTime(isStartingAtInitializationTime()).withServiceBuildPolicy(BuildPolicy.BUILD_NON_DESCRIBED.getPolicy()).withResourceBuildPolicy(BuildPolicy.BUILD_NON_DESCRIBED.getPolicy()).withDesynchronization(true).buildConfiguration(getResourceDescriptionFile(), getDefaults());
         this.endpoint = this.configureProtocolStackEndpoint();
         this.connect(configuration);
     }
 
     /**
      * @inheritDoc
-     *
      * @see HttpActivator#connect(ExtModelConfiguration)
      */
     @Override
-	public void connect(ExtModelConfiguration configuration) throws InvalidProtocolStackException {
+    public void connect(ExtModelConfiguration configuration) throws InvalidProtocolStackException {
         super.endpoint.registerDiscoveryTask(new OneM2MDiscoveryTask(mediator, endpoint));
-
         super.endpoint.setGetTaskType(OneM2MGetTask.class);
-
         super.connect(configuration);
     }
 }

@@ -8,10 +8,8 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.manager.test;
 
 interface TestResult {
-
     void setValue(int value);
 }

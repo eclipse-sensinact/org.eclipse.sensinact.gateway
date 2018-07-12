@@ -8,14 +8,12 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.temperature.generator.internal;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 
 public abstract class TemperaturesGeneratorAbstractPacketReader extends SimplePacketReader<TemperaturesGeneratorAbstractPacket> {
-
     public TemperaturesGeneratorAbstractPacketReader(Mediator mediator) {
         super(mediator);
     }

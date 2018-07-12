@@ -10,67 +10,53 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
-import java.lang.reflect.Method;
-
 import org.eclipse.sensinact.gateway.common.execution.Executable;
+
+import java.lang.reflect.Method;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class TaskCallBack
-{
+public class TaskCallBack {
     private final Executable<Task, Void> executor;
-    
+
     /**
-     * @throws InvalidTaskCallBackException 
-     * 
+     * @throws InvalidTaskCallBackException
      */
-    public TaskCallBack (final Method method, final Object object) 
-            throws InvalidTaskCallBackException
-    {
+    public TaskCallBack(final Method method, final Object object) throws InvalidTaskCallBackException {
         Class<?>[] parameterTypes = method.getParameterTypes();
-        
-        if(parameterTypes.length !=1  || !Task.class.isAssignableFrom(
-                parameterTypes[0]) || !method.getDeclaringClass().isAssignableFrom(
-                       object.getClass()))
-        {
+
+        if (parameterTypes.length != 1 || !Task.class.isAssignableFrom(parameterTypes[0]) || !method.getDeclaringClass().isAssignableFrom(object.getClass())) {
             throw new InvalidTaskCallBackException();
         }
-        this.executor = new Executable<Task,Void>()
-		{
-			@Override
-            public Void execute(Task task) throws Exception
-            {
-				method.setAccessible(true);
-		        method.invoke(object, task);
-				return null;
+        this.executor = new Executable<Task, Void>() {
+            @Override
+            public Void execute(Task task) throws Exception {
+                method.setAccessible(true);
+                method.invoke(object, task);
+                return null;
             }
-		};
+        };
     }
-    
+
     /**
      * Constructor
-     * 
+     *
      * @param executor
      */
-    public TaskCallBack (Executable<Task,Void> executor) 
-    {
+    public TaskCallBack(Executable<Task, Void> executor) {
         this.executor = executor;
     }
-    
+
     /**
      * @param task
      */
-    public void callback(Task task)
-    {
-        try
-        {
-	        this.executor.execute(task);
-        }
-        catch (Exception e)
-        {
-	        e.printStackTrace();
+    public void callback(Task task) {
+        try {
+            this.executor.execute(task);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
-    
+
 }

@@ -13,47 +13,45 @@ package org.eclipse.sensinact.gateway.core.message;
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface MidAgentCallback extends MidCallback
-{    
-	/**
-	 * Processes the {@link SnaLifecycleMessageImpl} passed as 
-	 * parameter
-	 *  
-	 * @param message the {@link SnaLifecycleMessageImpl} to be 
-	 * processed
-	 */
-	void doHandle(SnaLifecycleMessageImpl message);
-	
-	/**
-	 * Processes the {@link SnaUpdateMessageImpl} passed as 
-	 * parameter
-	 *  
-	 * @param message the {@link SnaUpdateMessageImpl} to be 
-	 * processed
-	 */
-	void doHandle(SnaUpdateMessageImpl message);
+public interface MidAgentCallback extends MidCallback {
+    /**
+     * Processes the {@link SnaLifecycleMessageImpl} passed as
+     * parameter
+     *
+     * @param message the {@link SnaLifecycleMessageImpl} to be
+     *                processed
+     */
+    void doHandle(SnaLifecycleMessageImpl message);
 
-	/**
-	 * Processes the {@link SnaErrorMessageImpl} passed as 
-	 * parameter
-	 *  
-	 * @param message the {@link SnaErrorMessageImpl}  to be 
-	 * processed
-	 */
-	void doHandle(SnaErrorMessageImpl message);
+    /**
+     * Processes the {@link SnaUpdateMessageImpl} passed as
+     * parameter
+     *
+     * @param message the {@link SnaUpdateMessageImpl} to be
+     *                processed
+     */
+    void doHandle(SnaUpdateMessageImpl message);
 
-	/**
-	 * Processes the {@link SnaResponseMessage} passed as 
-	 * parameter
-	 *  
-	 * @param message the {@link SnaResponseMessage} to be 
-	 * processed
-	 */
-	void doHandle(SnaResponseMessage<?,?> message);
-	
-	/**
-	 * Stops this {@link SnaAgent} callback
-	 */
-	void stop();
+    /**
+     * Processes the {@link SnaErrorMessageImpl} passed as
+     * parameter
+     *
+     * @param message the {@link SnaErrorMessageImpl}  to be
+     *                processed
+     */
+    void doHandle(SnaErrorMessageImpl message);
 
+    /**
+     * Processes the {@link SnaResponseMessage} passed as
+     * parameter
+     *
+     * @param message the {@link SnaResponseMessage} to be
+     *                processed
+     */
+    void doHandle(SnaResponseMessage<?, ?> message);
+
+    /**
+     * Stops this {@link SnaAgent} callback
+     */
+    void stop();
 }

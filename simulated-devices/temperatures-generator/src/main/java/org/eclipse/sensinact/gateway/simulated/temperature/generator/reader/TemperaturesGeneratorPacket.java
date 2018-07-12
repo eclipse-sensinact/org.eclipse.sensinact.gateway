@@ -8,39 +8,37 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.temperature.generator.reader;
 
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacket;
 
 /**
- * 
+ *
  */
 public class TemperaturesGeneratorPacket extends TemperaturesGeneratorAbstractPacket {
+    private final String serviceProviderId;
+    private final double value;
 
-	private final String serviceProviderId;
-	private final double value;
-
-	/**
-	 * @param serviceProviderId the id of the device
-	 * @param value the value of the sensor
-	 */
+    /**
+     * @param serviceProviderId the id of the device
+     * @param value             the value of the sensor
+     */
     public TemperaturesGeneratorPacket(String serviceProviderId, double value) {
-    	this.serviceProviderId = serviceProviderId;
-		this.value = value;
+        this.serviceProviderId = serviceProviderId;
+        this.value = value;
     }
 
     /**
      * @return the service provider ID
      */
-	public String getServiceProvider() {
+    public String getServiceProvider() {
         return this.serviceProviderId;
-	}
+    }
 
-	/**
-	 * @return the value of the sensor
-	 */
-	public double getValue() {
-		return this.value;
-	}
+    /**
+     * @return the value of the sensor
+     */
+    public double getValue() {
+        return this.value;
+    }
 }

@@ -17,68 +17,51 @@ import org.eclipse.sensinact.gateway.util.stack.StackEngineHandler;
 
 /**
  * Abstract {@link MidCallback} implementation
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class UnaryMidCallback extends AbstractMidCallback
-{		
-	/**
-	 * Mediator used to interact with the OSGi host
-	 * environment 
-	 */
-	protected final Mediator mediator;
-	protected Recipient recipient;
+public class UnaryMidCallback extends AbstractMidCallback {
+    /**
+     * Mediator used to interact with the OSGi host
+     * environment
+     */
+    protected final Mediator mediator;
+    protected Recipient recipient;
 
+    /**
+     * Constructor
+     *
+     * @param identifier   the identifier of the {@link MidCallback}
+     *                     to instantiate
+     * @param errorHandler the {@link SnaCallbackErrorHandler} of the
+     *                     {@link MidCallback} to instantiate
+     * @param lifetime
+     */
+    public UnaryMidCallback(Mediator mediator, String identifier, ErrorHandler errorHandler, Recipient recipient, long lifetime) {
+        super(true);
+        this.mediator = mediator;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param identifier
-	 * 		the identifier of the {@link MidCallback}
-	 * 		to instantiate
-	 * @param errorHandler
-	 * 		the {@link SnaCallbackErrorHandler} of the 
-	 * 		{@link MidCallback} to instantiate
-	 * @param lifetime 
-	 */
-	public UnaryMidCallback(Mediator mediator, 
-			String identifier, 
-			ErrorHandler errorHandler,
-			Recipient recipient, long lifetime)
-	{
-		super(true);
-		this.mediator = mediator;
-		
-		this.recipient = recipient;
-		super.setTimeout(lifetime<=10000?ENDLESS
-				:(System.currentTimeMillis()+lifetime));
-		super.setErrorHandler(errorHandler);
-		super.setIdentifier(identifier);
-	}
+        this.recipient = recipient;
+        super.setTimeout(lifetime <= 10000 ? ENDLESS : (System.currentTimeMillis() + lifetime));
+        super.setErrorHandler(errorHandler);
+        super.setIdentifier(identifier);
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see StackEngineHandler#doHandle(java.lang.Object)
-	 */
-	@Override
-	public void doCallback(SnaMessage<?> message)
-	{
-	   try
-	   {
-		   this.recipient.callback(this.getName(), 
-				   new SnaMessage[]{message});
-
-			setStatus(Status.SUCCESS);
-	   }
-	   catch (Exception e)
-	   {
-		   if(this.mediator.isDebugLoggable())
-		   {
-			   this.mediator.error(e, e.getMessage());
-		   }
-		   setStatus(Status.SUCCESS);
-		   super.getCallbackErrorHandler().register(e);
-	   }
-	}
+    /**
+     * @inheritDoc
+     * @see StackEngineHandler#doHandle(java.lang.Object)
+     */
+    @Override
+    public void doCallback(SnaMessage<?> message) {
+        try {
+            this.recipient.callback(this.getName(), new SnaMessage[]{message});
+            setStatus(Status.SUCCESS);
+        } catch (Exception e) {
+            if (this.mediator.isDebugLoggable()) {
+                this.mediator.error(e, e.getMessage());
+            }
+            setStatus(Status.SUCCESS);
+            super.getCallbackErrorHandler().register(e);
+        }
+    }
 }

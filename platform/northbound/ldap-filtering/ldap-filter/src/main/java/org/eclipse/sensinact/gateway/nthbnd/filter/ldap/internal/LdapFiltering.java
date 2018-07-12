@@ -15,87 +15,75 @@ import org.eclipse.sensinact.gateway.core.Filtering;
 
 /**
  * {@link Filtering} implementation allowing to apply an LDAP filter
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class LdapFiltering implements Filtering
-{
-	//********************************************************************//
-	//						NESTED DECLARATIONS			  			      //
-	//********************************************************************//
-	
-	//********************************************************************//
-	//						ABSTRACT DECLARATIONS						  //
-	//********************************************************************//
+public class LdapFiltering implements Filtering {
+    //********************************************************************//
+    //						NESTED DECLARATIONS			  			      //
+    //********************************************************************//
 
-	//********************************************************************//
-	//						STATIC DECLARATIONS							  //
-	//********************************************************************//
-	
-	//********************************************************************//
-	//						INSTANCE DECLARATIONS						  //
-	//********************************************************************//
+    //********************************************************************//
+    //						ABSTRACT DECLARATIONS						  //
+    //********************************************************************//
+    //********************************************************************//
+    //						STATIC DECLARATIONS							  //
+    //********************************************************************//
 
-	private Mediator mediator;
+    //********************************************************************//
+    //						INSTANCE DECLARATIONS						  //
+    //********************************************************************//
+    private Mediator mediator;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param mediator the {@link Mediator} allowing the
-	 * LdapFiltering to be instantiated to interact with
-	 * the OSGi host environment
-	 */
-	public LdapFiltering(Mediator mediator)
-	{
-		this.mediator = mediator;
-	}
-	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Filtering#
-	 * handle(java.lang.String)
-	 */
-	@Override
-	public boolean handle(String type)
-	{
-		return "ldap".equals(type);
-	}
-	
-	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Filtering#
-	 * apply(java.lang.String, java.lang.Object)
-	 */
-	@Override
-	public String apply(String definition, Object result)
-	{		
-		return String.valueOf(result);
-	}
+    /**
+     * Constructor
+     *
+     * @param mediator the {@link Mediator} allowing the
+     *                 LdapFiltering to be instantiated to interact with
+     *                 the OSGi host environment
+     */
+    public LdapFiltering(Mediator mediator) {
+        this.mediator = mediator;
+    }
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.Filtering#getLDAPComponent()
-	 */
-	@Override
-	public String getLDAPComponent(String definition) 
-	{
-		String ldapFilter = definition;
-		if(ldapFilter.startsWith("'"))
-		{
-			ldapFilter = ldapFilter.substring(1);
-		}
-		if(ldapFilter.endsWith("'"))
-		{
-			ldapFilter = ldapFilter.substring(0,ldapFilter.length()-1);
-		}	
-		
+    /**
+     * @inheritDoc
+     * @see org.eclipse.sensinact.gateway.core.Filtering#
+     * handle(java.lang.String)
+     */
+    @Override
+    public boolean handle(String type) {
+        return "ldap".equals(type);
+    }
+
+
+    /**
+     * @inheritDoc
+     * @see org.eclipse.sensinact.gateway.core.Filtering#
+     * apply(java.lang.String, java.lang.Object)
+     */
+    @Override
+    public String apply(String definition, Object result) {
+        return String.valueOf(result);
+    }
+
+    /**
+     * @inheritDoc
+     * @see org.eclipse.sensinact.gateway.core.Filtering#getLDAPComponent()
+     */
+    @Override
+    public String getLDAPComponent(String definition) {
+        String ldapFilter = definition;
+        if (ldapFilter.startsWith("'")) {
+            ldapFilter = ldapFilter.substring(1);
+        }
+        if (ldapFilter.endsWith("'")) {
+            ldapFilter = ldapFilter.substring(0, ldapFilter.length() - 1);
+        }
+
 //		System.out.println("*************************");
 //		System.out.println(ldapFilter);
 //		System.out.println("*************************");
-		return ldapFilter;
-	}
+        return ldapFilter;
+    }
 }

@@ -19,16 +19,16 @@ import java.lang.annotation.Target;
 /**
  * An XmlAttribute annotation associates an xml attribute
  * and a field name
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @Target(value = ElementType.PARAMETER)
 @Retention(value = RetentionPolicy.RUNTIME)
 @Documented
-public @interface XmlAttribute
-{     
-    public static final String DEFAULT_ATTRIBUTE_VALUE= "#DEFAULT_ATTRIBUTE#"; 
-    
+public @interface XmlAttribute {
+    public static final String DEFAULT_ATTRIBUTE_VALUE = "#DEFAULT_ATTRIBUTE#";
+
     public String attribute() default DEFAULT_ATTRIBUTE_VALUE;
+
     public String field() default DEFAULT_ATTRIBUTE_VALUE;
 }

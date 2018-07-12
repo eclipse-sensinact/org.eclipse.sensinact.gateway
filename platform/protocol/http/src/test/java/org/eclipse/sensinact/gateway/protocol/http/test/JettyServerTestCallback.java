@@ -10,97 +10,80 @@
  */
 package org.eclipse.sensinact.gateway.protocol.http.test;
 
-import java.io.IOException;
-//import java.util.concurrent.atomic.AtomicBoolean;
+import org.eclipse.sensinact.gateway.util.IOUtils;
+import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
-import org.json.JSONObject;
-import org.eclipse.sensinact.gateway.util.IOUtils;
+//import java.util.concurrent.atomic.AtomicBoolean;
 
-class JettyServerTestCallback
-{
-	//private AtomicBoolean available;
-	
-//	JettyTestServerCallback()
+class JettyServerTestCallback {
+    //private AtomicBoolean available;
+
+    //	JettyTestServerCallback()
 //	{
 //		//this.available = new AtomicBoolean(false);
 //	}
+    @doPost
+    public void callbackPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        JSONObject requestDescription = new JSONObject();
+        requestDescription.put("method", "POST");
+        if (request.getQueryString() != null) {
+            requestDescription.put("url", request.getRequestURI() + "?" + request.getQueryString());
 
-	@doPost
-	public void callbackPost(HttpServletRequest request, HttpServletResponse response) 
-			throws IOException
-	{		
-		JSONObject requestDescription = new JSONObject();
-		requestDescription.put("method", "POST");
-		if(request.getQueryString()!=null)
-		{
-			requestDescription.put("url", 
-				request.getRequestURI()+"?"+request.getQueryString());
-			
-		} else
-		{
-			requestDescription.put("url", request.getRequestURI());
-		}
-		requestDescription.put("content-type", request.getContentType());
-		requestDescription.put("content-length", request.getContentLength());
-		
-		try
-		{
-			byte[] content = IOUtils.read(request.getInputStream());				
-			String message = new String(content);
-			requestDescription.put("message", new JSONObject(message));
-			
-			response.setContentType("application/json");
-			response.getWriter().println(requestDescription.toString());
-			response.setStatus(200);
-			
-		} catch (IOException e) 
-		{
-			response.getWriter().println(e.getMessage());
-			response.setStatus(520);
-		} 
+        } else {
+            requestDescription.put("url", request.getRequestURI());
+        }
+        requestDescription.put("content-type", request.getContentType());
+        requestDescription.put("content-length", request.getContentLength());
+
+        try {
+            byte[] content = IOUtils.read(request.getInputStream());
+            String message = new String(content);
+            requestDescription.put("message", new JSONObject(message));
+
+            response.setContentType("application/json");
+            response.getWriter().println(requestDescription.toString());
+            response.setStatus(200);
+
+        } catch (IOException e) {
+            response.getWriter().println(e.getMessage());
+            response.setStatus(520);
+        }
 //		finally
 //		{
 //			this.setAvailable(true);
 //		}
-	}
-	
-	@doGet
-	public void callbackGet(HttpServletRequest request, HttpServletResponse response) 
-			throws IOException
-	{		
-		JSONObject requestDescription = new JSONObject();
-		requestDescription.put("method", "GET");
-		if(request.getQueryString()!=null)
-		{
-			requestDescription.put("url", 
-				request.getRequestURI()+"?"+request.getQueryString());
-			
-		} else
-		{
-			requestDescription.put("url", request.getRequestURI());
-		}
-		response.setContentType("application/json");
-		try
-		{
-			response.getWriter().println(requestDescription.toString());
-			response.setStatus(200);
-						
-		} catch (IOException e) 
-		{
-			response.getWriter().println(e.getMessage());
-			response.setStatus(520);
-			
-		} 
+    }
+
+    @doGet
+    public void callbackGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        JSONObject requestDescription = new JSONObject();
+        requestDescription.put("method", "GET");
+        if (request.getQueryString() != null) {
+            requestDescription.put("url", request.getRequestURI() + "?" + request.getQueryString());
+
+        } else {
+            requestDescription.put("url", request.getRequestURI());
+        }
+        response.setContentType("application/json");
+        try {
+            response.getWriter().println(requestDescription.toString());
+            response.setStatus(200);
+
+        } catch (IOException e) {
+            response.getWriter().println(e.getMessage());
+            response.setStatus(520);
+
+        }
 //		finally
 //		{
 //			this.setAvailable(true);
 //		}
-		
-	}
 
+    }
 //	private void setAvailable(boolean available) 
 //	{
 //		this.available.set(available);

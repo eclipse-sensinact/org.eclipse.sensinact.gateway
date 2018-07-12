@@ -22,8 +22,8 @@ import java.lang.annotation.Target;
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface ChainedHttpTasks
-{	
-	ChainedHttpTask[] tasks() default {};
-	RecurrentChainedHttpTask[] recurrences() default {};
+public @interface ChainedHttpTasks {
+    ChainedHttpTask[] tasks() default {};
+
+    RecurrentChainedHttpTask[] recurrences() default {};
 }

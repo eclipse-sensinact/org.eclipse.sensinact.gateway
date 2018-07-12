@@ -23,20 +23,16 @@ import java.util.Enumeration;
 import java.util.List;
 
 public class Activator implements BundleActivator {
-
     private List<SSDPAbstractListenerThread> discoveryThreads;
     private SSDPDiscoveryNotifier notifier;
 
     public void start(BundleContext context) throws Exception {
         this.discoveryThreads = new ArrayList<SSDPAbstractListenerThread>();
         this.notifier = new SSDPDiscoveryNotifier(context);
-
         Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-
-        while(networkInterfaces.hasMoreElements()) {
+        while (networkInterfaces.hasMoreElements()) {
             NetworkInterface networkInterface = networkInterfaces.nextElement();
-
-            if(!networkInterface.isLoopback() && !networkInterface.isVirtual()) {
+            if (!networkInterface.isLoopback() && !networkInterface.isVirtual()) {
                 discoveryThreads.add(new SSDPDiscoveryListenerThread(notifier, networkInterface));
                 discoveryThreads.add(new SSDPMulticastListenerThread(notifier, networkInterface));
             }
@@ -45,10 +41,9 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        for(SSDPAbstractListenerThread discoveryThread : discoveryThreads) {
+        for (SSDPAbstractListenerThread discoveryThread : discoveryThreads) {
             discoveryThread.stop();
         }
-
         notifier.stop(context);
     }
 }

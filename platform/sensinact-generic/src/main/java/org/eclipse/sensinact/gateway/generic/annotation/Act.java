@@ -22,4 +22,5 @@ import java.lang.annotation.Target;
 @Inherited
 @Target(value = {ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Act{}
+public @interface Act {
+}

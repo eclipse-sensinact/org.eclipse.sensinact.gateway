@@ -23,7 +23,6 @@ import io.moquette.spi.security.IAuthorizator;
 import io.moquette.spi.security.ISslContextCreator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleWiring;
-import org.sensinact.mqtt.server.osgi.Activator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +33,11 @@ import java.util.List;
 
 /**
  * Launch a  configured version of the server.
+ *
  * @author andrea
  */
 public class SensiNactServer {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(SensiNactServer.class);
 
     private static final String HZ_INTERCEPT_HANDLER = HazelcastInterceptHandler.class.getCanonicalName();
@@ -53,13 +53,11 @@ public class SensiNactServer {
 
     private SensiNactProtocolProcessorBootstrapper m_processorBootstrapper;
 
-    public SensiNactServer(BundleContext bundleContext){
-        this.bundleContext=bundleContext;
+    public SensiNactServer(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 
-    public void startServer(IConfig config, List<? extends InterceptHandler> handlers,
-                            ISslContextCreator sslCtxCreator, IAuthenticator authenticator,
-                            IAuthorizator authorizator) throws IOException {
+    public void startServer(IConfig config, List<? extends InterceptHandler> handlers, ISslContextCreator sslCtxCreator, IAuthenticator authenticator, IAuthorizator authorizator) throws IOException {
         if (handlers == null) {
             handlers = Collections.emptyList();
         }
@@ -82,7 +80,7 @@ public class SensiNactServer {
 
         ClassLoader tccl = Thread.currentThread().getContextClassLoader();
         try {
-            Thread.currentThread().setContextClassLoader(((BundleWiring)bundleContext.getBundle().adapt(BundleWiring.class)).getClassLoader());
+            Thread.currentThread().setContextClassLoader(((BundleWiring) bundleContext.getBundle().adapt(BundleWiring.class)).getClassLoader());
             //Thread.currentThread().setContextClassLoader(Activator.class.getClassLoader());
             m_acceptor.initialize(processor, config, sslCtxCreator);
         } finally {
@@ -101,10 +99,8 @@ public class SensiNactServer {
         String hzConfigPath = config.getProperty(BrokerConstants.HAZELCAST_CONFIGURATION);
         if (hzConfigPath != null) {
             boolean isHzConfigOnClasspath = this.getClass().getClassLoader().getResource(hzConfigPath) != null;
-            Config hzconfig = isHzConfigOnClasspath ?
-                    new ClasspathXmlConfig(hzConfigPath) :
-                    new FileSystemXmlConfig(hzConfigPath);
-            LOG.info(String.format("starting server with hazelcast configuration file : %s",hzconfig));
+            Config hzconfig = isHzConfigOnClasspath ? new ClasspathXmlConfig(hzConfigPath) : new FileSystemXmlConfig(hzConfigPath);
+            LOG.info(String.format("starting server with hazelcast configuration file : %s", hzconfig));
             hazelcastInstance = Hazelcast.newHazelcastInstance(hzconfig);
         } else {
             LOG.info("starting server with hazelcast default file");
@@ -115,7 +111,7 @@ public class SensiNactServer {
         topic.addMessageListener(new HazelcastListener(this));
     }
 
-    public HazelcastInstance getHazelcastInstance(){
+    public HazelcastInstance getHazelcastInstance() {
         return hazelcastInstance;
     }
 
@@ -125,16 +121,16 @@ public class SensiNactServer {
      *
      * @param msg the message to forward.
      * @throws IllegalStateException if the server is not yet started
-     * */
+     */
     public void internalPublish(PublishMessage msg) {
         if (!m_initialized) {
             throw new IllegalStateException("Can't publish on a server is not yet started");
         }
         m_processor.internalPublish(msg);
     }
-    
+
     public void stopServer() {
-    	LOG.info("Server stopping...");
+        LOG.info("Server stopping...");
         m_acceptor.close();
         m_processorBootstrapper.shutdown();
         m_initialized = false;
@@ -163,9 +159,10 @@ public class SensiNactServer {
 
     /**
      * SPI method used by Broker embedded applications to add intercept handlers.
+     *
      * @param interceptHandler the handler to add.
      * @return true id operation was successful.
-     * */
+     */
     public boolean addInterceptHandler(InterceptHandler interceptHandler) {
         if (!m_initialized) {
             throw new IllegalStateException("Can't register interceptors on a server that is not yet started");
@@ -175,9 +172,10 @@ public class SensiNactServer {
 
     /**
      * SPI method used by Broker embedded applications to remove intercept handlers.
+     *
      * @param interceptHandler the handler to remove.
      * @return true id operation was successful.
-     * */
+     */
     public boolean removeInterceptHandler(InterceptHandler interceptHandler) {
         if (!m_initialized) {
             throw new IllegalStateException("Can't deregister interceptors from a server that is not yet started");

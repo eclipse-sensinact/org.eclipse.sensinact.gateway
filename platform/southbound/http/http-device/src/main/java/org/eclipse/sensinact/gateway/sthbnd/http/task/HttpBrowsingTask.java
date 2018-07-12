@@ -17,37 +17,29 @@ import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 
 /**
  * Extended {@link HttpTask} dedicated to discovery process
- *  
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class HttpBrowsingTask<RESPONSE extends HttpResponse, 
-REQUEST extends Request<RESPONSE>> extends HttpDiscoveryTask<RESPONSE, REQUEST>
-{ 
-	 /** Constructor
-	 * 
-    * @param mediator the {@link Mediator} allowing to interact with 
-    * the OSGi host environment
-    * 
-    * @param transmitter the {@link HttpProtocolStackEndpoint} transmitting 
-    * the requests build by the HttpDiscoveryTask to instantiate
-    * 
-    * @param requestType the extended {@link HttpRequest} type handled
-    * by this HttpDiscoveryConnectionConfiguration
-	 */
-	public HttpBrowsingTask(Mediator mediator, 
-			HttpProtocolStackEndpoint transmitter, 
-			Class<REQUEST> requestType)
-	{
-		super(mediator, transmitter, requestType);
-	}
+public class HttpBrowsingTask<RESPONSE extends HttpResponse, REQUEST extends Request<RESPONSE>> extends HttpDiscoveryTask<RESPONSE, REQUEST> {
+    /**
+     * Constructor
+     *
+     * @param mediator    the {@link Mediator} allowing to interact with
+     *                    the OSGi host environment
+     * @param transmitter the {@link HttpProtocolStackEndpoint} transmitting
+     *                    the requests build by the HttpDiscoveryTask to instantiate
+     * @param requestType the extended {@link HttpRequest} type handled
+     *                    by this HttpDiscoveryConnectionConfiguration
+     */
+    public HttpBrowsingTask(Mediator mediator, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType) {
+        super(mediator, transmitter, requestType);
+    }
 
-    /** 
+    /**
      * @inheritDoc
-     * 
      * @see HttpTask#isDirect()
      */
-    public boolean isDirect()
-    {
-    	return false;
+    public boolean isDirect() {
+        return false;
     }
 }

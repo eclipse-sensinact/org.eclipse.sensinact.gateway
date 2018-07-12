@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.api.exception;
 
 /**
@@ -17,7 +16,6 @@ package org.eclipse.sensinact.gateway.app.api.exception;
  * @author Rémi Druilhe
  */
 public class ValidationException extends Exception {
-
     public ValidationException() {
         super();
     }

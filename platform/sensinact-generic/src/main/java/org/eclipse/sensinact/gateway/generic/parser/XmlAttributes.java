@@ -17,15 +17,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * An XmlAttributes annotation gathers {@link XmlAttribute} 
+ * An XmlAttributes annotation gathers {@link XmlAttribute}
  * annotations
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @Target(value = ElementType.TYPE)
 @Retention(value = RetentionPolicy.RUNTIME)
 @Documented
-public @interface XmlAttributes
-{      
+public @interface XmlAttributes {
     public XmlAttribute[] value();
 }

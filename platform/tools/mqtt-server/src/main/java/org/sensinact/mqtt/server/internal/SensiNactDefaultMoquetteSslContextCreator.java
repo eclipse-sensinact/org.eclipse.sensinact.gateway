@@ -20,7 +20,7 @@ import java.security.KeyStore;
 /**
  * Moquette server implementation to load SSL certificate from local filesystem path
  * configured in config file.
- *
+ * <p>
  * Created by andrea on 13/12/15.
  */
 public class SensiNactDefaultMoquetteSslContextCreator implements ISslContextCreator {
@@ -58,10 +58,10 @@ public class SensiNactDefaultMoquetteSslContextCreator implements ISslContextCre
             return null;
         }
 
-		// if client authentification is enabled a trustmanager needs to be
-		// added to the ServerContext
-		String sNeedsClientAuth = props.getProperty(BrokerConstants.NEED_CLIENT_AUTH, "false");
-		boolean needsClientAuth = Boolean.valueOf(sNeedsClientAuth);
+        // if client authentification is enabled a trustmanager needs to be
+        // added to the ServerContext
+        String sNeedsClientAuth = props.getProperty(BrokerConstants.NEED_CLIENT_AUTH, "false");
+        boolean needsClientAuth = Boolean.valueOf(sNeedsClientAuth);
 
         try {
             InputStream jksInputStream = jksDatastore(jksPath);
@@ -70,15 +70,15 @@ public class SensiNactDefaultMoquetteSslContextCreator implements ISslContextCre
             ks.load(jksInputStream, keyStorePassword.toCharArray());
             final KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             kmf.init(ks, keyManagerPassword.toCharArray());
-			TrustManager[] trustManagers = null;
-			if (needsClientAuth) {
-				// use keystore as truststore, as server needs to trust certificates signed by the server certificates
-				TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-				tmf.init(ks);
-				trustManagers = tmf.getTrustManagers();
-			}
-			// init sslContext
-			serverContext.init(kmf.getKeyManagers(), trustManagers, null);
+            TrustManager[] trustManagers = null;
+            if (needsClientAuth) {
+                // use keystore as truststore, as server needs to trust certificates signed by the server certificates
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init(ks);
+                trustManagers = tmf.getTrustManagers();
+            }
+            // init sslContext
+            serverContext.init(kmf.getKeyManagers(), trustManagers, null);
 
             return serverContext;
         } catch (Exception ex) {

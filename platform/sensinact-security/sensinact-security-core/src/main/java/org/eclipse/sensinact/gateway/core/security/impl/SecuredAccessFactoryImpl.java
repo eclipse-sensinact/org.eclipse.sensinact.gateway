@@ -17,40 +17,32 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
 
 /**
  * Implementation of a {@link SecuredAccessFactory}
- * 
- * @see SecuredAccessFactory
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @see SecuredAccessFactory
  */
-public class SecuredAccessFactoryImpl implements SecuredAccessFactory
-{
+public class SecuredAccessFactoryImpl implements SecuredAccessFactory {
+    //********************************************************************//
+    //						NESTED DECLARATIONS			  			      //
+    //********************************************************************//
+    //********************************************************************//
+    //						ABSTRACT DECLARATIONS						  //
+    //********************************************************************//
+    //********************************************************************//
+    //						STATIC DECLARATIONS							  //
+    //********************************************************************//
+    //********************************************************************//
+    //						INSTANCE DECLARATIONS						  //
+    //********************************************************************//
 
-	//********************************************************************//
-	//						NESTED DECLARATIONS			  			      //
-	//********************************************************************//
-
-	//********************************************************************//
-	//						ABSTRACT DECLARATIONS						  //
-	//********************************************************************//
-
-	//********************************************************************//
-	//						STATIC DECLARATIONS							  //
-	//********************************************************************//
-
-	//********************************************************************//
-	//						INSTANCE DECLARATIONS						  //
-	//********************************************************************//
-
-	/**
-	 * @throws SecuredAccessException
-	 * @inheritedDoc
-	 *
-	 * @see SecuredAccessFactory#
-	 * newInstance(org.eclipse.sensinact.gateway.common.bundle.Mediator)
-	 */
-	@Override
-	public SecuredAccess newInstance(Mediator mediator) throws SecuredAccessException
-	{
-		return new SecuredAccessImpl(mediator);
-	}
+    /**
+     * @throws SecuredAccessException
+     * @inheritedDoc
+     * @see SecuredAccessFactory#
+     * newInstance(org.eclipse.sensinact.gateway.common.bundle.Mediator)
+     */
+    @Override
+    public SecuredAccess newInstance(Mediator mediator) throws SecuredAccessException {
+        return new SecuredAccessImpl(mediator);
+    }
 }

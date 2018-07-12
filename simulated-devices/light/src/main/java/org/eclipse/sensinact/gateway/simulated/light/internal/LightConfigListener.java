@@ -8,10 +8,8 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.light.internal;
 
 public interface LightConfigListener {
-
     void brightnessChanged(int brightness);
 }

@@ -14,43 +14,33 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class HttpResponseContent extends AbstractContent
-        implements ResponseContent
-{
+public class HttpResponseContent extends AbstractContent implements ResponseContent {
+    //********************************************************************//
+    //						NESTED DECLARATIONS			  			      //
+    //********************************************************************//
+    //********************************************************************//
+    //						ABSTRACT DECLARATIONS						  //
+    //********************************************************************//
+    //********************************************************************//
+    //						STATIC DECLARATIONS							  //
+    //********************************************************************//
+    //********************************************************************//
+    //						INSTANCE DECLARATIONS						  //
+    //********************************************************************//
 
-	//********************************************************************//
-	//						NESTED DECLARATIONS			  			      //
-	//********************************************************************//
+    /**
+     *
+     */
+    public HttpResponseContent() {
+        super();
+    }
 
-	//********************************************************************//
-	//						ABSTRACT DECLARATIONS						  //
-	//********************************************************************//
-
-	//********************************************************************//
-	//						STATIC DECLARATIONS							  //
-	//********************************************************************//
-
-	//********************************************************************//
-	//						INSTANCE DECLARATIONS						  //
-	//********************************************************************//
-
-	/**
-	 * 
-	 */
-	public HttpResponseContent()
-	{
-		super();
-	}
-
-	/**
-	 * @param headers
-	 */
-	public HttpResponseContent(Map<String, List<String>> headers)
-	{
-		super(headers);
-	}
-
+    /**
+     * @param headers
+     */
+    public HttpResponseContent(Map<String, List<String>> headers) {
+        super(headers);
+    }
 }

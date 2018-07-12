@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.manager.test;
 
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
@@ -24,9 +23,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 
 class MockComponentAddition extends AbstractFunction<Integer> {
-
     private static final String JSON_SCHEMA = "mock_addition.json";
-
     private final AppServiceMediator mediator;
 
     MockComponentAddition(AppServiceMediator mediator) {
@@ -35,19 +32,14 @@ class MockComponentAddition extends AbstractFunction<Integer> {
 
     static JSONObject getJSONSchemaFunction(BundleContext context) {
         try {
-            return new JSONObject(new JSONTokener(
-                    new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
+            return new JSONObject(new JSONTokener(new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
     public void process(List<DataItf> variables) {
-        super.update((Integer) CastUtils.cast(mediator.getClassLoader(), variables.get(0).getType(),
-                variables.get(0).getValue()) + (Integer) CastUtils.cast(mediator.getClassLoader(),
-                variables.get(1).getType(),
-                variables.get(1).getValue()));
+        super.update((Integer) CastUtils.cast(mediator.getClassLoader(), variables.get(0).getType(), variables.get(0).getValue()) + (Integer) CastUtils.cast(mediator.getClassLoader(), variables.get(1).getType(), variables.get(1).getValue()));
     }
 }

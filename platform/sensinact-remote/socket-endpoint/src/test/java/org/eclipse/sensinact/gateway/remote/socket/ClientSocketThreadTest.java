@@ -10,37 +10,39 @@
  */
 package org.eclipse.sensinact.gateway.remote.socket;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
- *
  * @author <a href="mailto:stephane.bergeon@cea.fr">Stéphane Bergeon</a>
  */
 public class ClientSocketThreadTest {
-    
+
     public ClientSocketThreadTest() {
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() {
     }
-    
+
     @After
     public void tearDown() {
     }

@@ -18,10 +18,8 @@ import java.util.Set;
  * @author Rémi Druilhe
  */
 public class ResourceSubscription {
-
     private final String resourceUri;
     private final Set<AppCondition> conditions;
-
     private String subscriptionId;
 
     public ResourceSubscription(String resourceUri, Set<AppCondition> conditions) {

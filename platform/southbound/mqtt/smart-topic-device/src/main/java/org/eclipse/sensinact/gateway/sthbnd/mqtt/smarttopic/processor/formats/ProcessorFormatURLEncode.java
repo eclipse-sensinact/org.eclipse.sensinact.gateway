@@ -22,10 +22,10 @@ import java.net.URLDecoder;
 
 /**
  * Stateless class that is capable of interprete a given format.
+ *
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class ProcessorFormatURLEncode implements ProcessorFormatIface {
-
     private static final Logger LOG = LoggerFactory.getLogger(MqttActivator.class);
 
     @Override
@@ -34,11 +34,11 @@ public class ProcessorFormatURLEncode implements ProcessorFormatIface {
     }
 
     @Override
-    public String process(String inData,SelectorIface selector) throws ProcessorFormatException {
+    public String process(String inData, SelectorIface selector) throws ProcessorFormatException {
         try {
-            return URLDecoder.decode(inData,"utf-8").toString();
+            return URLDecoder.decode(inData, "utf-8").toString();
         } catch (IOException e) {
-            LOG.error("Failed to apply {} filter. Bypassing filter",getName(),e);
+            LOG.error("Failed to apply {} filter. Bypassing filter", getName(), e);
             return inData;
         }
     }

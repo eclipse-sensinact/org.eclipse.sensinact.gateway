@@ -8,42 +8,33 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.slider.internal;
 
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 
 /**
- * 
+ *
  */
-public class SliderAdapter 
-{
-	private final LocalProtocolStackEndpoint<SliderPacket> connector;
-	private final String id;
+public class SliderAdapter {
+    private final LocalProtocolStackEndpoint<SliderPacket> connector;
+    private final String id;
 
-	/**
-	 * @param connector 
-	 * 
-	 */
-	public SliderAdapter(String id, 
-		LocalProtocolStackEndpoint<SliderPacket> connector)
-	{
-		this.connector = connector;
-		this.id = id;
-	}
-    
+    /**
+     * @param connector
+     */
+    public SliderAdapter(String id, LocalProtocolStackEndpoint<SliderPacket> connector) {
+        this.connector = connector;
+        this.id = id;
+    }
+
     /**
      * @param value
      */
-    public void mouseReleased(int value)
-    {
-    	try
-        {
+    public void mouseReleased(int value) {
+        try {
             connector.process(new SliderPacket(id, value));
-        }
-        catch (InvalidPacketException e)
-        {
+        } catch (InvalidPacketException e) {
             e.printStackTrace();
         }
     }

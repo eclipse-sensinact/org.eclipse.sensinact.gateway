@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.exception;
 
 public class MessageInvalidSmartTopicException extends Exception {
-
     public MessageInvalidSmartTopicException() {
         super();
     }

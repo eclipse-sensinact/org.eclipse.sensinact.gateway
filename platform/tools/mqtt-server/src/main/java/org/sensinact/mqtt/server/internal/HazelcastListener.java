@@ -18,7 +18,7 @@ public class HazelcastListener implements MessageListener<HazelcastMsg> {
 
     private final SensiNactServer server;
 
-    public HazelcastListener(SensiNactServer server){
+    public HazelcastListener(SensiNactServer server) {
         this.server = server;
     }
 

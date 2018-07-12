@@ -11,66 +11,59 @@
 package org.eclipse.sensinact.gateway.util.tree;
 
 /**
- *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ImmutablePathTree<P extends ImmutablePathNode<P>>
-{
-	//********************************************************************//
-	//						NESTED DECLARATIONS			  			      //
-	//********************************************************************//
-		
-	//********************************************************************//
-	//						ABSTRACT DECLARATIONS						  //
-	//********************************************************************//
+public class ImmutablePathTree<P extends ImmutablePathNode<P>> {
+    //********************************************************************//
+    //						NESTED DECLARATIONS			  			      //
+    //********************************************************************//
 
-	//********************************************************************//
-	//						STATIC DECLARATIONS							  //
-	//********************************************************************//
-		
-	//********************************************************************//
-	//						INSTANCE DECLARATIONS						  //
-	//********************************************************************//
+    //********************************************************************//
+    //						ABSTRACT DECLARATIONS						  //
+    //********************************************************************//
 
-	protected final P root;
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param factory
-	 */
-	public ImmutablePathTree(P root)
-	{
-		this.root = root;
-	}
+    //********************************************************************//
+    //						STATIC DECLARATIONS							  //
+    //********************************************************************//
 
-	/**
-	 * Returns the root {@link PathNode} of this
-	 * PathTree
-	 *
-	 * @return this PathTree root {@link PathNode}
-	 */
-	public P getRoot()
-	{
-		return this.root;
-	}
-	
-	/**
-	 * @param uri
-	 * @return
-	 */
-	public P get(String uri)
-	{
-		return  this.root.get(uri);
-	}
-	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see java.lang.Object#toString()
-	 */
-	public String toString()
-	{
-		return this.root.toString();
-	}
+    //********************************************************************//
+    //						INSTANCE DECLARATIONS						  //
+    //********************************************************************//
+
+    protected final P root;
+
+    /**
+     * Constructor
+     *
+     * @param factory
+     */
+    public ImmutablePathTree(P root) {
+        this.root = root;
+    }
+
+    /**
+     * Returns the root {@link PathNode} of this
+     * PathTree
+     *
+     * @return this PathTree root {@link PathNode}
+     */
+    public P getRoot() {
+        return this.root;
+    }
+
+    /**
+     * @param uri
+     * @return
+     */
+    public P get(String uri) {
+        return this.root.get(uri);
+    }
+
+    /**
+     * @inheritDoc
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        return this.root.toString();
+    }
 }

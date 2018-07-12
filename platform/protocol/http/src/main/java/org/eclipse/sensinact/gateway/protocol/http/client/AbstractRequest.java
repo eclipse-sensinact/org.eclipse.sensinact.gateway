@@ -14,40 +14,33 @@ import java.io.IOException;
 
 /**
  * Abstract implementation of a {@link Request} service
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public abstract class AbstractRequest<RESPONSE extends Response> 
-implements Request<RESPONSE>
-{		
-	/**
-	 * the {@link ConnectionConfiguration} 
-	 * configuring this request
-	 */
-	protected ConnectionConfiguration<RESPONSE,
-	? extends AbstractRequest<RESPONSE>> configuration;
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param configuration the {@link ConnectionConfiguration} 
-	 * configuring the request to be instantiated
-	 */
-	public AbstractRequest(ConnectionConfiguration<RESPONSE,
-			? extends AbstractRequest<RESPONSE>> configuration)
-	{
-		this.configuration = configuration;
-	}
+public abstract class AbstractRequest<RESPONSE extends Response> implements Request<RESPONSE> {
+    /**
+     * the {@link ConnectionConfiguration}
+     * configuring this request
+     */
+    protected ConnectionConfiguration<RESPONSE, ? extends AbstractRequest<RESPONSE>> configuration;
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see Request#send()
-	 */
-	@Override
-	public RESPONSE send() throws IOException
-	{
-		return createResponse(this.configuration.connect());
-	}
-	
+    /**
+     * Constructor
+     *
+     * @param configuration the {@link ConnectionConfiguration}
+     *                      configuring the request to be instantiated
+     */
+    public AbstractRequest(ConnectionConfiguration<RESPONSE, ? extends AbstractRequest<RESPONSE>> configuration) {
+        this.configuration = configuration;
+    }
+
+    /**
+     * @inheritDoc
+     * @see Request#send()
+     */
+    @Override
+    public RESPONSE send() throws IOException {
+        return createResponse(this.configuration.connect());
+    }
+
 }

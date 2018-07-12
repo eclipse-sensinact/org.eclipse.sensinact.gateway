@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.manager.test;
 
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
@@ -24,11 +23,8 @@ import java.io.InputStreamReader;
 import java.util.List;
 
 class MockComponentSetter extends AbstractFunction<Boolean> {
-
     private static final String JSON_SCHEMA = "mock_set.json";
-
     private final AppServiceMediator mediator;
-
     private TestResult test;
 
     MockComponentSetter(AppServiceMediator mediator, TestResult test) {
@@ -38,18 +34,15 @@ class MockComponentSetter extends AbstractFunction<Boolean> {
 
     static JSONObject getJSONSchemaFunction(BundleContext context) {
         try {
-            return new JSONObject(new JSONTokener(
-                    new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
+            return new JSONObject(new JSONTokener(new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
     public void process(List<DataItf> variables) {
         test.setValue((Integer) CastUtils.cast(mediator.getClassLoader(), variables.get(0).getType(), variables.get(0).getValue()));
-
         super.update(true);
     }
 }

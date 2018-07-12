@@ -8,37 +8,29 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.datastore.api;
 
 /**
- * 
+ *
  */
 @SuppressWarnings("serial")
-public class UnableToLoadDriverClassException extends DataStoreException 
-{
+public class UnableToLoadDriverClassException extends DataStoreException {
+    /**
+     * Constructor
+     *
+     * @param message the error message
+     */
+    public UnableToLoadDriverClassException(String message) {
+        super(message);
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param message
-	 * 		the error message
-	 */
-	public UnableToLoadDriverClassException(String message)
-	{
-		super(message);
-	}
-
-	/**
-	 * Constructor
-	 * 
-	 * @param message
-	 * 		the error message
-	 * @param throwable
-	 * 		wrapped exception that has made the current one thrown
-	 */
-	public UnableToLoadDriverClassException(String message,Throwable throwable)
-	{
-		super(message,throwable);
-	}
+    /**
+     * Constructor
+     *
+     * @param message   the error message
+     * @param throwable wrapped exception that has made the current one thrown
+     */
+    public UnableToLoadDriverClassException(String message, Throwable throwable) {
+        super(message, throwable);
+    }
 }

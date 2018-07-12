@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.manager.json;
 
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
@@ -20,15 +19,14 @@ import org.json.JSONObject;
  * @author Remi Druilhe
  */
 public class AppOptions implements JSONable {
-
     private static final boolean DEFAULT_AUTORESTART_VALUE = false;
     private static final boolean DEFAULT_RESET_ON_STOP_VALUE = true;
-
     private final boolean autostart;
     private final boolean resetOnStop;
 
     /**
      * Constructor
+     *
      * @param builder the builder from which the AppOptions object is created
      */
     private AppOptions(Builder builder) {
@@ -38,6 +36,7 @@ public class AppOptions implements JSONable {
 
     /**
      * Get the autostart value
+     *
      * @return the autostart value
      */
     public boolean getAutoStart() {
@@ -46,6 +45,7 @@ public class AppOptions implements JSONable {
 
     /**
      * Get the resetOnStop value
+     *
      * @return the resetOnStop value
      */
     public boolean getResetOnStop() {
@@ -56,13 +56,13 @@ public class AppOptions implements JSONable {
      * The builder to create the AppOptions object
      */
     public static class Builder {
-
         private boolean autorestart = DEFAULT_AUTORESTART_VALUE;
         private boolean resetOnStop = DEFAULT_RESET_ON_STOP_VALUE;
 
         /**
          * An application stops when a resource disappears. If "true", the application
          * will be restarted when the resource re-appears.
+         *
          * @param autorestart the autostart value
          * @return the builder
          */
@@ -82,6 +82,7 @@ public class AppOptions implements JSONable {
 
         /**
          * Create the AppOptions object
+         *
          * @return the AppOptions object builds from the builder
          */
         public AppOptions build() {
@@ -93,8 +94,6 @@ public class AppOptions implements JSONable {
      * @see JSONable#getJSON()
      */
     public String getJSON() {
-        return new JSONObject().put(AppJsonConstant.INIT_OPTIONS_AUTORESTART, autostart)
-                .put(AppJsonConstant.INIT_OPTIONS_RESETONSTOP, resetOnStop)
-                .toString();
+        return new JSONObject().put(AppJsonConstant.INIT_OPTIONS_AUTORESTART, autostart).put(AppJsonConstant.INIT_OPTIONS_RESETONSTOP, resetOnStop).toString();
     }
 }

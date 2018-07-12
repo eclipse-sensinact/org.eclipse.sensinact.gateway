@@ -8,21 +8,18 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.light.internal;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LightConfig
-{
+public class LightConfig {
     private List<LightConfigListener> listeners;
-	private int brightness;
-	private boolean on = false;
+    private int brightness;
+    private boolean on = false;
 
-    public LightConfig()
-    {
-    	this.brightness = 10;
+    public LightConfig() {
+        this.brightness = 10;
         this.listeners = new ArrayList<LightConfigListener>();
     }
 
@@ -34,32 +31,26 @@ public class LightConfig
         listeners.remove(listener);
     }
 
-    private void updateBrightness(int brightness) 
-    {
-        for(LightConfigListener listener : listeners)
-        {
+    private void updateBrightness(int brightness) {
+        for (LightConfigListener listener : listeners) {
             listener.brightnessChanged(brightness);
         }
     }
 
-    public void turnOn() 
-    {
-    	this.on = true;
+    public void turnOn() {
+        this.on = true;
         this.updateBrightness(this.brightness);
     }
 
-    public void turnOff()
-    {
-    	this.on = false;
+    public void turnOff() {
+        this.on = false;
         this.updateBrightness(0);
     }
 
-    public void setBrightness(int brightness) 
-    {
-    	this.brightness = brightness;
-    	if(this.on)
-    	{
-    		this.updateBrightness(brightness);
-    	}
+    public void setBrightness(int brightness) {
+        this.brightness = brightness;
+        if (this.on) {
+            this.updateBrightness(brightness);
+        }
     }
 }

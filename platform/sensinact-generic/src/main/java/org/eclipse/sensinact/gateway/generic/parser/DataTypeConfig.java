@@ -15,66 +15,53 @@ import org.eclipse.sensinact.gateway.generic.ExtResourceImpl;
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class DataTypeConfig 
-{
-	private final AttributeDefinition attributeDefinition;
+public class DataTypeConfig {
+    private final AttributeDefinition attributeDefinition;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param attributeDefinition
-	 * 		the {@link AttributeDefinition} defining a 
-	 * 		value {@link Attribute}
-	 */
-	DataTypeConfig(AttributeDefinition attributeDefinition)
-	{
-		this.attributeDefinition = attributeDefinition;
-	}
-	
-	/**
-     * Returns the type of the associated {@link ExtResourceImpl}'s 
-     * enclosed value attribute for the specified target
-     * 
-     * @param target
-     *      the target's name for which retrieve the data type
-     * @return 
-     *      the type of the associated {@link ExtResourceImpl}'s 
-     *      enclosed attribute value for the specified target
+    /**
+     * Constructor
+     *
+     * @param attributeDefinition the {@link AttributeDefinition} defining a
+     *                            value {@link Attribute}
      */
-    public Class<?> getDataType()
-    {
-       TypeDefinition typeDefinition = 
-            attributeDefinition.getTypeDefinition();
-               
-       if(typeDefinition != null)
-       {
-           return typeDefinition.getType();
-       }
-       return null;
+    DataTypeConfig(AttributeDefinition attributeDefinition) {
+        this.attributeDefinition = attributeDefinition;
     }
 
     /**
-     * Returns the default object value of the associated 
-     * {@link ExtResourceImpl}'s enclosed value attribute for 
-     * the specified target
-     * 
-     * @param target
-     *        the target's name for which retrieve the 
-     *        object value
-     * @return 
-     *      the default object value of the associated 
-     *      {@link ExtResourceImpl}'s enclosed value attribute 
-     *      for the specified target
+     * Returns the type of the associated {@link ExtResourceImpl}'s
+     * enclosed value attribute for the specified target
+     *
+     * @param target the target's name for which retrieve the data type
+     * @return the type of the associated {@link ExtResourceImpl}'s
+     * enclosed attribute value for the specified target
      */
-    public Object getDefaultValue()
-    {
-       ValueDefinition valueDefinition = 
-            attributeDefinition.getValueDefinition();
-               
-       if(valueDefinition != null)
-       {
-           return valueDefinition.getValue();
-       }
-       return null;
+    public Class<?> getDataType() {
+        TypeDefinition typeDefinition = attributeDefinition.getTypeDefinition();
+
+        if (typeDefinition != null) {
+            return typeDefinition.getType();
+        }
+        return null;
+    }
+
+    /**
+     * Returns the default object value of the associated
+     * {@link ExtResourceImpl}'s enclosed value attribute for
+     * the specified target
+     *
+     * @param target the target's name for which retrieve the
+     *               object value
+     * @return the default object value of the associated
+     * {@link ExtResourceImpl}'s enclosed value attribute
+     * for the specified target
+     */
+    public Object getDefaultValue() {
+        ValueDefinition valueDefinition = attributeDefinition.getValueDefinition();
+
+        if (valueDefinition != null) {
+            return valueDefinition.getValue();
+        }
+        return null;
     }
 }

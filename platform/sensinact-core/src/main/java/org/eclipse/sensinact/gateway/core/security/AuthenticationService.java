@@ -12,22 +12,19 @@ package org.eclipse.sensinact.gateway.core.security;
 
 /**
  * Authentication service
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface AuthenticationService
-{
-	/**
-	 * Build a {@link UserKey} for the user whose the {@link 
-	 * Credentials} are passed as parameter
-	 *   
-	 * @param credentials the {@link Credentials} from which 
-	 * to build a {@link UserKey}
-	 * 
-	 * @return a {@link UserKey} for the specified {@link 
-	 * Credentials} 
-	 * 
-	 * @throws Exception 
-	 */
-	UserKey buildKey(Credentials credentials) throws Exception;
+public interface AuthenticationService {
+    /**
+     * Build a {@link UserKey} for the user whose the {@link
+     * Credentials} are passed as parameter
+     *
+     * @param credentials the {@link Credentials} from which
+     *                    to build a {@link UserKey}
+     * @return a {@link UserKey} for the specified {@link
+     * Credentials}
+     * @throws Exception
+     */
+    UserKey buildKey(Credentials credentials) throws Exception;
 }

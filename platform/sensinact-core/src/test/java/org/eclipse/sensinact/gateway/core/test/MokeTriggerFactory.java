@@ -10,40 +10,31 @@
  */
 package org.eclipse.sensinact.gateway.core.test;
 
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory;
+import org.json.JSONObject;
 
 /**
- * 
+ *
  */
-public class MokeTriggerFactory implements AccessMethodTriggerFactory
-{
+public class MokeTriggerFactory implements AccessMethodTriggerFactory {
+    /**
+     * @InheritedDoc
+     * @see AccessMethodTriggerFactory#handle(java.lang.String)
+     */
+    @Override
+    public boolean handle(String type) {
+        return "VARIATIONTEST_TRIGGER".equals(type);
+    }
 
-	/**
-	 * @InheritedDoc
-	 *
-	 * @see AccessMethodTriggerFactory#handle(java.lang.String)
-	 */
-	@Override
-	public boolean handle(String type)
-	{
-		return "VARIATIONTEST_TRIGGER".equals(type);
-	}
-
-	/**
-	 * @InheritedDoc
-	 *
-	 * @see AccessMethodTriggerFactory#newInstance(org.eclipse.sensinact.gateway.util.mediator.AbstractMediator, org.json.JSONObject)
-	 */
-	@Override
-	public <P> AccessMethodTrigger<P> newInstance(Mediator mediator,
-	        JSONObject trigger) throws InvalidValueException
-	{
-		return (AccessMethodTrigger<P>) new MokeTrigger();
-	}
-
+    /**
+     * @InheritedDoc
+     * @see AccessMethodTriggerFactory#newInstance(org.eclipse.sensinact.gateway.util.mediator.AbstractMediator, org.json.JSONObject)
+     */
+    @Override
+    public <P> AccessMethodTrigger<P> newInstance(Mediator mediator, JSONObject trigger) throws InvalidValueException {
+        return (AccessMethodTrigger<P>) new MokeTrigger();
+    }
 }

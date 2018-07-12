@@ -4,9 +4,8 @@ import com.jayway.jsonpath.Configuration;
 
 import java.io.IOException;
 import java.util.Scanner;
-
-import static com.jayway.jsonpath.JsonPath.using;
 import static org.assertj.core.api.Assertions.assertThat;
+import static com.jayway.jsonpath.JsonPath.using;
 
 /**
  * Created by mattg on 6/27/15.
@@ -18,14 +17,9 @@ public class BaseFunctionTest {
     /**
      * Verify the function returns the correct result based on the input expectedValue
      *
-     * @param pathExpr
-     *      The path expression to execute
-     *
-     * @param json
-     *      The json document (actual content) to parse
-     *
-     * @param expectedValue
-     *      The expected value to be returned from the test
+     * @param pathExpr      The path expression to execute
+     * @param json          The json document (actual content) to parse
+     * @param expectedValue The expected value to be returned from the test
      */
     protected void verifyFunction(Configuration conf, String pathExpr, String json, Object expectedValue) {
         Object result = using(conf).parse(json, false).read(pathExpr);

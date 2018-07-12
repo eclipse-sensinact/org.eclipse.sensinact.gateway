@@ -13,11 +13,10 @@ package org.eclipse.sensinact.gateway.protocol.http.server;
 import org.eclipse.sensinact.gateway.protocol.http.Headers;
 
 /**
- * 
- */ 
-public interface Content extends Headers
-{
-	byte[] getContent();
-	
-	void setContent(byte[] content);
+ *
+ */
+public interface Content extends Headers {
+    byte[] getContent();
+
+    void setContent(byte[] content);
 }

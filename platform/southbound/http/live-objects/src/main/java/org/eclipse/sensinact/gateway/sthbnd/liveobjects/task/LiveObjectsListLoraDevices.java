@@ -21,17 +21,15 @@ import org.eclipse.sensinact.gateway.sthbnd.liveobjects.LiveObjectsConstant;
 /**
  * @author Rémi Druilhe
  */
-public class LiveObjectsListLoraDevices extends HttpBrowsingTask<SimpleHttpResponse,SimpleHttpRequest> {
-
+public class LiveObjectsListLoraDevices extends HttpBrowsingTask<SimpleHttpResponse, SimpleHttpRequest> {
     public LiveObjectsListLoraDevices(Mediator mediator, HttpProtocolStackEndpoint transmitter) {
         super(mediator, transmitter, SimpleHttpRequest.class);
     }
 
     @Override
-    public String getUri() 
-    {
-    	String uri = LiveObjectsConstant.ROOT_URL + LiveObjectsConstant.ROOT_PATH + "vendors/lora/devices";
-    	return uri;
+    public String getUri() {
+        String uri = LiveObjectsConstant.ROOT_URL + LiveObjectsConstant.ROOT_PATH + "vendors/lora/devices";
+        return uri;
     }
 
     @Override

@@ -8,40 +8,37 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.nthbnd.jsonpath;
-
-import java.io.Reader;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.io.Reader;
+
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class JsonOrgJsonTokener extends JSONTokener {
+    public JsonOrgJsonTokener(Reader reader) {
+        super(reader);
+    }
 
-	public JsonOrgJsonTokener(Reader reader) {
-		super(reader);
-	}
+    public JsonOrgJsonTokener(String s) {
+        super(s);
+    }
 
-	public JsonOrgJsonTokener(String s) {
-		super(s);
-	}
-	
-	/**
+    /**
      * Get the next value. The value can be a Boolean, Double, Integer,
      * JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
-     * @throws JSONException If syntax error.
      *
      * @return An object.
+     * @throws JSONException If syntax error.
      */
-	@Override
+    @Override
     public Object nextValue() throws JSONException {
         char c = nextClean();
         String s;
-
         switch (c) {
             case '"':
             case '\'':
@@ -54,7 +51,6 @@ public class JsonOrgJsonTokener extends JSONTokener {
                 back();
                 return new JsonOrgJsonArray(this);
         }
-
         /*
          * Handle unquoted text. This could be the values true, false, or
          * null, or it can be a number. An implementation (such as this one)
@@ -63,7 +59,6 @@ public class JsonOrgJsonTokener extends JSONTokener {
          * Accumulate characters until we reach the end of the text or a
          * formatting character.
          */
-
         StringBuffer sb = new StringBuffer();
         char b = c;
         while (c >= ' ' && ",:]}/\\\"[{;=#".indexOf(c) < 0) {
@@ -71,11 +66,9 @@ public class JsonOrgJsonTokener extends JSONTokener {
             c = next();
         }
         back();
-
         /*
          * If it is true, false, or null, return the proper value.
          */
-
         s = sb.toString().trim();
         if (s.equals("")) {
             throw syntaxError("Missing value");
@@ -89,7 +82,6 @@ public class JsonOrgJsonTokener extends JSONTokener {
         if (s.equalsIgnoreCase("null")) {
             return JSONObject.NULL;
         }
-
         /*
          * If it might be a number, try converting it. We support the 0- and 0x-
          * conventions. If a number cannot be produced, then the value will just
@@ -97,14 +89,11 @@ public class JsonOrgJsonTokener extends JSONTokener {
          * conventions are non-standard. A JSON parser is free to accept
          * non-JSON forms as long as it accepts all correct JSON forms.
          */
-
         if ((b >= '0' && b <= '9') || b == '.' || b == '-' || b == '+') {
             if (b == '0') {
-                if (s.length() > 2 &&
-                        (s.charAt(1) == 'x' || s.charAt(1) == 'X')) {
+                if (s.length() > 2 && (s.charAt(1) == 'x' || s.charAt(1) == 'X')) {
                     try {
-                        return new Integer(Integer.parseInt(s.substring(2),
-                                16));
+                        return new Integer(Integer.parseInt(s.substring(2), 16));
                     } catch (Exception e) {
                         /* Ignore the error */
                     }
@@ -124,7 +113,7 @@ public class JsonOrgJsonTokener extends JSONTokener {
                 } catch (Exception f) {
                     try {
                         return new Double(s);
-                    }  catch (Exception g) {
+                    } catch (Exception g) {
                         return s;
                     }
                 }
@@ -132,5 +121,4 @@ public class JsonOrgJsonTokener extends JSONTokener {
         }
         return s;
     }
-
 }

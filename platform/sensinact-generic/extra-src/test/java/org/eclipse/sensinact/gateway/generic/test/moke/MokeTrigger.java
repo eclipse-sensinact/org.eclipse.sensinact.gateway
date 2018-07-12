@@ -8,70 +8,57 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.generic.test.moke;
 
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 
-/** 
- * 
+/**
+ *
  */
-public class MokeTrigger implements AccessMethodTrigger<AccessMethodResponseBuilder>
-{
-	/**
-	 * @InheritedDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.common.execution.Executable#execute(java.lang.Object)
-	 */
+public class MokeTrigger implements AccessMethodTrigger<AccessMethodResponseBuilder> {
+    /**
+     * @InheritedDoc
+     * @see org.eclipse.sensinact.gateway.common.execution.Executable#execute(java.lang.Object)
+     */
     @Override
-    public Object execute(AccessMethodResponseBuilder parameter) throws Exception
-    {
-	    return 0.2f;
+    public Object execute(AccessMethodResponseBuilder parameter) throws Exception {
+        return 0.2f;
     }
 
-	/**
-	 * @InheritedDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.common.primitive.JSONable#getJSON()
-	 */
+    /**
+     * @InheritedDoc
+     * @see org.eclipse.sensinact.gateway.common.primitive.JSONable#getJSON()
+     */
     @Override
-    public String getJSON()
-    {
-	    return "{\"index\":0,\"passOn\":false,\"type\":\"VARIATIONTEST_TRIGGER\"}";
+    public String getJSON() {
+        return "{\"index\":0,\"passOn\":false,\"type\":\"VARIATIONTEST_TRIGGER\"}";
     }
 
-	/**
-	 * @InheritedDoc
-	 *
-	 * @see AccessMethodTrigger#getParameters()
-	 */
+    /**
+     * @InheritedDoc
+     * @see AccessMethodTrigger#getParameters()
+     */
     @Override
-    public Parameters getParameters()
-    {
-	    return Parameters.INTERMEDIATE;
+    public Parameters getParameters() {
+        return Parameters.INTERMEDIATE;
     }
 
-	/**
-	 * @InheritedDoc
-	 *
-	 * @see AccessMethodTrigger#getName()
-	 */
+    /**
+     * @InheritedDoc
+     * @see AccessMethodTrigger#getName()
+     */
     @Override
-    public String getName()
-    {
-	    return "VARIATIONTEST_TRIGGER";
+    public String getName() {
+        return "VARIATIONTEST_TRIGGER";
     }
 
-	/**
-	 * @InheritedDoc
-	 *
-	 * @see AccessMethodTrigger#passOn()
-	 */
+    /**
+     * @InheritedDoc
+     * @see AccessMethodTrigger#passOn()
+     */
     @Override
-    public boolean passOn()
-    {
-	    return false;
+    public boolean passOn() {
+        return false;
     }
-
 }

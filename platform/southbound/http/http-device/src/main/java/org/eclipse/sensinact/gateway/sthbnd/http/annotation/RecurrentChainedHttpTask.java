@@ -10,29 +10,31 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.annotation;
 
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTasks;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.JSONHttpChainedTasks;
+
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RecurrentChainedHttpTask
-{	
-	Class<? extends HttpChainedTasks> chaining() default JSONHttpChainedTasks.class;
-	
-	CommandType command() default CommandType.GET;
-	
-	long period() default 60*1000;
-	long delay() default 1000;
-	long timeout() default -1;
-	
-	HttpTaskConfiguration configuration();
-	HttpChildTaskConfiguration[] chain();
+public @interface RecurrentChainedHttpTask {
+    Class<? extends HttpChainedTasks> chaining() default JSONHttpChainedTasks.class;
+
+    CommandType command() default CommandType.GET;
+
+    long period() default 60 * 1000;
+
+    long delay() default 1000;
+
+    long timeout() default -1;
+
+    HttpTaskConfiguration configuration();
+
+    HttpChildTaskConfiguration[] chain();
 }

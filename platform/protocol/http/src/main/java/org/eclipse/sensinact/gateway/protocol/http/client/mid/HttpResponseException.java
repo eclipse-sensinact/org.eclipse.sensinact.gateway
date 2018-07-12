@@ -14,43 +14,36 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 
+ *
  *
  */
 @SuppressWarnings("serial")
-public class HttpResponseException extends Exception
-{
-	private int statusCode;
-	private Map<String, List<String>> headers;
-	
-	/**
-	 * @param statusCode
-	 * @param content
-	 * @param map 
-	 */
-	public HttpResponseException(
-			int statusCode, 
-			byte[] content, 
-			Map<String, List<String>> headers) 
-	{
-		super(content!=null?new String(content):"Http Error");
-		this.statusCode = statusCode;
-		this.headers = headers;
-	}
-	
-	/**
-	 * @return
-	 */
-	public int getErrorStatusCode()
-	{
-		return this.statusCode;
-	}
+public class HttpResponseException extends Exception {
+    private int statusCode;
+    private Map<String, List<String>> headers;
 
-	/**
-	 * @return
-	 */
-	public Map<String,List<String>> getHeaders()
-	{
-		return this.headers;
-	}
+    /**
+     * @param statusCode
+     * @param content
+     * @param map
+     */
+    public HttpResponseException(int statusCode, byte[] content, Map<String, List<String>> headers) {
+        super(content != null ? new String(content) : "Http Error");
+        this.statusCode = statusCode;
+        this.headers = headers;
+    }
+
+    /**
+     * @return
+     */
+    public int getErrorStatusCode() {
+        return this.statusCode;
+    }
+
+    /**
+     * @return
+     */
+    public Map<String, List<String>> getHeaders() {
+        return this.headers;
+    }
 }

@@ -15,43 +15,35 @@ import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 
 /**
- * Extended {@link AccessMethodResponse} returned by an 
+ * Extended {@link AccessMethodResponse} returned by an
  * {@link DescribeMethod} invocation and holding a String as
  * result object
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class DescribeStringResponse extends DescribeResponse<String>
-{
-	/**
-	 * Constructor 
-	 * 
+public class DescribeStringResponse extends DescribeResponse<String> {
+    /**
+     * Constructor
+     *
      * @param mediator
      * @param uri
      * @param status
      * @param describeType
      */
-    public DescribeStringResponse(Mediator mediator, 
-    		String uri, Status status, DescribeMethod.DescribeType describeType)
-    {
-	    this(mediator, uri, status, Status.SUCCESS.equals(status)
-	    	?SnaErrorfulMessage.NO_ERROR:SnaErrorfulMessage.UNKNOWN_ERROR_CODE,
-	    	     describeType);
-    }	
-    
+    public DescribeStringResponse(Mediator mediator, String uri, Status status, DescribeMethod.DescribeType describeType) {
+        this(mediator, uri, status, Status.SUCCESS.equals(status) ? SnaErrorfulMessage.NO_ERROR : SnaErrorfulMessage.UNKNOWN_ERROR_CODE, describeType);
+    }
+
     /**
-	 * Constructor 
-	 * 
+     * Constructor
+     *
      * @param mediator
      * @param uri
      * @param status
      * @param code
      * @param describeType
      */
-    public DescribeStringResponse(Mediator mediator, String uri, 
-    	Status status, int code, DescribeMethod.DescribeType describeType)
-    {
-    	super(mediator, uri,  status, code, describeType);
+    public DescribeStringResponse(Mediator mediator, String uri, Status status, int code, DescribeMethod.DescribeType describeType) {
+        super(mediator, uri, status, code, describeType);
     }
-
 }

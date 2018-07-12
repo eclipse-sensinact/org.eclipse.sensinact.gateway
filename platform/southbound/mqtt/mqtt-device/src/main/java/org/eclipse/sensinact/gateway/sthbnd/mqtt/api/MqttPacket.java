@@ -11,29 +11,29 @@
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.api;
 
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.*;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.Data;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.GoodbyeMessage;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.HelloMessage;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ResourceID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID;
 
 /**
  * sensiNact Packet
+ *
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class MqttPacket implements Packet {
-
     @ServiceProviderID
     protected String providerId;
-
     @ServiceID
     protected String serviceId;
-
     @ResourceID
     protected String resourceId;
-
     @Data
     protected String payload;
-
     @HelloMessage
     private boolean helloMessage;
-
     @GoodbyeMessage
     private boolean goodbyeMessage;
 
@@ -67,7 +67,6 @@ public class MqttPacket implements Packet {
     @Override
     public byte[] getBytes() {
         //return payload.getBytes();
-
         return null;
     }
 

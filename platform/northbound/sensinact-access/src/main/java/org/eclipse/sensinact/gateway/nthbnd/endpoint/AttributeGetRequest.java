@@ -10,31 +10,24 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-public class AttributeGetRequest extends AttributeRequest
-{	
-	/**
-	 * @param mediator
-	 * @param serviceProvider
-	 * @param service
-	 * @param resource
-	 * @param attribute
-	 */
-	public AttributeGetRequest(NorthboundMediator mediator,
-			String requestIdentifier, String serviceProvider, 
-			String service, String resource, String attribute)
-	{
-		super(mediator,requestIdentifier, serviceProvider, 
-			service, resource, attribute);
-	}
+public class AttributeGetRequest extends AttributeRequest {
+    /**
+     * @param mediator
+     * @param serviceProvider
+     * @param service
+     * @param resource
+     * @param attribute
+     */
+    public AttributeGetRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, String resource, String attribute) {
+        super(mediator, requestIdentifier, serviceProvider, service, resource, attribute);
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ResourceRequest#getMethod()
-	 */
-	@Override
-	protected String getMethod()
-	{
-		return "get";
-	}
+    /**
+     * @inheritDoc
+     * @see ResourceRequest#getMethod()
+     */
+    @Override
+    protected String getMethod() {
+        return "get";
+    }
 }

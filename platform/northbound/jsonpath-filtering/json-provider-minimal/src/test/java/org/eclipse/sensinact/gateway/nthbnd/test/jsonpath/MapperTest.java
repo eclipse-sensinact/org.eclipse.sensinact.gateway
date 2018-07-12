@@ -5,12 +5,10 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
-
-import static com.jayway.jsonpath.JsonPath.parse;
 import static org.assertj.core.api.Assertions.assertThat;
+import static com.jayway.jsonpath.JsonPath.parse;
 
 public class MapperTest extends BaseTestConfiguration {
-
     @Test
     public void an_Integer_can_be_converted_to_a_Long() {
         assertThat(parse("{\"val\": 1}").read("val", Long.class)).isEqualTo(1L);
@@ -39,7 +37,7 @@ public class MapperTest extends BaseTestConfiguration {
     @Test
     public void a_Long_can_be_converted_to_a_Date() {
         Date now = new Date();
-        assertThat(parse("{\"val\": "+now.getTime()+"}").read("val", Date.class)).isEqualTo(now);
+        assertThat(parse("{\"val\": " + now.getTime() + "}").read("val", Date.class)).isEqualTo(now);
     }
 
     @Test

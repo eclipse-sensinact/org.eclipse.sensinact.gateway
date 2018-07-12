@@ -10,15 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.device.openhab.sensinact;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import javax.jmdns.JmDNS;
-import javax.jmdns.ServiceEvent;
-import javax.jmdns.ServiceInfo;
-import javax.jmdns.ServiceListener;
-
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
@@ -38,54 +29,30 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@HttpTasks(
-    recurrences = {
-        @RecurrentHttpTask(
-            delay = 1000 * 5,
-            period = 1000 * 2,
-            recurrence = @HttpTaskConfiguration(
-                host = "@context[openhab.host]",
-                port = "@context[openhab.port]",
-                path = "/rest/items/",
-                contentType = "application/json",
-                acceptType = "application/json"
-            )
-        )
-    },
-    tasks = {
-        @SimpleHttpTask(
-            commands = {Task.CommandType.ACT},
-            configuration = @HttpTaskConfiguration(
-                host = "@context[openhab.host]",
-                port = "@context[openhab.port]",
-                path = "/rest/items/@context[task.serviceProvider]",
-                httpMethod = "POST",
-                contentType = "text/plain",
-                acceptType = "application/json",
-                direct = true,
-                content = Activator.OpenHabTaskConfigurator.class
-            )
-        )
-    }
-)
+import javax.jmdns.JmDNS;
+import javax.jmdns.ServiceEvent;
+import javax.jmdns.ServiceInfo;
+import javax.jmdns.ServiceListener;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+@HttpTasks(recurrences = {@RecurrentHttpTask(delay = 1000 * 5, period = 1000 * 2, recurrence = @HttpTaskConfiguration(host = "@context[openhab.host]", port = "@context[openhab.port]", path = "/rest/items/", contentType = "application/json", acceptType = "application/json"))}, tasks = {@SimpleHttpTask(commands = {Task.CommandType.ACT}, configuration = @HttpTaskConfiguration(host = "@context[openhab.host]", port = "@context[openhab.port]", path = "/rest/items/@context[task.serviceProvider]", httpMethod = "POST", contentType = "text/plain", acceptType = "application/json", direct = true, content = Activator.OpenHabTaskConfigurator.class))})
 /**
  * OpenHab2 bundle activator
  *
  * @author <a href="mailto:christophe.munillaO@cea.fr">Christophe Munilla</a>
  * @author sb252289
- */
-public class Activator extends HttpActivator implements ServiceListener {
-
+ */ public class Activator extends HttpActivator implements ServiceListener {
     private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
     public static class OpenHabTaskConfigurator implements HttpTaskConfigurator {
-
         public OpenHabTaskConfigurator() {
         }
 
         /**
          * @inheritDoc
-         *
          * @see org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskConfigurator#configure(org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask)
          */
         @Override
@@ -108,43 +75,26 @@ public class Activator extends HttpActivator implements ServiceListener {
     private static final String DEFAULT_OPENHAB_IP = "127.0.0.1";
     private static final int DEFAULT_OPENHAB_PORT = 8080;
     private static final String ACTIVATE_DISCOVERY_PROPERTY_NAME = "org.eclipse.sensinact.gateway.device.openhab.OpenHabDiscovery2.disabled";
-
     private JmDNS dns;
     private ExtModelConfiguration configuration;
     private Map<String, SimpleHttpProtocolStackEndpoint> endpoints;
 
     /**
      * @inheritDoc
-     *
      * @see AbstractActivator#doStart()
      */
     @Override
     public void doStart() throws Exception {
-        super.mediator.setTaskProcessingContextHandler(
-                this.getProcessingContextHandler());
-
-        this.mediator.setTaskProcessingContextFactory(
-                this.getTaskProcessingContextFactory());
-
-        this.mediator.setChainedTaskProcessingContextFactory(
-                this.getChainedTaskProcessingContextFactory());
-
-        this.configuration = new ExtModelInstanceBuilder(
-                mediator, getPacketType()
-        ).withStartAtInitializationTime(isStartingAtInitializationTime()
-        ).withServiceBuildPolicy(getServiceBuildPolicy()
-        ).withResourceBuildPolicy(getResourceBuildPolicy()
-        ).buildConfiguration(
-                getResourceDescriptionFile(), getDefaults());
-
+        super.mediator.setTaskProcessingContextHandler(this.getProcessingContextHandler());
+        this.mediator.setTaskProcessingContextFactory(this.getTaskProcessingContextFactory());
+        this.mediator.setChainedTaskProcessingContextFactory(this.getChainedTaskProcessingContextFactory());
+        this.configuration = new ExtModelInstanceBuilder(mediator, getPacketType()).withStartAtInitializationTime(isStartingAtInitializationTime()).withServiceBuildPolicy(getServiceBuildPolicy()).withResourceBuildPolicy(getResourceBuildPolicy()).buildConfiguration(getResourceDescriptionFile(), getDefaults());
         endpoints = new HashMap<String, SimpleHttpProtocolStackEndpoint>();
-
         final String activateDiscoveryPropertyValue = (String) mediator.getProperty(ACTIVATE_DISCOVERY_PROPERTY_NAME);
         Boolean desactivateDiscovery = false;
         if (activateDiscoveryPropertyValue != null) {
             desactivateDiscovery = Boolean.parseBoolean(activateDiscoveryPropertyValue);
-            mediator.info("Openhab2 discovery configurated by %s property set to %s",
-                    ACTIVATE_DISCOVERY_PROPERTY_NAME, desactivateDiscovery);
+            mediator.info("Openhab2 discovery configurated by %s property set to %s", ACTIVATE_DISCOVERY_PROPERTY_NAME, desactivateDiscovery);
         } else {
             mediator.info("No openhab2 discovery configurated. Default configuration is enabled...");
         }
@@ -152,22 +102,18 @@ public class Activator extends HttpActivator implements ServiceListener {
         String openhabServiceType = DEFAULT_OPENHAB_SERVICE_TYPE;
         if (openhabServiceTypePropertyValue != null) {
             openhabServiceType = openhabServiceTypePropertyValue;
-            mediator.info("Openhab2 service type configurated by %s property set to %s",
-                    OPENHAB_SERVICE_TYPE_PROPERTY_NAME, openhabServiceType);
+            mediator.info("Openhab2 service type configurated by %s property set to %s", OPENHAB_SERVICE_TYPE_PROPERTY_NAME, openhabServiceType);
         } else {
             mediator.info("No openhab2 service type configurated. Using default type: " + openhabServiceType);
         }
-
         final String openhabServiceNamePropertyValue = (String) mediator.getProperty(OPENHAB_SERVICE_NAME_PROPERTY_NAME);
         String openhabServiceName = DEFAULT_OPENHAB_SERVICE_NAME;
         if (openhabServiceNamePropertyValue != null) {
             openhabServiceName = openhabServiceNamePropertyValue;
-            mediator.info("Openhab2 service name configurated by %s property set to %s",
-                    OPENHAB_SERVICE_NAME_PROPERTY_NAME, openhabServiceName);
+            mediator.info("Openhab2 service name configurated by %s property set to %s", OPENHAB_SERVICE_NAME_PROPERTY_NAME, openhabServiceName);
         } else {
             mediator.info("No openhab2 service name configurated. Using default type: " + openhabServiceName);
         }
-
         String openhabIP = DEFAULT_OPENHAB_IP;
         int openhabPort = DEFAULT_OPENHAB_PORT;
         if (!desactivateDiscovery) {
@@ -205,8 +151,7 @@ public class Activator extends HttpActivator implements ServiceListener {
             final String openhabIPPropertyValue = (String) mediator.getProperty(OPENHAB_IP_PROPERTY_NAME);
             if (openhabIPPropertyValue != null) {
                 openhabIP = openhabIPPropertyValue;
-                mediator.info("Openhab2 ip configurated by %s property set to %s",
-                        OPENHAB_IP_PROPERTY_NAME, openhabIP);
+                mediator.info("Openhab2 ip configurated by %s property set to %s", OPENHAB_IP_PROPERTY_NAME, openhabIP);
             } else {
                 openhabIP = DEFAULT_OPENHAB_IP;
                 mediator.info("No openhab2 ip configurated with %s. Using default ip: %s", OPENHAB_IP_PROPERTY_NAME, openhabIP);
@@ -214,26 +159,19 @@ public class Activator extends HttpActivator implements ServiceListener {
             final String openhabPortPropertyValue = (String) mediator.getProperty(OPENHAB_PORT_PROPERTY_NAME);
             if (openhabPortPropertyValue != null) {
                 openhabPort = Integer.parseInt(openhabPortPropertyValue);
-                mediator.info("Openhab2 port configurated by %s property set to %s",
-                        OPENHAB_PORT_PROPERTY_NAME, openhabPort);
+                mediator.info("Openhab2 port configurated by %s property set to %s", OPENHAB_PORT_PROPERTY_NAME, openhabPort);
             } else {
                 openhabPort = DEFAULT_OPENHAB_PORT;
                 mediator.info("No openhab2 port configurated with %s. Using default port: ", OPENHAB_PORT_PROPERTY_NAME, openhabPort);
             }
         }
-        String endpointId = "openHab".concat(
-                String.valueOf((openhabIP + openhabPort).hashCode()));
+        String endpointId = "openHab".concat(String.valueOf((openhabIP + openhabPort).hashCode()));
         try {
-            SimpleHttpProtocolStackEndpoint endpoint
-                    = this.configureProtocolStackEndpoint();
-
+            SimpleHttpProtocolStackEndpoint endpoint = this.configureProtocolStackEndpoint();
             endpoint.setEndpointIdentifier(endpointId);
             endpoint.connect(configuration);
             this.endpoints.put(endpointId, endpoint);
-
-            ((OpenHabMediator) mediator).newBroker(endpointId, openhabIP,
-                    String.valueOf(openhabPort));
-
+            ((OpenHabMediator) mediator).newBroker(endpointId, openhabIP, String.valueOf(openhabPort));
         } catch (Exception e) {
             mediator.error(e);
         }
@@ -241,14 +179,11 @@ public class Activator extends HttpActivator implements ServiceListener {
 
     /**
      * @inheritDoc
-     *
      * @see AbstractActivator#doStop()
      */
     @Override
     public void doStop() throws Exception {
-        Iterator<SimpleHttpProtocolStackEndpoint> iterator
-                = this.endpoints.values().iterator();
-
+        Iterator<SimpleHttpProtocolStackEndpoint> iterator = this.endpoints.values().iterator();
         while (iterator.hasNext()) {
             iterator.next().stop();
         }
@@ -258,7 +193,6 @@ public class Activator extends HttpActivator implements ServiceListener {
     @Override
     public void serviceAdded(ServiceEvent event) {
         try {
-
             ServiceInfo info = event.getInfo();
             mediator.debug("event " + event);
             mediator.debug("event info" + event.getInfo());
@@ -266,21 +200,14 @@ public class Activator extends HttpActivator implements ServiceListener {
             final String ips[] = info.getHostAddresses();
             if (ips != null && ips.length > 0) {
                 String ip = ips[0];
-                String endpointId = "openHab".concat(
-                        String.valueOf((ip + port.intValue()).hashCode()));
+                String endpointId = "openHab".concat(String.valueOf((ip + port.intValue()).hashCode()));
                 try {
-                    SimpleHttpProtocolStackEndpoint endpoint
-                            = this.configureProtocolStackEndpoint();
-
+                    SimpleHttpProtocolStackEndpoint endpoint = this.configureProtocolStackEndpoint();
                     endpoint.setEndpointIdentifier(endpointId);
                     endpoint.connect(configuration);
                     this.endpoints.put(endpointId, endpoint);
-
-                    ((OpenHabMediator) mediator).newBroker(endpointId, ip,
-                            String.valueOf(port.intValue()));
-
-                    mediator.info("Openhab2 device instance added. name %s type %s",
-                            event.getName(), event.getType());
+                    ((OpenHabMediator) mediator).newBroker(endpointId, ip, String.valueOf(port.intValue()));
+                    mediator.info("Openhab2 device instance added. name %s type %s", event.getName(), event.getType());
                 } catch (Exception e) {
                     mediator.error(e);
                 }
@@ -294,14 +221,10 @@ public class Activator extends HttpActivator implements ServiceListener {
 
     @Override
     public void serviceRemoved(ServiceEvent event) {
-
         ServiceInfo info = event.getInfo();
         final Integer port = info.getPort();
         final String ip = info.getHostAddresses()[0];
-
-        String endpointId = "openHab".concat(
-                String.valueOf((ip + port.intValue()).hashCode()));
-
+        String endpointId = "openHab".concat(String.valueOf((ip + port.intValue()).hashCode()));
         ((OpenHabMediator) mediator).deleteBroker(endpointId);
         try {
             this.endpoints.remove(endpointId).stop();
@@ -317,18 +240,15 @@ public class Activator extends HttpActivator implements ServiceListener {
 
     /**
      * @inheritDoc
-     *
      * @see org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator#getServiceBuildPolicy()
      */
     @Override
     protected byte getServiceBuildPolicy() {
-        return (byte) (BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy()
-                | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy());
+        return (byte) (BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy());
     }
 
     /**
      * @inheritDoc
-     *
      * @see AbstractActivator#doInstantiate(org.osgi.framework.BundleContext)
      */
     @Override
@@ -338,11 +258,9 @@ public class Activator extends HttpActivator implements ServiceListener {
 
     /**
      * @inheritDoc
-     *
      * @see org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator#connect(org.eclipse.sensinact.gateway.generic.ExtModelConfiguration)
      */
     @Override
-    protected void connect(ExtModelConfiguration configuration)
-            throws InvalidProtocolStackException {
+    protected void connect(ExtModelConfiguration configuration) throws InvalidProtocolStackException {
     }
 }

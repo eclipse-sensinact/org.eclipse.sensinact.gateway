@@ -11,14 +11,13 @@
 package org.eclipse.sensinact.gateway.core.message;
 
 /**
- *	A MessageRegisterer is a recipient for {@link SnaMessage}s
+ * A MessageRegisterer is a recipient for {@link SnaMessage}s
  */
-public interface MessageRegisterer 
-{
-	/**
-	 * Registers the {@link SnaMessage} passed as parameter
-	 * 
-	 * @param message the {@link SnaMessage} to be registered
-	 */
-	void register(SnaMessage<?> message);
+public interface MessageRegisterer {
+    /**
+     * Registers the {@link SnaMessage} passed as parameter
+     *
+     * @param message the {@link SnaMessage} to be registered
+     */
+    void register(SnaMessage<?> message);
 }

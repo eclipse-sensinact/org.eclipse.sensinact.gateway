@@ -11,22 +11,21 @@
 package org.eclipse.sensinact.gateway.protocol.http.server;
 
 /**
- * 
- */ 
-public interface RequestContent extends Content
-{
-	/**
-	 * @return
-	 */
-	String getRequestURI();
+ *
+ */
+public interface RequestContent extends Content {
+    /**
+     * @return
+     */
+    String getRequestURI();
 
-	/**
-	 * @return
-	 */
-	String getQueryString();
-	
-	/**
-	 * @return
-	 */
-	String getHttpMethod();
+    /**
+     * @return
+     */
+    String getQueryString();
+
+    /**
+     * @return
+     */
+    String getHttpMethod();
 }

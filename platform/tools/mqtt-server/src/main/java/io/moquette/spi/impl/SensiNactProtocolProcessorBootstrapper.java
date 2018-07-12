@@ -6,7 +6,11 @@ import io.moquette.server.config.IConfig;
 import io.moquette.server.config.IResourceLoader;
 import io.moquette.spi.IMessagesStore;
 import io.moquette.spi.ISessionsStore;
-import io.moquette.spi.impl.security.*;
+import io.moquette.spi.impl.security.ACLFileParser;
+import io.moquette.spi.impl.security.AcceptAllAuthenticator;
+import io.moquette.spi.impl.security.DenyAllAuthorizator;
+import io.moquette.spi.impl.security.PermitAllAuthorizator;
+import io.moquette.spi.impl.security.ResourceAuthenticator;
 import io.moquette.spi.impl.subscriptions.Subscription;
 import io.moquette.spi.impl.subscriptions.SubscriptionsStore;
 import io.moquette.spi.persistence.MapDBPersistentStore;
@@ -36,7 +40,7 @@ public class SensiNactProtocolProcessorBootstrapper {
     private SubscriptionsStore subscriptions;
 
     private MapDBPersistentStore m_mapStorage;
-    
+
     private ISessionsStore m_sessionsStore;
 
     private BrokerInterceptor m_interceptor;
@@ -44,24 +48,24 @@ public class SensiNactProtocolProcessorBootstrapper {
     private final ProtocolProcessor m_processor;
 
     public SensiNactProtocolProcessorBootstrapper(BundleContext bundleContext) {
-    	this.m_processor =  new SensiNactProtocolProcessor(bundleContext);
+        this.m_processor = new SensiNactProtocolProcessor(bundleContext);
     }
 
     /**
      * Initialize the processing part of the broker.
-     * @param props the properties carrier where some props like port end host could be loaded.
-     *              For the full list check of configurable properties check moquette.conf file.
+     *
+     * @param props             the properties carrier where some props like port end host could be loaded.
+     *                          For the full list check of configurable properties check moquette.conf file.
      * @param embeddedObservers a list of callbacks to be notified of certain events inside the broker.
      *                          Could be empty list of null.
-     * @param authenticator an implementation of the authenticator to be used, if null load that specified in config
-     *                      and fallback on the default one (permit all).
-     * @param authorizator an implementation of the authorizator to be used, if null load that specified in config
-     *                      and fallback on the default one (permit all).
-     * @param server the serber to init.
+     * @param authenticator     an implementation of the authenticator to be used, if null load that specified in config
+     *                          and fallback on the default one (permit all).
+     * @param authorizator      an implementation of the authorizator to be used, if null load that specified in config
+     *                          and fallback on the default one (permit all).
+     * @param server            the serber to init.
      * @return the processor created for the broker.
-     * */
-    public ProtocolProcessor init(IConfig props, List<? extends InterceptHandler> embeddedObservers,
-                                  IAuthenticator authenticator, IAuthorizator authorizator, SensiNactServer server) {
+     */
+    public ProtocolProcessor init(IConfig props, List<? extends InterceptHandler> embeddedObservers, IAuthenticator authenticator, IAuthorizator authorizator, SensiNactServer server) {
         subscriptions = new SubscriptionsStore();
 
         m_mapStorage = new MapDBPersistentStore(props);
@@ -77,7 +81,7 @@ public class SensiNactProtocolProcessorBootstrapper {
                 try {
                     final Constructor<? extends InterceptHandler> constructor = Class.forName(interceptorClassName).asSubclass(InterceptHandler.class).getConstructor(SensiNactServer.class);
                     handler = constructor.newInstance(server);
-                } catch (NoSuchMethodException nsme){
+                } catch (NoSuchMethodException nsme) {
                     handler = Class.forName(interceptorClassName).asSubclass(InterceptHandler.class).newInstance();
                 }
                 observers.add(handler);
@@ -93,7 +97,7 @@ public class SensiNactProtocolProcessorBootstrapper {
         String authenticatorClassName = props.getProperty(BrokerConstants.AUTHENTICATOR_CLASS_NAME, "");
 
         if (!authenticatorClassName.isEmpty()) {
-            authenticator = (IAuthenticator)loadClass(authenticatorClassName, IAuthenticator.class, props);
+            authenticator = (IAuthenticator) loadClass(authenticatorClassName, IAuthenticator.class, props);
             LOG.info("Loaded custom authenticator {}", authenticatorClassName);
         }
 
@@ -109,7 +113,7 @@ public class SensiNactProtocolProcessorBootstrapper {
 
         String authorizatorClassName = props.getProperty(BrokerConstants.AUTHORIZATOR_CLASS_NAME, "");
         if (!authorizatorClassName.isEmpty()) {
-            authorizator = (IAuthorizator)loadClass(authorizatorClassName, IAuthorizator.class, props);
+            authorizator = (IAuthorizator) loadClass(authorizatorClassName, IAuthorizator.class, props);
             LOG.info("Loaded custom authorizator {}", authorizatorClassName);
         }
 
@@ -133,42 +137,35 @@ public class SensiNactProtocolProcessorBootstrapper {
         m_processor.init(subscriptions, messagesStore, m_sessionsStore, authenticator, allowAnonymous, allowZeroByteClientId, authorizator, m_interceptor, props.getProperty(BrokerConstants.PORT_PROPERTY_NAME));
         return m_processor;
     }
-    
+
     private Object loadClass(String className, Class<?> cls, IConfig props) {
         Object instance = null;
         try {
             Class<?> clazz = Class.forName(className);
 
             // check if method getInstance exists
-            Method method = clazz.getMethod("getInstance", new Class[] {});
+            Method method = clazz.getMethod("getInstance", new Class[]{});
             try {
-                instance = method.invoke(null, new Object[] {});
+                instance = method.invoke(null, new Object[]{});
             } catch (IllegalArgumentException ex) {
                 LOG.error(null, ex);
-                throw new RuntimeException("Cannot call method "+ className +".getInstance", ex);
-            }catch (InvocationTargetException ex) {
+                throw new RuntimeException("Cannot call method " + className + ".getInstance", ex);
+            } catch (InvocationTargetException ex) {
                 LOG.error(null, ex);
-                throw new RuntimeException("Cannot call method "+ className +".getInstance", ex);
-            }catch (IllegalAccessException ex) {
+                throw new RuntimeException("Cannot call method " + className + ".getInstance", ex);
+            } catch (IllegalAccessException ex) {
                 LOG.error(null, ex);
-                throw new RuntimeException("Cannot call method "+ className +".getInstance", ex);
+                throw new RuntimeException("Cannot call method " + className + ".getInstance", ex);
             }
 
-        }
-        catch (NoSuchMethodException nsmex) {
+        } catch (NoSuchMethodException nsmex) {
             try {
                 // check if constructor with IConfig parameter exists
-                instance = this.getClass().getClassLoader()
-                        .loadClass(className)
-                        .asSubclass(cls)
-                        .getConstructor(IConfig.class).newInstance(props);
+                instance = this.getClass().getClassLoader().loadClass(className).asSubclass(cls).getConstructor(IConfig.class).newInstance(props);
             } catch (Exception e) {
                 try {
                     // fallback to default constructor
-                    instance = this.getClass().getClassLoader()
-                            .loadClass(className)
-                            .asSubclass(cls)
-                            .newInstance();
+                    instance = this.getClass().getClassLoader().loadClass(className).asSubclass(cls).newInstance();
                 } catch (Exception ex) {
                     LOG.error(null, ex);
                     throw new RuntimeException("Cannot load custom authenticator class " + className, ex);
@@ -179,7 +176,7 @@ public class SensiNactProtocolProcessorBootstrapper {
             throw new RuntimeException("Class " + className + " not found", ex);
         } catch (SecurityException ex) {
             LOG.error(null, ex);
-            throw new RuntimeException("Cannot call method "+ className +".getInstance", ex);
+            throw new RuntimeException("Cannot call method " + className + ".getInstance", ex);
         }
 
         return instance;

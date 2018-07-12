@@ -19,13 +19,12 @@ import org.json.JSONObject;
  * @author Remi Druilhe
  */
 public class ComponentProperties implements JSONable {
-
     private static final boolean DEFAULT_REGISTER_VALUE = false;
-
     private final boolean register;
 
     /**
      * Constructor
+     *
      * @param builder the builder from which the ComponentProperties object is created
      */
     private ComponentProperties(Builder builder) {
@@ -34,6 +33,7 @@ public class ComponentProperties implements JSONable {
 
     /**
      * If true, the component output is registered as a new sNa resource
+     *
      * @return the register property
      */
     public boolean getRegister() {
@@ -44,11 +44,11 @@ public class ComponentProperties implements JSONable {
      * The builder to create the AppOptions object
      */
     public static class Builder {
-
         private boolean register = DEFAULT_REGISTER_VALUE;
 
         /**
          * A component can register its output as a new sNa resource
+         *
          * @param register the register value
          * @return the builder
          */
@@ -59,6 +59,7 @@ public class ComponentProperties implements JSONable {
 
         /**
          * Create the ComponentProperties object
+         *
          * @return the ComponentProperties object builds from the builder
          */
         public ComponentProperties build() {

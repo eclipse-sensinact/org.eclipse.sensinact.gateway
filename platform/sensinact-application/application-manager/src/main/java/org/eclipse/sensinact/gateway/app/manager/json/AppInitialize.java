@@ -19,7 +19,6 @@ import org.json.JSONObject;
  * @author Rémi Druilhe
  */
 public class AppInitialize implements JSONable {
-
     private final AppOptions options;
 
     /**
@@ -31,6 +30,7 @@ public class AppInitialize implements JSONable {
 
     /**
      * Java constructor
+     *
      * @param options the options of the application
      */
     public AppInitialize(AppOptions options) {
@@ -39,28 +39,26 @@ public class AppInitialize implements JSONable {
 
     /**
      * JSON constructor
+     *
      * @param initialize the initialize as JSON
      */
     public AppInitialize(JSONObject initialize) {
         AppOptions.Builder appOptionBuilder = new AppOptions.Builder();
-
-        if(initialize.has(AppJsonConstant.INIT_OPTIONS)){
+        if (initialize.has(AppJsonConstant.INIT_OPTIONS)) {
             JSONObject optionsJson = initialize.getJSONObject(AppJsonConstant.INIT_OPTIONS);
-
-            if(optionsJson.has(AppJsonConstant.INIT_OPTIONS_AUTORESTART)) {
+            if (optionsJson.has(AppJsonConstant.INIT_OPTIONS_AUTORESTART)) {
                 appOptionBuilder.autorestart(optionsJson.getBoolean(AppJsonConstant.INIT_OPTIONS_AUTORESTART));
             }
-
-            if(optionsJson.has(AppJsonConstant.INIT_OPTIONS_RESETONSTOP)) {
+            if (optionsJson.has(AppJsonConstant.INIT_OPTIONS_RESETONSTOP)) {
                 appOptionBuilder.resetOnStop(optionsJson.getBoolean(AppJsonConstant.INIT_OPTIONS_RESETONSTOP));
             }
         }
-
         this.options = appOptionBuilder.build();
     }
 
     /**
      * Gets the options of the application
+     *
      * @return the options of the application
      */
     public AppOptions getOptions() {
@@ -72,9 +70,7 @@ public class AppInitialize implements JSONable {
      */
     public String getJSON() {
         JSONObject initialize = new JSONObject();
-
         initialize.put(AppJsonConstant.INIT_OPTIONS, options.getJSON());
-
         return initialize.toString();
     }
 }

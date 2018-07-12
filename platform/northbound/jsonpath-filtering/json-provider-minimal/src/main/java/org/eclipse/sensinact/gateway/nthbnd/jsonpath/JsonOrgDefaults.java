@@ -8,72 +8,62 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.nthbnd.jsonpath;
-
-import java.util.EnumSet;
-import java.util.Set;
-
-import org.eclipse.sensinact.gateway.nthbnd.jsonpath.builder.JsonOrgNodeBuilder;
-import org.eclipse.sensinact.gateway.nthbnd.jsonpath.json.JsonOrgJsonProvider;
-import org.eclipse.sensinact.gateway.nthbnd.jsonpath.mapper.JsonOrgMappingProvider;
 
 import com.jayway.jsonpath.Defaults;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.builder.NodeBuilder;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
+import org.eclipse.sensinact.gateway.nthbnd.jsonpath.builder.JsonOrgNodeBuilder;
+import org.eclipse.sensinact.gateway.nthbnd.jsonpath.json.JsonOrgJsonProvider;
+import org.eclipse.sensinact.gateway.nthbnd.jsonpath.mapper.JsonOrgMappingProvider;
+
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
- *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class JsonOrgDefaults implements Defaults
-{
-	private final MappingProvider mappingProvider = new JsonOrgMappingProvider();
-	
-	public JsonOrgDefaults(){}
+public class JsonOrgDefaults implements Defaults {
+    private final MappingProvider mappingProvider = new JsonOrgMappingProvider();
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see com.jayway.jsonpath.Defaults#jsonProvider()
-	 */
-	@Override
-	public JsonProvider jsonProvider()
-	{
-		return new JsonOrgJsonProvider();
-	}
+    public JsonOrgDefaults() {
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see com.jayway.jsonpath.Defaults#options()
-	 */
-	@Override
-	public Set<Option> options()
-	{
-		return EnumSet.noneOf(Option.class);
-	}
+    /**
+     * @inheritDoc
+     * @see com.jayway.jsonpath.Defaults#jsonProvider()
+     */
+    @Override
+    public JsonProvider jsonProvider() {
+        return new JsonOrgJsonProvider();
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see com.jayway.jsonpath.Defaults#mappingProvider()
-	 */
-	@Override
-	public MappingProvider mappingProvider()
-	{
-		return mappingProvider;
-	}
+    /**
+     * @inheritDoc
+     * @see com.jayway.jsonpath.Defaults#options()
+     */
+    @Override
+    public Set<Option> options() {
+        return EnumSet.noneOf(Option.class);
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see com.jayway.jsonpath.Defaults#nodeBuilder()
-	 */
-	@Override
-	public NodeBuilder nodeBuilder() {
-		return new JsonOrgNodeBuilder();
-	}
+    /**
+     * @inheritDoc
+     * @see com.jayway.jsonpath.Defaults#mappingProvider()
+     */
+    @Override
+    public MappingProvider mappingProvider() {
+        return mappingProvider;
+    }
+
+    /**
+     * @inheritDoc
+     * @see com.jayway.jsonpath.Defaults#nodeBuilder()
+     */
+    @Override
+    public NodeBuilder nodeBuilder() {
+        return new JsonOrgNodeBuilder();
+    }
 }

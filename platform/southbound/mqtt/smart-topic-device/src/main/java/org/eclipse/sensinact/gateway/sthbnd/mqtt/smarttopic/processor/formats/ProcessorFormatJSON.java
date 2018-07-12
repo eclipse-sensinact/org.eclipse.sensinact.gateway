@@ -24,6 +24,7 @@ import java.util.StringTokenizer;
  * inData 'statusCode' you ll get '200'
  * inData 'response.name' you ll get 'smartsantander_u7jcfa_t2530'
  * etc.
+ *
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class ProcessorFormatJSON implements ProcessorFormatIface {
@@ -32,24 +33,25 @@ public class ProcessorFormatJSON implements ProcessorFormatIface {
         return "json";
     }
 
-    public String jsonDepthSearch(String elementPath,String json){
-
-        StringTokenizer st=new StringTokenizer(elementPath,".");
-        JSONObject rootJSON=new JSONObject(json);
-        JSONObject current=rootJSON;
-        while(st.hasMoreElements()){
-            String val=st.nextToken();
-            if(st.hasMoreElements()){
-                current=current.getJSONObject(val);
-            }else {
+    public String jsonDepthSearch(String elementPath, String json) {
+        StringTokenizer st = new StringTokenizer(elementPath, ".");
+        JSONObject rootJSON = new JSONObject(json);
+        JSONObject current = rootJSON;
+        while (st.hasMoreElements()) {
+            String val = st.nextToken();
+            if (st.hasMoreElements()) {
+                current = current.getJSONObject(val);
+            } else {
                 return new String(current.get(val).toString());
             }
         }
         return current.toString();
-    };
+    }
+
+    ;
 
     @Override
-    public String process(String inData,SelectorIface selector) throws ProcessorFormatException {
-        return jsonDepthSearch(selector.getExpression(),inData);
+    public String process(String inData, SelectorIface selector) throws ProcessorFormatException {
+        return jsonDepthSearch(selector.getExpression(), inData);
     }
 }

@@ -17,34 +17,24 @@ import org.eclipse.sensinact.gateway.generic.packet.PacketReader;
 import org.eclipse.sensinact.gateway.generic.packet.PacketReaderFactory;
 
 /**
- * 
+ *
  */
-public class GenericTestPacketReaderFactory implements PacketReaderFactory
-{
+public class GenericTestPacketReaderFactory implements PacketReaderFactory {
+    /**
+     * @inheritDoc
+     * @see PacketReaderFactory#handle(java.lang.Class)
+     */
+    @Override
+    public boolean handle(Class<? extends Packet> packetType) {
+        return false;
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see PacketReaderFactory#handle(java.lang.Class)
-	 */
-	@Override
-	public boolean handle(Class<? extends Packet> packetType)
-	{
-		return false;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see PacketReaderFactory#newInstance(Mediator, ExtModelConfiguration, Packet)
-	 */
-	@Override
-	public <P extends Packet> PacketReader<P> newInstance(
-	        Mediator mediator,
-	        ExtModelConfiguration manager,
-	        P packet)
-	{
-		return null;
-	}
-
+    /**
+     * @inheritDoc
+     * @see PacketReaderFactory#newInstance(Mediator, ExtModelConfiguration, Packet)
+     */
+    @Override
+    public <P extends Packet> PacketReader<P> newInstance(Mediator mediator, ExtModelConfiguration manager, P packet) {
+        return null;
+    }
 }

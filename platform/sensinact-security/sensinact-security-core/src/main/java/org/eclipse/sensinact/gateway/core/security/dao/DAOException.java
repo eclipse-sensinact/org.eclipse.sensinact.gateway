@@ -11,15 +11,15 @@
 package org.eclipse.sensinact.gateway.core.security.dao;
 
 /**
- * A DAO Exception wraps any exception of the underlying code, such 
+ * A DAO Exception wraps any exception of the underlying code, such
  * as SQLExceptions.
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class DAOException extends Exception 
-{
+public class DAOException extends Exception {
     /**
      * Constructs a DAOException with the given detail message.
+     *
      * @param message The detail message of the DAOException.
      */
     public DAOException(String message) {
@@ -28,6 +28,7 @@ public class DAOException extends Exception
 
     /**
      * Constructs a DAOException with the given root cause.
+     *
      * @param cause The root cause of the DAOException.
      */
     public DAOException(Throwable cause) {
@@ -36,11 +37,11 @@ public class DAOException extends Exception
 
     /**
      * Constructs a DAOException with the given detail message and root cause.
+     *
      * @param message The detail message of the DAOException.
-     * @param cause The root cause of the DAOException.
+     * @param cause   The root cause of the DAOException.
      */
     public DAOException(String message, Throwable cause) {
         super(message, cause);
     }
-
 }

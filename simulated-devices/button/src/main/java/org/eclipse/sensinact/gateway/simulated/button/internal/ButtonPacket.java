@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.button.internal;
 
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
@@ -18,40 +17,37 @@ import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID;
 
 /**
- * 
+ *
  */
 public class ButtonPacket implements Packet {
+    @ServiceProviderID
+    public final String SERVICE_PROVIDER_IDENTIFIER = "button";
+    @ServiceID
+    public final String SERVICE_ID = "switch";
+    @ResourceID
+    public final String RESOURCE_ID = "state";
+    private final boolean value;
 
-	@ServiceProviderID
-	public final String SERVICE_PROVIDER_IDENTIFIER = "button";
-	@ServiceID
-	public final String SERVICE_ID = "switch";
-	@ResourceID
-	public final String RESOURCE_ID = "state";
-	private final boolean value;
-
-	/**
-	 * @param value hte value of the button
-	 */
+    /**
+     * @param value hte value of the button
+     */
     public ButtonPacket(boolean value) {
-    	this.value = value;
+        this.value = value;
     }
 
-	/**
-	 * @return the current value
-	 */
+    /**
+     * @return the current value
+     */
     @Data
-	public boolean getValue()
-	{
-		return this.value;
-	}
-	
-	/**
-	 * @see Packet#getBytes()
-	 */
-	@Override
-	public byte[] getBytes()
-	{
-		return null;
-	}
+    public boolean getValue() {
+        return this.value;
+    }
+
+    /**
+     * @see Packet#getBytes()
+     */
+    @Override
+    public byte[] getBytes() {
+        return null;
+    }
 }

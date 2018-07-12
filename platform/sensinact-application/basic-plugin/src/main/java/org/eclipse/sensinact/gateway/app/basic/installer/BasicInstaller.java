@@ -16,7 +16,13 @@ import org.eclipse.sensinact.gateway.app.api.plugin.PluginInstaller;
 import org.eclipse.sensinact.gateway.app.basic.logic.BetweenFunction;
 import org.eclipse.sensinact.gateway.app.basic.logic.DoubleConditionFunction;
 import org.eclipse.sensinact.gateway.app.basic.logic.SimpleConditionFunction;
-import org.eclipse.sensinact.gateway.app.basic.math.*;
+import org.eclipse.sensinact.gateway.app.basic.math.AdditionFunction;
+import org.eclipse.sensinact.gateway.app.basic.math.AssignmentFunction;
+import org.eclipse.sensinact.gateway.app.basic.math.DivisionFunction;
+import org.eclipse.sensinact.gateway.app.basic.math.MathFunction;
+import org.eclipse.sensinact.gateway.app.basic.math.ModuloFunction;
+import org.eclipse.sensinact.gateway.app.basic.math.MultiplicationFunction;
+import org.eclipse.sensinact.gateway.app.basic.math.SubtractionFunction;
 import org.eclipse.sensinact.gateway.app.basic.sna.ActActionFunction;
 import org.eclipse.sensinact.gateway.app.basic.sna.ActionFunction;
 import org.eclipse.sensinact.gateway.app.basic.sna.SetActionFunction;
@@ -30,12 +36,10 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.json.JSONObject;
 
 /**
- * @see PluginInstaller
- *
  * @author Remi Druilhe
+ * @see PluginInstaller
  */
 public class BasicInstaller extends AbstractPlugin {
-
     protected Mediator mediator;
 
     public BasicInstaller(Mediator mediator) {
@@ -46,12 +50,7 @@ public class BasicInstaller extends AbstractPlugin {
      * @see PluginInstaller#getComponentJSONSchema(String)
      */
     public JSONObject getComponentJSONSchema(String function) {
-
-        if (function.equals("lesserThan") || function.equals("lesserEqual") ||
-                function.equals("greaterThan") || function.equals("greaterEqual") ||
-                function.equals("equal") || function.equals("diff") ||
-                function.equals("regex") || function.equals("abs") ||
-                function.equals("delta")) {
+        if (function.equals("lesserThan") || function.equals("lesserEqual") || function.equals("greaterThan") || function.equals("greaterEqual") || function.equals("equal") || function.equals("diff") || function.equals("regex") || function.equals("abs") || function.equals("delta")) {
             return SimpleConditionFunction.getJSONSchemaFunction(mediator.getContext());
         } else if (function.equals("and") || function.equals("or")) {
             return DoubleConditionFunction.getJSONSchemaFunction(mediator.getContext());
@@ -80,7 +79,6 @@ public class BasicInstaller extends AbstractPlugin {
         } else if (TimeFunction.TimeOperator.SLEEP.getOperator().equalsIgnoreCase(function)) {
             return SleepFunction.getJSONSchemaFunction(mediator.getContext());
         }
-
         //TODO
         return null;
     }
@@ -90,16 +88,11 @@ public class BasicInstaller extends AbstractPlugin {
      */
     public AbstractFunction getFunction(AppFunction function) {
         String functionName = function.getName();
-
-        if(functionName.equals("lesserThan") || functionName.equals("lesserEqual") ||
-                functionName.equals("greaterThan") || functionName.equals("greaterEqual") ||
-                functionName.equals("equal") || functionName.equals("diff") ||
-                functionName.equals("regex") || functionName.equals("abs") ||
-                functionName.equals("delta")) {
+        if (functionName.equals("lesserThan") || functionName.equals("lesserEqual") || functionName.equals("greaterThan") || functionName.equals("greaterEqual") || functionName.equals("equal") || functionName.equals("diff") || functionName.equals("regex") || functionName.equals("abs") || functionName.equals("delta")) {
             return new SimpleConditionFunction(mediator, functionName);
-        } else if(functionName.equals("and") || functionName.equals("or")) {
+        } else if (functionName.equals("and") || functionName.equals("or")) {
             return new DoubleConditionFunction(functionName);
-        } else if(functionName.equals("in")) {
+        } else if (functionName.equals("in")) {
             return new BetweenFunction();
         } else if (MathFunction.MathOperator.ADDITION.getOperator().equalsIgnoreCase(functionName)) {
             return new AdditionFunction(this.mediator);
@@ -124,7 +117,6 @@ public class BasicInstaller extends AbstractPlugin {
         } else if (TimeFunction.TimeOperator.SLEEP.getOperator().equalsIgnoreCase(functionName)) {
             return new SleepFunction(this.mediator);
         }
-
         return null;
     }
 }

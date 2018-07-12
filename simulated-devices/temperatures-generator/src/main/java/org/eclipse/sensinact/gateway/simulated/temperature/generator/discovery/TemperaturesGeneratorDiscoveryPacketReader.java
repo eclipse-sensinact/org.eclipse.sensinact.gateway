@@ -8,16 +8,14 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.temperature.generator.discovery;
 
-import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacket;
-import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacketReader;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
+import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacket;
+import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacketReader;
 
 public class TemperaturesGeneratorDiscoveryPacketReader extends TemperaturesGeneratorAbstractPacketReader {
-
     /**
      * @param mediator the mediator
      */
@@ -30,13 +28,11 @@ public class TemperaturesGeneratorDiscoveryPacketReader extends TemperaturesGene
         super.setServiceProviderId(((TemperaturesGeneratorDiscoveryPacket) packet).getServiceProvider());
         super.isHelloMessage(true);
         super.configure();
-
         super.setServiceProviderId(((TemperaturesGeneratorDiscoveryPacket) packet).getServiceProvider());
         super.setServiceId("admin");
         super.setResourceId("location");
         super.setData(((TemperaturesGeneratorDiscoveryPacket) packet).getLocation());
         super.configure();
-
         super.setServiceProviderId(((TemperaturesGeneratorDiscoveryPacket) packet).getServiceProvider());
         super.setServiceId("sensor");
         super.setResourceId("temperature");

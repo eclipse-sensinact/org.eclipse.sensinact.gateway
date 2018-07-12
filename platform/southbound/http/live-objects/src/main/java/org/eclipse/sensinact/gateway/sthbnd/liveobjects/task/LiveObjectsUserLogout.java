@@ -22,23 +22,18 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 /**
  * @author Rémi Druilhe
  */
-public class LiveObjectsUserLogout extends HttpTask<SimpleHttpResponse,SimpleHttpRequest>
-{
-    public LiveObjectsUserLogout(Mediator mediator,  TaskTranslator transmitter)
-    {
-        super(mediator, null, transmitter, SimpleHttpRequest.class, 
-        		UriUtils.ROOT, null, null, null);
+public class LiveObjectsUserLogout extends HttpTask<SimpleHttpResponse, SimpleHttpRequest> {
+    public LiveObjectsUserLogout(Mediator mediator, TaskTranslator transmitter) {
+        super(mediator, null, transmitter, SimpleHttpRequest.class, UriUtils.ROOT, null, null, null);
     }
 
     @Override
-    public String getUri()
-    {
+    public String getUri() {
         return LiveObjectsConstant.ROOT_URL + "/logout?cookie=false";
     }
 
     @Override
-    public String getHttpMethod()
-    {
+    public String getHttpMethod() {
         return HttpConnectionConfiguration.POST;
     }
 }

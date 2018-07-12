@@ -21,16 +21,15 @@ import org.slf4j.LoggerFactory;
  * This class triggers an alert that stops the application when an exception is throw
  * during the runtime of the application
  *
- * @see AbstractAppWatchDog
- *
  * @author Remi Druilhe
+ * @see AbstractAppWatchDog
  */
 public class AppExceptionWatchDog extends AbstractAppWatchDog implements Thread.UncaughtExceptionHandler {
-
-    private static Logger LOG= LoggerFactory.getLogger(AppExceptionWatchDog.class);
+    private static Logger LOG = LoggerFactory.getLogger(AppExceptionWatchDog.class);
 
     /**
      * Constructor
+     *
      * @param service the application to watch
      */
     public AppExceptionWatchDog(AppServiceMediator mediator, ApplicationService service) {
@@ -55,10 +54,7 @@ public class AppExceptionWatchDog extends AbstractAppWatchDog implements Thread.
      * @see Thread.UncaughtExceptionHandler#uncaughtException(java.lang.Thread, java.lang.Throwable)
      */
     public void uncaughtException(Thread thread, Throwable exception) {
-
-        LOG.error("Watch dog exception",exception);
-
+        LOG.error("Watch dog exception", exception);
         super.alert(exception.getMessage());
-
     }
 }

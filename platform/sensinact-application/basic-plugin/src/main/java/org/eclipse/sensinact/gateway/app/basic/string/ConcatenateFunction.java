@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.basic.string;
 
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
@@ -24,27 +23,24 @@ import java.util.List;
 /**
  * This class implements the concatenate function
  *
- * @see StringFunction
- *
  * @author Remi Druilhe
+ * @see StringFunction
  */
 public class ConcatenateFunction extends StringFunction<String> {
-
     private static final String JSON_SCHEMA = "concatenate.json";
 
     /**
      * Gets the JSON schema of the function from the plugin
+     *
      * @param context the context of the bundle
      * @return the JSON schema of the function
      */
     public static JSONObject getJSONSchemaFunction(BundleContext context) {
         try {
-            return new JSONObject(new JSONTokener(
-                    new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
+            return new JSONObject(new JSONTokener(new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
@@ -53,11 +49,9 @@ public class ConcatenateFunction extends StringFunction<String> {
      */
     public void process(List<DataItf> datas) {
         StringBuilder sb = new StringBuilder();
-
-        for(DataItf data : datas) {
+        for (DataItf data : datas) {
             sb.append(data.getValue());
         }
-
         super.update(sb.toString());
     }
 }

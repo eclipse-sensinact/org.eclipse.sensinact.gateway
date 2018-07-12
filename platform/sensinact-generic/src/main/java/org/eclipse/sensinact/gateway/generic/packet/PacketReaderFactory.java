@@ -16,46 +16,34 @@ import org.eclipse.sensinact.gateway.generic.ExtResourceConfig;
 
 /**
  * A {@link PacketReader} factory service
- * 
- * @param <P>
- * 		extended {@link BasisPacket} type
- * 
+ *
+ * @param <P> extended {@link BasisPacket} type
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface PacketReaderFactory
-{
-	/**
-	 * Returns true if this factory handles the {@link Packet}
-	 * type passed as parameter; otherwise returns false
-	 * 
-	 * @param packetType
-	 * 		the {@link Packet} type
-	 * @return	
-	 * 		<ul>
-	 * 			<li>true if the specified {@link Packet} type
-	 * 				is handled by this factory</li>
-	 * 			<li>false otherwise</li>
-	 * 		</ul>
-	 */
-	boolean handle(Class<? extends Packet> packetType);
-	
-	/**
-	 * Returns a new {@link PacketReader} instance
-	 * 
-	 * @param mediator
-	 * 		the {@link Mediator} allowing to interact 
-	 * 		with the OSGi host environment
-	 * @param manager
-	 * 		the {@link ExtModelConfiguration} managing 
-	 * 		the set of accessible {@link ExtResourceConfig}s
-	 * @param packet
-	 * 		the {@link Packet} to parse
-	 * @return
-	 * 		 a new {@link PacketReader} instance
-	 * 
-	 * @throws InvalidPacketException 
-	 */
-	<P extends Packet> PacketReader<P> newInstance(Mediator mediator, 
-			ExtModelConfiguration manager, P packet) 
-			throws InvalidPacketException;	
+public interface PacketReaderFactory {
+    /**
+     * Returns true if this factory handles the {@link Packet}
+     * type passed as parameter; otherwise returns false
+     *
+     * @param packetType the {@link Packet} type
+     * @return <ul>
+     * <li>true if the specified {@link Packet} type
+     * is handled by this factory</li>
+     * <li>false otherwise</li>
+     * </ul>
+     */
+    boolean handle(Class<? extends Packet> packetType);
+
+    /**
+     * Returns a new {@link PacketReader} instance
+     *
+     * @param mediator the {@link Mediator} allowing to interact
+     *                 with the OSGi host environment
+     * @param manager  the {@link ExtModelConfiguration} managing
+     *                 the set of accessible {@link ExtResourceConfig}s
+     * @param packet   the {@link Packet} to parse
+     * @return a new {@link PacketReader} instance
+     * @throws InvalidPacketException
+     */
+    <P extends Packet> PacketReader<P> newInstance(Mediator mediator, ExtModelConfiguration manager, P packet) throws InvalidPacketException;
 }

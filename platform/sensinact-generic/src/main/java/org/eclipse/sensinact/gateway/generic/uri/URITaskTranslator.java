@@ -10,33 +10,27 @@
  */
 package org.eclipse.sensinact.gateway.generic.uri;
 
-import java.util.List;
-import java.util.Map;
-
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.TaskTranslator;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Service dedicated to data stream transmission
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface URITaskTranslator extends TaskTranslator
-{       
+public interface URITaskTranslator extends TaskTranslator {
     public static final Task.RequestType REQUEST_TYPE = Task.RequestType.URI;
-    
+
     /**
      * Creates an appropriate request and sends it
-     * 
-     * @param serviceProviderIdentifier
-     * 		the String identifier of the requirer {@link ServiceProvider}
-     * @param path
-     * 		URI targeted by the request to create  
-     * @param content
-     * 		the request object content
-     * @param options
-     * 		set of options applying on the request to create
+     *
+     * @param serviceProviderIdentifier the String identifier of the requirer {@link ServiceProvider}
+     * @param path                      URI targeted by the request to create
+     * @param content                   the request object content
+     * @param options                   set of options applying on the request to create
      */
-    void send(String serviceProviderIdentifier, String path, Object content, 
-    		Map<String,List<String>> options);
+    void send(String serviceProviderIdentifier, String path, Object content, Map<String, List<String>> options);
 }

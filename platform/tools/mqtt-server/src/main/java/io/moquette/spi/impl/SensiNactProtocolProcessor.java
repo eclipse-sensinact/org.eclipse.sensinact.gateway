@@ -9,7 +9,7 @@ import org.osgi.framework.wiring.BundleWiring;
 /**
  * Class responsible to handle the logic of MQTT protocol it's the director of
  * the protocol execution.
- *
+ * <p>
  * Used by the front facing class ProtocolProcessorBootstrapper.
  *
  * @author andrea
@@ -18,37 +18,32 @@ public class SensiNactProtocolProcessor extends io.moquette.spi.impl.ProtocolPro
 
     private final BundleContext bundleContext;
 
-    public SensiNactProtocolProcessor(BundleContext bundleContext)
-	{
-		super();
-		this.bundleContext=bundleContext;
-	}
+    public SensiNactProtocolProcessor(BundleContext bundleContext) {
+        super();
+        this.bundleContext = bundleContext;
+    }
 
     public void processPublish(Channel channel, PublishMessage msg) {
-        
+
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(((BundleWiring)bundleContext.getBundle().adapt(BundleWiring.class)).getClassLoader());
-        try
-        {
-        	super.processPublish(channel, msg);
-        
-        }finally
-        {
-        	Thread.currentThread().setContextClassLoader(cl);
+        Thread.currentThread().setContextClassLoader(((BundleWiring) bundleContext.getBundle().adapt(BundleWiring.class)).getClassLoader());
+        try {
+            super.processPublish(channel, msg);
+
+        } finally {
+            Thread.currentThread().setContextClassLoader(cl);
         }
     }
 
     public void processSubscribe(Channel channel, SubscribeMessage msg) {
 
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(((BundleWiring)bundleContext.getBundle().adapt(BundleWiring.class)).getClassLoader());
-        try
-        {
-        	super.processSubscribe(channel, msg);
-        
-        }finally
-        {
-        	Thread.currentThread().setContextClassLoader(cl);
+        Thread.currentThread().setContextClassLoader(((BundleWiring) bundleContext.getBundle().adapt(BundleWiring.class)).getClassLoader());
+        try {
+            super.processSubscribe(channel, msg);
+
+        } finally {
+            Thread.currentThread().setContextClassLoader(cl);
         }
     }
 

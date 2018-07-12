@@ -13,31 +13,23 @@ package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 
-public class DefaultHttpTaskProcessingContextFactory 
-implements HttpTaskProcessingContextFactory
-{
-	protected Mediator mediator;
+public class DefaultHttpTaskProcessingContextFactory implements HttpTaskProcessingContextFactory {
+    protected Mediator mediator;
 
-	/**
-	 * @param mediator
-	 */
-	public DefaultHttpTaskProcessingContextFactory(Mediator mediator)
-	{
-		this.mediator = mediator;
-	}
+    /**
+     * @param mediator
+     */
+    public DefaultHttpTaskProcessingContextFactory(Mediator mediator) {
+        this.mediator = mediator;
+    }
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see HttpTaskProcessingContextFactory#
-	 * newInstance(HttpTask)
-	 */
-	@Override
-	public HttpTaskProcessingContext newInstance( 
-			HttpTaskConfigurator httpTaskConfigurator, 
-			String endpointId, HttpTask<?, ?> task)
-	{
-		return new DefaultHttpTaskProcessingContext(this.mediator,
-				httpTaskConfigurator, endpointId, task);
-	}
+    /**
+     * @inheritDoc
+     * @see HttpTaskProcessingContextFactory#
+     * newInstance(HttpTask)
+     */
+    @Override
+    public HttpTaskProcessingContext newInstance(HttpTaskConfigurator httpTaskConfigurator, String endpointId, HttpTask<?, ?> task) {
+        return new DefaultHttpTaskProcessingContext(this.mediator, httpTaskConfigurator, endpointId, task);
+    }
 }

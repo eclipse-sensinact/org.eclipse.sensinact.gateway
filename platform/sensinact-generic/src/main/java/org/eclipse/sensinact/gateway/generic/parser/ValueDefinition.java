@@ -10,94 +10,76 @@
  */
 package org.eclipse.sensinact.gateway.generic.parser;
 
-import org.xml.sax.Attributes;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.xml.sax.Attributes;
 
 /**
  * A {@link ValueDefinition} defines a simple xml container element
- * potentially holding a target attribute 
- * 
+ * potentially holding a target attribute
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @XmlElement(tag = "value", field = "value")
-public class ValueDefinition extends XmlDefinition
-{    
+public class ValueDefinition extends XmlDefinition {
     /**
      * the value object defined in the associated
      * xml element
      */
     protected Object value;
-    
+
     /**
      * the TypeDefinition wrapping the Type of
      * this ValueDefinition's value object
      */
     protected TypeDefinition typeDefinition;
-    
+
     /**
      * Constructor
-     * 
-     * @param mediator
-     *      the associated Mediator
-     * @param atts
-     *      the set of attributes data structure for the 
-     *      xml value element
+     *
+     * @param mediator the associated Mediator
+     * @param atts     the set of attributes data structure for the
+     *                 xml value element
      */
-    public ValueDefinition (Mediator mediator, Attributes atts, 
-            TypeDefinition typeDefinition)
-    {
+    public ValueDefinition(Mediator mediator, Attributes atts, TypeDefinition typeDefinition) {
         super(mediator, atts);
         this.typeDefinition = typeDefinition;
     }
-    
+
     /**
      * Sets the string value defined in the associated
      * xml element
-     * 
-     * @param typeDefinition
-     *      the string value defined in the associated
-     *      xml element
+     *
+     * @param typeDefinition the string value defined in the associated
+     *                       xml element
      */
-    public void setValue(String value)
-    {
-       try
-       {
-           this.value = CastUtils.cast(
-        		super.mediator.getClassLoader(),
-                   this.typeDefinition.getType(), value);
-
-        } catch (ClassCastException e)
-        {
-            if(super.mediator.isErrorLoggable())
-            {
+    public void setValue(String value) {
+        try {
+            this.value = CastUtils.cast(super.mediator.getClassLoader(), this.typeDefinition.getType(), value);
+        } catch (ClassCastException e) {
+            if (super.mediator.isErrorLoggable()) {
                 super.mediator.error(e, e.getMessage());
             }
-        } 
-    }    
-    
+        }
+    }
+
     /**
-     * Returns this ValueDefinition's value object 
-     *  
-     * @return
-     *      this ValueDefinition's value object 
+     * Returns this ValueDefinition's value object
+     *
+     * @return this ValueDefinition's value object
      */
-    public Object getValue()
-    {
+    public Object getValue() {
         return this.value;
     }
 
     /**
      * Return the {@link TypeDefinition} wrapping the
      * value object Type of this ValueDefinition
-     * 
-     * @return
-     *      the {@link TypeDefinition} wrapping the
-     *      value object Type of this ValueDefinition
+     *
+     * @return the {@link TypeDefinition} wrapping the
+     * value object Type of this ValueDefinition
      */
-    public TypeDefinition getTypeDefinition()
-    {
+    public TypeDefinition getTypeDefinition() {
         return this.typeDefinition;
     }
 }

@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.app.manager.component.property;
 
 public abstract class AbstractPropertyBlock {
-
     public abstract void instantiate();
 
     public abstract void uninstantiate();

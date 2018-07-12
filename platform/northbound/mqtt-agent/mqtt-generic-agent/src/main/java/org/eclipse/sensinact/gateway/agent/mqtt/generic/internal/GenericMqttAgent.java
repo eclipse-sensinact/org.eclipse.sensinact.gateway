@@ -8,10 +8,13 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.agent.mqtt.generic.internal;
 
-import org.eclipse.paho.client.mqttv3.*;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,28 +25,23 @@ import java.io.IOException;
  * Generic MQTT Agent
  */
 public class GenericMqttAgent {
-
     private static final Logger LOG = LoggerFactory.getLogger(GenericMqttAgent.class);
-
     private final String broker;
     private final int qos;
-
     private MqttClient client;
 
-	/**
-	 * Constructor
-	 *
+    /**
+     * Constructor
+     *
      * @param broker URL of the broker
-     * @param qos QoS for the session
-	 * @throws IOException
-	 */
-	public GenericMqttAgent(String broker, int qos) throws IOException {
-	    this.broker = broker;
+     * @param qos    QoS for the session
+     * @throws IOException
+     */
+    public GenericMqttAgent(String broker, int qos) throws IOException {
+        this.broker = broker;
         this.qos = qos;
-
         MqttConnectOptions connOpts = new MqttConnectOptions();
         connOpts.setCleanSession(true);
-
         try {
             this.client = new MqttClient(this.broker, MqttClient.generateClientId(), new MemoryPersistence());
             this.client.connect(connOpts);
@@ -55,7 +53,7 @@ public class GenericMqttAgent {
             LOG.error("except " + me);
             me.printStackTrace();
         }
-	}
+    }
 
     public void publish(String topic, String message) {
         MqttMessage mqMessage = new MqttMessage(message.getBytes());
@@ -85,7 +83,6 @@ public class GenericMqttAgent {
 
     /**
      * Unsubscribe MQTT broker
-     *
      */
     public void close() {
         try {

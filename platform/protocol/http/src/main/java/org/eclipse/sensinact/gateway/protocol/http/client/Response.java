@@ -14,25 +14,22 @@ import org.eclipse.sensinact.gateway.protocol.http.Headers;
 
 /**
  * An Http Response service signature
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface Response extends Headers
-{
-	/**
-	 * Returns the bytes array content of the HTTP response
-	 * 
-	 * @return
-	 * 		the bytes array content of the HTTP response
-	 */
-	public byte[] getContent();
+public interface Response extends Headers {
+    /**
+     * Returns the bytes array content of the HTTP response
+     *
+     * @return the bytes array content of the HTTP response
+     */
+    public byte[] getContent();
 
-	/**
-	 * Returns the HTTP code of the HTTP response
-	 * 
-	 * @return
-	 * 		the HTTP response code
-	 */
-	public int getStatusCode();
-	
+    /**
+     * Returns the HTTP code of the HTTP response
+     *
+     * @return the HTTP response code
+     */
+    public int getStatusCode();
+
 }

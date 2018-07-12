@@ -8,20 +8,18 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.temperature.generator.discovery;
 
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacket;
 
 public class TemperaturesGeneratorDiscoveryPacket extends TemperaturesGeneratorAbstractPacket {
-
     private final String serviceProviderId;
     private final String location;
     private final double value;
 
     /**
      * @param serviceProviderId the id of the device
-     * @param value the value of the sensor
+     * @param value             the value of the sensor
      */
     public TemperaturesGeneratorDiscoveryPacket(String serviceProviderId, String location, double value) {
         this.serviceProviderId = serviceProviderId;

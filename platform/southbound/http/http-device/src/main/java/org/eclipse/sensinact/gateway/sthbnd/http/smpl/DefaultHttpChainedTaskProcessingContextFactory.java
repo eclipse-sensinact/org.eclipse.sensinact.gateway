@@ -14,31 +14,22 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTasks;
 
-public class DefaultHttpChainedTaskProcessingContextFactory 
-implements HttpChainedTaskProcessingContextFactory
-{
-	private Mediator mediator;
+public class DefaultHttpChainedTaskProcessingContextFactory implements HttpChainedTaskProcessingContextFactory {
+    private Mediator mediator;
 
-	/**
-	 * @param mediator
-	 */
-	public DefaultHttpChainedTaskProcessingContextFactory(Mediator mediator)
-	{
-		this.mediator = mediator;
-	}
+    /**
+     * @param mediator
+     */
+    public DefaultHttpChainedTaskProcessingContextFactory(Mediator mediator) {
+        this.mediator = mediator;
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see HttpChainedTaskProcessingContextFactory#newInstance(HttpChainedTasks, HttpChainedTask)
-	 */
-	@Override
-	public <CHAINED extends HttpChainedTask<?>> HttpTaskProcessingContext 
-	newInstance(HttpTaskConfigurator httpTaskConfigurator,  String endpointId, 
-			HttpChainedTasks<?, CHAINED> tasks, CHAINED task)
-	{
-		return new DefaultHttpChainedTaskProcessingContext(
-				this.mediator, httpTaskConfigurator, 
-				endpointId, tasks, task);
-	}
+    /**
+     * @inheritDoc
+     * @see HttpChainedTaskProcessingContextFactory#newInstance(HttpChainedTasks, HttpChainedTask)
+     */
+    @Override
+    public <CHAINED extends HttpChainedTask<?>> HttpTaskProcessingContext newInstance(HttpTaskConfigurator httpTaskConfigurator, String endpointId, HttpChainedTasks<?, CHAINED> tasks, CHAINED task) {
+        return new DefaultHttpChainedTaskProcessingContext(this.mediator, httpTaskConfigurator, endpointId, tasks, task);
+    }
 }

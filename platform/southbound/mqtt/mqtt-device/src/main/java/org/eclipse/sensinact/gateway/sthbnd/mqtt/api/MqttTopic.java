@@ -13,9 +13,7 @@ package org.eclipse.sensinact.gateway.sthbnd.mqtt.api;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.listener.MqttTopicMessage;
 
 public class MqttTopic {
-
     private final String topic;
-
     private MqttTopicMessage listener;
 
     public MqttTopic(String topic, MqttTopicMessage listener) {

@@ -9,7 +9,6 @@
  *    CEA - initial API and implementation
  */
 package org.eclipse.sensinact.gateway.device.mqtt.lite.it;
-
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.sensinact.gateway.core.Core;
@@ -31,31 +30,23 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.sensinact.mqtt.server.MQTTException;
 import org.sensinact.mqtt.server.MQTTServerService;
-
 import javax.inject.Inject;
 import java.util.Hashtable;
 import java.util.Set;
-
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class MqttBridgeTest extends MqttTestITAbstract {
-
     @Inject
     BundleContext bc;
-
     @Inject
     Core sensinactCore;
-
     @Inject
     MQTTServerService mqtt;
-
     private Session sensinactSession;
-
     @Before
     public void before() {
         sensinactSession = sensinactCore.getAnonymousSession();
     }
-
     @Test
     public void providerCreation() throws Exception {
         Object provider = createDevicePojo("myprovider","myservice","myresource","/myresource");
@@ -65,7 +56,6 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         final Set<String> providersSet = parseJSONArrayIntoSet(providers);
         Assert.assertTrue("Provider was not created, or at least is not shown via REST api", providersSet.contains("myprovider"));
     }
-
     @Test
     public void providerCreationViaRest() throws Exception {
         providerCreation();
@@ -73,7 +63,6 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         final String messageString1 = new Double(Math.random()).toString();
         MqttMessage message1 = new MqttMessage(messageString1.getBytes());
         mqttClient.publish("/myresource",message1 );
-
         final Integer maxRetries=3;
         Integer currentRetry=0;
         Integer statusCode=null;
@@ -85,12 +74,9 @@ public class MqttBridgeTest extends MqttTestITAbstract {
             currentRetry++;
             Thread.sleep(500);
         }
-
         String value =jsonResponse.getJSONObject("response").getString("value");
         Assert.assertEquals("Value should be updated on new message arrival, and was not the case", messageString1,value);
-
     }
-
     @Test
     public void providerRemoval() throws Exception {
         Object provider = createDevicePojo("myprovider","myservice","myresource","/myresource");
@@ -101,7 +87,6 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         final Set<String> providersSetNo = parseJSONArrayIntoSet(providers);
         Assert.assertTrue("Provider was removed",!providersSetNo.contains("myprovider"));
     }
-
     @Test
     public void serviceCreation() throws Exception {
         providerCreation();
@@ -110,7 +95,6 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         final Set<String> servicesSet = parseJSONArrayIntoSet(services);
         Assert.assertTrue("Service was not created, or at least is not shown via REST api",servicesSet.contains("myservice"));
     }
-
     @Test
     public void resourceCreation() throws Exception {
         serviceCreation();
@@ -119,7 +103,6 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         final Set<String> resourcesSet = parseJSONArrayIntoSet(resources);
         Assert.assertTrue("Resource was not created, or at least is not shown via REST api", resourcesSet.contains("myresource"));
     }
-
     @Test
     public void resourceValueQuery() throws Exception {
         resourceCreation();
@@ -127,7 +110,6 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         		).getResponse(String.class,"value");
         Assert.assertTrue("Initial Resource value should be empty ", value.equals(""));
     }
-
     @Test
     public void resourceValueQueryViaRest() throws Exception {
         resourceValueQuery();
@@ -141,7 +123,6 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         String value = invokeRestAPI("sensinact/providers/myprovider/services/myservice/resources/myresource/GET")
                 .getJSONObject("response").getString("value");
         Assert.assertEquals("Value should be updated on new message arrival, and was not the case", messageString1,value);
-
         final String messageString2=new Double(Math.random()).toString();
         MqttMessage message2=new MqttMessage(messageString2.getBytes());
         mqttClient.publish("/myresource",message2 );
@@ -151,41 +132,32 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         ).getResponse(String.class,"value");
         Assert.assertEquals("Value should be updated on new message arrival, and was not the case", messageString2,value2);
     }
-
     @Test(timeout = 20000)
     public void resourceValueQueryViaSubscription() throws Exception {
-
         resourceValueQuery();
         final RecipientCustom rtc=new RecipientCustom();
         sensinactSession.subscribe("myprovider", "myservice", "myresource", rtc, new JSONArray());
         MqttClient mqttClient=getMqttConnection(MQTT_HOST, MQTT_PORT);
-
         final String messageString1=new Double(Math.random()).toString();
         MqttMessage message1=new MqttMessage(messageString1.getBytes());
         mqttClient.publish("/myresource",message1 );
         waitForCallbackNotification();
         Assert.assertEquals("Sensinact Core did not dispatch any notification message for the subscription", 1,rtc.getMessages().length);
         Assert.assertEquals("The notification value does not correspond to the value sent", messageString1,new JSONObject(rtc.getMessages()[0].getJSON()).getJSONObject("notification").getString("value"));
-
         final String messageString2=new Double(Math.random()).toString();
         MqttMessage message2=new MqttMessage(messageString2.getBytes());
         mqttClient.publish("/myresource",message2 );
         waitForCallbackNotification();
-
         Assert.assertEquals("Sensinact Core did not dispatch any notification message for the subscription", 1,rtc.getMessages().length);
         Assert.assertEquals("The notification value does not correspond to the value sent", messageString2,new JSONObject(rtc.getMessages()[0].getJSON()).getJSONObject("notification").getString("value"));
     }
-
     private void waitForCallbackNotification() throws InterruptedException {
         synchronized (this){
             wait();
         }
     }
-
     class RecipientCustom implements Recipient {
-
         private SnaMessage[] messages;
-
         @Override
         public void callback(String callbackId, SnaMessage[] messages) throws Exception {
             this.messages=messages;
@@ -196,15 +168,12 @@ public class MqttBridgeTest extends MqttTestITAbstract {
                 MqttBridgeTest.this.notify();
             }
         }
-
         @Override
         public String getJSON() {
             return "{}";
         }
-
         public SnaMessage[] getMessages() {
             return messages;
         }
     }
-
 }

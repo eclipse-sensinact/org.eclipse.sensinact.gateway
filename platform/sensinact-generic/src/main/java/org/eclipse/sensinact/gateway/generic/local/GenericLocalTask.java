@@ -12,48 +12,41 @@ package org.eclipse.sensinact.gateway.generic.local;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
+import org.eclipse.sensinact.gateway.generic.ExtResourceConfig;
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.TaskImpl;
 import org.eclipse.sensinact.gateway.generic.TaskTranslator;
-import org.eclipse.sensinact.gateway.generic.ExtResourceConfig;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class GenericLocalTask extends TaskImpl
-{
-   /**
-    *  Constructor 
-     * 
-     * @param mediator  the {@link Mediator} allowing to interact with the 
-     * OSGi hot environment
-     * @param command 
-     * @param transmitter the {@link TaskTranslator} executing the {@link Task}
-     * to be instantiated 
-     * @param path the string path of the requirer {@link ModelElement}
-     * @param profileId the string profile identifier of the {@link ModelInstance} 
-     * to which the requirer {@link ModelElement} belongs
+public class GenericLocalTask extends TaskImpl {
+    /**
+     * Constructor
+     *
+     * @param mediator       the {@link Mediator} allowing to interact with the
+     *                       OSGi hot environment
+     * @param command
+     * @param transmitter    the {@link TaskTranslator} executing the {@link Task}
+     *                       to be instantiated
+     * @param path           the string path of the requirer {@link ModelElement}
+     * @param profileId      the string profile identifier of the {@link ModelInstance}
+     *                       to which the requirer {@link ModelElement} belongs
      * @param resourceConfig the {@link ExtResourceConfig} configuring the
-     * requirer {@link Resource} if it applies
-     * @param parameters the objects parameter parameterizing the task
-     * execution 
-    */
-    public GenericLocalTask(Mediator mediator, CommandType command, 
-    		TaskTranslator transmitter, String path, String profileId, 
-    		ResourceConfig resourceConfig, Object[] parameters)
-    {
-        super(mediator, command, transmitter, path, profileId, 
-        		resourceConfig, parameters);
+     *                       requirer {@link Resource} if it applies
+     * @param parameters     the objects parameter parameterizing the task
+     *                       execution
+     */
+    public GenericLocalTask(Mediator mediator, CommandType command, TaskTranslator transmitter, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+        super(mediator, command, transmitter, path, profileId, resourceConfig, parameters);
     }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see Task#getRequestType()
-	 */
+    /**
+     * @inheritDoc
+     * @see Task#getRequestType()
+     */
     @Override
-    public RequestType getRequestType()
-    {
+    public RequestType getRequestType() {
         return RequestType.LOCAL;
     }
 }

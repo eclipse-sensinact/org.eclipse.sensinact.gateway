@@ -16,17 +16,17 @@ import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.selector.S
 
 /**
  * Stateless class that is capable of interprete a given format.
+ *
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class ProcessorFormatToString implements ProcessorFormatIface {
-
     @Override
     public String getName() {
         return "toString";
     }
 
     @Override
-    public String process(String inData,SelectorIface selector) throws ProcessorFormatException {
+    public String process(String inData, SelectorIface selector) throws ProcessorFormatException {
         return inData;
     }
 }

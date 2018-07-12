@@ -1,113 +1,91 @@
 package org.eclipse.sensinact.gateway.core;
 
-import java.util.Collections;
-import java.util.Enumeration;
-
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+
+import java.util.Collections;
+import java.util.Enumeration;
 
 /**
- *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class UnaccessibleModelElementProxyWrapper 
-extends ElementsProxyWrapper<UnaccessibleModelElementProxy,Nameable>
-{
-	//********************************************************************//
-	//						NESTED DECLARATIONS			  			      //
-	//********************************************************************//
+public class UnaccessibleModelElementProxyWrapper extends ElementsProxyWrapper<UnaccessibleModelElementProxy, Nameable> {
+    //********************************************************************//
+    //						NESTED DECLARATIONS			  			      //
+    //********************************************************************//
+    //********************************************************************//
+    //						ABSTRACT DECLARATIONS						  //
+    //********************************************************************//
+    //********************************************************************//
+    //						STATIC DECLARATIONS							  //
+    //********************************************************************//
+    //********************************************************************//
+    //						INSTANCE DECLARATIONS						  //
+    //********************************************************************//
 
-	//********************************************************************//
-	//						ABSTRACT DECLARATIONS						  //
-	//********************************************************************//
+    /**
+     * @param modelElement
+     * @param proxy
+     * @param tree
+     */
+    protected UnaccessibleModelElementProxyWrapper(UnaccessibleModelElementProxy proxy) {
+        super(proxy);
+    }
 
-	//********************************************************************//
-	//						STATIC DECLARATIONS							  //
-	//********************************************************************//
+    /**
+     * @inheritDoc
+     * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#element(java.lang.String)
+     */
+    @Override
+    public Nameable element(String name) {
+        return null;
+    }
 
-	//********************************************************************//
-	//						INSTANCE DECLARATIONS						  //
-	//********************************************************************//
+    /**
+     * @inheritDoc
+     * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#elements()
+     */
+    @Override
+    public Enumeration<Nameable> elements() {
+        return Collections.<Nameable>emptyEnumeration();
+    }
 
-	/**
-	 * @param modelElement
-	 * @param proxy
-	 * @param tree
-	 */
-	protected UnaccessibleModelElementProxyWrapper(
-			UnaccessibleModelElementProxy proxy)
-	{
-		super(proxy);
-	}
+    /**
+     * @inheritDoc
+     * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#isAccessible()
+     */
+    @Override
+    public boolean isAccessible() {
+        return false;
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#element(java.lang.String)
-	 */
-	@Override
-	public Nameable element(String name)
-	{
-		return null;
-	}
+    /**
+     * @inheritDoc
+     * @see org.eclipse.sensinact.gateway.common.primitive.Describable#getDescription()
+     */
+    @Override
+    public Description getDescription() {
+        return new Description() {
+            @Override
+            public String getJSON() {
+                return getJSONDescription();
+            }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#elements()
-	 */
-	@Override
-	public Enumeration<Nameable> elements()
-	{
-		return Collections.<Nameable>emptyEnumeration();
-	}
+            @Override
+            public String getName() {
+                return proxy.getName();
+            }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#isAccessible()
-	 */
-	@Override
-	public boolean isAccessible()
-	{
-		return false;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.common.primitive.Describable#getDescription()
-	 */
-	@Override
-	public Description getDescription()
-	{
-		return new Description()
-		{
-			@Override
-			public String getJSON()
-			{
-				return getJSONDescription();
-			}
-
-			@Override
-			public String getName()
-			{
-				return proxy.getName();
-			}
-
-			@Override
-			public String getJSONDescription()
-			{
-				StringBuilder builder = new StringBuilder();
-				builder.append("{\"type\":\"DESCRIBE_ERROR\",\"statusCode\":");
-				builder.append(SnaErrorfulMessage.FORBIDDEN_ERROR_CODE);
-				builder.append(",\"errors\":[");
-				builder.append("{\"message\":\"Unaccessible object\",\"trace\":[]}]}");
-				return builder.toString();
-			}
-		};
-	}
-
+            @Override
+            public String getJSONDescription() {
+                StringBuilder builder = new StringBuilder();
+                builder.append("{\"type\":\"DESCRIBE_ERROR\",\"statusCode\":");
+                builder.append(SnaErrorfulMessage.FORBIDDEN_ERROR_CODE);
+                builder.append(",\"errors\":[");
+                builder.append("{\"message\":\"Unaccessible object\",\"trace\":[]}]}");
+                return builder.toString();
+            }
+        };
+    }
 }

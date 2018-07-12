@@ -13,52 +13,43 @@ package org.eclipse.sensinact.gateway.generic.parser;
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class InvalidXmlDefinitionException extends Exception
-{
+public class InvalidXmlDefinitionException extends Exception {
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructor
      */
-    public InvalidXmlDefinitionException()
-    {
+    public InvalidXmlDefinitionException() {
         super();
     }
 
     /**
      * Constructor
-     * 
-     * @param message
-     *            the exception message
+     *
+     * @param message the exception message
      */
-    public InvalidXmlDefinitionException(String message)
-    {
+    public InvalidXmlDefinitionException(String message) {
         super(message);
     }
 
     /**
      * Constructor
-     * 
-     * @param cause
-     *            the {@link Throwable} object which has caused the current
-     *            exception
+     *
+     * @param cause the {@link Throwable} object which has caused the current
+     *              exception
      */
-    public InvalidXmlDefinitionException(Throwable cause)
-    {
+    public InvalidXmlDefinitionException(Throwable cause) {
         super(cause);
     }
 
     /**
      * Constructor
-     * 
-     * @param message
-     *            the exception message
-     * @param cause
-     *            the {@link Throwable} object which has caused the current
-     *            exception
+     *
+     * @param message the exception message
+     * @param cause   the {@link Throwable} object which has caused the current
+     *                exception
      */
-    public InvalidXmlDefinitionException(String message, Throwable cause)
-    {
+    public InvalidXmlDefinitionException(String message, Throwable cause) {
         super(message, cause);
     }
 }

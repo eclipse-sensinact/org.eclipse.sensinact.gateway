@@ -19,21 +19,18 @@ import java.util.List;
 import java.util.UUID;
 
 public class OneM2MHttpGetConfigurator implements HttpTaskConfigurator {
-
     @Override
     public <T extends HttpTask<?, ?>> void configure(T task) {
         String[] path = task.getPath().split("/");
-
-        if(OneM2MHttpPacketReader.DEFAULT_SERVICE_NAME.equalsIgnoreCase(path[2])) {
+        if (OneM2MHttpPacketReader.DEFAULT_SERVICE_NAME.equalsIgnoreCase(path[2])) {
             task.setUri(task.getUri() + "/" + path[1] + "/" + path[3] + "/latest");
         } else {
             task.setUri(task.getUri() + "/" + path[1] + "/" + path[2] + "/" + path[3] + "/latest");
         }
-
         task.addHeaders(new HashMap<String, List<String>>() {{
             put("X-M2M-RI", new ArrayList<String>() {{
-                add(UUID.randomUUID().toString()); }}
-            );
+                add(UUID.randomUUID().toString());
+            }});
         }});
     }
 }

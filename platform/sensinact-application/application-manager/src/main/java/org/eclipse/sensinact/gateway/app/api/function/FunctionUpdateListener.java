@@ -11,9 +11,9 @@
 package org.eclipse.sensinact.gateway.app.api.function;
 
 public interface FunctionUpdateListener {
-
     /**
      * This method is called when an {@link AbstractFunction} returns a result
+     *
      * @param result the result of the function
      */
     void updatedResult(Object result);

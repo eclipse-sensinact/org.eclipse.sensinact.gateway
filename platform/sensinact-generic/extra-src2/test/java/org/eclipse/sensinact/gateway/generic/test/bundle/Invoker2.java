@@ -15,14 +15,12 @@ import org.eclipse.sensinact.gateway.generic.annotation.TaskCommand;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskExecution;
 
 /**
- * 
+ *
  */
 @TaskExecution(profile = {"testProfile"})
-public class Invoker2
-{	
-	@TaskCommand(method = Task.CommandType.SERVICES_ENUMERATION)
-	Object services(String uri)
-	{
-		return new String[] { "measureTest","serviceTest"};
-	}
+public class Invoker2 {
+    @TaskCommand(method = Task.CommandType.SERVICES_ENUMERATION)
+    Object services(String uri) {
+        return new String[]{"measureTest", "serviceTest"};
+    }
 }

@@ -19,7 +19,6 @@ import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpBrowsingTask;
 import java.util.UUID;
 
 public class OneM2MDiscoveryTask extends HttpBrowsingTask<SimpleHttpResponse, SimpleHttpRequest> {
-
     public OneM2MDiscoveryTask(Mediator mediator, HttpProtocolStackEndpoint transmitter) {
         super(mediator, transmitter, SimpleHttpRequest.class);
     }
@@ -29,14 +28,11 @@ public class OneM2MDiscoveryTask extends HttpBrowsingTask<SimpleHttpResponse, Si
         String host = (String) mediator.getProperty("http.onem2m.host");
         String port = (String) mediator.getProperty("http.onem2m.port");
         String cseBase = (String) mediator.getProperty("http.onem2m.cse.base");
-
         //Filtering the resourceType: 2 (application entity), 3 (container), 4 (contentInstance)
         String filter = "?ty=3&fu=1";
-
         super.addHeader("X-M2M-RI", UUID.randomUUID().toString());
         super.addHeader("X-M2M-Origin", "SOrigin");
-
-        return "http://" + host + ":" + port +"/" + cseBase + filter;
+        return "http://" + host + ":" + port + "/" + cseBase + filter;
     }
 
     @Override

@@ -8,26 +8,23 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.common.automata;
 
 import java.net.URL;
 
 /**
- * Signature of a service which provides an xml model of a 
+ * Signature of a service which provides an xml model of a
  * {@link FrameModel}
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface FrameModelProvider 
-{
-	/**
-	 * Returns the {@link URL} of the xml file describing 
-	 * the model
-	 * 
-	 * @return
-	 * 		the {@link URL} of the the xml file describing 
-	 * 		the model
-	 */
-	URL getModelURL();
+public interface FrameModelProvider {
+    /**
+     * Returns the {@link URL} of the xml file describing
+     * the model
+     *
+     * @return the {@link URL} of the the xml file describing
+     * the model
+     */
+    URL getModelURL();
 }

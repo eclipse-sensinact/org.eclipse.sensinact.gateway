@@ -19,23 +19,16 @@ import org.eclipse.sensinact.gateway.protocol.ssdp.model.SSDPMessage;
  * According to the type of message, the field are not the same.
  */
 public class SSDPDiscoveryParser {
-
     public static SSDPMessage parse(String message) {
-
         String[] content = message.split("\\r\\n");
-
         if (content[0].equals(SSDPMessage.RequestLine.RESPONSE.getRequestLine())) {
             ResponseMessage responseMessage = new ResponseMessage();
-
-            for(int i = 1; i < content.length; i++) {
+            for (int i = 1; i < content.length; i++) {
                 String[] splittedLine = content[i].split(":", 2);
-
                 if (splittedLine.length > 1) {
                     String header = splittedLine[0];
-
                     if (splittedLine[1] != null) {
                         String value = splittedLine[1];
-
                         if (header.equalsIgnoreCase("LOCATION")) {
                             responseMessage.setLocation(value.replace(" ", ""));
                         } else if (header.equalsIgnoreCase("USN")) {
@@ -54,20 +47,15 @@ public class SSDPDiscoveryParser {
                     }
                 }
             }
-
             return responseMessage;
         } else if (content[0].equals(SSDPMessage.RequestLine.NOTIFY.getRequestLine())) {
             NotifyMessage notifyMessage = new NotifyMessage();
-
-            for(int i = 1; i < content.length; i++) {
+            for (int i = 1; i < content.length; i++) {
                 String[] splittedLine = content[i].split(":", 2);
-
                 if (splittedLine.length > 1) {
                     String header = splittedLine[0];
-
                     if (splittedLine[1] != null) {
                         String value = splittedLine[1];
-
                         if (header.equalsIgnoreCase("LOCATION")) {
                             notifyMessage.setLocation(value.replace(" ", ""));
                         } else if (header.equalsIgnoreCase("USN")) {
@@ -86,12 +74,10 @@ public class SSDPDiscoveryParser {
                     }
                 }
             }
-
             return notifyMessage;
         } else if (content[0].equals(SSDPMessage.RequestLine.MSEARCH.getRequestLine())) {
             //Do nothing
         }
-
         return null;
     }
 }

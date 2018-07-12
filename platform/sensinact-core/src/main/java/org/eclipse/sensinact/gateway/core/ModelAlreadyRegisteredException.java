@@ -10,58 +10,48 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
-
 /**
  * Exception thrown if a ResourceModel is asked for registration
  * when it is already
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
-public class ModelAlreadyRegisteredException extends IllegalStateException
-{
-	/**
-	 * Constructor
-	 */
-	public ModelAlreadyRegisteredException()
-	{
-		super();
-	}
+public class ModelAlreadyRegisteredException extends IllegalStateException {
+    /**
+     * Constructor
+     */
+    public ModelAlreadyRegisteredException() {
+        super();
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param message
-	 *            the error message
-	 */
-	public ModelAlreadyRegisteredException(String message)
-	{
-		super(message);
-	}
+    /**
+     * Constructor
+     *
+     * @param message the error message
+     */
+    public ModelAlreadyRegisteredException(String message) {
+        super(message);
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param cause
-	 *            the Throwable object which has caused the triggering of this
-	 *            exception
-	 */
-	public ModelAlreadyRegisteredException(Throwable cause)
-	{
-		super(cause);
-	}
+    /**
+     * Constructor
+     *
+     * @param cause the Throwable object which has caused the triggering of this
+     *              exception
+     */
+    public ModelAlreadyRegisteredException(Throwable cause) {
+        super(cause);
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param message
-	 *            the error message
-	 * @param cause
-	 *            the Throwable object which has caused the triggering of this
-	 *            exception
-	 */
-	public ModelAlreadyRegisteredException(String message, Throwable cause)
-	{
-		super(message, cause);
-	}
+    /**
+     * Constructor
+     *
+     * @param message the error message
+     * @param cause   the Throwable object which has caused the triggering of this
+     *                exception
+     */
+    public ModelAlreadyRegisteredException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

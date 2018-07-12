@@ -8,17 +8,16 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.manager.test;
 
+import junit.framework.TestCase;
 import org.eclipse.sensinact.gateway.app.api.exception.InvalidApplicationException;
 import org.eclipse.sensinact.gateway.app.api.exception.ValidationException;
-import org.eclipse.sensinact.gateway.app.manager.json.AppComponent;
-import org.eclipse.sensinact.gateway.app.manager.json.AppJsonConstant;
 import org.eclipse.sensinact.gateway.app.manager.checker.ArchitectureChecker;
 import org.eclipse.sensinact.gateway.app.manager.checker.JsonValidator;
+import org.eclipse.sensinact.gateway.app.manager.json.AppComponent;
+import org.eclipse.sensinact.gateway.app.manager.json.AppJsonConstant;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -43,100 +42,70 @@ import java.util.List;
 
 @RunWith(PowerMockRunner.class)
 public class TestAppChecker extends TestCase {
-
     @Mock
     private AppServiceMediator mediator;
 
     @Before
     public void init() throws Exception {
         MockitoAnnotations.initMocks(this);
-
         ServiceReference serviceReference = Mockito.mock(ServiceReference.class);
         ServiceReference[] serviceReferences = new ServiceReference[]{serviceReference};
         BundleContext context = Mockito.mock(BundleContext.class);
-        Bundle bundle  = Mockito.mock(Bundle.class);
-
+        Bundle bundle = Mockito.mock(Bundle.class);
         TestInstaller installer = new TestInstaller(mediator, null);
-
-        Mockito.when(mediator.getService(serviceReference))
-                .thenReturn(installer);
-        Mockito.when(mediator.getServiceReferences(Mockito.anyString()))
-                .thenReturn(serviceReferences);
-        Mockito.when(bundle.getResource(Mockito.anyString()))
-                .thenAnswer(new Answer<URL>() {
-                    public URL answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        if (invocationOnMock.getArguments()[0].equals("/application.json")) {
-                            return this.getClass().getResource("/application.json");
-                        } else if (invocationOnMock.getArguments()[0].equals("/mock_addition.json")) {
-                            return this.getClass().getResource("/mock_addition.json");
-                        } else if (invocationOnMock.getArguments()[0].equals("/mock_set.json")) {
-                            return this.getClass().getResource("/mock_set.json");
-                        }
-
-                        return null;
-                    }
-                });
-        Mockito.when(context.getBundle())
-                .thenReturn(bundle);
-        Mockito.when(mediator.getContext())
-                .thenReturn(context);
+        Mockito.when(mediator.getService(serviceReference)).thenReturn(installer);
+        Mockito.when(mediator.getServiceReferences(Mockito.anyString())).thenReturn(serviceReferences);
+        Mockito.when(bundle.getResource(Mockito.anyString())).thenAnswer(new Answer<URL>() {
+            public URL answer(InvocationOnMock invocationOnMock) throws Throwable {
+                if (invocationOnMock.getArguments()[0].equals("/application.json")) {
+                    return this.getClass().getResource("/application.json");
+                } else if (invocationOnMock.getArguments()[0].equals("/mock_addition.json")) {
+                    return this.getClass().getResource("/mock_addition.json");
+                } else if (invocationOnMock.getArguments()[0].equals("/mock_set.json")) {
+                    return this.getClass().getResource("/mock_set.json");
+                }
+                return null;
+            }
+        });
+        Mockito.when(context.getBundle()).thenReturn(bundle);
+        Mockito.when(mediator.getContext()).thenReturn(context);
     }
 
     @Test(expected = InvalidApplicationException.class)
     public void testUniqueOutput() throws Exception {
         String content = null;
-
         try {
-            content = TestUtils.readFile(this.getClass().getResourceAsStream("/test_unique_output.json"),
-                    Charset.defaultCharset());
+            content = TestUtils.readFile(this.getClass().getResourceAsStream("/test_unique_output.json"), Charset.defaultCharset());
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         assertNotNull(content);
-
-        String applicationName = new JSONObject(content).getJSONArray("parameters")
-                .getJSONObject(0).getString(AppJsonConstant.VALUE);
-        JSONObject json = new JSONObject(content).getJSONArray("parameters")
-                .getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
-
+        String applicationName = new JSONObject(content).getJSONArray("parameters").getJSONObject(0).getString(AppJsonConstant.VALUE);
+        JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
         List<AppComponent> components = new ArrayList<AppComponent>();
-
         JSONArray componentArray = json.getJSONArray("application");
-
-        for(int i = 0; i < componentArray.length(); i++) {
+        for (int i = 0; i < componentArray.length(); i++) {
             components.add(new AppComponent(mediator, componentArray.getJSONObject(i)));
         }
-
         ArchitectureChecker.checkApplication(applicationName, components);
     }
 
     @Test(expected = InvalidApplicationException.class)
     public void testVariableExist() throws Exception {
         String content = null;
-
         try {
-            content = TestUtils.readFile(this.getClass().getResourceAsStream("/test_variable_exist.json"),
-                    Charset.defaultCharset());
+            content = TestUtils.readFile(this.getClass().getResourceAsStream("/test_variable_exist.json"), Charset.defaultCharset());
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         assertNotNull(content);
-
-        String applicationName = new JSONObject(content).getJSONArray("parameters")
-                .getJSONObject(0).getString(AppJsonConstant.VALUE);
-        JSONObject json = new JSONObject(content).getJSONArray("parameters")
-                .getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
-
+        String applicationName = new JSONObject(content).getJSONArray("parameters").getJSONObject(0).getString(AppJsonConstant.VALUE);
+        JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
         List<AppComponent> components = new ArrayList<AppComponent>();
-
         JSONArray componentArray = json.getJSONArray("application");
-
-        for(int i = 0; i < componentArray.length(); i++) {
+        for (int i = 0; i < componentArray.length(); i++) {
             components.add(new AppComponent(mediator, componentArray.getJSONObject(i)));
         }
-
         ArchitectureChecker.checkApplication(applicationName, components);
     }
 
@@ -144,19 +113,13 @@ public class TestAppChecker extends TestCase {
     @Ignore
     public void testInvalidJSONApplication() throws Exception {
         String content = null;
-
         try {
-            content = TestUtils.readFile(this.getClass().getResourceAsStream("/test_invalid_json.json"),
-                    Charset.defaultCharset());
+            content = TestUtils.readFile(this.getClass().getResourceAsStream("/test_invalid_json.json"), Charset.defaultCharset());
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         assertNotNull(content);
-
-        JSONObject json = new JSONObject(content).getJSONArray("parameters")
-                .getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
-
+        JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
         JsonValidator.validateApplication(mediator, json);
     }
 
@@ -164,26 +127,18 @@ public class TestAppChecker extends TestCase {
     @Ignore
     public void testValidJSONComponents() throws Exception {
         String content = null;
-
         try {
-            content = TestUtils.readFile(this.getClass().getResourceAsStream("/test_instance.json"),
-                    Charset.defaultCharset());
+            content = TestUtils.readFile(this.getClass().getResourceAsStream("/test_instance.json"), Charset.defaultCharset());
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         assertNotNull(content);
-
-        JSONObject json = new JSONObject(content).getJSONArray("parameters")
-                .getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
-
+        JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
         JsonValidator.validateFunctionsParameters(mediator, json.getJSONArray(AppJsonConstant.APPLICATION));
     }
-
     /*public void testBoundChecker() {
         assertTrue(true);
     }
-
     public void testCycleChecker() {
         assertTrue(true);
     }*/

@@ -10,51 +10,40 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.protocol.http.client.AbstractRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 
-/**
- * 
- */
-public class SimpleHttpRequest extends AbstractRequest<SimpleHttpResponse>
-{
-	protected Mediator mediator;
+import java.io.IOException;
+import java.net.HttpURLConnection;
 
-	/**
-	 * @param mediator
-	 * @param configuration
-	 */
-    public SimpleHttpRequest(Mediator mediator,
-        HttpConnectionConfiguration<SimpleHttpResponse, 
-            ? extends AbstractRequest<SimpleHttpResponse>> configuration)
-    {
-	    super(configuration);
-	    this.mediator = mediator;
+/**
+ *
+ */
+public class SimpleHttpRequest extends AbstractRequest<SimpleHttpResponse> {
+    protected Mediator mediator;
+
+    /**
+     * @param mediator
+     * @param configuration
+     */
+    public SimpleHttpRequest(Mediator mediator, HttpConnectionConfiguration<SimpleHttpResponse, ? extends AbstractRequest<SimpleHttpResponse>> configuration) {
+        super(configuration);
+        this.mediator = mediator;
     }
 
-	/**
-	 * @throws IOException 
-	 * @inheritDoc
-	 *
-	 * @see Request#
-	 * createResponse(java.net.HttpURLConnection)
-	 */
+    /**
+     * @throws IOException
+     * @inheritDoc
+     * @see Request#
+     * createResponse(java.net.HttpURLConnection)
+     */
     @Override
-    public SimpleHttpResponse createResponse(HttpURLConnection connection) 
-    		throws IOException
-    {
-    	if(connection == null)
-    	{
-    		return null;
-    	}
-    	SimpleHttpResponse response = new SimpleHttpResponse(mediator, connection, 
-	    	(HttpConnectionConfiguration<? extends HttpResponse, 
-	    		? extends Request<? extends HttpResponse>>) 
-	    			super.configuration);
-    	return response;
+    public SimpleHttpResponse createResponse(HttpURLConnection connection) throws IOException {
+        if (connection == null) {
+            return null;
+        }
+        SimpleHttpResponse response = new SimpleHttpResponse(mediator, connection, (HttpConnectionConfiguration<? extends HttpResponse, ? extends Request<? extends HttpResponse>>) super.configuration);
+        return response;
     }
 }

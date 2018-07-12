@@ -16,14 +16,10 @@ import org.eclipse.sensinact.gateway.protocol.ssdp.api.SSDPEvent;
  * Abstract class for SSDP messages
  */
 public abstract class SSDPMessage {
-
     protected SSDPEvent event;
 
     public enum RequestLine {
-        MSEARCH("M-SEARCH * " + HTTP_VERSION),
-        NOTIFY("NOTIFY * " + HTTP_VERSION),
-        RESPONSE(HTTP_VERSION + " 200 OK");
-
+        MSEARCH("M-SEARCH * " + HTTP_VERSION), NOTIFY("NOTIFY * " + HTTP_VERSION), RESPONSE(HTTP_VERSION + " 200 OK");
         private String header;
 
         RequestLine(String header) {

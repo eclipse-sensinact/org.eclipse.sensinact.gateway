@@ -2,39 +2,35 @@ package org.eclipse.sensinact.gateway.nthbnd.test.jsonpath.internal.function;
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPathException;
+import org.eclipse.sensinact.gateway.nthbnd.test.jsonpath.BaseTestConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.runners.Parameterized.Parameters;
-
-import org.eclipse.sensinact.gateway.nthbnd.test.jsonpath.BaseTestConfiguration;
 
 /**
  * Defines functional tests around executing:
- *
+ * <p>
  * - sum
  * - avg
  * - stddev
- *
+ * <p>
  * for each of the above, executes the test and verifies that the results are as expected based on a static input
  * and static output.
- *
+ * <p>
  * Created by mattg on 6/26/15.
  */
 @RunWith(Parameterized.class)
 public class NumericPathFunctionTest extends BaseFunctionTest {
-
     @Parameterized.Parameters
     public static Iterable<Configuration> configurations() {
         return BaseTestConfiguration.configurations();
     }
 
     private static final Logger logger = LoggerFactory.getLogger(NumericPathFunctionTest.class);
-
     private Configuration conf = BaseTestConfiguration.JSON_ORG_CONFIGURATION;
 
     public NumericPathFunctionTest(Configuration conf) {
@@ -98,7 +94,6 @@ public class NumericPathFunctionTest extends BaseFunctionTest {
         }
     }
 
-
     @Test
     public void testStdDevOfDouble() {
         verifyMathFunction(conf, "$.numbers.stddev()", 2.8722813232690143d);
@@ -112,7 +107,6 @@ public class NumericPathFunctionTest extends BaseFunctionTest {
             assertEquals(e.getMessage(), "Aggregation function attempted to calculate value using empty array");
         }
     }
-
     /**
      * Expect that for an invalid function name we'll get back the original input to the function
      */
@@ -123,5 +117,4 @@ public class NumericPathFunctionTest extends BaseFunctionTest {
 //        numberSeries.addAll(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
 //        assertThat(using(conf).parse(NUMBER_SERIES).read("$.numbers.foo()")).isEqualTo(numberSeries);
 //    }
-
 }

@@ -19,55 +19,48 @@ import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.json.JSONObject;
 
 public class OneM2MHttpPacketReader extends SimplePacketReader<HttpPacket> {
-
     public static final String DEFAULT_SERVICE_NAME = "container";
 
-	/**
-	 * @param mediator the mediator of the bundle
-	 */
-	public OneM2MHttpPacketReader(Mediator mediator) {
-		super(mediator);
-	}
+    /**
+     * @param mediator the mediator of the bundle
+     */
+    public OneM2MHttpPacketReader(Mediator mediator) {
+        super(mediator);
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see PacketReader#parse(Packet)
-	 */
-	@Override
-	public void parse(HttpPacket packet) throws InvalidPacketException {
-		try {
-			JSONObject content = new JSONObject(new String(packet.getBytes()));
-
-			if(mediator.isDebugLoggable()) {
-			    mediator.debug(content.toString());
+    /**
+     * @inheritDoc
+     * @see PacketReader#parse(Packet)
+     */
+    @Override
+    public void parse(HttpPacket packet) throws InvalidPacketException {
+        try {
+            JSONObject content = new JSONObject(new String(packet.getBytes()));
+            if (mediator.isDebugLoggable()) {
+                mediator.debug(content.toString());
             }
-
-			if(content.has("m2m:uril")) {
+            if (content.has("m2m:uril")) {
                 String[] uris = content.getString("m2m:uril").split(" ");
-
-                for(String uri : uris) {
+                for (String uri : uris) {
                     String[] elements = uri.split("/");
-
-                    if(elements.length >= 3) {
-                        if(elements.length >= 5 && elements.length < 6) {
+                    if (elements.length >= 3) {
+                        if (elements.length >= 5 && elements.length < 6) {
                             super.setResourceId(elements[4]);
                             super.setServiceId(elements[3]);
-                        } else if("admin".equalsIgnoreCase(elements[3])) {
+                        } else if ("admin".equalsIgnoreCase(elements[3])) {
                             super.setServiceId(elements[3]);
                         } else {
                             super.setResourceId(elements[3]);
                             super.setServiceId(DEFAULT_SERVICE_NAME);
                         }
-
                         super.setServiceProviderId(elements[2]);
                         super.configure();
                     }
                 }
             }
-		} catch(Exception e) {
-			mediator.error(e);
-			throw new InvalidPacketException(e);
-		}
-	}
+        } catch (Exception e) {
+            mediator.error(e);
+            throw new InvalidPacketException(e);
+        }
+    }
 }

@@ -14,33 +14,26 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 
 /**
- * 
+ *
  */
-public class SimpleRequest extends AbstractRequest<SimpleResponse>
-{
-	/**
-	 * @param configuration
-	 */
-    public SimpleRequest(
-    	   ConnectionConfiguration<SimpleResponse,SimpleRequest> configuration)
-    {
-	    super(configuration);
+public class SimpleRequest extends AbstractRequest<SimpleResponse> {
+    /**
+     * @param configuration
+     */
+    public SimpleRequest(ConnectionConfiguration<SimpleResponse, SimpleRequest> configuration) {
+        super(configuration);
     }
 
-	/**
-	 * @throws IOException 
-	 * @inheritDoc
-	 *
-	 * @see AbstractRequest#createResponse(java.net.HttpURLConnection)
-	 */
-	@Override
-	public SimpleResponse createResponse(HttpURLConnection connection) 
-			throws IOException
-	{
-		if(connection == null)
-		{
-			return null;
-		}
-		return new SimpleResponse(connection);
-	}
+    /**
+     * @throws IOException
+     * @inheritDoc
+     * @see AbstractRequest#createResponse(java.net.HttpURLConnection)
+     */
+    @Override
+    public SimpleResponse createResponse(HttpURLConnection connection) throws IOException {
+        if (connection == null) {
+            return null;
+        }
+        return new SimpleResponse(connection);
+    }
 }

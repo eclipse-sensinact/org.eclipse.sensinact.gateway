@@ -10,8 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.security.impl;
 
-import java.security.InvalidKeyException;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
@@ -22,43 +20,37 @@ import org.eclipse.sensinact.gateway.core.security.dao.UserDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.UserEntity;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
 
-public class AuthenticationServiceImpl implements AuthenticationService
-{
-	private UserDAO userDAO;
-	private Mediator mediator;
+import java.security.InvalidKeyException;
 
-	public AuthenticationServiceImpl(Mediator mediator) throws DAOException
-	{
-		this.mediator = mediator;
-		this.userDAO = new UserDAO(mediator);
-	}
-	
-	/**
-	 * @throws InvalidKeyException 
-	 * @throws DAOException
-	 *  
-	 * @inheritDoc
-	 * 
-	 * @see AuthenticationService#
-	 * getUserId(Credentials)
-	 */
-	@Override
-	public UserKey buildKey(Credentials credentials)
-			throws InvalidKeyException, DAOException, InvalidCredentialException
-	{
-		String md5 = CryptoUtils.cryptWithMD5(credentials.password);
-		
+public class AuthenticationServiceImpl implements AuthenticationService {
+    private UserDAO userDAO;
+    private Mediator mediator;
+
+    public AuthenticationServiceImpl(Mediator mediator) throws DAOException {
+        this.mediator = mediator;
+        this.userDAO = new UserDAO(mediator);
+    }
+
+    /**
+     * @throws InvalidKeyException
+     * @throws DAOException
+     * @inheritDoc
+     * @see AuthenticationService#
+     * getUserId(Credentials)
+     */
+    @Override
+    public UserKey buildKey(Credentials credentials) throws InvalidKeyException, DAOException, InvalidCredentialException {
+        String md5 = CryptoUtils.cryptWithMD5(credentials.password);
+
 //		System.out.println("---------------------------");
 //		System.out.println(credentials.password + "==" + md5);
 //		System.out.println("---------------------------");
-		
-		UserEntity userEntity = this.userDAO.find(credentials.login, md5);
 
-		if(userEntity == null) {
-		    return null;
-		} else {
+        UserEntity userEntity = this.userDAO.find(credentials.login, md5);
+        if (userEntity == null) {
+            return null;
+        } else {
             return new UserKey(userEntity.getPublicKey());
         }
-	}
-
+    }
 }

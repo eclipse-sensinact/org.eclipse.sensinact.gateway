@@ -16,30 +16,18 @@ import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTasks;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 
-public class DefaultHttpChainedTaskProcessingContext extends 
-DefaultHttpTaskProcessingContext implements HttpTaskProcessingContext 
-{
-	/**
-	 * @param mediator
-	 * @param task
-	 */
-	public <CHAINED extends HttpChainedTask<?>>
-	DefaultHttpChainedTaskProcessingContext(Mediator mediator, 
-		HttpTaskConfigurator httpTaskConfigurator,
-		final String endpointId, final HttpChainedTasks<?,CHAINED> tasks,
-		final CHAINED task) 
-	{ 
-		super(mediator, httpTaskConfigurator, endpointId, task);
-
-		this.properties.put("task.intermediate", new Executable<Void,String>()
-		{
-			@Override
-			public String execute(Void parameter) throws Exception
-			{
-				return CastUtils.cast(
-					DefaultHttpChainedTaskProcessingContext.this.mediator.getClassLoader(), 
-					String.class, tasks.getIntermediateResult());
-			}			
-		});
-	}
+public class DefaultHttpChainedTaskProcessingContext extends DefaultHttpTaskProcessingContext implements HttpTaskProcessingContext {
+    /**
+     * @param mediator
+     * @param task
+     */
+    public <CHAINED extends HttpChainedTask<?>> DefaultHttpChainedTaskProcessingContext(Mediator mediator, HttpTaskConfigurator httpTaskConfigurator, final String endpointId, final HttpChainedTasks<?, CHAINED> tasks, final CHAINED task) {
+        super(mediator, httpTaskConfigurator, endpointId, task);
+        this.properties.put("task.intermediate", new Executable<Void, String>() {
+            @Override
+            public String execute(Void parameter) throws Exception {
+                return CastUtils.cast(DefaultHttpChainedTaskProcessingContext.this.mediator.getClassLoader(), String.class, tasks.getIntermediateResult());
+            }
+        });
+    }
 }

@@ -17,29 +17,25 @@ import org.eclipse.sensinact.gateway.generic.annotation.TaskInject;
 import org.json.JSONObject;
 
 /**
- * 
+ *
  */
 @TaskExecution
-public class Invoker
-{
-	@TaskInject
-	Calculator calculator;
-	
-	@TaskCommand(method = Task.CommandType.GET)
-	Object get(String uri, String attributeName)
-	{
-		return "THIS IS THE GET "+calculator.plus(5, 3);
-	}		
+public class Invoker {
+    @TaskInject
+    Calculator calculator;
 
-	@TaskCommand(method = Task.CommandType.ACT)
-	JSONObject act(Object...parameters)
-	{
-		return new JSONObject().put("message" , "THIS IS THE ACT");
-	}
-	
-	@TaskCommand(method = Task.CommandType.SERVICES_ENUMERATION)
-	Object services(String uri)
-	{
-		return new String[]{};
-	}
+    @TaskCommand(method = Task.CommandType.GET)
+    Object get(String uri, String attributeName) {
+        return "THIS IS THE GET " + calculator.plus(5, 3);
+    }
+
+    @TaskCommand(method = Task.CommandType.ACT)
+    JSONObject act(Object... parameters) {
+        return new JSONObject().put("message", "THIS IS THE ACT");
+    }
+
+    @TaskCommand(method = Task.CommandType.SERVICES_ENUMERATION)
+    Object services(String uri) {
+        return new String[]{};
+    }
 }

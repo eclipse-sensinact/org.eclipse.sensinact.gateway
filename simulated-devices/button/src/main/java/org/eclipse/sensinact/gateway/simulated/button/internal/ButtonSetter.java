@@ -8,22 +8,21 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.button.internal;
 
 import org.eclipse.sensinact.gateway.simulated.button.api.ButtonSetterItf;
 
 public class ButtonSetter implements ButtonSetterItf {
-	private final ButtonAdapter listener;
+    private final ButtonAdapter listener;
 
     public ButtonSetter(ButtonAdapter listener) {
-    	this.listener = listener;
+        this.listener = listener;
     }
 
-    public void move(boolean value)
-    {
+    public void move(boolean value) {
         this.listener.mouseReleased(value);
     }
 
-    public void stop() {}
+    public void stop() {
+    }
 }

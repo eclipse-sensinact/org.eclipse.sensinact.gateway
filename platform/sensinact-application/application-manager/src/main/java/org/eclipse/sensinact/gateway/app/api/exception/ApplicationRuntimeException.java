@@ -14,7 +14,6 @@ package org.eclipse.sensinact.gateway.app.api.exception;
  * @author Rémi Druilhe
  */
 public class ApplicationRuntimeException extends Exception {
-
     public ApplicationRuntimeException() {
         super();
     }

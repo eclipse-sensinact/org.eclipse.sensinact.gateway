@@ -27,20 +27,19 @@ import java.util.Properties;
  * MQTT Server wrapper implementation, to hide dependencies and provide a MQTT server as a auto sufficient bundle
  */
 public class MQTTServerImpl implements MQTTServerService {
-
     private final BundleContext bundleContext;
     SensiNactServer server;
-    private HashMap<String,SensiNactServer> mqttServiceMap=new HashMap<>();
+    private HashMap<String, SensiNactServer> mqttServiceMap = new HashMap<>();
 
-    public MQTTServerImpl(BundleContext bundleContext){
-        this.bundleContext=bundleContext;
+    public MQTTServerImpl(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 
-    private void pushService(String id,SensiNactServer server) throws MQTTException{
-        if(mqttServiceMap.get(id)!=null){
-            throw new MQTTException(String.format("mqtt service already exists with id %s",id));
+    private void pushService(String id, SensiNactServer server) throws MQTTException {
+        if (mqttServiceMap.get(id) != null) {
+            throw new MQTTException(String.format("mqtt service already exists with id %s", id));
         }
-        mqttServiceMap.put(id,server);
+        mqttServiceMap.put(id, server);
     }
 
     /**
@@ -49,34 +48,30 @@ public class MQTTServerImpl implements MQTTServerService {
     @Override
     public String startService(final String hostParam, final String portParam) throws MQTTException {
         try {
-            String host="127.0.0.1";
-            String port="1883";
+            String host = "127.0.0.1";
+            String port = "1883";
             Properties properties = new Properties();
-            if(portParam!=null){
+            if (portParam != null) {
                 Integer.parseInt(portParam);
-                port=portParam;
+                port = portParam;
             }
-            if(hostParam!=null) {
-                host=hostParam;
+            if (hostParam != null) {
+                host = hostParam;
             }
             properties.put(BrokerConstants.HOST_PROPERTY_NAME, host);
             properties.put(BrokerConstants.PORT_PROPERTY_NAME, port);
             properties.put(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, "disabled");
-
-            server=new SensiNactServer(bundleContext);
-            final String id=String.format("%s:%s",host,port);
-
-            if(mqttServiceMap.get(id)!=null){
-                throw new MQTTException(String.format("MQTT service id %s already exists",id));
+            server = new SensiNactServer(bundleContext);
+            final String id = String.format("%s:%s", host, port);
+            if (mqttServiceMap.get(id) != null) {
+                throw new MQTTException(String.format("MQTT service id %s already exists", id));
             }
-
-            IConfig config =  new MemoryConfig(properties);
-
-            server.startServer(config,Collections.<InterceptHandler>emptyList(),null,null,null);
-            pushService(id,server);
+            IConfig config = new MemoryConfig(properties);
+            server.startServer(config, Collections.<InterceptHandler>emptyList(), null, null, null);
+            pushService(id, server);
             return id;
         } catch (Exception e) {
-            throw new MQTTException("Failed to start MQTT service with the configuration",e);
+            throw new MQTTException("Failed to start MQTT service with the configuration", e);
         }
     }
 
@@ -85,7 +80,7 @@ public class MQTTServerImpl implements MQTTServerService {
      */
     @Override
     public String startService(final String port) throws MQTTException {
-        return startService(null,port);
+        return startService(null, port);
     }
 
     /**
@@ -93,36 +88,34 @@ public class MQTTServerImpl implements MQTTServerService {
      */
     @Override
     public String startService() throws MQTTException {
-        return startService(null,null);
+        return startService(null, null);
     }
 
     /**
      * @inheritDoc
      */
     @Override
-    public void stopService(String id) throws MQTTException{
-        SensiNactServer server=mqttServiceMap.remove(id);
-        if(server!=null) server.stopServer();
+    public void stopService(String id) throws MQTTException {
+        SensiNactServer server = mqttServiceMap.remove(id);
+        if (server != null) server.stopServer();
     }
 
     @Override
     public Boolean activeService(String id) throws MQTTException {
-        return mqttServiceMap.get(id)!=null;
+        return mqttServiceMap.get(id) != null;
     }
 
     /**
      * @inheritDoc
      */
     public void stopServer() {
-        for(SensiNactServer server:mqttServiceMap.values()){
-            try{
+        for (SensiNactServer server : mqttServiceMap.values()) {
+            try {
                 server.stopServer();
-            }catch(Exception e){
-
-            }finally {
-                mqttServiceMap=new HashMap<>();
+            } catch (Exception e) {
+            } finally {
+                mqttServiceMap = new HashMap<>();
             }
         }
     }
-
 }

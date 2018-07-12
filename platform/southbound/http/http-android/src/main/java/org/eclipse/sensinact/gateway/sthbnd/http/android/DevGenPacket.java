@@ -12,7 +12,13 @@ package org.eclipse.sensinact.gateway.sthbnd.http.android;
 
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.*;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.CommandID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.Data;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.GoodbyeMessage;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.HelloMessage;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ResourceID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID;
 
 public class DevGenPacket implements Packet {
     private String processorId;
@@ -52,8 +58,7 @@ public class DevGenPacket implements Packet {
 
     @CommandID
     public Task.CommandType getCommand() {
-        return (getCurrentState() != null)
-                ? Task.CommandType.GET : Task.CommandType.SET;
+        return (getCurrentState() != null) ? Task.CommandType.GET : Task.CommandType.SET;
     }
 
     @ServiceProviderID

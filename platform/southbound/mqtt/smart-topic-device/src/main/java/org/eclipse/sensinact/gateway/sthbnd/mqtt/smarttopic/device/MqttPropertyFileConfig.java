@@ -12,10 +12,10 @@ package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.device;
 
 /**
  * POJO that is base to express the mapping between one MQTT topic and a internal device.
+ *
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public interface MqttPropertyFileConfig {
-
     String getHost();
 
     Integer getPort();

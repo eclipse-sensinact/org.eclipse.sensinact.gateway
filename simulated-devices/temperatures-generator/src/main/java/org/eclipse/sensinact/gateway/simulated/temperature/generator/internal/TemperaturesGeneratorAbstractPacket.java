@@ -8,14 +8,13 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.temperature.generator.internal;
 
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 
 public abstract class TemperaturesGeneratorAbstractPacket implements Packet {
-
-    public TemperaturesGeneratorAbstractPacket() {}
+    public TemperaturesGeneratorAbstractPacket() {
+    }
 
     @Override
     public byte[] getBytes() {

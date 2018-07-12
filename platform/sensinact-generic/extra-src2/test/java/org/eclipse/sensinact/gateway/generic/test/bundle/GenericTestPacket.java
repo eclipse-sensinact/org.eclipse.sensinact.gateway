@@ -12,20 +12,16 @@ package org.eclipse.sensinact.gateway.generic.test.bundle;
 
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 
-
 /**
- * 
+ *
  */
-public class GenericTestPacket implements Packet
-{
-	/**
-	 * @inheritDoc
-	 *
-	 * @see Packet#getBytes()
-	 */
+public class GenericTestPacket implements Packet {
+    /**
+     * @inheritDoc
+     * @see Packet#getBytes()
+     */
     @Override
-    public byte[] getBytes()
-    {
-	    return GenericTestPacket.class.getSimpleName().getBytes();
+    public byte[] getBytes() {
+        return GenericTestPacket.class.getSimpleName().getBytes();
     }
 }

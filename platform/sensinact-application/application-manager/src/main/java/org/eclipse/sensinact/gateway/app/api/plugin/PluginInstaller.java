@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.api.plugin;
 
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
@@ -22,9 +21,9 @@ import org.json.JSONObject;
  * @author Remi Druilhe
  */
 public interface PluginInstaller {
-
     /**
      * Get the JSON schema of the function to validate
+     *
      * @param function the function that is going to be validate
      * @return the JSON schema of the function
      */
@@ -33,6 +32,7 @@ public interface PluginInstaller {
 
     /**
      * Creation of the operation node from the JSON file.
+     *
      * @param function the JSON function
      * @return the created {@link AbstractFunction}
      */

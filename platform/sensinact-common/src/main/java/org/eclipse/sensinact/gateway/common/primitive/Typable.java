@@ -10,21 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.common.primitive;
 
-
 /**
- * A typed service 
- * 
+ * A typed service
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface Typable<T extends Enum<T>>
-{
-	/**
-	 * Returns the <code>&lt;T&gt;</code> Enum type
-	 * instance of this Typable service
-	 * 
-	 * @return
-	 * 		the <code>&lt;T&gt;</code> Enum type
-	 * 		of this Typable service
-	 */
-	T getType();
+public interface Typable<T extends Enum<T>> {
+    /**
+     * Returns the <code>&lt;T&gt;</code> Enum type
+     * instance of this Typable service
+     *
+     * @return the <code>&lt;T&gt;</code> Enum type
+     * of this Typable service
+     */
+    T getType();
 }

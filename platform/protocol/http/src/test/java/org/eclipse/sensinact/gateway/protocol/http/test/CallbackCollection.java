@@ -13,20 +13,18 @@ package org.eclipse.sensinact.gateway.protocol.http.test;
 import java.util.List;
 
 /**
- *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface CallbackCollection
-{
-	/**
-	 * @param class1
-	 * @return
-	 */
-	List<Callback> getdoGetCallbacks();
-	
-	/**
-	 * @param class1
-	 * @return
-	 */
-	List<Callback> getdoPostCallbacks();
+public interface CallbackCollection {
+    /**
+     * @param class1
+     * @return
+     */
+    List<Callback> getdoGetCallbacks();
+
+    /**
+     * @param class1
+     * @return
+     */
+    List<Callback> getdoPostCallbacks();
 }

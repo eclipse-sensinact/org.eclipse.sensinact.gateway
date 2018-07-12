@@ -1,22 +1,19 @@
 package org.eclipse.sensinact.gateway.nthbnd.test.jsonpath;
 
+import com.jayway.jsonpath.Configuration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
-import com.jayway.jsonpath.Configuration;
-
-import static com.jayway.jsonpath.JsonPath.using;
 import static org.assertj.core.api.Assertions.assertThat;
+import static com.jayway.jsonpath.JsonPath.using;
 
 @RunWith(Parameterized.class)
 public class JsonProviderTest extends BaseTestConfiguration {
-
     @Parameterized.Parameters
     public static Iterable<Configuration> configurations() {
         return BaseTestConfiguration.configurations();
     }
-    
+
     private final Configuration conf;
 
     public JsonProviderTest(Configuration conf) {
@@ -37,10 +34,4 @@ public class JsonProviderTest extends BaseTestConfiguration {
     public void ints_are_unwrapped() {
         assertThat(using(conf).parse(BaseTestJson.JSON_DOCUMENT, false).read("$.int-max-property", int.class)).isEqualTo(Integer.MAX_VALUE);
     }
-
-
-
-
-
-
 }

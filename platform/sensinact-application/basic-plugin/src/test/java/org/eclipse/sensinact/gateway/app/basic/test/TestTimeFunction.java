@@ -10,12 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.test;
 
+import junit.framework.TestCase;
 import org.eclipse.sensinact.gateway.app.api.function.DataItf;
 import org.eclipse.sensinact.gateway.app.api.function.FunctionUpdateListener;
 import org.eclipse.sensinact.gateway.app.basic.time.SleepFunction;
 import org.eclipse.sensinact.gateway.app.manager.component.data.ConstantData;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import junit.framework.TestCase;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -28,10 +28,8 @@ import java.util.List;
 
 @RunWith(PowerMockRunner.class)
 public class TestTimeFunction extends TestCase {
-
     @Mock
     private Mediator mediator;
-
     @Mock
     private FunctionUpdateListener listener;
 
@@ -43,12 +41,9 @@ public class TestTimeFunction extends TestCase {
     public void testSleep() {
         SleepFunction function = new SleepFunction(mediator);
         function.setListener(listener);
-
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData(100, Integer.class));
-
         function.process(variables);
-
         Mockito.verify(listener).updatedResult(true);
     }
 }

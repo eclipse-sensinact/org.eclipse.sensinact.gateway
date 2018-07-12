@@ -11,11 +11,11 @@
 package org.eclipse.sensinact.gateway.app.manager.component;
 
 public class DataProvider extends AbstractDataProvider {
-
     private final Class dataType;
 
     /**
      * Constructor
+     *
      * @param uri the URI of the {@link DataProvider}
      */
     public DataProvider(String uri, Class dataType) {
@@ -25,6 +25,7 @@ public class DataProvider extends AbstractDataProvider {
 
     /**
      * Get the {@link Class} of the data
+     *
      * @return the type of the data
      */
     public Class getDataType() {

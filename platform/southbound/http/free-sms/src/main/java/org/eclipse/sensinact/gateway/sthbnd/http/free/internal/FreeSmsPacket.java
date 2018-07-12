@@ -21,194 +21,156 @@ import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 
 /**
- *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class FreeSmsPacket extends HttpPacket 
-{
-	//********************************************************************//
-	//						NESTED DECLARATIONS			  			      //
-	//********************************************************************//
+public class FreeSmsPacket extends HttpPacket {
+    //********************************************************************//
+    //						NESTED DECLARATIONS			  			      //
+    //********************************************************************//
+    //********************************************************************//
+    //						ABSTRACT DECLARATIONS						  //
+    //********************************************************************//
+    //********************************************************************//
+    //						STATIC DECLARATIONS							  //
+    //********************************************************************//
+    //********************************************************************//
+    //						INSTANCE DECLARATIONS						  //
+    //********************************************************************//
+    private String name;
+    private String user;
+    private String pass;
+    private boolean appearance;
+    private int position = 0;
 
-	//********************************************************************//
-	//						ABSTRACT DECLARATIONS						  //
-	//********************************************************************//
+    /**
+     *
+     */
+    public FreeSmsPacket(String name, String user, String pass, boolean appearance) {
+        super(new byte[0]);
+        this.setName(name);
+        this.setAppearance(appearance);
+        this.setUser(user);
+        this.setPass(pass);
+    }
 
-	//********************************************************************//
-	//						STATIC DECLARATIONS							  //
-	//********************************************************************//
+    /**
+     *
+     */
+    @Iteration
+    public boolean iteration() {
+        return (++position) < 2;
+    }
 
-	//********************************************************************//
-	//						INSTANCE DECLARATIONS						  //
-	//********************************************************************//
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	private String name;
-	private String user;
-	private String pass;
-	private boolean appearance;
-	private int position = 0;
-	
-	/**
-	 * 
-	 */
-	public FreeSmsPacket(String name, String user, 
-			String pass, boolean appearance)
-	{
-		super(new byte[0]);
-		this.setName(name);
-		this.setAppearance(appearance);
-		this.setUser(user);
-		this.setPass(pass);		
-	}
+    /**
+     * @return the name
+     */
+    @ServiceProviderID
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * 
-	 */
-	@Iteration
-	public boolean iteration()
-	{
-		return (++position) < 2;
-	}
-	
-	/**
-	 * @param name 
-	 *     the name to set
-	 */
-	public void setName(String name)
-	{
-		this.name = name;
-	}
-	
-	/**
-	 * @return 
-	 *     the name
-	 */
-	@ServiceProviderID
-	public String getName()
-	{
-		return name;
-	}
-	
-	@ServiceID
-	public String getServiceID()
-	{
-		if(!isAppearance())
-		{
-			return null;
-		}
-		return "SMS";
-	}
+    @ServiceID
+    public String getServiceID() {
+        if (!isAppearance()) {
+            return null;
+        }
+        return "SMS";
+    }
 
-	@ResourceID
-	public String getResourceID()
-	{
-		if(!isAppearance())
-		{
-			return null;
-		}
-		return "send";
-	}
+    @ResourceID
+    public String getResourceID() {
+        if (!isAppearance()) {
+            return null;
+        }
+        return "send";
+    }
 
-	@AttributeID
-	public String getAttributeID()
-	{
-		if(!isAppearance())
-		{
-			return null;
-		}
-		switch(position)
-		{
-			case 0: 
-				return "user";
-			case 1:
-				return "pass";
-			default:
-				return null;
-		}
-	}
+    @AttributeID
+    public String getAttributeID() {
+        if (!isAppearance()) {
+            return null;
+        }
+        switch (position) {
+            case 0:
+                return "user";
+            case 1:
+                return "pass";
+            default:
+                return null;
+        }
+    }
 
-	@Data
-	public Object getData()
-	{
-		if(!isAppearance())
-		{
-			return null;
-		}
-		switch(position)
-		{
-			case 0: 
-				return getUser();
-			case 1:
-				return getPass();
-			default:
-				return null;
-		}
-	}
-	
-	@HelloMessage
-	public boolean isHelloMessage()
-	{
-		return this.isAppearance();
-	}
-	
+    @Data
+    public Object getData() {
+        if (!isAppearance()) {
+            return null;
+        }
+        switch (position) {
+            case 0:
+                return getUser();
+            case 1:
+                return getPass();
+            default:
+                return null;
+        }
+    }
 
-	@GoodbyeMessage
-	public boolean isGoodbyeMessage()
-	{
-		return !this.isAppearance();
-	}
-	
-	/**
-	 * @return 
-	 *     the user
-	 */
-	public String getUser()
-	{
-		return user;
-	}
+    @HelloMessage
+    public boolean isHelloMessage() {
+        return this.isAppearance();
+    }
 
-	/**
-	 * @param user 
-	 *     the user to set
-	 */
-	public void setUser(String user)
-	{
-		this.user = user;
-	}
+    @GoodbyeMessage
+    public boolean isGoodbyeMessage() {
+        return !this.isAppearance();
+    }
 
-	/**
-	 * @return 
-	 *     the pass
-	 */
-	public String getPass()
-	{
-		return pass;
-	}
+    /**
+     * @return the user
+     */
+    public String getUser() {
+        return user;
+    }
 
-	/**
-	 * @param pass 
-	 *     the pass to set
-	 */
-	public void setPass(String pass)
-	{
-		this.pass = pass;
-	}
+    /**
+     * @param user the user to set
+     */
+    public void setUser(String user) {
+        this.user = user;
+    }
 
-	/**
-	 * @return 
-	 *     the appearance
-	 */
-	public boolean isAppearance()
-	{
-		return appearance;
-	}
+    /**
+     * @return the pass
+     */
+    public String getPass() {
+        return pass;
+    }
 
-	/**
-	 * @param appearance 
-	 *     the appearance to set
-	 */
-	public void setAppearance(boolean appearance)
-	{
-		this.appearance = appearance;
-	}
+    /**
+     * @param pass the pass to set
+     */
+    public void setPass(String pass) {
+        this.pass = pass;
+    }
+
+    /**
+     * @return the appearance
+     */
+    public boolean isAppearance() {
+        return appearance;
+    }
+
+    /**
+     * @param appearance the appearance to set
+     */
+    public void setAppearance(boolean appearance) {
+        this.appearance = appearance;
+    }
 }

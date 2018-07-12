@@ -15,22 +15,24 @@ import org.eclipse.sensinact.gateway.protocol.ssdp.model.SSDPDescriptionPacket;
 import java.util.List;
 
 public interface SSDPDiscoveryNotifierItf {
-
     /**
      * Register a new listener to the SSDP notifier
+     *
      * @param listener the listener to notify
-     * @param filter the optional filter for the events notification
+     * @param filter   the optional filter for the events notification
      */
     void addListener(SSDPDiscoveryListenerItf listener, String filter);
 
     /**
      * Unregister a listener from the notifier
+     *
      * @param listener the listen to remove
      */
     void removeListener(SSDPDiscoveryListenerItf listener);
 
     /**
      * Gets a list of stored SSDP description packet according to a specific filter
+     *
      * @param filter the LDAP filter
      * @return the list of SSDP description packet
      */

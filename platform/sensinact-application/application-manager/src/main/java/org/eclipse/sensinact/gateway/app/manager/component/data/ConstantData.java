@@ -18,7 +18,6 @@ import org.eclipse.sensinact.gateway.app.api.function.DataItf;
  * @author Rémi Druilhe
  */
 public class ConstantData implements DataItf {
-
     private final Object value;
     private final Class type;
     private final long timestamp;

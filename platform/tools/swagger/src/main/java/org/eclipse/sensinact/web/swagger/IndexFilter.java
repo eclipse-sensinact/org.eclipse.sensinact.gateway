@@ -10,7 +10,12 @@
  */
 package org.eclipse.sensinact.web.swagger;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -18,20 +23,19 @@ import java.io.IOException;
  * @author Rémi Druilhe
  */
 public class IndexFilter implements Filter {
-
     private final String alias;
 
     IndexFilter(String alias) {
         this.alias = alias;
     }
 
-    public void init(FilterConfig filterConfig) throws ServletException {}
+    public void init(FilterConfig filterConfig) throws ServletException {
+    }
 
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
-
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         ((HttpServletResponse) response).sendRedirect(alias + "/index.html");
     }
 
-    public void destroy() {}
+    public void destroy() {
+    }
 }

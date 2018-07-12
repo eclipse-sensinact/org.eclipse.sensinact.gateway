@@ -14,7 +14,6 @@ package org.eclipse.sensinact.gateway.protocol.ssdp.model;
  * Factorisation of some field available in the {@link ResponseMessage} and {@link NotifyMessage}
  */
 public abstract class SSDPReceivedMessage extends SSDPMessage {
-
     protected int maxAge;
     protected String location;
     protected String usn;

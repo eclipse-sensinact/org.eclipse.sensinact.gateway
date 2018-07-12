@@ -16,29 +16,22 @@ import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 
 /**
- * 
+ *
  */
-public class GenericTestPacketReader extends SimplePacketReader<GenericTestPacket>
-{
-
-	/**
-	 * @param mediator
-	 */
-    protected GenericTestPacketReader(Mediator mediator)
-    {
-	    super(mediator);
+public class GenericTestPacketReader extends SimplePacketReader<GenericTestPacket> {
+    /**
+     * @param mediator
+     */
+    protected GenericTestPacketReader(Mediator mediator) {
+        super(mediator);
     }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.generic.packet.PacketReader#parse(Packet)
-	 */
+    /**
+     * @inheritDoc
+     * @see org.eclipse.sensinact.gateway.generic.packet.PacketReader#parse(Packet)
+     */
     @Override
-    public void parse(GenericTestPacket packet) throws InvalidPacketException
-    {
-	    
+    public void parse(GenericTestPacket packet) throws InvalidPacketException {
+
     }
-
-
 }

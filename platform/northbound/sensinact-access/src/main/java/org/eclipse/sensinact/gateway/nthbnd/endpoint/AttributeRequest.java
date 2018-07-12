@@ -10,68 +10,55 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-public abstract class AttributeRequest extends ResourceRequest
-{	
-	private String attribute;
+public abstract class AttributeRequest extends ResourceRequest {
+    private String attribute;
 
-	/**
-	 * @param mediator
-	 * @param serviceProvider
-	 * @param service
-	 * @param resource
-	 * @param attribute
-	 */
-	public AttributeRequest(NorthboundMediator mediator,
-			String requestIdentifier, String serviceProvider, 
-			String service, String resource, String attribute)
-	{
-		super(mediator, requestIdentifier, serviceProvider, 
-				service, resource);
-		
-		this.attribute = attribute;
-		if(this.attribute == null)
-		{
-			throw new NullPointerException("Attribute missing");
-		}
-	}
+    /**
+     * @param mediator
+     * @param serviceProvider
+     * @param service
+     * @param resource
+     * @param attribute
+     */
+    public AttributeRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, String resource, String attribute) {
+        super(mediator, requestIdentifier, serviceProvider, service, resource);
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ResourcesRequest#getName()
-	 */
-	public String getName()
-	{
-		return attribute;
-	}
-	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ResourceRequest#getMethod()
-	 */
-	@Override
-	protected String getMethod()
-	{
-		return null;
-	}
+        this.attribute = attribute;
+        if (this.attribute == null) {
+            throw new NullPointerException("Attribute missing");
+        }
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see NorthboundRequest#getExecutionArguments()
-	 */
-	@Override
-	protected Argument[] getExecutionArguments() 
-	{
-		Argument[] superArguments = super.getExecutionArguments();
-		int length = superArguments==null?0:superArguments.length;
-		Argument[] arguments = new Argument[length+1];
-		if(length > 0)
-		{
-			System.arraycopy(superArguments, 0, arguments, 0, length);
-		}
-		arguments[length] = new Argument(String.class, attribute);
-	    return arguments;
-	}
+    /**
+     * @inheritDoc
+     * @see ResourcesRequest#getName()
+     */
+    public String getName() {
+        return attribute;
+    }
+
+    /**
+     * @inheritDoc
+     * @see ResourceRequest#getMethod()
+     */
+    @Override
+    protected String getMethod() {
+        return null;
+    }
+
+    /**
+     * @inheritDoc
+     * @see NorthboundRequest#getExecutionArguments()
+     */
+    @Override
+    protected Argument[] getExecutionArguments() {
+        Argument[] superArguments = super.getExecutionArguments();
+        int length = superArguments == null ? 0 : superArguments.length;
+        Argument[] arguments = new Argument[length + 1];
+        if (length > 0) {
+            System.arraycopy(superArguments, 0, arguments, 0, length);
+        }
+        arguments[length] = new Argument(String.class, attribute);
+        return arguments;
+    }
 }

@@ -15,14 +15,12 @@ import org.eclipse.sensinact.gateway.generic.TaskTranslator;
 
 /**
  * Service dedicated to data stream transmission
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface StreamTaskTranslator extends TaskTranslator
-{   
-    
+public interface StreamTaskTranslator extends TaskTranslator {
+
     public static final Task.RequestType REQUEST_TYPE = Task.RequestType.STREAM;
-    
 
     void send(String processorIdentifier, byte[] payload);
 }

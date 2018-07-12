@@ -12,26 +12,21 @@ package org.eclipse.sensinact.gateway.common.automata;
 
 /**
  * Signature of a service allowing to create {@link Frame}
- * implementation instances 
- * 
+ * implementation instances
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface FrameFactory 
-{
-	/**
-	 * Returns a new empty {@link Frame} implementation
-	 * instance according to the {@link FrameModel} passed
-	 * as parameter
-	 * 
-	 * @param model
-	 * 		the {@link FrameModel} description of the 
-	 * 		{@link Frame} to build
-	 * 
-	 * @return
-	 * 		a new empty {@link Frame} implementation
-	 * 		instance
-	 * 
-	 * @throws FrameException
-	 */
-	Frame newInstance(FrameModel model) throws FrameException;
+public interface FrameFactory {
+    /**
+     * Returns a new empty {@link Frame} implementation
+     * instance according to the {@link FrameModel} passed
+     * as parameter
+     *
+     * @param model the {@link FrameModel} description of the
+     *              {@link Frame} to build
+     * @return a new empty {@link Frame} implementation
+     * instance
+     * @throws FrameException
+     */
+    Frame newInstance(FrameModel model) throws FrameException;
 }

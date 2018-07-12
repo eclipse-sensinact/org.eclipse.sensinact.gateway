@@ -11,15 +11,14 @@
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model;
 
 public class Resource {
-
     private Service service;
     private String name;
     private String value;
     private String topic;
     private String processor;
 
-    public Resource(Service service){
-        this.service=service;
+    public Resource(Service service) {
+        this.service = service;
     }
 
     public String getName() {

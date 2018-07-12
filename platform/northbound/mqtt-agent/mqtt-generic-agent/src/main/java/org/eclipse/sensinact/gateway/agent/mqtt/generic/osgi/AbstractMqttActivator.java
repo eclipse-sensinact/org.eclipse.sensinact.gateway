@@ -10,8 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.agent.mqtt.generic.osgi;
 
-import java.util.HashMap;
-
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.AbstractMqttHandler;
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.GenericMqttAgent;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
@@ -20,71 +18,53 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.osgi.framework.BundleContext;
 
-public abstract class AbstractMqttActivator extends AbstractActivator<Mediator> {
+import java.util.HashMap;
 
+public abstract class AbstractMqttActivator extends AbstractActivator<Mediator> {
     private AbstractMqttHandler handler;
     private GenericMqttAgent agent;
     private String registration;
 
     /**
      * @inheritDoc
-     *
      * @see AbstractActivator#doStart()
      */
-    protected void doStart(AbstractMqttHandler handler) throws Exception 
-    {
-        if(super.mediator.isDebugLoggable()) {
+    protected void doStart(AbstractMqttHandler handler) throws Exception {
+        if (super.mediator.isDebugLoggable()) {
             super.mediator.debug("Starting MQTT agent");
         }
-
         this.handler = handler;
-
         HashMap<String, String> config = new HashMap<String, String>();
         config.put("host", (String) super.mediator.getProperty("org.eclipse.sensinact.gateway.northbound.mqtt.host"));
         config.put("port", (String) super.mediator.getProperty("org.eclipse.sensinact.gateway.northbound.mqtt.port"));
         config.put("qos", (String) super.mediator.getProperty("org.eclipse.sensinact.gateway.northbound.mqtt.qos"));
-
         String broker = "tcp://" + config.get("host") + ":" + config.get("port");
         int qos = Integer.valueOf(config.get("qos"));
-
         this.agent = new GenericMqttAgent(broker, qos);
         this.handler.setAgent(agent);
-
-        this.registration = mediator.callService(Core.class,
-        new Executable<Core,String>() 
-        {
+        this.registration = mediator.callService(Core.class, new Executable<Core, String>() {
             @Override
-            public String execute(Core service) throws Exception
-            {
-                return service.registerAgent(mediator, 
-                		AbstractMqttActivator.this.handler, 
-                		null);
+            public String execute(Core service) throws Exception {
+                return service.registerAgent(mediator, AbstractMqttActivator.this.handler, null);
             }
         });
     }
 
     /**
      * @inheritDoc
-     *
      * @see AbstractActivator#doStop()
      */
     public void doStop() throws Exception {
-        if(super.mediator.isDebugLoggable()) {
+        if (super.mediator.isDebugLoggable()) {
             super.mediator.debug("Stopping MQTT agent");
         }
-
-        mediator.callService(Core.class,
-        new Executable<Core,Void>()
-        {
+        mediator.callService(Core.class, new Executable<Core, Void>() {
             @Override
-            public Void execute(Core service) throws Exception
-            {
-                service.unregisterAgent(
-                	AbstractMqttActivator.this.registration);
+            public Void execute(Core service) throws Exception {
+                service.unregisterAgent(AbstractMqttActivator.this.registration);
                 return null;
             }
         });
-
         this.registration = null;
         this.handler = null;
         this.agent.close();
@@ -92,7 +72,6 @@ public abstract class AbstractMqttActivator extends AbstractActivator<Mediator> 
 
     /**
      * @inheritDoc
-     *
      * @see AbstractActivator#doInstantiate(BundleContext)
      */
     public Mediator doInstantiate(BundleContext context) {

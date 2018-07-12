@@ -20,28 +20,31 @@ import java.util.Set;
  * @author Rémi Druilhe
  */
 public interface DataProviderItf {
-
     /**
      * Get the URI of this data provider
+     *
      * @return the URI
      */
     String getUri();
 
     /**
      * Get the last data
+     *
      * @return the data
      */
     DataItf getData();
 
     /**
      * Add a listener to be notified when a {@link Data} changes
-     * @param listener the listener of the event
+     *
+     * @param listener    the listener of the event
      * @param constraints the constraints on the event
      */
     void addListener(DataListenerItf listener, Set<Constraint> constraints);
 
     /**
      * Remove a listener
+     *
      * @param listener the listener of the event
      */
     void removeListener(DataListenerItf listener);

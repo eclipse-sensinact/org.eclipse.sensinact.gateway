@@ -8,32 +8,30 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.basic.test;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
+import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
+import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.AttributeDescription;
 import org.eclipse.sensinact.gateway.core.ModelElementProxy;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
-import org.eclipse.sensinact.gateway.common.constraint.Constraint;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
-import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 
 import java.util.Enumeration;
 import java.util.Set;
 
 class DisplayActionResource implements ActionResource {
-
     private TestSnaFunction function;
-	private Mediator mediator;
+    private Mediator mediator;
 
     public DisplayActionResource(Mediator mediator, TestSnaFunction function) {
         this.function = function;
@@ -43,10 +41,7 @@ class DisplayActionResource implements ActionResource {
     @Override
     public ActResponse act(Object... objects) {
         function.setDisplay((String) objects[0], (Integer) objects[1]);
-
-        return new AppActionResponse(this.mediator, 
-        		"/SimulatedTV_001/DisplayService_SimulatedTV_001/DISPLAY",
-                AccessMethodResponse.Status.SUCCESS, 200);
+        return new AppActionResponse(this.mediator, "/SimulatedTV_001/DisplayService_SimulatedTV_001/DISPLAY", AccessMethodResponse.Status.SUCCESS, 200);
     }
 
     @Override
@@ -73,7 +68,7 @@ class DisplayActionResource implements ActionResource {
     public UnsubscribeResponse unsubscribe(String s, String s1) {
         return null;
     }
-    
+
     @Override
     public <D extends Description> D getDescription() {
         return null;
@@ -94,58 +89,50 @@ class DisplayActionResource implements ActionResource {
         return null;
     }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ModelElementProxy#element(java.lang.String)
-	 */
+    /**
+     * @inheritDoc
+     * @see ModelElementProxy#element(java.lang.String)
+     */
     @Override
-    public AttributeDescription element(String arg0){
-	    return null;
+    public AttributeDescription element(String arg0) {
+        return null;
     }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ModelElementProxy#elements()
-	 */
+    /**
+     * @inheritDoc
+     * @see ModelElementProxy#elements()
+     */
     @Override
-    public Enumeration<AttributeDescription> elements(){
-	    return null;
+    public Enumeration<AttributeDescription> elements() {
+        return null;
     }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ElementsProxy#removeElement(java.lang.String)
-	 */
-	@Override
-	public AttributeDescription removeElement(String name)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /**
+     * @inheritDoc
+     * @see ElementsProxy#removeElement(java.lang.String)
+     */
+    @Override
+    public AttributeDescription removeElement(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ElementsProxy#addElement(Nameable)
-	 */
-	@Override
-	public boolean addElement(AttributeDescription element)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
+    /**
+     * @inheritDoc
+     * @see ElementsProxy#addElement(Nameable)
+     */
+    @Override
+    public boolean addElement(AttributeDescription element) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ElementsProxy#isAccessible()
-	 */
-	@Override
-	public boolean isAccessible()
-	{
-		return true;
-	}
+    /**
+     * @inheritDoc
+     * @see ElementsProxy#isAccessible()
+     */
+    @Override
+    public boolean isAccessible() {
+        return true;
+    }
 }

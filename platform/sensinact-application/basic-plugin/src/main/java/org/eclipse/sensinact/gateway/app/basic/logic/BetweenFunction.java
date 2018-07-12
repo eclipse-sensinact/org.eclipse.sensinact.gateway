@@ -24,42 +24,36 @@ import java.io.InputStreamReader;
 import java.util.List;
 
 public class BetweenFunction extends ConditionFunction {
-
     private static final String JSON_SCHEMA = "between.json";
 
     /**
      * Gets the JSON schema of the function from the plugin
+     *
      * @param context the context of the bundle
      * @return the JSON schema of the function
      */
     public static JSONObject getJSONSchemaFunction(BundleContext context) {
         try {
-            return new JSONObject(new JSONTokener(
-                    new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
+            return new JSONObject(new JSONTokener(new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
     /**
      * Test that the condition from both parent nodes are satisfied according to the operator
+     *
      * @see ConditionFunction#process(List)
      */
-    public Boolean testCondition(List<DataItf> datas)
-            throws NotAReadableResourceException, ResourceNotFoundException, ServiceNotFoundException {
-
+    public Boolean testCondition(List<DataItf> datas) throws NotAReadableResourceException, ResourceNotFoundException, ServiceNotFoundException {
         boolean result = false;
-
         double variable = CastUtils.castPrimitive(double.class, datas.get(0).getValue());
         double lowerLimit = CastUtils.castPrimitive(double.class, datas.get(1).getValue());
         double higherLimit = CastUtils.castPrimitive(double.class, datas.get(2).getValue());
-
-        if((variable >= lowerLimit) && (variable <= higherLimit)) {
+        if ((variable >= lowerLimit) && (variable <= higherLimit)) {
             result = true;
         }
-
         return result;
     }
 }

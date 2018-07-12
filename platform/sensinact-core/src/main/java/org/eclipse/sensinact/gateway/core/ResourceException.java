@@ -10,58 +10,46 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
-
 /**
  * Thrown to indicate a resource related exception.
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ResourceException extends RuntimeException
-{
+public class ResourceException extends RuntimeException {
+    /**
+     * Constructs an <code>ResourceException</code> with no detail message.
+     */
+    public ResourceException() {
+        super();
+    }
 
-	/**
-	 * Constructs an <code>ResourceException</code> with no detail message.
-	 */
-	public ResourceException()
-	{
-		super();
-	}
+    /**
+     * Constructs an <code>ResourceException</code> with the specified detail
+     * message.
+     *
+     * @param message the detail message
+     */
+    public ResourceException(String message) {
+        super(message);
+    }
 
-	/**
-	 * Constructs an <code>ResourceException</code> with the specified detail
-	 * message.
-	 * 
-	 * @param message
-	 *            the detail message
-	 */
-	public ResourceException(String message)
-	{
-		super(message);
-	}
+    /**
+     * Constructs an <code>ResourceException</code> with the specified detail
+     * message and cause.
+     *
+     * @param message the detail message
+     * @param cause   the cause
+     */
+    public ResourceException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	/**
-	 * Constructs an <code>ResourceException</code> with the specified detail
-	 * message and cause.
-	 * 
-	 * @param message
-	 *            the detail message
-	 * @param cause
-	 *            the cause
-	 */
-	public ResourceException(String message, Throwable cause)
-	{
-		super(message, cause);
-	}
-
-	/**
-	 * Constructs an <code>ResourceException</code> with the specified cause.
-	 * 
-	 * @param cause
-	 *            the cause
-	 */
-	public ResourceException(Throwable cause)
-	{
-		super(cause);
-	}
-
+    /**
+     * Constructs an <code>ResourceException</code> with the specified cause.
+     *
+     * @param cause the cause
+     */
+    public ResourceException(Throwable cause) {
+        super(cause);
+    }
 }

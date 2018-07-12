@@ -8,10 +8,8 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.fan.internal;
 
 public interface FanConfigListener {
-
     void speedChanged(int speed);
 }

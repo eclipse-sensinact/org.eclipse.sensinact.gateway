@@ -14,7 +14,6 @@ package org.eclipse.sensinact.gateway.protocol.ssdp.model;
  * Various constant related to SSDP
  */
 public class SSDPConstant {
-
     public static final String MULTICAST_IP = "239.255.255.250";
     public static final int MULTICAST_PORT = 1900;
 }

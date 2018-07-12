@@ -14,7 +14,6 @@ package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.selector;
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class Selector implements SelectorIface {
-
     private final String name;
     private final String expression;
 

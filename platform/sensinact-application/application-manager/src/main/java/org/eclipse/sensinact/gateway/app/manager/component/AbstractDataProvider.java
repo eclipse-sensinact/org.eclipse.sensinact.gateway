@@ -14,16 +14,18 @@ import org.eclipse.sensinact.gateway.app.api.function.DataItf;
 import org.eclipse.sensinact.gateway.app.manager.component.data.Data;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author Rémi Druilhe
  */
 public abstract class AbstractDataProvider implements DataProviderItf {
-
     private final String uri;
     private final Map<DataListenerItf, Set<Constraint>> listeners;
-
     private Data data;
 
     AbstractDataProvider(String uri) {
@@ -34,6 +36,7 @@ public abstract class AbstractDataProvider implements DataProviderItf {
 
     /**
      * Get the URI of this data provider
+     *
      * @return the URI
      */
     public String getUri() {
@@ -42,6 +45,7 @@ public abstract class AbstractDataProvider implements DataProviderItf {
 
     /**
      * Get the {@link Data} of this block
+     *
      * @return the {@link Data}
      */
     public DataItf getData() {
@@ -52,7 +56,8 @@ public abstract class AbstractDataProvider implements DataProviderItf {
 
     /**
      * Add a new listener to the notifier list
-     * @param listener the listener to notify
+     *
+     * @param listener    the listener to notify
      * @param constraints the possible constraints of the subscription
      */
     public void addListener(DataListenerItf listener, Set<Constraint> constraints) {
@@ -61,6 +66,7 @@ public abstract class AbstractDataProvider implements DataProviderItf {
 
     /**
      * Remove a listener from the notifier list
+     *
      * @param listener the listener to notify
      */
     public void removeListener(DataListenerItf listener) {
@@ -69,35 +75,27 @@ public abstract class AbstractDataProvider implements DataProviderItf {
 
     /**
      * Update the value of the {@link DataProvider} and notify the {@link DataListenerItf} of this modification
-     * @param eventUuid the uuid of the event
-     * @param value the value to set in the {@link DataProvider}
      *
+     * @param eventUuid the uuid of the event
+     * @param value     the value to set in the {@link DataProvider}
      */
-    public void updateAndNotify(UUID eventUuid, Object value, List<String> route) 
-    {
-        this.data = new Data(new UUID(System.currentTimeMillis(),System.currentTimeMillis()), 
-        		uri, getDataType(), value, System.currentTimeMillis());
-        
+    public void updateAndNotify(UUID eventUuid, Object value, List<String> route) {
+        this.data = new Data(new UUID(System.currentTimeMillis(), System.currentTimeMillis()), uri, getDataType(), value, System.currentTimeMillis());
+
         route.add(uri);
         Event event = new Event(eventUuid, data, route);
-
         // Notify the listeners
-        for(Map.Entry<DataListenerItf, Set<Constraint>> listener : listeners.entrySet())
-        {
+        for (Map.Entry<DataListenerItf, Set<Constraint>> listener : listeners.entrySet()) {
             boolean comply = true;
-            if(listener.getValue() != null) 
-            {
-                for(Constraint constraint : listener.getValue())
-                {
-                    if (!constraint.complies(value))
-                    {
+            if (listener.getValue() != null) {
+                for (Constraint constraint : listener.getValue()) {
+                    if (!constraint.complies(value)) {
                         comply = false;
                         break;
                     }
                 }
             }
-            if(comply) 
-            {
+            if (comply) {
                 listener.getKey().eventNotification(event);
             }
         }
@@ -107,11 +105,8 @@ public abstract class AbstractDataProvider implements DataProviderItf {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         AbstractDataProvider that = (AbstractDataProvider) o;
-
         return uri != null ? uri.equals(that.uri) : that.uri == null;
-
     }
 
     @Override

@@ -10,10 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.common.primitive;
 
-
 /**
  * A ProcessableData is a data processable by an {@link SnaModelElement}
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface ProcessableData extends Nameable {}
+public interface ProcessableData extends Nameable {
+}

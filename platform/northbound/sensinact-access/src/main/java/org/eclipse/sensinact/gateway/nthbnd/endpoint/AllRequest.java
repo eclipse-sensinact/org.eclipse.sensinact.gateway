@@ -12,59 +12,47 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import org.eclipse.sensinact.gateway.core.FilteringCollection;
 
-public class AllRequest extends NorthboundRequest
-{	
-	/**
-	 * @param mediator
-	 * @param requestIdentifier 
-	 * @param filteringCollection 
-	 */
-	public AllRequest(NorthboundMediator mediator, 
-			String requestIdentifier, FilteringCollection filteringCollection)
-	{
-		super(mediator, requestIdentifier, filteringCollection);
-	}
+public class AllRequest extends NorthboundRequest {
+    /**
+     * @param mediator
+     * @param requestIdentifier
+     * @param filteringCollection
+     */
+    public AllRequest(NorthboundMediator mediator, String requestIdentifier, FilteringCollection filteringCollection) {
+        super(mediator, requestIdentifier, filteringCollection);
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.common.primitive.Nameable#getName()
-	 */
-	public String getName()
-	{
-		return "all";
-	}
+    /**
+     * @inheritDoc
+     * @see org.eclipse.sensinact.gateway.common.primitive.Nameable#getName()
+     */
+    public String getName() {
+        return "all";
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest#getMethod()
-	 */
-	@Override
-	protected String getMethod()
-	{
-		return this.getName();
-	}
-	
+    /**
+     * @inheritDoc
+     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest#getMethod()
+     */
+    @Override
+    protected String getMethod() {
+        return this.getName();
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see NorthboundRequest#getExecutionArguments()
-	 */
-	@Override
-	protected Argument[] getExecutionArguments() 
-	{
-		Argument[] superArguments = super.getExecutionArguments();
-		int length = superArguments==null?0:superArguments.length;
-		Argument[] arguments = new Argument[length+2];
-		if(length > 0)
-		{
-			System.arraycopy(superArguments, 0, arguments, 0, length);
-		}
-		arguments[length] = new Argument(String.class, null);
-		arguments[length + 1] = new Argument(FilteringCollection.class, 
-			super.filteringCollection);
-	    return arguments;
-	}
+    /**
+     * @inheritDoc
+     * @see NorthboundRequest#getExecutionArguments()
+     */
+    @Override
+    protected Argument[] getExecutionArguments() {
+        Argument[] superArguments = super.getExecutionArguments();
+        int length = superArguments == null ? 0 : superArguments.length;
+        Argument[] arguments = new Argument[length + 2];
+        if (length > 0) {
+            System.arraycopy(superArguments, 0, arguments, 0, length);
+        }
+        arguments[length] = new Argument(String.class, null);
+        arguments[length + 1] = new Argument(FilteringCollection.class, super.filteringCollection);
+        return arguments;
+    }
 }

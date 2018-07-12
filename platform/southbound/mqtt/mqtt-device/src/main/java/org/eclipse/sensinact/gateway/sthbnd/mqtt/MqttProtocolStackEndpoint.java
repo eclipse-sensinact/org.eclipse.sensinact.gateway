@@ -22,14 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MqttProtocolStackEndpoint extends LocalProtocolStackEndpoint<MqttPacket> {
-
     private static final Logger LOG = LoggerFactory.getLogger(MqttProtocolStackEndpoint.class);
-
     private Map<String, MqttBroker> brokers;
 
     public MqttProtocolStackEndpoint(Mediator mediator) {
         super(mediator);
-
         this.brokers = new HashMap<String, MqttBroker>();
     }
 
@@ -39,7 +36,6 @@ public class MqttProtocolStackEndpoint extends LocalProtocolStackEndpoint<MqttPa
 
     public void removeBroker(String clientId) {
         MqttBroker broker = brokers.remove(clientId);
-
         try {
             broker.disconnect();
         } catch (MqttException e) {
@@ -48,7 +44,7 @@ public class MqttProtocolStackEndpoint extends LocalProtocolStackEndpoint<MqttPa
     }
 
     public void connectBrokers() {
-        for(Map.Entry<String, MqttBroker> map : brokers.entrySet()) {
+        for (Map.Entry<String, MqttBroker> map : brokers.entrySet()) {
             try {
                 map.getValue().connect();
             } catch (MqttException e) {
@@ -58,7 +54,7 @@ public class MqttProtocolStackEndpoint extends LocalProtocolStackEndpoint<MqttPa
     }
 
     public void disconnectBrokers() {
-        for(Map.Entry<String, MqttBroker> map : brokers.entrySet()) {
+        for (Map.Entry<String, MqttBroker> map : brokers.entrySet()) {
             try {
                 map.getValue().disconnect();
             } catch (MqttException e) {

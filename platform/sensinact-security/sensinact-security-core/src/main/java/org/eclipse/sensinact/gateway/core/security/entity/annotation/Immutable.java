@@ -17,25 +17,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Field annotation identifying immutable TABLE, 
- * meaning that it is not possible to UPDATE an 
+ * Field annotation identifying immutable TABLE,
+ * meaning that it is not possible to UPDATE an
  * existing entity or to CREATE a new one
  */
 @Inherited
 @Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = { ElementType.TYPE})
-public @interface Immutable
-{
-	enum Operation
-	{
-		CREATE,
-		READ,
-		UPDATE,
-		DELETE;		
-	}
-	
-	Operation[] operation() default {
-		Operation.CREATE,
-		Operation.UPDATE,
-		Operation.DELETE};
+@Target(value = {ElementType.TYPE})
+public @interface Immutable {
+    enum Operation {
+        CREATE, READ, UPDATE, DELETE;
+    }
+
+    Operation[] operation() default {Operation.CREATE, Operation.UPDATE, Operation.DELETE};
 }

@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.basic.logic;
 
 import org.eclipse.sensinact.gateway.app.api.exception.InvalidApplicationException;
@@ -28,12 +27,10 @@ import java.util.List;
 /**
  * A component that tests if the condition of both parent nodes is satisfied
  *
- * @see ConditionFunction
- *
  * @author Remi Druilhe
+ * @see ConditionFunction
  */
 public class DoubleConditionFunction extends ConditionFunction {
-
     private final String function;
     private static final String JSON_SCHEMA = "double_condition.json";
 
@@ -43,49 +40,43 @@ public class DoubleConditionFunction extends ConditionFunction {
 
     /**
      * Gets the JSON schema of the function from the plugin
+     *
      * @param context the context of the bundle
      * @return the JSON schema of the function
      */
     public static JSONObject getJSONSchemaFunction(BundleContext context) {
         try {
-            return new JSONObject(new JSONTokener(
-                    new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
+            return new JSONObject(new JSONTokener(new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
     /**
      * Test that the condition from both parent nodes are satisfied according to the operator
+     *
      * @see ConditionFunction#process(List)
      */
-    public Boolean testCondition(List<DataItf> datas)
-            throws NotAReadableResourceException, ResourceNotFoundException, ServiceNotFoundException {
-
+    public Boolean testCondition(List<DataItf> datas) throws NotAReadableResourceException, ResourceNotFoundException, ServiceNotFoundException {
         boolean result = false;
-
         if (function.equals("and")) {
             result = true;
         }
-
         for (DataItf data : datas) {
-            if(data != null) {
+            if (data != null) {
                 if (data.getValue() != null) {
                     if (function.equals("and")) {
                         if (!CastUtils.castPrimitive(boolean.class, data.getValue())) {
                             result = false;
                             break;
                         }
-
                         result = true;
                     } else if (function.equals("or")) {
                         if (CastUtils.castPrimitive(boolean.class, data.getValue())) {
                             result = true;
                             break;
                         }
-
                         result = false;
                     } else {
                         try {
@@ -93,7 +84,6 @@ public class DoubleConditionFunction extends ConditionFunction {
                         } catch (InvalidApplicationException e) {
                             e.printStackTrace();
                         }
-
                         return null;
                     }
                 } else {
@@ -104,7 +94,6 @@ public class DoubleConditionFunction extends ConditionFunction {
                 return null;
             }
         }
-
         return result;
     }
 }

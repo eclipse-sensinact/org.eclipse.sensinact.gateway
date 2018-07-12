@@ -14,54 +14,36 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 public class FileToApplicationParser {
-
-    public static Application parse(String filepath) throws ApplicationParseException{
-
+    public static Application parse(String filepath) throws ApplicationParseException {
         try {
-
-            File file=new File(filepath);
-
-            List<String> lines= Files.readAllLines(file.toPath(), Charset.defaultCharset());
-
-            StringBuffer sb=new StringBuffer();
-
+            File file = new File(filepath);
+            List<String> lines = Files.readAllLines(file.toPath(), Charset.defaultCharset());
+            StringBuffer sb = new StringBuffer();
             for (String line : lines) sb.append(line);
-
-            final String content=sb.toString();
-
-            JSONObject jsonFileContent=new JSONObject(content);
-            JSONArray array=jsonFileContent.getJSONArray("parameters");
-            final String applicationName=array.getJSONObject(0).getString("value");
-            final JSONObject jsonApplicationContent=array.getJSONObject(1).getJSONObject("value");
-
-            final String filename=file.getName();
-            final Integer indexOfLastDot=filename.lastIndexOf('.');
-            String filenameNoExtention=null;
+            final String content = sb.toString();
+            JSONObject jsonFileContent = new JSONObject(content);
+            JSONArray array = jsonFileContent.getJSONArray("parameters");
+            final String applicationName = array.getJSONObject(0).getString("value");
+            final JSONObject jsonApplicationContent = array.getJSONObject(1).getJSONObject("value");
+            final String filename = file.getName();
+            final Integer indexOfLastDot = filename.lastIndexOf('.');
+            String filenameNoExtention = null;
             //@TODO: Verify if the validation works
-            if(indexOfLastDot!=-1){
-                filenameNoExtention=filename.substring(0,indexOfLastDot);
-            }else {
-                filenameNoExtention=filename;
+            if (indexOfLastDot != -1) {
+                filenameNoExtention = filename.substring(0, indexOfLastDot);
+            } else {
+                filenameNoExtention = filename;
             }
-
-            if(!applicationName.equals(filenameNoExtention)){
+            if (!applicationName.equals(filenameNoExtention)) {
                 throw new ApplicationParseException("The file name and the application name should be the same");
             }
-
-            final String diggest=new String(MessageDigest.getInstance("MD5").digest(content.getBytes()));
-            Application application=new Application(applicationName,diggest,jsonFileContent);//jsonApplicationContent
-
+            final String diggest = new String(MessageDigest.getInstance("MD5").digest(content.getBytes()));
+            Application application = new Application(applicationName, diggest, jsonFileContent);//jsonApplicationContent
             return application;
-
         } catch (IOException e) {
             throw new ApplicationParseException(e);
         } catch (NoSuchAlgorithmException e) {
             throw new ApplicationParseException(e);
         }
-
-
     }
-
-
-
 }

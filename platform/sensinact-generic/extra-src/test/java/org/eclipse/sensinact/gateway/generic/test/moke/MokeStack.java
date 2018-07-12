@@ -10,9 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.generic.test.moke;
 
-import java.util.List;
-import java.util.Map;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
@@ -24,99 +21,72 @@ import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.uri.URIProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.uri.URITaskTranslator;
 
-public class MokeStack extends URIProtocolStackEndpoint<MokePacket>
-{
-	public MokeStack(Mediator mediator)
-	{
-		super(mediator);
-	}
+import java.util.List;
+import java.util.Map;
 
-	@Override
-	public Task createTask(Mediator mediator, Task.CommandType command,
-						   String path, String profileId, ResourceConfig resourceConfig,
-						   Object[] parameters)
-	{
-		return new MokeTask(mediator, command, (URITaskTranslator) this,
-				path, profileId, (ExtResourceConfig)
-				resourceConfig, parameters);
-	}
-	
-	public Connector<MokePacket> getConnector()
-	{
-		return super.connector;
-	}
-	
-	@Override
-	public void send(String processorIdentifier, 
-			String path, Object content, Map<String,List<String>> options) 
-	{
+public class MokeStack extends URIProtocolStackEndpoint<MokePacket> {
+    public MokeStack(Mediator mediator) {
+        super(mediator);
+    }
+
+    @Override
+    public Task createTask(Mediator mediator, Task.CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+        return new MokeTask(mediator, command, (URITaskTranslator) this, path, profileId, (ExtResourceConfig) resourceConfig, parameters);
+    }
+
+    public Connector<MokePacket> getConnector() {
+        return super.connector;
+    }
+
+    @Override
+    public void send(String processorIdentifier, String path, Object content, Map<String, List<String>> options) {
 //		System.out.println("####################################");
 //		System.out.println("SENDING : " + processorIdentifier 
 //				+ "[uri: "+path+"]" 
 //				+ "[content: {"+ content +"}]"
 //				+ options);
 //		System.out.println("####################################");
-		
-		final MokePacket packet;		
-	    String taskId = (String) options.remove("taskId").get(0);
-	    
-	    if(taskId.equals("device1#SERVICES_ENUMERATION"))
-	    {
-            packet = new MokePacket(mediator,"device1" , taskId, 
-                    new String[]{"pir","ldr","gpr"});  
-            
-	    }else if(taskId.equals("weather_5#SERVICES_ENUMERATION")
-	    		|| taskId.equals("weather_6#SERVICES_ENUMERATION")
-	    		|| taskId.equals("weather_7#SERVICES_ENUMERATION")
-	    		|| taskId.equals("weather_8#SERVICES_ENUMERATION"))
-	    {
-	    	String sp = taskId.split("#")[0];
-            packet = new MokePacket(mediator, sp , taskId, 
-                    new String[]{"weather"});  
-            
-	    }else if(taskId.equals("hydrometers_4#SERVICES_ENUMERATION"))
-	    {
-            packet = new MokePacket(mediator,"hydrometers_4" , taskId, 
-                    new String[]{"weather"});  
-            
-	    } else
-	    {        	
-        	if(!taskId.endsWith("SERVICES_ENUMERATION"))
-        	{        	
-        		String[] taskIdElements = taskId.split(new String(new char[]{
-        				TaskManager.IDENTIFIER_SEP_CHAR}));
-        		String service = taskIdElements[taskIdElements.length-2];
-	    		String resource = taskIdElements[taskIdElements.length-1];	  
-	    		
-	    		packet = new MokePacket(mediator, processorIdentifier, 
-	    			taskId, service, resource , AccessMethod.EMPTY);
-	    	} else
-	    	{
-	    		packet = new MokePacket(mediator, processorIdentifier, 
-	    			taskId, new String[]{}); 	
-	    	}
-	    }
+
+        final MokePacket packet;
+        String taskId = (String) options.remove("taskId").get(0);
+
+        if (taskId.equals("device1#SERVICES_ENUMERATION")) {
+            packet = new MokePacket(mediator, "device1", taskId, new String[]{"pir", "ldr", "gpr"});
+
+        } else if (taskId.equals("weather_5#SERVICES_ENUMERATION") || taskId.equals("weather_6#SERVICES_ENUMERATION") || taskId.equals("weather_7#SERVICES_ENUMERATION") || taskId.equals("weather_8#SERVICES_ENUMERATION")) {
+            String sp = taskId.split("#")[0];
+            packet = new MokePacket(mediator, sp, taskId, new String[]{"weather"});
+
+        } else if (taskId.equals("hydrometers_4#SERVICES_ENUMERATION")) {
+            packet = new MokePacket(mediator, "hydrometers_4", taskId, new String[]{"weather"});
+
+        } else {
+            if (!taskId.endsWith("SERVICES_ENUMERATION")) {
+                String[] taskIdElements = taskId.split(new String(new char[]{TaskManager.IDENTIFIER_SEP_CHAR}));
+                String service = taskIdElements[taskIdElements.length - 2];
+                String resource = taskIdElements[taskIdElements.length - 1];
+
+                packet = new MokePacket(mediator, processorIdentifier, taskId, service, resource, AccessMethod.EMPTY);
+            } else {
+                packet = new MokePacket(mediator, processorIdentifier, taskId, new String[]{});
+            }
+        }
 //		System.out.println("####################################");
 //		System.out.println("RECIVING : " + packet);
 //		System.out.println("####################################");
-		
-	    new Thread(new Runnable()
-	    {
+
+        new Thread(new Runnable() {
             @Override
-            public void run()
-            {
-                if(packet != null)
-                {
-                    try 
-                    {
-						MokeStack.this.connector.process(packet);
-						
-					} catch (InvalidPacketException e)
-                    {
-						e.printStackTrace();
-					}
+            public void run() {
+                if (packet != null) {
+                    try {
+                        MokeStack.this.connector.process(packet);
+
+                    } catch (InvalidPacketException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-	    }).start();
-	}
+        }).start();
+    }
 }

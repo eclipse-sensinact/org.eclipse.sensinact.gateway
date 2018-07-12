@@ -10,23 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.test;
 
+import org.eclipse.sensinact.gateway.util.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-import org.eclipse.sensinact.gateway.util.IOUtils;
-
 public class TestUtils {
-
-    public static String readFile(InputStream stream, Charset encoding)
-    		throws IOException 
-    {
-        String output = new String(IOUtils.read(
-        		stream, stream.available(), true), encoding);
-
+    public static String readFile(InputStream stream, Charset encoding) throws IOException {
+        String output = new String(IOUtils.read(stream, stream.available(), true), encoding);
         stream.close();
-
         return output;
     }
 }

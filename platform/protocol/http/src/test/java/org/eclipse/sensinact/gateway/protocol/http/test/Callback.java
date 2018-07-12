@@ -12,20 +12,17 @@ package org.eclipse.sensinact.gateway.protocol.http.test;
 
 import java.lang.reflect.Method;
 
-public class Callback
-{
-	public final Object target;
-	public final Method method;
-	
-	Callback(Object target, Method method)
-	{
-		this.target = target;
-		this.method = method;
-	}
-	
-	public Object invoke(Object[] parameters) throws Exception
-	{
-		this.method.setAccessible(true);
-		return this.method.invoke(this.target, parameters);
-	}
+public class Callback {
+    public final Object target;
+    public final Method method;
+
+    Callback(Object target, Method method) {
+        this.target = target;
+        this.method = method;
+    }
+
+    public Object invoke(Object[] parameters) throws Exception {
+        this.method.setAccessible(true);
+        return this.method.invoke(this.target, parameters);
+    }
 }

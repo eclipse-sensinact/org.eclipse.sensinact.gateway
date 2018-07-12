@@ -8,21 +8,19 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.billboard.internal;
 
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskCommand;
-import org.eclipse.sensinact.gateway.generic.annotation.TaskInject;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskExecution;
+import org.eclipse.sensinact.gateway.generic.annotation.TaskInject;
 
 @TaskExecution
 public class BillboardInvoker {
-
     @TaskInject
     BillboardConfig config;
 
-    @TaskCommand(method = Task.CommandType.ACT, target="/billboard/screen/display")
+    @TaskCommand(method = Task.CommandType.ACT, target = "/billboard/screen/display")
     public void display(String uri, String message) {
         config.setMessage(message);
     }

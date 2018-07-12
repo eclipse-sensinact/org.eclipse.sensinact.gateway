@@ -19,8 +19,8 @@ import org.json.JSONObject;
  * @author Rémi Druilhe
  */
 public class AppFinalize implements JSONable {
-
-    public AppFinalize(JSONObject finalize) {}
+    public AppFinalize(JSONObject finalize) {
+    }
 
     /**
      * @see JSONable#getJSON()

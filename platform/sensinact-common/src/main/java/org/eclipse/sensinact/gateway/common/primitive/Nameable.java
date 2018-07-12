@@ -8,22 +8,19 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.common.primitive;
 
 /**
  * A Service that has a name
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface Nameable
-{
-	/**
-	 * The string name of this Nameable 
-	 * service
-	 *  
-	 * @return
-	 * 		this service's name
-	 */
-	String getName();
+public interface Nameable {
+    /**
+     * The string name of this Nameable
+     * service
+     *
+     * @return this service's name
+     */
+    String getName();
 }

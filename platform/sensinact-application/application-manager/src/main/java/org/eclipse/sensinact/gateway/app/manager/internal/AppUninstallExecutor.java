@@ -8,14 +8,12 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.manager.internal;
 
 import org.eclipse.sensinact.gateway.app.api.exception.InvalidApplicationException;
 import org.eclipse.sensinact.gateway.app.api.persistence.ApplicationPersistenceService;
 import org.eclipse.sensinact.gateway.app.api.persistence.exception.ApplicationPersistenceException;
 import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAvailabilityListenerAbstract;
-import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
@@ -26,24 +24,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @see AccessMethodExecutor
- *
  * @author Remi Druilhe
+ * @see AccessMethodExecutor
  */
 public class AppUninstallExecutor extends ApplicationAvailabilityListenerAbstract implements AccessMethodExecutor {
-    private static Logger LOG= LoggerFactory.getLogger(AppUninstallExecutor.class);
+    private static Logger LOG = LoggerFactory.getLogger(AppUninstallExecutor.class);
     private final AppServiceMediator mediator;
     private final ServiceProviderImpl device;
     private final ApplicationPersistenceService persistenceService;
 
     /**
      * Constructor
+     *
      * @param device the AppManager service provider
      */
     AppUninstallExecutor(AppServiceMediator mediator, ServiceProviderImpl device, ApplicationPersistenceService persistenceService) {
         this.mediator = mediator;
         this.device = device;
-        this.persistenceService=persistenceService;
+        this.persistenceService = persistenceService;
     }
 
     /**
@@ -51,38 +49,28 @@ public class AppUninstallExecutor extends ApplicationAvailabilityListenerAbstrac
      */
     public Void execute(AccessMethodResponseBuilder jsonObjects) {
         String name = (String) jsonObjects.getParameter(0);
-
-        try{
+        try {
             uninstall(name);
-
-            jsonObjects.push(new JSONObject().put("message", "The application " + name +
-                    " has been uninstalled"));
-        }catch (Exception e){
-            jsonObjects.setAccessMethodObjectResult(new JSONObject().put(
-                    "message", "The application " + name +" has failed to be uninstalled"));
+            jsonObjects.push(new JSONObject().put("message", "The application " + name + " has been uninstalled"));
+        } catch (Exception e) {
+            jsonObjects.setAccessMethodObjectResult(new JSONObject().put("message", "The application " + name + " has failed to be uninstalled"));
         }
-
         return null;
     }
 
     public void uninstall(String name) throws InvalidApplicationException {
-
         if (name == null)
             throw new InvalidApplicationException("Wrong parameters. Unable to uninstall the application");
         else {
-
             try {
                 persistenceService.delete(name);
             } catch (ApplicationPersistenceException e) {
                 LOG.warn("Impossible to remove application '{}' from persistence system");
             }
-
 /*
             if (device.getService(name) != null) {
-
                 ApplicationService applicationService = (ApplicationService) device.getService(name);
                 if (applicationService != null && applicationService.getApplication() != null) {
-
                     applicationService.getApplication().stop();
                     applicationService.getApplication().uninstall();
                     if (device.removeService(applicationService.getName())) {
@@ -98,10 +86,6 @@ public class AppUninstallExecutor extends ApplicationAvailabilityListenerAbstrac
                         "Application " + name + " does not exist");
             }
 */
-
-
         }
-
     }
-
 }

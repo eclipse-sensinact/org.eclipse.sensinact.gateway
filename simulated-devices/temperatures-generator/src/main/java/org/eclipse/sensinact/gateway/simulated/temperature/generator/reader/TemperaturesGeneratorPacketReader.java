@@ -8,29 +8,23 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.temperature.generator.reader;
 
-import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacket;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
+import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacket;
 
-public class TemperaturesGeneratorPacketReader 
-extends SimplePacketReader<TemperaturesGeneratorAbstractPacket>
-{
-
-	/**
-	 * @param mediator the mediator
-	 */
+public class TemperaturesGeneratorPacketReader extends SimplePacketReader<TemperaturesGeneratorAbstractPacket> {
+    /**
+     * @param mediator the mediator
+     */
     public TemperaturesGeneratorPacketReader(Mediator mediator) {
-	    super(mediator);
+        super(mediator);
     }
 
     @Override
-    public void parse(TemperaturesGeneratorAbstractPacket packet)
-    		throws InvalidPacketException 
-    {
+    public void parse(TemperaturesGeneratorAbstractPacket packet) throws InvalidPacketException {
         super.setServiceProviderId(((TemperaturesGeneratorPacket) packet).getServiceProvider());
         super.setServiceId("sensor");
         super.setResourceId("temperature");

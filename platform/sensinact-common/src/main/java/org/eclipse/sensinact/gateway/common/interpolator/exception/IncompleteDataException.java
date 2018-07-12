@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.common.interpolator.exception;
 
 public class IncompleteDataException extends InterpolationException {
-
     public IncompleteDataException() {
         super();
     }

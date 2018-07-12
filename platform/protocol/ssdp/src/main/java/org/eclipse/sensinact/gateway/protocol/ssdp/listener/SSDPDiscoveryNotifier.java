@@ -33,21 +33,19 @@ import java.util.regex.Pattern;
  * {@link SSDPMulticastListenerThread} before notifying the registered listeners
  */
 public class SSDPDiscoveryNotifier implements SSDPDiscoveryNotifierItf {
-
     private ServiceReference registration;
-
     private Map<SSDPDiscoveryListenerItf, String> listeners;
     private Map<String, SSDPDescriptionPacket> discoveredDevices;
 
     /**
      * Constructor.
      * Registers itself to the OSGi registry.
+     *
      * @param context the bundle context
      */
     public SSDPDiscoveryNotifier(BundleContext context) {
         this.listeners = new HashMap<SSDPDiscoveryListenerItf, String>();
         this.discoveredDevices = new HashMap<String, SSDPDescriptionPacket>();
-
         this.registration = context.registerService(SSDPDiscoveryNotifierItf.class, this, null).getReference();
     }
 
@@ -77,37 +75,30 @@ public class SSDPDiscoveryNotifier implements SSDPDiscoveryNotifierItf {
      */
     public List<SSDPDescriptionPacket> getDescriptions(String filter) {
         List<SSDPDescriptionPacket> descriptionPackets = new ArrayList<SSDPDescriptionPacket>();
-
         Pattern pattern = Pattern.compile(filter);
-
-        for(Map.Entry<String, SSDPDescriptionPacket> map : discoveredDevices.entrySet()) {
+        for (Map.Entry<String, SSDPDescriptionPacket> map : discoveredDevices.entrySet()) {
             Matcher matcher = pattern.matcher(map.getKey());
-
-            if(matcher.find()) {
+            if (matcher.find()) {
                 descriptionPackets.add(map.getValue());
             }
         }
-
         return descriptionPackets;
     }
 
     /**
      * Notify listeners when a new SSDP message is received
+     *
      * @param message the received message
      */
     public void newSSDPPacket(SSDPMessage message) {
-        if(message instanceof SSDPReceivedMessage) {
+        if (message instanceof SSDPReceivedMessage) {
             if (((SSDPReceivedMessage) message).getLocation() != null) {
                 SSDPDescriptionPacket descriptionPacket = SSDPDescriptionRequest.getDescription((SSDPReceivedMessage) message);
-
                 for (Map.Entry<SSDPDiscoveryListenerItf, String> map : listeners.entrySet()) {
                     discoveredDevices.put(descriptionPacket.getFriendlyName(), descriptionPacket);
-
                     if (map.getValue() != null) {
                         Pattern pattern = Pattern.compile(map.getValue());
-
                         Matcher matcher = pattern.matcher(descriptionPacket.getFriendlyName());
-
                         if (matcher.find()) {
                             map.getKey().eventSSDP(message.getEvent(), descriptionPacket);
                         }

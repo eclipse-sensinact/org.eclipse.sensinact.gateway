@@ -16,7 +16,6 @@ import org.eclipse.sensinact.gateway.protocol.ssdp.api.SSDPEvent;
  * Response received in unicast after a M-SEARCH request has been sent
  */
 public class ResponseMessage extends SSDPReceivedMessage {
-
     private String st;
     private String ext;
 

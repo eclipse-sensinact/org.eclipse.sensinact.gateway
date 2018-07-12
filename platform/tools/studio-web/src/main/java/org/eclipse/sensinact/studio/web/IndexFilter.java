@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.studio.web;
 
-import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -18,20 +17,19 @@ import java.io.IOException;
  * @author Rémi Druilhe
  */
 public class IndexFilter implements Filter {
-
     private final String alias;
 
     IndexFilter(String alias) {
         this.alias = alias;
     }
 
-    public void init(FilterConfig filterConfig) throws ServletException {}
+    public void init(FilterConfig filterConfig) throws ServletException {
+    }
 
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
-
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         ((HttpServletResponse) response).sendRedirect(alias + "/index.html");
     }
 
-    public void destroy() {}
+    public void destroy() {
+    }
 }

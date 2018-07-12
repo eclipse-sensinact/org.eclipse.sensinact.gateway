@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.basic.time;
 
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
@@ -16,18 +15,15 @@ import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 /**
  * This class abstracts the time functions
  *
- * @see AbstractFunction
- *
  * @author Remi Druilhe
+ * @see AbstractFunction
  */
 public abstract class TimeFunction<T> extends AbstractFunction<T> {
-
     /**
      * The list of supported operators
      */
     public enum TimeOperator {
         SLEEP("sleep");
-
         private String type;
 
         TimeOperator(String type) {

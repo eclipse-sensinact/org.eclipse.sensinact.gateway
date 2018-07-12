@@ -9,19 +9,15 @@
  *    CEA - initial API and implementation
  */
 /**
- * 
+ *
  */
 package org.eclipse.sensinact.gateway.common.primitive;
 
-
 /**
  * The modifiable policy enumeration
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public enum Modifiable 
-{
-	MODIFIABLE,
-	UPDATABLE,
-	FIXED;
+public enum Modifiable {
+    MODIFIABLE, UPDATABLE, FIXED;
 }

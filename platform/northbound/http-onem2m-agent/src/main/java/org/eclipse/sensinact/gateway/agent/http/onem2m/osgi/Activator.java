@@ -25,51 +25,48 @@ import org.osgi.framework.BundleContext;
  */
 public class Activator extends AbstractActivator<Mediator> {
 
-	
+
     @Property(name = "org.eclipse.sensinact.gateway.northbound.http.onem2m.csebase")
     public String cseBase;
-    
+
     private SnaEventOneM2MHttpHandler handler;
 
-	private String registration;
+    private String registration;
 
-    /** @inheritDoc
-     *
+    /**
+     * @inheritDoc
      * @see AbstractActivator#doStart()
      */
     @Override
     public void doStart() throws Exception {
-    	
-    	this.handler = new SnaEventOneM2MHttpHandler(cseBase);
-    	this.registration = super.mediator.callService(Core.class, new Executable<Core,String>()
-		{
-			@Override
-			public String execute(Core core) throws Exception {
-				//Expression used in tests: "(\\/slider\\/cursor\\/position(\\/[^\\/]+)*)|(\\/(slider|(lora\\-tracker\\-[0-9]+))\\/admin\\/location(\\/[^\\/]+)*)"
-			SnaFilter filter = new SnaFilter(mediator,".*",true,false);
-			filter.addHandledType(SnaMessage.Type.values());
-			return core.registerAgent(mediator, handler, filter);
-			}
-		});
+
+        this.handler = new SnaEventOneM2MHttpHandler(cseBase);
+        this.registration = super.mediator.callService(Core.class, new Executable<Core, String>() {
+            @Override
+            public String execute(Core core) throws Exception {
+                //Expression used in tests: "(\\/slider\\/cursor\\/position(\\/[^\\/]+)*)|(\\/(slider|(lora\\-tracker\\-[0-9]+))\\/admin\\/location(\\/[^\\/]+)*)"
+                SnaFilter filter = new SnaFilter(mediator, ".*", true, false);
+                filter.addHandledType(SnaMessage.Type.values());
+                return core.registerAgent(mediator, handler, filter);
+            }
+        });
     }
 
-	@Override
-	public void doStop() throws Exception
-	{
-		super.mediator.callService(Core.class, new Executable<Core,Void>()
-		{
-			@Override
-			public Void execute(Core core) throws Exception {
-	
-				 core.unregisterAgent(registration);
-				 return null;
-			}
-		});
-	}
+    @Override
+    public void doStop() throws Exception {
+        super.mediator.callService(Core.class, new Executable<Core, Void>() {
+            @Override
+            public Void execute(Core core) throws Exception {
 
-	@Override
-	public Mediator doInstantiate(BundleContext context) {
-		
-		return new Mediator(context);
-	}
+                core.unregisterAgent(registration);
+                return null;
+            }
+        });
+    }
+
+    @Override
+    public Mediator doInstantiate(BundleContext context) {
+
+        return new Mediator(context);
+    }
 }

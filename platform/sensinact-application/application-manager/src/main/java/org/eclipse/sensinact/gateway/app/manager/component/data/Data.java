@@ -21,7 +21,6 @@ import java.util.UUID;
  * @author Rémi Druilhe
  */
 public class Data implements DataItf {
-
     private final UUID uuid;
     private final String sourceUri;
     private final Class<?> type;
@@ -38,6 +37,7 @@ public class Data implements DataItf {
 
     /**
      * Get the UUID of the {@link Data}
+     *
      * @return the UUID
      */
     public UUID getUuid() {
@@ -46,6 +46,7 @@ public class Data implements DataItf {
 
     /**
      * Get the source URI of this data
+     *
      * @return the source URI
      */
     public String getSourceUri() {
@@ -54,6 +55,7 @@ public class Data implements DataItf {
 
     /**
      * Get the value of the {@link Data}
+     *
      * @return the value
      */
     public Object getValue() {
@@ -62,6 +64,7 @@ public class Data implements DataItf {
 
     /**
      * Get the Java type of the {@link Data}
+     *
      * @return the Java type
      */
     public Class<?> getType() {
@@ -70,6 +73,7 @@ public class Data implements DataItf {
 
     /**
      * Get the timestamp of the data
+     *
      * @return the timestamp
      */
     public long getTimestamp() {

@@ -16,30 +16,27 @@ import org.eclipse.sensinact.gateway.core.ResourceConfig;
 /**
  * Handles {@link Task}s creation and translation into an appropriate
  * command according to the protocol in use
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface TaskTranslator
-{   
-	/**
+public interface TaskTranslator {
+    /**
      * Returns a new created {@link Get} task
-     * 
-     * @param mediator the associated {@link Mediator} 
-     * @param command the {@link CommandType} of the specific {@link Task}
-     * to be created 
-     * @param path the string path of the SnaObject from which the task is made
-     * @param profileId the string profile identifier of the {@link ModelInstance} 
-     * from which the task is made
-	 * @param profileId 
+     *
+     * @param mediator       the associated {@link Mediator}
+     * @param command        the {@link CommandType} of the specific {@link Task}
+     *                       to be created
+     * @param path           the string path of the SnaObject from which the task is made
+     * @param profileId      the string profile identifier of the {@link ModelInstance}
+     *                       from which the task is made
+     * @param profileId
      * @param resourceConfig the {@link ExtResourceConfig} mapped to the resource
-     *  on which applies the task
-     * @param parameters the objects array parameterizing the task execution            
+     *                       on which applies the task
+     * @param parameters     the objects array parameterizing the task execution
      * @return a new created {@link Get} task
-     */ 
-    public Task createTask(Mediator mediator, Task.CommandType command,
-    	String path, String profileId, ResourceConfig resourceConfig,
-    	Object[] parameters);
-    
+     */
+    public Task createTask(Mediator mediator, Task.CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters);
+
 //	/**
 //     * Returns a new created {@link Get} task
 //     * 
@@ -164,20 +161,19 @@ public interface TaskTranslator
 //     */
 //    public Task.ServicesEnumeration createServicesEnumerationTask(
 //            Mediator mediator, String path, String profileId); 
-    
+
     /**
      * Returns the {@link Request.Type} of the {@link Task}s
      * this transmitter is able to send
-     * 
-     * @return
-     *      the {@link Request.Type} of the {@link Task}s
-     *      this transmitter is able to send
+     *
+     * @return the {@link Request.Type} of the {@link Task}s
+     * this transmitter is able to send
      */
     Task.RequestType getRequestType();
-    
+
     /**
      * Sends the {@link Task} passed as parameter
-     * 
+     *
      * @param task the task to be transmitted
      */
     void send(Task task);

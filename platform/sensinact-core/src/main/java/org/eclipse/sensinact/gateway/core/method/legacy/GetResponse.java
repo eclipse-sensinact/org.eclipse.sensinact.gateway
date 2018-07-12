@@ -14,41 +14,30 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodJSONResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.json.JSONObject;
 
 /**
  * Extended {@link AccessMethodJSONResponse} returned by an
  * {@link GetMethod} invocation
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class GetResponse extends AccessMethodJSONResponse
-{
-	/**
-	 * Constructor 
-	 * 
-	 * @param status
-	 * 		the associated {@link Status}
-	 */
-    public GetResponse(Mediator mediator, 
-    		String uri, Status status)
-    {
-	    this(mediator, uri, status, Status.SUCCESS.equals(status)
-	    	? SnaErrorfulMessage.NO_ERROR:SnaErrorfulMessage.UNKNOWN_ERROR_CODE);
-    }	
-    
+public class GetResponse extends AccessMethodJSONResponse {
     /**
-	 * Constructor 
-	 * 
-	 * @param status
-	 * 		the associated {@link Status}
-	 * @param code
-	 * 		the associated status code 
-	 */
-    public GetResponse(Mediator mediator, 
-    		String uri, Status status, int code)
-    {
-    	super(mediator, uri, AccessMethodResponse.Response.GET_RESPONSE, 
-    		status, code);
+     * Constructor
+     *
+     * @param status the associated {@link Status}
+     */
+    public GetResponse(Mediator mediator, String uri, Status status) {
+        this(mediator, uri, status, Status.SUCCESS.equals(status) ? SnaErrorfulMessage.NO_ERROR : SnaErrorfulMessage.UNKNOWN_ERROR_CODE);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param status the associated {@link Status}
+     * @param code   the associated status code
+     */
+    public GetResponse(Mediator mediator, String uri, Status status, int code) {
+        super(mediator, uri, AccessMethodResponse.Response.GET_RESPONSE, status, code);
     }
 }

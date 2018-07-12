@@ -10,18 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.datastore.api;
 
-
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 
 /**
  * {@link DataStoreService} statement executor service
  *
- * @param <T>
- * 		the type returned by this StatementExecutor
- * 	
+ * @param <T> the type returned by this StatementExecutor
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface StatementExecutor<T> extends Executable<DataStoreService,T>
-{
-	T execute(DataStoreService service) throws DataStoreException;
+public interface StatementExecutor<T> extends Executable<DataStoreService, T> {
+    T execute(DataStoreService service) throws DataStoreException;
 }

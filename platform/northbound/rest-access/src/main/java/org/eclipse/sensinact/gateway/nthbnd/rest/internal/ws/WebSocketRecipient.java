@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -19,59 +18,46 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
 /**
  * This class is a wrapper for simple callback subscription
  */
-public class WebSocketRecipient extends NorthboundRecipient
-{
-	private WebSocketConnection wsConnection;
+public class WebSocketRecipient extends NorthboundRecipient {
+    private WebSocketConnection wsConnection;
 
-    public WebSocketRecipient(
-    		Mediator mediator,
-    		WebSocketConnection wsConnection)
-    {
+    public WebSocketRecipient(Mediator mediator, WebSocketConnection wsConnection) {
         super(mediator);
-        this.wsConnection = wsConnection;    
+        this.wsConnection = wsConnection;
     }
 
     /**
      * @inheritDoc
-     *
      * @see MidNorthboundRecipient#
      * doCallback(java.lang.String, SnaMessage)
      */
-    public void callback(String callbackId, SnaMessage[] messages)
-    {  	
-		int index = 0;
-		int length = messages==null?0:messages.length;
-
-		StringBuilder builder = new StringBuilder();
-		builder.append(JSONUtils.OPEN_BRACE);
-		builder.append("\"type\":\"CALLBACK\",");
-		builder.append("\"callbackId\":");
-		if(callbackId==null)
-		{
-			builder.append("null");			
-		} else
-		{
-			builder.append("\"");
-			builder.append(callbackId);
-			builder.append("\"");			
-		}
-		builder.append(",\"messages\":");
-		builder.append(JSONUtils.OPEN_BRACKET);
-		for(;index < length; index++)
-		{
-			builder.append(index==0?"":",");
-			builder.append(messages[index].getJSON());
-		}
-		builder.append(JSONUtils.CLOSE_BRACKET);
-		builder.append(JSONUtils.CLOSE_BRACE);
-		try 
-	    {		      
-	    	 this.wsConnection.send(builder.toString());
-
-    	} catch(Exception e)  
-	    {    		
-    		super.mediator.error(e);
-	    } 
+    public void callback(String callbackId, SnaMessage[] messages) {
+        int index = 0;
+        int length = messages == null ? 0 : messages.length;
+        StringBuilder builder = new StringBuilder();
+        builder.append(JSONUtils.OPEN_BRACE);
+        builder.append("\"type\":\"CALLBACK\",");
+        builder.append("\"callbackId\":");
+        if (callbackId == null) {
+            builder.append("null");
+        } else {
+            builder.append("\"");
+            builder.append(callbackId);
+            builder.append("\"");
+        }
+        builder.append(",\"messages\":");
+        builder.append(JSONUtils.OPEN_BRACKET);
+        for (; index < length; index++) {
+            builder.append(index == 0 ? "" : ",");
+            builder.append(messages[index].getJSON());
+        }
+        builder.append(JSONUtils.CLOSE_BRACKET);
+        builder.append(JSONUtils.CLOSE_BRACE);
+        try {
+            this.wsConnection.send(builder.toString());
+        } catch (Exception e) {
+            super.mediator.error(e);
+        }
     }
-    
+
 }

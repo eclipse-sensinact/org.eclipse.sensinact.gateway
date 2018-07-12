@@ -8,68 +8,51 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.nthbnd.forward.test;
-
-import java.io.IOException;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.eclipse.sensinact.gateway.util.crypto.Base64;
+import org.json.JSONException;
+
+import java.io.IOException;
+
 //import org.eclipse.sensinact.gateway.util.crypto.Base64;
-
 public class HttpServiceTestClient {
+    public static String newRequest(Mediator mediator, String url, String content, String method) {
+        SimpleResponse response;
+        ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> builder = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
 
-	public static String newRequest(Mediator mediator,
-			String url, String content, String method) 
-	{	
-		SimpleResponse response;
-        ConnectionConfigurationImpl<SimpleResponse,SimpleRequest> builder = 
-        		new ConnectionConfigurationImpl<SimpleResponse,SimpleRequest>();
-        
         builder.setUri(url);
         builder.setAccept("application/json");
 //        builder.addHeader("Authorization", 
 //        	"Basic " + Base64.encodeBytes("cea:sensiNact_team".getBytes()));
-        try 
-        {
-            if(method.equals("GET"))
-            {
-            	builder.setHttpMethod("GET");
-            	
-            } else if(method.equals("POST")) 
-            {
-            	builder.setContentType("application/json");
-            	builder.setHttpMethod("POST");
+        try {
+            if (method.equals("GET")) {
+                builder.setHttpMethod("GET");
 
-                if(content != null && content.length() > 0)
-                {
+            } else if (method.equals("POST")) {
+                builder.setContentType("application/json");
+                builder.setHttpMethod("POST");
+                if (content != null && content.length() > 0) {
                     builder.setContent(content);
                 }
-            } else 
-            {
+            } else {
                 return null;
             }
-        	SimpleRequest request = new SimpleRequest(builder);
-        	response = request.send();
-
-        	byte[] responseContent = response.getContent();
-        	String contentStr =  (responseContent==null?null:new String(responseContent));        	
-        	return contentStr;
-
+            SimpleRequest request = new SimpleRequest(builder);
+            response = request.send();
+            byte[] responseContent = response.getContent();
+            String contentStr = (responseContent == null ? null : new String(responseContent));
+            return contentStr;
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (IOException e) {
-			e.printStackTrace();
-		}catch(Exception e){  
-			e.printStackTrace();
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
         return null;
-	}
+    }
 }

@@ -8,43 +8,35 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.generic.test.moke3;
 
-import org.json.JSONObject;
-
-import org.eclipse.sensinact.gateway.generic.ExtResourceImpl;
-import org.eclipse.sensinact.gateway.generic.ExtServiceImpl;
 import org.eclipse.sensinact.gateway.generic.ExtModelInstance;
 import org.eclipse.sensinact.gateway.generic.ExtResourceConfig;
+import org.eclipse.sensinact.gateway.generic.ExtResourceImpl;
+import org.eclipse.sensinact.gateway.generic.ExtServiceImpl;
 import org.eclipse.sensinact.gateway.generic.annotation.Act;
+import org.json.JSONObject;
 
 /**
- * 
+ *
  */
-public class MokeAnnotatedAction extends ExtResourceImpl
-{
-
-	/**
-	 * @param mediator
-	 * @param resourceConfig
-	 * @param service
-	 */
-    protected MokeAnnotatedAction(ExtModelInstance<?> snaModelInstance, 
-    		ExtResourceConfig resourceConfig, ExtServiceImpl service)
-    {
-	    super(snaModelInstance, resourceConfig,service);
+public class MokeAnnotatedAction extends ExtResourceImpl {
+    /**
+     * @param mediator
+     * @param resourceConfig
+     * @param service
+     */
+    protected MokeAnnotatedAction(ExtModelInstance<?> snaModelInstance, ExtResourceConfig resourceConfig, ExtServiceImpl service) {
+        super(snaModelInstance, resourceConfig, service);
     }
 
     @Act
-    public JSONObject notNamedAct(String number, String message)
-    {
-    	return new JSONObject().put("message", number+" called : "+message);
+    public JSONObject notNamedAct(String number, String message) {
+        return new JSONObject().put("message", number + " called : " + message);
     }
 
     @Act
-    public JSONObject act()
-    {
-    	return new JSONObject().put("message", "empty call");
+    public JSONObject act() {
+        return new JSONObject().put("message", "empty call");
     }
 }

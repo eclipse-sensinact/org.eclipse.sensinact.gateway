@@ -11,8 +11,8 @@
 package org.eclipse.sensinact.gateway.common.interpolator.exception;
 
 public class ObjectInstantiationException extends InterpolationException {
-
-    public ObjectInstantiationException() {}
+    public ObjectInstantiationException() {
+    }
 
     public ObjectInstantiationException(String message) {
         super(message);

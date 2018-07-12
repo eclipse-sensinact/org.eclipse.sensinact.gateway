@@ -10,58 +10,45 @@
  */
 package org.eclipse.sensinact.gateway.generic.parser;
 
-import org.xml.sax.Attributes;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.Metadata;
 import org.eclipse.sensinact.gateway.core.MetadataBuilder;
-
+import org.xml.sax.Attributes;
 
 /**
- * Extended {@link NameTypeValueDefinition} for metadata 
- * xml element 
- * 
+ * Extended {@link NameTypeValueDefinition} for metadata
+ * xml element
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class MetadataDefinition extends NameTypeValueDefinition implements
-MetadataBuilder
-{
+public class MetadataDefinition extends NameTypeValueDefinition implements MetadataBuilder {
     /**
      * Constructor
-     * 
-     * @param mediator
-     *      the associated Mediator
-     * @param atts
-     *      the set of attributes data structure for the 
-     *      xml metadata element
+     *
+     * @param mediator the associated Mediator
+     * @param atts     the set of attributes data structure for the
+     *                 xml metadata element
      */
-    MetadataDefinition(Mediator mediator, Attributes atts)
-    {
+    MetadataDefinition(Mediator mediator, Attributes atts) {
         super(mediator, atts);
     }
-    
+
     /**
-     * Creates and returns the {@link Metadata} described by 
-     * this MetadataDefinition, according to the name of the 
+     * Creates and returns the {@link Metadata} described by
+     * this MetadataDefinition, according to the name of the
      * target passed as parameter
-     * 
-     * @return
-     *      the {@link Metadata} described by this 
-     *      MetadataDefinition, according to the name 
-     *      of the target passed as parameter
-     *      
+     *
+     * @return the {@link Metadata} described by this
+     * MetadataDefinition, according to the name
+     * of the target passed as parameter
+     * @throws InvalidValueException
      * @see MetadataBuilder#getMetadata(String)
-     * 
-     * @throws InvalidValueException 
      */
-    public Metadata getMetadata() throws InvalidValueException
-    {
-        Metadata metadata = new Metadata(super.mediator, super.getName(), 
-        	typeDefinition.getType(), valueDefinition!=null
-            ?valueDefinition.getValue():null, Modifiable.FIXED);
-        
+    public Metadata getMetadata() throws InvalidValueException {
+        Metadata metadata = new Metadata(super.mediator, super.getName(), typeDefinition.getType(), valueDefinition != null ? valueDefinition.getValue() : null, Modifiable.FIXED);
+
         return metadata;
     }
 }

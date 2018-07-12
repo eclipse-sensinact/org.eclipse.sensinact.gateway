@@ -8,63 +8,55 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.util.stack;
 
 /**
  * Abstract implementation of a {@link StackEnginetHandler}
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public abstract class AbstractStackEngineHandler<E> 
-implements StackEngineHandler<E>
-{
-	/**
-	 * the {@link StackEngine} stacking the <code>&lt;E&gt;</code>
-	 * typed elements
-	 */
-	protected final StackEngine<E, StackEngineHandler<E>> eventEngine;
-	
-	protected final Thread stackEngineThread;
+public abstract class AbstractStackEngineHandler<E> implements StackEngineHandler<E> {
+    /**
+     * the {@link StackEngine} stacking the <code>&lt;E&gt;</code>
+     * typed elements
+     */
+    protected final StackEngine<E, StackEngineHandler<E>> eventEngine;
 
-	/**
-	 * Constructor
-	 */
-	//TODO : allow restart by defining a separated start method
-	public AbstractStackEngineHandler() 
-	{
-		//instantiate the engine
-		this.eventEngine = new StackEngine<E, StackEngineHandler<E>>(this);
-		//start the engine
-	    this.stackEngineThread = new Thread(eventEngine);
-	    this.stackEngineThread.start();
-	}
+    protected final Thread stackEngineThread;
 
-	/**
-	 * Stops 
-	 */
-	public void stop()
-	{
-		//stop the engine
-		this.eventEngine.stop();
-	}
+    /**
+     * Constructor
+     */
+    //TODO : allow restart by defining a separated start method
+    public AbstractStackEngineHandler() {
+        //instantiate the engine
+        this.eventEngine = new StackEngine<E, StackEngineHandler<E>>(this);
+        //start the engine
+        this.stackEngineThread = new Thread(eventEngine);
+        this.stackEngineThread.start();
+    }
 
-	/**
-	 * Stops
-	 * 
-	 * @throws InterruptedException 
-	 */
-	public void close()
-	{
-		//wait for the stack emptiness for stopping
-		this.eventEngine.closeWhenEmpty();
-		try
-		{
-			this.stackEngineThread.join();
-			
-		} catch (InterruptedException e)
-		{
-			this.stackEngineThread.interrupt();
-		}
-	}
+    /**
+     * Stops
+     */
+    public void stop() {
+        //stop the engine
+        this.eventEngine.stop();
+    }
+
+    /**
+     * Stops
+     *
+     * @throws InterruptedException
+     */
+    public void close() {
+        //wait for the stack emptiness for stopping
+        this.eventEngine.closeWhenEmpty();
+        try {
+            this.stackEngineThread.join();
+
+        } catch (InterruptedException e) {
+            this.stackEngineThread.interrupt();
+        }
+    }
 }

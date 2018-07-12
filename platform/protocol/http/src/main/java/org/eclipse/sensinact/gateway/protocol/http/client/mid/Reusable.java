@@ -11,11 +11,10 @@
 package org.eclipse.sensinact.gateway.protocol.http.client.mid;
 
 /**
- * 
+ *
  */
-public interface Reusable
-{	
-	boolean isReusable();
-	
-	Reusable copy();
+public interface Reusable {
+    boolean isReusable();
+
+    Reusable copy();
 }

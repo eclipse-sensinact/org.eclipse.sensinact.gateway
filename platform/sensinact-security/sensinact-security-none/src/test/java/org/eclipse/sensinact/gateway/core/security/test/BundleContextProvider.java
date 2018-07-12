@@ -13,6 +13,6 @@ package org.eclipse.sensinact.gateway.core.security.test;
 import org.osgi.framework.BundleContext;
 
 public interface BundleContextProvider {
-	
-	BundleContext getBundleContext();
+
+    BundleContext getBundleContext();
 }

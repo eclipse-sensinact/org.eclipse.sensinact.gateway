@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint.format;
 
-public interface ResponseFormat<F>
-{
-	F format(Object object);
+public interface ResponseFormat<F> {
+    F format(Object object);
 }

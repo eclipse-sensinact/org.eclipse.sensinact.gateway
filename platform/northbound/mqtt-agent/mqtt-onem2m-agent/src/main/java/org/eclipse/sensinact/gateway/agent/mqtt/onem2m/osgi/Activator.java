@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.agent.mqtt.onem2m.osgi;
 
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.osgi.AbstractMqttActivator;
@@ -20,12 +19,11 @@ import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
  * Extended {@link AbstractActivator}
  */
 public class Activator extends AbstractMqttActivator {
-
     @Property(name = "org.eclipse.sensinact.gateway.northbound.mqtt.onem2m.csebase")
     public String cseBase;
 
-    /** @inheritDoc
-     *
+    /**
+     * @inheritDoc
      * @see AbstractActivator#doStart()
      */
     @Override

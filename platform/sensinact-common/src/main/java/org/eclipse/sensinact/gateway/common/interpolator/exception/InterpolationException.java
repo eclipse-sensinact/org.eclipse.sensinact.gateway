@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.common.interpolator.exception;
 
 public class InterpolationException extends Exception {
-
     public InterpolationException() {
         super();
     }

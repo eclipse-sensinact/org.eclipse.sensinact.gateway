@@ -18,120 +18,91 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.LoginResponse.TokenMode;
 
 /**
  * A LoginEndpoint is a connection point to a sensiNact instance
- * allowing to create an {@link NorthboundEndpoint} for a specific 
+ * allowing to create an {@link NorthboundEndpoint} for a specific
  * user or to reactivate an existing one
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class LoginEndpoint
-{
-	private NorthboundMediator mediator;
+public class LoginEndpoint {
+    private NorthboundMediator mediator;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param mediator the {@link NorthboundMediator} that will allow
-	 * the LoginEndpoint to be instantiated to interact with the
-	 * OSGi host environment
-	 * 
-	 * @throws InvalidCredentialException
-	 */
-	public LoginEndpoint(NorthboundMediator mediator) 
-	{
-		super();
-		this.mediator = mediator;
-	}	
+    /**
+     * Constructor
+     *
+     * @param mediator the {@link NorthboundMediator} that will allow
+     *                 the LoginEndpoint to be instantiated to interact with the
+     *                 OSGi host environment
+     * @throws InvalidCredentialException
+     */
+    public LoginEndpoint(NorthboundMediator mediator) {
+        super();
+        this.mediator = mediator;
+    }
 
-	/**
-	 * Returns a newly created {@link NorthboundEndpoint} attached to
-	 * a {@link Session} built using the specified {@link Credentials}
-	 * 
-	 * @param credentials the {@link Credentials}  that will allow
-	 * this LoginEndpoint to create a valid {@link NorthboundEndpoint}
-	 * 
-	 * @return {@link NorthboundEndpoint} for the specified {@link 
-	 * Credentials}
-	 */
-	public LoginResponse createNorthboundEndpoint(
-			Credentials credentials) throws InvalidCredentialException
-	{
-		LoginResponse response = new LoginResponse(mediator, 
-						TokenMode.TOKEN_CREATION);
-		if(credentials != null)
-		{
-			NorthboundEndpoints endpoints = 
-					this.mediator.getNorthboundEndpoints();
-			
-			NorthboundEndpoint endpoint = endpoints.add(
-			new NorthboundEndpoint(this.mediator, credentials));
-				
-			long lifetime = endpoints.getLifetime();
-			long timeout = endpoints.getTimeout(
-						endpoint.getSessionToken());
-				
-			response.setTimeout(timeout); 
-			response.setGenerated(timeout - lifetime);
-			response.setToken(endpoint.getSessionToken());
-				
-		} else
-		{
-			throw new InvalidCredentialException("Null credentials");
-		}
-		return response;
-	}
+    /**
+     * Returns a newly created {@link NorthboundEndpoint} attached to
+     * a {@link Session} built using the specified {@link Credentials}
+     *
+     * @param credentials the {@link Credentials}  that will allow
+     *                    this LoginEndpoint to create a valid {@link NorthboundEndpoint}
+     * @return {@link NorthboundEndpoint} for the specified {@link
+     * Credentials}
+     */
+    public LoginResponse createNorthboundEndpoint(Credentials credentials) throws InvalidCredentialException {
+        LoginResponse response = new LoginResponse(mediator, TokenMode.TOKEN_CREATION);
+        if (credentials != null) {
+            NorthboundEndpoints endpoints = this.mediator.getNorthboundEndpoints();
 
-	/**
-	 * Reactivates the {@link NorthboundEndpoint} attached to {@link 
-	 * Session} whose String identifier is wrapped by the {@link 
-	 * AuthenticationToken} passed as parameter
-	 * 
-	 * @param token the String identifier of the {@link Session} attached
-	 * to the {@link NorthboundEndpoint} to be reactivated
-	 * 
-	 * @return true if the appropriate the {@link NorthboundEndpoint} has 
-	 * been reactivated; false otherwise
-	 */
-	public LoginResponse reactivateEndpoint(AuthenticationToken token) 
-	{ 
+            NorthboundEndpoint endpoint = endpoints.add(new NorthboundEndpoint(this.mediator, credentials));
 
-		LoginResponse response = new LoginResponse(mediator, 
-						TokenMode.TOKEN_RENEW);	
-		
-		String authenticationMaterial = token==null
-				?null:token.getAuthenticationMaterial();
-		
-		if(token != null)
-		{
-			NorthboundEndpoints endpoints = 
-					this.mediator.getNorthboundEndpoints();
-			try
-			{			
-				NorthboundEndpoint endpoint = 
-				this.mediator.getNorthboundEndpoints(
-					).getEndpoint(token);
+            long lifetime = endpoints.getLifetime();
+            long timeout = endpoints.getTimeout(endpoint.getSessionToken());
 
-				if(endpoint == null)
-				{
-					throw new NullPointerException("Null endpoint");
-				}
-				long lifetime = endpoints.getLifetime();
-				long timeout = endpoints.getTimeout(
-						authenticationMaterial);
-				
-				response.setTimeout(timeout); 
-				response.setGenerated(timeout - lifetime);
-				response.setToken(authenticationMaterial);
+            response.setTimeout(timeout);
+            response.setGenerated(timeout - lifetime);
+            response.setToken(endpoint.getSessionToken());
 
-			} catch(InvalidCredentialException | NullPointerException e)
-			{
-				mediator.error(e);
-				response.setErrors(e);
-			}
-		} else
-		{
-			response.setErrors(new NullPointerException(
-					"Null token"));
-		}
-		return response;
-	}	
+        } else {
+            throw new InvalidCredentialException("Null credentials");
+        }
+        return response;
+    }
+
+    /**
+     * Reactivates the {@link NorthboundEndpoint} attached to {@link
+     * Session} whose String identifier is wrapped by the {@link
+     * AuthenticationToken} passed as parameter
+     *
+     * @param token the String identifier of the {@link Session} attached
+     *              to the {@link NorthboundEndpoint} to be reactivated
+     * @return true if the appropriate the {@link NorthboundEndpoint} has
+     * been reactivated; false otherwise
+     */
+    public LoginResponse reactivateEndpoint(AuthenticationToken token) {
+        LoginResponse response = new LoginResponse(mediator, TokenMode.TOKEN_RENEW);
+
+        String authenticationMaterial = token == null ? null : token.getAuthenticationMaterial();
+
+        if (token != null) {
+            NorthboundEndpoints endpoints = this.mediator.getNorthboundEndpoints();
+            try {
+                NorthboundEndpoint endpoint = this.mediator.getNorthboundEndpoints().getEndpoint(token);
+                if (endpoint == null) {
+                    throw new NullPointerException("Null endpoint");
+                }
+                long lifetime = endpoints.getLifetime();
+                long timeout = endpoints.getTimeout(authenticationMaterial);
+
+                response.setTimeout(timeout);
+                response.setGenerated(timeout - lifetime);
+                response.setToken(authenticationMaterial);
+            } catch (InvalidCredentialException | NullPointerException e) {
+                mediator.error(e);
+                response.setErrors(e);
+            }
+        } else {
+            response.setErrors(new NullPointerException("Null token"));
+        }
+        return response;
+    }
 }

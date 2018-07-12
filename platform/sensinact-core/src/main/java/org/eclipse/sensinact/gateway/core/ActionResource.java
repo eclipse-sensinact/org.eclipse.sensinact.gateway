@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.core;
 
 import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
@@ -18,21 +17,18 @@ import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface ActionResource extends Resource
-{
-	/**
-	 * The action resource's type attribute value.
-	 */
-	public static final Resource.Type TYPE_VALUE = Resource.Type.ACTION;
-	
-	/**
-	 * Asks for this ActionResource execution
-	 * 
-	 * @param parameters
-	 * 		objects array parameterizing the action 
-	 * 		invocation
-	 * @return 
-	 * 		the action execution {@link ActResponse}
-	 */
-	ActResponse act(Object... parameters);
+public interface ActionResource extends Resource {
+    /**
+     * The action resource's type attribute value.
+     */
+    public static final Resource.Type TYPE_VALUE = Resource.Type.ACTION;
+
+    /**
+     * Asks for this ActionResource execution
+     *
+     * @param parameters objects array parameterizing the action
+     *                   invocation
+     * @return the action execution {@link ActResponse}
+     */
+    ActResponse act(Object... parameters);
 }

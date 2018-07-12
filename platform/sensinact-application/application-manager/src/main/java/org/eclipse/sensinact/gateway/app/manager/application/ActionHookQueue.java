@@ -18,7 +18,6 @@ import org.eclipse.sensinact.gateway.app.manager.component.Event;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.osgi.framework.ServiceReference;
 
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -27,7 +26,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * fired when the application reaches the end of the tree.
  */
 class ActionHookQueue implements DataListenerItf {
-
     private final AppServiceMediator mediator;
     private final Queue<PluginHook> actionQueue;
 
@@ -38,10 +36,8 @@ class ActionHookQueue implements DataListenerItf {
 
     public void instantiate() throws LifeCycleException {
         try {
-            String filter = "(&(objectClass=" + DataProviderItf.class.getName() + ")" +
-                    "(type=" + PluginHook.class.getName() + "))";
+            String filter = "(&(objectClass=" + DataProviderItf.class.getName() + ")" + "(type=" + PluginHook.class.getName() + "))";
             ServiceReference[] serviceReferences = mediator.getServiceReferences(filter);
-
 //            Mediator.ServiceCaller caller = mediator.CALLERS.get();
 //
 //            caller.attach();
@@ -57,10 +53,8 @@ class ActionHookQueue implements DataListenerItf {
 //            if (caller.release() == 0) {
 //                mediator.CALLERS.remove();
 //            }
-
-            for(ServiceReference serviceReference : serviceReferences) {
+            for (ServiceReference serviceReference : serviceReferences) {
                 DataProviderItf dataProviderItf = ((DataProviderItf) mediator.getService(serviceReference));
-
                 dataProviderItf.addListener(this, null);
             }
         } catch (Exception e) {
@@ -71,13 +65,10 @@ class ActionHookQueue implements DataListenerItf {
 
     public void uninstantiate() throws LifeCycleException {
         try {
-            String filter = "(&(objectClass=" + DataProviderItf.class.getName() + ")" +
-                    "(type=" + PluginHook.class.getName() + "))";
+            String filter = "(&(objectClass=" + DataProviderItf.class.getName() + ")" + "(type=" + PluginHook.class.getName() + "))";
             ServiceReference[] serviceReferences = mediator.getContext().getServiceReferences((String) null, filter);
-
-            for(ServiceReference serviceReference : serviceReferences) {
+            for (ServiceReference serviceReference : serviceReferences) {
                 DataProviderItf dataProviderItf = (DataProviderItf) mediator.getService(serviceReference);
-
                 dataProviderItf.removeListener(this);
             }
         } catch (Exception e) {
@@ -87,6 +78,7 @@ class ActionHookQueue implements DataListenerItf {
 
     /**
      * Add a new {@link Event} on a notification
+     *
      * @param event the event to store
      */
     public void eventNotification(Event event) {
@@ -98,7 +90,6 @@ class ActionHookQueue implements DataListenerItf {
      */
     void fireHooks() {
         //System.out.println(actionQueue.size() + " actions in the queue");
-
         try {
             for (PluginHook hook : actionQueue) {
                 hook.fireHook();

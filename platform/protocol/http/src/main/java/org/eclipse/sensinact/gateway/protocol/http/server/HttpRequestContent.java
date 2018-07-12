@@ -16,80 +16,64 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class HttpRequestContent extends AbstractContent
-        implements RequestContent
-{
+public class HttpRequestContent extends AbstractContent implements RequestContent {
+    //********************************************************************//
+    //						NESTED DECLARATIONS			  			      //
+    //********************************************************************//
+    //********************************************************************//
+    //						ABSTRACT DECLARATIONS						  //
+    //********************************************************************//
+    //********************************************************************//
+    //						STATIC DECLARATIONS							  //
+    //********************************************************************//
+    //********************************************************************//
+    //						INSTANCE DECLARATIONS						  //
+    //********************************************************************//
+    private URI uri;
+    private String method;
 
-	//********************************************************************//
-	//						NESTED DECLARATIONS			  			      //
-	//********************************************************************//
+    /**
+     *
+     */
+    public HttpRequestContent(URI uri, String method) {
+        this(uri, method, Collections.<String, List<String>>emptyMap());
+    }
 
-	//********************************************************************//
-	//						ABSTRACT DECLARATIONS						  //
-	//********************************************************************//
+    /**
+     * @param headers
+     */
+    public HttpRequestContent(URI uri, String method, Map<String, List<String>> headers) {
+        super(headers);
+        this.uri = uri;
+        this.method = method;
+    }
 
-	//********************************************************************//
-	//						STATIC DECLARATIONS							  //
-	//********************************************************************//
+    /**
+     * @inheritDoc
+     * @see RequestContent#getRequestURI()
+     */
+    @Override
+    public String getRequestURI() {
+        return this.uri.getPath();
+    }
 
-	//********************************************************************//
-	//						INSTANCE DECLARATIONS						  //
-	//********************************************************************//
+    /**
+     * @inheritDoc
+     * @see RequestContent#getQueryString()
+     */
+    @Override
+    public String getQueryString() {
+        return this.uri.getQuery();
+    }
 
-	private URI uri;
-	private String method;
-
-	/**
-	 * 
-	 */
-	public HttpRequestContent(URI uri, String method)
-	{
-		this(uri, method, Collections.<String,List<String>>emptyMap());
-	}
-
-	/**
-	 * @param headers
-	 */
-	public HttpRequestContent(URI uri, String method, Map<String, List<String>> headers)
-	{
-		super(headers);
-		this.uri = uri;
-		this.method = method;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see RequestContent#getRequestURI()
-	 */
-	@Override
-	public String getRequestURI()
-	{
-		return this.uri.getPath();
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see RequestContent#getQueryString()
-	 */
-	@Override
-	public String getQueryString()
-	{
-		return this.uri.getQuery();
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see RequestContent#getHttpMethod()
-	 */
-	@Override
-	public String getHttpMethod()
-	{
-		return this.method;
-	}
+    /**
+     * @inheritDoc
+     * @see RequestContent#getHttpMethod()
+     */
+    @Override
+    public String getHttpMethod() {
+        return this.method;
+    }
 }

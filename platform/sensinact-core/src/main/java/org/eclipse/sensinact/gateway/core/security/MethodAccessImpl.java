@@ -14,65 +14,53 @@ import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 
 /**
- *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class MethodAccessImpl implements MethodAccess
-{
-	private final AccessLevel accessLevel;
-	private final AccessMethod.Type method;
+public class MethodAccessImpl implements MethodAccess {
+    private final AccessLevel accessLevel;
+    private final AccessMethod.Type method;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param accessLevel
-	 * @param method
-	 */
-	public MethodAccessImpl(AccessLevel accessLevel, AccessMethod.Type method)
-	{
-		this.accessLevel = accessLevel;
-		this.method = method;
-	}
-	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see MethodAccess#getMethod()
-	 */
-	@Override
-	public AccessMethod.Type getMethod()
-	{
-		return this.method;
-	}
+    /**
+     * Constructor
+     *
+     * @param accessLevel
+     * @param method
+     */
+    public MethodAccessImpl(AccessLevel accessLevel, AccessMethod.Type method) {
+        this.accessLevel = accessLevel;
+        this.method = method;
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see MethodAccess#getAccessLevel()
-	 */
-	@Override
-	public AccessLevel getAccessLevel() 
-	{
-		return this.accessLevel;
-	}
+    /**
+     * @inheritDoc
+     * @see MethodAccess#getMethod()
+     */
+    @Override
+    public AccessMethod.Type getMethod() {
+        return this.method;
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see Nameable#getName()
-	 */
-	@Override
-	public String getName()
-	{
-		return this.method.name();
-	}
-	
-	
-	public String toString()
-	{
-		return new StringBuilder().append(this.method
-				).append(this.accessLevel).toString();
-	}
-	
+    /**
+     * @inheritDoc
+     * @see MethodAccess#getAccessLevel()
+     */
+    @Override
+    public AccessLevel getAccessLevel() {
+        return this.accessLevel;
+    }
+
+    /**
+     * @inheritDoc
+     * @see Nameable#getName()
+     */
+    @Override
+    public String getName() {
+        return this.method.name();
+    }
+
+
+    public String toString() {
+        return new StringBuilder().append(this.method).append(this.accessLevel).toString();
+    }
 
 }

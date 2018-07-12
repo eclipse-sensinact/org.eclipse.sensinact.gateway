@@ -20,9 +20,7 @@ import org.eclipse.sensinact.gateway.sthbnd.liveobjects.LiveObjectsConstant;
 /**
  * @author Rémi Druilhe
  */
-public class LiveObjectsGetAssetsList extends HttpBrowsingTask<SimpleHttpResponse,SimpleHttpRequest>
-{
-
+public class LiveObjectsGetAssetsList extends HttpBrowsingTask<SimpleHttpResponse, SimpleHttpRequest> {
     public LiveObjectsGetAssetsList(Mediator mediator, HttpProtocolStackEndpoint transmitter) {
         super(mediator, transmitter, SimpleHttpRequest.class);
     }

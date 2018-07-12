@@ -12,22 +12,18 @@ package org.eclipse.sensinact.gateway.core;
 
 import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
 
-
 /**
- * A set of {@link ProcessableData} processable by one {@link ResourceImpl} and 
+ * A set of {@link ProcessableData} processable by one {@link ResourceImpl} and
  * targeting one identified {@link ServiceImpl}
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface ServiceProcessableData<R extends ResourceProcessableData> 
-extends ResourceProcessableContainer<R>
-{
-	/**
-     * Returns the {@link Service}'s string identifier 
+public interface ServiceProcessableData<R extends ResourceProcessableData> extends ResourceProcessableContainer<R> {
+    /**
+     * Returns the {@link Service}'s string identifier
      * targeted by this PayloadFragment
-     * 
-     * @return 
-     * 		the targeted {@link Service}'s identifier
+     *
+     * @return the targeted {@link Service}'s identifier
      */
     String getServiceId();
 }

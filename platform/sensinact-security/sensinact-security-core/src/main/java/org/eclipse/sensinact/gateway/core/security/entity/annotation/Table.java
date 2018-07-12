@@ -20,7 +20,6 @@ import java.lang.annotation.Target;
  */
 @Retention(value = RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.TYPE})
-public @interface Table
-{
-	public String value();
+public @interface Table {
+    public String value();
 }

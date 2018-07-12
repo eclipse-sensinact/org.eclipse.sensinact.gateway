@@ -16,153 +16,119 @@ import org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy;
 /**
  * {@link ResourceConfig} descriptor
  */
-public class ResourceDescriptor
-{
-	protected Class<? extends ResourceConfig> resourceConfigType;
-	
-	protected Class<? extends Resource> resourceType;
-	protected Class<? extends ResourceImpl> resourceImplementationType;
-	protected String profile;
-	protected String serviceName;
-	protected String resourceName;
-	protected Class<?> dataType;
-	protected Object value;
-	protected UpdatePolicy updatePolicy;
-	protected Modifiable modifiable;
-	protected Boolean hidden;
+public class ResourceDescriptor {
+    protected Class<? extends ResourceConfig> resourceConfigType;
 
-
+    protected Class<? extends Resource> resourceType;
+    protected Class<? extends ResourceImpl> resourceImplementationType;
+    protected String profile;
+    protected String serviceName;
+    protected String resourceName;
+    protected Class<?> dataType;
+    protected Object value;
+    protected UpdatePolicy updatePolicy;
+    protected Modifiable modifiable;
+    protected Boolean hidden;
 //	private ResourceDescriptor ()
 //	{}
-	
-	public ResourceDescriptor withProfile(String profile)
-	{
-		this.profile = profile;
-		return this;
-	}
 
-	public String profile()
-	{
-		return this.profile;
-	}
-	
-	public ResourceDescriptor withServiceName(String serviceName)
-	{
-		this.serviceName = serviceName;
-		return this;
-	}
+    public ResourceDescriptor withProfile(String profile) {
+        this.profile = profile;
+        return this;
+    }
 
-	public String serviceName()
-	{
-		return this.serviceName;
-	}
+    public String profile() {
+        return this.profile;
+    }
 
-	public ResourceDescriptor withResourceName(
-			String resourceName)
-	{
-		this.resourceName = resourceName;
-		return this;
-	}
+    public ResourceDescriptor withServiceName(String serviceName) {
+        this.serviceName = serviceName;
+        return this;
+    }
 
-	public String resourceName()
-	{
-		return this.resourceName;
-	}
-	
-	public ResourceDescriptor withResourceType(
-			Class<? extends Resource> resourceType)
-	{
-		this.resourceType = resourceType;
-		return this;
-	}
+    public String serviceName() {
+        return this.serviceName;
+    }
 
-	public Class<? extends Resource> resourceType()
-	{
-		return this.resourceType;
-	}
-	
-	public ResourceDescriptor withDataType(
-			Class<?> dataType)
-	{
-		this.dataType = dataType;
-		return this;
-	}
+    public ResourceDescriptor withResourceName(String resourceName) {
+        this.resourceName = resourceName;
+        return this;
+    }
 
-	public Class<?> dataType()
-	{
-		return this.dataType;
-	}
+    public String resourceName() {
+        return this.resourceName;
+    }
 
-	public ResourceDescriptor withDataValue(
-			Object value)
-	{
-		this.value = value;
-		return this;
-	}
+    public ResourceDescriptor withResourceType(Class<? extends Resource> resourceType) {
+        this.resourceType = resourceType;
+        return this;
+    }
 
-	public Object dataValue()
-	{
-		return this.value;
-	}
-	
-	public ResourceDescriptor withUpdatePolicy(
-			UpdatePolicy updatePolicy)
-	{
-		this.updatePolicy = updatePolicy;
-		return this;
-	}
+    public Class<? extends Resource> resourceType() {
+        return this.resourceType;
+    }
 
-	public UpdatePolicy updatePolicy()
-	{
-		return this.updatePolicy;
-	}
+    public ResourceDescriptor withDataType(Class<?> dataType) {
+        this.dataType = dataType;
+        return this;
+    }
 
-	public ResourceDescriptor withModifiable(
-			Modifiable modifiable)
-	{
-		this.modifiable = modifiable;
-		return this;
-	}
+    public Class<?> dataType() {
+        return this.dataType;
+    }
 
-	public Modifiable modifiable()
-	{
-		return this.modifiable;
-	}
+    public ResourceDescriptor withDataValue(Object value) {
+        this.value = value;
+        return this;
+    }
 
-	public ResourceDescriptor withHidden(
-			boolean hidden)
-	{
-		this.hidden = hidden;
-		return this;
-	}
-	
-	public Boolean hidden()
-	{
-		return this.hidden;
-	}
+    public Object dataValue() {
+        return this.value;
+    }
 
-	public ResourceDescriptor withResourceConfigType(
-			Class<? extends ResourceConfig> resourceConfigType)
-	{
-		this.resourceConfigType = resourceConfigType;
-		return this;
-	}
-	
-	public Class<? extends ResourceConfig> resourceConfigType()
-	{
-		return this.resourceConfigType;
-	}
+    public ResourceDescriptor withUpdatePolicy(UpdatePolicy updatePolicy) {
+        this.updatePolicy = updatePolicy;
+        return this;
+    }
 
-	public ResourceDescriptor withResourceImplementationType(
-			Class<? extends ResourceImpl> resourceImplementationType)
-	{
-		this.resourceImplementationType = resourceImplementationType;
-		return this;
-	}
-	
-	public Class<? extends ResourceImpl> resourceImplementationType() {
-		
-		return this.resourceImplementationType;
-	}
+    public UpdatePolicy updatePolicy() {
+        return this.updatePolicy;
+    }
 
+    public ResourceDescriptor withModifiable(Modifiable modifiable) {
+        this.modifiable = modifiable;
+        return this;
+    }
+
+    public Modifiable modifiable() {
+        return this.modifiable;
+    }
+
+    public ResourceDescriptor withHidden(boolean hidden) {
+        this.hidden = hidden;
+        return this;
+    }
+
+    public Boolean hidden() {
+        return this.hidden;
+    }
+
+    public ResourceDescriptor withResourceConfigType(Class<? extends ResourceConfig> resourceConfigType) {
+        this.resourceConfigType = resourceConfigType;
+        return this;
+    }
+
+    public Class<? extends ResourceConfig> resourceConfigType() {
+        return this.resourceConfigType;
+    }
+
+    public ResourceDescriptor withResourceImplementationType(Class<? extends ResourceImpl> resourceImplementationType) {
+        this.resourceImplementationType = resourceImplementationType;
+        return this;
+    }
+
+    public Class<? extends ResourceImpl> resourceImplementationType() {
+
+        return this.resourceImplementationType;
+    }
 }

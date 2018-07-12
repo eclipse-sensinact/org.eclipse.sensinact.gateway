@@ -16,15 +16,11 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
 
 /**
- * 
+ *
  */
-public class MokeSecuredAccessFactory implements SecuredAccessFactory
-{
-	@Override
-	public SecuredAccess newInstance(Mediator mediator) 
-			throws SecuredAccessException 
-	{
-		return new MySecuredAccess(mediator);
-	}
-
+public class MokeSecuredAccessFactory implements SecuredAccessFactory {
+    @Override
+    public SecuredAccess newInstance(Mediator mediator) throws SecuredAccessException {
+        return new MySecuredAccess(mediator);
+    }
 }

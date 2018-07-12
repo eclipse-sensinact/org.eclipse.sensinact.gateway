@@ -10,62 +10,48 @@
  */
 package org.eclipse.sensinact.gateway.core.method.legacy;
 
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.json.JSONObject;
 
 /**
  * Extended {@link AccessMethod} dedicated to an Actuation
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ActMethod 
-extends AbstractAccessMethod<JSONObject,ActResponse>
-{
-	/**
-	 * Constructor
-	 * 
+public class ActMethod extends AbstractAccessMethod<JSONObject, ActResponse> {
+    /**
+     * Constructor
+     *
      * @param mediator
      * @param uri
      * @param preProcessingExecutor
      */
-    public ActMethod(Mediator mediator, String uri, 
-			AccessMethodExecutor preProcessingExecutor)
-    {
-	    this(mediator, uri, preProcessingExecutor,null);
+    public ActMethod(Mediator mediator, String uri, AccessMethodExecutor preProcessingExecutor) {
+        this(mediator, uri, preProcessingExecutor, null);
     }
 
-	/**
-	 * Constructor
-	 * 
+    /**
+     * Constructor
+     *
      * @param mediator
      * @param uri
      * @param preProcessingExecutor
      * @param postProcessingExecutor
      */
-    public ActMethod(Mediator mediator, String uri, 
-			AccessMethodExecutor preProcessingExecutor, 
-			AccessMethodExecutor postProcessingExecutor)
-    {
-	    super(mediator, uri, AccessMethod.ACT, preProcessingExecutor,
-	    		postProcessingExecutor, null);
+    public ActMethod(Mediator mediator, String uri, AccessMethodExecutor preProcessingExecutor, AccessMethodExecutor postProcessingExecutor) {
+        super(mediator, uri, AccessMethod.ACT, preProcessingExecutor, postProcessingExecutor, null);
     }
 
     /**
      * @inheritDoc
-     *
      * @see org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod#
      * createAccessMethodResponseBuilder(java.lang.Object[])
      */
     @Override
-    protected ActResponseBuilder
-    createAccessMethodResponseBuilder(Object[] parameters)
-    {
-	    return new ActResponseBuilder(super.mediator, uri, parameters);
+    protected ActResponseBuilder createAccessMethodResponseBuilder(Object[] parameters) {
+        return new ActResponseBuilder(super.mediator, uri, parameters);
     }
 }

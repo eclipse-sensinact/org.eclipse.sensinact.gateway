@@ -8,15 +8,12 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.temperature.generator.parser;
 
 import java.util.Arrays;
 
 public class DeviceInfo {
-
     private static final String DEVICE_NAME = "temperature_station_";
-
     private String serviceProviderId;
     private String location;
     private double[] temperatures;
@@ -46,11 +43,6 @@ public class DeviceInfo {
     }
 
     public String toString() {
-        return "DeviceInfo{" +
-                "serviceProviderId='" + serviceProviderId + '\'' +
-                ", location='" + location + '\'' +
-                ", temperatures=" + Arrays.toString(temperatures) +
-                ", sleepTime=" + sleepTime +
-                '}';
+        return "DeviceInfo{" + "serviceProviderId='" + serviceProviderId + '\'' + ", location='" + location + '\'' + ", temperatures=" + Arrays.toString(temperatures) + ", sleepTime=" + sleepTime + '}';
     }
 }

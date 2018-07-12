@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.sthbnd.http.free.osgi;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -28,106 +27,69 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskProcessingContextF
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
-
 /**
  * Extended {@link HttpActivator}
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@HttpTasks (tasks = {
-	@SimpleHttpTask(
-		commands = {CommandType.ACT}, 
-		configuration = @HttpTaskConfiguration(
-			scheme = "https",
-			host = "smsapi.free-mobile.fr",
-			path = "/sendmsg",
-			query = {
-				@KeyValuePair(key = "msg", value = "@context[task.msg]"),
-				@KeyValuePair(key = "user", value = "@context[task.user]"),
-				@KeyValuePair(key = "pass", value = "@context[task.pass]"),
-				})
-			)
-	}
-)
-public class Activator extends HttpActivator
-{	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see HttpActivator#
-	 * getProcessingContextFactory()
-	 */
-	@Override
-	public HttpTaskProcessingContextFactory getTaskProcessingContextFactory()
-	{
-		return new DefaultHttpTaskProcessingContextFactory(mediator)
-		{
-			@Override
-			public HttpTaskProcessingContext newInstance(HttpTaskConfigurator httpTaskConfigurator,
-					String endpointId, HttpTask<?,?> task) 
-			{
-				return new FreeSmsTaskProcessingContext(super.mediator,
-						httpTaskConfigurator, endpointId, task);
-			}
-		};				
-	}
-	
-	/**
-	 * Extended {@link DefaultHttpTaskProcessingContext} dedicated
-	 * to Free SMS tasks processing context 
-	 * 
-	 * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
-	 */
-	private class FreeSmsTaskProcessingContext extends DefaultHttpTaskProcessingContext
-	{
-		/**
-		 * @param mediator
-		 * @param task
-		 */
-		public FreeSmsTaskProcessingContext(Mediator mediator,
-		      HttpTaskConfigurator httpTaskConfigurator,
-		      final String endpointId, final HttpTask<?, ?> task)
-		{
-			super(mediator, httpTaskConfigurator, endpointId, task);
-			
-			final FreeSmsProtocolStackEndpoint.FreeSmsResourceConfig config = 
-		     ((FreeSmsProtocolStackEndpoint)Activator.super.endpoint
-		    	).getFreeSmsResourceConfig(UriUtils.getRoot(task.getPath()
-		    			).substring(1));
-				
-			super.properties.put("task.msg", new Executable<Void,String>()
-			{
-				@Override
-				public String execute(Void parameter) throws Exception
-				{
-					return (String) task.getParameters()[0];
-				}			
-			});
-			super.properties.put("task.user", new Executable<Void,String>()
-			{
-				@Override
-				public String execute(Void parameter) throws Exception
-				{					
-					if(config == null)
-					{
-						return null;
-					}
-					return config.getUser();
-				}			
-			});
-			super.properties.put("task.pass", new Executable<Void,String>()
-			{
-				@Override
-				public String execute(Void parameter) throws Exception
-				{
-					if(config == null)
-					{
-						return null;
-					}
-					return config.getPass();
-				}
-			});
-		}
-		
-	}
+@HttpTasks(tasks = {@SimpleHttpTask(commands = {CommandType.ACT}, configuration = @HttpTaskConfiguration(scheme = "https", host = "smsapi.free-mobile.fr", path = "/sendmsg", query = {@KeyValuePair(key = "msg", value = "@context[task.msg]"), @KeyValuePair(key = "user", value = "@context[task.user]"), @KeyValuePair(key = "pass", value = "@context[task.pass]"),}))})
+public class Activator extends HttpActivator {
+    /**
+     * @inheritDoc
+     * @see HttpActivator#
+     * getProcessingContextFactory()
+     */
+    @Override
+    public HttpTaskProcessingContextFactory getTaskProcessingContextFactory() {
+        return new DefaultHttpTaskProcessingContextFactory(mediator) {
+            @Override
+            public HttpTaskProcessingContext newInstance(HttpTaskConfigurator httpTaskConfigurator, String endpointId, HttpTask<?, ?> task) {
+                return new FreeSmsTaskProcessingContext(super.mediator, httpTaskConfigurator, endpointId, task);
+            }
+        };
+    }
+
+    /**
+     * Extended {@link DefaultHttpTaskProcessingContext} dedicated
+     * to Free SMS tasks processing context
+     *
+     * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+     */
+    private class FreeSmsTaskProcessingContext extends DefaultHttpTaskProcessingContext {
+        /**
+         * @param mediator
+         * @param task
+         */
+        public FreeSmsTaskProcessingContext(Mediator mediator, HttpTaskConfigurator httpTaskConfigurator, final String endpointId, final HttpTask<?, ?> task) {
+            super(mediator, httpTaskConfigurator, endpointId, task);
+
+            final FreeSmsProtocolStackEndpoint.FreeSmsResourceConfig config = ((FreeSmsProtocolStackEndpoint) Activator.super.endpoint).getFreeSmsResourceConfig(UriUtils.getRoot(task.getPath()).substring(1));
+
+            super.properties.put("task.msg", new Executable<Void, String>() {
+                @Override
+                public String execute(Void parameter) throws Exception {
+                    return (String) task.getParameters()[0];
+                }
+            });
+            super.properties.put("task.user", new Executable<Void, String>() {
+                @Override
+                public String execute(Void parameter) throws Exception {
+                    if (config == null) {
+                        return null;
+                    }
+                    return config.getUser();
+                }
+            });
+            super.properties.put("task.pass", new Executable<Void, String>() {
+                @Override
+                public String execute(Void parameter) throws Exception {
+                    if (config == null) {
+                        return null;
+                    }
+                    return config.getPass();
+                }
+            });
+        }
+
+    }
 }

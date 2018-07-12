@@ -10,8 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.test;
 
-
-public interface ProcessorService
-{
-	void process(String packet);
+public interface ProcessorService {
+    void process(String packet);
 }

@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.common.interpolator.exception;
 
 public class InvalidValueException extends InterpolationException {
-
     public InvalidValueException() {
         super();
     }

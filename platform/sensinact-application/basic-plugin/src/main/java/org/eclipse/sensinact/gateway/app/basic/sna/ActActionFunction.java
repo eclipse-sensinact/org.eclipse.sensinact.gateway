@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.basic.sna;
 
 import org.eclipse.sensinact.gateway.app.api.plugin.PluginHook;
@@ -25,27 +24,24 @@ import java.io.InputStreamReader;
 /**
  * This class is fired at the end of the application
  *
- * @see ActionFunction
- *
  * @author Remi Druilhe
+ * @see ActionFunction
  */
 public class ActActionFunction extends ActionFunction {
-
     private static final String JSON_SCHEMA = "act.json";
 
     /**
      * Gets the JSON schema of the function from the plugin
+     *
      * @param context the context of the bundle
      * @return the JSON schema of the function
      */
     public static JSONObject getJSONSchemaFunction(BundleContext context) {
         try {
-            return new JSONObject(new JSONTokener(
-                    new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
+            return new JSONObject(new JSONTokener(new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
@@ -56,19 +52,15 @@ public class ActActionFunction extends ActionFunction {
         if (variables.size() != 0) {
             ResourceData resourceVariable = (ResourceData) variables.remove(0);
             Resource resource = resourceVariable.getResource();
-
-            if(resource != null) {
+            if (resource != null) {
                 if (resource instanceof ActionResource) {
                     Object[] arguments = new Object[variables.size()];
-
                     for (int i = 0; i < variables.size(); i++) {
                         arguments[i] = variables.get(i).getValue();
                     }
-
                     ((ActionResource) resource).act(arguments);
                 } else {
-                    throw new RuntimeException("Resource " + resourceVariable.getSourceUri()
-                            + " is not an ActionResource");
+                    throw new RuntimeException("Resource " + resourceVariable.getSourceUri() + " is not an ActionResource");
                 }
             } else {
                 throw new RuntimeException("Resource " + resourceVariable.getSourceUri() + " does not exist");

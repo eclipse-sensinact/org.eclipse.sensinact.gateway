@@ -17,10 +17,10 @@ import java.util.List;
 
 /**
  * POJO that is base to express the mapping between one MQTT topic and a internal device.
+ *
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public interface MqttProvider {
-
     String getName();
 
     Boolean isDiscoveryOnFirstMessage();

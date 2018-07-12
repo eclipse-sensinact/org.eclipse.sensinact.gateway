@@ -14,29 +14,22 @@ import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 
 /**
  * A factory of {@link HttpTaskProcessingContext} for {@link HttpTask}s
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface HttpTaskProcessingContextFactory
-{
-	/**
-	 * Creates and returns a {@link HttpTaskProcessingContext} for the 
-	 * {@link HttpTask} passed as parameter
-	 * 
-	 * @param httpTaskConfigurator 
-	 * 
-	 * @param endpointId the string identifier of the {@link 
-	 * ProtocolStackEndpoint} that instantiated the {@link HttpTask}
-	 * for which to create a  new {@link HttpTaskProcesingContext}
-	 * 
-	 * @param task the {@link HttpTask} for which to create
-	 * a new {@link HttpTaskProcessingContext}
-	 * 
-	 * @return a new {@link HttpTaskProcessingContext} for the 
-	 * specified {@link HttpTask}
-	 */
-	HttpTaskProcessingContext newInstance( 
-		HttpTaskConfigurator httpTaskConfigurator,
-		String endpointId, 
-		HttpTask<?,?> task);
+public interface HttpTaskProcessingContextFactory {
+    /**
+     * Creates and returns a {@link HttpTaskProcessingContext} for the
+     * {@link HttpTask} passed as parameter
+     *
+     * @param httpTaskConfigurator
+     * @param endpointId           the string identifier of the {@link
+     *                             ProtocolStackEndpoint} that instantiated the {@link HttpTask}
+     *                             for which to create a  new {@link HttpTaskProcesingContext}
+     * @param task                 the {@link HttpTask} for which to create
+     *                             a new {@link HttpTaskProcessingContext}
+     * @return a new {@link HttpTaskProcessingContext} for the
+     * specified {@link HttpTask}
+     */
+    HttpTaskProcessingContext newInstance(HttpTaskConfigurator httpTaskConfigurator, String endpointId, HttpTask<?, ?> task);
 }

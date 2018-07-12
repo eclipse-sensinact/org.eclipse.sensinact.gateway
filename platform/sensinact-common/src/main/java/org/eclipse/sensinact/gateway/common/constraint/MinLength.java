@@ -8,57 +8,43 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.common.constraint;
 
 /**
- * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class MinLength extends ConstraintOnCollectionSize
-{
-	public static final String OPERATOR = "+";
+public class MinLength extends ConstraintOnCollectionSize {
+    public static final String OPERATOR = "+";
 
-	/**
-	 * Constructor
-	 * 
-	 * @param operator
-	 *            String operator of this constraint
-	 * @param length
-	 *            integer value on which will be based the compliance evaluation
-	 *            of the size of a collection
-	 */
-	public MinLength(ClassLoader classloader, 
-			int length, boolean complement)
-	{
-		super(classloader, OPERATOR, length, complement);
-	}
+    /**
+     * Constructor
+     *
+     * @param operator String operator of this constraint
+     * @param length   integer value on which will be based the compliance evaluation
+     *                 of the size of a collection
+     */
+    public MinLength(ClassLoader classloader, int length, boolean complement) {
+        super(classloader, OPERATOR, length, complement);
+    }
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see ConstraintOnCollectionSize#
-	 * doComplies(int)
-	 */
-	@Override
-	protected boolean doComplies(int length)
-	{
-		return this.length <= length;
-	}
-	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see Constraint#getComplement()
-	 */
+    /**
+     * @inheritDoc
+     * @see ConstraintOnCollectionSize#
+     * doComplies(int)
+     */
     @Override
-    public Constraint getComplement()
-    {
-    	MinLength complement = null;
-		complement = new MinLength(
-				super.classloader,
-				super.length,
-				!this.complement);			
-		return complement;
+    protected boolean doComplies(int length) {
+        return this.length <= length;
+    }
+
+    /**
+     * @inheritDoc
+     * @see Constraint#getComplement()
+     */
+    @Override
+    public Constraint getComplement() {
+        MinLength complement = null;
+        complement = new MinLength(super.classloader, super.length, !this.complement);
+        return complement;
     }
 }

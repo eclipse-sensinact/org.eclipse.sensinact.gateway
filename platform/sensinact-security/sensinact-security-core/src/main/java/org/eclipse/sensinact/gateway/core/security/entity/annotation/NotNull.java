@@ -20,6 +20,6 @@ import java.lang.annotation.Target;
  * cannot be null when processing a CRUD operation
  */
 @Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = { ElementType.FIELD})
-public @interface NotNull
-{}
+@Target(value = {ElementType.FIELD})
+public @interface NotNull {
+}

@@ -15,15 +15,14 @@ import java.util.Dictionary;
 /**
  * Listener of a {@link MediatorManagedConfiguration} properties
  * set update
- *   
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface ManagedConfigurationListener
-{
-	/**
-	 * Notification of an update of the properties set 
-	 * 
-	 * @param properties the updated set of properties
-	 */
-	void updated(Dictionary<String, ?> properties);
+public interface ManagedConfigurationListener {
+    /**
+     * Notification of an update of the properties set
+     *
+     * @param properties the updated set of properties
+     */
+    void updated(Dictionary<String, ?> properties);
 }

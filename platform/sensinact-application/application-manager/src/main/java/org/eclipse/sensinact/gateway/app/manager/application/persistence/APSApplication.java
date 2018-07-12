@@ -13,32 +13,36 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class APSApplication implements ApplicationPersistenceService,Runnable {
-    private final Logger LOG=LoggerFactory.getLogger(APSApplication.class);
+public class APSApplication implements ApplicationPersistenceService, Runnable {
+    private final Logger LOG = LoggerFactory.getLogger(APSApplication.class);
     private final File directoryMonitor;
-    private final List<String> files=new ArrayList<>();
-    private final Map<String,Application> filesPath=new HashMap<>();
-    private final Set<ApplicationAvailabilityListener> listener=new HashSet<ApplicationAvailabilityListener>();
+    private final List<String> files = new ArrayList<>();
+    private final Map<String, Application> filesPath = new HashMap<>();
+    private final Set<ApplicationAvailabilityListener> listener = new HashSet<ApplicationAvailabilityListener>();
     private final Long readingDelay;
     private final String fileExtention;
-    private Boolean active=Boolean.TRUE;
-    private static final Object lock=new Object();
+    private Boolean active = Boolean.TRUE;
+    private static final Object lock = new Object();
 
-    public APSApplication(File directoryMonitor, Long readingDelay,String fileExtention){
-        this.directoryMonitor=directoryMonitor;
-        this.readingDelay=readingDelay;
-        this.fileExtention=fileExtention;
+    public APSApplication(File directoryMonitor, Long readingDelay, String fileExtention) {
+        this.directoryMonitor = directoryMonitor;
+        this.readingDelay = readingDelay;
+        this.fileExtention = fileExtention;
     }
 
     @Override
     public void persist(Application application) throws ApplicationPersistenceException {
-
-        final String filename=directoryMonitor+File.separator+application.getName()+"."+fileExtention;
-
+        final String filename = directoryMonitor + File.separator + application.getName() + "." + fileExtention;
         synchronized (lock) {
-
             File file = new File(filename);
             try {
                 file.createNewFile();
@@ -50,24 +54,19 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
             } catch (IOException e) {
                 LOG.error("Failed to create application file {} into the disk.", filename);
             }
-
         }
     }
 
     @Override
     public void delete(String applicationName) throws ApplicationPersistenceException {
-
-        final String filename=directoryMonitor+File.separator+applicationName+"."+fileExtention;
-
+        final String filename = directoryMonitor + File.separator + applicationName + "." + fileExtention;
         synchronized (lock) {
-
             File file = new File(filename);
             try {
                 file.delete();
             } catch (Exception e) {
                 LOG.error("Failed to remove application file {} from the disk.", filename);
             }
-
         }
     }
 
@@ -83,10 +82,9 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
 
     @Override
     public void registerServiceAvailabilityListener(ApplicationAvailabilityListener listenerClient) {
-        synchronized (this.listener){
+        synchronized (this.listener) {
             this.listener.add(listenerClient);
         }
-
     }
 
     @Override
@@ -96,18 +94,13 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
         }
     }
 
-    public void run(){
+    public void run() {
         notifyServiceAvailable();
-        while(active){
-
+        while (active) {
             try {
-
                 Thread.sleep(readingDelay);
-
                 synchronized (lock) {
-
                     List<String> filesToBeProcessed = new ArrayList<>();
-
                     for (File applicationFile : directoryMonitor.listFiles(new FilenameFilter() {
                         @Override
                         public boolean accept(File dir, String name) {
@@ -116,15 +109,12 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
                     })) {
                         filesToBeProcessed.add(applicationFile.getAbsolutePath());
                     }
-
                     List<String> filesRemoved = new ArrayList<>(files);
                     filesRemoved.removeAll(filesToBeProcessed);
-
                     //Remove old application files
                     for (String fileRemoved : filesRemoved) {
                         notifyRemoval(fileRemoved);
                     }
-
                     //Process (new files or already installed) files
                     for (String toprocess : filesToBeProcessed) {
                         try {
@@ -144,131 +134,113 @@ public class APSApplication implements ApplicationPersistenceService,Runnable {
                                     //Dont do anything, file already taken into account
                                 }
                             }
-
                         } catch (Exception e) {
                             LOG.warn("Failed to process application description file {}", toprocess, e);
                         }
-
                     }
                 }
                 Thread.sleep(readingDelay);
-
             } catch (Exception e) {
-                LOG.error("Application persistency system failed",e);
+                LOG.error("Application persistency system failed", e);
             }
-
         }
         notifyServiceUnavailable();
         LOG.error("Application persistency system is exiting");
-
     }
 
-    private void notifyInclusion(String filepath){
+    private void notifyInclusion(String filepath) {
         try {
-            Application application=FileToApplicationParser.parse(filepath);
-
-            LOG.info("Notifying application '{}' deployment ",filepath);
-
-            for(ApplicationAvailabilityListener list:new HashSet<ApplicationAvailabilityListener>(listener)){
+            Application application = FileToApplicationParser.parse(filepath);
+            LOG.info("Notifying application '{}' deployment ", filepath);
+            for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listener)) {
                 try {
                     synchronized (list) {
                         list.applicationFound(application.getName(), application.getContent().toString());
                     }
-                }catch(Exception e){
-                    LOG.error("Failed to add application {} into the platform, is ApplicationManager running?",application.getName(),e);
+                } catch (Exception e) {
+                    LOG.error("Failed to add application {} into the platform, is ApplicationManager running?", application.getName(), e);
                 }
-
             }
-
             manageFile(filepath);
-
         } catch (ApplicationParseException e) {
-            LOG.error("Failed to read application file",e);
+            LOG.error("Failed to read application file", e);
         }
-
-
     }
 
-    private void unmanageFile(String filepath){
+    private void unmanageFile(String filepath) {
         files.remove(filepath);
         filesPath.remove(filepath);
     }
 
-    private void manageFile(String filepath){
+    private void manageFile(String filepath) {
         try {
-            Application application= FileToApplicationParser.parse(filepath);
+            Application application = FileToApplicationParser.parse(filepath);
             files.add(filepath);
-            filesPath.put(filepath,application);
+            filesPath.put(filepath, application);
         } catch (ApplicationParseException e) {
             files.remove(filepath);
             filesPath.remove(filepath);
-            LOG.error("Error processing file.",e);
+            LOG.error("Error processing file.", e);
         }
     }
 
-    private void notifyModification(String filepath){
-        LOG.info("Notifying application '{}' changed",filepath);
-
+    private void notifyModification(String filepath) {
+        LOG.info("Notifying application '{}' changed", filepath);
         try {
-            Application application=FileToApplicationParser.parse(filepath);
-            if(application!=null){
-                for(ApplicationAvailabilityListener list:new HashSet<ApplicationAvailabilityListener>(listener)){
+            Application application = FileToApplicationParser.parse(filepath);
+            if (application != null) {
+                for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listener)) {
                     try {
-
-                        list.applicationChanged(application.getName(),application.getContent().toString());
-
-                    }catch(Exception e){
-                        LOG.error("Failed to remove application from the platform",e);
+                        list.applicationChanged(application.getName(), application.getContent().toString());
+                    } catch (Exception e) {
+                        LOG.error("Failed to remove application from the platform", e);
                     }
-
                 }
                 manageFile(filepath);
-            }else {
-                LOG.warn("The application file '{}' was already notified by the system",filepath);
+            } else {
+                LOG.warn("The application file '{}' was already notified by the system", filepath);
             }
         } catch (ApplicationParseException e) {
             e.printStackTrace();
         }
     }
 
-    private void notifyRemoval(String filepath){
-        LOG.info("Notifying application '{}' removal",filepath);
-        Application application=filesPath.get(filepath);
+    private void notifyRemoval(String filepath) {
+        LOG.info("Notifying application '{}' removal", filepath);
+        Application application = filesPath.get(filepath);
         unmanageFile(filepath);
-        if(application!=null){
-            for(ApplicationAvailabilityListener list:new HashSet<ApplicationAvailabilityListener>(listener)){
+        if (application != null) {
+            for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listener)) {
                 try {
-                        list.applicationRemoved(application.getName());
-                }catch(Exception e){
-                    LOG.error("Failed to remove application from the platform",e);
+                    list.applicationRemoved(application.getName());
+                } catch (Exception e) {
+                    LOG.error("Failed to remove application from the platform", e);
                 }
             }
-        }else {
-            LOG.warn("The application file '{}' was already notified by the system",filepath);
+        } else {
+            LOG.warn("The application file '{}' was already notified by the system", filepath);
         }
     }
 
-    private void notifyServiceUnavailable(){
+    private void notifyServiceUnavailable() {
         LOG.debug("Persistence service is going offline");
-        for(ApplicationAvailabilityListener list:new HashSet<ApplicationAvailabilityListener>(listener)){
+        for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listener)) {
             try {
                 list.serviceOffline();
-            }catch(Exception e){
-                LOG.error("Persistence service is going offline",e);
+            } catch (Exception e) {
+                LOG.error("Persistence service is going offline", e);
             }
-
         }
     }
 
-    private void notifyServiceAvailable(){
+    private void notifyServiceAvailable() {
         LOG.debug("Persistence service is going online");
-        for(ApplicationAvailabilityListener list:new HashSet<ApplicationAvailabilityListener>(listener)){
+        for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listener)) {
             try {
                 list.serviceOnline();
-            }catch(Exception e){
-                LOG.error("Persistence service is going online",e);
+            } catch (Exception e) {
+                LOG.error("Persistence service is going online", e);
             }
-
         }
     }
 }

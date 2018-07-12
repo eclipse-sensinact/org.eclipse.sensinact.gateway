@@ -10,17 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.commands.gogo.internal;
 
+import org.apache.felix.service.command.Descriptor;
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 
-import org.apache.felix.service.command.Descriptor;
-
-import java.io.*;
+import java.io.Console;
 import java.security.InvalidKeyException;
 
 public class UserCommands {
-
     private CommandServiceMediator mediator;
 
     public UserCommands(CommandServiceMediator mediator) {
@@ -45,14 +43,13 @@ public class UserCommands {
 
     /**
      * Enable to switch to a different sNa user
+     *
      * @param userID the user ID to switch to
      */
     @Descriptor("switch to another user")
     public void su(@Descriptor("the user login") String userID) {
         Console console = System.console();
-
         char[] passwordChar = console.readPassword("Enter the password: ");
-
         try {
             mediator.switchUser(userID, new String(passwordChar));
         } catch (InvalidCredentialException e) {

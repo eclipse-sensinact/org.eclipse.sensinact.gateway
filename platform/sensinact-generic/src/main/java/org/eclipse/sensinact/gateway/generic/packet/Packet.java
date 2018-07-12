@@ -12,18 +12,16 @@ package org.eclipse.sensinact.gateway.generic.packet;
 
 /**
  * A communication object
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface Packet
-{
-	/**
-	 * Returns the bytes array of this communication 
-	 * packet
-	 *  
-	 * @return
-	 * 		the bytes array of this communication 
-	 * 		packet
-	 */
-	byte[] getBytes();
+public interface Packet {
+    /**
+     * Returns the bytes array of this communication
+     * packet
+     *
+     * @return the bytes array of this communication
+     * packet
+     */
+    byte[] getBytes();
 }

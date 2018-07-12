@@ -8,9 +8,9 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.basic.test;
 
+import junit.framework.TestCase;
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.basic.installer.BasicInstaller;
 import org.eclipse.sensinact.gateway.app.basic.string.ConcatenateFunction;
@@ -18,7 +18,6 @@ import org.eclipse.sensinact.gateway.app.basic.string.SubstringFunction;
 import org.eclipse.sensinact.gateway.app.manager.json.AppFunction;
 import org.eclipse.sensinact.gateway.app.manager.json.AppJsonConstant;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
-import junit.framework.TestCase;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -31,7 +30,6 @@ import java.nio.charset.Charset;
 
 @RunWith(PowerMockRunner.class)
 public class TestStringInstaller extends TestCase {
-
     @Mock
     private AppServiceMediator mediator;
 
@@ -42,48 +40,32 @@ public class TestStringInstaller extends TestCase {
 
     public void testConcatenateCreation() {
         String content = null;
-
         try {
-            content = TestUtils.readFile(this.getClass().getResourceAsStream("/simple_concatenate.json"),
-                    Charset.defaultCharset());
+            content = TestUtils.readFile(this.getClass().getResourceAsStream("/simple_concatenate.json"), Charset.defaultCharset());
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         if (content != null) {
-            JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1)
-                    .getJSONObject(AppJsonConstant.VALUE).getJSONArray("application").getJSONObject(0);
-
+            JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE).getJSONArray("application").getJSONObject(0);
             BasicInstaller installer = new BasicInstaller(mediator);
-
             AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
-
             AbstractFunction function = installer.getFunction(appFunction);
-
             assertTrue(function instanceof ConcatenateFunction);
         }
     }
 
     public void testSubtractionCreation() {
         String content = null;
-
         try {
-            content = TestUtils.readFile(this.getClass().getResourceAsStream("/simple_substring.json"),
-                    Charset.defaultCharset());
+            content = TestUtils.readFile(this.getClass().getResourceAsStream("/simple_substring.json"), Charset.defaultCharset());
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         if (content != null) {
-            JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1)
-                    .getJSONObject(AppJsonConstant.VALUE).getJSONArray("application").getJSONObject(0);
-
+            JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE).getJSONArray("application").getJSONObject(0);
             BasicInstaller installer = new BasicInstaller(mediator);
-
             AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
-
             AbstractFunction function = installer.getFunction(appFunction);
-
             assertTrue(function instanceof SubstringFunction);
         }
     }

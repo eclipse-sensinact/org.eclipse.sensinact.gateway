@@ -15,87 +15,74 @@ import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpChildTaskConfigu
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTaskConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 
-class RecurrentChainedTaskConfigurator extends 
-ChainedHttpTaskConfigurator implements RecurrentHttpTaskConfigurator
-{ 	
-	private long period = 1000*60;
-	private long delay = 1000;
-	private long timeout = -1;
-	private Class<? extends HttpTask> taskType;
-	
-	public RecurrentChainedTaskConfigurator(
-		SimpleHttpProtocolStackEndpoint endpoint,
-		CommandType command, HttpTaskUrlConfigurator urlBuilder, 
-		Class<? extends HttpTask> taskType, long period, 
-		long delay, long timeout,
-		HttpTaskConfiguration parent,
-		HttpChildTaskConfiguration[] annotation)
-	{	
-		super(endpoint, null, command, urlBuilder, parent, annotation);
-		this.setTaskType(taskType);
-		this.setPeriod(period);
-		this.setDelay(delay);
-		this.setTimeout(timeout);
-	}
+class RecurrentChainedTaskConfigurator extends ChainedHttpTaskConfigurator implements RecurrentHttpTaskConfigurator {
+    private long period = 1000 * 60;
+    private long delay = 1000;
+    private long timeout = -1;
+    private Class<? extends HttpTask> taskType;
 
-	/**
-	 * @return the period
-	 */
-	public long getPeriod() {
-		return period;
-	}
+    public RecurrentChainedTaskConfigurator(SimpleHttpProtocolStackEndpoint endpoint, CommandType command, HttpTaskUrlConfigurator urlBuilder, Class<? extends HttpTask> taskType, long period, long delay, long timeout, HttpTaskConfiguration parent, HttpChildTaskConfiguration[] annotation) {
+        super(endpoint, null, command, urlBuilder, parent, annotation);
+        this.setTaskType(taskType);
+        this.setPeriod(period);
+        this.setDelay(delay);
+        this.setTimeout(timeout);
+    }
 
-	/**
-	 * @param period the period to set
-	 */
-	public void setPeriod(long period) {
-		this.period = period;
-	}
+    /**
+     * @return the period
+     */
+    public long getPeriod() {
+        return period;
+    }
 
-	/**
-	 * @return the delay
-	 */
-	public long getDelay() {
-		return delay;
-	}
+    /**
+     * @param period the period to set
+     */
+    public void setPeriod(long period) {
+        this.period = period;
+    }
 
-	/**
-	 * @param delay the delay to set
-	 */
-	public void setDelay(long delay) {
-		this.delay = delay;
-	}
+    /**
+     * @return the delay
+     */
+    public long getDelay() {
+        return delay;
+    }
 
-	/**
-	 * @return the timeout
-	 */
-	public long getTimeout() {
-		return timeout;
-	}
+    /**
+     * @param delay the delay to set
+     */
+    public void setDelay(long delay) {
+        this.delay = delay;
+    }
 
-	/**
-	 * @param timeout the timeout to set
-	 */
-	public void setTimeout(long timeout) {
-		this.timeout = timeout;
-	}
+    /**
+     * @return the timeout
+     */
+    public long getTimeout() {
+        return timeout;
+    }
 
-	/**
-	 * @return 
-	 *     the taskType
-	 */
-	public Class<? extends HttpTask> getTaskType()
-	{
-		return taskType;
-	}
+    /**
+     * @param timeout the timeout to set
+     */
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
+    }
 
-	/**
-	 * @param taskType 
-	 *     the taskType to set
-	 */
-	public void setTaskType(Class<? extends HttpTask> taskType)
-	{
-		this.taskType = taskType;
-	}
-	
+    /**
+     * @return the taskType
+     */
+    public Class<? extends HttpTask> getTaskType() {
+        return taskType;
+    }
+
+    /**
+     * @param taskType the taskType to set
+     */
+    public void setTaskType(Class<? extends HttpTask> taskType) {
+        this.taskType = taskType;
+    }
+
 }

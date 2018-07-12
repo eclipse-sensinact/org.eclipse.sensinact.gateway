@@ -10,12 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.common.primitive;
 
-
 /**
  * A ProcessableContainer contains a set of {@link ProcessableData} on which
  * it is possible to iterate
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface ProcessableContainer<S extends ProcessableData> 
-extends Iterable<S> {}
+public interface ProcessableContainer<S extends ProcessableData> extends Iterable<S> {
+}

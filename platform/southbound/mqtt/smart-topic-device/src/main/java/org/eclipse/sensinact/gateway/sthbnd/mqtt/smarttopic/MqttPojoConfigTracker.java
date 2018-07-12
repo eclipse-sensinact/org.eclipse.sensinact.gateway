@@ -23,7 +23,17 @@ import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Resource;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Service;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.ProcessorExecutor;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.ProcessorUtil;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.*;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatArray;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatBase64;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatDivide;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatJSON;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatMinus;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatMultiply;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatPlus;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatToFloat;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatToInteger;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatToString;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatURLEncode;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.iface.ProcessorFormatIface;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -35,14 +45,12 @@ import java.util.ArrayList;
 
 /**
  * Tracker responsible for detecting when new OSGi Service instance that configures an MQTT topic monitoring
+ *
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
-
     private static final Logger LOG = LoggerFactory.getLogger(MqttActivator.class);
-
     private final BundleContext bundleContext;
-
     private MqttProtocolStackEndpoint endpoint;
 
     public MqttPojoConfigTracker(MqttProtocolStackEndpoint endpoint, BundleContext bundleContext) {
@@ -50,7 +58,7 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
         this.endpoint = endpoint;
     }
 
-    public static final ProcessorExecutor processorExecutor=new ProcessorExecutor(new ArrayList<ProcessorFormatIface>(){{
+    public static final ProcessorExecutor processorExecutor = new ProcessorExecutor(new ArrayList<ProcessorFormatIface>() {{
         add(new ProcessorFormatArray());
         add(new ProcessorFormatBase64());
         add(new ProcessorFormatJSON());
@@ -67,71 +75,54 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
     @Override
     public Object addingService(ServiceReference serviceReference) {
         LOG.info("Loading POJO device configuration");
-
         final Provider provider = (Provider) bundleContext.getService(serviceReference);
-
         LOG.debug("Loading POJO device configuration {}", provider.getName());
-
         try {
             final MqttBroker broker = provider.getBroker();
             broker.connect();
-            for(final Service service : provider.getServices()) {
-                for(final Resource resource : service.getResources()) {
-
+            for (final Service service : provider.getServices()) {
+                for (final Resource resource : service.getResources()) {
                     MqttTopicMessage listener = new MqttTopicMessage() {
                         @Override
                         public void messageReceived(String s, String s1) {
-
                             try {
-                                String value=processorExecutor.execute(s1, ProcessorUtil.transformProcessorListInSelector(resource.getProcessor()==null?"":resource.getProcessor()));
+                                String value = processorExecutor.execute(s1, ProcessorUtil.transformProcessorListInSelector(resource.getProcessor() == null ? "" : resource.getProcessor()));
                                 MqttPacket packet = new MqttPacket(provider.getName(), service.getName(), resource.getName(), value);
                                 endpoint.process(packet);
-                            } catch (Exception e){
-                                LOG.error("Failed to process MQTT package",e);
+                            } catch (Exception e) {
+                                LOG.error("Failed to process MQTT package", e);
                             }
-
                         }
                     };
-
                     LOG.info("Subscribing to topic: {}", resource.getTopic());
-
-                    if(resource.getTopic() != null) {
+                    if (resource.getTopic() != null) {
                         MqttTopic topic = new MqttTopic(resource.getTopic(), listener);
-
                         broker.subscribeToTopic(topic);
                     } else {
                         LOG.warn("Failed to register device {}, topic assigned cannot be null", provider.getName());
                     }
-
-                    if(!provider.isDiscoveryOnFirstMessage()) {
+                    if (!provider.isDiscoveryOnFirstMessage()) {
                         LOG.info("Initiating {}/{}/{} with empty value", provider.getName(), service.getName(), resource.getName());
-                        MqttPacket packet = new MqttPacket(provider.getName(), service.getName(),
-                                resource.getName(), resource.getValue()==null?"":resource.getValue());
+                        MqttPacket packet = new MqttPacket(provider.getName(), service.getName(), resource.getName(), resource.getValue() == null ? "" : resource.getValue());
                         packet.setHelloMessage(true);
                         endpoint.process(packet);
                         //runtime.updateValue(provider.getName(), service.getName(), resource.getName(), "");
                     } else {
-                        LOG.warn("Device {}/{}/{} is hidden until the first message is received",
-                                provider.getName(), service.getName(), resource.getName());
+                        LOG.warn("Device {}/{}/{} is hidden until the first message is received", provider.getName(), service.getName(), resource.getName());
                     }
-
-                    LOG.info("Subscribed {}/{}/{} to the topic {}", provider.getName(), service.getName(),
-                            resource.getName(), resource.getTopic());
+                    LOG.info("Subscribed {}/{}/{} to the topic {}", provider.getName(), service.getName(), resource.getName(), resource.getTopic());
                 }
             }
-
             /*
             if(!provider.isDiscoveryOnFirstMessage()){
                 runtime.updateValue(provider.getName(), null,null,null);
             }else {
                 LOG.info("Device {} will appear as soon as one of the topic associated received the first message",provider.getName());
             }*/
-
             LOG.info("sensiNact Device created with the id {}", provider.getName());
         } catch (Exception e) {
             LOG.warn("Failed to create device {}, ignoring device", provider.getName(), e);
         }
-
         return bundleContext.getService(serviceReference);
     }
 
@@ -143,13 +134,10 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
     @Override
     public void removedService(ServiceReference serviceReference, Object o) {
         LOG.info("Detaching devices MQTT Bus service");
-
         try {
             Provider provider = (Provider) o;
-
             MqttPacket packet = new MqttPacket(provider.getName());
             packet.setGoodbyeMessage(true);
-
             endpoint.process(packet);
             LOG.info("sensiNact device {} removed", provider.getName());
             LOG.info("Detaching devices {} MQTT Bus service", provider.getName());

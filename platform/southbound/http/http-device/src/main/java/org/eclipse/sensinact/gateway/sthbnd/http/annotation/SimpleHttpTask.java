@@ -10,22 +10,22 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.annotation;
 
+import org.eclipse.sensinact.gateway.core.ResourceConfig;
+import org.eclipse.sensinact.gateway.generic.Task.CommandType;
+
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
-import org.eclipse.sensinact.gateway.core.ResourceConfig;
-import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SimpleHttpTask
-{	
-	CommandType[] commands() default { CommandType.GET };
-	
-	String profile() default ResourceConfig.ALL_PROFILES;
-	HttpTaskConfiguration configuration();
+public @interface SimpleHttpTask {
+    CommandType[] commands() default {CommandType.GET};
+
+    String profile() default ResourceConfig.ALL_PROFILES;
+
+    HttpTaskConfiguration configuration();
 }

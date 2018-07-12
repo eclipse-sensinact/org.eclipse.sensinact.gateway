@@ -10,103 +10,78 @@
  */
 package org.eclipse.sensinact.gateway.generic.parser;
 
-import org.xml.sax.Attributes;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Resource;
+import org.xml.sax.Attributes;
 
 /**
  * The extended {@link Resource} interface type of a {@link PolicyDefinition}
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @XmlElement(tag = "interfaceName", field = "resourceInterfaceType")
-final class ResourceInterfaceDefinition extends XmlDefinition
-{
+final class ResourceInterfaceDefinition extends XmlDefinition {
     private Class<? extends Resource> resourceInterfaceType;
 
     /**
      * Constructor
-     * 
-     * @param mediator
-     *      the associated Mediator
-     * @param atts
-     *      the set of attributes data structure for the 
-     *      xml identifier element
+     *
+     * @param mediator the associated Mediator
+     * @param atts     the set of attributes data structure for the
+     *                 xml identifier element
      */
-    public ResourceInterfaceDefinition(Mediator mediator, Attributes atts)
-    {
+    public ResourceInterfaceDefinition(Mediator mediator, Attributes atts) {
         super(mediator, atts);
     }
 
     /**
-     * Defines the name of the extended {@link Resource} interface 
+     * Defines the name of the extended {@link Resource} interface
      * type wrapped by this ResourceInterfaceDefinition
-     * 
-     * @param interfaceName
-     *     the extended {@link Resource} interface type
-     * 		name
+     *
+     * @param interfaceName the extended {@link Resource} interface type
+     *                      name
      */
     @SuppressWarnings("unchecked")
-    void setResourceInterfaceType(String interfaceName)
-    {
-    	this.resourceInterfaceType = (Class<? extends Resource>) 
-    			this.resolveInterfaceType(interfaceName);
-    	
-    	if(resourceInterfaceType != null)
-    	{
-    		return;
-    	}
-        try
-        {
-            this.resourceInterfaceType = (Class<? extends Resource>)
-            		super.mediator.getContext().getBundle().loadClass(
-            			interfaceName);
-            
-            if(!this.resourceInterfaceType.isInterface())
-            {
-            	this.resourceInterfaceType = null;
+    void setResourceInterfaceType(String interfaceName) {
+        this.resourceInterfaceType = (Class<? extends Resource>) this.resolveInterfaceType(interfaceName);
+
+        if (resourceInterfaceType != null) {
+            return;
+        }
+        try {
+            this.resourceInterfaceType = (Class<? extends Resource>) super.mediator.getContext().getBundle().loadClass(interfaceName);
+
+            if (!this.resourceInterfaceType.isInterface()) {
+                this.resourceInterfaceType = null;
             }
-        } catch (ClassNotFoundException e)
-        {
-            if(super.mediator.isErrorLoggable())
-            {
+        } catch (ClassNotFoundException e) {
+            if (super.mediator.isErrorLoggable()) {
                 super.mediator.error(e, e.getMessage());
             }
         }
     }
 
-    private Class resolveInterfaceType(String interfaceName)
-    {
-    	if(XmlResourceConfigHandler.DEFAULT_VARIABLE_POLICY_INTERFACE
-    			== interfaceName.intern())
-    	{
-    		return XmlResourceConfigHandler.DEFAULT_VARIABLE_INTERFACE;
-    	}
-    	if(XmlResourceConfigHandler.DEFAULT_SENSOR_POLICY_INTERFACE
-    			== interfaceName.intern())
-    	{
-    		return XmlResourceConfigHandler.DEFAULT_SENSOR_INTERFACE;
-    	}
-    	if(XmlResourceConfigHandler.DEFAULT_PROPERTY_POLICY_INTERFACE
-    			== interfaceName.intern())
-    	{
-    		return XmlResourceConfigHandler.DEFAULT_PROPERTY_INTERFACE;
-    	}
-    	if(XmlResourceConfigHandler.DEFAULT_ACTION_POLICY_INTERFACE
-    			== interfaceName.intern())
-    	{
-    		return XmlResourceConfigHandler.DEFAULT_ACTION_INTERFACE;
-    	}
-    	return null;
+    private Class resolveInterfaceType(String interfaceName) {
+        if (XmlResourceConfigHandler.DEFAULT_VARIABLE_POLICY_INTERFACE == interfaceName.intern()) {
+            return XmlResourceConfigHandler.DEFAULT_VARIABLE_INTERFACE;
+        }
+        if (XmlResourceConfigHandler.DEFAULT_SENSOR_POLICY_INTERFACE == interfaceName.intern()) {
+            return XmlResourceConfigHandler.DEFAULT_SENSOR_INTERFACE;
+        }
+        if (XmlResourceConfigHandler.DEFAULT_PROPERTY_POLICY_INTERFACE == interfaceName.intern()) {
+            return XmlResourceConfigHandler.DEFAULT_PROPERTY_INTERFACE;
+        }
+        if (XmlResourceConfigHandler.DEFAULT_ACTION_POLICY_INTERFACE == interfaceName.intern()) {
+            return XmlResourceConfigHandler.DEFAULT_ACTION_INTERFACE;
+        }
+        return null;
     }
-    
+
     /**
      * Returns the extended {@link Resource} interface type
      * wrapped by this ResourceInterfaceDefinition
      */
-	public Class<? extends Resource> getResourceInterfaceType()
-	{
-		return this.resourceInterfaceType;
-	}
+    public Class<? extends Resource> getResourceInterfaceType() {
+        return this.resourceInterfaceType;
+    }
 }

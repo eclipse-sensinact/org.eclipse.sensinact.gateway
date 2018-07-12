@@ -8,10 +8,8 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.billboard.internal;
 
 public interface BillboardConfigListener {
-
     void messageChanged(String message);
 }

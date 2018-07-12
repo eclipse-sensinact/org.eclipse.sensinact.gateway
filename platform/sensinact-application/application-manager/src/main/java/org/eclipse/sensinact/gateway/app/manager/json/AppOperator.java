@@ -10,7 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.json;
 
-import org.eclipse.sensinact.gateway.common.constraint.*;
+import org.eclipse.sensinact.gateway.common.constraint.Absolute;
+import org.eclipse.sensinact.gateway.common.constraint.Delta;
+import org.eclipse.sensinact.gateway.common.constraint.Different;
+import org.eclipse.sensinact.gateway.common.constraint.Fixed;
+import org.eclipse.sensinact.gateway.common.constraint.MaxExclusive;
+import org.eclipse.sensinact.gateway.common.constraint.MaxInclusive;
+import org.eclipse.sensinact.gateway.common.constraint.MinExclusive;
+import org.eclipse.sensinact.gateway.common.constraint.MinInclusive;
 
 /**
  * Resumes the operators available in the sensinact-core
@@ -18,23 +25,22 @@ import org.eclipse.sensinact.gateway.common.constraint.*;
  * @author Rémi Druilhe
  */
 public class AppOperator {
-
     public static String getOperator(String operator) {
-        if(operator.equals("equal")) {
+        if (operator.equals("equal")) {
             return Fixed.OPERATOR;
-        } else if(operator.equals("lesserThan")) {
+        } else if (operator.equals("lesserThan")) {
             return MaxExclusive.OPERATOR;
-        } else if(operator.equals("lesserEqual")) {
+        } else if (operator.equals("lesserEqual")) {
             return MaxInclusive.OPERATOR;
-        } else if(operator.equals("greaterThan")) {
+        } else if (operator.equals("greaterThan")) {
             return MinExclusive.OPERATOR;
-        } else if(operator.equals("greaterEqual")) {
+        } else if (operator.equals("greaterEqual")) {
             return MinInclusive.OPERATOR;
-        } else if(operator.equals("abs")) {
+        } else if (operator.equals("abs")) {
             return Absolute.OPERATOR;
-        } else if(operator.equals("diff")) {
+        } else if (operator.equals("diff")) {
             return Different.OPERATOR;
-        } else if(operator.equals("delta")) {
+        } else if (operator.equals("delta")) {
             return Delta.OPERATOR;
         } else {
             return operator;

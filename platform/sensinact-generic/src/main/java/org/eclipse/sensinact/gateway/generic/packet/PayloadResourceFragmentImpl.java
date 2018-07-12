@@ -10,163 +10,130 @@
  */
 package org.eclipse.sensinact.gateway.generic.packet;
 
-import org.eclipse.sensinact.gateway.generic.TaskManager;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
+import org.eclipse.sensinact.gateway.generic.TaskManager;
 
 /**
  * Basis implementation of a {@link PayloadResourceFragment}
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class PayloadResourceFragmentImpl implements PayloadResourceFragment
-{
-	private String taskIdentifier;
-	protected final String attributeId;
-	protected final String metadataId;
-	protected final Object data;
-	protected long timestamp;
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param data
-	 * 		the object data
-	 */
-	public PayloadResourceFragmentImpl(Object data)
-	{
-		this(null, null, data);
-	}
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param attributeId
-	 * 		the string identifier of the targeted {@link Attribute}
-	 * @param data
-	 * 		the object data
-	 */
-	public PayloadResourceFragmentImpl(String attributeId, 
-			String metadataId, Object data)
-	{
-		this.attributeId = attributeId;
-		this.metadataId = metadataId;
-		this.data = data;
-		this.timestamp = -1;
-	}
+public class PayloadResourceFragmentImpl implements PayloadResourceFragment {
+    private String taskIdentifier;
+    protected final String attributeId;
+    protected final String metadataId;
+    protected final Object data;
+    protected long timestamp;
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see PayloadResourceFragment#getAttributeId()
-	 */
-    @Override
-    public String getAttributeId()
-    {
-	    return this.attributeId;
+    /**
+     * Constructor
+     *
+     * @param data the object data
+     */
+    public PayloadResourceFragmentImpl(Object data) {
+        this(null, null, data);
     }
 
     /**
-	 * @inheritDoc
-	 *
-	 * @see PayloadResourceFragment#getMetadataId()
-	 */
-    @Override
-    public String getMetadataId()
-    {
-	    return this.metadataId;
+     * Constructor
+     *
+     * @param attributeId the string identifier of the targeted {@link Attribute}
+     * @param data        the object data
+     */
+    public PayloadResourceFragmentImpl(String attributeId, String metadataId, Object data) {
+        this.attributeId = attributeId;
+        this.metadataId = metadataId;
+        this.data = data;
+        this.timestamp = -1;
     }
 
-    
-	/**
-	 * @inheritDoc
-	 *
-	 * @see PayloadResourceFragment#getData()
-	 */
+    /**
+     * @inheritDoc
+     * @see PayloadResourceFragment#getAttributeId()
+     */
     @Override
-    public Object getData()
-    {
-	    return this.data;
+    public String getAttributeId() {
+        return this.attributeId;
     }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see PayloadResourceFragment#
-	 * AsTaskIdValuePair()
-	 */
+    /**
+     * @inheritDoc
+     * @see PayloadResourceFragment#getMetadataId()
+     */
     @Override
-    public TaskIdValuePair AsTaskIdValuePair(String taskIdentifier)
-    {
-    	if(taskIdentifier == null)
-    	{
-    		return null;
-    	}
-		this.taskIdentifier = taskIdentifier;
-		
-		if(this.attributeId != null)
-		{
-			this.taskIdentifier = new StringBuilder().append(
-				taskIdentifier).append(TaskManager.IDENTIFIER_SEP_CHAR
-					).append(this.attributeId).toString();
-			
-			if(this.metadataId != null)
-			{
-    			this.taskIdentifier = new StringBuilder().append(
-    				this.taskIdentifier).append(TaskManager.IDENTIFIER_SEP_CHAR
-    					).append(this.metadataId).toString();
-			}
-		}
-		return new TaskIdValuePair(this.taskIdentifier, 
-				data, this.getTimestamp());
+    public String getMetadataId() {
+        return this.metadataId;
     }
 
-	/**
-	 * Defines the timestamp of the update of the 
-	 * targeted Attribute
-	 * 
-	 * @param		
-	 * 		the update timestamp
-	 */
-    public long setTimestamp(long timestamp)
-    {
-	    return this.timestamp = timestamp;
-    }	
-    
-	/**
-	 * @inheritDoc
-	 *
-	 * @see PayloadResourceFragment#getTimestamp()
-	 */
+    /**
+     * @inheritDoc
+     * @see PayloadResourceFragment#getData()
+     */
     @Override
-    public long getTimestamp()
-    {
-    	if(timestamp == -1)
-    	{
-    		return System.currentTimeMillis();
-    	}
-	    return this.timestamp;
+    public Object getData() {
+        return this.data;
     }
 
-	/**
-	 * @InheritedDoc
-	 *
-	 * @see PayloadResourceFragment#
-	 * getTaskIdentifier()
-	 */
+    /**
+     * @inheritDoc
+     * @see PayloadResourceFragment#
+     * AsTaskIdValuePair()
+     */
     @Override
-    public String getTaskIdentifier()
-    {
-	    return this.taskIdentifier;
+    public TaskIdValuePair AsTaskIdValuePair(String taskIdentifier) {
+        if (taskIdentifier == null) {
+            return null;
+        }
+        this.taskIdentifier = taskIdentifier;
+
+        if (this.attributeId != null) {
+            this.taskIdentifier = new StringBuilder().append(taskIdentifier).append(TaskManager.IDENTIFIER_SEP_CHAR).append(this.attributeId).toString();
+
+            if (this.metadataId != null) {
+                this.taskIdentifier = new StringBuilder().append(this.taskIdentifier).append(TaskManager.IDENTIFIER_SEP_CHAR).append(this.metadataId).toString();
+            }
+        }
+        return new TaskIdValuePair(this.taskIdentifier, data, this.getTimestamp());
     }
 
-	/** 
-	 * @inheritDoc
-	 * 
-	 * @see Nameable#getName()
-	 */
-	@Override
-	public String getName() 
-	{
-	    return this.taskIdentifier;
-	}	
+    /**
+     * Defines the timestamp of the update of the
+     * targeted Attribute
+     *
+     * @param the update timestamp
+     */
+    public long setTimestamp(long timestamp) {
+        return this.timestamp = timestamp;
+    }
+
+    /**
+     * @inheritDoc
+     * @see PayloadResourceFragment#getTimestamp()
+     */
+    @Override
+    public long getTimestamp() {
+        if (timestamp == -1) {
+            return System.currentTimeMillis();
+        }
+        return this.timestamp;
+    }
+
+    /**
+     * @InheritedDoc
+     * @see PayloadResourceFragment#
+     * getTaskIdentifier()
+     */
+    @Override
+    public String getTaskIdentifier() {
+        return this.taskIdentifier;
+    }
+
+    /**
+     * @inheritDoc
+     * @see Nameable#getName()
+     */
+    @Override
+    public String getName() {
+        return this.taskIdentifier;
+    }
 }

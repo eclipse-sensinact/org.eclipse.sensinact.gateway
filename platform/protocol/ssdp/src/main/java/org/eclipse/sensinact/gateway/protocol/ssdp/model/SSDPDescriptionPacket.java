@@ -11,11 +11,11 @@
 package org.eclipse.sensinact.gateway.protocol.ssdp.model;
 
 public class SSDPDescriptionPacket {
-
     private String friendlyName;
     private String url;
 
-    public SSDPDescriptionPacket() {}
+    public SSDPDescriptionPacket() {
+    }
 
     public String getFriendlyName() {
         return friendlyName;
@@ -37,9 +37,6 @@ public class SSDPDescriptionPacket {
      * @inheritDoc
      */
     public String toString() {
-        return "SSDPDescriptionPacket{" +
-                "friendlyName='" + friendlyName + '\'' +
-                ", url='" + url + '\'' +
-                '}';
+        return "SSDPDescriptionPacket{" + "friendlyName='" + friendlyName + '\'' + ", url='" + url + '\'' + '}';
     }
 }

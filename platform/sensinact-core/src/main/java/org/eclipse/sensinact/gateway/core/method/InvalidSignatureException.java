@@ -10,61 +10,50 @@
  */
 package org.eclipse.sensinact.gateway.core.method;
 
-
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.Attribute;
 
-
 /**
  * Exception thrown if an error occurred while creating a new {@link Attribute}
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
-public class InvalidSignatureException extends InvalidValueException
-{
-	/**
-	 * Constructor
-	 */
-	public InvalidSignatureException()
-	{
-		super();
-	}
+public class InvalidSignatureException extends InvalidValueException {
+    /**
+     * Constructor
+     */
+    public InvalidSignatureException() {
+        super();
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param message
-	 *            the error message
-	 */
-	public InvalidSignatureException(String message)
-	{
-		super(message);
-	}
+    /**
+     * Constructor
+     *
+     * @param message the error message
+     */
+    public InvalidSignatureException(String message) {
+        super(message);
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param cause
-	 *            the Throwable object which has caused the triggering of this
-	 *            exception
-	 */
-	public InvalidSignatureException(Throwable cause)
-	{
-		super(cause);
-	}
+    /**
+     * Constructor
+     *
+     * @param cause the Throwable object which has caused the triggering of this
+     *              exception
+     */
+    public InvalidSignatureException(Throwable cause) {
+        super(cause);
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param message
-	 *            the error message
-	 * @param cause
-	 *            the Throwable object which has caused the triggering of this
-	 *            exception
-	 */
-	public InvalidSignatureException(String message, Throwable cause)
-	{
-		super(message, cause);
-	}
+    /**
+     * Constructor
+     *
+     * @param message the error message
+     * @param cause   the Throwable object which has caused the triggering of this
+     *                exception
+     */
+    public InvalidSignatureException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

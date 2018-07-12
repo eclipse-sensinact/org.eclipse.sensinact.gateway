@@ -11,8 +11,7 @@
 package org.eclipse.sensinact.gateway.protocol.http.server;
 
 /**
- * 
- */ 
-public interface ResponseContent extends Content
-{
+ *
+ */
+public interface ResponseContent extends Content {
 }

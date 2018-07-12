@@ -8,43 +8,33 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.datastore.api;
 
 /**
- * 
+ *
  */
 @SuppressWarnings("serial")
-public class UnableToFindDataStoreException extends DataStoreException 
-{
+public class UnableToFindDataStoreException extends DataStoreException {
+    public UnableToFindDataStoreException() {
+        super();
+    }
 
-	public UnableToFindDataStoreException() 
-	{
-		super();
-	}
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param message
-	 * 		the error message
-	 */
-	public UnableToFindDataStoreException(String message)
-	{
-		super(message);
-	}
+    /**
+     * Constructor
+     *
+     * @param message the error message
+     */
+    public UnableToFindDataStoreException(String message) {
+        super(message);
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param message
-	 * 		the error message
-	 * @param throwable
-	 * 		wrapped exception that has made the current one thrown
-	 */
-	public UnableToFindDataStoreException(String message,Throwable throwable)
-	{
-		super(message,throwable);
-	}
-
+    /**
+     * Constructor
+     *
+     * @param message   the error message
+     * @param throwable wrapped exception that has made the current one thrown
+     */
+    public UnableToFindDataStoreException(String message, Throwable throwable) {
+        super(message, throwable);
+    }
 }

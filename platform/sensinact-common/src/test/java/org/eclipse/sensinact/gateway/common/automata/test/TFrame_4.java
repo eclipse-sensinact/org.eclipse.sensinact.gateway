@@ -10,10 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.common.automata.test;
 
-public class TFrame_4 extends TFrame_1
-{
-	public TFrame_4() 
-	{
-		super();
-	}
+public class TFrame_4 extends TFrame_1 {
+    public TFrame_4() {
+        super();
+    }
 }

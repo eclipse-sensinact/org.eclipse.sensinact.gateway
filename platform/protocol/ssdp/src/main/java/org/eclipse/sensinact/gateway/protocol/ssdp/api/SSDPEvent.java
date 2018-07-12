@@ -14,12 +14,7 @@ package org.eclipse.sensinact.gateway.protocol.ssdp.api;
  * Summarize the SSDP events
  */
 public enum SSDPEvent {
-
-    DISCOVER("ssdp:discover"),
-    ALIVE("ssdp:alive"),
-    UPDATE("ssdp:update"),
-    GOODBYE("ssdp:byebye");
-
+    DISCOVER("ssdp:discover"), ALIVE("ssdp:alive"), UPDATE("ssdp:update"), GOODBYE("ssdp:byebye");
     private String ssdpEvent;
 
     SSDPEvent(String ssdpEvent) {

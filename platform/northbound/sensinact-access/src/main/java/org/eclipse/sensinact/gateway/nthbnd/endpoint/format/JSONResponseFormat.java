@@ -10,47 +10,36 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint.format;
 
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
+import org.json.JSONObject;
 
 public class JSONResponseFormat implements ResponseFormat<JSONObject> {
+    private Mediator mediator;
 
-	private Mediator mediator;
-	
-	public JSONResponseFormat(Mediator mediator)
-	{
-		this.mediator = mediator;
-	}
+    public JSONResponseFormat(Mediator mediator) {
+        this.mediator = mediator;
+    }
 
-	@Override
-	public JSONObject format(Object object) 
-	{
-		if(object == null)
-		{
-			return null;
-		}
-		if(JSONObject.class.isAssignableFrom(object.getClass()))
-		{
-			return (JSONObject) object;
-		}
-		if(JSONable.class.isAssignableFrom(object.getClass()))
-		{
-			return new JSONObject(((JSONable)object).getJSON());
-		}
-		String json = JSONUtils.toJSONFormat(object);
-		try
-		{
-			return CastUtils.cast(
-				this.mediator.getClassLoader(), 
-					JSONObject.class, json);
-			
-		} catch(ClassCastException e)
-		{
-			return new JSONObject().put("response", json);
-		}
-	}
+    @Override
+    public JSONObject format(Object object) {
+        if (object == null) {
+            return null;
+        }
+        if (JSONObject.class.isAssignableFrom(object.getClass())) {
+            return (JSONObject) object;
+        }
+        if (JSONable.class.isAssignableFrom(object.getClass())) {
+            return new JSONObject(((JSONable) object).getJSON());
+        }
+        String json = JSONUtils.toJSONFormat(object);
+        try {
+            return CastUtils.cast(this.mediator.getClassLoader(), JSONObject.class, json);
+
+        } catch (ClassCastException e) {
+            return new JSONObject().put("response", json);
+        }
+    }
 }

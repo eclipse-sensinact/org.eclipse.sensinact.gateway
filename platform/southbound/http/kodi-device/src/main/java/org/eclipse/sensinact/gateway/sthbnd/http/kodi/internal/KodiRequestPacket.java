@@ -9,7 +9,7 @@
  *    CEA - initial API and implementation
  */
 /**
- * 
+ *
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.kodi.internal;
 
@@ -24,44 +24,34 @@ import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID
  *
  */
 public class KodiRequestPacket extends KodiResponsePacket {
+    @Data
+    public final Object data;
 
-	@Data
-	public final Object data;
-	
-	/**
-	 * @param content
-	 */
-	public KodiRequestPacket(
-			String serviceProvider,
-			String service, 
-			String resource,
-			Object data) 
-	{
-		super(serviceProvider, service, resource);
-		this.data = data;
-	}
+    /**
+     * @param content
+     */
+    public KodiRequestPacket(String serviceProvider, String service, String resource, Object data) {
+        super(serviceProvider, service, resource);
+        this.data = data;
+    }
 
-	@ServiceProviderID
-    public String getServiceProvider()
-    {
-		return super.serviceProvider;
+    @ServiceProviderID
+    public String getServiceProvider() {
+        return super.serviceProvider;
     }
-	
-	@ServiceID
-    public String getService()
-    {
-		return super.service;
+
+    @ServiceID
+    public String getService() {
+        return super.service;
     }
-	
-	@ResourceID
-	public String getResource()
-	{
-		return super.resource;
-	}
-	
-	@CommandID
-	public CommandType getCommand()
-	{
-		return super.getCommand();
-	}
+
+    @ResourceID
+    public String getResource() {
+        return super.resource;
+    }
+
+    @CommandID
+    public CommandType getCommand() {
+        return super.getCommand();
+    }
 }

@@ -18,12 +18,12 @@ import org.xml.sax.helpers.DefaultHandler;
 import java.util.Stack;
 
 public class SSDPDescriptionHandler extends DefaultHandler {
-
     private SSDPDescriptionPacket descriptionPacket;
     private Stack<String> elementStack = new Stack<String>();
     private Stack<SSDPDescriptionPacket> descriptionStack = new Stack<SSDPDescriptionPacket>();
 
-    public SSDPDescriptionHandler() {}
+    public SSDPDescriptionHandler() {
+    }
 
     /**
      * @inheritDoc
@@ -51,21 +51,18 @@ public class SSDPDescriptionHandler extends DefaultHandler {
      */
     public void characters(char[] ch, int start, int length) throws SAXException {
         String value = new String(ch, start, length).trim();
-
         if (value.length() == 0) {
             return;
         }
-
-        if("friendlyName".equalsIgnoreCase(this.elementStack.peek())) {
+        if ("friendlyName".equalsIgnoreCase(this.elementStack.peek())) {
             SSDPDescriptionPacket packet = this.descriptionStack.peek();
             packet.setFriendlyName(value.replace(" ", "_"));
-        } else if("URLBase".equalsIgnoreCase(this.elementStack.peek())) {
+        } else if ("URLBase".equalsIgnoreCase(this.elementStack.peek())) {
             SSDPDescriptionPacket packet = this.descriptionStack.peek();
             packet.setUrl(value.split(":")[1].replace("/", ""));
-        } else if("presentationURL".equalsIgnoreCase(this.elementStack.peek())) {
-            if(value.startsWith("http")) {
+        } else if ("presentationURL".equalsIgnoreCase(this.elementStack.peek())) {
+            if (value.startsWith("http")) {
                 SSDPDescriptionPacket packet = this.descriptionStack.peek();
-
                 if (packet.getUrl() == null) {
                     packet.setUrl(value.split(":")[1].replace("/", ""));
                 }
@@ -75,6 +72,7 @@ public class SSDPDescriptionHandler extends DefaultHandler {
 
     /**
      * Gets the packet after XML parsing
+     *
      * @return the Java representation of the packet after parsing
      */
     public SSDPDescriptionPacket getDescriptionPacket() {

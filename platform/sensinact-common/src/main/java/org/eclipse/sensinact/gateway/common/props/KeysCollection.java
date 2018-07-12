@@ -8,34 +8,30 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.common.props;
 
 import java.util.Set;
 
 /**
- * A set of {@link TypedKey} 
- *  
+ * A set of {@link TypedKey}
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface KeysCollection
-{
-	/**
-	 * Returns the array of this KeyCollection's key strings
-	 * 
-	 * @return
-	 * 		 this KeyCollection's key strings
-	 */
-	Set<TypedKey<?>> keys();
-	
-	/**
-	 * Returns the {@link TypedKey} whose name is passed
-	 * as parameter
-	 * 
-	 * @return
-	 * 		the {@link TypedKey} with the specified
-	 * 		name
-	 */
-	TypedKey<?> key(String key);
-	
+public interface KeysCollection {
+    /**
+     * Returns the array of this KeyCollection's key strings
+     *
+     * @return this KeyCollection's key strings
+     */
+    Set<TypedKey<?>> keys();
+
+    /**
+     * Returns the {@link TypedKey} whose name is passed
+     * as parameter
+     *
+     * @return the {@link TypedKey} with the specified
+     * name
+     */
+    TypedKey<?> key(String key);
+
 }

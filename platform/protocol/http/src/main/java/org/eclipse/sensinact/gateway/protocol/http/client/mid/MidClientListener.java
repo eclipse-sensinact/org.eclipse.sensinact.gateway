@@ -11,9 +11,8 @@
 package org.eclipse.sensinact.gateway.protocol.http.client.mid;
 
 /**
- * 
+ *
  */
-public interface MidClientListener<RESPONSE>
-{
-	void respond(RESPONSE response);
+public interface MidClientListener<RESPONSE> {
+    void respond(RESPONSE response);
 }

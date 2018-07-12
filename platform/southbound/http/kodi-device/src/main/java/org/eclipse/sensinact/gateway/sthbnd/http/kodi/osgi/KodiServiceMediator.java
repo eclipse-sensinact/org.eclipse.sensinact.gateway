@@ -16,16 +16,14 @@ import org.osgi.framework.BundleContext;
 import java.util.HashMap;
 import java.util.Map;
 
-public class KodiServiceMediator extends HttpMediator
-{
+public class KodiServiceMediator extends HttpMediator {
     private Map<String, String> kodiIPMap;
 
-    public KodiServiceMediator(BundleContext context)  
-    {
+    public KodiServiceMediator(BundleContext context) {
         super(context);
         this.kodiIPMap = new HashMap<String, String>();
     }
-    
+
     public void putKodiIP(String friendlyName, String ip) {
         kodiIPMap.put(friendlyName, ip);
     }
@@ -38,14 +36,12 @@ public class KodiServiceMediator extends HttpMediator
         return kodiIPMap.get(friendlyName);
     }
 
-    public String getKodiFriendlyName(String ip)
-    {
+    public String getKodiFriendlyName(String ip) {
         for (Map.Entry<String, String> map : kodiIPMap.entrySet()) {
-            if(map.getValue().equals(ip)) {
+            if (map.getValue().equals(ip)) {
                 return map.getKey();
             }
         }
-
         return null;
     }
 }

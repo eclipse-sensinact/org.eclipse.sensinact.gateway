@@ -12,63 +12,50 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import org.json.JSONArray;
 
+public class AttributeSubscribeRequest extends AttributeRequest {
+    private NorthboundRecipient recipient;
+    private JSONArray conditions;
 
-public class AttributeSubscribeRequest extends AttributeRequest
-{	
-	private NorthboundRecipient recipient;
-	private JSONArray conditions;
+    /**
+     * @param mediator
+     * @param serviceProvider
+     * @param service
+     * @param resource
+     * @param attribute
+     * @param recipient
+     */
+    public AttributeSubscribeRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, String resource, String attribute, NorthboundRecipient recipient, JSONArray conditions) {
+        super(mediator, requestIdentifier, serviceProvider, service, resource, attribute);
+        this.recipient = recipient;
+        this.conditions = conditions;
+        if (this.recipient == null) {
+            throw new NullPointerException("Recipient missing");
+        }
+    }
 
-	/**
-	 * @param mediator
-	 * @param serviceProvider
-	 * @param service
-	 * @param resource
-	 * @param attribute
-	 * @param recipient
-	 */
-	public AttributeSubscribeRequest(NorthboundMediator mediator,
-			String requestIdentifier, String serviceProvider, 
-			String service, String resource, String attribute, 
-			NorthboundRecipient recipient, JSONArray conditions)
-	{
-		super(mediator, requestIdentifier, serviceProvider, 
-				service, resource, attribute);
-		this.recipient = recipient;
-		this.conditions = conditions;
-		if(this.recipient == null)
-		{
-			throw new NullPointerException("Recipient missing");
-		}
-	}
+    /**
+     * @inheritDoc
+     * @see ServiceProvidersRequest#getExecutionArguments()
+     */
+    @Override
+    protected Argument[] getExecutionArguments() {
+        Argument[] superArguments = super.getExecutionArguments();
+        int length = superArguments == null ? 0 : superArguments.length;
+        Argument[] arguments = new Argument[length + 2];
+        if (length > 0) {
+            System.arraycopy(superArguments, 0, arguments, 0, length);
+        }
+        arguments[length] = new Argument(NorthboundRecipient.class, this.recipient);
+        arguments[length + 1] = new Argument(JSONArray.class, this.conditions);
+        return arguments;
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ServiceProvidersRequest#getExecutionArguments()
-	 */
-	@Override
-	protected Argument[] getExecutionArguments() 
-	{
-		Argument[] superArguments = super.getExecutionArguments();
-		int length = superArguments==null?0:superArguments.length;
-		Argument[] arguments = new Argument[length+2];
-		if(length > 0)
-		{
-			System.arraycopy(superArguments, 0, arguments, 0, length);
-		}
-		arguments[length] = new Argument(NorthboundRecipient.class, this.recipient);
-		arguments[length+1] = new Argument(JSONArray.class, this.conditions);
-	    return arguments;
-	}
-	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ResourceRequest#getMethod()
-	 */
-	@Override
-	protected String getMethod()
-	{
-		return "subscribe";
-	}
+    /**
+     * @inheritDoc
+     * @see ResourceRequest#getMethod()
+     */
+    @Override
+    protected String getMethod() {
+        return "subscribe";
+    }
 }

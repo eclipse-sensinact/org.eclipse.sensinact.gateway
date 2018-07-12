@@ -11,7 +11,12 @@
 package org.eclipse.sensinact.gateway.agent.http.onem2m.internal;
 
 import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.message.*;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
+import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +30,9 @@ import java.io.IOException;
  * Instance = sNa Attribute
  */
 public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
-    private static Logger LOG=LoggerFactory.getLogger(SnaEventOneM2MHttpHandler.class.getCanonicalName());
+    private static Logger LOG = LoggerFactory.getLogger(SnaEventOneM2MHttpHandler.class.getCanonicalName());
     private final String cseBase;
+
     public SnaEventOneM2MHttpHandler(String cseBase) throws IOException {
         this.cseBase = cseBase;
     }
@@ -38,24 +44,24 @@ public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
      */
     public void doHandle(SnaUpdateMessageImpl event) {
 
-        LOG.debug("Received event {}",event.getJSON().toString());
+        LOG.debug("Received event {}", event.getJSON().toString());
 
         OneM2MModel model = OneM2MModel.getInstance(cseBase);
 
         JSONObject eventJson = new JSONObject(event.getJSON()).getJSONObject("notification");
-        final String eventPathSplit[]=event.getPath().split("/");
+        final String eventPathSplit[] = event.getPath().split("/");
         final String provider = eventPathSplit[1];
         final String service = eventPathSplit[2];
         final String resource = eventPathSplit[3];
 
-        LOG.debug("Extracted provider '{}' service '{}' and resource '{}' from message",provider,service,resource);
+        LOG.debug("Extracted provider '{}' service '{}' and resource '{}' from message", provider, service, resource);
 
         switch (event.getType()) {
             // Create contentInstance
             case ATTRIBUTE_VALUE_UPDATED:
 
                 Object value = eventJson.get(DataResource.VALUE);
-                LOG.debug("Extracted value '{}' from message",value.toString());
+                LOG.debug("Extracted value '{}' from message", value.toString());
                 if (event.getPath().endsWith("/admin/location/value")) {
                     LOG.debug("Location update message");
                     String[] locs = String.valueOf(value).split(":");
@@ -64,20 +70,20 @@ public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
                     }
                     try {
                         Double latitude = Double.parseDouble(locs[0]);
-                        LOG.debug("Extracted latitude '{}'",latitude);
+                        LOG.debug("Extracted latitude '{}'", latitude);
                         Double longitude = Double.parseDouble(locs[1]);
-                        LOG.debug("Extracted longitude '{}'",longitude);
-                        model.integrateReading(provider, "location","latitude", latitude.toString());
-                        model.integrateReading(provider, "location", "longitude",longitude.toString());
+                        LOG.debug("Extracted longitude '{}'", longitude);
+                        model.integrateReading(provider, "location", "latitude", latitude.toString());
+                        model.integrateReading(provider, "location", "longitude", longitude.toString());
                     } catch (NumberFormatException e) {
-                        LOG.error("Failed to integrate value",e);
+                        LOG.error("Failed to integrate value", e);
                     }
                 } else {
-                    LOG.debug("Value update message to value '{}'",value.toString());
+                    LOG.debug("Value update message to value '{}'", value.toString());
                     try {
-                        model.integrateReading(provider, service,resource, value.toString());
+                        model.integrateReading(provider, service, resource, value.toString());
                     } catch (NumberFormatException e) {
-                        LOG.error("Failed to integrate value '{}'",value.toString(),e);
+                        LOG.error("Failed to integrate value '{}'", value.toString(), e);
                     }
                 }
                 break;
@@ -92,15 +98,14 @@ public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
      * @param event the ServiceRegisteredSnaEvent to process
      */
     public void doHandle(SnaLifecycleMessageImpl event) {
-        LOG.debug("Received Lifecycle event {}",event.getJSON().toString());
-        JSONObject eventJson = new JSONObject(event.getJSON()
-        );
+        LOG.debug("Received Lifecycle event {}", event.getJSON().toString());
+        JSONObject eventJson = new JSONObject(event.getJSON());
 
-        LOG.debug("Evaluating event of the type {}",event.getType());
+        LOG.debug("Evaluating event of the type {}", event.getType());
 
         switch (event.getType()) {
             case RESOURCE_DISAPPEARING:
-                LOG.debug("Provider disappearing{}",event.getJSON().toString());
+                LOG.debug("Provider disappearing{}", event.getJSON().toString());
                 String provider = event.getPath().split("/")[1];
                 String service = event.getPath().split("/")[2];
                 String resource = event.getPath().split("/")[3];

@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.api.plugin;
 
 /**
@@ -18,9 +17,9 @@ package org.eclipse.sensinact.gateway.app.api.plugin;
  * @author Remi Druilhe
  */
 public interface PluginHook {
-
     /**
      * Fire the hooked action
+     *
      * @throws Exception when any problems occur
      */
     void fireHook() throws Exception;

@@ -19,8 +19,7 @@ import java.lang.annotation.Target;
  * Field annotation to map to a TABLE's COLUMN
  */
 @Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = { ElementType.FIELD})
-public @interface Column
-{
-	public String value();
+@Target(value = {ElementType.FIELD})
+public @interface Column {
+    public String value();
 }

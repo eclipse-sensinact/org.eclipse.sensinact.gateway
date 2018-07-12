@@ -22,8 +22,8 @@ import java.lang.annotation.Target;
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-public @interface KeyValuePair
-{
-	String key();
-	String value();
+public @interface KeyValuePair {
+    String key();
+
+    String value();
 }

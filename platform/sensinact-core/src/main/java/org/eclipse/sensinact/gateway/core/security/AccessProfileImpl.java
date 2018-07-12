@@ -17,31 +17,25 @@ import java.util.Set;
 /**
  * Basis {@link AccessProfile} implementation
  */
-public class AccessProfileImpl implements AccessProfile
-{
-	private HashSet<MethodAccess> methodAccesses;
+public class AccessProfileImpl implements AccessProfile {
+    private HashSet<MethodAccess> methodAccesses;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param methodAccesses the Set of {@link MethodAccess} of
-	 * the {@link AccessProfile} to be instantiated
-	 */
-	public AccessProfileImpl(Set<MethodAccess> methodAccesses)
-	{
-		this.methodAccesses = new HashSet<MethodAccess>(methodAccesses);
-	}
+    /**
+     * Constructor
+     *
+     * @param methodAccesses the Set of {@link MethodAccess} of
+     *                       the {@link AccessProfile} to be instantiated
+     */
+    public AccessProfileImpl(Set<MethodAccess> methodAccesses) {
+        this.methodAccesses = new HashSet<MethodAccess>(methodAccesses);
+    }
 
-	/** 
-	 * @inheritDoc
-	 * 
-	 * @see AccessProfile#getMethodAccesses()
-	 */
-	@Override
-	public Set<MethodAccess> getMethodAccesses() 
-	{
-		return Collections.<MethodAccess>unmodifiableSet(
-				this.methodAccesses);
-	}
-
+    /**
+     * @inheritDoc
+     * @see AccessProfile#getMethodAccesses()
+     */
+    @Override
+    public Set<MethodAccess> getMethodAccesses() {
+        return Collections.<MethodAccess>unmodifiableSet(this.methodAccesses);
+    }
 }

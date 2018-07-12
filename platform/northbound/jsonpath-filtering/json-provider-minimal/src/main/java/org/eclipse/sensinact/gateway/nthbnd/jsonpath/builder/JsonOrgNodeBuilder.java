@@ -10,103 +10,91 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.jsonpath.builder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import org.eclipse.sensinact.gateway.nthbnd.jsonpath.JsonOrgJsonTokener;
-import org.json.JSONException;
-import org.json.JSONTokener;
-
 import com.jayway.jsonpath.Predicate.PredicateContext;
 import com.jayway.jsonpath.internal.filter.JsonNode;
 import com.jayway.jsonpath.internal.filter.ValueListNode;
 import com.jayway.jsonpath.internal.filter.ValueNode;
 import com.jayway.jsonpath.spi.builder.AbstractNodeBuilder;
+import org.eclipse.sensinact.gateway.nthbnd.jsonpath.JsonOrgJsonTokener;
+import org.json.JSONException;
+import org.json.JSONTokener;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class JsonOrgNodeBuilder extends AbstractNodeBuilder {
-	class JsonNodeImpl extends JsonNode{
-		
-		/**
-		 * @param charSequence
-		 */
-		JsonNodeImpl(CharSequence charSequence)
-		{
-			super(charSequence);
-		}
+    class JsonNodeImpl extends JsonNode {
 
-		/**
-		 * @param parsedJson
-		 */
-		JsonNodeImpl(Object parsedJson)
-		{
-			super(parsedJson);
-		}
+        /**
+         * @param charSequence
+         */
+        JsonNodeImpl(CharSequence charSequence) {
+            super(charSequence);
+        }
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see com.jayway.jsonpath.internal.filter.JsonNode#parse(com.jayway.jsonpath.Predicate.PredicateContext)
-		 */
-		@Override
-		public Object parse(PredicateContext ctx){
-			if(parsed)
-			{
-				return json;
-			}
-            try	{
-            	return new JsonOrgJsonTokener(
-            			json.toString().trim()).nextValue();
-			}
-			catch (JSONException e){
-				throw new IllegalArgumentException(e);
-			}
-		}
+        /**
+         * @param parsedJson
+         */
+        JsonNodeImpl(Object parsedJson) {
+            super(parsedJson);
+        }
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see com.jayway.jsonpath.internal.filter.JsonNode#asValueListNode(com.jayway.jsonpath.Predicate.PredicateContext)
-		 */
-		@Override
-		@SuppressWarnings("rawtypes")
-		public ValueNode asValueListNode(PredicateContext ctx)
-		{
-			if(!isArray(ctx)){
+        /**
+         * @inheritDoc
+         * @see com.jayway.jsonpath.internal.filter.JsonNode#parse(com.jayway.jsonpath.Predicate.PredicateContext)
+         */
+        @Override
+        public Object parse(PredicateContext ctx) {
+            if (parsed) {
+                return json;
+            }
+            try {
+                return new JsonOrgJsonTokener(json.toString().trim()).nextValue();
+            } catch (JSONException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
+
+        /**
+         * @inheritDoc
+         * @see com.jayway.jsonpath.internal.filter.JsonNode#asValueListNode(com.jayway.jsonpath.Predicate.PredicateContext)
+         */
+        @Override
+        @SuppressWarnings("rawtypes")
+        public ValueNode asValueListNode(PredicateContext ctx) {
+            if (!isArray(ctx)) {
                 return ValueNode.UNDEFINED;
-            } else {            	
-            	List list = (List) parse(ctx);
-            	Iterator iterator = list.iterator();            	
-            	List<ValueNode> valueNodes = new ArrayList<ValueNode>();
-            	while(iterator.hasNext())
-            	{
-            		valueNodes.add(toValueNode(iterator.next()));
-            	}
+            } else {
+                List list = (List) parse(ctx);
+                Iterator iterator = list.iterator();
+                List<ValueNode> valueNodes = new ArrayList<ValueNode>();
+                while (iterator.hasNext()) {
+                    valueNodes.add(toValueNode(iterator.next()));
+                }
                 return new ValueListNode(Collections.unmodifiableList(valueNodes));
             }
-		}
-		
-	}
-	
-	/**
-	 * 
-	 */
-	public JsonOrgNodeBuilder(){}
+        }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see com.jayway.jsonpath.spi.builder.NodeBuilder#isJson(java.lang.Object)
-	 */
-	@Override
-	public boolean isJson(Object o)
-	{
-		if(o == null || !(o instanceof String)){
+    }
+
+    /**
+     *
+     */
+    public JsonOrgNodeBuilder() {
+    }
+
+    /**
+     * @inheritDoc
+     * @see com.jayway.jsonpath.spi.builder.NodeBuilder#isJson(java.lang.Object)
+     */
+    @Override
+    public boolean isJson(Object o) {
+        if (o == null || !(o instanceof String)) {
             return false;
         }
         String str = o.toString().trim();
@@ -115,36 +103,34 @@ public class JsonOrgNodeBuilder extends AbstractNodeBuilder {
         }
         char c0 = str.charAt(0);
         char c1 = str.charAt(str.length() - 1);
-        if ((c0 == '[' && c1 == ']') || (c0 == '{' && c1 == '}')){
+        if ((c0 == '[' && c1 == ']') || (c0 == '{' && c1 == '}')) {
             try {
                 new JSONTokener(str).nextValue();
                 return true;
-            } catch(Exception e){
+            } catch (Exception e) {
                 return false;
             }
         }
         return false;
-	}
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see com.jayway.jsonpath.spi.builder.NodeBuilder#createJsonNode(java.lang.CharSequence)
-	 */
-	@Override
-	public JsonNode createJsonNode(CharSequence json){
-		JsonNodeImpl n = new JsonNodeImpl(json);
-		return n;
-	}
+    /**
+     * @inheritDoc
+     * @see com.jayway.jsonpath.spi.builder.NodeBuilder#createJsonNode(java.lang.CharSequence)
+     */
+    @Override
+    public JsonNode createJsonNode(CharSequence json) {
+        JsonNodeImpl n = new JsonNodeImpl(json);
+        return n;
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see com.jayway.jsonpath.spi.builder.NodeBuilder#createJsonNode(java.lang.Object)
-	 */
-	@Override
-	public JsonNode createJsonNode(Object parsedJson){
-		JsonNodeImpl n = new JsonNodeImpl(parsedJson);
-		return n;
-	}
+    /**
+     * @inheritDoc
+     * @see com.jayway.jsonpath.spi.builder.NodeBuilder#createJsonNode(java.lang.Object)
+     */
+    @Override
+    public JsonNode createJsonNode(Object parsedJson) {
+        JsonNodeImpl n = new JsonNodeImpl(parsedJson);
+        return n;
+    }
 }

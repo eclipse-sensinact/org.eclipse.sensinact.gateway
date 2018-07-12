@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.test;
 
 import org.osgi.framework.BundleContext;
 
-public interface BundleContextProvider
-{
-	BundleContext getBundleContext();
+public interface BundleContextProvider {
+    BundleContext getBundleContext();
 }

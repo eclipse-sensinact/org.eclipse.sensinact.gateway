@@ -1,6 +1,7 @@
 package org.eclipse.sensinact.gateway.nthbnd.test.jsonpath.internal.function;
 
 import com.jayway.jsonpath.Configuration;
+import org.eclipse.sensinact.gateway.nthbnd.test.jsonpath.BaseTestConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -10,21 +11,17 @@ import org.slf4j.LoggerFactory;
 import static com.jayway.jsonpath.JsonPath.using;
 import static org.junit.Assert.assertTrue;
 
-import org.eclipse.sensinact.gateway.nthbnd.test.jsonpath.BaseTestConfiguration;
-
 /**
  * Created by matt@mjgreenwood.net on 12/10/15.
  */
 @RunWith(Parameterized.class)
 public class NestedFunctionTest extends BaseFunctionTest {
-
     @Parameterized.Parameters
     public static Iterable<Configuration> configurations() {
         return BaseTestConfiguration.configurations();
     }
-    
-    private static final Logger logger = LoggerFactory.getLogger(NumericPathFunctionTest.class);
 
+    private static final Logger logger = LoggerFactory.getLogger(NumericPathFunctionTest.class);
     private Configuration conf = BaseTestConfiguration.JSON_ORG_CONFIGURATION;
 
     public NestedFunctionTest(Configuration conf) {
@@ -44,10 +41,10 @@ public class NestedFunctionTest extends BaseFunctionTest {
 
     /**
      * This test calculates the following:
-     *
+     * <p>
      * For each number in $.numbers 1 -> 10 add each number up,
      * then add 1 (min), 10 (max)
-     *
+     * <p>
      * Alternatively 1+2+3+4+5+6+7+8+9+10+1+10 == 66
      */
     @Test
@@ -87,9 +84,8 @@ public class NestedFunctionTest extends BaseFunctionTest {
     public void testErrantCloseBraceNegative() {
         try {
             using(conf).parse(BaseFunctionTest.NUMBER_SERIES, false).read("$.numbers.append(0, 1, 2}).avg()");
-            assert(false);
-        }
-        catch (Exception e) {
+            assert (false);
+        } catch (Exception e) {
             assertTrue(e.getMessage().startsWith("Unexpected close brace"));
         }
     }
@@ -98,9 +94,8 @@ public class NestedFunctionTest extends BaseFunctionTest {
     public void testErrantCloseBracketNegative() {
         try {
             using(conf).parse(BaseFunctionTest.NUMBER_SERIES, false).read("$.numbers.append(0, 1, 2]).avg()");
-            assert(false);
-        }
-        catch (Exception e) {
+            assert (false);
+        } catch (Exception e) {
             assertTrue(e.getMessage().startsWith("Unexpected close bracket"));
         }
     }
@@ -109,11 +104,9 @@ public class NestedFunctionTest extends BaseFunctionTest {
     public void testUnclosedFunctionCallNegative() {
         try {
             using(conf).parse(BaseFunctionTest.NUMBER_SERIES, false).read("$.numbers.append(0, 1, 2");
-            assert(false);
-        }
-        catch (Exception e) {
+            assert (false);
+        } catch (Exception e) {
             assertTrue(e.getMessage().startsWith("Arguments to function: 'append'"));
         }
     }
-
 }

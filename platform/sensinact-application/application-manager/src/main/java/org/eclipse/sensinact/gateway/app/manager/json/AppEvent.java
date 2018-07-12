@@ -8,12 +8,10 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.manager.json;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -27,10 +25,8 @@ import java.util.Set;
  * @author Remi Druilhe
  */
 public class AppEvent implements JSONable {
-
     public enum EventType {
-        RESOURCE,
-        VARIABLE
+        RESOURCE, VARIABLE
     }
 
     protected final String uri;
@@ -40,24 +36,21 @@ public class AppEvent implements JSONable {
     /**
      * JSON constructor of the event subscription. It includes the variable to listen to
      * and the conditions/parameters of the subscription
+     *
      * @param mediator the mediator
-     * @param json the json value of the subscription.
+     * @param json     the json value of the subscription.
      */
     public AppEvent(Mediator mediator, JSONObject json) {
         this.uri = json.getString(AppJsonConstant.VALUE);
-
-        if(AppJsonConstant.TYPE_RESOURCE.equals(json.getString(AppJsonConstant.TYPE))) {
+        if (AppJsonConstant.TYPE_RESOURCE.equals(json.getString(AppJsonConstant.TYPE))) {
             this.type = EventType.RESOURCE;
         } else {
             this.type = EventType.VARIABLE;
         }
-
         this.conditions = new HashSet<AppCondition>();
-
-        if(json.has(AppJsonConstant.APP_EVENTS_CONDITIONS)) {
+        if (json.has(AppJsonConstant.APP_EVENTS_CONDITIONS)) {
             JSONArray conditionsArray = json.getJSONArray(AppJsonConstant.APP_EVENTS_CONDITIONS);
-
-            for(int i = 0; i < conditionsArray.length(); i++) {
+            for (int i = 0; i < conditionsArray.length(); i++) {
                 this.conditions.add(new AppCondition(mediator, conditionsArray.getJSONObject(i)));
             }
         }
@@ -65,6 +58,7 @@ public class AppEvent implements JSONable {
 
     /**
      * Get the uri of the provider of the events
+     *
      * @return the uri
      */
     public String getUri() {
@@ -73,6 +67,7 @@ public class AppEvent implements JSONable {
 
     /**
      * Get the type of the provider of the events
+     *
      * @return the type of the provider
      */
     public EventType getType() {
@@ -81,6 +76,7 @@ public class AppEvent implements JSONable {
 
     /**
      * Get the condition
+     *
      * @return the condition
      */
     public Set<AppCondition> getConditions() {
@@ -91,20 +87,14 @@ public class AppEvent implements JSONable {
      * @see JSONable#getJSON()
      */
     public String getJSON() {
-        JSONObject json = new JSONObject()
-                .put(AppJsonConstant.VALUE, this.uri)
-                .put(AppJsonConstant.TYPE, this.type);
-
-        if(!conditions.isEmpty()) {
+        JSONObject json = new JSONObject().put(AppJsonConstant.VALUE, this.uri).put(AppJsonConstant.TYPE, this.type);
+        if (!conditions.isEmpty()) {
             JSONArray conditionsArray = new JSONArray();
-
             for (AppCondition condition : conditions) {
                 conditionsArray.put(condition.getJSON());
             }
-
             json.put(AppJsonConstant.APP_EVENTS_CONDITIONS, conditionsArray);
         }
-
         return json.toString();
     }
 }

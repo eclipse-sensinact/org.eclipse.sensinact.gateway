@@ -8,38 +8,31 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.simulated.button.internal;
 
-import org.eclipse.sensinact.gateway.simulated.button.api.ButtonSetterItf;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.simulated.button.api.ButtonSetterItf;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 public class ButtonGUI extends JLabel implements MouseListener, ButtonSetterItf {
-
     private final ImageIcon buttonOn;
     private final ImageIcon buttonOff;
     private final ButtonAdapter listener;
-
     private boolean state;
 
     public ButtonGUI(Mediator mediator, ButtonAdapter listener) {
         super();
         super.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-
         buttonOn = new ImageIcon(mediator.getContext().getBundle().getResource("images/button/on.png"));
         buttonOff = new ImageIcon(mediator.getContext().getBundle().getResource("images/button/off.png"));
-
         super.setIcon(buttonOff);
         this.state = false;
-
         super.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
         super.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         super.addMouseListener(this);
-
         this.listener = listener;
     }
 
@@ -56,32 +49,36 @@ public class ButtonGUI extends JLabel implements MouseListener, ButtonSetterItf 
      * @see MouseListener#mouseClicked(MouseEvent)
      */
     @Override
-    public void mouseClicked(MouseEvent arg0) {}
+    public void mouseClicked(MouseEvent arg0) {
+    }
 
     /**
      * @see MouseListener#mouseEntered(MouseEvent)
      */
     @Override
-    public void mouseEntered(MouseEvent event) {}
+    public void mouseEntered(MouseEvent event) {
+    }
 
     /**
      * @see MouseListener#mouseExited(MouseEvent)
      */
     @Override
-    public void mouseExited(MouseEvent event) {}
+    public void mouseExited(MouseEvent event) {
+    }
 
     /**
      * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
      */
     @Override
-    public void mousePressed(MouseEvent arg0) {}
+    public void mousePressed(MouseEvent arg0) {
+    }
 
     /**
      * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
      */
     @Override
     public void mouseReleased(MouseEvent arg0) {
-        if(state) {
+        if (state) {
             this.move(false);
             super.setIcon(buttonOff);
             state = false;

@@ -10,21 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.generic.annotation;
 
+import org.eclipse.sensinact.gateway.core.ResourceConfig;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.eclipse.sensinact.gateway.core.ResourceConfig;
-
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @Inherited
-@Target(value={ElementType.TYPE})
+@Target(value = {ElementType.TYPE})
 @Retention(value = RetentionPolicy.RUNTIME)
-public @interface TaskExecution
-{
-	String[] profile() default ResourceConfig.ALL_PROFILES;
+public @interface TaskExecution {
+    String[] profile() default ResourceConfig.ALL_PROFILES;
 }

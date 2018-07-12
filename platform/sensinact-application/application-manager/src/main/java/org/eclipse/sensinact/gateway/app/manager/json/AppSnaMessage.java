@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.manager.json;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -16,21 +15,19 @@ import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 
 /**
- * @see AbstractSnaMessage
- *
  * @author Remi Druilhe
+ * @see AbstractSnaMessage
  */
-public class AppSnaMessage extends SnaErrorMessageImpl
-{
+public class AppSnaMessage extends SnaErrorMessageImpl {
     /**
      * Constructor of the AppSnaMessage
-     * @see SnaErrorMessageImpl#SnaErrorMessageImpl(Mediator, String, Error, int)
-     * @param uri the URI of the service
-     * @param type the type of the message
+     *
+     * @param uri     the URI of the service
+     * @param type    the type of the message
      * @param message the string message
+     * @see SnaErrorMessageImpl#SnaErrorMessageImpl(Mediator, String, Error, int)
      */
-    public AppSnaMessage(Mediator mediator, String uri, Error type, String message)
-    {
+    public AppSnaMessage(Mediator mediator, String uri, Error type, String message) {
         super(mediator, uri, type);
         super.putValue("message", message);
     }

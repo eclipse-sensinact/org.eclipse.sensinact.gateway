@@ -24,7 +24,6 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  * @author Rémi Druilhe
  */
 public class ResourceData implements DataItf {
-
     private final Session session;
     private final String uri;
 
@@ -35,6 +34,7 @@ public class ResourceData implements DataItf {
 
     /**
      * Get the source sensiNact URI of this resource
+     *
      * @return the URI of the resource
      */
     public String getSourceUri() {
@@ -43,45 +43,41 @@ public class ResourceData implements DataItf {
 
     /**
      * The resource registered in the OSGi registry.
+     *
      * @return the resource. Null if the resource does not exist
      */
-    public Resource getResource()
-    {
-    	String[] uriElements = UriUtils.getUriElements(getSourceUri());
-    	if(uriElements.length != 3)
-    	{
-    		return null;
-    	}
-    	return session.resource(uriElements[0],uriElements[1],uriElements[2]);
+    public Resource getResource() {
+        String[] uriElements = UriUtils.getUriElements(getSourceUri());
+        if (uriElements.length != 3) {
+            return null;
+        }
+        return session.resource(uriElements[0], uriElements[1], uriElements[2]);
     }
-    
+
     /**
      * Get the value of the {@link Resource}
+     *
      * @return the value
      */
-    public Object getValue() 
-    {
-        return getResource().get(DataResource.VALUE
-        	).getResponse(DataResource.VALUE);
+    public Object getValue() {
+        return getResource().get(DataResource.VALUE).getResponse(DataResource.VALUE);
     }
 
     /**
      * Get the Java type of the {@link Resource}
+     *
      * @return the Java type
      */
-    public Class<?> getType() 
-    {
-        return CastUtils.jsonTypeToJavaType((String) getResource(
-        ).get(DataResource.VALUE).getResponse(DataResource.TYPE));
+    public Class<?> getType() {
+        return CastUtils.jsonTypeToJavaType((String) getResource().get(DataResource.VALUE).getResponse(DataResource.TYPE));
     }
 
     /**
      * Get the timestamp of the data
+     *
      * @return the timestamp of the data
      */
-    public long getTimestamp()
-    {
-        return getResource().get(DataResource.VALUE
-        	).getResponse(Long.class,Metadata.TIMESTAMP);
+    public long getTimestamp() {
+        return getResource().get(DataResource.VALUE).getResponse(Long.class, Metadata.TIMESTAMP);
     }
 }

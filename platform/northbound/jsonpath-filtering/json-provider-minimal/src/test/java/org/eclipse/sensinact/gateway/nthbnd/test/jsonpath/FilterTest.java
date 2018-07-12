@@ -1,17 +1,5 @@
 package org.eclipse.sensinact.gateway.nthbnd.test.jsonpath;
 
-import static com.jayway.jsonpath.Filter.filter;
-import static com.jayway.jsonpath.Filter.parse;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import org.assertj.core.util.Lists;
-import org.junit.Test;
-
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Criteria;
 import com.jayway.jsonpath.Filter;
@@ -19,27 +7,22 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Predicate;
 import com.jayway.jsonpath.Predicate.PredicateContext;
 import com.jayway.jsonpath.spi.builder.NodeBuilder;
+import org.assertj.core.util.Lists;
+import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import static com.jayway.jsonpath.Filter.filter;
+import static com.jayway.jsonpath.Filter.parse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FilterTest extends BaseTestConfiguration {
-
-	Configuration configuration = Configuration.defaultConfiguration();	
-	NodeBuilder builder = configuration.nodeBuilder();
-
-    Object json = configuration.jsonProvider().parse(
-            "{" +
-            "  \"int-key\" : 1, " +
-            "  \"long-key\" : 3000000000, " +
-            "  \"double-key\" : 10.1, " +
-            "  \"boolean-key\" : true, " +
-            "  \"null-key\" : null, " +
-            "  \"string-key\" : \"string\", " +
-            "  \"string-key-empty\" : \"\", " +
-            "  \"char-key\" : \"c\", " +
-            "  \"arr-empty\" : [], " +
-            "  \"int-arr\" : [0,1,2,3,4], " +
-            "  \"string-arr\" : [\"a\",\"b\",\"c\",\"d\",\"e\"] " +
-            "}"
-    );
+    Configuration configuration = Configuration.defaultConfiguration();
+    NodeBuilder builder = configuration.nodeBuilder();
+    Object json = configuration.jsonProvider().parse("{" + "  \"int-key\" : 1, " + "  \"long-key\" : 3000000000, " + "  \"double-key\" : 10.1, " + "  \"boolean-key\" : true, " + "  \"null-key\" : null, " + "  \"string-key\" : \"string\", " + "  \"string-key-empty\" : \"\", " + "  \"char-key\" : \"c\", " + "  \"arr-empty\" : [], " + "  \"int-arr\" : [0,1,2,3,4], " + "  \"string-arr\" : [\"a\",\"b\",\"c\",\"d\",\"e\"] " + "}");
 
     //----------------------------------------------------------------------------
     //
@@ -56,14 +39,10 @@ public class FilterTest extends BaseTestConfiguration {
     public void int_eq_string_evals() {
         assertThat(filter(builder.where("int-key").eq("1")).apply(createPredicateContext(json))).isEqualTo(true);
         assertThat(filter(builder.where("int-key").eq("666")).apply(createPredicateContext(json))).isEqualTo(false);
-
-
         assertThat(Filter.parse("[?(1 == '1')]").apply(createPredicateContext(json))).isEqualTo(true);
         assertThat(Filter.parse("[?('1' == 1)]").apply(createPredicateContext(json))).isEqualTo(true);
-
         assertThat(Filter.parse("[?(1 === '1')]").apply(createPredicateContext(json))).isEqualTo(false);
         assertThat(Filter.parse("[?('1' === 1)]").apply(createPredicateContext(json))).isEqualTo(false);
-
         assertThat(Filter.parse("[?(1 === 1)]").apply(createPredicateContext(json))).isEqualTo(true);
     }
 
@@ -106,6 +85,7 @@ public class FilterTest extends BaseTestConfiguration {
         assertThat(filter(builder.where("int-arr").eq("[0,1,2,3]")).apply(createPredicateContext(json))).isEqualTo(false);
         assertThat(filter(builder.where("int-arr").eq("[0,1,2,3,4,5]")).apply(createPredicateContext(json))).isEqualTo(false);
     }
+
     //----------------------------------------------------------------------------
     //
     // NE
@@ -318,7 +298,6 @@ public class FilterTest extends BaseTestConfiguration {
         assertThat(filter(builder.where("null-key").nin("a", null)).apply(createPredicateContext(json))).isEqualTo(false);
         assertThat(filter(builder.where("null-key").nin("a", "b")).apply(createPredicateContext(json))).isEqualTo(true);
         assertThat(filter(builder.where("string-arr").nin("a")).apply(createPredicateContext(json))).isEqualTo(true);
-
     }
 
     //----------------------------------------------------------------------------
@@ -328,17 +307,19 @@ public class FilterTest extends BaseTestConfiguration {
     //----------------------------------------------------------------------------
     @Test
     public void int_all_evals() {
-        assertThat(filter(builder.where("int-arr").all(0,1)).apply(createPredicateContext(json))).isEqualTo(true);
-        assertThat(filter(builder.where("int-arr").all(0,7)).apply(createPredicateContext(json))).isEqualTo(false);
+        assertThat(filter(builder.where("int-arr").all(0, 1)).apply(createPredicateContext(json))).isEqualTo(true);
+        assertThat(filter(builder.where("int-arr").all(0, 7)).apply(createPredicateContext(json))).isEqualTo(false);
     }
+
     @Test
     public void string_all_evals() {
-        assertThat(filter(builder.where("string-arr").all("a","b")).apply(createPredicateContext(json))).isEqualTo(true);
-        assertThat(filter(builder.where("string-arr").all("a","x")).apply(createPredicateContext(json))).isEqualTo(false);
+        assertThat(filter(builder.where("string-arr").all("a", "b")).apply(createPredicateContext(json))).isEqualTo(true);
+        assertThat(filter(builder.where("string-arr").all("a", "x")).apply(createPredicateContext(json))).isEqualTo(false);
     }
+
     @Test
     public void not_array_all_evals() {
-        assertThat(filter(builder.where("string-key").all("a","b")).apply(createPredicateContext(json))).isEqualTo(false);
+        assertThat(filter(builder.where("string-key").all("a", "b")).apply(createPredicateContext(json))).isEqualTo(false);
     }
 
     //----------------------------------------------------------------------------
@@ -395,7 +376,6 @@ public class FilterTest extends BaseTestConfiguration {
     public void exists_evals() {
         assertThat(filter(builder.where("string-key").exists(true)).apply(createPredicateContext(json))).isEqualTo(true);
         assertThat(filter(builder.where("string-key").exists(false)).apply(createPredicateContext(json))).isEqualTo(false);
-
         assertThat(filter(builder.where("missing-key").exists(true)).apply(createPredicateContext(json))).isEqualTo(false);
         assertThat(filter(builder.where("missing-key").exists(false)).apply(createPredicateContext(json))).isEqualTo(true);
     }
@@ -409,12 +389,9 @@ public class FilterTest extends BaseTestConfiguration {
     public void type_evals() {
         assertThat(filter(builder.where("string-key").type(String.class)).apply(createPredicateContext(json))).isEqualTo(true);
         assertThat(filter(builder.where("string-key").type(Number.class)).apply(createPredicateContext(json))).isEqualTo(false);
-
         assertThat(filter(builder.where("int-key").type(String.class)).apply(createPredicateContext(json))).isEqualTo(false);
         assertThat(filter(builder.where("int-key").type(Number.class)).apply(createPredicateContext(json))).isEqualTo(true);
-
         assertThat(filter(builder.where("null-key").type(String.class)).apply(createPredicateContext(json))).isEqualTo(false);
-
         assertThat(filter(builder.where("int-arr").type(List.class)).apply(createPredicateContext(json))).isEqualTo(true);
     }
 
@@ -427,10 +404,8 @@ public class FilterTest extends BaseTestConfiguration {
     public void not_empty_evals() {
         assertThat(filter(builder.where("string-key").notEmpty()).apply(createPredicateContext(json))).isEqualTo(true);
         assertThat(filter(builder.where("string-key-empty").notEmpty()).apply(createPredicateContext(json))).isEqualTo(false);
-
         assertThat(filter(builder.where("int-arr").notEmpty()).apply(createPredicateContext(json))).isEqualTo(true);
         assertThat(filter(builder.where("arr-empty").notEmpty()).apply(createPredicateContext(json))).isEqualTo(false);
-
         assertThat(filter(builder.where("null-key").notEmpty()).apply(createPredicateContext(json))).isEqualTo(false);
     }
 
@@ -443,38 +418,29 @@ public class FilterTest extends BaseTestConfiguration {
     public void empty_evals() {
         assertThat(filter(builder.where("string-key").empty(false)).apply(createPredicateContext(json))).isEqualTo(true);
         assertThat(filter(builder.where("string-key").empty(true)).apply(createPredicateContext(json))).isEqualTo(false);
-
         assertThat(filter(builder.where("string-key-empty").empty(true)).apply(createPredicateContext(json))).isEqualTo(true);
         assertThat(filter(builder.where("string-key-empty").empty(false)).apply(createPredicateContext(json))).isEqualTo(false);
-
         assertThat(filter(builder.where("int-arr").empty(false)).apply(createPredicateContext(json))).isEqualTo(true);
         assertThat(filter(builder.where("int-arr").empty(true)).apply(createPredicateContext(json))).isEqualTo(false);
-
         assertThat(filter(builder.where("arr-empty").empty(true)).apply(createPredicateContext(json))).isEqualTo(true);
         assertThat(filter(builder.where("arr-empty").empty(false)).apply(createPredicateContext(json))).isEqualTo(false);
-
         assertThat(filter(builder.where("null-key").empty(true)).apply(createPredicateContext(json))).isEqualTo(false);
         assertThat(filter(builder.where("null-key").empty(false)).apply(createPredicateContext(json))).isEqualTo(false);
     }
-
 
     //----------------------------------------------------------------------------
     //
     // MATCHES
     //
     //----------------------------------------------------------------------------
-
     @Test
     public void matches_evals() {
         Predicate p = new Predicate() {
             @Override
             public boolean apply(PredicateContext ctx) {
                 Map<String, Object> t = (Map<String, Object>) ctx.item();
-
                 Object o = t.get("int-key");
-
                 Integer i = (Integer) o;
-
                 return i == 1;
             }
         };
@@ -488,29 +454,22 @@ public class FilterTest extends BaseTestConfiguration {
     //----------------------------------------------------------------------------
     @Test
     public void or_and_filters_evaluates() {
-
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("foo", true);
         model.put("bar", false);
-
         Filter isFoo = filter(builder.where("foo").is(true));
         Filter isBar = filter(builder.where("bar").is(true));
-
-
         Filter fooOrBar = filter(builder.where("foo").is(true)).or(builder.where("bar").is(true));
         Filter fooAndBar = filter(builder.where("foo").is(true)).and(builder.where("bar").is(true));
-
         assertThat(isFoo.or(isBar).apply(createPredicateContext(model))).isTrue();
         assertThat(isFoo.and(isBar).apply(createPredicateContext(model))).isFalse();
         assertThat(fooOrBar.apply(createPredicateContext(model))).isTrue();
         assertThat(fooAndBar.apply(createPredicateContext(model))).isFalse();
-
     }
-
 
     @Test
     public void testFilterWithOrShortCircuit1() throws Exception {
-        Object json = Configuration.defaultConfiguration().jsonProvider().parse( "{\"firstname\":\"Bob\",\"surname\":\"Smith\",\"age\":30}");
+        Object json = Configuration.defaultConfiguration().jsonProvider().parse("{\"firstname\":\"Bob\",\"surname\":\"Smith\",\"age\":30}");
         assertThat(Filter.parse("[?((@.firstname == 'Bob' || @.firstname == 'Jane') && @.surname == 'Doe')]").apply(createPredicateContext(json))).isFalse();
     }
 
@@ -522,14 +481,11 @@ public class FilterTest extends BaseTestConfiguration {
 
     @Test
     public void criteria_can_be_parsed() {
-
         Criteria criteria = Configuration.defaultConfiguration().nodeBuilder().parse("@.foo == 'baar'");
         assertThat(criteria.toString()).isEqualTo("@['foo'] == 'baar'");
-
         criteria = Configuration.defaultConfiguration().nodeBuilder().parse("@.foo");
         assertThat(criteria.toString()).isEqualTo("@['foo']");
     }
-
 
     @Test
     public void inline_in_criteria_evaluates() {

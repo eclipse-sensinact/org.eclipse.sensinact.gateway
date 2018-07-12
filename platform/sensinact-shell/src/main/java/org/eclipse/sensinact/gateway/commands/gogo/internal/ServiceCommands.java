@@ -16,39 +16,30 @@ import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
 import org.json.JSONObject;
 
 public class ServiceCommands {
-
     private CommandServiceMediator mediator;
 
-
-    public ServiceCommands(CommandServiceMediator mediator) 
-    {
+    public ServiceCommands(CommandServiceMediator mediator) {
         this.mediator = mediator;
     }
 
-    
     /**
      * Display the existing sensiNact service instances
+     *
      * @param serviceProviderID the ID of the service provider
      */
     @Descriptor("display the existing sensiNact service instances")
-    public void services(@Descriptor("the service provider ID") String serviceProviderID)
-    {
-    	ShellAccess.proceed(mediator, new JSONObject().put("uri", 
-    			CommandServiceMediator.uri(serviceProviderID,
-    					null,null,true)));
+    public void services(@Descriptor("the service provider ID") String serviceProviderID) {
+        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, null, null, true)));
     }
 
     /**
      * Display the description of a specific sensiNact service instance
+     *
      * @param serviceProviderID the ID of the service provider
-     * @param serviceID the ID of the service
+     * @param serviceID         the ID of the service
      */
     @Descriptor("display the description of a specific sensiNact service instance")
-    public void service(@Descriptor("the service provider ID") String serviceProviderID,
-                        @Descriptor("the service ID") String serviceID) 
-    {
-    	ShellAccess.proceed(mediator, new JSONObject().put("uri", 
-    			CommandServiceMediator.uri(serviceProviderID, serviceID, 
-    					null,false)));
+    public void service(@Descriptor("the service provider ID") String serviceProviderID, @Descriptor("the service ID") String serviceID) {
+        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, null, false)));
     }
 }

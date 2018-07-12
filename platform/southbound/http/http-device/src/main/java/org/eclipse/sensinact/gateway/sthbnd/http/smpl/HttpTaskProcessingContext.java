@@ -10,9 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 
-public interface HttpTaskProcessingContext
-{
-	HttpTaskConfigurator getHttpTaskConfigurator();
-	
-	String resolve(String property);
+public interface HttpTaskProcessingContext {
+    HttpTaskConfigurator getHttpTaskConfigurator();
+
+    String resolve(String property);
 }

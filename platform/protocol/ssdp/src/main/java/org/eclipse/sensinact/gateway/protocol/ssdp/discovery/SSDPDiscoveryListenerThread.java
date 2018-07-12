@@ -29,38 +29,32 @@ import java.util.Enumeration;
  * Creates a thread that listen for responses from the multicast request it sends
  */
 public class SSDPDiscoveryListenerThread extends SSDPAbstractListenerThread {
-
     private DatagramChannel channel;
     private Thread thread;
 
     /**
      * Constructor.
+     *
      * @param notifier the notifier that will receive the discovery messages from the thread
      */
     public SSDPDiscoveryListenerThread(SSDPDiscoveryNotifier notifier, NetworkInterface networkInterface) {
         super(notifier, networkInterface);
-
         try {
             InetAddress addr = null;
             Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
-
-            while(addresses.hasMoreElements()) {
+            while (addresses.hasMoreElements()) {
                 InetAddress address = addresses.nextElement();
-
                 if (!(address instanceof Inet6Address)) {
                     addr = address;
                     break;
                 }
             }
-
             channel = DatagramChannel.open();
             channel.socket().bind(new InetSocketAddress(addr, 9654));
-
             this.sendDiscovery();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         thread = new Thread(this);
         thread.start();
     }
@@ -70,17 +64,14 @@ public class SSDPDiscoveryListenerThread extends SSDPAbstractListenerThread {
      */
     public void run() {
         ByteBuffer in = ByteBuffer.allocate(8000);
-
-        while(running) {
+        while (running) {
             try {
                 in.clear();
-
-                if(channel.isOpen()) {
+                if (channel.isOpen()) {
                     channel.receive(in);
                     in.flip();
                     byte[] buf = new byte[in.limit()];
                     in.get(buf, 0, in.limit());
-
                     notifier.newSSDPPacket(SSDPDiscoveryParser.parse(new String(buf)));
                 } else {
                     break;
@@ -96,7 +87,6 @@ public class SSDPDiscoveryListenerThread extends SSDPAbstractListenerThread {
      */
     public void stop() {
         this.running = false;
-
         try {
             channel.close();
         } catch (IOException e) {
@@ -106,19 +96,17 @@ public class SSDPDiscoveryListenerThread extends SSDPAbstractListenerThread {
 
     /**
      * Construct the M-SEARCH request and send it through the channel on the multicast address
+     *
      * @throws IOException
      */
     public void sendDiscovery() throws IOException {
         ByteBuffer buffer = ByteBuffer.allocate(8000);
-
         try {
             buffer.put(MSearchMessage.createMessage("upnp:rootdevice", 3).getBytes());
         } catch (InvalidParameterException e) {
             e.printStackTrace();
         }
-
         buffer.flip();
-
         channel.send(buffer, new InetSocketAddress(SSDPConstant.MULTICAST_IP, SSDPConstant.MULTICAST_PORT));
     }
 }

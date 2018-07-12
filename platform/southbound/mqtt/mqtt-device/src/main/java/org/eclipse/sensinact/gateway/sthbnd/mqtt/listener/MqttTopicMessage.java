@@ -14,7 +14,6 @@ import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 public abstract class MqttTopicMessage implements IMqttMessageListener {
-
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
         this.messageReceived(topic, new String(message.getPayload()));

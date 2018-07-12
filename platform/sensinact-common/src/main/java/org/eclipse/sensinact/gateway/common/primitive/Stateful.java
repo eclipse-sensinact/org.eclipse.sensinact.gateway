@@ -10,37 +10,29 @@
  */
 package org.eclipse.sensinact.gateway.common.primitive;
 
-
 /**
  * A service with a state
  *
- * @param <S>
- * 		extended Enum type defining the status
- * 
+ * @param <S> extended Enum type defining the status
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface Stateful<S extends Enum<S>>
-{
-	/**
+public interface Stateful<S extends Enum<S>> {
+    /**
      * Returns <code>&lt;S&gt;</code> typed status
      * of this stateful service
-     * 
-     * @return
-     * 		this stateful service's status
+     *
+     * @return this stateful service's status
      */
     S getStatus();
-    
+
     /**
      * Sets the <code>&lt;S&gt;</code> typed status
      * of this stateful service
-     * 
-     * @param status
-     * 		the <code>&lt;S&gt;</code> typed status to set
-     * @return
-     * 		the <code>&lt;S&gt;</code> typed status this 
-     * 		stateful service
-     * @throws InvalidValueException 
-     * 
+     *
+     * @param status the <code>&lt;S&gt;</code> typed status to set
+     * @return the <code>&lt;S&gt;</code> typed status this
+     * stateful service
+     * @throws InvalidValueException
      */
     S setStatus(S status) throws InvalidValueException;
 }

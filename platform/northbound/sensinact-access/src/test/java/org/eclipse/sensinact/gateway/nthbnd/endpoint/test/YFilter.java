@@ -3,66 +3,54 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint.test;
 import org.eclipse.sensinact.gateway.core.Filtering;
 
 /**
- *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class YFilter implements Filtering
-{	
-	//********************************************************************//
-	//						NESTED DECLARATIONS			  			      //
-	//********************************************************************//
+public class YFilter implements Filtering {
+    //********************************************************************//
+    //						NESTED DECLARATIONS			  			      //
+    //********************************************************************//
+    //********************************************************************//
+    //						ABSTRACT DECLARATIONS						  //
+    //********************************************************************//
+    //********************************************************************//
+    //						STATIC DECLARATIONS							  //
+    //********************************************************************//
+    //********************************************************************//
+    //						INSTANCE DECLARATIONS						  //
+    //********************************************************************//
 
-	//********************************************************************//
-	//						ABSTRACT DECLARATIONS						  //
-	//********************************************************************//
+    /**
+     *
+     */
+    public YFilter() {
+    }
 
-	//********************************************************************//
-	//						STATIC DECLARATIONS							  //
-	//********************************************************************//
+    /**
+     * @inheritDoc
+     * @see org.eclipse.sensinact.gateway.core.Filtering#handle(java.lang.String)
+     */
+    @Override
+    public boolean handle(String type) {
+        return "yfilter".equals(type);
+    }
 
-	//********************************************************************//
-	//						INSTANCE DECLARATIONS						  //
-	//********************************************************************//
+    /**
+     * @inheritDoc
+     * @see org.eclipse.sensinact.gateway.core.Filtering#apply(java.lang.String, java.lang.Object)
+     */
+    @Override
+    public String apply(String definition, Object result) {
+        String str = String.valueOf(result);
+        char flt = definition.charAt(0);
+        return str.replace(flt, 'Y');
+    }
 
-	/**
-	 * 
-	 */
-	public YFilter()
-	{
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Filtering#handle(java.lang.String)
-	 */
-	@Override
-	public boolean handle(String type)
-	{
-		return "yfilter".equals(type);
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Filtering#apply(java.lang.String, java.lang.Object)
-	 */
-	@Override
-	public String apply(String definition, Object result)
-	{
-		String str = String.valueOf(result);
-		char flt = definition.charAt(0);				
-		return str.replace(flt, 'Y');
-	}
-	
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.Filtering#getLDAPComponent()
-	 */
-	@Override
-	public String getLDAPComponent(String definition) 
-	{
-		return null;
-	}
+    /**
+     * @inheritDoc
+     * @see org.eclipse.sensinact.gateway.core.Filtering#getLDAPComponent()
+     */
+    @Override
+    public String getLDAPComponent(String definition) {
+        return null;
+    }
 }

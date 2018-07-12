@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.api.exception;
 
 /**
@@ -17,7 +16,6 @@ package org.eclipse.sensinact.gateway.app.api.exception;
  * @author Rémi Druilhe
  */
 public class LifeCycleException extends Exception {
-
     public LifeCycleException() {
         super();
     }
@@ -26,4 +24,3 @@ public class LifeCycleException extends Exception {
         super(message);
     }
 }
-

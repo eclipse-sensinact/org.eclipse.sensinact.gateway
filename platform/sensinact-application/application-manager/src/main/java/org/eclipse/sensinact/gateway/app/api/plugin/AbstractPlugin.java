@@ -14,7 +14,6 @@ import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.manager.json.AppFunction;
 
 public abstract class AbstractPlugin implements PluginInstaller {
-
     /**
      * @see PluginInstaller#getFunction(AppFunction)
      */

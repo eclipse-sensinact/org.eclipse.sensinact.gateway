@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.generic.packet;
 
 import java.util.Iterator;
 
-public interface StructuredPacket extends Packet
-{
-	Iterator<SubPacket> iterator();
+public interface StructuredPacket extends Packet {
+    Iterator<SubPacket> iterator();
 }

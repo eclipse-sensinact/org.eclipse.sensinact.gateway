@@ -10,6 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.remote.socket;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -17,10 +21,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * The ClientSocketThread is in charge of sending requests to the remote
@@ -30,7 +30,6 @@ import org.json.JSONObject;
  * @author <a href="mailto:stephane.bergeon@cea.fr">Stéphane Bergeon</a>
  */
 class ClientSocketThread implements Runnable {
-
     public static final long TIMEOUT_DELAY = 5000;  //5s timeout
     public static final long REQUEST_PERIOD = 100;  //try requesting every 100ms 
     public static final long GARBAGE_REQUEST_PERIOD = 10 * 60 * 1000;   //remove remaining timeout requests evry 10 min
@@ -38,19 +37,15 @@ class ClientSocketThread implements Runnable {
     private static final String UUID_KEY = "uuid";
     private boolean running;
     private SocketHolder holder = null;
-
     private final Map<String, String> requests;
     protected Mediator mediator;
-
     private final InetAddress remoteAddress;
     private final int remotePort;
     private final SocketEndpoint endpoint;
 
-    ClientSocketThread(Mediator mediator, SocketEndpoint endpoint,
-            String address, int port) throws IOException {
+    ClientSocketThread(Mediator mediator, SocketEndpoint endpoint, String address, int port) throws IOException {
         this.mediator = mediator;
         this.endpoint = endpoint;
-
         this.requests = new HashMap<String, String>();
         this.remoteAddress = InetAddress.getByName(address);
         this.remotePort = port;
@@ -66,8 +61,7 @@ class ClientSocketThread implements Runnable {
     }
 
     private boolean checkStatus() {
-        return this.holder != null
-                && this.holder.checkSocketStatus();
+        return this.holder != null && this.holder.checkSocketStatus();
     }
 
     private void close() {
@@ -83,11 +77,9 @@ class ClientSocketThread implements Runnable {
             return result;
         }
         final String uuid = generateUUID();
-
         object.put(UUID_KEY, uuid);
         try {
             this.holder.write(object);
-
         } catch (IOException e) {
             this.mediator.error(e);
             if (!this.holder.checkSocketStatus()) {
@@ -120,10 +112,8 @@ class ClientSocketThread implements Runnable {
             s.setReuseAddress(true);
             s.connect(new InetSocketAddress(remoteAddress, remotePort));
             this.holder = new SocketHolder(mediator, s);
-
         } catch (IOException e) {
             mediator.error(e);
-
         } finally {
             if (checkStatus()) {
                 this.running = true;
@@ -141,8 +131,7 @@ class ClientSocketThread implements Runnable {
                             final long now = System.currentTimeMillis();
                             final long delay = now - requestTime;
                             if (delay < TIMEOUT_DELAY) {    //avoid to put requests which response are out of delay because will never be removed from map
-                                this.requests.put(uuid,
-                                        object.optString("response"));
+                                this.requests.put(uuid, object.optString("response"));
                             } else {
                                 mediator.warn("void out of delay response for request " + uuid);
                             }
@@ -152,10 +141,8 @@ class ClientSocketThread implements Runnable {
             } catch (SocketException e) {
                 mediator.error(e);
                 break;
-
             } catch (IOException | JSONException e) {
                 mediator.error(e);
-
             } finally {
                 if (!this.checkStatus()) {
                     break;
@@ -171,6 +158,7 @@ class ClientSocketThread implements Runnable {
 
     /**
      * generate uuid
+     *
      * @return the generated uuid from current timestamp and hashcode
      */
     private String generateUUID() {
@@ -181,19 +169,19 @@ class ClientSocketThread implements Runnable {
 
     /**
      * generate uuid for a given time stamp
+     *
      * @param timestamp
      * @return the generated uuid from givn timestamp (for test purpose)
      */
     protected final String generateUUID(final long timestamp) {
         final long bluredTimestamp = timestamp + this.hashCode();
-        final String uuid = new StringBuilder().append(
-                UUID_PREFIX).append(bluredTimestamp
-                ).toString();
+        final String uuid = new StringBuilder().append(UUID_PREFIX).append(bluredTimestamp).toString();
         return uuid;
     }
 
     /**
      * retrieve the time stamp from a given uuid
+     *
      * @param uuid
      * @return the time stamp for the given uuid
      */

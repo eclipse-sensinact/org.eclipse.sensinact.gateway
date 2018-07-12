@@ -14,55 +14,47 @@ import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 
 /**
  * Data structure gathering the identifier of a {@link Task}
- * and its result value Object 
- * 
+ * and its result value Object
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class TaskIdValuePair implements Nameable
-{	
-	public final String taskIdentifier;
-	public final Object value;
-	public final long timestamp;
-	
-	/**
-	 * Constructor 
-	 * 
-	 * @param taskIdentifier
-	 * 		the identifier of a {@link Task}
-	 * @param value
-	 * 		 result value Object of the identified {@link Task}
-	 */
-	TaskIdValuePair(String taskIdentifier, Object value, long timestamp)
-	{		
-		this.taskIdentifier = taskIdentifier;
-		this.timestamp = timestamp;
-		this.value = value;
-	}
+public class TaskIdValuePair implements Nameable {
+    public final String taskIdentifier;
+    public final Object value;
+    public final long timestamp;
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see Nameable#getName()
-	 */
+    /**
+     * Constructor
+     *
+     * @param taskIdentifier the identifier of a {@link Task}
+     * @param value          result value Object of the identified {@link Task}
+     */
+    TaskIdValuePair(String taskIdentifier, Object value, long timestamp) {
+        this.taskIdentifier = taskIdentifier;
+        this.timestamp = timestamp;
+        this.value = value;
+    }
+
+    /**
+     * @inheritDoc
+     * @see Nameable#getName()
+     */
     @Override
-    public String getName()
-    {
-    	return this.taskIdentifier;
+    public String getName() {
+        return this.taskIdentifier;
     }
 
-	/**
-	 * @return
-	 */
-    public Object getValue()
-    {
-	    return this.value;
+    /**
+     * @return
+     */
+    public Object getValue() {
+        return this.value;
     }
 
-	/**
-	 * @return
-	 */
-    public long getTimestamp()
-    {
-	    return this.timestamp;
+    /**
+     * @return
+     */
+    public long getTimestamp() {
+        return this.timestamp;
     }
 }

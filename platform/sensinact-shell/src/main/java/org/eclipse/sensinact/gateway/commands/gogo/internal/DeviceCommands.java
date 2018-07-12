@@ -10,24 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.commands.gogo.internal;
 
+import org.apache.felix.service.command.Descriptor;
 import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccess;
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
-import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.LocationResource;
-import org.eclipse.sensinact.gateway.core.Service;
-import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.json.JSONObject;
-import org.apache.felix.service.command.Descriptor;
 
 import java.security.InvalidKeyException;
-import java.util.List;
-import java.util.Set;
 
 public class DeviceCommands {
-
     private CommandServiceMediator mediator;
-
 
     public DeviceCommands(CommandServiceMediator mediator) throws DataStoreException, InvalidKeyException {
         this.mediator = mediator;
@@ -37,21 +29,17 @@ public class DeviceCommands {
      * Display the existing sensiNact service providers instances
      */
     @Descriptor("display the existing sensiNact service providers instances")
-    public void devices()
-    {
-    	ShellAccess.proceed(mediator, new JSONObject().put("uri", 
-    		CommandServiceMediator.uri(null,null,null,true)));
+    public void devices() {
+        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(null, null, null, true)));
     }
 
     /**
      * Display the description of a specific sensiNact service provider instance
+     *
      * @param serviceProviderID the ID of the service provider
      */
     @Descriptor("display the description of a specific sensiNact service provider instance")
-    public void device(@Descriptor("the device ID") String serviceProviderID)
-    {
-    	ShellAccess.proceed(mediator, new JSONObject().put("uri", 
-    			CommandServiceMediator.uri(serviceProviderID,
-    					null,null,false)));
+    public void device(@Descriptor("the device ID") String serviceProviderID) {
+        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, null, null, false)));
     }
 }

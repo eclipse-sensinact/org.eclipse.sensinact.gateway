@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.generic.test.moke;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -18,32 +17,24 @@ import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFact
 import org.json.JSONObject;
 
 /**
- * 
+ *
  */
-public class MokeTriggerFactory implements AccessMethodTriggerFactory
-{
+public class MokeTriggerFactory implements AccessMethodTriggerFactory {
+    /**
+     * @inheritDoc
+     * @see AccessMethodTriggerFactory#handle(String)
+     */
+    @Override
+    public boolean handle(String type) {
+        return "VARIATIONTEST_TRIGGER".equals(type);
+    }
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AccessMethodTriggerFactory#handle(String)
-	 */
-	@Override
-	public boolean handle(String type)
-	{
-		return "VARIATIONTEST_TRIGGER".equals(type);
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AccessMethodTriggerFactory#newInstance(Mediator, JSONObject)
-	 */
-	@Override
-	public <P> AccessMethodTrigger<P> newInstance(Mediator mediator,
-												  JSONObject trigger) throws InvalidValueException
-	{
-		return (AccessMethodTrigger<P>) new MokeTrigger();
-	}
-
+    /**
+     * @inheritDoc
+     * @see AccessMethodTriggerFactory#newInstance(Mediator, JSONObject)
+     */
+    @Override
+    public <P> AccessMethodTrigger<P> newInstance(Mediator mediator, JSONObject trigger) throws InvalidValueException {
+        return (AccessMethodTrigger<P>) new MokeTrigger();
+    }
 }

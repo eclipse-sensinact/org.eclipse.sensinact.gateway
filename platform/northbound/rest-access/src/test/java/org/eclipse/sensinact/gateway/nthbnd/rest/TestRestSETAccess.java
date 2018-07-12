@@ -10,112 +10,87 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.rest;
 
-import static org.junit.Assert.assertTrue;
-
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.http.test.HttpServiceTestClient;
+import org.eclipse.sensinact.gateway.nthbnd.rest.ws.test.WsServiceTestClient;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.nthbnd.rest.ws.test.WsServiceTestClient;
+import static org.junit.Assert.assertTrue;
 
-public class TestRestSETAccess  extends TestRestAccess
-{
-	public TestRestSETAccess() throws Exception
-	{
-		super();
-	}
-	
-	@Test
-	public void testHttpAccessMethodSET() throws Exception
-	{
-		Mediator mediator = new Mediator(context);
-        String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL  +
-        	"/providers/slider/services/admin/resources/location/GET", null, "GET");
-        
+public class TestRestSETAccess extends TestRestAccess {
+    public TestRestSETAccess() throws Exception {
+        super();
+    }
+
+    @Test
+    public void testHttpAccessMethodSET() throws Exception {
+        Mediator mediator = new Mediator(context);
+        String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/GET", null, "GET");
+
         JSONObject response = new JSONObject(simulated);
-        
+
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/admin/location"));
         assertTrue(response.getJSONObject("response").get("value").equals("45.19334890078532:5.706474781036377"));
+        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/SET", "{\"parameters\":[{\"name\": \"location\",\"value\": \"0.0,0.0\",\"type\": \"string\"}]}", "POST");
 
-
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL  + 
-        	"/providers/slider/services/admin/resources/location/SET",
-        	"{\"parameters\":[{\"name\": \"location\",\"value\": \"0.0,0.0\",\"type\": \"string\"}]}", "POST");
-        
         response = new JSONObject(simulated);
-        
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL  + 
-            	"/providers/slider/services/admin/resources/location/GET", null, "GET");
-            
+
+        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/GET", null, "GET");
 
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/admin/location"));
-        assertTrue(response.getJSONObject("response").get("value").equals("0.0,0.0"));	
-	}	
-	
-	@Test
-	public void testWsAccessMethodSET() throws Exception
-	{	
+        assertTrue(response.getJSONObject("response").get("value").equals("0.0,0.0"));
+    }
+
+    @Test
+    public void testWsAccessMethodSET() throws Exception {
         JSONObject response;
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
-                
-		new Thread(client).start();
-		
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + 
-        	"/providers/slider/services/admin/resources/location/GET", null);
-        
+
+        new Thread(client).start();
+
+        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/slider/services/admin/resources/location/GET", null);
+
         response = new JSONObject(simulated);
-        
+
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/admin/location"));
         assertTrue(response.getJSONObject("response").get("value").equals("45.19334890078532:5.706474781036377"));
+        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/slider/services/admin/resources/location/SET", "[{\"name\": \"location\",\"value\": \"0.0,0.0\",\"type\": \"string\"}]");
 
-
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + 
-            "/providers/slider/services/admin/resources/location/SET",
-        	"[{\"name\": \"location\",\"value\": \"0.0,0.0\",\"type\": \"string\"}]");
-        
         response = new JSONObject(simulated);
-        
-        simulated =  this.synchronizedRequest(client, WS_ROOTURL + 
-            	"/providers/slider/services/admin/resources/location/GET", null);
-            
+
+        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/slider/services/admin/resources/location/GET", null);
 
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/admin/location"));
-        assertTrue(response.getJSONObject("response").get("value").equals("0.0,0.0"));	
-	}
-	
-	private String synchronizedRequest(WsServiceTestClient client, 
-			String url, String content)
-	{
-		String simulated = null; 
-		long wait = 1000;
+        assertTrue(response.getJSONObject("response").get("value").equals("0.0,0.0"));
+    }
+
+    private String synchronizedRequest(WsServiceTestClient client, String url, String content) {
+        String simulated = null;
+        long wait = 1000;
 //		long start = System.currentTimeMillis();
-		
+
         client.newRequest(url, content);
-        
-        while(!client.isAvailable() && wait > 0)
-        {
-        	try
-        	{
-        	Thread.sleep(100);
-        	} catch (InterruptedException e)
-        	{
-        		Thread.interrupted();
-        	}
+
+        while (!client.isAvailable() && wait > 0) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.interrupted();
+            }
         }
-        if(client.isAvailable())
-        {
-        	simulated = client.getResponseMessage();
+        if (client.isAvailable()) {
+            simulated = client.getResponseMessage();
         }
 //        System.out.println(String.format(
 //        		"Response returned in %s ms",
 //        		(System.currentTimeMillis()-start)));
-        
+
         return simulated;
-	}
+    }
 }

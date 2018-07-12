@@ -15,13 +15,13 @@ import org.eclipse.sensinact.gateway.protocol.ssdp.listener.SSDPDiscoveryNotifie
 import java.net.NetworkInterface;
 
 public abstract class SSDPAbstractListenerThread implements Runnable {
-
     protected SSDPDiscoveryNotifier notifier;
     protected NetworkInterface networkInterface;
     protected boolean running;
 
     /**
      * Constructor.
+     *
      * @param notifier the notifier that will receive the discovery messages from the thread
      */
     public SSDPAbstractListenerThread(SSDPDiscoveryNotifier notifier, NetworkInterface networkInterface) {

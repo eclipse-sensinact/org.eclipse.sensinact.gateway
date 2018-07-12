@@ -12,10 +12,10 @@ package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.e
 
 /**
  * This exception is raised whenever the format send to the processor to not correspont to the accepted respective processor syntax
+ *
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class ProcessorFormatException extends org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.exception.ProcessorException {
-
     public ProcessorFormatException(String message) {
         super(message);
     }

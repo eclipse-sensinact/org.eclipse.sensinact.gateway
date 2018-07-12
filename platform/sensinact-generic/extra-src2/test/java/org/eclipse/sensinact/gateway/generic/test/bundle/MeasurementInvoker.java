@@ -16,22 +16,17 @@ import org.eclipse.sensinact.gateway.generic.annotation.TaskExecution;
 import org.json.JSONObject;
 
 /**
- * 
+ *
  */
-@TaskExecution(profile={"measurement"})
-public class MeasurementInvoker
-{
-	@TaskCommand(target="/*/*/threshold", method = Task.CommandType.GET)
-	Object get(String uri , String attributeName)
-	{
-		return 0.2f;
-	}		
-	
-	@TaskCommand(target="/*/*/activate", method = Task.CommandType.ACT)
-	JSONObject act(Object...parameters)
-	{		
-		return parameters!=null
-				?new JSONObject().put("value", ((Float)parameters[1]).floatValue())
-						:new JSONObject().put("value",0.0f);
-	}		
+@TaskExecution(profile = {"measurement"})
+public class MeasurementInvoker {
+    @TaskCommand(target = "/*/*/threshold", method = Task.CommandType.GET)
+    Object get(String uri, String attributeName) {
+        return 0.2f;
+    }
+
+    @TaskCommand(target = "/*/*/activate", method = Task.CommandType.ACT)
+    JSONObject act(Object... parameters) {
+        return parameters != null ? new JSONObject().put("value", ((Float) parameters[1]).floatValue()) : new JSONObject().put("value", 0.0f);
+    }
 }

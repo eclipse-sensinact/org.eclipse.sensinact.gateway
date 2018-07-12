@@ -10,11 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.remote.socket;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * OutputStream wrapper
@@ -22,39 +21,33 @@ import org.json.JSONObject;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class SocketOutputStreamWriter {
+    private OutputStream output;
 
-	private OutputStream output;
+    /**
+     * Constructor
+     */
+    public SocketOutputStreamWriter(OutputStream output) {
+        this.output = output;
+    }
 
-	/**
-	 * Constructor
-	 */
-	public SocketOutputStreamWriter(OutputStream output) 
-	{
-		this.output = output;
-	}
+    /**
+     * @param response
+     * @throws IOException
+     */
+    protected void write(JSONObject response) throws IOException {
+        int block = SocketEndpoint.BUFFER_SIZE;
+        byte[] data = response.toString().getBytes();
+        int written = 0;
+        int length = data == null ? 0 : data.length;
 
-	/**
-	 * @param response
-	 * @throws IOException
-	 */
-	protected void write(JSONObject response) throws IOException
-	{
-		int block = SocketEndpoint.BUFFER_SIZE;
-		byte[] data = response.toString().getBytes();
-		int written = 0;
-		int length = data==null?0:data.length;			
-		
-		while(written < length)
-		{
-			if((written+block) > length)
-			{
-				block = length-written;
-			}
-			output.write(data, written, block);
-			written+=block;
-		}	
-		output.write(new byte[]{'\0'});
-		output.flush();
-	}	
-
+        while (written < length) {
+            if ((written + block) > length) {
+                block = length - written;
+            }
+            output.write(data, written, block);
+            written += block;
+        }
+        output.write(new byte[]{'\0'});
+        output.flush();
+    }
 }

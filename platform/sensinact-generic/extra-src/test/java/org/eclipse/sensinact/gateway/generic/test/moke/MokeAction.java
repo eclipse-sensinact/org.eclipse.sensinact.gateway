@@ -18,37 +18,29 @@ import org.eclipse.sensinact.gateway.generic.annotation.Act;
 import org.json.JSONObject;
 
 /**
- * 
+ *
  */
-public class MokeAction extends ExtResourceImpl
-{
-
-	/**
-	 * @param resourceConfig
-	 * @param service
-	 */
-    protected MokeAction(ExtModelInstance<?> snaModelInstance,
-						 ExtResourceConfig resourceConfig, ExtServiceImpl service)
-    {
-	    super(snaModelInstance, resourceConfig, service);
+public class MokeAction extends ExtResourceImpl {
+    /**
+     * @param resourceConfig
+     * @param service
+     */
+    protected MokeAction(ExtModelInstance<?> snaModelInstance, ExtResourceConfig resourceConfig, ExtServiceImpl service) {
+        super(snaModelInstance, resourceConfig, service);
     }
 
     @Act
-    JSONObject act(String number, String message)
-    {
-    	
-    	JSONObject jsonObject = new JSONObject().put(
-    			"message", number+" called : "+message);
-    	
-    	return jsonObject;
+    JSONObject act(String number, String message) {
+
+        JSONObject jsonObject = new JSONObject().put("message", number + " called : " + message);
+
+        return jsonObject;
     }
 
     @Act
-    public JSONObject act()
-    {
-    	JSONObject jsonObject = new JSONObject().put(
-    			"message", "empty call");
-    	
-    	return jsonObject;
+    public JSONObject act() {
+        JSONObject jsonObject = new JSONObject().put("message", "empty call");
+
+        return jsonObject;
     }
 }

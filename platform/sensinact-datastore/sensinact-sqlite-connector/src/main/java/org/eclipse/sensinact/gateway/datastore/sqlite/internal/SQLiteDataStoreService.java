@@ -10,151 +10,117 @@
  */
 package org.eclipse.sensinact.gateway.datastore.sqlite.internal;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreConnectionProvider;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
+import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
+import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
+import org.eclipse.sensinact.gateway.datastore.jdbc.JdbcDataStoreService;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreConnectionProvider;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
-import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
-import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
-import org.eclipse.sensinact.gateway.datastore.jdbc.JdbcDataStoreService;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
-
 /**
- *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class SQLiteDataStoreService extends JdbcDataStoreService
-{
-	//********************************************************************//
-	//						NESTED DECLARATIONS			  			      //
-	//********************************************************************//
+public class SQLiteDataStoreService extends JdbcDataStoreService {
+    //********************************************************************//
+    //						NESTED DECLARATIONS			  			      //
+    //********************************************************************//
+    //********************************************************************//
+    //						ABSTRACT DECLARATIONS						  //
+    //********************************************************************//
+    //********************************************************************//
+    //						STATIC DECLARATIONS							  //
+    //********************************************************************//
+    //********************************************************************//
+    //						INSTANCE DECLARATIONS						  //
+    //********************************************************************//
+    private SQLiteConnectionProvider provider;
 
-	//********************************************************************//
-	//						ABSTRACT DECLARATIONS						  //
-	//********************************************************************//
+    /**
+     * @param mediator
+     * @param dbName
+     * @throws UnableToFindDataStoreException
+     * @throws UnableToConnectToDataStoreException
+     */
+    public SQLiteDataStoreService(Mediator mediator, String dbName) throws UnableToFindDataStoreException, UnableToConnectToDataStoreException {
+        super(mediator);
+        this.provider = new SQLiteConnectionProvider(mediator, dbName);
+    }
 
-	//********************************************************************//
-	//						STATIC DECLARATIONS							  //
-	//********************************************************************//
+    /**
+     * @inheritDoc
+     * @see JdbcDataStoreService#
+     * getDataBaseConnectionProvider(java.lang.String)
+     */
+    @Override
+    protected DataStoreConnectionProvider<Connection> getDataBaseConnectionProvider() {
+        return this.provider;
+    }
 
-	//********************************************************************//
-	//						INSTANCE DECLARATIONS						  //
-	//********************************************************************//
+    /**
+     * @inheritDoc
+     * @see JdbcDataStoreService#stop()
+     */
+    public void stop() {
+        if (provider != null) {
+            provider.stop();
+            while (provider.getCount() > 0) {
+                try {
+                    Thread.sleep(10);
 
-	private SQLiteConnectionProvider provider;
+                } catch (InterruptedException ex) {
+                    Thread.interrupted();
+                    ex.printStackTrace();
+                }
+            }
+        }
+        provider = null;
+    }
 
-	/**
-	 * @param mediator
-	 * @param dbName
-	 * @throws UnableToFindDataStoreException
-	 * @throws UnableToConnectToDataStoreException 
-	 */
-	public SQLiteDataStoreService(Mediator mediator, String dbName)
-	        throws UnableToFindDataStoreException, 
-	        UnableToConnectToDataStoreException
-	{
-		super(mediator);
-	    this.provider = new SQLiteConnectionProvider(mediator, dbName);    
-	}
+    /**
+     * @inheritDoc
+     * @see DataStoreService#
+     * insert(java.lang.String)
+     */
+    @Override
+    public long insert(final String query) {
+        return super.<Long>executeStatement(new Executable<Statement, Long>() {
+            @Override
+            public Long execute(Statement statement) throws Exception {
+                ResultSet rs = null;
+                long lastID = -1;
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see JdbcDataStoreService#
-	 * getDataBaseConnectionProvider(java.lang.String)
-	 */
-	@Override
-	protected DataStoreConnectionProvider<Connection> getDataBaseConnectionProvider()
-	{
-		return this.provider;
-	}
-	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see JdbcDataStoreService#stop()
-	 */
-	public void stop()
-	{	
-		if(provider != null)
-		{
-			provider.stop();
-			while(provider.getCount()>0)
-			{
-				try
-				{
-					Thread.sleep(10);
-				
-				} catch (InterruptedException ex)
-				{
-					Thread.interrupted();
-					ex.printStackTrace();
-				}
-			}
-		}	
-		provider = null;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see DataStoreService#
-	 * insert(java.lang.String)
-	 */
-	@Override
-	public long insert(final String query)
-	{
-		return super.<Long>executeStatement(
-			new Executable<Statement, Long>()
-			{
-				@Override
-				public Long execute(Statement statement) 
-						throws Exception
-				{	
-					ResultSet rs = null;
-					long lastID = -1;
-					
-					synchronized (lock) 
-					{
-						try
-						{
-							statement.addBatch(query);
-							statement.executeBatch();
-							rs = statement.executeQuery(
-									"SELECT last_insert_rowid() AS LASTID;");
-							if(rs.next())
-							{
-								lastID = rs.getLong(1);
-							}
-							Connection connection = statement.getConnection();
-							connection.commit();
-
-						} catch (Exception e) 
-						{
-							synchronized (lock) 
-							{
-								try 
-								{
-									statement.getConnection().rollback();
-
-								} catch (SQLException ex)
-								{
-									throw new DataStoreException(ex);
-
-								} catch (NullPointerException ex) {
-									// do nothing
-								}
-							}
-							throw new DataStoreException(e);
-						}
-					}
-					return lastID;				
-				}
-			});
-	}
+                synchronized (lock) {
+                    try {
+                        statement.addBatch(query);
+                        statement.executeBatch();
+                        rs = statement.executeQuery("SELECT last_insert_rowid() AS LASTID;");
+                        if (rs.next()) {
+                            lastID = rs.getLong(1);
+                        }
+                        Connection connection = statement.getConnection();
+                        connection.commit();
+                    } catch (Exception e) {
+                        synchronized (lock) {
+                            try {
+                                statement.getConnection().rollback();
+                            } catch (SQLException ex) {
+                                throw new DataStoreException(ex);
+                            } catch (NullPointerException ex) {
+                                // do nothing
+                            }
+                        }
+                        throw new DataStoreException(e);
+                    }
+                }
+                return lastID;
+            }
+        });
+    }
 }

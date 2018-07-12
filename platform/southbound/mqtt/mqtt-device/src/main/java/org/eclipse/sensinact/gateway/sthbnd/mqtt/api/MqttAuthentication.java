@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.sthbnd.mqtt.api;
 import java.util.Properties;
 
 public class MqttAuthentication {
-
     private String username;
     private String password;
     private String certificate;
@@ -46,7 +45,6 @@ public class MqttAuthentication {
      * The builder abstraction.
      */
     public static class Builder {
-
         private String username = null;
         private String password = null;
         private String certificate = null;

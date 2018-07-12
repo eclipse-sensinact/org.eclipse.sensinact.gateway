@@ -11,55 +11,46 @@
 package org.eclipse.sensinact.gateway.generic;
 
 /**
- * Exception thrown by a resource at initialization time if an error 
+ * Exception thrown by a resource at initialization time if an error
  * occurred
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class InvalidTaskCallBackException extends Exception
-{
+public class InvalidTaskCallBackException extends Exception {
     /**
      * Constructor
      */
-    public InvalidTaskCallBackException()
-    {
+    public InvalidTaskCallBackException() {
         super();
     }
 
     /**
      * Constructor
-     * 
-     * @param message
-     *            the exception message
+     *
+     * @param message the exception message
      */
-    public InvalidTaskCallBackException(String message)
-    {
+    public InvalidTaskCallBackException(String message) {
         super(message);
     }
 
     /**
      * Constructor
-     * 
-     * @param cause
-     *            the {@link Throwable} object which has caused the current
-     *            exception
+     *
+     * @param cause the {@link Throwable} object which has caused the current
+     *              exception
      */
-    public InvalidTaskCallBackException(Throwable cause)
-    {
+    public InvalidTaskCallBackException(Throwable cause) {
         super(cause);
     }
 
     /**
      * Constructor
-     * 
-     * @param message
-     *            the exception message
-     * @param cause
-     *            the {@link Throwable} object which has caused the current
-     *            exception
+     *
+     * @param message the exception message
+     * @param cause   the {@link Throwable} object which has caused the current
+     *                exception
      */
-    public InvalidTaskCallBackException(String message, Throwable cause)
-    {
+    public InvalidTaskCallBackException(String message, Throwable cause) {
         super(message, cause);
     }
 }

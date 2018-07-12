@@ -14,20 +14,14 @@ package org.eclipse.sensinact.gateway.app.manager.component;
  * @author Rémi Druilhe
  */
 public class ComponentConstant {
-
     /********************************
      * Data produced by a component *
      ********************************/
-
     public static final String RESULT_DATA = "result";
-
     public static final String STATUS_DATA = "status";
-
     /*****************************
      * Properties of a component *
      *****************************/
-
     public static final String REGISTER_PROPERTY = "register";
-
     public static final String SYNCHRONOUS_PROPERTY = "synchronous";
 }

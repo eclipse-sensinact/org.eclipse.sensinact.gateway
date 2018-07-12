@@ -10,80 +10,68 @@
  */
 package org.eclipse.sensinact.gateway.generic.parser;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.xml.sax.Attributes;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-
 /**
  * Command definition wrapping its type and its bytes array identifier
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @XmlAttributes({@XmlAttribute(attribute = "type", field = "commandType")})
-public final class CommandDefinition extends XmlDefinition
-{
+public final class CommandDefinition extends XmlDefinition {
     private Task.CommandType commandType;
     private IdentifierDefinition identifierDefinition;
 
     /**
      * Constructor
-     * 
-     * @param mediator
-     *      the associated Mediator
-     * @param atts
-     *      the set of attributes data structure for the 
-     *      xml command element
+     *
+     * @param mediator the associated Mediator
+     * @param atts     the set of attributes data structure for the
+     *                 xml command element
      */
-    public CommandDefinition(Mediator mediator, Attributes atts)
-    {
+    public CommandDefinition(Mediator mediator, Attributes atts) {
         super(mediator, atts);
     }
-    
+
     /**
      * @param commandType
      */
-    public void setCommandType(String commandType)
-    {
+    public void setCommandType(String commandType) {
         this.commandType = Task.CommandType.valueOf(commandType);
     }
-    
+
     /**
-     * Sets the {@link IdentifierDefinition} wrapping the bytes array 
+     * Sets the {@link IdentifierDefinition} wrapping the bytes array
      * identifier of this CommandDefinition
-     * 
-     * @param identifierDefinition
-     *      the {@link IdentifierDefinition} wrapping the bytes array 
-     *      identifier of this CommandDefinition
+     *
+     * @param identifierDefinition the {@link IdentifierDefinition} wrapping the bytes array
+     *                             identifier of this CommandDefinition
      */
-    public void setIdentifier(IdentifierDefinition identifierDefinition)
-    {
+    public void setIdentifier(IdentifierDefinition identifierDefinition) {
         this.identifierDefinition = identifierDefinition;
     }
 
     /**
      * Returns the {@link Task.CommandType} of this
      * CommandDefinition
-     * 
-     * @return 
-     *      the {@link Task.CommandType} of this
-     *      CommandDefinition
+     *
+     * @return the {@link Task.CommandType} of this
+     * CommandDefinition
      */
-    public Task.CommandType getCommandType()
-    {
+    public Task.CommandType getCommandType() {
         return this.commandType;
     }
 
     /**
-     * Returns this CommandDefinition's bytes array 
+     * Returns this CommandDefinition's bytes array
      * identifier
-     * 
-     * @return 
-     *      this CommandDefinition's bytes array 
-     *      identifier
+     *
+     * @return this CommandDefinition's bytes array
+     * identifier
      */
-    public byte[] getIdentifier()
-    {
+    public byte[] getIdentifier() {
         return this.identifierDefinition.getIdentifier();
     }
 }

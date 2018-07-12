@@ -11,7 +11,11 @@
 package org.eclipse.sensinact.gateway.sthbnd.http.android;
 
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.*;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
@@ -28,10 +32,8 @@ public class AndroidWebSocketWrapper {
     private Logger LOG = LoggerFactory.getLogger(AndroidWebSocketWrapper.class.getName());
     private final LocalProtocolStackEndpoint<DevGenPacket> endpoint;
     private List<String> providers = new ArrayList<String>();
-
     protected Session session;
     protected Mediator mediator;
-
 
     protected AndroidWebSocketWrapper(Mediator mediator, LocalProtocolStackEndpoint<DevGenPacket> endpoint) {
         this.mediator = mediator;
@@ -57,7 +59,7 @@ public class AndroidWebSocketWrapper {
             try {
                 endpoint.process(pack);
             } catch (InvalidPacketException e) {
-                LOG.error("failed to remove all providers generated via websocket",e);
+                LOG.error("failed to remove all providers generated via websocket", e);
             }
         }
     }

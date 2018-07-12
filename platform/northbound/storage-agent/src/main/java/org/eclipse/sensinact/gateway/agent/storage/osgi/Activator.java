@@ -10,74 +10,61 @@
  */
 package org.eclipse.sensinact.gateway.agent.storage.osgi;
 
+import org.eclipse.sensinact.gateway.agent.storage.internal.StorageAgent;
 import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.osgi.framework.BundleContext;
-import org.eclipse.sensinact.gateway.agent.storage.internal.StorageAgent;
 import org.eclipse.sensinact.gateway.core.Core;
+import org.osgi.framework.BundleContext;
 
 /**
  * Extended {@link AbstractActivator}
  */
 public class Activator extends AbstractActivator<Mediator> {
-
     @Property
     private String login;
     @Property
     private String password;
     @Property(validationRegex = "^http[s]*://.*/write/measure$")
     private String broker;
-
     private StorageAgent handler;
     private String registration;
 
     /**
      * @inheritDoc
-     *
      * @see AbstractActivator#doStart() (org.osgi.framework.BundleContext)
      */
     @Override
     public void doStart() throws Exception {
         try {
-            if(super.mediator.isDebugLoggable()) {
+            if (super.mediator.isDebugLoggable()) {
                 super.mediator.debug("Starting storage agent.");
             }
-
-            this.handler = new StorageAgent(login,password,broker,super.mediator);
-
-            this.registration = mediator.callService(Core.class,
-                    new Executable<Core,String>()
-            {
+            this.handler = new StorageAgent(login, password, broker, super.mediator);
+            this.registration = mediator.callService(Core.class, new Executable<Core, String>() {
                 @Override
-                public String execute(Core service) throws Exception
-                {
-                   return service.registerAgent(mediator, 
-                		   Activator.this.handler, null);
+                public String execute(Core service) throws Exception {
+                    return service.registerAgent(mediator, Activator.this.handler, null);
                 }
             });
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     /**
      * @inheritDoc
-     *
      * @see AbstractActivator#doStop()
      */
     @Override
     public void doStop() throws Exception {
-        if(super.mediator.isDebugLoggable()) {
+        if (super.mediator.isDebugLoggable()) {
             super.mediator.debug("Stopping storage agent.");
         }
-        mediator.callService(Core.class,
-                new Executable<Core,Void>()
-        {
+        mediator.callService(Core.class, new Executable<Core, Void>() {
             @Override
-            public Void execute(Core service) throws Exception
-            {
+            public Void execute(Core service) throws Exception {
                 service.unregisterAgent(Activator.this.registration);
                 return null;
             }
@@ -88,7 +75,6 @@ public class Activator extends AbstractActivator<Mediator> {
 
     /**
      * @inheritDoc
-     *
      * @see AbstractActivator#doInstantiate(BundleContext)
      */
     @Override

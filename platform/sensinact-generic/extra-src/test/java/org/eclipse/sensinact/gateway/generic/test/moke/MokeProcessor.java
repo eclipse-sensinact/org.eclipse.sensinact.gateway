@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.generic.test.moke;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -17,36 +16,28 @@ import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.test.ProcessorService;
 
 /**
- *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class MokeProcessor implements ProcessorService
-{
-	private Connector<MokePacket> connector;
-	private Mediator mediator;
+public class MokeProcessor implements ProcessorService {
+    private Connector<MokePacket> connector;
+    private Mediator mediator;
 
-	MokeProcessor(Mediator mediator,Connector<MokePacket> connector)
-	{
-		this.mediator = mediator;
-		this.connector = connector;
-	}
+    MokeProcessor(Mediator mediator, Connector<MokePacket> connector) {
+        this.mediator = mediator;
+        this.connector = connector;
+    }
 
-	/**
-	 * @throws org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException
-	 * @inheritDoc
-	 *
-	 * @see ProcessorService#process(java.lang.String)
-	 */
-	@Override
-	public void process(String packet)
-	{
-		try
-		{
-			this.connector.process(new MokePacket(mediator,packet,null,null,null,null));
-		}
-		catch (InvalidPacketException e)
-		{
-			e.printStackTrace();
-		}
-	}
+    /**
+     * @throws org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException
+     * @inheritDoc
+     * @see ProcessorService#process(java.lang.String)
+     */
+    @Override
+    public void process(String packet) {
+        try {
+            this.connector.process(new MokePacket(mediator, packet, null, null, null, null));
+        } catch (InvalidPacketException e) {
+            e.printStackTrace();
+        }
+    }
 }

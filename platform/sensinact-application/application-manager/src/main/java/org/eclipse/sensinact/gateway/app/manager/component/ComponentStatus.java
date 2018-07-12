@@ -12,29 +12,23 @@ package org.eclipse.sensinact.gateway.app.manager.component;
 
 /**
  * This class represents the lifecycle of a component. The lifecycle works as follow:
- *
- *    +-> UNINSTANTIATED <-+
- *    |                    |
- *    |                    ?
- *    |          +--?-- ABORTED TODO: next status should depends on the policy
- *    v          |         ^
+ * <p>
+ * +-> UNINSTANTIATED <-+
+ * |                    |
+ * |                    ?
+ * |          +--?-- ABORTED TODO: next status should depends on the policy
+ * v          |         ^
  * WAITING <-----+         |
- *    ^          |         |
- *    |          +--- BROADCASTING
- *    |          |         ^
- *    |          |         |
- *    +---> PROCESSING ----+
+ * ^          |         |
+ * |          +--- BROADCASTING
+ * |          |         ^
+ * |          |         |
+ * +---> PROCESSING ----+
  *
  * @author Remi Druilhe
  */
 public enum ComponentStatus {
-
-    UNINSTANTIATED("UNINSTANTIATED"),
-    WAITING("WAITING"),
-    PROCESSING("PROCRESSING"),
-    BROADCASTING("BROADCASTING"),
-    ABORTED("ABORTED");
-
+    UNINSTANTIATED("UNINSTANTIATED"), WAITING("WAITING"), PROCESSING("PROCRESSING"), BROADCASTING("BROADCASTING"), ABORTED("ABORTED");
     private String value;
 
     ComponentStatus(String value) {

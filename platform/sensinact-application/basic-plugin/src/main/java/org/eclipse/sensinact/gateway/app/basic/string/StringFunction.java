@@ -8,7 +8,6 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-
 package org.eclipse.sensinact.gateway.app.basic.string;
 
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
@@ -16,19 +15,15 @@ import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 /**
  * This class abstracts the string functions
  *
- * @see AbstractFunction
- *
  * @author Remi Druilhe
+ * @see AbstractFunction
  */
 public abstract class StringFunction<T> extends AbstractFunction<T> {
-
     /**
      * The list of supported operators
      */
     public enum StringOperator {
-        CONCATENATE("concat"),
-        SUBSTRING("substr");
-
+        CONCATENATE("concat"), SUBSTRING("substr");
         private String type;
 
         StringOperator(String type) {

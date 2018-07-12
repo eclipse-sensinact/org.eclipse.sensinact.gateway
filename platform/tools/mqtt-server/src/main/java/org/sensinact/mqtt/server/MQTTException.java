@@ -10,8 +10,7 @@
  */
 package org.sensinact.mqtt.server;
 
-public class MQTTException extends Exception{
-
+public class MQTTException extends Exception {
     public MQTTException() {
         super();
     }

@@ -16,13 +16,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Field annotation to map to use when referenced as a 
+ * Field annotation to map to use when referenced as a
  * FOREIGN_KEY in the associated TABLE
  */
 @Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = { ElementType.FIELD})
-public @interface ForeignKey
-{
-	public String refer();
-	public String table();
+@Target(value = {ElementType.FIELD})
+public @interface ForeignKey {
+    public String refer();
+
+    public String table();
 }

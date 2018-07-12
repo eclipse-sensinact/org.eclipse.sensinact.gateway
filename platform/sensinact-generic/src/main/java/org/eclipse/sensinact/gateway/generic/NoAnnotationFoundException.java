@@ -11,55 +11,46 @@
 package org.eclipse.sensinact.gateway.generic;
 
 /**
- * Exception thrown by a resource at initialization time if an error 
+ * Exception thrown by a resource at initialization time if an error
  * occurred
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class NoAnnotationFoundException extends Exception
-{
+public class NoAnnotationFoundException extends Exception {
     /**
      * Constructor
      */
-    public NoAnnotationFoundException()
-    {
+    public NoAnnotationFoundException() {
         super();
     }
 
     /**
      * Constructor
-     * 
-     * @param message
-     *            the exception message
+     *
+     * @param message the exception message
      */
-    public NoAnnotationFoundException(String message)
-    {
+    public NoAnnotationFoundException(String message) {
         super(message);
     }
 
     /**
      * Constructor
-     * 
-     * @param cause
-     *            the {@link Throwable} object which has caused the current
-     *            exception
+     *
+     * @param cause the {@link Throwable} object which has caused the current
+     *              exception
      */
-    public NoAnnotationFoundException(Throwable cause)
-    {
+    public NoAnnotationFoundException(Throwable cause) {
         super(cause);
     }
 
     /**
      * Constructor
-     * 
-     * @param message
-     *            the exception message
-     * @param cause
-     *            the {@link Throwable} object which has caused the current
-     *            exception
+     *
+     * @param message the exception message
+     * @param cause   the {@link Throwable} object which has caused the current
+     *                exception
      */
-    public NoAnnotationFoundException(String message, Throwable cause)
-    {
+    public NoAnnotationFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 }

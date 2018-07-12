@@ -1,5 +1,4 @@
 package io.moquette.server.netty;
-
 /*
  * Copyright (c) 2012-2017 The original author or authorsgetRockQuestions()
  * ------------------------------------------------------
@@ -17,18 +16,29 @@ package io.moquette.server.netty;
  */
 
 import io.moquette.BrokerConstants;
-import static io.moquette.BrokerConstants.*;
 import io.moquette.parser.commons.Constants;
 import io.moquette.parser.netty.MQTTDecoder;
 import io.moquette.parser.netty.MQTTEncoder;
-import io.moquette.spi.security.ISslContextCreator;
 import io.moquette.server.ServerAcceptor;
 import io.moquette.server.config.IConfig;
-import io.moquette.server.netty.metrics.*;
+import io.moquette.server.netty.metrics.BytesMetrics;
+import io.moquette.server.netty.metrics.BytesMetricsCollector;
+import io.moquette.server.netty.metrics.BytesMetricsHandler;
+import io.moquette.server.netty.metrics.MQTTMessageLogger;
+import io.moquette.server.netty.metrics.MessageMetrics;
+import io.moquette.server.netty.metrics.MessageMetricsCollector;
+import io.moquette.server.netty.metrics.MessageMetricsHandler;
 import io.moquette.spi.impl.ProtocolProcessor;
+import io.moquette.spi.security.ISslContextCreator;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -45,7 +55,6 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.Future;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleWiring;
-import org.sensinact.mqtt.server.osgi.Activator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,17 +64,16 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
 
+import static io.moquette.BrokerConstants.*;
+
 /**
- *
  * @author andrea
  */
 public class SensinactNettyAcceptor implements ServerAcceptor {
-
     private static final String MQTT_SUBPROTOCOL_CSV_LIST = "mqtt, mqttv3.1, mqttv3.1.1";
     private final BundleContext bundleContext;
 
     static class WebSocketFrameToByteBufDecoder extends MessageToMessageDecoder<BinaryWebSocketFrame> {
-
         @Override
         protected void decode(ChannelHandlerContext chc, BinaryWebSocketFrame frame, List<Object> out) throws Exception {
             //convert the frame to a ByteBuf
@@ -77,7 +85,6 @@ public class SensinactNettyAcceptor implements ServerAcceptor {
     }
 
     static class ByteBufToWebSocketFrameEncoder extends MessageToMessageEncoder<ByteBuf> {
-
         @Override
         protected void encode(ChannelHandlerContext chc, ByteBuf bb, List<Object> out) throws Exception {
             //convert the ByteBuf to a WebSocketFrame
@@ -89,19 +96,17 @@ public class SensinactNettyAcceptor implements ServerAcceptor {
     }
 
     abstract class PipelineInitializer {
-
         abstract void init(ChannelPipeline pipeline) throws Exception;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(io.moquette.server.netty.NettyAcceptor.class);
-
     EventLoopGroup m_bossGroup;
     EventLoopGroup m_workerGroup;
     BytesMetricsCollector m_bytesMetricsCollector = new BytesMetricsCollector();
     MessageMetricsCollector m_metricsCollector = new MessageMetricsCollector();
 
-    public SensinactNettyAcceptor(BundleContext bundleContext){
-        this.bundleContext=bundleContext;
+    public SensinactNettyAcceptor(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 
     @Override
@@ -109,23 +114,20 @@ public class SensinactNettyAcceptor implements ServerAcceptor {
         m_bossGroup = new NioEventLoopGroup(0, new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
-
-                Thread t1=new Thread(r);
-                t1.setContextClassLoader(((BundleWiring)bundleContext.getBundle().adapt(BundleWiring.class)).getClassLoader());
+                Thread t1 = new Thread(r);
+                t1.setContextClassLoader(((BundleWiring) bundleContext.getBundle().adapt(BundleWiring.class)).getClassLoader());
                 return t1;
             }
         });
         m_workerGroup = new NioEventLoopGroup(0, new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
-
-                Thread t1=new Thread(r);
-                t1.setContextClassLoader(((BundleWiring)bundleContext.getBundle().adapt(BundleWiring.class)).getClassLoader());
+                Thread t1 = new Thread(r);
+                t1.setContextClassLoader(((BundleWiring) bundleContext.getBundle().adapt(BundleWiring.class)).getClassLoader());
                 return t1;
             }
         });
         final NettyMQTTHandler handler = new NettyMQTTHandler(processor);
-
         initializePlainTCPTransport(handler, props);
         initializeWebSocketTransport(handler, props);
         String sslTcpPortProp = props.getProperty(BrokerConstants.SSL_PORT_PROPERTY_NAME);
@@ -143,24 +145,18 @@ public class SensinactNettyAcceptor implements ServerAcceptor {
 
     private void initFactory(String host, int port, final SensinactNettyAcceptor.PipelineInitializer pipeliner) {
         ServerBootstrap b = new ServerBootstrap();
-        b.group(m_bossGroup, m_workerGroup)
-                .channel(NioServerSocketChannel.class)
-                .childHandler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    public void initChannel(SocketChannel ch) throws Exception {
-                        ChannelPipeline pipeline = ch.pipeline();
-                        try {
-                            pipeliner.init(pipeline);
-                        } catch (Throwable th) {
-                            LOG.error("Severe error during pipeline creation", th);
-                            throw th;
-                        }
-                    }
-                })
-                .option(ChannelOption.SO_BACKLOG, 128)
-                .option(ChannelOption.SO_REUSEADDR, true)
-                .option(ChannelOption.TCP_NODELAY, true)
-                .childOption(ChannelOption.SO_KEEPALIVE, true);
+        b.group(m_bossGroup, m_workerGroup).channel(NioServerSocketChannel.class).childHandler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            public void initChannel(SocketChannel ch) throws Exception {
+                ChannelPipeline pipeline = ch.pipeline();
+                try {
+                    pipeliner.init(pipeline);
+                } catch (Throwable th) {
+                    LOG.error("Severe error during pipeline creation", th);
+                    throw th;
+                }
+            }
+        }).option(ChannelOption.SO_BACKLOG, 128).option(ChannelOption.SO_REUSEADDR, true).option(ChannelOption.TCP_NODELAY, true).childOption(ChannelOption.SO_KEEPALIVE, true);
         try {
             // Bind and start to accept incoming connections.
             ChannelFuture f = b.bind(host, port);
@@ -204,9 +200,7 @@ public class SensinactNettyAcceptor implements ServerAcceptor {
             return;
         }
         int port = Integer.parseInt(webSocketPortProp);
-
         final MoquetteIdleTimeoutHandler timeoutHandler = new MoquetteIdleTimeoutHandler();
-
         String host = props.getProperty(BrokerConstants.HOST_PROPERTY_NAME);
         initFactory(host, port, new SensinactNettyAcceptor.PipelineInitializer() {
             @Override
@@ -235,14 +229,12 @@ public class SensinactNettyAcceptor implements ServerAcceptor {
             LOG.info("SSL MQTT is disabled because there is no value in properties for key {}", BrokerConstants.SSL_PORT_PROPERTY_NAME);
             return;
         }
-
         int sslPort = Integer.parseInt(sslPortProp);
         LOG.info("Starting SSL on port {}", sslPort);
-
         final MoquetteIdleTimeoutHandler timeoutHandler = new MoquetteIdleTimeoutHandler();
         String host = props.getProperty(BrokerConstants.HOST_PROPERTY_NAME);
         String sNeedsClientAuth = props.getProperty(BrokerConstants.NEED_CLIENT_AUTH, "false");
-        final boolean needsClientAuth =  Boolean.valueOf(sNeedsClientAuth);
+        final boolean needsClientAuth = Boolean.valueOf(sNeedsClientAuth);
         initFactory(host, sslPort, new SensinactNettyAcceptor.PipelineInitializer() {
             @Override
             void init(ChannelPipeline pipeline) throws Exception {
@@ -271,7 +263,7 @@ public class SensinactNettyAcceptor implements ServerAcceptor {
         final MoquetteIdleTimeoutHandler timeoutHandler = new MoquetteIdleTimeoutHandler();
         String host = props.getProperty(BrokerConstants.HOST_PROPERTY_NAME);
         String sNeedsClientAuth = props.getProperty(BrokerConstants.NEED_CLIENT_AUTH, "false");
-        final boolean needsClientAuth =  Boolean.valueOf(sNeedsClientAuth);
+        final boolean needsClientAuth = Boolean.valueOf(sNeedsClientAuth);
         initFactory(host, sslPort, new SensinactNettyAcceptor.PipelineInitializer() {
             @Override
             void init(ChannelPipeline pipeline) throws Exception {
@@ -303,22 +295,18 @@ public class SensinactNettyAcceptor implements ServerAcceptor {
         }
         Future workerWaiter = m_workerGroup.shutdownGracefully();
         Future bossWaiter = m_bossGroup.shutdownGracefully();
-
         try {
             workerWaiter.await(100);
         } catch (InterruptedException iex) {
             throw new IllegalStateException(iex);
         }
-
         try {
             bossWaiter.await(100);
         } catch (InterruptedException iex) {
             throw new IllegalStateException(iex);
         }
-
         MessageMetrics metrics = m_metricsCollector.computeMetrics();
         LOG.info("Msg read: {}, msg wrote: {}", metrics.messagesRead(), metrics.messagesWrote());
-
         BytesMetrics bytesMetrics = m_bytesMetricsCollector.computeMetrics();
         LOG.info(String.format("Bytes read: %d, bytes wrote: %d", bytesMetrics.readBytes(), bytesMetrics.wroteBytes()));
     }
@@ -326,10 +314,9 @@ public class SensinactNettyAcceptor implements ServerAcceptor {
     private ChannelHandler createSslHandler(SSLContext sslContext, boolean needsClientAuth) {
         SSLEngine sslEngine = sslContext.createSSLEngine();
         sslEngine.setUseClientMode(false);
-        if(needsClientAuth) {
+        if (needsClientAuth) {
             sslEngine.setNeedClientAuth(true);
         }
         return new SslHandler(sslEngine);
     }
 }
-

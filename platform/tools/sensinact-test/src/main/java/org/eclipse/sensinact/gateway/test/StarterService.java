@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.test;
 
-public interface StarterService
-{
-	void start(String serviceProvider);
+public interface StarterService {
+    void start(String serviceProvider);
 }

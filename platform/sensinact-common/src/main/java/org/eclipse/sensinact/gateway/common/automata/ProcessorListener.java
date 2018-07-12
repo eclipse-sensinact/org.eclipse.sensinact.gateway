@@ -10,36 +10,29 @@
  */
 package org.eclipse.sensinact.gateway.common.automata;
 
-
 /**
  * Signature of a service listening for {@link Processor}'s frame
  * instantiation events
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface ProcessorListener extends FrameModelProvider
-{
-	/**
-	 * The listener is informed about the instantiation of
-	 * a new {@link Frame}
-	 * 
-	 * @param frame 
-	 * 		the instantiated {@link Frame}
-	 * @param delimitation 
-	 * 		the delimitation type
-	 * @param delimiters 
-	 * 		the array of delimiters
-	 */
-	void push(Frame frame, int delimitation, byte[] delimiters);
+public interface ProcessorListener extends FrameModelProvider {
+    /**
+     * The listener is informed about the instantiation of
+     * a new {@link Frame}
+     *
+     * @param frame        the instantiated {@link Frame}
+     * @param delimitation the delimitation type
+     * @param delimiters   the array of delimiters
+     */
+    void push(Frame frame, int delimitation, byte[] delimiters);
 
-	/**
-	 * Returns the {@link FrameFactory} used to instantiate 
-	 * new {@link Frame}s 
-	 * 
-	 * @return
-	 * 		the {@link FrameFactory} used to instantiate 
-	 * 		new {@link Frame}s 
-	 */
-	FrameFactory getFrameFactory();
-
+    /**
+     * Returns the {@link FrameFactory} used to instantiate
+     * new {@link Frame}s
+     *
+     * @return the {@link FrameFactory} used to instantiate
+     * new {@link Frame}s
+     */
+    FrameFactory getFrameFactory();
 }

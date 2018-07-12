@@ -12,13 +12,12 @@ package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 
-public interface HttpTaskProcessingContextHandler
-{
-	void registerProcessingContext(HttpTask<?,?> key, HttpTaskProcessingContext context);
-	
-	void unregisterProcessingContext(HttpTask<?,?> key);
-	
-	String resolve(HttpTask<?,?> task, String property);
-	
-	void configure(HttpTask<?,?> task) throws Exception;
+public interface HttpTaskProcessingContextHandler {
+    void registerProcessingContext(HttpTask<?, ?> key, HttpTaskProcessingContext context);
+
+    void unregisterProcessingContext(HttpTask<?, ?> key);
+
+    String resolve(HttpTask<?, ?> task, String property);
+
+    void configure(HttpTask<?, ?> task) throws Exception;
 }

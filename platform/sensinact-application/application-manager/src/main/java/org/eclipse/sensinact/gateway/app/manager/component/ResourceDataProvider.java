@@ -14,7 +14,6 @@ package org.eclipse.sensinact.gateway.app.manager.component;
  * @author Rémi Druilhe
  */
 public class ResourceDataProvider extends AbstractDataProvider {
-
     public ResourceDataProvider(String uri) {
         super(uri);
     }

@@ -12,92 +12,74 @@ package org.eclipse.sensinact.gateway.core.message;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.eclipse.sensinact.gateway.util.stack.StackEngineHandler;
 
 /**
- * Extended {@link MidCallback} managing a buffer to store 
+ * Extended {@link MidCallback} managing a buffer to store
  * received events before transmission
- * 
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class BufferMidCallback extends UnaryMidCallback
-{	
-	/**
-	 * current buffer's size
-	 */
-	protected int length;
-	
-	/**
-	 * the buffer total capacity
-	 */
-	protected final int bufferSize;
-	
-	/**
-	 * the {@link SnaMessage}s buffer
-	 */
-	protected final SnaMessage[] buffer;
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param bufferSize
-	 * 		the length of the buffer to create
-	 */
-    public BufferMidCallback(Mediator mediator, 
-    		String identifier, 
-    		ErrorHandler errorHandler,
-    		Recipient recipient, long timeout,
-    		int bufferSize) 
-	{
-    	super(mediator, identifier, errorHandler, 
-    			recipient, timeout);    	
-		if(bufferSize == 0)
-		{
-			this.bufferSize = 1;
-			
-		} else
-		{
-			this.bufferSize = bufferSize;
-		}
-		this.length = 0;		
-        buffer = new SnaMessage[this.bufferSize];
-	}
-    
+public class BufferMidCallback extends UnaryMidCallback {
     /**
-	 * @inheritDoc
-	 *
-	 * @see StackEngineHandler#doHandle(java.lang.Object)
-	 */
-	@Override
-	public void doCallback(SnaMessage<?> message)
-	{
-		synchronized(this.buffer)
-    	{
-	    	this.buffer[length++] = message;
-	    	
-	    	if(this.length == this.bufferSize)
-	    	{
-				SnaMessage[] msgBuffer = new SnaMessage[length];
-				int index = 0;
-			
-				for(;index < length; index++)
-				{
-					msgBuffer[index] = this.buffer[index];
-				}
-	    		try
-	    		{
-					this.recipient.callback(this.getName(), msgBuffer);
-					setStatus(Status.SUCCESS);
-					
-				} catch (Exception e)
-	    		{
-					setStatus(Status.ERROR);
-				    getCallbackErrorHandler().register(e);
-				}
-	    		this.length = 0;
-	    	}
-    	}
-	}
+     * current buffer's size
+     */
+    protected int length;
+
+    /**
+     * the buffer total capacity
+     */
+    protected final int bufferSize;
+
+    /**
+     * the {@link SnaMessage}s buffer
+     */
+    protected final SnaMessage[] buffer;
+
+    /**
+     * Constructor
+     *
+     * @param bufferSize the length of the buffer to create
+     */
+    public BufferMidCallback(Mediator mediator, String identifier, ErrorHandler errorHandler, Recipient recipient, long timeout, int bufferSize) {
+        super(mediator, identifier, errorHandler, recipient, timeout);
+        if (bufferSize == 0) {
+            this.bufferSize = 1;
+
+        } else {
+            this.bufferSize = bufferSize;
+        }
+        this.length = 0;
+        buffer = new SnaMessage[this.bufferSize];
+    }
+
+    /**
+     * @inheritDoc
+     * @see StackEngineHandler#doHandle(java.lang.Object)
+     */
+    @Override
+    public void doCallback(SnaMessage<?> message) {
+        synchronized (this.buffer) {
+            this.buffer[length++] = message;
+
+            if (this.length == this.bufferSize) {
+                SnaMessage[] msgBuffer = new SnaMessage[length];
+                int index = 0;
+
+                for (; index < length; index++) {
+                    msgBuffer[index] = this.buffer[index];
+                }
+                try {
+                    this.recipient.callback(this.getName(), msgBuffer);
+                    setStatus(Status.SUCCESS);
+
+                } catch (Exception e) {
+                    setStatus(Status.ERROR);
+                    getCallbackErrorHandler().register(e);
+                }
+                this.length = 0;
+            }
+        }
+    }
 }

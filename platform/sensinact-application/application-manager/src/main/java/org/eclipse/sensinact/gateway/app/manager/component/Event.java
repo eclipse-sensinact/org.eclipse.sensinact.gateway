@@ -19,7 +19,6 @@ import java.util.UUID;
  * @author Rémi Druilhe
  */
 public class Event {
-
     private final UUID uuid;
     private final DataItf data;
     private final List<String> route;

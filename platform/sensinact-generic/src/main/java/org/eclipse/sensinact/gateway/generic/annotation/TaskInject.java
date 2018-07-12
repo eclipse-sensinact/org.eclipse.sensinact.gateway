@@ -22,9 +22,8 @@ import java.lang.annotation.Target;
 @Inherited
 @Target(value = {ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TaskInject
-{
-	public static final String DEFAULT_FILTER = "#NO_FILTER#";
-	
-	String filter() default DEFAULT_FILTER ;
+public @interface TaskInject {
+    public static final String DEFAULT_FILTER = "#NO_FILTER#";
+
+    String filter() default DEFAULT_FILTER;
 }

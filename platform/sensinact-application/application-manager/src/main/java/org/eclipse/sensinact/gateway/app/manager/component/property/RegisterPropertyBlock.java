@@ -18,9 +18,7 @@ import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 
 public class RegisterPropertyBlock extends AbstractPropertyBlock implements DataListenerItf {
-
     public static final String PROPERTY = "register";
-
     private final ResourceImpl resource;
     private final AbstractDataProvider dataProvider;
 

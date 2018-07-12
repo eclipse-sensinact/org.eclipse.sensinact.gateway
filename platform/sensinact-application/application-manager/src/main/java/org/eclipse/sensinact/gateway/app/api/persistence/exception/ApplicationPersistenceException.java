@@ -1,7 +1,6 @@
 package org.eclipse.sensinact.gateway.app.api.persistence.exception;
 
-public class ApplicationPersistenceException extends Exception{
-
+public class ApplicationPersistenceException extends Exception {
     public ApplicationPersistenceException() {
         super();
     }

@@ -17,18 +17,19 @@ import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 /**
  * sensiNact Application service
  */
-public interface SensiNactApplication extends Nameable, Recipient
-{
-	/**
-	 * Starts this SensiNactApplication
-	 * @return 
-	 */
-	 SnaErrorMessage start();
+public interface SensiNactApplication extends Nameable, Recipient {
+    /**
+     * Starts this SensiNactApplication
+     *
+     * @return
+     */
+    SnaErrorMessage start();
 
-	 /**
-	 * Stops this SensiNactApplication
-	 * @return 
-	 */
-	 SnaErrorMessage stop();
-	
+    /**
+     * Stops this SensiNactApplication
+     *
+     * @return
+     */
+    SnaErrorMessage stop();
+
 }
