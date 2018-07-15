@@ -10,10 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.datastore.sqlite.test;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
 import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
-import org.eclipse.sensinact.gateway.datastore.sqlite.internal.SQLiteConnectionProvider;
+import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteConnectionProvider;
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+
+import java.sql.Connection;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -24,53 +30,51 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.log.LogService;
 
-import java.sql.Connection;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
 public class TestSqliteConnectionProvider {
-    private static final String LOG_FILTER = "(" + Constants.OBJECTCLASS + "=" + LogService.class.getCanonicalName() + ")";
+	private static final String LOG_FILTER = "(" + Constants.OBJECTCLASS + "=" + LogService.class.getCanonicalName()
+			+ ")";
 
-    private static final String FAKE_DATABASE_PATH = "target/test-resources/fake.db";
-    private static final String TEST_DATABASE_PATH = "target/test-resources/sample.db";
-    private static final String MOCK_BUNDLE_NAME = "MockedBundle";
-    private static final long MOCK_BUNDLE_ID = 1;
+	private static final String FAKE_DATABASE_PATH = "target/test-resources/fake.db";
+	private static final String TEST_DATABASE_PATH = "target/test-resources/sample.db";
 
-    private final BundleContext context = Mockito.mock(BundleContext.class);
-    private final Bundle bundle = Mockito.mock(Bundle.class);
+	private static final String MOCK_BUNDLE_NAME = "MockedBundle";
+	private static final long MOCK_BUNDLE_ID = 1;
 
-    private SQLiteConnectionProvider sqliteProvider;
-    private Mediator mediator;
+	private final BundleContext context = Mockito.mock(BundleContext.class);
+	private final Bundle bundle = Mockito.mock(Bundle.class);
 
-    @Before
-    public void init() throws UnableToConnectToDataStoreException, InvalidSyntaxException {
-        Filter filter = Mockito.mock(Filter.class);
-        Mockito.when(filter.toString()).thenReturn(LOG_FILTER);
+	private SQLiteConnectionProvider sqliteProvider;
+	private Mediator mediator;
 
-        Mockito.when(context.createFilter(LOG_FILTER)).thenReturn(filter);
-        Mockito.when(context.getServiceReferences((String) null, LOG_FILTER)).thenReturn(null);
-        Mockito.when(context.getServiceReference(LOG_FILTER)).thenReturn(null);
-        Mockito.when(context.getProperty(Mockito.eq("org.eclipse.sensinact.gateway.security.database"))).thenReturn("src/test/resources/sample.db");
+	@Before
+	public void init() throws UnableToConnectToDataStoreException, InvalidSyntaxException {
+		Filter filter = Mockito.mock(Filter.class);
+		Mockito.when(filter.toString()).thenReturn(LOG_FILTER);
 
-        Mockito.when(context.getBundle()).thenReturn(bundle);
-        Mockito.when(bundle.getSymbolicName()).thenReturn(MOCK_BUNDLE_NAME);
-        Mockito.when(bundle.getBundleId()).thenReturn(MOCK_BUNDLE_ID);
+		Mockito.when(context.createFilter(LOG_FILTER)).thenReturn(filter);
+		Mockito.when(context.getServiceReferences((String) null, LOG_FILTER)).thenReturn(null);
+		Mockito.when(context.getServiceReference(LOG_FILTER)).thenReturn(null);
+		Mockito.when(context.getProperty(Mockito.eq("org.eclipse.sensinact.gateway.security.database")))
+				.thenReturn("src/test/resources/sample.db");
 
-        mediator = new Mediator(context);
-    }
+		Mockito.when(context.getBundle()).thenReturn(bundle);
+		Mockito.when(bundle.getSymbolicName()).thenReturn(MOCK_BUNDLE_NAME);
+		Mockito.when(bundle.getBundleId()).thenReturn(MOCK_BUNDLE_ID);
 
-    @Test
-    public void testOpenConnection() throws UnableToConnectToDataStoreException, UnableToFindDataStoreException {
-        sqliteProvider = new SQLiteConnectionProvider(mediator, TEST_DATABASE_PATH);
-        Connection connection = sqliteProvider.openConnection();
-        assertNotNull(connection);
-        sqliteProvider.closeConnection();
-    }
+		mediator = new Mediator(context);
+	}
 
-    @Test(expected = UnableToFindDataStoreException.class)
-    public void testOpenConnectionFail() throws UnableToFindDataStoreException, UnableToConnectToDataStoreException {
-        sqliteProvider = new SQLiteConnectionProvider(mediator, FAKE_DATABASE_PATH);
-        fail("No Exception has been thrown");
-    }
+	@Test
+	public void testOpenConnection() throws UnableToConnectToDataStoreException, UnableToFindDataStoreException {
+		sqliteProvider = new SQLiteConnectionProvider(mediator, TEST_DATABASE_PATH);
+		Connection connection = sqliteProvider.openConnection();
+		assertNotNull(connection);
+		sqliteProvider.closeConnection();
+	}
+
+	@Test(expected = UnableToFindDataStoreException.class)
+	public void testOpenConnectionFail() throws UnableToFindDataStoreException, UnableToConnectToDataStoreException {
+		sqliteProvider = new SQLiteConnectionProvider(mediator, FAKE_DATABASE_PATH);
+		fail("No Exception has been thrown");
+	}
 }
