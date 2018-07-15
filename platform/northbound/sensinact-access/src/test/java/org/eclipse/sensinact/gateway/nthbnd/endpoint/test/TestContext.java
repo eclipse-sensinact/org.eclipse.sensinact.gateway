@@ -23,6 +23,7 @@ import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
@@ -121,7 +122,7 @@ public class TestContext<R extends ModelInstance> {
     private boolean xFilterAvailable = true;
     private boolean yFilterAvailable = true;
 
-    public TestContext() throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException, BundleException {
+    public TestContext() throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException, BundleException, DataStoreException {
         Filter filter = Mockito.mock(Filter.class);
         Mockito.when(filter.toString()).thenReturn(LOG_FILTER);
 

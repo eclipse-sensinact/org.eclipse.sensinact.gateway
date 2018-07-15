@@ -12,6 +12,7 @@ import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.DefaultNorthboundRequestHandler;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
@@ -52,7 +53,7 @@ public class NorthboundRequestHandlerTest {
     private final Bundle bundle = Mockito.mock(Bundle.class);
 
     @Before
-    public void init() throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException, BundleException {
+    public void init() throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException, BundleException, DataStoreException {
         this.testContext = new TestContext();
         this.tree = new AccessTreeImpl(testContext.getMediator()).withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
     }
