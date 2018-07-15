@@ -11,15 +11,15 @@
 package org.eclipse.sensinact.gateway.core.message;
 
 /**
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface SnaMessageSubType {
-    /**
-     * Returns the {@link SnaMessage.Type} to which this
-     * SnaMessageSubType belongs to
-     *
-     * @return the the {@link SnaMessage.Type} of this
-     * SnaMessageSubType
-     */
-    SnaMessage.Type getSnaMessageType();
+	/**
+	 * Returns the {@link SnaMessage.Type} to which this SnaMessageSubType belongs
+	 * to
+	 * 
+	 * @return the the {@link SnaMessage.Type} of this SnaMessageSubType
+	 */
+	SnaMessage.Type getSnaMessageType();
 }

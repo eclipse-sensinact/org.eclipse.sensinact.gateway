@@ -9,50 +9,51 @@
  *    CEA - initial API and implementation
  */
 /**
- *
+ * 
  */
 package org.eclipse.sensinact.gateway.core.security;
 
 import org.eclipse.sensinact.gateway.util.tree.PathTree;
 
 /**
- * Extended {@link PathTree} gathering access rights to a sensiNact
- * gateway's data model instance using an hierarchical data structure
- *
+ * Extended {@link PathTree} gathering access rights to a sensiNact gateway's
+ * data model instance using an hierarchical data structure
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface AccessTree<A extends AccessNode> {
-    //********************************************************************//
-    //						NESTED DECLARATIONS	     					  //
-    //********************************************************************//
+	// ********************************************************************//
+	// NESTED DECLARATIONS //
+	// ********************************************************************//
 
-    //********************************************************************//
-    //						ABSTRACT DECLARATIONS						  //
-    //********************************************************************//
+	// ********************************************************************//
+	// ABSTRACT DECLARATIONS //
+	// ********************************************************************//
 
-    //********************************************************************//
-    //						STATIC DECLARATIONS  						  //
-    //********************************************************************//
+	// ********************************************************************//
+	// STATIC DECLARATIONS //
+	// ********************************************************************//
 
-    //********************************************************************//
-    //						INSTANCE DECLARATIONS						  //
-    //********************************************************************//
+	// ********************************************************************//
+	// INSTANCE DECLARATIONS //
+	// ********************************************************************//
 
-    /**
-     * Returns the root {@link AccessNode} of this AccessTree
-     *
-     * @return this AccessTree's root node
-     */
-    A getRoot();
+	/**
+	 * Returns the root {@link AccessNode} of this AccessTree
+	 * 
+	 * @return this AccessTree's root node
+	 */
+	A getRoot();
 
-    /**
-     * Returns true if this AccessTree is mutable, meaning that
-     * it is possible to add/remove {@link AccessNode} to/from it
-     *
-     * @return <ul>
-     * <li>true if this AccessTree is mutable</li>
-     * <li>false otherwise</li>
-     * </ul>
-     */
-    boolean isMutable();
+	/**
+	 * Returns true if this AccessTree is mutable, meaning that it is possible to
+	 * add/remove {@link AccessNode} to/from it
+	 * 
+	 * @return
+	 *         <ul>
+	 *         <li>true if this AccessTree is mutable</li>
+	 *         <li>false otherwise</li>
+	 *         </ul>
+	 */
+	boolean isMutable();
 }

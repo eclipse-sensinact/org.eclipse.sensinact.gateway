@@ -12,16 +12,17 @@ package org.eclipse.sensinact.gateway.core;
 
 /**
  * A {@link ProcessableData} targeting one {@link ServiceProviderImpl}
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface ServiceProviderProcessableData<S extends ServiceProcessableData<?>> extends ServiceProcessableContainer<S> {
-    /**
-     * Returns the string identifier of a {@link ServiceProvider}
-     * targeted by this SubPacket
-     *
-     * @return the identifier of the targeted {@link ServiceProvider}
-     */
-    public String getServiceProviderIdentifier();
+public interface ServiceProviderProcessableData<S extends ServiceProcessableData<?>>
+		extends ServiceProcessableContainer<S> {
+	/**
+	 * Returns the string identifier of a {@link ServiceProvider} targeted by this
+	 * SubPacket
+	 * 
+	 * @return the identifier of the targeted {@link ServiceProvider}
+	 */
+	public String getServiceProviderIdentifier();
 
 }

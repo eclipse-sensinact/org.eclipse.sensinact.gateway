@@ -16,46 +16,47 @@ import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONObject;
 
 /**
- * Extended {@link SnaMessage} dedicated to the responses
- * to the {@link AccessMethod}s invocation
- *
+ * Extended {@link SnaMessage} dedicated to the responses to the
+ * {@link AccessMethod}s invocation
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class AccessMethodJSONResponse extends AccessMethodResponse<JSONObject> {
-    /**
-     * @param uri
-     * @param type
-     * @param status
-     */
-    protected AccessMethodJSONResponse(Mediator mediator, String uri, Response type, Status status) {
-        this(mediator, uri, type, status, (status == Status.SUCCESS) ? AccessMethodJSONResponse.SUCCESS_CODE : UNKNOWN_ERROR_CODE);
-    }
+	/**
+	 * @param uri
+	 * @param type
+	 * @param status
+	 */
+	protected AccessMethodJSONResponse(Mediator mediator, String uri, Response type, Status status) {
+		this(mediator, uri, type, status,
+				(status == Status.SUCCESS) ? AccessMethodJSONResponse.SUCCESS_CODE : UNKNOWN_ERROR_CODE);
+	}
 
-    /**
-     * @param uri
-     * @param type
-     * @param status
-     */
-    protected AccessMethodJSONResponse(Mediator mediator, String uri, Response type, Status status, int statusCode) {
-        super(mediator, uri, type, status, statusCode);
-    }
+	/**
+	 * @param uri
+	 * @param type
+	 * @param status
+	 */
+	protected AccessMethodJSONResponse(Mediator mediator, String uri, Response type, Status status, int statusCode) {
+		super(mediator, uri, type, status, statusCode);
+	}
 
-    /**
-     * @param key
-     * @return
-     */
-    public Object getResponse(String key) {
-        return super.getResponse().opt(key);
-    }
+	/**
+	 * @param key
+	 * @return
+	 */
+	public Object getResponse(String key) {
+		return super.getResponse().opt(key);
+	}
 
-    /**
-     * @param clazz
-     * @param key
-     * @return
-     */
-    public <T> T getResponse(Class<T> clazz, String key) {
-        Object o = this.getResponse(key);
-        return CastUtils.cast(super.mediator.getClassLoader(), clazz, o);
-    }
+	/**
+	 * @param clazz
+	 * @param key
+	 * @return
+	 */
+	public <T> T getResponse(Class<T> clazz, String key) {
+		Object o = this.getResponse(key);
+		return CastUtils.cast(super.mediator.getClassLoader(), clazz, o);
+	}
 
 }

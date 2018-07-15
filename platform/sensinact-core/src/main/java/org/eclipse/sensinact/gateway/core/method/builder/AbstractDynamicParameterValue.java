@@ -16,61 +16,63 @@ import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
 
 /**
  * Abstract implementation of a {@link DynamicParameterValue}
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class AbstractDynamicParameterValue implements DynamicParameterValue {
-    protected final String resourceName;
-    protected final String parameterName;
-    protected final Mediator mediator;
-    private Executable<Void, Object> resourceValueExtractor;
+	protected final String resourceName;
+	protected final String parameterName;
 
-    /**
-     * Constructor
-     *
-     * @param mediator
-     * @param parameterName
-     * @param resourceName
-     */
-    protected AbstractDynamicParameterValue(Mediator mediator, String parameterName, String resourceName) {
-        this.mediator = mediator;
-        this.parameterName = parameterName;
-        this.resourceName = resourceName;
-    }
+	protected final Mediator mediator;
+	private Executable<Void, Object> resourceValueExtractor;
 
-    /**
-     * @InheritedDoc
-     * @see DynamicParameterValue#getResource()
-     */
-    @Override
-    public String getResource() {
-        return this.resourceName;
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param mediator
+	 * @param parameterName
+	 * @param resourceName
+	 */
+	protected AbstractDynamicParameterValue(Mediator mediator, String parameterName, String resourceName) {
+		this.mediator = mediator;
+		this.parameterName = parameterName;
+		this.resourceName = resourceName;
+	}
 
-    /**
-     * Returns the Object value of the linked {@link ResourceImpl}
-     *
-     * @return the linked {@link ResourceImpl}'s Object value
-     */
-    public Object getResourceValue() {
-        if (this.resourceValueExtractor != null) {
-            try {
-                return this.resourceValueExtractor.execute(null);
-            } catch (Exception e) {
-                if (this.mediator.isErrorLoggable()) {
-                    this.mediator.error(e, e.getMessage());
-                }
-            }
-        }
-        return null;
-    }
+	/**
+	 * @InheritedDoc
+	 *
+	 * @see DynamicParameterValue#getResource()
+	 */
+	@Override
+	public String getResource() {
+		return this.resourceName;
+	}
 
-    /**
-     * @InheritedDoc
-     * @see DynamicParameterValue#
-     * setResourceValueExtractor(Executable)
-     */
-    public void setResourceValueExtractor(Executable<Void, Object> resourceValueExtractor) {
-        this.resourceValueExtractor = resourceValueExtractor;
-    }
+	/**
+	 * Returns the Object value of the linked {@link ResourceImpl}
+	 * 
+	 * @return the linked {@link ResourceImpl}'s Object value
+	 */
+	public Object getResourceValue() {
+		if (this.resourceValueExtractor != null) {
+			try {
+				return this.resourceValueExtractor.execute(null);
+			} catch (Exception e) {
+				if (this.mediator.isErrorLoggable()) {
+					this.mediator.error(e, e.getMessage());
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * @InheritedDoc
+	 *
+	 * @see DynamicParameterValue# setResourceValueExtractor(Executable)
+	 */
+	public void setResourceValueExtractor(Executable<Void, Object> resourceValueExtractor) {
+		this.resourceValueExtractor = resourceValueExtractor;
+	}
 }

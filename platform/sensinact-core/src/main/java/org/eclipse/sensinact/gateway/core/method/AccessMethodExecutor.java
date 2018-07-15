@@ -15,12 +15,14 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 /**
  * Extended {@link Executable} dedicated to an {@link AbstractModelElement}'s
  * {@link AccessMethod} invocation
- *
- * @param <V> the executor returned type
+ * 
+ * @param <V>
+ *            the executor returned type
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface AccessMethodExecutor extends Executable<AccessMethodResponseBuilder<?, ?>, Void> {
-    enum ExecutionPolicy {
-        BEFORE, AFTER, REPLACE;
-    }
+	enum ExecutionPolicy {
+		BEFORE, AFTER, REPLACE;
+	}
 }

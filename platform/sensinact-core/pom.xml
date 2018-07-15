@@ -89,8 +89,7 @@
                         </DynamicImport-Package>
                         <Require-Capability>
                             org.eclipse.sensinact.security,
-                            org.eclipse.sensinact.datastore,
-                            org.eclipse.sensinact.datastore.connector,
+                            org.eclipse.sensinact.data.store,
                             org.eclipse.sensinact.signature.validator
                         </Require-Capability>
                         <Include-Resource>

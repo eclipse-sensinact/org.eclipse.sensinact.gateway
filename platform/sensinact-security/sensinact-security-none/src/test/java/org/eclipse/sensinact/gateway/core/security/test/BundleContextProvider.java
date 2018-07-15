@@ -14,5 +14,5 @@ import org.osgi.framework.BundleContext;
 
 public interface BundleContextProvider {
 
-    BundleContext getBundleContext();
+	BundleContext getBundleContext();
 }

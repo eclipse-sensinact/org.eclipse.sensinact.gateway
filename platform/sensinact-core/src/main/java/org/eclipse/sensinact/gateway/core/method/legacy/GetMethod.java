@@ -18,24 +18,25 @@ import org.json.JSONObject;
 
 /**
  * Getter {@link AccessMethod}
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class GetMethod extends AbstractAccessMethod<JSONObject, GetResponse> {
-    /**
-     * Constructor
-     */
-    public GetMethod(Mediator mediator, String uri, AccessMethodExecutor preProcessingExecutor) {
-        super(mediator, uri, AccessMethod.GET, preProcessingExecutor);
-    }
+	/**
+	 * Constructor
+	 */
+	public GetMethod(Mediator mediator, String uri, AccessMethodExecutor preProcessingExecutor) {
+		super(mediator, uri, AccessMethod.GET, preProcessingExecutor);
+	}
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod#
-     * createAccessMethodResponseBuilder(java.lang.Object[])
-     */
-    @Override
-    protected GetResponseBuilder createAccessMethodResponseBuilder(Object[] parameters) {
-        return new GetResponseBuilder(super.mediator, uri, parameters);
-    }
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod#
+	 *      createAccessMethodResponseBuilder(java.lang.Object[])
+	 */
+	@Override
+	protected GetResponseBuilder createAccessMethodResponseBuilder(Object[] parameters) {
+		return new GetResponseBuilder(super.mediator, uri, parameters);
+	}
 }

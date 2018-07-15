@@ -15,16 +15,17 @@ import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 /**
  * Extended {@link DataResource} whose type is VARIABLE and whose 'value'
  * {@link Attribute} can be modified by default
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface StateVariableResource extends DataResource {
-    /**
-     * The state variable resource type.
-     */
-    public static final Resource.Type TYPE_VALUE = Type.STATE_VARIABLE;
-    // Constant name is the concatenation the name of the targeted
-    // AttributeBuilder's field and of the associated requirement
-    // constant value
-    public static final Modifiable DEFAULT_VALUE_MODIFIABLE = Modifiable.UPDATABLE;
+	/**
+	 * The state variable resource type.
+	 */
+	public static final Resource.Type TYPE_VALUE = Type.STATE_VARIABLE;
+
+	// Constant name is the concatenation the name of the targeted
+	// AttributeBuilder's field and of the associated requirement
+	// constant value
+	public static final Modifiable DEFAULT_VALUE_MODIFIABLE = Modifiable.UPDATABLE;
 }

@@ -16,37 +16,39 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.json.JSONObject;
 
 /**
- * Extended  {@link AccessMethodResponseBuilder} dedicated to {@link SetMethod}
+ * Extended {@link AccessMethodResponseBuilder} dedicated to {@link SetMethod}
  * execution
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
 public class SetResponseBuilder extends AccessMethodResponseBuilder<JSONObject, SetResponse> {
-    /**
-     * @param uri
-     * @param parameters
-     */
-    protected SetResponseBuilder(Mediator mediator, String uri, Object[] parameters) {
-        super(mediator, uri, parameters);
-    }
+	/**
+	 * @param uri
+	 * @param parameters
+	 */
+	protected SetResponseBuilder(Mediator mediator, String uri, Object[] parameters) {
+		super(mediator, uri, parameters);
+	}
 
-    /**
-     * @inheritDoc
-     * @see AccessMethodResponseBuilder#
-     * createAccessMethodResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
-     */
-    @Override
-    public SetResponse createAccessMethodResponse(Status status) {
-        return new SetResponse(super.mediator, super.getPath(), status);
-    }
+	/**
+	 * @inheritDoc
+	 *
+	 * @see AccessMethodResponseBuilder#
+	 *      createAccessMethodResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
+	 */
+	@Override
+	public SetResponse createAccessMethodResponse(Status status) {
+		return new SetResponse(super.mediator, super.getPath(), status);
+	}
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder#getComponentType()
-     */
-    @Override
-    public Class<JSONObject> getComponentType() {
-        return JSONObject.class;
-    }
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder#getComponentType()
+	 */
+	@Override
+	public Class<JSONObject> getComponentType() {
+		return JSONObject.class;
+	}
 }

@@ -10,55 +10,56 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import org.json.JSONObject;
+
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
-import org.json.JSONObject;
 
 /**
  * {@link Description} of a {@link Metadata}
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class MetadataDescription extends PrimitiveDescription {
-    private static final String EMPTY = "";
+	private static final String EMPTY = "";
 
-    /**
-     * Constructor
-     *
-     * @param metadata the {@link Metadata} for which to instantiate
-     *                 the MetadataDescription
-     */
-    public MetadataDescription(Metadata metadata) {
-        super(metadata);
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param metadata
+	 *            the {@link Metadata} for which to instantiate the
+	 *            MetadataDescription
+	 */
+	public MetadataDescription(Metadata metadata) {
+		super(metadata);
+	}
 
-    /**
-     * @inheritDoc
-     * @see Description #getJSONDescription()
-     */
-    @Override
-    public String getJSONDescription() {
-        JSONObject description = this.getJSONObjectDescription();
-        if (description == null) {
-            return EMPTY;
-        }
-        return description.toString();
-    }
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see Description #getJSONDescription()
+	 */
+	@Override
+	public String getJSONDescription() {
+		JSONObject description = this.getJSONObjectDescription();
+		if (description == null) {
+			return EMPTY;
+		}
+		return description.toString();
+	}
 
-    /**
-     * Returns the JSON object representation of the
-     * described {@link Metadata}
-     *
-     * @return the JSON object representation of the
-     * described {@link Metadata}
-     */
-    protected JSONObject getJSONObjectDescription() {
-        if (Modifiable.FIXED.equals(super.modifiable)) {
-            JSONObject description = super.getJSONObject();
-            description.put(VALUE_KEY, PrimitiveDescription.toJson(this.getType(), this.getValue()));
-            return description;
-        }
-        return null;
-    }
+	/**
+	 * Returns the JSON object representation of the described {@link Metadata}
+	 * 
+	 * @return the JSON object representation of the described {@link Metadata}
+	 */
+	protected JSONObject getJSONObjectDescription() {
+		if (Modifiable.FIXED.equals(super.modifiable)) {
+			JSONObject description = super.getJSONObject();
+			description.put(VALUE_KEY, PrimitiveDescription.toJson(this.getType(), this.getValue()));
+			return description;
+		}
+		return null;
+	}
 }

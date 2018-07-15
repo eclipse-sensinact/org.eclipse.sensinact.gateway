@@ -8,11 +8,11 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
+
 package org.eclipse.sensinact.gateway.core.test;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
-import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory;
+import static org.junit.Assert.assertEquals;
+
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,101 +28,115 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import static org.junit.Assert.assertEquals;
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
+import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory;
 
 /**
  * test Constraint
  */
 public class TriggerTest {
-    public static final String TRIGGER_0 = "{\"type\":\"CONDITIONAL\",\"passOn\":false,\"index\": 0," + "\"constants\":[" + "{\"constant\":100," + " \"constraint\":{\"operator\":\"in\",\"operand\":[22,23,18,3], \"type\":\"int\", \"complement\":false}}," + "{\"constant\":1000," + " \"constraint\":{\"operator\":\">=\",\"operand\":5, \"type\":\"int\", \"complement\":false}}," + "{\"constant\":0," + " \"constraint\":{\"operator\":\">=\",\"operand\":5, \"type\":\"int\", \"complement\":true}}]}";
-    public static final String TRIGGER_1 = "{\"type\":\"CONSTANT\",\"passOn\":false, \"constant\":\"constant\"}";
-    public static final String TRIGGER_2 = "{\"type\":\"COPY\",\"passOn\":false,\"index\": 2}";
+	public static final String TRIGGER_0 = "{\"type\":\"CONDITIONAL\",\"passOn\":false,\"index\": 0,"
+			+ "\"constants\":[" + "{\"constant\":100,"
+			+ " \"constraint\":{\"operator\":\"in\",\"operand\":[22,23,18,3], \"type\":\"int\", \"complement\":false}},"
+			+ "{\"constant\":1000,"
+			+ " \"constraint\":{\"operator\":\">=\",\"operand\":5, \"type\":\"int\", \"complement\":false}},"
+			+ "{\"constant\":0,"
+			+ " \"constraint\":{\"operator\":\">=\",\"operand\":5, \"type\":\"int\", \"complement\":true}}]}";
 
-    public static final String TRIGGER_3 = "{\"type\":\"VARIATIONTEST_TRIGGER\",\"passOn\":false,\"index\":0}";
+	public static final String TRIGGER_1 = "{\"type\":\"CONSTANT\",\"passOn\":false, \"constant\":\"constant\"}";
 
-    private static final String LOG_FILTER = "(" + Constants.OBJECTCLASS + "=" + LogService.class.getCanonicalName() + ")";
+	public static final String TRIGGER_2 = "{\"type\":\"COPY\",\"passOn\":false,\"index\": 2}";
 
-    private static final String MOCK_BUNDLE_NAME = "MockedBundle";
-    private static final long MOCK_BUNDLE_ID = 1;
+	public static final String TRIGGER_3 = "{\"type\":\"VARIATIONTEST_TRIGGER\",\"passOn\":false,\"index\":0}";
 
-    private final BundleContext context = Mockito.mock(BundleContext.class);
-    private final Bundle bundle = Mockito.mock(Bundle.class);
-    private Mediator mediator;
+	private static final String LOG_FILTER = "(" + Constants.OBJECTCLASS + "=" + LogService.class.getCanonicalName()
+			+ ")";
 
-    @Before
-    public void init() throws InvalidSyntaxException {
-        Filter filter = Mockito.mock(Filter.class);
-        Mockito.when(filter.toString()).thenReturn(LOG_FILTER);
+	private static final String MOCK_BUNDLE_NAME = "MockedBundle";
+	private static final long MOCK_BUNDLE_ID = 1;
 
-        Mockito.when(context.createFilter(LOG_FILTER)).thenReturn(filter);
-        Mockito.when(context.getServiceReferences((String) Mockito.eq(null), Mockito.eq(LOG_FILTER))).thenReturn(null);
-        Mockito.when(context.getServiceReference(LOG_FILTER)).thenReturn(null);
-        Mockito.when(context.getServiceReferences(Mockito.anyString(), Mockito.anyString())).then(new Answer<ServiceReference[]>() {
-            @Override
-            public ServiceReference[] answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                if (arguments == null || arguments.length != 2) {
-                    return null;
-                }
-                return null;
-            }
-        });
-        Mockito.when(context.getService(Mockito.any(ServiceReference.class))).then(new Answer<Object>() {
+	private final BundleContext context = Mockito.mock(BundleContext.class);
+	private final Bundle bundle = Mockito.mock(Bundle.class);
 
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                if (arguments == null || arguments.length != 1) {
-                    return null;
-                }
-                return null;
-            }
-        });
-        Mockito.when(context.getBundle()).thenReturn(bundle);
-        Mockito.when(bundle.getSymbolicName()).thenReturn(MOCK_BUNDLE_NAME);
-        Mockito.when(bundle.getBundleId()).thenReturn(MOCK_BUNDLE_ID);
+	private Mediator mediator;
 
-        mediator = new Mediator(context);
-    }
+	@Before
+	public void init() throws InvalidSyntaxException {
+		Filter filter = Mockito.mock(Filter.class);
+		Mockito.when(filter.toString()).thenReturn(LOG_FILTER);
 
-    @Test
-    public void testFactory() throws Exception {
-        AccessMethodTriggerFactory.Loader loader = AccessMethodTriggerFactory.LOADER.get();
-        try {
-            AccessMethodTriggerFactory factory = loader.load(mediator, AccessMethodTrigger.Type.CONDITIONAL.name());
+		Mockito.when(context.createFilter(LOG_FILTER)).thenReturn(filter);
+		Mockito.when(context.getServiceReferences((String) Mockito.eq(null), Mockito.eq(LOG_FILTER))).thenReturn(null);
+		Mockito.when(context.getServiceReference(LOG_FILTER)).thenReturn(null);
 
-            JSONObject jsonTrigger = new JSONObject(TriggerTest.TRIGGER_0);
-            AccessMethodTrigger<Object[]> trigger = factory.<Object[]>newInstance(mediator, jsonTrigger);
+		Mockito.when(context.getServiceReferences(Mockito.anyString(), Mockito.anyString()))
+				.then(new Answer<ServiceReference[]>() {
+					@Override
+					public ServiceReference[] answer(InvocationOnMock invocation) throws Throwable {
+						Object[] arguments = invocation.getArguments();
+						if (arguments == null || arguments.length != 2) {
+							return null;
+						}
+						return null;
+					}
+				});
+		Mockito.when(context.getService(Mockito.any(ServiceReference.class))).then(new Answer<Object>() {
 
-            String triggerJSON = trigger.getJSON();
+			@Override
+			public Object answer(InvocationOnMock invocation) throws Throwable {
+				Object[] arguments = invocation.getArguments();
+				if (arguments == null || arguments.length != 1) {
+					return null;
+				}
+				return null;
+			}
+		});
+		Mockito.when(context.getBundle()).thenReturn(bundle);
+		Mockito.when(bundle.getSymbolicName()).thenReturn(MOCK_BUNDLE_NAME);
+		Mockito.when(bundle.getBundleId()).thenReturn(MOCK_BUNDLE_ID);
 
-            assertEquals(0, trigger.execute(new Object[]{2}));
-            assertEquals(100, trigger.execute(new Object[]{22}));
-            assertEquals(100, trigger.execute(new Object[]{18}));
-            assertEquals(1000, trigger.execute(new Object[]{55}));
+		mediator = new Mediator(context);
+	}
 
-            JSONAssert.assertEquals(TriggerTest.TRIGGER_0, triggerJSON, false);
-            trigger = factory.<Object[]>newInstance(mediator, new JSONObject(TriggerTest.TRIGGER_1));
-            assertEquals("constant", trigger.execute(null));
+	@Test
+	public void testFactory() throws Exception {
+		AccessMethodTriggerFactory.Loader loader = AccessMethodTriggerFactory.LOADER.get();
+		try {
+			AccessMethodTriggerFactory factory = loader.load(mediator, AccessMethodTrigger.Type.CONDITIONAL.name());
 
-            JSONAssert.assertEquals(TriggerTest.TRIGGER_1, trigger.getJSON(), false);
+			JSONObject jsonTrigger = new JSONObject(TriggerTest.TRIGGER_0);
+			AccessMethodTrigger<Object[]> trigger = factory.<Object[]>newInstance(mediator, jsonTrigger);
 
-            trigger = factory.<Object[]>newInstance(mediator, new JSONObject(TriggerTest.TRIGGER_2));
-            assertEquals("value", trigger.execute(new Object[]{2, "copy", "value"}));
-            assertEquals(2, trigger.execute(new Object[]{"copy", "value", 2}));
-            assertEquals("copy", trigger.execute(new Object[]{"value", 2, "copy"}));
+			String triggerJSON = trigger.getJSON();
 
-            JSONAssert.assertEquals(TriggerTest.TRIGGER_2, trigger.getJSON(), false);
+			assertEquals(0, trigger.execute(new Object[] { 2 }));
+			assertEquals(100, trigger.execute(new Object[] { 22 }));
+			assertEquals(100, trigger.execute(new Object[] { 18 }));
+			assertEquals(1000, trigger.execute(new Object[] { 55 }));
 
-            jsonTrigger = new JSONObject(TriggerTest.TRIGGER_3);
-            factory = loader.load(mediator, jsonTrigger.getString("type"));
-            trigger = factory.newInstance(mediator, jsonTrigger);
+			JSONAssert.assertEquals(TriggerTest.TRIGGER_0, triggerJSON, false);
 
-            assertEquals(0.2f, (Float) trigger.execute(null), 0.0f);
-        } finally {
-            AccessMethodTriggerFactory.LOADER.remove();
-        }
-    }
+			trigger = factory.<Object[]>newInstance(mediator, new JSONObject(TriggerTest.TRIGGER_1));
+			assertEquals("constant", trigger.execute(null));
 
+			JSONAssert.assertEquals(TriggerTest.TRIGGER_1, trigger.getJSON(), false);
+
+			trigger = factory.<Object[]>newInstance(mediator, new JSONObject(TriggerTest.TRIGGER_2));
+			assertEquals("value", trigger.execute(new Object[] { 2, "copy", "value" }));
+			assertEquals(2, trigger.execute(new Object[] { "copy", "value", 2 }));
+			assertEquals("copy", trigger.execute(new Object[] { "value", 2, "copy" }));
+
+			JSONAssert.assertEquals(TriggerTest.TRIGGER_2, trigger.getJSON(), false);
+
+			jsonTrigger = new JSONObject(TriggerTest.TRIGGER_3);
+			factory = loader.load(mediator, jsonTrigger.getString("type"));
+			trigger = factory.newInstance(mediator, jsonTrigger);
+
+			assertEquals(0.2f, (Float) trigger.execute(null), 0.0f);
+		} finally {
+			AccessMethodTriggerFactory.LOADER.remove();
+		}
+	}
 
 }

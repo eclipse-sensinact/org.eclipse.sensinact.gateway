@@ -10,22 +10,21 @@
  */
 package org.eclipse.sensinact.gateway.core.security;
 
-import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-
 import java.util.Set;
+
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 
 /**
  * An AccessProfile maps {@link AccessLevel}s to the set of existing
  * {@link AccessMethod.Type}s
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface AccessProfile {
-    /**
-     * Returns the set of {@link MethodAccess} this AccessProfile
-     * gathers
-     *
-     * @return this AccessProfile's {@link MethodAccess}es
-     */
-    Set<MethodAccess> getMethodAccesses();
+	/**
+	 * Returns the set of {@link MethodAccess} this AccessProfile gathers
+	 * 
+	 * @return this AccessProfile's {@link MethodAccess}es
+	 */
+	Set<MethodAccess> getMethodAccesses();
 }

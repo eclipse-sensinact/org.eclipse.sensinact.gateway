@@ -10,6 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao.directive;
 
+import java.lang.reflect.Field;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.dao.SnaDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.SnaEntity;
@@ -17,65 +20,70 @@ import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
 
-import java.lang.reflect.Field;
-import java.util.Map;
-
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class DeleteDirective extends Directive {
 
-    //********************************************************************//
-    //						NESTED DECLARATIONS		    				  //
-    //********************************************************************//
-    //********************************************************************//
-    //						ABSTRACT DECLARATIONS						  //
-    //********************************************************************//
+	// ********************************************************************//
+	// NESTED DECLARATIONS //
+	// ********************************************************************//
 
-    //********************************************************************//
-    //						STATIC DECLARATIONS		      				  //
-    //********************************************************************//
+	// ********************************************************************//
+	// ABSTRACT DECLARATIONS //
+	// ********************************************************************//
 
-    /**
-     * @param mediator
-     * @param entityType
-     * @param fields
-     * @return
-     */
-    public static <E extends SnaEntity> DeleteDirective getDeleteDirective(Mediator mediator, E entity) {
-        Class<? extends SnaEntity> entityType = entity.getClass();
+	// ********************************************************************//
+	// STATIC DECLARATIONS //
+	// ********************************************************************//
 
-        Table table = entityType.getAnnotation(Table.class);
-        Map<Field, Column> fields = SnaEntity.getFields(entityType);
+	/**
+	 * @param mediator
+	 * @param entityType
+	 * @param fields
+	 * 
+	 * @return
+	 */
+	public static <E extends SnaEntity> DeleteDirective getDeleteDirective(Mediator mediator, E entity) {
+		Class<? extends SnaEntity> entityType = entity.getClass();
 
-        KeyDirective keyDirective = KeyDirective.createKeyDirective(mediator, table, entityType.getAnnotation(PrimaryKey.class), fields);
-        keyDirective.assign(entity);
-        DeleteDirective deleteDirective = new DeleteDirective(mediator, table.value(), keyDirective);
-        return deleteDirective;
-    }
-    //********************************************************************//
-    //						INSTANCE DECLARATIONS						  //
-    //********************************************************************//
+		Table table = entityType.getAnnotation(Table.class);
+		Map<Field, Column> fields = SnaEntity.getFields(entityType);
 
-    protected KeyDirective keyDirective;
+		KeyDirective keyDirective = KeyDirective.createKeyDirective(mediator, table,
+				entityType.getAnnotation(PrimaryKey.class), fields);
+		keyDirective.assign(entity);
+		DeleteDirective deleteDirective = new DeleteDirective(mediator, table.value(), keyDirective);
+		return deleteDirective;
+	}
 
-    /**
-     * Constructor
-     */
-    public DeleteDirective(Mediator mediator, String table, KeyDirective keyDirective) {
-        super(mediator, table);
-        this.keyDirective = keyDirective;
-    }
+	// ********************************************************************//
+	// INSTANCE DECLARATIONS //
+	// ********************************************************************//
 
-    /**
-     * @inheritDoc
-     * @see java.lang.Object#toString()
-     */
-    public String toString() {
-        String deleteStatement = new StringBuilder().append(SnaDAO.DELETE_DIRECTIVE).append(SnaDAO.SPACE).append(table).append(SnaDAO.SPACE).append(SnaDAO.WHERE_DIRECTIVE).append(SnaDAO.SPACE).append(this.keyDirective.getValueDirective()).toString();
-//		System.out.println("**************************************");
-//		System.out.println(deleteStatement);
-//		System.out.println("**************************************");
-        return deleteStatement;
-    }
+	protected KeyDirective keyDirective;
+
+	/**
+	 * Constructor
+	 */
+	public DeleteDirective(Mediator mediator, String table, KeyDirective keyDirective) {
+		super(mediator, table);
+		this.keyDirective = keyDirective;
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		String deleteStatement = new StringBuilder().append(SnaDAO.DELETE_DIRECTIVE).append(SnaDAO.SPACE).append(table)
+				.append(SnaDAO.SPACE).append(SnaDAO.WHERE_DIRECTIVE).append(SnaDAO.SPACE)
+				.append(this.keyDirective.getValueDirective()).toString();
+		// System.out.println("**************************************");
+		// System.out.println(deleteStatement);
+		// System.out.println("**************************************");
+		return deleteStatement;
+	}
+
 }

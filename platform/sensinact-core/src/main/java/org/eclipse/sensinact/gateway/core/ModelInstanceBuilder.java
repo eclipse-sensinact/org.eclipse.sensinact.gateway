@@ -10,6 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
@@ -26,453 +33,476 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 
 /**
- * Allows to build  a {@link ModelInstance} in a simple way
- *
- * @param <C> the extended {@link ModelConfiguration}
- *            type in use
- * @param <I> the extended {@link ModelInstance} type in use
+ * Allows to build a {@link ModelInstance} in a simple way
+ * 
+ * @param <C>
+ *            the extended {@link ModelConfiguration} type in use
+ * @param <I>
+ *            the extended {@link ModelInstance} type in use
  */
 public class ModelInstanceBuilder {
-    protected Mediator mediator;
-    protected Class<? extends ModelInstance<? extends ModelConfiguration>> resourceModelType;
-    protected Class<? extends ModelConfiguration> resourceModelConfigurationType;
+	protected Mediator mediator;
+	protected Class<? extends ModelInstance<? extends ModelConfiguration>> resourceModelType;
+	protected Class<? extends ModelConfiguration> resourceModelConfigurationType;
 
-    protected Class<? extends ResourceImpl> resourceType;
-    protected Class<? extends ServiceProviderImpl> serviceProviderType;
-    protected Class<? extends ServiceImpl> serviceType;
+	protected Class<? extends ResourceImpl> resourceType;
+	protected Class<? extends ServiceProviderImpl> serviceProviderType;
+	protected Class<? extends ServiceImpl> serviceType;
 
-    private Class<? extends Resource> defaultResourceType;
-    private Class<?> defaultDataType;
-    private Modifiable defaultModifiable;
-    private Resource.UpdatePolicy defaultUpdatePolicy;
+	private Class<? extends Resource> defaultResourceType;
+	private Class<?> defaultDataType;
+	private Modifiable defaultModifiable;
+	private Resource.UpdatePolicy defaultUpdatePolicy;
 
-    protected boolean startAtInitializationTime = false;
+	protected boolean startAtInitializationTime = false;
 
-    //default behavior : refer to the xml description to instantiate all
-    //pre-defined resources
-    protected byte resourceBuildPolicy = (byte) (BuildPolicy.BUILD_APPEARING_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy());
+	// default behavior : refer to the xml description to instantiate all
+	// pre-defined resources
+	protected byte resourceBuildPolicy = (byte) (BuildPolicy.BUILD_APPEARING_ON_DESCRIPTION.getPolicy()
+			| BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy());
 
-    //default behavior : instantiate services whose name is returned
-    //by the initial ServiceEnumeration request only
-    protected byte serviceBuildPolicy = (byte) (BuildPolicy.BUILD_APPEARING_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy());
+	// default behavior : instantiate services whose name is returned
+	// by the initial ServiceEnumeration request only
+	protected byte serviceBuildPolicy = (byte) (BuildPolicy.BUILD_APPEARING_ON_DESCRIPTION.getPolicy()
+			| BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy());
 
-    protected AccessProfile accessProfile;
+	protected AccessProfile accessProfile;
 
-    protected Map<String, AccessLevel> users;
-    protected ModelConfiguration modelConfiguration;
-    protected ResourceConfigBuilder defaultResourceConfigBuilder;
-    protected ArrayList<String> observed;
+	protected Map<String, AccessLevel> users;
+	protected ModelConfiguration modelConfiguration;
+	protected ResourceConfigBuilder defaultResourceConfigBuilder;
+	protected ArrayList<String> observed;
 
-    /**
-     * @param resourceModelType
-     * @param name
-     */
-    public ModelInstanceBuilder(Mediator mediator) {
-        this(mediator, ModelInstance.class, ModelConfiguration.class);
-    }
+	/**
+	 * @param resourceModelType
+	 * @param name
+	 */
+	public ModelInstanceBuilder(Mediator mediator) {
+		this(mediator, ModelInstance.class, ModelConfiguration.class);
+	}
 
-    /**
-     * @param resourceModelType
-     * @param name
-     */
-    public <C extends ModelConfiguration, I extends ModelInstance<C>> ModelInstanceBuilder(Mediator mediator, Class<? extends I> resourceModelType, Class<? extends C> resourceModelConfigurationType) {
-        this.mediator = mediator;
-        this.resourceModelType = resourceModelType;
-        this.resourceModelConfigurationType = resourceModelConfigurationType;
-        this.users = new HashMap<String, AccessLevel>();
-    }
+	/**
+	 * @param resourceModelType
+	 * @param name
+	 */
+	public <C extends ModelConfiguration, I extends ModelInstance<C>> ModelInstanceBuilder(Mediator mediator,
+			Class<? extends I> resourceModelType, Class<? extends C> resourceModelConfigurationType) {
+		this.mediator = mediator;
+		this.resourceModelType = resourceModelType;
+		this.resourceModelConfigurationType = resourceModelConfigurationType;
+		this.users = new HashMap<String, AccessLevel>();
+	}
 
-    /**
-     * Defines the extended {@link ServiceProviderImpl} type to use
-     *
-     * @param serviceProviderType the extended {@link ServiceProviderImpl} type to use
-     * @return this SnaProcessorConfiguration
-     */
-    public ModelInstanceBuilder withProviderImplementationType(Class<? extends ServiceProviderImpl> serviceProviderType) {
-        this.serviceProviderType = serviceProviderType;
-        return this;
-    }
+	/**
+	 * Defines the extended {@link ServiceProviderImpl} type to use
+	 * 
+	 * @param serviceProviderType
+	 *            the extended {@link ServiceProviderImpl} type to use
+	 * @return this SnaProcessorConfiguration
+	 */
+	public ModelInstanceBuilder withProviderImplementationType(
+			Class<? extends ServiceProviderImpl> serviceProviderType) {
+		this.serviceProviderType = serviceProviderType;
+		return this;
+	}
 
-    /**
-     * Defines the extended {@link ServiceImpl} type to use
-     *
-     * @param serviceType the extended {@link ServiceImpl} type to use
-     */
-    public ModelInstanceBuilder withServiceImplementationType(Class<? extends ServiceImpl> serviceType) {
-        this.serviceType = serviceType;
-        return this;
-    }
+	/**
+	 * Defines the extended {@link ServiceImpl} type to use
+	 * 
+	 * @param serviceType
+	 *            the extended {@link ServiceImpl} type to use
+	 */
+	public ModelInstanceBuilder withServiceImplementationType(Class<? extends ServiceImpl> serviceType) {
+		this.serviceType = serviceType;
+		return this;
+	}
 
-    /**
-     * Defines the {@link AccessProfile} applying to the
-     * {@link SensiNactResourceModel} to be created. If the
-     * resource model is referenced in the datastore
-     * of the sensiNact framework holding it this {@link
-     * AccessProfile} is useless
-     *
-     * @param accessProfile the {@link AccessProfile} applying
-     */
-    public ModelInstanceBuilder withAccessProfile(AccessProfile accessProfile) {
-        this.accessProfile = accessProfile;
-        return this;
-    }
+	/**
+	 * Defines the {@link AccessProfile} applying to the
+	 * {@link SensiNactResourceModel} to be created. If the resource model is
+	 * referenced in the datastore of the sensiNact framework holding it this
+	 * {@link AccessProfile} is useless
+	 * 
+	 * @param accessProfile
+	 *            the {@link AccessProfile} applying
+	 */
+	public ModelInstanceBuilder withAccessProfile(AccessProfile accessProfile) {
+		this.accessProfile = accessProfile;
+		return this;
+	}
 
-    /**
-     * Specifies a specific {@link AccessLevel} for the user
-     * whose public key is passed as parameter
-     *
-     * @param userPublicKey the user's public key
-     * @param accessLevel   the {@link AccessLevel} for the specified
-     *                      user
-     */
-    public ModelInstanceBuilder withUser(String userPublicKey, AccessLevel accessLevel) {
-        this.users.put(userPublicKey, accessLevel);
-        return this;
-    }
+	/**
+	 * Specifies a specific {@link AccessLevel} for the user whose public key is
+	 * passed as parameter
+	 * 
+	 * @param userPublicKey
+	 *            the user's public key
+	 * @param accessLevel
+	 *            the {@link AccessLevel} for the specified user
+	 */
+	public ModelInstanceBuilder withUser(String userPublicKey, AccessLevel accessLevel) {
+		this.users.put(userPublicKey, accessLevel);
+		return this;
+	}
 
-    /**
-     * Defines the extended {@link ResourceImpl} type to use
-     *
-     * @param resourceType the extended {@link ResourceImpl} type to use
-     */
-    public ModelInstanceBuilder withResourceImplementationType(Class<? extends ResourceImpl> resourceType) {
-        this.resourceType = resourceType;
-        return this;
-    }
+	/**
+	 * Defines the extended {@link ResourceImpl} type to use
+	 * 
+	 * @param resourceType
+	 *            the extended {@link ResourceImpl} type to use
+	 */
+	public ModelInstanceBuilder withResourceImplementationType(Class<? extends ResourceImpl> resourceType) {
+		this.resourceType = resourceType;
+		return this;
+	}
 
-    /**
-     * Sets the default extended {@link Resource} interface to be
-     * used by the {@link ResourceConfigBuilder} of the {@link
-     * ModelConfiguration} to be created and/or configured by
-     * this ModelInstanceBuilder
-     *
-     * @param defaultResourceType the default extended {@link
-     *                            Resource} interface to be used
-     * @return this ModelInstanceBuilder
-     */
-    public ModelInstanceBuilder withDefaultResourceType(Class<? extends Resource> defaultResourceType) {
-        this.defaultResourceType = defaultResourceType;
-        return this;
-    }
+	/**
+	 * Sets the default extended {@link Resource} interface to be used by the
+	 * {@link ResourceConfigBuilder} of the {@link ModelConfiguration} to be created
+	 * and/or configured by this ModelInstanceBuilder
+	 * 
+	 * @param defaultResourceType
+	 *            the default extended {@link Resource} interface to be used
+	 * 
+	 * @return this ModelInstanceBuilder
+	 */
+	public ModelInstanceBuilder withDefaultResourceType(Class<? extends Resource> defaultResourceType) {
+		this.defaultResourceType = defaultResourceType;
+		return this;
+	}
 
-    /**
-     * Sets the default data Type to be used by the {@link
-     * ResourceConfigBuilder} of the {@link ModelConfiguration}
-     * to be created and/or configured by this ModelInstanceBuilder
-     *
-     * @param defaultDataType the default data Type to be used
-     * @return this ModelInstanceBuilder
-     */
-    public ModelInstanceBuilder withDefaultDataType(Class<?> defaultDataType) {
-        this.defaultDataType = defaultDataType;
-        return this;
-    }
+	/**
+	 * Sets the default data Type to be used by the {@link ResourceConfigBuilder} of
+	 * the {@link ModelConfiguration} to be created and/or configured by this
+	 * ModelInstanceBuilder
+	 * 
+	 * @param defaultDataType
+	 *            the default data Type to be used
+	 * 
+	 * @return this ModelInstanceBuilder
+	 */
+	public ModelInstanceBuilder withDefaultDataType(Class<?> defaultDataType) {
+		this.defaultDataType = defaultDataType;
+		return this;
+	}
 
-    /**
-     * Sets the default {@link Modifiable} to be used by the
-     * {@link ResourceConfigBuilder} of the {@link
-     * ModelConfiguration} to be created and/or configured by
-     * this ModelInstanceBuilder
-     *
-     * @param defaultModifiable the default {@link Modifiable}
-     *                          to be used
-     * @return this ModelInstanceBuilder
-     */
-    public ModelInstanceBuilder withDefaultModifiable(Modifiable defaultModifiable) {
-        this.defaultModifiable = defaultModifiable;
-        return this;
-    }
+	/**
+	 * Sets the default {@link Modifiable} to be used by the
+	 * {@link ResourceConfigBuilder} of the {@link ModelConfiguration} to be created
+	 * and/or configured by this ModelInstanceBuilder
+	 * 
+	 * @param defaultModifiable
+	 *            the default {@link Modifiable} to be used
+	 * 
+	 * @return this ModelInstanceBuilder
+	 */
+	public ModelInstanceBuilder withDefaultModifiable(Modifiable defaultModifiable) {
+		this.defaultModifiable = defaultModifiable;
+		return this;
+	}
 
-    /**
-     * Sets the default extended {@link Resource.UpdatePolicy} to be
-     * used by the {@link ResourceConfigBuilder} of the {@link
-     * ModelConfiguration} to be created and/or configured by
-     * this ModelInstanceBuilder
-     *
-     * @param defaultUpdatePolicy the default {@link Resource.UpdatePolicy}
-     *                            to be used
-     * @return this ModelInstanceBuilder
-     */
-    public ModelInstanceBuilder withDefaultUpdatePolicy(Resource.UpdatePolicy defaultUpdatePolicy) {
-        this.defaultUpdatePolicy = defaultUpdatePolicy;
-        return this;
-    }
+	/**
+	 * Sets the default extended {@link Resource.UpdatePolicy} to be used by the
+	 * {@link ResourceConfigBuilder} of the {@link ModelConfiguration} to be created
+	 * and/or configured by this ModelInstanceBuilder
+	 * 
+	 * @param defaultUpdatePolicy
+	 *            the default {@link Resource.UpdatePolicy} to be used
+	 * 
+	 * @return this ModelInstanceBuilder
+	 */
+	public ModelInstanceBuilder withDefaultUpdatePolicy(Resource.UpdatePolicy defaultUpdatePolicy) {
+		this.defaultUpdatePolicy = defaultUpdatePolicy;
+		return this;
+	}
 
-    /**
-     * Defines the build policy applying on service instantiation
-     *
-     * @param buildPolicy the byte representing the {@link BuildPolicy}(s)
-     *                    applying on service instantiation
-     */
-    public ModelInstanceBuilder withServiceBuildPolicy(byte buildPolicy) {
-        this.serviceBuildPolicy = buildPolicy;
-        return this;
-    }
+	/**
+	 * Defines the build policy applying on service instantiation
+	 * 
+	 * @param buildPolicy
+	 *            the byte representing the {@link BuildPolicy}(s) applying on
+	 *            service instantiation
+	 * 
+	 */
+	public ModelInstanceBuilder withServiceBuildPolicy(byte buildPolicy) {
+		this.serviceBuildPolicy = buildPolicy;
+		return this;
+	}
 
-    /**
-     * Defines the build policy applying on resource instantiation
-     *
-     * @param buildPolicy the byte representing the {@link BuildPolicy}(s)
-     *                    applying on resource instantiation
-     */
-    public ModelInstanceBuilder withResourceBuildPolicy(byte buildPolicy) {
-        this.resourceBuildPolicy = buildPolicy;
-        return this;
-    }
+	/**
+	 * Defines the build policy applying on resource instantiation
+	 * 
+	 * @param buildPolicy
+	 *            the byte representing the {@link BuildPolicy}(s) applying on
+	 *            resource instantiation
+	 * 
+	 */
+	public ModelInstanceBuilder withResourceBuildPolicy(byte buildPolicy) {
+		this.resourceBuildPolicy = buildPolicy;
+		return this;
+	}
 
-    /**
-     * Defines the default {@link ResourceConfigCatalog} providing the
-     * available {@link ResourceConfig}s
-     *
-     * @param resourceConfigCatalog the {@link ResourceConfigBuilder} to
-     *                              be set
-     */
-    public ModelInstanceBuilder withDefaultResourceConfigBuilder(ResourceConfigBuilder defaultResourceConfigBuilder) {
-        this.defaultResourceConfigBuilder = defaultResourceConfigBuilder;
-        return this;
-    }
+	/**
+	 * Defines the default {@link ResourceConfigCatalog} providing the available
+	 * {@link ResourceConfig}s
+	 * 
+	 * @param resourceConfigCatalog
+	 *            the {@link ResourceConfigBuilder} to be set
+	 */
+	public ModelInstanceBuilder withDefaultResourceConfigBuilder(ResourceConfigBuilder defaultResourceConfigBuilder) {
+		this.defaultResourceConfigBuilder = defaultResourceConfigBuilder;
+		return this;
+	}
 
-    /**
-     * Defines whether the resource model is build dynamically according
-     * to the content of a parsed communication packet
-     *
-     * @param buildDynamically <ul>
-     *                         <li>true if the resource model has to be build
-     *                         dynamically according to the content
-     *                         of a parsed communication packet</li>
-     *                         <li>false otherwise</li>
-     *                         </ul>
-     */
-    public ModelInstanceBuilder withStartAtInitializationTime(boolean startAtInitializationTime) {
-        this.startAtInitializationTime = startAtInitializationTime;
-        return this;
-    }
+	/**
+	 * Defines whether the resource model is build dynamically according to the
+	 * content of a parsed communication packet
+	 * 
+	 * @param buildDynamically
+	 *            <ul>
+	 *            <li>true if the resource model has to be build dynamically
+	 *            according to the content of a parsed communication packet</li>
+	 *            <li>false otherwise</li>
+	 *            </ul>
+	 */
+	public ModelInstanceBuilder withStartAtInitializationTime(boolean startAtInitializationTime) {
+		this.startAtInitializationTime = startAtInitializationTime;
+		return this;
+	}
 
-    /**
-     * Attaches a new String path, starting from the service definition, of
-     * an attribute to be observed by the {@link ModelInstanceRegistration}
-     * of a {@link ModelInstance} built by this ModelInstanceBuilder
-     *
-     * @param observed the String path of an attribute to be observed
-     */
-    public ModelInstanceBuilder withObserved(String observed) {
-        if (this.observed == null) {
-            this.observed = new ArrayList<String>();
-        }
-        this.observed.add(observed);
-        return this;
-    }
+	/**
+	 * Attaches a new String path, starting from the service definition, of an
+	 * attribute to be observed by the {@link ModelInstanceRegistration} of a
+	 * {@link ModelInstance} built by this ModelInstanceBuilder
+	 * 
+	 * @param observed
+	 *            the String path of an attribute to be observed
+	 */
+	public ModelInstanceBuilder withObserved(String observed) {
+		if (this.observed == null) {
+			this.observed = new ArrayList<String>();
+		}
+		this.observed.add(observed);
+		return this;
+	}
 
-    /**
-     * Attaches a the collection of String paths, starting from services definition,
-     * of attributes to be observed by the {@link ModelInstanceRegistration}
-     * of a {@link ModelInstance} built by this ModelInstanceBuilder
-     *
-     * @param observed the collection of String paths of attributes to be observed
-     */
-    public ModelInstanceBuilder withObserved(Collection<String> observed) {
-        if (this.observed == null) {
-            this.observed = new ArrayList<String>();
-        }
-        this.observed.addAll(observed);
-        return this;
-    }
+	/**
+	 * Attaches a the collection of String paths, starting from services definition,
+	 * of attributes to be observed by the {@link ModelInstanceRegistration} of a
+	 * {@link ModelInstance} built by this ModelInstanceBuilder
+	 * 
+	 * @param observed
+	 *            the collection of String paths of attributes to be observed
+	 */
+	public ModelInstanceBuilder withObserved(Collection<String> observed) {
+		if (this.observed == null) {
+			this.observed = new ArrayList<String>();
+		}
+		this.observed.addAll(observed);
+		return this;
+	}
 
-    /**
-     * Defines the {@link ModelConfiguration} which applies
-     * on new created {@link ModelInstance}s
-     *
-     * @param configuration the {@link ModelConfiguration} which applies
-     */
-    public ModelInstanceBuilder withConfiguration(ModelConfiguration modelConfiguration) {
-        this.modelConfiguration = modelConfiguration;
-        return this;
-    }
+	/**
+	 * Defines the {@link ModelConfiguration} which applies on new created
+	 * {@link ModelInstance}s
+	 * 
+	 * @param configuration
+	 *            the {@link ModelConfiguration} which applies
+	 */
+	public ModelInstanceBuilder withConfiguration(ModelConfiguration modelConfiguration) {
+		this.modelConfiguration = modelConfiguration;
+		return this;
+	}
 
-    /**
-     * Configures the {@link ModelConfiguration} passed as parameter
-     *
-     * @param configuration the {@link ModelConfiguration} to
-     *                      configure
-     */
-    protected <C extends ModelConfiguration> void configure(C configuration) {
-        configuration.setServiceBuildPolicy(this.serviceBuildPolicy).setResourceBuildPolicy(this.resourceBuildPolicy).setStartAtInitializationTime(this.startAtInitializationTime);
+	/**
+	 * Configures the {@link ModelConfiguration} passed as parameter
+	 * 
+	 * @param configuration
+	 *            the {@link ModelConfiguration} to configure
+	 */
+	protected <C extends ModelConfiguration> void configure(C configuration) {
+		configuration.setServiceBuildPolicy(this.serviceBuildPolicy).setResourceBuildPolicy(this.resourceBuildPolicy)
+				.setStartAtInitializationTime(this.startAtInitializationTime);
 
-        if (this.resourceType != null) {
-            configuration.setResourceImplementationType(this.resourceType);
-        }
-        if (this.serviceType != null) {
-            configuration.setServiceImplmentationType(this.serviceType);
-        }
-        if (this.serviceProviderType != null) {
-            configuration.setProviderImplementationType(this.serviceProviderType);
-        }
-        if (this.defaultResourceType != null) {
-            configuration.setDefaultResourceType(this.defaultResourceType);
-        }
-        if (this.defaultDataType != null) {
-            configuration.setDefaultDataType(this.defaultDataType);
-        }
-        if (this.defaultModifiable != null) {
-            configuration.setDefaultModifiable(this.defaultModifiable);
-        }
-        if (this.defaultUpdatePolicy != null) {
-            configuration.setDefaultUpdatePolicy(this.defaultUpdatePolicy);
-        }
-        if (this.observed != null) {
-            configuration.setObserved(this.observed);
-        }
-    }
+		if (this.resourceType != null) {
+			configuration.setResourceImplementationType(this.resourceType);
+		}
+		if (this.serviceType != null) {
+			configuration.setServiceImplmentationType(this.serviceType);
+		}
+		if (this.serviceProviderType != null) {
+			configuration.setProviderImplementationType(this.serviceProviderType);
+		}
+		if (this.defaultResourceType != null) {
+			configuration.setDefaultResourceType(this.defaultResourceType);
+		}
+		if (this.defaultDataType != null) {
+			configuration.setDefaultDataType(this.defaultDataType);
+		}
+		if (this.defaultModifiable != null) {
+			configuration.setDefaultModifiable(this.defaultModifiable);
+		}
+		if (this.defaultUpdatePolicy != null) {
+			configuration.setDefaultUpdatePolicy(this.defaultUpdatePolicy);
+		}
+		if (this.observed != null) {
+			configuration.setObserved(this.observed);
+		}
+	}
 
-    /**
-     * Creates and returns the {@link RootNode} of the {@link AccessNodeImpl}s
-     * hierarchy for the {@link SensiNactResourceModel}(s) to be built
-     * by the intermediate of this builder
-     *
-     * @return the {@link RootNode} of the {@link AccessNodeImpl}s hierarchy
-     * for the {@link SensiNactResourceModel}(s) to be built
-     */
-    protected AccessTree<?> buildAccessTree() {
-        return AccessController.<AccessTree<?>>doPrivileged(new PrivilegedAction<AccessTree<?>>() {
-            @Override
-            public AccessTree<?> run() {
-                final String identifier = ModelInstanceBuilder.this.mediator.callService(BundleValidation.class, new Executable<BundleValidation, String>() {
-                    @Override
-                    public String execute(BundleValidation service) throws Exception {
-                        return service.check(ModelInstanceBuilder.this.mediator.getContext().getBundle());
-                    }
-                });
-                AccessTree<?> tree = null;
-                if (identifier == null) {
-                    tree = new AccessTreeImpl<>(mediator).withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
+	/**
+	 * Creates and returns the {@link RootNode} of the {@link AccessNodeImpl}s
+	 * hierarchy for the {@link SensiNactResourceModel}(s) to be built by the
+	 * intermediate of this builder
+	 * 
+	 * @return the {@link RootNode} of the {@link AccessNodeImpl}s hierarchy for the
+	 *         {@link SensiNactResourceModel}(s) to be built
+	 */
+	protected AccessTree<?> buildAccessTree() {
+		return AccessController.<AccessTree<?>>doPrivileged(new PrivilegedAction<AccessTree<?>>() {
+			@Override
+			public AccessTree<?> run() {
+				final String identifier = ModelInstanceBuilder.this.mediator.callService(BundleValidation.class,
+						new Executable<BundleValidation, String>() {
+							@Override
+							public String execute(BundleValidation service) throws Exception {
+								return service.check(ModelInstanceBuilder.this.mediator.getContext().getBundle());
+							}
+						});
+				AccessTree<?> tree = null;
+				if (identifier == null) {
+					tree = new AccessTreeImpl<>(mediator).withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
 
-                } else {
-                    tree = ModelInstanceBuilder.this.mediator.callService(SecuredAccess.class, new Executable<SecuredAccess, AccessTree<?>>() {
-                        @Override
-                        public AccessTree<?> execute(SecuredAccess service) throws Exception {
-                            return service.getAccessTree(identifier);
-                        }
-                    });
-                }
-                return tree;
-            }
-        });
-    }
+				} else {
+					tree = ModelInstanceBuilder.this.mediator.callService(SecuredAccess.class,
+							new Executable<SecuredAccess, AccessTree<?>>() {
+								@Override
+								public AccessTree<?> execute(SecuredAccess service) throws Exception {
+									return service.getAccessTree(identifier);
+								}
+							});
+				}
+				return tree;
+			}
+		});
+	}
 
-    /**
-     * Creates the {@link AccessNodeImpl} for the {@link SensiNactResourceModel}
-     * to be built, and add it to the {@link RootNode} passed as parameter
-     *
-     * @param root the {@link RootNode} to which attach the new created
-     *             {@link AccessNodeImpl}
-     */
-    protected void buildAccessNode(final MutableAccessTree<? extends MutableAccessNode> accessTree, final String name) {
-        final AccessProfile accessProfile = this.accessProfile;
+	/**
+	 * Creates the {@link AccessNodeImpl} for the {@link SensiNactResourceModel} to
+	 * be built, and add it to the {@link RootNode} passed as parameter
+	 * 
+	 * @param root
+	 *            the {@link RootNode} to which attach the new created
+	 *            {@link AccessNodeImpl}
+	 */
+	protected void buildAccessNode(final MutableAccessTree<? extends MutableAccessNode> accessTree, final String name) {
+		final AccessProfile accessProfile = this.accessProfile;
 
-        AccessController.<Void>doPrivileged(new PrivilegedAction<Void>() {
-            @Override
-            public Void run() {
-                final String identifier = ModelInstanceBuilder.this.mediator.callService(BundleValidation.class, new Executable<BundleValidation, String>() {
-                    @Override
-                    public String execute(BundleValidation service) throws Exception {
-                        return service.check(ModelInstanceBuilder.this.mediator.getContext().getBundle());
-                    }
-                });
+		AccessController.<Void>doPrivileged(new PrivilegedAction<Void>() {
+			@Override
+			public Void run() {
+				final String identifier = ModelInstanceBuilder.this.mediator.callService(BundleValidation.class,
+						new Executable<BundleValidation, String>() {
+							@Override
+							public String execute(BundleValidation service) throws Exception {
+								return service.check(ModelInstanceBuilder.this.mediator.getContext().getBundle());
+							}
+						});
 
-                if (identifier == null) {
-                    accessTree.add(UriUtils.getUri(new String[]{name})).withAccessProfile(accessProfile == null ? AccessProfileOption.ALL_ANONYMOUS.getAccessProfile() : accessProfile);
+				if (identifier == null) {
+					accessTree.add(UriUtils.getUri(new String[] { name })).withAccessProfile(
+							accessProfile == null ? AccessProfileOption.ALL_ANONYMOUS.getAccessProfile()
+									: accessProfile);
 
-                } else {
-                    ModelInstanceBuilder.this.mediator.callService(SecuredAccess.class, new Executable<SecuredAccess, Void>() {
-                        @Override
-                        public Void execute(SecuredAccess service) throws Exception {
-                            service.buildAccessNodesHierarchy(identifier, name, accessTree);
+				} else {
+					ModelInstanceBuilder.this.mediator.callService(SecuredAccess.class,
+							new Executable<SecuredAccess, Void>() {
+								@Override
+								public Void execute(SecuredAccess service) throws Exception {
+									service.buildAccessNodesHierarchy(identifier, name, accessTree);
 
-                            return null;
-                        }
-                    });
-                }
-                return null;
-            }
-        });
-    }
+									return null;
+								}
+							});
+				}
+				return null;
+			}
+		});
+	}
 
-    /**
-     * Creates and returns a {@link ModelConfiguration}
-     * instance with the specified properties.
-     *
-     * @return the new created {@link ModelConfiguration}
-     */
-    public <C extends ModelConfiguration> C buildConfiguration(Object... parameters) {
-        C configuration = null;
-        AccessTree<?> accessTree = this.buildAccessTree();
+	/**
+	 * Creates and returns a {@link ModelConfiguration} instance with the specified
+	 * properties.
+	 * 
+	 * @return the new created {@link ModelConfiguration}
+	 */
+	public <C extends ModelConfiguration> C buildConfiguration(Object... parameters) {
+		C configuration = null;
+		AccessTree<?> accessTree = this.buildAccessTree();
 
-        int parametersLength = (parameters == null ? 0 : parameters.length);
-        int offset = (this.defaultResourceConfigBuilder != null) ? 3 : 2;
-        Object[] arguments = new Object[parametersLength + offset];
-        if (parametersLength > 0) {
-            System.arraycopy(parameters, 0, arguments, offset, parametersLength);
-        }
-        arguments[0] = mediator;
-        arguments[1] = accessTree;
+		int parametersLength = (parameters == null ? 0 : parameters.length);
+		int offset = (this.defaultResourceConfigBuilder != null) ? 3 : 2;
+		Object[] arguments = new Object[parametersLength + offset];
+		if (parametersLength > 0) {
+			System.arraycopy(parameters, 0, arguments, offset, parametersLength);
+		}
+		arguments[0] = mediator;
+		arguments[1] = accessTree;
 
-        if (this.defaultResourceConfigBuilder != null) {
-            arguments[2] = defaultResourceConfigBuilder;
-        }
-        configuration = ReflectUtils.<ModelConfiguration, C>getInstance(ModelConfiguration.class, (Class<C>) this.resourceModelConfigurationType, arguments);
+		if (this.defaultResourceConfigBuilder != null) {
+			arguments[2] = defaultResourceConfigBuilder;
+		}
+		configuration = ReflectUtils.<ModelConfiguration, C>getInstance(ModelConfiguration.class,
+				(Class<C>) this.resourceModelConfigurationType, arguments);
 
-        if (configuration != null) {
-            this.configure(configuration);
-            this.withConfiguration(configuration);
-        }
-        return configuration;
-    }
+		if (configuration != null) {
+			this.configure(configuration);
+			this.withConfiguration(configuration);
+		}
+		return configuration;
+	}
 
-    /**
-     * Creates and return a {@link SensiNactResourceModel}
-     * instance with the specified properties. Optional arguments
-     * apply to the {@link SensiNactResourceModelConfiguration}
-     * initialization
-     *
-     * @return the new created {@link SensiNactResourceModel}
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <C extends ModelConfiguration, I extends ModelInstance<C>> I build(final String name, String profileId, Object... parameters) {
-        I instance = null;
-        if (this.modelConfiguration == null) {
-            this.buildConfiguration(parameters);
-        }
-        if (this.modelConfiguration != null) {
-            this.buildAccessNode(this.modelConfiguration.getAccessTree(), name);
+	/**
+	 * Creates and return a {@link SensiNactResourceModel} instance with the
+	 * specified properties. Optional arguments apply to the
+	 * {@link SensiNactResourceModelConfiguration} initialization
+	 * 
+	 * @return the new created {@link SensiNactResourceModel}
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public <C extends ModelConfiguration, I extends ModelInstance<C>> I build(final String name, String profileId,
+			Object... parameters) {
+		I instance = null;
+		if (this.modelConfiguration == null) {
+			this.buildConfiguration(parameters);
+		}
+		if (this.modelConfiguration != null) {
+			this.buildAccessNode(this.modelConfiguration.getAccessTree(), name);
 
-            instance = (I) ReflectUtils.<ModelInstance, I>getInstance(ModelInstance.class, (Class<I>) this.resourceModelType, this.mediator, this.modelConfiguration, name, profileId);
-            try {
-                this.register(instance);
+			instance = (I) ReflectUtils.<ModelInstance, I>getInstance(ModelInstance.class,
+					(Class<I>) this.resourceModelType, this.mediator, this.modelConfiguration, name, profileId);
+			try {
+				this.register(instance);
 
-            } catch (ModelAlreadyRegisteredException e) {
-                mediator.error("Model instance '%s' already exists", name);
-                instance = null;
-            }
-        }
-        return instance;
-    }
+			} catch (ModelAlreadyRegisteredException e) {
+				mediator.error("Model instance '%s' already exists", name);
+				instance = null;
+			}
+		}
+		return instance;
+	}
 
-    /**
-     * @param instance
-     */
-    protected final <C extends ModelConfiguration, I extends ModelInstance<C>> void register(final I instance) {
-        if (instance == null) {
-            return;
-        }
-        instance.register();
-    }
+	/**
+	 * @param instance
+	 */
+	protected final <C extends ModelConfiguration, I extends ModelInstance<C>> void register(final I instance) {
+		if (instance == null) {
+			return;
+		}
+		instance.register();
+	}
 }

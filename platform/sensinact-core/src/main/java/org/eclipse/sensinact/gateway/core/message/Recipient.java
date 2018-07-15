@@ -14,23 +14,23 @@ import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 
 /**
  * A callback recipient
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface Recipient extends JSONable {
-    static final String RECIPIENT_JSONSCHEMA = "";
+	static final String RECIPIENT_JSONSCHEMA = "";
 
-    /**
-     * Transmits the array of recorded {@link SnaMessage}
-     * to the recipient
-     *
-     * @param callbackId the {@link MidCallback}'s identifier from which
-     *                   the array of {@link SnaMessage}s come
-     * @param messages   the array of recorded {@link SnaMessage}
-     *                   to transmit
-     * @throws Exception If an error occurred while transmitting
-     *                   the messages array
-     */
-    void callback(String callbackId, SnaMessage[] messages) throws Exception;
+	/**
+	 * Transmits the array of recorded {@link SnaMessage} to the recipient
+	 * 
+	 * @param callbackId
+	 *            the {@link MidCallback}'s identifier from which the array of
+	 *            {@link SnaMessage}s come
+	 * @param messages
+	 *            the array of recorded {@link SnaMessage} to transmit
+	 * @throws Exception
+	 *             If an error occurred while transmitting the messages array
+	 */
+	void callback(String callbackId, SnaMessage[] messages) throws Exception;
 
 }

@@ -16,32 +16,33 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 /**
  * An MethodAccessibility defines whether an {@link AccessMethod.Type} is
  * accessible for a specific {@link AccessLevelOption}
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface MethodAccessibility extends Nameable {
-    /**
-     * The {@link AccessMethod.Type} of this MethodAccessibility
-     *
-     * @return this MethodAccessibility's {@link AccessMethod.Type}
-     */
-    AccessMethod.Type getMethod();
+	/**
+	 * The {@link AccessMethod.Type} of this MethodAccessibility
+	 * 
+	 * @return this MethodAccessibility's {@link AccessMethod.Type}
+	 */
+	AccessMethod.Type getMethod();
 
-    /**
-     * The {@link AccessLevelOption} of this MethodAccessibility
-     *
-     * @return this MethodAccessibility's {@link AccessLevelOption}
-     */
-    AccessLevelOption getAccessLevelOption();
+	/**
+	 * The {@link AccessLevelOption} of this MethodAccessibility
+	 * 
+	 * @return this MethodAccessibility's {@link AccessLevelOption}
+	 */
+	AccessLevelOption getAccessLevelOption();
 
-    /**
-     * Returns true if the method held by this MethodAccessibility
-     * is accessible; false otherwise
-     *
-     * @return <ul>
-     * <li>true if the method is accessible</li>
-     * <li>false otherwise</li>
-     * </ul>
-     */
-    boolean isAccessible();
+	/**
+	 * Returns true if the method held by this MethodAccessibility is accessible;
+	 * false otherwise
+	 * 
+	 * @return
+	 *         <ul>
+	 *         <li>true if the method is accessible</li>
+	 *         <li>false otherwise</li>
+	 *         </ul>
+	 */
+	boolean isAccessible();
 }

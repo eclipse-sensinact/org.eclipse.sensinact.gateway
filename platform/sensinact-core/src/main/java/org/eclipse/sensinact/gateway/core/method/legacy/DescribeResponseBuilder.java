@@ -14,33 +14,32 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 
 /**
- * Extended  {@link AccessMethodResponseBuilder} dedicated
- * to {@link DescribeMethod} execution and {@link DescribeResponse}
- * creation
- *
+ * Extended {@link AccessMethodResponseBuilder} dedicated to
+ * {@link DescribeMethod} execution and {@link DescribeResponse} creation
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
 public abstract class DescribeResponseBuilder<T> extends AccessMethodResponseBuilder<T, DescribeResponse<T>> {
-    protected DescribeMethod.DescribeType describeType;
-    protected boolean payloadOnly;
+	protected DescribeMethod.DescribeType describeType;
+	protected boolean payloadOnly;
 
-    /**
-     * @param mediator
-     * @param uri
-     * @param describeType
-     */
-    protected DescribeResponseBuilder(Mediator mediator, String uri, DescribeMethod.DescribeType describeType) {
-        super(mediator, uri, null);
-        this.describeType = describeType;
-    }
+	/**
+	 * @param mediator
+	 * @param uri
+	 * @param describeType
+	 */
+	protected DescribeResponseBuilder(Mediator mediator, String uri, DescribeMethod.DescribeType describeType) {
+		super(mediator, uri, null);
+		this.describeType = describeType;
+	}
 
-    /**
-     * @param payloadOnly
-     * @return
-     */
-    public DescribeResponseBuilder<T> withPayloadOnly(boolean payloadOnly) {
-        this.payloadOnly = payloadOnly;
-        return this;
-    }
+	/**
+	 * @param payloadOnly
+	 * @return
+	 */
+	public DescribeResponseBuilder<T> withPayloadOnly(boolean payloadOnly) {
+		this.payloadOnly = payloadOnly;
+		return this;
+	}
 }

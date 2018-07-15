@@ -1,77 +1,73 @@
-<!--
-  ~ Copyright (c) 2017 CEA.
-  ~ All rights reserved. This program and the accompanying materials
-  ~ are made available under the terms of the Eclipse Public License v1.0
-  ~ which accompanies this distribution, and is available at
-  ~ http://www.eclipse.org/legal/epl-v10.html
-  ~
-  ~ Contributors:
-  ~    CEA - initial API and implementation
-  -->
+<!-- ~ Copyright (c) 2017 CEA. ~ All rights reserved. This program and the 
+	accompanying materials ~ are made available under the terms of the Eclipse 
+	Public License v1.0 ~ which accompanies this distribution, and is available 
+	at ~ http://www.eclipse.org/legal/epl-v10.html ~ ~ Contributors: ~ CEA - 
+	initial API and implementation -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.eclipse.sensinact.gateway</groupId>
-        <artifactId>sensinact-security</artifactId>
-        <version>1.5-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway</groupId>
+		<artifactId>sensinact-security</artifactId>
+		<version>1.5-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>sensinact-security-core</artifactId>
-    <packaging>bundle</packaging>
-    	
-    <name>sensiNact IoT Gateway - Security Core</name>
+	<artifactId>sensinact-security-core</artifactId>
+	<packaging>bundle</packaging>
+
+	<name>sensiNact IoT Gateway - Security Core</name>
 
 	<dependencies>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-core</artifactId>
-            <version>${project.version}</version>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-core</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-signature-validator</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-utils</artifactId>
-            <version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-signature-validator</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-common</artifactId>
-            <version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-utils</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-datastore-api</artifactId>
-            <version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-common</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.tools</groupId>
-            <artifactId>sensinact-test</artifactId>
-            <version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-datastore-api</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.tools</groupId>
+			<artifactId>sensinact-test</artifactId>
+			<version>${project.version}</version>
 			<scope>test</scope>
-        </dependency>
+		</dependency>
 		<dependency>
 			<groupId>org.skyscreamer</groupId>
 			<artifactId>jsonassert</artifactId>
 			<version>1.2.3</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>		
-  			<groupId>org.eclipse.sensinact.gateway</groupId>
-  			<artifactId>sensinact-sqlite-connector</artifactId>
-    		<version>1.5-SNAPSHOT</version>
-    		<scope>test</scope>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-sqlite-connector</artifactId>
+			<version>1.5-SNAPSHOT</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -80,10 +76,10 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
-    <!-- Build -->
-    <build>
-        <plugins>
+
+	<!-- Build -->
+	<build>
+		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -101,14 +97,14 @@
 									<version>3.5.0</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.fileinstall.jar</destFileName>
-								</artifactItem>				
-                                <artifactItem>
-                                    <groupId>org.apache.felix</groupId>
-                                    <artifactId>org.apache.felix.framework.security</artifactId>
-                                    <version>2.4.0</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.felix</groupId>
+									<artifactId>org.apache.felix.framework.security</artifactId>
+									<version>2.4.0</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.framework.security.jar</destFileName>
-                                </artifactItem>
+								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-utils</artifactId>
@@ -123,10 +119,10 @@
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-datastore-api.jar</destFileName>
 								</artifactItem>
-								<artifactItem>	
-  									<groupId>org.eclipse.sensinact.gateway</groupId>
-  									<artifactId>sensinact-sqlite-connector</artifactId>
-    								<version>1.5-SNAPSHOT</version>
+								<artifactItem>
+									<groupId>org.eclipse.sensinact.gateway</groupId>
+									<artifactId>sensinact-sqlite-connector</artifactId>
+									<version>1.5-SNAPSHOT</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-sqlite-connector.jar</destFileName>
 								</artifactItem>
@@ -143,7 +139,7 @@
 									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-framework-extension.jar</destFileName>
-								</artifactItem>								
+								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.tools</groupId>
 									<artifactId>sensinact-test-configuration</artifactId>
@@ -224,21 +220,21 @@
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.simulated.devices</groupId>
 									<artifactId>slider</artifactId>
-        							<version>1.5-SNAPSHOT</version>
+									<version>1.5-SNAPSHOT</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>slider.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.simulated.devices</groupId>
 									<artifactId>fan</artifactId>
-        							<version>1.5-SNAPSHOT</version>
+									<version>1.5-SNAPSHOT</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>fan.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.simulated.devices</groupId>
 									<artifactId>button</artifactId>
-        							<version>1.5-SNAPSHOT</version>
+									<version>1.5-SNAPSHOT</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>button.jar</destFileName>
 								</artifactItem>
@@ -261,35 +257,34 @@
 						<configuration>
 							<tasks>
 								<echo>Copying keystore.jks</echo>
-								<copy file="../sensinact-signature-validator/src/main/resources/keystore.jks"
-									  tofile="${project.build.directory}/felix/bundle/keystore.jks"/>
+								<copy file="../cert/keystore.jks"
+									tofile="${project.build.directory}/felix/bundle/keystore.jks" />
 							</tasks>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Fragment-Host>
-                        	sensinact-core
-                        </Fragment-Host>
-                        <Export-Package>
-                        	org.eclipse.sensinact.gateway.core.security.impl
-                        </Export-Package>
-                        <Provide-Capability>
-                        	org.eclipse.sensinact.security,
-                        	org.eclipse.sensinact.datastore,
-                    		org.eclipse.sensinact.datastore.connector
-                        </Provide-Capability>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<Fragment-Host>
+							sensinact-core
+						</Fragment-Host>
+						<Export-Package>
+							org.eclipse.sensinact.gateway.core.security.impl
+						</Export-Package>
+						<Provide-Capability>
+							org.eclipse.sensinact.user.manager,
+							org.eclipse.sensinact.security
+						</Provide-Capability>
 						<Include-Resource>
 							about.html,
 							src/main/resources/
 						</Include-Resource>
-                    </instructions>
-                </configuration>	
+					</instructions>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>
@@ -306,8 +301,8 @@
 						</configuration>
 					</execution>
 				</executions>
-            </plugin>
-        </plugins>
-    </build>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

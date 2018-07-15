@@ -16,42 +16,44 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.json.JSONObject;
 
 /**
- * Extended  {@link AccessMethodResponseBuilder} dedicated to {@link ActMethod}
+ * Extended {@link AccessMethodResponseBuilder} dedicated to {@link ActMethod}
  * execution
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
 public class ActResponseBuilder extends AccessMethodResponseBuilder<JSONObject, ActResponse> {
-    /**
-     * @param uri
-     * @param parameters
-     */
-    protected ActResponseBuilder(Mediator mediator, String uri, Object[] parameters) {
-        super(mediator, uri, parameters);
-    }
+	/**
+	 * @param uri
+	 * @param parameters
+	 */
+	protected ActResponseBuilder(Mediator mediator, String uri, Object[] parameters) {
+		super(mediator, uri, parameters);
+	}
 
-    /**
-     * @inheritDoc
-     * @see AccessMethodResponseBuilder#
-     * createAccessMethodResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
-     */
-    @Override
-    public ActResponse createAccessMethodResponse(AccessMethodResponse.Status status) {
-        ActResponse response = new ActResponse(super.mediator, super.getPath(), status);
+	/**
+	 * @inheritDoc
+	 *
+	 * @see AccessMethodResponseBuilder#
+	 *      createAccessMethodResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
+	 */
+	@Override
+	public ActResponse createAccessMethodResponse(AccessMethodResponse.Status status) {
+		ActResponse response = new ActResponse(super.mediator, super.getPath(), status);
 
-        while (!super.isEmpty()) {
-            response.addTriggered(super.pop().toString());
-        }
-        return response;
-    }
+		while (!super.isEmpty()) {
+			response.addTriggered(super.pop().toString());
+		}
+		return response;
+	}
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder#getComponentType()
-     */
-    @Override
-    public Class<JSONObject> getComponentType() {
-        return JSONObject.class;
-    }
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder#getComponentType()
+	 */
+	@Override
+	public Class<JSONObject> getComponentType() {
+		return JSONObject.class;
+	}
 }

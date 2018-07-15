@@ -18,11 +18,14 @@ import org.eclipse.sensinact.gateway.common.props.TypedKey;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface SnaResponseMessage<T, S extends Enum<S> & SnaMessageSubType & KeysCollection> extends SnaErrorfulMessage<S> {
-    public static final TypedKey<?>[] PERMANENT_KEYS = new TypedKey[]{new TypedKey<Object>(SnaConstants.RESPONSE_KEY, Object.class, false), new TypedKey<Integer>(SnaConstants.STATUS_CODE_KEY, int.class, false)};
+public interface SnaResponseMessage<T, S extends Enum<S> & SnaMessageSubType & KeysCollection>
+		extends SnaErrorfulMessage<S> {
+	public static final TypedKey<?>[] PERMANENT_KEYS = new TypedKey[] {
+			new TypedKey<Object>(SnaConstants.RESPONSE_KEY, Object.class, false),
+			new TypedKey<Integer>(SnaConstants.STATUS_CODE_KEY, int.class, false) };
 
-    public static final SnaMessage.Type TYPE = SnaMessage.Type.RESPONSE;
+	public static final SnaMessage.Type TYPE = SnaMessage.Type.RESPONSE;
 
-    T getResponse();
+	T getResponse();
 
 }

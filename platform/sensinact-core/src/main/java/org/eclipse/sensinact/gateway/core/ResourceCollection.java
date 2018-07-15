@@ -14,26 +14,24 @@ import java.util.List;
 
 /**
  * A collection of {@link Resource} service
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface ResourceCollection {
-    /**
-     * Returns the set of all {@link Resource}s
-     * of this collection
-     *
-     * @return the set of held {@link Resource}s
-     */
-    List<Resource> getResources();
+	/**
+	 * Returns the set of all {@link Resource}s of this collection
+	 * 
+	 * @return the set of held {@link Resource}s
+	 */
+	List<Resource> getResources();
 
-    /**
-     * Returns the {@link Resource} held by this
-     * collection and whose name is passed as
-     * parameter
-     *
-     * @param resource the name of the {@link Resource}
-     * @return the {@link Resource} of this collection
-     * with the specified name
-     */
-    <R extends Resource> R getResource(String resource);
+	/**
+	 * Returns the {@link Resource} held by this collection and whose name is passed
+	 * as parameter
+	 * 
+	 * @param resource
+	 *            the name of the {@link Resource}
+	 * @return the {@link Resource} of this collection with the specified name
+	 */
+	<R extends Resource> R getResource(String resource);
 }

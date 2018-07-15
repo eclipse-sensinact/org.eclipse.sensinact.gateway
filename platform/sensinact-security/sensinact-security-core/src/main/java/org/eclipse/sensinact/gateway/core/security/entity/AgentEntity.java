@@ -10,106 +10,116 @@
  */
 package org.eclipse.sensinact.gateway.core.security.entity;
 
+import org.json.JSONObject;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
-import org.json.JSONObject;
 
 /**
  * Agent Entity
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @Table(value = "AGENT")
-@PrimaryKey(value = {"AID"})
+@PrimaryKey(value = { "AID" })
 public class AgentEntity extends SnaEntity {
-    @Column(value = "AID")
-    private long identifier;
-    @Column(value = "APUBLIC_KEY")
-    private String publicKey;
-    @Column(value = "BID")
-    @ForeignKey(refer = "BID", table = "BUNDLE")
-    private long bundleEntity;
+	@Column(value = "AID")
+	private long identifier;
 
+	@Column(value = "APUBLIC_KEY")
+	private String publicKey;
 
-    /**
-     * Constructor
-     *
-     * @param mediator the {@link Mediator} allowing to
-     *                 interact with the OSGi host environment
-     */
-    public AgentEntity(Mediator mediator) {
-        super(mediator);
-    }
+	@Column(value = "BID")
+	@ForeignKey(refer = "BID", table = "BUNDLE")
+	private long bundleEntity;
 
-    /**
-     * Constructor
-     *
-     * @param mediator the {@link Mediator} allowing to
-     *                 interact with the OSGi host environment
-     * @param row
-     */
-    public AgentEntity(Mediator mediator, JSONObject row) {
-        super(mediator, row);
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param mediator
+	 *            the {@link Mediator} allowing to interact with the OSGi host
+	 *            environment
+	 */
+	public AgentEntity(Mediator mediator) {
+		super(mediator);
+	}
 
-    /**
-     * Constructor
-     *
-     * @param mediator the {@link Mediator} allowing to
-     *                 interact with the OSGi host environment
-     * @param login
-     * @param password
-     * @param mail
-     */
-    public AgentEntity(Mediator mediator, String publicKey, long bundleEntity) {
-        this(mediator);
-        this.setPublicKey(publicKey);
-        this.setBundleEntity(bundleEntity);
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param mediator
+	 *            the {@link Mediator} allowing to interact with the OSGi host
+	 *            environment
+	 * @param row
+	 * 
+	 */
+	public AgentEntity(Mediator mediator, JSONObject row) {
+		super(mediator, row);
+	}
 
-    /**
-     * @inheritDoc
-     * @see SnaEntity#getIdentifier()
-     */
-    public long getIdentifier() {
-        return identifier;
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param mediator
+	 *            the {@link Mediator} allowing to interact with the OSGi host
+	 *            environment
+	 * @param login
+	 * @param password
+	 * @param mail
+	 */
+	public AgentEntity(Mediator mediator, String publicKey, long bundleEntity) {
+		this(mediator);
+		this.setPublicKey(publicKey);
+		this.setBundleEntity(bundleEntity);
+	}
 
-    /**
-     * @param identifier the identifier to set
-     */
-    public void setIdentifier(long identifier) {
-        this.identifier = identifier;
-    }
+	/**
+	 * @inheritDoc
+	 *
+	 * @see SnaEntity#getIdentifier()
+	 */
+	public long getIdentifier() {
+		return identifier;
+	}
 
-    /**
-     * @return the login
-     */
-    public long getBundleEntity() {
-        return this.bundleEntity;
-    }
+	/**
+	 * @param identifier
+	 *            the identifier to set
+	 */
+	public void setIdentifier(long identifier) {
+		this.identifier = identifier;
+	}
 
-    /**
-     * @param login the login to set
-     */
-    public void setBundleEntity(long bundleEntity) {
-        this.bundleEntity = bundleEntity;
-    }
+	/**
+	 * @return the login
+	 */
+	public long getBundleEntity() {
+		return this.bundleEntity;
+	}
 
-    /**
-     * @return the public key
-     */
-    public String getPublicKey() {
-        return publicKey;
-    }
+	/**
+	 * @param login
+	 *            the login to set
+	 */
+	public void setBundleEntity(long bundleEntity) {
+		this.bundleEntity = bundleEntity;
+	}
 
-    /**
-     * @param publicKey the public key to set
-     */
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
+	/**
+	 * @return the public key
+	 */
+	public String getPublicKey() {
+		return publicKey;
+	}
+
+	/**
+	 * @param publicKey
+	 *            the public key to set
+	 */
+	public void setPublicKey(String publicKey) {
+		this.publicKey = publicKey;
+	}
 }

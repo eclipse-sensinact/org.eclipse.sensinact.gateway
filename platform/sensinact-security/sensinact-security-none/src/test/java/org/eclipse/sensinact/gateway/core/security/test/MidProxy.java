@@ -10,91 +10,98 @@
  */
 package org.eclipse.sensinact.gateway.core.security.test;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
+
 public class MidProxy<T> implements InvocationHandler {
-    private BundleContextProvider contextProvider;
-    private Class<T> serviceType;
+	private BundleContextProvider contextProvider;
+	private Class<T> serviceType;
 
-    private Object contextualizedInstance;
-    private FilterOSGiClassLoader classloader;
+	private Object contextualizedInstance;
+	private FilterOSGiClassLoader classloader;
 
-    public MidProxy(FilterOSGiClassLoader classloader, BundleContextProvider contextProvider, Class<T> serviceType) {
-        this.contextProvider = contextProvider;
-        this.classloader = classloader;
-        this.serviceType = serviceType;
-    }
+	public MidProxy(FilterOSGiClassLoader classloader, BundleContextProvider contextProvider, Class<T> serviceType) {
+		this.contextProvider = contextProvider;
+		this.classloader = classloader;
+		this.serviceType = serviceType;
+	}
 
-    @SuppressWarnings("unchecked")
-    public T buildProxy() throws ClassNotFoundException {
-        String classname = this.serviceType.getCanonicalName();
-        Class<?> contextualizedClazz = this.loadClass(classname);
+	@SuppressWarnings("unchecked")
+	public T buildProxy() throws ClassNotFoundException {
+		String classname = this.serviceType.getCanonicalName();
+		Class<?> contextualizedClazz = this.loadClass(classname);
 
-        ServiceReference reference = null;
+		ServiceReference reference = null;
 
-        if (contextualizedClazz != null && (reference = this.contextProvider.getBundleContext().getServiceReference(contextualizedClazz)) != null && (this.contextualizedInstance = this.contextProvider.getBundleContext().getService(reference)) != null) {
-            return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class<?>[]{serviceType}, this);
-        }
-        return null;
-    }
+		if (contextualizedClazz != null
+				&& (reference = this.contextProvider.getBundleContext()
+						.getServiceReference(contextualizedClazz)) != null
+				&& (this.contextualizedInstance = this.contextProvider.getBundleContext()
+						.getService(reference)) != null) {
+			return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+					new Class<?>[] { serviceType }, this);
+		}
+		return null;
+	}
 
-    private Class<?> loadClass(String classname) throws ClassNotFoundException {
-        Class<?> contextualizedClazz = null;
+	private Class<?> loadClass(String classname) throws ClassNotFoundException {
+		Class<?> contextualizedClazz = null;
 
-        String bundleName = classloader.isAFilteredClass(classname);
+		String bundleName = classloader.isAFilteredClass(classname);
 
-        if (bundleName != null && Thread.currentThread().getContextClassLoader() != classloader) {
-            Bundle[] bundles = this.contextProvider.getBundleContext().getBundles();
-            int index = 0;
-            int length = bundles == null ? 0 : bundles.length;
-            for (; index < length; index++) {
-                if (bundleName.equals(bundles[index].getSymbolicName())) {
-                    try {
-                        contextualizedClazz = bundles[index].loadClass(classname);
+		if (bundleName != null && Thread.currentThread().getContextClassLoader() != classloader) {
 
-                    } catch (ClassNotFoundException e) {
-                    }
-                    break;
-                }
-            }
-        } else {
-            contextualizedClazz = classloader.loadClass(classname);
-        }
-        return contextualizedClazz;
-    }
+			Bundle[] bundles = this.contextProvider.getBundleContext().getBundles();
+			int index = 0;
+			int length = bundles == null ? 0 : bundles.length;
+			for (; index < length; index++) {
+				if (bundleName.equals(bundles[index].getSymbolicName())) {
+					try {
+						contextualizedClazz = bundles[index].loadClass(classname);
 
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        String methodName = method.getName();
-        Class<?> clazz = method.getDeclaringClass();
+					} catch (ClassNotFoundException e) {
+					}
+					break;
+				}
+			}
+		} else {
+			contextualizedClazz = classloader.loadClass(classname);
+		}
+		return contextualizedClazz;
+	}
 
-        Class<?>[] parameterTypes = method.getParameterTypes();
-        Class<?>[] contextualizedParameterTypes = new Class<?>[parameterTypes.length];
+	@Override
+	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		String methodName = method.getName();
+		Class<?> clazz = method.getDeclaringClass();
 
-        int index = 0;
-        int length = parameterTypes.length;
+		Class<?>[] parameterTypes = method.getParameterTypes();
+		Class<?>[] contextualizedParameterTypes = new Class<?>[parameterTypes.length];
 
-        for (; index < length; index++) {
-            if (parameterTypes[index].isPrimitive() || parameterTypes[index] == String.class) {
-                contextualizedParameterTypes[index] = parameterTypes[index];
-                continue;
-            }
-            contextualizedParameterTypes[index] = this.loadClass(parameterTypes[index].getCanonicalName());
+		int index = 0;
+		int length = parameterTypes.length;
 
-            //TODO:handle MidProxy object parameters
-            if (contextualizedParameterTypes[index] == null || contextualizedParameterTypes[index] != parameterTypes[index]) {
-                throw new IllegalArgumentException("Invalid parameter Types ");
-            }
-        }
-        Class<?> contextualizedClazz = this.loadClass(clazz.getCanonicalName());
+		for (; index < length; index++) {
+			if (parameterTypes[index].isPrimitive() || parameterTypes[index] == String.class) {
+				contextualizedParameterTypes[index] = parameterTypes[index];
+				continue;
+			}
+			contextualizedParameterTypes[index] = this.loadClass(parameterTypes[index].getCanonicalName());
 
-        Method contextualizedMethod = contextualizedClazz.getMethod(methodName, contextualizedParameterTypes);
+			// TODO:handle MidProxy object parameters
+			if (contextualizedParameterTypes[index] == null
+					|| contextualizedParameterTypes[index] != parameterTypes[index]) {
+				throw new IllegalArgumentException("Invalid parameter Types ");
+			}
+		}
+		Class<?> contextualizedClazz = this.loadClass(clazz.getCanonicalName());
 
-        return contextualizedMethod.invoke(this.contextualizedInstance, args);
-    }
+		Method contextualizedMethod = contextualizedClazz.getMethod(methodName, contextualizedParameterTypes);
+
+		return contextualizedMethod.invoke(this.contextualizedInstance, args);
+	}
 }

@@ -10,112 +10,120 @@
  */
 package org.eclipse.sensinact.gateway.core.security.entity;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
-import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.NotNull;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
 import org.json.JSONObject;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
+import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
+
 /**
  * ObjectProfileAccess DAO Entity
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @Table(value = "AUTHENTICATED")
-@PrimaryKey(value = {"PUBLIC_KEY", "OID", "UAID"})
+@PrimaryKey(value = { "PUBLIC_KEY", "OID", "UAID" })
 public class AuthenticatedEntity extends SnaEntity {
-    @NotNull
-    @Column(value = "PUBLIC_KEY")
-    private String publicKey;
-    @NotNull
-    @Column(value = "OID")
-    @ForeignKey(refer = "OID", table = "OBJECT")
-    private long objectEntity;
-    @NotNull
-    @Column(value = "UAID")
-    @ForeignKey(refer = "UAID", table = "USER_ACCESS")
-    private long userAccessEntity;
+	@NotNull
+	@Column(value = "PUBLIC_KEY")
+	private String publicKey;
 
-    /**
-     * Constructor
-     *
-     * @param mediator the {@link Mediator} allowing to
-     *                 interact with the OSGi host environment
-     */
-    public AuthenticatedEntity(Mediator mediator) {
-        super(mediator);
-    }
+	@NotNull
+	@Column(value = "OID")
+	@ForeignKey(refer = "OID", table = "OBJECT")
+	private long objectEntity;
 
-    /**
-     * Constructor
-     *
-     * @param mediator the {@link Mediator} allowing to
-     *                 interact with the OSGi host environment
-     * @param row
-     */
-    public AuthenticatedEntity(Mediator mediator, JSONObject row) {
-        super(mediator, row);
-    }
+	@NotNull
+	@Column(value = "UAID")
+	@ForeignKey(refer = "UAID", table = "USER_ACCESS")
+	private long userAccessEntity;
 
-    /**
-     * Constructor
-     *
-     * @param mediator            the {@link Mediator} allowing to
-     *                            interact with the OSGi host environment
-     * @param methodEntity
-     * @param objectProfileEntity
-     * @param objectAccessEntity
-     */
-    public AuthenticatedEntity(Mediator mediator, String publicKey, long objectEntity, long userAccessEntity) {
-        super(mediator);
-        this.setPublicKey(publicKey);
-        this.setObjectEntity(objectEntity);
-        this.setUserAccessEntity(userAccessEntity);
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param mediator
+	 *            the {@link Mediator} allowing to interact with the OSGi host
+	 *            environment
+	 */
+	public AuthenticatedEntity(Mediator mediator) {
+		super(mediator);
+	}
 
-    /**
-     * @return the userEntity
-     */
-    public String getPublicKey() {
-        return this.publicKey;
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param mediator
+	 *            the {@link Mediator} allowing to interact with the OSGi host
+	 *            environment
+	 * @param row
+	 */
+	public AuthenticatedEntity(Mediator mediator, JSONObject row) {
+		super(mediator, row);
+	}
 
-    /**
-     * @param userEntity the userEntity to set
-     */
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param mediator
+	 *            the {@link Mediator} allowing to interact with the OSGi host
+	 *            environment
+	 * @param methodEntity
+	 * @param objectProfileEntity
+	 * @param objectAccessEntity
+	 */
+	public AuthenticatedEntity(Mediator mediator, String publicKey, long objectEntity, long userAccessEntity) {
+		super(mediator);
+		this.setPublicKey(publicKey);
+		this.setObjectEntity(objectEntity);
+		this.setUserAccessEntity(userAccessEntity);
+	}
 
-    /**
-     * @return the objectEntity
-     */
-    public long getObjectEntity() {
-        return objectEntity;
-    }
+	/**
+	 * @return the userEntity
+	 */
+	public String getPublicKey() {
+		return this.publicKey;
+	}
 
-    /**
-     * @param objectEntity the objectEntity to set
-     */
-    public void setObjectEntity(long objectEntity) {
-        this.objectEntity = objectEntity;
-    }
+	/**
+	 * @param userEntity
+	 *            the userEntity to set
+	 */
+	public void setPublicKey(String publicKey) {
+		this.publicKey = publicKey;
+	}
 
-    /**
-     * @return the userAccessEntity
-     */
-    public long getUserAccessEntity() {
-        return userAccessEntity;
-    }
+	/**
+	 * @return the objectEntity
+	 */
+	public long getObjectEntity() {
+		return objectEntity;
+	}
 
-    /**
-     * @param userAccessEntity the userAccessEntity to set
-     */
-    public void setUserAccessEntity(long userAccessEntity) {
-        this.userAccessEntity = userAccessEntity;
-    }
+	/**
+	 * @param objectEntity
+	 *            the objectEntity to set
+	 */
+	public void setObjectEntity(long objectEntity) {
+		this.objectEntity = objectEntity;
+	}
 
+	/**
+	 * @return the userAccessEntity
+	 */
+	public long getUserAccessEntity() {
+		return userAccessEntity;
+	}
+
+	/**
+	 * @param userAccessEntity
+	 *            the userAccessEntity to set
+	 */
+	public void setUserAccessEntity(long userAccessEntity) {
+		this.userAccessEntity = userAccessEntity;
+	}
 
 }

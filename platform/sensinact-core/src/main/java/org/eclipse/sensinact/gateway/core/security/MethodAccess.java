@@ -14,23 +14,23 @@ import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 
 /**
- * An MethodAccess defines an {@link AccessLevel} for an {@link AccessMethod.Type}
- *
+ * An MethodAccess defines an {@link AccessLevel} for an
+ * {@link AccessMethod.Type}
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface MethodAccess extends Nameable {
-    /**
-     * The {@link AccessMethod.Type} of this MethodAccess
-     *
-     * @return this MethodAccess's {@link AccessMethod.Type}
-     */
-    AccessMethod.Type getMethod();
+	/**
+	 * The {@link AccessMethod.Type} of this MethodAccess
+	 * 
+	 * @return this MethodAccess's {@link AccessMethod.Type}
+	 */
+	AccessMethod.Type getMethod();
 
-    /**
-     * The {@link AccessLevel} for this MethodAccess's
-     * {@link AccessMethod.Type}
-     *
-     * @return this MethodAccess's {@link AccessLevel}
-     */
-    AccessLevel getAccessLevel();
+	/**
+	 * The {@link AccessLevel} for this MethodAccess's {@link AccessMethod.Type}
+	 * 
+	 * @return this MethodAccess's {@link AccessLevel}
+	 */
+	AccessLevel getAccessLevel();
 }

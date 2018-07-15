@@ -15,8 +15,9 @@ import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
 
 /**
  * A set of {@link ProcessableData} processable by {@link ServiceImpl}s
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface ServiceProcessableContainer<S extends ServiceProcessableData<?>> extends ProcessableData, ProcessableContainer<S> {
+public interface ServiceProcessableContainer<S extends ServiceProcessableData<?>>
+		extends ProcessableData, ProcessableContainer<S> {
 }

@@ -10,6 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao.directive;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.dao.SnaDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.SnaEntity;
@@ -18,128 +23,128 @@ import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class CreateDirective extends Directive {
 
-    //********************************************************************//
-    //						NESTED DECLARATIONS		    				  //
-    //********************************************************************//
-    //********************************************************************//
-    //						ABSTRACT DECLARATIONS						  //
-    //********************************************************************//
+	// ********************************************************************//
+	// NESTED DECLARATIONS //
+	// ********************************************************************//
 
-    //********************************************************************//
-    //						STATIC DECLARATIONS		      				  //
-    //********************************************************************//
+	// ********************************************************************//
+	// ABSTRACT DECLARATIONS //
+	// ********************************************************************//
 
-    /**
-     * @param mediator
-     * @param entityType
-     * @param fields
-     * @return
-     */
-    public static <E extends SnaEntity> CreateDirective getCreateDirective(Mediator mediator, E entity) {
-        Class<? extends SnaEntity> entityType = entity.getClass();
+	// ********************************************************************//
+	// STATIC DECLARATIONS //
+	// ********************************************************************//
 
-        Table table = entityType.getAnnotation(Table.class);
-        PrimaryKey primaryKey = entityType.getAnnotation(PrimaryKey.class);
-        Map<Field, Column> fields = SnaEntity.getFields(entityType);
+	/**
+	 * @param mediator
+	 * @param entityType
+	 * @param fields
+	 * 
+	 * @return
+	 */
+	public static <E extends SnaEntity> CreateDirective getCreateDirective(Mediator mediator, E entity) {
+		Class<? extends SnaEntity> entityType = entity.getClass();
 
-        CreateDirective createDirective = new CreateDirective(mediator, table.value());
-        Iterator<Map.Entry<Field, Column>> iterator = fields.entrySet().iterator();
+		Table table = entityType.getAnnotation(Table.class);
+		PrimaryKey primaryKey = entityType.getAnnotation(PrimaryKey.class);
+		Map<Field, Column> fields = SnaEntity.getFields(entityType);
 
-        String[] keys = primaryKey == null ? null : primaryKey.value();
-        int index = 0;
-        int length = keys == null ? 0 : keys.length;
+		CreateDirective createDirective = new CreateDirective(mediator, table.value());
+		Iterator<Map.Entry<Field, Column>> iterator = fields.entrySet().iterator();
 
-        while (iterator.hasNext()) {
-            Map.Entry<Field, Column> entry = iterator.next();
+		String[] keys = primaryKey == null ? null : primaryKey.value();
+		int index = 0;
+		int length = keys == null ? 0 : keys.length;
 
-            index = 0;
-            for (; index < length; index++) {
-                if (keys[index].equals(entry.getValue().value()) && entry.getKey().getAnnotation(ForeignKey.class) == null) {
-                    break;
-                }
-            }
-            if (index < length) {
-                continue;
-            }
-            createDirective.create(entry.getValue().value(), entity.getFieldValue(entry.getKey()));
-        }
+		while (iterator.hasNext()) {
+			Map.Entry<Field, Column> entry = iterator.next();
 
-        return createDirective;
-    }
-    //********************************************************************//
-    //						INSTANCE DECLARATIONS						  //
-    //********************************************************************//
+			index = 0;
+			for (; index < length; index++) {
+				if (keys[index].equals(entry.getValue().value())
+						&& entry.getKey().getAnnotation(ForeignKey.class) == null) {
+					break;
+				}
+			}
+			if (index < length) {
+				continue;
+			}
+			createDirective.create(entry.getValue().value(), entity.getFieldValue(entry.getKey()));
+		}
 
+		return createDirective;
+	}
 
-    protected Map<String, Object> create;
+	// ********************************************************************//
+	// INSTANCE DECLARATIONS //
+	// ********************************************************************//
 
-    /**
-     * Constructor
-     */
-    public CreateDirective(Mediator mediator, String table) {
-        super(mediator, table);
-        this.create = new HashMap<String, Object>();
-    }
+	protected Map<String, Object> create;
 
-    /**
-     * @param column
-     */
-    public void create(String column, Object value) {
-        if (column == null || column.length() == 0) {
-            return;
-        }
-        this.create.put(column, value);
-    }
+	/**
+	 * Constructor
+	 */
+	public CreateDirective(Mediator mediator, String table) {
+		super(mediator, table);
+		this.create = new HashMap<String, Object>();
+	}
 
-    /**
-     * @inheritDoc
-     * @see java.lang.Object#toString()
-     */
-    public String toString() {
-        StringBuilder columnsBuilder = new StringBuilder();
-        columnsBuilder.append(SnaDAO.INSERT_DIRECTIVE);
-        columnsBuilder.append(SnaDAO.SPACE);
-        columnsBuilder.append(super.table);
-        columnsBuilder.append(SnaDAO.OPEN_PARENTHESIS);
+	/**
+	 * @param column
+	 */
+	public void create(String column, Object value) {
+		if (column == null || column.length() == 0) {
+			return;
+		}
+		this.create.put(column, value);
+	}
 
-        StringBuilder valuesBuilder = new StringBuilder();
-        valuesBuilder.append(SnaDAO.VALUES_DIRECTIVE);
-        valuesBuilder.append(SnaDAO.OPEN_PARENTHESIS);
+	/**
+	 * @inheritDoc
+	 *
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		StringBuilder columnsBuilder = new StringBuilder();
+		columnsBuilder.append(SnaDAO.INSERT_DIRECTIVE);
+		columnsBuilder.append(SnaDAO.SPACE);
+		columnsBuilder.append(super.table);
+		columnsBuilder.append(SnaDAO.OPEN_PARENTHESIS);
 
-        Map.Entry<String, Object> entry = null;
+		StringBuilder valuesBuilder = new StringBuilder();
+		valuesBuilder.append(SnaDAO.VALUES_DIRECTIVE);
+		valuesBuilder.append(SnaDAO.OPEN_PARENTHESIS);
 
-        Iterator<Map.Entry<String, Object>> iterator = this.create.entrySet().iterator();
+		Map.Entry<String, Object> entry = null;
 
-        if (iterator.hasNext()) {
-            entry = iterator.next();
-            columnsBuilder.append(entry.getKey());
-            valuesBuilder.append(super.getStringValue(entry.getValue()));
-        }
-        while (iterator.hasNext()) {
-            entry = iterator.next();
-            columnsBuilder.append(SnaDAO.COMMA);
-            columnsBuilder.append(entry.getKey());
-            valuesBuilder.append(SnaDAO.COMMA);
-            valuesBuilder.append(super.getStringValue(entry.getValue()));
-        }
-        columnsBuilder.append(SnaDAO.CLOSE_PARENTHESIS);
-        valuesBuilder.append(SnaDAO.CLOSE_PARENTHESIS);
+		Iterator<Map.Entry<String, Object>> iterator = this.create.entrySet().iterator();
 
-        columnsBuilder.append(valuesBuilder.toString());
-        String createDirective = columnsBuilder.toString();
-//		System.out.println("**************************************");
-//		System.out.println(createDirective);
-//		System.out.println("**************************************");
-        return createDirective;
-    }
+		if (iterator.hasNext()) {
+			entry = iterator.next();
+			columnsBuilder.append(entry.getKey());
+			valuesBuilder.append(super.getStringValue(entry.getValue()));
+		}
+		while (iterator.hasNext()) {
+			entry = iterator.next();
+			columnsBuilder.append(SnaDAO.COMMA);
+			columnsBuilder.append(entry.getKey());
+			valuesBuilder.append(SnaDAO.COMMA);
+			valuesBuilder.append(super.getStringValue(entry.getValue()));
+		}
+		columnsBuilder.append(SnaDAO.CLOSE_PARENTHESIS);
+		valuesBuilder.append(SnaDAO.CLOSE_PARENTHESIS);
+
+		columnsBuilder.append(valuesBuilder.toString());
+		String createDirective = columnsBuilder.toString();
+		// System.out.println("**************************************");
+		// System.out.println(createDirective);
+		// System.out.println("**************************************");
+		return createDirective;
+	}
+
 }

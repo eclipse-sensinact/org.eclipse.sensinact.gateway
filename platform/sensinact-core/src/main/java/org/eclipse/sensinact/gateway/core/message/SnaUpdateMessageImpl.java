@@ -14,14 +14,15 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 
 /**
  * Extended notification message dedicated to update events
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class SnaUpdateMessageImpl extends SnaNotificationMessageImpl<SnaUpdateMessage.Update> implements SnaUpdateMessage {
-    /**
-     * Constructor
-     */
-    protected SnaUpdateMessageImpl(Mediator mediator, String uri, Update type) {
-        super(mediator, uri, type);
-    }
+public class SnaUpdateMessageImpl extends SnaNotificationMessageImpl<SnaUpdateMessage.Update>
+		implements SnaUpdateMessage {
+	/**
+	 * Constructor
+	 */
+	protected SnaUpdateMessageImpl(Mediator mediator, String uri, Update type) {
+		super(mediator, uri, type);
+	}
 }

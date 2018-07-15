@@ -10,6 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao.directive;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
@@ -20,296 +26,301 @@ import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 /**
  * DAO TABLE Primary Key directive
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class KeyDirective extends Directive {
-    //********************************************************************//
-    //						NESTED DECLARATIONS						  	  //
-    //********************************************************************//
 
-    /**
-     * References a Column of the Table
-     * of this KeyDirective
-     */
-    public class KeyEntry implements Nameable {
-        private String column;
-        private Object value = null;
+	// ********************************************************************//
+	// NESTED DECLARATIONS //
+	// ********************************************************************//
 
-        /**
-         * @return the column
-         */
-        public String getColumn() {
-            return column;
-        }
+	/**
+	 * References a Column of the Table of this KeyDirective
+	 */
+	public class KeyEntry implements Nameable {
+		private String column;
+		private Object value = null;
 
-        /**
-         * @param column the column to set
-         */
-        public void setColumn(String column) {
-            this.column = column;
-        }
+		/**
+		 * @return the column
+		 */
+		public String getColumn() {
+			return column;
+		}
 
-        /**
-         * @return the value
-         */
-        public Object getValue() {
-            return value;
-        }
+		/**
+		 * @param column
+		 *            the column to set
+		 */
+		public void setColumn(String column) {
+			this.column = column;
+		}
 
-        /**
-         * @param value the value to set
-         */
-        public void setValue(Object value) {
-            this.value = value;
-        }
+		/**
+		 * @return the value
+		 */
+		public Object getValue() {
+			return value;
+		}
 
-        /**
-         * @inheritDoc
-         * @see Nameable#getName()
-         */
-        @Override
-        public String getName() {
-            return KeyDirective.this.getColumnName(this.column);
-        }
-    }
+		/**
+		 * @param value
+		 *            the value to set
+		 */
+		public void setValue(Object value) {
+			this.value = value;
+		}
 
-    /**
-     * References Foreign Column and Table
-     * for a composed primary key definition
-     */
-    class ForeignKeyEntry extends KeyEntry {
-        private String foreignTable;
-        private String foreignColumn;
+		/**
+		 * @inheritDoc
+		 * 
+		 * @see Nameable#getName()
+		 */
+		@Override
+		public String getName() {
+			return KeyDirective.this.getColumnName(this.column);
+		}
+	}
 
-        /**
-         * @return the foreignTable
-         */
-        public String getForeignTable() {
-            return foreignTable;
-        }
+	/**
+	 * References Foreign Column and Table for a composed primary key definition
+	 */
+	class ForeignKeyEntry extends KeyEntry {
+		private String foreignTable;
+		private String foreignColumn;
 
-        /**
-         * @param foreignTable the foreignTable to set
-         */
-        public void setForeignTable(String foreignTable) {
-            this.foreignTable = foreignTable;
-        }
+		/**
+		 * @return the foreignTable
+		 */
+		public String getForeignTable() {
+			return foreignTable;
+		}
 
-        /**
-         * @return the foreignColumn
-         */
-        public String getForeignColumn() {
-            return foreignColumn;
-        }
+		/**
+		 * @param foreignTable
+		 *            the foreignTable to set
+		 */
+		public void setForeignTable(String foreignTable) {
+			this.foreignTable = foreignTable;
+		}
 
-        /**
-         * @param foreignColumn the foreignColumn to set
-         */
-        public void setForeignColumn(String foreignColumn) {
-            this.foreignColumn = foreignColumn;
-        }
+		/**
+		 * @return the foreignColumn
+		 */
+		public String getForeignColumn() {
+			return foreignColumn;
+		}
 
-        /**
-         * @inheritDoc
-         * @see Nameable#getName()
-         */
-        @Override
-        public String getName() {
-            return new StringBuilder().append(this.foreignTable).append(SnaDAO.DOT).append(this.foreignColumn).toString();
-        }
-    }
-    //********************************************************************//
-    //						ABSTRACT DECLARATIONS						  //
-    //********************************************************************//
-    //********************************************************************//
-    //						STATIC DECLARATIONS  						  //
-    //********************************************************************//
+		/**
+		 * @param foreignColumn
+		 *            the foreignColumn to set
+		 */
+		public void setForeignColumn(String foreignColumn) {
+			this.foreignColumn = foreignColumn;
+		}
 
-    /**
-     * Creates and returns a {@link KeyDirective} object
-     * for the extended {@link SnaEntity} type passed as
-     * parameter
-     *
-     * @return a new {@link KeyDirective} instance for the
-     * specified {@link SnaEntity} type
-     */
-    public static <E extends SnaEntity> KeyDirective createKeyDirective(Mediator mediator, Class<E> entityType) {
-        return createKeyDirective(mediator, entityType.getAnnotation(Table.class), entityType.getAnnotation(PrimaryKey.class), SnaEntity.getFields(entityType));
-    }
+		/**
+		 * @inheritDoc
+		 * 
+		 * @see Nameable#getName()
+		 */
+		@Override
+		public String getName() {
+			return new StringBuilder().append(this.foreignTable).append(SnaDAO.DOT).append(this.foreignColumn)
+					.toString();
+		}
+	}
 
-    /**
-     * Creates and returns a {@link KeyDirective} object
-     * for the extended {@link SnaEntity} type passed as
-     * parameter
-     *
-     * @return a new {@link KeyDirective} instance for the
-     * specified {@link SnaEntity} type
-     */
-    public static <E extends SnaEntity> KeyDirective createKeyDirective(Mediator mediator, Table table, PrimaryKey primaryKey, Map<Field, Column> fields) {
-        KeyDirective keyDirective = new KeyDirective(mediator, table.value());
-        String[] keys = primaryKey == null ? null : primaryKey.value();
-        int length = keys == null ? 0 : keys.length;
+	// ********************************************************************//
+	// ABSTRACT DECLARATIONS //
+	// ********************************************************************//
 
-        if (length > 0) {
-            Iterator<Map.Entry<Field, Column>> iterator = fields.entrySet().iterator();
+	// ********************************************************************//
+	// STATIC DECLARATIONS //
+	// ********************************************************************//
 
-            while (iterator.hasNext()) {
-                Map.Entry<Field, Column> entry = iterator.next();
-                String fieldAnnotation = entry.getValue().value();
+	/**
+	 * Creates and returns a {@link KeyDirective} object for the extended
+	 * {@link SnaEntity} type passed as parameter
+	 * 
+	 * @return a new {@link KeyDirective} instance for the specified
+	 *         {@link SnaEntity} type
+	 */
+	public static <E extends SnaEntity> KeyDirective createKeyDirective(Mediator mediator, Class<E> entityType) {
+		return createKeyDirective(mediator, entityType.getAnnotation(Table.class),
+				entityType.getAnnotation(PrimaryKey.class), SnaEntity.getFields(entityType));
+	}
 
-                int index = 0;
-                for (; index < length; index++) {
-                    if (!keys[index].equals(fieldAnnotation)) {
-                        continue;
-                    }
-                    ForeignKey foreignAnnotation = entry.getKey().getAnnotation(ForeignKey.class);
+	/**
+	 * Creates and returns a {@link KeyDirective} object for the extended
+	 * {@link SnaEntity} type passed as parameter
+	 * 
+	 * @return a new {@link KeyDirective} instance for the specified
+	 *         {@link SnaEntity} type
+	 */
+	public static <E extends SnaEntity> KeyDirective createKeyDirective(Mediator mediator, Table table,
+			PrimaryKey primaryKey, Map<Field, Column> fields) {
+		KeyDirective keyDirective = new KeyDirective(mediator, table.value());
+		String[] keys = primaryKey == null ? null : primaryKey.value();
+		int length = keys == null ? 0 : keys.length;
 
-                    if (foreignAnnotation == null) {
-                        keyDirective.addKeyEntry(keys[index]);
+		if (length > 0) {
+			Iterator<Map.Entry<Field, Column>> iterator = fields.entrySet().iterator();
 
-                    } else {
-                        keyDirective.addForeignKeyEntry(keys[index], foreignAnnotation.table(), foreignAnnotation.refer());
-                    }
-                }
+			while (iterator.hasNext()) {
+				Map.Entry<Field, Column> entry = iterator.next();
+				String fieldAnnotation = entry.getValue().value();
 
-            }
-        }
-        return keyDirective;
-    }
+				int index = 0;
+				for (; index < length; index++) {
+					if (!keys[index].equals(fieldAnnotation)) {
+						continue;
+					}
+					ForeignKey foreignAnnotation = entry.getKey().getAnnotation(ForeignKey.class);
 
-    //********************************************************************//
-    //						INSTANCE DECLARATIONS						  //
-    //********************************************************************//
+					if (foreignAnnotation == null) {
+						keyDirective.addKeyEntry(keys[index]);
 
-    private List<KeyEntry> keyEntries;
+					} else {
+						keyDirective.addForeignKeyEntry(keys[index], foreignAnnotation.table(),
+								foreignAnnotation.refer());
+					}
+				}
 
-    /**
-     * Constructor
-     */
-    public KeyDirective(Mediator mediator, String table) {
-        super(mediator, table);
-        this.keyEntries = new ArrayList<KeyEntry>();
-    }
+			}
+		}
+		return keyDirective;
+	}
 
-    /**
-     * @param keyDirective
-     */
-    protected void join(KeyDirective keyDirective) {
-        this.keyEntries.addAll(keyDirective.keyEntries);
-    }
+	// ********************************************************************//
+	// INSTANCE DECLARATIONS //
+	// ********************************************************************//
 
-    /**
-     * @param entity
-     */
-    public void assign(SnaEntity entity) {
-        this.assign(entity.getKeys());
-    }
+	private List<KeyEntry> keyEntries;
 
-    /**
-     * @param entity
-     */
-    public void assign(List<SnaEntity.Key> keyList) {
-        Iterator<SnaEntity.Key> iterator = keyList.iterator();
-        while (iterator.hasNext()) {
-            SnaEntity.Key entry = iterator.next();
-            this.assign(entry.getName(), entry.value());
-        }
-    }
+	/**
+	 * Constructor
+	 */
+	public KeyDirective(Mediator mediator, String table) {
+		super(mediator, table);
+		this.keyEntries = new ArrayList<KeyEntry>();
+	}
 
-    /**
-     * @param entity
-     */
-    public void assign(String name, Object value) {
-        int index = this.keyEntries.indexOf(new Name<KeyEntry>(name));
-        if (index == -1) {
-            return;
-        }
-        this.keyEntries.get(index).setValue(value);
-    }
+	/**
+	 * @param keyDirective
+	 */
+	protected void join(KeyDirective keyDirective) {
+		this.keyEntries.addAll(keyDirective.keyEntries);
+	}
 
-    /**
-     * Defines the value of all KeyEntries of this KeyDirective
-     * to -1
-     */
-    protected void reset() {
-        Iterator<KeyEntry> iterator = this.keyEntries.iterator();
-        while (iterator.hasNext()) {
-            KeyEntry entry = iterator.next();
-            entry.setValue(-1);
-        }
-    }
+	/**
+	 * @param entity
+	 */
+	public void assign(SnaEntity entity) {
+		this.assign(entity.getKeys());
+	}
 
-    /**
-     * @param table
-     * @param column
-     */
-    public KeyEntry addKeyEntry(String column) {
-        KeyEntry keyEntry = new KeyEntry();
-        keyEntry.setColumn(column);
-        this.keyEntries.add(keyEntry);
-        return keyEntry;
-    }
+	/**
+	 * @param entity
+	 */
+	public void assign(List<SnaEntity.Key> keyList) {
+		Iterator<SnaEntity.Key> iterator = keyList.iterator();
+		while (iterator.hasNext()) {
+			SnaEntity.Key entry = iterator.next();
+			this.assign(entry.getName(), entry.value());
+		}
+	}
 
-    /**
-     * @param table
-     * @param column
-     * @param foreignTable
-     * @param foreignColumn
-     */
-    public ForeignKeyEntry addForeignKeyEntry(String column, String foreignTable, String foreignColumn) {
-        ForeignKeyEntry keyEntry = new ForeignKeyEntry();
-        keyEntry.setColumn(column);
-        keyEntry.setForeignTable(foreignTable);
-        keyEntry.setForeignColumn(foreignColumn);
-        this.keyEntries.add(keyEntry);
-        return keyEntry;
-    }
+	/**
+	 * @param entity
+	 */
+	public void assign(String name, Object value) {
+		int index = this.keyEntries.indexOf(new Name<KeyEntry>(name));
+		if (index == -1) {
+			return;
+		}
+		this.keyEntries.get(index).setValue(value);
+	}
 
-    /**
-     * @return
-     */
-    public String getValueDirective() {
-        StringBuilder builder = new StringBuilder();
-        Iterator<KeyEntry> iterator = this.keyEntries.iterator();
+	/**
+	 * Defines the value of all KeyEntries of this KeyDirective to -1
+	 */
+	protected void reset() {
+		Iterator<KeyEntry> iterator = this.keyEntries.iterator();
+		while (iterator.hasNext()) {
+			KeyEntry entry = iterator.next();
+			entry.setValue(-1);
+		}
+	}
 
-        while (iterator.hasNext()) {
-            KeyEntry entry = iterator.next();
-            if (entry.getValue() != null) {
-                if (builder.length() > 0) {
-                    builder.append(SnaDAO.SPACE).append(SnaDAO.AND).append(SnaDAO.SPACE);
-                }
-                super.buildEqualityDirective(builder, entry.getColumn(), entry.getValue());
-            }
-        }
-        return builder.toString();
-    }
+	/**
+	 * @param table
+	 * @param column
+	 */
+	public KeyEntry addKeyEntry(String column) {
+		KeyEntry keyEntry = new KeyEntry();
+		keyEntry.setColumn(column);
+		this.keyEntries.add(keyEntry);
+		return keyEntry;
+	}
 
-    /**
-     * @inheritDoc
-     * @see java.lang.Object#toString()
-     */
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        Iterator<KeyEntry> iterator = this.keyEntries.iterator();
+	/**
+	 * @param table
+	 * @param column
+	 * @param foreignTable
+	 * @param foreignColumn
+	 */
+	public ForeignKeyEntry addForeignKeyEntry(String column, String foreignTable, String foreignColumn) {
+		ForeignKeyEntry keyEntry = new ForeignKeyEntry();
+		keyEntry.setColumn(column);
+		keyEntry.setForeignTable(foreignTable);
+		keyEntry.setForeignColumn(foreignColumn);
+		this.keyEntries.add(keyEntry);
+		return keyEntry;
+	}
 
-        while (iterator.hasNext()) {
-            KeyEntry entry = iterator.next();
-            if (ForeignKeyEntry.class.isAssignableFrom(entry.getClass())) {
-                if (builder.length() > 0) {
-                    builder.append(SnaDAO.SPACE).append(SnaDAO.AND).append(SnaDAO.SPACE);
-                }
-                builder.append(((ForeignKeyEntry) entry).getForeignTable()).append(SnaDAO.DOT).append(((ForeignKeyEntry) entry).getForeignColumn()).append(SnaDAO.EQUALS_OPERATOR).append(super.getColumnName(entry.getColumn()));
-            }
-        }
-        return builder.toString();
-    }
+	/**
+	 * @return
+	 */
+	public String getValueDirective() {
+		StringBuilder builder = new StringBuilder();
+		Iterator<KeyEntry> iterator = this.keyEntries.iterator();
+
+		while (iterator.hasNext()) {
+			KeyEntry entry = iterator.next();
+			if (entry.getValue() != null) {
+				if (builder.length() > 0) {
+					builder.append(SnaDAO.SPACE).append(SnaDAO.AND).append(SnaDAO.SPACE);
+				}
+				super.buildEqualityDirective(builder, entry.getColumn(), entry.getValue());
+			}
+		}
+		return builder.toString();
+	}
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		Iterator<KeyEntry> iterator = this.keyEntries.iterator();
+
+		while (iterator.hasNext()) {
+			KeyEntry entry = iterator.next();
+			if (ForeignKeyEntry.class.isAssignableFrom(entry.getClass())) {
+				if (builder.length() > 0) {
+					builder.append(SnaDAO.SPACE).append(SnaDAO.AND).append(SnaDAO.SPACE);
+				}
+				builder.append(((ForeignKeyEntry) entry).getForeignTable()).append(SnaDAO.DOT)
+						.append(((ForeignKeyEntry) entry).getForeignColumn()).append(SnaDAO.EQUALS_OPERATOR)
+						.append(super.getColumnName(entry.getColumn()));
+			}
+		}
+		return builder.toString();
+	}
 }

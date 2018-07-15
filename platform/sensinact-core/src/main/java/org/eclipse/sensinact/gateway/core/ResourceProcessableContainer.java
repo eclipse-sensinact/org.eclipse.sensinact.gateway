@@ -14,15 +14,15 @@ import org.eclipse.sensinact.gateway.common.primitive.ProcessableContainer;
 import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
 
 /**
- * A set of {@link ProcessableData} targeting one identified {@link ResourceImpl}
+ * A set of {@link ProcessableData} targeting one identified
+ * {@link ResourceImpl}
  */
-public interface ResourceProcessableContainer<R extends ResourceProcessableData> extends ProcessableData, ProcessableContainer<R> {
-    /**
-     * Returns the String identifier of the targeted
-     * {@link ResourceImpl}
-     *
-     * @return the String identifier of the targeted
-     * {@link ResourceImpl}
-     */
-    String getResourceId();
+public interface ResourceProcessableContainer<R extends ResourceProcessableData>
+		extends ProcessableData, ProcessableContainer<R> {
+	/**
+	 * Returns the String identifier of the targeted {@link ResourceImpl}
+	 * 
+	 * @return the String identifier of the targeted {@link ResourceImpl}
+	 */
+	String getResourceId();
 }

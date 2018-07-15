@@ -10,9 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
-import org.eclipse.sensinact.gateway.common.props.KeysCollection;
-import org.eclipse.sensinact.gateway.common.props.TypedKey;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -20,62 +17,69 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.sensinact.gateway.common.props.KeysCollection;
+import org.eclipse.sensinact.gateway.common.props.TypedKey;
+
 /**
  * Error dedicated {@link SnaMessage}
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface SnaErrorMessage extends SnaErrorfulMessage<SnaErrorMessage.Error> {
-    public static final SnaMessage.Type TYPE = SnaMessage.Type.ERROR;
+	public static final SnaMessage.Type TYPE = SnaMessage.Type.ERROR;
 
-    enum Error implements SnaMessageSubType, KeysCollection {
-        NO_ERROR, UPDATE_ERROR, RESPONSE_ERROR, LIFECYCLE_ERROR, SYSTEM_ERROR;
-        final Set<TypedKey<?>> keys;
+	enum Error implements SnaMessageSubType, KeysCollection {
+		NO_ERROR, UPDATE_ERROR, RESPONSE_ERROR, LIFECYCLE_ERROR, SYSTEM_ERROR;
 
-        Error() {
-            List<TypedKey<?>> list = Arrays.asList(new SnaMessage.KeysBuilder(SnaErrorMessage.class).keys());
+		final Set<TypedKey<?>> keys;
 
-            Set<TypedKey<?>> tmpKeys = new HashSet<TypedKey<?>>();
-            tmpKeys.addAll(list);
-            keys = Collections.unmodifiableSet(tmpKeys);
-        }
+		Error() {
+			List<TypedKey<?>> list = Arrays.asList(new SnaMessage.KeysBuilder(SnaErrorMessage.class).keys());
 
-        /**
-         * @inheritDoc
-         * @see SnaMessageSubType#getSnaMessageType()
-         */
-        @Override
-        public SnaMessage.Type getSnaMessageType() {
-            return SnaErrorMessage.TYPE;
-        }
+			Set<TypedKey<?>> tmpKeys = new HashSet<TypedKey<?>>();
+			tmpKeys.addAll(list);
+			keys = Collections.unmodifiableSet(tmpKeys);
+		}
 
-        /**
-         * @inheritDoc
-         * @see KeysCollection#keys()
-         */
-        @Override
-        public Set<TypedKey<?>> keys() {
-            return this.keys;
-        }
+		/**
+		 * @inheritDoc
+		 * 
+		 * @see SnaMessageSubType#getSnaMessageType()
+		 */
+		@Override
+		public SnaMessage.Type getSnaMessageType() {
+			return SnaErrorMessage.TYPE;
+		}
 
-        /**
-         * @inheritDoc
-         * @see KeysCollection#key(java.lang.String)
-         */
-        @Override
-        public TypedKey<?> key(String key) {
-            TypedKey<?> typedKey = null;
+		/**
+		 * @inheritDoc
+		 * 
+		 * @see KeysCollection#keys()
+		 */
+		@Override
+		public Set<TypedKey<?>> keys() {
+			return this.keys;
+		}
 
-            Iterator<TypedKey<?>> iterator = this.keys.iterator();
-            while (iterator.hasNext()) {
-                typedKey = iterator.next();
-                if (typedKey.equals(key)) {
-                    break;
-                }
-                typedKey = null;
-            }
-            return typedKey;
-        }
-    }
+		/**
+		 * @inheritDoc
+		 * 
+		 * @see KeysCollection#key(java.lang.String)
+		 */
+		@Override
+		public TypedKey<?> key(String key) {
+			TypedKey<?> typedKey = null;
+
+			Iterator<TypedKey<?>> iterator = this.keys.iterator();
+			while (iterator.hasNext()) {
+				typedKey = iterator.next();
+				if (typedKey.equals(key)) {
+					break;
+				}
+				typedKey = null;
+			}
+			return typedKey;
+		}
+	}
 
 }

@@ -16,13 +16,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Field annotation defining a default value
- * for a TABLE's COLUMN
+ * Field annotation defining a default value for a TABLE's COLUMN
  */
 @Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.FIELD})
+@Target(value = { ElementType.FIELD })
 public @interface Default {
-    public String value();
+	public String value();
 
-    public String type();
+	public String type();
 }

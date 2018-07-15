@@ -10,111 +10,113 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 /**
- * Extended {@link BufferMidCallback} allowing to
- * schedule the transmission of the associated buffer's
- * content independently of its filling state
- *
+ * Extended {@link BufferMidCallback} allowing to schedule the transmission of
+ * the associated buffer's content independently of its filling state
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ScheduledMidCallback extends AbstractMidCallback {
-    /**
-     * Mediator used to interact with the OSGi host
-     * environment
-     */
-    protected final Mediator mediator;
-    protected Recipient recipient;
-    protected final int delay;
-    private Timer timer;
-    protected SnaMessage<?> lastMessage;
+	/**
+	 * Mediator used to interact with the OSGi host environment
+	 */
+	protected final Mediator mediator;
+	protected Recipient recipient;
+	protected final int delay;
+	private Timer timer;
 
-    /**
-     * Constructor
-     *
-     * @param delay the delay between two triggered event
-     */
-    public ScheduledMidCallback(Mediator mediator, String identifier, ErrorHandler errorHandler, Recipient recipient, long lifetime, int delay) {
-        super(true);
-        this.mediator = mediator;
+	protected SnaMessage<?> lastMessage;
 
-        this.recipient = recipient;
-        super.setErrorHandler(errorHandler);
-        super.setTimeout(lifetime == ENDLESS ? ENDLESS : (System.currentTimeMillis() + lifetime));
-        super.setIdentifier(identifier);
+	/**
+	 * Constructor
+	 * 
+	 * @param delay
+	 *            the delay between two triggered event
+	 */
+	public ScheduledMidCallback(Mediator mediator, String identifier, ErrorHandler errorHandler, Recipient recipient,
+			long lifetime, int delay) {
+		super(true);
+		this.mediator = mediator;
 
-        if (delay < 1000) {
-            this.delay = 1000;
+		this.recipient = recipient;
+		super.setErrorHandler(errorHandler);
+		super.setTimeout(lifetime == ENDLESS ? ENDLESS : (System.currentTimeMillis() + lifetime));
+		super.setIdentifier(identifier);
 
-        } else {
-            this.delay = delay;
-        }
-    }
+		if (delay < 1000) {
+			this.delay = 1000;
 
-    /**
-     * Starts this extended {@link MidCallback}
-     */
-    public void start() {
-        TimerTask task = new TimerTask() {
-            /**
-             * @inheritDoc
-             *
-             * @see java.util.TimerTask#run()
-             */
-            @Override
-            public void run() {
-                try {
-                    synchronized (this) {
-                        ScheduledMidCallback.this.recipient.callback(getName(), new SnaMessage[]{ScheduledMidCallback.this.lastMessage});
-                    }
-                    setStatus(Status.SUCCESS);
+		} else {
+			this.delay = delay;
+		}
+	}
 
-                } catch (Exception e) {
-                    setStatus(Status.ERROR);
-                    getCallbackErrorHandler().register(e);
-                }
-            }
-        };
-        this.timer = new Timer(true);
-        this.timer.scheduleAtFixedRate(task, 0, delay);
-    }
+	/**
+	 * Starts this extended {@link MidCallback}
+	 */
+	public void start() {
+		TimerTask task = new TimerTask() {
+			/**
+			 * @inheritDoc
+			 *
+			 * @see java.util.TimerTask#run()
+			 */
+			@Override
+			public void run() {
+				try {
+					synchronized (this) {
+						ScheduledMidCallback.this.recipient.callback(getName(),
+								new SnaMessage[] { ScheduledMidCallback.this.lastMessage });
+					}
+					setStatus(Status.SUCCESS);
 
-    /**
-     * Stops this {@link MidCallback} and frees
-     * the associated {@link Timer}
-     */
-    public void stop() {
-        super.stop();
-        this.timer.cancel();
-        this.timer.purge();
-        this.timer = null;
-    }
+				} catch (Exception e) {
+					setStatus(Status.ERROR);
+					getCallbackErrorHandler().register(e);
+				}
+			}
+		};
+		this.timer = new Timer(true);
+		this.timer.scheduleAtFixedRate(task, 0, delay);
+	}
 
-    /**
-     * @inheritDoc
-     * @see MidCallback#
-     * register(SnaMessage)
-     */
-    @Override
-    public void doCallback(SnaMessage<?> message) {
-        synchronized (this) {
-            this.lastMessage = message;
-        }
-    }
+	/**
+	 * Stops this {@link MidCallback} and frees the associated {@link Timer}
+	 */
+	public void stop() {
+		super.stop();
+		this.timer.cancel();
+		this.timer.purge();
+		this.timer = null;
+	}
 
-    /**
-     * @inheritDoc
-     * @see Nameable#getName()
-     */
-    @Override
-    public String getName() {
-        return this.identifier;
-    }
+	/**
+	 * @inheritDoc
+	 *
+	 * @see MidCallback# register(SnaMessage)
+	 */
+	@Override
+	public void doCallback(SnaMessage<?> message) {
+		synchronized (this) {
+			this.lastMessage = message;
+		}
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see Nameable#getName()
+	 */
+	@Override
+	public String getName() {
+		return this.identifier;
+	}
 }

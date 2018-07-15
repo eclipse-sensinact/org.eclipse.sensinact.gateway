@@ -14,35 +14,45 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
+import org.eclipse.sensinact.gateway.core.security.UserManager;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 
 /**
  * Implementation of a {@link SecuredAccessFactory}
- *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * 
  * @see SecuredAccessFactory
+ * 
+ * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class SecuredAccessFactoryImpl implements SecuredAccessFactory {
-    //********************************************************************//
-    //						NESTED DECLARATIONS			  			      //
-    //********************************************************************//
-    //********************************************************************//
-    //						ABSTRACT DECLARATIONS						  //
-    //********************************************************************//
-    //********************************************************************//
-    //						STATIC DECLARATIONS							  //
-    //********************************************************************//
-    //********************************************************************//
-    //						INSTANCE DECLARATIONS						  //
-    //********************************************************************//
 
-    /**
-     * @throws SecuredAccessException
-     * @inheritedDoc
-     * @see SecuredAccessFactory#
-     * newInstance(org.eclipse.sensinact.gateway.common.bundle.Mediator)
-     */
-    @Override
-    public SecuredAccess newInstance(Mediator mediator) throws SecuredAccessException {
-        return new SecuredAccessImpl(mediator);
-    }
+	// ********************************************************************//
+	// NESTED DECLARATIONS //
+	// ********************************************************************//
+
+	// ********************************************************************//
+	// ABSTRACT DECLARATIONS //
+	// ********************************************************************//
+
+	// ********************************************************************//
+	// STATIC DECLARATIONS //
+	// ********************************************************************//
+
+	// ********************************************************************//
+	// INSTANCE DECLARATIONS //
+	// ********************************************************************//
+
+	/**
+	 * @throws SecuredAccessException
+	 * @throws DataStoreException
+	 * @inheritedDoc
+	 *
+	 * @see SecuredAccessFactory#
+	 *      newInstance(org.eclipse.sensinact.gateway.common.bundle.Mediator)
+	 */
+	@Override
+	public SecuredAccess newInstance(Mediator mediator) throws SecuredAccessException {
+		return new SecuredAccessImpl(mediator);
+	}
 }

@@ -15,16 +15,17 @@ import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 /**
  * Extended {@link DataResource} whose type is PROPERTY and whose 'value'
  * {@link Attribute} can be modified by default
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface PropertyResource extends DataResource {
-    /**
-     * The property resource type.
-     */
-    public static final Type TYPE_VALUE = Type.PROPERTY;
-    // Constant name is the concatenation the name of the targeted
-    // AttributeBuilder's field and of the associated requirement
-    // constant value
-    public static final Modifiable DEFAULT_VALUE_MODIFIABLE = Modifiable.MODIFIABLE;
+	/**
+	 * The property resource type.
+	 */
+	public static final Type TYPE_VALUE = Type.PROPERTY;
+
+	// Constant name is the concatenation the name of the targeted
+	// AttributeBuilder's field and of the associated requirement
+	// constant value
+	public static final Modifiable DEFAULT_VALUE_MODIFIABLE = Modifiable.MODIFIABLE;
 }

@@ -16,10 +16,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Field annotation identifying field whose value
- * cannot be null when processing a CRUD operation
+ * Field annotation identifying field whose value cannot be null when processing
+ * a CRUD operation
  */
 @Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.FIELD})
+@Target(value = { ElementType.FIELD })
 public @interface NotNull {
 }

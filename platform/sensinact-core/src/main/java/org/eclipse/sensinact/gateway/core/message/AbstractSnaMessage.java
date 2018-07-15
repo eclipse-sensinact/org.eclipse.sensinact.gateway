@@ -23,90 +23,93 @@ import org.json.JSONObject;
 
 /**
  * Abstract implementation of an {@link AbstractSnaMessage}
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public abstract class AbstractSnaMessage<S extends Enum<S> & KeysCollection & SnaMessageSubType> extends TypedProperties<S> implements SnaMessage<S> {
-    public static SnaMessage<?> fromJSON(final Mediator mediator, String json) {
-        final JSONObject jsonMessage = new JSONObject(json);
-        final String typeStr = (String) jsonMessage.remove("type");
-        final String uri = (String) jsonMessage.remove("uri");
-        if (typeStr == null) {
-            return null;
-        }
-        @SuppressWarnings("unchecked") Executable<Void, SnaMessage<?>>[] converters = new Executable[]{new Executable<Void, SnaLifecycleMessage>() {
-            @Override
-            public SnaLifecycleMessage execute(Void v) throws Exception {
-                Lifecycle l = Lifecycle.valueOf(typeStr);
-                return new SnaLifecycleMessageImpl(mediator, uri, l);
-            }
-        }, new Executable<Void, SnaUpdateMessage>() {
-            @Override
-            public SnaUpdateMessage execute(Void v) throws Exception {
-                Update u = Update.valueOf(typeStr);
-                return new SnaUpdateMessageImpl(mediator, uri, u);
-            }
-        }, new Executable<Void, SnaErrorMessage>() {
-            @Override
-            public SnaErrorMessage execute(Void v) throws Exception {
-                SnaErrorMessage.Error e = SnaErrorMessage.Error.valueOf(typeStr);
-                return new SnaErrorMessageImpl(mediator, uri, e);
-            }
-        }, new Executable<Void, AccessMethodResponse>() {
-            @Override
-            public AccessMethodResponse<?> execute(Void v) throws Exception {
-                return null;
-            }
-        }};
-        SnaMessage<?> message = null;
-        for (Executable<Void, SnaMessage<?>> converter : converters) {
-            try {
-                message = converter.execute(null);
-                break;
+public abstract class AbstractSnaMessage<S extends Enum<S> & KeysCollection & SnaMessageSubType>
+		extends TypedProperties<S> implements SnaMessage<S> {
+	public static SnaMessage<?> fromJSON(final Mediator mediator, String json) {
+		final JSONObject jsonMessage = new JSONObject(json);
+		final String typeStr = (String) jsonMessage.remove("type");
+		final String uri = (String) jsonMessage.remove("uri");
+		if (typeStr == null) {
+			return null;
+		}
+		@SuppressWarnings("unchecked")
+		Executable<Void, SnaMessage<?>>[] converters = new Executable[] { new Executable<Void, SnaLifecycleMessage>() {
+			@Override
+			public SnaLifecycleMessage execute(Void v) throws Exception {
+				Lifecycle l = Lifecycle.valueOf(typeStr);
+				return new SnaLifecycleMessageImpl(mediator, uri, l);
+			}
+		}, new Executable<Void, SnaUpdateMessage>() {
+			@Override
+			public SnaUpdateMessage execute(Void v) throws Exception {
+				Update u = Update.valueOf(typeStr);
+				return new SnaUpdateMessageImpl(mediator, uri, u);
+			}
+		}, new Executable<Void, SnaErrorMessage>() {
+			@Override
+			public SnaErrorMessage execute(Void v) throws Exception {
+				SnaErrorMessage.Error e = SnaErrorMessage.Error.valueOf(typeStr);
+				return new SnaErrorMessageImpl(mediator, uri, e);
+			}
+		}, new Executable<Void, AccessMethodResponse>() {
+			@Override
+			public AccessMethodResponse<?> execute(Void v) throws Exception {
+				return null;
+			}
+		} };
+		SnaMessage<?> message = null;
+		for (Executable<Void, SnaMessage<?>> converter : converters) {
+			try {
+				message = converter.execute(null);
+				break;
 
-            } catch (Exception e) {
-                continue;
-            }
-        }
-        if (message != null) {
-            JSONArray names = jsonMessage.names();
-            int index = 0;
-            int length = names == null ? 0 : names.length();
-            for (; index < length; index++) {
-                String name = names.getString(index);
-                ((TypedProperties<?>) message).put(name, jsonMessage.get(name));
-            }
-        }
-        return message;
-    }
+			} catch (Exception e) {
+				continue;
+			}
+		}
+		if (message != null) {
+			JSONArray names = jsonMessage.names();
+			int index = 0;
+			int length = names == null ? 0 : names.length();
+			for (; index < length; index++) {
+				String name = names.getString(index);
+				((TypedProperties<?>) message).put(name, jsonMessage.get(name));
+			}
+		}
+		return message;
+	}
 
-    /**
-     * Constructor
-     *
-     * @param uri
-     * @param type
-     */
-    protected AbstractSnaMessage(Mediator mediator, String uri, S type) {
-        super(mediator, type);
-        super.putValue(SnaConstants.URI_KEY, uri);
+	/**
+	 * Constructor
+	 * 
+	 * @param uri
+	 * @param type
+	 */
+	protected AbstractSnaMessage(Mediator mediator, String uri, S type) {
+		super(mediator, type);
+		super.putValue(SnaConstants.URI_KEY, uri);
 
-    }
+	}
 
-    /**
-     * @inheritDoc
-     * @see PathElement#getPath()
-     */
-    public String getPath() {
-        return super.<String>get(SnaConstants.URI_KEY);
-    }
+	/**
+	 * @inheritDoc
+	 *
+	 * @see PathElement#getPath()
+	 */
+	public String getPath() {
+		return super.<String>get(SnaConstants.URI_KEY);
+	}
 
-    /**
-     * Returns the {@link SnaMessage.Type} to which
-     * this extended {@link SnaMessage}'s type belongs to
-     */
-    public SnaMessage.Type getSnaMessageType() {
-        S type = super.getType();
-        return type.getSnaMessageType();
-    }
+	/**
+	 * Returns the {@link SnaMessage.Type} to which this extended
+	 * {@link SnaMessage}'s type belongs to
+	 */
+	public SnaMessage.Type getSnaMessageType() {
+		S type = super.getType();
+		return type.getSnaMessageType();
+	}
 
 }

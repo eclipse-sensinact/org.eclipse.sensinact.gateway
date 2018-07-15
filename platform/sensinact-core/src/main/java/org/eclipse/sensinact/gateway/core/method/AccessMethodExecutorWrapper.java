@@ -12,31 +12,33 @@ package org.eclipse.sensinact.gateway.core.method;
 
 /**
  * {@link AccessMethodExecutor} wrapper
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class AccessMethodExecutorWrapper extends AbstractAccessMethodExecutor {
-    /**
-     * the wrapped {@link AccessMethodExecutor}
-     */
-    private final AccessMethodExecutor executor;
+	/**
+	 * the wrapped {@link AccessMethodExecutor}
+	 */
+	private final AccessMethodExecutor executor;
 
-    /**
-     * Constructor
-     *
-     * @param executor the wrapped {@link AccessMethodExecutor}
-     */
-    AccessMethodExecutorWrapper(AccessMethodExecutor executor) {
-        this.executor = executor;
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param executor
+	 *            the wrapped {@link AccessMethodExecutor}
+	 */
+	AccessMethodExecutorWrapper(AccessMethodExecutor executor) {
+		this.executor = executor;
+	}
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.method.AbstractAccessMethodExecutor#
-     * doExecute(org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder)
-     */
-    @Override
-    void doExecute(AccessMethodResponseBuilder<?, ?> responseBuilder) throws Exception {
-        this.executor.execute(responseBuilder);
-    }
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.method.AbstractAccessMethodExecutor#
+	 *      doExecute(org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder)
+	 */
+	@Override
+	void doExecute(AccessMethodResponseBuilder<?, ?> responseBuilder) throws Exception {
+		this.executor.execute(responseBuilder);
+	}
 }

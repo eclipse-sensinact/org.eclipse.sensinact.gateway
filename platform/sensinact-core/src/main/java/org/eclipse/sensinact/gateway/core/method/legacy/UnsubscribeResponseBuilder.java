@@ -16,38 +16,40 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.json.JSONObject;
 
 /**
- * Extended {@link AccessMethodResponseBuilder} dedicated to {@link UnsubscribeMethod}
- * execution
- *
+ * Extended {@link AccessMethodResponseBuilder} dedicated to
+ * {@link UnsubscribeMethod} execution
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
 public class UnsubscribeResponseBuilder extends AccessMethodResponseBuilder<JSONObject, UnsubscribeResponse> {
-    /**
-     * @param uri
-     * @param parameters
-     */
-    protected UnsubscribeResponseBuilder(Mediator mediator, String uri, Object[] parameters) {
-        super(mediator, uri, parameters);
-    }
+	/**
+	 * @param uri
+	 * @param parameters
+	 */
+	protected UnsubscribeResponseBuilder(Mediator mediator, String uri, Object[] parameters) {
+		super(mediator, uri, parameters);
+	}
 
-    /**
-     * @inheritDoc
-     * @see AccessMethodResponseBuilder#
-     * createAccessMethodResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
-     */
-    @Override
-    public UnsubscribeResponse createAccessMethodResponse(AccessMethodResponse.Status status) {
-        return new UnsubscribeResponse(super.mediator, super.getPath(), status);
-    }
+	/**
+	 * @inheritDoc
+	 *
+	 * @see AccessMethodResponseBuilder#
+	 *      createAccessMethodResponse(org.eclipse.sensinact.gateway.core.model.message.SnaMessage.Status)
+	 */
+	@Override
+	public UnsubscribeResponse createAccessMethodResponse(AccessMethodResponse.Status status) {
+		return new UnsubscribeResponse(super.mediator, super.getPath(), status);
+	}
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder#getComponentType()
-     */
-    @Override
-    public Class<JSONObject> getComponentType() {
-        return JSONObject.class;
-    }
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder#getComponentType()
+	 */
+	@Override
+	public Class<JSONObject> getComponentType() {
+		return JSONObject.class;
+	}
 
 }

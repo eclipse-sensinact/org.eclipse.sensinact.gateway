@@ -19,7 +19,7 @@ import java.lang.annotation.Target;
  * Type annotation to map to a TABLE
  */
 @Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.TYPE})
+@Target(value = { ElementType.TYPE })
 public @interface PrimaryKey {
-    public String[] value();
+	public String[] value();
 }

@@ -11,49 +11,52 @@
 package org.eclipse.sensinact.gateway.core.test;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
 import org.eclipse.sensinact.gateway.core.method.builder.AbstractDynamicParameterValue;
+import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 
-/**
- *
+/** 
+ * 
  */
 public class MokeDynamicParameterValue extends AbstractDynamicParameterValue {
 
-    /**
-     * @param mediator
-     * @param parameterName
-     * @param resourceName
-     */
-    protected MokeDynamicParameterValue(Mediator mediator, String parameterName, String resourceName) {
-        super(mediator, parameterName, resourceName);
-    }
+	/**
+	 * @param mediator
+	 * @param parameterName
+	 * @param resourceName
+	 */
+	protected MokeDynamicParameterValue(Mediator mediator, String parameterName, String resourceName) {
+		super(mediator, parameterName, resourceName);
+	}
 
-    /**
-     * @InheritedDoc
-     * @see JSONable#getJSON()
-     */
-    @Override
-    public String getJSON() {
-        return "{\"resource\":\"fake\",\"parameter\":\"fake\",\"type\":\"VARIABLE_PARAMETER_BUILDER\"}";
-    }
+	/**
+	 * @InheritedDoc
+	 *
+	 * @see JSONable#getJSON()
+	 */
+	@Override
+	public String getJSON() {
+		return "{\"resource\":\"fake\",\"parameter\":\"fake\",\"type\":\"VARIABLE_PARAMETER_BUILDER\"}";
+	}
 
-    /**
-     * @InheritedDoc
-     * @see AccessMethodTrigger#getName()
-     */
-    @Override
-    public String getName() {
-        return "VARIABLE_PARAMETER_BUILDER";
-    }
+	/**
+	 * @InheritedDoc
+	 *
+	 * @see AccessMethodTrigger#getName()
+	 */
+	@Override
+	public String getName() {
+		return "VARIABLE_PARAMETER_BUILDER";
+	}
 
-    /**
-     * @InheritedDoc
-     * @see DynamicParameterValue#getValue()
-     */
-    @Override
-    public Object getValue() {
-        return (Float) (new Float((Integer) this.getResourceValue()).floatValue() / 100.0f);
-    }
+	/**
+	 * @InheritedDoc
+	 *
+	 * @see DynamicParameterValue#getValue()
+	 */
+	@Override
+	public Object getValue() {
+		return (Float) (new Float((Integer) this.getResourceValue()).floatValue() / 100.0f);
+	}
 }

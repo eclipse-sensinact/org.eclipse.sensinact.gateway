@@ -10,41 +10,47 @@
  */
 package org.eclipse.sensinact.gateway.core.security.entity;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.entity.annotation.Immutable;
 import org.json.JSONObject;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.security.entity.annotation.Immutable;
+
 /**
+ *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @Immutable
 public abstract class ImmutableSnaEntity extends SnaEntity {
-    //********************************************************************//
-    //						NESTED DECLARATIONS			  			      //
-    //********************************************************************//
-    //********************************************************************//
-    //						ABSTRACT DECLARATIONS						  //
-    //********************************************************************//
-    //********************************************************************//
-    //						STATIC DECLARATIONS							  //
-    //********************************************************************//
-    //********************************************************************//
-    //						INSTANCE DECLARATIONS						  //
 
-    //********************************************************************//
+	// ********************************************************************//
+	// NESTED DECLARATIONS //
+	// ********************************************************************//
 
-    /**
-     * @param mediator
-     */
-    public ImmutableSnaEntity(Mediator mediator) {
-        super(mediator);
-    }
+	// ********************************************************************//
+	// ABSTRACT DECLARATIONS //
+	// ********************************************************************//
 
-    /**
-     * @param mediator
-     * @param row
-     */
-    public ImmutableSnaEntity(Mediator mediator, JSONObject row) {
-        super(mediator, row);
-    }
+	// ********************************************************************//
+	// STATIC DECLARATIONS //
+	// ********************************************************************//
+
+	// ********************************************************************//
+	// INSTANCE DECLARATIONS //
+
+	// ********************************************************************//
+
+	/**
+	 * @param mediator
+	 */
+	public ImmutableSnaEntity(Mediator mediator) {
+		super(mediator);
+	}
+
+	/**
+	 * @param mediator
+	 * @param row
+	 */
+	public ImmutableSnaEntity(Mediator mediator, JSONObject row) {
+		super(mediator, row);
+	}
 }

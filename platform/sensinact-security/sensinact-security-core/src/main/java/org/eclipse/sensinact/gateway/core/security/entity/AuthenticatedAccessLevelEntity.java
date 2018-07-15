@@ -20,154 +20,163 @@ import org.json.JSONObject;
 
 /**
  * UserAccessLevel DAO Entity
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @Table(value = "AUTHENTICATED_ACCESS_LEVEL")
 public class AuthenticatedAccessLevelEntity extends ImmutableSnaEntity implements AccessLevel {
-    @Column(value = "UOID")
-    private long objectId;
-    @Column(value = "PUBLIC_KEY")
-    private String publicKey;
+	@Column(value = "UOID")
+	private long objectId;
 
-    @Column(value = "UID")
-    private long authenticatedId;
+	@Column(value = "PUBLIC_KEY")
+	private String publicKey;
 
-    @Column(value = "UAID")
-    private long userAccessId;
+	@Column(value = "UID")
+	private long authenticatedId;
 
-    @Column(value = "UALEVEL")
-    private int accessLevel;
+	@Column(value = "UAID")
+	private long userAccessId;
 
-    /**
-     * Constructor
-     *
-     * @param mediator the {@link Mediator} allowing to
-     *                 interact with the OSGi host environment
-     */
-    public AuthenticatedAccessLevelEntity(Mediator mediator) {
-        super(mediator);
-    }
+	@Column(value = "UALEVEL")
+	private int accessLevel;
 
-    /**
-     * Constructor
-     *
-     * @param mediator the {@link Mediator} allowing to
-     *                 interact with the OSGi host environment
-     * @param row      the JSON formated description of the
-     *                 UserAccessLevelEntity to be instantiated
-     */
-    public AuthenticatedAccessLevelEntity(Mediator mediator, JSONObject row) {
-        super(mediator, row);
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param mediator
+	 *            the {@link Mediator} allowing to interact with the OSGi host
+	 *            environment
+	 */
+	public AuthenticatedAccessLevelEntity(Mediator mediator) {
+		super(mediator);
+	}
 
-    /**
-     * Constructor
-     *
-     * @param mediator    the {@link Mediator} allowing to
-     *                    interact with the OSGi host environment
-     * @param publicKey
-     * @param user
-     * @param object
-     * @param accessLevel
-     */
-    public AuthenticatedAccessLevelEntity(Mediator mediator, long objectId, String publicKey, long authenticatedId, long userAccessId, int accessLevel) {
-        this(mediator);
-        this.setObjectId(objectId);
-        this.setPublicKey(publicKey);
-        this.setAuthenticatedId(authenticatedId);
-        this.setUserAccessId(userAccessId);
-        this.setAccessLevel(accessLevel);
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param mediator
+	 *            the {@link Mediator} allowing to interact with the OSGi host
+	 *            environment
+	 * @param row
+	 *            the JSON formated description of the UserAccessLevelEntity to be
+	 *            instantiated
+	 */
+	public AuthenticatedAccessLevelEntity(Mediator mediator, JSONObject row) {
+		super(mediator, row);
+	}
 
-    /**
-     * @param objectId
-     */
-    public void setObjectId(long objectId) {
-        this.objectId = objectId;
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param mediator
+	 *            the {@link Mediator} allowing to interact with the OSGi host
+	 *            environment
+	 * @param publicKey
+	 * @param user
+	 * @param object
+	 * @param accessLevel
+	 */
+	public AuthenticatedAccessLevelEntity(Mediator mediator, long objectId, String publicKey, long authenticatedId,
+			long userAccessId, int accessLevel) {
+		this(mediator);
+		this.setObjectId(objectId);
+		this.setPublicKey(publicKey);
+		this.setAuthenticatedId(authenticatedId);
+		this.setUserAccessId(userAccessId);
+		this.setAccessLevel(accessLevel);
+	}
 
-    /**
-     * @return
-     */
-    public long getObjectId() {
-        return this.objectId;
-    }
+	/**
+	 * @param objectId
+	 */
+	public void setObjectId(long objectId) {
+		this.objectId = objectId;
+	}
 
-    /**
-     * @param authenticatedId
-     */
-    public void setAuthenticatedId(long authenticatedId) {
-        this.authenticatedId = authenticatedId;
-    }
+	/**
+	 * @return
+	 */
+	public long getObjectId() {
+		return this.objectId;
+	}
 
-    /**
-     * @return
-     */
-    public long getAuthenticatedId() {
-        return this.authenticatedId;
-    }
+	/**
+	 * @param authenticatedId
+	 */
+	public void setAuthenticatedId(long authenticatedId) {
+		this.authenticatedId = authenticatedId;
+	}
 
-    /**
-     * @param userAccessId
-     */
-    public void setUserAccessId(long userAccessId) {
-        this.userAccessId = userAccessId;
-    }
+	/**
+	 * @return
+	 */
+	public long getAuthenticatedId() {
+		return this.authenticatedId;
+	}
 
-    /**
-     * @return
-     */
-    public long getUserAccessId() {
-        return this.userAccessId;
-    }
+	/**
+	 * @param userAccessId
+	 */
+	public void setUserAccessId(long userAccessId) {
+		this.userAccessId = userAccessId;
+	}
 
-    /**
-     * @return the public key of the associated user
-     */
-    public String getPublicKey() {
-        return publicKey;
-    }
+	/**
+	 * @return
+	 */
+	public long getUserAccessId() {
+		return this.userAccessId;
+	}
 
-    /**
-     * @param publicKey the user's public key to set
-     */
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
+	/**
+	 * 
+	 * @return the public key of the associated user
+	 */
+	public String getPublicKey() {
+		return publicKey;
+	}
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.security.AccessLevel#getLevel()
-     */
-    @Override
-    public int getLevel() {
-        return this.getAccessLevel();
-    }
+	/**
+	 * @param publicKey
+	 *            the user's public key to set
+	 */
+	public void setPublicKey(String publicKey) {
+		this.publicKey = publicKey;
+	}
 
-    /**
-     * @return access level
-     */
-    public int getAccessLevel() {
-        return this.accessLevel;
-    }
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.security.AccessLevel#getLevel()
+	 */
+	@Override
+	public int getLevel() {
+		return this.getAccessLevel();
+	}
 
-    /**
-     * @param the access level to set
-     */
-    public void setAccessLevel(int accessLevel) {
-        this.accessLevel = accessLevel;
-    }
+	/**
+	 * @return access level
+	 */
+	public int getAccessLevel() {
+		return this.accessLevel;
+	}
 
-    /**
-     * Returns the {@link AccessLevelOption} providing
-     * the {@link AccessLevel} whose level is the same
-     * as this UserAccessLevelEntity
-     *
-     * @return the {@link AccessLevelOption} with the
-     * same access level as this UserAccessLevelEntity
-     */
-    public AccessLevelOption getAccessLevelOption() {
-        return AccessLevelOption.valueOf(new AccessLevelImpl(this.accessLevel));
-    }
+	/**
+	 * @param the
+	 *            access level to set
+	 */
+	public void setAccessLevel(int accessLevel) {
+		this.accessLevel = accessLevel;
+	}
+
+	/**
+	 * Returns the {@link AccessLevelOption} providing the {@link AccessLevel} whose
+	 * level is the same as this UserAccessLevelEntity
+	 * 
+	 * @return the {@link AccessLevelOption} with the same access level as this
+	 *         UserAccessLevelEntity
+	 */
+	public AccessLevelOption getAccessLevelOption() {
+		return AccessLevelOption.valueOf(new AccessLevelImpl(this.accessLevel));
+	}
 }

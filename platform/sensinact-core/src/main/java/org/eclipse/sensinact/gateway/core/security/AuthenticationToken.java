@@ -11,17 +11,18 @@
 package org.eclipse.sensinact.gateway.core.security;
 
 /**
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class AuthenticationToken implements Authentication<String> {
-    private String token;
+	private String token;
 
-    public AuthenticationToken(String token) {
-        this.token = token;
-    }
+	public AuthenticationToken(String token) {
+		this.token = token;
+	}
 
-    @Override
-    public String getAuthenticationMaterial() {
-        return this.token;
-    }
+	@Override
+	public String getAuthenticationMaterial() {
+		return this.token;
+	}
 }

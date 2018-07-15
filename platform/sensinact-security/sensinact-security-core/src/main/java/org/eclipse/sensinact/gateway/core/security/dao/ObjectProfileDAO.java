@@ -10,83 +10,100 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
-import org.eclipse.sensinact.gateway.core.security.entity.ObjectProfileEntity;
-
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
+import org.eclipse.sensinact.gateway.core.security.entity.ObjectProfileEntity;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
+
 /**
  * Method DAO
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ObjectProfileDAO extends AbstractImmutableSnaDAO<ObjectProfileEntity> {
-    //********************************************************************//
-    //						NESTED DECLARATIONS	     					  //
-    //********************************************************************//
-    //********************************************************************//
-    //						ABSTRACT DECLARATIONS						  //
-    //********************************************************************//
-    //********************************************************************//
-    //						STATIC DECLARATIONS  						  //
-    //********************************************************************//
+	// ********************************************************************//
+	// NESTED DECLARATIONS //
+	// ********************************************************************//
 
-    public static final String DEFAULT_OBJECT_PROFILE = "DEFAULT";
+	// ********************************************************************//
+	// ABSTRACT DECLARATIONS //
+	// ********************************************************************//
 
-    //********************************************************************//
-    //						INSTANCE DECLARATIONS						  //
-    //********************************************************************//
+	// ********************************************************************//
+	// STATIC DECLARATIONS //
+	// ********************************************************************//
 
-    /**
-     * Constructor
-     *
-     * @param mediator the {@link Mediator} allowing to
-     *                 interact with the OSGi host environment
-     */
-    ObjectProfileDAO(Mediator mediator) {
-        super(mediator, ObjectProfileEntity.class);
-    }
+	public static final String DEFAULT_OBJECT_PROFILE = "DEFAULT";
 
-    /**
-     * Returns the {@link ObjectProfileEntity} from the datastore
-     * matching the given Long identifier, otherwise null.
-     *
-     * @param identifier The Long identifier specifying the primary key of
-     *                   the {@link ObjectProfileEntity} to be returned.
-     * @return the {@link ObjectProfileEntity} from the datastore matching
-     * the given Long identifier, otherwise null.
-     * @throws DAOException If something fails at datastore level.
-     */
-    public ObjectProfileEntity find(final long identifier) throws DAOException {
-        List<ObjectProfileEntity> objectProfileEntities = super.select(new HashMap<String, Object>() {{
-            this.put("OPID", identifier);
-        }});
+	// ********************************************************************//
+	// INSTANCE DECLARATIONS //
+	// ********************************************************************//
 
-        if (objectProfileEntities.size() != 1) {
-            return null;
-        }
-        return objectProfileEntities.get(0);
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param mediator
+	 *            the {@link Mediator} allowing to interact with the OSGi host
+	 *            environment
+	 */
+	ObjectProfileDAO(Mediator mediator, DataStoreService dataStoreService) throws DAOException {
+		super(mediator, ObjectProfileEntity.class, dataStoreService);
+	}
 
-    /**
-     * Returns the {@link ObjectEntity} from the datastore
-     * matching the given Long identifier, otherwise null.
-     *
-     * @param objectProfileEntity
-     * @return the {@link ObjectEntity} from the datastore matching
-     * the given Long identifier, otherwise null.
-     * @throws DAOException If something fails at datastore level.
-     */
-    public ObjectProfileEntity find(final String name) throws DAOException {
-        List<ObjectProfileEntity> objectProfileEntities = super.select(new HashMap<String, Object>() {{
-            this.put("OPNAME", name);
-        }});
+	/**
+	 * Returns the {@link ObjectProfileEntity} from the datastore matching the given
+	 * Long identifier, otherwise null.
+	 * 
+	 * @param identifier
+	 *            The Long identifier specifying the primary key of the
+	 *            {@link ObjectProfileEntity} to be returned.
+	 * @return the {@link ObjectProfileEntity} from the datastore matching the given
+	 *         Long identifier, otherwise null.
+	 * 
+	 * @throws DAOException
+	 *             If something fails at datastore level.
+	 * @throws DataStoreException
+	 */
+	public ObjectProfileEntity find(final long identifier) throws DAOException, DataStoreException {
+		List<ObjectProfileEntity> objectProfileEntities = super.select(new HashMap<String, Object>() {
+			{
+				this.put("OPID", identifier);
+			}
+		});
 
-        if (objectProfileEntities.size() != 1) {
-            return null;
-        }
-        return objectProfileEntities.get(0);
-    }
+		if (objectProfileEntities.size() != 1) {
+			return null;
+		}
+		return objectProfileEntities.get(0);
+	}
+
+	/**
+	 * Returns the {@link ObjectEntity} from the datastore matching the given Long
+	 * identifier, otherwise null.
+	 * 
+	 * @param objectProfileEntity
+	 * 
+	 * @return the {@link ObjectEntity} from the datastore matching the given Long
+	 *         identifier, otherwise null.
+	 * 
+	 * @throws DAOException
+	 *             If something fails at datastore level.
+	 * @throws DataStoreException
+	 */
+	public ObjectProfileEntity find(final String name) throws DAOException, DataStoreException {
+		List<ObjectProfileEntity> objectProfileEntities = super.select(new HashMap<String, Object>() {
+			{
+				this.put("OPNAME", name);
+			}
+		});
+
+		if (objectProfileEntities.size() != 1) {
+			return null;
+		}
+		return objectProfileEntities.get(0);
+	}
 }
