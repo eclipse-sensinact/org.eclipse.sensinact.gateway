@@ -12,8 +12,15 @@ package org.eclipse.sensinact.gateway.simulated.light.swing;
 
 import org.eclipse.sensinact.gateway.simulated.light.internal.LightConfigListener;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
+import java.awt.BorderLayout;
 
 /**
  * The light JPanel.

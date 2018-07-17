@@ -5,28 +5,31 @@
 <!-- This is the initial checkstyle with some base rules (Author: Jander Nascimento) -->
 <module name="Checker">
     <property name="fileExtensions" value="java, xml"/> <!-- , properties -->
-
-
     <module name="Translation"/>
     
     <module name="RegexpHeader">
 	    <property name="headerFile" value="eclipse.header"/>
 	    <property name="fileExtensions" value="java"/>
     </module>
-
     <module name="TreeWalker">
-
-
+	<module name="TypeName">
+		<property name="tokens" value="CLASS_DEF"/>
+		<property name="applyToPublic" value="true"/>
+		<property name="applyToProtected" value="true"/>
+		<property name="applyToPackage" value="true"/>
+		<property name="applyToPrivate" value="true"/>
+	</module>
         <module name="IllegalImport"/> 
         <module name="RedundantImport"/>
-
+	<module name="AvoidStarImport"/>
+        <module name="LeftCurly"/>
+        <module name="AvoidNestedBlocks"/>
 <!--
         <module name="UnusedImports">
-            <property name="processJavadoc" value="false"/>
-        </module>
+		<property name="processJavadoc" value="false"/>
+	</module>
 -->
 
-        <module name="LeftCurly"/>
     </module>
 
 </module>
