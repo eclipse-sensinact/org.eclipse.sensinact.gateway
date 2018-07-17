@@ -36,7 +36,6 @@ import java.util.List;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class Activator extends AbstractActivator<Mediator> {
-    //private static final String VERSION = "1.5-SNAPSHOT";
 
     private ServiceRegistration registration;
 
