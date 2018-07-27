@@ -78,10 +78,17 @@ public class AndroidWebSocketWrapper {
             String service = jsonPayload.getString("service");
             String resource = jsonPayload.getString("resource");
             String value = null;
+            String type = null;
+            DevGenPacket packet = new DevGenPacket(provider, service, resource);
+
             if (jsonPayload.has("value")) {
                 value = jsonPayload.get("value").toString();
             }
-            DevGenPacket packet = new DevGenPacket(provider, service, resource);
+
+            if (jsonPayload.has("type") && jsonPayload.get("type")!=null && jsonPayload.get("type").equals("remove")) {
+                packet.isGoodbye(true);
+            }
+
             if (value != null) {
                 packet.setCurrentState(value);
             }
