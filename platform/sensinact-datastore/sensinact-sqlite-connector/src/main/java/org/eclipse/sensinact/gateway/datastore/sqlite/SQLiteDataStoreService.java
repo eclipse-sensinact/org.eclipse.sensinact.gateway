@@ -29,7 +29,9 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class SQLiteDataStoreService extends JdbcDataStoreService implements SecurityDataStoreService {
+public class SQLiteDataStoreService extends JdbcDataStoreService 
+implements SecurityDataStoreService{
+	
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
 	// ********************************************************************//
@@ -47,6 +49,7 @@ public class SQLiteDataStoreService extends JdbcDataStoreService implements Secu
 	// ********************************************************************//
 
 	private SQLiteConnectionProvider provider;
+	private long lastInsertedId = -1;
 
 	/**
 	 * @param mediator
@@ -92,47 +95,15 @@ public class SQLiteDataStoreService extends JdbcDataStoreService implements Secu
 		provider = null;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see DataStoreService# insert(java.lang.String)
-	 */
+
 	@Override
-	public long insert(final String query) {
-		return super.<Long>executeStatement(new Executable<Statement, Long>() {
-			@Override
-			public Long execute(Statement statement) throws Exception {
-				ResultSet rs = null;
-				long lastID = -1;
-
-				synchronized (lock) {
-					try {
-						statement.addBatch(query);
-						statement.executeBatch();
-						rs = statement.executeQuery("SELECT last_insert_rowid() AS LASTID;");
-						if (rs.next()) {
-							lastID = rs.getLong(1);
-						}
-						Connection connection = statement.getConnection();
-						connection.commit();
-
-					} catch (Exception e) {
-						synchronized (lock) {
-							try {
-								statement.getConnection().rollback();
-
-							} catch (SQLException ex) {
-								throw new DataStoreException(ex);
-
-							} catch (NullPointerException ex) {
-								// do nothing
-							}
-						}
-						throw new DataStoreException(e);
-					}
-				}
-				return lastID;
-			}
-		});
+	public long getLastInsertedId(Statement statement) throws SQLException {
+		ResultSet rs = null;
+		long lastID = -1;
+		rs = statement.executeQuery("SELECT last_insert_rowid() AS LASTID;");
+		if (rs.next()) {
+			lastID = rs.getLong(1);
+		}
+		return lastID;
 	}
 }

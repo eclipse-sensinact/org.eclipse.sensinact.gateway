@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.datastore.sqlite.osgi;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
-import org.eclipse.sensinact.gateway.datastore.sqlite.internal.SQLiteDataStoreService;
+import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -39,7 +39,7 @@ public class Activator extends AbstractActivator<Mediator> {
             props.put("data.store.provider", (String) mediator.getProperty("data.store.provider"));
             props.put("data.store.sgbd", (String) mediator.getProperty("data.store.sgbd"));
 
-            dataBaseService = new SQLiteDataStoreService(mediator, (String) mediator.getProperty("org.eclipse.sensinact.gateway.security.database"));
+            dataBaseService = new SQLiteDataStoreService(mediator);
 
             this.dataServiceRegistration = super.mediator.getContext().registerService(DataStoreService.class.getCanonicalName(), dataBaseService, props);
 

@@ -36,6 +36,20 @@ import java.sql.Statement;
 //because retrieving the last inserted row identifier depends on the SGBD
 //in use
 public abstract class JdbcDataStoreService implements DataStoreService {
+	
+    /**
+	 * Retrieves and returns the long identifier of the last 
+	 * inserted record
+	 * 
+	 * @param statement the {@link Statement} used for executing a 
+	 * static SQL statement and returning the results it produces
+	 * 
+	 * @return the last inserted recortd's long identifier
+     * @throws SQLException 
+	 */
+	protected abstract long getLastInsertedId(Statement statement)
+			throws SQLException;
+	
     /**
      * Returns the {@link DataStoreConnectionProvider} providing
      * JDBC {@link Connection}s
@@ -50,14 +64,10 @@ public abstract class JdbcDataStoreService implements DataStoreService {
     protected abstract void stop();
 
     /**
-     * the name of the data base
-     */
-    //protected String simpleDbName;
-
-    /**
      * Lock use for synchronization
      */
     protected final Object lock = new Object();
+    
     /**
      * The {@link Mediator}
      */
@@ -166,6 +176,46 @@ public abstract class JdbcDataStoreService implements DataStoreService {
         });
     }
 
+	/**
+	 * @inheritDoc
+	 *
+	 * @see DataStoreService# insert(java.lang.String)
+	 */
+	@Override
+	public long insert(final String query) {
+		return this.<Long>executeStatement(new Executable<Statement, Long>() {
+			@Override
+			public Long execute(Statement statement) throws Exception {
+				
+				long lastID = -1;
+
+				synchronized (lock) {
+					try {
+						statement.addBatch(query);
+						statement.executeBatch();
+						lastID = JdbcDataStoreService.this.getLastInsertedId(statement);
+						Connection connection = statement.getConnection();
+						connection.commit();
+
+					} catch (Exception e) {
+						synchronized (lock) {
+							try {
+								statement.getConnection().rollback();
+
+							} catch (SQLException ex) {
+								throw new DataStoreException(ex);
+
+							} catch (NullPointerException ex) {
+								// do nothing
+							}
+						}
+						throw new DataStoreException(e);
+					}
+				}
+				return lastID;
+			}
+		});
+	}
     /**
      * @inheritDoc
      * @see DataStoreService#delete(java.lang.String)

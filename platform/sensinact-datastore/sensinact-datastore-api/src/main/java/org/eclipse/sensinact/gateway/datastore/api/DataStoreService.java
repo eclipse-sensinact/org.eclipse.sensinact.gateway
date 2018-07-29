@@ -16,6 +16,7 @@ import org.json.JSONArray;
  * C(reate)R(ead)U(update)D(delete) Service signature
  */
 public interface DataStoreService {
+		
     /**
      * Execute the update define by the query passed as parameter
      * and return the number of impacted entries.
