@@ -93,7 +93,6 @@ public class TestLdapFiltering extends MidOSGiTest {
     }
 
     @Test
-    @Ignore
     public void testLdapFilter() throws Exception {
         File tmpDirectory = new File("./target/felix/tmp");
 

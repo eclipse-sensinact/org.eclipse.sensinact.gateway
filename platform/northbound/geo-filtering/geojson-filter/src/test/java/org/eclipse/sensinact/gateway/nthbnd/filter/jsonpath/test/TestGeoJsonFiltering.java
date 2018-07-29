@@ -90,7 +90,6 @@ public class TestGeoJsonFiltering extends MidOSGiTest {
     }
 
     @Test
-    @Ignore
     public void testHttpFiltered() throws Exception {
         Thread.sleep(3000);
         Mediator mediator = new Mediator(context);

@@ -52,7 +52,6 @@ public class SocketEndpointManagerTest {
      * @throws Exception
      */
     @Test
-    @Ignore
     public void socketEndpointManagerTest() throws Throwable {
         List<MidOSGiTestExtended> instances = new ArrayList<MidOSGiTestExtended>();
 
