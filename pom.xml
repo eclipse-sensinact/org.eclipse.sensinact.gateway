@@ -12,7 +12,7 @@
 
 	<groupId>org.eclipse.sensinact</groupId>
 	<artifactId>gateway</artifactId>
-	<version>1.5-SNAPSHOT</version>
+	<version>2.0-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 	<name>sensiNact IoT Gateway - Gateway Project</name>
@@ -147,6 +147,8 @@
 		<maven.build.timestamp.format>yyyyMMd</maven.build.timestamp.format>
 		<sonar.jacoco.itReportPath>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
 		<signer.path>${java.home}/../bin/jarsigner</signer.path>
+		<checkstyle.suppressions.file>checkstyle-suppressions.xml</checkstyle.suppressions.file>
+		<checkstyle.header.file>checkstyle-sun.xml</checkstyle.header.file>
 		<timestamp>${maven.build.timestamp}</timestamp>
 	</properties>
 
@@ -469,6 +471,7 @@
 							<phase>validate</phase>
 							<configuration>
 								<configLocation>checkstyle-sun.xml</configLocation>
+								<suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
 								<encoding>UTF-8</encoding>
 								<consoleOutput>false</consoleOutput>
 								<failsOnError>false</failsOnError>
@@ -496,16 +499,15 @@
 
 	<modules>
 		<module>platform</module>
-		<module>distribution</module>
+		<!--<module>distribution</module>-->
 		<module>integration-tests</module>
 	</modules>
-
+	
 	<reporting>
-		<plugins>
+		<plugins>			
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.0.0</version>
 				<reportSets>
 					<reportSet>
 						<reports>
@@ -516,4 +518,5 @@
 			</plugin>
 		</plugins>
 	</reporting>
+	
 </project>
