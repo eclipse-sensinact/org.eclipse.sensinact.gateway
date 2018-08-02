@@ -11,12 +11,9 @@
 package org.eclipse.sensinact.gateway.sthbnd.http.task;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-import org.eclipse.sensinact.gateway.generic.TaskImpl;
 import org.eclipse.sensinact.gateway.generic.TaskTranslator;
-import org.eclipse.sensinact.gateway.generic.uri.URITask;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpConnectionConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpResponse;

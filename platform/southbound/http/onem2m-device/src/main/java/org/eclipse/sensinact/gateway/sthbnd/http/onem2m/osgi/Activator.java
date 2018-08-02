@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 CEA.
+ * Copyright (c) 2017 CEA.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.onem2m.osgi;
 
-import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;

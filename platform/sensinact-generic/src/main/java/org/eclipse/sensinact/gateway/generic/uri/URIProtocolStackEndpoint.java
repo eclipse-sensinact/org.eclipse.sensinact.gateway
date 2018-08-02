@@ -14,7 +14,6 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.Task.RequestType;
-import org.eclipse.sensinact.gateway.generic.TaskTranslator;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 

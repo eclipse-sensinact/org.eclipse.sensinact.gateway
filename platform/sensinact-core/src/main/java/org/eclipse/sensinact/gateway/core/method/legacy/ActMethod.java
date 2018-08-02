@@ -14,8 +14,6 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.json.JSONObject;
 
 /**

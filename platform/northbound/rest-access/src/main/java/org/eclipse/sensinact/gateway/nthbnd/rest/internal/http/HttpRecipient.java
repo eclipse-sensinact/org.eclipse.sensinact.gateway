@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfiguration;

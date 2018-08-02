@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.generic;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.DefaultPacketReaderFactory;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
-import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketTypeException;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.generic.packet.PacketReader;
 import org.eclipse.sensinact.gateway.generic.packet.PacketReaderFactory;

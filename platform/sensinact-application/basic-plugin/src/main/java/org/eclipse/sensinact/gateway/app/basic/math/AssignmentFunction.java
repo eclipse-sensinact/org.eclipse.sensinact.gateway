@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.math;
 
-import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.api.function.DataItf;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.json.JSONObject;

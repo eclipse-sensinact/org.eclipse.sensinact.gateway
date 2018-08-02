@@ -13,7 +13,10 @@ package org.eclipse.sensinact.gateway.simulated.button.internal;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.simulated.button.api.ButtonSetterItf;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 

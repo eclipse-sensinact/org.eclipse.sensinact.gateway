@@ -11,14 +11,11 @@
 package org.eclipse.sensinact.gateway.generic;
 
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
-import org.eclipse.sensinact.gateway.core.ModelElement;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.osgi.framework.BundleContext;
 
 import java.lang.reflect.Array;
 import java.util.Collections;

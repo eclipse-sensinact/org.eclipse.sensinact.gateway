@@ -12,8 +12,6 @@ package org.eclipse.sensinact.gateway.generic.packet;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
-import org.eclipse.sensinact.gateway.common.primitive.Nameable;
-import org.eclipse.sensinact.gateway.core.ServiceProvider;
 
 import java.util.ArrayList;
 import java.util.Iterator;

@@ -11,5 +11,6 @@
 >]> 
 <suppressions>
   <suppress checks="Header" files="org/json/"/>
+  <suppress checks="RegexpHeader" files="org/json/"/>
   <suppress checks="JavadocMethod" files="org/json/"/>
 </suppressions>

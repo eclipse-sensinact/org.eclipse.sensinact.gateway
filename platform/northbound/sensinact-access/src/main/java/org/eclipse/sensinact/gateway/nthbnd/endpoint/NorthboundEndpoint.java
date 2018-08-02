@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 import org.eclipse.sensinact.gateway.core.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
@@ -24,7 +23,6 @@ import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.ResponseFormat;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

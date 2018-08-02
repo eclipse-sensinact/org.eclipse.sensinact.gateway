@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.nthbnd.http.forward;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.nthbnd.http.forward.internal.ForwardingFilter;
 
 import java.util.Dictionary;
 

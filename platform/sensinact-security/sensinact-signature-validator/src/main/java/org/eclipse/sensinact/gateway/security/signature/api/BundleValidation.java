@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.security.signature.api;
 
 import org.eclipse.sensinact.gateway.security.signature.exception.BundleValidationException;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 
 /**
  * BundleValidation defines a service for checking the

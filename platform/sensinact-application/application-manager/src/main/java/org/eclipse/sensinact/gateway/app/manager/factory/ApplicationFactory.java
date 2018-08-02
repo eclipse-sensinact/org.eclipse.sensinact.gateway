@@ -32,7 +32,6 @@ import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.app.manager.osgi.PluginsProxy;
 import org.eclipse.sensinact.gateway.app.manager.watchdog.AppExceptionWatchDog;
 import org.eclipse.sensinact.gateway.core.InvalidResourceException;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.SensorDataResource;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.osgi.framework.ServiceRegistration;

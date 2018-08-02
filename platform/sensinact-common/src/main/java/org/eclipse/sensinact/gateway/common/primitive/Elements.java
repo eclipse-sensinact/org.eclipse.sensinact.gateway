@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.common.primitive;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 

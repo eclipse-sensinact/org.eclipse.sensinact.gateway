@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.common.constraint;
 
-import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 
 /**

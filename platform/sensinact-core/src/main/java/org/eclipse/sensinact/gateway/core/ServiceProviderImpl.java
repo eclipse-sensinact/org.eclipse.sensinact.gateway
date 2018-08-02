@@ -22,7 +22,6 @@ import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Localizable;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
-import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
 import org.eclipse.sensinact.gateway.common.primitive.Stateful;
 import org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;

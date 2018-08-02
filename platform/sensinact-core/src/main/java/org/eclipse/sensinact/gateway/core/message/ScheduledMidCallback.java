@@ -15,7 +15,6 @@ import java.util.TimerTask;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
-import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 
 /**

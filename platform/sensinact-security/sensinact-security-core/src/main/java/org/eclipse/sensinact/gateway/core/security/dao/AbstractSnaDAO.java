@@ -33,7 +33,6 @@ import org.eclipse.sensinact.gateway.core.security.entity.annotation.Immutable;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Immutable.Operation;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
-import org.eclipse.sensinact.gateway.datastore.api.StatementExecutor;
 import org.eclipse.sensinact.gateway.util.IOUtils;
 
 /**

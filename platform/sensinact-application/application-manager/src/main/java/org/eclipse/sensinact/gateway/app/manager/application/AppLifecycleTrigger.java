@@ -13,8 +13,6 @@ package org.eclipse.sensinact.gateway.app.manager.application;
 import org.eclipse.sensinact.gateway.app.api.exception.LifeCycleException;
 import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;

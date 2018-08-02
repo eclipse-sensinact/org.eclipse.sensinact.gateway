@@ -23,7 +23,9 @@ import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class KeyStoreManagerTest {
     static KeyStoreManager ksm = null;

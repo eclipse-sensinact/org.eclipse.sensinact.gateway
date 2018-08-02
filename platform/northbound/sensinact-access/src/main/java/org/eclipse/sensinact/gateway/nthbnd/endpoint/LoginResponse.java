@@ -17,7 +17,6 @@ import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaMessageSubType;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
-import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 
 import java.util.Arrays;

@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.app.manager;
 
-import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
 
 /**
  * This class defines the public constants used in the AppManager.

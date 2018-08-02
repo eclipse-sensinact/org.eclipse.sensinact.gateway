@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.generic.packet;
 
 import org.eclipse.sensinact.gateway.core.ServiceProviderProcessableContainer;
-import org.eclipse.sensinact.gateway.generic.Task;
 
 import java.util.Iterator;
 

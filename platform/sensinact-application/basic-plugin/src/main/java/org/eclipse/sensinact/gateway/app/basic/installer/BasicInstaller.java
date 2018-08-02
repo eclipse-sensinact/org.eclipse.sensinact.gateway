@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.app.basic.installer;
 
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.api.plugin.AbstractPlugin;
-import org.eclipse.sensinact.gateway.app.api.plugin.PluginInstaller;
 import org.eclipse.sensinact.gateway.app.basic.logic.BetweenFunction;
 import org.eclipse.sensinact.gateway.app.basic.logic.DoubleConditionFunction;
 import org.eclipse.sensinact.gateway.app.basic.logic.SimpleConditionFunction;

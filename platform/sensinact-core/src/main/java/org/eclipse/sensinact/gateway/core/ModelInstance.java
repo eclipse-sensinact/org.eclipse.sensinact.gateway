@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;

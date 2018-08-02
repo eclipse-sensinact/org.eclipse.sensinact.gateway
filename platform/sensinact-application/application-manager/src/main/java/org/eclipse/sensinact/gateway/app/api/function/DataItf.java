@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.app.api.function;
 
-import org.eclipse.sensinact.gateway.app.manager.component.data.Data;
 
 /**
  * This interface is used by the third party developers to access to a data and its metadatas.

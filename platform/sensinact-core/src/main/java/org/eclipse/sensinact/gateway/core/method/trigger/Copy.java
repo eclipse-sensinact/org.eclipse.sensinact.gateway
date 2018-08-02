@@ -11,8 +11,6 @@
 package org.eclipse.sensinact.gateway.core.method.trigger;
 
 import org.eclipse.sensinact.gateway.util.JSONUtils;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 
 /**
  * Extended {@link AccessMethodTrigger} returning the value of the Primitive

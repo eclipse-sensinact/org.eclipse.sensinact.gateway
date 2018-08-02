@@ -17,10 +17,7 @@ import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.osgi.framework.BundleContext;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 import java.util.Collections;
 
 public class Activator extends AbstractActivator<Mediator> {

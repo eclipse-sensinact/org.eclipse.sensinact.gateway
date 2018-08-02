@@ -23,7 +23,6 @@ import org.eclipse.sensinact.gateway.app.manager.watchdog.AppExceptionWatchDog;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Resource;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.util.UriUtils;

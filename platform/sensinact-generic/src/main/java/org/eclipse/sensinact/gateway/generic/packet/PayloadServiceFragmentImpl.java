@@ -11,10 +11,6 @@
 package org.eclipse.sensinact.gateway.generic.packet;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.primitive.Nameable;
-import org.eclipse.sensinact.gateway.core.Resource;
-import org.eclipse.sensinact.gateway.core.Service;
-import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.TaskManager;
 

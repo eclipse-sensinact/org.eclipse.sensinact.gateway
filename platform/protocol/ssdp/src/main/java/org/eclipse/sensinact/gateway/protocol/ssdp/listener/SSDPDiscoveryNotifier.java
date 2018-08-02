@@ -13,8 +13,6 @@ package org.eclipse.sensinact.gateway.protocol.ssdp.listener;
 import org.eclipse.sensinact.gateway.protocol.ssdp.api.SSDPDiscoveryListenerItf;
 import org.eclipse.sensinact.gateway.protocol.ssdp.api.SSDPDiscoveryNotifierItf;
 import org.eclipse.sensinact.gateway.protocol.ssdp.description.SSDPDescriptionRequest;
-import org.eclipse.sensinact.gateway.protocol.ssdp.discovery.SSDPDiscoveryListenerThread;
-import org.eclipse.sensinact.gateway.protocol.ssdp.discovery.SSDPMulticastListenerThread;
 import org.eclipse.sensinact.gateway.protocol.ssdp.model.SSDPDescriptionPacket;
 import org.eclipse.sensinact.gateway.protocol.ssdp.model.SSDPMessage;
 import org.eclipse.sensinact.gateway.protocol.ssdp.model.SSDPReceivedMessage;

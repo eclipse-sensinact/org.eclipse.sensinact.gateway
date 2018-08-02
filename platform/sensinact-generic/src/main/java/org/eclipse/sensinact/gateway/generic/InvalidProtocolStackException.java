@@ -10,8 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
-import org.eclipse.sensinact.gateway.generic.packet.Packet;
-
 /**
  * Exception thrown when an invalid communication {@link Packet}
  * object is detected

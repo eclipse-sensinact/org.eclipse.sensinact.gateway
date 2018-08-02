@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.security;
 
-import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>

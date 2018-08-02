@@ -10,10 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.component.data;
 
-import org.eclipse.sensinact.gateway.app.api.function.DataItf;
-import org.eclipse.sensinact.gateway.app.manager.component.DataProvider;
-
 import java.util.UUID;
+
+import org.eclipse.sensinact.gateway.app.api.function.DataItf;
 
 /**
  * This class stores a data from a {@link DataProvider}

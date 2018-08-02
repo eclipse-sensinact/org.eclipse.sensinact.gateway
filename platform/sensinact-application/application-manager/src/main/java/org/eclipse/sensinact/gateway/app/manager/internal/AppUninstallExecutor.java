@@ -15,7 +15,6 @@ import org.eclipse.sensinact.gateway.app.api.persistence.ApplicationPersistenceS
 import org.eclipse.sensinact.gateway.app.api.persistence.exception.ApplicationPersistenceException;
 import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAvailabilityListenerAbstract;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;

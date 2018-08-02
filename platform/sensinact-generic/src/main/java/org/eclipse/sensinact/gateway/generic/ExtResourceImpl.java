@@ -14,7 +14,6 @@
 package org.eclipse.sensinact.gateway.generic;
 
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
@@ -22,7 +21,6 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor.ExecutionPolicy;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.eclipse.sensinact.gateway.core.method.Signature;
-import org.eclipse.sensinact.gateway.core.method.legacy.ActMethod;
 import org.eclipse.sensinact.gateway.generic.annotation.Act;
 import org.eclipse.sensinact.gateway.generic.annotation.Get;
 import org.eclipse.sensinact.gateway.generic.annotation.Subscribe;

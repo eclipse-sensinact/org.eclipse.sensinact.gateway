@@ -11,13 +11,11 @@
 package org.eclipse.sensinact.gateway.sthbnd.http;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.generic.Connector;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
 import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.Task.RequestType;
-import org.eclipse.sensinact.gateway.generic.TaskTranslator;
 import org.eclipse.sensinact.gateway.protocol.http.Headers;
 import org.eclipse.sensinact.gateway.protocol.http.HeadersCollection;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;

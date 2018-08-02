@@ -24,12 +24,8 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Fixed;
 import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
-import org.eclipse.sensinact.gateway.common.primitive.Describable;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.common.primitive.Nameable;
-import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 
 /**
  * Abstract {@link AccessMethod} implementation

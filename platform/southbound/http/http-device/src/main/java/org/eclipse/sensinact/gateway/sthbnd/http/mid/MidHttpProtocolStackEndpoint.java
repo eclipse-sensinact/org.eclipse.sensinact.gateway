@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.sthbnd.http.mid;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.Task;
-import org.eclipse.sensinact.gateway.generic.TaskTranslator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.protocol.http.client.mid.MidClient;
 import org.eclipse.sensinact.gateway.protocol.http.client.mid.MidClientListener;

@@ -19,10 +19,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
-import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
-import org.eclipse.sensinact.gateway.common.primitive.Describable;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
-import org.eclipse.sensinact.gateway.common.primitive.Elements;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;

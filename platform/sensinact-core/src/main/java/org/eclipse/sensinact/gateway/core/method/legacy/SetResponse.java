@@ -14,7 +14,6 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodJSONResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.json.JSONObject;
 
 /**
  * Extended {@link AccessMethodJSONResponse} returned by an {@link SetMethod}

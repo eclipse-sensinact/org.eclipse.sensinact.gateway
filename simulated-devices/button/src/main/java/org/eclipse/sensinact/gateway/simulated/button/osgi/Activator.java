@@ -23,8 +23,9 @@ import org.eclipse.sensinact.gateway.simulated.button.internal.ButtonSetter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import java.awt.BorderLayout;
 import java.util.Collections;
 
 public class Activator extends AbstractActivator<Mediator> {

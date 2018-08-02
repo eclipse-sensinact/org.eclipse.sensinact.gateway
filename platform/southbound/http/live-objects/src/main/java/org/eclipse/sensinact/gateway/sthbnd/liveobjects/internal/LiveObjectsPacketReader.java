@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.sthbnd.liveobjects.internal;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
-import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.liveobjects.LiveObjectsConstant;

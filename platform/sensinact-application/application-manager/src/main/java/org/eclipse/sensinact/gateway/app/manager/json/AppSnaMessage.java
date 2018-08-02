@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.app.manager.json;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 
 /**

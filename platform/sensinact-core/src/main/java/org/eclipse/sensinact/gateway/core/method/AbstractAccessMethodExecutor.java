@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.constraint.Fixed;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 
 /**
  * Abstract {@link AccessMethodExecutor} implementation allowing to condition

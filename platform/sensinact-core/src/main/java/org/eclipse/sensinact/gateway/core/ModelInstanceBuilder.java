@@ -22,7 +22,6 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.core.security.AccessLevel;
-import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessProfile;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
@@ -33,8 +32,6 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 
 /**
  * Allows to build a {@link ModelInstance} in a simple way

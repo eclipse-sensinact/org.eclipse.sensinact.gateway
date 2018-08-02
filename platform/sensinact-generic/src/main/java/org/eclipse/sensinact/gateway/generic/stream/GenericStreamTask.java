@@ -12,10 +12,8 @@ package org.eclipse.sensinact.gateway.generic.stream;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
-import org.eclipse.sensinact.gateway.generic.ExtResourceConfig;
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.TaskImpl;
-import org.eclipse.sensinact.gateway.generic.TaskTranslator;
 
 /**
  * A generic {@link Task} implementation

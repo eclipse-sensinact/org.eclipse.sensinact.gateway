@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core.method.builder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

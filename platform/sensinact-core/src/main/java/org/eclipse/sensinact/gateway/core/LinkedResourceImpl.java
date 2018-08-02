@@ -15,8 +15,6 @@ import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.common.primitive.Typable;
-//import AccessMethod;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
 /**

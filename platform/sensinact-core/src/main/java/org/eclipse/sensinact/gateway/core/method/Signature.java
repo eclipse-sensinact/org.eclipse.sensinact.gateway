@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.core.method;
 
 import java.util.Iterator;
-import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -19,8 +18,6 @@ import org.json.JSONObject;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
-import org.eclipse.sensinact.gateway.util.JSONUtils;
 
 /**
  * Signature of an {@link AccessMethod}

@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.generic.local;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;

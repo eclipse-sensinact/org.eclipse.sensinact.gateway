@@ -15,7 +15,6 @@ import org.eclipse.sensinact.gateway.protocol.http.client.AbstractRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.mid.Reusable;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpConnectionConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
-import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 
 import java.io.IOException;
 

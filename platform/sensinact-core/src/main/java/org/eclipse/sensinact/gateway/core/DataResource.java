@@ -14,8 +14,6 @@ import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;

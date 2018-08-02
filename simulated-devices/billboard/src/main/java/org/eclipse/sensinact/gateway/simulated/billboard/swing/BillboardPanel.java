@@ -12,8 +12,14 @@ package org.eclipse.sensinact.gateway.simulated.billboard.swing;
 
 import org.eclipse.sensinact.gateway.simulated.billboard.internal.BillboardConfigListener;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
+import java.awt.BorderLayout;
 
 public class BillboardPanel extends JPanel implements BillboardConfigListener {
     protected JLabel text;

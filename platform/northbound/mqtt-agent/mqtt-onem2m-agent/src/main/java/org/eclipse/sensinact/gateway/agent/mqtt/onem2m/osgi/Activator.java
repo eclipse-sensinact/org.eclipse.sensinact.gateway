@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.agent.mqtt.onem2m.osgi;
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.osgi.AbstractMqttActivator;
 import org.eclipse.sensinact.gateway.agent.mqtt.onem2m.internal.SnaEventOneM2MMqttHandler;
 import org.eclipse.sensinact.gateway.common.annotation.Property;
-import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 
 /**
  * Extended {@link AbstractActivator}

@@ -15,7 +15,6 @@ import org.eclipse.sensinact.gateway.core.LocationResource;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
-import org.eclipse.sensinact.gateway.generic.packet.PacketReader;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.util.JSONUtils;

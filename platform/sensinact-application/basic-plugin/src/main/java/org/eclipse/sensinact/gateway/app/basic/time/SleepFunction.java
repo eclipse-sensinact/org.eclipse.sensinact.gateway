@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.time;
 
-import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.api.function.DataItf;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.CastUtils;

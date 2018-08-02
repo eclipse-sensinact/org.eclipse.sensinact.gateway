@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Elements;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
@@ -32,7 +31,6 @@ import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.core.message.SnaNotificationMessageImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-import org.eclipse.sensinact.gateway.core.security.AccessLevel;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;

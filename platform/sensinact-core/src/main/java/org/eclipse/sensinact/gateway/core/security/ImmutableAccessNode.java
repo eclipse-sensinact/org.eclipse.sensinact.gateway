@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.primitive.Name;
-import org.eclipse.sensinact.gateway.core.ModelElement;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
 import org.eclipse.sensinact.gateway.util.tree.ImmutablePathNode;

@@ -13,18 +13,6 @@ package org.eclipse.sensinact.gateway.generic.packet;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.generic.Task;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.AttributeID;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.CommandID;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.Data;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.GoodbyeMessage;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.HelloMessage;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.Iteration;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.MetadataID;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.ProfileID;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.ResourceID;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceID;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.Timestamp;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;

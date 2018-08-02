@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.common.constraint;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;

@@ -17,8 +17,6 @@ import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.Typable;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;

@@ -11,9 +11,7 @@
 package org.eclipse.sensinact.gateway.generic;
 
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
-import org.eclipse.sensinact.gateway.core.ServiceProvider;
 
 /**
  * a Task gathers data relative to a command invocation

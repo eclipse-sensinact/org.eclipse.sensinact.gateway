@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core.method.builder;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
-import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.json.JSONObject;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;

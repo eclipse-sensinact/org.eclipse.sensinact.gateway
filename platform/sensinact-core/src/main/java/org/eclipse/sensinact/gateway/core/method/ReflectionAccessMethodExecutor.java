@@ -14,8 +14,6 @@ import java.lang.reflect.Method;
 
 import org.json.JSONObject;
 
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-
 /**
  * Extended {@link AbstractAccessMethodExecutor} implementation referring to a
  * java {@link Method}

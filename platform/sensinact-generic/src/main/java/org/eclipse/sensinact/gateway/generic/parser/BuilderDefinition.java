@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.generic.parser;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.xml.sax.Attributes;

@@ -71,25 +71,32 @@ public class AndroidWebSocketWrapper {
      */
     @OnWebSocketMessage
     public void onMessage(String message) {
-        try {
-            LOG.debug("Message received from the client {}, starting packet transformation", message);
-            JSONObject jsonPayload = new JSONObject(message);
-            String provider = jsonPayload.getString("provider");
-            String service = jsonPayload.getString("service");
-            String resource = jsonPayload.getString("resource");
-            String value = null;
-            if (jsonPayload.has("value")) {
-                value = jsonPayload.get("value").toString();
-            }
-            DevGenPacket packet = new DevGenPacket(provider, service, resource);
-            if (value != null) {
-                packet.setCurrentState(value);
-            }
-            endpoint.process(packet);
-            providers.add(provider);
-            LOG.debug("Package {}/{}/{}/{} received from the client processed with success.", provider, service, resource, value);
+    	try {
+	        LOG.debug("Message received from the client {}, starting packet transformation", message);
+	        JSONObject jsonPayload = new JSONObject(message);
+	        String provider = jsonPayload.getString("provider");
+	        String service = jsonPayload.getString("service");
+	        String resource = jsonPayload.getString("resource");
+	        String value = null;
+	        String type = null;
+	        DevGenPacket packet = new DevGenPacket(provider, service, resource);
+	
+	        if (jsonPayload.has("value")) {
+	            value = jsonPayload.get("value").toString();
+	        }
+	
+	        if (jsonPayload.has("type") && jsonPayload.get("type")!=null && jsonPayload.get("type").equals("remove")) {
+	            packet.isGoodbye(true);
+	        }
+	
+	        if (value != null) {
+	            packet.setCurrentState(value);
+	        }
+	        endpoint.process(packet);
+	        providers.add(provider);
+	        LOG.debug("Package {}/{}/{}/{} received from the client processed with success.", provider, service, resource, value);
         } catch (Exception e) {
-            LOG.error("Failed to process the package received from the client", e);
+        	LOG.error("Failed to process the package received from the client", e);
         }
     }
 

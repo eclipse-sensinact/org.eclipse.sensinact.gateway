@@ -11,9 +11,7 @@
 package org.eclipse.sensinact.gateway.core.osgi;
 
 import java.security.AccessController;
-import java.security.AllPermission;
 import java.security.PrivilegedAction;
-import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 

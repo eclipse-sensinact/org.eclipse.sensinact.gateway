@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core;
 import java.util.Collection;
 
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.json.JSONArray;

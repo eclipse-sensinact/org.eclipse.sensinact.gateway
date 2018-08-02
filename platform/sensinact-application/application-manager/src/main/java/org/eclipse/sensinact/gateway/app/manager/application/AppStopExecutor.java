@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.app.manager.application;
 import org.eclipse.sensinact.gateway.app.api.exception.ResourceNotFoundException;
 import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Attribute;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;

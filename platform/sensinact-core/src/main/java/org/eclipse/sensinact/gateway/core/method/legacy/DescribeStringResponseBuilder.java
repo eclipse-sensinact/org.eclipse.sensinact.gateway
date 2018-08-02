@@ -15,7 +15,6 @@ import java.util.Iterator;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

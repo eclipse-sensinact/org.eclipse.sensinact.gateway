@@ -11,11 +11,8 @@
 package org.eclipse.sensinact.gateway.common.bundle;
 
 import org.eclipse.sensinact.gateway.common.interpolator.Interpolator;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-
-import java.io.IOException;
 
 /**
  * Abstract implementation of the {@link BundleActivator} interface

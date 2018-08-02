@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.app.manager.component;
 
 import org.eclipse.sensinact.gateway.app.api.function.DataItf;
-import org.eclipse.sensinact.gateway.app.manager.component.data.Data;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 
 import java.util.Set;

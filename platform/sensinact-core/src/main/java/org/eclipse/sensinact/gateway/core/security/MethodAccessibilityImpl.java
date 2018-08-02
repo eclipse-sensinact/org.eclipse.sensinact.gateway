@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
-import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 
 /**
  * Basis {@link MethodAccessibility} interface implementation

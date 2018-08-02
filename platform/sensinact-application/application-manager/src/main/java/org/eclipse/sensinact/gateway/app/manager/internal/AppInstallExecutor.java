@@ -29,7 +29,6 @@ import org.eclipse.sensinact.gateway.app.manager.json.AppContainer;
 import org.eclipse.sensinact.gateway.app.manager.json.AppParameter;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.app.manager.osgi.PluginsProxy;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.Attribute;
 import org.eclipse.sensinact.gateway.core.DataResource;

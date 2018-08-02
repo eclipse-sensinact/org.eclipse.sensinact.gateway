@@ -19,7 +19,6 @@ import org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy;
 import org.eclipse.sensinact.gateway.core.ResourceConfigBuilder;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
-import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;

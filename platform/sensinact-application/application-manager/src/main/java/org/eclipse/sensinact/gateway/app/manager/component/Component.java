@@ -21,7 +21,6 @@ import org.eclipse.sensinact.gateway.app.manager.component.property.AbstractProp
 import org.eclipse.sensinact.gateway.app.manager.json.AppJsonConstant;
 import org.eclipse.sensinact.gateway.app.manager.json.AppParameter;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.osgi.framework.ServiceReference;

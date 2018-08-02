@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpChildTaskConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTaskConfiguration;

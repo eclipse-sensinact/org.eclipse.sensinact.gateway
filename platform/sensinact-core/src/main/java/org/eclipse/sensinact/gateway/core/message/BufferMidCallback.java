@@ -12,9 +12,7 @@ package org.eclipse.sensinact.gateway.core.message;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
-import org.eclipse.sensinact.gateway.util.stack.StackEngineHandler;
 
 /**
  * Extended {@link MidCallback} managing a buffer to store received events

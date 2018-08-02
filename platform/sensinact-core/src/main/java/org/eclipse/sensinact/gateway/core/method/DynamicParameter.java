@@ -10,8 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.method;
 
-import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.eclipse.sensinact.gateway.common.primitive.Primitive;
 import org.json.JSONObject;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;

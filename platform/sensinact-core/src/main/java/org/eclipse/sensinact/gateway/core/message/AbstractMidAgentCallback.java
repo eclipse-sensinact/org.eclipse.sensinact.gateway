@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core.message;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 
 /**

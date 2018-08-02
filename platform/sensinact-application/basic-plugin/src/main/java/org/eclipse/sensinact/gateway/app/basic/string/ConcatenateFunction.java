@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.string;
 
-import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.api.function.DataItf;
 import org.json.JSONObject;
 import org.json.JSONTokener;

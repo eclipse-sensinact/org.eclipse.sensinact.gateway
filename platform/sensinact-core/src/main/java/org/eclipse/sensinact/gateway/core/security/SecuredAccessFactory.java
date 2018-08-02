@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.core.security;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 
 /**
  * Factory providing a {@link SecuredAccess} instance

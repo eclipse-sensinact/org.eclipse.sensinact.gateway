@@ -13,7 +13,6 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;

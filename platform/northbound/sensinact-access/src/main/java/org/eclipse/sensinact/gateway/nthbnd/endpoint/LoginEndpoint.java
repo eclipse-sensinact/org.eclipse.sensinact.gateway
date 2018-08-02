@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;

@@ -12,8 +12,6 @@ package org.eclipse.sensinact.gateway.agent.mqtt.onem2m.internal;
 
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.AbstractMqttHandler;
 import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;

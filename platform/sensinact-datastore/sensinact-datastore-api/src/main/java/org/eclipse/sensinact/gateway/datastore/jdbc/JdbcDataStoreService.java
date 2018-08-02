@@ -16,7 +16,6 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreConnectionProvider;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
-import org.eclipse.sensinact.gateway.datastore.api.UnableToLoadDriverClassException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

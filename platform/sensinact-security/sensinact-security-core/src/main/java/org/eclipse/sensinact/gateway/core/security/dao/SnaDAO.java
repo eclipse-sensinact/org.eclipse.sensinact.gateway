@@ -13,11 +13,9 @@ package org.eclipse.sensinact.gateway.core.security.dao;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.core.security.dao.directive.SelectDirective;
 import org.eclipse.sensinact.gateway.core.security.entity.SnaEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.SnaEntity.Key;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
-import org.json.JSONArray;
 
 /**
  * Data Access Object interface definition

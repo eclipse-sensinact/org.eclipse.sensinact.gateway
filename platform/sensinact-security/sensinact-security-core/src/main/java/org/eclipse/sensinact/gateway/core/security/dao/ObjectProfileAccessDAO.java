@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
-import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectProfileAccessEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectProfileEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;

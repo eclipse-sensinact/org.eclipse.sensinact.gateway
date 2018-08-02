@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.commands.gogo.osgi;
 
 import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellOutput;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;

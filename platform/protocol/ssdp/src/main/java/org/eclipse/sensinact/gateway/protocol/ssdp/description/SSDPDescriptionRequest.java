@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.protocol.ssdp.description;
 
-import org.eclipse.sensinact.gateway.protocol.ssdp.model.ResponseMessage;
 import org.eclipse.sensinact.gateway.protocol.ssdp.model.SSDPDescriptionPacket;
 import org.eclipse.sensinact.gateway.protocol.ssdp.model.SSDPReceivedMessage;
 import org.eclipse.sensinact.gateway.protocol.ssdp.parser.SSDPDescriptionHandler;

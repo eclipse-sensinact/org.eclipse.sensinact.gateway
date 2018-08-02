@@ -10,16 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
-import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.InvalidResourceException;
 import org.eclipse.sensinact.gateway.core.InvalidServiceException;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceBuilder;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
-import org.eclipse.sensinact.gateway.core.ResourceProxy;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
-import org.eclipse.sensinact.gateway.core.ServiceProxy;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor.ExecutionPolicy;
 import org.eclipse.sensinact.gateway.core.method.Signature;

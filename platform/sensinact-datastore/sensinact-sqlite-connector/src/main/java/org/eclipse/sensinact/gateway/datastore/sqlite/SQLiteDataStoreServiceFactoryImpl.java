@@ -19,7 +19,6 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService;
 import org.eclipse.sensinact.gateway.core.security.SecurityDataStoreServiceFactory;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 
 /**
  * Factory of {@link DataStoreService}

@@ -13,9 +13,7 @@ package org.eclipse.sensinact.gateway.app.manager.osgi;
 import org.eclipse.sensinact.gateway.app.api.exception.FunctionNotFoundException;
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.api.plugin.PluginInstaller;
-import org.eclipse.sensinact.gateway.app.manager.json.AppComponent;
 import org.eclipse.sensinact.gateway.app.manager.json.AppFunction;
-import org.eclipse.sensinact.gateway.app.manager.json.AppParameter;
 import org.json.JSONObject;
 import org.osgi.framework.ServiceReference;
 

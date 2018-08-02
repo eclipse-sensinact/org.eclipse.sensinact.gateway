@@ -14,7 +14,6 @@ import org.eclipse.sensinact.gateway.app.api.exception.ApplicationFactoryExcepti
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.manager.component.Component;
 import org.eclipse.sensinact.gateway.app.manager.component.DataProvider;
-import org.eclipse.sensinact.gateway.app.manager.component.DataProviderItf;
 import org.eclipse.sensinact.gateway.app.manager.component.DataProviderSubscription;
 import org.eclipse.sensinact.gateway.app.manager.component.property.AbstractPropertyBlock;
 import org.eclipse.sensinact.gateway.app.manager.json.AppParameter;

@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core.message;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
-import org.eclipse.sensinact.gateway.util.stack.StackEngineHandler;
 
 /**
  * Abstract {@link MidCallback} implementation

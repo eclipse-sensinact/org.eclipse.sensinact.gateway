@@ -24,8 +24,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 /**
  * Manages {@link Task}s to execute

@@ -14,11 +14,9 @@ import org.eclipse.sensinact.gateway.app.api.plugin.PluginInstaller;
 import org.eclipse.sensinact.gateway.app.basic.installer.BasicInstaller;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import java.io.FileOutputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 

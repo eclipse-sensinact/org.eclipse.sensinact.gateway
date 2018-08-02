@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.protocol.http.client.mid;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.protocol.http.client.Response;
 import org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler;
-import org.eclipse.sensinact.gateway.util.stack.StackEngineHandler;
 
 import java.util.logging.Logger;
 

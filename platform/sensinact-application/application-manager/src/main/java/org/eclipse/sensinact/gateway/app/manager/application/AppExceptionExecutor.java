@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.application;
 
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.json.JSONObject;

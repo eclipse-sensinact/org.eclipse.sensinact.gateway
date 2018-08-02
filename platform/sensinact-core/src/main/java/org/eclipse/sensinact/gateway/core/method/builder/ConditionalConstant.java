@@ -14,13 +14,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintConstantPair;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
-import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 
 /**
  * Extended {@link DynamicParameterValue} whose execution result depends on the

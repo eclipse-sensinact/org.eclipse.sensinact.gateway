@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.primitive.Description;
-import org.eclipse.sensinact.gateway.core.StateVariableResource;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodJSONResponse;

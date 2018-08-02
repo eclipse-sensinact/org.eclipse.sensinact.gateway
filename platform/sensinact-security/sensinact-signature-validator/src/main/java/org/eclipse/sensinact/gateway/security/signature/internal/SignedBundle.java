@@ -23,8 +23,6 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.cert.CertStoreException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -35,7 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 /**

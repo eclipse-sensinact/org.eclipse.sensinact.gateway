@@ -14,7 +14,6 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.core.Attribute;
 import org.eclipse.sensinact.gateway.core.AttributeBuilder;
 import org.eclipse.sensinact.gateway.core.AttributeBuilder.Requirement;
 import org.eclipse.sensinact.gateway.core.MetadataBuilder;

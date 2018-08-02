@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;

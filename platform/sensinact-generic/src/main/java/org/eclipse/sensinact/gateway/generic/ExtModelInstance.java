@@ -13,9 +13,7 @@ package org.eclipse.sensinact.gateway.generic;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
-import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
 
 public class ExtModelInstance<C extends ExtModelConfiguration> extends ModelInstance<C> {
     /**

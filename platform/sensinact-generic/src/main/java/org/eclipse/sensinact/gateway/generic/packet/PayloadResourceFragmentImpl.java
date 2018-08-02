@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.generic.packet;
 
-import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.generic.TaskManager;
 
 /**

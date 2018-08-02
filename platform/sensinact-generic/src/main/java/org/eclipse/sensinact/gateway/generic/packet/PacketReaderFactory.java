@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.generic.packet;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
-import org.eclipse.sensinact.gateway.generic.ExtResourceConfig;
 
 /**
  * A {@link PacketReader} factory service

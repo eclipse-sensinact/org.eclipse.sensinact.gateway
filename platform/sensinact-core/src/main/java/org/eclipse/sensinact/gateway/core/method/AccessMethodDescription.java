@@ -13,8 +13,6 @@ package org.eclipse.sensinact.gateway.core.method;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.json.JSONArray;
 
 import org.eclipse.sensinact.gateway.common.primitive.Description;

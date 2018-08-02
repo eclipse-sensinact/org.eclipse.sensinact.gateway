@@ -15,12 +15,10 @@ import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
-import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketTypeException;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.generic.packet.PacketReader;
 import org.eclipse.sensinact.gateway.generic.packet.PayloadFragment;
 import org.eclipse.sensinact.gateway.generic.packet.TaskIdValuePair;
-import org.osgi.framework.BundleContext;
 
 import java.util.ArrayList;
 import java.util.Iterator;

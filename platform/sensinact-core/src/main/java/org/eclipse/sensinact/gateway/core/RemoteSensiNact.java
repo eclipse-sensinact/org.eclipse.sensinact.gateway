@@ -33,7 +33,6 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
-import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.generic.packet;
 
-import org.eclipse.sensinact.gateway.core.Attribute;
 import org.eclipse.sensinact.gateway.core.ResourceProcessableData;
 
 /**

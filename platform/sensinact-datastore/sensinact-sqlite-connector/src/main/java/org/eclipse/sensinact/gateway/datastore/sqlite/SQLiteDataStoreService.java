@@ -16,14 +16,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreConnectionProvider;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.jdbc.JdbcDataStoreService;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 
 /**
  *

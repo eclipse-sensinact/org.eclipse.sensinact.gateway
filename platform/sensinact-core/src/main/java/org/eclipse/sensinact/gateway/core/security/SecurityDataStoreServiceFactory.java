@@ -12,8 +12,6 @@
 package org.eclipse.sensinact.gateway.core.security;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
-import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
 
 /**
  * Factory of {@link SecurityDataStoreService}

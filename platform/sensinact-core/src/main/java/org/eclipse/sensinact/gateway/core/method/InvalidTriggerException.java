@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.core.method;
 
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
-import org.eclipse.sensinact.gateway.core.Attribute;
 
 /**
  * Exception thrown if an error occurred while creating a new {@link Attribute}

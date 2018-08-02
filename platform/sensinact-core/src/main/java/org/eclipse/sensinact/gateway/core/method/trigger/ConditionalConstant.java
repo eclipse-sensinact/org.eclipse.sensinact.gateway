@@ -14,12 +14,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintConstantPair;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
-import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 
 /**
  * Extended {@link AccessMethodTrigger} whose execution result depends on the

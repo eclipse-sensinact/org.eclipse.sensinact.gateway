@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.sna;
 
-import org.eclipse.sensinact.gateway.app.api.plugin.PluginHook;
 import org.eclipse.sensinact.gateway.app.manager.component.data.ResourceData;
 import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.Resource;

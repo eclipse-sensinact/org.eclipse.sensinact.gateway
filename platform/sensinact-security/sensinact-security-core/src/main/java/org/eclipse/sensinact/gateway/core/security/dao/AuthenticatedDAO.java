@@ -18,7 +18,6 @@ import org.eclipse.sensinact.gateway.core.security.entity.AgentEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ApplicationEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.AuthenticatedEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
-import org.eclipse.sensinact.gateway.core.security.entity.ObjectProfileEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.UserEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;

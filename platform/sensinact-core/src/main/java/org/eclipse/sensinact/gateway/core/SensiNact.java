@@ -69,7 +69,6 @@ import org.eclipse.sensinact.gateway.core.security.User;
 import org.eclipse.sensinact.gateway.core.security.UserKey;
 import org.eclipse.sensinact.gateway.core.security.UserManager;
 import org.eclipse.sensinact.gateway.core.security.UserManagerFactory;
-import org.eclipse.sensinact.gateway.core.security.UserUpdater;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;

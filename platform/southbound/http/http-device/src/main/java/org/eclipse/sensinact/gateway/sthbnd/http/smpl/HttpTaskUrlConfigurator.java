@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
-import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 
 /**
  * Configuration applying on an {@link HttpTask}s

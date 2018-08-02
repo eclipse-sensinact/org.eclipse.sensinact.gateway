@@ -15,7 +15,6 @@ import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.app.manager.watchdog.AppResourceLifecycleWatchDog;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Attribute;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;

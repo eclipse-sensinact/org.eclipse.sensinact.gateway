@@ -17,7 +17,6 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.UserEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
-import org.eclipse.sensinact.gateway.util.CryptoUtils;
 
 /**
  * User DAO

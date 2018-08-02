@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    CEA - initial implementation
+ *    CEA - initial API and implementation
  */
 package org.eclipse.sensinact.gateway.agent.http.onem2m.internal;
 

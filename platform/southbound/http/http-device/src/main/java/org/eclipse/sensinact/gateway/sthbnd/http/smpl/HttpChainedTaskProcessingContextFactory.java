@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTasks;
-import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 
 /**
  * A factory of {@link HttpTaskProcessingContext} for {@link HttpChainedTask}s

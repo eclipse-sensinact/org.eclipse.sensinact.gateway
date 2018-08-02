@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
+ */
 package org.eclipse.sensinact.gateway.core;
 
 import java.security.InvalidKeyException;
@@ -5,8 +15,6 @@ import java.util.Collection;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;

@@ -10,8 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.generic.parser;
 
-import org.eclipse.sensinact.gateway.generic.ExtResourceImpl;
-
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
