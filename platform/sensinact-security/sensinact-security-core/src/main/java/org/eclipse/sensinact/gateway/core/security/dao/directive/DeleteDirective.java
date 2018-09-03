@@ -76,6 +76,7 @@ public class DeleteDirective extends Directive {
 	 *
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		String deleteStatement = new StringBuilder().append(SnaDAO.DELETE_DIRECTIVE).append(SnaDAO.SPACE).append(table)
 				.append(SnaDAO.SPACE).append(SnaDAO.WHERE_DIRECTIVE).append(SnaDAO.SPACE)
