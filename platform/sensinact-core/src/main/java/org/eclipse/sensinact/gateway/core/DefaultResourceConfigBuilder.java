@@ -27,8 +27,7 @@ public class DefaultResourceConfigBuilder implements ResourceConfigBuilder {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.ResourceConfigBuilder#
-	 *      getResourceConfig(org.eclipse.sensinact.gateway.core.ResourceDescriptor)
+	 * @see org.eclipse.sensinact.gateway.core.ResourceConfigBuilder#getResourceConfig(org.eclipse.sensinact.gateway.core.ResourceDescriptor)
 	 */
 	@Override
 	public ResourceConfig getResourceConfig(ResourceDescriptor resourceConfigDescriptor) {

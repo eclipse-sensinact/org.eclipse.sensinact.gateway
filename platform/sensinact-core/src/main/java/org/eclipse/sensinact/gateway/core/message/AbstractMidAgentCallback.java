@@ -13,8 +13,6 @@ package org.eclipse.sensinact.gateway.core.message;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
-
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
@@ -86,10 +84,10 @@ public abstract class AbstractMidAgentCallback extends AbstractMidCallback imple
 	/**
 	 * @inheritDoc
 	 *
-	 * @see MessageRegisterer#register(SnaMessage)
+	 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidCallback#doCallback(org.eclipse.sensinact.gateway.core.message.SnaMessage)
 	 */
 	@Override
-	public void doCallback(SnaMessage<?> message) {
+	public void doCallback(SnaMessage<?> message) throws MidCallbackException {
 		used++;
 		if (message == null) {
 			used--;
@@ -130,9 +128,7 @@ public abstract class AbstractMidAgentCallback extends AbstractMidCallback imple
 				;
 			}
 		} catch (Exception e) {
-			super.setStatus(Status.ERROR);
-			super.getCallbackErrorHandler().register(e);
-
+			throw new MidCallbackException(e);
 		} finally {
 			used--;
 		}

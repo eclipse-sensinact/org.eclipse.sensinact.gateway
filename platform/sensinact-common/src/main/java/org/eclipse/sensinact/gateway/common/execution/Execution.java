@@ -24,11 +24,11 @@ public interface Execution {
      * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
      */
     enum ExecutionParameterizingPolicy {
-        //each SnaExecutor is parameterized with the same
+        //each Executable is parameterized with the same
         //set of parameters
-        UNIQUE_SET_OF_PARAMETERS, //SnaExecutors are parameterized using a dedicated
+        UNIQUE_SET_OF_PARAMETERS, //Executables are parameterized using a dedicated
         //set of parameters
-        DISTINCT_PARAMETERS, //The result returned by an SnaExecutor becomes the
+        DISTINCT_PARAMETERS, //The result returned by an Executable becomes the
         //parameter passed to the next one
         RESULT_TO_PARAMETERS;
     }
@@ -42,9 +42,12 @@ public interface Execution {
      */
     enum ExecutionResultPolicy {
         //the array of each result is returned
-        ALL, //all results are gathered in one
-        ALL_TO_ONE, //the first result is returned
-        FIRST, //the last result is returned
+        ALL, 
+        //all results are gathered in one
+        ALL_TO_ONE,
+        //the first result is returned
+        FIRST, 
+        //the last result is returned
         LAST;
     }
 

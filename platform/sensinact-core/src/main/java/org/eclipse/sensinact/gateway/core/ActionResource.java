@@ -25,11 +25,13 @@ public interface ActionResource extends Resource {
 	public static final Resource.Type TYPE_VALUE = Resource.Type.ACTION;
 
 	/**
-	 * Asks for this ActionResource execution
+	 * Executes an act access method on this ActionResource and returns its 
+	 * {@link ActResponse}.
 	 * 
 	 * @param parameters
-	 *            objects array parameterizing the action invocation
-	 * @return the action execution {@link ActResponse}
+	 *            objects array parameterizing the actuation
+	 *            
+	 * @return the {@link ActResponse} of the executed act access method
 	 */
 	ActResponse act(Object... parameters);
 }

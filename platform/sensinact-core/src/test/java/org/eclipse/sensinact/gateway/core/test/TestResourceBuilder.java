@@ -136,14 +136,11 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		final JSONObject changed = new JSONObject(
 				new Changed(Thread.currentThread().getContextClassLoader(), true).getJSON());
 
-		JSONObject res = session.subscribe("serviceProvider", "testService", "TestProperty", new Recipient() {
+		SubscribeResponse res = session.subscribe("serviceProvider", "testService", "TestProperty", new Recipient() {
 			@Override
 			public void callback(String callbackId, SnaMessage[] messages) throws Exception {
 				boolean hasChanged = ((TypedProperties<?>) messages[0]).<Boolean>get("hasChanged");
-
-				if (!hasChanged)
-					;
-				{
+				if (!hasChanged){
 					TestResourceBuilder.this.testContext.extraCallbackInc();
 				}
 			}
@@ -156,8 +153,9 @@ public class TestResourceBuilder<R extends ModelInstance> {
 			{
 				this.put(changed);
 			}
-		}).getResponse();
+		});
 
+		System.out.println(res.getJSON());
 		session.set("serviceProvider", "testService", "TestProperty", DataResource.VALUE, "hello");
 
 		Thread.sleep(500);

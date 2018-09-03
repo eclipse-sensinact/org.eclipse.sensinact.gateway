@@ -16,6 +16,7 @@ import java.util.Set;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
+import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
@@ -113,10 +114,9 @@ public abstract class AbstractSession implements Session {
 				break;
 			}
 			if (clazz != null) {
-				response = clazz
-						.getConstructor(new Class<?>[] { Mediator.class, String.class, Status.class, int.class })
-						.newInstance(mediator, uri, statusCode.intValue() == 200 ? Status.SUCCESS : Status.ERROR,
-								statusCode.intValue());
+				response = clazz.getConstructor(new Class<?>[] { Mediator.class, String.class, 
+					Status.class, int.class }).newInstance(mediator, uri, statusCode.intValue() == 200 
+					? Status.SUCCESS : Status.ERROR, statusCode.intValue());
 
 				response.setResponse((JSONObject) object.remove("response"));
 				response.setErrors((JSONArray) object.remove("errors"));
@@ -231,9 +231,8 @@ public abstract class AbstractSession implements Session {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session#
-	 *      registerSessionAgent(org.eclipse.sensinact.gateway.core.message.MidAgentCallback,
-	 *      org.eclipse.sensinact.gateway.core.message.SnaFilter)
+	 * @see org.eclipse.sensinact.gateway.core.Session#registerSessionAgent(org.eclipse.sensinact.gateway.core.message.MidAgentCallback, 
+	 * org.eclipse.sensinact.gateway.core.message.SnaFilter)
 	 */
 	@Override
 	public SubscribeResponse registerSessionAgent(MidAgentCallback callback, SnaFilter filter) {
@@ -280,7 +279,8 @@ public abstract class AbstractSession implements Session {
 	 * @see org.eclipse.sensinact.gateway.core.Session# act(java.lang.String,
 	 *      java.lang.String, java.lang.String, java.lang.Object[])
 	 */
-	public ActResponse act(String serviceProviderId, String serviceId, String resourceId, Object[] parameters) {
+	public ActResponse act(String serviceProviderId, String serviceId, String resourceId, 
+			Object[] parameters) {
 		return act(null, serviceProviderId, serviceId, resourceId, parameters);
 	}
 
@@ -288,14 +288,40 @@ public abstract class AbstractSession implements Session {
 	 * @inheritDoc
 	 * 
 	 * @see org.eclipse.sensinact.gateway.core.Session# subscribe(java.lang.String,
-	 *      java.lang.String, java.lang.String,
-	 *      org.eclipse.sensinact.gateway.core.message.Recipient,
+	 *      java.lang.String, java.lang.String,org.eclipse.sensinact.gateway.core.message.Recipient,
 	 *      org.json.JSONArray)
 	 */
 	@Override
-	public SubscribeResponse subscribe(final String serviceProviderId, final String serviceId, final String resourceId,
-			final Recipient recipient, final JSONArray conditions) {
+	public SubscribeResponse subscribe(String serviceProviderId, String serviceId, 
+		    String resourceId, Recipient recipient, JSONArray conditions) {
 		return subscribe(null, serviceProviderId, serviceId, resourceId, recipient, conditions);
+	}
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.Session#subscribe(java.lang.String, java.lang.String, 
+	 * java.lang.String, org.eclipse.sensinact.gateway.core.message.Recipient, org.json.JSONArray, 
+	 * java.lang.String)
+	 */
+	@Override
+	public SubscribeResponse subscribe(String serviceProviderId, String serviceId, 
+		    String resourceId, Recipient recipient, JSONArray conditions, String policy) {
+		return subscribe(null, serviceProviderId, serviceId, resourceId, recipient, conditions, policy);
+	}
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.Session#subscribe(java.lang.String, java.lang.String, 
+	 * java.lang.String, java.lang.String, org.eclipse.sensinact.gateway.core.message.Recipient, 
+	 * org.json.JSONArray)
+	 */
+	@Override
+	public SubscribeResponse subscribe(String requestId, String serviceProviderId, String serviceId, 
+		    String resourceId, Recipient recipient, JSONArray conditions) {
+		return subscribe(requestId, serviceProviderId, serviceId, resourceId, recipient, 
+				conditions, String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY));
 	}
 
 	/**
@@ -306,8 +332,8 @@ public abstract class AbstractSession implements Session {
 	 *      java.lang.String)
 	 */
 	@Override
-	public UnsubscribeResponse unsubscribe(String serviceProviderId, String serviceId, final String resourceId,
-			String subscriptionId) {
+	public UnsubscribeResponse unsubscribe(String serviceProviderId, String serviceId, 
+			final String resourceId, String subscriptionId) {
 		return unsubscribe(null, serviceProviderId, serviceId, resourceId, subscriptionId);
 	}
 

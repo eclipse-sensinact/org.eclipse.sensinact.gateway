@@ -64,6 +64,13 @@ class DisplayActionResource implements ActionResource {
         return null;
     }
 
+    
+	@Override
+	public SubscribeResponse subscribe(String attributeName, Recipient recipient, Set<Constraint> conditions,
+			String policy) {
+		return null;
+	}
+	
     @Override
     public UnsubscribeResponse unsubscribe(String s, String s1) {
         return null;

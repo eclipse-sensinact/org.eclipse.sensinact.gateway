@@ -134,6 +134,7 @@ public class SocketEndpointManagerTest {
         int count = 0;
         Thread.sleep(5000);
         for (String ms : instances.get(2).listAgentMessages()) {
+        	System.out.println(ms);
             if (ms.contains("ATTRIBUTE_VALUE_UPDATED")) {
                 count++;
             }
@@ -158,6 +159,7 @@ public class SocketEndpointManagerTest {
         Thread.sleep(5000);
         count = 0;
         for (String ms : instances.get(2).listAgentMessages()) {
+        	System.out.println(ms);
             if (ms.contains("ATTRIBUTE_VALUE_UPDATED")) {
                 count++;
             }
@@ -196,6 +198,7 @@ public class SocketEndpointManagerTest {
         Thread.sleep(5000);
         count = 0;
         for (String ms : instances.get(2).listAgentMessages()) {
+        	System.out.println(ms);
             if (ms.contains("ATTRIBUTE_VALUE_UPDATED")) {
                 count++;
             }

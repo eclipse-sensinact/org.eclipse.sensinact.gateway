@@ -15,7 +15,6 @@ import java.util.TimerTask;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 
 /**
  * Extended {@link BufferMidCallback} allowing to schedule the transmission of
@@ -24,6 +23,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ScheduledBufferMidCallback extends BufferMidCallback {
+	
 	protected final int delay;
 	private Timer timer;
 
@@ -67,12 +67,18 @@ public class ScheduledBufferMidCallback extends BufferMidCallback {
 						}
 						try {
 							ScheduledBufferMidCallback.this.recipient.callback(getName(), buffer);
-							setStatus(Status.SUCCESS);
-
 						} catch (Exception e) {
-
-							setStatus(Status.ERROR);
-							getCallbackErrorHandler().register(e);
+							int continuation = ScheduledBufferMidCallback.this.getCallbackErrorHandler().handle(e);
+							switch(continuation){
+								case ErrorHandler.Policy.CONTINUE :
+								case ErrorHandler.Policy.IGNORE:
+								case ErrorHandler.Policy.ROLLBACK:
+									break;
+								case ErrorHandler.Policy.STOP:
+									ScheduledBufferMidCallback.this.stop();
+								default:
+									break;		       
+							}
 						}
 						ScheduledBufferMidCallback.this.length = 0;
 					}
@@ -82,7 +88,7 @@ public class ScheduledBufferMidCallback extends BufferMidCallback {
 		this.timer = new Timer(true);
 		this.timer.scheduleAtFixedRate(task, 0, delay);
 	}
-
+	
 	/**
 	 * Stops this {@link MidCallback} and frees the associated {@link Timer}
 	 */

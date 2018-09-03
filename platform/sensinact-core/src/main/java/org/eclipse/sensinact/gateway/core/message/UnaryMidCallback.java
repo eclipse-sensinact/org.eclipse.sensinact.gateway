@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.core.message;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 
 /**
  * Abstract {@link MidCallback} implementation
@@ -53,17 +52,11 @@ public class UnaryMidCallback extends AbstractMidCallback {
 	 * @see StackEngineHandler#doHandle(java.lang.Object)
 	 */
 	@Override
-	public void doCallback(SnaMessage<?> message) {
+	public void doCallback(SnaMessage<?> message) throws MidCallbackException {
 		try {
 			this.recipient.callback(this.getName(), new SnaMessage[] { message });
-
-			setStatus(Status.SUCCESS);
 		} catch (Exception e) {
-			if (this.mediator.isDebugLoggable()) {
-				this.mediator.error(e, e.getMessage());
-			}
-			setStatus(Status.SUCCESS);
-			super.getCallbackErrorHandler().register(e);
+			throw new MidCallbackException(e);
 		}
 	}
 }

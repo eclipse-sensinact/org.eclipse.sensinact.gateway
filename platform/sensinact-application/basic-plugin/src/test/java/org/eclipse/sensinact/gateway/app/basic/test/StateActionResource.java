@@ -65,6 +65,12 @@ class StateActionResource implements ActionResource {
     public SubscribeResponse subscribe(String s, Recipient recipient, Set<Constraint> set) {
         return null;
     }
+    
+	@Override
+	public SubscribeResponse subscribe(String attributeName, Recipient recipient, Set<Constraint> conditions,
+			String policy) {
+		return null;
+	}
 
     @Override
     public UnsubscribeResponse unsubscribe(String s, String s1) {
@@ -135,4 +141,5 @@ class StateActionResource implements ActionResource {
     public boolean isAccessible() {
         return true;
     }
+
 }

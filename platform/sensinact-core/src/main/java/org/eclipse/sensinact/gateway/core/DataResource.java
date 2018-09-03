@@ -43,47 +43,81 @@ public interface DataResource extends Resource {
 	public static final boolean DEFAULT_VALUE_HIDDEN = false;
 
 	/**
-	 * Asks for this Resource's associated get execution
+	 * Executes an get access method on this DataResource and returns its 
+	 * {@link GetResponse}. The read attribute is the one defined as being
+	 * the default attribute of this DataResource (the "value" attribute by default).
 	 * 
-	 * @param parameters
-	 *            objects array parameterizing the invocation
-	 * @return the invocation {@link SnaMessage} result
+	 * @return the {@link GetResponse} of the executed get access method
 	 */
 	GetResponse get();
 
 	/**
-	 * Asks for this Resource's associated set execution
+	 * Executes an set access method on this DataResource and returns its 
+	 * {@link SetResponse}. The modified attribute is the one defined as being
+	 * the default attribute of this DataResource (the "value" attribute by default).
 	 * 
-	 * @param parameters
-	 *            objects array parameterizing the invocation
-	 * @return the invocation {@link SnaMessage} result
+	 * @param value the Object to set as value of the default attribute
+	 * 
+	 * @return the {@link SetResponse} of the executed set access method
 	 */
 	SetResponse set(Object value);
 
 	/**
-	 * Asks for this Resource's associated set execution
+	 * Executes an subscribe access method on this DataResource and returns its 
+	 * {@link SubscribeResponse}. The observed attribute is the one defined as being
+	 * the default attribute of this DataResource (the "value" attribute by default).
+	 * By default the only {@link Constraint} applying on the subscription will concern 
+	 * the "changed status" of the observed attribute, and by default the associated 
+	 *  {@link org.eclipse.sensinact.gateway.common.execution.ErrorHandler}'s policy 
+	 *  defines that an error during a notification transmission conducts to the 
+	 *  subscription closing and to the thrown exception logging
 	 * 
-	 * @param parameters
-	 *            array of {@link Parameter}s parameterizing the invocation
-	 * @return the {@link SnaMessage} resulting of the invocation
+	 * @param recipient the {@link Recipient} to which the messages will be sent
+	 * 
+	 * @return the {@link SubscribeResponse} of the executed subscribe access method
 	 */
 	SubscribeResponse subscribe(Recipient recipient);
 
 	/**
-	 * Asks for this Resource's associated set execution
+	 * Executes an subscribe access method on this DataResource and returns its 
+	 * {@link SubscribeResponse}. The observed attribute is the one defined as being
+	 * the default attribute of this DataResource (the "value" attribute by default).
+	 * By default the associated  {@link org.eclipse.sensinact.gateway.common.execution.ErrorHandler}'s 
+	 * policy defines that an error during a notification transmission conducts to the 
+	 * subscription closing and to the thrown exception logging
 	 * 
-	 * @param parameters
-	 *            array of {@link Parameter}s parameterizing the invocation
-	 * @return the {@link SnaMessage} resulting of the invocation
+	 * @param recipient the {@link Recipient} to which the messages will be sent
+	 * @param conditions the {@link Set} of {@link Constraint}s that will help at
+	 * discriminating the messages to be transmitted to the recipient
+	 * 
+	 * @return the {@link SubscribeResponse} of the executed subscribe access method
 	 */
 	SubscribeResponse subscribe(Recipient recipient, Set<Constraint> conditions);
 
 	/**
-	 * Asks for this Resource's associated set execution
+	 * Executes an subscribe access method on this DataResource and returns its 
+	 * {@link SubscribeResponse}. The observed attribute is the one defined as being
+	 * the default attribute of this DataResource (the "value" attribute by default).
 	 * 
-	 * @param parameters
-	 *            array of {@link Parameter}s parameterizing the invocation
-	 * @return the {@link SnaMessage} resulting of the invocation
+	 * @param recipient the {@link Recipient} to which the messages will be sent
+	 * @param conditions the {@link Set} of {@link Constraint}s that will help at
+	 * discriminating the messages to be transmitted to the recipient   
+	 * @param policy the String representation of the policy that will apply on the 
+	 * {@link org.eclipse.sensinact.gateway.common.execution.ErrorHandler} of the 
+	 * subscription to be created.
+	 * 
+	 * @return the {@link SubscribeResponse} of the executed subscribe access method
+	 */
+	SubscribeResponse subscribe(Recipient recipient, Set<Constraint> conditions, String policy);
+
+	/**
+	 * Executes an unsubscribe access method on this DataResource and returns its 
+	 * {@link UnsubscribeResponse}. It closes the subscription whose String identifier 
+	 * is passed as parameter.
+	 * 
+	 * @param subscriptionId the String identifier of the subscription to close
+	 * 
+	 * @return the {@link UnsubscribeResponse} of the executed unsubscribe access method
 	 */
 	UnsubscribeResponse unsubscribe(String subscriptionId);
 }

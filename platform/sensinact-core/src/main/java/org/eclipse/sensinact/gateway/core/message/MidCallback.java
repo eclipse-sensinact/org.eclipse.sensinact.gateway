@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.core.message;
 
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 
 /**
  * {@link SnaMessage} callback service
@@ -49,20 +48,13 @@ public interface MidCallback extends Nameable {
 	}
 
 	/**
-	 * Returns this SnaCallback's error handler. The {@link ErrorHandler} is in
-	 * charge of defining the error treatment policy for the
+	 * Returns this MidCallback's error handler. The {@link ErrorHandler} 
+	 * is in charge of defining the error treatment policy for the
 	 * {@link SnaMessageListener} holding it
 	 * 
 	 * @return this SnaCallback's error handler
 	 */
 	ErrorHandler getCallbackErrorHandler();
-
-	/**
-	 * Returns the {@link AccessMethodResponse.Status} of the last callback
-	 * 
-	 * @return the last callback {@link AccessMethodResponse.Status}
-	 */
-	AccessMethodResponse.Status getStatus();
 
 	/**
 	 * Returns this callback's timeout
@@ -86,5 +78,18 @@ public interface MidCallback extends Nameable {
 	 *            the String identifier of this MidCallback.
 	 */
 	void setIdentifier(String identifier);
-
+	
+	/**
+	 * Returns true if this MidCallback is active; otherwise
+	 * returns false. The active status of this MidCallback depends 
+	 * on the potential occurrence of message transmission errors 
+	 * and of the error handling policy
+	 *  
+	 * @return
+	 * 		<ul>
+	 * 			<li>true if this MidCallback is active</li>
+	 * 			<li>false otherwise</li>
+	 * 		</ul>
+	 */		
+	boolean isActive();
 }

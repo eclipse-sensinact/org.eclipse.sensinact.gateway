@@ -10,11 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.common.execution;
 
-import org.eclipse.sensinact.gateway.util.JSONUtils;
-import org.json.JSONArray;
+import java.util.Arrays;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.json.JSONArray;
 
 /**
  * Error handler service
@@ -22,145 +20,149 @@ import java.util.List;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface ErrorHandler {
-    /**
-     * Possible error handling
-     * policy
-     */
-    enum ErrorHandlerPolicy {
-        NONE((byte) 0x00), BREAK((byte) 0x01), CONTINUE((byte) 0x02), ROLLBACK((byte) 0x04), REMOVE((byte) 0x08), ALTERNATIVE((byte) 0x10);
 
-        protected final byte policy;
+    public static class Policy{
 
-        /**
-         * Constructor
-         *
-         * @param policy byte identifier of the policy
-         */
-        ErrorHandlerPolicy(byte policy) {
-            this.policy = policy;
-        }
+        public static final int CONTINUE = 0x000001;
+        public static final int STOP = 0x000010;
+        public static final int ROLLBACK = 0x000100;
+        public static final int IGNORE = 0x001000;
+        public static final int ALTERNATIVE = 0x010000;
+        public static final int LOG = 0x100000;
+        
+        public static final int DEFAULT_POLICY = CONTINUE | LOG;
 
-        /**
-         * Returns true if the ErrorHandlerPolicy passed
-         * as parameter is present in the byte value
-         * representation of specified policy(s)
-         *
-         * @param policy             byte value representation of subscription
-         *                           policy(s)
-         * @param errorHandlerPolicy the subscription policy to check the presence
-         * @return
-         */
-        public static boolean contains(byte policy, ErrorHandlerPolicy errorHandlerPolicy) {
-            return (policy & errorHandlerPolicy.policy) == errorHandlerPolicy.policy;
-        }
-
-        /**
-         * Builds and returns the byte value representation of
-         * the {@link ErrorHandlerPolicy}s array passed as
-         * parameter
-         *
-         * @param policies the array of {@link ErrorHandlerPolicy}s to build
-         *                 the byte value representation of
-         * @return the byte value representation of the specified
-         * {@link ErrorHandlerPolicy}s
-         */
-        public static byte valueOf(ErrorHandlerPolicy[] policies) {
-            byte policy = NONE.policy;
-            int index = 0;
-            int length = policies == null ? 0 : policies.length;
-            for (; index < length; index++) {
-                policy |= policies[index].policy;
-            }
-            return policy;
-        }
+	    /**
+	     * Builds and returns the int value representation of
+	     * the int policies array passed as parameter
+	     *
+	     * @param policies 
+	     * 		the array of {@link ErrorHandlerPolicy}s to build
+	     *      the byte value representation of
+	     * @return 
+	     * 		the byte value representation of the specified
+	     * 		{@link ErrorHandlerPolicy}s
+	     */
+	    public static int valueOf(int[] policies) {
+	        int policy = 0x0000;
+	        int index = 0;
+	        int length = policies == null ? 0 : policies.length;
+	        for (; index < length; index++) {
+	            policy |= policies[index];
+	        }
+	        return policy;
+	    }
 
         /**
          * Converts the byte value passed as parameter into
          * the array of {@link ErrorHandlerPolicy}s whose byte
          * values composed the specified one
          *
-         * @param policy the byte value representation to convert
-         * @return the {@link ErrorHandlerPolicy}s array based on
-         * the specified byte value representation
+         * @param policy 
+         * 		the byte value representation to convert
+         * @return 
+         * 		the {@link ErrorHandlerPolicy}s array based on
+         * 		the specified byte value representation
          */
-        public static ErrorHandlerPolicy[] valueOf(byte policy) {
-            ErrorHandlerPolicy[] policies = ErrorHandlerPolicy.values();
-
-            List<ErrorHandlerPolicy> contained = new ArrayList<ErrorHandlerPolicy>();
-
+        public static int[] valueOf(int policy) {        	
+            int[] policies = new int[] {
+            	CONTINUE,STOP,ROLLBACK,IGNORE,LOG
+            };
+            int[] effectivePolicies = new int[policies.length];
+            int pos = 0;
             int index = 0;
             int length = policies == null ? 0 : policies.length;
 
             for (; index < length; index++) {
-                if (ErrorHandlerPolicy.contains(policy, policies[index])) {
-                    contained.add(policies[index]);
+                if (Policy.contains(policy, policies[index])) {
+                	effectivePolicies[pos++]=policies[index];
                 }
             }
-            return contained.toArray(new ErrorHandlerPolicy[contained.size()]);
+            if(pos==0){
+            	return new int[0];
+            }
+            return Arrays.copyOfRange(effectivePolicies, 0, pos);
         }
 
-        /**
-         * Returns the JSON formated String description of
-         * the array of {@link ErrorHandlerPolicy}s passed as
-         * parameter using its processed byte value
-         * representation
+	    /**
+         * Returns true if the ErrorHandlerPolicy passed
+         * as parameter is present in the byte value
+         * representation of specified policy(s)
+         *
+         * @param policy             
+         * 		byte value representation of subscription policy(s)
+         * @param errorHandlerPolicy 
+         * 		the subscription policy to check the presence
+         * @return
          */
-        public static String getJSON(ErrorHandlerPolicy[] policies) {
-            StringBuilder buffer = new StringBuilder();
-            buffer.append(JSONUtils.QUOTE);
-            buffer.append("errorHandlerPolicy");
-            buffer.append(JSONUtils.QUOTE);
-            buffer.append(JSONUtils.COLON);
-            buffer.append(ErrorHandlerPolicy.valueOf(policies));
-            return buffer.toString();
+        public static boolean contains(int policy, int errorHandlerPolicy) {
+            return (policy & errorHandlerPolicy) == errorHandlerPolicy;
         }
     }
-
+	
     /**
-     * Registers an {@link Exception} to this
-     * error handler
+     * Registers an {@link Exception} to this ErrorHandler and 
+     * returns an integer identifying the continuation to be applied
+     * on the current execution according to the defined error policy
      *
-     * @param e the {@link Exception} to register
+     * @param e 
+     * 		the {@link Exception} to be registered
+     * @return 
+     * 		the continuation integer identifier
      */
-    void register(Exception e);
+    int handle(Exception e);
 
     /**
-     * Returns true if exceptions has been registered
-     * into this SnaErrorHandler; otherwise returns
-     * false
-     *
-     * @return <ul>
-     * <li>true if this handler contains registered
-     * exceptions</li>
-     * <li>false otherwise</li>
-     * </ul>
-     */
-    boolean hasError();
-
-    /**
-     * Returns this SnaErrorHandler's handling policy
+     * Returns this ErrorHandler's handling policy
      * byte value representation
      *
      * @return handling policy byte value representation
      * of this handler
      */
-    byte getPolicy();
+    int getPolicy();
 
     /**
      * Returns the traces of registered exceptions
      * as a JSON formated array
      *
-     * @return the JSONArray of registered exceptions'
-     * traces
+     * @return the JSONArray of registered exceptions traces
      */
     JSONArray getStackTrace();
 
     /**
-     * Returns the alternative execution as a list
-     * of {@link Executable}s
-     *
-     * @return the alternative execution as a list
-     * of {@link Executable}s
+     * Returns the number of exceptions registered by this
+     * ErrorHandler
+     * 
+     * @return 
+     * 		the number of registered exceptions
      */
-    <E extends Executable<?, ?>> List<E> getAlternative();
+    int getExceptions();
+    
+    /**
+     * Sets the alternative execution to be executed when an
+     * error occurred and if it has been defined by the policy 
+     * of this ErrorHandler
+     *
+     * @param alternative 
+     * 		the alternative execution
+     */
+     void setAlternative(Execution alternative);
+
+    /**
+     * Sets the array of parameters to be used as arguments of the 
+     * alternative execution
+     *
+     * @param parameters 
+     * 		the array of parameters of the alternative execution
+     */
+     void setAlternativeParameters(Object[] parameters);
+
+     /**
+      * Returns the result Object of the alternative execution
+      *
+      * @return 
+      * 	the result Object of the alternative execution
+      */
+      Object getAlternativeResult();
+     
 }

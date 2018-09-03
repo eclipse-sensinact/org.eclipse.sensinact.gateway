@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
+import org.eclipse.sensinact.gateway.common.execution.DefaultErrorHandler;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
@@ -557,7 +558,7 @@ public class ResourceImpl extends
 	 *         properly; null otherwise
 	 */
 	protected String listen(String attributeName, Recipient recipient, Set<Constraint> conditions,
-			MidCallback.Type type, long lifetime, int buffer, int delay) {
+			int policy, MidCallback.Type type, long lifetime, int buffer, int delay) {
 		StringBuilder builder = new StringBuilder();
 		builder = new StringBuilder();
 		builder.append(this.getPath());
@@ -580,19 +581,20 @@ public class ResourceImpl extends
 
 		switch (callbackType) {
 		case BUFFERERIZED_AND_SCHEDULED:
-			callback = new ScheduledBufferMidCallback(super.modelInstance.mediator(), callbackId, null, recipient,
-					timeout, schedulerDelay, bufferSize);
+			callback = new ScheduledBufferMidCallback(super.modelInstance.mediator(), callbackId,
+				new DefaultErrorHandler(policy), recipient, timeout, schedulerDelay, bufferSize);
 			break;
 		case BUFFERIZED:
-			callback = new BufferMidCallback(super.modelInstance.mediator(), callbackId, null, recipient, timeout,
-					bufferSize);
+			callback = new BufferMidCallback(super.modelInstance.mediator(), callbackId, 
+				new DefaultErrorHandler(policy), recipient, timeout, bufferSize);
 			break;
 		case SCHEDULED:
-			callback = new ScheduledMidCallback(super.modelInstance.mediator(), callbackId, null, recipient, timeout,
-					schedulerDelay);
+			callback = new ScheduledMidCallback(super.modelInstance.mediator(), callbackId, 
+				new DefaultErrorHandler(policy), recipient, timeout, schedulerDelay);
 			break;
 		case UNARY:
-			callback = new UnaryMidCallback(super.modelInstance.mediator(), callbackId, null, recipient, timeout);
+			callback = new UnaryMidCallback(super.modelInstance.mediator(), callbackId, 
+				new DefaultErrorHandler(policy), recipient, timeout);
 			break;
 		default:
 			break;

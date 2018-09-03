@@ -23,6 +23,7 @@ import org.json.JSONObject;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
+import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
@@ -294,8 +295,8 @@ public class ResourceBuilder {
 				this.getPreProcessingExecutor(resource, AccessMethod.SUBSCRIBE));
 
 		subscribeSignature = new Signature(this.mediator, SUBSCRIBE,
-				new Class<?>[] { String.class, Recipient.class, Set.class },
-				new String[] { "attributeName", "listener", "conditions" });
+				new Class<?>[] { String.class, Recipient.class, Set.class, String.class },
+				new String[] { "attributeName", "listener", "conditions", "policy" });
 
 		unsubscribeMethod = new UnsubscribeMethod(this.mediator, resource.getPath(),
 				this.getPreProcessingExecutor(resource, AccessMethod.UNSUBSCRIBE));
@@ -326,18 +327,34 @@ public class ResourceBuilder {
 		unsubscribeMethod.addSignature(unsubscribeSignature, unsubscribeExecutor(resource),
 				AccessMethodExecutor.ExecutionPolicy.BEFORE);
 
-		// Subscribe method - condition parameter shortcut
+		// Subscribe method - shortcuts
 		Parameter conditionsParameter = new Parameter(this.mediator, "conditions", Set.class);
 		conditionsParameter.setValue(Collections.emptySet());
 
-		Map<Integer, Parameter> fixedConditionsParameters = new HashMap<Integer, Parameter>();
+		Parameter policyParameter = new Parameter(this.mediator, "policy", String.class);
+		policyParameter.setValue(String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY));
+
+		Map<Integer, Parameter> fixedPolicyParameters = new HashMap<Integer, Parameter>();
+
+		fixedPolicyParameters = new HashMap<Integer, Parameter>();
+		fixedPolicyParameters.put(3, policyParameter);
+
+		Shortcut subscribePolicyShortcut = new Shortcut(this.mediator, SUBSCRIBE,
+			new Class<?>[] { String.class, Recipient.class, Set.class }, 
+			new String[] { "attributeName", "listener", "conditions" },
+				fixedPolicyParameters);
+
+		subscribeMethod.addShortcut(subscribePolicyShortcut, subscribeSignature);
+
+		Map<Integer, Parameter> fixedConditionsParameters = new HashMap<Integer, Parameter>();		
 		fixedConditionsParameters.put(2, conditionsParameter);
 
-		Shortcut subscribeConditionsShortcut = new Shortcut(this.mediator, SUBSCRIBE,
-				new Class<?>[] { String.class, Recipient.class }, new String[] { "attributeName", "listener" },
+		Shortcut subscribeConditionsAndPolicyShortcut = new Shortcut(this.mediator, SUBSCRIBE,
+				new Class<?>[] { String.class, Recipient.class }, 
+				new String[] { "attributeName", "listener" },
 				fixedConditionsParameters);
 
-		subscribeMethod.addShortcut(subscribeConditionsShortcut, subscribeSignature);
+		subscribeMethod.addShortcut(subscribeConditionsAndPolicyShortcut, subscribePolicyShortcut);
 
 		if (resource.getDefault() != null) {
 			Parameter nameParameter = new Parameter(this.mediator, "attributeName", String.class);
@@ -363,15 +380,22 @@ public class ResourceBuilder {
 
 				setMethod.addShortcut(setAttributeShortcut, setSignature);
 			}
-			Shortcut subscribeNameConditionsShortcut = new Shortcut(this.mediator, SUBSCRIBE,
-					new Class<?>[] { Recipient.class }, new String[] { "listener" }, fixedNameParameter);
+			Shortcut subscribeNameConditionsAndPolicyShortcut = new Shortcut(this.mediator, SUBSCRIBE,
+					new Class<?>[] { Recipient.class }, 
+					new String[] { "listener" }, fixedNameParameter);
 
-			Shortcut subscribeNameShortcut = new Shortcut(this.mediator, SUBSCRIBE,
-					new Class<?>[] { Recipient.class, Set.class }, new String[] { "listener", "conditions" },
+			Shortcut subscribeNameAndPolicyShortcut = new Shortcut(this.mediator, SUBSCRIBE,
+					new Class<?>[] { Recipient.class, Set.class }, 
+					new String[] { "listener", "conditions" },
 					fixedNameParameter);
 
-			subscribeMethod.addShortcut(subscribeNameConditionsShortcut, subscribeConditionsShortcut);
+			Shortcut subscribeNameShortcut = new Shortcut(this.mediator, SUBSCRIBE,
+					new Class<?>[] { Recipient.class, Set.class, String.class }, 
+					new String[] { "listener", "conditions", "policy" },
+					fixedNameParameter);
 
+			subscribeMethod.addShortcut(subscribeNameConditionsAndPolicyShortcut, subscribeConditionsAndPolicyShortcut);
+			subscribeMethod.addShortcut(subscribeNameAndPolicyShortcut, subscribePolicyShortcut);
 			subscribeMethod.addShortcut(subscribeNameShortcut, subscribeSignature);
 
 			Shortcut unsubscribeNameShortcut = new Shortcut(this.mediator, UNSUBSCRIBE, new Class<?>[] { String.class },
@@ -484,8 +508,8 @@ public class ResourceBuilder {
 			 */
 			@Override
 			public Void execute(AccessMethodResponseBuilder snaResult) throws Exception {
-				JSONObject result = new JSONObject(
-						resource.set((String) snaResult.getParameter(0), snaResult.getParameter(1)).getJSON());
+				JSONObject result = new JSONObject(resource.set((String) snaResult.getParameter(0), 
+						snaResult.getParameter(1)).getJSON());
 				snaResult.setAccessMethodObjectResult(result);
 				return null;
 			}
@@ -513,33 +537,61 @@ public class ResourceBuilder {
 				}
 				Object[] parameters = snaResult.getParameters();
 				if (parameters == null || parameters.length < 2) {
-					throw new IllegalArgumentException("Parameters expected");
+					throw new IllegalArgumentException("Minimum set of parameters expected: attribute name and recipient");
 				}
 				Recipient recipient = null;
 				Set<Constraint> conditions = null;
 				MidCallback.Type type = null;
+				int policy = ErrorHandler.Policy.DEFAULT_POLICY;
 				long lifetime = 0;
 				int buffer = 0;
 				int delay = 0;
 
 				switch (parameters.length) {
-				case 7:
-					buffer = ((Integer) parameters[5]).intValue();
-					delay = ((Integer) parameters[6]).intValue();
-				case 5:
-					lifetime = ((Long) parameters[4]).longValue();
-				case 4:
-					type = (MidCallback.Type) parameters[3];
-				case 3:
-					conditions = (Set) parameters[2];
-				case 2:
-					recipient = (Recipient) parameters[1];
-					break;
-				default:
-					throw new IllegalArgumentException("Invalid parameters");
+					case 8:
+						buffer = ((Integer) parameters[6]).intValue();
+						delay = ((Integer) parameters[7]).intValue();
+					case 6:
+						lifetime = ((Long) parameters[5]).longValue();
+					case 5:
+						type = (MidCallback.Type) parameters[4];
+					case 4:
+						if(parameters[3].getClass() == String.class) {
+							try {
+								policy = Integer.parseInt((String) parameters[3]);
+							} catch(NumberFormatException e) {							
+								policy = 0x000000;
+								String[] policies = ((String) parameters[3]).split("|");
+								for(int index = 0;index < policies.length;index++) {
+									switch((policies[index]).trim()) {
+									case "CONTINUE" : policy |= ErrorHandler.Policy.CONTINUE;
+									break;
+									case "STOP" : policy |= ErrorHandler.Policy.STOP;
+									break;
+									case "ROLLBACK" : policy |= ErrorHandler.Policy.ROLLBACK;
+									break;
+									case "IGNORE" : policy |= ErrorHandler.Policy.IGNORE;
+									break;
+									case "ALTERNATIVE" : policy |= ErrorHandler.Policy.ALTERNATIVE;
+									break;
+									case "LOG" : policy |= ErrorHandler.Policy.LOG;
+									break;
+									}								
+								}
+							}
+						} else {
+							policy = ((Integer) parameters[3]).intValue();
+						}				
+					case 3:
+						conditions = (Set) parameters[2];
+					case 2:
+						recipient = (Recipient) parameters[1];
+						break;
+					default:
+						throw new IllegalArgumentException("Invalid parameters");
 				}
-				String callbackId = resource.listen(attributeName, recipient, conditions, type, lifetime, buffer,
-						delay);
+				String callbackId = resource.listen(attributeName, recipient, conditions, policy, type, 
+						lifetime, buffer, delay);
 
 				if (callbackId != null) {
 					JSONObject result = new JSONObject();

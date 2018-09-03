@@ -121,5 +121,14 @@ public interface Resource extends ElementsProxy<AttributeDescription>, Typable<R
 	 *            array of {@link Parameter}s parameterizing the invocation
 	 * @return the {@link SnaMessage} resulting of the invocation
 	 */
+	SubscribeResponse subscribe(String attributeName, Recipient recipient, Set<Constraint> conditions, String policy);
+
+	/**
+	 * Asks for this Resource's associated set execution
+	 * 
+	 * @param parameters
+	 *            array of {@link Parameter}s parameterizing the invocation
+	 * @return the {@link SnaMessage} resulting of the invocation
+	 */
 	UnsubscribeResponse unsubscribe(String attributeName, String subscriptionId);
 }

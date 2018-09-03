@@ -33,5 +33,6 @@ public abstract class SnaConstants {
 	public static final String GENERATED_KEY = "generated";
 	public static final String TIMEOUT_KEY = "validUntil";
 	public static final String TOKEN_KEY = "token";
+	public static final String MESSAGE_KEY = "message";
 
 }

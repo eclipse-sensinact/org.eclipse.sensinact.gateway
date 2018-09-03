@@ -15,7 +15,6 @@ import java.util.TimerTask;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 
 /**
  * Extended {@link BufferMidCallback} allowing to schedule the transmission of
@@ -75,11 +74,18 @@ public class ScheduledMidCallback extends AbstractMidCallback {
 						ScheduledMidCallback.this.recipient.callback(getName(),
 								new SnaMessage[] { ScheduledMidCallback.this.lastMessage });
 					}
-					setStatus(Status.SUCCESS);
-
 				} catch (Exception e) {
-					setStatus(Status.ERROR);
-					getCallbackErrorHandler().register(e);
+					int continuation = ScheduledMidCallback.this.getCallbackErrorHandler().handle(e);
+					switch(continuation){
+						case ErrorHandler.Policy.CONTINUE :
+						case ErrorHandler.Policy.IGNORE:
+						case ErrorHandler.Policy.ROLLBACK:
+							break;
+						case ErrorHandler.Policy.STOP:
+							ScheduledMidCallback.this.stop();
+						default:
+							break;		       
+					}
 				}
 			}
 		};
@@ -103,7 +109,7 @@ public class ScheduledMidCallback extends AbstractMidCallback {
 	 * @see MidCallback# register(SnaMessage)
 	 */
 	@Override
-	public void doCallback(SnaMessage<?> message) {
+	public void doCallback(SnaMessage<?> message) throws MidCallbackException {
 		synchronized (this) {
 			this.lastMessage = message;
 		}

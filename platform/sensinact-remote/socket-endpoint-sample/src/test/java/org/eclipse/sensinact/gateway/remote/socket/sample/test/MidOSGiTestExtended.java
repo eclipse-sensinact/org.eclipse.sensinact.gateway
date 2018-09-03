@@ -18,6 +18,7 @@ import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidCallback;
 import org.eclipse.sensinact.gateway.core.message.MessageRegisterer;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
@@ -25,7 +26,6 @@ import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
 import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.eclipse.sensinact.gateway.test.MidProxy;
@@ -74,7 +74,7 @@ public class MidOSGiTestExtended extends MidOSGiTest {
          * @see MessageRegisterer#register(SnaMessage)
          */
         @Override
-        public void doCallback(SnaMessage<?> message) {
+        public void doCallback(SnaMessage<?> message) throws MidCallbackException {
             if (message == null) {
                 return;
             }
@@ -97,9 +97,7 @@ public class MidOSGiTestExtended extends MidOSGiTest {
                 treat(message);
 
             } catch (Exception e) {
-                e.printStackTrace();
-                super.setStatus(Status.ERROR);
-                super.getCallbackErrorHandler().register(e);
+                throw new MidCallbackException(e);
             }
         }
 

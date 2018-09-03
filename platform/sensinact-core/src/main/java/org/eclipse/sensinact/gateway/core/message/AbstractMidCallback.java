@@ -10,18 +10,23 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
-import org.eclipse.sensinact.gateway.common.execution.DefaultCallbackErrorHandler;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.eclipse.sensinact.gateway.common.execution.DefaultErrorHandler;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class AbstractMidCallback implements MidCallback {
+	
 	class MessageRegistererBufferDelegate extends AbstractStackEngineHandler<SnaMessage<?>>
 			implements MessageRegisterer {
+		
+		/**
+		 * Constructor
+		 */
 		MessageRegistererBufferDelegate() {
 			super();
 		}
@@ -33,7 +38,21 @@ public abstract class AbstractMidCallback implements MidCallback {
 		 */
 		@Override
 		public void doHandle(SnaMessage<?> message) {
-			AbstractMidCallback.this.doCallback(message);
+			try {
+				AbstractMidCallback.this.doCallback(message);
+			} catch (MidCallbackException e) {
+				int continuation = AbstractMidCallback.this.getCallbackErrorHandler().handle(e);
+				switch(continuation){
+					case ErrorHandler.Policy.CONTINUE :
+					case ErrorHandler.Policy.IGNORE:
+					case ErrorHandler.Policy.ROLLBACK:
+						break;
+					case ErrorHandler.Policy.STOP:
+						AbstractMidCallback.this.stop();
+					default:
+						break;		        
+				}
+			}
 		}
 
 		/**
@@ -48,12 +67,27 @@ public abstract class AbstractMidCallback implements MidCallback {
 
 	class MessageRegistererDirectDelegate implements MessageRegisterer {
 		/**
+		 * @throws MidCallbackException 
 		 * @inheritDoc
 		 *
 		 * @see org.eclipse.sensinact.gateway.core.message.MessageRegisterer#register(org.eclipse.sensinact.gateway.core.message.SnaMessage)
 		 */
 		public void register(SnaMessage<?> message) {
-			AbstractMidCallback.this.doCallback(message);
+			try {
+				AbstractMidCallback.this.doCallback(message);
+			} catch (MidCallbackException e) {
+				int continuation = AbstractMidCallback.this.getCallbackErrorHandler().handle(e);
+				switch(continuation){
+					case ErrorHandler.Policy.CONTINUE :
+					case ErrorHandler.Policy.IGNORE:
+					case ErrorHandler.Policy.ROLLBACK:
+						break;
+					case ErrorHandler.Policy.STOP:
+						AbstractMidCallback.this.stop();
+					default:
+						break;		     
+				}
+			}
 		}
 	}
 
@@ -63,13 +97,11 @@ public abstract class AbstractMidCallback implements MidCallback {
 	 * 
 	 * @param message
 	 *            the {@link SnaMessage} to be sent
+	 * @throws MidCallbackException 
+	 * 			  if an error occurs when transmitting the specified message
 	 */
-	protected abstract void doCallback(SnaMessage<?> message);
-
-	/**
-	 * last callback status
-	 */
-	protected Status status;
+	protected abstract void doCallback(SnaMessage<?> message)
+			throws MidCallbackException;
 
 	/**
 	 * this callback's error handler
@@ -90,6 +122,11 @@ public abstract class AbstractMidCallback implements MidCallback {
 	 * this {@link MidCallback}'s String identifier
 	 */
 	protected String identifier;
+
+	/**
+	 * the active status of this {@link MidCallback}
+	 */
+	protected AtomicBoolean isActive;
 
 	/**
 	 * Constructor
@@ -114,6 +151,7 @@ public abstract class AbstractMidCallback implements MidCallback {
 	protected AbstractMidCallback(boolean buffer) {
 		this.setTimeout(MidCallback.ENDLESS);
 		this.registerer = buffer ? new MessageRegistererBufferDelegate() : new MessageRegistererDirectDelegate();
+		this.isActive = new AtomicBoolean(true);
 	}
 
 	/**
@@ -146,7 +184,7 @@ public abstract class AbstractMidCallback implements MidCallback {
 	 */
 	public ErrorHandler getCallbackErrorHandler() {
 		if (this.errorHandler == null) {
-			this.errorHandler = new DefaultCallbackErrorHandler();
+			this.errorHandler = new DefaultErrorHandler();
 		}
 		return this.errorHandler;
 	}
@@ -159,25 +197,6 @@ public abstract class AbstractMidCallback implements MidCallback {
 	 */
 	public void setErrorHandler(ErrorHandler errorHandler) {
 		this.errorHandler = errorHandler;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.MidCallback#getStatus()
-	 */
-	public AccessMethodResponse.Status getStatus() {
-		return this.status;
-	}
-
-	/**
-	 * Defines this callback's {@link AccessMethodResponse.Status}
-	 * 
-	 * @param status
-	 *            the {@link AccessMethodResponse.Status} of this callback
-	 */
-	protected void setStatus(Status status) {
-		this.status = status;
 	}
 
 	/**
@@ -210,9 +229,22 @@ public abstract class AbstractMidCallback implements MidCallback {
 	}
 
 	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.message.MidCallback#isActive()
+	 */
+	@Override
+	public boolean isActive(){
+		return this.isActive.get();
+	}
+	
+	/**
 	 * Stops this {@link MidCallback} and all its associated processes
 	 */
 	public void stop() {
+		
+		this.isActive.set(false);
+		
 		if (MessageRegistererBufferDelegate.class.isAssignableFrom(this.registerer.getClass())) {
 			((MessageRegistererBufferDelegate) this.registerer).stop();
 		}

@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.core.message;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 
 /**
  * Extended {@link MidCallback} managing a buffer to store received events
@@ -61,7 +60,7 @@ public class BufferMidCallback extends UnaryMidCallback {
 	 * @see StackEngineHandler#doHandle(java.lang.Object)
 	 */
 	@Override
-	public void doCallback(SnaMessage<?> message) {
+	public void doCallback(SnaMessage<?> message) throws MidCallbackException {
 		synchronized (this.buffer) {
 			this.buffer[length++] = message;
 
@@ -74,11 +73,9 @@ public class BufferMidCallback extends UnaryMidCallback {
 				}
 				try {
 					this.recipient.callback(this.getName(), msgBuffer);
-					setStatus(Status.SUCCESS);
 
 				} catch (Exception e) {
-					setStatus(Status.ERROR);
-					getCallbackErrorHandler().register(e);
+					throw new MidCallbackException(e);
 				}
 				this.length = 0;
 			}

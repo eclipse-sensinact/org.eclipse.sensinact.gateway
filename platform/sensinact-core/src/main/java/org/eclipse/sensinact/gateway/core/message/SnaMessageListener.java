@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration;
@@ -82,7 +81,7 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 	 */
 	@Override
 	public void addCallback(SnaFilter filter, MidCallback callback) {
-		if (filter == null || callback == null) {
+		if (filter == null || callback == null ||!callback.isActive()) {
 			return;
 		}
 		synchronized (this.callbacks) {
@@ -237,15 +236,11 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 				Iterator<MidCallback> callbackIterator = entry.getValue().iterator();
 
 				while (callbackIterator.hasNext()) {
-					ErrorHandler handler = null;
 					MidCallback callback = callbackIterator.next();
 
 					if ((callback.getTimeout() != MidCallback.ENDLESS
 							&& System.currentTimeMillis() > callback.getTimeout())
-							|| (AccessMethodResponse.Status.ERROR == callback.getStatus()
-									&& (handler = callback.getCallbackErrorHandler()) != null
-									&& ErrorHandler.ErrorHandlerPolicy.contains(handler.getPolicy(),
-											ErrorHandler.ErrorHandlerPolicy.REMOVE))) {
+							    || !callback.isActive()) {
 						callbackIterator.remove();
 						continue;
 					}

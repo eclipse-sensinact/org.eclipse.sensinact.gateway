@@ -72,7 +72,6 @@ public class SnaAgentImpl implements SnaAgent {
 			}
 		}
 		SnaAgentImpl agent = new SnaAgentImpl(mediator, callback, filter, agentKey);
-
 		return agent;
 	}
 
@@ -181,7 +180,7 @@ public class SnaAgentImpl implements SnaAgent {
 	// ********************************************************************//
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
-
+	
 	/**
 	 * the {@link AbstractMidAgentCallback} type
 	 */
@@ -226,12 +225,18 @@ public class SnaAgentImpl implements SnaAgent {
 	/**
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.MessageRegisterer#
-	 *      register(org.eclipse.sensinact.gateway.core.message.SnaMessage)
+	 * @see org.eclipse.sensinact.gateway.core.message.MessageRegisterer#register(org.eclipse.sensinact.gateway.core.message.SnaMessage)
 	 */
-	public synchronized void register(SnaMessage<?> message) {
-		if (this.filter == null || filter.matches(message)) {
-			this.callback.getMessageRegisterer().register(message);
+	@Override
+	public void register(SnaMessage<?> message) {
+		synchronized(this) {
+			if(!this.callback.isActive()) {
+				this.stop();
+				return;
+			}
+			if (this.filter == null || filter.matches(message)) {
+				this.callback.getMessageRegisterer().register(message);
+			}
 		}
 	}
 
@@ -242,40 +247,6 @@ public class SnaAgentImpl implements SnaAgent {
 	 */
 	public String getPublicKey() {
 		return this.publicKey;
-	}
-
-	/**
-	 * @param properties
-	 */
-	public void start(Dictionary<String, Object> properties) {
-		boolean local = false;
-		String identifier = null;
-
-		Object localProp = properties.get("org.eclipse.sensinact.gateway.agent.local");
-		Object identifierProp = properties.get("org.eclipse.sensinact.gateway.agent.id");
-
-		try {
-			identifier = (String) identifierProp;
-		} catch (Exception e) {
-			mediator.error("Invalid 'identifier' property : %s", e.getMessage());
-		}
-		if (identifier == null) {
-			return;
-		}
-		this.callback.setIdentifier(identifier);
-		try {
-			local = ((Boolean) localProp).booleanValue();
-		} catch (Exception e) {
-			mediator.warn("Invalid 'local' property :%s", e.getMessage());
-		}
-		try {
-			this.registration = this.mediator.getContext().registerService(SnaAgent.class, this, properties);
-			if (local) {
-				registerRemote();
-			}
-		} catch (IllegalStateException e) {
-			this.mediator.error("The agent is not registered ", e);
-		}
 	}
 
 	/**
@@ -313,26 +284,69 @@ public class SnaAgentImpl implements SnaAgent {
 	}
 
 	/**
+	 * Starts this SnaAgent, registers it into the registry of the OSGi host
+	 * environment and if they exist, registers it into remote cores
+	 * 
+	 * @param properties 
+	 * 		the Dictionary of properties of this SnaAgent
+	 */
+	public void start(Dictionary<String, Object> properties) {
+		boolean local = false;
+		String identifier = null;
+
+		Object localProp = properties.get("org.eclipse.sensinact.gateway.agent.local");
+		Object identifierProp = properties.get("org.eclipse.sensinact.gateway.agent.id");
+
+		try {
+			identifier = (String) identifierProp;
+		} catch (Exception e) {
+			mediator.error("Invalid 'identifier' property : %s", e.getMessage());
+		}
+		if (identifier == null) {
+			return;
+		}
+		this.callback.setIdentifier(identifier);
+		try {
+			local = ((Boolean) localProp).booleanValue();
+		} catch (Exception e) {
+			mediator.warn("Invalid 'local' property :%s", e.getMessage());
+		}
+		synchronized(this){
+			try {
+				this.registration = this.mediator.getContext().registerService(SnaAgent.class, this, properties);
+				if (local) {
+					registerRemote();
+				}
+			} catch (IllegalStateException e) {
+				this.mediator.error("The agent is not registered ", e);
+			}
+		}
+	}
+	
+	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler#stop()
+	 * @see org.eclipse.sensinact.gateway.core.message.SnaAgent#stop()
 	 */
 	@Override
 	public void stop() {
-		try {
-			this.callback.stop();
-
-		} catch (Exception e) {
-			this.mediator.error(e);
-		}
-		if (this.registration == null) {
-			return;
-		}
-		try {
-			this.registration.unregister();
-
-		} catch (IllegalStateException e) {
-			this.mediator.error(e);
+		synchronized(this) {
+			if(this.callback.isActive()) {
+				try {
+					this.callback.stop();
+		
+				} catch (Exception e) {
+					this.mediator.error(e);
+				}
+			}
+			if (this.registration != null) {
+				try {
+					this.registration.unregister();
+					this.registration = null;
+				} catch (IllegalStateException e) {
+					this.mediator.error(e);
+				}
+			}
 		}
 	}
 }

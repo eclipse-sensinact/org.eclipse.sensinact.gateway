@@ -27,7 +27,7 @@ public interface ExecutionContext<P, V> {
      *
      * @return this ExecutionContext's  {@link ExecutionErrorHandler}
      */
-    ExecutionErrorHandler getExecutionErrorHandler();
+    ErrorHandler getErrorHandler();
 
     /**
      * Returns the {@link Executable} wrapped by this
