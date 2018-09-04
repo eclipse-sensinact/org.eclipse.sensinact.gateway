@@ -27,14 +27,12 @@
 
 	<modules>
 	    <module>rest-access</module>
-            <module>jsonpath-filtering</module>
-            <module>geo-filtering</module>
-            <module>ldap-filtering</module>
-            <module>mqtt-agent</module>
-            <module>storage-agent</module>
-            <module>http-tools</module>
-            <module>http-onem2m-agent</module>
-            <module>cdmi-agent</module>
-            <module>innovallee</module>
+        <module>jsonpath-filtering</module>
+        <module>geo-filtering</module>
+        <module>ldap-filtering</module>
+        <module>mqtt-agent</module>
+        <module>storage-agent</module>
+        <module>http-tools</module>
+        <module>http-onem2m-agent</module>
 	</modules>
 </project>

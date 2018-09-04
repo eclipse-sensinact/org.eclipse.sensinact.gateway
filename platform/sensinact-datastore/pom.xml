@@ -31,7 +31,6 @@
 	<modules>
         <module>sensinact-datastore-api</module>
         <module>sensinact-sqlite-connector</module>
-        <module>sensinact-psql-connector</module>
 	</modules>
 
 </project>

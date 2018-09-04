@@ -66,7 +66,5 @@
 		<module>kodi-device</module>
         <module>live-objects</module>
 		<module>onem2m-device</module>
-		<module>metromobilite-line</module>
-		<module>metromobilite-station</module>
     </modules>
 </project>
