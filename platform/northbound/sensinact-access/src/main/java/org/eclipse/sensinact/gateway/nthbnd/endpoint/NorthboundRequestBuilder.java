@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.core.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
@@ -268,9 +269,11 @@ public class NorthboundRequestBuilder {
                     break;
                 }
                 if (this.resource != null) {
-                    request = new AttributeSubscribeRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, attribute, (NorthboundRecipient) arguments[0], (arguments.length > 1 ? ((JSONArray) arguments[1]) : new JSONArray()));
+                    request = new AttributeSubscribeRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, attribute, (NorthboundRecipient) arguments[0],
+                    	(arguments.length > 1 ? ((JSONArray) arguments[1]) : new JSONArray()),(arguments.length > 2 ? ((String) arguments[2]) : String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY)));
                 } else {
-                    request = new RegisterAgentRequest(mediator, getRequestIdentifier(), serviceProvider, service, (NorthboundRecipient) arguments[0], (SnaFilter) (arguments.length > 1 ? arguments[1] : null));
+                    request = new RegisterAgentRequest(mediator, getRequestIdentifier(), serviceProvider, service, (NorthboundRecipient) arguments[0], 
+                    	(SnaFilter) (arguments.length > 1 ? arguments[1] : null),(arguments.length > 2 ? ((String) arguments[2]) : String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY)));
                 }
                 break;
             case "UNSUBSCRIBE":

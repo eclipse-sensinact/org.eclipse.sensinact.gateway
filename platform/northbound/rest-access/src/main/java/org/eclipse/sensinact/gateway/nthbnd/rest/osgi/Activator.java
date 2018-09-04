@@ -21,6 +21,7 @@ import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.CorsFilter;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpLoginEndpoint;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpRegisteringEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws.WebSocketConnectionFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -78,21 +79,27 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
                         mediator.error(e);
                     }
                 }
-                Dictionary<String, Object> params = new Hashtable<String, Object>();
-                params.put(Mediator.class.getCanonicalName(), Activator.this.mediator);
                 try {
+                    Dictionary<String, Object> params = new Hashtable<String, Object>();
+                    params.put(Mediator.class.getCanonicalName(), Activator.this.mediator);
+                    
                     HttpContext context = service.createDefaultHttpContext();
                     service.registerServlet(RestAccessConstants.LOGIN_ENDPOINT, new HttpLoginEndpoint(mediator), params, context);
                     Activator.this.mediator.info(String.format("%s servlet registered", RestAccessConstants.LOGIN_ENDPOINT));
+
+                    params = new Hashtable<String, Object>();
+                    params.put(Mediator.class.getCanonicalName(), Activator.this.mediator);
+                    
+                    context = service.createDefaultHttpContext();
+                    service.registerServlet(RestAccessConstants.REGISTERING_ENDPOINT, new HttpRegisteringEndpoint(mediator), params, context);
+                    Activator.this.mediator.info(String.format("%s servlet registered", RestAccessConstants.REGISTERING_ENDPOINT));
+                    
                     params = new Hashtable<String, Object>();
                     params.put(Mediator.class.getCanonicalName(), Activator.this.mediator);
 
                     context = service.createDefaultHttpContext();
                     service.registerServlet(RestAccessConstants.HTTP_ROOT, new HttpEndpoint(mediator), params, context);
                     Activator.this.mediator.info(String.format("%s servlet registered", RestAccessConstants.HTTP_ROOT));
-
-                    params = new Hashtable<String, Object>();
-                    params.put(Mediator.class.getCanonicalName(), Activator.this.mediator);
 
                     final WebSocketConnectionFactory sessionPool = new WebSocketConnectionFactory(Activator.this.mediator);
                     //define the current thread classloader to avoid ServiceLoader error

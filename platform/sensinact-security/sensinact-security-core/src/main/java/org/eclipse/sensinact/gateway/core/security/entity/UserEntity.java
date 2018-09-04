@@ -217,7 +217,7 @@ public class UserEntity extends SnaEntity implements User {
 				mediator.error(e);
 			}
 		}
-		return publicKey;
+		return this.publicKey;
 	}
 
 	/**

@@ -109,7 +109,7 @@ public class WebSocketConnectionFactory implements WebSocketCreator {
         }
         if (credentials != null) {
             try {
-                LoginResponse response = mediator.getLoginEndpoint().createNorthboundEndpoint(credentials);
+                LoginResponse response = mediator.getAccessingEndpoint().createNorthboundEndpoint(credentials);
                 token = new AuthenticationToken(response.getToken());
 
             } catch (InvalidCredentialException | NullPointerException e) {

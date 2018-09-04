@@ -68,7 +68,7 @@ public class NorthboundMediator extends Mediator {
 
     NorthboundEndpoints northboundEndpoints;
 
-    LoginEndpoint loginEndpoint;
+    AccessingEndpoint accessingEndpoint;
 
     /**
      * Constructor
@@ -80,7 +80,7 @@ public class NorthboundMediator extends Mediator {
     public NorthboundMediator(BundleContext context) {
         super(context);
         this.northboundEndpoints = new NorthboundEndpoints(this);
-        this.loginEndpoint = new LoginEndpoint(this);
+        this.accessingEndpoint = new AccessingEndpoint(this);
     }
 
     /**
@@ -115,12 +115,12 @@ public class NorthboundMediator extends Mediator {
     }
 
     /**
-     * Returns the {@link LoginEndpoint} attached to this
+     * Returns the {@link AccessingEndpoint} attached to this
      * NorthboundMediator
      *
-     * @return this NorthboundMediator's {@link LoginEndpoint}
+     * @return this NorthboundMediator's {@link AccessingEndpoint}
      */
-    public LoginEndpoint getLoginEndpoint() {
-        return this.loginEndpoint;
+    public AccessingEndpoint getAccessingEndpoint() {
+        return this.accessingEndpoint;
     }
 }

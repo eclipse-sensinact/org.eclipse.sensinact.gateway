@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
+
 /**
  * A Session allows to invoke access method on resources, and to access to
  * available service providers, services, and/or resources
@@ -25,6 +27,7 @@ public interface AuthenticatedSession extends Session {
 	 *            the current String password to be replaced
 	 * @param newPassword
 	 *            the new String password to be set
+	 * @throws SecuredAccessException 
 	 */
-	void changePassword(String oldPassword, String newPassword);
+	void changePassword(String oldPassword, String newPassword) throws SecuredAccessException;
 }

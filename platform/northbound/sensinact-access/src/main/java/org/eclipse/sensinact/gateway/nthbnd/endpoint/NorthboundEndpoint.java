@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import org.eclipse.sensinact.gateway.core.AnonymousSession;
 import org.eclipse.sensinact.gateway.core.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
@@ -23,6 +24,7 @@ import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
+import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -95,6 +97,31 @@ public class NorthboundEndpoint {
         return result;
     }
 
+    /**
+     * @param login
+     * @param password
+     * @param account
+     * @param accountType
+     * @throws SecuredAccessException
+     */
+    public void registerUser(String login, String password, String account, String accountType) throws SecuredAccessException {
+    	if(!(session instanceof AnonymousSession)) {
+    		throw new SecuredAccessException("Invalid Session");
+    	}
+		((AnonymousSession)session).registerUser(login, password, account, accountType);
+    }
+
+    /**
+     * @param account
+     * @throws SecuredAccessException
+     */
+    public void renewUserPassword(String account) throws SecuredAccessException {    	
+    	if(!(session instanceof AnonymousSession)) {
+    		throw new SecuredAccessException("Invalid Session");
+    	}
+		((AnonymousSession)session).renewPassword(account);
+    }
+    
     /**
      * Registers an {@link SnaAgent} whose lifetime will be linked
      * to the {@link Session} of this NorthboundEndpoint
@@ -365,8 +392,9 @@ public class NorthboundEndpoint {
      * @param conditions
      * @return
      */
-    public SubscribeResponse subscribe(String requestIdentifier, String serviceProviderId, String serviceId, String resourceId, String attributeId, NorthboundRecipient recipient, JSONArray conditions) {
-        return session.subscribe(requestIdentifier, serviceProviderId, serviceId, resourceId, recipient, conditions);
+    public SubscribeResponse subscribe(String requestIdentifier, String serviceProviderId, String serviceId, String resourceId, String attributeId, 
+    		NorthboundRecipient recipient, JSONArray conditions, String policy) {
+        return session.subscribe(requestIdentifier, serviceProviderId, serviceId, resourceId, recipient, conditions, policy);
     }
 
     /**

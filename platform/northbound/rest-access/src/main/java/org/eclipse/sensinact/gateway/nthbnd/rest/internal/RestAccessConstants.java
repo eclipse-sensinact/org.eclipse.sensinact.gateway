@@ -27,5 +27,6 @@ public abstract class RestAccessConstants {
     public static final String HTTP_ROOT = "/";
     public static final String WS_ROOT = "/ws";
     public static final String LOGIN_ENDPOINT = "/login";
+    public static final String REGISTERING_ENDPOINT = "/register";
 
 }

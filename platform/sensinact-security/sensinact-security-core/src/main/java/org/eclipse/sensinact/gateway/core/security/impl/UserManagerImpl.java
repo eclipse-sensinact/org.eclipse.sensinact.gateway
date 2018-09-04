@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core.security.impl;
 
+import java.lang.reflect.Method;
 import java.security.InvalidKeyException;
 import java.util.HashMap;
 
@@ -35,6 +36,7 @@ import org.osgi.framework.ServiceReference;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class UserManagerImpl implements UserManager, AuthenticationService {
+	
 	private Mediator mediator;
 	private UserDAO userDAO;
 	private UserEntity anonymous;
@@ -109,35 +111,13 @@ public class UserManagerImpl implements UserManager, AuthenticationService {
 	 * @inheritDoc
 	 * 
 	 * @see org.eclipse.sensinact.gateway.core.security.UserManager#
-	 *      createUser(java.lang.String, java.lang.String, java.lang.String)
-	 */
-	@Override
-	public UserUpdater createUser(String login, String password, String account) throws SecuredAccessException {
-		return null;
-	}
-
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.UserManager#
 	 *      getUser(java.lang.String, java.lang.String)
 	 */
 	@Override
 	public User getUser(String login, String password) throws SecuredAccessException, DataStoreException {
 		return userDAO.find(login, password);
 	}
-
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.UserManager#
-	 *      updateUserPassword(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public UserUpdater updateUserPassword(String account, String newPassword) throws SecuredAccessException {
-		return null;
-	}
-
+	
 	/**
 	 * @inheritDoc
 	 * 
@@ -184,4 +164,118 @@ public class UserManagerImpl implements UserManager, AuthenticationService {
 		}
 	}
 
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.security.UserManager#createUser(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public UserUpdater createUser(String token, final String login, final String password, final String account, final String accountType) throws SecuredAccessException {
+		return new AbstractUserUpdater(mediator, token, "create") {
+			@Override
+			public String getAccount() {
+				return account;
+			}
+			@Override
+			public String getAccountType() {
+				return accountType;
+			}
+			@Override
+			protected String doUpdate() throws SecuredAccessException {				
+				String publicKey = null;
+				String publicKeyStr = new StringBuilder().append(login).append(":").append(account
+						).append(System.currentTimeMillis()).toString();
+				try {
+					publicKey = CryptoUtils.cryptWithMD5(publicKeyStr);
+					UserEntity user = new UserEntity(mediator, login, password, account, accountType, 
+						publicKey);
+					UserManagerImpl.this.userDAO.create(user);
+					return new StringBuilder().append("Public Key : ").append(publicKey).toString();
+				} catch(DAOException | DataStoreException | InvalidKeyException e) {
+					throw new SecuredAccessException(e);
+				}
+			}
+			
+		};
+	}
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.security.UserManager#renewUserPassword(java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public UserUpdater renewUserPassword(String token, final String account, final String accountType) throws SecuredAccessException {
+		return new AbstractUserUpdater(mediator, token, "renew") {
+			static final String ALPHABET = ".!0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+			@Override
+			public String getAccount() {
+				return account;
+			}
+			@Override
+			public String getAccountType() {
+				return accountType;
+			}
+			@Override
+			protected String doUpdate() throws SecuredAccessException {		
+				try {
+					User user = UserManagerImpl.this.getUserFromAccount(account);
+					StringBuilder builder = new StringBuilder();					
+					do {
+						String millis = String.valueOf(System.currentTimeMillis());
+						for(int i=millis.length()-1;i>6;i--) {
+								int val = Integer.parseInt(millis.substring(i-1, i+1));
+								int hval = Integer.parseInt(millis.substring(i-1, i+1),16);
+								int index = -1;
+								if((index = ALPHABET.indexOf(val))>-1){
+									builder.append(ALPHABET.substring(index, index+1));
+								} else if((index = ALPHABET.indexOf(hval))>-1){
+									builder.append(ALPHABET.substring(index, index+1));
+								} else if(val < millis.length()) {
+									builder.append(ALPHABET.substring(val, val+1));
+								}else if(hval < millis.length()) {
+									builder.append(ALPHABET.substring(hval, hval+1));
+								}
+						}
+						Thread.sleep(345);
+					}while(builder.length() <= 10);
+					String password = builder.toString();
+					String encryptedPassword = CryptoUtils.cryptWithMD5(password);
+					((UserEntity)user).setPassword(encryptedPassword);
+					UserManagerImpl.this.userDAO.update((UserEntity) user);
+					return new StringBuilder().append("Your new password : ").append(password).toString();
+				} catch(DAOException | DataStoreException | InvalidKeyException | InterruptedException e) {
+					throw new SecuredAccessException(e);
+				}
+			}
+		};
+	}
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.security.UserManager#updateField(java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public void updateField(User user, String fieldName, Object oldValue, Object newValue) throws SecuredAccessException {
+		try {
+			Class<? extends User> clazz = user.getClass();		
+			String getPrefix = "get";
+			String setPrefix = "set";
+			String suffix = new StringBuilder().append(fieldName.substring(0, 1
+				).toUpperCase()).append(fieldName.substring(1)).toString();
+			Method getMethod = clazz.getMethod(new StringBuilder().append(getPrefix).append(suffix
+				).toString());
+			Object current = getMethod.invoke(user);
+			if((current==null && oldValue!=null)||(current!=null && !current.equals(oldValue))){
+				throw new SecuredAccessException("Invalid current value");
+			}
+			Method setMethod = clazz.getMethod(new StringBuilder().append(setPrefix).append(suffix
+				).toString(), newValue.getClass());
+			setMethod.invoke(user, newValue);			
+		} catch (Exception e) {
+			throw new SecuredAccessException(e);
+		}
+	}
+	
 }

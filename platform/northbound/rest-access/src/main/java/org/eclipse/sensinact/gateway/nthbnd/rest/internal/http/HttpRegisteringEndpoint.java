@@ -10,12 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 
-import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
-import org.eclipse.sensinact.gateway.core.security.Credentials;
-import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.LoginResponse;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletOutputStream;
@@ -24,7 +21,13 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.RegisteringResponse;
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
+import org.eclipse.sensinact.gateway.util.IOUtils;
+import org.json.JSONObject;
 
 /**
  * This class is the REST interface between each others classes
@@ -32,24 +35,14 @@ import java.io.IOException;
  */
 @SuppressWarnings("serial")
 @WebServlet(asyncSupported = true)
-public class HttpLoginEndpoint extends HttpServlet {
+public class HttpRegisteringEndpoint extends HttpServlet {
     private NorthboundMediator mediator;
 
     /**
      * Constructor
      */
-    public HttpLoginEndpoint(NorthboundMediator mediator) {
+    public HttpRegisteringEndpoint(NorthboundMediator mediator) {
         this.mediator = mediator;
-    }
-
-    /**
-     * @inheritDoc
-     * @see javax.servlet.http.HttpServlet#
-     * doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
-    @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        this.doExecute(request, response);
     }
 
     /**
@@ -89,17 +82,42 @@ public class HttpLoginEndpoint extends HttpServlet {
                 HttpServletRequest request = (HttpServletRequest) asyncContext.getRequest();
                 HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
                 try {
-                    LoginResponse loginResponse = null;
-                    String tokenHeader = request.getHeader("X-Auth-Token");
-                    String authorizationHeader = request.getHeader("Authorization");
-
-                    if (tokenHeader != null) {
-                        loginResponse = mediator.getAccessingEndpoint().reactivateEndpoint(new AuthenticationToken(tokenHeader));
-
-                    } else if (authorizationHeader != null) {
-                        loginResponse = mediator.getAccessingEndpoint().createNorthboundEndpoint(new Credentials(authorizationHeader));
+                    String queryString = request.getQueryString();
+                    if(queryString == null) {
+                    	response.sendError(400, "'create' or 'renew' request parameter expected");
                     }
-                    byte[] resultBytes = loginResponse.getJSON().getBytes();
+                    Map<String,List<String>> map = NorthboundRequest.processRequestQuery(queryString);
+                    String query = null;
+                    List<String> list = map.get("request");
+                    if(list!= null){
+                    	query = list.get(list.size()-1);
+                    }else {
+                    	query = map.get("create")!=null?"create":(map.get("renew")!=null?"renew":null);
+                    }
+                    if(query == null) {
+                    	response.sendError(400, "'create' or 'renew' request parameter expected");
+                    }                    
+                    byte[] content = IOUtils.read(request.getInputStream(),false);
+                    JSONObject jcontent = new JSONObject(new String(content));          
+
+                    RegisteringResponse registeringResponse = null;
+                    
+                    switch(query) {
+                        case "create":
+                        	String login = (String) jcontent.opt("login");
+                        	String password= (String) jcontent.opt("password");
+                        	String account= (String) jcontent.opt("account");
+                        	String accountType= (String) jcontent.opt("accountType");
+                            registeringResponse = mediator.getAccessingEndpoint().registeringEndpoint(login, password, account, accountType);
+                             break;
+                        case "renew":
+                        	 account= (String) jcontent.opt("account");
+                            registeringResponse = mediator.getAccessingEndpoint().passwordRenewingEndpoint(account);
+                             break;
+						default:
+                        	response.sendError(400, "'create' or 'renew' request parameter expected");
+                    }
+                    byte[] resultBytes = registeringResponse.getJSON().getBytes();
                     response.setContentType(RestAccessConstants.JSON_CONTENT_TYPE);
                     response.setContentLength(resultBytes.length);
                     response.setBufferSize(resultBytes.length);
@@ -109,9 +127,9 @@ public class HttpLoginEndpoint extends HttpServlet {
 
                     response.setStatus(200);
 
-                } catch (InvalidCredentialException e) {
+                } catch (ClassCastException e) {
                     mediator.error(e);
-                    response.sendError(403, e.getMessage());
+                    response.sendError(400, "Invalid parameters type");
 
                 } catch (Exception e) {
                     mediator.error(e);
@@ -127,8 +145,7 @@ public class HttpLoginEndpoint extends HttpServlet {
             /**
              * @inheritDoc
              *
-             * @see javax.servlet.WriteListener#
-             * onError(java.lang.Throwable)
+             * @see javax.servlet.WriteListener#onError(java.lang.Throwable)
              */
             @Override
             public void onError(Throwable t) {

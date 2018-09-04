@@ -95,8 +95,8 @@ public class SecuredAccessImpl implements SecuredAccess {
 	 * Constructor
 	 * 
 	 * @param mediator
-	 *            the extended {@link Mediator} associated to the SecuredAccessImpl
-	 *            to instantiate
+	 *            the {@link Mediator} allowing to interact with the OSGi host 
+	 *            environment
 	 * @throws DataStoreException
 	 */
 	public SecuredAccessImpl(Mediator mediator) throws SecuredAccessException {

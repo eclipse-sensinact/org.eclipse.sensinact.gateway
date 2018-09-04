@@ -80,6 +80,11 @@ public abstract class NorthboundRequest implements PathElement, Nameable {
                     element.append(c);
             }
         }
+        if(name == null && element.length()>0) {
+        	name = element.toString();
+            addQueryParameter(queryMap, name, Boolean.TRUE.toString());
+            return queryMap;
+        }
         value = element.toString();
         addQueryParameter(queryMap, name, value);
         return queryMap;

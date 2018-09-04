@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
+import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
@@ -552,6 +553,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
                 String sender = null;
                 boolean isPattern = false;
                 boolean isComplement = false;
+                String policy = String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY);
                 SnaMessage.Type[] types = null;
                 JSONArray conditions = null;
 
@@ -574,6 +576,9 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
                             break;
                         case "types":
                             types = CastUtils.castArray(mediator.getClassLoader(), SnaMessage.Type[].class, parameter.getValue());
+                        case "policy":
+                            policy = CastUtils.cast(mediator.getClassLoader(), String.class, parameter.getValue());
+                            break;
                         default:
                             ;
                     }
@@ -592,12 +597,12 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
                 if (this.resource == null) {
                     SnaFilter snaFilter = new SnaFilter(mediator, sender, isPattern, isComplement, conditions);
                     snaFilter.addHandledType(types);
-                    argument = snaFilter;
-
+                    argument = snaFilter;                    
+                    builder.withArgument(new Object[]{recipient, argument});
                 } else {
                     argument = conditions;
+                    builder.withArgument(new Object[]{recipient, argument, policy});
                 }
-                builder.withArgument(new Object[]{recipient, argument});
                 break;
             default:
                 break;

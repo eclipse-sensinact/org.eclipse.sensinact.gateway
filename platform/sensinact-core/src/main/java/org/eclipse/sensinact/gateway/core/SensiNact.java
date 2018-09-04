@@ -55,6 +55,7 @@ import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
+import org.eclipse.sensinact.gateway.core.security.AccountConnector;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
@@ -69,6 +70,7 @@ import org.eclipse.sensinact.gateway.core.security.User;
 import org.eclipse.sensinact.gateway.core.security.UserKey;
 import org.eclipse.sensinact.gateway.core.security.UserManager;
 import org.eclipse.sensinact.gateway.core.security.UserManagerFactory;
+import org.eclipse.sensinact.gateway.core.security.UserUpdater;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
@@ -149,8 +151,8 @@ public class SensiNact implements Core {
 			String agentId = AccessController.<String>doPrivileged(new PrivilegedAction<String>() {
 				@Override
 				public String run() {
-					SessionKey key = SensiNact.this.sessions
-							.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, getSessionId()));
+					SessionKey key = SensiNact.this.sessions.get(new KeyExtractor<KeyExtractorType>(
+							KeyExtractorType.TOKEN, getSessionId()));
 
 					if (key == null || key.getPublicKey() == null) {
 						return null;
@@ -377,13 +379,13 @@ public class SensiNact implements Core {
 		 */
 		@Override
 		public SubscribeResponse subscribe(String requestId, final String serviceProviderId, final String serviceId,
-				final String resourceId, final Recipient recipient, final JSONArray conditions) {
+				final String resourceId, final Recipient recipient, final JSONArray conditions, final String policy) {
 			SubscribeResponse response = null;
-			SessionKey sessionKey = SensiNact.this.sessions
-					.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, this.getSessionId()));
+			SessionKey sessionKey = SensiNact.this.sessions.get(new KeyExtractor<KeyExtractorType>(
+					KeyExtractorType.TOKEN, this.getSessionId()));
 
-			String uri = getUri((sessionKey.localID() != 0), SensiNact.this.namespace(), serviceProviderId, serviceId,
-					resourceId);
+			String uri = getUri((sessionKey.localID() != 0), SensiNact.this.namespace(), serviceProviderId, 
+				serviceId, resourceId);
 			Resource resource = this.resource(serviceProviderId, serviceId, resourceId);
 
 			if (resource != null) {
@@ -397,9 +399,8 @@ public class SensiNact implements Core {
 							mediator.error(e);
 						}
 					}
-					response = ((DataResource) resource).subscribe(recipient,
-							(constraint == null ? Collections.<Constraint>emptySet()
-									: Collections.<Constraint>singleton(constraint)));
+					response = ((DataResource) resource).subscribe(recipient, (constraint == null 
+						? Collections.<Constraint>emptySet():Collections.<Constraint>singleton(constraint)),policy);
 				} else {
 					response = SensiNact.<JSONObject, SubscribeResponse>createErrorResponse(mediator,
 							AccessMethod.SUBSCRIBE, uri, 404, "Unknown Method", null);
@@ -870,33 +871,115 @@ public class SensiNact implements Core {
 	 * {@link Session} service implementation for anonymous user
 	 */
 	final class SensiNactAnonymousSession extends SensiNactSession implements AnonymousSession {
+		
+		/**
+		 * Constructor
+		 * 
+		 * @param identifier 
+		 * 		the String identifier of the Session to be created
+		 */
 		SensiNactAnonymousSession(String identifier) {
 			super(identifier);
+		}
+		
+		/**
+		 * @inheritDoc
+		 * 
+		 * @see org.eclipse.sensinact.gateway.core.AnonymousSession#registerUser(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+		 */
+		@Override
+		public final void registerUser(final String login, final String password, final String accountType,
+			final String account) throws SecuredAccessException {
+			SecuredAccessException exception = SensiNact.this.mediator.callService(
+				UserManager.class, new Executable<UserManager,SecuredAccessException>(){
+					@Override
+					public SecuredAccessException execute(UserManager userManager) throws Exception {
+					    if(userManager.accountExists(account)||userManager.loginExists(login)) {
+					    	return new SecuredAccessException("A user with this login or account already exists");
+					    }
+					    try {
+					    	final String token = SensiNact.this.nextToken();
+					        final UserUpdater userUpdater = userManager.createUser(token, login, password, account, accountType);
+
+					        ServiceReference[] references = SensiNact.this.mediator.getContext().getServiceReferences(
+					        	AccountConnector.class.getName(), new StringBuilder().append("(org.eclipse.sensinact.security.account.type="
+					        		).append(accountType).append(")").toString());
+					        
+					        if(references == null || references.length == 0){
+					        	return new SecuredAccessException("No account connector");
+					        }
+					        int index = 0;
+					        for(;index < references.length;index++) {
+					        	AccountConnector connector = (AccountConnector)SensiNact.this.mediator.getContext(
+					        			).getService(references[index]);
+					        	if(connector != null) {
+					        		connector.connect(token, userUpdater);
+					        		SensiNact.this.mediator.getContext().ungetService(references[index]);
+					        		break;
+					        	}
+					        }
+					   } catch(SecuredAccessException e) {
+						   return e;
+					   } catch(Exception e) {
+						   return new SecuredAccessException(e);
+					   }
+					   return null;
+					}
+				}
+			);
+			if(exception != null) {
+				throw exception;
+			}
 		}
 
 		/**
 		 * @inheritDoc
 		 * 
-		 * @see org.eclipse.sensinact.gateway.core.AnonymousSession#
-		 *      registerUser(java.lang.String, java.lang.String, java.lang.String)
+		 * @see org.eclipse.sensinact.gateway.core.AnonymousSession#renewPassword(java.lang.String)
 		 */
 		@Override
-		public void registerUser(final String login, final String password, final String account) {
-			this.registerUser(login, password, User.MAIL_ACCOUNT, account);
-		}
-
-		public void registerUser(final String login, final String password, final String accountType,
-				final String account) {
-			SensiNact.this.requestUserCreation(login, password, accountType, account);
-		}
-
-		@Override
-		public void renewPassword(final String account) {
-			this.renewPassword(User.MAIL_ACCOUNT, account);
-		}
-
-		public void renewPassword(final String accountType, final String account) {
-			SensiNact.this.requestUserPasswordRenewing(accountType, account);
+		public final void renewPassword(final String account) throws SecuredAccessException {
+			SecuredAccessException exception = SensiNact.this.mediator.callService(
+				UserManager.class, new Executable<UserManager,SecuredAccessException>(){
+				    @Override
+				    public SecuredAccessException execute(UserManager userManager) throws Exception {
+				    	User user = userManager.getUserFromAccount(account);
+					    if(user==null) {
+					    	return new SecuredAccessException("No user found for this account");
+					    }
+				    	try{
+					    	final String token = SensiNact.this.nextToken();
+					        final UserUpdater userUpdater = userManager.renewUserPassword(token, account, user.getAccountType());
+					        
+					        ServiceReference[] references = SensiNact.this.mediator.getContext().getServiceReferences(
+					        	AccountConnector.class.getName(), new StringBuilder().append("(org.eclipse.sensinact.security.account.type="
+					        		).append(user.getAccountType()).append(")").toString());
+					        
+					        if(references == null || references.length == 0){
+					        	return new SecuredAccessException("No account connector");
+					        }
+					        int index = 0;
+					        for(;index < references.length;index++) {
+					        	AccountConnector connector = (AccountConnector)SensiNact.this.mediator.getContext(
+					        			).getService(references[index]);
+					        	if(connector != null) {
+					        		connector.connect(token, userUpdater);
+					        		SensiNact.this.mediator.getContext().ungetService(references[index]);
+					        		break;
+					        	}
+					        }
+					   } catch(SecuredAccessException e) {
+						   return e;
+					   } catch(Exception e) {
+						   return new SecuredAccessException(e);
+					   }
+					   return null;
+				    }
+				}
+			);
+			if(exception != null) {
+				throw exception;
+			}
 		}
 	}
 
@@ -904,21 +987,48 @@ public class SensiNact implements Core {
 	 * {@link Session} service implementation for authenticated user
 	 */
 	final class SensiNactAuthenticatedSession extends SensiNactSession implements AuthenticatedSession {
+		
+		/**
+		 * Constructor 
+		 * 
+		 * @param identifier
+		 * 		the String identifier of the Session to be created
+		 */
 		SensiNactAuthenticatedSession(String identifier) {
 			super(identifier);
 		}
 
+		/**
+		 * @inheritDoc
+		 * 
+		 * @see org.eclipse.sensinact.gateway.core.AuthenticatedSession#changePassword(java.lang.String, java.lang.String)
+		 */
 		@Override
-		public void changePassword(final String oldPassword, final String newPassword) {
-			SessionKey key = SensiNact.this.sessions
-					.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, getSessionId()));
-
+		public final void changePassword(final String oldPassword, final String newPassword) throws SecuredAccessException {
+			final SessionKey key = SensiNact.this.sessions.get(new KeyExtractor<KeyExtractorType>(
+					KeyExtractorType.TOKEN, getSessionId()));
 			if (key == null || key.getPublicKey() == null) {
-				return;
+				throw new SecuredAccessException("Invalid user key");
 			}
 			final String publicKey = key.getPublicKey();
-
-			SensiNact.this.changeUserPassword(publicKey, oldPassword, newPassword);
+			
+			SecuredAccessException exception = SensiNact.this.mediator.callService(
+				UserManager.class, new Executable<UserManager,SecuredAccessException>(){
+				    @Override
+				    public SecuredAccessException execute(UserManager userManager) throws Exception {
+				    	User user = userManager.getUserFromPublicKey(publicKey);
+				    	try {
+							String encryptedPassword = CryptoUtils.cryptWithMD5(oldPassword);
+				    		userManager.updateField(user, "password", encryptedPassword, newPassword);
+				    	} catch(SecuredAccessException e){
+				    		return e;
+				    	}catch(Exception e){
+				    		return new SecuredAccessException(e);
+				    	}
+				    	return null;
+				    }
+				}
+			);
 		}
 	}
 
@@ -1204,7 +1314,6 @@ public class SensiNact implements Core {
 			String prefix = resolveNamespace
 					? new StringBuilder().append(SensiNact.this.namespace()).append(":").toString()
 					: "";
-
 			Collection<ServiceReference<SensiNactResourceModel>> references = this.getReferences(sessionKey, filter);
 			Iterator<ServiceReference<SensiNactResourceModel>> iterator = references.iterator();
 
@@ -2354,66 +2463,6 @@ public class SensiNact implements Core {
 				return null;
 			}
 		});
-	}
-
-	/**
-	 * Creates a request for a user creation, with the specified name, password, and
-	 * account endpoint with the specified type. To be effective the creation of the
-	 * user needs the validation of the {@link UserUpdater} generated by this
-	 * request. To be valid the specified login and account must be unique in the
-	 * system.
-	 * 
-	 * @param login
-	 *            the String name of the user to be created
-	 * @param password
-	 *            the MD5 hashed password of the user to be created
-	 * @param accountType
-	 *            the String type of the account endpoint of the user to be created
-	 * @param account
-	 *            the String account endpoint of the user to be created
-	 * 
-	 */
-	public void requestUserCreation(String login, String password, String accountType, String account) {
-
-	}
-
-	/**
-	 * Creates a request for a user password renewing. The user is identified by the
-	 * way of the specified account endpoint. To be effective the renewing of the
-	 * user password needs the validation of the {@link UserUpdater} generated by
-	 * the request.
-	 * 
-	 * @param accountType
-	 *            the String type of the account of the user whose password has to
-	 *            be renewed
-	 * @param account
-	 *            the String account endpoint of the user whose password has to be
-	 *            renewed
-	 */
-	public void requestUserPasswordRenewing(String accountType, String account) {
-
-	}
-
-	/**
-	 * Changes the specified old password of the user whose String public key is
-	 * passed as parameter for the new one also passed as parameter, and returns
-	 * true if the update has been made properly. Otherwise it returns false
-	 * 
-	 * @param publicKey
-	 *            the String public key of the user
-	 * @param oldPassword
-	 *            the old String password to be replaced
-	 * @param newPassword
-	 *            the new String password to be set
-	 * 
-	 * @return
-	 *         <ul>
-	 *         <li>true if the password has been updated properly</li>
-	 *         <li>false otherwise</li>
-	 *         </ul>
-	 */
-	public boolean changeUserPassword(String publicKey, String oldPassword, String newPassword) {
-		return false;
 	}
 
 	/**

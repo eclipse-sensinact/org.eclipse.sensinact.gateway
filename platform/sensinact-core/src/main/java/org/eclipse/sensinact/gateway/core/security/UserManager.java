@@ -18,6 +18,7 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface UserManager {
+	
 	public static final long ANONYMOUS_ID = 0L;
 	public static final String ANONYMOUS_PKEY = "anonymous";
 
@@ -75,33 +76,41 @@ public interface UserManager {
 	 * holding the creation. The validation of the {@link UserUpdater} by the
 	 * appropriate String token will result in the affective user creation.
 	 * 
+	 * @param token
+	 *            the String token allowing to validate the  user creation operation 
+	 *            held by the returned  {@link UserUpdater}
 	 * @param login
 	 *            the String login of the user to be created
 	 * @param password
 	 *            the String password of the user to be created
 	 * @param account
 	 *            the String account endpoint used to validate the request
+	 * @param accountType
+	 *            the String account type of the account endpoint used to validate the request
 	 * 
 	 * @return the {@link UserUpdater} holding the user creation
 	 */
-	UserUpdater createUser(String login, String password, String account) throws SecuredAccessException;
+	UserUpdater createUser(String token, String login, String password, String account, String accountType) 
+			throws SecuredAccessException;
 
 	/**
 	 * Asks for the update of the password of the user whose account endpoint is
 	 * passed as parameter and returns the {@link UserUpdater} holding the update.
 	 * The validation of the {@link UserUpdater} by the appropriate String token
-	 * will result in the effective password update.
+	 * and a new password will result in the effective password renewing
 	 * 
+	 * @param token
+	 *       the String token allowing to validate the renewing password operation 
+	 *       held by the returned {@link UserUpdater}
 	 * @param account
-	 *            the String account endpoint of the user for who to update the
-	 *            password
-	 * @param newPassword
-	 *            the new String password to be to defined
-	 * 
-	 * @return the {@link UserUpdater} holding the password update
+	 *       the String account endpoint of the user for who to update the password
+	 * @param accountType
+	 *       the String account type of the account endpoint used to validate the request
+	 *       
+	 * @return the {@link UserUpdater} holding the password renewing
 	 */
-	UserUpdater updateUserPassword(String account, String newPassword) throws SecuredAccessException;
-
+	UserUpdater renewUserPassword(String token, String account, String accountType) throws SecuredAccessException;
+	
 	/**
 	 * @param publicKey
 	 * @return
@@ -116,4 +125,12 @@ public interface UserManager {
 	 * @throws DataStoreException
 	 */
 	User getUserFromAccount(String account) throws SecuredAccessException, DataStoreException;
+
+	/**
+	 * @param fieldName
+	 * @param oldValue
+	 * @param newValue
+	 * @throws SecuredAccessException
+	 */
+	void updateField(User user, String fieldName, Object oldValue, Object newValue) throws SecuredAccessException;
 }

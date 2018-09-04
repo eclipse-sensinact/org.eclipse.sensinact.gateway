@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import org.eclipse.sensinact.gateway.common.execution.DefaultErrorHandler;
+import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
@@ -26,6 +28,7 @@ public class RegisterAgentRequest extends NorthboundRequest {
     private String serviceProvider;
     private String service;
     private SnaFilter filter;
+	private String policy ;
 
     /**
      * Constructor
@@ -36,12 +39,14 @@ public class RegisterAgentRequest extends NorthboundRequest {
      * @param recipient
      * @param constraints
      */
-    public RegisterAgentRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, NorthboundRecipient recipient, SnaFilter filter) {
+    public RegisterAgentRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider,
+    		String service, NorthboundRecipient recipient, SnaFilter filter, String policy) {
         super(mediator, requestIdentifier, null);
         this.serviceProvider = serviceProvider;
         this.service = service;
         this.recipient = recipient;
         this.filter = filter;
+        this.policy = policy;
         if (this.recipient == null) {
             throw new NullPointerException("Recipient missing");
         }
@@ -80,6 +85,29 @@ public class RegisterAgentRequest extends NorthboundRequest {
                 RegisterAgentRequest.this.recipient.setIdentifier(super.identifier);
             }
         };
+        int intPolicy = 0x000000;
+        try {
+			intPolicy = Integer.parseInt(policy);
+		} catch(NumberFormatException e) {			
+			String[] policies = policy.split("|");
+			for(int index = 0;index < policies.length;index++) {
+				switch((policies[index]).trim()) {
+				case "CONTINUE" : intPolicy |= ErrorHandler.Policy.CONTINUE;
+				break;
+				case "STOP" : intPolicy |= ErrorHandler.Policy.STOP;
+				break;
+				case "ROLLBACK" : intPolicy |= ErrorHandler.Policy.ROLLBACK;
+				break;
+				case "IGNORE" : intPolicy |= ErrorHandler.Policy.IGNORE;
+				break;
+				case "ALTERNATIVE" : intPolicy |= ErrorHandler.Policy.ALTERNATIVE;
+				break;
+				case "LOG" : intPolicy |= ErrorHandler.Policy.LOG;
+				break;
+				}								
+			}
+		}
+        callback.setErrorHandler(new DefaultErrorHandler(intPolicy));
         Argument[] superArguments = super.getExecutionArguments();
         int length = superArguments == null ? 0 : superArguments.length;
         Argument[] arguments = new Argument[length + 2];
