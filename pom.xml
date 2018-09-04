@@ -474,8 +474,8 @@
 							<id>validate</id>
 							<phase>validate</phase>
 							<configuration>
-								<configLocation>checkstyle-sun.xml</configLocation>
-								<suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
+								<configLocation>${sensinact.rootdir}/checkstyle-sun.xml</configLocation>
+								<suppressionsLocation>${sensinact.rootdir}/checkstyle-suppressions.xml</suppressionsLocation>
 								<encoding>UTF-8</encoding>
 								<consoleOutput>false</consoleOutput>
 								<failsOnError>false</failsOnError>
