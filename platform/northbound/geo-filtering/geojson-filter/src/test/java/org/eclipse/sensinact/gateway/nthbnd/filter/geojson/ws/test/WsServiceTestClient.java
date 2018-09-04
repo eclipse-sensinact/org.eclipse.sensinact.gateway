@@ -8,7 +8,7 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.ws.test;
+package org.eclipse.sensinact.gateway.nthbnd.filter.geojson.ws.test;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;

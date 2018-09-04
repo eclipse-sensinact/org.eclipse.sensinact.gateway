@@ -8,11 +8,11 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.test;
+package org.eclipse.sensinact.gateway.nthbnd.filter.geojson.test;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.http.test.HttpServiceTestClient;
-import org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.ws.test.WsServiceTestClient;
+import org.eclipse.sensinact.gateway.nthbnd.filter.geojson.http.test.HttpServiceTestClient;
+import org.eclipse.sensinact.gateway.nthbnd.filter.geojson.ws.test.WsServiceTestClient;
 import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.json.JSONObject;
 import org.junit.Ignore;
