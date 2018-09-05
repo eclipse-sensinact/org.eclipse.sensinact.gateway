@@ -113,21 +113,21 @@ public interface Core {
 	Session getApplicationSession(Mediator mediator, String privateKey);
 
 	/**
-	 * Returns the {@link Session} for the anonymous user
+	 * Returns the {@link AnonymousSession} for the anonymous user
 	 * 
-	 * @return the anonymous user's {@link Session}
+	 * @return the anonymous user's {@link AnonymousSession}
 	 */
-	Session getAnonymousSession();
+	AnonymousSession getAnonymousSession();
 
 	/**
-	 * Returns the {@link Session} whose String identifier is passed as parameter
+	 * Returns the {@link AuthenticatedSession} whose String identifier is passed as parameter
 	 * 
 	 * @param token
 	 *            the String identifier of the {@link Session}
 	 * 
-	 * @return the {@link Session} with the specified identifier
+	 * @return the {@link AuthenticatedSession} with the specified identifier
 	 */
-	Session getSession(String token);
+	AuthenticatedSession getSession(String token);
 
 	/**
 	 * Creates and returns a {@link Session} for the user whose

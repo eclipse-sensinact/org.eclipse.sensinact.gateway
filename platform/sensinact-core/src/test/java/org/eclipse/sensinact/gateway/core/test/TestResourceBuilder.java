@@ -154,8 +154,6 @@ public class TestResourceBuilder<R extends ModelInstance> {
 				this.put(changed);
 			}
 		});
-
-		System.out.println(res.getJSON());
 		session.set("serviceProvider", "testService", "TestProperty", DataResource.VALUE, "hello");
 
 		Thread.sleep(500);

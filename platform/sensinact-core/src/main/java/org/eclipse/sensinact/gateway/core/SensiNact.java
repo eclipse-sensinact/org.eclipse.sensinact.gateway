@@ -888,16 +888,16 @@ public class SensiNact implements Core {
 		 * @see org.eclipse.sensinact.gateway.core.AnonymousSession#registerUser(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 		 */
 		@Override
-		public final void registerUser(final String login, final String password, final String accountType,
-			final String account) throws SecuredAccessException {
+		public final void registerUser(final String login, final String password, final String account, final String accountType) 
+			throws SecuredAccessException {
 			SecuredAccessException exception = SensiNact.this.mediator.callService(
 				UserManager.class, new Executable<UserManager,SecuredAccessException>(){
 					@Override
 					public SecuredAccessException execute(UserManager userManager) throws Exception {
-					    if(userManager.accountExists(account)||userManager.loginExists(login)) {
-					    	return new SecuredAccessException("A user with this login or account already exists");
-					    }
 					    try {
+					    	if(userManager.accountExists(account)||userManager.loginExists(login)) {
+					    		throw new SecuredAccessException("A user with this login or account already exists");
+					    	}
 					    	final String token = SensiNact.this.nextToken();
 					        final UserUpdater userUpdater = userManager.createUser(token, login, password, account, accountType);
 
@@ -906,7 +906,7 @@ public class SensiNact implements Core {
 					        		).append(accountType).append(")").toString());
 					        
 					        if(references == null || references.length == 0){
-					        	return new SecuredAccessException("No account connector");
+					        	throw new SecuredAccessException("No account connector");
 					        }
 					        int index = 0;
 					        for(;index < references.length;index++) {
@@ -1544,11 +1544,11 @@ public class SensiNact implements Core {
 	 *      getSession(org.eclipse.sensinact.gateway.core.security.Authentication)
 	 */
 	@Override
-	public Session getSession(final Authentication<?> authentication)
+	public AuthenticatedSession getSession(final Authentication<?> authentication)
 			throws InvalidKeyException, InvalidCredentialException {
-		Session session = null;
+		AuthenticatedSession session = null;
 		if (authentication == null) {
-			return this.getAnonymousSession();
+			return null;
 
 		} else if (Credentials.class.isAssignableFrom(authentication.getClass())) {
 			UserKey userKey = this.doPrivilegedService(AuthenticationService.class, null,
@@ -1584,8 +1584,8 @@ public class SensiNact implements Core {
 	 * @see org.eclipse.sensinact.gateway.core.Core#getSession(java.lang.String)
 	 */
 	@Override
-	public Session getSession(final String token) {
-		Session session = this.sessions.getSessionFromToken(token);
+	public AuthenticatedSession getSession(final String token) {
+		AuthenticatedSession session = (AuthenticatedSession) this.sessions.getSessionFromToken(token);
 		return session;
 	}
 
@@ -1595,7 +1595,7 @@ public class SensiNact implements Core {
 	 * @see org.eclipse.sensinact.gateway.core.Core#getAnonymousSession()
 	 */
 	@Override
-	public Session getAnonymousSession() {
+	public AnonymousSession getAnonymousSession() {
 		AccessTree<?> tree = this.getUserAccessTree(null);
 
 		count++;
@@ -1604,7 +1604,7 @@ public class SensiNact implements Core {
 		SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, this.nextToken(), tree, null);
 
 		sessionKey.setUserKey(new UserKey(pkey));
-		Session session = new SensiNactAnonymousSession(sessionKey.getToken());
+		AnonymousSession session = new SensiNactAnonymousSession(sessionKey.getToken());
 
 		this.sessions.put(sessionKey, session);
 		return session;
