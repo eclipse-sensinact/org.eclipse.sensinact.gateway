@@ -58,6 +58,18 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+			<artifactId>http-tools</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
+			<artifactId>http</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.skyscreamer</groupId>
 			<artifactId>jsonassert</artifactId>
 			<version>1.2.3</version>
@@ -176,6 +188,20 @@
 									<destFileName>sensinact-northbound-access.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
+									<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+									<artifactId>rest-access</artifactId>
+									<version>${project.version}</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>rest-access.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+									<artifactId>http-tools</artifactId>
+									<version>${project.version}</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>http-tools.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
 									<artifactId>http</artifactId>
 									<version>${project.version}</version>
@@ -261,7 +287,25 @@
 									tofile="${project.build.directory}/felix/bundle/keystore.jks" />
 							</tasks>
 						</configuration>
-					</execution>
+					</execution>					
+			        <execution>
+			            <id>createClassesDir</id>
+			            <phase>test-compile</phase>
+			            <configuration>
+			                <target>
+			                    <mkdir dir="${project.build.directory}/felix/tmp" />
+			                    <mkdir dir="${project.build.directory}/extra-test-classes" />
+		                	    <javac fork="true" executable="${env.JAVA_HOME}/bin/javac"
+		                	     srcdir="${project.basedir}/extra-src/test/java" 
+		                	     destdir="${project.basedir}/target/extra-test-classes">
+   									<classpath refid="maven.test.classpath"/>
+   								</javac>
+			                </target>
+			            </configuration>
+			            <goals>
+			                <goal>run</goal>
+			            </goals>
+			        </execution>
 				</executions>
 			</plugin>
 			<plugin>

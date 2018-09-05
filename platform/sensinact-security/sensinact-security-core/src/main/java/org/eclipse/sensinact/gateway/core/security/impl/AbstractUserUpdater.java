@@ -63,12 +63,11 @@ abstract class AbstractUserUpdater implements UserUpdater{
 	}
 
 	/**
-	 * Defines the {@link ServiceRegistration} of the callback service associated to 
-	 * this {@link UserUpdated}
+	 * @inheritDoc
 	 * 
-	 * @param registration
-	 * 		the {@link ServiceRegistration} of the associated callback service
+	 * @see org.eclipse.sensinact.gateway.core.security.UserUpdater#setRegistration(org.osgi.framework.ServiceRegistration)
 	 */
+	@Override
 	public void setRegistration(ServiceRegistration<?> registration) {
 		this.registration = registration;
 		if(this.registration == null) {

@@ -91,9 +91,9 @@ public class UserManagerImpl implements UserManager, AuthenticationService {
 	public boolean loginExists(final String login) throws SecuredAccessException, DataStoreException {
 		return this.userDAO.select(new HashMap<String, Object>() {
 			{
-				this.put("UNAME", login);
+				this.put("SULOGIN", login);
 			}
-		}) != null;
+		}).size()>0;
 	}
 
 	/**
@@ -181,7 +181,7 @@ public class UserManagerImpl implements UserManager, AuthenticationService {
 				return accountType;
 			}
 			@Override
-			protected String doUpdate() throws SecuredAccessException {				
+			protected String doUpdate() throws SecuredAccessException {
 				String publicKey = null;
 				String publicKeyStr = new StringBuilder().append(login).append(":").append(account
 						).append(System.currentTimeMillis()).toString();

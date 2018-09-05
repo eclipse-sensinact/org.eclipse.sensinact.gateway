@@ -108,9 +108,10 @@
         <module>sensinact-security</module>
         <module>sensinact-generic</module>
         <module>../simulated-devices</module>
+		<module>northbound</module>
+		<module>sensinact-security/sensinact-mail-connector</module>
         <module>sensinact-security/sensinact-signature-validator</module>
         <module>sensinact-security/sensinact-security-core</module>
-		<module>northbound</module>
         <module>southbound</module>
         <module>sensinact-system</module>
 		<module>sensinact-shell</module>
