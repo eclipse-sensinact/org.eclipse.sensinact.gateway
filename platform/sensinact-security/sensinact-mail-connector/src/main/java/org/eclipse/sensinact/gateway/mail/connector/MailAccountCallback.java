@@ -8,7 +8,7 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.mail.connector.internal;
+package org.eclipse.sensinact.gateway.mail.connector;
 
 import java.util.Dictionary;
 import java.util.Enumeration;

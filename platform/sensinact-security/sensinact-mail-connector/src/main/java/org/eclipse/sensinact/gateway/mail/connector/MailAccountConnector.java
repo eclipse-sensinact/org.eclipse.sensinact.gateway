@@ -8,7 +8,7 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.mail.connector.internal;
+package org.eclipse.sensinact.gateway.mail.connector;
 
 import java.util.Properties;
 
@@ -100,10 +100,12 @@ public class MailAccountConnector implements AccountConnector {
          String linkHost = hostIp == null?"127.0.0.1":String.valueOf(hostIp);
          String linkPort = hostPort == null?"80":String.valueOf(hostPort);
          
-         String link =  new StringBuilder().append(scheme).append("://").append(linkHost).append(":"
-        	).append(linkPort).append("/").append(userUpdater.getUpdateType()).append(
-        		System.currentTimeMillis()).append(userUpdater.hashCode()).append(
-        			this.hashCode()).toString();
+         final String path = new StringBuilder().append("/").append(userUpdater.getUpdateType()).append(
+                System.currentTimeMillis()).append(userUpdater.hashCode()).append(
+                		this.hashCode()).toString();
+         
+         final String link =  new StringBuilder().append(scheme).append("://").append(linkHost).append(":"
+        	).append(linkPort).append(path).toString();
          
          // Now set the actual message
          message.setText(new StringBuilder().append(userUpdater.getMessage()
@@ -113,7 +115,7 @@ public class MailAccountConnector implements AccountConnector {
          Transport.send(message, (String)mediator.getProperty("mail.account.connector.login"),
         		 (String)mediator.getProperty("mail.account.connector.password"));
          
-         MailAccountCallback callback = new MailAccountCallback(link, properties, 
+         MailAccountCallback callback = new MailAccountCallback(path, properties, 
     		new Executable<CallbackContext, Void>() {
 				@Override
 				public Void execute(CallbackContext context) throws Exception {

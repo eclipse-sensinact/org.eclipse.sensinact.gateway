@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.mail.connector.osgi;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AccountConnector;
-import org.eclipse.sensinact.gateway.mail.connector.internal.MailAccountConnector;
+import org.eclipse.sensinact.gateway.mail.connector.MailAccountConnector;
 import org.osgi.framework.BundleContext;
 
 import java.util.Dictionary;
