@@ -31,7 +31,7 @@
 	<modules>
 		<module>sensinact-framework-extension</module>
 		<module>sensinact-security-none</module>
-		<module>sensinact-mail-connector</module>
+		<!--<module>sensinact-mail-connector</module>-->
 		<!--<module>sensinact-signature-validator</module>-->
         <!--<module>sensinact-security-core</module>-->
 	</modules>
