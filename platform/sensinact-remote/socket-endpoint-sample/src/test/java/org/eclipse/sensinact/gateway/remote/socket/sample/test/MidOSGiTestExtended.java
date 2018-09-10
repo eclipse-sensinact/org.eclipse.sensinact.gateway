@@ -117,9 +117,12 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         public void doHandle(SnaResponseMessage<?, ?> message) {
         }
 
-        private final void treat(SnaMessage<?> message) {
+        private final void treat(SnaMessage<?> message) { 
+        	//System.out.println("TREAT ["+identifier+"] :" + message.getJSON());       	
             String json = message.getJSON();
-            stack.push(json);
+            synchronized(MidOSGiTestExtended.this.stack) {
+            	stack.push(json);
+            }
         }
     }
 
@@ -410,7 +413,9 @@ public class MidOSGiTestExtended extends MidOSGiTest {
 
     public List<String> listAgentMessages() {
         List<String> messages = new ArrayList<>();
-        messages.addAll(this.stack);
+        synchronized(this.stack) {
+        	messages.addAll(this.stack);
+        }
         return Collections.unmodifiableList(messages);
     }
 }
