@@ -152,11 +152,12 @@ public class UserManagerImpl implements UserManager, AuthenticationService {
 	 * @see AuthenticationService#buildKey(Credentials)
 	 */
 	@Override
-	public UserKey buildKey(Credentials credentials)
-			throws InvalidKeyException, DAOException, InvalidCredentialException, DataStoreException {
+	public UserKey buildKey(Credentials credentials) throws InvalidKeyException, DAOException, InvalidCredentialException, DataStoreException {
+		if(Credentials.ANONYMOUS_LOGIN.equals(credentials.login) && Credentials.ANONYMOUS_PASSWORD.equals(credentials.password)) {
+			return null;
+		}
 		String md5 = CryptoUtils.cryptWithMD5(credentials.password);
 		UserEntity userEntity = this.userDAO.find(credentials.login, md5);
-
 		if (userEntity == null) {
 			return null;
 		} else {
