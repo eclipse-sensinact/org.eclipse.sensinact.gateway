@@ -26,11 +26,6 @@ public abstract class AbstractMidAgentCallback extends AbstractMidCallback imple
 	private Map<String, String> locations;
 
 	/**
-	 * Defines how many messages are currently processed
-	 */
-	protected int used;
-
-	/**
 	 * Constructor
 	 * 
 	 * @param identifier
@@ -40,7 +35,6 @@ public abstract class AbstractMidAgentCallback extends AbstractMidCallback imple
 	protected AbstractMidAgentCallback() {
 		super(true);
 		this.locations = new HashMap<String, String>();
-		this.used = 0;
 	}
 
 	/**
@@ -75,27 +69,17 @@ public abstract class AbstractMidAgentCallback extends AbstractMidCallback imple
 	}
 
 	/**
-	 * @return
-	 */
-	protected int used() {
-		return used;
-	}
-
-	/**
 	 * @inheritDoc
 	 *
 	 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidCallback#doCallback(org.eclipse.sensinact.gateway.core.message.SnaMessage)
 	 */
 	@Override
 	public void doCallback(SnaMessage<?> message) throws MidCallbackException {
-		used++;
 		if (message == null) {
-			used--;
 			return;
 		}
 		String path = message.getPath();
 		if (path == null) {
-			used--;
 			return;
 		}
 		int index = 0;
@@ -106,7 +90,6 @@ public abstract class AbstractMidAgentCallback extends AbstractMidCallback imple
 				continue;
 			}
 			if (path.startsWith(unlistened)) {
-				used--;
 				return;
 			}
 		}
@@ -129,8 +112,6 @@ public abstract class AbstractMidAgentCallback extends AbstractMidCallback imple
 			}
 		} catch (Exception e) {
 			throw new MidCallbackException(e);
-		} finally {
-			used--;
 		}
 	}
 }
