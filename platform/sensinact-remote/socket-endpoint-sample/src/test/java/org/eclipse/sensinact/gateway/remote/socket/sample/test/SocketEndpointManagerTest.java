@@ -35,6 +35,22 @@ public class SocketEndpointManagerTest {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
+	
+	class TestRecipient implements Recipient{
+		
+            @Override
+            public String getJSON() {
+                return null;
+            }
+
+            @Override
+            public void callback(String callbackId, SnaMessage[] messages) throws Exception {
+            	System.out.println("SUBSCRIPTION CALLBACK ["+callbackId+"]");
+                synchronized (SocketEndpointManagerTest.this.stack) {
+                	SocketEndpointManagerTest.this.stack.push(messages[0]);
+                }
+            }
+    }
 
     //********************************************************************//
     //						ABSTRACT DECLARATIONS						  //
@@ -47,14 +63,15 @@ public class SocketEndpointManagerTest {
     //********************************************************************//
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
-
+    private final List<MidOSGiTestExtended> instances = new ArrayList<MidOSGiTestExtended>();
+    private final Stack<SnaMessage<?>> stack = new Stack<SnaMessage<?>>();
+    
     /**
      * @throws Exception
      */
     @Test
     public void socketEndpointManagerTest() throws Throwable {
-        List<MidOSGiTestExtended> instances = new ArrayList<MidOSGiTestExtended>();
-
+        
         for (int n = 1; n <= INSTANCES_COUNT; n++) {
             MidOSGiTestExtended t = new MidOSGiTestExtended(n);
             instances.add(t);
@@ -65,9 +82,7 @@ public class SocketEndpointManagerTest {
         }
         for (int n = 1; n <= INSTANCES_COUNT; n++) {
             Thread.sleep(2 * 1000);
-
             FileInputStream input = new FileInputStream(new File(String.format("src/test/resources/conf%s/socket.endpoint.sample.cfg", n)));
-
             byte[] content = IOUtils.read(input);
             byte[] contentPlus = new byte[content.length + 1];
 
@@ -90,33 +105,17 @@ public class SocketEndpointManagerTest {
 
         assertEquals(0, j.getJSONObject("response").getInt("value"));
 
-        final Stack<SnaMessage<?>> stack = new Stack<SnaMessage<?>>();
-
-        s = instances.get(2).subscribe("sna2:slider", "cursor", "position", new Recipient() {
-            @Override
-            public String getJSON() {
-                return null;
-            }
-
-            @Override
-            public void callback(String callbackId, SnaMessage[] messages) throws Exception {
-                synchronized (stack) {
-                    stack.push(messages[0]);
-                }
-            }
-        });
-        Thread.sleep(2000);
-
+        s = instances.get(2).subscribe("sna2:slider", "cursor", "position", new TestRecipient());
+        
         instances.get(1).moveSlider(45);
         s = instances.get(0).get("sna2:slider", "cursor", "position");
         j = new JSONObject(s);
 
         assertEquals(45, j.getJSONObject("response").getInt("value"));
-        JSONObject message = null;
-
-        Thread.sleep(5000);
+        assertEquals(1, waitStackSize(1));
+        
+        JSONObject message = null;     
         synchronized (stack) {
-            assertEquals(1, stack.size());
             message = new JSONObject(((SnaMessage) stack.peek()).getJSON());
             assertEquals(45, message.getJSONObject("notification").getInt("value"));
         }
@@ -124,22 +123,14 @@ public class SocketEndpointManagerTest {
         s = instances.get(0).get("sna2:slider", "cursor", "position");
         j = new JSONObject(s);
 
-        assertEquals(150, j.getJSONObject("response").getInt("value"));
-        Thread.sleep(3000);
+        assertEquals(150, j.getJSONObject("response").getInt("value"));        
+        assertEquals(2, waitStackSize(2));
+        
         synchronized (stack) {
-            assertEquals(2, stack.size());
             message = new JSONObject(((SnaMessage) stack.peek()).getJSON());
             assertEquals(150, message.getJSONObject("notification").getInt("value"));
         }
-        int count = 0;
-        Thread.sleep(5000);
-        for (String ms : instances.get(2).listAgentMessages()) {
-        	System.out.println(ms);
-            if (ms.contains("ATTRIBUTE_VALUE_UPDATED")) {
-                count++;
-            }
-        }
-        assertEquals(3, count);
+        assertEquals(3, waitUpdated(3,2));
         instances.get(2).stop();
 
         //check that the remote core is no more registered
@@ -156,16 +147,9 @@ public class SocketEndpointManagerTest {
         j = new JSONObject(s);
         assertEquals(375, j.getJSONObject("response").getInt("value"));
 
-        Thread.sleep(5000);
-        count = 0;
-        for (String ms : instances.get(2).listAgentMessages()) {
-        	System.out.println(ms);
-            if (ms.contains("ATTRIBUTE_VALUE_UPDATED")) {
-                count++;
-            }
-        }
-        assertEquals(0, count);
-
+        Thread.sleep(10000);
+        assertEquals(0,waitUpdated(0,2));
+        
         File f = new File(String.format("target/felix/conf%s/socket.endpoint.sample.config", 3));
 
         f.delete();
@@ -195,18 +179,57 @@ public class SocketEndpointManagerTest {
         j = new JSONObject(s);
         assertEquals(350, j.getJSONObject("response").getInt("value"));
 
-        Thread.sleep(5000);
-        count = 0;
-        for (String ms : instances.get(2).listAgentMessages()) {
-        	System.out.println(ms);
-            if (ms.contains("ATTRIBUTE_VALUE_UPDATED")) {
-                count++;
-            }
-        }
-        assertEquals(1, count);
+        Thread.sleep(10000);
+        assertEquals(1, waitUpdated(1,2));
 
         while (instances.size() > 0) {
             instances.remove(0).tearDown();
         }
+    }
+    
+    private int waitUpdated(int limit, int instance){
+        int wait = 60*1000;
+        int count = 0;
+        while(true) {
+        	count = 0;
+        	try {        		
+        		Thread.sleep(500);
+        	} catch(InterruptedException e) {
+        		Thread.interrupted();
+        		break;
+        	}
+        	wait-=500;
+            for (String ms : instances.get(instance).listAgentMessages()) {
+                if (ms.contains("ATTRIBUTE_VALUE_UPDATED")) {
+                    count++;
+                }
+            }
+            if(count == limit|wait<=0) {
+            	break;
+            }
+        }
+        return count;
+    }
+
+    private int waitStackSize(int limit){
+        int wait = 60*1000;
+        int size = 0;
+        while(true) {
+        	size = 0;
+        	try {        		
+        		Thread.sleep(500);
+        	} catch(InterruptedException e) {
+        		Thread.interrupted();
+        		break;
+        	}
+        	wait-=500;
+            synchronized (stack) {
+            	size = stack.size();
+            }
+            if(size == limit|wait<=0) {
+            	break;
+            }
+        }
+        return size;
     }
 }
