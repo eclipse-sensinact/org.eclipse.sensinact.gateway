@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
@@ -1059,7 +1060,7 @@ public class SensiNact implements Core {
 					String name = (String) reference.getProperty("name");
 					Integer level = (Integer) reference.getProperty(name.concat(".DESCRIBE"));
 					if (level == null) {
-						level = new Integer(AccessLevelOption.OWNER.getAccessLevel().getLevel());
+						level = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
 					}
 					AccessNode node = sessionKey.getAccessTree().getRoot().get(UriUtils.getUri(new String[] { name }));
 
@@ -1239,7 +1240,7 @@ public class SensiNact implements Core {
 					String serviceUri = UriUtils.getUri(new String[] { name, service });
 					Integer serviceLevel = (Integer) reference.getProperty(service.concat(".DESCRIBE"));
 					if (serviceLevel == null) {
-						serviceLevel = new Integer(AccessLevelOption.OWNER.getAccessLevel().getLevel());
+						serviceLevel = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
 					}
 					AccessNode node = sessionKey.getAccessTree().getRoot().get(serviceUri);
 					if (node == null) {
@@ -1271,7 +1272,7 @@ public class SensiNact implements Core {
 						String resourceUri = UriUtils.getUri(new String[] { name, service, resource });
 						Integer resourceLevel = (Integer) reference.getProperty(resolvedResource.concat(".DESCRIBE"));
 						if (resourceLevel == null) {
-							resourceLevel = new Integer(AccessLevelOption.OWNER.getAccessLevel().getLevel());
+							resourceLevel = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
 						}
 						node = sessionKey.getAccessTree().getRoot().get(resourceUri);
 						if (node == null) {
@@ -1389,13 +1390,13 @@ public class SensiNact implements Core {
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
 
-	final AccessTree<? extends AccessNode> anonymousTree;
-	final Sessions sessions;
+	private final AccessTree<? extends AccessNode> anonymousTree;
+	private final Sessions sessions;
 
-	Mediator mediator;
+	private Mediator mediator;
 	private RegistryEndpoint registry;
 
-	private volatile int count = LOCAL_ID + 1;
+	private volatile AtomicInteger count = new AtomicInteger(LOCAL_ID + 1);
 	private final String namespace;
 	private final String defaultLocation;
 
@@ -1562,16 +1563,11 @@ public class SensiNact implements Core {
 				throw new InvalidCredentialException("Invalid credentials");
 			}
 			String pkey = userKey.getPublicKey();
-			// session = this.sessions.getSessionFromPublicKey(pkey);
-			//
-			// if (session == null)
-			// {
 			AccessTree<? extends AccessNode> tree = this.getUserAccessTree(pkey);
 			SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, SensiNact.this.nextToken(), tree, null);
 			sessionKey.setUserKey(userKey);
 			session = new SensiNactAuthenticatedSession(sessionKey.getToken());
 			sessions.put(sessionKey, session);
-			// }
 		} else if (AuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
 			session = this.getSession(((AuthenticationToken) authentication).getAuthenticationMaterial());
 		}
@@ -1598,8 +1594,8 @@ public class SensiNact implements Core {
 	public AnonymousSession getAnonymousSession() {
 		AccessTree<?> tree = this.getUserAccessTree(null);
 
-		count++;
-		String pkey = new StringBuilder().append(UserManager.ANONYMOUS_PKEY).append("_").append(count).toString();
+		String pkey = new StringBuilder().append(UserManager.ANONYMOUS_PKEY).append("_").append(
+				count.incrementAndGet()).toString();
 
 		SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, this.nextToken(), tree, null);
 
@@ -1625,12 +1621,9 @@ public class SensiNact implements Core {
 						String publicKey = securedAccess.getApplicationPublicKey(privateKey);
 						AccessTree<? extends AccessNode> tree = null;
 						if (publicKey == null) {
-							count++;
-							publicKey = new StringBuilder().append(UserManager.ANONYMOUS_PKEY).append("_").append(count)
-									.toString();
-
+							publicKey = new StringBuilder().append(UserManager.ANONYMOUS_PKEY).append("_").append(
+								count.incrementAndGet()).toString();
 							tree = SensiNact.this.getAnonymousTree();
-
 						} else {
 							tree = securedAccess.getApplicationAccessTree(publicKey);
 						}
@@ -1749,9 +1742,8 @@ public class SensiNact implements Core {
 	@Override
 	public void createRemoteCore(final AbstractRemoteEndpoint remoteEndpoint,
 			Collection<Executable<String, Void>> onConnectedCallbacks,
-			Collection<Executable<String, Void>> onDisconnectedCallbacks) {
-		count++;
-		final RemoteSensiNact remoteCore = new RemoteSensiNact(mediator, new LocalEndpoint(count) {
+			Collection<Executable<String, Void>> onDisconnectedCallbacks) {		
+		final RemoteSensiNact remoteCore = new RemoteSensiNact(mediator, new LocalEndpoint(count.incrementAndGet()) {
 			private Map<String, Session> remoteSessions = new HashMap<String, Session>();
 
 			private Session createSession(String publicKey) {

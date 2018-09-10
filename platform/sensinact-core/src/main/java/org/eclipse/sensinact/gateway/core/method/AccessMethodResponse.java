@@ -45,10 +45,17 @@ import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
  */
 public abstract class AccessMethodResponse<T> extends AbstractSnaErrorfulMessage<AccessMethodResponse.Response>
 		implements SnaResponseMessage<T, AccessMethodResponse.Response> {
+	
 	public static final int SUCCESS_CODE = SnaErrorfulMessage.NO_ERROR;
 
 	public enum Response implements SnaMessageSubType, KeysCollection {
-		DESCRIBE_RESPONSE, GET_RESPONSE, SET_RESPONSE, ACT_RESPONSE, SUBSCRIBE_RESPONSE, UNSUBSCRIBE_RESPONSE, UNKNOWN_METHOD_RESPONSE;
+		DESCRIBE_RESPONSE, 
+		GET_RESPONSE, 
+		SET_RESPONSE, 
+		ACT_RESPONSE, 
+		SUBSCRIBE_RESPONSE, 
+		UNSUBSCRIBE_RESPONSE, 
+		UNKNOWN_METHOD_RESPONSE;
 
 		final Set<TypedKey<?>> keys;
 
