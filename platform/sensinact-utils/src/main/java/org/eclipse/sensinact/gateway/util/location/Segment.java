@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.util.location;
 
+
 /**
  *
  */
@@ -176,5 +177,19 @@ public class Segment {
     	builder.append(this.dist!=0?"distance :"+dist+"\n":"\n");
     	builder.append("--------------------------\n");
     	return builder.toString();
+    }
+    
+    public String toGeoJSON() {
+   	  StringBuilder builder = new StringBuilder();
+   	  builder.append("{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"type\":\"LineString\",\"coordinates\":[[");
+   	  builder.append(lng1);
+   	  builder.append(",");
+   	  builder.append(lat1); 
+   	  builder.append("],[");
+   	  builder.append(lng2);
+   	  builder.append(",");
+   	  builder.append(lat2);
+   	  builder.append("]]}}");
+   	  return builder.toString();
     }
 }

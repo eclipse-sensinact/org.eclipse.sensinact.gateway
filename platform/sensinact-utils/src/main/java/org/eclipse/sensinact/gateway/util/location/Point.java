@@ -55,4 +55,14 @@ public class Point {
     	return builder.toString();
     }
 
+    public String toGeoJSON() {
+   	  StringBuilder builder = new StringBuilder();
+   	  builder.append("{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"type\":\"Point\",\"coordinates\":[");
+   	  builder.append(longitude);
+   	  builder.append(",");
+   	  builder.append(latitude); 
+   	  builder.append("]");
+   	  builder.append("]}}");
+   	  return builder.toString();
+    }
 }

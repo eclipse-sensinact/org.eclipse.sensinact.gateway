@@ -10,6 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.util.crypto;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
 /**
  * <p>Encodes and decodes to and from Base64 notation.</p>
  * <p>Homepage: <a href="http://iharder.net/base64">http://iharder.net/base64</a>.</p>
@@ -384,7 +392,51 @@ public class Base64 {
     };
 
     /* ********  D E T E R M I N E   W H I C H   A L H A B E T  ******** */
+    
+    public static BufferedImage decodeToImage(String imageString) {
+    	 
+        BufferedImage image = null;
+        byte[] imageByte;
+        try {
+            imageByte = decode(imageString);
+            ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
+            image = ImageIO.read(bis);
+            bis.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return image;
+    }
+    
+    public static String encodeToString(BufferedImage image, String type) {
+        String imageString = null;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+        try {
+            ImageIO.write(image, type, bos);
+            byte[] imageBytes = bos.toByteArray(); 
+            imageString = encodeBytes(imageBytes); 
+            bos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return imageString;
+    }
 
+    public static String encodeToString(File imageFile) throws IOException {
+    	String name = imageFile.getName();
+    	String encoding = name.substring(name.lastIndexOf('.'));
+    	if(encoding == null) {
+    		encoding = "png";
+    	}
+    	String imageString = null;
+        try {
+        	imageString = encodeToString(ImageIO.read(imageFile),encoding);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return imageString;
+    }
+    
     /**
      * Returns one of the _SOMETHING_ALPHABET byte arrays depending on
      * the options specified.
