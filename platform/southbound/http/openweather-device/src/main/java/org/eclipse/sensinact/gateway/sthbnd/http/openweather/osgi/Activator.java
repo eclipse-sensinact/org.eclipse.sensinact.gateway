@@ -35,7 +35,34 @@ import org.json.JSONArray;
 import java.util.ArrayList;
 import java.util.List;
 
-@ChainedHttpTasks(recurrences = {@RecurrentChainedHttpTask(delay = 1000, period = 1000 * 60 * 5, configuration = @HttpTaskConfiguration(host = HttpChildTaskConfiguration.DEFAULT_HOST), chain = {@HttpChildTaskConfiguration(host = "api.openweathermap.org", path = "/data/2.5/weather", identifier = "weather", query = {@KeyValuePair(key = "lat", value = "$(org.eclipse.sensinact.gateway.weather.latitude.@context[endpoint.id])"), @KeyValuePair(key = "lon", value = "$(org.eclipse.sensinact.gateway.weather.longitude.@context[endpoint.id])"), @KeyValuePair(key = "APPID", value = "$(openweather-token)")}), @HttpChildTaskConfiguration(host = "openweathermap.org", path = "/img/w/@context[weather.icon].png", identifier = "icon", query = {@KeyValuePair(key = "APPID", value = "$(openweather-token)")})})})
+@ChainedHttpTasks(recurrences = {
+	@RecurrentChainedHttpTask(
+		delay = 1000, 
+		period = 1000 * 60 * 5, 
+		configuration = @HttpTaskConfiguration(host = HttpChildTaskConfiguration.DEFAULT_HOST), 
+		chain = {
+			@HttpChildTaskConfiguration(
+			    host = "api.openweathermap.org", 
+			    path = "/data/2.5/weather", 
+			    identifier = "weather", 
+			    query = {
+			    	@KeyValuePair(key = "units", value= "metric"),
+			    	@KeyValuePair(key = "lat", value = "$(org.eclipse.sensinact.gateway.weather.latitude.@context[endpoint.id])"), 
+					@KeyValuePair(key = "lon", value = "$(org.eclipse.sensinact.gateway.weather.longitude.@context[endpoint.id])"), 
+					@KeyValuePair(key = "APPID", value = "$(openweather-token)")
+			    }
+			), 
+			@HttpChildTaskConfiguration(
+				host = "openweathermap.org", 
+				path = "/img/w/@context[weather.icon].png", 
+				identifier = "icon", 
+				query = {
+					@KeyValuePair(key = "APPID", value = "$(openweather-token)")
+				}
+			)
+		}
+	)
+})
 public class Activator extends HttpActivator {
     List<SimpleHttpProtocolStackEndpoint> endpoints;
 
@@ -55,7 +82,7 @@ public class Activator extends HttpActivator {
 
         endpoints = new ArrayList<SimpleHttpProtocolStackEndpoint>();
 
-        String stationsList = (String) mediator.getProperty("$(openweather-stations)");
+        String stationsList = (String) mediator.getProperty("org.eclipse.sensinact.gateway.weather.stations");
 
         String[] stations = stationsList.split(",");
 
