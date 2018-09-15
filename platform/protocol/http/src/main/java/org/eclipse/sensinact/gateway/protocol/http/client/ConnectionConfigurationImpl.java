@@ -91,7 +91,7 @@ public class ConnectionConfigurationImpl<RESPONSE extends Response, REQUEST exte
      */
     @Override
     public ConnectionConfigurationImpl<RESPONSE, REQUEST> queryParameter(String key, String value) {
-        if (key != null && key.length() > 0 && value != null && value.length() > 0) {
+        if (key != null && key.length() > 0 && value != null) {
             this.parameters.put(key, value);
         }
         return this;
