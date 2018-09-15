@@ -36,7 +36,19 @@ import java.util.List;
  * @param <P>
  */
 public class StructuredPacketReader<P extends Packet> extends SimplePacketReader<P> {
-    private static final List<String> ANNOTATIONS = Arrays.asList(AttributeID.class.getCanonicalName(), CommandID.class.getCanonicalName(), Data.class.getCanonicalName(), Iteration.class.getCanonicalName(), MetadataID.class.getCanonicalName(), ProfileID.class.getCanonicalName(), ResourceID.class.getCanonicalName(), ServiceID.class.getCanonicalName(), ServiceProviderID.class.getCanonicalName(), Timestamp.class.getCanonicalName(), HelloMessage.class.getCanonicalName(), GoodbyeMessage.class.getCanonicalName());
+    private static final List<String> ANNOTATIONS = Arrays.asList(
+    		AttributeID.class.getCanonicalName(), 
+    		CommandID.class.getCanonicalName(), 
+    		Data.class.getCanonicalName(), 
+    		Iteration.class.getCanonicalName(), 
+    		MetadataID.class.getCanonicalName(), 
+    		ProfileID.class.getCanonicalName(), 
+    		ResourceID.class.getCanonicalName(), 
+    		ServiceID.class.getCanonicalName(), 
+    		ServiceProviderID.class.getCanonicalName(), 
+    		Timestamp.class.getCanonicalName(), 
+    		HelloMessage.class.getCanonicalName(), 
+    		GoodbyeMessage.class.getCanonicalName());
 
     private PojoPacketWrapper<P> wrapper;
 
@@ -133,6 +145,7 @@ public class StructuredPacketReader<P extends Packet> extends SimplePacketReader
             super.isGoodbyeMessage(subPacket.isGoodbyeMessage());
             super.isHelloMessage(subPacket.isHelloMessage());
             super.setCommand(subPacket.getCommand());
+            super.setProfileId(subPacket.getProfileId());
             super.setServiceProviderId(subPacket.getServiceProviderId());
             super.setServiceId(subPacket.getServiceId());
             super.setResourceId(subPacket.getResourceId());
