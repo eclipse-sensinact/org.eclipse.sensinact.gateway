@@ -32,9 +32,9 @@ public class Activator extends AbstractActivator<AppServiceMediator> {
     private Thread persistenceThread;
     @Property(defaultValue = "application")
     private String directory;
-    @Property(validationRegex = Property.INTEGER)
+    @Property(validationRegex = Property.INTEGER, mandatory=false, defaultValue="0")
     private Long updateFileCheck;
-    @Property
+    @Property(mandatory = false, defaultValue="false")
     private Boolean applicationPersist;
     @Property(defaultValue = "json", validationRegex = Property.ALPHANUMERIC)
     private String applicationFileExtension;
