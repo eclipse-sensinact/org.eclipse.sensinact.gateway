@@ -12,7 +12,9 @@ package org.eclipse.sensinact.gateway.util.location;
 
 
 /**
+ * Line segment between two points
  *
+ * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class Segment {
 	
@@ -165,10 +167,21 @@ public class Segment {
     	this.dist = dist;
     }
 
+    /**
+     * The double distance between the two points of this Segment
+     * 
+     * @return this Segment size
+     */
     public double getDistance() {
     	return this.dist;
     }
     
+    /**
+     * @inheritDoc
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
     public String toString() {
     	StringBuilder builder = new StringBuilder();
     	builder.append("--------------------------\n");
@@ -178,7 +191,12 @@ public class Segment {
     	builder.append("--------------------------\n");
     	return builder.toString();
     }
-    
+
+    /**
+     * Returns the GeoJSON formated string description of this Segment
+     * 
+     * @return this Segment description GeoJSON formated
+     */
     public String toGeoJSON() {
    	  StringBuilder builder = new StringBuilder();
    	  builder.append("{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"type\":\"LineString\",\"coordinates\":[[");

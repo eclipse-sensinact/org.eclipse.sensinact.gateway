@@ -11,11 +11,23 @@
 package org.eclipse.sensinact.gateway.util.location;
 
 /**
- * @author christophe
- *
+ * Location point
+ * 
+ * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class Point {
 
+	public static Point fromString(String s) {
+		String[] coordinates = s.split(":");
+		try {
+			Point p  = new Point(Double.parseDouble(coordinates[0]),Double.parseDouble(coordinates[1]));
+			return p;
+		} catch(Exception e) {
+			//do nothing
+		}
+		return null;
+	}
+	
 	public final double latitude;
 	public final double longitude;
 	public final double altitude;
@@ -39,6 +51,27 @@ public class Point {
 		this.altitude = altitude;
 	}
 	
+	/** 
+	 * @inheritDoc
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == null) {
+			return false;
+		}
+		if(Point.class.isAssignableFrom(obj.getClass())){
+			Point p = (Point) obj;
+			return p.latitude == latitude && p.longitude==longitude;
+			//return Math.abs(p.latitude-latitude)<1e-7 && Math.abs(p.longitude-longitude)<1e-7;
+		}
+		if(String.class == obj.getClass()) {
+			return equals(fromString((String) obj));
+		}
+		return false;
+	}
+	
     /** 
      * @inheritDoc
      * 
@@ -55,6 +88,11 @@ public class Point {
     	return builder.toString();
     }
 
+    /**
+     * Returns the GeoJSON formated string description of this Point
+     * 
+     * @return this Point description GeoJSON formated
+     */
     public String toGeoJSON() {
    	  StringBuilder builder = new StringBuilder();
    	  builder.append("{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"type\":\"Point\",\"coordinates\":[");

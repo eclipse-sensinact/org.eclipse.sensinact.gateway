@@ -18,7 +18,9 @@ import org.eclipse.sensinact.gateway.util.location.Point;
 import org.eclipse.sensinact.gateway.util.location.Segment;
 
 /**
+ * Geolocation helpers
  *
+ * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class LocationUtils {
 
