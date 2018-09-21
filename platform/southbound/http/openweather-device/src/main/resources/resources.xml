@@ -11,7 +11,15 @@
 <resourceInfos xmlns="http://org.eclipse.sensinact/resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../../../sensinact-generic/src/main/resources/sensinact-resource.xsd"
  empty_profile="true"> 
- 
+  <resourceInfo xsi:type="resourceInfoProperty" name="ICON" target="admin">
+    <policy name="PROPERTY" update="AUTO"/>
+    <identifier xsi:type="stringContent">ICON</identifier>    
+    <attributes>
+    	<attribute name="value" type="string" modifiable="FIXED">
+    		<value>weather</value>
+    	</attribute>
+    </attributes>
+  </resourceInfo> 
   <resourceInfo xsi:type="resourceInfoProperty" name="STATE" target="weather">
     <policy name="PROPERTY" update="AUTO"/>
     <identifier xsi:type="stringContent">weather/main</identifier>
@@ -27,16 +35,13 @@
     	<attribute name="value" type="string" modifiable="UPDATABLE"/>
     </attributes>
   </resourceInfo> 
-  
-  
-  <resourceInfo xsi:type="resourceInfoProperty" name="ICON" target="weather">
+  <resourceInfo xsi:type="resourceInfoProperty" name="IMAGE" target="weather">
     <policy name="PROPERTY" update="AUTO"/>
     <identifier xsi:type="stringContent">weather/icon</identifier>
     <attributes>
     	<attribute name="value" type="string" modifiable="UPDATABLE"/>
     </attributes>
-  </resourceInfo> 
-  
+  </resourceInfo>
   <resourceInfo xsi:type="resourceInfoSensor" name="PRESSURE"  target="weather">
     <policy name="SENSOR" update="AUTO"/>
     <identifier xsi:type="stringContent">main/pressure</identifier> 

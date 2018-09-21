@@ -59,7 +59,7 @@ public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
             if (iconObject != null && iconObject.length() != 0) {
                 super.setServiceProviderId(serviceProvider);
                 super.setServiceId("weather");
-                super.setResourceId("icon");
+                super.setResourceId("image");
                 super.setData(Base64.encodeBytes(iconObject.getBytes()));
                 super.configure();
             }
