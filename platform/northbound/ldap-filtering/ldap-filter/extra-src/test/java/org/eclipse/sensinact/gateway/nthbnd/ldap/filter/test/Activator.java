@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.nthbnd.ldap.filter.test;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
@@ -25,10 +26,12 @@ public class Activator extends AbstractActivator<Mediator> {
     private LocalProtocolStackEndpoint<Packet> connector;
 
     public void doStart() throws Exception {
-        ExtModelConfiguration manager = new ExtModelInstanceBuilder(super.mediator, Packet.class).withStartAtInitializationTime(true).withObserved(new ArrayList<String>() {{
-            this.add("/service1/humidity/accessible");
-            this.add("/service1/temperature");
-        }}).<ExtModelConfiguration>buildConfiguration("resources.xml", Collections.<String, String>emptyMap());
+        ExtModelConfiguration<Packet> manager = ExtModelConfigurationBuilder.instance(super.mediator
+        	).withStartAtInitializationTime(true
+        	).withObserved(new ArrayList<String>() {{
+        		this.add("/service1/humidity/accessible");
+        		this.add("/service1/temperature");
+        	}}).build("resources.xml", Collections.<String, String>emptyMap());
 
         connector = new LocalProtocolStackEndpoint<Packet>(super.mediator);
         connector.connect(manager);
