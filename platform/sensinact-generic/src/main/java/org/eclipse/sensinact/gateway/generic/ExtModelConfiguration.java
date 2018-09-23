@@ -26,6 +26,7 @@ import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.generic.parser.Commands;
 import org.eclipse.sensinact.gateway.generic.parser.FixedProviders;
 import org.eclipse.sensinact.gateway.generic.parser.XmlResourceConfigHandler;
+import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -40,7 +41,8 @@ import java.util.Map;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ExtModelConfiguration extends ModelConfiguration {
+public class ExtModelConfiguration<P extends Packet> extends ModelConfiguration {
+	
     /**
      * Returns true if the two bytes arrays passed as parameters are equals
      * (same content)
@@ -81,30 +83,38 @@ public class ExtModelConfiguration extends ModelConfiguration {
     /**
      * the handled {@link Packet} type
      */
-    private Class<? extends Packet> packetType;
+    protected Class<P> packetType;
 
     /**
      * The {@link ConnectorCustomizer} to attach to the
-     * connector to build
+     * connector to be built 
      */
-    private ConnectorCustomizer<? extends Packet> customizer;
+    protected ConnectorCustomizer<P> customizer;
+
+    /**
+     * The {@link Connector} type to be built by this ExtModelConfiguration
+     */
+    protected Class<Connector<P>> connectorType;
+    
     /**
      * the set of {@link Task.CommandType}
      */
     protected Commands commands;
+    
     /**
      * the initial set of service providers map to their profile
      */
-    private Map<String, String> fixedProviders;
-
+    protected Map<String, String> fixedProviders;
+    
     /**
      * Constructor
      *
-     * @param mediator          the {@link Mediator} allowing the ExtModelConfiguration
-     *                          to be instantiated to interact with the OSGi host environment
-     * @param accessTree        the {@link AccessTree} defining the secured access
-     *                          rights applying on sensiNact resource model instances configured
-     *                          by the ExtModelConfiguration to be instantiated
+     * @param mediator
+     * 		the {@link Mediator} allowing the ExtModelConfiguration to be instantiated to interact 
+     * 		with the OSGi host environment
+     * @param accessTree 
+     * 		the {@link AccessTree} defining the secured access rights applying on sensiNact 
+     * 		resource model instances configured by the ExtModelConfiguration to be instantiated
      * @param packetType
      * @param configurationFile
      * @param defaults
@@ -112,18 +122,30 @@ public class ExtModelConfiguration extends ModelConfiguration {
      * @throws SAXException
      * @throws IOException
      */
-    public ExtModelConfiguration(Mediator mediator, AccessTreeImpl<? extends AccessNodeImpl<?>> accessTree, Class<? extends Packet> packetType, String configurationFile, Map<String, String> defaults) throws ParserConfigurationException, SAXException, IOException {
-        this(mediator, accessTree, packetType, new DefaultResourceConfigBuilder(), configurationFile, defaults);
+    public ExtModelConfiguration(
+    	Mediator mediator, 
+    	AccessTreeImpl<? extends AccessNodeImpl<?>> accessTree, 
+    	Class<P> packetType, 
+    	String configurationFile, 
+    	Map<String, String> defaults) 
+    		throws ParserConfigurationException, SAXException, IOException {
+        this(mediator, 
+        	accessTree, 
+        	packetType, 
+        	new DefaultResourceConfigBuilder(), 
+        	configurationFile, 
+        	defaults);
     }
 
     /**
      * Constructor
      *
-     * @param mediator                     the {@link Mediator} allowing the ExtModelConfiguration
-     *                                     to be instantiated to interact with the OSGi host environment
-     * @param accessTree                   the {@link AccessTree} defining the secured access
-     *                                     rights applying on sensiNact resource model instances configured
-     *                                     by the ExtModelConfiguration to be instantiated
+     * @param mediator
+     * 		the {@link Mediator} allowing the ExtModelConfiguration to be instantiated to interact 
+     * 		with the OSGi host environment
+     * @param accessTree
+     * 		the {@link AccessTree} defining the secured access rights applying on sensiNact 
+     * 		resource model instances configured by the ExtModelConfiguration to be instantiated
      * @param packetType
      * @param defaultResourceConfigBuilder
      * @param configurationFile
@@ -132,8 +154,24 @@ public class ExtModelConfiguration extends ModelConfiguration {
      * @throws SAXException
      * @throws IOException
      */
-    public ExtModelConfiguration(Mediator mediator, AccessTreeImpl<? extends AccessNodeImpl<?>> accessTree, Class<? extends Packet> packetType, ResourceConfigBuilder defaultResourceConfigBuilder, String configurationFile, Map<String, String> defaults) throws ParserConfigurationException, SAXException, IOException {
-        this(mediator, accessTree, packetType, defaultResourceConfigBuilder, configurationFile, defaults, ExtServiceProviderImpl.class, ExtServiceImpl.class, ExtResourceImpl.class);
+    public ExtModelConfiguration(
+    	Mediator mediator, 
+    	AccessTreeImpl<? extends AccessNodeImpl<?>> accessTree, 
+    	Class<P> packetType, 
+    	ResourceConfigBuilder defaultResourceConfigBuilder, 
+    	String configurationFile, 
+    	Map<String, String> defaults) 
+    			throws ParserConfigurationException, SAXException, IOException {
+        this(
+        	mediator, 
+        	accessTree, 
+        	packetType, 
+        	defaultResourceConfigBuilder, 
+        	configurationFile, 
+        	defaults, 
+        	ExtServiceProviderImpl.class, 
+        	ExtServiceImpl.class, 
+        	ExtResourceImpl.class);
     }
 
     /**
@@ -155,8 +193,26 @@ public class ExtModelConfiguration extends ModelConfiguration {
      * @throws SAXException
      * @throws IOException
      */
-    protected ExtModelConfiguration(Mediator mediator, AccessTreeImpl<?> accessTree, Class<? extends Packet> packetType, ResourceConfigBuilder defaultResourceConfigBuilder, String configurationFile, Map<String, String> defaults, Class<? extends ServiceProviderImpl> defaultServiceProviderType, Class<? extends ServiceImpl> defaultServiceType, Class<? extends ResourceImpl> defaultResourceType) throws ParserConfigurationException, SAXException, IOException {
-        this(mediator, accessTree, packetType, defaultResourceConfigBuilder, configurationFile != null ? mediator.getContext().getBundle().getResource(configurationFile) : null, defaults, defaultServiceProviderType, defaultServiceType, defaultResourceType);
+    protected ExtModelConfiguration(
+		Mediator mediator, 
+		AccessTreeImpl<?> accessTree, 
+		Class<P> packetType, 
+		ResourceConfigBuilder defaultResourceConfigBuilder, 
+		String configurationFile, 
+		Map<String, String> defaults, 
+		Class<? extends ExtServiceProviderImpl> defaultServiceProviderType, 
+		Class<? extends ExtServiceImpl> defaultServiceType, 
+		Class<? extends ExtResourceImpl> defaultResourceType) 
+			throws ParserConfigurationException, SAXException, IOException {
+        this(mediator, 
+    		accessTree, 
+    		packetType, 
+    		defaultResourceConfigBuilder, 
+    		configurationFile != null?mediator.getContext().getBundle().getResource(configurationFile):null, 
+    		defaults, 
+    		defaultServiceProviderType, 
+    		defaultServiceType, 
+    		defaultResourceType);
     }
 
     /**
@@ -178,13 +234,29 @@ public class ExtModelConfiguration extends ModelConfiguration {
      * @throws SAXException
      * @throws IOException
      */
-    public ExtModelConfiguration(Mediator mediator, AccessTreeImpl<?> accessTree, Class<? extends Packet> packetType, ResourceConfigBuilder defaultResourceConfigBuilder, URL configurationFile, Map<String, String> defaults, Class<? extends ServiceProviderImpl> defaultServiceProviderType, Class<? extends ServiceImpl> defaultServiceType, Class<? extends ResourceImpl> defaultResourceType) throws ParserConfigurationException, SAXException, IOException {
-        super(mediator, accessTree, defaultResourceConfigBuilder, ExtServiceProviderImpl.class, ExtServiceImpl.class, ExtResourceImpl.class);
+    public ExtModelConfiguration(
+    	Mediator mediator, 
+    	AccessTreeImpl<?> accessTree, 
+    	Class<P> packetType, 
+    	ResourceConfigBuilder defaultResourceConfigBuilder, 
+    	URL configurationFile, 
+    	Map<String, String> defaults, 
+    	Class<? extends ExtServiceProviderImpl> defaultServiceProviderType, 
+    	Class<? extends ExtServiceImpl> defaultServiceType, 
+    	Class<? extends ExtResourceImpl> defaultResourceType) 
+    			throws ParserConfigurationException, SAXException, IOException {
+        super(
+        	mediator, 
+        	accessTree, 
+        	defaultResourceConfigBuilder, 
+        	defaultServiceProviderType, 
+        	defaultServiceType, 
+        	defaultResourceType);
+        
         this.packetType = packetType;
         super.setResourceConfigType(ExtResourceConfig.class);
-
-        XmlResourceConfigHandler handler = ExtResourceConfig.loadFromXml(mediator, configurationFile);
-
+        XmlResourceConfigHandler handler = ExtResourceConfig.loadFromXml(
+        		mediator, configurationFile);
         if (handler != null) {
             this.commands = handler.getCommandDefinitions();
             FixedProviders fixedProviders = handler.getDeviceDefinitions();
@@ -199,7 +271,6 @@ public class ExtModelConfiguration extends ModelConfiguration {
             super.fixed = Collections.<String, List<String>>emptyMap();
             super.profiles = Collections.<String, List<String>>emptyMap();
         }
-        this.packetType = packetType;
         this.mediator.info("ExtModelConfiguration initialized...");
     }
 
@@ -209,7 +280,7 @@ public class ExtModelConfiguration extends ModelConfiguration {
      * setDefaultResourceType(java.lang.Class)
      */
     @Override
-    public ExtModelConfiguration setDefaultResourceType(Class<? extends Resource> defaultResourceType) {
+    public ExtModelConfiguration<P> setDefaultResourceType(Class<? extends Resource> defaultResourceType) {
         super.setDefaultResourceType(defaultResourceType);
         return this;
     }
@@ -220,7 +291,7 @@ public class ExtModelConfiguration extends ModelConfiguration {
      * setDefaultDataType(java.lang.Class)
      */
     @Override
-    public ExtModelConfiguration setDefaultDataType(Class<?> defaultDataType) {
+    public ExtModelConfiguration<P> setDefaultDataType(Class<?> defaultDataType) {
         super.setDefaultDataType(defaultDataType);
         return this;
     }
@@ -231,7 +302,7 @@ public class ExtModelConfiguration extends ModelConfiguration {
      * setDefaultModifiable(org.eclipse.sensinact.gateway.common.primitive.Modifiable)
      */
     @Override
-    public ExtModelConfiguration setDefaultModifiable(Modifiable defaultModifiable) {
+    public ExtModelConfiguration<P> setDefaultModifiable(Modifiable defaultModifiable) {
         super.setDefaultModifiable(defaultModifiable);
         return this;
     }
@@ -242,7 +313,7 @@ public class ExtModelConfiguration extends ModelConfiguration {
      * setDefaultUpdatePolicy(org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy)
      */
     @Override
-    public ExtModelConfiguration setDefaultUpdatePolicy(UpdatePolicy defaultUpdatePolicy) {
+    public ExtModelConfiguration<P> setDefaultUpdatePolicy(UpdatePolicy defaultUpdatePolicy) {
         super.setDefaultUpdatePolicy(defaultUpdatePolicy);
         return this;
     }
@@ -253,7 +324,7 @@ public class ExtModelConfiguration extends ModelConfiguration {
      * setProviderImplementationType(java.lang.Class)
      */
     @Override
-    public ExtModelConfiguration setProviderImplementationType(Class<? extends ServiceProviderImpl> serviceProviderType) {
+    public ExtModelConfiguration<P> setProviderImplementationType(Class<? extends ServiceProviderImpl> serviceProviderType) {
         super.setProviderImplementationType(serviceProviderType);
         return this;
     }
@@ -264,7 +335,7 @@ public class ExtModelConfiguration extends ModelConfiguration {
      * setServiceImplmentationType(java.lang.Class)
      */
     @Override
-    public ExtModelConfiguration setServiceImplmentationType(Class<? extends ServiceImpl> serviceType) {
+    public ExtModelConfiguration<P> setServiceImplmentationType(Class<? extends ServiceImpl> serviceType) {
         super.setServiceImplmentationType(serviceType);
         return this;
     }
@@ -275,7 +346,7 @@ public class ExtModelConfiguration extends ModelConfiguration {
      * setResourceImplementationType(java.lang.Class)
      */
     @Override
-    public ExtModelConfiguration setResourceImplementationType(Class<? extends ResourceImpl> resourceType) {
+    public ExtModelConfiguration<P> setResourceImplementationType(Class<? extends ResourceImpl> resourceType) {
         super.setResourceImplementationType(resourceType);
         return this;
     }
@@ -284,7 +355,7 @@ public class ExtModelConfiguration extends ModelConfiguration {
      * @param lockedAtInitializationTime
      * @return
      */
-    public ExtModelConfiguration setLockedAtInitializationTime(boolean lockedAtInitializationTime) {
+    public ExtModelConfiguration<P> setLockedAtInitializationTime(boolean lockedAtInitializationTime) {
         this.lockedAtInitializationTime = lockedAtInitializationTime;
         return this;
     }
@@ -299,7 +370,7 @@ public class ExtModelConfiguration extends ModelConfiguration {
     /**
      * @param isDesynchronized
      */
-    public ExtModelConfiguration setDesynchronized(boolean isDesynchronized) {
+    public ExtModelConfiguration<P> setDesynchronized(boolean isDesynchronized) {
         this.isDesynchronized = isDesynchronized;
         return this;
     }
@@ -318,10 +389,21 @@ public class ExtModelConfiguration extends ModelConfiguration {
      * @param customizer the {@link ConnectorCustomizer} to attach to
      *                   the {@link Connector}(s) instantiated by this ExtModelConfiguration
      */
-    public void setConnectorCustomizer(ConnectorCustomizer<? extends Packet> customizer) {
+    public void setConnectorCustomizer(ConnectorCustomizer<P> customizer) {
         this.customizer = customizer;
     }
-
+    
+    /**
+     * Defines the {@link Connector} type to be instantiated by this ExtModelConfiguration
+     *
+     * @param connectorType 
+     * 		the {@link Connector} type to be instantiated by this ExtModelConfiguration
+     */
+    public ExtModelConfiguration<P> setConnectorType(Class<Connector<P>> connectorType) {
+        this.connectorType = connectorType;
+        return this;
+    } 
+    
     /**
      * Returns the command bytes array mapped to the
      * {@link Task.CommandType} passed as parameter
@@ -359,23 +441,24 @@ public class ExtModelConfiguration extends ModelConfiguration {
     /**
      * @return
      */
-    public Class<? extends Packet> getPacketType() {
+    public Class<P> getPacketType() {
         return this.packetType;
     }
 
     /**
-     * @param connector
+     * @param endpoint
      * @return
      * @throws InvalidProtocolStackException
      */
-    public <P extends Packet> Connector<P> connect(ProtocolStackEndpoint<P> connector) throws InvalidProtocolStackException {
-        Connector<P> processor = null;
-        try {
-            processor = this.newProcessor(connector);
-        } catch (ClassCastException e) {
-            throw new InvalidProtocolStackException(e);
-        }
-        return processor;
+    public Connector<P> connect(ProtocolStackEndpoint<P> endpoint) 
+    	throws InvalidProtocolStackException {
+    	Connector<P> connector = null;
+	    try {
+	    	connector = this.newConnector(endpoint);
+	    } catch (ClassCastException e) {
+	        throw new InvalidProtocolStackException(e);
+	    }
+    	return connector;
     }
 
     /**
@@ -387,10 +470,24 @@ public class ExtModelConfiguration extends ModelConfiguration {
      *                 Connector} to instantiate will be connected to
      * @return a new {@link Connector} instance
      */
-    protected <P extends Packet> Connector<P> newProcessor(ProtocolStackEndpoint<P> endpoint) throws InvalidProtocolStackException {
-        if (this.customizer != null) {
-            return new Connector<P>(mediator, endpoint, this, (ConnectorCustomizer<P>) this.customizer);
-        }
-        return new Connector<P>(mediator, endpoint, this);
+    protected Connector<P> newConnector(ProtocolStackEndpoint<P> endpoint) 
+    	throws InvalidProtocolStackException {
+    	Connector<P> connector = null;
+    	if(this.connectorType != null) {
+            if (this.customizer != null) {
+                connector = (Connector<P>) ReflectUtils.<Connector<P>>getTheBestInstance(
+                this.connectorType, new Object[] {mediator, endpoint, this, this.customizer});
+            } else {
+                connector = (Connector<P>) ReflectUtils.<Connector<P>>getTheBestInstance(
+                this.connectorType, new Object[] {mediator, endpoint, this});
+            }  		
+    	} else {
+            if (this.customizer != null) {
+                return new Connector<P>(mediator, endpoint, this, (ConnectorCustomizer<P>) this.customizer);
+            } else {
+            	connector = new Connector<P>(mediator, endpoint, this);
+            }  		
+    	}
+        return connector;
     }
 }

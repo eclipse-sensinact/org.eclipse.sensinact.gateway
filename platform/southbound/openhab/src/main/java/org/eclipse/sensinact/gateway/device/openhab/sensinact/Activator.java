@@ -12,9 +12,10 @@ package org.eclipse.sensinact.gateway.device.openhab.sensinact;
 
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
-import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
 import org.eclipse.sensinact.gateway.generic.Task;
+import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTaskConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTasks;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.RecurrentHttpTask;
@@ -76,7 +77,7 @@ import java.util.Map;
     private static final int DEFAULT_OPENHAB_PORT = 8080;
     private static final String ACTIVATE_DISCOVERY_PROPERTY_NAME = "org.eclipse.sensinact.gateway.device.openhab.OpenHabDiscovery2.disabled";
     private JmDNS dns;
-    private ExtModelConfiguration configuration;
+    private ExtModelConfiguration<? extends HttpPacket> configuration;
     private Map<String, SimpleHttpProtocolStackEndpoint> endpoints;
 
     /**
@@ -88,7 +89,11 @@ import java.util.Map;
         super.mediator.setTaskProcessingContextHandler(this.getProcessingContextHandler());
         this.mediator.setTaskProcessingContextFactory(this.getTaskProcessingContextFactory());
         this.mediator.setChainedTaskProcessingContextFactory(this.getChainedTaskProcessingContextFactory());
-        this.configuration = new ExtModelInstanceBuilder(mediator, getPacketType()).withStartAtInitializationTime(isStartingAtInitializationTime()).withServiceBuildPolicy(getServiceBuildPolicy()).withResourceBuildPolicy(getResourceBuildPolicy()).buildConfiguration(getResourceDescriptionFile(), getDefaults());
+        this.configuration = ExtModelConfigurationBuilder.instance(mediator, getPacketType()
+        		).withStartAtInitializationTime(isStartingAtInitializationTime()
+        		).withServiceBuildPolicy(getServiceBuildPolicy()
+        		).withResourceBuildPolicy(getResourceBuildPolicy()
+        		).build(getResourceDescriptionFile(), getDefaults());
         endpoints = new HashMap<String, SimpleHttpProtocolStackEndpoint>();
         final String activateDiscoveryPropertyValue = (String) mediator.getProperty(ACTIVATE_DISCOVERY_PROPERTY_NAME);
         Boolean desactivateDiscovery = false;

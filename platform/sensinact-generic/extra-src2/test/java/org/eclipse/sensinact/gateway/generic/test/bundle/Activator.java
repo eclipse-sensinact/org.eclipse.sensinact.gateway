@@ -14,6 +14,7 @@ import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.ExtModelInstance;
 import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
@@ -35,7 +36,14 @@ public class Activator<C extends ExtModelConfiguration, I extends ExtModelInstan
     @SuppressWarnings({"unchecked"})
     @Override
     public void doStart() throws Exception {
-        this.manager = new ExtModelInstanceBuilder(super.mediator, GenericTestPacket.class).withDesynchronization(false).withStartAtInitializationTime(true).withResourceBuildPolicy(BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy()).<ExtModelConfiguration>buildConfiguration("test-resource.xml", Collections.<String, String>emptyMap());
+        this.manager = new ExtModelConfigurationBuilder(super.mediator, 
+    			ExtModelConfiguration.class, 
+    			ExtModelInstance.class, 
+    			GenericTestPacket.class
+    		).withDesynchronization(false
+    		).withStartAtInitializationTime(true
+    		).withResourceBuildPolicy(BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy()
+    		).build("test-resource.xml", Collections.<String, String>emptyMap());
         this.connector = new LocalProtocolStackEndpoint<GenericTestPacket>(mediator);
         this.connector.connect(manager);
     }

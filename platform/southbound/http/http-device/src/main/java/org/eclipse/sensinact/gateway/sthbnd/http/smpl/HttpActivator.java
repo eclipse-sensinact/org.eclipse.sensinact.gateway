@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
-import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.ChainedHttpTask;
@@ -54,7 +54,13 @@ public abstract class HttpActivator extends AbstractActivator<HttpMediator> {
         this.mediator.setTaskProcessingContextFactory(this.getTaskProcessingContextFactory());
         this.mediator.setChainedTaskProcessingContextFactory(this.getChainedTaskProcessingContextFactory());
 
-        ExtModelConfiguration configuration = new ExtModelInstanceBuilder(mediator, getPacketType()).withStartAtInitializationTime(isStartingAtInitializationTime()).withServiceBuildPolicy(getServiceBuildPolicy()).withResourceBuildPolicy(getResourceBuildPolicy()).buildConfiguration(getResourceDescriptionFile(), getDefaults());
+        ExtModelConfiguration<? extends HttpPacket> configuration = 
+        	ExtModelConfigurationBuilder.instance(
+        		mediator, getPacketType()
+        		).withStartAtInitializationTime(isStartingAtInitializationTime()
+        		).withServiceBuildPolicy(getServiceBuildPolicy()
+        		).withResourceBuildPolicy(getResourceBuildPolicy()
+        		).build(getResourceDescriptionFile(), getDefaults());
 
         this.endpoint = this.configureProtocolStackEndpoint();
         this.connect(configuration);

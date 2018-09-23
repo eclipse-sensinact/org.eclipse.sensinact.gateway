@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.system.osgi;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
-import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.osgi.framework.BundleContext;
@@ -21,7 +21,7 @@ import org.osgi.framework.BundleContext;
 import java.util.Collections;
 
 public class Activator extends AbstractActivator<Mediator> {
-    private ExtModelConfiguration manager = null;
+    private ExtModelConfiguration<Packet> manager = null;
     private LocalProtocolStackEndpoint<Packet> connector = null;
 
     /**
@@ -33,7 +33,9 @@ public class Activator extends AbstractActivator<Mediator> {
      */
     public void doStart() throws Exception {
         if (manager == null) {
-            manager = new ExtModelInstanceBuilder(super.mediator, Packet.class).withStartAtInitializationTime(true).buildConfiguration("system-resource.xml", Collections.<String, String>emptyMap());
+            manager = ExtModelConfigurationBuilder.instance(super.mediator
+            ).withStartAtInitializationTime(true
+            ).build("system-resource.xml", Collections.<String, String>emptyMap());
         }
         if (this.connector == null) {
             this.connector = new LocalProtocolStackEndpoint<Packet>(mediator);

@@ -12,7 +12,7 @@ package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic;
 
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
-import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttActivator;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttPacket;
@@ -33,7 +33,12 @@ public class Activator extends MqttActivator {
 
     @Override
     public void doStart() throws Exception {
-        ExtModelConfiguration configuration = new ExtModelInstanceBuilder(mediator, MqttPacket.class).withServiceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())).withResourceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())).withStartAtInitializationTime(true).buildConfiguration("mqtt-resource.xml", Collections.emptyMap());
+        ExtModelConfiguration<MqttPacket> configuration = ExtModelConfigurationBuilder.instance(
+        		mediator, MqttPacket.class
+        		).withServiceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
+        		).withResourceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
+        		).withStartAtInitializationTime(true
+        		).build("mqtt-resource.xml", Collections.emptyMap());
         endPoint = new MqttProtocolStackEndpoint(mediator);
         super.connect(configuration);
         managedServiceFactory = super.mediator.getContext().registerService(ManagedServiceFactory.class, new MqttManagedService(super.mediator.getContext()), new Hashtable<String, String>() {{

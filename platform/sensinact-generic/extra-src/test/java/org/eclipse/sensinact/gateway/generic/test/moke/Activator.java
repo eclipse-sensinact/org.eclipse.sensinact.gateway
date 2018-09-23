@@ -12,14 +12,19 @@ package org.eclipse.sensinact.gateway.generic.test.moke;
 
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
+import org.eclipse.sensinact.gateway.generic.ExtModelInstance;
 import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
+import org.eclipse.sensinact.gateway.generic.test.moke.MokePacket;
 import org.eclipse.sensinact.gateway.test.ProcessorService;
 import org.eclipse.sensinact.gateway.test.StarterService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -45,10 +50,16 @@ public class Activator extends AbstractActivator<Mediator> {
             String key = (String) iterator.next();
             defaults.put(key, props.getProperty(key));
         }
-        this.manager = new ExtModelInstanceBuilder(super.mediator, MokePacket.class).withDesynchronization(false).withStartAtInitializationTime(startAtInitializationTime
-                //).withResourceBuildPolicy(SensiNactResourceModelConfiguration.BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy()
-        ).<ExtModelConfiguration>buildConfiguration("resources.xml", defaults);
 
+    	this.manager = new ExtModelConfigurationBuilder(super.mediator, 
+    			ExtModelConfiguration.class, 
+    			ExtModelInstance.class, 
+    			MokePacket.class
+    		).withDesynchronization(false
+    		).withStartAtInitializationTime(startAtInitializationTime
+    		).build("resources.xml", defaults);
+
+    	
         this.endpoint = new MokeStack(mediator);
         this.endpoint.connect(this.manager);
 

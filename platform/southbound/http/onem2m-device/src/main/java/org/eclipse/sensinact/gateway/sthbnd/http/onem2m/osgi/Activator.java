@@ -12,9 +12,10 @@ package org.eclipse.sensinact.gateway.sthbnd.http.onem2m.osgi;
 
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
-import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
 import org.eclipse.sensinact.gateway.generic.Task;
+import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTaskConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTasks;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.KeyValuePair;
@@ -35,7 +36,12 @@ public class Activator extends HttpActivator {
         super.mediator.setTaskProcessingContextHandler(this.getProcessingContextHandler());
         this.mediator.setTaskProcessingContextFactory(this.getTaskProcessingContextFactory());
         this.mediator.setChainedTaskProcessingContextFactory(this.getChainedTaskProcessingContextFactory());
-        ExtModelConfiguration configuration = new ExtModelInstanceBuilder(mediator, getPacketType()).withStartAtInitializationTime(isStartingAtInitializationTime()).withServiceBuildPolicy(BuildPolicy.BUILD_NON_DESCRIBED.getPolicy()).withResourceBuildPolicy(BuildPolicy.BUILD_NON_DESCRIBED.getPolicy()).withDesynchronization(true).buildConfiguration(getResourceDescriptionFile(), getDefaults());
+        ExtModelConfiguration<? extends HttpPacket> configuration = ExtModelConfigurationBuilder.instance(mediator, getPacketType()
+        ).withStartAtInitializationTime(isStartingAtInitializationTime()
+        ).withServiceBuildPolicy(BuildPolicy.BUILD_NON_DESCRIBED.getPolicy()
+        ).withResourceBuildPolicy(BuildPolicy.BUILD_NON_DESCRIBED.getPolicy()
+        ).withDesynchronization(true
+        ).build(getResourceDescriptionFile(), getDefaults());
         this.endpoint = this.configureProtocolStackEndpoint();
         this.connect(configuration);
     }

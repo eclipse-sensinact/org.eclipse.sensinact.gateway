@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.sthbnd.mqtt;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
-import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttPacket;
 import org.osgi.framework.BundleContext;
@@ -32,7 +32,12 @@ public abstract class MqttActivator extends AbstractActivator<Mediator> {
 
     @Override
     public void doStart() throws Exception {
-        ExtModelConfiguration configuration = new ExtModelInstanceBuilder(mediator, MqttPacket.class).withServiceBuildPolicy((byte) (BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())).withResourceBuildPolicy((byte) (BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())).withStartAtInitializationTime(true).buildConfiguration("mqtt-resource.xml", Collections.emptyMap());
+        ExtModelConfiguration<MqttPacket> configuration = ExtModelConfigurationBuilder.instance(
+    		mediator, MqttPacket.class
+    		).withServiceBuildPolicy((byte) (BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
+    		).withResourceBuildPolicy((byte) (BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
+    		).withStartAtInitializationTime(true
+    		).build("mqtt-resource.xml", Collections.emptyMap());
         endPoint = new MqttProtocolStackEndpoint(mediator);
         this.connect(configuration);
     }
@@ -41,7 +46,7 @@ public abstract class MqttActivator extends AbstractActivator<Mediator> {
      * @param configuration the configuration for the bridge
      * @throws InvalidProtocolStackException
      */
-    protected void connect(ExtModelConfiguration configuration) throws InvalidProtocolStackException {
+    protected void connect( ExtModelConfiguration<MqttPacket> configuration) throws InvalidProtocolStackException {
         endPoint.connect(configuration);
         endPoint.connectBrokers();
     }

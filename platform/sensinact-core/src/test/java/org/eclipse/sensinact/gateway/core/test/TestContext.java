@@ -21,6 +21,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Filtering;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.ModelConfiguration;
+import org.eclipse.sensinact.gateway.core.ModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.core.ModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.core.SensiNact;
@@ -338,8 +339,11 @@ public class TestContext<R extends ModelInstance> {
 		mediator = new Mediator(context);
 
 		sensinact = new SensiNact(mediator);
-		instance = new ModelInstanceBuilder(mediator, MyModelInstance.class, ModelConfiguration.class)
-				.withStartAtInitializationTime(true).build("serviceProvider", null);
+		
+		instance = (MyModelInstance) new ModelInstanceBuilder(mediator
+			).build("serviceProvider", null, new ModelConfigurationBuilder(
+				mediator,ModelConfiguration.class, MyModelInstance.class
+				).withStartAtInitializationTime(true).build());
 		initialized = true;
 
 		callbackCount = 0;

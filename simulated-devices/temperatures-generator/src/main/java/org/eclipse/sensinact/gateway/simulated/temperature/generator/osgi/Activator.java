@@ -15,7 +15,7 @@ import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
-import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacket;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.parser.DataParser;
@@ -29,12 +29,16 @@ public class Activator extends AbstractActivator<Mediator> {
     @Property(name = "org.eclipse.sensinact.simulated.generator.amount", defaultValue = "10")
     Integer DEVICES_NUMBER;
     private LocalProtocolStackEndpoint<TemperaturesGeneratorAbstractPacket> connector;
-    private ExtModelConfiguration manager;
+    private ExtModelConfiguration<TemperaturesGeneratorPacket> manager;
     private TemperaturesGeneratorThreadManager threadManager;
 
     public void doStart() throws Exception {
         if (manager == null) {
-            manager = new ExtModelInstanceBuilder(super.mediator, TemperaturesGeneratorPacket.class).withResourceBuildPolicy((byte) (BuildPolicy.BUILD_NON_DESCRIBED.getPolicy() | BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy())).withServiceBuildPolicy((byte) (BuildPolicy.BUILD_NON_DESCRIBED.getPolicy() | BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy())).withStartAtInitializationTime(true).buildConfiguration("temperature-resource.xml", Collections.<String, String>emptyMap());
+            manager = ExtModelConfigurationBuilder.instance(super.mediator, TemperaturesGeneratorPacket.class
+        	).withResourceBuildPolicy((byte) (BuildPolicy.BUILD_NON_DESCRIBED.getPolicy() | BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy())
+        	).withServiceBuildPolicy((byte) (BuildPolicy.BUILD_NON_DESCRIBED.getPolicy() | BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy())
+        	).withStartAtInitializationTime(true
+        	).build("temperature-resource.xml", Collections.<String, String>emptyMap());
         }
         if (connector == null) {
             connector = new LocalProtocolStackEndpoint<TemperaturesGeneratorAbstractPacket>(super.mediator);

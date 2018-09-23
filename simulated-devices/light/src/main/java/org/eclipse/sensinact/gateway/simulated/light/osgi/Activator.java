@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.simulated.light.osgi;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
-import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.simulated.light.internal.LightConfig;
@@ -31,7 +31,9 @@ public class Activator extends AbstractActivator<Mediator> {
     public void doStart() throws Exception {
         config = new LightConfig();
 
-        ExtModelConfiguration manager = new ExtModelInstanceBuilder(super.mediator, Packet.class).withStartAtInitializationTime(true).buildConfiguration("light-resource.xml", Collections.<String, String>emptyMap());
+        ExtModelConfiguration<?> manager = ExtModelConfigurationBuilder.instance(super.mediator
+        	).withStartAtInitializationTime(true
+        	).build("light-resource.xml", Collections.<String, String>emptyMap());
 
         connector = new LocalProtocolStackEndpoint<Packet>(super.mediator);
         connector.addInjectableInstance(LightConfig.class, config);

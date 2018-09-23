@@ -23,6 +23,7 @@ import org.eclipse.sensinact.gateway.core.InvalidResourceException;
 import org.eclipse.sensinact.gateway.core.InvalidServiceException;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.ModelConfiguration;
+import org.eclipse.sensinact.gateway.core.ModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.core.ModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.core.PropertyResource;
@@ -62,7 +63,13 @@ public class AppManagerFactory extends ApplicationAvailabilityListenerAbstract {
      */
     public AppManagerFactory(AppServiceMediator mediator, ApplicationPersistenceService persistenceService) throws InvalidResourceException, InvalidServiceProviderException, InvalidServiceException, InvalidValueException {
         this.persistenceService = persistenceService;
-        this.modelInstance = new ModelInstanceBuilder(mediator, ModelInstance.class, ModelConfiguration.class).withStartAtInitializationTime(true).build(AppConstant.DEVICE_NAME, null);
+        
+        ModelConfiguration config = new ModelConfigurationBuilder(mediator, 
+        		ModelConfiguration.class, ModelInstance.class
+        		).withStartAtInitializationTime(true).build();
+        this.modelInstance = new ModelInstanceBuilder(mediator).build(
+        		AppConstant.DEVICE_NAME, null, config);
+        
         this.modelInstance.configuration().setServiceImplmentationType(ApplicationService.class);
 
         this.serviceProvider = this.modelInstance.getRootElement();

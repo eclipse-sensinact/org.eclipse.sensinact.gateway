@@ -42,6 +42,8 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 
 	protected Class<? extends ResourceImpl> resourceType = null;
 	private final Class<? extends ResourceImpl> defaultResourceType;
+	
+	protected Class<? extends ModelInstance<?>> modelInstanceType;
 
 	private ResourceConfigCatalogCollection resourceConfigCatalogs = null;
 	private ResourceConfigBuilder defaultResourceConfigBuilder = null;
@@ -94,8 +96,12 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 	 */
 	public ModelConfiguration(Mediator mediator, MutableAccessTree<? extends MutableAccessNode> accessTree,
 			ResourceConfigBuilder defaultResourceConfigBuilder) {
-		this(mediator, accessTree, defaultResourceConfigBuilder, ServiceProviderImpl.class, ServiceImpl.class,
-				ResourceImpl.class);
+		this(mediator, 
+			accessTree, 
+			defaultResourceConfigBuilder, 
+			ServiceProviderImpl.class, 
+			ServiceImpl.class,
+			ResourceImpl.class);
 	}
 
 	/**
@@ -118,11 +124,18 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 	 *            the extended {@link ResourceImpl} type to define as the default
 	 *            resource one
 	 */
-	protected ModelConfiguration(Mediator mediator, MutableAccessTree<? extends MutableAccessNode> accessTree,
+	protected ModelConfiguration(
+			Mediator mediator, 
+			MutableAccessTree<? extends MutableAccessNode> accessTree,
 			Class<? extends ServiceProviderImpl> defaultServiceProviderType,
-			Class<? extends ServiceImpl> defaultServiceType, Class<? extends ResourceImpl> defaultResourceType) {
-		this(mediator, accessTree, new DefaultResourceConfigBuilder(), defaultServiceProviderType, defaultServiceType,
-				defaultResourceType);
+			Class<? extends ServiceImpl> defaultServiceType, 
+			Class<? extends ResourceImpl> defaultResourceType) {
+		this(mediator, 
+			accessTree, 
+			new DefaultResourceConfigBuilder(), 
+			defaultServiceProviderType, 
+			defaultServiceType,
+			defaultResourceType);
 	}
 
 	/**
@@ -503,6 +516,23 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 		return this.resourceConfigType;
 	}
 
+	/**
+	 * @param modelInstanceType
+	 */
+	public <C extends ModelConfiguration,I extends ModelInstance<C>> void setModelInstanceType(
+		Class<I> modelInstanceType){
+		this.modelInstanceType = modelInstanceType;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public <C extends ModelConfiguration,I extends ModelInstance<C>> Class<I> 
+	getModelInstanceType(){
+		return (Class<I>) this.modelInstanceType;
+	}
+	
 	/**
 	 * Returns the list of String paths, starting from the service definition, of
 	 * the attributes to be observed by the {@link ModelInstanceRegistration} of a

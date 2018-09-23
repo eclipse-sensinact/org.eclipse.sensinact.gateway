@@ -40,7 +40,12 @@ public class Connector<P extends Packet> extends TaskManager {
      * The global XML formated sensiNact resource model
      * configuration
      */
-    protected final ExtModelConfiguration ExtModelConfiguration;
+    protected final ExtModelConfiguration extModelConfiguration;
+    
+    /**
+     * The model instance builder
+     */
+    protected final ExtModelInstanceBuilder extModelInstanceBuilder;
 
     /**
      * the {@link ConnectorCustomizer} handling the {@link PacketReader}
@@ -60,11 +65,17 @@ public class Connector<P extends Packet> extends TaskManager {
      * @param locked  Defines the initial lock state of the
      *                {@link TokenEventProvider} to instantiate
      */
-    public Connector(Mediator mediator, ProtocolStackEndpoint<?> endpoint, ExtModelConfiguration ExtModelConfiguration, ConnectorCustomizer<P> customizer) {
-        super(mediator, endpoint, ExtModelConfiguration.isLockedAtInitializationTime(), ExtModelConfiguration.isDesynchronized());
+    public Connector(Mediator mediator,
+    		ProtocolStackEndpoint<?> endpoint, 
+    		ExtModelConfiguration extModelConfiguration, 
+    		ConnectorCustomizer<P> customizer) {
+        super(mediator, endpoint, extModelConfiguration.isLockedAtInitializationTime(), extModelConfiguration.isDesynchronized());
 
-        this.ExtModelConfiguration = ExtModelConfiguration;
-        this.locked = ExtModelConfiguration.isLockedAtInitializationTime();
+        this.extModelConfiguration = extModelConfiguration;        
+        this.extModelInstanceBuilder = new ExtModelInstanceBuilder(mediator);
+        this.extModelInstanceBuilder.withConnector(this);
+        
+        this.locked = extModelConfiguration.isLockedAtInitializationTime();
         this.instances = new ArrayList<ExtModelInstance<?>>();
 
         this.customizer = customizer;
@@ -92,7 +103,7 @@ public class Connector<P extends Packet> extends TaskManager {
     protected void configureCustomizer() {
         try {
             if (this.customizer == null) {
-                this.customizer = new DefaultConnectorCustomizer<P>(mediator, this.ExtModelConfiguration);
+                this.customizer = new DefaultConnectorCustomizer<P>(mediator, this.extModelConfiguration);
             }
         } catch (Exception e) {
             mediator.error(e);
@@ -230,8 +241,10 @@ public class Connector<P extends Packet> extends TaskManager {
      * @return a new {@link ExtServiceProviderImpl} instance
      * @throws InvalidServiceProviderException
      */
-    protected ExtModelInstance<?> addModelInstance(String profileId, final String serviceProviderName) throws InvalidServiceProviderException {
-        @SuppressWarnings({"unchecked", "rawtypes"}) ExtModelInstance<?> instance = new ExtModelInstanceBuilder(this.mediator, this.ExtModelConfiguration.getPacketType()).withConnector(this).withConfiguration(this.ExtModelConfiguration).<ExtModelConfiguration, ExtModelInstance>build(serviceProviderName, profileId);
+    protected ExtModelInstance<?> addModelInstance(String profileId, 
+    	final String serviceProviderName) throws InvalidServiceProviderException {
+    	ExtModelInstance<?> instance = this.extModelInstanceBuilder.<ExtModelConfiguration, 
+    		ExtModelInstance>build(serviceProviderName, profileId,this.extModelConfiguration);
         if (instance != null) {
             this.instances.add(instance);
         }

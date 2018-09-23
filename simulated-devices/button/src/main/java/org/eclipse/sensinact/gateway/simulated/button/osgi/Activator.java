@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.simulated.button.osgi;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
-import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.simulated.button.api.ButtonSetterItf;
 import org.eclipse.sensinact.gateway.simulated.button.internal.ButtonAdapter;
@@ -31,14 +31,16 @@ import java.util.Collections;
 public class Activator extends AbstractActivator<Mediator> {
     private static final String GUI_ENABLED = "org.eclipse.sensinact.simulated.gui.enabled";
     private LocalProtocolStackEndpoint<ButtonPacket> connector;
-    private ExtModelConfiguration manager;
+    private ExtModelConfiguration<ButtonPacket> manager;
     private ButtonSetterItf buttonPanel;
     private JFrame jFrame;
     private ServiceRegistration buttonRegistration;
 
     public void doStart() throws Exception {
         if (manager == null) {
-            manager = new ExtModelInstanceBuilder(super.mediator, ButtonPacket.class).withStartAtInitializationTime(true).<ExtModelConfiguration>buildConfiguration("button-resource.xml", Collections.<String, String>emptyMap());
+            manager = ExtModelConfigurationBuilder.instance(super.mediator,ButtonPacket.class
+            	).withStartAtInitializationTime(true
+            	).build("button-resource.xml", Collections.<String, String>emptyMap());
         }
         if (connector == null) {
             connector = new LocalProtocolStackEndpoint<ButtonPacket>(super.mediator);

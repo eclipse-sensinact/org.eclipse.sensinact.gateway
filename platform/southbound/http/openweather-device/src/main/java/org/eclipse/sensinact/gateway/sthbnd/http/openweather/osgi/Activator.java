@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.sthbnd.http.openweather.osgi;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
-import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.ChainedHttpTasks;
@@ -78,7 +78,11 @@ public class Activator extends HttpActivator {
 
         this.mediator.setChainedTaskProcessingContextFactory(this.getChainedTaskProcessingContextFactory());
 
-        ExtModelConfiguration configuration = new ExtModelInstanceBuilder(mediator, getPacketType()).withStartAtInitializationTime(isStartingAtInitializationTime()).withServiceBuildPolicy(getServiceBuildPolicy()).withResourceBuildPolicy(getResourceBuildPolicy()).buildConfiguration(getResourceDescriptionFile(), getDefaults());
+        ExtModelConfiguration<? extends HttpPacket> configuration = ExtModelConfigurationBuilder.instance(mediator, getPacketType()
+        ).withStartAtInitializationTime(isStartingAtInitializationTime()
+        ).withServiceBuildPolicy(getServiceBuildPolicy()
+        ).withResourceBuildPolicy(getResourceBuildPolicy()
+        ).build(getResourceDescriptionFile(), getDefaults());
 
         endpoints = new ArrayList<SimpleHttpProtocolStackEndpoint>();
 

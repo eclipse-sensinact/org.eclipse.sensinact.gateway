@@ -22,6 +22,7 @@ import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ModelConfiguration;
+import org.eclipse.sensinact.gateway.core.ModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.core.ModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.core.PropertyResource;
@@ -142,7 +143,11 @@ public class TestSnaFunction extends TestCase {
 
         this.mediator = new AppServiceMediator(context);
 
-        this.modelInstance = new ModelInstanceBuilder(mediator, ModelInstance.class, ModelConfiguration.class).withStartAtInitializationTime(true).build("SimulatedLight_001", null);
+        this.modelInstance = new ModelInstanceBuilder(mediator
+        	).build("SimulatedLight_001", null, new ModelConfigurationBuilder(
+				mediator, ModelConfiguration.class,ModelInstance.class
+				).withStartAtInitializationTime(true).build());
+		
         ServiceProviderImpl serviceProvider = modelInstance.getRootElement();
         ServiceImpl service = serviceProvider.addService("LightService_SimulatedLight_001");
         ResourceImpl resource = service.addDataResource(PropertyResource.class, "DIM", int.class, 0);

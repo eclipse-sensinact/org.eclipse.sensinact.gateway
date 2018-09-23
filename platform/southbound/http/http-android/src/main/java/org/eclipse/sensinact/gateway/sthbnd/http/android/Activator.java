@@ -17,7 +17,7 @@ import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
-import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -39,7 +39,11 @@ public class Activator extends AbstractActivator {
     @Override
     public void doStart() {
         try {
-            ExtModelConfiguration configuration = new ExtModelInstanceBuilder(mediator, DevGenPacket.class).withServiceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())).withResourceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())).withStartAtInitializationTime(true).buildConfiguration("devgen-resource.xml", Collections.emptyMap());
+            ExtModelConfiguration<DevGenPacket> configuration = ExtModelConfigurationBuilder.instance(mediator, DevGenPacket.class
+            		).withServiceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
+            		).withResourceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
+            		).withStartAtInitializationTime(true
+            		).build("devgen-resource.xml", Collections.emptyMap());
             connector = new LocalProtocolStackEndpoint<DevGenPacket>(mediator);
             connector.connect(configuration);
             pool = new AndroidWebSocketPool(mediator, connector);

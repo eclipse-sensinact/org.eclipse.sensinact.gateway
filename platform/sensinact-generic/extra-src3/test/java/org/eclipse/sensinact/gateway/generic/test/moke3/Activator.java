@@ -14,6 +14,8 @@ import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
+import org.eclipse.sensinact.gateway.generic.ExtModelInstance;
 import org.eclipse.sensinact.gateway.generic.ExtModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.test.ProcessorService;
 import org.eclipse.sensinact.gateway.test.StarterService;
@@ -30,7 +32,16 @@ public class Activator extends AbstractActivator<Mediator> {
 
     @Override
     public void doStart() throws Exception {
-        this.manager = new ExtModelInstanceBuilder(super.mediator, MokePacket.class).withDesynchronization(false).withStartAtInitializationTime(false).withServiceBuildPolicy(BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy()).withResourceBuildPolicy(BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy()).<ExtModelConfiguration>buildConfiguration("genova-resource.xml", Collections.<String, String>emptyMap());
+    	
+    	this.manager = new ExtModelConfigurationBuilder(super.mediator, 
+    			ExtModelConfiguration.class, 
+    			ExtModelInstance.class, 
+    			MokePacket.class
+    		).withDesynchronization(false
+    		).withStartAtInitializationTime(false
+    		).withServiceBuildPolicy(BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy()
+    		).withResourceBuildPolicy(BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy()
+    		).build("genova-resource.xml", Collections.<String, String>emptyMap());
 
         this.endpoint = new MokeStack(mediator);
         this.endpoint.connect(this.manager);
