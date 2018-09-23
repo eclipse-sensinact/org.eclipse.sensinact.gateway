@@ -124,11 +124,13 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
 
+	private final Object lock = new Object();
+	
 	protected final boolean automaticReconnection;
 	protected final Mediator mediator;
 
 	protected RemoteCore remoteCore;
-	protected boolean connected;
+	private boolean connected;
 
 	protected Map<String, Recipient> recipients;
 	private ConnectionThread connectionThread;
@@ -163,6 +165,26 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	}
 
 	/**
+	 * @return
+	 */
+	public boolean getConnected() {
+		boolean connected = false;
+		synchronized(lock) {			
+			connected = this.connected;
+		}
+		return connected;
+	}
+
+	/**
+	 * @param connected
+	 */
+	private void setConnected(boolean connected) {
+		synchronized(lock) {			
+			this.connected = connected;
+		}
+	}
+	
+	/**
 	 * @inheritDoc
 	 *
 	 * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#
@@ -170,7 +192,7 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	 */
 	@Override
 	public void open(RemoteCore remoteCore) {
-		if (this.connected) {
+		if (this.getConnected()) {
 			mediator.debug("Endpoint already connected");
 			return;
 		}
@@ -189,10 +211,7 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	 * remote one
 	 */
 	protected void connected() {
-		if (this.connected) {
-			return;
-		}
-		this.connected = true;
+		this.setConnected(true);
 		this.remoteCore.connect(this.namespace());
 	}
 
@@ -205,7 +224,7 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	public void close() {
 		this.connectionThread.stop();
 		this.doClose();
-		this.connected = false;
+		this.setConnected(false);
 	}
 
 	/**
@@ -213,11 +232,11 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	 * the remote one
 	 */
 	protected void disconnected() {
-		if (!this.connected) {
+		if (!this.getConnected()) {
 			return;
 		}
 		this.remoteCore.disconnect();
-		this.connected = false;
+		this.setConnected(false);
 	}
 
 	/**
@@ -230,7 +249,7 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	@Override
 	public JSONObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
 			Recipient recipient, JSONArray conditions) {
-		if (!this.connected) {
+		if (!this.getConnected()) {
 			return null;
 		}
 		JSONObject response = this.doSubscribe(publicKey, serviceProviderId, serviceId, resourceId, conditions);
@@ -264,7 +283,7 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	 */
 	@Override
 	public void disappearing(String publicKey) {
-		if (!this.connected) {
+		if (!this.getConnected()) {
 			return;
 		}
 		this.closeSession(publicKey);

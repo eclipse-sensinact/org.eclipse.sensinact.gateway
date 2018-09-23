@@ -300,7 +300,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public void callback(String callbackId, SnaMessage[] messages) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return;
         }
         String uri = String.format("/callback?%s", callbackId);
@@ -404,7 +404,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      * stopped
      */
     protected void serverStopped() {
-        if (super.connected) {
+        if (super.getConnected()) {
             super.disconnected();
             this.client.stop();
 
@@ -421,7 +421,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      * stopped
      */
     public void clientDisconnected() {
-        if (super.connected) {
+        if (super.getConnected()) {
             super.disconnected();
             this.remoteNamespace = null;
 
@@ -455,7 +455,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public void registerAgent(String identifier, SnaFilter filter, String agentKey) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return;
         }
         String uri = String.format("/agent?%s", identifier);
@@ -473,7 +473,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public void unregisterAgent(String identifier) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return;
         }
         String uri = String.format("/agent?%s", identifier);
@@ -491,7 +491,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public void dispatch(String agentId, SnaMessage<?> message) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return;
         }
         String uri = String.format("/agent?%s", agentId);
@@ -515,7 +515,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     protected void closeSession(String publicKey) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return;
         }
         String response = this.client.request(new JSONObject().put("uri", "/session").put("pkey", publicKey));
@@ -540,7 +540,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public String getAll(String publicKey, String filter) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return null;
         }
         String uri = String.format("/all?%s", filter);
@@ -557,7 +557,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public String getProviders(String publicKey) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return null;
         }
         String response = this.client.request(new JSONObject().put("uri", "/providers").put("pkey", publicKey));
@@ -574,7 +574,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public String getProvider(String publicKey, String serviceProviderId) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return null;
         }
         String uri = String.format("/providers/%s", serviceProviderId);
@@ -592,7 +592,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public String getServices(String publicKey, String serviceProviderId) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return null;
         }
         String uri = String.format("/providers/%s/services", serviceProviderId);
@@ -610,7 +610,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public String getService(String publicKey, String serviceProviderId, String serviceId) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return null;
         }
         String uri = String.format("/providers/%s/services/%s", serviceProviderId, serviceId);
@@ -628,7 +628,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public String getResources(String publicKey, String serviceProviderId, String serviceId) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return null;
         }
         String uri = String.format("/providers/%s/services/%s/resources", serviceProviderId, serviceId);
@@ -646,7 +646,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public String getResource(String publicKey, String serviceProviderId, String serviceId, String resourceId) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return null;
         }
         String uri = String.format("/providers/%s/services/%s/resources/%s", serviceProviderId, serviceId, resourceId);
@@ -664,7 +664,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public JSONObject get(String publicKey, String serviceProviderId, String serviceId, String resourceId, String attributeId) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return null;
         }
         String uri = String.format("/providers/%s/services/%s/resources/%s/GET", serviceProviderId, serviceId, resourceId);
@@ -689,7 +689,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public JSONObject set(String publicKey, String serviceProviderId, String serviceId, String resourceId, String attributeId, Object parameter) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return null;
         }
         String uri = String.format("/providers/%s/services/%s/resources/%s/SET", serviceProviderId, serviceId, resourceId);
@@ -727,7 +727,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public JSONObject act(String publicKey, String serviceProviderId, String serviceId, String resourceId, Object[] parameters) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return null;
         }
         String uri = String.format("/providers/%s/services/%s/resources/%s/ACT", serviceProviderId, serviceId, resourceId);
@@ -762,7 +762,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public JSONObject unsubscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId, String subscriptionId) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return null;
         }
         String uri = String.format("/providers/%s/services/%s/resources/%s/UNSUBSCRIBE", serviceProviderId, serviceId, resourceId);
@@ -792,7 +792,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     protected JSONObject doSubscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId, JSONArray conditions) {
-        if (!super.connected) {
+        if (!super.getConnected()) {
             return null;
         }
         String uri = String.format("/providers/%s/services/%s/resources/%s/SUBSCRIBE", serviceProviderId, serviceId, resourceId);

@@ -234,34 +234,36 @@ public class RemoteSensiNact implements RemoteCore {
 	 */
 	@Override
 	public void connect(final String namespace) {
-		if (namespace == null) {
-			mediator.debug("Unable to register because of null namespace");
-			return;
-		}
-		this.registration = AccessController
-				.<ServiceRegistration<RemoteCore>>doPrivileged(new PrivilegedAction<ServiceRegistration<RemoteCore>>() {
+		synchronized(this) {
+			if (namespace == null) {
+				mediator.debug("Unable to register because of null namespace");
+				return;
+			}
+			this.registration = AccessController.<ServiceRegistration<RemoteCore>>doPrivileged(
+				new PrivilegedAction<ServiceRegistration<RemoteCore>>() {
 					@Override
 					public ServiceRegistration<RemoteCore> run() {
 						Dictionary<String, Object> props = new Hashtable<String, Object>();
 						props.put(NAMESPACE_PROP, namespace);
 
-						ServiceRegistration<RemoteCore> reg = mediator.getContext().registerService(RemoteCore.class,
-								RemoteSensiNact.this, props);
+						ServiceRegistration<RemoteCore> reg = mediator.getContext().registerService(
+							RemoteCore.class, RemoteSensiNact.this, props);
 						mediator.debug("RemoteCore '%s' registration done", namespace);
 						return reg;
 					}
 				});
-		if (this.registration == null) {
-			mediator.debug("Registration error");
-			return;
-		}
-		if (this.onConnectedCallback != null) {
-			Iterator<Executable<String, Void>> it = this.onConnectedCallback.iterator();
-			while (it.hasNext()) {
-				try {
-					it.next().execute(namespace);
-				} catch (Exception e) {
-					mediator.error(e);
+			if (this.registration == null) {
+				mediator.debug("Registration error");
+				return;
+			}
+			if (this.onConnectedCallback != null) {
+				Iterator<Executable<String, Void>> it = this.onConnectedCallback.iterator();
+				while (it.hasNext()) {
+					try {
+						it.next().execute(namespace);
+					} catch (Exception e) {
+						mediator.error(e);
+					}
 				}
 			}
 		}
@@ -287,49 +289,51 @@ public class RemoteSensiNact implements RemoteCore {
 	 */
 	@Override
 	public void disconnect() {
-		if (this.registration != null) {
-			final String namespace = this.remoteEndpoint.namespace();
-			AccessController.<Void>doPrivileged(new PrivilegedAction<Void>() {
-				@Override
-				public Void run() {
-					try {
-						RemoteSensiNact.this.registration.unregister();
-
-					} catch (IllegalStateException e) {
-						RemoteSensiNact.this.mediator.error(e);
-
-					} finally {
-						RemoteSensiNact.this.registration = null;
+		synchronized(this) {
+			if (this.registration != null) {
+				final String namespace = this.remoteEndpoint.namespace();
+				AccessController.<Void>doPrivileged(new PrivilegedAction<Void>() {
+					@Override
+					public Void run() {
+						try {
+							RemoteSensiNact.this.registration.unregister();
+	
+						} catch (IllegalStateException e) {
+							RemoteSensiNact.this.mediator.error(e);
+	
+						} finally {
+							RemoteSensiNact.this.registration = null;
+						}
+						return null;
 					}
-					return null;
-				}
-			});
-			if (!this.subscriptionIds.isEmpty()) {
-				String[] keys = null;
-				synchronized (this.subscriptionIds) {
-					keys = new String[this.subscriptionIds.size()];
-					this.subscriptionIds.keySet().toArray(keys);
-				}
-				int index = 0;
-				int length = keys == null ? 0 : keys.length;
-				for (; index < length; index++) {
-					SubscriptionReference ref = this.subscriptionIds.remove(keys[index]);
-					if (ref == null) {
-						continue;
+				});
+				if (!this.subscriptionIds.isEmpty()) {
+					String[] keys = null;
+					synchronized (this.subscriptionIds) {
+						keys = new String[this.subscriptionIds.size()];
+						this.subscriptionIds.keySet().toArray(keys);
 					}
-					JSONObject response = this.localEndpoint.unsubscribe(ref.publicKey, ref.serviceProviderId,
-							ref.serviceId, ref.resourceId, keys[index]);
+					int index = 0;
+					int length = keys == null ? 0 : keys.length;
+					for (; index < length; index++) {
+						SubscriptionReference ref = this.subscriptionIds.remove(keys[index]);
+						if (ref == null) {
+							continue;
+						}
+						JSONObject response = this.localEndpoint.unsubscribe(ref.publicKey, 
+							ref.serviceProviderId, ref.serviceId, ref.resourceId, keys[index]);
+					}
 				}
-			}
-			if (this.onDisconnectedCallback != null) {
-				Iterator<Executable<String, Void>> it = this.onDisconnectedCallback.iterator();
-
-				while (it.hasNext()) {
-					try {
-						it.next().execute(namespace);
-
-					} catch (Exception e) {
-						mediator.error(e);
+				if (this.onDisconnectedCallback != null) {
+					Iterator<Executable<String, Void>> it = this.onDisconnectedCallback.iterator();
+	
+					while (it.hasNext()) {
+						try {
+							it.next().execute(namespace);
+	
+						} catch (Exception e) {
+							mediator.error(e);
+						}
 					}
 				}
 			}
@@ -632,15 +636,15 @@ public class RemoteSensiNact implements RemoteCore {
 	 * @param local
 	 * @param executable
 	 */
-	private void callAgent(final String agentId, final boolean local, final Executable<SnaAgent, Void> executable) {
+	private void callAgent(final String agentId, final boolean local, 
+			final Executable<SnaAgent, Void> executable) {
 		AccessController.<Void>doPrivileged(new PrivilegedAction<Void>() {
 			@Override
 			public Void run() {
-				return RemoteSensiNact.this.mediator.callService(SnaAgent.class,
-						new StringBuilder().append("(&(org.eclipse.sensinact.gateway.agent.id=").append(agentId)
-								.append(")(org.eclipse.sensinact.gateway.agent.local=").append(Boolean.toString(local))
-								.append("))").toString(),
-						executable);
+			return RemoteSensiNact.this.mediator.callService(SnaAgent.class,
+				new StringBuilder().append("(&(org.eclipse.sensinact.gateway.agent.id="
+				).append(agentId).append(")(org.eclipse.sensinact.gateway.agent.local="
+				).append(Boolean.toString(local)).append("))").toString(), executable);
 			}
 		});
 	}
