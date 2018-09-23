@@ -50,7 +50,7 @@ public class ExtModelConfigurationBuilder<P extends Packet, C extends ExtModelCo
 	protected Boolean lockedAtInitializationTime;
     protected Boolean isDesynchronized;
     private Class<P> packetType;
-	private Class<Connector<P>> connectorType;
+	private Class<? extends Connector<P>> connectorType;
 
     /**
      * @param mediator
@@ -222,8 +222,7 @@ public class ExtModelConfigurationBuilder<P extends Packet, C extends ExtModelCo
      *   the {@link SensiNactResourceModel} to build
      * @return this builder
      */
-    public ExtModelConfigurationBuilder<P,C,I> withConnectorType(Class<Connector<P>>
-    connectorType) {
+    public ExtModelConfigurationBuilder<P,C,I> withConnectorType(Class<? extends Connector<P>> connectorType) {
         this.connectorType = connectorType;
         return this;
     }

@@ -94,7 +94,7 @@ public class ExtModelConfiguration<P extends Packet> extends ModelConfiguration 
     /**
      * The {@link Connector} type to be built by this ExtModelConfiguration
      */
-    protected Class<Connector<P>> connectorType;
+    protected Class<? extends Connector<P>> connectorType;
     
     /**
      * the set of {@link Task.CommandType}
@@ -399,7 +399,7 @@ public class ExtModelConfiguration<P extends Packet> extends ModelConfiguration 
      * @param connectorType 
      * 		the {@link Connector} type to be instantiated by this ExtModelConfiguration
      */
-    public ExtModelConfiguration<P> setConnectorType(Class<Connector<P>> connectorType) {
+    public ExtModelConfiguration<P> setConnectorType(Class<? extends Connector<P>> connectorType) {
         this.connectorType = connectorType;
         return this;
     } 
@@ -470,22 +470,22 @@ public class ExtModelConfiguration<P extends Packet> extends ModelConfiguration 
      *                 Connector} to instantiate will be connected to
      * @return a new {@link Connector} instance
      */
-    protected Connector<P> newConnector(ProtocolStackEndpoint<P> endpoint) 
+    protected <N extends Connector<P>> N newConnector(ProtocolStackEndpoint<P> endpoint) 
     	throws InvalidProtocolStackException {
-    	Connector<P> connector = null;
+    	N connector = null;
     	if(this.connectorType != null) {
             if (this.customizer != null) {
-                connector = (Connector<P>) ReflectUtils.<Connector<P>>getTheBestInstance(
-                this.connectorType, new Object[] {mediator, endpoint, this, this.customizer});
+                connector = (N) ReflectUtils.<N>getTheBestInstance(
+                (Class<N>)this.connectorType, new Object[] {mediator, endpoint, this, this.customizer});
             } else {
-                connector = (Connector<P>) ReflectUtils.<Connector<P>>getTheBestInstance(
-                this.connectorType, new Object[] {mediator, endpoint, this});
+                connector = (N) ReflectUtils.<N>getTheBestInstance(
+                (Class<N>)this.connectorType, new Object[] {mediator, endpoint, this});
             }  		
     	} else {
             if (this.customizer != null) {
-                return new Connector<P>(mediator, endpoint, this, (ConnectorCustomizer<P>) this.customizer);
+                return (N) new Connector<P>(mediator, endpoint, this, (ConnectorCustomizer<P>) this.customizer);
             } else {
-            	connector = new Connector<P>(mediator, endpoint, this);
+            	connector = (N) new Connector<P>(mediator, endpoint, this);
             }  		
     	}
         return connector;
