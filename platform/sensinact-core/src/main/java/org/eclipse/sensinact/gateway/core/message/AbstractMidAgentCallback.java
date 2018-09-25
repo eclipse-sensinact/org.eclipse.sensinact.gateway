@@ -110,6 +110,8 @@ public abstract class AbstractMidAgentCallback extends AbstractMidCallback imple
 			default:
 				;
 			}
+		} catch (MidCallbackException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new MidCallbackException(e);
 		}

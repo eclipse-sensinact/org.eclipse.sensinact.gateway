@@ -20,7 +20,7 @@ public interface MidAgentCallback extends MidCallback {
 	 * @param message
 	 *            the {@link SnaLifecycleMessageImpl} to be processed
 	 */
-	void doHandle(SnaLifecycleMessageImpl message);
+	void doHandle(SnaLifecycleMessageImpl message) throws MidCallbackException;
 
 	/**
 	 * Processes the {@link SnaUpdateMessageImpl} passed as parameter
@@ -28,7 +28,7 @@ public interface MidAgentCallback extends MidCallback {
 	 * @param message
 	 *            the {@link SnaUpdateMessageImpl} to be processed
 	 */
-	void doHandle(SnaUpdateMessageImpl message);
+	void doHandle(SnaUpdateMessageImpl message) throws MidCallbackException;
 
 	/**
 	 * Processes the {@link SnaErrorMessageImpl} passed as parameter
@@ -36,7 +36,7 @@ public interface MidAgentCallback extends MidCallback {
 	 * @param message
 	 *            the {@link SnaErrorMessageImpl} to be processed
 	 */
-	void doHandle(SnaErrorMessageImpl message);
+	void doHandle(SnaErrorMessageImpl message) throws MidCallbackException;
 
 	/**
 	 * Processes the {@link SnaResponseMessage} passed as parameter
@@ -44,7 +44,7 @@ public interface MidAgentCallback extends MidCallback {
 	 * @param message
 	 *            the {@link SnaResponseMessage} to be processed
 	 */
-	void doHandle(SnaResponseMessage<?, ?> message);
+	void doHandle(SnaResponseMessage<?, ?> message) throws MidCallbackException;
 
 	/**
 	 * Stops this {@link SnaAgent} callback

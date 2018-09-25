@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 
+import java.io.IOException;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
@@ -35,10 +37,12 @@ public class HttpRecipient extends NorthboundRecipient {
     }
 
     /**
+     * @throws IOException 
      * @inheritDoc
-     * @see Recipient#callback(String, SnaMessage[])
+     * 
+     * @see org.eclipse.sensinact.gateway.core.message.Recipient#callback(java.lang.String, org.eclipse.sensinact.gateway.core.message.SnaMessage[])
      */
-    public void callback(String callbackId, SnaMessage[] messages) {
+    public void callback(String callbackId, SnaMessage[] messages) throws IOException {
         int index = 0;
         int length = messages == null ? 0 : messages.length;
 
@@ -62,26 +66,19 @@ public class HttpRecipient extends NorthboundRecipient {
         builder.append(JSONUtils.CLOSE_BRACKET);
         builder.append(JSONUtils.CLOSE_BRACE);
 
-        try {
-            String uri = null;
-            if (callbackId != null) {
-                String separator = urlCallback.endsWith("/") ? "" : "/";
-                uri = new StringBuilder().append(urlCallback).append(separator).append(callbackId).toString();
-            } else {
-                uri = urlCallback;
-            }
-
-            this.connectionBuilder.setUri(uri);
-            this.connectionBuilder.setContent(builder.toString());
-            this.connectionBuilder.setHttpMethod("POST");
-            this.connectionBuilder.setContentType("application/json");
-
-            SimpleRequest request = new SimpleRequest(HttpRecipient.this.connectionBuilder);
-            //SimpleResponse response =
-            request.send();
-            //super.mediator.debug(response.toString());
-        } catch (Exception e) {
-            super.mediator.error(e);
+        String uri = null;
+        if (callbackId != null) {
+            String separator = urlCallback.endsWith("/") ? "" : "/";
+            uri = new StringBuilder().append(urlCallback).append(separator).append(callbackId).toString();
+        } else {
+            uri = urlCallback;
         }
+        this.connectionBuilder.setUri(uri);
+        this.connectionBuilder.setContent(builder.toString());
+        this.connectionBuilder.setHttpMethod("POST");
+        this.connectionBuilder.setContentType("application/json");
+
+        SimpleRequest request = new SimpleRequest(HttpRecipient.this.connectionBuilder);
+        request.send();
     }
 }

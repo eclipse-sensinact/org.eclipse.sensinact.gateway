@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidCallback;
+import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 
@@ -44,12 +45,11 @@ public abstract class NorthboundRecipient extends AbstractMidCallback implements
      * doCallback(org.eclipse.sensinact.gateway.core.message.SnaMessage)
      */
     @Override
-    protected void doCallback(SnaMessage<?> message) {
+    protected void doCallback(SnaMessage<?> message) throws MidCallbackException {
         try {
             this.callback(super.getName(), new SnaMessage[]{message});
-
         } catch (Exception e) {
-            e.printStackTrace();
+           throw new MidCallbackException(e);
         }
 
     }

@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 import org.eclipse.sensinact.gateway.common.execution.DefaultErrorHandler;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
@@ -60,22 +61,22 @@ public class RegisterAgentRequest extends NorthboundRequest {
     protected Argument[] getExecutionArguments() {
         AbstractMidAgentCallback callback = new AbstractMidAgentCallback() {
             @Override
-            public void doHandle(SnaLifecycleMessageImpl message) {
+            public void doHandle(SnaLifecycleMessageImpl message) throws MidCallbackException  {
                 RegisterAgentRequest.this.recipient.doCallback(message);
             }
 
             @Override
-            public void doHandle(SnaUpdateMessageImpl message) {
+            public void doHandle(SnaUpdateMessageImpl message) throws MidCallbackException {
                 RegisterAgentRequest.this.recipient.doCallback(message);
             }
 
             @Override
-            public void doHandle(SnaErrorMessageImpl message) {
+            public void doHandle(SnaErrorMessageImpl message) throws MidCallbackException {
                 RegisterAgentRequest.this.recipient.doCallback(message);
             }
 
             @Override
-            public void doHandle(SnaResponseMessage<?, ?> message) {
+            public void doHandle(SnaResponseMessage<?, ?> message) throws MidCallbackException {
                 RegisterAgentRequest.this.recipient.doCallback(message);
             }
 

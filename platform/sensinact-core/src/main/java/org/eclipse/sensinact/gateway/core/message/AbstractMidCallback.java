@@ -235,17 +235,20 @@ public abstract class AbstractMidCallback implements MidCallback {
 	 */
 	@Override
 	public boolean isActive(){
-		return this.isActive.get();
+		synchronized(this.isActive) {
+			return this.isActive.get();
+		}
 	}
 	
 	/**
 	 * Stops this {@link MidCallback} and all its associated processes
 	 */
 	public void stop() {
-		
-		this.isActive.set(false);
-		
-		if (MessageRegistererBufferDelegate.class.isAssignableFrom(this.registerer.getClass())) {
+		synchronized(this.isActive) {
+			this.isActive.set(false);
+		}		
+		if (MessageRegistererBufferDelegate.class.isAssignableFrom(
+				this.registerer.getClass())) {
 			((MessageRegistererBufferDelegate) this.registerer).stop();
 		}
 	}

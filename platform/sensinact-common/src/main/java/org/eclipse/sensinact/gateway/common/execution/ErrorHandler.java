@@ -30,7 +30,7 @@ public interface ErrorHandler {
         public static final int ALTERNATIVE = 0x010000;
         public static final int LOG = 0x100000;
         
-        public static final int DEFAULT_POLICY = CONTINUE | LOG;
+        public static final int DEFAULT_POLICY = STOP | LOG;
 
 	    /**
 	     * Builds and returns the int value representation of
@@ -90,9 +90,9 @@ public interface ErrorHandler {
          * representation of specified policy(s)
          *
          * @param policy             
-         * 		byte value representation of subscription policy(s)
+         * 		the global policy integer value applying
          * @param errorHandlerPolicy 
-         * 		the subscription policy to check the presence
+         * 		the policy integer value to identify
          * @return
          */
         public static boolean contains(int policy, int errorHandlerPolicy) {
