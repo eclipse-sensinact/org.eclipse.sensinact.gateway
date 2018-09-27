@@ -102,7 +102,7 @@ public class HttpEndpoint extends HttpServlet {
                         String clientAddress = rar.getRemoteAddr();
                         int clientPort = rar.getRemotePort();
 
-                        client = new StringBuilder().append(clientAddress).append(":").append(clientPort).toString();
+                        client = /*new StringBuilder().append(*/clientAddress/*).append(":").append(clientPort).toString()*/;
 
                         String sid = HttpEndpoint.this.anonymous.get(client);
                         if (sid != null) {
@@ -113,7 +113,6 @@ public class HttpEndpoint extends HttpServlet {
                         }
                     }
                     HttpRestAccess restAccess = new HttpRestAccess(rar, new HttpServletResponseWrapper(response));
-
                     restAccess.proceed();
 
                 } catch (InvalidCredentialException e) {
