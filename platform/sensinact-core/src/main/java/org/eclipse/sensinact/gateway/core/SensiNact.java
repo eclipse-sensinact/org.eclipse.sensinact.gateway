@@ -1581,7 +1581,8 @@ public class SensiNact implements Core {
 	 */
 	@Override
 	public AuthenticatedSession getSession(final String token) {
-		AuthenticatedSession session = (AuthenticatedSession) this.sessions.getSessionFromToken(token);
+		AuthenticatedSession session = (AuthenticatedSession) 
+				this.sessions.getSessionFromToken(token);
 		return session;
 	}
 
@@ -1592,16 +1593,19 @@ public class SensiNact implements Core {
 	 */
 	@Override
 	public AnonymousSession getAnonymousSession() {
-		AccessTree<?> tree = this.getUserAccessTree(null);
-
-		String pkey = new StringBuilder().append(UserManager.ANONYMOUS_PKEY).append("_").append(
-				count.incrementAndGet()).toString();
-
-		SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, this.nextToken(), tree, null);
-
+		int sessionCount = -1;
+		String sessionToken = null;	
+		
+		synchronized(count) {
+			sessionCount = count.incrementAndGet();
+			sessionToken = this.nextToken();
+		}
+		String pkey = new StringBuilder().append(UserManager.ANONYMOUS_PKEY).append(
+			"_").append(sessionCount).toString();
+		SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, sessionToken, 
+				this.getAnonymousTree(), null);
 		sessionKey.setUserKey(new UserKey(pkey));
-		AnonymousSession session = new SensiNactAnonymousSession(sessionKey.getToken());
-
+		AnonymousSession session = new SensiNactAnonymousSession(sessionToken);
 		this.sessions.put(sessionKey, session);
 		return session;
 	}
@@ -1614,26 +1618,34 @@ public class SensiNact implements Core {
 	 */
 	@Override
 	public Session getApplicationSession(final Mediator mediator, final String privateKey) {
-		SessionKey skey = this.doPrivilegedService(SecuredAccess.class, null,
-				new Executable<SecuredAccess, SessionKey>() {
-					@Override
-					public SessionKey execute(SecuredAccess securedAccess) throws Exception {
-						String publicKey = securedAccess.getApplicationPublicKey(privateKey);
-						AccessTree<? extends AccessNode> tree = null;
-						if (publicKey == null) {
-							publicKey = new StringBuilder().append(UserManager.ANONYMOUS_PKEY).append("_").append(
-								count.incrementAndGet()).toString();
-							tree = SensiNact.this.getAnonymousTree();
-						} else {
-							tree = securedAccess.getApplicationAccessTree(publicKey);
-						}
-						SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, SensiNact.this.nextToken(), tree,
-								null);
 
-						sessionKey.setUserKey(new UserKey(publicKey));
-						return sessionKey;
-					}
-				});
+		final int sessionCount;
+		final String sessionToken;	
+		
+		synchronized(count) {
+			sessionCount = count.incrementAndGet();
+			sessionToken = this.nextToken();
+		}
+		SessionKey skey = this.doPrivilegedService(SecuredAccess.class, null,
+		new Executable<SecuredAccess, SessionKey>() {
+			@Override
+			public SessionKey execute(SecuredAccess securedAccess) throws Exception {
+				String publicKey = securedAccess.getApplicationPublicKey(privateKey);
+				AccessTree<? extends AccessNode> tree = null;
+				if (publicKey == null) {
+					publicKey = new StringBuilder().append(UserManager.ANONYMOUS_PKEY
+						).append("_").append(sessionCount).toString();
+					tree = SensiNact.this.getAnonymousTree();
+				} else {
+					tree = securedAccess.getApplicationAccessTree(publicKey);
+				}
+				SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, 
+					sessionToken, tree, null);
+
+				sessionKey.setUserKey(new UserKey(publicKey));
+				return sessionKey;
+			}
+		});
 		Session session = new SensiNactAuthenticatedSession(skey.getToken());
 		sessions.put(skey, session);
 		return session;
@@ -1742,8 +1754,17 @@ public class SensiNact implements Core {
 	@Override
 	public void createRemoteCore(final AbstractRemoteEndpoint remoteEndpoint,
 			Collection<Executable<String, Void>> onConnectedCallbacks,
-			Collection<Executable<String, Void>> onDisconnectedCallbacks) {		
-		final RemoteSensiNact remoteCore = new RemoteSensiNact(mediator, new LocalEndpoint(count.incrementAndGet()) {
+			Collection<Executable<String, Void>> onDisconnectedCallbacks) {	
+	
+		final int sessionCount;
+		final String sessionToken;
+		
+		synchronized(this.count) {
+			sessionCount = count.incrementAndGet();
+			sessionToken = this.nextToken();
+		}
+		final RemoteSensiNact remoteCore = new RemoteSensiNact(mediator, new LocalEndpoint(
+			sessionCount) {
 			private Map<String, Session> remoteSessions = new HashMap<String, Session>();
 
 			private Session createSession(String publicKey) {
@@ -1751,16 +1772,16 @@ public class SensiNact implements Core {
 				Class<? extends Session> sessionClass = null;
 
 				if (publicKey.startsWith(UserManager.ANONYMOUS_PKEY)) {
-					filteredKey = new StringBuilder().append(publicKey).append("_remote").append(super.localID())
-							.toString();
+					filteredKey = new StringBuilder().append(publicKey).append("_remote"
+						).append(super.localID()).toString();
 					sessionClass = SensiNactAnonymousSession.class;
 				} else {
 					sessionClass = SensiNactAuthenticatedSession.class;
 				}
-				AccessTree<? extends AccessNode> tree = SensiNact.this.getUserAccessTree(filteredKey);
-
-				SessionKey sessionKey = new SessionKey(mediator, localID(), SensiNact.this.nextToken(), tree,
-						remoteEndpoint);
+				AccessTree<? extends AccessNode> tree = SensiNact.this.getUserAccessTree(
+						filteredKey);
+				SessionKey sessionKey = new SessionKey(mediator, localID(), 
+						sessionToken, tree,remoteEndpoint);
 
 				sessionKey.setUserKey(new UserKey(filteredKey));
 				Session session = null;
