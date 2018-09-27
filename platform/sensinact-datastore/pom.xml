@@ -29,7 +29,7 @@
     </properties>
 
 	<modules>
-        <module>sensinact-datastore-api</module>
+        <!--<module>sensinact-datastore-api</module>-->
         <module>sensinact-sqlite-connector</module>
 	</modules>
 
