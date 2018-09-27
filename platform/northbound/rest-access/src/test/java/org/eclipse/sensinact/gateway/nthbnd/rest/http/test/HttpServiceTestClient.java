@@ -18,14 +18,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.ConnectException;
 
 //import org.eclipse.sensinact.gateway.util.crypto.Base64;
 public class HttpServiceTestClient {
     public static String newRequest(Mediator mediator, String url, String content, String method) {
         SimpleResponse response;
-        ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> builder = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
+        ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> builder = 
+        		new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
         builder.setUri(url);
         builder.setAccept("application/json");
+        builder.setConnectTimeout(60000);
+        builder.setReadTimeout(60000);
         /*builder.addHeader("Authorization",
         		"Basic " + Base64.encodeBytes(
                 	"cea:sensiNact_team".getBytes()));*/
@@ -48,7 +52,7 @@ public class HttpServiceTestClient {
             byte[] responseContent = response.getContent();
             String contentStr = (responseContent == null ? null : new String(responseContent));
             return contentStr;
-        } catch (JSONException e) {
+        }catch (JSONException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();

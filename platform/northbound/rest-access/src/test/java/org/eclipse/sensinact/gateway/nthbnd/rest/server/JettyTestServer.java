@@ -10,143 +10,146 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.rest.server;
 
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.sensinact.gateway.util.ReflectUtils;
+import java.io.IOException;
+import java.util.concurrent.Executors;
 
 import javax.servlet.AsyncContext;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+
+import org.eclipse.jetty.io.Connection;
+import org.eclipse.jetty.io.EndPoint;
+import org.eclipse.jetty.server.ConnectionFactory;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.thread.ExecutorThreadPool;
+import org.eclipse.sensinact.gateway.util.IOUtils;
 
 public class JettyTestServer implements Runnable {
-    @Target(value = {ElementType.METHOD})
-    @Retention(value = RetentionPolicy.RUNTIME)
-    public @interface doPost {
-    }
 
-    @Target(value = {ElementType.METHOD})
-    @Retention(value = RetentionPolicy.RUNTIME)
-    public @interface doGet {
-    }
 
-    public class Callback {
-        public final Object target;
-        public final Method method;
-
-        Callback(Object target, Method method) {
-            this.target = target;
-            this.method = method;
-        }
-
-        public Object invoke(Object[] parameters) throws Exception {
-            this.method.setAccessible(true);
-            return this.method.invoke(this.target, parameters);
-        }
-    }
-
-    private Server server;
-    private Map<Class<? extends Annotation>, List<Callback>> callbacks;
+    private final Server server;
+    private ServerConnector connector ;
+	private int port;
+    private String message;
+	private boolean available;
 
     public JettyTestServer(int port) throws Exception {
-        this.callbacks = new HashMap<Class<? extends Annotation>, List<Callback>>();
-        this.server = new Server(port);
-        ServletHandler handler = new ServletHandler();
-        ServletHolder holder = new ServletHolder(new JettyTestServerCallbackServlet());
-        holder.setName("callbackServlet");
 
-        handler.addServletWithMapping(holder, "/");
-        this.server.setHandler(handler);
-    }
-
-    public void registerCallback(Object callback) {
-        Map<Method, doGet> getMethods = ReflectUtils.getAnnotatedMethods(callback.getClass(), doGet.class);
-
-        if (getMethods != null && getMethods.size() > 0) {
-            List<Callback> callbackList = this.callbacks.get(doGet.class);
-
-            if (callbackList == null) {
-                callbackList = new ArrayList<Callback>();
-                this.callbacks.put(doGet.class, callbackList);
-            }
-            Iterator<Method> iterator = getMethods.keySet().iterator();
-            while (iterator.hasNext()) {
-                callbackList.add(new Callback(callback, iterator.next()));
-            }
-        }
-        Map<Method, doPost> postMethods = ReflectUtils.getAnnotatedMethods(callback.getClass(), doPost.class);
-        if (postMethods != null && postMethods.size() > 0) {
-            List<Callback> callbackList = this.callbacks.get(doPost.class);
-
-            if (callbackList == null) {
-                callbackList = new ArrayList<Callback>();
-                this.callbacks.put(doPost.class, callbackList);
-            }
-            Iterator<Method> iterator = postMethods.keySet().iterator();
-            while (iterator.hasNext()) {
-                callbackList.add(new Callback(callback, iterator.next()));
-            }
-        }
+    	this.port = port;      
+        this.server = new Server(new ExecutorThreadPool(Executors.newFixedThreadPool(10)));
     }
 
     public boolean isStarted() {
         return this.running;
     }
 
-    public void start() throws Exception {
+    public void start() throws Exception {  
+        ServletHolder holder = new ServletHolder(new JettyTestServerCallbackServlet());
+        holder.setName("callbackServlet");
+        
+        ServletHandler handler = new ServletHandler();
+        handler.addServletWithMapping(holder, "/");
+        
+        this.server.setHandler(handler);
+        connector = new ServerConnector(server);
+        connector.setPort(port);
+        connector.addConnectionFactory(new ConnectionFactory() {
+
+			@Override
+			public String getProtocol() {
+				return "HTTP";
+			}
+
+			@Override
+			public Connection newConnection(Connector connector, EndPoint endpoint) {
+				System.out.println(connector);
+				System.out.println(endpoint);
+				return endpoint.getConnection();
+			}
+        	
+        });
+        server.setConnectors(new Connector[] { connector });
         this.server.start();
+    	
     }
 
     public void stop() throws Exception {
-        this.server.stop();
+    	if(this.connector != null) {
+    		this.connector.stop();
+    	}
+    	this.server.stop();
     }
 
+    public void dump() throws Exception {
+        this.server.dumpStdErr();
+    }
+    
     public void join() throws Exception {
-        this.server.join();
+    	if(this.connector != null) {
+        	connector.join();
+    	}
         Thread.sleep(2000);
     }
 
     @SuppressWarnings("serial")
     public class JettyTestServerCallbackServlet extends HttpServlet {
-        /**
+
+		/**
          * @throws IOException
          * @inheritDoc
          * @see javax.servlet.http.HttpServlet#
          * service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
          */
+    	@Override
         public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-            if (!response.isCommitted()) {
-                final AsyncContext context = request.startAsync(request, response);
-                response.getOutputStream().setWriteListener(new WriteListener() {
-                    @Override
-                    public void onWritePossible() throws IOException {
-                        JettyTestServerCallbackServlet.this.doHandle(context, JettyTestServer.this.callbacks.get(doGet.class));
-                    }
-
-                    @Override
-                    public void onError(Throwable t) {
-                        t.printStackTrace();
-                    }
-                });
+        	System.out.println("GETTING ...");
+    		if (response.isCommitted()) {
+                return;
             }
+            final AsyncContext asyncContext;
+            if (request.isAsyncStarted()) {
+                asyncContext = request.getAsyncContext();
+
+            } else {
+                asyncContext = request.startAsync(request, response);
+            }
+            //System.out.println(request);
+            response.getOutputStream().setWriteListener(new WriteListener() {
+                @Override
+                public void onWritePossible() throws IOException {
+                    HttpServletRequest request = (HttpServletRequest) asyncContext.getRequest();
+                    HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
+                    System.out.println("REQUEST " + request);
+                    System.out.println("RESPONSE " + response);
+                     try {
+                    	JettyTestServer.this.message = null;
+             	        JettyTestServer.this.setAvailable(true);
+             	        response.setStatus(200);
+
+                    }catch (Exception e) {
+                        e.printStackTrace();
+                        response.sendError(520, "Internal server error");
+
+                    } finally {                        
+                        if (request.isAsyncStarted()) {
+                            asyncContext.complete();
+                        }  
+                        System.out.println("...GOT");
+                    }
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                   t.printStackTrace();;
+                }
+
+            });
         }
 
         /**
@@ -155,75 +158,74 @@ public class JettyTestServer implements Runnable {
          * @see javax.servlet.http.HttpServlet#
          * service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
          */
+        @Override
         public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-            if (!response.isCommitted()) {
-                final AsyncContext context = request.startAsync(request, response);
-
-                response.getOutputStream().setWriteListener(new WriteListener() {
-                    @Override
-                    public void onWritePossible() throws IOException {
-                        JettyTestServerCallbackServlet.this.doHandle(context, JettyTestServer.this.callbacks.get(doPost.class));
-                    }
-
-                    @Override
-                    public void onError(Throwable t) {
-                        t.printStackTrace();
-                    }
-                });
+        	System.out.println("POSTING ...");
+        	if (response.isCommitted()) {
+                return;
             }
-        }
+            final AsyncContext asyncContext;
+            if (request.isAsyncStarted()) {
+                asyncContext = request.getAsyncContext();
 
-        /**
-         * @param request
-         * @param result
-         * @param callbackList
-         */
-        private void doHandle(AsyncContext context, List<Callback> callbackList) {
-            int index = 0;
-            int length = callbackList == null ? 0 : callbackList.size();
-            HttpServletRequest request = (HttpServletRequest) context.getRequest();
-            HttpServletResponse response = (HttpServletResponse) context.getResponse();
-
-            for (; index < length; index++) {
-                Callback callback = callbackList.get(index);
-                Class<?>[] parameterTypes = callback.method.getParameterTypes();
-
-                int parametersIndex = 0;
-                int parametersLength = parameterTypes == null ? 0 : parameterTypes.length;
-
-                Object[] parameters = new Object[parametersLength];
-
-                for (; parametersIndex < parametersLength; parametersIndex++) {
-                    Class<?> parameterClass = parameterTypes[parametersIndex];
-                    if (ServletRequest.class.isAssignableFrom(parameterClass)) {
-                        parameters[parametersIndex] = request;
-                        continue;
-                    }
-                    if (ServletResponse.class.isAssignableFrom(parameterClass)) {
-                        parameters[parametersIndex] = response;
-                        continue;
-                    }
-                    if (ServletContext.class.isAssignableFrom(parameterClass)) {
-                        parameters[parametersIndex] = super.getServletContext();
-                        continue;
-                    }
-                    if (ServletConfig.class.isAssignableFrom(parameterClass)) {
-                        parameters[parametersIndex] = super.getServletConfig();
-                        continue;
-                    }
-                    parameters[parametersIndex] = super.getServletContext().getAttribute(parameterClass.getCanonicalName());
-                }
-                try {
-                    callback.invoke(parameters);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            } else {
+                asyncContext = request.startAsync(request, response);
             }
-            context.complete();
+            //System.out.println(request);
+            response.getOutputStream().setWriteListener(new WriteListener() {
+                @Override
+                public void onWritePossible() throws IOException {
+                    HttpServletRequest request = (HttpServletRequest) asyncContext.getRequest();
+                    HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
+                    System.out.println("REQUEST " + request);
+                    System.out.println("RESPONSE " + response);
+                    try {
+                    	JettyTestServer.this.message = null;
+             	        int length = request.getContentLength();
+             	        if (length > -1) {
+             	            byte[] content = IOUtils.read(request.getInputStream(), length, false);
+             	            JettyTestServer.this.message = new String(content);
+             	        } else {
+             	            byte[] content = IOUtils.read(request.getInputStream(), false);
+             	            JettyTestServer.this.message = new String(content);
+             	        }
+             	        JettyTestServer.this.setAvailable(true);
+             	        response.setStatus(200);
+
+                    }catch (Exception e) {
+                        e.printStackTrace();
+                        response.sendError(520, "Internal server error");
+
+                    } finally {                        
+                        if (request.isAsyncStarted()) {
+                            asyncContext.complete();
+                        }	                   
+                        System.out.println("...POSTED");
+                    	
+                    }
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                   t.printStackTrace();;
+                }
+
+            });
         }
     }
 
+	public boolean isAvailable() {
+		return this.available;
+	}
+	
+	public void setAvailable(boolean available) {
+		this.available = available;
+	}
+
+    public String getResponseMessage() {
+        return this.message;
+    }
+    
     private boolean running = false;
 
     @Override
