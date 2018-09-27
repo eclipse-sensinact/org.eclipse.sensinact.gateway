@@ -101,16 +101,17 @@
         <module>sensinact-utils</module>
         <module>sensinact-common</module>
 		<module>tools</module>
-        <module>sensinact-datastore</module>
+        <module>sensinact-datastore/sensinact-datastore-api</module>
+        <module>sensinact-security/sensinact-signature-validator</module>
         <module>sensinact-core</module>
+        <module>sensinact-security</module>
         <module>protocol</module>
 		<module>northbound/sensinact-access</module>
-        <module>sensinact-security</module>
         <module>sensinact-generic</module>
         <module>../simulated-devices</module>
+        <module>sensinact-datastore</module>
 		<module>northbound</module>
 		<module>sensinact-security/sensinact-mail-connector</module>
-        <module>sensinact-security/sensinact-signature-validator</module>
         <module>sensinact-security/sensinact-security-core</module>
         <module>southbound</module>
         <module>sensinact-system</module>
