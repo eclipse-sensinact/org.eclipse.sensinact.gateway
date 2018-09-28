@@ -33,6 +33,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+            <artifactId>http-tools</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
             <artifactId>http-device</artifactId>
             <version>${project.version}</version>
