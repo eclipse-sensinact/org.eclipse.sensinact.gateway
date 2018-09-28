@@ -1,0 +1,126 @@
+<html>
+
+<head>
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
+   integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+   crossorigin=""/>
+ <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"
+   integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
+   crossorigin=""></script>
+<style>
+#mapid { height: 100%; }
+</style>
+</head>
+<body>
+<div id="mapid"></div>
+</body>
+<script>
+var mymap = L.map('mapid').setView([45.1841602,5.6805231], 13);
+L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox.streets',
+    accessToken: 'pk.eyJ1IjoiZ3Jlbm9ibGVtYXJ0aW4iLCJhIjoiY2pmM3o3eW9xMTljYjJxb200a3poNGw0MSJ9.mq14wMXNknIqgaaVrZr7Yw'
+}).addTo(mymap);
+
+//var marker = L.marker([45.1841602,5.6805231]).addTo(mymap);
+
+
+//this.serverAddr="localhost"
+this.serverAddr=document.URL.replace(/http[s]{0,1}:\/\//i, "").replace(/\/.*/i, "");
+var ws= new WebSocket("ws"+(document.URL.indexOf("https")>-1?"s":"")+"://"+this.serverAddr+"/ws");
+var markersAll = new Array();
+
+
+ ws.onopen = function(evt) {
+	 //var state=document.getElementById("state")
+	 //state.innerHTML="CONNECTED";
+
+ ws.send("{\"uri\":\"sensinact/SUBSCRIBE\",\"rid\":\"webapp\",\"parameters\":[{\"name\":\"sender\",\"type\":\"string\",\"value\":\"/.*\"},{\"name\":\"pattern\",\"type\":\"boolean\",\"value\":true},{\"name\":\"complement\",\"type\":\"boolean\",\"value\":false},{\"name\":\"types\",\"type\":\"array\",\"value\":[\"UPDATE\",\"LIFECYCLE\"]}]}")
+
+ws.send("{\"uri\":\"/jsonpath:sensinact\",\"rid\":\"webapp\",\"parameters\":[{\"name\":\"jsonpath\",\"type\":\"string\",\"value\":\"$.*\"}]}")
+
+ };
+
+
+
+ ws.onmessage = function(evt) {
+	 console.log( "Received Message: " + evt.data);
+
+	try{
+	       var ig=JSON.parse(evt.data);
+		//console.log("----"+Object.ig.messages[0]);
+		if(ig.providers!=undefined){
+			console.log("providers received");
+			ig.providers.forEach(function(provider){
+				provider.services.forEach(function(service){
+					service.resources.forEach(function(resource){
+						if(resource.name=="location"){
+							    latlong=provider.location.split(":");
+							    latitude=latlong[0];
+							    longitude=latlong[1];
+							console.log("providers received:---->"+resource.name);
+							var marker = L.marker([parseFloat(latitude), parseFloat(longitude)]).addTo(mymap).bindPopup(provider.name);
+              markersAll[provider.name]=marker;
+						}
+					});
+				});
+			});
+		}
+		if(ig.messages!=undefined){
+			for (var i = 0; i < ig.messages.length; i++) {
+			    if((ig.messages[i].type=="ATTRIBUTE_VALUE_UPDATED" || ig.messages[i].type=="RESOURCE_APPEARING") && ig.messages[i].notification.name=="location"){
+				    var notifi = ig.messages[i].notification;
+				    latlong=notifi.value.split(":");
+				    latitude=latlong[0];
+				    longitude=latlong[1];
+				    deviceName=ig.messages[i].uri.split("/")[1]
+				    console.log("+++"+deviceName+"--"+latitude+"-"+longitude);
+					//var mymap;//
+				    if(markersAll[deviceName]===undefined){
+				    var marker = L.marker([parseFloat(latitude), parseFloat(longitude)]).addTo(mymap).bindPopup(deviceName);
+				    markersAll[deviceName]=marker;
+				    }else {
+					var latlng =L.latLng(parseFloat(latitude), parseFloat(longitude));
+					markersAll[deviceName].setLatLng(latlng);
+				    }
+
+			   }else if(ig.messages[i].type=="PROVIDER_DISAPPEARING") {
+				    deviceName=ig.messages[i].uri.split("/")[1];
+				    myrc=markersAll[deviceName];
+
+				  if(!(typeof myrc === "undefined")){
+				    mymap.removeLayer(markersAll[deviceName]);
+				    markersAll[deviceName]=undefined;
+				  }
+			   }
+			    //var marker = L.marker([45.424, 4.29]).addTo(mymap);
+			}
+		}
+	}catch(error){
+		console.error(error);
+	}
+
+ };
+ ws.onclose = function(evt) {
+	 //var state=document.getElementById("state")
+	 //state.innerHTML="DISCONNECTED";
+   console.log("removing all devices");
+   for (var marker in markersAll) {
+     try {
+    mymap.removeLayer(marker);   
+     }catch(error){
+
+     }
+
+    }
+    markersAll = new Array();
+ };
+ ws.onerror = function(evt) {
+	 var state=document.getElementById("state")
+	 state.innerHTML="ERROR";
+ };
+
+</script>
+
+</html>
