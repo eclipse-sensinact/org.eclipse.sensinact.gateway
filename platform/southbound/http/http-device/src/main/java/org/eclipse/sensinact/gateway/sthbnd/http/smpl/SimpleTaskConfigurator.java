@@ -168,18 +168,18 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
         while (argument != null) {
             Matcher valueMatcher = this.valuePattern.matcher(argument);
             Matcher contextMatcher = this.contextPattern.matcher(argument);
-            if (valueMatcher.find()) {
+            
+            int valueIndex = valueMatcher.find()?valueMatcher.start(1):-1;
+            int contextIndex = contextMatcher.find()?contextMatcher.start(1):-1;
+            
+            if (valueIndex > contextIndex) {            	
                 String val = (String) this.endpoint.getMediator().getProperty(valueMatcher.group(1));
-
                 StringBuilder builder = new StringBuilder().append(argument.substring(0, valueMatcher.start(1) - 2)).append(val).append(argument.substring(valueMatcher.end(1) + 1, argument.length()));
                 argument = builder.toString();
-
-            } else if (contextMatcher.find()) {
-                String val = this.endpoint.getMediator().resolve(key, contextMatcher.group(1));
-
+            } else if (contextIndex > valueIndex) {            	
+            	String val = this.endpoint.getMediator().resolve(key, contextMatcher.group(1));
                 StringBuilder builder = new StringBuilder().append(argument.substring(0, contextMatcher.start(1) - 9)).append(val).append(argument.substring(contextMatcher.end(1) + 1, argument.length()));
                 argument = builder.toString();
-
             } else {
                 resolved = argument;
                 break;

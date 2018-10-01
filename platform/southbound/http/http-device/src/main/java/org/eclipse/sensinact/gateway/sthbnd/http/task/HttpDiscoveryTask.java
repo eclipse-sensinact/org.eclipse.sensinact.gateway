@@ -21,6 +21,7 @@ import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class HttpDiscoveryTask<RESPONSE extends HttpResponse, REQUEST extends Request<RESPONSE>> extends HttpTask<RESPONSE, REQUEST> {
+
     /**
      * Constructor
      *
@@ -32,6 +33,54 @@ public abstract class HttpDiscoveryTask<RESPONSE extends HttpResponse, REQUEST e
      *                    by this HttpDiscoveryConnectionConfiguration
      */
     public HttpDiscoveryTask(Mediator mediator, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType) {
-        super(mediator, CommandType.GET, transmitter, requestType, null, null, null, null);
+        this(mediator, CommandType.GET, transmitter, requestType, null);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param mediator    the {@link Mediator} allowing to interact with
+     *                    the OSGi host environment
+     * @param transmitter the {@link HttpProtocolStackEndpoint} transmitting
+     *                    the requests build by the HttpDiscoveryTask to instantiate
+     * @param requestType the extended {@link HttpRequest} type handled
+     *                    by this HttpDiscoveryConnectionConfiguration
+     * @param parameters   the Objects array parameterizing the remote discovery call
+     */
+    public HttpDiscoveryTask(Mediator mediator, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType, Object[] parameters) {
+        this(mediator, CommandType.GET, transmitter, requestType, parameters);
+    }
+    
+    /**
+     * Constructor
+     *
+     * @param mediator    the {@link Mediator} allowing to interact with
+     *                    the OSGi host environment
+     * @param command     the {@link CommandType} of the HttpDiscoveryTask to be
+     *                    instantiated
+     * @param transmitter the {@link HttpProtocolStackEndpoint} transmitting
+     *                    the requests build by the HttpDiscoveryTask to instantiate
+     * @param requestType the extended {@link HttpRequest} type handled
+     *                    by this HttpDiscoveryConnectionConfiguration
+     */
+    public HttpDiscoveryTask(Mediator mediator, CommandType command, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType) {
+        this(mediator, command, transmitter, requestType, null);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param mediator    the {@link Mediator} allowing to interact with
+     *                    the OSGi host environment
+     * @param command     the {@link CommandType} of the HttpDiscoveryTask to be
+     *                    instantiated
+     * @param transmitter the {@link HttpProtocolStackEndpoint} transmitting
+     *                    the requests build by the HttpDiscoveryTask to instantiate
+     * @param requestType the extended {@link HttpRequest} type handled
+     *                    by this HttpDiscoveryConnectionConfiguration
+     * @param parameters   the Objects array parameterizing the remote discovery call
+     */
+    public HttpDiscoveryTask(Mediator mediator, CommandType command, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType, Object[] parameters) {
+        super(mediator, command, transmitter, requestType, null, null, null, parameters);
     }
 }
