@@ -58,9 +58,14 @@
 			            <configuration>
 			                <target>
 			                    <mkdir dir="${project.build.directory}/felix/tmp" />
+			                    <mkdir dir="${project.build.directory}/felix/tmp1" />
+			                    <mkdir dir="${project.build.directory}/felix/tmp2" />
 			                    <mkdir dir="${project.build.directory}/extra-test-classes" />
 			                    <mkdir dir="${project.build.directory}/extra-test-classes2" />
 			                    <mkdir dir="${project.build.directory}/extra-test-classes3" />
+			                    <mkdir dir="${project.build.directory}/extra-test-classes4" />
+			                    <mkdir dir="${project.build.directory}/extra-test-classes5" />
+			                    <mkdir dir="${project.build.directory}/extra-test-classes6" />
 		                	    <javac fork="true" executable="${env.JAVA_HOME}/bin/javac"
 		                	     srcdir="${project.basedir}/extra-src/test/java" 
 		                	     destdir="${project.basedir}/target/extra-test-classes">
@@ -74,6 +79,21 @@
    								<javac fork="true" executable="${env.JAVA_HOME}/bin/javac"
 		                	     srcdir="${project.basedir}/extra-src3/test/java" 
 		                	     destdir="${project.basedir}/target/extra-test-classes3">
+   									<classpath refid="maven.test.classpath"/>
+   								</javac>
+   								<javac fork="true" executable="${env.JAVA_HOME}/bin/javac"
+		                	     srcdir="${project.basedir}/extra-src4/test/java" 
+		                	     destdir="${project.basedir}/target/extra-test-classes4">
+   									<classpath refid="maven.test.classpath"/>
+   								</javac>
+   								<javac fork="true" executable="${env.JAVA_HOME}/bin/javac"
+		                	     srcdir="${project.basedir}/extra-src5/test/java" 
+		                	     destdir="${project.basedir}/target/extra-test-classes5">
+   									<classpath refid="maven.test.classpath"/>
+   								</javac>
+   								<javac fork="true" executable="${env.JAVA_HOME}/bin/javac"
+		                	     srcdir="${project.basedir}/extra-src6/test/java" 
+		                	     destdir="${project.basedir}/target/extra-test-classes6">
    									<classpath refid="maven.test.classpath"/>
    								</javac>
 			                </target>

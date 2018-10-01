@@ -20,6 +20,7 @@ import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
 import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.eclipse.sensinact.gateway.test.MidProxy;
 import org.eclipse.sensinact.gateway.test.ProcessorService;
@@ -182,9 +183,7 @@ public class TestGenericImplementation extends MidOSGiTest {
         }}, true);
 
         ServiceReference reference = super.getBundleContext().getServiceReference(ProcessorService.class);
-
         ProcessorService processor = (ProcessorService) super.getBundleContext().getService(reference);
-
         processor.process("device1");
         Thread.sleep(2000);
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
@@ -279,13 +278,335 @@ public class TestGenericImplementation extends MidOSGiTest {
         JSONAssert.assertEquals(new JSONObject("{\"statusCode\":200,\"response\":{\"name\":\"location\",\"value\":\"45.900002:6.11667\"," + "\"type\":\"string\"},\"type\":\"GET_RESPONSE\",\"uri\":\"/weather_7/admin/location\"}"), jsonObject, false);
     }
 
+    @Test
+    public void testExtraCatalogs() throws Throwable {
+    	String all = "{"+
+    			   "\"providers\": ["+
+    			     "{"+
+    			       "\"name\": \"weather_0\","+
+    			       "\"location\": \"45.19334890078532:5.706474781036377\","+
+    			       "\"services\": ["+
+    			         "{"+
+    			           "\"name\": \"admin\","+
+    			           "\"resources\": ["+
+    			             "{"+
+    			               "\"name\": \"friendlyName\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"location\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"bridge\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"icon\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "}"+
+    			           "]"+
+    			         "},"+
+    			         "{"+
+    			           "\"name\": \"weather\","+
+    			           "\"resources\": ["+
+    			             "{"+
+    			               "\"name\": \"pressure\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"temperature\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"wind-chill\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"rainfall\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"humidity\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"dew-point\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"wind-orientation\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"wind-speed\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "}"+
+    			           "]"+
+    			         "},"+
+    			         "{"+
+    			           "\"name\": \"hydrometers\","+
+    			           "\"resources\": ["+
+    			             "{"+
+    			               "\"name\": \"value\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"alarm_name\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"alarm_limit\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"alarm_status\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "}"+
+    			           "]"+
+    			         "}"+
+    			       "]"+
+    			     "},"+
+    			     "{"+
+    			       "\"name\": \"weather_2\","+
+    			       "\"location\": \"45.19334890078532:5.706474781036377\","+
+    			       "\"services\": ["+
+    			         "{"+
+    			           "\"name\": \"admin\","+
+    			           "\"resources\": ["+
+    			             "{"+
+    			               "\"name\": \"friendlyName\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"location\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"bridge\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"icon\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "}"+
+    			           "]"+
+    			         "},"+
+    			         "{"+
+    			           "\"name\": \"weather\","+
+    			           "\"resources\": ["+
+    			             "{"+
+    			               "\"name\": \"pressure\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"temperature\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"wind-chill\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"rainfall\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"humidity\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"dew-point\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"wind-orientation\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"wind-speed\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "}"+
+    			           "]"+
+    			         "},"+
+    			         "{"+
+    			           "\"name\": \"hydrometers\","+
+    			           "\"resources\": ["+
+    			             "{"+
+    			               "\"name\": \"value\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"alarm_name\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"alarm_limit\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"alarm_status\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "}"+
+    			           "]"+
+    			         "},"+
+    			         "{"+
+    			           "\"name\": \"pressure\","+
+    			           "\"resources\": ["+
+    			             "{"+
+    			               "\"name\": \"atmospheric\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"submarine\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "}"+
+    			           "]"+
+    			         "}"+
+    			       "]"+
+    			     "},"+
+    			     "{"+
+    			       "\"name\": \"weather_1\","+
+    			       "\"location\": \"45.19334890078532:5.706474781036377\","+
+    			       "\"services\": ["+
+    			         "{"+
+    			           "\"name\": \"admin\","+
+    			           "\"resources\": ["+
+    			             "{"+
+    			               "\"name\": \"friendlyName\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"location\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"bridge\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"icon\","+
+    			               "\"type\": \"PROPERTY\""+
+    			             "}"+
+    			           "]"+
+    			         "},"+
+    			         "{"+
+    			           "\"name\": \"weather\","+
+    			           "\"resources\": ["+
+    			             "{"+
+    			               "\"name\": \"pressure\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"temperature\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"wind-chill\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"rainfall\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"humidity\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"dew-point\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"wind-orientation\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "},"+
+    			             "{"+
+    			               "\"name\": \"wind-speed\","+
+    			               "\"type\": \"SENSOR\""+
+    			             "}"+
+    			           "]"+
+    			         "}"+
+    			       "]"+
+    			     "}"+
+    			   "],"+
+    			   "\"type\": \"COMPLETE_LIST\","+
+    			   "\"uri\": \"/\","+
+    			   "\"statusCode\": 200"+
+    			 "}";
+    	
+        File tmpDirectory = new File("target/felix/tmp");
+        File tmpDirectory1 = new File("target/felix/tmp1");
+        File tmpDirectory2 = new File("target/felix/tmp2");
+
+        new File(tmpDirectory, "props.xml").delete();
+        new File(tmpDirectory, "resources.xml").delete();
+        new File(tmpDirectory, "dynamicBundle.jar").delete();
+
+        super.createDynamicBundle(
+        	new File("./extra-src6/test/resources/MANIFEST.MF"), 
+        	tmpDirectory2, 
+        	new File("./extra-src6/test/resources/meta"), 
+        	new File("./extra-src6/test/resources/genova-resource_2.xml"), 
+        	new File("./target/extra-test-classes6"));
+        
+        super.installDynamicBundle(new File(tmpDirectory2, 
+        		"dynamicBundle.jar").toURI().toURL());
+        
+        Thread.sleep(2000);
+
+        super.createDynamicBundle(
+        	new File("./extra-src5/test/resources/MANIFEST.MF"), 
+        	tmpDirectory1, 
+        	new File("./extra-src5/test/resources/meta"), 
+        	new File("./extra-src5/test/resources/genova-resource_1.xml"), 
+        	new File("./target/extra-test-classes5"));
+        
+        super.installDynamicBundle(new File(tmpDirectory1, 
+        		"dynamicBundle.jar").toURI().toURL());
+        
+        Thread.sleep(2000);
+        
+        super.createDynamicBundle(
+        	new File("./extra-src4/test/resources/MANIFEST.MF"), 
+        	tmpDirectory, 
+        	new File("./extra-src4/test/resources/meta"), 
+        	new File("./src/test/resources/genova-resource_0.xml"), 
+        	new File("./target/extra-test-classes4"));
+
+        super.installDynamicBundle(new File(tmpDirectory, 
+        		"dynamicBundle.jar").toURI().toURL()).start();
+        
+        Thread.sleep(5000);
+
+        MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
+        Core core = mid.buildProxy();
+        Session session = core.getAnonymousSession();
+
+        MidProxy midSession = (MidProxy) Proxy.getInvocationHandler(session);
+        SnaMessage response = (SnaMessage) midSession.toOSGi(Session.class.getDeclaredMethod("getAll"), null);
+        JSONAssert.assertEquals(all, response.getJSON(), false);
+    }
+
     @Override
     protected void doInit(Map configuration) {
-        configuration.put("felix.auto.start.1", "file:target/felix/bundle/org.osgi.compendium.jar " + "file:target/felix/bundle/org.apache.felix.configadmin.jar " + "file:target/felix/bundle/org.apache.felix.framework.security.jar ");
-        configuration.put("felix.auto.install.2", "file:target/felix/bundle/sensinact-utils.jar " + "file:target/felix/bundle/sensinact-common.jar " + "file:target/felix/bundle/sensinact-datastore-api.jar " + "file:target/felix/bundle/sensinact-framework-extension.jar " + "file:target/felix/bundle/sensinact-security-none.jar ");
-
-        configuration.put("felix.auto.start.2", "file:target/felix/bundle/sensinact-test-configuration.jar " + "file:target/felix/bundle/sensinact-signature-validator.jar " + "file:target/felix/bundle/sensinact-core.jar ");
-        configuration.put("felix.auto.install.3", "file:target/felix/bundle/dynamicBundle.jar ");
+        configuration.put("felix.auto.start.1", 
+        	"file:target/felix/bundle/org.osgi.compendium.jar " + 
+        	"file:target/felix/bundle/org.apache.felix.configadmin.jar " + 
+        	"file:target/felix/bundle/org.apache.felix.framework.security.jar ");
+        configuration.put("felix.auto.install.2", 
+        	"file:target/felix/bundle/sensinact-utils.jar " + 
+            "file:target/felix/bundle/sensinact-common.jar " + 
+        	"file:target/felix/bundle/sensinact-datastore-api.jar " + 
+            "file:target/felix/bundle/sensinact-framework-extension.jar " + 
+        	"file:target/felix/bundle/sensinact-security-none.jar ");
+        configuration.put("felix.auto.start.2", 
+        	"file:target/felix/bundle/sensinact-test-configuration.jar " + 
+            "file:target/felix/bundle/sensinact-signature-validator.jar " + 
+        	"file:target/felix/bundle/sensinact-core.jar ");
+        configuration.put("felix.auto.install.3", 
+        	"file:target/felix/bundle/dynamicBundle.jar ");
+        
         configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
     }

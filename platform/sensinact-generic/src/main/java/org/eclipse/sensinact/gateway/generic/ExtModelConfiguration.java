@@ -30,9 +30,12 @@ import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -230,6 +233,7 @@ public class ExtModelConfiguration<P extends Packet> extends ModelConfiguration 
      * @param defaultServiceProviderType
      * @param defaultServiceType
      * @param defaultResourceType
+     * 
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws IOException
@@ -255,22 +259,55 @@ public class ExtModelConfiguration<P extends Packet> extends ModelConfiguration 
         
         this.packetType = packetType;
         super.setResourceConfigType(ExtResourceConfig.class);
-        XmlResourceConfigHandler handler = ExtResourceConfig.loadFromXml(
-        		mediator, configurationFile);
+        
+        XmlResourceConfigHandler handler = ExtResourceConfig.loadFromXml(mediator, configurationFile);
+        
+        Map<String, String> builtFixedProviders = new HashMap<String, String>();
+        Map<String, List<String>> builtFixed = new HashMap<String, List<String>>();
+        Map<String, List<String>> builtProfiles = new HashMap<String, List<String>>();
+        
         if (handler != null) {
             this.commands = handler.getCommandDefinitions();
             FixedProviders fixedProviders = handler.getDeviceDefinitions();
-            this.fixedProviders = fixedProviders.getProviderMap();
-            super.fixed = fixedProviders.getFixedMap();
-            super.profiles = handler.getProfiles();
-
+            builtFixedProviders.putAll(fixedProviders.getProviderMap());
+            builtFixed.putAll(fixedProviders.getFixedMap());
+            builtProfiles.putAll(handler.getProfiles());            
             super.addResourceConfigCatalog(new ExtResourceConfigCatalog(handler, defaults));
         } else {
             this.commands = new Commands(null);
-            this.fixedProviders = Collections.<String, String>emptyMap();
-            super.fixed = Collections.<String, List<String>>emptyMap();
-            super.profiles = Collections.<String, List<String>>emptyMap();
         }
+        //load all xml catalogs from org.eclipse.sensinact.gateway.catalog
+        //can we imagine to replace the initial mechanism of the declared xml resources description file ?
+        Enumeration<URL> catalogs = mediator.getContext().getBundle().findEntries(
+        		"/org/eclipse/sensinact/gateway/catalog/", "*.xml", false);
+        
+        if(catalogs!= null) {
+        	while(catalogs.hasMoreElements()){
+        		URL catalog = catalogs.nextElement();
+        		if(catalog==null||!catalog.toExternalForm().endsWith(".xml")) {
+        			continue;
+        		}
+        		try {
+	        		handler = ExtResourceConfig.loadFromXml(mediator, catalog);
+	        		if(handler == null) {
+	        			continue;
+	        		}
+	                FixedProviders fixedProviders = handler.getDeviceDefinitions();
+	                builtFixedProviders.putAll(fixedProviders.getProviderMap());
+	                builtFixed.putAll(fixedProviders.getFixedMap());
+	                builtProfiles.putAll(handler.getProfiles());
+	                
+	                super.addResourceConfigCatalog(new ExtResourceConfigCatalog(handler, defaults));
+        		}catch( ParserConfigurationException | SAXException | IOException e){
+        			mediator.debug("%s does not contains a valid catalog", catalog.toExternalForm());
+        			continue;
+        		}
+        	}
+        }
+        super.fixed = Collections.unmodifiableMap(builtFixed);
+        super.profiles = Collections.unmodifiableMap(builtProfiles);
+        this.fixedProviders =  Collections.unmodifiableMap(builtFixedProviders);
+        
         this.mediator.info("ExtModelConfiguration initialized...");
     }
 

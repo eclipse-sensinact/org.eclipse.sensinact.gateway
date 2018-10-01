@@ -25,6 +25,7 @@ import java.util.Map;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class Commands {
+	
     final Map<Task.CommandType, byte[]> commands;
 
     /**

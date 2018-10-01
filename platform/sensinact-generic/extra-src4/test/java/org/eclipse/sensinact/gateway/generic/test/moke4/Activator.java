@@ -8,7 +8,9 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.generic.test.moke3;
+package org.eclipse.sensinact.gateway.generic.test.moke4;
+
+import java.util.Collections;
 
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -17,11 +19,8 @@ import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.ExtModelInstance;
 import org.eclipse.sensinact.gateway.test.ProcessorService;
-import org.eclipse.sensinact.gateway.test.StarterService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
-import java.util.Collections;
 
 public class Activator extends AbstractActivator<Mediator> {
     private ExtModelConfiguration manager;
@@ -37,20 +36,15 @@ public class Activator extends AbstractActivator<Mediator> {
     			ExtModelInstance.class, 
     			MokePacket.class
     		).withDesynchronization(false
-    		).withStartAtInitializationTime(false
-    		).withServiceBuildPolicy(BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy()
+    		).withStartAtInitializationTime(true
+    		).withServiceBuildPolicy(BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy()
     		).withResourceBuildPolicy(BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy()
-    		).build("genova-resource.xml", Collections.<String, String>emptyMap());
+    		).build("genova-resource_0.xml", Collections.<String, String>emptyMap());
 
         this.endpoint = new MokeStack(mediator);
         this.endpoint.connect(this.manager);
-
         MokeProcessor processor = new MokeProcessor(super.mediator, this.endpoint.getConnector());
-
         this.processorRegistration = super.mediator.getContext().registerService(ProcessorService.class, processor, null);
-        MokeStarter starter = new MokeStarter(this.endpoint.getConnector());
-
-        this.starterRegistration = super.mediator.getContext().registerService(StarterService.class, starter, null);
 
     }
 
