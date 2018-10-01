@@ -177,9 +177,11 @@ public abstract class MidOSGiTest implements BundleContextProvider {
      */
     public Bundle installDynamicBundle(final URL url) {
         try {
-            File testFile = new File(loadDir, "test.jar");
+        	int length = loadDir.listFiles().length;
+        	String fileName = String.format("test%s.jar",length);
+            File testFile = new File(loadDir, fileName);
             URL testFileURL = testFile.toURI().toURL();
-            FileOutputStream output = new FileOutputStream(new File(loadDir, "test.jar"));
+            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
             byte[] testJar = IOUtils.read(url.openStream(), true);
             IOUtils.write(testJar, output);
             this.classloader.addFiltered(testFileURL);
