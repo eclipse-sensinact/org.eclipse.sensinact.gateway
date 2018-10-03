@@ -86,6 +86,7 @@
 		                	     destdir="${project.basedir}/target/extra-test-classes4">
    									<classpath refid="maven.test.classpath"/>
    								</javac>
+   								<!--
    								<javac fork="true" executable="${env.JAVA_HOME}/bin/javac"
 		                	     srcdir="${project.basedir}/extra-src5/test/java" 
 		                	     destdir="${project.basedir}/target/extra-test-classes5">
@@ -96,6 +97,7 @@
 		                	     destdir="${project.basedir}/target/extra-test-classes6">
    									<classpath refid="maven.test.classpath"/>
    								</javac>
+   								-->
 			                </target>
 			            </configuration>
 			            <goals>
