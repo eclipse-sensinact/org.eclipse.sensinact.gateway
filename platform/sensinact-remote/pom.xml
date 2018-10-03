@@ -28,5 +28,7 @@
 	<modules>
 		<module>socket-endpoint</module>
 		<module>socket-endpoint-sample</module>
+		<module>http-endpoint</module>
+		<module>http-endpoint-sample</module>
 	</modules>
 </project>
