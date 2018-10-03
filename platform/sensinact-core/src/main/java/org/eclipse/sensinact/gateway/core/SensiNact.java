@@ -154,10 +154,6 @@ public class SensiNact implements Core {
 				public String run() {
 					SessionKey key = SensiNact.this.sessions.get(new KeyExtractor<KeyExtractorType>(
 							KeyExtractorType.TOKEN, getSessionId()));
-
-					if (key == null || key.getPublicKey() == null) {
-						return null;
-					}
 					return key.registerAgent(callback, filter);
 				}
 			});
@@ -1792,7 +1788,6 @@ public class SensiNact implements Core {
 					this.remoteSessions.put(filteredKey, session);
 
 				} catch (Exception e) {
-					e.printStackTrace();
 					mediator.error(e);
 				}
 				return session;
@@ -1828,15 +1823,11 @@ public class SensiNact implements Core {
 			void close() {
 				String[] keys = this.remoteSessions.keySet().toArray(new String[] {});
 				int index = 0;
-
-				while (index < keys.length) {
-					Session s = this.remoteSessions.remove(keys[index++]);
-					SessionKey k = SensiNact.this.sessions
-							.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, s.getSessionId()));
-					if (k == null) {
-						continue;
-					}
+				while (index < keys.length) {			
+					Session s = this.remoteSessions.remove(keys[index]);
+					SessionKey k = SensiNact.this.sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, s.getSessionId()));
 					k.unregisterAgents();
+					index++;
 				}
 			}
 
