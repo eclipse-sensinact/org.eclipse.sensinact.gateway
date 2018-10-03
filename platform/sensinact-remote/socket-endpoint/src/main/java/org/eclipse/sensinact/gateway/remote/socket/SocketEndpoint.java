@@ -356,7 +356,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
             if (timeout <= 0 || remoteNamespace != null) {
                 break;
             }
-            this.namespace();
+            //this.namespace();
             try {
                 timeout -= 100;
                 Thread.sleep(100);
