@@ -563,16 +563,19 @@ public class RemoteSensiNact implements RemoteCore {
 	 *      org.eclipse.sensinact.gateway.core.message.SnaFilter, java.lang.String)
 	 */
 	@Override
-	public void registerAgent(final String remoteAgentId, final SnaFilter filter, final String publicKey) {
+	public void registerAgent(final String remoteAgentId, final SnaFilter filter, final String publicKey) {		
+		if(this.localAgents.get(remoteAgentId) != null) {
+			mediator.warn("the remote agent already exists");
+			return;
+		}
 		Session session = this.localEndpoint.getSession(publicKey);
-
-		SubscribeResponse resp = session.registerSessionAgent(new RemoteSensiNactCallback(remoteAgentId), filter);
-
+		SubscribeResponse resp = session.registerSessionAgent(new RemoteSensiNactCallback(
+				remoteAgentId), filter);
 		JSONObject registration = resp.getResponse();
 		String localAgentId = null;
 
-		if (!JSONObject.NULL.equals(registration)
-				&& (localAgentId = (String) registration.opt("subscriptionId")) != null) {
+		if (!JSONObject.NULL.equals(registration) && (localAgentId = (String) 
+			registration.opt("subscriptionId")) != null) {
 			this.localAgents.put(remoteAgentId, localAgentId);
 		}
 	}
