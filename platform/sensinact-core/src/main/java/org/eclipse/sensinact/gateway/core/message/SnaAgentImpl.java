@@ -274,9 +274,7 @@ public class SnaAgentImpl implements SnaAgent {
 	 *            this SnaAgent's identifier
 	 */
 	public void registerRemote(RemoteCore remoteCore) {
-		final String identifier = (String) this.registration.getReference()
-				.getProperty("org.eclipse.sensinact.gateway.agent.id");
-
+		final String identifier = this.callback.getName();
 		if (remoteCore == null || identifier == null || identifier.length() == 0) {
 			return;
 		}
