@@ -181,7 +181,7 @@ public class CallbackFactory {
             return;
         }
         String endpoint = callbackService.getPattern();
-        CallbackServlet CallbackServlet = callbacks.get(endpoint);
+        CallbackServlet CallbackServlet = callbacks.remove(endpoint);
         if (CallbackServlet == null) {
             mediator.warn("The specified callback service '%s' was not registered", endpoint);
             return;
