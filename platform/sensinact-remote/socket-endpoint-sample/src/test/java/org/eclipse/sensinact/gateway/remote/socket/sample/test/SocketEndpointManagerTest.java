@@ -15,7 +15,6 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -45,7 +44,6 @@ public class SocketEndpointManagerTest {
 
             @Override
             public void callback(String callbackId, SnaMessage[] messages) throws Exception {
-            	System.out.println("SUBSCRIPTION CALLBACK ["+callbackId+"]");
                 synchronized (SocketEndpointManagerTest.this.stack) {
                 	SocketEndpointManagerTest.this.stack.push(messages[0]);
                 }
@@ -204,7 +202,7 @@ public class SocketEndpointManagerTest {
                     count++;
                 }
             }
-            if(count == limit|wait<=0) {
+            if(count >= limit||wait<0) {
             	break;
             }
         }
@@ -226,7 +224,7 @@ public class SocketEndpointManagerTest {
             synchronized (stack) {
             	size = stack.size();
             }
-            if(size == limit|wait<=0) {
+            if(size >= limit||wait<0) {
             	break;
             }
         }
