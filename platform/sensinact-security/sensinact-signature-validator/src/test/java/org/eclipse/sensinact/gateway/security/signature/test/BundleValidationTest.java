@@ -49,7 +49,7 @@ public class BundleValidationTest {
     private Bundle fan = null;
     private Bundle failer = null;
     private Bundle button = null;
-    private static final String DEFAULT_KEYSTORE_FILE_PATH = "./src/test/resources/keystore.jks";
+    private static final String DEFAULT_KEYSTORE_FILE_PATH = "../cert/keystore.jks";
     private static final String DEFAULT_KEYSTORE_PASSWORD = "sensiNact_team";
 
     @Before
@@ -97,7 +97,7 @@ public class BundleValidationTest {
 
     @Test
     public void testCheckFanOK() throws BundleException {
-        this.fan = felix.getBundleContext().installBundle("file:./src/test/resources/fan.jar");
+        this.fan = felix.getBundleContext().installBundle("file:./target/extra/fan.jar");
         ////logger.log(Level.INFO, "testCheckOK");
         String result = null;
         try {
@@ -130,7 +130,7 @@ public class BundleValidationTest {
 
     @Test
     public void testCheckButtonOK() throws BundleException {
-        this.button = felix.getBundleContext().installBundle("file:./src/test/resources/button.jar");
+        this.button = felix.getBundleContext().installBundle("file:./target/extra/button.jar");
 
         ////logger.log(Level.INFO, "testCheckOK");
         String result = null;

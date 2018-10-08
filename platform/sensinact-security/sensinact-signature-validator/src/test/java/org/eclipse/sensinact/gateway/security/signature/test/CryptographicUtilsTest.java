@@ -35,7 +35,7 @@ public class CryptographicUtilsTest {
     String alias = "selfsigned";
     String passwd = "sensiNact_team";
     String keyStoreType = "jks";
-    String defaultKeystoreFile = "src/test/resources/keystore.jks";
+    String defaultKeystoreFile = "../cert/keystore.jks";
     String signatureFileName = "src/test/resources/JUNITTES.SF";
     String signatureBlockName = "src/test/resources/JUNITTES.DSA";
     KeyStore ks = null;

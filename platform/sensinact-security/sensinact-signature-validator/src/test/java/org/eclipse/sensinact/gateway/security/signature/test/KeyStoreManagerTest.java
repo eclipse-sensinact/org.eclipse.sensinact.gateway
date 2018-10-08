@@ -33,7 +33,7 @@ public class KeyStoreManagerTest {
     String fake_alias = "notselfsigned";
     String passwd = "sensiNact_team";
     String falsePasswd = "keyStore";
-    static String defaultKeystoreFile = "./src/test/resources/keystore.jks";
+    static String defaultKeystoreFile = "../cert/keystore.jks";
 
     @Test
     public void testGetCertificateOK() throws KeyStoreManagerException {

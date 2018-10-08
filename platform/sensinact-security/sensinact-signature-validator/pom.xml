@@ -84,6 +84,45 @@
 
 	<build>
 		<plugins>
+		
+			<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-antrun-plugin</artifactId>
+			    <version>1.8</version>
+			    <executions>
+			        <execution>
+			            <id>signTestJar</id>
+			            <phase>test-compile</phase>
+			            <configuration>
+			                <target>
+			                    <mkdir dir="${project.build.directory}/extra" />
+			                    <mkdir dir="${project.build.directory}/extra-test-classes" />
+		                	    <javac fork="true" executable="${env.JAVA_HOME}/bin/javac"
+		                	     srcdir="${project.basedir}/extra-src/test/java" 
+		                	     destdir="${project.basedir}/target/extra-test-classes">
+   									<classpath refid="maven.test.classpath"/>
+   								</javac>
+   								<jar destfile="${project.build.directory}/extra/button.jar" basedir="${project.basedir}/target/extra-test-classes" />
+   								<signjar alias="selfsigned" storepass="sensiNact_team" keystore="${project.basedir}/../cert/keystore.jks"
+   								sigalg="SHA256withRSA" digestalg="SHA-256" jar="${project.build.directory}/extra/button.jar" />
+   								
+			                    <mkdir dir="${project.build.directory}/extra-test-classes2" />
+		                	    <javac fork="true" executable="${env.JAVA_HOME}/bin/javac"
+		                	     srcdir="${project.basedir}/extra-src2/test/java" 
+		                	     destdir="${project.basedir}/target/extra-test-classes2">
+   									<classpath refid="maven.test.classpath"/>
+   								</javac>
+   								<jar destfile="${project.build.directory}/extra/fan.jar" basedir="${project.basedir}/target/extra-test-classes2" />
+   								<signjar alias="selfsigned" storepass="sensiNact_team" keystore="${project.basedir}/../cert/keystore.jks"
+   								sigalg="SHA256withRSA" digestalg="SHA-256" jar="${project.build.directory}/extra/fan.jar" />
+			                </target>
+			            </configuration>
+			            <goals>
+			                <goal>run</goal>
+			            </goals>
+			        </execution>
+			    </executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
