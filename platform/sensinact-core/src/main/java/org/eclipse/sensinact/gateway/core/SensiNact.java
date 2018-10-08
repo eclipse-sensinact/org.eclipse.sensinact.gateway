@@ -1815,6 +1815,9 @@ public class SensiNact implements Core {
 							.toString();
 				}
 				Session s = this.remoteSessions.remove(filteredKey);
+				if(s == null) {
+					return;
+				}
 				SessionKey k = SensiNact.this.sessions.get(s);
 				k.unregisterAgents();
 			}
