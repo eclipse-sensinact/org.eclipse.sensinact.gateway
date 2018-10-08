@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 
 /**
  * InputStream wrapper
@@ -38,23 +39,33 @@ public class SocketInputStreamReader {
     protected JSONObject read() throws IOException, JSONException {
         JSONObject object = null;
         int read = 0;
+        int pos = 0;
         int length = 0;
         byte[] content = new byte[length];
         byte[] buffer = new byte[SocketEndpoint.BUFFER_SIZE];
 
         boolean eof = false;
-        while ((read = input.read(buffer)) > -1) {
-            eof = (buffer[read - 1] == '\0');
-            byte[] newContent = new byte[length + read];
-            if (length > 0) {
-                System.arraycopy(content, 0, newContent, 0, length);
-            }
-            System.arraycopy(buffer, 0, newContent, length, eof ? read - 1 : read);
-            content = newContent;
-            newContent = null;
-            length += (eof ? read - 1 : read);
-            if (eof) {
-                break;
+        while (true) {
+        	read = input.read();
+        	if(read == -1) {
+        		throw new ConnectException();
+        	}
+            eof = ( read == '\0') ;
+            buffer[pos] = (byte) read;
+            pos+=(eof)?0:1;
+            if(eof || pos == SocketEndpoint.BUFFER_SIZE) {            
+	            byte[] newContent = new byte[length + pos];
+	            if (length > 0) {
+	                System.arraycopy(content, 0, newContent, 0, length);
+	            }
+	            System.arraycopy(buffer, 0, newContent, length, pos);
+	            content = newContent;	 
+	            newContent = null;           
+	            if (eof) {
+	                break;
+	            }
+	            length += pos;
+	            pos = 0;
             }
         }
         String strContent = new String(content);
