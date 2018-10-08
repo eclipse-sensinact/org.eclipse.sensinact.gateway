@@ -526,7 +526,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 * @param filter
 	 * @param callback
 	 */
-	protected void registerCallback(SnaFilter filter, MidCallback callback) {
+	public void registerCallback(SnaFilter filter, MidCallback callback) {
 		if (this.messageHandler == null) {
 			return;
 		}
@@ -537,7 +537,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 * 
 	 * @param callback
 	 */
-	protected void unregisterCallback(String callback) {
+	public void unregisterCallback(String callback) {
 		if (this.messageHandler == null) {
 			return;
 		}
