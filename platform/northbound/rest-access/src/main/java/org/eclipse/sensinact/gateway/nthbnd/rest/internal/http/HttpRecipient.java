@@ -20,6 +20,8 @@ import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfiguratio
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * This class is a wrapper for simple callback subscription
@@ -31,6 +33,18 @@ public class HttpRecipient extends NorthboundRecipient {
     public HttpRecipient(Mediator mediator, String callback) {
         super(mediator);
         this.urlCallback = callback;
+        this.connectionBuilder = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
+        this.connectionBuilder.setContentType("application/json");
+        this.connectionBuilder.setHttpMethod(ConnectionConfiguration.POST);
+    }
+
+    public HttpRecipient(Mediator mediator, JSONObject object) {
+        super(mediator);
+        try {
+        	this.urlCallback = object.getString("callback");
+        } catch(JSONException e) {
+        	throw new NullPointerException("callback is required");
+        }
         this.connectionBuilder = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
         this.connectionBuilder.setContentType("application/json");
         this.connectionBuilder.setHttpMethod(ConnectionConfiguration.POST);
@@ -81,4 +95,17 @@ public class HttpRecipient extends NorthboundRecipient {
         SimpleRequest request = new SimpleRequest(HttpRecipient.this.connectionBuilder);
         request.send();
     }
+
+	/** 
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.common.primitive.JSONable#getJSON()
+	 */
+	@Override
+	public String getJSON() {
+		return new StringBuilder(
+			).append("{\"callback\":\""
+			).append(this.urlCallback
+			).append("\"}").toString();
+	}
 }
