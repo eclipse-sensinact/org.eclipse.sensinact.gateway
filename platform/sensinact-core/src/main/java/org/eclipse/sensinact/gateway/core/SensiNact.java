@@ -1764,31 +1764,32 @@ public class SensiNact implements Core {
 			private Map<String, Session> remoteSessions = new HashMap<String, Session>();
 
 			private Session createSession(String publicKey) {
-				String filteredKey = publicKey;
-				Class<? extends Session> sessionClass = null;
-
-				if (publicKey.startsWith(UserManager.ANONYMOUS_PKEY)) {
-					filteredKey = new StringBuilder().append(publicKey).append("_remote"
-						).append(super.localID()).toString();
-					sessionClass = SensiNactAnonymousSession.class;
-				} else {
-					sessionClass = SensiNactAuthenticatedSession.class;
-				}
-				AccessTree<? extends AccessNode> tree = SensiNact.this.getUserAccessTree(
-						filteredKey);
-				SessionKey sessionKey = new SessionKey(mediator, localID(), 
-						sessionToken, tree,remoteEndpoint);
-
-				sessionKey.setUserKey(new UserKey(filteredKey));
 				Session session = null;
-				try {
-					session = sessionClass.getDeclaredConstructor(new Class<?>[] { SensiNact.class, String.class })
-							.newInstance(new Object[] { SensiNact.this, sessionKey.getToken() });
-					SensiNact.this.sessions.put(sessionKey, session);
-					this.remoteSessions.put(filteredKey, session);
-
-				} catch (Exception e) {
-					mediator.error(e);
+				synchronized(this.remoteSessions) {
+					String filteredKey = publicKey;
+					Class<? extends Session> sessionClass = null;
+	
+					if (publicKey.startsWith(UserManager.ANONYMOUS_PKEY)) {
+						filteredKey = new StringBuilder().append(publicKey).append("_remote"
+							).append(super.localID()).toString();
+						sessionClass = SensiNactAnonymousSession.class;
+					} else {
+						sessionClass = SensiNactAuthenticatedSession.class;
+					}
+					AccessTree<? extends AccessNode> tree = SensiNact.this.getUserAccessTree(
+							filteredKey);
+					SessionKey sessionKey = new SessionKey(mediator, localID(), 
+							sessionToken, tree,remoteEndpoint);	
+					sessionKey.setUserKey(new UserKey(filteredKey));					
+					try {
+						session = sessionClass.getDeclaredConstructor(new Class<?>[] { SensiNact.class, String.class })
+								.newInstance(new Object[] { SensiNact.this, sessionKey.getToken() });
+						SensiNact.this.sessions.put(sessionKey, session);
+						this.remoteSessions.put(filteredKey, session);
+	
+					} catch (Exception e) {
+						mediator.error(e);
+					}
 				}
 				return session;
 			}
@@ -1800,7 +1801,10 @@ public class SensiNact implements Core {
 					filteredKey = new StringBuilder().append(publicKey).append("_remote").append(super.localID())
 							.toString();
 				}
-				Session session = this.remoteSessions.get(filteredKey);
+				Session session = null;
+				synchronized(this.remoteSessions) {
+					session = this.remoteSessions.get(filteredKey);
+				}
 				if (session == null) {
 					session = createSession(publicKey);
 				}
@@ -1814,23 +1818,28 @@ public class SensiNact implements Core {
 					filteredKey = new StringBuilder().append(publicKey).append("_remote").append(super.localID())
 							.toString();
 				}
-				Session s = this.remoteSessions.remove(filteredKey);
-				if(s == null) {
+				Session session = null;
+				synchronized(this.remoteSessions) {
+					session = this.remoteSessions.remove(filteredKey);
+				}
+				if(session == null) {
 					return;
 				}
-				SessionKey k = SensiNact.this.sessions.get(s);
+				SessionKey k = SensiNact.this.sessions.get(session);
 				k.unregisterAgents();
 			}
 
 			@Override
 			void close() {
-				String[] keys = this.remoteSessions.keySet().toArray(new String[] {});
-				int index = 0;
-				while (index < keys.length) {			
-					Session s = this.remoteSessions.remove(keys[index]);
-					SessionKey k = SensiNact.this.sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, s.getSessionId()));
-					k.unregisterAgents();
-					index++;
+				synchronized(this.remoteSessions) {
+					String[] keys = this.remoteSessions.keySet().toArray(new String[] {});
+					int index = 0;
+					while (index < keys.length) {			
+						Session s = this.remoteSessions.remove(keys[index]);
+						SessionKey k = SensiNact.this.sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, s.getSessionId()));
+						k.unregisterAgents();
+						index++;
+					}
 				}
 			}
 
