@@ -883,21 +883,22 @@ public class Mediator {
 			return;
 		}
 		String message = null;
-
-		// format the message
-		if (variables != null && variables.length > 0) {
-			Object[] replacements = null;
-
-			if (variables.length == 1 && variables[0] != null && variables[0].getClass().isArray()) {
-				replacements = (Object[]) variables[0];
-
+		if(msg != null) {
+			// format the message
+			if (variables != null && variables.length > 0) {
+				Object[] replacements = null;
+	
+				if (variables.length == 1 && variables[0] != null && variables[0].getClass().isArray()) {
+					replacements = (Object[]) variables[0];
+	
+				} else {
+					replacements = variables;
+				}
+				message = String.format(msg, replacements);
+	
 			} else {
-				replacements = variables;
+				message = msg;
 			}
-			message = String.format(msg, replacements);
-
-		} else {
-			message = msg;
 		}
 		callService(LogService.class, new LogExecutor(level, message, throwable));
 	}
