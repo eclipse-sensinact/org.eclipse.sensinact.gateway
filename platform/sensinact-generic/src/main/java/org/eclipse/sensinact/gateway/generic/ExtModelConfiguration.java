@@ -36,8 +36,10 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Manages IO for a set of {@link ServiceProvider}s
@@ -295,8 +297,17 @@ public class ExtModelConfiguration<P extends Packet> extends ModelConfiguration 
 	                FixedProviders fixedProviders = handler.getDeviceDefinitions();
 	                builtFixedProviders.putAll(fixedProviders.getProviderMap());
 	                builtFixed.putAll(fixedProviders.getFixedMap());
-	                builtProfiles.putAll(handler.getProfiles());
 	                
+	                Iterator<Entry<String, List<String>>> iterator =
+	                		handler.getProfiles().entrySet().iterator();
+	                while(iterator.hasNext()) {
+	                	Entry<String, List<String>> entry = iterator.next();
+	                	if(builtProfiles.containsKey(entry.getKey())) {
+	                		builtProfiles.get(entry.getKey()).addAll(entry.getValue());
+	                	} else{
+	                		builtProfiles.put(entry.getKey(), entry.getValue());
+	                	}
+	                }
 	                super.addResourceConfigCatalog(new ExtResourceConfigCatalog(handler, defaults));
         		}catch( ParserConfigurationException | SAXException | IOException e){
         			mediator.debug("%s does not contains a valid catalog", catalog.toExternalForm());
