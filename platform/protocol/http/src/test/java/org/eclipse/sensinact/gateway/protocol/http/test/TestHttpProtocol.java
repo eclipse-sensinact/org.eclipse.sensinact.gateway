@@ -35,7 +35,7 @@ public class TestHttpProtocol {
     //********************************************************************//
     //						STATIC DECLARATIONS							  //
     //********************************************************************//
-    public static int HTTP_PORT = 8893;
+    public static int HTTP_PORT = 8895;
     public static String HTTP_ROOTURL = "http://127.0.0.1:" + HTTP_PORT;
 
     public static String newRequest(String configuration) throws IOException {

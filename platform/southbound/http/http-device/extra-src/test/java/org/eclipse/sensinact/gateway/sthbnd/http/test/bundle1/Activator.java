@@ -24,14 +24,14 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator;
 		commands = Task.CommandType.GET,
 		configuration = @HttpTaskConfiguration(
 			host = "127.0.0.1", 
-			port="8893", 
+			port="8895", 
 			path = "/get")
 			),
 	@SimpleHttpTask(
 		commands = Task.CommandType.SET,
 		configuration = @HttpTaskConfiguration(
 			host = "127.0.0.1", 
-			port="8893",
+			port="8895",
 			httpMethod = "POST",
 			path = "/set",
 			content=ContentBuilderImpl.class)
