@@ -277,7 +277,6 @@ public class RemoteSensiNact implements RemoteCore {
 	@Override
 	public void close() {
 		this.disconnect();
-		this.localAgents.clear();
 		this.subscriptionIds.clear();
 		this.remoteEndpoint.close();
 	}
@@ -324,6 +323,7 @@ public class RemoteSensiNact implements RemoteCore {
 							ref.serviceProviderId, ref.serviceId, ref.resourceId, keys[index]);
 					}
 				}
+				this.localAgents.clear();
 				if (this.onDisconnectedCallback != null) {
 					Iterator<Executable<String, Void>> it = this.onDisconnectedCallback.iterator();
 	
