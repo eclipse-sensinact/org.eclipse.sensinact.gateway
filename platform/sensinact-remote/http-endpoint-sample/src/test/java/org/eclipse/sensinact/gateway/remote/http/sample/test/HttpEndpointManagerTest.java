@@ -152,8 +152,7 @@ public class HttpEndpointManagerTest {
 
         f.delete();
         Thread.sleep(3000);
-
-        getInstance(2).cleanAgent();
+        instances.get(2).cleanAgent();
         //now lets try to reconnect
         FileInputStream input = new FileInputStream(new File(String.format("src/test/resources/conf%s/http.endpoint.sample.cfg", 3)));
 
