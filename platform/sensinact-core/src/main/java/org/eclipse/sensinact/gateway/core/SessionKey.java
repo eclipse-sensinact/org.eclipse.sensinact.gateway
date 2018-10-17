@@ -11,8 +11,6 @@
 package org.eclipse.sensinact.gateway.core;
 
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -103,17 +101,24 @@ public class SessionKey {
 	 * @return
 	 */
 	public String registerAgent(MidAgentCallback callback, SnaFilter filter) {
+		String agentId = null;
+		if(callback.getName()!= null) {
+			if(this.agents.contains(callback.getName())){
+				this.mediator.warn("Agent %s already registered",callback.getName());
+				return null;
+			}
+			agentId = callback.getName();
+		}
 		final SnaAgentImpl agent = SnaAgentImpl.createAgent(mediator, callback, filter, getPublicKey());
-
-		final String identifier = new StringBuilder().append("agent_").append(agent.hashCode()).toString();
-
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
-		props.put("org.eclipse.sensinact.gateway.agent.id", identifier);
-		props.put("org.eclipse.sensinact.gateway.agent.local", (localID() == 0));
-
-		agent.start(props);
-		this.agents.add(identifier);
-		return identifier;
+		if(agentId == null) {
+			agentId = new StringBuilder().append("agent_").append(agent.hashCode()).toString();
+			callback.setIdentifier(agentId);
+		}
+		if(this.agents.add(agentId)) {
+			agent.start((localID() == 0));
+			return agentId;
+		}
+		return null;
 	}
 
 	/**
@@ -125,9 +130,10 @@ public class SessionKey {
 		if (!this.agents.remove(agentId)) {
 			return false;
 		}
+		final boolean local =(localID() == 0);
 		StringBuilder builder = new StringBuilder();
 		builder.append("(&(org.eclipse.sensinact.gateway.agent.local=");
-		builder.append(localID() == 0);
+		builder.append(local);
 		builder.append(")(");
 		builder.append("org.eclipse.sensinact.gateway.agent.id=");
 		builder.append(agentId);
@@ -137,7 +143,7 @@ public class SessionKey {
 			@Override
 			public Boolean execute(SnaAgent agent) throws Exception {
 				try {
-					agent.stop();
+					agent.stop(local);
 					return true;
 				} catch (Exception e) {
 					mediator.error(e);
@@ -212,14 +218,16 @@ public class SessionKey {
 		if (this.agents.size() == 0) {
 			return;
 		}
-		String filter = getAgentsFilter();
+		String filter = getAgentsFilter();	
+		final boolean local = (this.localID()==0); 
 		this.mediator.callServices(SnaAgent.class, filter, new Executable<SnaAgent, Void>() {
 			@Override
-			public Void execute(SnaAgent agent) throws Exception {
-				agent.stop();
+			public Void execute(final SnaAgent agent) throws Exception {
+				agent.stop(local);
 				return null;
 			}
 		});
+		this.agents.clear();
 	}
 
 	/*
@@ -229,10 +237,10 @@ public class SessionKey {
 	 */
 	@Override
 	public void finalize() throws Throwable {
+		this.unregisterAgents();
 		if (this.observer != null) {
 			this.observer.disappearing(this.getPublicKey());
 		}
-		this.unregisterAgents();
 	}
 
 }

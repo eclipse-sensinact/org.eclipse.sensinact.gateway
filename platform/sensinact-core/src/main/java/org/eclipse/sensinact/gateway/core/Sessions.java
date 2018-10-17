@@ -78,7 +78,7 @@ public class Sessions {
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
 		public boolean equals(Object o) {
-			if (v == null || o == null || !SessionKey.class.isAssignableFrom(o.getClass())) {
+			if (v == null || o == null || SessionKey.class!=o.getClass()) {
 				return false;
 			}
 			SessionKey k = (SessionKey) o;
@@ -202,7 +202,7 @@ public class Sessions {
 	 * checking for nulls.
 	 */
 	private static boolean eq(Object o1, Object o2) {
-		return o1 == null ? o2 == null : o1.equals(o2);
+		return o1 == null ? o2 == null : (o1 == o2 || o1.equals(o2));
 	}
 
 	/**
@@ -219,7 +219,7 @@ public class Sessions {
 	/**
 	 * The table, resized as necessary. Length MUST Always be a power of two.
 	 */
-	Entry[] table;
+	private Entry[] table;
 
 	/**
 	 * The number of key-value mappings contained in this weak hash map.
@@ -355,8 +355,8 @@ public class Sessions {
 		int index = indexFor(h, tab.length);
 		Entry e = tab[index];
 		while (e != null) {
-			if (e.hash == h && ((KeyExtractor.class.isAssignableFrom(key.getClass()) && eq(k, e.getValue()))
-					|| (Session.class.isAssignableFrom(key.getClass()) && eq(k, e.getKey())))) {
+			if (e.hash == h && ((KeyExtractor.class == k.getClass() && eq(k, e.getValue()))
+					|| (Session.class == k.getClass() && eq(k, e.getKey())))) {
 				return e.value;
 			}
 			e = e.next;
@@ -416,8 +416,9 @@ public class Sessions {
 		Entry e = tab[index];
 
 		while (e != null) {
-			if (e.hash == h && ((KeyExtractor.class.isAssignableFrom(key.getClass()) && eq(k, e.getValue()))
-					|| (Session.class.isAssignableFrom(key.getClass()) && eq(k, e.getKey())))) {
+			if (e.hash == h
+			&& ((KeyExtractor.class == k.getClass() && eq(k, e.getValue()))
+					|| (Session.class == k.getClass() && eq(k, e.getKey())))) {
 				break;
 			}
 			e = e.next;

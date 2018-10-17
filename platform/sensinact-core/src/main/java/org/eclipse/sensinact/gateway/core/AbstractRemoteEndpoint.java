@@ -235,8 +235,8 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 		if (!this.getConnected()) {
 			return;
 		}
-		this.remoteCore.disconnect();
 		this.setConnected(false);
+		this.remoteCore.disconnect();
 	}
 
 	/**

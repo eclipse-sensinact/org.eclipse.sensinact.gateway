@@ -277,7 +277,9 @@ public class RemoteSensiNact implements RemoteCore {
 	@Override
 	public void close() {
 		this.disconnect();
-		this.subscriptionIds.clear();
+		synchronized (this.subscriptionIds) {
+			this.subscriptionIds.clear();
+		}
 		this.remoteEndpoint.close();
 	}
 
@@ -289,8 +291,18 @@ public class RemoteSensiNact implements RemoteCore {
 	@Override
 	public void disconnect() {
 		synchronized(this) {
+			final String namespace = this.remoteEndpoint.namespace();
+			if (this.onDisconnectedCallback!= null && !this.onDisconnectedCallback.isEmpty() && namespace!=null) {
+				Iterator<Executable<String, Void>> it = this.onDisconnectedCallback.iterator();
+				while (it.hasNext()) {
+					try {
+						it.next().execute(namespace);
+					} catch (Exception e) {
+						mediator.error(e);
+					}
+				}
+			}
 			if (this.registration != null) {
-				final String namespace = this.remoteEndpoint.namespace();
 				AccessController.<Void>doPrivileged(new PrivilegedAction<Void>() {
 					@Override
 					public Void run() {
@@ -306,12 +318,12 @@ public class RemoteSensiNact implements RemoteCore {
 						return null;
 					}
 				});
-				if (!this.subscriptionIds.isEmpty()) {
-					String[] keys = null;
-					synchronized (this.subscriptionIds) {
-						keys = new String[this.subscriptionIds.size()];
-						this.subscriptionIds.keySet().toArray(keys);
-					}
+			}
+			if (!this.subscriptionIds.isEmpty()) {
+				String[] keys = null;
+				synchronized (this.subscriptionIds) {
+					keys = new String[this.subscriptionIds.size()];
+					this.subscriptionIds.keySet().toArray(keys);				
 					int index = 0;
 					int length = keys == null ? 0 : keys.length;
 					for (; index < length; index++) {
@@ -321,22 +333,12 @@ public class RemoteSensiNact implements RemoteCore {
 						}
 						JSONObject response = this.localEndpoint.unsubscribe(ref.publicKey, 
 							ref.serviceProviderId, ref.serviceId, ref.resourceId, keys[index]);
-					}
-				}
-				this.localAgents.clear();
-				if (this.onDisconnectedCallback != null) {
-					Iterator<Executable<String, Void>> it = this.onDisconnectedCallback.iterator();
-	
-					while (it.hasNext()) {
-						try {
-							it.next().execute(namespace);
-	
-						} catch (Exception e) {
-							mediator.error(e);
-						}
+						mediator.debug(response.toString());
 					}
 				}
 			}
+			this.localEndpoint.close();
+			this.localAgents.clear();
 		}
 	}
 
@@ -596,7 +598,7 @@ public class RemoteSensiNact implements RemoteCore {
 			@Override
 			public Void execute(SnaAgent agent) throws Exception {
 				if (agent != null) {
-					agent.stop();
+					agent.stop(false);
 				}
 				return null;
 			}
