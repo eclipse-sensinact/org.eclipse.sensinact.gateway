@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @WebSocket(maxTextMessageSize = 64 * 1024)
 public class WsServiceTestClient implements Runnable {
-    String destUri = "ws://localhost:8095/ws";
+    String destUri = "ws://localhost:8898/ws";
     WebSocketClient client = null;
     Session session;
     AtomicBoolean available;

@@ -37,7 +37,7 @@ public class TestForwardingService extends MidOSGiTest {
     //						STATIC DECLARATIONS							  //
     //********************************************************************//
 
-    protected static final String HTTP_ROOTURL = "http://localhost:8095";
+    protected static final String HTTP_ROOTURL = "http://localhost:8898";
 
     //********************************************************************//
     //						INSTANCE DECLARATIONS						  //
@@ -77,7 +77,7 @@ public class TestForwardingService extends MidOSGiTest {
         configuration.put("felix.log.level", "4");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
-        configuration.put("org.osgi.service.http.port", "8095");
+        configuration.put("org.osgi.service.http.port", "8898");
         configuration.put("org.apache.felix.http.jettyEnabled", "true");
     }
 

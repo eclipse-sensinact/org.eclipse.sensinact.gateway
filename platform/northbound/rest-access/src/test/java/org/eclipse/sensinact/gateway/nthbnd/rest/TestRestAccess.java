@@ -30,7 +30,7 @@ public class TestRestAccess extends MidOSGiTest {
     //						STATIC DECLARATIONS							  //
     //********************************************************************//
 
-    protected static final String HTTP_ROOTURL = "http://localhost:8095/sensinact";
+    protected static final String HTTP_ROOTURL = "http://localhost:8898/sensinact";
     protected static final String WS_ROOTURL = "/sensinact";
 
     //********************************************************************//
@@ -71,7 +71,7 @@ public class TestRestAccess extends MidOSGiTest {
         configuration.put("felix.auto.start.4", "file:target/felix/bundle/slider.jar " + "file:target/felix/bundle/light.jar ");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
-        configuration.put("org.osgi.service.http.port", "8095");
+        configuration.put("org.osgi.service.http.port", "8898");
         configuration.put("org.apache.felix.http.jettyEnabled", "true");
         configuration.put("org.apache.felix.http.whiteboardEnabled", "true");
     }

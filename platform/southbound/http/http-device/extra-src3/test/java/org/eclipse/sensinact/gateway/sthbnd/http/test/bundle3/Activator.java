@@ -23,7 +23,7 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator;
 		configuration = 
 			@HttpTaskConfiguration(
 				host = "127.0.0.1", 
-				port="8895"),
+				port="8898"),
 		chain = { 
 			@HttpChildTaskConfiguration(
 				identifier="serviceProviderId",

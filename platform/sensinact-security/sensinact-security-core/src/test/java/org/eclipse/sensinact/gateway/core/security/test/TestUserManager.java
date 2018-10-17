@@ -62,7 +62,7 @@ public class TestUserManager extends MidOSGiTest {
     //						STATIC DECLARATIONS							  //
     //********************************************************************//
 	
-	public static int HTTP_PORT = 8895;
+	public static int HTTP_PORT = 8898;
     public static String HTTP_ROOTURL = "http://127.0.0.1:" + HTTP_PORT;
 
     public static String newRequest(String url, String content, String method) {
@@ -219,7 +219,7 @@ public class TestUserManager extends MidOSGiTest {
 		configuration.put("mail.account.connector.password","478569LM");
 
 		configuration.put("org.osgi.service.http.host","localhost");
-		configuration.put("org.osgi.service.http.port","8895");
+		configuration.put("org.osgi.service.http.port","8898");
 		configuration.put("org.apache.felix.http.enable","true");
 	}
 
