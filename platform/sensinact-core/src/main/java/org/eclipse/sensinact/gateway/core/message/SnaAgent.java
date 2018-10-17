@@ -29,8 +29,11 @@ public interface SnaAgent extends MessageRegisterer {
 
 	/**
 	 * Stops this SnaAgent
+	 * 
+	 * @param local true if this SnaAgent has been registered locally or false
+	 * if it is the delegate of a remote one
 	 */
-	void stop();
+	void stop(boolean local);
 
 	/**
 	 * Returns the String public key of this SnaAgent used to defined access level

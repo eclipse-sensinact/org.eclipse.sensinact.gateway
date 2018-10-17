@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.core.message;
 
 import java.util.Dictionary;
+import java.util.Hashtable;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
@@ -231,7 +232,7 @@ public class SnaAgentImpl implements SnaAgent {
 	public void register(SnaMessage<?> message) {
 		synchronized(this) {
 			if(!this.callback.isActive()) {
-				this.stop();
+				this.mediator.error("This agent's callback is not active");
 				return;
 			}
 			if (this.filter == null || filter.matches(message)) {
@@ -256,13 +257,15 @@ public class SnaAgentImpl implements SnaAgent {
 	 *            this SnaAgent's identifier
 	 */
 	protected void registerRemote() {
-		SnaAgentImpl.this.mediator.callServices(RemoteCore.class, new Executable<RemoteCore, Void>() {
-			@Override
-			public Void execute(RemoteCore remoteCore) throws Exception {
-				SnaAgentImpl.this.registerRemote(remoteCore);
-				return null;
-			}
-		});
+		synchronized(this) {
+			SnaAgentImpl.this.mediator.callServices(RemoteCore.class, new Executable<RemoteCore, Void>() {
+				@Override
+				public Void execute(RemoteCore remoteCore) throws Exception {
+					SnaAgentImpl.this.registerRemote(remoteCore);
+					return null;
+				}
+			});
+		}
 	}
 
 	/**
@@ -274,11 +277,13 @@ public class SnaAgentImpl implements SnaAgent {
 	 *            this SnaAgent's identifier
 	 */
 	public void registerRemote(RemoteCore remoteCore) {
-		final String identifier = this.callback.getName();
-		if (remoteCore == null || identifier == null || identifier.length() == 0) {
-			return;
+		synchronized(this) {
+			final String identifier = this.callback.getName();
+			if (remoteCore == null || identifier == null || identifier.length() == 0) {
+				return;
+			}
+			remoteCore.endpoint().registerAgent(identifier, filter, publicKey);
 		}
-		remoteCore.endpoint().registerAgent(identifier, filter, publicKey);
 	}
 
 	/**
@@ -288,37 +293,25 @@ public class SnaAgentImpl implements SnaAgent {
 	 * @param properties 
 	 * 		the Dictionary of properties of this SnaAgent
 	 */
-	public void start(Dictionary<String, Object> properties) {
-		boolean local = false;
-		String identifier = null;
-
-		Object localProp = properties.get("org.eclipse.sensinact.gateway.agent.local");
-		Object identifierProp = properties.get("org.eclipse.sensinact.gateway.agent.id");
-
-		try {
-			identifier = (String) identifierProp;
-		} catch (Exception e) {
-			mediator.error("Invalid 'identifier' property : %s", e.getMessage());
-		}
-		if (identifier == null) {
-			return;
-		}
-		this.callback.setIdentifier(identifier);
-		try {
-			local = ((Boolean) localProp).booleanValue();
-		} catch (Exception e) {
-			mediator.warn("Invalid 'local' property :%s", e.getMessage());
-		}
-		synchronized(this){
-			try {
-				this.registration = this.mediator.getContext().registerService(SnaAgent.class, this, properties);
-				if (local) {
-					registerRemote();
+	public void start(boolean local) {
+			Dictionary properties = new Hashtable();
+			properties.put("org.eclipse.sensinact.gateway.agent.local",local);
+			properties.put("org.eclipse.sensinact.gateway.agent.id", this.callback.getName());
+			synchronized(this){
+				if(!this.callback.isActive()) {
+					this.mediator.error("The agent cannot be registered with an inactive callback");
+					return;
 				}
-			} catch (IllegalStateException e) {
-				this.mediator.error("The agent is not registered ", e);
+				try {
+					this.registration = this.mediator.getContext().registerService(SnaAgent.class, 
+							this, properties);
+					if (local) {
+						registerRemote();
+					}
+				} catch (IllegalStateException e) {
+					this.mediator.error("The agent is not registered ", e);
+				}
 			}
-		}
 	}
 	
 	/**
@@ -327,8 +320,17 @@ public class SnaAgentImpl implements SnaAgent {
 	 * @see org.eclipse.sensinact.gateway.core.message.SnaAgent#stop()
 	 */
 	@Override
-	public void stop() {
+	public void stop(boolean local) {
 		synchronized(this) {
+			if(local) {
+				this.mediator.callServices(RemoteCore.class, new Executable<RemoteCore, Void>() {
+					@Override
+					public Void execute(RemoteCore remoteCore) throws Exception {
+						remoteCore.endpoint().unregisterAgent(SnaAgentImpl.this.callback.getName());
+						return null;
+					}
+				});
+			}
 			if(this.callback.isActive()) {
 				try {
 					this.callback.stop();
