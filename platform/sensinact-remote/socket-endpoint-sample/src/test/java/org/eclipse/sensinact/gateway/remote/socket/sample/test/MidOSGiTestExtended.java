@@ -118,9 +118,8 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         }
 
         private final void treat(SnaMessage<?> message) { 
-        	//System.out.println("TREAT ["+identifier+"] :" + message.getJSON());       	
-            String json = message.getJSON();
-            synchronized(MidOSGiTestExtended.this.stack) {
+        	String json = message.getJSON();
+           synchronized(MidOSGiTestExtended.this.stack) {
             	stack.push(json);
             }
         }
@@ -403,12 +402,18 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
     }
 
+    public void cleanAgent() throws Throwable {
+    	synchronized(this.stack) {
+        	this.stack.clear();
+        }
+    }
+    
     public void stop() throws Throwable {
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
         Core core = mid.buildProxy();
         mid.toOSGi(SensiNact.class.getDeclaredMethod("unregisterEndpoint", String.class), new Object[]{"sna2"});
         mid.toOSGi(SensiNact.class.getDeclaredMethod("unregisterEndpoint", String.class), new Object[]{"sna1"});
-        this.stack.clear();
+        this.cleanAgent();
     }
 
     public List<String> listAgentMessages() {
