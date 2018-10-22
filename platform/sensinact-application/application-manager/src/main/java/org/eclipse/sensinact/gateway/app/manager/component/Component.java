@@ -202,6 +202,10 @@ public class Component implements DataListenerItf, FunctionUpdateListener {
             } else if (parameter.getType().equals(AppJsonConstant.TYPE_EVENT)) {
                 if (event.getData().getSourceUri().matches((String) parameter.getValue())) {
                     data = event.getData();
+                } else {
+                	String filter = "(&(objectClass=" + DataProviderItf.class.getName() + ")" + "(uri=" + parameter.getValue() + "))";
+	                ServiceReference[] serviceReferences = mediator.getServiceReferences(filter);
+	                data = ((DataProviderItf) mediator.getService(serviceReferences[0])).getData();
                 }
             } else if (CastUtils.jsonTypeToJavaType(parameter.getType()) != null) {
                 data = new ConstantData(parameter.getValue(), CastUtils.jsonTypeToJavaType(parameter.getType()));
