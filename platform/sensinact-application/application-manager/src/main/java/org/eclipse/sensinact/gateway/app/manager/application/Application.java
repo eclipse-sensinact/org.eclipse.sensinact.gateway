@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -49,9 +51,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Application extends AbstractSensiNactApplication {
     private static Logger LOG = LoggerFactory.getLogger(Application.class);
     private static Logger LOG4J = LoggerFactory.getLogger(Application.class.getCanonicalName());
+   
     private final List<ServiceRegistration> serviceRegistrations;
     private final Map<ResourceDataProvider, Collection<ResourceSubscription>> resourceSubscriptions;
     private final Map<String, Component> components;
+    
+    private ExecutorService executor = Executors.newFixedThreadPool(1);
+    
     private final LinkedBlockingQueue<SnaMessage> waitingEvents;
     private final ActionHookQueue actionHookQueue;
     private final AppExceptionWatchDog watchDog;
@@ -209,48 +215,50 @@ public class Application extends AbstractSensiNactApplication {
      * This function create a {@link Thread} to wrap the processing of the next event
      */
     private void triggerNextEvent() throws Exception {
-        Thread thread = new Thread() {
+        executor.execute(new Runnable() {
             public void run() {
-                SnaMessage message = waitingEvents.poll();
-                JSONObject messageJson = new JSONObject(message.getJSON());
-                LOG4J.debug("Processing message {}", message.getJSON());
-                String[] uri = message.getPath().split("/");
-                String resourceUri = "/" + uri[1] + "/" + uri[2] + "/" + uri[3];
-                Object value = messageJson.getJSONObject("notification").get("value");
-                ResourceDataProvider dataProvider = null;
-                for (Map.Entry<ResourceDataProvider, Collection<ResourceSubscription>> subscription : resourceSubscriptions.entrySet()) {
-                    if (resourceUri.equals(subscription.getKey().getUri())) {
-                        dataProvider = subscription.getKey();
-                        break;
-                    }
-                }
-                if (dataProvider == null) {
-                    try {
-                        throw new ResourceNotFoundException("Resource " + resourceUri + " not found while triggering a new event");
-
-                    } catch (ResourceNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                }
-                List<String> sources = new ArrayList<String>();
-                sources.add(resourceUri);
-
-                // Notify the first component with the new event
-                dataProvider.updateAndNotify(new UUID(System.currentTimeMillis(), System.currentTimeMillis()), value, sources);
-
-                // Fire the PluginHook actions after the component graph browsing
-                actionHookQueue.fireHooks();
-                if (!waitingEvents.isEmpty()) {
-                    try {
-                        triggerNextEvent();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            	try {
+	                SnaMessage message = waitingEvents.poll();
+	                if(message == null) {
+	                	return;
+	                }
+	                JSONObject messageJson = new JSONObject(message.getJSON());
+	                System.out.println(message.getJSON());
+	                LOG4J.debug("Processing message {}", message.getJSON());
+	                String[] uri = message.getPath().split("/");
+	                String resourceUri = "/" + uri[1] + "/" + uri[2] + "/" + uri[3];
+	                Object value = messageJson.getJSONObject("notification").get("value");
+	                ResourceDataProvider dataProvider = null;
+	                for (Map.Entry<ResourceDataProvider, Collection<ResourceSubscription>> subscription : resourceSubscriptions.entrySet()) {
+	                    if (resourceUri.equals(subscription.getKey().getUri())) {
+	                        dataProvider = subscription.getKey();
+	                        break;
+	                    }
+	                }
+	                if (dataProvider == null) {
+	                    try {
+	                        throw new ResourceNotFoundException("Resource " + resourceUri + " not found while triggering a new event");
+	
+	                    } catch (ResourceNotFoundException e) {
+	                        e.printStackTrace();
+	                    }
+	                }
+	                List<String> sources = new ArrayList<String>();
+	                sources.add(resourceUri);
+	
+	                // Notify the first component with the new event
+	                dataProvider.updateAndNotify(new UUID(System.currentTimeMillis(), System.currentTimeMillis()), value, sources);
+	
+	                // Fire the PluginHook actions after the component graph browsing
+	                actionHookQueue.fireHooks();
+	                if (!waitingEvents.isEmpty()) {
+	                    triggerNextEvent();
+	                }
+                }catch(Exception e) {
+                	watchDog.uncaughtException(Thread.currentThread(), e);
                 }
             }
-        };
-        thread.setUncaughtExceptionHandler(watchDog);
-        thread.start();
+        });
     }
 
     public Map<ResourceDataProvider, Collection<ResourceSubscription>> getResourceSubscriptions() {
