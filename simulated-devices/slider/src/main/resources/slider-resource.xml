@@ -11,11 +11,17 @@
 
 <resourceInfos xmlns="http://org.eclipse.sensinact/resource"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../../platform/sensinact-generic/src/main/resources/sensinact-resource.xsd">
+ xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../../platform/sensinact-generic/src/main/resources/sensinact-resource.xsd"
+ empty_profile="true">
+  <policies>
+  	<policy name="SENSOR" update="AUTO"/>
+  </policies>
   <resourceInfo xsi:type="resourceInfoSensor" name="POSITION"  target="cursor">
     <identifier xsi:type="stringContent">POSITION</identifier>
     <attributes>
-    	<attribute name="value" type="int"  modifiable="UPDATABLE"/>
+    	<attribute name="value" type="int"  modifiable="UPDATABLE">
+    		<value>0</value>
+    	</attribute>
     </attributes>
   </resourceInfo>
-  </resourceInfos>
+</resourceInfos>

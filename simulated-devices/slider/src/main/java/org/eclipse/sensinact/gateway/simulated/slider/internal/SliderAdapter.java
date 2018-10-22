@@ -33,6 +33,7 @@ public class SliderAdapter {
      */
     public void mouseReleased(int value) {
         try {
+        	System.out.println("====> MOUSE RELEASED: " + value);
             connector.process(new SliderPacket(id, value));
         } catch (InvalidPacketException e) {
             e.printStackTrace();

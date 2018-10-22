@@ -10,9 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.simulated.slider.internal;
 
-import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.CommandID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.Data;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.ResourceID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceID;
@@ -24,48 +22,40 @@ import org.eclipse.sensinact.gateway.generic.packet.annotation.Timestamp;
  */
 public class SliderPacket implements Packet {
     @ServiceProviderID
-    public String serviceProviderIdentifier = null;
+    public final String serviceProviderIdentifier;
 
     @ServiceID
-    public String serviceId = null;
+    public final String serviceId;
 
     @ResourceID
-    public String resourceId = null;
-    private final CommandType command;
-    private final Object value;
+    public final String resourceId;
+
+    @Data
+    public final Object value;
+
+    @Timestamp
+    public final long timestamp;
 
     /**
+     * @param id
      * @param value
      */
     public SliderPacket(String id, int value) {
-        this(id, "cursor", "position", CommandType.GET, value);
+        this(id, "cursor", "position", value);
     }
 
     /**
+     * @param id
+     * @param serviceId
+     * @param resourceId
      * @param value
      */
-    public SliderPacket(String id, String serviceId, String resourceId, CommandType command, Object value) {
+    public SliderPacket(String id, String serviceId, String resourceId, Object value) {
         this.serviceProviderIdentifier = id;
         this.serviceId = serviceId;
         this.resourceId = resourceId;
-        this.command = command;
         this.value = value;
-    }
-
-    /**
-     * @return
-     */
-    @CommandID
-    public CommandType getCommand() {
-        return this.command;
-    }
-
-    /**
-     * @return
-     */
-    @Data
-    public Object getValue() {
-        return this.value;
+        this.timestamp = System.currentTimeMillis();
     }
 
     /**
@@ -75,10 +65,5 @@ public class SliderPacket implements Packet {
     @Override
     public byte[] getBytes() {
         return null;
-    }
-
-    @Timestamp
-    public long getTimestamp() {
-        return System.currentTimeMillis();
     }
 }
