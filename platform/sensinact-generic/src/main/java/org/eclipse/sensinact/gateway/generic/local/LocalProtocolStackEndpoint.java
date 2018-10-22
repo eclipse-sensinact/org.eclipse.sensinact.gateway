@@ -31,6 +31,7 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -272,9 +273,9 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
 
             //the path is automatically provided as first parameter
             parameterTypes[0] = String.class;
-
             for (; index < length; index++) {
-                parameterTypes[index] = parameters[index - 1].getClass();
+                parameterTypes[index] = parameters[index - 1]== null
+                	?Object.class:parameters[index - 1].getClass();
             }
             Iterator<AnnotationExecutor> iterator = this.executors.listIterator();
 
