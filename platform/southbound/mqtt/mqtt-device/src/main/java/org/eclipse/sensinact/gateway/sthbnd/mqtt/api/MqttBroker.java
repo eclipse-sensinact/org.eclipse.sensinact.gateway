@@ -168,12 +168,14 @@ public class MqttBroker {
         }
     }
 
-    public void disconnect() throws MqttException {
+    public synchronized void disconnect() throws MqttException {
         if (client.isConnected()) {
-            for (MqttTopic topic : topics) {
+            for (java.util.Iterator it = topics.iterator(); it.hasNext();) {
+                MqttTopic topic=null;
                 try {
+                    topic=(MqttTopic) it.next();
                     client.unsubscribe(topic.getTopic());
-                    topics.remove(topic);
+                    it.remove();
                     LOG.info("Unsubscription to the topic {} done", topic.getTopic());
                 } catch (MqttException e) {
                     LOG.error("Unable to unsubscribe from the topic {}", topic.getTopic());
