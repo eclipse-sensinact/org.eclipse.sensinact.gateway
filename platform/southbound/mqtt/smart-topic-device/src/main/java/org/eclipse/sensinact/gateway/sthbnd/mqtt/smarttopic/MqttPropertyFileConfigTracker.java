@@ -126,7 +126,7 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
     public void removedService(ServiceReference serviceReference, Object o) {
         LOG.info("Detaching devices MQTT Bus service");
         final String servicePid = serviceReference.getProperty("service.pid").toString();
-        ServiceRegistration record = registration.get(servicePid);
+        ServiceRegistration record = registration.remove(servicePid);
         LOG.debug("Removing service pid {} which correspond to record {} from the list", servicePid, record);
         if (record != null) {
             try {
