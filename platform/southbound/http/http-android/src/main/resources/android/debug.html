@@ -19,12 +19,14 @@ try{
 
 	 var nodeUpdated=document.createElement("div");
 	 nodeUpdated.id=json.messages[0].uri;
-	 var nodeNew = document.createTextNode(json.messages[0].uri +" => "+json.messages[0].notification.value);
-	 nodeUpdated.appendChild(nodeNew);
-	 if(node != null){
-		 document.body.replaceChild(nodeUpdated,node);
-	 }else {
-		 document.body.appendChild(nodeUpdated);
+	 if(typeof(json.messages[0].notification.value) != "undefined"){
+         var nodeNew = document.createTextNode(json.messages[0].uri +" => "+json.messages[0].notification.value);
+         nodeUpdated.appendChild(nodeNew);
+         if(node != null){
+             document.body.replaceChild(nodeUpdated,node);
+         }else {
+             document.body.appendChild(nodeUpdated);
+         }
 	 }
 
 }catch(error){
