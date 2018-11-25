@@ -20,7 +20,7 @@ import org.xml.sax.Attributes;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @XmlElement(tag = "className", field = "resourceClassType")
-final class ResourceClassDefinition extends XmlDefinition {
+final class ResourceClassDefinition extends XmlModelParsingContext {
     private Class<? extends ExtResourceImpl> resourceClassType;
 
     /**
@@ -42,7 +42,8 @@ final class ResourceClassDefinition extends XmlDefinition {
      */
     void setResourceClassType(String className) {
         try {
-            this.resourceClassType = (Class<? extends ExtResourceImpl>) super.mediator.getContext().getBundle().loadClass(className);
+            this.resourceClassType = (Class<? extends ExtResourceImpl>) 
+            		super.mediator.getClassLoader().loadClass(className);
 
             if (this.resourceClassType.isInterface()) {
                 this.resourceClassType = null;

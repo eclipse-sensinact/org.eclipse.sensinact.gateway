@@ -11,13 +11,9 @@
 package org.eclipse.sensinact.gateway.generic.parser;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.xml.sax.Attributes;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Extended {@link XmlDefinition} describing a trigger executed
@@ -25,14 +21,11 @@ import java.util.List;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@XmlAttributes({@XmlAttribute(attribute = "xsi:type", field = "name"), @XmlAttribute(attribute = "reference", field = "reference"), @XmlAttribute(attribute = "passOn", field = "passOn"), @XmlAttribute(attribute = "index", field = "index"), @XmlAttribute(attribute = "calculated", field = "subType")})
-public class ReferenceDefinition extends NameTypeValueDefinition implements JSONable, ConstrainableDefinition {
-    private List<ConditionalConstant> conditionalConstants;
-    private String reference;
-
-    private String subType;
+@XmlAttributes({@XmlAttribute(attribute = "passOn", field = "passOn")})
+public class ReferenceDefinition extends BuilderDefinition {
+	
+	private TriggerBuilderDefinition builder;
     private boolean passOn;
-    private int index;
 
     /**
      * Constructor
@@ -43,52 +36,8 @@ public class ReferenceDefinition extends NameTypeValueDefinition implements JSON
      */
     ReferenceDefinition(Mediator mediator, Attributes atts) {
         super(mediator, atts);
-        this.conditionalConstants = new ArrayList<ConditionalConstant>();
     }
 
-    /**
-     * Sets the sub type of the CALCULATED {@link AccessMethodTrigger}s
-     * described by this ReferenceDefinition
-     *
-     * @param subType the described CALCULATED {@link AccessMethodTrigger}s'
-     *                sub type
-     */
-    public void setSubType(String subType) {
-        this.subType = subType;
-    }
-
-    /**
-     * Returns the sub type of the CALCULATED {@link AccessMethodTrigger}s
-     * described by this ReferenceDefinition
-     *
-     * @return the described CALCULATED {@link AccessMethodTrigger}s'
-     * sub type
-     */
-    public String getSubType() {
-        return this.subType;
-    }
-
-    /**
-     * Defines the name of the {@link StateVariableResource}
-     * targeted by the {@link AccessMethodTrigger} described by
-     * this ReferenceDefinition
-     *
-     * @param reference the name of the targeted {@link StateVariableResource}
-     */
-    public void setReference(String reference) {
-        this.reference = reference.toLowerCase();
-    }
-
-    /**
-     * Returns the name of the {@link StateVariableResource}
-     * targeted by the {@link AccessMethodTrigger} described by
-     * this ReferenceDefinition
-     *
-     * @return the name of the targeted {@link StateVariableResource}
-     */
-    public String getReference() {
-        return this.reference;
-    }
 
     /**
      * Defines whether the {@link AccessMethodTrigger} described
@@ -119,70 +68,29 @@ public class ReferenceDefinition extends NameTypeValueDefinition implements JSON
     }
 
     /**
-     * @param name
-     */
-    public void setName(String name) {
-        this.name = name.substring(0, name.length() - 9).toUpperCase();
-    }
-
-    /**
-     * Defines the index of the parameter on which applies
-     * the calculation of the value returned by the {@link
-     * AccessMethodTrigger} described by this ReferenceDefinition
+     * Returns the name of the type of the {@link DynamicParameterValue}
+     * described by this BuilderDefinition
      *
-     * @param index the index of the parameter on which applies
-     *              the calculation
+     * @return the name of the type of the described {@link
+     * DynamicParameterValue}
      */
-    public void setIndex(String index) {
-        this.index = Integer.parseInt(index);
+    public String getName() {
+    	String name = super.getName().toUpperCase();
+    	name = name.substring(0,name.length()-9);
+        if ("CALCULATED".equals(name)) {
+            return super.getSubType();
+        }
+        return name;
     }
 
     /**
-     * Returns the index of the parameter on which applies
-     * the calculation of the value returned by the {@link
-     * AccessMethodTrigger} described by this ReferenceDefinition
+     * Returns the argument builder of the {@link AccessMethodTrigger} described by this 
+     * ReferenceDefinition
      *
-     * @return the index of the parameter on which applies
-     * the calculation
+     * @return the {@link AccessMethodTrigger} argument builder
      */
-    public int getIndex() {
-        return this.index;
-    }
-
-    /**
-     * @param target
-     * @return
-     */
-    public TypeDefinition getTypeDefinition() {
-        return this.conditionalConstants.get(this.conditionalConstants.size() - 1).getTypeDefinition();
-    }
-
-    /**
-     * @param typeDefinition
-     */
-    @Override
-    protected void setTypeDefinition(TypeDefinition typeDefinition) {
-        ConditionalConstant conditional = new ConditionalConstant(super.mediator, null);
-        conditional.setTypeDefinition(typeDefinition);
-        this.conditionalConstants.add(conditional);
-    }
-
-    /**
-     * @param valueDefinition
-     */
-    @Override
-    protected void setValueDefinition(ValueDefinition valueDefinition) {
-        this.conditionalConstants.get(this.conditionalConstants.size() - 1).setValueDefinition(valueDefinition);
-    }
-
-    /**
-     * @inheritDoc
-     * @see ConstrainableDefinition#
-     * addConstraint(ConstraintDefinition)
-     */
-    @Override
-    public void addConstraint(ConstraintDefinition constraint) {
-        this.conditionalConstants.get(this.conditionalConstants.size() - 1).addConstraint(constraint);
+    public TriggerBuilderDefinition getTriggerBuilderDefinition() {
+        return this.builder;
     }
 
     /**
@@ -199,7 +107,7 @@ public class ReferenceDefinition extends NameTypeValueDefinition implements JSON
         builder.append(JSONUtils.QUOTE);
         builder.append(JSONUtils.COLON);
         builder.append(JSONUtils.QUOTE);
-        builder.append(this.reference);
+        builder.append(super.getReference());
         builder.append(JSONUtils.QUOTE);
         builder.append(JSONUtils.COMMA);
         builder.append(JSONUtils.QUOTE);
@@ -212,54 +120,30 @@ public class ReferenceDefinition extends NameTypeValueDefinition implements JSON
         builder.append(JSONUtils.QUOTE);
         builder.append(JSONUtils.COLON);
         builder.append(JSONUtils.QUOTE);
-        if ("CALCULATED".equals(name)) {
-            builder.append(this.subType);
-
-        } else {
-            builder.append(name);
-        }
+        builder.append(getName());
         builder.append(JSONUtils.QUOTE);
         builder.append(JSONUtils.COMMA);
         builder.append(JSONUtils.QUOTE);
-        builder.append(AccessMethodTrigger.TRIGGER_PASS_ON);
+        builder.append(AccessMethodTrigger.TRIGGER_PASSON_KEY);
         builder.append(JSONUtils.QUOTE);
         builder.append(JSONUtils.COLON);
         builder.append(this.passOn);
-        builder.append(JSONUtils.COMMA);
-        builder.append(JSONUtils.QUOTE);
-        builder.append(AccessMethodTrigger.TRIGGER_INDEX_KEY);
-        builder.append(JSONUtils.QUOTE);
-        builder.append(JSONUtils.COLON);
-        builder.append(this.index);
-
-        if (!this.conditionalConstants.isEmpty()) {
-            builder.append(JSONUtils.COMMA);
-
-            if (this.conditionalConstants.size() == 1 && this.conditionalConstants.get(0).isUnconditional()) {
-                builder.append(JSONUtils.QUOTE);
-                builder.append(AccessMethodTrigger.TRIGGER_CONSTANT_KEY);
-                builder.append(JSONUtils.QUOTE);
-                builder.append(JSONUtils.COLON);
-                builder.append(this.conditionalConstants.get(0).getJSON());
-
-            } else {
-                builder.append(JSONUtils.QUOTE);
-                builder.append(AccessMethodTrigger.TRIGGER_CONSTANTS_KEY);
-                builder.append(JSONUtils.QUOTE);
-                builder.append(JSONUtils.COLON);
-                builder.append(JSONUtils.OPEN_BRACKET);
-                int index = 0;
-                int length = this.conditionalConstants.size();
-
-                for (; index < length; index++) {
-                    builder.append(index > 0 ? JSONUtils.COMMA : JSONUtils.EMPTY);
-                    builder.append(this.conditionalConstants.get(index).getJSON());
-                }
-                builder.append(JSONUtils.CLOSE_BRACKET);
-            }
+        if(this.builder!=null) {
+        	builder.append(JSONUtils.COMMA);
+        	builder.append(this.builder.getJSON());
         }
         builder.append(JSONUtils.CLOSE_BRACE);
         builder.append(JSONUtils.CLOSE_BRACE);
         return builder.toString();
     }
+    
+    /**
+     * @param atts
+     */
+    public void builderStart(Attributes atts) {
+    	 TriggerBuilderDefinition builder = new TriggerBuilderDefinition(mediator, atts);
+    	 this.builder = builder;
+    	 super.setNext(builder);
+    }
+   
 }

@@ -17,8 +17,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * An XmlAttribute annotation associates an xml attribute
- * and a field name
+ * An XmlAttribute annotation associates an xml attribute and a field name
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */

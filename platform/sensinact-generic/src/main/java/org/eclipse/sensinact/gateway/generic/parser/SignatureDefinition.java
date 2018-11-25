@@ -32,7 +32,8 @@ import java.util.Map;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class SignatureDefinition implements Comparable<SignatureDefinition> {
-    protected List<ReferenceDefinition> references;
+    
+	protected List<ReferenceDefinition> references;
     private List<ParameterDefinition> parameters;
     private final AccessMethod.Type type;
 
@@ -45,16 +46,14 @@ public class SignatureDefinition implements Comparable<SignatureDefinition> {
     public SignatureDefinition(AccessMethod.Type type) {
         this.type = type;
         this.parameters = new ArrayList<ParameterDefinition>();
+        this.references = new ArrayList<ReferenceDefinition>();
     }
 
     /**
      * @param referenceDefinition
      */
     public void addReferenceDefinition(ReferenceDefinition referenceDefinition) {
-        if (this.references == null) {
-            this.references = new ArrayList<ReferenceDefinition>();
-        }
-        this.references.add(referenceDefinition);
+       this.references.add(referenceDefinition);
     }
 
     /**
@@ -65,9 +64,6 @@ public class SignatureDefinition implements Comparable<SignatureDefinition> {
      * ACTION typed {@link ResourceConfig}
      */
     public List<ReferenceDefinition> getReferenceDefinitions() {
-        if (this.references == null) {
-            return Collections.<ReferenceDefinition>emptyList();
-        }
         return Collections.unmodifiableList(this.references);
     }
 
@@ -114,12 +110,6 @@ public class SignatureDefinition implements Comparable<SignatureDefinition> {
         }
         return signature;
     }
-
-//    public List<ParameterDefinition> getParameters()
-//    {
-//    	return Collections.unmodifiableList(this.parameters);
-//    }
-//    
 
     /**
      * @return

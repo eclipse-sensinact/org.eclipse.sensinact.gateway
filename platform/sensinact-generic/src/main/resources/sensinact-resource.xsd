@@ -18,9 +18,10 @@ elementFormDefault="qualified" attributeFormDefault="unqualified">
      <simpleType name="reference_parameter_enum">
 		<restriction base="string">		
 			<enumeration value="EMPTY"/>
-			<enumeration value="PARAMETERS"/>
+			<enumeration value="PARAMETER"/>
 			<enumeration value="INTERMEDIATE"/>
 			<enumeration value="RESPONSE"/>
+			<enumeration value="MODEL"/>
 		</restriction>
 	</simpleType>
 	
@@ -203,7 +204,7 @@ elementFormDefault="qualified" attributeFormDefault="unqualified">
 		<complexContent>
 			<extension base="sensinact:nameTypeValue">
 				<choice minOccurs="0" maxOccurs="1">
-					<element name="contraints" type="sensinact:constraints" minOccurs="0" maxOccurs="1"/>
+					<element name="constraints" type="sensinact:constraints" minOccurs="0" maxOccurs="1"/>
 					<element name="builder" type="sensinact:builder" minOccurs="0" maxOccurs="1"/>
 				</choice>
 				<attribute name="name" type="string" use="required"/> 
@@ -260,7 +261,7 @@ elementFormDefault="qualified" attributeFormDefault="unqualified">
 	<complexType name="conditionalConstant" >
 		<sequence>
 			<element name="value" type="sensinact:restrictedValueType" minOccurs="1" maxOccurs="1"/>
-			<element name="contraints" type="sensinact:constraints" minOccurs="0" maxOccurs="1"/>
+			<element name="constraints" type="sensinact:constraints" minOccurs="0" maxOccurs="1"/>
 		</sequence>
 				<attribute name="type" use="required" type="string" />
 	</complexType>
@@ -270,16 +271,34 @@ elementFormDefault="qualified" attributeFormDefault="unqualified">
 			<restriction base="sensinact:conditionalConstant">
 				<sequence>
 					<element name="value" type="sensinact:restrictedValueType" minOccurs="1" maxOccurs="1"/>
-					<element name="contraints" type="sensinact:constraints"  minOccurs="0" maxOccurs="0"/>
+					<element name="constraints" type="sensinact:constraints"  minOccurs="0" maxOccurs="0"/>
 				</sequence>
 				<attribute name="type" use="required" type="string" />
 			</restriction>
 		</complexContent>
 	</complexType>
 	
+	<complexType name="argument" abstract="false">
+		<complexContent>
+			<extension base="sensinact:conditionalConstantFixed">
+				<attribute name="name" use="optional" fixed="argument"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="argumentBuilder" abstract="false">
+		<sequence>
+			<element name="argument" type="sensinact:argument" minOccurs="0" maxOccurs="1"/>
+		</sequence>
+		<attribute name="type" type="sensinact:reference_parameter_enum" use="required" />
+	</complexType>
+	
 	<complexType name="reference" abstract="true">
 		<complexContent>
 			<extension base="sensinact:nameTypeValue">
+				<sequence>
+					<element name="builder" type="sensinact:argumentBuilder" minOccurs="1" maxOccurs="1"/>
+				</sequence>
 				<attribute name="reference" type="string" use="required"/>
 				<attribute name="passOn" type="boolean" default="false"/>
 				<attribute name="policy" type="sensinact:policy_enum" use="optional" fixed="STATE_VARIABLE"/>
@@ -288,11 +307,15 @@ elementFormDefault="qualified" attributeFormDefault="unqualified">
 		</complexContent>
 	</complexType>
 	
-	<complexType name="copyReference" >
+	<complexType name="copyReference" abstract="false" >
 		<complexContent>
-			<extension base="sensinact:reference">
-				<attribute name="index" type="nonNegativeInteger" use="required" />
-			</extension>
+			<extension base="sensinact:reference"/>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="constantReference" >
+		<complexContent>
+			<extension base="sensinact:reference"/>
 		</complexContent>
 	</complexType>
 	
@@ -302,21 +325,10 @@ elementFormDefault="qualified" attributeFormDefault="unqualified">
 				<sequence>
 					<element name="constant" type="sensinact:conditionalConstant" minOccurs="1" maxOccurs="unbounded"/>
 				</sequence>
-				<attribute name="index" type="nonNegativeInteger" use="required" />
 			</extension>
 		</complexContent>
 	</complexType>
-		
-	<complexType name="constantReference" >
-		<complexContent>
-			<extension base="sensinact:reference">
-				<sequence>
-					<element name="constant" type="sensinact:conditionalConstantFixed" minOccurs="1" maxOccurs="1"/>
-				</sequence>
-			</extension>
-		</complexContent>
-	</complexType>
-	
+			
 	<complexType name="calculatedReference" >
 		<complexContent>
 			<extension base="sensinact:reference">
@@ -326,7 +338,6 @@ elementFormDefault="qualified" attributeFormDefault="unqualified">
 					</choice>
 				</sequence>
 				<attribute name="calculated" type="string" use="required"/>
-				<attribute name="index" type="nonNegativeInteger" use="optional" />
 			</extension>
 		</complexContent>
 	</complexType>

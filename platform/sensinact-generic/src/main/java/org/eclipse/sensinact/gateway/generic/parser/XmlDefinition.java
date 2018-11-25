@@ -18,30 +18,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Abstract xml element definition
+ * Abstract XML node definition
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class XmlDefinition {
-    /**
-     * the associated {@link Mediator}
-     */
-    protected Mediator mediator;
-    /**
-     * Setting {@link Method} of an xml element content
-     */
-    protected Method tagged;
 
+    protected Mediator mediator;
+    protected Method tagged;
 
     /**
      * Constructor
      *
-     * @param mediator the associated Mediator
-     * @param atts     the set of attributes data structure for the
-     *                 xml element
-     */
+     * @param mediator the {@link Mediator} allowing the XmlDefinition to be
+     * instantiated to interact with the OSGi host environment
+     * @param atts     the {@link Attributes} data structure of the current 
+     * XML node */
     public XmlDefinition(Mediator mediator, Attributes atts) {
-        this.mediator = mediator;
+        this.mediator = mediator;        
         XmlElement element = this.getClass().getAnnotation(XmlElement.class);
 
         if (element != null) {
@@ -62,14 +56,16 @@ public abstract class XmlDefinition {
                 String field = annotation.field();
                 String value = null;
 
-                if (name.equals(XmlAttribute.DEFAULT_ATTRIBUTE_VALUE) || field.equals(XmlAttribute.DEFAULT_ATTRIBUTE_VALUE) || (value = atts.getValue(name)) == null || value.length() == 0) {
+                if (name.equals(XmlAttribute.DEFAULT_ATTRIBUTE_VALUE) 
+                		|| field.equals(XmlAttribute.DEFAULT_ATTRIBUTE_VALUE) 
+                		|| (value = atts.getValue(name)) == null 
+                		|| value.length() == 0) {
                     continue;
                 }
                 char[] fieldChars = field.toCharArray();
                 fieldChars[0] = Character.toUpperCase(fieldChars[0]);
 
                 String methodName = new StringBuilder("set").append(new String(fieldChars)).toString();
-
                 Method method = this.getMethod(methodName);
 
                 if (method != null) {
@@ -80,10 +76,10 @@ public abstract class XmlDefinition {
     }
 
     /**
-     * Sets the value of the field mapped to the xml tag name
-     * passed as parameter
+     * Sets the value of the field mapped to the XML node whose 
+     * name is specified by the {@link XmlElement} annotation annotating
+     * this XmlDefinition if any
      *
-     * @param tag   the name of the xml tag
      * @param value the string value to set
      */
     public void mapTag(String value) {
@@ -106,22 +102,18 @@ public abstract class XmlDefinition {
                 method.invoke(this, value);
 
             } catch (Exception e) {
-                if (this.mediator.isErrorLoggable()) {
-                    this.mediator.error(e, e.getMessage());
-                }
+                this.mediator.error(e);
             }
         }
     }
 
     /**
      * Builds and returns an array of all declared XmlAttribute
-     * annotations wrapped in XmlAttributes ones for this
-     * XmlDefinition and its super classes until the Object
-     * one
+     * annotations held by an XmlAttributes annotating this
+     * XmlDefinition and its super classes
      *
-     * @return an array of all declared XmlAttribute annotations
-     * wrapped in XmlAttributes ones for this XmlDefinition
-     * and its super classes until the Object one
+     * @return the array of {@link XmlAttribute} annotations
+     * for this XmlDefinition
      */
     private XmlAttribute[] buildAttributeAnnotationsSet() {
         List<XmlAttribute> tags = new ArrayList<XmlAttribute>();
@@ -141,9 +133,13 @@ public abstract class XmlDefinition {
     }
 
     /**
-     * @param methodName
-     * @param parameterTypes
-     * @return
+     * Get the method whose name is passed as parameter and whose
+     * signature contains only one single String argument for this 
+     * XmlDefinition
+     * 
+     * @param methodName the name of the method
+     * 
+     * @return the {@link Method} with the specified name if found
      */
     private Method getMethod(String methodName) {
         Class<?> currentClass = this.getClass();

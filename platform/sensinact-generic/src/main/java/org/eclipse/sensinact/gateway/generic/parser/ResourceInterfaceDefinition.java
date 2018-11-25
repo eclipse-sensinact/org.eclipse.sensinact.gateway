@@ -20,7 +20,7 @@ import org.xml.sax.Attributes;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @XmlElement(tag = "interfaceName", field = "resourceInterfaceType")
-final class ResourceInterfaceDefinition extends XmlDefinition {
+final class ResourceInterfaceDefinition extends XmlModelParsingContext {
     private Class<? extends Resource> resourceInterfaceType;
 
     /**

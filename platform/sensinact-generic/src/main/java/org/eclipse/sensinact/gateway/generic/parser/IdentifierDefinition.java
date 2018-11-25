@@ -14,23 +14,24 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.xml.sax.Attributes;
 
 /**
- * Identifier definition wrapping the identifier array of bytes as well as
+ * Identifier definition wrapping the identifier bytes array as well as
  * its encoding allowing to extract it from the its definition
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @XmlElement(tag = "identifier", field = "identifier")
 @XmlAttributes({@XmlAttribute(attribute = "xsi:type", field = "encoding")})
-final class IdentifierDefinition extends XmlDefinition {
+final class IdentifierDefinition extends XmlModelParsingContext {
     private String encoding;
     private byte[] identifier;
 
     /**
      * Constructor
      *
-     * @param mediator the associated Mediator
-     * @param atts     the set of attributes data structure for the
-     *                 xml identifier element
+     * @param mediator the {@link Mediator} allowing the IdentifierDefinition 
+     * to be instantiated to interact with the OSGi host environment
+     * @param atts     the {@link Attributes} data structure of the "identifier" 
+     * XML node 
      */
     public IdentifierDefinition(Mediator mediator, Attributes atts) {
         super(mediator, atts);

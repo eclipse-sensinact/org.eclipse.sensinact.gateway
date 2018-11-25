@@ -10,17 +10,19 @@
  */
 package org.eclipse.sensinact.gateway.generic.parser;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
- * A {@link  ConstraintDefinition} holder
- *
+ * XmlEscaped defines the list of untreated XML node *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface ConstrainableDefinition {
-    /**
-     * Adds the {@link ConstraintDefinition} passed as parameter
-     * to this ConstrainableDefinition
-     *
-     * @param constraint the {@link ConstraintDefinition} to be added
-     */
-    void addConstraint(ConstraintDefinition constraint);
-}
+@Target(value = ElementType.TYPE)
+@Retention(value = RetentionPolicy.RUNTIME)
+@Documented
+public @interface XmlEscaped {
+    public String[] value() default {};
+ }

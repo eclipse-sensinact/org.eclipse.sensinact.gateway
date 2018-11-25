@@ -21,13 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Gathers a constant value to a set of {@link ConstraintDefinition}s
+ * Gathers a constant value with a set of {@link ConstraintDefinition}s 
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ConditionalConstant extends NameTypeValueDefinition implements ConstrainableDefinition, JSONable {
-    private Mediator mediator;
-
+@XmlEscaped(value = {"constraints"})
+public class ConditionalConstant extends ResolvedNameTypeValueDefinition implements ConstrainableDefinition, JSONable {
+    
     private List<ConstraintDefinition> constraints;
 
     /**
@@ -63,7 +63,8 @@ public class ConditionalConstant extends NameTypeValueDefinition implements Cons
      */
     public boolean isUnconditional() {
         int length = this.constraints.size();
-        return (length == 0 || (length == 1 && Fixed.class.isAssignableFrom(this.constraints.get(0).getClass())));
+        return (length == 0 || (length == 1 
+        && Fixed.class.isAssignableFrom(this.constraints.get(0).getClass())));
     }
 
     /**
@@ -72,7 +73,8 @@ public class ConditionalConstant extends NameTypeValueDefinition implements Cons
      */
     @Override
     public String getJSON() {
-        String constant = JSONUtils.toJSONFormat(super.getTypeValuePair().value);
+    	TypeValuePair pair = super.getTypeValuePair();
+        String constant = JSONUtils.toJSONFormat(pair.value);
 
         StringBuilder builder = new StringBuilder();
 
@@ -95,7 +97,9 @@ public class ConditionalConstant extends NameTypeValueDefinition implements Cons
             int index = 0;
             for (; index < this.constraints.size(); index++) {
                 builder.append(index > 0 ? JSONUtils.COMMA : JSONUtils.EMPTY);
-                builder.append(this.constraints.get(index).getJSON());
+                ConstraintDefinition def = this.constraints.get(index);
+                def.setType(new TypeDefinition<Class<?>>(pair.type));
+                builder.append(def.getJSON());
             }
             builder.append(JSONUtils.CLOSE_BRACKET);
             builder.append(JSONUtils.CLOSE_BRACE);

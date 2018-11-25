@@ -18,18 +18,18 @@ import org.eclipse.sensinact.gateway.core.MetadataBuilder;
 import org.xml.sax.Attributes;
 
 /**
- * Extended {@link NameTypeValueDefinition} for metadata
- * xml element
- *
+ * Extended {@link ResolvedNameTypeValueDefinition} for metadata XML node
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class MetadataDefinition extends NameTypeValueDefinition implements MetadataBuilder {
-    /**
+public class MetadataDefinition extends ResolvedNameTypeValueDefinition implements MetadataBuilder {
+	/**
      * Constructor
      *
-     * @param mediator the associated Mediator
-     * @param atts     the set of attributes data structure for the
-     *                 xml metadata element
+     * @param mediator the {@link Mediator} allowing the MetadataDefinition 
+     * to be instantiated to interact with the OSGi host environment
+     * @param atts     the {@link Attributes} data structure of the "meta" 
+     * XML node 
      */
     MetadataDefinition(Mediator mediator, Attributes atts) {
         super(mediator, atts);
@@ -47,8 +47,8 @@ public class MetadataDefinition extends NameTypeValueDefinition implements Metad
      * @see MetadataBuilder#getMetadata(String)
      */
     public Metadata getMetadata() throws InvalidValueException {
-        Metadata metadata = new Metadata(super.mediator, super.getName(), typeDefinition.getType(), valueDefinition != null ? valueDefinition.getValue() : null, Modifiable.FIXED);
-
+        Metadata metadata = new Metadata(super.mediator, super.getName(),super.getType(), 
+        	valueDefinition != null ? valueDefinition.getValue() : null, Modifiable.FIXED);
         return metadata;
     }
 }
