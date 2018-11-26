@@ -73,8 +73,6 @@ public class TestRestSETAccess extends TestRestAccess {
     private String synchronizedRequest(WsServiceTestClient client, String url, String content) {
         String simulated = null;
         long wait = 1000;
-//		long start = System.currentTimeMillis();
-
         client.newRequest(url, content);
 
         while (!client.isAvailable() && wait > 0) {
@@ -87,10 +85,6 @@ public class TestRestSETAccess extends TestRestAccess {
         if (client.isAvailable()) {
             simulated = client.getResponseMessage();
         }
-//        System.out.println(String.format(
-//        		"Response returned in %s ms",
-//        		(System.currentTimeMillis()-start)));
-
         return simulated;
     }
 }
