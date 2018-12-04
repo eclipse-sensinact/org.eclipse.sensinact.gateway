@@ -27,8 +27,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
-//import org.osgi.service.permissionadmin.PermissionAdmin;
-//import org.osgi.service.permissionadmin.PermissionInfo;
 
 /**
  * Bundle Activator
@@ -36,7 +34,6 @@ import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class Activator extends AbstractActivator<Mediator> {
-	// private static final String VERSION = "2.0-SNAPSHOT";
 
 	private ServiceRegistration registration;
 
@@ -61,7 +58,7 @@ public class Activator extends AbstractActivator<Mediator> {
 
 		for (int index = 0; index < types.size(); index++) {
 			if (index > 0)
-				builder.append(",");
+				builder.append("\\,");
 			builder.append(types.get(index));
 		}
 		cpa = super.mediator.getContext().getService(sRef);
@@ -69,24 +66,25 @@ public class Activator extends AbstractActivator<Mediator> {
 		ConditionalPermissionUpdate cpu = cpa.newConditionalPermissionUpdate();
 		List piList = cpu.getConditionalPermissionInfos();
 
-		ConditionalPermissionInfo cpiDeny = cpa.newConditionalPermissionInfo(String
-				.format("DENY { [org.eclipse.sensinact.gateway.core.security.perm.StrictCodeBaseCondition \"%s\" \"!\"]"
-						+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.Core\" \"register\")"
-						+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.RemoteCore\" \"register,get\")"
-						+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModel\" \"register,get\")"
-						+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement\" \"register,get\")"
-						+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.SnaAgent\" \"register\")"
-						+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecuredAccess\" \"register,get\")"
-						+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.UserManager\" \"register,get\")"
-						+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService\" \"register,get\")"
-						+ "} null", builder.toString()));
+		ConditionalPermissionInfo cpiDeny = cpa.newConditionalPermissionInfo(
+			String.format("DENY { [org.eclipse.sensinact.gateway.core.security.perm.StrictCodeBaseCondition \"%s\" \"!\"]"
+				+ " (org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.Core\" \"register\")"
+				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModel\" \"register,get\")"
+				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement\" \"register,get\")"
+				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.LocalAgent\" \"register,get\")"
+				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.RemoteAgent\" \"register,get\")"
+				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.remote.RemoteCore\" \"register,get\")"
+				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecuredAccess\" \"register,get\")"
+				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.UserManager\" \"register,get\")"
+				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService\" \"register,get\")"
+				+ "} null", builder.toString()));
 		piList.add(cpiDeny);
 
 		ConditionalPermissionInfo cpiAllow = null;
 
 		cpiAllow = cpa.newConditionalPermissionInfo(
-				"ALLOW {" + "[org.eclipse.sensinact.gateway.core.security.perm.CodeBaseCondition \"*\"]"
-						+ "(java.security.AllPermission \"\" \"\")" + "} null");
+			"ALLOW {[org.eclipse.sensinact.gateway.core.security.perm.CodeBaseCondition \"*\"](java.security.AllPermission \"\" \"\")} null");
+		
 		piList.add(cpiAllow);
 
 		if (!cpu.commit()) {
@@ -96,8 +94,8 @@ public class Activator extends AbstractActivator<Mediator> {
 			@Override
 			public ServiceRegistration run() {
 				try {
-					return mediator.getContext().registerService(Core.class.getCanonicalName(), new SensiNact(mediator),
-							null);
+					return mediator.getContext().registerService(Core.class.getCanonicalName(), 
+							new SensiNact(mediator), null);
 				} catch (Exception e) {
 					mediator.error(e);
 				}

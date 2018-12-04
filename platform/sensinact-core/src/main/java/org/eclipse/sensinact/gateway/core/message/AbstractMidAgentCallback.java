@@ -26,17 +26,80 @@ public abstract class AbstractMidAgentCallback extends AbstractMidCallback imple
 	private Map<String, String> locations;
 
 	/**
+	 * true if the {@link SnaAgent} attached to this
+	 * {@link MidAgentCallback} is propagated through the
+	 * connected remote sensiNact instance(s)
+	 */
+	private final boolean propagate;
+		
+	/**
 	 * Constructor
 	 * 
-	 * @param identifier
-	 *            the {@link Mediator} that will be used by the
-	 *            AbstractSnaAgentCallback to instantiate
 	 */
 	protected AbstractMidAgentCallback() {
-		super(true);
-		this.locations = new HashMap<String, String>();
+		this(true,true);
 	}
 
+	/**
+	 * Constructor
+	 * 
+	 * @param identifier the String identifier of the {@link MidAgentCallback}
+	 * to be instantiated 
+	 */
+	protected AbstractMidAgentCallback(String identifier) {
+		this(true,true,identifier);
+	}
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param propagate true if the {@link SnaAgent} attached to the
+	 * 		{@link MidAgentCallback} to be instantiated must be propagated 
+	 * 		through the connected remote sensiNact instance(s); false 
+	 * 		otherwise
+	 */
+	protected AbstractMidAgentCallback(boolean propagate) {
+		this(true, propagate);
+	}
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param stack true if the registered {@link SnaMessage}s are first
+	 * 		stored into an intermediate stack for desynchronization purpose 
+	 * 		before to be processed. False if the {@link SnaMessage}s are
+	 * 		processed immediately when received
+	 * @param propagate true if the {@link SnaAgent} attached to the
+	 * 		{@link MidAgentCallback} to be instantiated must be propagated 
+	 * 		through the connected remote sensiNact instance(s). False 
+	 * 		otherwise
+	 */
+	protected AbstractMidAgentCallback(boolean stack, boolean propagate) {
+		super(stack);
+		this.locations = new HashMap<String, String>();
+		this.propagate = propagate;
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param stack true if the registered {@link SnaMessage}s are first
+	 * stored into an intermediate stack for desynchronization purpose 
+	 * before to be processed. False if the {@link SnaMessage}s are
+	 * processed immediately when received
+	 * @param propagate true if the {@link SnaAgent} attached to the
+	 * {@link MidAgentCallback} to be instantiated must be propagated 
+	 * through the connected remote sensiNact instance(s). False 
+	 * otherwise
+	 * @param identifier the String identifier of the {@link MidAgentCallback}
+	 * to be instantiated 
+	 */
+	protected AbstractMidAgentCallback(boolean stack, boolean propagate, String identifier) {
+		super(stack, identifier);
+		this.locations = new HashMap<String, String>();
+		this.propagate = propagate;
+	}
+	
 	/**
 	 * Returns the String location for the service provider whose path is passed as
 	 * parameter
@@ -68,6 +131,15 @@ public abstract class AbstractMidAgentCallback extends AbstractMidCallback imple
 		}
 	}
 
+	/** 
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.message.MidAgentCallback#propagate()
+	 */
+	public boolean propagate() {
+		return this.propagate;
+	}
+	
 	/**
 	 * @inheritDoc
 	 *
@@ -107,6 +179,9 @@ public abstract class AbstractMidAgentCallback extends AbstractMidCallback imple
 			case UPDATE:
 				this.doHandle((SnaUpdateMessageImpl) message);
 				break;
+			case REMOTE:
+				this.doHandle((SnaRemoteMessageImpl) message);
+				break;
 			default:
 				;
 			}
@@ -115,5 +190,55 @@ public abstract class AbstractMidAgentCallback extends AbstractMidCallback imple
 		} catch (Exception e) {
 			throw new MidCallbackException(e);
 		}
+	}
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.message.MidAgentCallback#doHandle(org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl)
+	 */
+	@Override
+	public void doHandle(SnaLifecycleMessageImpl message) throws MidCallbackException {
+		//to be overridden
+	}
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.message.MidAgentCallback#doHandle(org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl)
+	 */
+	@Override
+	public void doHandle(SnaUpdateMessageImpl message) throws MidCallbackException {
+		//to be overridden
+	}
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.message.MidAgentCallback#doHandle(org.eclipse.sensinact.gateway.core.message.SnaRemoteMessageImpl)
+	 */
+	@Override
+	public void doHandle(SnaRemoteMessageImpl message) throws MidCallbackException {	
+		//to be overridden	
+	}
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.message.MidAgentCallback#doHandle(org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl)
+	 */
+	@Override
+	public void doHandle(SnaErrorMessageImpl message) throws MidCallbackException {
+		//to be overridden
+	}
+
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.core.message.MidAgentCallback#doHandle(org.eclipse.sensinact.gateway.core.message.SnaResponseMessage)
+	 */
+	@Override
+	public void doHandle(SnaResponseMessage<?, ?> message) throws MidCallbackException {
+		//to be overridden
 	}
 }

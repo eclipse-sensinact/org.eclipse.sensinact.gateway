@@ -100,8 +100,7 @@ public abstract class AbstractMidCallback implements MidCallback {
 	 * @throws MidCallbackException 
 	 * 			  if an error occurs when transmitting the specified message
 	 */
-	protected abstract void doCallback(SnaMessage<?> message)
-			throws MidCallbackException;
+	protected abstract void doCallback(SnaMessage<?> message) throws MidCallbackException;
 
 	/**
 	 * this callback's error handler
@@ -134,24 +133,48 @@ public abstract class AbstractMidCallback implements MidCallback {
 	 * @param identifier
 	 */
 	protected AbstractMidCallback() {
-		this(false);
+		this(false, null);
+	}
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param identifier the String identifier of the {@link MidCallback}
+	 * to be instantiated 
+	 */
+	protected AbstractMidCallback(String identifier) {
+		this(false, identifier);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param identifier
-	 *            the String identifier of the {@link MidCallback} to be
-	 *            instantiated
-	 * 
-	 * @param buffer
-	 *            Defines whether the {@link MidCallback} to be instantiated will
-	 *            use a fifo buffer to store received messages before treating them
+	 * @param buffer Defines whether the {@link MidCallback} to be instantiated will
+	 * use a fifo buffer to store received messages before treating them
 	 */
 	protected AbstractMidCallback(boolean buffer) {
+		this(buffer,null);
+	}
+
+
+	/**
+	 * Constructor
+	 * 
+	 * @param buffer Defines whether the {@link MidCallback} to be instantiated 
+	 * will use a fifo buffer to store received messages before treating them
+	 * @param identifier the String identifier of the {@link MidCallback}
+	 * to be instantiated 
+	 */
+	protected AbstractMidCallback(boolean buffer, String identifier) {
 		this.setTimeout(MidCallback.ENDLESS);
 		this.registerer = buffer ? new MessageRegistererBufferDelegate() : new MessageRegistererDirectDelegate();
 		this.isActive = new AtomicBoolean(true);
+		if(identifier == null) {
+			this.identifier = new StringBuilder().append("MID").append(
+				System.currentTimeMillis()).append(this.hashCode()).toString();
+		} else {
+			this.identifier = identifier;
+		}
 	}
 
 	/**
@@ -161,19 +184,6 @@ public abstract class AbstractMidCallback implements MidCallback {
 	 */
 	public String getName() {
 		return this.identifier;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.MidCallback#
-	 *      setIdentifier(java.lang.String)
-	 */
-	public void setIdentifier(String identifier) {
-		if (this.identifier != null) {
-			return;
-		}
-		this.identifier = identifier;
 	}
 
 	/**
@@ -247,8 +257,7 @@ public abstract class AbstractMidCallback implements MidCallback {
 		synchronized(this.isActive) {
 			this.isActive.set(false);
 		}		
-		if (MessageRegistererBufferDelegate.class.isAssignableFrom(
-				this.registerer.getClass())) {
+		if (MessageRegistererBufferDelegate.class.isAssignableFrom(this.registerer.getClass())) {
 			((MessageRegistererBufferDelegate) this.registerer).stop();
 		}
 	}

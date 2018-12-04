@@ -27,6 +27,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.eclipse.sensinact.gateway.core.method.InvalidTriggerException;
 import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
+import org.eclipse.sensinact.gateway.core.method.trigger.TriggerArgumentBuilder;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
@@ -412,8 +413,14 @@ public class ServiceImpl
 	}
 
 	/**
-	 * @param resource
-	 * @return
+	 * Add the {@link ResourceImpl} passed as parameter to this ServiceImpl.
+	 * If this ServiceImpl is already registered, the added {@link ResourceImpl}
+	 * is started
+	 * 
+	 * @param resource the {@link ResourceImpl} to be added and potentially 
+	 * started
+	 * 
+	 * @return true if the {@link ResourceImpl} has been added - false otherwise
 	 */
 	private boolean addResource(ResourceImpl resource) {
 		if (resource == null || !super.addElement(resource)) {
@@ -426,44 +433,52 @@ public class ServiceImpl
 	}
 
 	/**
-	 * @param resource
-	 * @return
+	 * Stop and remove from this ServiceImpl the {@link ResourceImpl} whose 
+	 * name is passed as parameter
+	 *  
+	 * @param resource the name of the {@link ResourceImpl} to be removed
+	 * 
+	 * @return the removed {@link ResourceImpl}
 	 */
 	public ResourceImpl removeResource(String resource) {
 		return super.removeElement(resource);
 	}
 
 	/**
-	 * Registers an {@link AccessMethodTrigger} and links its execution to the call
-	 * of an action resource to define the value of a state variable resource
+	 * Registers an {@link AccessMethodTrigger} and links its execution to a
+	 * resource to define the value of a state variable one
 	 * 
-	 * @param listen
-	 *            the name of the action resource
-	 * @param target
-	 *            the name of the state variable resource to link to the action
-	 *            resource
-	 * @param signature
-	 *            the signature to which attach the specified
-	 *            {@link AccessMethodTrigger}
-	 * @param trigger
-	 *            the {@link AccessMethodTrigger} to call when the specified action
-	 *            resource is executed
+	 * @param method the name of the AccessMethod for which a signature is provided
+	 * @param resourceType the extended {@link Resource} type of the listened resource
+	 * @param listened the name of the listened resource
+	 * @param target the name of the state variable resource to link to the listened resource
+	 * @param signature the signature to which attach the specified {@link AccessMethodTrigger}
+	 * @param trigger the {@link AccessMethodTrigger} to call when the specified signature is called
+	 * @param policy the {@link AccessMethodExecutor.ExecutionPolicy} defining the trigger 
+	 * execution order            
 	 * @throws InvalidValueException
 	 */
-	public <P> void addActionTrigger(String listen, final String target, Signature signature,
-			final AccessMethodTrigger<P> trigger, AccessMethodExecutor.ExecutionPolicy policy)
-			throws InvalidValueException {
-		if (signature.getName().intern() != AccessMethod.ACT) {
-			throw new InvalidTriggerException("ACT method expected");
+	public void addTrigger(String listen, final String target, Signature signature, 
+		final AccessMethodTrigger trigger, AccessMethodExecutor.ExecutionPolicy policy) 
+				throws InvalidValueException {
+		
+		if (!(signature.getName().equals(AccessMethod.ACT) || signature.getName().equals(AccessMethod.SET))){
+			throw new InvalidTriggerException(String.format("ACT or SET method expected"));
 		}
-		ResourceImpl actuator = this.getResource(listen);
+		ResourceImpl listened = this.getResource(listen);
 		final ResourceImpl variable = this.getResource(target);
-
+		
+		if(listened == null||variable == null) {
+			throw new InvalidTriggerException("Both observed and updated Resources are required");
+		}
+		Class<? extends Resource> resourceType = listened.getResourceType();
+		
 		// ensures that the listened resource exists and is an action one
 		// and that the targeted one exists and is a variable
-		if (actuator == null || !ActionResource.class.isAssignableFrom(actuator.getResourceType()) || variable == null
-				|| !StateVariableResource.class.isAssignableFrom(variable.getResourceType())) {
-			throw new InvalidTriggerException("An ActionResource and a StateVariableResource were expected");
+		if ((signature.getName().equals(AccessMethod.ACT) && !ActionResource.class.isAssignableFrom(resourceType))
+			||(signature.getName().equals(AccessMethod.SET) && !DataResource.class.isAssignableFrom(resourceType))
+			|| !StateVariableResource.class.isAssignableFrom(variable.getResourceType())) {
+			throw new InvalidTriggerException(String.format("An %s and a StateVariableResource were expected", resourceType.getSimpleName()));
 		}
 		final Attribute attribute = variable.getAttribute(variable.getDefault());
 		if (Modifiable.FIXED.equals(attribute.getModifiable())) {
@@ -472,28 +487,33 @@ public class ServiceImpl
 		attribute.lock();
 
 		// registers the executor which calls the trigger
-		actuator.registerExecutor(signature, new AccessMethodExecutor() {
+		listened.registerExecutor(signature, new AccessMethodExecutor() {
 			/**
 			 * @inheritDoc
 			 * 
 			 * @see Executable#execute(java.lang.Object)
 			 */
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings({ "rawtypes", "unchecked" })
 			@Override
-			public Void execute(AccessMethodResponseBuilder parameter) throws Exception {
+			public Void execute(AccessMethodResponseBuilder builder) throws Exception {
 				Object result = null;
-				switch (trigger.getParameters()) {
-				case EMPTY:
-					result = trigger.execute((P) null);
+				switch (trigger.getArgumentBuilder()) {
+				case TriggerArgumentBuilder.EMPTY:
+					result = trigger.execute(new TriggerArgumentBuilder.Empty().build(null));
 					break;
-				case PARAMETERS:
-					result = trigger.execute((P) parameter.getParameters());
+				case TriggerArgumentBuilder.PARAMETER:
+					result = trigger.execute(new TriggerArgumentBuilder.Parameter(
+						trigger.<Integer>getArgument()).build(builder));
 					break;
-				case RESPONSE:
-					result = trigger.execute((P) parameter.createAccessMethodResponse());
+				case TriggerArgumentBuilder.RESPONSE:
+					result = trigger.execute(new TriggerArgumentBuilder.Response().build(builder));
 					break;
-				case INTERMEDIATE:
-					result = trigger.execute((P) parameter);
+				case TriggerArgumentBuilder.INTERMEDIATE:
+					result = trigger.execute(new TriggerArgumentBuilder.Intermediate().build(builder));
+					break;
+				case TriggerArgumentBuilder.MODEL:
+					result = trigger.execute(new TriggerArgumentBuilder.Model(
+						trigger.<String>getArgument()).build(ServiceImpl.this));
 					break;
 				default:
 					break;
@@ -502,7 +522,7 @@ public class ServiceImpl
 					ServiceImpl.this.passOn(AccessMethod.SET, target, new Object[] { DataResource.VALUE, result });
 				}
 				attribute.setValue(result);
-				parameter.push(new JSONObject(attribute.getDescription().getJSON()));
+				builder.push(new JSONObject(attribute.getDescription().getJSON()));
 				return null;
 			}
 		}, policy);

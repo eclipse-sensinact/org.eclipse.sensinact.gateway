@@ -437,28 +437,14 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		SnaFilter filter = new SnaFilter(this.testContext.getMediator(), "/serviceProvider/(test).*", true, false);
 
 		filter.addHandledType(SnaMessage.Type.UPDATE);
-		this.testContext.getSensiNact().registerAgent(this.testContext.getMediator(), new AbstractMidAgentCallback() {
-			@Override
-			public void doHandle(SnaLifecycleMessageImpl message) {
-				/* System.out.println(message); */}
-
-			@Override
-			public void doHandle(SnaErrorMessageImpl message) {
-				/* System.out.println(message); */}
-
-			@Override
-			public void doHandle(SnaResponseMessage message) {
-				/* System.out.println(message); */}
-
+		String agentId = this.testContext.getSensiNact().registerAgent(this.testContext.getMediator(), new AbstractMidAgentCallback() {
 			@Override
 			public void doHandle(SnaUpdateMessageImpl message) {
 				TestResourceBuilder.this.testContext.agentCallbackInc();
-				/* System.out.println("TestResourceBuilder.this.agentCallbackCount++"); */}
-
-			@Override
-			public void stop() {
+				// System.out.println("TestResourceBuilder.this.agentCallbackCount++");
 			}
 		}, filter);
+		//System.out.println("AGENT ID = " + agentId);
 		PropertyResource r1 = r1impl.<PropertyResource>getProxy(this.tree);
 		PropertyResource r2 = r2impl.<PropertyResource>getProxy(this.tree);
 
@@ -732,8 +718,8 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		ResourceImpl r2impl = service.addDataResource(StateVariableResource.class, "TestVariable", String.class,
 				"untriggered");
 
-		service.addActionTrigger("TestAction", "TestVariable",
-				new Signature(this.testContext.getMediator(), AccessMethod.Type.valueOf(AccessMethod.ACT), null, null),
+		service.addTrigger("TestAction", "TestVariable",
+			new Signature(this.testContext.getMediator(), AccessMethod.Type.valueOf(AccessMethod.ACT), null, null),
 				new Constant("triggered", false), AccessMethodExecutor.ExecutionPolicy.AFTER);
 
 		// test locked

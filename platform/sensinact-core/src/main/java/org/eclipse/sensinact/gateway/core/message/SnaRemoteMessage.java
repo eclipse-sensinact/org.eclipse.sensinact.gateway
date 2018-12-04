@@ -25,21 +25,21 @@ import org.eclipse.sensinact.gateway.common.props.TypedKey;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface SnaLifecycleMessage extends SnaNotificationMessage<SnaLifecycleMessage.Lifecycle> {
-	public static final SnaMessage.Type TYPE = SnaMessage.Type.LIFECYCLE;
+public interface SnaRemoteMessage extends SnaNotificationMessage<SnaRemoteMessage.Remote> {
+	public static final SnaMessage.Type TYPE = SnaMessage.Type.REMOTE;
 
 	public static final TypedKey<?>[] PERMANENT_KEYS = new TypedKey[] {
-			new TypedKey<String>(SnaConstants.ADDED_OR_REMOVED, String.class, false) };
+			new TypedKey<String>(SnaConstants.NAMESPACE, String.class, false),
+			new TypedKey<Remote>(SnaConstants.REMOTE, Remote.class, false) };
 
-
-	enum Lifecycle implements SnaMessageSubType, KeysCollection {
-		PROVIDER_APPEARING, PROVIDER_DISAPPEARING, SERVICE_APPEARING, SERVICE_DISAPPEARING, RESOURCE_APPEARING, RESOURCE_DISAPPEARING;
+	
+	enum Remote implements SnaMessageSubType, KeysCollection {
+		CONNECTED, DISCONNECTED;
 
 		final Set<TypedKey<?>> keys;
 
-		Lifecycle() {
-			List<TypedKey<?>> list = Arrays.asList(new SnaMessage.KeysBuilder(SnaLifecycleMessage.class).keys());
-
+		Remote() {
+			List<TypedKey<?>> list = Arrays.asList(new SnaMessage.KeysBuilder(SnaRemoteMessage.class).keys());
 			Set<TypedKey<?>> tmpKeys = new HashSet<TypedKey<?>>();
 			tmpKeys.addAll(list);
 			keys = Collections.unmodifiableSet(tmpKeys);
@@ -52,7 +52,7 @@ public interface SnaLifecycleMessage extends SnaNotificationMessage<SnaLifecycle
 		 */
 		@Override
 		public SnaMessage.Type getSnaMessageType() {
-			return SnaLifecycleMessage.TYPE;
+			return SnaRemoteMessage.TYPE;
 		}
 
 		/**

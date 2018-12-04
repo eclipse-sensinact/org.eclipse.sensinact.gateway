@@ -249,7 +249,7 @@ public class SnaFilter implements JSONable {
 	 *         <li>false otherwise</li>
 	 *         </ul>
 	 */
-	boolean matches(SnaMessage<?> message) {
+	public boolean matches(SnaMessage<?> message) {
 		boolean matchType = this.matchesType(message);
 		if (!matchType) {
 			return false;
@@ -351,23 +351,29 @@ public class SnaFilter implements JSONable {
 				toValidate = response.opt("value");
 			}
 			break;
+		case REMOTE:
+			JSONObject remote = new JSONObject(message.getJSON()).optJSONObject("notification");
+			if (!JSONObject.NULL.equals(remote)) {
+				toValidate = remote.opt("namespace");
+			}
+			break;
 		case UPDATE:
 			switch ((SnaUpdateMessage.Update) message.getType()) {
-			case ACTUATED:
-				return false;
-			case ATTRIBUTE_VALUE_UPDATED:
-			case METADATA_VALUE_UPDATED:
-				if (this.handleChangedStatus(((TypedProperties<?>) message).<Boolean>get("hasChanged"))) {
-					JSONObject notification = new JSONObject(message.getJSON()).optJSONObject("notification");
-					if (!JSONObject.NULL.equals(notification)) {
-						toValidate = notification.opt("value");
-					}
-				} else {
+				case ACTUATED:
 					return false;
-				}
-				break;
-			default:
-				break;
+				case ATTRIBUTE_VALUE_UPDATED:
+				case METADATA_VALUE_UPDATED:
+					if (this.handleChangedStatus(((TypedProperties<?>) message).<Boolean>get("hasChanged"))) {
+						JSONObject notification = new JSONObject(message.getJSON()).optJSONObject("notification");
+						if (!JSONObject.NULL.equals(notification)) {
+							toValidate = notification.opt("value");
+						}
+					} else {
+						return false;
+					}
+					break;
+				default:
+					break;
 			}
 			break;
 		default:

@@ -50,27 +50,26 @@ public class DefaultAccessMethodTriggerFactory implements AccessMethodTriggerFac
 	 *      newInstance(org.eclipse.sensinact.gateway.common.bundle.Mediator,
 	 *      org.json.JSONObject)
 	 */
-	@SuppressWarnings({ "unchecked" })
 	@Override
-	public <P> AccessMethodTrigger<P> newInstance(Mediator mediator, JSONObject jsonTrigger)
+	public AccessMethodTrigger newInstance(Mediator mediator, JSONObject jsonTrigger)
 			throws InvalidValueException {
 		if (JSONObject.NULL.equals(jsonTrigger)) {
 			throw new InvalidValueException("Null JSON trigger definition");
 		}
-		AccessMethodTrigger<P> trigger = null;
+		AccessMethodTrigger trigger = null;
 		try {
 			String jsonType = jsonTrigger.getString(AccessMethodTrigger.TRIGGER_TYPE_KEY);
 
 			AccessMethodTrigger.Type type = AccessMethodTrigger.Type.valueOf(jsonType);
-
-			boolean passOn = jsonTrigger.optBoolean(AccessMethodTrigger.TRIGGER_PASS_ON);
-			int index = -1;
+			String builder = jsonTrigger.getString(AccessMethodTrigger.TRIGGER_BUILDER_KEY);
+			boolean passOn = jsonTrigger.optBoolean(AccessMethodTrigger.TRIGGER_PASSON_KEY);
+			Object argument = jsonTrigger.opt(AccessMethodTrigger.TRIGGER_ARGUMENT_KEY);
 
 			switch (type) {
 			case CONDITIONAL:
 				List<ConstraintConstantPair> constraints = new ArrayList<ConstraintConstantPair>();
-				index = jsonTrigger.optInt(AccessMethodTrigger.TRIGGER_INDEX_KEY);
 				JSONArray constants = jsonTrigger.optJSONArray(Constant.TRIGGER_CONSTANTS_KEY);
+				
 				int constantsIndex = 0;
 				int length = constants == null ? 0 : constants.length();
 
@@ -82,15 +81,13 @@ public class DefaultAccessMethodTriggerFactory implements AccessMethodTriggerFac
 									constantObject.opt(Constant.TRIGGER_CONSTRAINT_KEY)),
 							constantObject.opt(Constant.TRIGGER_CONSTANT_KEY)));
 				}
-				trigger = (AccessMethodTrigger<P>) new ConditionalConstant(mediator, index, constraints, passOn);
+				trigger = new ConditionalConstant(argument, builder, passOn, constraints);
 				break;
 			case CONSTANT:
-				Object constant = jsonTrigger.opt(Constant.TRIGGER_CONSTANT_KEY);
-				trigger = (AccessMethodTrigger<P>) new Constant(constant, passOn);
+				trigger = new Constant(argument, passOn);
 				break;
 			case COPY:
-				index = jsonTrigger.optInt(AccessMethodTrigger.TRIGGER_INDEX_KEY);
-				trigger = (AccessMethodTrigger<P>) new Copy(index, passOn);
+				trigger = new Copy(argument, builder, passOn);
 				break;
 			default:
 				throw new InvalidValueException(

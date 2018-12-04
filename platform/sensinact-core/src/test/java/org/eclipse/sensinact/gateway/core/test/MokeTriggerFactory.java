@@ -39,8 +39,8 @@ public class MokeTriggerFactory implements AccessMethodTriggerFactory {
 	 *      org.json.JSONObject)
 	 */
 	@Override
-	public <P> AccessMethodTrigger<P> newInstance(Mediator mediator, JSONObject trigger) throws InvalidValueException {
-		return (AccessMethodTrigger<P>) new MokeTrigger();
+	public AccessMethodTrigger newInstance(Mediator mediator, JSONObject trigger) throws InvalidValueException {
+		return new MokeTrigger();
 	}
 
 }

@@ -14,13 +14,10 @@ import java.security.AccessController;
 import java.security.InvalidKeyException;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
-//import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-//import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
-//import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,10 +32,12 @@ import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefiniti
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractor;
 import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractorType;
+import org.eclipse.sensinact.gateway.core.message.LocalAgent;
+import org.eclipse.sensinact.gateway.core.message.LocalAgentImpl;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.message.ResourceIntent;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.message.SnaAgentImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
@@ -54,6 +53,10 @@ import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
+import org.eclipse.sensinact.gateway.core.remote.AbstractRemoteEndpoint;
+import org.eclipse.sensinact.gateway.core.remote.LocalEndpoint;
+import org.eclipse.sensinact.gateway.core.remote.RemoteCore;
+import org.eclipse.sensinact.gateway.core.remote.RemoteSensiNact;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
@@ -139,7 +142,7 @@ public class SensiNact implements Core {
 			});
 			return provider;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 *
@@ -148,13 +151,13 @@ public class SensiNact implements Core {
 		 *      org.eclipse.sensinact.gateway.core.message.SnaFilter)
 		 */
 		@Override
-		public SubscribeResponse registerSessionAgent(String requestId, final MidAgentCallback callback,
-				final SnaFilter filter) {
-			String agentId = AccessController.<String>doPrivileged(new PrivilegedAction<String>() {
+		public SubscribeResponse registerSessionAgent(String requestId, 
+				final MidAgentCallback callback, final SnaFilter filter) {
+			boolean registered = AccessController.<Boolean>doPrivileged(new PrivilegedAction<Boolean>() {
 				@Override
-				public String run() {
-					SessionKey sessionKey = SensiNact.this.sessions.get(new KeyExtractor<KeyExtractorType>(
-							KeyExtractorType.TOKEN, getSessionId()));
+				public Boolean run() {
+					SessionKey sessionKey = SensiNact.this.sessions.get(
+					new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, getSessionId()));
 					return sessionKey.registerAgent(callback, filter);
 				}
 			});
@@ -165,22 +168,21 @@ public class SensiNact implements Core {
 				uri = UriUtils.PATH_SEPARATOR;
 			}
 			SubscribeResponse response = null;
-			if (agentId != null) {
+			if (registered) {
 				response = new SubscribeResponse(mediator, uri, Status.SUCCESS, 200);
-				response.setResponse(new JSONObject().put("subscriptionId", agentId));
-
+				response.setResponse(new JSONObject().put("subscriptionId", callback.getName()));
 			} else {
-				response = SensiNact.<JSONObject, SubscribeResponse>createErrorResponse(mediator,
-						AccessMethod.SUBSCRIBE, uri, 520, "Unable to subscribe", null);
+				response = SensiNact.<JSONObject, SubscribeResponse>createErrorResponse(
+					mediator, AccessMethod.SUBSCRIBE, uri, 520, "Unable to subscribe", 
+					    null);
 			}
 			return tatooRequestId(requestId, response);
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 *
-		 * @see org.eclipse.sensinact.gateway.core.Session#
-		 *      unregisterSessionAgent(java.lang.String)
+		 * @see org.eclipse.sensinact.gateway.core.Session#unregisterSessionAgent(java.lang.String)
 		 */
 		@Override
 		public UnsubscribeResponse unregisterSessionAgent(String requestId, final String agentId) {
@@ -207,6 +209,66 @@ public class SensiNact implements Core {
 			return tatooRequestId(requestId, response);
 		}
 
+		@Override
+		public SubscribeResponse registerSessionIntent(String requestId, Executable<Boolean, Void> callback,
+				String... resourcePath) {
+			final SessionKey sessionKey = SensiNact.this.sessions.get(
+					new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, getSessionId()));
+			final ResourceIntent intent = new ResourceIntent(mediator, sessionKey.getPublicKey(), callback, resourcePath) {
+				@Override
+				public boolean isAccessible(String path) {					
+					return SensiNactSession.this.isAccessible(path);
+				}
+
+				@Override
+				public String namespace() {
+					return SensiNact.this.namespace();
+				}
+
+			}; 
+			boolean registered = AccessController.<Boolean>doPrivileged(new PrivilegedAction<Boolean>() {
+				@Override
+				public Boolean run() {
+					return sessionKey.registerAgent(intent.getName(), intent);
+				}
+			});
+			SubscribeResponse response = null;
+			if (registered) {
+				response = new SubscribeResponse(mediator, intent.getCommonPath(), Status.SUCCESS, 200);
+				response.setResponse(new JSONObject().put("subscriptionId", intent.getName()));
+			} else {
+				response = SensiNact.<JSONObject, SubscribeResponse>createErrorResponse(
+					mediator, AccessMethod.SUBSCRIBE, intent.getCommonPath(), 520, "Unable to subscribe", 
+					    null);
+			}
+			return tatooRequestId(requestId, response);
+		}
+
+		@Override
+		public UnsubscribeResponse unregisterSessionIntent(String requestId, final String intentId) {
+			boolean unregistered = AccessController.<Boolean>doPrivileged(new PrivilegedAction<Boolean>() {
+				@Override
+				public Boolean run() {
+					SessionKey key = SensiNact.this.sessions.get(new KeyExtractor<KeyExtractorType>(
+							KeyExtractorType.TOKEN, getSessionId()));
+					if (key != null && key.getPublicKey() != null) {
+						return key.unregisterAgent(intentId);
+					}
+					return false;
+				}
+			});
+			UnsubscribeResponse response = null;
+			if (unregistered) {
+				response = new UnsubscribeResponse(mediator, UriUtils.PATH_SEPARATOR, Status.SUCCESS, 200);
+				response.setResponse(new JSONObject().put("message", "The intent has been properly unregistered"));
+
+			} else {
+				response = SensiNact.<JSONObject, UnsubscribeResponse>createErrorResponse(mediator,
+						AccessMethod.UNSUBSCRIBE, UriUtils.PATH_SEPARATOR, 520, "Unable to unsubscribe", null);
+			}
+			return tatooRequestId(requestId, response);
+		}
+		
 		/**
 		 * @inheritDoc
 		 *
@@ -647,15 +709,10 @@ public class SensiNact implements Core {
 					KeyExtractorType.TOKEN, this.getSessionId()));
 
 			String uri = getUri((sessionKey.localID() != 0), SensiNact.this.namespace(), serviceProviderId);
-
 			DescribeResponse<String> response = null;
-
 			DescribeMethod<String> method = new DescribeMethod<String>(mediator, uri, null, DescribeType.SERVICES_LIST);
-
 			DescribeResponseBuilder<String> builder = method.createAccessMethodResponseBuilder(null);
-
 			ServiceProvider provider = this.serviceProvider(serviceProviderId);
-
 			String services = null;
 
 			if (provider == null) {
@@ -856,6 +913,31 @@ public class SensiNact implements Core {
 			});
 			return tatooRequestId(requestId, describeFromJSONObject(mediator, builder, DescribeType.RESOURCE, object));
 		}
+
+		/**
+		 * Returns true if the model element targeted by the String path argument
+		 * exists and is accessible to this {@link Session}. Returns false if the 
+		 * model element does not exist or is not accessible to this {@link Session}
+		 * 
+		 * @param path the String path of the targeted model element
+		 * 
+		 * @return 
+		 * <ul>
+		 * 	<li>true if the targeted model element exists and is accessible to this 
+		 *      {@link Session}</li>
+		 * 	<li>false otherwise</li>
+		 * </ul>
+		 */
+		private final boolean isAccessible(final String path) {
+			final SessionKey sessionKey = SensiNact.this.sessions.get(this);
+			Boolean exists = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+				@Override
+				public Boolean run() {
+					return SensiNact.this.isAccessible(sessionKey, path);
+				}
+			});
+			return exists.booleanValue();
+		}
 	};
 
 	/**
@@ -1025,22 +1107,21 @@ public class SensiNact implements Core {
 	 * Endpoint of the local OSGi host environment
 	 */
 	final class RegistryEndpoint {
-		/**
-		 * @param publicKey
-		 * @param filter
-		 * @return
-		 */
-		private Collection<ServiceReference<SensiNactResourceModel>> getReferences(SessionKey sessionKey,
-				String filter) {
-			AccessTree<? extends AccessNode> tree = sessionKey.getAccessTree();
+
+		private Collection<ServiceReference<SensiNactResourceModel>> getReferences(String publicKey, String filter) {
+			return getReferences(SensiNact.this.getUserAccessTree(publicKey),filter);
+		}
+
+		private Collection<ServiceReference<SensiNactResourceModel>> getReferences(SessionKey sessionKey, String filter) {
+			return getReferences(sessionKey.getAccessTree(),filter);
+		}
+		
+		private Collection<ServiceReference<SensiNactResourceModel>> getReferences(AccessTree<? extends AccessNode> tree, String filter) {
 			AccessMethod.Type describe = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
-
 			Collection<ServiceReference<SensiNactResourceModel>> result = new ArrayList<ServiceReference<SensiNactResourceModel>>();
-
 			Collection<ServiceReference<SensiNactResourceModel>> references = null;
 			try {
-				references = SensiNact.this.mediator.getContext().getServiceReferences(SensiNactResourceModel.class,
-						filter);
+				references = SensiNact.this.mediator.getContext().getServiceReferences(SensiNactResourceModel.class, filter);
 				Iterator<ServiceReference<SensiNactResourceModel>> iterator = references.iterator();
 
 				while (iterator.hasNext()) {
@@ -1050,8 +1131,7 @@ public class SensiNact implements Core {
 					if (level == null) {
 						level = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
 					}
-					AccessNode node = sessionKey.getAccessTree().getRoot().get(UriUtils.getUri(new String[] { name }));
-
+					AccessNode node = tree.getRoot().get(UriUtils.getUri(new String[] { name }));
 					if (node == null) {
 						node = tree.getRoot();
 					}
@@ -1065,11 +1145,6 @@ public class SensiNact implements Core {
 			return result;
 		}
 
-		/**
-		 * @param publicKey
-		 * @param filter
-		 * @return
-		 */
 		private Set<ServiceProvider> serviceProviders(final SessionKey sessionKey, String filter) {
 			String activeFilter = "(lifecycle.status=ACTIVE)";
 			String providersFilter = null;
@@ -1092,44 +1167,40 @@ public class SensiNact implements Core {
 			}
 			final String fltr = providersFilter;
 
-			Set<ServiceProvider> serviceProviders = AccessController
-					.<Set<ServiceProvider>>doPrivileged(new PrivilegedAction<Set<ServiceProvider>>() {
-						@SuppressWarnings("unchecked")
-						@Override
-						public Set<ServiceProvider> run() {
-							Collection<ServiceReference<SensiNactResourceModel>> references = RegistryEndpoint.this
-									.getReferences(sessionKey, fltr);
+			Set<ServiceProvider> serviceProviders = AccessController.<Set<ServiceProvider>>doPrivileged(
+				new PrivilegedAction<Set<ServiceProvider>>() {
+					@SuppressWarnings("unchecked")
+					@Override
+					public Set<ServiceProvider> run() {
+						Collection<ServiceReference<SensiNactResourceModel>> references = 
+							RegistryEndpoint.this.getReferences(sessionKey, fltr);
 
-							Iterator<ServiceReference<SensiNactResourceModel>> iterator = references.iterator();
+						Iterator<ServiceReference<SensiNactResourceModel>> iterator = 
+								references.iterator();
 
-							Set<ServiceProvider> providers = new HashSet<ServiceProvider>();
+						Set<ServiceProvider> providers = new HashSet<ServiceProvider>();
 
-							while (iterator.hasNext()) {
-								ServiceReference<SensiNactResourceModel> ref = iterator.next();
-								SensiNactResourceModel model = SensiNact.this.mediator.getContext().getService(ref);
-								ServiceProvider provider = null;
-								try {
-									provider = (ServiceProvider) model.getRootElement()
-											.getProxy(sessionKey.getAccessTree());
+						while (iterator.hasNext()) {
+							ServiceReference<SensiNactResourceModel> ref = iterator.next();
+							SensiNactResourceModel model = SensiNact.this.mediator.getContext().getService(ref);
+							ServiceProvider provider = null;
+							try {
+								provider = (ServiceProvider) model.getRootElement()
+										.getProxy(sessionKey.getAccessTree());
 
-								} catch (ModelElementProxyBuildException e) {
-									SensiNact.this.mediator.error(e);
-								}
-								if (provider != null && provider.isAccessible()) {
-									providers.add(provider);
-								}
+							} catch (ModelElementProxyBuildException e) {
+								SensiNact.this.mediator.error(e);
 							}
-							return providers;
+							if (provider != null && provider.isAccessible()) {
+								providers.add(provider);
+							}
 						}
-					});
+						return providers;
+					}
+				});
 			return serviceProviders;
 		}
 
-		/**
-		 * @param publicKey
-		 * @param serviceProviderName
-		 * @return
-		 */
 		private ServiceProvider serviceProvider(SessionKey sessionKey, final String serviceProviderName) {
 			ServiceProvider provider = null;
 
@@ -1142,13 +1213,7 @@ public class SensiNact implements Core {
 			provider = providers.iterator().next();
 			return provider;
 		}
-
-		/**
-		 * @param publicKey
-		 * @param serviceProviderName
-		 * @param serviceName
-		 * @return
-		 */
+		
 		private Service service(SessionKey sessionKey, String serviceProviderName, String serviceName) {
 			ServiceProvider serviceProvider = serviceProvider(sessionKey, serviceProviderName);
 			Service service = null;
@@ -1157,14 +1222,7 @@ public class SensiNact implements Core {
 			}
 			return service;
 		}
-
-		/**
-		 * @param publicKey
-		 * @param serviceProviderName
-		 * @param serviceName
-		 * @param resourceName
-		 * @return
-		 */
+		
 		private Resource resource(SessionKey sessionKey, String serviceProviderName, String serviceName,
 				String resourceName) {
 			Service service = this.service(sessionKey, serviceProviderName, serviceName);
@@ -1175,13 +1233,86 @@ public class SensiNact implements Core {
 			return resource;
 		}
 
-		/**
-		 * @param publicKey
-		 * @param resolveNamespace
-		 * @param filter
-		 * @param filterDefinition
-		 * @return
-		 */
+		private boolean isAccessible(String publicKey, String path) {
+			return this.isAccessible(SensiNact.this.getUserAccessTree(publicKey), path);		
+		}
+
+		private boolean isAccessible(SessionKey sessionKey, String path) {
+			return this.isAccessible(sessionKey.getAccessTree(), path);		
+		}
+		
+		private boolean isAccessible(AccessTree<? extends AccessNode> tree, String path) {
+			String[] uriElements = UriUtils.getUriElements(path);
+			String providerName = uriElements[0];
+			String serviceName = uriElements.length>1?uriElements[1]:null;
+			String resourceName = uriElements.length>2?uriElements[2]:null;
+			
+			String filter = new StringBuilder().append("&((name=").append(providerName
+					).append(")(lifecycle.status=ACTIVE))").toString();
+			
+			Collection<ServiceReference<SensiNactResourceModel>> references = 
+					this.getReferences(tree, filter);
+			if(references.size()!=1) {
+				return false;
+			}
+			ServiceReference<SensiNactResourceModel> reference = references.iterator().next();
+
+			AccessMethod.Type describe = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
+			AccessNode node = tree.getRoot();
+			
+			int index = 0;
+			String pa = UriUtils.ROOT;
+			String key = null;
+			
+			Integer inheritedObjectDescribeLevel = Integer.valueOf(
+					AccessLevelOption.OWNER.getAccessLevel().getLevel());
+						
+			while(true) {
+				switch(index) {
+				case 0:
+					pa = UriUtils.getUri(new String[] {pa,providerName});
+					key = providerName.concat(".DESCRIBE");
+					break;
+				case 1:	
+					List<String> services = (List<String>) reference.getProperty("services");
+					if(services == null || !services.contains(serviceName)) {
+						return false;
+					}
+					pa = UriUtils.getUri(new String[] {pa,serviceName});
+					key =  new StringBuilder().append(serviceName).append(".DESCRIBE").toString();
+					break;
+				case 2:
+					List<String> resources = (List<String>) reference.getProperty(serviceName.concat(".resources"));
+					if(resources == null || !resources.contains(resourceName)) {
+						return false;
+					}
+					pa = UriUtils.getUri(new String[] {pa,resourceName});
+					key =  new StringBuilder().append(serviceName).append(".").append(resourceName).append(".DESCRIBE").toString();
+					break;
+				default:
+					return false;
+				}
+				AccessNode tmpNode = tree.getRoot().get(pa);
+				if (tmpNode == null) {
+					tmpNode = node;
+				} else{
+					node = tmpNode;
+				}
+				Integer level =  (Integer) reference.getProperty(key);
+				if(level == null) {
+					level = inheritedObjectDescribeLevel;
+				}else {
+					inheritedObjectDescribeLevel = level;	
+				}
+				if (node.getAccessLevelOption(describe).getAccessLevel().getLevel() < inheritedObjectDescribeLevel.intValue()) {
+					return false;
+				}
+				if(++index == uriElements.length) {
+					return true;
+				}
+			}			
+		}
+		
 		private String getAll(SessionKey sessionKey, boolean resolveNamespace, String filter) {
 			StringBuilder builder = new StringBuilder();
 			String prefix = resolveNamespace
@@ -1293,12 +1424,6 @@ public class SensiNact implements Core {
 			return content;
 		}
 
-		/**
-		 * @param publicKey
-		 * @param resolveNamespace
-		 * @param filter
-		 * @return
-		 */
 		private String getProviders(SessionKey sessionKey, boolean resolveNamespace, String filter) {
 			String prefix = resolveNamespace
 					? new StringBuilder().append(SensiNact.this.namespace()).append(":").toString()
@@ -1388,96 +1513,6 @@ public class SensiNact implements Core {
 	private final String namespace;
 	private final String defaultLocation;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param mediator
-	 *            the extended {@link Mediator} allowing the {@link Core} to be
-	 *            instantiated to interact with the OSGi host environment
-	 * 
-	 * @throws SecuredAccessException
-	 * @throws BundleException
-	 */
-	public SensiNact(final Mediator mediator) throws SecuredAccessException, BundleException, DataStoreException {
-		this.namespace = SensiNact.namespace(mediator);
-
-		SecuredAccess securedAccess = null;
-
-		ServiceLoader<SecurityDataStoreServiceFactory> dataStoreServiceFactoryLoader = ServiceLoader
-				.load(SecurityDataStoreServiceFactory.class, mediator.getClassLoader());
-
-		Iterator<SecurityDataStoreServiceFactory> dataStoreServiceFactoryIterator = dataStoreServiceFactoryLoader
-				.iterator();
-
-		if (dataStoreServiceFactoryIterator.hasNext()) {
-			SecurityDataStoreServiceFactory<?> factory = dataStoreServiceFactoryIterator.next();
-			if (factory != null) {
-				factory.newInstance(mediator);
-			}
-		}
-		// do not constrain that a DataStoreService exists
-		// if (dataStoreService == null)
-		// {
-		// throw new BundleException("A data store service was excepted");
-		// }
-
-		// org.eclipse.sensinact.user.manager capability required
-		ServiceLoader<UserManagerFactory> userManagerFactoryLoader = ServiceLoader.load(UserManagerFactory.class,
-				mediator.getClassLoader());
-
-		Iterator<UserManagerFactory> userManagerFactoryIterator = userManagerFactoryLoader.iterator();
-
-		if (userManagerFactoryIterator.hasNext()) {
-			UserManagerFactory factory = userManagerFactoryIterator.next();
-			if (factory != null) {
-				factory.newInstance(mediator);
-			}
-		}
-		// do not constrain that a UserManager exists
-		// if (userManager == null)
-		// {
-		// throw new BundleException("A UserManager service was excepted");
-		// }
-		// org.eclipse.sensinact.security capability required
-		ServiceLoader<SecuredAccessFactory> securedAccessFactoryLoader = ServiceLoader.load(SecuredAccessFactory.class,
-				mediator.getClassLoader());
-
-		Iterator<SecuredAccessFactory> securedAccessFactoryIterator = securedAccessFactoryLoader.iterator();
-
-		if (securedAccessFactoryIterator.hasNext()) {
-			SecuredAccessFactory factory = securedAccessFactoryIterator.next();
-			if (factory != null) {
-				securedAccess = factory.newInstance(mediator);
-			}
-		}
-		if (securedAccess == null) {
-			throw new BundleException("A SecuredAccess service was excepted");
-		}
-		securedAccess.createAuthorizationService();
-		final SecuredAccess sa = securedAccess;
-
-		AccessController.doPrivileged(new PrivilegedAction<Void>() {
-			@Override
-			public Void run() {
-				mediator.register(sa, SecuredAccess.class, null);
-				return null;
-			}
-		});
-
-		this.defaultLocation = ModelInstance.defaultLocation(mediator);
-		this.sessions = new Sessions();
-
-		this.anonymousTree = mediator.callService(SecuredAccess.class,
-				new Executable<SecuredAccess, AccessTree<? extends AccessNode>>() {
-					@Override
-					public AccessTree<? extends AccessNode> execute(SecuredAccess securedAccess) throws Exception {
-						return securedAccess.getUserAccessTree(UserManager.ANONYMOUS_PKEY);
-					}
-				});
-		this.mediator = mediator;
-		this.registry = new RegistryEndpoint();
-	}
-
 	private final <R, P> R doPrivilegedService(final Class<P> p, final String f, final Executable<P, R> e) {
 		R r = AccessController.<R>doPrivileged(new PrivilegedAction<R>() {
 			@Override
@@ -1512,18 +1547,97 @@ public class SensiNact implements Core {
 		AccessTree<? extends AccessNode> tree = null;
 		if (publicKey != null && !publicKey.startsWith(UserManager.ANONYMOUS_PKEY)) {
 			tree = doPrivilegedService(SecuredAccess.class, null,
-					new Executable<SecuredAccess, AccessTree<? extends AccessNode>>() {
-						@Override
-						public AccessTree<? extends AccessNode> execute(SecuredAccess securedAccess) throws Exception {
-							AccessTree<? extends AccessNode> tree = securedAccess.getUserAccessTree(publicKey);
-							return tree;
-						}
-					});
+				new Executable<SecuredAccess, AccessTree<? extends AccessNode>>() {
+					@Override
+					public AccessTree<? extends AccessNode> execute(SecuredAccess securedAccess) throws Exception {
+						AccessTree<? extends AccessNode> tree = securedAccess.getUserAccessTree(publicKey);
+						return tree;
+					}
+				});
 		}
 		if (tree == null) {
 			tree = getAnonymousTree();
 		}
 		return tree;
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param mediator
+	 *            the extended {@link Mediator} allowing the {@link Core} to be
+	 *            instantiated to interact with the OSGi host environment
+	 * 
+	 * @throws SecuredAccessException
+	 * @throws BundleException
+	 */
+	public SensiNact(final Mediator mediator) throws SecuredAccessException, BundleException, DataStoreException {
+		this.namespace = SensiNact.namespace(mediator);
+
+		SecuredAccess securedAccess = null;
+
+		ServiceLoader<SecurityDataStoreServiceFactory> dataStoreServiceFactoryLoader = ServiceLoader
+				.load(SecurityDataStoreServiceFactory.class, mediator.getClassLoader());
+
+		Iterator<SecurityDataStoreServiceFactory> dataStoreServiceFactoryIterator = dataStoreServiceFactoryLoader
+				.iterator();
+
+		if (dataStoreServiceFactoryIterator.hasNext()) {
+			SecurityDataStoreServiceFactory<?> factory = dataStoreServiceFactoryIterator.next();
+			if (factory != null) {
+				factory.newInstance(mediator);
+			}
+		}
+		ServiceLoader<UserManagerFactory> userManagerFactoryLoader = ServiceLoader.load(UserManagerFactory.class,
+				mediator.getClassLoader());
+
+		Iterator<UserManagerFactory> userManagerFactoryIterator = userManagerFactoryLoader.iterator();
+
+		while (userManagerFactoryIterator.hasNext()) {
+			UserManagerFactory factory = userManagerFactoryIterator.next();
+			if (factory != null) {
+				factory.newInstance(mediator);
+				break;
+			}
+		}
+		ServiceLoader<SecuredAccessFactory> securedAccessFactoryLoader = ServiceLoader.load(SecuredAccessFactory.class,
+				mediator.getClassLoader());
+
+		Iterator<SecuredAccessFactory> securedAccessFactoryIterator = securedAccessFactoryLoader.iterator();
+
+		while (securedAccessFactoryIterator.hasNext()) {
+			SecuredAccessFactory factory = securedAccessFactoryIterator.next();
+			if (factory != null) {
+				securedAccess = factory.newInstance(mediator);
+				break;
+			}
+		}
+		if (securedAccess == null) {
+			throw new BundleException("A SecuredAccess service was excepted");
+		}
+		securedAccess.createAuthorizationService();
+		final SecuredAccess sa = securedAccess;
+
+		AccessController.doPrivileged(new PrivilegedAction<Void>() {
+			@Override
+			public Void run() {
+				mediator.register(sa, SecuredAccess.class, null);
+				return null;
+			}
+		});
+
+		this.defaultLocation = ModelInstance.defaultLocation(mediator);
+		this.sessions = new Sessions();
+
+		this.anonymousTree = mediator.callService(SecuredAccess.class,
+				new Executable<SecuredAccess, AccessTree<? extends AccessNode>>() {
+					@Override
+					public AccessTree<? extends AccessNode> execute(SecuredAccess securedAccess) throws Exception {
+						return securedAccess.getUserAccessTree(UserManager.ANONYMOUS_PKEY);
+					}
+				});
+		this.mediator = mediator;
+		this.registry = new RegistryEndpoint();
 	}
 
 	/**
@@ -1541,12 +1655,12 @@ public class SensiNact implements Core {
 
 		} else if (Credentials.class.isAssignableFrom(authentication.getClass())) {
 			UserKey userKey = this.doPrivilegedService(AuthenticationService.class, null,
-					new Executable<AuthenticationService, UserKey>() {
-						@Override
-						public UserKey execute(AuthenticationService service) throws Exception {
-							return service.buildKey((Credentials) authentication);
-						}
-					});
+				new Executable<AuthenticationService, UserKey>() {
+					@Override
+					public UserKey execute(AuthenticationService service) throws Exception {
+						return service.buildKey((Credentials) authentication);
+					}
+				});
 			if (userKey == null) {
 				throw new InvalidCredentialException("Invalid credentials");
 			}
@@ -1653,9 +1767,7 @@ public class SensiNact implements Core {
 	 * @inheritDoc
 	 *
 	 * @see org.eclipse.sensinact.gateway.core.Core#
-	 *      registerAgent(org.eclipse.sensinact.gateway.common.bundle.Mediator,
-	 *      org.eclipse.sensinact.gateway.core.message.MidAgentCallback,
-	 *      org.eclipse.sensinact.gateway.core.message.SnaFilter)
+	 * registerAgent(org.eclipse.sensinact.gateway.common.bundle.Mediator,org.eclipse.sensinact.gateway.core.message.MidAgentCallback,org.eclipse.sensinact.gateway.core.message.SnaFilter)
 	 */
 	@Override
 	public String registerAgent(final Mediator mediator, final MidAgentCallback callback, final SnaFilter filter) {
@@ -1675,21 +1787,62 @@ public class SensiNact implements Core {
 						return securedAccess.getAgentPublicKey(bundleIdentifier);
 					}
 				});
-		final SnaAgentImpl agent = SnaAgentImpl.createAgent(mediator, callback, filter, agentKey);
-
-		String identifier = new StringBuilder().append("agent_").append(agent.hashCode()).toString();
-		callback.setIdentifier(identifier);
-
+		final LocalAgent agent = LocalAgentImpl.createAgent(mediator, callback, filter, agentKey);
 		AccessController.<Void>doPrivileged(new PrivilegedAction<Void>() {
 			@Override
 			public Void run() {
-				agent.start(true);
+				agent.start();
 				return null;
 			}
 		});
-		return identifier;
+		return callback.getName();
 	}
+	
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.Core#registerIntent(org.eclipse.sensinact.gateway.common.bundle.Mediator, org.eclipse.sensinact.gateway.common.execution.Executable, String...)
+	 */
+	@Override
+	public String registerIntent(Mediator mediator, Executable<Boolean,Void> onAccessible, final String... path) {
+		
+		final Bundle bundle = mediator.getContext().getBundle();
 
+		final String bundleIdentifier = this.doPrivilegedService(BundleValidation.class, null,
+			new Executable<BundleValidation, String>() {
+				@Override
+				public String execute(BundleValidation bundleValidation) throws Exception {
+					return bundleValidation.check(bundle);
+				}
+			});
+		final String intentKey = this.doPrivilegedService(SecuredAccess.class, null,
+			new Executable<SecuredAccess, String>() {
+				@Override
+				public String execute(SecuredAccess securedAccess) throws Exception {
+					return securedAccess.getAgentPublicKey(bundleIdentifier);
+				}
+			});
+		final ResourceIntent intent = new ResourceIntent(mediator, intentKey, onAccessible, path) {
+			@Override
+			public boolean isAccessible(String path) {
+				return SensiNact.this.isAccessible(this.getPublicKey(), path);
+			}
+
+			@Override
+			public String namespace() {
+				return SensiNact.this.namespace();
+			}
+		};
+		AccessController.<Void>doPrivileged(new PrivilegedAction<Void>() {
+			@Override
+			public Void run() {
+				intent.start();
+				return null;
+			}
+		});
+		return intent.getName();
+	}
+	
 	/**
 	 * Unregisters the {@link SnaAgent} whose identifier is passed as parameter
 	 * 
@@ -1698,12 +1851,11 @@ public class SensiNact implements Core {
 	 */
 	public void unregisterAgent(final String identifier) {
 		doPrivilegedService(SnaAgent.class,
-			new StringBuilder().append("(&(org.eclipse.sensinact.gateway.agent.id=").append(identifier)
-					.append(")(org.eclipse.sensinact.gateway.agent.local=true))").toString(),
+			String.format("(org.eclipse.sensinact.gateway.agent.id=%s",identifier),
 			new Executable<SnaAgent, Void>() {
 				@Override
 				public Void execute(SnaAgent agent) throws Exception {
-					agent.stop(true);
+					agent.stop();
 					return null;
 				}
 			}
@@ -1714,7 +1866,7 @@ public class SensiNact implements Core {
 	 * @inheritDoc
 	 *
 	 * @see org.eclipse.sensinact.gateway.core.Core#
-	 *      createRemoteCore(org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint)
+	 *      createRemoteCore(org.eclipse.sensinact.gateway.core.remote.AbstractRemoteEndpoint)
 	 */
 	@Override
 	public void createRemoteCore(AbstractRemoteEndpoint remoteEndpoint) {
@@ -1726,7 +1878,7 @@ public class SensiNact implements Core {
 	 * @inheritDoc
 	 *
 	 * @see org.eclipse.sensinact.gateway.core.Core#
-	 *      createRemoteCore(org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint,
+	 *      createRemoteCore(org.eclipse.sensinact.gateway.core.remote.AbstractRemoteEndpoint,
 	 *      java.util.Collection, java.util.Collection)
 	 */
 	@Override
@@ -1794,7 +1946,30 @@ public class SensiNact implements Core {
 			}
 
 			@Override
-			void closeSession(String publicKey) {
+			public String localNamespace() {
+				return SensiNact.this.namespace();
+			}
+
+			@Override
+			public boolean isAccessible(String publicKey, String path) {
+				return SensiNact.this.isAccessible(publicKey, path);
+			}
+
+			@Override
+			public void unregisterAgent(String localAgentId) {
+				synchronized(this.remoteSessions) {
+					Iterator<Session> iterator = this.remoteSessions.values().iterator();
+					while(iterator.hasNext()) {
+						SessionKey sessionKey = SensiNact.this.sessions.get(iterator.next());
+						if(sessionKey.unregisterAgent(localAgentId)) {
+							break;
+						}
+					}
+				}
+			}
+			
+			@Override
+			public void closeSession(String publicKey) {
 				String filteredKey = publicKey;
 				if (publicKey.startsWith(UserManager.ANONYMOUS_PKEY)) {
 					filteredKey = new StringBuilder().append(publicKey).append("_remote"
@@ -1812,7 +1987,7 @@ public class SensiNact implements Core {
 			}
 
 			@Override
-			void close() {
+			public void close() {
 				synchronized(this.remoteSessions) {
 					String[] keys = this.remoteSessions.keySet().toArray(new String[0]);
 					int index = 0;
@@ -1825,25 +2000,19 @@ public class SensiNact implements Core {
 					}
 				}
 			}
-
-			@Override
-			String localNamespace() {
-				return SensiNact.this.namespace();
-			}
 		});
 		remoteCore.onConnected(onConnectedCallbacks);
 		remoteCore.onDisconnected(onDisconnectedCallbacks);
 		remoteCore.onConnected(Collections.<Executable<String, Void>>singletonList(new Executable<String, Void>() {
 			@Override
-			public Void execute(String parameter) throws Exception {
-				mediator.callServices(SnaAgent.class, "(org.eclipse.sensinact.gateway.agent.local=true)",
-						new Executable<SnaAgent, Void>() {
-							@Override
-							public Void execute(SnaAgent agent) throws Exception {
-								((SnaAgentImpl) agent).registerRemote(remoteCore);
-								return null;
-							}
-						});
+			public Void execute(String namespace) throws Exception {
+				mediator.callServices(LocalAgent.class, new Executable<LocalAgent, Void>() {
+					@Override
+					public Void execute(LocalAgent agent) throws Exception {
+						agent.registerRemote(remoteCore);
+						return null;
+					}
+				});
 				return null;
 			}
 		}));
@@ -1862,13 +2031,13 @@ public class SensiNact implements Core {
 			return;
 		}
 		this.doPrivilegedService(RemoteCore.class, String.format("(namespace=%s)", namespace),
-				new Executable<RemoteCore, Void>() {
-					@Override
-					public Void execute(RemoteCore remoteCore) throws Exception {
-						remoteCore.close();
-						return null;
-					}
-				});
+			new Executable<RemoteCore, Void>() {
+				@Override
+				public Void execute(RemoteCore remoteCore) throws Exception {
+					remoteCore.close();
+					return null;
+				}
+			});
 	}
 
 	/**
@@ -1906,9 +2075,7 @@ public class SensiNact implements Core {
 	 * @return the {@link ServiceProvider}
 	 */
 	protected ServiceProvider serviceProvider(String identifier, String serviceProviderId) {
-		final SessionKey sessionKey = sessions
-				.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
-
+		final SessionKey sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
 		return this.registry.serviceProvider(sessionKey, serviceProviderId);
 	}
 
@@ -1926,9 +2093,7 @@ public class SensiNact implements Core {
 	 * @return the {@link Service}
 	 */
 	protected Service service(String identifier, String serviceProviderId, String serviceId) {
-		final SessionKey sessionKey = sessions
-				.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
-
+		final SessionKey sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
 		return this.registry.service(sessionKey, serviceProviderId, serviceId);
 	}
 
@@ -1950,12 +2115,98 @@ public class SensiNact implements Core {
 	 * @return the {@link Resource}
 	 */
 	protected Resource resource(String identifier, String serviceProviderId, String serviceId, String resourceId) {
-		final SessionKey sessionKey = sessions
-				.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
-
+		final SessionKey sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
 		return this.registry.resource(sessionKey, serviceProviderId, serviceId, resourceId);
 	}
+	
+	/**
+	 * Returns true if the model element targeted by the String path argument
+	 * exists and is accessible to the {@link Session} whose {@link SessionKey}  
+	 * is also passed as parameter. Returns false if the model element does not 
+	 * exist or is not accessible to the {@link Session}
+	 * 
+	 * @param sessionKey the {@link SessionKey} of the {@link Session} for which to
+	 * define the targeted model element accessibility
+	 * @param path the String path of the targeted model element
+	 * 
+	 * @return 
+	 * <ul>
+	 * 	<li>true if the targeted model element exists and is accessible to the 
+	 * 		specified {@link Session}</li>
+	 * 	<li>false otherwise</li>
+	 * </ul>
+	 */
+	protected boolean isAccessible(final SessionKey sessionKey , final String path) {
+		return isAccessible(sessionKey.getPublicKey(),sessionKey.getAccessTree(),path);
+	}
+	
+	/**
+	 * Returns true if the model element targeted by the String path argument
+	 * exists and is accessible to the user whose String public key 
+	 * is also passed as parameter. Returns false if the model element does not 
+	 * exist or is not accessible to the {@link Session}
+	 * 
+	 * @param publicKey the String public key of the user for which to
+	 * define the targeted model element accessibility
+	 * @param path the String path of the targeted model element
+	 * 
+	 * @return 
+	 * <ul>
+	 * 	<li>true if the targeted model element exists and is accessible to the 
+	 * 		specified user</li>
+	 * 	<li>false otherwise</li>
+	 * </ul>
+	 */
+	protected boolean isAccessible(final String publicKey , final String path) {
+		return isAccessible(publicKey, getUserAccessTree(publicKey),path);
+	}
+	
+	/**
+	 * Returns true if the model element targeted by the String path argument
+	 * exists and is accessible to the user whose String public key and {@link AccessTree} 
+	 * are also passed as parameters. Returns false if the model element does not 
+	 * exist or is not accessible to the {@link Session}
+	 * 
+	 * @param publicKey the String public key of the user for which to
+	 * define the targeted model element accessibility
+	 * @param tree the {@link AccessTree} of the user for which to
+	 * define the targeted model element accessibility
+	 * @param path the String path of the targeted model element
+	 * 
+	 * @return 
+	 * <ul>
+	 * 	<li>true if the targeted model element exists and is accessible to the 
+	 * 		specified user</li>
+	 * 	<li>false otherwise</li>
+	 * </ul>
+	 */
+	protected boolean isAccessible(final String publicKey, AccessTree<?> tree , final String path) {
+		String[] uriElements = UriUtils.getUriElements(path);
+		String[] providerElements = uriElements[0].split(":");
+		
+		String namespace = providerElements.length>1?providerElements[0]:null;
 
+		if(namespace != null && !namespace.equals(SensiNact.this.namespace())) {
+			Boolean exists = mediator.callService(RemoteCore.class, new StringBuilder().append(
+				"(namespace=").append(namespace).append(")").toString(), new Executable<RemoteCore,Boolean>(){
+					@Override
+					public Boolean execute(RemoteCore remoteCore) throws Exception {
+						if(remoteCore == null) {
+							return false;
+						}
+						return remoteCore.endpoint().isAccessible(publicKey,path);
+					}
+				});
+			return exists==null?false:exists.booleanValue();
+		}
+		String[] uri = new String[uriElements.length];		
+		if(uriElements.length > 1) {
+			System.arraycopy(uriElements, 1, uri, 1, uriElements.length -1);
+		}
+		uri[0] = providerElements.length > 1?providerElements[1]:providerElements[0];
+		return this.registry.isAccessible(tree, UriUtils.getUri(uri));
+	}
+	
 	/**
 	 * Executes the {@link Executable} passed as parameter which expects a
 	 * {@link RemoteCore} parameter, and returns its JSON formated execution result
@@ -2034,9 +2285,7 @@ public class SensiNact implements Core {
 	 *         service and service provider
 	 */
 	protected String getResources(String identifier, final String serviceProviderId, final String serviceId) {
-		final SessionKey sessionKey = sessions
-				.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
-
+		final SessionKey sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
 		String object = remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore, String>() {
 			@Override
 			public String execute(RemoteCore connector) throws Exception {
@@ -2448,7 +2697,7 @@ public class SensiNact implements Core {
 				SensiNact.this.mediator.callServices(SnaAgent.class, new Executable<SnaAgent, Void>() {
 					@Override
 					public Void execute(SnaAgent agent) throws Exception {
-						agent.stop(true);
+						agent.stop();
 						return null;
 					}
 				});

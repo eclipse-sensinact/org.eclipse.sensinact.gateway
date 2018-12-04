@@ -205,14 +205,11 @@ public class ResourceImpl extends
 	 * @param service
 	 */
 	protected ResourceImpl(ModelInstance<?> modelInstance, ResourceConfig resourceConfig, ServiceImpl service) {
-		super(modelInstance, service,
-				UriUtils.getUri(new String[] { service.getPath(), resourceConfig.getName(service.getName()) }));
-
-		this.resourceType = resourceConfig.getTypeConfig().getResourceImplementedInterface();
-
+		super(modelInstance, service, UriUtils.getUri(
+				new String[] { service.getPath(), resourceConfig.getName(service.getName()) }));
 		this.methods = new HashMap<AccessMethod.Type, AccessMethod>();
 		this.links = new ArrayList<String>();
-
+		this.resourceType = resourceConfig.getTypeConfig().getResourceImplementedInterface();
 		this.setUpdatePolicy(resourceConfig.getUpdatePolicy());
 		buildAttributes(resourceConfig);
 	}
@@ -327,6 +324,7 @@ public class ResourceImpl extends
 	 *            {@link AttributeBuilder}s
 	 */
 	public void buildAttributes(ResourceConfig resourceConfig) {
+		try {
 		String parentPath = UriUtils.getParentUri(super.getPath());
 		String parentName = UriUtils.getLeaf(parentPath);
 
@@ -342,8 +340,8 @@ public class ResourceImpl extends
 		for (; index < length; index++) {
 			Attribute attribute = null;
 			try {
-				attribute = builders.get(index).getAttribute(super.modelInstance.mediator(), this,
-						resourceConfig.getTypeConfig());
+				attribute = builders.get(index).getAttribute(super.modelInstance.mediator(), 
+					this, resourceConfig.getTypeConfig());
 
 			} catch (InvalidAttributeException e) {
 				super.modelInstance.mediator().error(e);
@@ -351,8 +349,8 @@ public class ResourceImpl extends
 			if (attribute != null) {
 				if (attribute.getName().equals(defaultAttributeName)) {
 					try {
-						Metadata metadata = new Metadata(super.modelInstance.mediator(), Attribute.NICKNAME,
-								String.class, this.getName(), Modifiable.FIXED);
+						Metadata metadata = new Metadata(super.modelInstance.mediator(), 
+							Attribute.NICKNAME, String.class, this.getName(), Modifiable.FIXED);
 
 						attribute.addMetadata(metadata);
 
@@ -362,6 +360,9 @@ public class ResourceImpl extends
 				}
 				this.addAttribute(attribute);
 			}
+		}
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 	}
 
@@ -566,44 +567,37 @@ public class ResourceImpl extends
 		builder.append(attributeName);
 		String filter = builder.toString();
 
-		StringBuilder callbackIdBuffer = new StringBuilder();
-		callbackIdBuffer.append(this.getName());
-		callbackIdBuffer.append(Math.abs(filter.hashCode()));
-		callbackIdBuffer.append(System.currentTimeMillis());
-
 		MidCallback.Type callbackType = type == null ? MidCallback.Type.UNARY : type;
 		long timeout = lifetime <= 10000 ? MidCallback.ENDLESS : System.currentTimeMillis() + lifetime;
 		int schedulerDelay = delay < 1000 ? 1000 : delay;
 		int bufferSize = buffer < 10 ? 10 : buffer;
 
-		String callbackId = callbackIdBuffer.toString();
 		MidCallback callback = null;
 
 		switch (callbackType) {
 		case BUFFERERIZED_AND_SCHEDULED:
-			callback = new ScheduledBufferMidCallback(super.modelInstance.mediator(), callbackId,
+			callback = new ScheduledBufferMidCallback(super.modelInstance.mediator(), 
 				new DefaultErrorHandler(policy), recipient, timeout, schedulerDelay, bufferSize);
 			break;
 		case BUFFERIZED:
-			callback = new BufferMidCallback(super.modelInstance.mediator(), callbackId, 
+			callback = new BufferMidCallback(super.modelInstance.mediator(),
 				new DefaultErrorHandler(policy), recipient, timeout, bufferSize);
 			break;
 		case SCHEDULED:
-			callback = new ScheduledMidCallback(super.modelInstance.mediator(), callbackId, 
+			callback = new ScheduledMidCallback(super.modelInstance.mediator(), 
 				new DefaultErrorHandler(policy), recipient, timeout, schedulerDelay);
 			break;
 		case UNARY:
-			callback = new UnaryMidCallback(super.modelInstance.mediator(), callbackId, 
+			callback = new UnaryMidCallback(super.modelInstance.mediator(), 
 				new DefaultErrorHandler(policy), recipient, timeout);
 			break;
 		default:
 			break;
 		}
 		if (callback != null) {
-			super.modelInstance.registerCallback(
-					new SubscriptionFilter(super.modelInstance.mediator(), filter, conditions), callback);
-
-			return callbackId;
+			super.modelInstance.registerCallback(new SubscriptionFilter(
+				super.modelInstance.mediator(), filter, conditions), callback);
+			return callback.getName();
 		}
 		return null;
 	}

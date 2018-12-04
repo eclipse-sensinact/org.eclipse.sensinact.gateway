@@ -31,6 +31,14 @@ public interface MidAgentCallback extends MidCallback {
 	void doHandle(SnaUpdateMessageImpl message) throws MidCallbackException;
 
 	/**
+	 * Processes the {@link SnaRemoteMessageImpl} passed as parameter
+	 * 
+	 * @param message
+	 *            the {@link SnaRemoteMessageImpl} to be processed
+	 */
+	void doHandle(SnaRemoteMessageImpl message) throws MidCallbackException;
+
+	/**
 	 * Processes the {@link SnaErrorMessageImpl} passed as parameter
 	 * 
 	 * @param message
@@ -46,6 +54,14 @@ public interface MidAgentCallback extends MidCallback {
 	 */
 	void doHandle(SnaResponseMessage<?, ?> message) throws MidCallbackException;
 
+	/**
+	 * Returns true if the {@link SnaAgent} attached to this
+	 * {@link MidAgentCallback} must be propagated through the 
+	 * connected remote sensiNact instance(s). False if the 
+	 * {@link SnaAgent} observes local events only.
+	 */
+	boolean propagate();
+	
 	/**
 	 * Stops this {@link SnaAgent} callback
 	 */

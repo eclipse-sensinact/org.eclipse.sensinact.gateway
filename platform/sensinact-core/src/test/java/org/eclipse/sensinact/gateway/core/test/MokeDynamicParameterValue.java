@@ -11,10 +11,7 @@
 package org.eclipse.sensinact.gateway.core.test;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
 import org.eclipse.sensinact.gateway.core.method.builder.AbstractDynamicParameterValue;
-import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 
 /** 
  * 
@@ -31,9 +28,9 @@ public class MokeDynamicParameterValue extends AbstractDynamicParameterValue {
 	}
 
 	/**
-	 * @InheritedDoc
+	 * @inheritedDoc
 	 *
-	 * @see JSONable#getJSON()
+	 * @see org.eclipse.sensinact.gateway.common.primitive.JSONable#getJSON()
 	 */
 	@Override
 	public String getJSON() {
@@ -41,9 +38,9 @@ public class MokeDynamicParameterValue extends AbstractDynamicParameterValue {
 	}
 
 	/**
-	 * @InheritedDoc
+	 * @inheritedDoc
 	 *
-	 * @see AccessMethodTrigger#getName()
+	 * @see org.eclipse.sensinact.gateway.core.method.DynamicParameterValue#getName()
 	 */
 	@Override
 	public String getName() {
@@ -51,9 +48,9 @@ public class MokeDynamicParameterValue extends AbstractDynamicParameterValue {
 	}
 
 	/**
-	 * @InheritedDoc
+	 * @inheritedDoc
 	 *
-	 * @see DynamicParameterValue#getValue()
+	 * @see org.eclipse.sensinact.gateway.core.method.DynamicParameterValue#getValue()
 	 */
 	@Override
 	public Object getValue() {

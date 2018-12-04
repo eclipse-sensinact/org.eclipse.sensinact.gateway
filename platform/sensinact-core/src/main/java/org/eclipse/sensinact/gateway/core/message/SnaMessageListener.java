@@ -263,14 +263,10 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 			@Override
 			public Void execute(SnaAgent agent) throws Exception {
 				String agentKey = agent.getPublicKey();
-
-				List<MethodAccessibility> methodAccessibilities = SnaMessageListener.this.agentsAccessibility
-						.get(agentKey);
-
+				List<MethodAccessibility> methodAccessibilities = SnaMessageListener.this.agentsAccessibility.get(agentKey);
 				int index = -1;
 				if (methodAccessibilities == null) {
-					AccessLevelOption option = SnaMessageListener.this.configuration
-							.getAuthenticatedAccessLevelOption(path, agentKey);
+					AccessLevelOption option = SnaMessageListener.this.configuration.getAuthenticatedAccessLevelOption(path, agentKey);
 					if (option == null) {
 						option = AccessLevelOption.ANONYMOUS;
 					}

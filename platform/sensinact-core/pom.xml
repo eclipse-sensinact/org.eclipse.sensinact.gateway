@@ -74,7 +74,8 @@
                             org.eclipse.sensinact.gateway.core.method.trigger,
                             org.eclipse.sensinact.gateway.core.method.builder,
                             org.eclipse.sensinact.gateway.core.osgi,
-                            org.eclipse.sensinact.gateway.core.security
+                            org.eclipse.sensinact.gateway.core.security,
+                            org.eclipse.sensinact.gateway.core.remote
                         </Export-Package>
                         <!--
                         <Import-Package>

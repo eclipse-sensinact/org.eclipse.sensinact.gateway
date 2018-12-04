@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.core;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
@@ -476,6 +477,64 @@ public interface Session {
 	 */
 	UnsubscribeResponse unregisterSessionAgent(String requestId, String agentId);
 
+	/**
+	 * Registers a new {@link ResourceIntent} attached to this Session targeting the 
+	 * {@link Resource} whose String path is passed as parameter and executing the 
+	 * {@link Executable} also passed as parameter the availability status of the target
+	 * changes 
+	 * 
+	 * @param requestId the String identifier of the request, to be reported into the response
+	 * @param callback the {@link Executable} to be executing when the availability status 
+	 * of the specified target changes
+	 * @param resourcePath the String path of the targeted {@link Resource} 
+	 * 
+	 * @return the JSON formated result of the {@link ResourceIntent} registration,
+	 * tagged by the specified request identifier, and wrapped into an {@link SubscribeResponse}.
+	 */
+	SubscribeResponse registerSessionIntent(String requestId, Executable<Boolean, Void> callback, String... resourcePath);
+	
+	/**
+	 * Unregisters the {@link ResourceIntent} attached to this Session and whose String
+	 * identifier is passed as parameter
+	 * 
+	 * @param requestId the String identifier of the request, to be reported into the response
+	 * @param intentId the String identifier of the linked {@link ResourceIntent} to be
+	 * unregistered
+	 * 
+	 * @return the JSON formated result of the {@link ResourceIntent} unregistration,
+	 * tagged by the specified request identifier, and wrapped into an {@link UnsubscribeResponse}.
+	 */
+	UnsubscribeResponse unregisterSessionIntent(String requestId, String intentId);
+	
+	/**
+	 * Registers a new {@link ResourceIntent} attached to this Session targeting the 
+	 * {@link Resource} whose String path is passed as parameter and executing the 
+	 * {@link Executable} also passed as parameter the availability status of the target
+	 * changes 
+	 * 
+	 * @param callback the {@link Executable} to be executing when the availability status 
+	 * of the specified target changes
+	 * @param resourcePath the String path of the targeted {@link Resource} 
+	 * 
+	 * @return the JSON formated result of the {@link ResourceIntent} registration, 
+	 * wrapped into an {@link SubscribeResponse}.
+	 */
+	SubscribeResponse registerSessionIntent(Executable<Boolean, Void> callback, String resourcePath);
+	
+	/**
+	 * Unregisters the {@link ResourceIntent} attached to this Session and whose String
+	 * identifier is passed as parameter
+	 * 
+	 * @param requestId the String identifier of the request, and to be reported into 
+	 * the response
+	 * @param intentId the String identifier of the linked {@link ResourceIntent} to be
+	 * unregistered
+	 * 
+	 * @return the JSON formated result of the {@link ResourceIntent} unregistration,
+	 * wrapped into an {@link UnsubscribeResponse}.
+	 */
+	UnsubscribeResponse unregisterSessionIntent(String intentId);
+	
 	/**
 	 * Returns the JSON formated list of all registered resource model instances,
 	 * accessible to this Session, from the local sensiNact instance, as well as

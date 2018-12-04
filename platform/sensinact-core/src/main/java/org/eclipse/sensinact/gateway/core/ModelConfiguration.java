@@ -57,13 +57,14 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 	protected Map<String, List<String>> profiles;
 	protected Map<String, List<String>> fixed;
 	protected List<String> observed;
-
+	
 	/**
 	 * the {@link AccessTree} of the {@link AccessProfile}s hierarchy describing the
 	 * access policy applying on this sensiNact resource model
 	 */
 	protected final MutableAccessTree<? extends MutableAccessNode> accessTree;
 	protected Mediator mediator;
+	
 
 	/**
 	 * Constructor
@@ -251,8 +252,7 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see SensiNactResourceModelConfiguration#
-	 *      setDefaultResourceType(java.lang.Class)
+	 * @see SensiNactResourceModelConfiguration#setDefaultResourceType(java.lang.Class)
 	 */
 	public ModelConfiguration setDefaultResourceType(Class<? extends Resource> defaultResourceType) {
 		if (this.defaultResourceConfigBuilder != null) {
@@ -372,7 +372,7 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 		}
 		return this.resourceType;
 	}
-
+	
 	/**
 	 * Adds a {@link ResourceConfigCatalog} to the list of those of this
 	 * ModelConfiguration

@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core.method.trigger;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintConstantPair;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
@@ -24,7 +23,7 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ConditionalConstant implements AccessMethodTrigger<Object[]> {
+public class ConditionalConstant extends AbstractAccessMethodTrigger {
 	public static final String NAME = "CONDITIONAL";
 
 	/**
@@ -32,14 +31,7 @@ public class ConditionalConstant implements AccessMethodTrigger<Object[]> {
 	 */
 	private List<ConstraintConstantPair> constants;
 
-	/**
-	 * the index of the execution parameter on which to validate the constraint(s)
-	 */
-	private final int index;
-
-	private final boolean doPassOn;
-
-	/**
+	/** 
 	 * Constructor
 	 * 
 	 * @param index
@@ -49,10 +41,9 @@ public class ConditionalConstant implements AccessMethodTrigger<Object[]> {
 	 *            defines whether the result object has to be pass on for treatment
 	 * @throws InvalidValueException
 	 */
-	public ConditionalConstant(Mediator mediator, int index, List<ConstraintConstantPair> constraints, boolean doPassOn)
+	public ConditionalConstant(Object argument, String argumentBuilder, boolean passOn, List<ConstraintConstantPair> constraints)
 			throws InvalidValueException {
-		this.doPassOn = doPassOn;
-		this.index = index;
+		super(argument,argumentBuilder,passOn);
 		this.constants = constraints;
 	}
 
@@ -62,85 +53,19 @@ public class ConditionalConstant implements AccessMethodTrigger<Object[]> {
 	 * @see Executable#execute(java.lang.Object)
 	 */
 	@Override
-	public Object execute(Object[] parameters) throws Exception {
+	public Object execute(Object parameter) throws Exception {
 		if (this.constants == null) {
 			return null;
 		}
-		Object object = parameters[this.index];
-
 		Iterator<ConstraintConstantPair> iterator = this.constants.iterator();
 
 		while (iterator.hasNext()) {
 			ConstraintConstantPair entry = iterator.next();
-			if (entry.constraint.complies(object)) {
+			if (entry.constraint.complies(parameter)) {
 				return entry.constant;
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see JSONable#getJSON()
-	 */
-	@Override
-	public String getJSON() {
-		StringBuilder buffer = new StringBuilder();
-		buffer.append(JSONUtils.OPEN_BRACE);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(TRIGGER_TYPE_KEY);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(JSONUtils.COLON);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(this.getName());
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(JSONUtils.COMMA);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(TRIGGER_PASS_ON);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(JSONUtils.COLON);
-		buffer.append(this.doPassOn);
-		buffer.append(JSONUtils.COMMA);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(TRIGGER_INDEX_KEY);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(JSONUtils.COLON);
-		buffer.append(this.index);
-		buffer.append(JSONUtils.COMMA);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(TRIGGER_CONSTANTS_KEY);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(JSONUtils.COLON);
-		buffer.append(JSONUtils.OPEN_BRACKET);
-
-		if (this.constants != null) {
-			Iterator<ConstraintConstantPair> iterator = this.constants.iterator();
-
-			int index = 0;
-
-			while (iterator.hasNext()) {
-				ConstraintConstantPair entry = iterator.next();
-				buffer.append(index > 0 ? JSONUtils.COMMA : JSONUtils.EMPTY);
-				buffer.append(JSONUtils.OPEN_BRACE);
-				buffer.append(JSONUtils.QUOTE);
-				buffer.append(TRIGGER_CONSTANT_KEY);
-				buffer.append(JSONUtils.QUOTE);
-				buffer.append(JSONUtils.COLON);
-				buffer.append(JSONUtils.toJSONFormat(entry.constant));
-				buffer.append(JSONUtils.COMMA);
-				buffer.append(JSONUtils.QUOTE);
-				buffer.append(TRIGGER_CONSTRAINT_KEY);
-				buffer.append(JSONUtils.QUOTE);
-				buffer.append(JSONUtils.COLON);
-				buffer.append(entry.constraint.getJSON());
-				buffer.append(JSONUtils.CLOSE_BRACE);
-				index++;
-			}
-		}
-		buffer.append(JSONUtils.CLOSE_BRACKET);
-		buffer.append(JSONUtils.CLOSE_BRACE);
-		return buffer.toString();
 	}
 
 	/**
@@ -156,20 +81,40 @@ public class ConditionalConstant implements AccessMethodTrigger<Object[]> {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see AccessMethodTrigger#getParameters()
+	 * @see org.eclipse.sensinact.gateway.core.method.trigger.AbstractAccessMethodTrigger#doGetJSON()
 	 */
 	@Override
-	public AccessMethodTrigger.Parameters getParameters() {
-		return AccessMethodTrigger.Parameters.PARAMETERS;
-	}
+	public String doGetJSON() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(JSONUtils.QUOTE);
+		builder.append(TRIGGER_CONSTANTS_KEY);
+		builder.append(JSONUtils.QUOTE);
+		builder.append(JSONUtils.COLON);
+		builder.append(JSONUtils.OPEN_BRACKET);
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AccessMethodTrigger#passOn()
-	 */
-	@Override
-	public boolean passOn() {
-		return this.doPassOn;
+		if (this.constants != null) {
+			Iterator<ConstraintConstantPair> iterator = this.constants.iterator();
+			int index = 0;
+			while (iterator.hasNext()) {
+				ConstraintConstantPair entry = iterator.next();
+				builder.append(index > 0 ? JSONUtils.COMMA : JSONUtils.EMPTY);
+				builder.append(JSONUtils.OPEN_BRACE);
+				builder.append(JSONUtils.QUOTE);
+				builder.append(TRIGGER_CONSTANT_KEY);
+				builder.append(JSONUtils.QUOTE);
+				builder.append(JSONUtils.COLON);
+				builder.append(JSONUtils.toJSONFormat(entry.constant));
+				builder.append(JSONUtils.COMMA);
+				builder.append(JSONUtils.QUOTE);
+				builder.append(TRIGGER_CONSTRAINT_KEY);
+				builder.append(JSONUtils.QUOTE);
+				builder.append(JSONUtils.COLON);
+				builder.append(entry.constraint.getJSON());
+				builder.append(JSONUtils.CLOSE_BRACE);
+				index++;
+			}
+		}
+		builder.append(JSONUtils.CLOSE_BRACKET);
+		return builder.toString();
 	}
 }

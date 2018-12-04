@@ -17,6 +17,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.remote.AbstractRemoteEndpoint;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
@@ -61,43 +62,46 @@ public interface Core {
 	 *            {@link RemoteCore} to be instantiated
 	 * @param onConnectedCallbacks
 	 *            the collection of {@link Executable}s to be executed after the
-	 *            connection of the specified {@link RemoteEndpoint}
+	 *            connection to the specified {@link RemoteEndpoint}
 	 * @param onDisconnectedCallbacks
 	 *            the collection of {@link Executable}s to be executed after the
-	 *            disconnection of the specified {@link RemoteEndpoint}
+	 *            disconnection from the specified {@link RemoteEndpoint}
 	 */
 	void createRemoteCore(AbstractRemoteEndpoint remoteEndpoint,
 			Collection<Executable<String, Void>> onConnectedCallbacks,
 			Collection<Executable<String, Void>> onDisconnectedCallbacks);
 
 	/**
-	 * Instantiates and registers a new {@link SnaAgent}, build with the
-	 * {@link AbstractMidAgentCallback} and the {@link SnaFilter} passed as
-	 * parameters in the OSGi host environment
+	 * Instantiates and registers a new agent, connected to the {@link MidAgentCallback} 
+	 * and whose received messages are filtered by the {@link SnaFilter} passed as
+	 * parameters 
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} provided by the bundle to which the
-	 *            {@link SnaAgent} to be instantiated belongs to.
-	 * @param callback
-	 *            the {@link AbstractMidAgentCallback} in charge of handling the
-	 *            messages transmitted to the {@link SnaAgent} to be instantiated
-	 * @param filter
-	 *            the {@link SnaFilter} helping in filtering the messages
-	 *            transmitted to the {@link SnaAgent} to be created and registered
+	 * @param mediator the {@link Mediator} allowing the agent to be instantiated 
+	 * to interact with the OSGi host environment
+	 * @param callback the {@link MidAgentCallback} in charge of handling the
+	 * messages transmitted to the agent to be instantiated
+	 * @param filter the {@link SnaFilter} helping in filtering the messages
+	 * transmitted to the agent to be instantiated and registered
 	 * 
-	 * @return the String identifier of the new {@link SnaAgent}
+	 * @return the String identifier of the newly created and registered agent
 	 */
 	String registerAgent(Mediator mediator, MidAgentCallback callback, SnaFilter filter);
-
+	
 	/**
-	 * Unregisters the {@link SnaAgent} whose String identifier is passed as
-	 * parameter
+	 * Instantiates and registers a new {@link ResourceIntent} targeting the 
+	 * {@link Resource} whose String path is passed as parameter and executing the 
+	 * {@link Executable} also passed as parameter the availability status of the target
+	 * changes 
 	 * 
-	 * @param identifier
-	 *            the String identifier of the {@link SnaAgent} to be unregistered
+	 * @param mediator the {@link Mediator} allowing the {@link ResourceIntent} to be instantiated 
+	 * to interact with the OSGi host environment
+	 * @param path the String path of the targeted {@link Resource} 
+	 * @param callback the {@link Executable} to be executing when the availability status 
+	 * of the specified target changes
+	 * @return the String identifier of the newly created and registered {@link ResourceIntent}
 	 */
-	void unregisterAgent(String identifier);
-
+	String registerIntent(Mediator mediator, Executable<Boolean,Void> onAccessible, final String... path);
+	
 	/**
 	 * Creates and returns a {@link Session} for the application whose private
 	 * String identifier is passed as parameter.
@@ -122,8 +126,7 @@ public interface Core {
 	/**
 	 * Returns the {@link AuthenticatedSession} whose String identifier is passed as parameter
 	 * 
-	 * @param token
-	 *            the String identifier of the {@link Session}
+	 * @param token the String identifier of the {@link Session}
 	 * 
 	 * @return the {@link AuthenticatedSession} with the specified identifier
 	 */
@@ -138,9 +141,9 @@ public interface Core {
 	 * 
 	 * @return the {@link Session} for the specified user
 	 */
-	Session getSession(Authentication<?> authentication)
-			throws InvalidKeyException, DataStoreException, InvalidCredentialException;
-
+	Session getSession(Authentication<?> authentication) throws InvalidKeyException, 
+	DataStoreException, InvalidCredentialException;
+	
 	/**
 	 * Closes this Core
 	 */

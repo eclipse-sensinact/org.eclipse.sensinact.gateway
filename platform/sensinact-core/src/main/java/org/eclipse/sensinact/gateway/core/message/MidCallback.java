@@ -69,15 +69,6 @@ public interface MidCallback extends Nameable {
 	 * @return the {@link MessageReisterer} of this SnaCallback
 	 */
 	MessageRegisterer getMessageRegisterer();
-
-	/**
-	 * Defines the String identifier of this MidCallback. if the String identifier
-	 * has already been defined, using this method will produce no effect
-	 * 
-	 * @param identifier
-	 *            the String identifier of this MidCallback.
-	 */
-	void setIdentifier(String identifier);
 	
 	/**
 	 * Returns true if this MidCallback is active; otherwise
