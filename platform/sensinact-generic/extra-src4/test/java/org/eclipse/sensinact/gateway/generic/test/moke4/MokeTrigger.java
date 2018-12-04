@@ -11,54 +11,42 @@
 package org.eclipse.sensinact.gateway.generic.test.moke4;
 
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
+import org.eclipse.sensinact.gateway.core.method.trigger.AbstractAccessMethodTrigger;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
+import org.eclipse.sensinact.gateway.core.method.trigger.TriggerArgumentBuilder;
 
 /**
  *
  */
-public class MokeTrigger implements AccessMethodTrigger<AccessMethodResponseBuilder> {
-    /**
+public class MokeTrigger extends AbstractAccessMethodTrigger {
+	
+    protected MokeTrigger() {
+		super(null, TriggerArgumentBuilder.INTERMEDIATE, false);
+	}
+
+	/**
      * @InheritedDoc
      * @see org.eclipse.sensinact.gateway.common.execution.Executable#execute(java.lang.Object)
      */
     @Override
-    public Object execute(AccessMethodResponseBuilder parameter) throws Exception {
+    public Object execute(Object parameter) throws Exception {
+    	if(!AccessMethodResponseBuilder.class.isAssignableFrom(parameter.getClass()) ) {
+    		throw new IllegalArgumentException("AccessMethodResponseBuilder expected");
+    	}
         return 0.2f;
     }
-
+    
     /**
      * @InheritedDoc
-     * @see org.eclipse.sensinact.gateway.common.primitive.JSONable#getJSON()
-     */
-    @Override
-    public String getJSON() {
-        return "{\"index\":0,\"passOn\":false,\"type\":\"VARIATIONTEST_TRIGGER\"}";
-    }
-
-    /**
-     * @InheritedDoc
-     * @see org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger#getParameters()
-     */
-    @Override
-    public Parameters getParameters() {
-        return Parameters.INTERMEDIATE;
-    }
-
-    /**
-     * @InheritedDoc
-     * @see org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger#getName()
+     * @see AccessMethodTrigger#getName()
      */
     @Override
     public String getName() {
         return "VARIATIONTEST_TRIGGER";
     }
 
-    /**
-     * @InheritedDoc
-     * @see org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger#passOn()
-     */
-    @Override
-    public boolean passOn() {
-        return false;
-    }
+	@Override
+	public String doGetJSON() {
+		return null;
+	}
 }

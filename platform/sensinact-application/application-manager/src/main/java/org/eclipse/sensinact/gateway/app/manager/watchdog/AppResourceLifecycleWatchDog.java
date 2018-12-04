@@ -10,6 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.watchdog;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
 import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
@@ -23,18 +28,12 @@ import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * This class triggers an alert that stops the application when a resource disappears
@@ -45,7 +44,7 @@ import java.util.List;
  */
 public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
     private Collection<String> resourceUris;
-    private List<String> registrations;
+    private Map<String,MidAgentCallback> registrations;
 
     /**
      * Constructor
@@ -57,7 +56,7 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
     public AppResourceLifecycleWatchDog(AppServiceMediator mediator, ApplicationService service, Collection<String> resourceUris) {
         super(mediator, service);
         this.resourceUris = resourceUris;
-        this.registrations = new ArrayList<String>();
+        this.registrations = new HashMap<String,MidAgentCallback>();
     }
 
     private Resource getResource(Session session, String uri) {
@@ -87,8 +86,8 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
                 for (String resourceUri : resourceUris) {
                     final SnaFilter filter = new SnaFilter(mediator, resourceUri);
                     filter.addHandledType(SnaMessage.Type.LIFECYCLE);
-
-                    AppResourceLifecycleWatchDog.this.registrations.add(service.registerAgent(mediator, new AppResourceLifeCycleSnaAgent(mediator, AppResourceLifecycleWatchDog.this), filter));
+                    AppResourceLifeCycleSnaAgent callback = new AppResourceLifeCycleSnaAgent(mediator, AppResourceLifecycleWatchDog.this);
+                    AppResourceLifecycleWatchDog.this.registrations.put(service.registerAgent(mediator,callback , filter), callback);
                 }
                 return null;
             }
@@ -100,16 +99,11 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
      * @see AbstractAppWatchDog#stop(Session)
      */
     public SnaErrorMessage stop(Session session) {
-        mediator.callService(Core.class, new Executable<Core, Void>() {
-            @Override
-            public Void execute(Core service) throws Exception {
-                for (String registration : AppResourceLifecycleWatchDog.this.registrations) {
-                    service.unregisterAgent(registration);
-                }
-                return null;
-            }
-        });
-        return null;
+    	Iterator<MidAgentCallback> iterator = this.registrations.values().iterator();
+    	while(iterator.hasNext()) {
+    		iterator.next().stop();
+    	}
+    	return null;
     }
 
     /**
@@ -126,6 +120,7 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
         /**
          * @see AbstractMidAgentCallback#doHandle(SnaLifecycleMessageImpl)
          */
+        @Override
         public void doHandle(SnaLifecycleMessageImpl message) {
             try {
                 Attribute attribute = service.getResource(AppConstant.STATUS).getAttribute(DataResource.VALUE);
@@ -164,37 +159,6 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
             } catch (Exception e) {
                 mediator.error(e);
             }
-        }
-
-        /**
-         * Not used
-         *
-         * @see AbstractMidAgentCallback#doHandle(SnaUpdateMessageImpl)
-         */
-        public void doHandle(SnaUpdateMessageImpl event) {
-        }
-
-        /**
-         * Not used
-         *
-         * @see AbstractMidAgentCallback#doHandle(SnaErrorMessageImpl)
-         */
-        public void doHandle(SnaErrorMessageImpl event) {
-        }
-
-        /**
-         * Not used
-         *
-         * @see AbstractMidAgentCallback#doHandle(SnaResponseMessage)
-         */
-        public void doHandle(SnaResponseMessage event) {
-        }
-
-        /**
-         * @inheritDoc
-         * @see AbstractMidAgentCallback#stop()
-         */
-        public void stop() {
         }
     }
 }

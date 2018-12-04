@@ -15,15 +15,16 @@ import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.SensiNact;
 import org.eclipse.sensinact.gateway.core.Session;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidCallback;
-import org.eclipse.sensinact.gateway.core.message.MessageRegisterer;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MessageRegisterer;
 import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaRemoteMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
@@ -57,9 +58,8 @@ public class MidOSGiTestExtended extends MidOSGiTest {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
-    class AgentCallback extends AbstractMidCallback implements MidAgentCallback {
-        final String[] UNLISTENED = new String[]{"/sensiNact/system", "/AppManager/admin"};
-
+    class AgentCallback extends AbstractMidAgentCallback  {
+    	
         /**
          * Constructor
          *
@@ -67,7 +67,7 @@ public class MidOSGiTestExtended extends MidOSGiTest {
          *                   by the AbstractSnaAgentCallback to instantiate
          */
         protected AgentCallback() {
-            super(false);
+            super(false,true);
         }
 
         /**
@@ -101,23 +101,7 @@ public class MidOSGiTestExtended extends MidOSGiTest {
                 throw new MidCallbackException(e);
             }
         }
-
-        @Override
-        public void doHandle(SnaLifecycleMessageImpl message) {
-        }
-
-        @Override
-        public void doHandle(SnaUpdateMessageImpl message) {
-        }
-
-        @Override
-        public void doHandle(SnaErrorMessageImpl message) {
-        }
-
-        @Override
-        public void doHandle(SnaResponseMessage<?, ?> message) {
-        }
-
+        
         private final void treat(SnaMessage<?> message) { 
             String json = message.getJSON();
             synchronized(MidOSGiTestExtended.this.stack) {

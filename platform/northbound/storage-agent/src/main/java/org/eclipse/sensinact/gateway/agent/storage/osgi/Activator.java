@@ -62,14 +62,8 @@ public class Activator extends AbstractActivator<Mediator> {
         if (super.mediator.isDebugLoggable()) {
             super.mediator.debug("Stopping storage agent.");
         }
-        mediator.callService(Core.class, new Executable<Core, Void>() {
-            @Override
-            public Void execute(Core service) throws Exception {
-                service.unregisterAgent(Activator.this.registration);
-                return null;
-            }
-        });
         this.registration = null;
+        this.handler.stop();
         this.handler = null;
     }
 

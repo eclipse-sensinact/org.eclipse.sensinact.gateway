@@ -114,9 +114,11 @@ xmlns="http://org.eclipse.sensinact/resource"
 	    <method type="ACT">
 		    <references>
 		    	<reference xsi:type="constantReference" reference="STATUS" passOn="false">
-		    		<constant type="int">
-		    			<value>1</value>
-		    		</constant>
+		    		<builder type="EMPTY">
+						<argument type="int">
+							<value>1</value>
+						</argument>
+					</builder>
 		    	</reference>
 		    </references>
 	    </method>
@@ -128,11 +130,19 @@ xmlns="http://org.eclipse.sensinact/resource"
 	    <method type="ACT">
 			<references>
 		    	<reference xsi:type="constantReference" reference="STATUS" passOn="false">
-		    		<constant type="int">
-		    			<value>0</value>
-		    		</constant>
+		    		<builder type="EMPTY">
+						<argument type="int">
+							<value>0</value>
+						</argument>
+					</builder>
 		    	</reference>
-		    	<reference xsi:type="calculatedReference"  calculated="VARIATIONTEST_TRIGGER" reference="VARIATION" passOn="false"/>
+		    	<reference xsi:type="calculatedReference" calculated="VARIATIONTEST_TRIGGER" reference="VARIATION" passOn="false">
+		    		<builder type="PARAMETER">
+						<argument type="int">
+							<value>0</value>
+						</argument>
+					</builder>
+				</reference>
 		    </references> 
 	    </method>
     </methods>

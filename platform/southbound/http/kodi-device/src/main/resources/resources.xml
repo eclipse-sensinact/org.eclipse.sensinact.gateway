@@ -123,9 +123,9 @@
 	            <parameter name="title" type="string"/>
 	            <parameter name="message" type="string"/>
 	            <parameter name="image" type="string">
-	                <contraints>
+	                <constraints>
 	                    <pattern value="()|(info)|(warning)|(error)"/>
-	                </contraints>
+	                </constraints>
 	            </parameter>
 	            <parameter name="displaytime" type="int"/>
 	        </method>
@@ -249,10 +249,10 @@
         <methods>
 	        <method type="ACT">
 	            <parameter name="volume" type="int">	            	
-	                <contraints>
+	                <constraints>
 	                    <minInclusive value="0"/>
 	                    <maxInclusive value="100"/>
-	                </contraints>
+	                </constraints>
 	            </parameter>
 	        </method>
         </methods>

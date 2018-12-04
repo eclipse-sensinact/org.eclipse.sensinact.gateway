@@ -93,7 +93,7 @@ public abstract class PrimitiveDescription implements Description, Nameable {
     @Override
     public String getJSON() {
         JSONObject description = getJSONObject();
-        description.put(VALUE_KEY, this.toJson(this.getType(), this.getValue()));
+        description.put(VALUE_KEY, toJson(this.getType(), this.getValue()));
         return description.toString(INDENT_FACTOR);
     }
 

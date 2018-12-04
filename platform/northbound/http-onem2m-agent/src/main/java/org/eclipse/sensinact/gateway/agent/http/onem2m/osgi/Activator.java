@@ -54,14 +54,10 @@ public class Activator extends AbstractActivator<Mediator> {
 
     @Override
     public void doStop() throws Exception {
-        super.mediator.callService(Core.class, new Executable<Core, Void>() {
-            @Override
-            public Void execute(Core core) throws Exception {
-
-                core.unregisterAgent(registration);
-                return null;
-            }
-        });
+        
+        this.handler.stop();
+        this.handler = null;
+        this.registration = null;
     }
 
     @Override

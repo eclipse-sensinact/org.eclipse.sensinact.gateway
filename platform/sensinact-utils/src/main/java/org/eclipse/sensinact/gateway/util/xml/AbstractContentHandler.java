@@ -80,7 +80,6 @@ public abstract class AbstractContentHandler<T> implements ContentHandler {
      * startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
      */
     public void startElement(String uri, String localName, String qname, Attributes atts) throws SAXException {
-        //System.out.println("==============> START " + localName);
         T object = null;
         try {
             object = start(localName, qname, atts);
@@ -94,7 +93,6 @@ public abstract class AbstractContentHandler<T> implements ContentHandler {
         }
         this.textContent = null;
         this.textContent = new StringBuilder();
-        //System.out.println( localName + "START <======================= ");
     }
 
     /**
@@ -103,7 +101,6 @@ public abstract class AbstractContentHandler<T> implements ContentHandler {
      * endElement(java.lang.String, java.lang.String, java.lang.String)
      */
     public void endElement(String uri, String localName, String qname) throws SAXException {
-        //System.out.println("==============> END " + localName);
         T object = null;
         try {
             object = end(localName, qname);
@@ -115,7 +112,6 @@ public abstract class AbstractContentHandler<T> implements ContentHandler {
         if (object != null) {
             stack.push(object);
         }
-        //System.out.println( localName + "END <======================= ");
     }
 
     /**
@@ -157,7 +153,6 @@ public abstract class AbstractContentHandler<T> implements ContentHandler {
      */
     public void endDocument() throws SAXException {
         LOGGER.log(Level.CONFIG, "end document parsing");
-        //this.stack = null;
     }
 
     /**

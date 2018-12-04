@@ -94,8 +94,8 @@ public class ExtServiceImpl extends ServiceImpl {
      *                     {@link AccessMethodTrigger}(s) to create
      */
     protected void buildTriggers(String resourceName, Signature signature, List<ReferenceDefinition> references) {
-        if (signature.getName().intern() != AccessMethod.ACT) {
-            super.modelInstance.mediator().debug("Action trigger allowed for ACT method only");
+        if (signature.getName().intern() != AccessMethod.ACT && signature.getName().intern() != AccessMethod.SET) {
+            super.modelInstance.mediator().debug("Trigger allowed for ACT and SET methods only");
             return;
         }
         int index = 0;
@@ -106,11 +106,15 @@ public class ExtServiceImpl extends ServiceImpl {
                 JSONObject referenceJson = new JSONObject(references.get(index).getJSON());
                 JSONObject triggerJson = referenceJson.getJSONObject(AccessMethodTrigger.TRIGGER_KEY);
 
-                AccessMethodTriggerFactory factory = loader.load(super.modelInstance.mediator(), triggerJson.getString(AccessMethodTrigger.TRIGGER_TYPE_KEY));
-
-                super.addActionTrigger(resourceName, referenceJson.getString("reference"), signature, factory.newInstance(super.modelInstance.mediator(), triggerJson), ExecutionPolicy.AFTER);
+                AccessMethodTriggerFactory factory = loader.load(super.modelInstance.mediator(), 
+                		triggerJson.getString(AccessMethodTrigger.TRIGGER_TYPE_KEY));
+                
+                super.addTrigger(resourceName, referenceJson.getString("reference"), signature, 
+                	factory.newInstance(super.modelInstance.mediator(), triggerJson), 
+                	ExecutionPolicy.AFTER);
             }
         } catch (Exception e) {
+        	e.printStackTrace();
             super.modelInstance.mediator().error(e);
 
         } finally {

@@ -16,6 +16,7 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Timer;
@@ -23,7 +24,7 @@ import java.util.TimerTask;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint;
+import org.eclipse.sensinact.gateway.core.remote.AbstractRemoteEndpoint;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
@@ -212,6 +213,19 @@ public class HttpEndpoint extends AbstractRemoteEndpoint {
                             }
                             super.remoteCore.registerAgent(agentId, filter, object.getString("agentKey"));
                         }
+                        break;
+                    case "accessible":
+                        if (subUriELements.length != 2) {
+                            break;
+                        }
+                        JSONArray array = new JSONArray(subUriELements[1]);                        
+                        StringBuilder builder = new StringBuilder();
+                        for(int i=0;i<array.length();i++) {
+                        	builder.append(UriUtils.ROOT);
+                        	builder.append(array.getString(i));
+                        }
+                        boolean accessible = super.remoteCore.isAccessible(publicKey, builder.toString());
+                        response = String.valueOf(accessible);
                         break;
                     case "session":
                         super.remoteCore.closeSession(publicKey);
@@ -747,7 +761,24 @@ public class HttpEndpoint extends AbstractRemoteEndpoint {
         }
         return response;
     }
-
+    /**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.Endpoint#isAccessible(java.lang.String,java.lang.String)
+	 */
+	public boolean isAccessible(String publicKey, String path) {
+		if (!super.getConnected()) {
+            return false;
+        }
+        String response = this.outgoingRequest(new JSONObject(
+        	).put("uri", String.format("/accessible?path=%s",Arrays.toString(UriUtils.getUriElements(path)))
+        	).put("pkey", publicKey));
+        if (response != null) {
+            mediator.debug(response);
+        }
+        return Boolean.parseBoolean(response);
+	}
+	
     /**
      * @inheritDoc
      * @see org.eclipse.sensinact.gateway.core.Endpoint#

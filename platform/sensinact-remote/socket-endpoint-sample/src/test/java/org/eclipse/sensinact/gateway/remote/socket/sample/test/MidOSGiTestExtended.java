@@ -10,31 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.remote.socket.sample.test;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.Core;
-import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.SensiNact;
-import org.eclipse.sensinact.gateway.core.Session;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidCallback;
-import org.eclipse.sensinact.gateway.core.message.MessageRegisterer;
-import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
-import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
-import org.eclipse.sensinact.gateway.test.MidOSGiTest;
-import org.eclipse.sensinact.gateway.test.MidProxy;
-import org.json.JSONArray;
-import org.junit.Assert;
-import org.junit.Before;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -49,6 +24,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.eclipse.sensinact.gateway.core.Core;
+import org.eclipse.sensinact.gateway.core.DataResource;
+import org.eclipse.sensinact.gateway.core.SensiNact;
+import org.eclipse.sensinact.gateway.core.Session;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
+import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
+import org.eclipse.sensinact.gateway.test.MidOSGiTest;
+import org.eclipse.sensinact.gateway.test.MidProxy;
+import org.json.JSONArray;
+import org.junit.Assert;
+import org.junit.Before;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
@@ -56,22 +50,20 @@ public class MidOSGiTestExtended extends MidOSGiTest {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
-    class AgentCallback extends AbstractMidCallback implements MidAgentCallback {
-        final String[] UNLISTENED = new String[]{"/sensiNact/system", "/AppManager/admin"};
+    class AgentCallback extends AbstractMidAgentCallback {
 
         /**
          * Constructor
-         *
-         * @param identifier the {@link Mediator} that will be used
-         *                   by the AbstractSnaAgentCallback to instantiate
          */
         protected AgentCallback() {
-            super(false);
+            super(false, true);
         }
+
 
         /**
          * @inheritDoc
-         * @see MessageRegisterer#register(SnaMessage)
+         * 
+         * @see org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback#doCallback(org.eclipse.sensinact.gateway.core.message.SnaMessage)
          */
         @Override
         public void doCallback(SnaMessage<?> message) throws MidCallbackException {
@@ -94,33 +86,12 @@ public class MidOSGiTestExtended extends MidOSGiTest {
                 }
             }
             try {
-                treat(message);
-
+            	String json = message.getJSON();
+            	synchronized(MidOSGiTestExtended.this.stack) {
+            		stack.push(json);
+            	}
             } catch (Exception e) {
                 throw new MidCallbackException(e);
-            }
-        }
-
-        @Override
-        public void doHandle(SnaLifecycleMessageImpl message) {
-        }
-
-        @Override
-        public void doHandle(SnaUpdateMessageImpl message) {
-        }
-
-        @Override
-        public void doHandle(SnaErrorMessageImpl message) {
-        }
-
-        @Override
-        public void doHandle(SnaResponseMessage<?, ?> message) {
-        }
-
-        private final void treat(SnaMessage<?> message) { 
-        	String json = message.getJSON();
-           synchronized(MidOSGiTestExtended.this.stack) {
-            	stack.push(json);
             }
         }
     }

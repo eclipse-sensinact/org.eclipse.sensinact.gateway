@@ -68,10 +68,10 @@
     <methods>
 	    <method type="ACT">	    
 	    	<parameter name="speed" type="int">
-	    		<contraints>
+	    		<constraints>
 	    			<minInclusive value="0"/>
 	    			<maxInclusive value="10"/>
-	    		</contraints>
+	    		</constraints>
 	    	</parameter>
 	    	<references>
 	    		<reference reference="SPEED" passOn="true" xsi:type="copyReference" index="0"/>
