@@ -1,6 +1,7 @@
 <!-- This is a basic html in order to test websocket communication -->
 <html>
 <script>
+
  this.serverAddr=document.URL.replace(/http[s]{0,1}:\/\//i, "").replace(/\/.*/i, "");
  ws= new WebSocket("ws"+(document.URL.indexOf("https")>-1?"s":"")+"://"+this.serverAddr+"/ws");
  ws.onopen = function(evt) {
@@ -8,6 +9,7 @@
 	 state.innerHTML="CONNECTED";
 	 ws.send("{\"uri\":\"sensinact/SUBSCRIBE\",\"rid\":\"webapp\",\"parameters\":[{\"name\":\"sender\",\"type\":\"string\",\"value\":\"/.*\"},{\"name\":\"pattern\",\"type\":\"boolean\",\"value\":true},{\"name\":\"complement\",\"type\":\"boolean\",\"value\":false},{\"name\":\"types\",\"type\":\"array\",\"value\":[\"UPDATE\",\"LIFECYCLE\"]}]}")
  };
+
  ws.onmessage = function(evt) {
 	 console.log( "Received Message: " + evt.data);
 
@@ -19,12 +21,14 @@ try{
 
 	 var nodeUpdated=document.createElement("div");
 	 nodeUpdated.id=json.messages[0].uri;
-	 var nodeNew = document.createTextNode(json.messages[0].uri +" => "+json.messages[0].notification.value);
-	 nodeUpdated.appendChild(nodeNew);
-	 if(node != null){
-		 document.body.replaceChild(nodeUpdated,node);
-	 }else {
-		 document.body.appendChild(nodeUpdated);
+	 if(typeof(json.messages[0].notification.value) != "undefined"){
+         var nodeNew = document.createTextNode(json.messages[0].uri +" => "+json.messages[0].notification.value);
+         nodeUpdated.appendChild(nodeNew);
+         if(node != null){
+             document.body.replaceChild(nodeUpdated,node);
+         }else {
+             document.body.appendChild(nodeUpdated);
+         }
 	 }
 
 }catch(error){
@@ -46,9 +50,9 @@ console.log(error);
 </script>
 <body>
 <t1>debug info</t1>
-<div>Websocket Status:<div id="state"></div><div>
+<div>Websocket Status:<div id="state"/></div>
 <div>Sensor values:</div>
-<div id="sensors"/><div>
+<div id="sensors"/></div>
 </body>
 </html>
 
