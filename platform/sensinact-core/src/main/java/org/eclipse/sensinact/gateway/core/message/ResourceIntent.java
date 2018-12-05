@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.core.message;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -190,7 +189,7 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 			throw new NullPointerException("Nothing to observed");
 		}
 		this.mediator = mediator;
-		this.accessibility = Collections.synchronizedMap(new HashMap<ResolvedPath,Boolean>());
+		this.accessibility = new HashMap<ResolvedPath,Boolean>();
 		this.filters = new HashMap<String,String>();
 		int length = resourcePath.length;
 		boolean pattern = length > 1;
@@ -265,23 +264,21 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 		this.setAccessible(accessibleAll);
 	}
 
-	private void setAccessible (final boolean accessible) {
-		synchronized(this) {
-			if((this.accessible && accessible) || (!this.accessible && !accessible)) {
-				return;
-			}
-			this.accessible = accessible;
-			executor.execute(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						ResourceIntent.this.onAccessible.execute(accessible);
-					} catch (Exception e) {
-						ResourceIntent.this.mediator.error(e);
-					}
-				}
-			});
+	private synchronized void setAccessible (final boolean accessible) {
+		if((this.accessible && accessible) || (!this.accessible && !accessible)) {
+			return;
 		}
+		this.accessible = accessible;
+		executor.execute(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					ResourceIntent.this.onAccessible.execute(accessible);
+				} catch (Exception e) {
+					ResourceIntent.this.mediator.error(e);
+				}
+			}
+		});
 	}
 	
 	private boolean setAccessible(String path, boolean accessible) {
@@ -347,22 +344,23 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 				if(!this.filters.containsKey(namespace)) {
 					return;
 				}
+				ResolvedPath[] paths = null;
 				synchronized(this.accessibility) {
-					ResolvedPath[] paths = this.accessibility.keySet().toArray(new ResolvedPath[this.filters.size()]);					
-					for(ResolvedPath path:paths) {						
-						if(!namespace.equals(path.getNamespace().getName())) {
-							continue;
-						}
-						switch(((SnaRemoteMessage.Remote)message.getType())) {
-							case CONNECTED:
-								setAccessible(path.getName(), this.isAccessible(path.getName()));
-								break;
-							case DISCONNECTED:
-								setAccessible(path.getName(), false);
-								break;
-							default:
-								break;
-						}
+					paths = this.accessibility.keySet().toArray(new ResolvedPath[this.filters.size()]);					
+				}
+				for(ResolvedPath path:paths) {						
+					if(!namespace.equals(path.getNamespace().getName())) {
+						continue;
+					}
+					switch(((SnaRemoteMessage.Remote)message.getType())) {
+						case CONNECTED:
+							setAccessible(path.getName(), this.isAccessible(path.getName()));
+							break;
+						case DISCONNECTED:
+							setAccessible(path.getName(), false);
+							break;
+						default:
+							break;
 					}
 				}
 				setAccessible();
@@ -438,18 +436,16 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 	public void start() {
 		Dictionary properties = new Hashtable();
 		properties.put("org.eclipse.sensinact.gateway.agent.id", this.identifier); 
-		synchronized(this){
-			try {
-					this.registration = this.mediator.getContext().registerService(
-					new String[] {SnaAgent.class.getName(),LocalAgent.class.getName()},
-					this, properties);
-					registerRemote();
-			} catch (IllegalStateException e) {
-				this.mediator.error("The agent is not registered ", e);
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
-		}	
+		try {
+				this.registration = this.mediator.getContext().registerService(
+				new String[] {SnaAgent.class.getName(),LocalAgent.class.getName()},
+				this, properties);
+				registerRemote();
+		} catch (IllegalStateException e) {
+			this.mediator.error("The agent is not registered ", e);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 		synchronized(this.accessibility) {
 			Iterator<Map.Entry<ResolvedPath,Boolean>> iterator = this.accessibility.entrySet().iterator();			
 			while(iterator.hasNext()) {
@@ -488,14 +484,12 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 				}
 			});
 		}
-		synchronized(this) {
-			if (this.registration != null) {
-				try {
-					this.registration.unregister();
-					this.registration = null;
-				} catch (IllegalStateException e) {
-					this.mediator.error(e);
-				}
+		if (this.registration != null) {
+			try {
+				this.registration.unregister();
+				this.registration = null;
+			} catch (IllegalStateException e) {
+				this.mediator.error(e);
 			}
 		}
 	}

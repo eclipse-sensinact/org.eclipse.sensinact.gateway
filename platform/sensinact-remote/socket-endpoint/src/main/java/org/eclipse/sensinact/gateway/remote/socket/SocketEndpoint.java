@@ -23,7 +23,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -167,17 +166,18 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
                         }
                         break;
                     case "accessible":
-                        if (subUriELements.length != 2) {
-                            break;
-                        }
-                        JSONArray array = new JSONArray(subUriELements[1]);                        
-                        StringBuilder builder = new StringBuilder();
-                        for(int i=0;i<array.length();i++) {
-                        	builder.append(UriUtils.ROOT);
-                        	builder.append(array.getString(i));
-                        }
-                        boolean accessible = super.remoteCore.isAccessible(publicKey, builder.toString());
-                        response = String.valueOf(accessible);
+	                        if (subUriELements.length != 2) {
+	                            break;
+	                        }
+	                        String els = subUriELements[1].substring(subUriELements[1].indexOf('[')+1, subUriELements[1].lastIndexOf(']'));                        
+	                        String[] array = els.split(",");
+	                        StringBuilder builder = new StringBuilder();
+	                        for(int i=0;i<array.length;i++) {
+	                        	builder.append(UriUtils.PATH_SEPARATOR);
+	                        	builder.append(array[i]);
+	                        }
+	                        boolean accessible = super.remoteCore.isAccessible(publicKey, builder.toString());
+	                        response = String.valueOf(accessible);
                         break;
                     case "session":
                         super.remoteCore.closeSession(publicKey);
@@ -679,9 +679,20 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 		if (!super.getConnected()) {
             return false;
         }
+		String[] elements = UriUtils.getUriElements(path);
+		StringBuilder builder = new StringBuilder();
+		builder.append("[");
+		for(int i=0;i<elements.length;i++) {
+			if(i>0) {
+				builder.append(",");
+			}
+			builder.append(elements[i]);
+		}
+		builder.append("]");
         String response = this.client.request(new JSONObject(
-        	).put("uri", String.format("/accessible?path=%s",Arrays.toString(UriUtils.getUriElements(path)))
+        	).put("uri", String.format("/accessible?path=%s",builder.toString())
         	).put("pkey", publicKey));
+        
         if (response != null) {
             mediator.debug(response);
         }

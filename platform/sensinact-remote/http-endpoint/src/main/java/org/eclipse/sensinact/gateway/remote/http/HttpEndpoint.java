@@ -16,7 +16,6 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Timer;
@@ -218,11 +217,12 @@ public class HttpEndpoint extends AbstractRemoteEndpoint {
                         if (subUriELements.length != 2) {
                             break;
                         }
-                        JSONArray array = new JSONArray(subUriELements[1]);                        
+                        String els = subUriELements[1].substring(subUriELements[1].indexOf('[')+1, subUriELements[1].lastIndexOf(']'));                        
+                        String[] array = els.split(",");
                         StringBuilder builder = new StringBuilder();
-                        for(int i=0;i<array.length();i++) {
-                        	builder.append(UriUtils.ROOT);
-                        	builder.append(array.getString(i));
+                        for(int i=0;i<array.length;i++) {
+                        	builder.append(UriUtils.PATH_SEPARATOR);
+                        	builder.append(array[i]);
                         }
                         boolean accessible = super.remoteCore.isAccessible(publicKey, builder.toString());
                         response = String.valueOf(accessible);
@@ -761,6 +761,7 @@ public class HttpEndpoint extends AbstractRemoteEndpoint {
         }
         return response;
     }
+    
     /**
 	 * @inheritDoc
 	 *
@@ -770,9 +771,20 @@ public class HttpEndpoint extends AbstractRemoteEndpoint {
 		if (!super.getConnected()) {
             return false;
         }
+		String[] elements = UriUtils.getUriElements(path);
+		StringBuilder builder = new StringBuilder();
+		builder.append("[");
+		for(int i=0;i<elements.length;i++) {
+			if(i>0) {
+				builder.append(",");
+			}
+			builder.append(elements[i]);
+		}
+		builder.append("]");
         String response = this.outgoingRequest(new JSONObject(
-        	).put("uri", String.format("/accessible?path=%s",Arrays.toString(UriUtils.getUriElements(path)))
+        	).put("uri", String.format("/accessible?path=%s",builder.toString())
         	).put("pkey", publicKey));
+        
         if (response != null) {
             mediator.debug(response);
         }

@@ -128,6 +128,44 @@ public class TestResourceIntent<R extends ModelInstance> {
 		assertEquals(1, countOn.get());
 		assertEquals(1, countOff.get());
 	}
+	
+
+	@Test
+	public void testTwoIntentsResourcesAppearing() throws Exception {
+		ServiceImpl service1 = this.testContext.getModelInstance().getRootElement().addService("testService");
+		ResourceImpl r1impl = service1.addDataResource(PropertyResource.class, "TestProperty", String.class, "hello");
+		ServiceImpl service2 = this.testContext.getModelInstance().getRootElement().addService("tostService");
+		
+		Thread.sleep(1000);
+		String intentId = this.testContext.getSensiNact().registerIntent(
+			this.testContext.getMediator(), new Executable<Boolean,Void>(){
+				@Override
+				public Void execute(Boolean parameter) throws Exception {
+					if(parameter.booleanValue()) {
+						countOn.incrementAndGet();
+					} else {
+						countOff.incrementAndGet();
+					}
+					return null;
+				}}, 
+			"/serviceProvider/tostService/TestProperty",
+			"/serviceProvider/testService/TestProperty");
+		Thread.sleep(1000);
+		assertEquals(0, countOn.get());
+		assertEquals(0, countOff.get());		
+		ResourceImpl r2impl = service2.addDataResource(PropertyResource.class, "TestProperty", String.class, "hello");
+		Thread.sleep(1000);
+		assertEquals(1, countOn.get());
+		assertEquals(0, countOff.get());		
+		ResourceImpl  deleted  = service1.removeResource("TestProperty");
+		Thread.sleep(1000);
+		assertEquals(1, countOn.get());
+		assertEquals(1, countOff.get());
+		deleted  = service2.removeResource("TestProperty");
+		Thread.sleep(1000);
+		assertEquals(1, countOn.get());
+		assertEquals(1, countOff.get());
+	}
 
 
 }

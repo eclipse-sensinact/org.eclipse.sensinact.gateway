@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
@@ -34,6 +35,7 @@ import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
 import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.eclipse.sensinact.gateway.test.MidProxy;
@@ -96,6 +98,22 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         }
     }
 
+    class IntentExecutable implements Executable<Boolean,Void>{
+		@Override
+		public Void execute(Boolean accessible) throws Exception {
+			if(accessible.booleanValue()) {
+				synchronized(MidOSGiTestExtended.this.countOn) {
+					MidOSGiTestExtended.this.countOn.incrementAndGet();
+				}
+			} else {
+				synchronized(MidOSGiTestExtended.this.countOff) {
+					MidOSGiTestExtended.this.countOff.incrementAndGet();
+				}
+			}
+			return null;
+		}
+    }
+
     //********************************************************************//
     //						ABSTRACT DECLARATIONS						  //
     //********************************************************************//
@@ -106,6 +124,8 @@ public class MidOSGiTestExtended extends MidOSGiTest {
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
     private int count;
+    private AtomicInteger countOn;
+    private AtomicInteger countOff;
     private File confDir;
 
     private final Stack<String> stack = new Stack<>();
@@ -117,6 +137,8 @@ public class MidOSGiTestExtended extends MidOSGiTest {
     public MidOSGiTestExtended(int count) throws Exception {
         super();
         this.count = count;
+        this.countOn = new AtomicInteger(0);
+        this.countOff = new AtomicInteger(0);
         super.cacheDir.delete();
         cacheDir = new File(felixDir, String.format("felix-cache%s", count));
         if (!cacheDir.exists()) {
@@ -371,6 +393,7 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         MidProxy<Session> mids = (MidProxy<Session>) Proxy.getInvocationHandler(s);
         Object o = mids.toOSGi(Session.class.getMethod("registerSessionAgent", new Class<?>[]{MidAgentCallback.class, SnaFilter.class}), new Object[]{new AgentCallback(), null});
         Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
+        System.out.println(j);
     }
 
     public void cleanAgent() throws Throwable {
@@ -378,6 +401,19 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         	this.stack.clear();
         }
     }
+
+    public void registerIntent(String...path) throws Throwable {
+        MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
+        Core core = mid.buildProxy();
+        s = core.getAnonymousSession();
+
+        MidProxy<Session> mids = (MidProxy<Session>) Proxy.getInvocationHandler(s);
+        Object o = mids.toOSGi(Session.class.getMethod("registerSessionIntent", new Class<?>[]{Executable.class, String[].class}), 
+        	new Object[]{new IntentExecutable(), path});
+        Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
+        System.out.println(j);
+    }
+
     
     public void stop() throws Throwable {
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
@@ -393,5 +429,21 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         	messages.addAll(this.stack);
         }
         return Collections.unmodifiableList(messages);
+    }
+
+    public int getCountOn() {
+    	int count = 0;
+		synchronized(this.countOn) {
+			count = this.countOn.get();
+		}
+        return count;
+    }
+    
+    public int getCountOff() {
+    	int count = 0;
+		synchronized(this.countOff) {
+			count = this.countOff.get();
+		}
+        return count;
     }
 }
