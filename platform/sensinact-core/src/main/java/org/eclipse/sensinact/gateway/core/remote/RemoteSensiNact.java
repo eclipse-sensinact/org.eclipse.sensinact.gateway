@@ -577,9 +577,10 @@ public class RemoteSensiNact implements RemoteCore {
 		AccessController.<Void>doPrivileged(new PrivilegedAction<Void>() {
 			@Override
 			public Void run() {
-			return RemoteSensiNact.this.mediator.callService(SnaAgent.class,
+			    RemoteSensiNact.this.mediator.callServices(SnaAgent.class,
 				new StringBuilder().append("(org.eclipse.sensinact.gateway.agent.id="
 				).append(agentId).append(")").toString(), executable);
+			    return null;
 			}
 		});
 	}

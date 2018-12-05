@@ -216,7 +216,7 @@ public class SensiNact implements Core {
 					new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, getSessionId()));
 			final ResourceIntent intent = new ResourceIntent(mediator, sessionKey.getPublicKey(), callback, resourcePath) {
 				@Override
-				public boolean isAccessible(String path) {					
+				public boolean isAccessible(String path) {	
 					return SensiNactSession.this.isAccessible(path);
 				}
 
@@ -929,7 +929,8 @@ public class SensiNact implements Core {
 		 * </ul>
 		 */
 		private final boolean isAccessible(final String path) {
-			final SessionKey sessionKey = SensiNact.this.sessions.get(this);
+			final SessionKey sessionKey = SensiNact.this.sessions.get(new KeyExtractor<KeyExtractorType>(
+					KeyExtractorType.TOKEN, this.getSessionId()));
 			Boolean exists = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
 				@Override
 				public Boolean run() {
@@ -1247,7 +1248,7 @@ public class SensiNact implements Core {
 			String serviceName = uriElements.length>1?uriElements[1]:null;
 			String resourceName = uriElements.length>2?uriElements[2]:null;
 			
-			String filter = new StringBuilder().append("&((name=").append(providerName
+			String filter = new StringBuilder().append("(&(name=").append(providerName
 					).append(")(lifecycle.status=ACTIVE))").toString();
 			
 			Collection<ServiceReference<SensiNactResourceModel>> references = 
@@ -1256,12 +1257,12 @@ public class SensiNact implements Core {
 				return false;
 			}
 			ServiceReference<SensiNactResourceModel> reference = references.iterator().next();
-
+			
 			AccessMethod.Type describe = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
 			AccessNode node = tree.getRoot();
 			
 			int index = 0;
-			String pa = UriUtils.ROOT;
+			String pa = null;
 			String key = null;
 			
 			Integer inheritedObjectDescribeLevel = Integer.valueOf(
@@ -1270,7 +1271,7 @@ public class SensiNact implements Core {
 			while(true) {
 				switch(index) {
 				case 0:
-					pa = UriUtils.getUri(new String[] {pa,providerName});
+					pa = UriUtils.getUri(new String[] {providerName});
 					key = providerName.concat(".DESCRIBE");
 					break;
 				case 1:	
@@ -1307,7 +1308,7 @@ public class SensiNact implements Core {
 				if (node.getAccessLevelOption(describe).getAccessLevel().getLevel() < inheritedObjectDescribeLevel.intValue()) {
 					return false;
 				}
-				if(++index == uriElements.length) {
+				if(++index == uriElements.length) {					
 					return true;
 				}
 			}			
@@ -1318,7 +1319,6 @@ public class SensiNact implements Core {
 			String prefix = resolveNamespace
 					? new StringBuilder().append(SensiNact.this.namespace()).append(":").toString()
 					: "";
-
 			int index = -1;
 
 			Collection<ServiceReference<SensiNactResourceModel>> references = RegistryEndpoint.this
@@ -2183,9 +2183,7 @@ public class SensiNact implements Core {
 	protected boolean isAccessible(final String publicKey, AccessTree<?> tree , final String path) {
 		String[] uriElements = UriUtils.getUriElements(path);
 		String[] providerElements = uriElements[0].split(":");
-		
 		String namespace = providerElements.length>1?providerElements[0]:null;
-
 		if(namespace != null && !namespace.equals(SensiNact.this.namespace())) {
 			Boolean exists = mediator.callService(RemoteCore.class, new StringBuilder().append(
 				"(namespace=").append(namespace).append(")").toString(), new Executable<RemoteCore,Boolean>(){

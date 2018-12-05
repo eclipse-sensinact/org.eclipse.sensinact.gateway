@@ -71,12 +71,21 @@ public class HttpEndpointManagerTest {
     public void httpEndpointManagerTest() throws Throwable {
         
         for (int n = 1; n <= INSTANCES_COUNT; n++) {
-            MidOSGiTestExtended t = new MidOSGiTestExtended(n);
-            instances.add(t);
-            t.init();
-            if (n == 3) {
-                t.registerAgent();
-            }
+        	 MidOSGiTestExtended t = new MidOSGiTestExtended(n);
+             instances.add(t);
+             t.init();
+             switch(n) {
+             case 1:
+                 Thread.sleep(2 * 1000);
+                 t.registerIntent("/sna1:slider/cursor/position", "/sna2:slider/cursor/position", "/sna3:slider/cursor/position");
+                 break;
+             case 2:
+             	break;
+             case 3:
+                 t.registerAgent();
+             default:
+                 break;
+             }
         }
         for (int n = 1; n <= INSTANCES_COUNT; n++) {
             Thread.sleep(2 * 1000);
@@ -91,12 +100,14 @@ public class HttpEndpointManagerTest {
             IOUtils.write(contentPlus, output);
         }
         Thread.sleep(20 * 1000);
+
+        assertEquals(1, instances.get(0).getCountOn());
+        assertEquals(0, instances.get(0).getCountOff());
         String s = instances.get(0).providers();
-        System.out.println(s);
 
         JSONObject j = new JSONObject(s);
         JSONAssert.assertEquals(new JSONArray("[\"slider\",\"light\",\"sna3:slider\",\"sna3:light\",\"sna2:slider\",\"sna2:light\"]"), j.getJSONArray("providers"), false);
-
+   
         instances.get(1).moveSlider(0);
         s = instances.get(0).get("sna2:slider", "cursor", "position");
         j = new JSONObject(s);
@@ -138,21 +149,23 @@ public class HttpEndpointManagerTest {
         j = new JSONObject(s);
         JSONAssert.assertEquals(new JSONArray("[\"slider\",\"light\",\"sna2:slider\",\"sna2:light\"]"), j.getJSONArray("providers"), false);
 
+        
         //check that the agent is unregistered
         instances.get(1).moveSlider(375);
         s = instances.get(0).get("sna2:slider", "cursor", "position");
 
         j = new JSONObject(s);
         assertEquals(375, j.getJSONObject("response").getInt("value"));
-
-        Thread.sleep(10000);
         assertEquals(0,waitUpdated(0,2));
         
         File f = new File(String.format("target/felix/conf%s/http.endpoint.sample.config", 3));
 
         f.delete();
         Thread.sleep(3000);
-        instances.get(2).cleanAgent();
+
+        assertEquals(1, instances.get(0).getCountOn());
+        assertEquals(1, instances.get(0).getCountOff());
+        
         //now lets try to reconnect
         FileInputStream input = new FileInputStream(new File(String.format("src/test/resources/conf%s/http.endpoint.sample.cfg", 3)));
 
@@ -166,6 +179,9 @@ public class HttpEndpointManagerTest {
         IOUtils.write(contentPlus, output);
         Thread.sleep(20 * 1000);
 
+        assertEquals(2, instances.get(0).getCountOn());
+        assertEquals(1, instances.get(0).getCountOff());
+        
         s = instances.get(0).providers();
         System.out.println(s);
 
@@ -173,7 +189,7 @@ public class HttpEndpointManagerTest {
         JSONAssert.assertEquals(new JSONArray("[\"slider\",\"light\",\"sna2:slider\",\"sna2:light\",\"sna3:slider\",\"sna3:light\"]"), j.getJSONArray("providers"), false);
         instances.get(1).moveSlider(350);
         s = instances.get(0).get("sna2:slider", "cursor", "position");
-
+        
         j = new JSONObject(s);
         assertEquals(350, j.getJSONObject("response").getInt("value"));
 

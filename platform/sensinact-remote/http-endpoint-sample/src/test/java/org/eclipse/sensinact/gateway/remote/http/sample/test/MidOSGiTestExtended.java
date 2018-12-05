@@ -10,32 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.remote.http.sample.test;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.Core;
-import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.SensiNact;
-import org.eclipse.sensinact.gateway.core.Session;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.MessageRegisterer;
-import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaRemoteMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
-import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
-import org.eclipse.sensinact.gateway.test.MidOSGiTest;
-import org.eclipse.sensinact.gateway.test.MidProxy;
-import org.json.JSONArray;
-import org.junit.Assert;
-import org.junit.Before;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -44,12 +18,34 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.security.AllPermission;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.core.Core;
+import org.eclipse.sensinact.gateway.core.DataResource;
+import org.eclipse.sensinact.gateway.core.SensiNact;
+import org.eclipse.sensinact.gateway.core.Session;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MessageRegisterer;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
+import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
+import org.eclipse.sensinact.gateway.test.MidOSGiTest;
+import org.eclipse.sensinact.gateway.test.MidProxy;
+import org.json.JSONArray;
+import org.junit.Assert;
+import org.junit.Before;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -110,6 +106,23 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         }
     }
 
+
+    class IntentExecutable implements Executable<Boolean,Void>{
+		@Override
+		public Void execute(Boolean accessible) throws Exception {
+			if(accessible.booleanValue()) {
+				synchronized(MidOSGiTestExtended.this.countOn) {
+					MidOSGiTestExtended.this.countOn.incrementAndGet();
+				}
+			} else {
+				synchronized(MidOSGiTestExtended.this.countOff) {
+					MidOSGiTestExtended.this.countOff.incrementAndGet();
+				}
+			}
+			return null;
+		}
+    }
+
     //********************************************************************//
     //						ABSTRACT DECLARATIONS						  //
     //********************************************************************//
@@ -120,6 +133,8 @@ public class MidOSGiTestExtended extends MidOSGiTest {
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
     private int count;
+    private AtomicInteger countOn;
+    private AtomicInteger countOff;
     private File confDir;
 
     private final Stack<String> stack = new Stack<>();
@@ -131,6 +146,8 @@ public class MidOSGiTestExtended extends MidOSGiTest {
     public MidOSGiTestExtended(int count) throws Exception {
         super();
         this.count = count;
+        this.countOn = new AtomicInteger(0);
+        this.countOff = new AtomicInteger(0);
         super.cacheDir.delete();
         cacheDir = new File(felixDir, String.format("felix-cache%s", count));
         if (!cacheDir.exists()) {
@@ -415,7 +432,19 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         	this.stack.clear();
         }
     }
-    
+
+    public void registerIntent(String...path) throws Throwable {
+        MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
+        Core core = mid.buildProxy();
+        s = core.getAnonymousSession();
+
+        MidProxy<Session> mids = (MidProxy<Session>) Proxy.getInvocationHandler(s);
+        Object o = mids.toOSGi(Session.class.getMethod("registerSessionIntent", new Class<?>[]{Executable.class, String[].class}), 
+        	new Object[]{new IntentExecutable(), path});
+        Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
+        System.out.println(j);
+    }
+
     public void stop() throws Throwable {
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
         Core core = mid.buildProxy();
@@ -430,5 +459,21 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         	messages.addAll(this.stack);
         }
         return Collections.unmodifiableList(messages);
+    }
+
+    public int getCountOn() {
+    	int count = 0;
+		synchronized(this.countOn) {
+			count = this.countOn.get();
+		}
+        return count;
+    }
+
+    public int getCountOff() {
+    	int count = 0;
+		synchronized(this.countOff) {
+			count = this.countOff.get();
+		}
+        return count;
     }
 }

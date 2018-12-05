@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.core.message;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -24,13 +25,14 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.remote.RemoteCore;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler;
 import org.osgi.framework.ServiceRegistration;
 
 /**
  * A ResourceIntent provides a way to trigger a specific process when 
  * some {@link Resource}(s) become(s) available or unavailable
  */
-public abstract class ResourceIntent implements LocalAgent,Nameable {
+public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessage<?>>  implements LocalAgent,Nameable {
 	
 	private class Namespace implements Nameable {
 		
@@ -85,7 +87,7 @@ public abstract class ResourceIntent implements LocalAgent,Nameable {
 					this.namespace = new Namespace(LOCAL_NAMESPACE);
 					this.path = UriUtils.getUri(new String[]{providerElements[1],
 						UriUtils.getUri(Arrays.copyOfRange(uriElements, 1, 
-								uriElements.length-1))});
+								uriElements.length))});
 				} else {
 					this.namespace = new Namespace(providerElements[0]);
 					this.path = path;
@@ -183,12 +185,12 @@ public abstract class ResourceIntent implements LocalAgent,Nameable {
 	 */
 	public ResourceIntent(Mediator mediator, String publicKey, Executable<Boolean,Void> onAccessible, 
 		String... resourcePath) {
-		
+		super();
 		if(resourcePath == null ||resourcePath.length==0) {
 			throw new NullPointerException("Nothing to observed");
 		}
 		this.mediator = mediator;
-		this.accessibility = new HashMap<ResolvedPath,Boolean>();
+		this.accessibility = Collections.synchronizedMap(new HashMap<ResolvedPath,Boolean>());
 		this.filters = new HashMap<String,String>();
 		int length = resourcePath.length;
 		boolean pattern = length > 1;
@@ -246,14 +248,13 @@ public abstract class ResourceIntent implements LocalAgent,Nameable {
 		this.publicKey = publicKey;
 		this.onAccessible = onAccessible;		
 		executor = Executors.newCachedThreadPool();
-		
 	}
 	
 	public String getCommonPath() {
 		return this.commonPath;
 	}
 	
-	private void checkAccessible() {
+	private void setAccessible() {
 		boolean accessibleAll = true;		
 		synchronized(this.accessibility) {
 			Iterator<Boolean> iterator = this.accessibility.values().iterator();			
@@ -262,22 +263,6 @@ public abstract class ResourceIntent implements LocalAgent,Nameable {
 			}
 		}
 		this.setAccessible(accessibleAll);
-	}
-	
-	private boolean setAccessible(String path, boolean accessible) {
-		synchronized(this.accessibility) {
-			this.accessibility.put(new ResolvedPath(path), accessible);		
-			if(!accessible){
-				return false;
-			}
-			Iterator<Boolean> iterator = this.accessibility.values().iterator();
-			while(iterator.hasNext()) {
-				if(!iterator.next().booleanValue()) {
-					return false;
-				}
-			}
-		}
-		return true;
 	}
 
 	private void setAccessible (final boolean accessible) {
@@ -298,19 +283,45 @@ public abstract class ResourceIntent implements LocalAgent,Nameable {
 			});
 		}
 	}
+	
+	private boolean setAccessible(String path, boolean accessible) {
+		synchronized(this.accessibility) {
+			this.accessibility.put(new ResolvedPath(path), accessible);		
+			if(!accessible){
+				return false;
+			}
+			Iterator<Boolean> iterator = this.accessibility.values().iterator();
+			while(iterator.hasNext()) {
+				if(!iterator.next().booleanValue()) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
 	/**
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.MessageRegisterer#
-	 * register(org.eclipse.sensinact.gateway.core.message.SnaMessage)
+	 * @see org.eclipse.sensinact.gateway.core.message.MessageRegisterer#register(org.eclipse.sensinact.gateway.core.message.SnaMessage)
 	 */
 	@Override
 	public void register(final SnaMessage<?> message) {
-		if(!this.filter.matches(message)) {
-			return;
-		}
+		super.eventEngine.push(message);
+	}
+	
+	/**
+	 * @inheritDoc
+	 * 
+	 * @see org.eclipse.sensinact.gateway.util.stack.StackEngineHandler#doHandle(java.lang.Object)
+	 */
+	@Override
+	public void doHandle(final SnaMessage<?> message) {
 		switch(((SnaMessageSubType)message.getType()).getSnaMessageType()){		
 			case LIFECYCLE:
+				if(!this.filter.matches(message)) {
+					return;
+				}
 				switch(((SnaLifecycleMessage.Lifecycle)message.getType())) {				
 					case RESOURCE_APPEARING:
 							setAccessible(setAccessible(message.getPath(),true));
@@ -333,7 +344,7 @@ public abstract class ResourceIntent implements LocalAgent,Nameable {
 				String namespace = ((SnaNotificationMessageImpl<?>)message
 					).getNotification(String.class, SnaConstants.NAMESPACE);
 				
-				if(!this.filters.keySet().contains(namespace())) {
+				if(!this.filters.containsKey(namespace)) {
 					return;
 				}
 				synchronized(this.accessibility) {
@@ -344,17 +355,17 @@ public abstract class ResourceIntent implements LocalAgent,Nameable {
 						}
 						switch(((SnaRemoteMessage.Remote)message.getType())) {
 							case CONNECTED:
-								this.accessibility.put(path, this.isAccessible(path.getName()));
+								setAccessible(path.getName(), this.isAccessible(path.getName()));
 								break;
 							case DISCONNECTED:
-								this.accessibility.put(path, false);
+								setAccessible(path.getName(), false);
 								break;
 							default:
 								break;
 						}
 					}
 				}
-				checkAccessible();
+				setAccessible();
 				break;
 			case RESPONSE:
 			case UPDATE:
@@ -430,21 +441,24 @@ public abstract class ResourceIntent implements LocalAgent,Nameable {
 		synchronized(this){
 			try {
 					this.registration = this.mediator.getContext().registerService(
-						new String[] {SnaAgent.class.getName(),LocalAgent.class.getName()},
-						this, properties);
+					new String[] {SnaAgent.class.getName(),LocalAgent.class.getName()},
+					this, properties);
 					registerRemote();
 			} catch (IllegalStateException e) {
 				this.mediator.error("The agent is not registered ", e);
+			} catch(Exception e) {
+				e.printStackTrace();
 			}
 		}	
 		synchronized(this.accessibility) {
 			Iterator<Map.Entry<ResolvedPath,Boolean>> iterator = this.accessibility.entrySet().iterator();			
 			while(iterator.hasNext()) {
 				Map.Entry<ResolvedPath,Boolean> entry = iterator.next();
-				entry.setValue(this.isAccessible(entry.getKey().getName()));
+				boolean acc = this.isAccessible(entry.getKey().getName());
+				entry.setValue(acc);
 			}
 		}
-		checkAccessible();
+		setAccessible();
 	}
  	
 	/**
@@ -454,6 +468,7 @@ public abstract class ResourceIntent implements LocalAgent,Nameable {
 	 */
 	@Override
 	public void stop() {
+		super.stop();
 		if(this.filters.size() > 0) {
 			StringBuilder filterBuilder = new StringBuilder();
 			Iterator<String> iterator = this.filters.keySet().iterator();

@@ -233,10 +233,10 @@ public abstract class AbstractSession implements Session {
 	 * @inheritDoc
 	 *
 	 * @see org.eclipse.sensinact.gateway.core.Session#
-	 * registerSessionIntent(org.eclipse.sensinact.gateway.common.execution.Executable,java.lang.String)
+	 * registerSessionIntent(org.eclipse.sensinact.gateway.common.execution.Executable, java.lang.String[])
 	 */
 	@Override
-	public SubscribeResponse registerSessionIntent(Executable<Boolean,Void> callback, String resourcePath) {
+	public SubscribeResponse registerSessionIntent(Executable<Boolean,Void> callback, String... resourcePath) {
 		return registerSessionIntent(null, callback, resourcePath);
 	}
 

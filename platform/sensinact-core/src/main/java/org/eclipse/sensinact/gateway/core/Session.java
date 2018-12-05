@@ -486,7 +486,7 @@ public interface Session {
 	 * @param requestId the String identifier of the request, to be reported into the response
 	 * @param callback the {@link Executable} to be executing when the availability status 
 	 * of the specified target changes
-	 * @param resourcePath the String path of the targeted {@link Resource} 
+	 * @param resourcePath the array of String paths of the targeted {@link Resource}s
 	 * 
 	 * @return the JSON formated result of the {@link ResourceIntent} registration,
 	 * tagged by the specified request identifier, and wrapped into an {@link SubscribeResponse}.
@@ -514,12 +514,12 @@ public interface Session {
 	 * 
 	 * @param callback the {@link Executable} to be executing when the availability status 
 	 * of the specified target changes
-	 * @param resourcePath the String path of the targeted {@link Resource} 
+	 * @param resourcePath the array of String paths of the targeted {@link Resource}s 
 	 * 
 	 * @return the JSON formated result of the {@link ResourceIntent} registration, 
 	 * wrapped into an {@link SubscribeResponse}.
 	 */
-	SubscribeResponse registerSessionIntent(Executable<Boolean, Void> callback, String resourcePath);
+	SubscribeResponse registerSessionIntent(Executable<Boolean, Void> callback, String... resourcePath);
 	
 	/**
 	 * Unregisters the {@link ResourceIntent} attached to this Session and whose String
