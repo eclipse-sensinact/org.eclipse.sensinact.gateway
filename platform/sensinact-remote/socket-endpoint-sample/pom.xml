@@ -101,7 +101,7 @@
 						<configuration>
 							<tasks>								
 			                    <mkdir dir="${project.build.directory}/felix/tmp" />
-								<copy file="../../sensinact-security/sensinact-signature-validator/src/main/resources/keystore.jks"
+								<copy file="../../sensinact-security/cert/keystore.jks"
                                       tofile="${project.build.directory}/felix/bundle/keystore.jks"/>
 							</tasks>
 						</configuration>

@@ -426,7 +426,7 @@
 						<configuration>
 							<tasks>
 								<echo>Copying keystore.jks</echo>
-								<copy file="../../../sensinact-security/sensinact-signature-validator/src/main/resources/keystore.jks"
+								<copy file="../../../sensinact-security/cert/keystore.jks"
 									  tofile="${project.build.directory}/felix/bundle/keystore.jks"/>
 							</tasks>
 						</configuration>
