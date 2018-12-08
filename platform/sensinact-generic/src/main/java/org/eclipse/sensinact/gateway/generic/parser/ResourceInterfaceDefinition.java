@@ -43,11 +43,13 @@ final class ResourceInterfaceDefinition extends XmlModelParsingContext {
      */
     @SuppressWarnings("unchecked")
     void setResourceInterfaceType(String interfaceName) {
-        this.resourceInterfaceType = (Class<? extends Resource>) this.resolveInterfaceType(interfaceName);
-
+        if(interfaceName == null || interfaceName.length()==0) {
+        	return;
+        }
+    	this.resourceInterfaceType = (Class<? extends Resource>) this.resolveInterfaceType(interfaceName);
         if (resourceInterfaceType != null) {
             return;
-        }
+        }        
         try {
             this.resourceInterfaceType = (Class<? extends Resource>) super.mediator.getContext().getBundle().loadClass(interfaceName);
 
@@ -55,25 +57,21 @@ final class ResourceInterfaceDefinition extends XmlModelParsingContext {
                 this.resourceInterfaceType = null;
             }
         } catch (ClassNotFoundException e) {
-            if (super.mediator.isErrorLoggable()) {
-                super.mediator.error(e, e.getMessage());
-            }
+            super.mediator.error(e);
         }
     }
 
     private Class resolveInterfaceType(String interfaceName) {
-        if (XmlResourceConfigHandler.DEFAULT_VARIABLE_POLICY_INTERFACE == interfaceName.intern()) {
-            return XmlResourceConfigHandler.DEFAULT_VARIABLE_INTERFACE;
-        }
-        if (XmlResourceConfigHandler.DEFAULT_SENSOR_POLICY_INTERFACE == interfaceName.intern()) {
-            return XmlResourceConfigHandler.DEFAULT_SENSOR_INTERFACE;
-        }
-        if (XmlResourceConfigHandler.DEFAULT_PROPERTY_POLICY_INTERFACE == interfaceName.intern()) {
-            return XmlResourceConfigHandler.DEFAULT_PROPERTY_INTERFACE;
-        }
-        if (XmlResourceConfigHandler.DEFAULT_ACTION_POLICY_INTERFACE == interfaceName.intern()) {
-            return XmlResourceConfigHandler.DEFAULT_ACTION_INTERFACE;
-        }
+		switch(interfaceName) {
+    		case "org.eclipse.sensinact.gateway.core.StateVariableResource" :
+    			return XmlResourceConfigHandler.DEFAULT_VARIABLE_INTERFACE;
+    		case "org.eclipse.sensinact.gateway.core.SensorDataResource" :
+    			return XmlResourceConfigHandler.DEFAULT_SENSOR_INTERFACE;
+    		case "org.eclipse.sensinact.gateway.core.PropertyResource":
+    			return XmlResourceConfigHandler.DEFAULT_PROPERTY_INTERFACE;
+    		case "org.eclipse.sensinact.gateway.core.ActionResource":
+    			return XmlResourceConfigHandler.DEFAULT_ACTION_INTERFACE;    		
+	    }
         return null;
     }
 

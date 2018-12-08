@@ -41,6 +41,9 @@ final class ResourceClassDefinition extends XmlModelParsingContext {
      * @param className the extended {@link ResourceImpl} type name
      */
     void setResourceClassType(String className) {
+    	if(className == null || className.length()==0) {
+    		return;
+    	}
         try {
             this.resourceClassType = (Class<? extends ExtResourceImpl>) 
             		super.mediator.getClassLoader().loadClass(className);
@@ -49,9 +52,7 @@ final class ResourceClassDefinition extends XmlModelParsingContext {
                 this.resourceClassType = null;
             }
         } catch (ClassNotFoundException e) {
-            if (super.mediator.isErrorLoggable()) {
-                super.mediator.error(e, e.getMessage());
-            }
+            super.mediator.error(e);
         }
     }
 
