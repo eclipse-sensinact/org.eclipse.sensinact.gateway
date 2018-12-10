@@ -74,7 +74,6 @@ public class StrictCodeBaseCondition implements Condition {
         if (_sources == null) {
             String[] s = info.getArgs()[0].split("\\\\,");
             _sources = new CodeBaseCondition.CodeBaseSources(Arrays.<String>asList(s), CONDITION_TYPE, STRICT_CODEBASE_SOURCES_TYPE)  {};
-            System.out.println(Arrays.<String>asList(s));
         }
         _sources.check(STRICT_CODEBASE_SOURCES_TYPE);
 
