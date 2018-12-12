@@ -75,15 +75,7 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
         } else {
             LOG.info("Latitude or longitude are null for {}", configFile.getId());
         }
-        try {
-            Resource valueResource = new Resource(serviceInfo);
-            valueResource.setName("value");
-            valueResource.setTopic(configFile.getTopic());
-            valueResource.setProcessor(configFile.getProcessor());
-            serviceInfo.getResources().add(valueResource);
-        } catch (Exception e) {
-            LOG.info("Failed to process info/value received for device {}", configFile.getId());
-        }
+
         if (configFile.getTopicType().equals("smarttopic")) {
             LOG.info("This topic config {} is a SmartTopic", configFile.getId());
             SmartTopic smartTopic = new SmartTopic(this.endpoint, broker, configFile.getTopic());
@@ -93,9 +85,16 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
             }
             smartTopic.activate();
             LOG.info("SmartTopic service started.");
-            provider.setIsDiscoveryOnFirstMessage(true);
-            smartTopicService.put(configFile.getId(), smartTopic);
-            return provider;
+        }else {
+            try {
+                Resource valueResource = new Resource(serviceInfo);
+                valueResource.setName("value");
+                valueResource.setTopic(configFile.getTopic());
+                valueResource.setProcessor(configFile.getProcessor());
+                serviceInfo.getResources().add(valueResource);
+            } catch (Exception e) {
+                LOG.info("Failed to process info/value received for device {}", configFile.getId());
+            }
         }
         return provider;
     }
@@ -108,7 +107,7 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
         try {
             Provider provider = buildProvider(configFile);
             Dictionary<String, String> properties = new Hashtable<String, String>();
-            if (provider != null && !configFile.getTopicType().equals("smarttopic")) {
+            if (provider != null) {
                 registration.put(serviceReference.getProperty("service.pid").toString(), bundleContext.registerService(Provider.class.getName(), provider, properties));
             }
         } catch (Exception e) {
