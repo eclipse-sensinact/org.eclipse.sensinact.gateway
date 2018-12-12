@@ -15,17 +15,19 @@ import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
-import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
+import org.eclipse.sensinact.gateway.core.method.trigger.AbstractAccessMethodTrigger;
+import org.eclipse.sensinact.gateway.core.method.trigger.TriggerArgumentBuilder;
 
 /**
  * @author Remi Druilhe
  * @see AccessMethodTrigger
  */
-public class AppLifecycleTrigger implements AccessMethodTrigger<AccessMethodResponseBuilder> {
+public class AppLifecycleTrigger extends AbstractAccessMethodTrigger {
     private static final String APP_LIFECYCLE_TRIGGER = "AppLifecycleTrigger";
     private final ApplicationService service;
 
     public AppLifecycleTrigger(ApplicationService service) {
+    	super(null,TriggerArgumentBuilder.INTERMEDIATE,true);
         this.service = service;
     }
 
@@ -37,16 +39,10 @@ public class AppLifecycleTrigger implements AccessMethodTrigger<AccessMethodResp
     }
 
     /**
-     * @see AccessMethodTrigger#getParameters()
-     */
-    public Parameters getParameters() {
-        return Parameters.INTERMEDIATE;
-    }
-
-    /**
      * @see Executable#execute(java.lang.Object)
      */
-    public Object execute(AccessMethodResponseBuilder snaResult) throws Exception {
+    public Object execute(Object object) throws Exception {
+    	AccessMethodResponseBuilder<?,?> snaResult = (AccessMethodResponseBuilder<?, ?>) object;
         String uri = snaResult.getPath();
         ApplicationStatus currentStatus = (ApplicationStatus) service.getResource(AppConstant.STATUS).getAttribute(DataResource.VALUE).getValue();
         if (uri.endsWith(AppConstant.START)) {
@@ -86,15 +82,7 @@ public class AppLifecycleTrigger implements AccessMethodTrigger<AccessMethodResp
     /**
      * @see JSONable#getJSON()
      */
-    public String getJSON() {
+    public String doGetJSON() {
         return null;
-    }
-
-    /**
-     * @inheritDoc
-     * @see AccessMethodTrigger#passOn()
-     */
-    public boolean passOn() {
-        return true;
     }
 }

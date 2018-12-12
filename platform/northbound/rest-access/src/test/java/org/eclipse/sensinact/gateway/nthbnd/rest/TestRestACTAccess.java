@@ -16,6 +16,7 @@ import org.eclipse.sensinact.gateway.nthbnd.rest.ws.test.WsServiceTestClient;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TestRestACTAccess extends TestRestAccess {
@@ -80,6 +81,7 @@ public class TestRestACTAccess extends TestRestAccess {
         simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/light/services/switch/resources/dim/ACT", "{\"parameters\":[{\"name\": \"brightness\",\"value\": 5,\"type\": \"int\"}]}", "POST");
 
         response = new JSONObject(simulated);
+        System.out.println(response.toString());
 
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/light/switch/dim"));
@@ -88,7 +90,8 @@ public class TestRestACTAccess extends TestRestAccess {
 
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/light/switch/brightness"));
-        assertTrue(response.getJSONObject("response").get("value").equals(5));
+        System.out.println(response.toString());
+        assertEquals(5,response.getJSONObject("response").getInt("value"));
     }
 
     @Test
@@ -144,14 +147,13 @@ public class TestRestACTAccess extends TestRestAccess {
 
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/light/switch/brightness"));
-        assertTrue(response.getJSONObject("response").get("value").equals(5));
+        System.out.println(response.toString());
+        assertEquals(5,response.getJSONObject("response").getInt("value"));
     }
 
     private String synchronizedRequest(WsServiceTestClient client, String url, String content) {
         String simulated = null;
         long wait = 1000;
-//		long start = System.currentTimeMillis();
-
         client.newRequest(url, content);
 
         while (!client.isAvailable() && wait > 0) {
@@ -164,10 +166,6 @@ public class TestRestACTAccess extends TestRestAccess {
         if (client.isAvailable()) {
             simulated = client.getResponseMessage();
         }
-//        System.out.println(String.format(
-//        		"Response returned in %s ms",
-//        		(System.currentTimeMillis()-start)));
-
         return simulated;
     }
 }

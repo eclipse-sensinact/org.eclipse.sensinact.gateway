@@ -10,23 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.core.method.trigger;
 
-import org.eclipse.sensinact.gateway.util.JSONUtils;
-
 /**
  * Extended {@link AccessMethodTrigger} returning the value of the Primitive
  * parameter when executed
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class Copy implements AccessMethodTrigger<Object[]> {
+public class Copy extends AbstractAccessMethodTrigger {
 	public static final String NAME = "COPY";
 
-	/**
-	 * the index of the execution parameter to copy
-	 */
-	private final int index;
-
-	private final boolean doPassOn;
 
 	/**
 	 * Constructor
@@ -34,9 +26,8 @@ public class Copy implements AccessMethodTrigger<Object[]> {
 	 * @param index
 	 *            the index of the execution parameter to copy
 	 */
-	public Copy(int index, boolean doPassOn) {
-		this.index = index;
-		this.doPassOn = doPassOn;
+	public Copy(Object argument, String argumentBuilder, boolean passOn) {
+		super(argument, argumentBuilder, passOn);
 	}
 
 	/**
@@ -45,8 +36,8 @@ public class Copy implements AccessMethodTrigger<Object[]> {
 	 * @see Executable#execute(java.lang.Object)
 	 */
 	@Override
-	public Object execute(Object[] parameters) throws Exception {
-		return parameters[this.index];
+	public Object execute(Object parameter) throws Exception {
+		return parameter;
 	}
 
 	/**
@@ -55,30 +46,8 @@ public class Copy implements AccessMethodTrigger<Object[]> {
 	 * @see JSONable#getJSON()
 	 */
 	@Override
-	public String getJSON() {
-		StringBuilder buffer = new StringBuilder();
-		buffer.append(JSONUtils.OPEN_BRACE);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(TRIGGER_TYPE_KEY);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(JSONUtils.COLON);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(this.getName());
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(JSONUtils.COMMA);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(TRIGGER_PASS_ON);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(JSONUtils.COLON);
-		buffer.append(this.doPassOn);
-		buffer.append(JSONUtils.COMMA);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(TRIGGER_INDEX_KEY);
-		buffer.append(JSONUtils.QUOTE);
-		buffer.append(JSONUtils.COLON);
-		buffer.append(this.index);
-		buffer.append(JSONUtils.CLOSE_BRACE);
-		return buffer.toString();
+	public String doGetJSON() {
+		return null;
 	}
 
 	/**
@@ -89,25 +58,5 @@ public class Copy implements AccessMethodTrigger<Object[]> {
 	@Override
 	public String getName() {
 		return Copy.NAME;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AccessMethodTrigger#getParameters()
-	 */
-	@Override
-	public AccessMethodTrigger.Parameters getParameters() {
-		return AccessMethodTrigger.Parameters.PARAMETERS;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AccessMethodTrigger#passOn()
-	 */
-	@Override
-	public boolean passOn() {
-		return this.doPassOn;
 	}
 }

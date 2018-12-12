@@ -155,74 +155,73 @@ public class TestContext<R extends ModelInstance> {
 		Mockito.when(filtering.match(filteringReference)).thenReturn(true);
 
 		Mockito.when(context.getServiceReferences(Mockito.any(Class.class), Mockito.anyString()))
-				.then(new Answer<Collection<ServiceReference>>() {
-					@Override
-					public Collection<ServiceReference> answer(InvocationOnMock invocation) throws Throwable {
-						Object[] arguments = invocation.getArguments();
-						if (SnaAgent.class.equals(arguments[0])) {
-							return Collections.singletonList(referenceAgent);
+			.then(new Answer<Collection<ServiceReference>>() {
+				@Override
+				public Collection<ServiceReference> answer(InvocationOnMock invocation) throws Throwable {
+					Object[] arguments = invocation.getArguments();
+					if (SnaAgent.class.equals(arguments[0])) {
+						return Collections.singletonList(referenceAgent);
 
-						} else if (SensiNactResourceModel.class.equals(arguments[0])) {
-							if (initialized()) {
-								return Collections.singletonList(referenceProvider);
+					} else if (SensiNactResourceModel.class.equals(arguments[0])) {
+						if (initialized()) {
+							return Collections.singletonList(referenceProvider);
 
-							} else {
-								return Collections.emptyList();
-							}
-						} else if ((Filtering.class.equals(arguments[0]))) {
-							return Collections.singletonList(filteringReference);
-
-						} else if ((AuthorizationService.class.equals(arguments[0]) && arguments[1] == null)
-								|| (arguments[0] == null && arguments[1].equals(AUTHORIZATION_FILTER))) {
-							return Collections.singletonList(referenceAuthorization);
-
-						} else if ((SecuredAccess.class.equals(arguments[0]) && arguments[1] == null)
-								|| (arguments[0] == null && arguments[1].equals(ACCESS_FILTER))) {
-							return Collections.singletonList(referenceAccess);
-
-						} else if ((BundleValidation.class.equals(arguments[0]) && arguments[1] == null)
-								|| (arguments[0] == null && arguments[1].equals(VALIDATION_FILTER))) {
-							return Collections.singletonList(referenceValidation);
+						} else {
+							return Collections.emptyList();
 						}
-						return null;
+					} else if ((Filtering.class.equals(arguments[0]))) {
+						return Collections.singletonList(filteringReference);
+
+					} else if ((AuthorizationService.class.equals(arguments[0]) && arguments[1] == null)
+							|| (arguments[0] == null && arguments[1].equals(AUTHORIZATION_FILTER))) {
+						return Collections.singletonList(referenceAuthorization);
+
+					} else if ((SecuredAccess.class.equals(arguments[0]) && arguments[1] == null)
+							|| (arguments[0] == null && arguments[1].equals(ACCESS_FILTER))) {
+						return Collections.singletonList(referenceAccess);
+
+					} else if ((BundleValidation.class.equals(arguments[0]) && arguments[1] == null)
+							|| (arguments[0] == null && arguments[1].equals(VALIDATION_FILTER))) {
+						return Collections.singletonList(referenceValidation);
 					}
-				});
+					return null;
+				}
+			});
 		Mockito.when(context.getServiceReferences(Mockito.anyString(), Mockito.anyString()))
-				.then(new Answer<ServiceReference[]>() {
-					@Override
-					public ServiceReference[] answer(InvocationOnMock invocation) throws Throwable {
-						Object[] arguments = invocation.getArguments();
-						if (SnaAgent.class.getCanonicalName().equals(arguments[0])
-								|| (arguments[0] == null && arguments[1].equals(AGENT_FILTER))) {
-							return new ServiceReference[] { referenceAgent };
+			.then(new Answer<ServiceReference[]>() {
+				@Override
+				public ServiceReference[] answer(InvocationOnMock invocation) throws Throwable {
+					Object[] arguments = invocation.getArguments();
+					if (SnaAgent.class.getCanonicalName().equals(arguments[0])
+							|| (arguments[0] == null && arguments[1].equals(AGENT_FILTER))) {
+						return new ServiceReference[] { referenceAgent };
 
-						} else if (SensiNactResourceModel.class.getCanonicalName().equals(arguments[0])) {
-							if (initialized()) {
-								return new ServiceReference[] { referenceProvider };
-							} else {
-								return new ServiceReference[] {};
-							}
-
-						} else if ((Filtering.class.getCanonicalName().equals(arguments[0]))) {
-							return new ServiceReference[] { filteringReference };
-
-						} else if ((AuthorizationService.class.getCanonicalName().equals(arguments[0])
-								&& arguments[1] == null)
-								|| (arguments[0] == null && arguments[1].equals(AUTHORIZATION_FILTER))) {
-							return new ServiceReference[] { referenceAuthorization };
-
-						} else if ((SecuredAccess.class.getCanonicalName().equals(arguments[0]) && arguments[1] == null)
-								|| (arguments[0] == null && arguments[1].equals(ACCESS_FILTER))) {
-							return new ServiceReference[] { referenceAccess };
-
-						} else if ((BundleValidation.class.getCanonicalName().equals(arguments[0])
-								&& arguments[1] == null)
-								|| (arguments[0] == null && arguments[1].equals(VALIDATION_FILTER))) {
-							return new ServiceReference[] { referenceValidation };
+					} else if (SensiNactResourceModel.class.getCanonicalName().equals(arguments[0])) {
+						if (initialized()) {
+							return new ServiceReference[] { referenceProvider };
+						} else {
+							return new ServiceReference[] {};
 						}
-						return null;
+					} else if ((Filtering.class.getCanonicalName().equals(arguments[0]))) {
+						return new ServiceReference[] { filteringReference };
+
+					} else if ((AuthorizationService.class.getCanonicalName().equals(arguments[0])
+							&& arguments[1] == null)
+							|| (arguments[0] == null && arguments[1].equals(AUTHORIZATION_FILTER))) {
+						return new ServiceReference[] { referenceAuthorization };
+
+					} else if ((SecuredAccess.class.getCanonicalName().equals(arguments[0]) && arguments[1] == null)
+							|| (arguments[0] == null && arguments[1].equals(ACCESS_FILTER))) {
+						return new ServiceReference[] { referenceAccess };
+
+					} else if ((BundleValidation.class.getCanonicalName().equals(arguments[0])
+							&& arguments[1] == null)
+							|| (arguments[0] == null && arguments[1].equals(VALIDATION_FILTER))) {
+						return new ServiceReference[] { referenceValidation };
 					}
-				});
+					return null;
+				}
+			});
 		Mockito.when(context.getServiceReference(Mockito.any(Class.class))).then(new Answer<ServiceReference>() {
 			@Override
 			public ServiceReference answer(InvocationOnMock invocation) throws Throwable {
@@ -277,34 +276,58 @@ public class TestContext<R extends ModelInstance> {
 			}
 		});
 		Mockito.when(context.registerService(Mockito.any(Class.class), Mockito.any(Object.class),
+			Mockito.any(Dictionary.class))).thenAnswer(new Answer<ServiceRegistration>() {
+				@Override
+				public ServiceRegistration answer(InvocationOnMock invocation) throws Throwable {
+					Object[] arguments = invocation.getArguments();
+					if (SecuredAccess.class.equals(arguments[0])) {
+						securedAccess = (SecuredAccess) arguments[1];
+						return registrationAccess;
+
+					} else if (SnaAgent.class.equals(arguments[0])) {
+						TestContext.this.setAgent((SnaAgent) arguments[1]);
+						return registrationAgent;
+
+					} else if (SensiNactResourceModel.class.equals(arguments[0])) {
+						TestContext.this.props = (Dictionary<String, Object>) arguments[2];
+						return registration;
+
+					} else if (BundleValidation.class.equals(arguments[0])) {
+						return registrationValidation;
+					}
+					return null;
+				}
+			});
+		Mockito.when(context.registerService(Mockito.any(String[].class), Mockito.any(Object.class),
 				Mockito.any(Dictionary.class))).thenAnswer(new Answer<ServiceRegistration>() {
 					@Override
 					public ServiceRegistration answer(InvocationOnMock invocation) throws Throwable {
 						Object[] arguments = invocation.getArguments();
-						if (SecuredAccess.class.equals(arguments[0])) {
-							securedAccess = (SecuredAccess) arguments[1];
-							return registrationAccess;
-
-						} else if (SnaAgent.class.equals(arguments[0])) {
-							TestContext.this.setAgent((SnaAgent) arguments[1]);
-							return registrationAgent;
-
-						} else if (SensiNactResourceModel.class.equals(arguments[0])) {
-							TestContext.this.props = (Dictionary<String, Object>) arguments[2];
-							return registration;
-
-						} else if (BundleValidation.class.equals(arguments[0])) {
-							return registrationValidation;
-						}
-						return null;
+						TestContext.this.setAgent((SnaAgent) arguments[1]);
+						return registrationAgent;
 					}
 				});
+		Mockito.doAnswer(new Answer<Void>() {
+			@Override
+			public Void answer(InvocationOnMock invocation) throws Throwable {
+				if(TestContext.this.props == null) {
+					TestContext.this.props = (Dictionary<String, Object>) invocation.getArguments()[0];
+				} else {
+					Dictionary<String, Object> dico = (Dictionary<String, Object>) invocation.getArguments()[0];
+					Enumeration<String> enu = dico.keys();
+					while(enu.hasMoreElements()) {
+						String key = enu.nextElement();
+						TestContext.this.props.put(key,dico.get(key));
+					}
+				}
+				return null;
+			}
+		}).when(registration).setProperties(Mockito.any(Dictionary.class));
 		Mockito.when(referenceProvider.getProperty(Mockito.anyString())).thenAnswer(new Answer<Object>() {
 			@Override
 			public Object answer(InvocationOnMock invocation) throws Throwable {
 				return TestContext.this.props.get(invocation.getArguments()[0]);
 			}
-
 		});
 		Mockito.when(referenceProvider.getPropertyKeys()).thenAnswer(new Answer<String[]>() {
 			@Override
@@ -316,18 +339,9 @@ public class TestContext<R extends ModelInstance> {
 				}
 				return l.toArray(new String[0]);
 			}
-
 		});
-		Mockito.doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock invocation) throws Throwable {
-				TestContext.this.props = (Dictionary<String, Object>) invocation.getArguments()[0];
-				return null;
-			}
-
-		}).when(registration).setProperties(Mockito.any(Dictionary.class));
-
 		Mockito.when(registration.getReference()).thenReturn(referenceProvider);
+		
 		Mockito.when(registrationAgent.getReference()).thenReturn(referenceAgent);
 		Mockito.when(registrationValidation.getReference()).thenReturn(referenceValidation);
 

@@ -10,45 +10,37 @@
  */
 package org.eclipse.sensinact.gateway.core.test;
 
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
-import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.common.primitive.JSONable;
+import org.eclipse.sensinact.gateway.core.method.trigger.AbstractAccessMethodTrigger;
+import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 
 /** 
  * 
  */
-public class MokeTrigger implements AccessMethodTrigger<AccessMethodResponseBuilder> {
+public class MokeTrigger extends  AbstractAccessMethodTrigger {
+	
+	protected MokeTrigger() {
+		super(null, "EMPTY", false);
+	}
+
 	/**
 	 * @InheritedDoc
 	 *
 	 * @see Executable#execute(java.lang.Object)
 	 */
 	@Override
-	public Object execute(AccessMethodResponseBuilder parameter) throws Exception {
+	public Object execute(Object v) throws Exception {
 		return 0.2f;
 	}
 
 	/**
-	 * @InheritedDoc
-	 *
-	 * @see JSONable#getJSON()
+	 * @return
 	 */
 	@Override
-	public String getJSON() {
-		return "{\"index\":0,\"passOn\":false,\"type\":\"VARIATIONTEST_TRIGGER\"}";
-	}
-
-	/**
-	 * @InheritedDoc
-	 *
-	 * @see AccessMethodTrigger#getParameters()
-	 */
-	@Override
-	public Parameters getParameters() {
-		return Parameters.INTERMEDIATE;
-	}
-
+	public String doGetJSON() {
+		return null;
+	} 
+	
 	/**
 	 * @InheritedDoc
 	 *
@@ -58,15 +50,4 @@ public class MokeTrigger implements AccessMethodTrigger<AccessMethodResponseBuil
 	public String getName() {
 		return "VARIATIONTEST_TRIGGER";
 	}
-
-	/**
-	 * @InheritedDoc
-	 *
-	 * @see AccessMethodTrigger#passOn()
-	 */
-	@Override
-	public boolean passOn() {
-		return false;
-	}
-
 }

@@ -32,7 +32,6 @@ import org.osgi.service.log.LogService;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.message.SnaAgentImpl;
 import org.eclipse.sensinact.gateway.core.message.MessageHandler;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 
@@ -204,7 +203,17 @@ public class TestSecuredAccess {
 					}
 				});
 		Mockito.when(context.registerService(Mockito.eq(SnaAgent.class.getCanonicalName()),
-				Mockito.any(SnaAgentImpl.class), Mockito.any(Dictionary.class)))
+				Mockito.any(SnaAgent.class), Mockito.any(Dictionary.class)))
+				.thenAnswer(new Answer<ServiceRegistration>() {
+					@Override
+					public ServiceRegistration answer(InvocationOnMock invocation) throws Throwable {
+						// TestResourceBuilder.this.setAgent(
+						// (SnaAgent) invocation.getArguments()[1]);
+						return registrationAgent;
+					}
+				});
+		Mockito.when(context.registerService(Mockito.any(String[].class),
+				Mockito.any(SnaAgent.class), Mockito.any(Dictionary.class)))
 				.thenAnswer(new Answer<ServiceRegistration>() {
 					@Override
 					public ServiceRegistration answer(InvocationOnMock invocation) throws Throwable {

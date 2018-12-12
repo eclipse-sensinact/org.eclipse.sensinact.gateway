@@ -18,28 +18,27 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.core.message.MessageHandler;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
-import org.eclipse.sensinact.gateway.core.security.AccessNode;
-import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
-import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
-import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
 import org.eclipse.sensinact.gateway.core.ServiceProvider.LifecycleStatus;
+import org.eclipse.sensinact.gateway.core.message.MessageHandler;
 import org.eclipse.sensinact.gateway.core.message.MidCallback;
+import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaMessageListener;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
+import org.eclipse.sensinact.gateway.core.security.AccessNode;
+import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
+import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * A sensiNact Resource Model instance
@@ -118,6 +117,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 */
 	private ModelInstanceRegistration registration;
 
+	
 	/**
 	 * Constructor
 	 * 
@@ -131,11 +131,11 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 * 
 	 * @throws InvalidServiceProviderException
 	 */
-	public ModelInstance(final Mediator mediator, C resourceModelConfig, String name, String profileId)
+	public ModelInstance(final Mediator mediator, C modelConfiguration, String name, String profileId)
 			throws InvalidServiceProviderException {
 		this.mediator = mediator;
 		this.profileId = profileId;
-		this.configuration = resourceModelConfig;
+		this.configuration = modelConfiguration;
 
 		List<String> initialSetOfServices = this.configuration.getFixedServices(name);
 		initialSetOfServices.addAll(this.configuration.getServices(profileId));
@@ -172,9 +172,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 */
 	public ServiceBuilder getServiceBuilder() {
 		ServiceBuilder builder = new ServiceBuilder(this.mediator, ServiceImpl.class);
-
 		builder.configureImplementationClass(this.configuration.getServiceImplementationType());
-
 		return builder;
 	}
 
@@ -191,7 +189,6 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 */
 	public ResourceBuilder getResourceBuilder(ResourceConfig resourceConfig) {
 		ResourceBuilder builder = new ResourceBuilder(this.mediator, resourceConfig);
-
 		return builder;
 	}
 
@@ -377,27 +374,25 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 		int index = 0;
 		for (; index < typesLength; index++) {
 			AccessLevelOption accessLevelOption = node.getAccessLevelOption(accessMethodTypes[index]);
-
 			props.put(new StringBuilder().append(name).append(".").append(accessMethodTypes[index].name()).toString(),
 					accessLevelOption.getAccessLevel().getLevel());
 		}
-		ServiceRegistration<SensiNactResourceModel> instanceRegistration = AccessController
-				.<ServiceRegistration<SensiNactResourceModel>>doPrivileged(
-						new PrivilegedAction<ServiceRegistration<SensiNactResourceModel>>() {
-							@Override
-							public ServiceRegistration<SensiNactResourceModel> run() {
-								return ModelInstance.this.mediator.getContext()
-										.registerService(SensiNactResourceModel.class, ModelInstance.this, props);
-							}
-						});
+		ServiceRegistration<SensiNactResourceModel> instanceRegistration = 
+			AccessController.<ServiceRegistration<SensiNactResourceModel>>doPrivileged(
+				new PrivilegedAction<ServiceRegistration<SensiNactResourceModel>>() {
+					@Override
+					public ServiceRegistration<SensiNactResourceModel> run() {
+						return ModelInstance.this.mediator.getContext(
+							).registerService(SensiNactResourceModel.class, ModelInstance.this, props);
+					}
+				});
 		if (instanceRegistration != null) {
 			this.registered = true;
 			List<String> observed = this.configuration.getObserved();
 
 			this.registration = new ModelInstanceRegistration(uri, observed, instanceRegistration, this.configuration);
-
 			this.messageHandler = new SnaMessageListener(mediator, this.configuration());
-
+			
 			boolean pattern = false;
 
 			StringBuilder observedBuilder = new StringBuilder().append(uri);
@@ -428,7 +423,6 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 			} else {
 				observedBuilder.append("/admin/location/value");
 			}
-			// System.out.println("OBSERVED : "+observedBuilder.toString());
 			SnaFilter filter = new SnaFilter(mediator, observedBuilder.toString(), pattern, false);
 
 			filter.addHandledType(SnaMessage.Type.UPDATE);

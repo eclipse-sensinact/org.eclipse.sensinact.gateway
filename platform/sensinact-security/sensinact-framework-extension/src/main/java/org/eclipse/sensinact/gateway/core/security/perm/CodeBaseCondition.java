@@ -162,9 +162,8 @@ public class CodeBaseCondition implements Condition {
         final ConditionWrapper pod = new ConditionWrapper();
         pod.c = uncomplies;
         if (_sources == null) {
-            String[] s = info.getArgs()[0].split(",");
-            _sources = new CodeBaseCondition.CodeBaseSources(Arrays.<String>asList(s), CONDITION_TYPE, CODEBASE_SOURCES_TYPE) {
-            };
+            String[] s = info.getArgs()[0].split("\\\\,");
+            _sources = new CodeBaseCondition.CodeBaseSources(Arrays.<String>asList(s), CONDITION_TYPE, CODEBASE_SOURCES_TYPE) {};
         }
         _sources.check(CODEBASE_SOURCES_TYPE);
 

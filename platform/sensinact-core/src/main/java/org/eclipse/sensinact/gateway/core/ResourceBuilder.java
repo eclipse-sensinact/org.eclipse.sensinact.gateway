@@ -162,8 +162,8 @@ public class ResourceBuilder {
 		TypeConfig typeConfig = this.getResourceConfig().getTypeConfig();
 
 		ResourceImpl resourceImpl = ReflectUtils.getInstance(typeConfig.getResourceBaseClass(),
-				typeConfig.getResourceImplementedClass(),
-				new Object[] { modelInstance, this.getResourceConfig(), service });
+			typeConfig.getResourceImplementedClass(), new Object[] { modelInstance, 
+					this.getResourceConfig(), service });
 
 		if (resourceImpl == null) {
 			throw new InvalidResourceException(String.format("Unable to create the resource : %s", name));
@@ -532,8 +532,8 @@ public class ResourceBuilder {
 				String attributeName = (String) snaResult.getParameter(0);
 				Attribute attribute = (Attribute) resource.getAttribute(attributeName);
 				if (attribute == null) {
-					throw new InvalidAttributeException(
-							new StringBuilder().append("unknown attribute :").append(attributeName).toString());
+					throw new InvalidAttributeException(new StringBuilder().append(
+						"unknown attribute :").append(attributeName).toString());
 				}
 				Object[] parameters = snaResult.getParameters();
 				if (parameters == null || parameters.length < 2) {

@@ -21,8 +21,9 @@ import org.eclipse.sensinact.gateway.common.props.TypedKey;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface SnaNotificationMessage<S extends Enum<S> & SnaMessageSubType & KeysCollection> extends SnaMessage<S> {
+	
 	public static final TypedKey<?>[] PERMANENT_KEYS = new TypedKey[] {
-			new TypedKey<JSONObject>(SnaConstants.NOTIFICATION_KEY, JSONObject.class, false) };
+		new TypedKey<JSONObject>(SnaConstants.NOTIFICATION_KEY, JSONObject.class, false) };
 
 	/**
 	 * Returns the {@link JSONObject} notification's content

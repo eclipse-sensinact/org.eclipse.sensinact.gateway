@@ -10,13 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.generic.parser;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-import org.xml.sax.Attributes;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.xml.sax.Attributes;
 
 /**
  * Method definition gathering the signatures of the
@@ -25,7 +25,8 @@ import java.util.List;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @XmlAttributes({@XmlAttribute(attribute = "type", field = "type")})
-public class MethodDefinition extends XmlDefinition implements Iterable<SignatureDefinition> {
+@XmlEscaped(value = {"references"})
+public class MethodDefinition extends XmlModelParsingContext implements Iterable<SignatureDefinition> {
     private List<SignatureDefinition> signatureDefinitions;
     private AccessMethod.Type type;
 
@@ -109,4 +110,31 @@ public class MethodDefinition extends XmlDefinition implements Iterable<Signatur
     public void setType(String type) {
         this.type = AccessMethod.Type.valueOf(type);
     }
+
+    /**
+     * End of a "parameters" Element parsing
+     */
+    @Override
+    public void end() {
+        this.closeParameters();
+        super.end();
+    }
+
+    /**
+     * Start of a "parameter" Element parsing
+     */
+    public void parameterStart(Attributes atts) {
+        ParameterDefinition parameterDefinition = new ParameterDefinition(this.mediator, atts);
+        addParameter(parameterDefinition);
+        super.setNext(parameterDefinition);
+    }
+    
+    /**
+     * Start of a "reference" Element parsing
+     */
+    public void referenceStart(Attributes atts) {
+        ReferenceDefinition referenceDefinition = new ReferenceDefinition(this.mediator, atts);
+        this.addReferenceDefinition(referenceDefinition);
+        super.setNext(referenceDefinition);
+    }   
 }

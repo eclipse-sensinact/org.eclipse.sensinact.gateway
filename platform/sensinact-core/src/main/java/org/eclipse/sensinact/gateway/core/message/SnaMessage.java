@@ -38,7 +38,7 @@ public interface SnaMessage<S extends Enum<S> & SnaMessageSubType & KeysCollecti
 			new TypedKey<String>(SnaConstants.URI_KEY, String.class, false) };
 
 	static enum Type {
-		LIFECYCLE, UPDATE, RESPONSE, ERROR;
+		LIFECYCLE, UPDATE, RESPONSE, ERROR, REMOTE;
 	}
 
 	/**

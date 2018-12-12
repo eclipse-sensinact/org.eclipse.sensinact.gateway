@@ -121,7 +121,7 @@ public interface SensiNactResourceModelConfiguration {
 	 * @return the extended {@link ResourceImpl} type in use
 	 */
 	Class<? extends ResourceImpl> getResourceImplementationType();
-
+	
 	/**
 	 * Returns the byte representing the {@link BuildPolicy}(s) that apply on non
 	 * described resource instantiation
@@ -155,12 +155,10 @@ public interface SensiNactResourceModelConfiguration {
 	/**
 	 * Defines the extended {@link ServiceProviderImpl} type to use
 	 * 
-	 * @param serviceProviderType
-	 *            the extended {@link ServiceProviderImpl} type to use
+	 * @param serviceProviderType the extended {@link ServiceProviderImpl} type to use
 	 * @return this SensiNactResourceModelConfiguration
 	 */
-	SensiNactResourceModelConfiguration setProviderImplementationType(
-			Class<? extends ServiceProviderImpl> serviceProviderType);
+	SensiNactResourceModelConfiguration setProviderImplementationType(Class<? extends ServiceProviderImpl> serviceProviderType);
 
 	/**
 	 * Defines the extended {@link ServiceImpl} type to use

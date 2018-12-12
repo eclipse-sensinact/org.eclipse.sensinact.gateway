@@ -11,12 +11,10 @@
 package org.eclipse.sensinact.gateway.core.message;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 import org.eclipse.sensinact.gateway.common.props.TypedProperties;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage.Update;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -27,6 +25,7 @@ import org.json.JSONObject;
  */
 public abstract class AbstractSnaMessage<S extends Enum<S> & KeysCollection & SnaMessageSubType>
 		extends TypedProperties<S> implements SnaMessage<S> {
+	
 	public static SnaMessage<?> fromJSON(final Mediator mediator, String json) {
 		final JSONObject jsonMessage = new JSONObject(json);
 		final String typeStr = (String) jsonMessage.remove("type");
@@ -34,40 +33,38 @@ public abstract class AbstractSnaMessage<S extends Enum<S> & KeysCollection & Sn
 		if (typeStr == null) {
 			return null;
 		}
-		@SuppressWarnings("unchecked")
-		Executable<Void, SnaMessage<?>>[] converters = new Executable[] { new Executable<Void, SnaLifecycleMessage>() {
-			@Override
-			public SnaLifecycleMessage execute(Void v) throws Exception {
-				Lifecycle l = Lifecycle.valueOf(typeStr);
-				return new SnaLifecycleMessageImpl(mediator, uri, l);
-			}
-		}, new Executable<Void, SnaUpdateMessage>() {
-			@Override
-			public SnaUpdateMessage execute(Void v) throws Exception {
-				Update u = Update.valueOf(typeStr);
-				return new SnaUpdateMessageImpl(mediator, uri, u);
-			}
-		}, new Executable<Void, SnaErrorMessage>() {
-			@Override
-			public SnaErrorMessage execute(Void v) throws Exception {
-				SnaErrorMessage.Error e = SnaErrorMessage.Error.valueOf(typeStr);
-				return new SnaErrorMessageImpl(mediator, uri, e);
-			}
-		}, new Executable<Void, AccessMethodResponse>() {
-			@Override
-			public AccessMethodResponse<?> execute(Void v) throws Exception {
-				return null;
-			}
-		} };
 		SnaMessage<?> message = null;
-		for (Executable<Void, SnaMessage<?>> converter : converters) {
-			try {
-				message = converter.execute(null);
+		
+		switch(typeStr) {
+			case "PROVIDER_APPEARING":
+			case "PROVIDER_DISAPPEARING":
+			case "SERVICE_APPEARING":
+			case "SERVICE_DISAPPEARING":
+			case "RESOURCE_APPEARING":
+			case "RESOURCE_DISAPPEARING":
+				Lifecycle l = Lifecycle.valueOf(typeStr);
+				message = new SnaLifecycleMessageImpl(mediator, uri, l);
 				break;
-
-			} catch (Exception e) {
-				continue;
-			}
+			case "ATTRIBUTE_VALUE_UPDATED":
+			case "METADATA_VALUE_UPDATED":
+			case "ACTUATED":
+				Update u = Update.valueOf(typeStr);
+				message = new SnaUpdateMessageImpl(mediator, uri, u);
+				break;
+			case "CONNECTED":
+			case "DISCONNECTED":
+				SnaRemoteMessage.Remote r = SnaRemoteMessage.Remote.valueOf(typeStr);
+				message = new SnaRemoteMessageImpl(mediator, uri, r);
+				break;
+			case "NO_ERROR" :
+			case "UPDATE_ERROR": 
+			case "RESPONSE_ERROR":
+			case "LIFECYCLE_ERROR": 
+			case "SYSTEM_ERROR":
+				SnaErrorMessage.Error e = SnaErrorMessage.Error.valueOf(typeStr);
+				message = new SnaErrorMessageImpl(mediator, uri, e);
+			default:
+				break;
 		}
 		if (message != null) {
 			JSONArray names = jsonMessage.names();

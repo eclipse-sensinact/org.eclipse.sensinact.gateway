@@ -143,7 +143,8 @@ public interface Endpoint {
 	 * 
 	 * @return the JSON formated description of the specified resource
 	 */
-	String getResource(String publicKey, String serviceProviderId, String serviceId, String resourceId);
+	String getResource(String publicKey, String serviceProviderId, String serviceId, 
+		String resourceId);
 
 	/**
 	 * Invokes the GET access method on the resource whose String identifier is
@@ -165,7 +166,8 @@ public interface Endpoint {
 	 * 
 	 * @return the JSON formated response of the GET access method invocation
 	 */
-	JSONObject get(String publicKey, String serviceProviderId, String serviceId, String resourceId, String attributeId);
+	JSONObject get(String publicKey, String serviceProviderId, String serviceId, 
+		String resourceId, String attributeId);
 
 	/**
 	 * Invokes the SET access method on the resource whose String identifier is
@@ -190,8 +192,8 @@ public interface Endpoint {
 	 * 
 	 * @return the JSON formated response of the SET access method invocation
 	 */
-	JSONObject set(String publicKey, String serviceProviderId, String serviceId, String resourceId, String attributeId,
-			Object parameter);
+	JSONObject set(String publicKey, String serviceProviderId, String serviceId, 
+		String resourceId, String attributeId, Object parameter);
 
 	/**
 	 * Invokes the ACT access method on the resource whose String identifier is
@@ -213,8 +215,8 @@ public interface Endpoint {
 	 * 
 	 * @return the JSON formated response of the ACT access method invocation
 	 */
-	JSONObject act(String publicKey, String serviceProviderId, String serviceId, String resourceId,
-			Object[] parameters);
+	JSONObject act(String publicKey, String serviceProviderId, String serviceId, 
+		String resourceId, Object[] parameters);
 
 	/**
 	 * Invokes the SUBSCRIBE access method on the resource whose String identifier
@@ -240,8 +242,8 @@ public interface Endpoint {
 	 * 
 	 * @return the JSON formated response of the SUBSCRIBE access method invocation
 	 */
-	JSONObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
-			Recipient recipient, JSONArray conditions);
+	JSONObject subscribe(String publicKey, String serviceProviderId, String serviceId, 
+		String resourceId, Recipient recipient, JSONArray conditions);
 
 	/**
 	 * Invokes the UNSUBSCRIBE access method on the resource whose String identifier
@@ -264,6 +266,25 @@ public interface Endpoint {
 	 * @return the JSON formated response of the UNSUBSCRIBE access method
 	 *         invocation
 	 */
-	JSONObject unsubscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
-			String subscriptionId);
+	JSONObject unsubscribe(String publicKey, String serviceProviderId, String serviceId, 
+		String resourceId, String subscriptionId);
+	
+	/**
+	 * Returns true if the model element targeted by the String path argument
+	 * exists and is accessible to the user whose String public key 
+	 * is also passed as parameter. Returns false if the model element does not 
+	 * exist or is not accessible to the user
+	 * 
+	 * @param publicKey the String public key of the user for which to
+	 * define the targeted model element accessibility
+	 * @param path the String path of the targeted model element
+	 * 
+	 * @return 
+	 * <ul>
+	 * 	<li>true if the targeted model element exists and is accessible to the 
+	 * 		specified user</li>
+	 * 	<li>false otherwise</li>
+	 * </ul>
+	 */
+	boolean isAccessible(String publicKey, String path);
 }

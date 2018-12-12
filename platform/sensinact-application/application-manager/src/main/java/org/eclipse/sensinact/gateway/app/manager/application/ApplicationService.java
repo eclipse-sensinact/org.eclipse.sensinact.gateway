@@ -93,11 +93,11 @@ public class ApplicationService extends ServiceImpl {
 
         status.addAttribute(new Attribute(super.modelInstance.mediator(), status, AppConstant.STATUS_MESSAGE, String.class, "Application installed", Modifiable.UPDATABLE, false));
         AppLifecycleTrigger appLifecycleTrigger = new AppLifecycleTrigger(this);
-        this.addActionTrigger(AppConstant.START, AppConstant.STATUS, new Signature(super.modelInstance.mediator(), act, null, null), appLifecycleTrigger, AccessMethodExecutor.ExecutionPolicy.BEFORE);
-        this.addActionTrigger(AppConstant.START, AppConstant.STATUS, new Signature(super.modelInstance.mediator(), act, null, null), appLifecycleTrigger, AccessMethodExecutor.ExecutionPolicy.AFTER);
-        this.addActionTrigger(AppConstant.STOP, AppConstant.STATUS, new Signature(super.modelInstance.mediator(), act, null, null), appLifecycleTrigger, AccessMethodExecutor.ExecutionPolicy.AFTER);
-        this.addActionTrigger(AppConstant.UNINSTALL, AppConstant.STATUS, new Signature(super.modelInstance.mediator(), act, null, null), appLifecycleTrigger, AccessMethodExecutor.ExecutionPolicy.BEFORE);
-        this.addActionTrigger(AppConstant.EXCEPTION, AppConstant.STATUS, new Signature(super.modelInstance.mediator(), act, null, null), appLifecycleTrigger, AccessMethodExecutor.ExecutionPolicy.AFTER);
+        this.addTrigger(AppConstant.START, AppConstant.STATUS, new Signature(super.modelInstance.mediator(), act, null, null), appLifecycleTrigger, AccessMethodExecutor.ExecutionPolicy.BEFORE);
+        this.addTrigger(AppConstant.START, AppConstant.STATUS, new Signature(super.modelInstance.mediator(), act, null, null), appLifecycleTrigger, AccessMethodExecutor.ExecutionPolicy.AFTER);
+        this.addTrigger(AppConstant.STOP, AppConstant.STATUS, new Signature(super.modelInstance.mediator(), act, null, null), appLifecycleTrigger, AccessMethodExecutor.ExecutionPolicy.AFTER);
+        this.addTrigger(AppConstant.UNINSTALL, AppConstant.STATUS, new Signature(super.modelInstance.mediator(), act, null, null), appLifecycleTrigger, AccessMethodExecutor.ExecutionPolicy.BEFORE);
+        this.addTrigger(AppConstant.EXCEPTION, AppConstant.STATUS, new Signature(super.modelInstance.mediator(), act, null, null), appLifecycleTrigger, AccessMethodExecutor.ExecutionPolicy.AFTER);
         this.addDataResource(PropertyResource.class, AppConstant.CONTENT, JSONObject.class, new JSONObject(appContainer.getJSON()));
         this.addDataResource(PropertyResource.class, AppConstant.RESET_ON_STOP, boolean.class, appContainer.getInitialize().getOptions().getResetOnStop());
         this.addDataResource(PropertyResource.class, AppConstant.AUTORESTART, boolean.class, appContainer.getInitialize().getOptions().getAutoStart());

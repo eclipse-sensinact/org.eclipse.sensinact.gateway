@@ -15,6 +15,8 @@ import org.json.JSONObject;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage.Update;
+import org.eclipse.sensinact.gateway.core.message.SnaRemoteMessage.Remote;
+import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 
 /**
@@ -37,13 +39,15 @@ public abstract class SnaNotificationMessageImpl<S extends Enum<S> & SnaMessageS
 			case ERROR:
 				break;
 			case LIFECYCLE:
-				notification = (N) new SnaLifecycleMessageImpl(mediator, uri,
-						(SnaLifecycleMessage.Lifecycle) notificationType);
+				notification = (N) new SnaLifecycleMessageImpl(mediator, uri,(Lifecycle) notificationType);
 				break;
 			case RESPONSE:
 				break;
 			case UPDATE:
 				notification = (N) new SnaUpdateMessageImpl(mediator, uri, (Update) notificationType);
+				break;
+			case REMOTE:
+				notification = (N) new SnaRemoteMessageImpl(mediator, uri, (Remote) notificationType);
 				break;
 			default:
 				break;

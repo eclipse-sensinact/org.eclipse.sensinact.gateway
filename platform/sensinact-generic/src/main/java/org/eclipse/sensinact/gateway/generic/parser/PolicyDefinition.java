@@ -22,14 +22,16 @@ import org.xml.sax.Attributes;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@XmlAttributes({@XmlAttribute(attribute = "name", field = "policy"), @XmlAttribute(attribute = "update", field = "updatePolicy")})
-public final class PolicyDefinition extends XmlDefinition {
+@XmlAttributes({
+	@XmlAttribute(attribute = "name", field = "policy"), 
+	@XmlAttribute(attribute = "update", field = "updatePolicy")})
+public final class PolicyDefinition extends XmlModelParsingContext {
 
-    private TypeConfig.Type policy;
     private ResourceClassDefinition resourceClassDefinition;
     private ResourceInterfaceDefinition resourceInterfaceDefinition;
 
     private Resource.UpdatePolicy updatePolicy;
+    private TypeConfig.Type policy;
 
     /**
      * Constructor
@@ -50,6 +52,14 @@ public final class PolicyDefinition extends XmlDefinition {
     public void setPolicy(String policy) {
         this.policy = TypeConfig.Type.valueOf(policy);
     }
+
+	public void setResourceClassDefinition(ResourceClassDefinition resourceClassDefinition) {
+		this.resourceClassDefinition=resourceClassDefinition;		
+	}
+
+	public void setResourceInterfaceDefinition(ResourceInterfaceDefinition resourceInterfaceDefinition) {
+		this.resourceInterfaceDefinition=resourceInterfaceDefinition;
+	}
 
     /**
      * Returns the wrapped {@link ResourceTypeConf}
@@ -78,24 +88,6 @@ public final class PolicyDefinition extends XmlDefinition {
     }
 
     /**
-     * Defines the {@link ResourceInterfaceDefinition} of this PolicyDefinition
-     *
-     * @param resourceInterfaceDefinition the {@link ResourceInterfaceDefinition} to set
-     */
-    void setResourceInterfaceDefinition(ResourceInterfaceDefinition resourceInterfaceDefinition) {
-        this.resourceInterfaceDefinition = resourceInterfaceDefinition;
-    }
-
-    /**
-     * Defines the {@link ResourceClassDefinition} of this PolicyDefinition
-     *
-     * @param resourceClassDefinition the {@link ResourceClassDefinition} to set
-     */
-    void setResourceClassDefinition(ResourceClassDefinition resourceClassDefinition) {
-        this.resourceClassDefinition = resourceClassDefinition;
-    }
-
-    /**
      * @return
      */
     public Class<? extends ExtResourceImpl> getPolicyImplementationClass() {
@@ -115,10 +107,36 @@ public final class PolicyDefinition extends XmlDefinition {
         return null;
     }
 
+	protected void setPolicyImplementationClass(String policyImplementationClass) {
+		this.resourceClassDefinition = new ResourceClassDefinition(mediator, null);
+		this.resourceClassDefinition.setResourceClassType(policyImplementationClass);		
+	}
+
+	protected void setPolicyImplementationInterface(String policyImplementationInterface) {
+		this.resourceInterfaceDefinition = new ResourceInterfaceDefinition(mediator, null);
+		this.resourceInterfaceDefinition.setResourceInterfaceType(policyImplementationInterface);
+	}
+	
     /**
      * @return
      */
     public Resource.UpdatePolicy getUpdatePolicy() {
         return this.updatePolicy;
+    }
+    
+    /**
+     * Start of "classname" Element parsing
+     */
+    public void classnameStart(Attributes atts) {
+        this.resourceClassDefinition = new ResourceClassDefinition(mediator, atts);
+        super.setNext(this.resourceClassDefinition);
+    }
+
+    /**
+     * Start of "interfacename" Element parsing
+     */
+    public void interfacenameStart(Attributes atts) {
+        this.resourceInterfaceDefinition = new ResourceInterfaceDefinition(mediator, atts);
+        super.setNext(this.resourceInterfaceDefinition);
     }
 }

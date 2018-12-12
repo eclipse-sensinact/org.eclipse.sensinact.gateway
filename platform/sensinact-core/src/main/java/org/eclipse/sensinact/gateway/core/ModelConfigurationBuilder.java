@@ -59,7 +59,6 @@ public class ModelConfigurationBuilder<C extends ModelConfiguration,I extends Mo
 			| BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy());
 
 	protected Map<String, AccessLevel> users;
-	protected ModelConfiguration modelConfiguration;
 	protected ResourceConfigBuilder defaultResourceConfigBuilder;
 	protected ArrayList<String> observed;
 

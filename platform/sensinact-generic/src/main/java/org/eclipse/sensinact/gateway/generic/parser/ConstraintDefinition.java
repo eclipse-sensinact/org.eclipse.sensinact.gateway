@@ -20,26 +20,31 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.xml.sax.Attributes;
 
 /**
- * A ConstraintDefinition described a {@link Restriction} which applies
- * on an access method parameter
+ * Extended {@link XmlModelParsingContext}  dedicated to "constraint" 
+ * XML node parsing context
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@XmlAttributes({@XmlAttribute(attribute = "value", field = "value"), @XmlAttribute(attribute = "reference", field = "reference"), @XmlAttribute(attribute = "complement", field = "complement")})
-public class ConstraintDefinition extends XmlDefinition implements JSONable {
-    private String value;
+@XmlAttributes({
+	@XmlAttribute(attribute = "value", field = "value"), 
+	@XmlAttribute(attribute = "reference", field = "reference"), 
+	@XmlAttribute(attribute = "complement", field = "complement")})
+public class ConstraintDefinition extends XmlModelParsingContext implements JSONable {
+    
+	private String value;
     private String reference;
     private boolean complement;
-
-    private TypeDefinition typeDefinition;
-
     private final String name;
 
+    private TypeDefinition<Class<?>> typeDefinition;
+    
     /**
      * Constructor
      *
-     * @param mediator the associated {@link Mediator}
-     * @param atts     the restriction xml element's set of attributes
+     * @param mediator the {@link Mediator} allowing the ConstraintDefinition to 
+     * be instantiated to interact with the OSGi host environment
+     * @param atts     the {@link Attributes} data structure of the "constraint" 
+     * XML node
      */
     public ConstraintDefinition(Mediator mediator, String name, Attributes atts) {
         super(mediator, atts);
@@ -47,11 +52,9 @@ public class ConstraintDefinition extends XmlDefinition implements JSONable {
     }
 
     /**
-     * Sets the string formated value of this
-     * ConstraintDefinition
+     * Sets the string formated value of this ConstraintDefinition
      *
-     * @param value the string formated value of this
-     *              ConstraintDefinition
+     * @param value the string formated value of this ConstraintDefinition
      */
     public void setValue(String value) {
         this.value = value;
@@ -63,53 +66,53 @@ public class ConstraintDefinition extends XmlDefinition implements JSONable {
      * specified condition or its logical complement
      *
      * @param complement defines if a value has to comply the specified
-     *                   condition or its logical complement
+     * condition or its logical complement
      */
     public void setComplement(String complement) {
         this.complement = Boolean.parseBoolean(complement);
     }
 
     /**
-     * Sets the {@link TypeDefinition} defining the string
-     * formated value of this ConstraintDefinition
+     * Sets the {@link TypeDefinition} defining the type of the value 
+     * on which the described constraint applies 
      *
-     * @param value the string formated value of this
-     *              ConstraintDefinition
+     * @param typeDefinition the {@link TypeDefinition} applying
      */
-    public void setType(TypeDefinition typeDefinition) {
+    public void setType(TypeDefinition<Class<?>> typeDefinition) {
         this.typeDefinition = typeDefinition;
     }
 
+
     /**
-     * Sets the string formated reference of this
-     * ConstraintDefinition
+     * Sets the string formated reference of this ConstraintDefinition if any
      *
-     * @param reference the string formated reference of this
-     *                  ConstraintDefinition
+     * @param reference the string formated reference of this ConstraintDefinition
      */
     public void setReference(String reference) {
         this.reference = reference;
     }
 
     /**
-     * Returns the {@link Constraint} defined by this
-     * ConstraintDefinition
+     * Returns the {@link Constraint} described by this ConstraintDefinition
      *
-     * @param clazz the type of the value on which the restriction
-     *              applies
-     * @return the {@link Constraint} defined by
-     * this ConstraintDefinition
+     * @param clazz the type of the value on which the described constraint applies
+     * @return the {@link Constraint} described by this ConstraintDefinition
+     * 
      * @throws InvalidConstraintDefinitionException
      */
     public Constraint getConstraint(Class<?> clazz) throws InvalidConstraintDefinitionException {
-        Constraint constraint = ConstraintFactory.Loader.load(super.mediator.getClassLoader(), this.name, clazz, (reference != null) ? new Object[]{this.value, this.reference} : this.value, this.complement);
-
+        Constraint constraint = ConstraintFactory.Loader.load(
+    		super.mediator.getClassLoader(), 
+    		this.name, 
+    		clazz, 
+    		(reference != null)?new Object[]{this.value, this.reference}:this.value, this.complement);
         return constraint;
     }
 
     /**
      * @inheritDoc
-     * @see JSONable#getJSON()
+     * 
+     * @see org.eclipse.sensinact.gateway.common.primitive.JSONable#getJSON()
      */
     @Override
     public String getJSON() {

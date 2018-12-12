@@ -17,6 +17,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
@@ -228,6 +229,27 @@ public abstract class AbstractSession implements Session {
 		return resource;
 	}
 
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.Session#
+	 * registerSessionIntent(org.eclipse.sensinact.gateway.common.execution.Executable, java.lang.String[])
+	 */
+	@Override
+	public SubscribeResponse registerSessionIntent(Executable<Boolean,Void> callback, String... resourcePath) {
+		return registerSessionIntent(null, callback, resourcePath);
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.Session#unregisterSessionIntent(java.lang.String)
+	 */
+	@Override
+	public UnsubscribeResponse unregisterSessionIntent(String intentId) {
+		return unregisterSessionIntent(null, intentId);
+	}
+	
 	/**
 	 * @inheritDoc
 	 *

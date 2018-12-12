@@ -16,10 +16,10 @@ import java.util.Map;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.props.TypedKey;
-import org.eclipse.sensinact.gateway.core.RemoteCore;
-import org.eclipse.sensinact.gateway.core.RemoteEndpoint;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
+import org.eclipse.sensinact.gateway.core.remote.RemoteCore;
+import org.eclipse.sensinact.gateway.core.remote.RemoteEndpoint;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

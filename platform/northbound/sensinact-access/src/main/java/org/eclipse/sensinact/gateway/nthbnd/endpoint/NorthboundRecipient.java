@@ -11,16 +11,13 @@
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidCallback;
-import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 
 /**
  * Abstract {@link Recipient} type implementation to be extended to
  * parameterize calls to subscribe access methods
  */
-public abstract class NorthboundRecipient extends AbstractMidCallback implements Recipient {
+public abstract class NorthboundRecipient implements Recipient {
     /**
      * the {@link Mediator} allowing to interact with the OSGi
      * host environment
@@ -37,21 +34,6 @@ public abstract class NorthboundRecipient extends AbstractMidCallback implements
     public NorthboundRecipient(Mediator mediator) {
         super();
         this.mediator = mediator;
-    }
-
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.message.AbstractMidCallback#
-     * doCallback(org.eclipse.sensinact.gateway.core.message.SnaMessage)
-     */
-    @Override
-    protected void doCallback(SnaMessage<?> message) throws MidCallbackException {
-        try {
-            this.callback(super.getName(), new SnaMessage[]{message});
-        } catch (Exception e) {
-           throw new MidCallbackException(e);
-        }
-
     }
 
     /**

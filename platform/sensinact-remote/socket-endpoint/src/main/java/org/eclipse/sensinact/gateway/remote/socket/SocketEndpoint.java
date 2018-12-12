@@ -11,11 +11,11 @@
 package org.eclipse.sensinact.gateway.remote.socket;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.remote.AbstractRemoteEndpoint;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
@@ -164,6 +164,20 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
                             }
                             super.remoteCore.registerAgent(agentId, filter, object.getString("agentKey"));
                         }
+                        break;
+                    case "accessible":
+	                        if (subUriELements.length != 2) {
+	                            break;
+	                        }
+	                        String els = subUriELements[1].substring(subUriELements[1].indexOf('[')+1, subUriELements[1].lastIndexOf(']'));                        
+	                        String[] array = els.split(",");
+	                        StringBuilder builder = new StringBuilder();
+	                        for(int i=0;i<array.length;i++) {
+	                        	builder.append(UriUtils.PATH_SEPARATOR);
+	                        	builder.append(array[i]);
+	                        }
+	                        boolean accessible = super.remoteCore.isAccessible(publicKey, builder.toString());
+	                        response = String.valueOf(accessible);
                         break;
                     case "session":
                         super.remoteCore.closeSession(publicKey);
@@ -400,8 +414,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
     }
 
     /**
-     * The ServerSocketThread attached to this SocketEndpoint
-     * stopped
+     * The ServerSocketThread attached to this SocketEndpoint stopped
      */
     protected void serverStopped() {
         if (super.getConnected()) {
@@ -417,8 +430,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
     }
 
     /**
-     * The ClientSocketThread attached to this SocketEndpoint
-     * stopped
+     * The ClientSocketThread attached to this SocketEndpoint stopped
      */
     public void clientDisconnected() {
         if (super.getConnected()) {
@@ -432,8 +444,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint#
-     * doClose()
+     * 
+     * @see org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint#doClose()
      */
     @Override
     protected void doClose() {
@@ -450,8 +462,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#
-     * registerAgent(java.lang.String, org.eclipse.sensinact.gateway.core.message.SnaFilter, java.lang.String)
+     * 
+     * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#registerAgent(java.lang.String, org.eclipse.sensinact.gateway.core.message.SnaFilter, java.lang.String)
      */
     @Override
     public void registerAgent(String identifier, SnaFilter filter, String agentKey) {
@@ -459,17 +471,19 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
             return;
         }
         String uri = String.format("/agent?%s", identifier);
-
-        String response = this.client.request(new JSONObject().put("uri", uri).put("agent", new JSONObject().put("agentKey", agentKey).put("filter", filter == null ? null : filter.toJSONObject())));
+        String response = this.client.request(new JSONObject(
+        	).put("uri", uri
+        	).put("agent", new JSONObject().put("agentKey", agentKey
+        	).put("filter", filter == null ? null : filter.toJSONObject())));
         if (response != null) {
-            mediator.debug(response.toString());
+            mediator.debug(response);
         }
     }
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#
-     * unregisterAgent(java.lang.String)
+     * 
+     * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#unregisterAgent(java.lang.String)
      */
     @Override
     public void unregisterAgent(String identifier) {
@@ -486,8 +500,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#
-     * dispatch(java.lang.String, org.eclipse.sensinact.gateway.core.message.SnaMessage)
+     * 
+     * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#dispatch(java.lang.String, org.eclipse.sensinact.gateway.core.message.SnaMessage)
      */
     @Override
     public void dispatch(String agentId, SnaMessage<?> message) {
@@ -495,14 +509,10 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
             return;
         }
         String uri = String.format("/agent?%s", agentId);
-
         JSONObject object = new JSONObject(message.getJSON());
         String path = (String) object.remove("uri");
-
         object.put("uri", new StringBuilder().append("/").append(super.getLocalNamespace()).append(":").append(path.substring(1)).toString());
-
         String response = this.client.request(new JSONObject().put("uri", uri).put("message", object));
-
         if (response != null) {
             mediator.debug(response.toString());
         }
@@ -510,8 +520,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint#
-     * closeSession(java.lang.String)
+     * 
+     * @see org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint#closeSession(java.lang.String)
      */
     @Override
     protected void closeSession(String publicKey) {
@@ -526,6 +536,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
+     * 
      * @see org.eclipse.sensinact.gateway.core.Endpoint#getAll(java.lang.String)
      */
     @Override
@@ -535,8 +546,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Endpoint#
-     * getAll(java.lang.String, java.lang.String)
+     * 
+     * @see org.eclipse.sensinact.gateway.core.Endpoint#getAll(java.lang.String, java.lang.String)
      */
     @Override
     public String getAll(String publicKey, String filter) {
@@ -553,6 +564,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
+     * 
      * @see org.eclipse.sensinact.gateway.core.Endpoint#getProviders(java.lang.String)
      */
     @Override
@@ -569,8 +581,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Endpoint#
-     * getProvider(java.lang.String, java.lang.String)
+     * 
+     * @see org.eclipse.sensinact.gateway.core.Endpoint#getProvider(java.lang.String, java.lang.String)
      */
     @Override
     public String getProvider(String publicKey, String serviceProviderId) {
@@ -587,8 +599,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Endpoint#
-     * getServices(java.lang.String, java.lang.String)
+     * 
+     * @see org.eclipse.sensinact.gateway.core.Endpoint#getServices(java.lang.String, java.lang.String)
      */
     @Override
     public String getServices(String publicKey, String serviceProviderId) {
@@ -605,8 +617,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Endpoint#
-     * getService(java.lang.String, java.lang.String, java.lang.String)
+     * 
+     * @see org.eclipse.sensinact.gateway.core.Endpoint#getService(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
     public String getService(String publicKey, String serviceProviderId, String serviceId) {
@@ -623,8 +635,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Endpoint#
-     * getResources(java.lang.String, java.lang.String, java.lang.String)
+     * 
+     * @see org.eclipse.sensinact.gateway.core.Endpoint#getResources(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
     public String getResources(String publicKey, String serviceProviderId, String serviceId) {
@@ -641,8 +653,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Endpoint#
-     * getResource(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     * 
+     * @see org.eclipse.sensinact.gateway.core.Endpoint#getResource(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
     public String getResource(String publicKey, String serviceProviderId, String serviceId, String resourceId) {
@@ -657,10 +669,40 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
         return response;
     }
 
+
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.Endpoint#isAccessible(java.lang.String,java.lang.String)
+	 */
+	public boolean isAccessible(String publicKey, String path) {
+		if (!super.getConnected()) {
+            return false;
+        }
+		String[] elements = UriUtils.getUriElements(path);
+		StringBuilder builder = new StringBuilder();
+		builder.append("[");
+		for(int i=0;i<elements.length;i++) {
+			if(i>0) {
+				builder.append(",");
+			}
+			builder.append(elements[i]);
+		}
+		builder.append("]");
+        String response = this.client.request(new JSONObject(
+        	).put("uri", String.format("/accessible?path=%s",builder.toString())
+        	).put("pkey", publicKey));
+        
+        if (response != null) {
+            mediator.debug(response);
+        }
+        return Boolean.parseBoolean(response);
+	}
+
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Endpoint#
-     * get(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     * 
+     * @see org.eclipse.sensinact.gateway.core.Endpoint#get(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
     public JSONObject get(String publicKey, String serviceProviderId, String serviceId, String resourceId, String attributeId) {
@@ -684,8 +726,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Endpoint#
-     * set(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+     * 
+     * @see org.eclipse.sensinact.gateway.core.Endpoint#set(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
     public JSONObject set(String publicKey, String serviceProviderId, String serviceId, String resourceId, String attributeId, Object parameter) {
@@ -722,8 +764,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Endpoint#
-     * act(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object[])
+     * 
+     * @see org.eclipse.sensinact.gateway.core.Endpoint#act(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object[])
      */
     @Override
     public JSONObject act(String publicKey, String serviceProviderId, String serviceId, String resourceId, Object[] parameters) {
@@ -757,8 +799,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Endpoint#
-     * unsubscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     * 
+     * @see org.eclipse.sensinact.gateway.core.Endpoint#unsubscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
     public JSONObject unsubscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId, String subscriptionId) {
@@ -787,8 +829,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint#
-     * doSubscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.String, org.json.JSONArray)
+     * 
+     * @see org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint#doSubscribe(java.lang.String, java.lang.String, java.lang.String, java.lang.String, org.json.JSONArray)
      */
     @Override
     protected JSONObject doSubscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId, JSONArray conditions) {

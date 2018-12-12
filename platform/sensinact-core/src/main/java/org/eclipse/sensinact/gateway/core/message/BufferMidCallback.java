@@ -41,9 +41,9 @@ public class BufferMidCallback extends UnaryMidCallback {
 	 * @param bufferSize
 	 *            the length of the buffer to create
 	 */
-	public BufferMidCallback(Mediator mediator, String identifier, ErrorHandler errorHandler, Recipient recipient,
+	public BufferMidCallback(Mediator mediator, ErrorHandler errorHandler, Recipient recipient,
 			long timeout, int bufferSize) {
-		super(mediator, identifier, errorHandler, recipient, timeout);
+		super(mediator, errorHandler, recipient, timeout);
 		if (bufferSize == 0) {
 			this.bufferSize = 1;
 

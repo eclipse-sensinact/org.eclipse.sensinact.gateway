@@ -13,14 +13,15 @@ package org.eclipse.sensinact.gateway.core;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Sessions.SessionObserver;
+import org.eclipse.sensinact.gateway.core.message.LocalAgentImpl;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.RemoteAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.RemoteAgentImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.message.SnaAgentImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
@@ -48,8 +49,8 @@ public class SessionKey {
 	 * @param token
 	 * @param tree
 	 */
-	public SessionKey(Mediator mediator, int localID, String token, AccessTree<? extends AccessNode> tree,
-			SessionObserver observer) {
+	public SessionKey(Mediator mediator, int localID, String token, 
+		AccessTree<? extends AccessNode> tree, SessionObserver observer) {
 		this.localID = localID;
 		this.token = token;
 		this.tree = tree;
@@ -95,32 +96,40 @@ public class SessionKey {
 	}
 
 	/**
-	 * 
 	 * @param callback
 	 * @param filter
 	 * @return
 	 */
-	public String registerAgent(MidAgentCallback callback, SnaFilter filter) {
-		String agentId = null;
-		if(callback.getName()!= null) {
-			if(this.agents.contains(callback.getName())){
-				this.mediator.warn("Agent %s already registered",callback.getName());
-				return null;
-			}
-			agentId = callback.getName();
+	public boolean registerAgent(MidAgentCallback callback, SnaFilter filter) {
+		if(this.agents.contains(callback.getName())){
+			this.mediator.warn("Agent '%s' already registered",callback.getName());
+			return false;
 		}
-		final SnaAgentImpl agent = SnaAgentImpl.createAgent(mediator, callback, filter, getPublicKey());
-		if(agentId == null) {
-			agentId = new StringBuilder().append("agent_").append(agent.hashCode()).toString();
-			callback.setIdentifier(agentId);
+		SnaAgent agent = null; 
+		if(RemoteAgentCallback.class.isAssignableFrom(callback.getClass())) {
+			agent = new RemoteAgentImpl(mediator, (RemoteAgentCallback) callback, filter, getPublicKey());
+		} else {
+			agent = LocalAgentImpl.createAgent(mediator, callback, filter, getPublicKey());
 		}
-		if(this.agents.add(agentId)) {
-			agent.start((localID() == 0));
-			return agentId;
-		}
-		return null;
+		return registerAgent(callback.getName(), agent);
 	}
-
+	
+	/**
+	 * @param callback
+	 * @param filter
+	 * @return
+	 */
+	public boolean registerAgent(String agentId, SnaAgent agent) {
+		if(this.agents.contains(agentId)) {
+			this.mediator.warn("Agent %s already registered",agentId);
+			return false;
+		}
+		synchronized(this) {
+			this.agents.add(agentId);
+			agent.start();
+		}
+		return true;
+	}
 	/**
 	 * 
 	 * @param agentId
@@ -130,20 +139,11 @@ public class SessionKey {
 		if (!this.agents.remove(agentId)) {
 			return false;
 		}
-		final boolean local =(localID() == 0);
-		StringBuilder builder = new StringBuilder();
-		builder.append("(&(org.eclipse.sensinact.gateway.agent.local=");
-		builder.append(local);
-		builder.append(")(");
-		builder.append("org.eclipse.sensinact.gateway.agent.id=");
-		builder.append(agentId);
-		builder.append("))");
-
-		return this.mediator.callService(SnaAgent.class, builder.toString(), new Executable<SnaAgent, Boolean>() {
+		return this.mediator.callService(SnaAgent.class, String.format("org.eclipse.sensinact.gateway.agent.id=%s",agentId), new Executable<SnaAgent, Boolean>() {
 			@Override
 			public Boolean execute(SnaAgent agent) throws Exception {
 				try {
-					agent.stop(local);
+					agent.stop();
 					return true;
 				} catch (Exception e) {
 					mediator.error(e);
@@ -153,50 +153,11 @@ public class SessionKey {
 		});
 	}
 
-	public boolean waitUntilClosed() {
-		return waitUntilClosed(60 * 1000);
-	}
-
-	public boolean waitUntilClosed(long timeout) {
-		if (this.agents.size() == 0) {
-			return true;
-		}
-		final AtomicInteger c = new AtomicInteger();
-		String filter = getAgentsFilter();
-		long t = timeout;
-		while (t > 0) {
-			c.set(0);
-			this.mediator.callServices(SnaAgent.class, filter, new Executable<SnaAgent, Void>() {
-				@Override
-				public Void execute(SnaAgent agent) throws Exception {
-					if (agent != null) {
-						c.incrementAndGet();
-					}
-					return null;
-				}
-			});
-			if (c.get() == 0) {
-				break;
-			}
-			try {
-				Thread.sleep(2000);
-				t -= 2000;
-
-			} catch (InterruptedException e) {
-				Thread.interrupted();
-			}
-		}
-		return c.get() == 0;
-	}
-
 	private String getAgentsFilter() {
 		if (this.agents.size() == 0) {
 			return null;
 		}
 		StringBuilder builder = new StringBuilder();
-		builder.append("(&(org.eclipse.sensinact.gateway.agent.local=");
-		builder.append(localID() == 0);
-		builder.append(")");
 		if (this.agents.size() > 1) {
 			builder.append("(|");
 		}
@@ -210,7 +171,6 @@ public class SessionKey {
 		if (this.agents.size() > 1) {
 			builder.append(")");
 		}
-		builder.append(")");
 		return builder.toString();
 	}
 
@@ -218,20 +178,19 @@ public class SessionKey {
 		if (this.agents.size() == 0) {
 			return;
 		}
-		String filter = getAgentsFilter();	
-		final boolean local = (this.localID()==0); 
+		String filter = getAgentsFilter();	 
 		this.mediator.callServices(SnaAgent.class, filter, new Executable<SnaAgent, Void>() {
 			@Override
 			public Void execute(final SnaAgent agent) throws Exception {
-				agent.stop(local);
+				agent.stop();
 				return null;
 			}
 		});
 		this.agents.clear();
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * @inheritDoc
 	 * 
 	 * @see java.lang.Object#finalize()
 	 */
@@ -242,5 +201,4 @@ public class SessionKey {
 			this.observer.disappearing(this.getPublicKey());
 		}
 	}
-
 }

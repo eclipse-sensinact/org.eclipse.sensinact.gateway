@@ -71,15 +71,12 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 	public ModelInstanceRegistration(String path, List<String> observed, ServiceRegistration<?> registration,
 			ModelConfiguration configuration) {
 		super(false);
-		super.setIdentifier(path);
 		this.observed = new HashMap<String, List<String>>();
 
 		if (observed != null && !observed.isEmpty()) {
 			Iterator<String> it = observed.iterator();
 			while (it.hasNext()) {
 				String obs = it.next();
-				// System.out.println("["+this.identifier+"] OBSERVED TO BE ADDED " + obs + "
-				// ...");
 				String[] obsEls = UriUtils.getUriElements(obs);
 				int length = obsEls == null ? 0 : obsEls.length;
 
@@ -116,8 +113,6 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 		if (!list.contains(DataResource.VALUE)) {
 			list.add(DataResource.VALUE);
 		}
-		// System.out.println(" ["+this.identifier+"] OBSERVED " + this.observed + "
-		// ...");
 		this.instanceRegistration = registration;
 		this.configuration = configuration;
 		this.registered = true;
@@ -214,11 +209,6 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 		if (!registered || observed == null) {
 			return;
 		}
-		// System.out.println("______________________________");
-		// System.out.println(
-		// new StringBuilder().append(observed).append(" = ").append(value).toString());
-		// System.out.println("______________________________");
-
 		Dictionary<String, Object> properties = properties();
 		properties.remove(observed);
 
@@ -334,12 +324,6 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 					}
 				}
 				if (value != null) {
-					// System.out.println("______________________________");
-					// System.out.println(
-					// new StringBuilder().append(resourceKey).append("."
-					// ).append(attribute).append(" = ").append(value).toString());
-					// System.out.println("______________________________");
-
 					properties.put(new StringBuilder().append(resourceKey).append(".").append(attribute).toString(),
 							value);
 				}
@@ -388,7 +372,6 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 		List<String> services = (List<String>) properties.get("services");
 		if (services == null) {
 			services = new ArrayList<String>();
-			properties.put("services", services);
 		}
 		if (added) {
 			AccessMethod.Type[] accessMethodTypes = AccessMethod.Type.values();
@@ -402,7 +385,6 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 						.toString(), accessLevelOption.getAccessLevel().getLevel());
 			}
 			services.add(service);
-
 		} else {
 			services.remove(service);
 			List<String> tobeRemoved = new ArrayList<String>();
@@ -418,6 +400,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 				properties.remove(iterator.next());
 			}
 		}
+		properties.put("services", services);
 	}
 
 	/**
@@ -428,8 +411,6 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 	 */
 	@Override
 	public void doCallback(SnaMessage<?> message) {
-		// System.out.println("MESSAGE : " + message.getJSON());
-		// System.out.println();
 
 		String uri = message.getPath();
 		switch (((SnaMessageSubType) message.getType()).getSnaMessageType()) {
@@ -440,54 +421,38 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 			SnaUpdateMessage m = (SnaUpdateMessage) message;
 			String path = m.getPath();
 			JSONObject notification = m.getNotification();
-
 			String[] uriElements = UriUtils.getUriElements(path);
-
 			String key = new StringBuilder().append(uriElements[1]).append(".").append(uriElements[2]).toString();
-
 			List<String> obs = this.observed.get(key);
-			// System.out.println("=============================>");
-			// System.out.println("UPDATING... ");
-			// System.out.println(obs);
-
 			if (obs != null && !obs.isEmpty() && obs.contains(uriElements[3])) {
 				Object value = notification.opt(DataResource.VALUE);
-				this.updateObserved(new StringBuilder().append(key).append(".").append(uriElements[3]).toString(),
-						value);
+				this.updateObserved(new StringBuilder().append(key).append("."
+					).append(uriElements[3]).toString(), value);
 			}
 			break;
 		case LIFECYCLE:
 			SnaLifecycleMessage l = (SnaLifecycleMessage) message;
 			String type = null;
 			JSONObject initial = null;
-
 			switch (l.getType()) {
-			case RESOURCE_APPEARING:
-				initial = (JSONObject) ((SnaLifecycleMessageImpl) l).get("initial");
-				type = ((SnaLifecycleMessageImpl) l).getNotification().optString("type");
-			case SERVICE_APPEARING:
-			case PROVIDER_DISAPPEARING:
-			case RESOURCE_DISAPPEARING:
-			case SERVICE_DISAPPEARING:
-				this.updateContent(l.getType(), uri, initial, type);
-			case PROVIDER_APPEARING:
-			default:
-				break;
+				case RESOURCE_APPEARING:
+					initial = (JSONObject) ((SnaLifecycleMessageImpl) l).get("initial");
+					type = ((SnaLifecycleMessageImpl) l).getNotification().optString("type");
+				case SERVICE_APPEARING:
+				case PROVIDER_DISAPPEARING:
+				case RESOURCE_DISAPPEARING:
+				case SERVICE_DISAPPEARING:
+					this.updateContent(l.getType(), uri, initial, type);
+				case PROVIDER_APPEARING:
+				default:
+					break;
 			}
 			break;
 		case ERROR:
+		case REMOTE:
 		case RESPONSE:
 		default:
 			break;
 		}
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see java.lang.Object#hashCode()
-	 */
-	public int hashCode() {
-		return super.getName().hashCode();
 	}
 }

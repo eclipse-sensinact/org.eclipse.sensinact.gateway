@@ -23,7 +23,7 @@ import java.util.TimerTask;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.AbstractRemoteEndpoint;
+import org.eclipse.sensinact.gateway.core.remote.AbstractRemoteEndpoint;
 import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
@@ -212,6 +212,20 @@ public class HttpEndpoint extends AbstractRemoteEndpoint {
                             }
                             super.remoteCore.registerAgent(agentId, filter, object.getString("agentKey"));
                         }
+                        break;
+                    case "accessible":
+                        if (subUriELements.length != 2) {
+                            break;
+                        }
+                        String els = subUriELements[1].substring(subUriELements[1].indexOf('[')+1, subUriELements[1].lastIndexOf(']'));                        
+                        String[] array = els.split(",");
+                        StringBuilder builder = new StringBuilder();
+                        for(int i=0;i<array.length;i++) {
+                        	builder.append(UriUtils.PATH_SEPARATOR);
+                        	builder.append(array[i]);
+                        }
+                        boolean accessible = super.remoteCore.isAccessible(publicKey, builder.toString());
+                        response = String.valueOf(accessible);
                         break;
                     case "session":
                         super.remoteCore.closeSession(publicKey);
@@ -747,7 +761,36 @@ public class HttpEndpoint extends AbstractRemoteEndpoint {
         }
         return response;
     }
-
+    
+    /**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.Endpoint#isAccessible(java.lang.String,java.lang.String)
+	 */
+	public boolean isAccessible(String publicKey, String path) {
+		if (!super.getConnected()) {
+            return false;
+        }
+		String[] elements = UriUtils.getUriElements(path);
+		StringBuilder builder = new StringBuilder();
+		builder.append("[");
+		for(int i=0;i<elements.length;i++) {
+			if(i>0) {
+				builder.append(",");
+			}
+			builder.append(elements[i]);
+		}
+		builder.append("]");
+        String response = this.outgoingRequest(new JSONObject(
+        	).put("uri", String.format("/accessible?path=%s",builder.toString())
+        	).put("pkey", publicKey));
+        
+        if (response != null) {
+            mediator.debug(response);
+        }
+        return Boolean.parseBoolean(response);
+	}
+	
     /**
      * @inheritDoc
      * @see org.eclipse.sensinact.gateway.core.Endpoint#

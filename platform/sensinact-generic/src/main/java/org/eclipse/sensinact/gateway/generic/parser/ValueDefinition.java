@@ -15,52 +15,52 @@ import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.xml.sax.Attributes;
 
 /**
- * A {@link ValueDefinition} defines a simple xml container element
- * potentially holding a target attribute
+ * A {@link ValueDefinition} defines a simple XML "value" element
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @XmlElement(tag = "value", field = "value")
-public class ValueDefinition extends XmlDefinition {
+public class ValueDefinition<C> extends XmlModelParsingContext {
     /**
-     * the value object defined in the associated
-     * xml element
+     * the value object defined in the associated XML "value" element
      */
     protected Object value;
 
     /**
-     * the TypeDefinition wrapping the Type of
-     * this ValueDefinition's value object
+     * the TypeDefinition wrapping the Type of this ValueDefinition
      */
-    protected TypeDefinition typeDefinition;
+    protected TypeDefinition<C> typeDefinition;
 
     /**
      * Constructor
      *
-     * @param mediator the associated Mediator
-     * @param atts     the set of attributes data structure for the
-     *                 xml value element
-     */
-    public ValueDefinition(Mediator mediator, Attributes atts, TypeDefinition typeDefinition) {
+     * @param mediator the {@link Mediator} allowing the ValueDefinition to be
+     * instantiated to interact with the OSGi host environment
+     * @param atts     the {@link Attributes} data structure of the current 
+     * XML node */
+    public ValueDefinition(Mediator mediator, Attributes atts, TypeDefinition<C> typeDefinition) {
         super(mediator, atts);
         this.typeDefinition = typeDefinition;
     }
 
     /**
-     * Sets the string value defined in the associated
-     * xml element
+     * Sets the string value defined in the associated XML "value" element
      *
-     * @param typeDefinition the string value defined in the associated
-     *                       xml element
+     * @param value the string value
      */
-    public void setValue(String value) {
-        try {
-            this.value = CastUtils.cast(super.mediator.getClassLoader(), this.typeDefinition.getType(), value);
-        } catch (ClassCastException e) {
-            if (super.mediator.isErrorLoggable()) {
-                super.mediator.error(e, e.getMessage());
-            }
-        }
+	public void setValue(String value) {
+    	C type = this.typeDefinition.getType();
+    	if(Class.class.isAssignableFrom(type.getClass())){
+	        try {
+	            this.value = CastUtils.cast(super.mediator.getClassLoader(), (Class<?>)type, value);
+	        } catch (ClassCastException e) {
+	            super.mediator.error(e);
+	        }catch(Exception e) {
+	        	e.printStackTrace();
+	        }
+    	} else {
+    		this.value = value;
+    	}
     }
 
     /**
@@ -73,13 +73,12 @@ public class ValueDefinition extends XmlDefinition {
     }
 
     /**
-     * Return the {@link TypeDefinition} wrapping the
-     * value object Type of this ValueDefinition
+     * Return the {@link TypeDefinition} associated to this 
+     * ValueDefinition
      *
-     * @return the {@link TypeDefinition} wrapping the
-     * value object Type of this ValueDefinition
+     * @return this ValueDefinition's {@link TypeDefinition}
      */
-    public TypeDefinition getTypeDefinition() {
+    public TypeDefinition<?> getTypeDefinition() {
         return this.typeDefinition;
     }
 }

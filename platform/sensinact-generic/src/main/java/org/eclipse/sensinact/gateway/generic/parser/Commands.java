@@ -20,7 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The commands set of an SnaManager
+ * Wrapper of the set of {@link Task.CommandType}s of an {@link ExtModelConfiguration} 
+ * mapped to their bytes array definition  
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
@@ -29,7 +30,10 @@ public class Commands {
     final Map<Task.CommandType, byte[]> commands;
 
     /**
-     * @param commands
+     * Constructor
+     * 
+     * @param commands the list of {@link CommandDefinition} describing
+     * the {@link Task.CommandType}s and their bytes array definition
      */
     public Commands(List<CommandDefinition> commands) {
         Map<Task.CommandType, byte[]> preCommands = new HashMap<Task.CommandType, byte[]>();
@@ -45,7 +49,10 @@ public class Commands {
     }
 
     /**
-     * @param commands
+     * Constructor
+     * 
+     * @param commands the Map of {@link Task.CommandType}s related to 
+     * their bytes array definition
      */
     protected Commands(Map<Task.CommandType, byte[]> commands) {
         this.commands = Collections.unmodifiableMap(commands);

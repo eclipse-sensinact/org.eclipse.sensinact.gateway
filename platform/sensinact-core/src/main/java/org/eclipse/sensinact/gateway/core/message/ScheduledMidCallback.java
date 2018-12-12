@@ -39,7 +39,7 @@ public class ScheduledMidCallback extends AbstractMidCallback {
 	 * @param delay
 	 *            the delay between two triggered event
 	 */
-	public ScheduledMidCallback(Mediator mediator, String identifier, ErrorHandler errorHandler, Recipient recipient,
+	public ScheduledMidCallback(Mediator mediator, ErrorHandler errorHandler, Recipient recipient,
 			long lifetime, int delay) {
 		super(true);
 		this.mediator = mediator;
@@ -47,7 +47,6 @@ public class ScheduledMidCallback extends AbstractMidCallback {
 		this.recipient = recipient;
 		super.setErrorHandler(errorHandler);
 		super.setTimeout(lifetime == ENDLESS ? ENDLESS : (System.currentTimeMillis() + lifetime));
-		super.setIdentifier(identifier);
 
 		if (delay < 1000) {
 			this.delay = 1000;

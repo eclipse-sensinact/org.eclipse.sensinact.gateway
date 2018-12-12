@@ -15,17 +15,14 @@ import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.xml.sax.Attributes;
 
 /**
- * A {@link TargetedDefinition} defines a simple xml container element
- * potentially holding a target attribute
- *
+ * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @XmlAttributes({@XmlAttribute(attribute = "target", field = "target")})
-public abstract class TargetedDefinition extends XmlDefinition {
+public abstract class TargetedGenericNameTypeValueDefinition extends GenericNameTypeValueDefinition {
 
     /**
-     * the target attribute value of the associated xml element
-     */
+     * the target attribute value of the associated XML node */
     protected String[] target;
 
     /**
@@ -33,12 +30,11 @@ public abstract class TargetedDefinition extends XmlDefinition {
      *
      * @param mediator the associated Mediator
      * @param atts     the set of attributes data structure for the
-     *                 xml element
-     */
-    public TargetedDefinition(Mediator mediator, Attributes atts) {
+     *                 XML node */
+    TargetedGenericNameTypeValueDefinition(Mediator mediator, Attributes atts) {
         super(mediator, atts);
     }
-
+    
     /**
      * Sets the name of the target
      *

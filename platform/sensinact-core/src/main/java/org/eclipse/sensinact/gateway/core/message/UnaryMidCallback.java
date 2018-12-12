@@ -35,7 +35,7 @@ public class UnaryMidCallback extends AbstractMidCallback {
 	 *            instantiate
 	 * @param lifetime
 	 */
-	public UnaryMidCallback(Mediator mediator, String identifier, ErrorHandler errorHandler, Recipient recipient,
+	public UnaryMidCallback(Mediator mediator, ErrorHandler errorHandler, Recipient recipient,
 			long lifetime) {
 		super(true);
 		this.mediator = mediator;
@@ -43,7 +43,6 @@ public class UnaryMidCallback extends AbstractMidCallback {
 		this.recipient = recipient;
 		super.setTimeout(lifetime <= 10000 ? ENDLESS : (System.currentTimeMillis() + lifetime));
 		super.setErrorHandler(errorHandler);
-		super.setIdentifier(identifier);
 	}
 
 	/**

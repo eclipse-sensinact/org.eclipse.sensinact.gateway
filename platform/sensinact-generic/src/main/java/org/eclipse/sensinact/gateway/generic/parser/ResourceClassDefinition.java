@@ -20,7 +20,7 @@ import org.xml.sax.Attributes;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @XmlElement(tag = "className", field = "resourceClassType")
-final class ResourceClassDefinition extends XmlDefinition {
+final class ResourceClassDefinition extends XmlModelParsingContext {
     private Class<? extends ExtResourceImpl> resourceClassType;
 
     /**
@@ -41,16 +41,18 @@ final class ResourceClassDefinition extends XmlDefinition {
      * @param className the extended {@link ResourceImpl} type name
      */
     void setResourceClassType(String className) {
+    	if(className == null || className.length()==0) {
+    		return;
+    	}
         try {
-            this.resourceClassType = (Class<? extends ExtResourceImpl>) super.mediator.getContext().getBundle().loadClass(className);
+            this.resourceClassType = (Class<? extends ExtResourceImpl>) 
+            		super.mediator.getClassLoader().loadClass(className);
 
             if (this.resourceClassType.isInterface()) {
                 this.resourceClassType = null;
             }
         } catch (ClassNotFoundException e) {
-            if (super.mediator.isErrorLoggable()) {
-                super.mediator.error(e, e.getMessage());
-            }
+            super.mediator.error(e);
         }
     }
 

@@ -34,5 +34,7 @@ public abstract class SnaConstants {
 	public static final String TIMEOUT_KEY = "validUntil";
 	public static final String TOKEN_KEY = "token";
 	public static final String MESSAGE_KEY = "message";
+	public static final String NAMESPACE = "namespace";
+	public static final String REMOTE = "remote";
 
 }

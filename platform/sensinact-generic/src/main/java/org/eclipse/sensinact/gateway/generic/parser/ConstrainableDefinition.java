@@ -11,7 +11,7 @@
 package org.eclipse.sensinact.gateway.generic.parser;
 
 /**
- * A XmlDefinition on which constraints can apply
+ * A {@link  ConstraintDefinition} holder
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
@@ -20,7 +20,7 @@ public interface ConstrainableDefinition {
      * Adds the {@link ConstraintDefinition} passed as parameter
      * to this ConstrainableDefinition
      *
-     * @param constraint the {@link ConstraintDefinition} to add
+     * @param constraint the {@link ConstraintDefinition} to be added
      */
     void addConstraint(ConstraintDefinition constraint);
 }

@@ -17,6 +17,7 @@ import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.util.UriUtils;
@@ -62,28 +63,42 @@ public class RegisterAgentRequest extends NorthboundRequest {
         AbstractMidAgentCallback callback = new AbstractMidAgentCallback() {
             @Override
             public void doHandle(SnaLifecycleMessageImpl message) throws MidCallbackException  {
-                RegisterAgentRequest.this.recipient.doCallback(message);
+                try {
+					RegisterAgentRequest.this.recipient.callback(
+							this.getName(), new SnaMessage[] {message});
+				} catch (Exception e) {
+					throw new MidCallbackException(e);
+				}
             }
 
             @Override
             public void doHandle(SnaUpdateMessageImpl message) throws MidCallbackException {
-                RegisterAgentRequest.this.recipient.doCallback(message);
+            	try {
+					RegisterAgentRequest.this.recipient.callback(
+							this.getName(), new SnaMessage[] {message});
+				} catch (Exception e) {
+					throw new MidCallbackException(e);
+				}
             }
 
             @Override
             public void doHandle(SnaErrorMessageImpl message) throws MidCallbackException {
-                RegisterAgentRequest.this.recipient.doCallback(message);
+            	try {
+					RegisterAgentRequest.this.recipient.callback(
+							this.getName(), new SnaMessage[] {message});
+				} catch (Exception e) {
+					throw new MidCallbackException(e);
+				}
             }
 
             @Override
             public void doHandle(SnaResponseMessage<?, ?> message) throws MidCallbackException {
-                RegisterAgentRequest.this.recipient.doCallback(message);
-            }
-
-            @Override
-            public void setIdentifier(String identifier) {
-                super.setIdentifier(identifier);
-                RegisterAgentRequest.this.recipient.setIdentifier(super.identifier);
+            	try {
+					RegisterAgentRequest.this.recipient.callback(
+							this.getName(), new SnaMessage[] {message});
+				} catch (Exception e) {
+					throw new MidCallbackException(e);
+				}
             }
         };
         int intPolicy = 0x000000;

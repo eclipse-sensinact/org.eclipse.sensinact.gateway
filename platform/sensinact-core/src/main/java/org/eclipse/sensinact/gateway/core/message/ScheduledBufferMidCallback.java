@@ -33,9 +33,9 @@ public class ScheduledBufferMidCallback extends BufferMidCallback {
 	 * @param delay
 	 *            the delay between two triggered event
 	 */
-	public ScheduledBufferMidCallback(Mediator mediator, String identifier, ErrorHandler errorHandler,
+	public ScheduledBufferMidCallback(Mediator mediator, ErrorHandler errorHandler,
 			Recipient recipient, long timeout, int delay, int bufferSize) {
-		super(mediator, identifier, errorHandler, recipient, timeout, bufferSize);
+		super(mediator, errorHandler, recipient, timeout, bufferSize);
 		if (delay < 10000) {
 			this.delay = 10000;
 

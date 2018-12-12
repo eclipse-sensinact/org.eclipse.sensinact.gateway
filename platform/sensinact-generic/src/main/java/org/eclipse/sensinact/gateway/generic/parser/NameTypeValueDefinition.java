@@ -14,21 +14,18 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.xml.sax.Attributes;
 
 /**
- * Extended abstract {@link TargetedDefinition} for xml elements gathering a name
+ * Extended abstract {@link TargetedDefinition} for XML node s gathering a name
  * attribute, as well as types and values elements
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@XmlAttributes({@XmlAttribute(attribute = "name", field = "name"), @XmlAttribute(attribute = "type", field = "type")})
-public abstract class NameTypeValueDefinition extends XmlDefinition {
-    /**
-     * the {@link TypeDefinition} of this NameTypeValueDefinition
-     */
-    protected TypeDefinition typeDefinition;
+@XmlAttributes({ @XmlAttribute(attribute = "name", field = "name") })
+public abstract class NameTypeValueDefinition<C> extends TypedDefinition<C> {
+    
     /**
      * the {@link ValueDefinition} of this NameTypeValueDefinition
      */
-    protected ValueDefinition valueDefinition;
+    protected ValueDefinition<C> valueDefinition;
 
     protected String name;
 
@@ -37,8 +34,7 @@ public abstract class NameTypeValueDefinition extends XmlDefinition {
      *
      * @param mediator the associated Mediator
      * @param atts     the set of attributes data structure for the
-     *                 xml element
-     */
+     *                 XML node */
     NameTypeValueDefinition(Mediator mediator, Attributes atts) {
         super(mediator, atts);
     }
@@ -61,63 +57,18 @@ public abstract class NameTypeValueDefinition extends XmlDefinition {
      * @param target
      * @return
      */
-    public TypeDefinition getTypeDefinition() {
-        return this.typeDefinition;
-    }
-
-    /**
-     * @param target
-     * @return
-     */
-    public ValueDefinition getValueDefinition() {
+    public ValueDefinition<C> getValueDefinition() {
         return this.valueDefinition;
     }
-
+    
     /**
-     * @param valueDefinition
-     */
-    protected void setValueDefinition(ValueDefinition valueDefinition) {
-        this.valueDefinition = valueDefinition;
-    }
-
-    /**
-     * @param valueDefinition
-     */
-    protected void setTypeDefinition(TypeDefinition typeDefinition) {
-        this.typeDefinition = typeDefinition;
-    }
-
-    /**
+     * Start of an "value" Element parsing
      *
+     * @throws InvalidXmlDefinitionException
      */
-    protected final TypeValuePair getTypeValuePair() {
-        Class<?> type = typeDefinition == null ? null : typeDefinition.getType();
-
-        return new TypeValuePair(type, valueDefinition != null ? valueDefinition.getValue() : null);
-    }
-
-    /**
-     * Sets the canonical name of the Type specified
-     * by the associated xml tag element
-     *
-     * @param type the canonical name of the Type specified
-     *             by the associated xml tag element
-     */
-    public void setType(String type) {
-        TypeDefinition typeDefinition = new TypeDefinition(mediator, null);
-        typeDefinition.setType(type);
-        this.setTypeDefinition(typeDefinition);
-    }
-
-    /**
-     * Defines this TypeDefinition's type
-     *
-     * @param type this TypeDefinition's type
-     */
-    public void setType(Class<?> type) {
-        TypeDefinition typeDefinition = new TypeDefinition(mediator, null);
-        typeDefinition.setType(type);
-        this.setTypeDefinition(typeDefinition);
+    public void valueStart(Attributes atts) throws InvalidXmlDefinitionException {
+        this.valueDefinition = new ValueDefinition<C>(this.mediator, atts, this.getTypeDefinition());
+        setNext(this.valueDefinition);
     }
 
 }

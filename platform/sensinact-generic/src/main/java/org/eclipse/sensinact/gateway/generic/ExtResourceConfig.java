@@ -85,11 +85,15 @@ public class ExtResourceConfig extends ResourceConfig implements Iterable<Method
      * Constructor
      */
     public ExtResourceConfig() {
-        this.attributeDefinitions = new ArrayList<AttributeDefinition>();
-        this.methodDefinitions = new ArrayList<MethodDefinition>();
+        this(new ArrayList<AttributeDefinition>(),new ArrayList<MethodDefinition>());
     }
 
-    /**
+    public ExtResourceConfig(List<AttributeDefinition> attributeDefinitions, List<MethodDefinition> methodDefinitions) {
+    	this.attributeDefinitions = attributeDefinitions;
+        this.methodDefinitions = methodDefinitions;
+	}
+
+	/**
      * Defines the command bytes array
      *
      * @param identifier the command bytes array
@@ -129,25 +133,6 @@ public class ExtResourceConfig extends ResourceConfig implements Iterable<Method
     }
 
     /**
-     * @param actMethodDefinition
-     */
-    public void addMethodDefinition(MethodDefinition methodDefinition) {
-        if (methodDefinition == null) {
-            return;
-        }
-        this.methodDefinitions.add(methodDefinition);
-    }
-
-    /**
-     * @param attributeDefinition
-     */
-    public void addAttributeDefinition(AttributeDefinition attributeDefinition) {
-        if (attributeDefinition != null) {
-            this.attributeDefinitions.add(attributeDefinition);
-        }
-    }
-
-    /**
      * Returns the set of {@link AttributeBuilder}s for
      * the configured {@link Resource} type
      *
@@ -167,15 +152,11 @@ public class ExtResourceConfig extends ResourceConfig implements Iterable<Method
                 continue;
             }
             int builderIndex = -1;
-
             if ((builderIndex = builders.indexOf(new Name<AttributeBuilder>(attributeDefinition.getName()))) > -1) {
                 AttributeBuilder builder = builders.get(builderIndex);
-
                 List<RequirementBuilder> requirementBuilders = attributeDefinition.getRequirementBuilders(service);
-
                 int index = 0;
                 int length = requirementBuilders.size();
-
                 for (; index < length; index++) {
                     requirementBuilders.get(index).apply(service, builder);
                 }
@@ -183,7 +164,6 @@ public class ExtResourceConfig extends ResourceConfig implements Iterable<Method
                 builder.addMetadataBuilders(attributeDefinition.getMetadataBuilders());
             } else {
                 AttributeBuilder attributeBuilder = attributeDefinition.getAttributeBuilder(service);
-
                 if (attributeBuilder != null) {
                     builders.add(attributeBuilder);
                 }

@@ -33,9 +33,10 @@ public final class DeviceDefinition extends XmlDefinition {
     /**
      * Constructor
      *
-     * @param mediator the associated Mediator
-     * @param atts     the set of attributes data structure for the
-     *                 xml command element
+     * @param mediator the {@link Mediator} allowing the DeviceDefinition 
+     * to be instantiated to interact with the OSGi host environment
+     * @param atts     the {@link Attributes} data structure of the "device" 
+     * XML node 
      */
     public DeviceDefinition(Mediator mediator, Attributes atts) {
         super(mediator, atts);

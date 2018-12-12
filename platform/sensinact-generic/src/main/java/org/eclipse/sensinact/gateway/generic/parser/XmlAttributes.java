@@ -26,5 +26,5 @@ import java.lang.annotation.Target;
 @Retention(value = RetentionPolicy.RUNTIME)
 @Documented
 public @interface XmlAttributes {
-    public XmlAttribute[] value();
+    public XmlAttribute[] value() default {};
 }

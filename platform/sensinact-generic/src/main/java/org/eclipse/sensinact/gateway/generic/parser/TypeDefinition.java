@@ -10,69 +10,35 @@
  */
 package org.eclipse.sensinact.gateway.generic.parser;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.xml.sax.Attributes;
-
 /**
- * A {@link TypeDefinition} defines a simple xml container element
- * potentially holding a target attribute
+ * Java Type wrapper
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@XmlElement(tag = "type", field = "type")
-public class TypeDefinition extends XmlDefinition {
+public class TypeDefinition<T>  {
+	
     /**
-     * the Type specified by the associated
-     * xml tag element
+     * the java Type 
      */
-    protected Class<?> type;
+    protected T type;
 
+    
     /**
      * Constructor
-     *
-     * @param mediator the associated Mediator
-     * @param atts     the set of attributes data structure for the
-     *                 xml type element
+     * 
+     * @param type the Java Type of the TypeDefinition 
+     * to be instantiated
      */
-    public TypeDefinition(Mediator mediator, Attributes atts) {
-        super(mediator, atts);
+    public TypeDefinition(T type) {
+    	this.type = type;
     }
 
     /**
-     * Sets the canonical name of the Type specified
-     * by the associated xml tag element
+     * Returns the wrapped Java Type 
      *
-     * @param type the canonical name of the Type specified
-     *             by the associated xml tag element
+     * @return the Java Type of this TypeDefinition
      */
-    public void setType(String type) {
-        this.type = null;
-        try {
-            this.type = CastUtils.loadClass(super.mediator.getClassLoader(), type);
-
-        } catch (ClassNotFoundException e) {
-            super.mediator.error(new StringBuilder().append("Invalid type : ").append(type).toString());
-        }
-    }
-
-    /**
-     * Defines this TypeDefinition's type
-     *
-     * @param type this TypeDefinition's type
-     */
-    public void setType(Class<?> type) {
-        this.type = type;
-    }
-
-    /**
-     * Returns the Type specified by the associated
-     * xml tag element
-     *
-     * @return the Type specified by the associated
-     * xml tag element
-     */
-    public Class<?> getType() {
+    public T getType() {
         return this.type;
     }
 }

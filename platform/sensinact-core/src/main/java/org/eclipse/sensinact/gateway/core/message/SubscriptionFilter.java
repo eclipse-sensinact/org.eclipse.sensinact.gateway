@@ -61,7 +61,7 @@ public class SubscriptionFilter extends SnaFilter {
 	 * @see SnaFilter# matches(SnaMessage)
 	 */
 	@Override
-	boolean matches(SnaMessage message) {
+	public	boolean matches(SnaMessage message) {
 		if (!super.matches(message)) {
 			return false;
 		}

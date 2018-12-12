@@ -8,9 +8,8 @@
   ~ Contributors:
   ~    CEA - initial API and implementation
   -->
-<resourceInfos xmlns="http://org.eclipse.sensinact/resource"
-               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-               xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../sensinact-generic/src/main/resources/sensinact-resource.xsd">
+<resourceInfos xmlns="http://org.eclipse.sensinact/resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../sensinact-generic/src/main/resources/sensinact-resource.xsd">
 
     <resourceInfo xsi:type="resourceInfoProperty" name="NAME" target="system">
         <policy name="PROPERTY" update="INIT"/>

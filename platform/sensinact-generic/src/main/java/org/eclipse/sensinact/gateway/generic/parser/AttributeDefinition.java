@@ -26,25 +26,30 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Extended {@link NameTypeValueDefinition} for attribute
- * xml element
+ * Extended {@link TargetedResolvedNameTypeValueDefinition}  dedicated to "attribute" 
+ * XML node parsing context
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@XmlAttributes({@XmlAttribute(attribute = "modifiable", field = "modifiable"), @XmlAttribute(attribute = "hidden", field = "hidden")})
-public class AttributeDefinition extends TargetedNameTypeValueDefinition implements ConstrainableDefinition {
-    private List<ConstraintDefinition> constraintDefinitions;
+@XmlAttributes({
+	@XmlAttribute(attribute = "modifiable", field = "modifiable"), 
+	@XmlAttribute(attribute = "hidden", field = "hidden")})
+@XmlEscaped(value = {"metadata","constraints"})
+public class AttributeDefinition extends TargetedResolvedNameTypeValueDefinition 
+implements ConstrainableDefinition {
+    
+	private List<ConstraintDefinition> constraintDefinitions;
     private List<MetadataBuilder> metadataDefinitions;
-
     protected Modifiable modifiable;
     protected boolean hidden;
 
     /**
      * Constructor
      *
-     * @param mediator the associated Mediator
-     * @param atts     the set of attributes data structure for the
-     *                 xml attribute element
+     * @param mediator the {@link Mediator} allowing the AttributeDefinition to be
+     * instantiated to interact with the OSGi host environment
+     * @param atts     the {@link Attributes} data structure of the "attribute" xml 
+     * element
      */
     AttributeDefinition(Mediator mediator, Attributes atts) {
         super(mediator, atts);
@@ -91,67 +96,63 @@ public class AttributeDefinition extends TargetedNameTypeValueDefinition impleme
      * AttributeDefinition are hidden ; Otherwise returns
      * false
      *
-     * @return visible state of the {@link Attribute} base
+     * @return visible state of an {@link Attribute} based
      * on this AttributeDefinition
      */
     public boolean isHidden() {
         return this.hidden;
     }
-
-    /**
+  
+    /** 
      * @inheritDoc
-     * @see ConstrainableDefinition#
-     * addConstraint(ConstraintDefinition)
+     * 
+     * @see org.eclipse.sensinact.gateway.generic.parser.ConstrainableDefinition#addConstraint(org.eclipse.sensinact.gateway.generic.parser.ConstraintDefinition)
      */
     public void addConstraint(ConstraintDefinition constraint) {
-        if (constraint != null) {
-            this.constraintDefinitions.add(constraint);
-        }
+        this.constraintDefinitions.add(constraint);
     }
 
     /**
-     *
+     * Add the {@link MetadataDefinition} passed as parameter to the list of those 
+     * held by this AttributeDefinition
+     * @param metadata the {@link MetadataDefinition} to be addded
      */
-    public void addMetadataBuilder(MetadataDefinition metadata) {
-        if (metadata != null) {
-            this.metadataDefinitions.add(metadata);
-        }
+    public void addMetadataDefinition(MetadataDefinition metadata) {
+        this.metadataDefinitions.add(metadata);
     }
 
     /**
-     * @return
+     * Returns the list of {@link MetadataBuilder} held by this AttributeDefinition
+     * @return this AttributeDefinition's {@link MetadataBuilder}
      */
     public List<MetadataBuilder> getMetadataBuilders() {
         return Collections.unmodifiableList(this.metadataDefinitions);
     }
 
     /**
-     * Converts this AttributeDefinition into a set of
-     * {@link RequirementBuilder} and returns it as a list
+     * Converts this AttributeDefinition into a set of {@link RequirementBuilder} 
+     * and returns it as a list
      *
-     * @return the list of {@link RequirementBuilder}s this
-     * AttributeDefinition describes
+     * @return the list of {@link RequirementBuilder}s this AttributeDefinition describes
      */
     public List<RequirementBuilder> getRequirementBuilders(String service) {
         List<RequirementBuilder> requirementBuilders = new ArrayList<RequirementBuilder>();
-
-        TypeValuePair nameTypePair = this.getTypeValuePair(service);
-
+        TypeValuePair nameTypePair = super.getTypeValuePair(service);
         if (nameTypePair != null && nameTypePair.type != null) {
             RequirementBuilder requirementBuilder = null;
-
+            String name = getName();
             if (this.modifiable != null) {
-                requirementBuilder = new RequirementBuilder(Requirement.MODIFIABLE, this.getName());
+                requirementBuilder = new RequirementBuilder(Requirement.MODIFIABLE,name);
                 requirementBuilder.put(service, this.modifiable);
                 requirementBuilders.add(requirementBuilder);
             }
-            requirementBuilder = new RequirementBuilder(Requirement.HIDDEN, this.getName());
+            requirementBuilder = new RequirementBuilder(Requirement.HIDDEN, name);
             requirementBuilder.put(service, this.hidden);
             requirementBuilders.add(requirementBuilder);
-            requirementBuilder = new RequirementBuilder(Requirement.TYPE, this.getName());
+            requirementBuilder = new RequirementBuilder(Requirement.TYPE, name);
             requirementBuilder.put(service, nameTypePair.type);
             requirementBuilders.add(requirementBuilder);
-            requirementBuilder = new RequirementBuilder(Requirement.VALUE, this.getName());
+            requirementBuilder = new RequirementBuilder(Requirement.VALUE, name);
             requirementBuilder.put(service, nameTypePair.value);
             requirementBuilders.add(requirementBuilder);
         }
@@ -171,7 +172,8 @@ public class AttributeDefinition extends TargetedNameTypeValueDefinition impleme
         if (nameTypePair == null || nameTypePair.type == null) {
             return null;
         }
-        AttributeBuilder attributeBuilder = new AttributeBuilder(this.getName(), new Requirement[]{Requirement.TYPE, Requirement.MODIFIABLE, Requirement.HIDDEN});
+        AttributeBuilder attributeBuilder = new AttributeBuilder(this.getName(), 
+        	new Requirement[]{Requirement.TYPE, Requirement.MODIFIABLE, Requirement.HIDDEN});
         attributeBuilder.type(nameTypePair.type);
         if (nameTypePair.value != null) {
             attributeBuilder.value(nameTypePair.value);
@@ -207,7 +209,6 @@ public class AttributeDefinition extends TargetedNameTypeValueDefinition impleme
             return Collections.<Constraint>emptyList();
         }
         List<Constraint> constraints = new ArrayList<Constraint>();
-
         Iterator<ConstraintDefinition> iterator = this.constraintDefinitions.iterator();
 
         while (iterator.hasNext()) {
@@ -215,11 +216,20 @@ public class AttributeDefinition extends TargetedNameTypeValueDefinition impleme
             try {
                 constraints.add(definition.getConstraint(nameTypePair.type));
             } catch (InvalidConstraintDefinitionException e) {
-                if (super.mediator.isErrorLoggable()) {
-                    super.mediator.error(e, e.getMessage());
-                }
+                super.mediator.error(e);
             }
         }
         return constraints;
+    }
+
+    /**
+     * Start of a "meta" XML node parsing
+     * 
+     * @param atts the {@link Attributes} of the parsed XML node 
+     */
+    public void metaStart(Attributes atts) {
+        MetadataDefinition metadataDefinition = new MetadataDefinition(this.mediator, atts);
+        this.addMetadataDefinition(metadataDefinition);
+        super.setNext(metadataDefinition);
     }
 }

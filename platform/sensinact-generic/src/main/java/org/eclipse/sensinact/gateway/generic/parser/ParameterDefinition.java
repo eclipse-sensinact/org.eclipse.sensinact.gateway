@@ -29,14 +29,15 @@ import java.util.LinkedList;
 import java.util.Set;
 
 /**
- * Extended {@link NameTypeValueDefinition} for parameter
- * xml element
- *
+ * Extended {@link ResolvedNameTypeValueDefinition} for parameter
+ * XML node *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ParameterDefinition extends NameTypeValueDefinition implements ConstrainableDefinition {
-    private LinkedList<ConstraintDefinition> constraintDefinitions;
-    private BuilderDefinition builder;
+@XmlEscaped(value = {"constraints"})
+public class ParameterDefinition extends ResolvedNameTypeValueDefinition implements ConstrainableDefinition {
+    
+	private LinkedList<ConstraintDefinition> constraintDefinitions;
+    private ParameterBuilderDefinition builder;
     private boolean fixed = false;
 
     /**
@@ -49,17 +50,6 @@ public class ParameterDefinition extends NameTypeValueDefinition implements Cons
     ParameterDefinition(Mediator mediator, Attributes atts) {
         super(mediator, atts);
         this.constraintDefinitions = new LinkedList<ConstraintDefinition>();
-    }
-
-    /**
-     * Returns the {@link TypeDefinition} of this
-     * ParameterDefinition
-     *
-     * @return the {@link TypeDefinition} of this
-     * ParameterDefinition
-     */
-    public TypeDefinition getType() {
-        return super.getTypeDefinition();
     }
 
     /**
@@ -85,14 +75,6 @@ public class ParameterDefinition extends NameTypeValueDefinition implements Cons
     public Parameter getParameter(ServiceImpl service) throws InvalidValueException {
         Parameter parameter = null;
         try {
-            TypeDefinition typeDefinition = super.getTypeDefinition();
-
-            if (typeDefinition == null) {
-                if (super.mediator.isErrorLoggable()) {
-                    super.mediator.error("no defined type : " + "unable to create the Parameter");
-                }
-                return parameter;
-            }
             if (builder != null) {
                 DynamicParameterValue dynamic = null;
                 DynamicParameterValueFactory.Loader loader = DynamicParameterValueFactory.LOADER.get();
@@ -104,8 +86,7 @@ public class ParameterDefinition extends NameTypeValueDefinition implements Cons
                 } finally {
                     DynamicParameterValueFactory.LOADER.remove();
                 }
-                parameter = new DynamicParameter(mediator, name, typeDefinition.getType(), dynamic);
-
+                parameter = new DynamicParameter(mediator, name, super.getType(), dynamic);
                 return parameter;
             }
             Object fixedValue = null;
@@ -114,7 +95,7 @@ public class ParameterDefinition extends NameTypeValueDefinition implements Cons
 
             while (iterator.hasNext()) {
                 try {
-                    Constraint constraint = iterator.next().getConstraint(typeDefinition.getType());
+                    Constraint constraint = iterator.next().getConstraint(super.getType());
 
                     if (Fixed.class.isAssignableFrom(constraint.getClass())) {
                         fixedValue = ((Fixed) constraint).getValue();
@@ -128,9 +109,9 @@ public class ParameterDefinition extends NameTypeValueDefinition implements Cons
                 }
             }
             if (fixedValue == null) {
-                parameter = new Parameter(super.mediator, super.getName(), typeDefinition.getType(), (Set<Constraint>) constraints);
+                parameter = new Parameter(super.mediator, super.getName(), super.getType(), (Set<Constraint>) constraints);
             } else {
-                parameter = new Parameter(super.mediator, super.getName(), typeDefinition.getType(), fixedValue);
+                parameter = new Parameter(super.mediator, super.getName(), super.getType(), fixedValue);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -140,11 +121,11 @@ public class ParameterDefinition extends NameTypeValueDefinition implements Cons
 
     /**
      * @inheritDoc
-     * @see ConstrainableDefinition#
-     * addConstraint(ConstraintDefinition)
+     * 
+     * @see org.eclipse.sensinact.gateway.generic.parser.ConstrainableDefinition#addConstraint(org.eclipse.sensinact.gateway.generic.parser.ConstraintDefinition)
      */
     public void addConstraint(ConstraintDefinition constraint) {
-        if (constraint != null && Fixed.class.isAssignableFrom(constraint.getClass())) {
+        if (Fixed.class.isAssignableFrom(constraint.getClass())) {
             fixed = true;
         }
         this.constraintDefinitions.add(constraint);
@@ -160,11 +141,9 @@ public class ParameterDefinition extends NameTypeValueDefinition implements Cons
      *                DynamicParameterValue} of the described {@link
      *                DynamicParameter}
      */
-    public void setBuilder(BuilderDefinition builder) {
-        if (builder != null) {
-            this.fixed = true;
-            this.builder = builder;
-        }
+    public void setBuilder(ParameterBuilderDefinition builder) {
+        this.fixed = true;
+        this.builder = builder;
     }
 
     /**
@@ -177,7 +156,16 @@ public class ParameterDefinition extends NameTypeValueDefinition implements Cons
      * DynamicParameterValue} of the described {@link
      * DynamicParameter}
      */
-    public BuilderDefinition getBuilder() {
+    public ParameterBuilderDefinition getBuilder() {
         return this.builder;
+    }
+    
+    /**
+     * @param atts
+     */
+    public void builderStart(Attributes atts) {
+    	ParameterBuilderDefinition builder = new ParameterBuilderDefinition(mediator, getName(), atts);
+    	this.builder = builder;
+    	super.setNext(builder);
     }
 }

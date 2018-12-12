@@ -19,36 +19,18 @@ import org.eclipse.sensinact.gateway.common.primitive.JSONable;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface AccessMethodTrigger<P> extends Executable<P, Object>, JSONable {
+public interface AccessMethodTrigger extends Executable, JSONable {
 	/**
 	 * handled {@link AccessMethodTrigger} types
 	 */
 	public enum Type {
 		// constant value associated to the one
-		// of the linked parameter
+		// of the trigger argument
 		CONDITIONAL,
 		// constant value
 		CONSTANT,
-		// copy one of the linked parameter
+		// copy one of the trigger argument
 		COPY;
-	}
-
-	/**
-	 * AccessMethodTrigger's parameters type
-	 */
-	public enum Parameters {
-		// No Parameter Executor<Void,Object>
-		// expected
-		EMPTY,
-		// Initial Parameters array
-		// Executor<Object[],Object> expected
-		PARAMETERS,
-		// Intermediate AccessMethodResult Parameter
-		// Executor<AccessMethodResult,Object> expected
-		INTERMEDIATE,
-		// Resulting AccessMethodResponse Parameter
-		// Executor<AccessMethodResponse,Object> expected
-		RESPONSE;
 	}
 
 	public static final String TRIGGERS_ARRAY_KEY = "triggers";
@@ -57,15 +39,21 @@ public interface AccessMethodTrigger<P> extends Executable<P, Object>, JSONable 
 	public static final String TRIGGER_CONSTANT_KEY = "constant";
 	public static final String TRIGGER_CONSTRAINT_KEY = "constraint";
 	public static final String TRIGGER_TYPE_KEY = "type";
-	public static final String TRIGGER_INDEX_KEY = "index";
-	public static final String TRIGGER_PASS_ON = "passOn";
-
+	public static final String TRIGGER_BUILDER_KEY = "builder";
+	public static final String TRIGGER_ARGUMENT_KEY = "argument";
+	public static final String TRIGGER_PASSON_KEY = "passOn";
+	
 	/**
-	 * Returns this AccessMethodTrigger's {@link Parameters} enum instance
-	 * 
-	 * @return this AccessMethodTrigger's {@link Parameters} enum instance
+	 * @return the argument 
 	 */
-	Parameters getParameters();
+	<T> T getArgument();
+	
+	/**
+	 * Returns this AccessMethodTrigger's {@link TriggerArgumentBuilder} name
+	 * 
+	 * @return this AccessMethodTrigger's {@link TriggerArgumentBuilder} name
+	 */
+	String getArgumentBuilder();
 
 	/**
 	 * Returns this {@link AccessMethodTrigger}'s name

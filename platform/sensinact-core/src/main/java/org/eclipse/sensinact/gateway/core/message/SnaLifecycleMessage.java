@@ -29,11 +29,8 @@ public interface SnaLifecycleMessage extends SnaNotificationMessage<SnaLifecycle
 	public static final SnaMessage.Type TYPE = SnaMessage.Type.LIFECYCLE;
 
 	public static final TypedKey<?>[] PERMANENT_KEYS = new TypedKey[] {
-			new TypedKey<AddedOrRemoved>(SnaConstants.ADDED_OR_REMOVED, AddedOrRemoved.class, false) };
+			new TypedKey<String>(SnaConstants.ADDED_OR_REMOVED, String.class, false) };
 
-	enum AddedOrRemoved {
-		ADDED, REMOVED;
-	}
 
 	enum Lifecycle implements SnaMessageSubType, KeysCollection {
 		PROVIDER_APPEARING, PROVIDER_DISAPPEARING, SERVICE_APPEARING, SERVICE_DISAPPEARING, RESOURCE_APPEARING, RESOURCE_DISAPPEARING;
@@ -41,7 +38,7 @@ public interface SnaLifecycleMessage extends SnaNotificationMessage<SnaLifecycle
 		final Set<TypedKey<?>> keys;
 
 		Lifecycle() {
-			List<TypedKey<?>> list = Arrays.asList(new SnaMessage.KeysBuilder(SnaErrorMessage.class).keys());
+			List<TypedKey<?>> list = Arrays.asList(new SnaMessage.KeysBuilder(SnaLifecycleMessage.class).keys());
 
 			Set<TypedKey<?>> tmpKeys = new HashSet<TypedKey<?>>();
 			tmpKeys.addAll(list);

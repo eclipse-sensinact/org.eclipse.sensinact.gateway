@@ -29,14 +29,18 @@ import org.osgi.service.log.LogService;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory;
+import org.eclipse.sensinact.gateway.core.method.trigger.TriggerArgumentBuilder;
 
 /**
  * test Constraint
  */
 public class TriggerTest {
-	public static final String TRIGGER_0 = "{\"type\":\"CONDITIONAL\",\"passOn\":false,\"index\": 0,"
+	public static final String TRIGGER_0 = "{\"type\":\"CONDITIONAL\",\"passOn\":false,\"argument\": 0,\"builder\":\"PARAMETER\","
 			+ "\"constants\":[" + "{\"constant\":100,"
 			+ " \"constraint\":{\"operator\":\"in\",\"operand\":[22,23,18,3], \"type\":\"int\", \"complement\":false}},"
 			+ "{\"constant\":1000,"
@@ -44,11 +48,11 @@ public class TriggerTest {
 			+ "{\"constant\":0,"
 			+ " \"constraint\":{\"operator\":\">=\",\"operand\":5, \"type\":\"int\", \"complement\":true}}]}";
 
-	public static final String TRIGGER_1 = "{\"type\":\"CONSTANT\",\"passOn\":false, \"constant\":\"constant\"}";
+	public static final String TRIGGER_1 = "{\"type\":\"CONSTANT\",\"passOn\":false, \"argument\":\"constant\", \"builder\":\"EMPTY\"}";
 
-	public static final String TRIGGER_2 = "{\"type\":\"COPY\",\"passOn\":false,\"index\": 2}";
+	public static final String TRIGGER_2 = "{\"type\":\"COPY\",\"passOn\":false,\"argument\": 2, \"builder\":\"PARAMETER\"}";
 
-	public static final String TRIGGER_3 = "{\"type\":\"VARIATIONTEST_TRIGGER\",\"passOn\":false,\"index\":0}";
+	public static final String TRIGGER_3 = "{\"type\":\"VARIATIONTEST_TRIGGER\",\"passOn\":false,\"argument\":0, \"builder\":\"EMPTY\"}";
 
 	private static final String LOG_FILTER = "(" + Constants.OBJECTCLASS + "=" + LogService.class.getCanonicalName()
 			+ ")";
@@ -99,6 +103,7 @@ public class TriggerTest {
 		mediator = new Mediator(context);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void testFactory() throws Exception {
 		AccessMethodTriggerFactory.Loader loader = AccessMethodTriggerFactory.LOADER.get();
@@ -106,26 +111,124 @@ public class TriggerTest {
 			AccessMethodTriggerFactory factory = loader.load(mediator, AccessMethodTrigger.Type.CONDITIONAL.name());
 
 			JSONObject jsonTrigger = new JSONObject(TriggerTest.TRIGGER_0);
-			AccessMethodTrigger<Object[]> trigger = factory.<Object[]>newInstance(mediator, jsonTrigger);
+			AccessMethodTrigger trigger = factory.newInstance(mediator, jsonTrigger);
 
 			String triggerJSON = trigger.getJSON();
 
-			assertEquals(0, trigger.execute(new Object[] { 2 }));
-			assertEquals(100, trigger.execute(new Object[] { 22 }));
-			assertEquals(100, trigger.execute(new Object[] { 18 }));
-			assertEquals(1000, trigger.execute(new Object[] { 55 }));
+			assertEquals(0, trigger.execute(new TriggerArgumentBuilder.Parameter(
+				trigger.<Integer>getArgument()).build(
+					new AccessMethodResponseBuilder(mediator, "/", new Object[]{2}) {
+					private static final long serialVersionUID = 1L;
 
+					@Override
+					public Class getComponentType() {
+						return null;
+					}
+
+					@Override
+					public AccessMethodResponse createAccessMethodResponse(Status status) {
+						return null;
+					}					
+				})));
+			assertEquals(100,trigger.execute(new TriggerArgumentBuilder.Parameter(
+				trigger.<Integer>getArgument()).build(
+					new AccessMethodResponseBuilder(mediator, "/", new Object[]{22}) {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Class getComponentType() {
+						return null;
+					}
+
+					@Override
+					public AccessMethodResponse createAccessMethodResponse(Status status) {
+						return null;
+					}					
+				})));
+			assertEquals(100, trigger.execute(new TriggerArgumentBuilder.Parameter(
+				trigger.<Integer>getArgument()).build(
+					new AccessMethodResponseBuilder(mediator, "/", new Object[]{18}) {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Class getComponentType() {
+						return null;
+					}
+
+					@Override
+					public AccessMethodResponse createAccessMethodResponse(Status status) {
+						return null;
+					}					
+				})));
+			assertEquals(1000,trigger.execute(new TriggerArgumentBuilder.Parameter(
+				trigger.<Integer>getArgument()).build(
+					new AccessMethodResponseBuilder(mediator, "/", new Object[]{55}) {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Class getComponentType() {
+						return null;
+					}
+
+					@Override
+					public AccessMethodResponse createAccessMethodResponse(Status status) {
+						return null;
+					}					
+				})));
+			
 			JSONAssert.assertEquals(TriggerTest.TRIGGER_0, triggerJSON, false);
 
-			trigger = factory.<Object[]>newInstance(mediator, new JSONObject(TriggerTest.TRIGGER_1));
-			assertEquals("constant", trigger.execute(null));
+			trigger = factory.<Object>newInstance(mediator, new JSONObject(TriggerTest.TRIGGER_1));
+			assertEquals("constant", trigger.execute(new TriggerArgumentBuilder.Empty().build(null)));
 
 			JSONAssert.assertEquals(TriggerTest.TRIGGER_1, trigger.getJSON(), false);
 
-			trigger = factory.<Object[]>newInstance(mediator, new JSONObject(TriggerTest.TRIGGER_2));
-			assertEquals("value", trigger.execute(new Object[] { 2, "copy", "value" }));
-			assertEquals(2, trigger.execute(new Object[] { "copy", "value", 2 }));
-			assertEquals("copy", trigger.execute(new Object[] { "value", 2, "copy" }));
+			trigger = factory.<Object>newInstance(mediator, new JSONObject(TriggerTest.TRIGGER_2));
+			assertEquals("value", trigger.execute(new TriggerArgumentBuilder.Parameter(trigger.<Integer>getArgument()).build(
+				new AccessMethodResponseBuilder(mediator, "/", new Object[]{ 2, "copy", "value"}) {
+
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Class getComponentType() {
+						return null;
+					}
+
+					@Override
+					public AccessMethodResponse createAccessMethodResponse(Status status) {
+						return null;
+					}					
+				})));
+			assertEquals(2, trigger.execute(new TriggerArgumentBuilder.Parameter(trigger.<Integer>getArgument()).build(
+				new AccessMethodResponseBuilder(mediator, "/", new Object[]{ "copy", "value", 2}) {
+
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Class getComponentType() {
+						return null;
+					}
+
+					@Override
+					public AccessMethodResponse createAccessMethodResponse(Status status) {
+						return null;
+					}					
+				})));
+			assertEquals("copy", trigger.execute(new TriggerArgumentBuilder.Parameter(trigger.<Integer>getArgument()).build(
+				new AccessMethodResponseBuilder(mediator, "/", new Object[]{ "value", 2, "copy"}) {
+
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Class getComponentType() {
+						return null;
+					}
+
+					@Override
+					public AccessMethodResponse createAccessMethodResponse(Status status) {
+						return null;
+					}					
+				})));
 
 			JSONAssert.assertEquals(TriggerTest.TRIGGER_2, trigger.getJSON(), false);
 
@@ -133,7 +236,7 @@ public class TriggerTest {
 			factory = loader.load(mediator, jsonTrigger.getString("type"));
 			trigger = factory.newInstance(mediator, jsonTrigger);
 
-			assertEquals(0.2f, (Float) trigger.execute(null), 0.0f);
+			assertEquals(0.2f, (Float) trigger.execute(new TriggerArgumentBuilder.Empty().build(null)), 0.0f);
 		} finally {
 			AccessMethodTriggerFactory.LOADER.remove();
 		}
