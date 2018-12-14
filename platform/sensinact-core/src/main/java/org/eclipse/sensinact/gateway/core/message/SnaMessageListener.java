@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -259,27 +261,36 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 	 */
 	private void doHandleAgents(final SnaMessage<?> message, final String method) {
 		final String path = message.getPath();
-		mediator.callServices(SnaAgent.class, new Executable<SnaAgent, Void>() {
+		
+		AccessController.doPrivileged(new PrivilegedAction<Void>() {
 			@Override
-			public Void execute(SnaAgent agent) throws Exception {
-				String agentKey = agent.getPublicKey();
-				List<MethodAccessibility> methodAccessibilities = SnaMessageListener.this.agentsAccessibility.get(agentKey);
-				int index = -1;
-				if (methodAccessibilities == null) {
-					AccessLevelOption option = SnaMessageListener.this.configuration.getAuthenticatedAccessLevelOption(path, agentKey);
-					if (option == null) {
-						option = AccessLevelOption.ANONYMOUS;
+			public Void run() {
+				mediator.callServices(SnaAgent.class, new Executable<SnaAgent, Void>() {
+					@Override
+					public Void execute(SnaAgent agent) throws Exception {
+						String agentKey = agent.getPublicKey();
+						List<MethodAccessibility> methodAccessibilities = SnaMessageListener.this.agentsAccessibility.get(agentKey);
+						int index = -1;
+						if (methodAccessibilities == null) {
+							AccessLevelOption option = SnaMessageListener.this.configuration.getAuthenticatedAccessLevelOption(path, agentKey);
+							if (option == null) {
+								option = AccessLevelOption.ANONYMOUS;
+							}
+							methodAccessibilities = SnaMessageListener.this.configuration.getAccessibleMethods(path, option);
+							SnaMessageListener.this.agentsAccessibility.put(agentKey, methodAccessibilities);
+						}
+						if ((index = methodAccessibilities.indexOf(new Name<MethodAccessibility>(method))) > -1
+								&& methodAccessibilities.get(index).isAccessible()) {
+							agent.register(message);
+						}
+						return null;
 					}
-					methodAccessibilities = SnaMessageListener.this.configuration.getAccessibleMethods(path, option);
-					SnaMessageListener.this.agentsAccessibility.put(agentKey, methodAccessibilities);
-				}
-				if ((index = methodAccessibilities.indexOf(new Name<MethodAccessibility>(method))) > -1
-						&& methodAccessibilities.get(index).isAccessible()) {
-					agent.register(message);
-				}
+				});
 				return null;
-			}
-		});
+				}
+			});
+		
+		
 	}
 
 	/**
