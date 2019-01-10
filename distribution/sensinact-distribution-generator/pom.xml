@@ -258,8 +258,8 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
-                                    <artifactId>org.apache.felix.ipojo</artifactId>
-                                    <version>${ipojo.version}</version>
+                                    <artifactId>org.apache.felix.shell.remote</artifactId>
+                                    <version>1.1.2</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}/dependencies/bundle/4</outputDirectory>
