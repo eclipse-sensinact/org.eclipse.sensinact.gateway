@@ -94,5 +94,8 @@
         <module>simulation-profile</module>
         <module>storage-agent-profile</module>
         <module>swagger-profile</module>
+        <module>sensinact-remote</module>
+        <module>sensinact-datastore</module>
+        <module>ldapfilter</module>
     </modules>
 </project>
