@@ -26,11 +26,14 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class StorageAgent extends AbstractMidAgentCallback {
+    private static final Logger LOG = LoggerFactory.getLogger(StorageAgent.class);
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private final StorageConnection storageConnection;
 
@@ -52,6 +55,7 @@ public class StorageAgent extends AbstractMidAgentCallback {
     @Override
     public void doHandle(SnaUpdateMessageImpl message) {
         String path = message.getPath();
+        LOG.debug("storage agent informed of an update on {}...", path);
         String[] elements = UriUtils.getUriElements(path);
         String serviceProvider = elements[0];
         String service = elements[1];
@@ -88,6 +92,7 @@ public class StorageAgent extends AbstractMidAgentCallback {
         Object initialValue = content.opt(DataResource.VALUE);
         if (JSONObject.NULL.equals(initialValue)) {
             //exclude initial null value
+            LOG.debug("Unexpected null initial value error {}/{}/{}/{}...", serviceProvider, service, resource, initialValue);
             return;
         }
         Long timestamp = (Long) content.opt("timestamp");
@@ -100,7 +105,7 @@ public class StorageAgent extends AbstractMidAgentCallback {
             try {
                 super.setLocation(serviceProvider, String.valueOf(initialValue));
             } catch (Exception e) {
-                e.printStackTrace();
+                LOG.debug("Unexpected location error {}", e.getMessage(), e);
             }
         }
         JSONObject jsonObject = new JSONObject();
@@ -110,7 +115,9 @@ public class StorageAgent extends AbstractMidAgentCallback {
         jsonObject.put("resource", resource);
         jsonObject.put(DataResource.VALUE, initialValue);
         jsonObject.put("timestamp", timestampStr);
+        LOG.debug("pushing to database {}/{}/{}/{}...", serviceProvider, service, resource, initialValue);
         this.storageConnection.push(jsonObject);
+        LOG.debug("...done");
     }
 
     /**
