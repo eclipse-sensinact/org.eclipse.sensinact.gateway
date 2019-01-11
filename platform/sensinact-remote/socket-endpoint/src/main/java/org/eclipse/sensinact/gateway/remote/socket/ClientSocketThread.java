@@ -33,7 +33,7 @@ import java.util.Map;
  */
 class ClientSocketThread implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(ClientSocketThread.class);
-    public static final long TIMEOUT_DELAY = 500;  //5s timeout
+    public Long TIMEOUT_DELAY=500l;  //5s timeout
     public static final long REQUEST_PERIOD = 100;  //try requesting every 100ms
     private static final String UUID_PREFIX = "edpnt";
     private static final String UUID_KEY = "uuid";
@@ -45,12 +45,15 @@ class ClientSocketThread implements Runnable {
     private final int remotePort;
     private final SocketEndpoint endpoint;
 
-    ClientSocketThread(Mediator mediator, SocketEndpoint endpoint, String address, int port) throws IOException {
+    ClientSocketThread(Mediator mediator, SocketEndpoint endpoint, String address, int port,Long timeout) throws IOException {
         this.mediator = mediator;
         this.endpoint = endpoint;
         this.requests = new HashMap<String, String>();
         this.remoteAddress = InetAddress.getByName(address);
         this.remotePort = port;
+        if(timeout!=null){
+            this.TIMEOUT_DELAY=timeout;
+        }
     }
 
     protected void stop() {
@@ -134,11 +137,12 @@ class ClientSocketThread implements Runnable {
                             final long requestTime = getRequestTime(uuid);
                             final long now = System.currentTimeMillis();
                             final long delay = now - requestTime;
-                            LOG.debug("Response delay is {} (timeout config at {}) on remote instance {}:{}",delay,TIMEOUT_DELAY,remoteAddress,remotePort);
+                            LOG.debug("Response delay is {} (timeout is configured to {}) on remote instance {}:{}",delay,TIMEOUT_DELAY,remoteAddress,remotePort);
                             if (delay < TIMEOUT_DELAY) {    //avoid to put requests which response are out of delay because will never be removed from map
                                 this.requests.put(uuid, object.optString("response"));
                             } else {
-                                mediator.warn("void out of delay response for request " + uuid);
+                                LOG.debug("Timeout for response. Delay is {} (which larger than the timeout configured {}) for remote instance {}:{}",delay,TIMEOUT_DELAY,remoteAddress,remotePort);
+                                //mediator.warn("void out of delay response for request " + uuid);
                             }
                         }
                     }

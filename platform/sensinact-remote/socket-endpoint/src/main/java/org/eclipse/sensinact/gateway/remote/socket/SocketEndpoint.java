@@ -35,6 +35,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
     public final static int BUFFER_SIZE = 64 * 1024;
     public final static int PORT = 54460;
     public final static int MAGIC = 0xDEADBEEF;
+    private Long timeout;
 
     static byte[] intToBytes(int l) {
         byte[] result = new byte[8];
@@ -83,6 +84,12 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
         this.remotePort = remotePort <= 0 ? 80 : remotePort;
     }
 
+
+    public SocketEndpoint(Mediator mediator, String localAddress, int localPort, String remoteAddress, int remotePort, Long timeout) {
+        this(mediator, localAddress, localPort, remoteAddress,remotePort);
+        this.timeout=timeout;
+    }
+
     /**
      * @return the localAddress
      */
@@ -109,6 +116,10 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     protected int getRemotePort() {
         return remotePort;
+    }
+
+    protected Long getTimeout() {
+        return timeout;
     }
 
     /**
@@ -362,7 +373,9 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
             }
         }
         if (!this.server.running()) {
-            new Thread(server).start();
+            Thread t=new Thread(server);
+            t.setDaemon(true);
+            t.start();
         }
         connectionTimer();
         int timeout = 60 * 3000;
@@ -393,7 +406,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
             public void run() {
                 try {
                     if (SocketEndpoint.this.client == null) {
-                        SocketEndpoint.this.client = new ClientSocketThread(mediator, SocketEndpoint.this, SocketEndpoint.this.getRemoteAddress(), SocketEndpoint.this.getRemotePort());
+                        SocketEndpoint.this.client = new ClientSocketThread(mediator, SocketEndpoint.this, SocketEndpoint.this.getRemoteAddress(), SocketEndpoint.this.getRemotePort(),SocketEndpoint.this.getTimeout());
                     }
                     if (!SocketEndpoint.this.client.running()) {
                         new Thread(SocketEndpoint.this.client).start();
