@@ -11,3 +11,4 @@ deploy_local.sh
 deploy.sh
 bin
 build
+nbproject
