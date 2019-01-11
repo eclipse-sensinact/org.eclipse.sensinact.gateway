@@ -142,7 +142,7 @@ public class Mediator {
 		// If not even the fallback didnt manage to get loaded, display message in the
 		// log
 		if (!propertiesLoaded) {
-			warn("%s bundle failed to load property file (either %s or %s respectively).", symbolicName,
+			debug("bundle %s does not have custom configuration, using default values (either %s or %s respectively).", symbolicName,
 					bundlePropertyFileName, bundlePropertyFileNameFallback);
 		}
 
