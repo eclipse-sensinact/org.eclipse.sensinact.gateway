@@ -21,7 +21,7 @@
     
 	<artifactId>http-endpoint</artifactId>
 	<packaging>bundle</packaging>
-	<name>sensiNact IoT Gateway - Http Endpoint Connector</name>
+	<name>sensiNact IoT Gateway - Remote Http Endpoint Connector</name>
 	
 	<dependencies>
         <dependency>
