@@ -39,7 +39,64 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-@HttpTasks(recurrences = {@RecurrentHttpTask(delay = 1000 * 5, period = 1000 * 2, recurrence = @HttpTaskConfiguration(host = "@context[openhab.host]", port = "@context[openhab.port]", path = "/rest/items/", contentType = "application/json", acceptType = "application/json"))}, tasks = {@SimpleHttpTask(commands = {Task.CommandType.ACT}, configuration = @HttpTaskConfiguration(host = "@context[openhab.host]", port = "@context[openhab.port]", path = "/rest/items/@context[task.serviceProvider]", httpMethod = "POST", contentType = "text/plain", acceptType = "application/json", direct = true, content = Activator.OpenHabTaskConfigurator.class))})
+@HttpTasks(
+    recurrences = {
+        @RecurrentHttpTask(
+            delay = 1000 * 5, 
+            period = 1000 * 2, 
+            recurrence = @HttpTaskConfiguration(
+                host = "@context[openhab.host]", 
+                port = "@context[openhab.port]", 
+                path = "/rest/items/", 
+                contentType = "application/json", 
+                acceptType = "application/json"
+            )
+        ),
+        @RecurrentHttpTask(
+            delay = 1000 * 5, 
+            period = 1000 * 10, 
+            recurrence = @HttpTaskConfiguration(
+                host = "@context[openhab.host]", 
+                port = "@context[openhab.port]", 
+                path = "/rest/things/", 
+                contentType = "application/json", 
+                acceptType = "application/json"
+            )
+        )
+    }, 
+    tasks = {
+        @SimpleHttpTask(
+            commands = {
+                Task.CommandType.ACT
+            }, 
+            configuration = @HttpTaskConfiguration(
+                host = "@context[openhab.host]", 
+                port = "@context[openhab.port]", 
+                path = "/rest/items/@context[task.serviceProvider]_@context[task.service]_binary", 
+                httpMethod = "POST", 
+                contentType = "text/plain", 
+                acceptType = "application/json", 
+                direct = true, 
+                content = Activator.OpenHabTaskConfigurator.class
+            )
+        ),
+        @SimpleHttpTask(
+            commands = {
+                Task.CommandType.SET
+            }, 
+            configuration = @HttpTaskConfiguration(
+                host = "@context[openhab.host]", 
+                port = "@context[openhab.port]", 
+                path = "/rest/items/@context[task.serviceProvider]_@context[task.service]_@context[task.resource]", 
+                httpMethod = "POST", 
+                contentType = "text/plain", 
+                acceptType = "application/json", 
+                direct = true, 
+                content = Activator.OpenHabSetTaskConfigurator.class
+            )
+        )
+    }
+)
 /**
  * OpenHab2 bundle activator
  *
@@ -58,11 +115,23 @@ import java.util.Map;
          */
         @Override
         public <T extends HttpTask<?, ?>> void configure(T task) throws Exception {
-//            System.out.println("configuring task " + task);
-            String leaf = UriUtils.getLeaf(task.getPath());
-//            System.out.println("leaf =  " + leaf);
-            String content = leaf.substring(5).toUpperCase();
-//            System.out.println("content = " + content);
+            final String leaf = UriUtils.getLeaf(task.getPath());
+            final String content = leaf.substring(5).toUpperCase();
+            task.setContent(content);
+        }
+    }
+    public static class OpenHabSetTaskConfigurator implements HttpTaskConfigurator {
+        public OpenHabSetTaskConfigurator() {
+        }
+
+        /**
+         * @inheritDoc
+         * @see org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskConfigurator#configure(org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask)
+         */
+        @Override
+        public <T extends HttpTask<?, ?>> void configure(T task) throws Exception {
+            final Object[] parameters = task.getParameters();
+            final String content = parameters[1].toString();
             task.setContent(content);
         }
     }
@@ -244,12 +313,19 @@ import java.util.Map;
     }
 
     /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator#getServiceBuildPolicy()
+     * @return
+     */
+    @Override
+    protected byte getResourceBuildPolicy() {
+        return (byte) (BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy());
+    }
+
+    /**
+     * @return
      */
     @Override
     protected byte getServiceBuildPolicy() {
-        return (byte) (BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy());
+        return (byte) (BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy());
     }
 
     /**
