@@ -13,6 +13,8 @@ package org.eclipse.sensinact.gateway.remote.socket;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -30,9 +32,9 @@ import java.util.Map;
  * @author <a href="mailto:stephane.bergeon@cea.fr">Stéphane Bergeon</a>
  */
 class ClientSocketThread implements Runnable {
-    public static final long TIMEOUT_DELAY = 5000;  //5s timeout
-    public static final long REQUEST_PERIOD = 100;  //try requesting every 100ms 
-    public static final long GARBAGE_REQUEST_PERIOD = 10 * 60 * 1000;   //remove remaining timeout requests evry 10 min
+    private static final Logger LOG = LoggerFactory.getLogger(ClientSocketThread.class);
+    public static final long TIMEOUT_DELAY = 500;  //5s timeout
+    public static final long REQUEST_PERIOD = 100;  //try requesting every 100ms
     private static final String UUID_PREFIX = "edpnt";
     private static final String UUID_KEY = "uuid";
     private boolean running;
@@ -105,6 +107,8 @@ class ClientSocketThread implements Runnable {
         return result;
     }
 
+
+
     @Override
     public void run() {
         try {
@@ -113,7 +117,7 @@ class ClientSocketThread implements Runnable {
             s.connect(new InetSocketAddress(remoteAddress, remotePort));
             this.holder = new SocketHolder(mediator, s);
         } catch (IOException e) {
-            mediator.error(e);
+            LOG.error("Failed to bind to address {}:{}",remoteAddress,remotePort,e);
         } finally {
             if (checkStatus()) {
                 this.running = true;
@@ -130,6 +134,7 @@ class ClientSocketThread implements Runnable {
                             final long requestTime = getRequestTime(uuid);
                             final long now = System.currentTimeMillis();
                             final long delay = now - requestTime;
+                            LOG.debug("Response delay is {} (timeout config at {}) on remote instance {}:{}",delay,TIMEOUT_DELAY,remoteAddress,remotePort);
                             if (delay < TIMEOUT_DELAY) {    //avoid to put requests which response are out of delay because will never be removed from map
                                 this.requests.put(uuid, object.optString("response"));
                             } else {
@@ -139,10 +144,10 @@ class ClientSocketThread implements Runnable {
                     }
                 }
             } catch (SocketException e) {
-                mediator.error(e);
+                LOG.error("Socket exception on remote address {}:{}",remoteAddress,remotePort,e);
                 break;
             } catch (IOException | JSONException e) {
-                mediator.error(e);
+                LOG.error("Socket exception on remote address {}:{}",remoteAddress,remotePort,e);
             } finally {
                 if (!this.checkStatus()) {
                     break;
