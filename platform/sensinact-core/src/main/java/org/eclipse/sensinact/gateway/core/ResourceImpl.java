@@ -511,8 +511,13 @@ public class ResourceImpl extends
 		if (this.defaultAttribute == null) {
 			return false;
 		}
-		Attribute attribute = this.getAttribute(defaultAttribute);
-		return attribute.isHidden();
+		try{
+			Attribute attribute = this.getAttribute(defaultAttribute);
+			return attribute.isHidden();
+		}catch (Exception e){
+			return false;
+		}
+
 	}
 
 	/**
