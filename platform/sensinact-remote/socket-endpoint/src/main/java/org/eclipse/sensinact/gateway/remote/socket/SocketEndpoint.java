@@ -35,7 +35,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
     public final static int BUFFER_SIZE = 64 * 1024;
     public final static int PORT = 54460;
     public final static int MAGIC = 0xDEADBEEF;
-    private Long timeout;
+    private final String identifier;
 
     static byte[] intToBytes(int l) {
         byte[] result = new byte[8];
@@ -73,7 +73,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      * @param remoteAddress
      * @param remotePort
      */
-    public SocketEndpoint(Mediator mediator, String localAddress, int localPort, String remoteAddress, int remotePort) {
+    public SocketEndpoint(Mediator mediator, String identifier,String localAddress, int localPort, String remoteAddress, int remotePort) {
         super(mediator);
         if (localAddress == null || remoteAddress == null) {
             throw new NullPointerException("Local and remote addresses are needed");
@@ -82,12 +82,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
         this.localPort = localPort <= 0 ? 80 : localPort;
         this.remoteAddress = remoteAddress;
         this.remotePort = remotePort <= 0 ? 80 : remotePort;
-    }
-
-
-    public SocketEndpoint(Mediator mediator, String localAddress, int localPort, String remoteAddress, int remotePort, Long timeout) {
-        this(mediator, localAddress, localPort, remoteAddress,remotePort);
-        this.timeout=timeout;
+        this.identifier=identifier;
     }
 
     /**
@@ -118,8 +113,8 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
         return remotePort;
     }
 
-    protected Long getTimeout() {
-        return timeout;
+    public String getIdentifier() {
+        return identifier;
     }
 
     /**
@@ -406,10 +401,13 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
             public void run() {
                 try {
                     if (SocketEndpoint.this.client == null) {
-                        SocketEndpoint.this.client = new ClientSocketThread(mediator, SocketEndpoint.this, SocketEndpoint.this.getRemoteAddress(), SocketEndpoint.this.getRemotePort(),SocketEndpoint.this.getTimeout());
+                        SocketEndpoint.this.client = new ClientSocketThread(mediator, SocketEndpoint.this, SocketEndpoint.this.getRemoteAddress(), SocketEndpoint.this.getRemotePort());
                     }
                     if (!SocketEndpoint.this.client.running()) {
-                        new Thread(SocketEndpoint.this.client).start();
+                        Thread t1=new Thread(SocketEndpoint.this.client);
+                        t1.setDaemon(true);
+                        t1.setPriority(Thread.MIN_PRIORITY);
+                        t1.start();
                         SocketEndpoint.this.mediator.debug("Client socket thread started");
                     }
                     if (SocketEndpoint.this.namespace() != null) {

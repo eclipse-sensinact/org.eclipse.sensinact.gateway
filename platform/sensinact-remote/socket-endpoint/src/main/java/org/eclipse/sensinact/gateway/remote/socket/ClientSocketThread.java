@@ -33,7 +33,7 @@ import java.util.Map;
  */
 class ClientSocketThread implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(ClientSocketThread.class);
-    public Long TIMEOUT_DELAY=500l;  //5s timeout
+    public Long TIMEOUT_DELAY;  //5s timeout
     public static final long REQUEST_PERIOD = 100;  //try requesting every 100ms
     private static final String UUID_PREFIX = "edpnt";
     private static final String UUID_KEY = "uuid";
@@ -45,15 +45,16 @@ class ClientSocketThread implements Runnable {
     private final int remotePort;
     private final SocketEndpoint endpoint;
 
-    ClientSocketThread(Mediator mediator, SocketEndpoint endpoint, String address, int port,Long timeout) throws IOException {
+    ClientSocketThread(Mediator mediator, SocketEndpoint endpoint, String address, int port) throws IOException {
+
+        LOG.debug("Instantiating ClientSocketThread for {} on local {}:{} and remote {}:{}",endpoint.getIdentifier(),endpoint.getLocalAddress(),endpoint.getLocalPort(),endpoint.getRemoteAddress(),endpoint.getRemotePort());
+
         this.mediator = mediator;
         this.endpoint = endpoint;
         this.requests = new HashMap<String, String>();
         this.remoteAddress = InetAddress.getByName(address);
         this.remotePort = port;
-        if(timeout!=null){
-            this.TIMEOUT_DELAY=timeout;
-        }
+        this.TIMEOUT_DELAY=Long.parseLong(System.getProperty("clientSocketThreadTimeout","400"));
     }
 
     protected void stop() {
@@ -120,7 +121,7 @@ class ClientSocketThread implements Runnable {
             s.connect(new InetSocketAddress(remoteAddress, remotePort));
             this.holder = new SocketHolder(mediator, s);
         } catch (IOException e) {
-            LOG.error("Failed to bind to address {}:{}",remoteAddress,remotePort,e);
+            LOG.error("Failed to bind to address ID {} address {}:{}",endpoint.getIdentifier(),remoteAddress,remotePort,e);
         } finally {
             if (checkStatus()) {
                 this.running = true;
@@ -148,10 +149,10 @@ class ClientSocketThread implements Runnable {
                     }
                 }
             } catch (SocketException e) {
-                LOG.error("Socket exception on remote address {}:{}",remoteAddress,remotePort,e);
+                LOG.error("Socket exception on remote ID {} address {}:{}",endpoint.getIdentifier(),remoteAddress,remotePort,e);
                 break;
             } catch (IOException | JSONException e) {
-                LOG.error("Socket exception on remote address {}:{}",remoteAddress,remotePort,e);
+                LOG.error("Socket exception on remote ID {} address {}:{}",endpoint.getIdentifier(),remoteAddress,remotePort,e);
             } finally {
                 if (!this.checkStatus()) {
                     break;

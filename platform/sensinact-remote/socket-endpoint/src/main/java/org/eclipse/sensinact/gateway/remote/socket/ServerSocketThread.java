@@ -13,6 +13,8 @@ package org.eclipse.sensinact.gateway.remote.socket;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -118,11 +120,13 @@ class ServerSocketThread implements Runnable {
         run(server);
     }
 
+    private static Logger LOG= LoggerFactory.getLogger(ServerSocketThread.class);
+
     private ServerSocket createServer() throws IOException {
         ServerSocket server = new ServerSocket();
         server.setReuseAddress(true);
+        LOG.debug("Trying to bind server address socket on {}:{}",endpoint.getLocalAddress(), endpoint.getLocalPort());
         server.bind(new InetSocketAddress(localAddress, localPort));
-        mediator.info("Binding server socket on %s:%s", endpoint.getLocalAddress(), endpoint.getLocalPort());
         return server;
     }
 

@@ -51,7 +51,7 @@ public class ClientSocketThreadTest {
     public void testUUIDtoTimeStamp() {
         final long timestamp = System.currentTimeMillis();
         try {
-            ClientSocketThread instance = new ClientSocketThread(null, null, "localhost", 80,5000l);
+            ClientSocketThread instance = new ClientSocketThread(null, null, "localhost", 80);
             final String uuid = instance.generateUUID(timestamp);
             System.out.print("at " + timestamp);
             System.out.println(" generated uuid= " + uuid);

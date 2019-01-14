@@ -145,7 +145,7 @@ public class SocketEndpointManager implements ManagedConfigurationListener {
                 if (!descriptor.complete()) {
                     continue;
                 }
-                final SocketEndpoint endpoint = new SocketEndpoint(mediator, descriptor.localAddress, descriptor.localPort, descriptor.remoteAddress, descriptor.remotePort);
+                final SocketEndpoint endpoint = new SocketEndpoint(mediator, descriptor.getName(),descriptor.localAddress, descriptor.localPort, descriptor.remoteAddress, descriptor.remotePort);
                 if (endpoint != null) {
                     this.map.put(descriptor, endpoint);
                     new Thread(new Runnable() {
