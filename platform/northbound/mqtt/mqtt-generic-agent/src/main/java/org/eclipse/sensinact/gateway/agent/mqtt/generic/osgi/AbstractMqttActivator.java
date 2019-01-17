@@ -12,17 +12,23 @@ package org.eclipse.sensinact.gateway.agent.mqtt.generic.osgi;
 
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.AbstractMqttHandler;
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.GenericMqttAgent;
+import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 
 public abstract class AbstractMqttActivator extends AbstractActivator<Mediator> {
+    private final Logger LOG= LoggerFactory.getLogger(AbstractMqttActivator.class);
+
     private AbstractMqttHandler handler;
     private GenericMqttAgent agent;
+
     private String registration;
 
     /**
@@ -30,17 +36,15 @@ public abstract class AbstractMqttActivator extends AbstractActivator<Mediator> 
      * @see AbstractActivator#doStart()
      */
     protected void doStart(AbstractMqttHandler handler) throws Exception {
-        if (super.mediator.isDebugLoggable()) {
-            super.mediator.debug("Starting MQTT agent");
-        }
+        LOG.debug("Starting MQTT Agent");
+        final String broker =mediator.getProperty("broker").toString();
+        final String prefix =mediator.getProperty("prefix").toString();
+        final Integer qos =new Integer(mediator.getProperty("qos").toString());
+        LOG.debug("Starting MQTT Agent point to server {} with prefix {} and qos {}",broker,prefix,qos);
+
         this.handler = handler;
-        HashMap<String, String> config = new HashMap<String, String>();
-        config.put("host", (String) super.mediator.getProperty("org.eclipse.sensinact.gateway.northbound.mqtt.host"));
-        config.put("port", (String) super.mediator.getProperty("org.eclipse.sensinact.gateway.northbound.mqtt.port"));
-        config.put("qos", (String) super.mediator.getProperty("org.eclipse.sensinact.gateway.northbound.mqtt.qos"));
-        String broker = "tcp://" + config.get("host") + ":" + config.get("port");
-        int qos = Integer.valueOf(config.get("qos"));
-        this.agent = new GenericMqttAgent(broker, qos);
+
+        this.agent = new GenericMqttAgent(broker, qos,prefix);
         this.handler.setAgent(agent);
         this.registration = mediator.callService(Core.class, new Executable<Core, String>() {
             @Override

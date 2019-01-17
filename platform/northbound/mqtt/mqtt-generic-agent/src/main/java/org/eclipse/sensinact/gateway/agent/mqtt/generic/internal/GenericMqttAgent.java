@@ -16,6 +16,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,7 @@ import java.io.IOException;
 /**
  * Generic MQTT Agent
  */
-public class GenericMqttAgent {
+public class GenericMqttAgent extends AbstractMidAgentCallback {
     private static final Logger LOG = LoggerFactory.getLogger(GenericMqttAgent.class);
     private final String broker;
     private final int qos;
@@ -37,9 +38,15 @@ public class GenericMqttAgent {
      * @param qos    QoS for the session
      * @throws IOException
      */
-    public GenericMqttAgent(String broker, int qos) throws IOException {
+    public GenericMqttAgent(String broker, int qos,String prefix) throws IOException {
+        super();
+        LOG.debug("Connecting to broker {} with QoS {} and prefix {}",broker,qos,prefix);
         this.broker = broker;
         this.qos = qos;
+
+    }
+
+    private void connect(){
         MqttConnectOptions connOpts = new MqttConnectOptions();
         connOpts.setCleanSession(true);
         try {
@@ -62,6 +69,9 @@ public class GenericMqttAgent {
     }
 
     public void publish(String topic, MqttMessage message) {
+        if(this.client==null){
+            connect();
+        }
         try {
             this.client.publish(topic, message);
         } catch (MqttPersistenceException me) {
@@ -72,6 +82,7 @@ public class GenericMqttAgent {
             LOG.error("except " + me);
             me.printStackTrace();
         } catch (MqttException me) {
+            this.client=null;
             LOG.error("reason " + me.getReasonCode());
             LOG.error("msg " + me.getMessage());
             LOG.error("loc " + me.getLocalizedMessage());

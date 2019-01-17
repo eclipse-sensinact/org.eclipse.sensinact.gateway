@@ -84,11 +84,12 @@
         <module>free-sms</module>
         <module>kodi-profile</module>
         <module>mqtt-sb-profile</module>
-        <module>mqtt-agent-profile</module>
+        <module>mqtt-nb-profile</module>
         <module>mqtt-server</module>
         <module>openhab-profile</module>
         <module>openweather-profile</module>
         <module>onem2m</module>
+        <module>onem2m-mqttbinding</module>
         <module>rest-profile</module>
         <module>jsonpath-profile</module>
         <module>simulation-profile</module>

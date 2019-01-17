@@ -15,13 +15,13 @@
 
     <parent>
         <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-        <artifactId>mqtt-agent</artifactId>
+        <artifactId>mqtt</artifactId>
         <version>2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>mqtt-onem2m-agent</artifactId>
+    <artifactId>mqtt-agent</artifactId>
     <packaging>bundle</packaging>
-    <name>sensiNact IoT Gateway - MQTT oneM2M Northbound Agent</name>
+    <name>sensiNact IoT Gateway - MQTT Northbound Agent Instance</name>
 
     <dependencies>
         <dependency>
@@ -42,7 +42,7 @@
                     <instructions>
                         <Embed-Transitive>false</Embed-Transitive>
                         <Bundle-Activator>
-                            org.eclipse.sensinact.gateway.agent.mqtt.onem2m.osgi.Activator
+                            org.eclipse.sensinact.gateway.agent.mqtt.inst.osgi.Activator
                         </Bundle-Activator>
                         <Include-Resource>
                             about.html,
