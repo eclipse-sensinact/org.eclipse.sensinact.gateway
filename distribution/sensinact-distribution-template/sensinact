@@ -62,7 +62,7 @@ while [[ $# -gt 0 ]]; do
 			done
 
 			result=$(whiptail --title "sensiNact Profile Configurator" \
-				--checklist "Please select the profiles to activate" 26 46 16 ${files[@]} 2>&1 >/dev/tty)
+				--checklist "Please select the profiles to activate" 36 70 26 ${files[@]} 2>&1 >/dev/tty)
 			
 			if [ $? == 1 ]; then
 				echo "Cancelling"
