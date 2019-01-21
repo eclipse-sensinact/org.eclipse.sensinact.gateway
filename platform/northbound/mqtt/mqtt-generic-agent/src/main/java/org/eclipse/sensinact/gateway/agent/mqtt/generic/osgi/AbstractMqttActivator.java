@@ -39,12 +39,18 @@ public abstract class AbstractMqttActivator extends AbstractActivator<Mediator> 
         LOG.debug("Starting MQTT Agent");
         final String broker =mediator.getProperty("broker").toString();
         final String prefix =mediator.getProperty("prefix").toString();
+        final Object username=mediator.getProperty("username");
+        final Object password=mediator.getProperty("password");
         final Integer qos =new Integer(mediator.getProperty("qos").toString());
         LOG.debug("Starting MQTT Agent point to server {} with prefix {} and qos {}",broker,prefix,qos);
-
         this.handler = handler;
 
-        this.agent = new GenericMqttAgent(broker, qos,prefix);
+        if(username!=null&&password!=null&&!username.toString().trim().equals("")&&!password.toString().trim().equals("")){
+            this.agent = new GenericMqttAgent(broker, qos,prefix,username.toString(),password.toString());
+        }else {
+            this.agent = new GenericMqttAgent(broker, qos,prefix);
+        }
+
         this.handler.setAgent(agent);
         this.registration = mediator.callService(Core.class, new Executable<Core, String>() {
             @Override

@@ -59,7 +59,11 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
         serviceInfo.setName("info");
         provider.getServices().add(serviceAdmin);
         provider.getServices().add(serviceInfo);
-        MqttAuthentication authentication = new MqttAuthentication.Builder().username(configFile.getUsername()).password(configFile.getPassword()).build();
+        MqttAuthentication authentication = null;
+        if(configFile.getUsername()!=null && !configFile.getUsername().trim().equals("")&&
+                configFile.getPassword()!=null && !configFile.getPassword().trim().equals("") ){
+            authentication=new MqttAuthentication.Builder().username(configFile.getUsername()).password(configFile.getPassword()).build();
+        }
         MqttBroker broker = new MqttBroker.Builder().host(configFile.getHost()).port(configFile.getPort()).protocol(MqttBroker.Protocol.valueOf(configFile.getProtocol())).authentication(authentication).build();
         provider.setBroker(broker);
         provider.setIsDiscoveryOnFirstMessage(configFile.getDiscoveryOnFirstMessage());

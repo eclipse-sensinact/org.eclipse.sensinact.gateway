@@ -29,6 +29,8 @@ public class GenericMqttAgent extends AbstractMidAgentCallback {
     private static final Logger LOG = LoggerFactory.getLogger(GenericMqttAgent.class);
     private final String broker;
     private final int qos;
+    private final String username;
+    private final String password;
     private MqttClient client;
 
     /**
@@ -39,15 +41,24 @@ public class GenericMqttAgent extends AbstractMidAgentCallback {
      * @throws IOException
      */
     public GenericMqttAgent(String broker, int qos,String prefix) throws IOException {
+        this(broker,qos,prefix,null,null);
+    }
+
+    public GenericMqttAgent(String broker, int qos,String prefix,String username,String password) throws IOException {
         super();
         LOG.debug("Connecting to broker {} with QoS {} and prefix {}",broker,qos,prefix);
         this.broker = broker;
         this.qos = qos;
-
+        this.username=username;
+        this.password=password;
     }
 
     private void connect(){
         MqttConnectOptions connOpts = new MqttConnectOptions();
+        if (username != null && password!=null) {
+            connOpts.setUserName(username);
+            connOpts.setPassword(password.toCharArray());
+        }
         connOpts.setCleanSession(true);
         try {
             this.client = new MqttClient(this.broker, MqttClient.generateClientId(), new MemoryPersistence());
