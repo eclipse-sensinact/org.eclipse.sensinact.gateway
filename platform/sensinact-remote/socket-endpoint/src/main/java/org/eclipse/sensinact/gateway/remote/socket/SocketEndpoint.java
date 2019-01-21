@@ -21,6 +21,8 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Timer;
@@ -32,6 +34,7 @@ import java.util.TimerTask;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class SocketEndpoint extends AbstractRemoteEndpoint {
+    private static final Logger LOG= LoggerFactory.getLogger(SocketEndpoint.class.getName());
     public final static int BUFFER_SIZE = 64 * 1024;
     public final static int PORT = 54460;
     public final static int MAGIC = 0xDEADBEEF;
@@ -122,6 +125,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      * @return
      */
     protected JSONObject incomingRequest(JSONObject request) {
+        LOG.info("Incoming request {}",request.toString());
         String response = null;
         JSONObject accessMethodResponse = null;
         if (request == null) {
@@ -303,13 +307,15 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public String namespace() {
+        LOG.debug("Fetching namespace..");
         if (this.remoteNamespace == null && this.client != null) {
             String response = this.client.request(new JSONObject().put("uri", "/namespace"));
-
+            LOG.debug("Http Respose.. {}",response);
             if (response != null && response.length() > 0) {
                 this.remoteNamespace = response;
             }
         }
+        LOG.debug("Fetching namespace.. Result {}",this.remoteNamespace);
         return this.remoteNamespace;
     }
 
@@ -478,17 +484,24 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
      */
     @Override
     public void registerAgent(String identifier, SnaFilter filter, String agentKey) {
+        LOG.debug("Registering agent identifier {} filter {} agentkey {}",identifier,filter == null ? null : filter.toJSONObject().toString(),agentKey);
         if (!super.getConnected()) {
+            LOG.warn("Not connected, registering failed");
             return;
         }
         String uri = String.format("/agent?%s", identifier);
-        String response = this.client.request(new JSONObject(
-        	).put("uri", uri
-        	).put("agent", new JSONObject().put("agentKey", agentKey
-        	).put("filter", filter == null ? null : filter.toJSONObject())));
-        if (response != null) {
-            mediator.debug(response);
-        }
+
+        JSONObject requestJSON=new JSONObject(
+        ).put("uri", uri
+        ).put("agent", new JSONObject().put("agentKey", agentKey
+        ).put("filter", filter == null ? null : filter.toJSONObject()));
+
+        LOG.debug("Sending request {}",requestJSON.toString());
+
+        String response = this.client.request(requestJSON);
+
+        LOG.debug("Received response {}",response);
+
     }
 
     /**
@@ -517,16 +530,18 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
     @Override
     public void dispatch(String agentId, SnaMessage<?> message) {
         if (!super.getConnected()) {
+            LOG.warn("Not connected, dispatch failed");
             return;
         }
+
         String uri = String.format("/agent?%s", agentId);
         JSONObject object = new JSONObject(message.getJSON());
         String path = (String) object.remove("uri");
         object.put("uri", new StringBuilder().append("/").append(super.getLocalNamespace()).append(":").append(path.substring(1)).toString());
-        String response = this.client.request(new JSONObject().put("uri", uri).put("message", object));
-        if (response != null) {
-            mediator.debug(response.toString());
-        }
+        JSONObject requestJSON=new JSONObject().put("uri", uri).put("message", object);
+        LOG.debug("Sending request {}",requestJSON.toString());
+        String response = this.client.request(requestJSON);
+        LOG.debug("Received response {}",response);
     }
 
     /**
@@ -566,10 +581,10 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
             return null;
         }
         String uri = String.format("/all?%s", filter);
-        String response = this.client.request(new JSONObject().put("uri", uri).put("pkey", publicKey));
-        if (response != null) {
-            mediator.debug(response.toString());
-        }
+        JSONObject requestJSON=new JSONObject().put("uri", uri).put("pkey", publicKey);
+        LOG.debug("Sending request {}",requestJSON.toString());
+        String response = this.client.request(requestJSON);
+        LOG.debug("Received response {}",response);
         return response;
     }
 
@@ -583,10 +598,10 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
         if (!super.getConnected()) {
             return null;
         }
-        String response = this.client.request(new JSONObject().put("uri", "/providers").put("pkey", publicKey));
-        if (response != null) {
-            mediator.debug(response.toString());
-        }
+        JSONObject requestJSON=new JSONObject().put("uri", "/providers").put("pkey", publicKey);
+        LOG.debug("Sending request {}",requestJSON.toString());
+        String response = this.client.request(requestJSON);
+        LOG.debug("Received response {}",response);
         return response;
     }
 
@@ -601,10 +616,11 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
             return null;
         }
         String uri = String.format("/providers/%s", serviceProviderId);
-        String response = this.client.request(new JSONObject().put("uri", uri).put("pkey", publicKey));
-        if (response != null) {
-            mediator.debug(response.toString());
-        }
+
+        JSONObject requestJSON=new JSONObject().put("uri", uri).put("pkey", publicKey);
+        LOG.debug("Sending request {}",requestJSON.toString());
+        String response = this.client.request(requestJSON);
+        LOG.debug("Received response {}",response);
         return response;
     }
 
@@ -619,10 +635,11 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
             return null;
         }
         String uri = String.format("/providers/%s/services", serviceProviderId);
-        String response = this.client.request(new JSONObject().put("uri", uri).put("pkey", publicKey));
-        if (response != null) {
-            mediator.debug(response.toString());
-        }
+
+        JSONObject requestJSON=new JSONObject().put("uri", uri).put("pkey", publicKey);
+        LOG.debug("Sending request {}",requestJSON.toString());
+        String response = this.client.request(requestJSON);
+        LOG.debug("Received response {}",response);
         return response;
     }
 
@@ -637,10 +654,11 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
             return null;
         }
         String uri = String.format("/providers/%s/services/%s", serviceProviderId, serviceId);
-        String response = this.client.request(new JSONObject().put("uri", uri).put("pkey", publicKey));
-        if (response != null) {
-            mediator.debug(response.toString());
-        }
+
+        JSONObject requestJSON=new JSONObject().put("uri", uri).put("pkey", publicKey);
+        LOG.debug("Sending request {}",requestJSON.toString());
+        String response = this.client.request(requestJSON);
+        LOG.debug("Received response {}",response);
         return response;
     }
 
@@ -655,10 +673,11 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
             return null;
         }
         String uri = String.format("/providers/%s/services/%s/resources", serviceProviderId, serviceId);
-        String response = this.client.request(new JSONObject().put("uri", uri).put("pkey", publicKey));
-        if (response != null) {
-            mediator.debug(response.toString());
-        }
+
+        JSONObject requestJSON=new JSONObject().put("uri", uri).put("pkey", publicKey);
+        LOG.debug("Sending request {}",requestJSON.toString());
+        String response = this.client.request(requestJSON);
+        LOG.debug("Received response {}",response);
         return response;
     }
 
@@ -673,10 +692,11 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
             return null;
         }
         String uri = String.format("/providers/%s/services/%s/resources/%s", serviceProviderId, serviceId, resourceId);
-        String response = this.client.request(new JSONObject().put("uri", uri).put("pkey", publicKey));
-        if (response != null) {
-            mediator.debug(response.toString());
-        }
+
+        JSONObject requestJSON=new JSONObject().put("uri", uri).put("pkey", publicKey);
+        LOG.debug("Sending request {}",requestJSON.toString());
+        String response = this.client.request(requestJSON);
+        LOG.debug("Received response {}",response);
         return response;
     }
 
@@ -721,15 +741,19 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
             return null;
         }
         String uri = String.format("/providers/%s/services/%s/resources/%s/GET", serviceProviderId, serviceId, resourceId);
-        String response = this.client.request(new JSONObject().put("uri", uri).put("pkey", publicKey));
+
+        JSONObject requestJSON=new JSONObject().put("uri", uri).put("pkey", publicKey);
+        LOG.debug("Sending request {}",requestJSON.toString());
+        String response = this.client.request(requestJSON);
+        LOG.debug("Received response {}",response);
 
         JSONObject result = null;
         if (response != null) {
-            mediator.debug(response.toString());
+            LOG.debug("Received {}",response.toString());
             try {
                 result = new JSONObject(response);
             } catch (JSONException | NullPointerException e) {
-                mediator.error(e);
+                LOG.error("Failed getting result",e);
             }
         }
         return result;
@@ -760,14 +784,18 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
         object.put("value", value);
         parameters.put(object);
 
-        String response = this.client.request(new JSONObject().put("uri", uri).put("pkey", publicKey).put("parameters", parameters));
+        JSONObject requestJSON=new JSONObject().put("uri", uri).put("pkey", publicKey).put("parameters", parameters);
+        LOG.debug("Sending request {}",requestJSON.toString());
+        String response = this.client.request(requestJSON);
+        LOG.debug("Received response {}",response);
+
         JSONObject result = null;
         if (response != null) {
-            mediator.debug(response.toString());
+            LOG.debug("Received {}",response.toString());
             try {
                 result = new JSONObject(response);
             } catch (JSONException | NullPointerException e) {
-                mediator.error(e);
+                LOG.error("Failed creating result",e);
             }
         }
         return result;
@@ -795,14 +823,20 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
             object.put("value", value);
             parametersArray.put(object);
         }
-        String response = this.client.request(new JSONObject().put("uri", uri).put("pkey", publicKey).put("parameters", parametersArray));
+
+        JSONObject requestJSON=new JSONObject().put("uri", uri).put("pkey", publicKey).put("parameters", parametersArray);
+        LOG.debug("Sending request {}",requestJSON.toString());
+        String response = this.client.request(requestJSON);
+        LOG.debug("Received response {}",response);
+
+
         JSONObject result = null;
         if (response != null) {
-            mediator.debug(response.toString());
+            LOG.debug("Received {}",response.toString());
             try {
                 result = new JSONObject(response);
             } catch (JSONException | NullPointerException e) {
-                mediator.error(e);
+                LOG.error("Failed creating result",e);
             }
         }
         return result;
@@ -825,14 +859,20 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
         object.put("type", "string");
         object.put("value", subscriptionId);
         parametersArray.put(object);
-        String response = this.client.request(new JSONObject().put("uri", uri).put("pkey", publicKey).put("parameters", parametersArray));
+
+        JSONObject requestJSON=new JSONObject().put("uri", uri).put("pkey", publicKey).put("parameters", parametersArray);
+        LOG.debug("Sending request {}",requestJSON.toString());
+        String response = this.client.request(requestJSON);
+        LOG.debug("Received response {}",response);
+
+
         JSONObject result = null;
         if (response != null) {
-            mediator.debug(response.toString());
+            LOG.debug("Received {}",response.toString());
             try {
                 result = new JSONObject(response);
             } catch (JSONException | NullPointerException e) {
-                mediator.error(e);
+                LOG.error("Failed creating result",e);
             }
         }
         return result;
@@ -855,14 +895,20 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
         object.put("type", "array");
         object.put("value", conditions);
         parametersArray.put(object);
-        String response = this.client.request(new JSONObject().put("uri", uri).put("pkey", publicKey).put("parameters", parametersArray));
+
+        JSONObject requestJSON=new JSONObject().put("uri", uri).put("pkey", publicKey).put("parameters", parametersArray);
+        LOG.debug("Sending request {}",requestJSON.toString());
+        String response = this.client.request(requestJSON);
+        LOG.debug("Received response {}",response);
+
+
         JSONObject result = null;
         if (response != null) {
-            mediator.debug(response.toString());
+            LOG.debug("Received {}",response.toString());
             try {
                 result = new JSONObject(response);
             } catch (JSONException | NullPointerException e) {
-                mediator.error(e);
+                LOG.error("Failed creating result",e);
             }
         }
         return result;
