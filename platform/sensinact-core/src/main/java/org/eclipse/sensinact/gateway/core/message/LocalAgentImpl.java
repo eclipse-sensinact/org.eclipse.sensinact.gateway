@@ -19,7 +19,7 @@ import org.json.JSONException;
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class LocalAgentImpl extends AbstractAgent implements LocalAgent {
+public class LocalAgentImpl extends AbstractAgent implements LocalAgent,RemoteAgent {
 
 	// ********************************************************************//
 	// STATIC DECLARATIONS //
@@ -221,6 +221,6 @@ public class LocalAgentImpl extends AbstractAgent implements LocalAgent {
 	 */
 	@Override
 	public String[] getAgentInterfaces() {
-		return new String[] {SnaAgent.class.getName(), LocalAgent.class.getName()};
+		return new String[] {SnaAgent.class.getName(), LocalAgent.class.getName(),RemoteAgent.class.getName()};
 	}
 }
