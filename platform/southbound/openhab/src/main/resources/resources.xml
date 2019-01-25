@@ -29,9 +29,11 @@
             <method type="ACT">
                 <references>
                     <reference reference="POWER" passOn="true" xsi:type="constantReference">
-                        <constant type="string">
-                            <value>ON</value>
-                        </constant>
+                        <builder type="EMPTY">
+                            <argument type="string">
+                                <value>ON</value>
+                            </argument>
+                        </builder>
                     </reference>
                 </references>
             </method>
@@ -44,9 +46,11 @@
             <method type="ACT">
                 <references>
                     <reference reference="POWER" passOn="true" xsi:type="constantReference">
-                        <constant type="string">
-                            <value>OFF</value>
-                        </constant>
+                        <builder type="EMPTY">
+                            <argument type="string">
+                                <value>OFF</value>
+                            </argument>
+                        </builder>
                     </reference>
                 </references>
             </method>
