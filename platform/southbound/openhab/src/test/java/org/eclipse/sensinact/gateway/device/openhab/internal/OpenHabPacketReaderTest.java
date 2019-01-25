@@ -10,37 +10,17 @@
  */
 package org.eclipse.sensinact.gateway.device.openhab.internal;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
  * @author Stéphane Bergeon <stephane.bergeon@cea.fr
  */
 public class OpenHabPacketReaderTest {
-    
-    public OpenHabPacketReaderTest() {
-    }
-    
-    @BeforeClass
-    public static void setUpClass() {
-    }
-    
-    @AfterClass
-    public static void tearDownClass() {
-    }
-    
-    @Before
-    public void setUp() {
-    }
-    
-    @After
-    public void tearDown() {
-    }
 
     @Test
     public void testParseOpenhabPath_zwave_device_07150a2a_node21_alarm_general() {
@@ -67,7 +47,7 @@ public class OpenHabPacketReaderTest {
         testCreateProvider("zwave_device_07150a2a_node21_alarm_general");
     }
 
-    private String[]  testParseOpenhabPath(final String openhabDeviceId) {
+    private String[] testParseOpenhabPath(final String openhabDeviceId) {
         return testParseOpenhabPath(openhabDeviceId, null);
     }
 
@@ -99,5 +79,4 @@ public class OpenHabPacketReaderTest {
         assertNotNull("unexpected null provider", createdProvider);
         System.out.println("provider= " + createdProvider.toString());
     }
-
 }
