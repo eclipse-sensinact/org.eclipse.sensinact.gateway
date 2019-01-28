@@ -118,6 +118,9 @@ class ClientSocketThread implements Runnable {
         try {
             Socket s = new Socket();
             s.setReuseAddress(true);
+            s.setSoTimeout(0);      
+            s.setKeepAlive(true);
+            
             s.connect(new InetSocketAddress(remoteAddress, remotePort));
             this.holder = new SocketHolder(mediator, s);
         } catch (IOException e) {

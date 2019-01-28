@@ -10,38 +10,33 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.application;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import org.eclipse.sensinact.gateway.app.api.exception.ApplicationRuntimeException;
 import org.eclipse.sensinact.gateway.app.api.exception.LifeCycleException;
 import org.eclipse.sensinact.gateway.app.api.exception.ResourceNotFoundException;
 import org.eclipse.sensinact.gateway.app.manager.component.Component;
 import org.eclipse.sensinact.gateway.app.manager.component.ResourceDataProvider;
-import org.eclipse.sensinact.gateway.app.manager.json.AppCondition;
 import org.eclipse.sensinact.gateway.app.manager.json.AppContainer;
 import org.eclipse.sensinact.gateway.app.manager.json.AppSnaMessage;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.app.manager.watchdog.AppExceptionWatchDog;
-import org.eclipse.sensinact.gateway.common.constraint.Constraint;
-import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONObject;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * This class wraps the components and handles the lifecycle of the components
@@ -126,22 +121,18 @@ public class Application extends AbstractSensiNactApplication {
             for (Map.Entry<ResourceDataProvider, Collection<ResourceSubscription>> map : resourceSubscriptions.entrySet()) {
                 Collection<ResourceSubscription> resourceSubscriptions = map.getValue();
                 for (ResourceSubscription resourceSubscription : resourceSubscriptions) {
-                    String[] uriElements = UriUtils.getUriElements(resourceSubscription.getResourceUri());
+                	String[] uriElements = UriUtils.getUriElements(resourceSubscription.getResourceUri());
                     if (uriElements.length != 3) {
                         continue;
                     }
-                    Resource resource = super.getSession().resource(uriElements[0], uriElements[1], uriElements[2]);
-                    if (resource == null) {
-                        throw new ResourceNotFoundException("The resource " + resourceSubscription.getResourceUri() + " does not exist. Unable to subscribe to the resource.");
+                    DescribeResponse<JSONObject> response = super.getSession().getResource(uriElements[0], uriElements[1], uriElements[2]);
+                    if(response.getStatusCode()!=200) {
+                    	 throw new ResourceNotFoundException("The resource " + resourceSubscription.getResourceUri() + " is not accessible. Unable to subscribe to the resource.");
                     }
-                    Set<Constraint> constraints = new HashSet<Constraint>();
-                    if (resourceSubscription.getConditions() != null) {
-                        for (AppCondition condition : resourceSubscription.getConditions()) {
-                            constraints.add(condition.getConstraint());
-                        }
-                    }
-                    String subscriptionId = resource.subscribe(DataResource.VALUE, this, constraints).getSubscriptionId();
-                    resourceSubscription.setSubscriptionId(subscriptionId);
+                    String subscriptionId = super.getSession().subscribe(uriElements[0], uriElements[1], uriElements[2], this,
+                    		resourceSubscription.getConditionsAsJSONArray()).getSubscriptionId(); 
+                    System.out.println("SUBSCRIBING TO "+resourceSubscription.getResourceUri()+":" + subscriptionId);
+                	resourceSubscription.setSubscriptionId(subscriptionId);
                 }
             }
         } catch (ResourceNotFoundException e) {
@@ -160,18 +151,16 @@ public class Application extends AbstractSensiNactApplication {
         for (Map.Entry<ResourceDataProvider, Collection<ResourceSubscription>> map : resourceSubscriptions.entrySet()) {
             Collection<ResourceSubscription> resourceSubscriptions = map.getValue();
             for (ResourceSubscription resourceSubscription : resourceSubscriptions) {
-                Resource resource;
-                try {
-                    String[] uriElements = UriUtils.getUriElements(resourceSubscription.getResourceUri());
-
-                    if (uriElements.length != 3) {
-                        continue;
-                    }
-                    resource = super.getSession().resource(uriElements[0], uriElements[1], uriElements[2]);
-                } catch (NullPointerException e) {
+            	String[] uriElements = UriUtils.getUriElements(resourceSubscription.getResourceUri());
+                if (uriElements.length != 3) {
                     continue;
                 }
-                resource.unsubscribe(DataResource.VALUE, resourceSubscription.getSubscriptionId());
+                DescribeResponse<JSONObject> response = super.getSession().getResource(uriElements[0], uriElements[1], uriElements[2]);
+                if(response.getStatusCode()!=200) {
+                	 continue;
+                }
+                super.getSession().unsubscribe(uriElements[0], uriElements[1], uriElements[2], 
+                		resourceSubscription.getSubscriptionId());
             }
         }
         for (Map.Entry<String, Component> map : components.entrySet()) {
@@ -207,6 +196,7 @@ public class Application extends AbstractSensiNactApplication {
      * @see Recipient#callback(String, SnaMessage[])
      */
     public void callback(String callbackId, SnaMessage[] messages) throws Exception {
+    	System.out.println("CALLING BACK :" + messages[0].getJSON());
         waitingEvents.put(messages[0]);
         triggerNextEvent();
     }

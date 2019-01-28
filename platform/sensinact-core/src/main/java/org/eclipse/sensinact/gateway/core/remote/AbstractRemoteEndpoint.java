@@ -53,17 +53,16 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 		public void run() {
 			running = true;
 			while (running) {
-				if (AbstractRemoteEndpoint.this.getConnected()) {
-					try {
-						Thread.sleep(5000);
-					} catch (InterruptedException e) {
-						Thread.interrupted();
-						break;
-					}
-				} else {
+				boolean connected = AbstractRemoteEndpoint.this.getConnected();
+				if(!connected) {
 					AbstractRemoteEndpoint.this.doOpen();
 				}
-
+				try {						
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					Thread.interrupted();
+					break;
+				}
 			}
 		}
 
@@ -126,11 +125,12 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 
 	private final Object lock = new Object();
 	
+	private volatile boolean connected;
+	
 	protected final boolean automaticReconnection;
 	protected final Mediator mediator;
 
 	protected RemoteCore remoteCore;
-	private boolean connected;
 
 	protected Map<String, Recipient> recipients;
 	private ConnectionThread connectionThread;
@@ -138,8 +138,9 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator the {@link Mediator} allowing the {@link RemoteEndpoint} to be
-	 * instantiated to interact with the OSGi host environment
+	 * @param mediator
+	 *            the {@link Mediator} allowing the {@link RemoteEndpoint} to be
+	 *            instantiated to interact with the OSGi host environment
 	 */
 	public AbstractRemoteEndpoint(Mediator mediator) {
 		this(mediator, true);
@@ -148,10 +149,12 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator the {@link Mediator} allowing the {@link RemoteEndpoint} to be
-	 * instantiated to interact with the OSGi host environment
-	 * @param automaticReconnection defines whether the {@link RemoteEndpoint} to be 
-	 * instantiated will try to reconnect when the connection is closed unexpectedly
+	 * @param mediator
+	 *            the {@link Mediator} allowing the {@link RemoteEndpoint} to be
+	 *            instantiated to interact with the OSGi host environment
+	 * @param automaticReconnection
+	 *            defines whether the {@link RemoteEndpoint} to be instantiated will
+	 *            try to reconnect when the connection is closed unexpectedly
 	 */
 	public AbstractRemoteEndpoint(Mediator mediator, boolean automaticReconnection) {
 		this.mediator = mediator;
@@ -159,16 +162,10 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 		this.connected = false;
 		this.connectionThread = null;
 		this.automaticReconnection = automaticReconnection;
-	} 
-	
+	}
+
 	/**
-	 * Returns the connection status of this {@link RemoteEndpoint} as
-	 * a boolean value : true if connected, false if not connected
-	 * @return 
-	 * <ul>
-	 * 		<li>true if this {@link RemoteEndpoint} is connected</li>
-	 * 		<li>false otherwise</li>
-	 * </ul>
+	 * @return
 	 */
 	public boolean getConnected() {
 		boolean connected = false;
@@ -178,7 +175,12 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 		return connected;
 	}
 
+	/**
+	 * @param connected
+	 */
 	private void setConnected(boolean connected) {
+		System.out.println("SET CONNECTED "+connected);
+		Thread.dumpStack();
 		synchronized(lock) {			
 			this.connected = connected;
 		}
@@ -187,8 +189,8 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteEndpoint#
-	 * open(org.eclipse.sensinact.gateway.core.remote.RemoteCore)
+	 * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#
+	 *      open(org.eclipse.sensinact.gateway.core.RemoteCore)
 	 */
 	@Override
 	public void open(RemoteCore remoteCore) {
@@ -197,7 +199,8 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 			return;
 		}
 		this.remoteCore = remoteCore;
-		if (this.automaticReconnection) {
+		if (this.automaticReconnection && 
+			(this.connectionThread==null || !this.connectionThread.running)) {
 			this.connectionThread = new ConnectionThread();
 			new Thread(connectionThread).start();
 
@@ -207,8 +210,8 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	}
 
 	/**
-	 * This method is called when this {@link RemoteEndpoint} is connected to 
-	 * the remote one
+	 * This method is called when this {@link RemoteEndpoint} is connected to the
+	 * remote one
 	 */
 	protected void connected() {
 		this.setConnected(true);
@@ -218,33 +221,35 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteEndpoint#close()
+	 * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#close()
 	 */
 	@Override
 	public void close() {
-		this.connectionThread.stop();
+		if(this.connectionThread != null) {
+			this.connectionThread.stop();
+		}
 		this.doClose();
 		this.setConnected(false);
 	}
 
 	/**
-	 * This method is called when this {@link RemoteEndpoint} is disconnected from
+	 * This method is called when this AbstractRemoteEndpoint is disconnected from
 	 * the remote one
 	 */
 	protected void disconnected() {
 		if (!this.getConnected()) {
-			mediator.debug("Endpoint already disconnected");
 			return;
 		}
 		this.setConnected(false);
 		this.remoteCore.disconnect();
 	}
-	
+
 	/**
 	 * @inheritDoc
 	 *
-	 * @see fr.cea.sna.gateway.core.RemoteEndpoint#
-	 * jsonSubscribe(java.lang.String,java.lang.String, java.lang.String,fr.cea.sna.gateway.core.model.message.Recipient, org.json.JSONArray)
+	 * @see fr.cea.sna.gateway.core.RemoteEndpoint# jsonSubscribe(java.lang.String,
+	 *      java.lang.String, java.lang.String,
+	 *      fr.cea.sna.gateway.core.model.message.Recipient, org.json.JSONArray)
 	 */
 	@Override
 	public JSONObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
@@ -279,7 +284,7 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	 * @inheritDoc
 	 *
 	 * @see org.eclipse.sensinact.gateway.core.Sessions.SessionObserver#
-	 * disappearing(java.lang.String)
+	 *      disappearing(java.lang.String)
 	 */
 	@Override
 	public void disappearing(String publicKey) {

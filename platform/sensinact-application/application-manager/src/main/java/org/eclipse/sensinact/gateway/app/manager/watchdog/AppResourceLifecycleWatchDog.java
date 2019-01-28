@@ -74,8 +74,11 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
         // Testing that all resources exist at start
         for (String resourceUri : resourceUris) {
             try {
-                getResource(session, resourceUri).getName();
-
+            	 String[] uriElements = UriUtils.getUriElements(resourceUri);
+                 if (uriElements.length != 3 || session.getResource(uriElements[0], 
+                		 uriElements[1], uriElements[2]).getStatusCode()!=200) {
+                     throw new NullPointerException();
+                 }
             } catch (NullPointerException e) {
                 return new AppSnaMessage(this.mediator, "/AppManager", SnaErrorMessage.Error.SYSTEM_ERROR, "Resource " + resourceUri + " does not exist or you are not allowed to access it.");
             }

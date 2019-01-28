@@ -36,6 +36,13 @@ import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.TypeConfig;
+import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.message.SnaConstants;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod.DescribeType;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
@@ -43,6 +50,8 @@ import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.security.signature.exception.BundleValidationException;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -57,6 +66,7 @@ import org.osgi.framework.wiring.BundleWiring;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -152,11 +162,55 @@ public class TestSnaFunction extends TestCase {
         ServiceImpl service = serviceProvider.addService("LightService_SimulatedLight_001");
         ResourceImpl resource = service.addDataResource(PropertyResource.class, "DIM", int.class, 0);
         dimResource = resource.getProxy(new AccessTreeImpl<>(mediator).withAccessProfile(AccessProfileOption.ALL_ANONYMOUS));
+        
         Mockito.when(session.resource(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("TURN_ON"))).thenReturn(new StateActionResource(mediator, "TURN_ON", this));
 
         Mockito.when(session.resource(Mockito.eq("SimulatedTV_001"), Mockito.eq("DisplayService_SimulatedTV_001"), Mockito.eq("DISPLAY"))).thenReturn(new DisplayActionResource(mediator, this));
 
         Mockito.when(session.resource(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("DIM"))).thenReturn(dimResource);
+   
+        Mockito.when(session.getResource(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("TURN_ON"))).thenReturn(
+    		new DescribeResponse<JSONObject>(mediator, "/SimulatedLight_001/LightService_SimulatedLight_001/TURN_ON", Status.SUCCESS, DescribeType.RESOURCE) {
+    			{this.putValue(SnaConstants.RESPONSE_KEY, new JSONObject().put(Resource.TYPE, Resource.Type.ACTION.name()));}
+    		});
+        Mockito.when(session.getResource(Mockito.eq("SimulatedTV_001"), Mockito.eq("DisplayService_SimulatedTV_001"), Mockito.eq("DISPLAY"))).thenReturn(
+        	new DescribeResponse<JSONObject>(mediator, "/SimulatedTV_001/DisplayService_SimulatedTV_001/DISPLAY", Status.SUCCESS, DescribeType.RESOURCE) {
+    			{this.putValue(SnaConstants.RESPONSE_KEY, new JSONObject().put(Resource.TYPE, Resource.Type.ACTION.name()));}
+        	});
+        Mockito.when(session.getResource(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("DIM"))).thenReturn(
+        	new DescribeResponse<JSONObject>(mediator, "/SimulatedLight_001/LightService_SimulatedLight_001/DIM", Status.SUCCESS, DescribeType.RESOURCE) {
+    			{this.putValue(SnaConstants.RESPONSE_KEY, new JSONObject().put(Resource.TYPE, Resource.Type.PROPERTY.name()));}
+        	});
+        final ActResponse actionResponse = Mockito.mock(ActResponse.class);
+        Mockito.when(session.act(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("TURN_ON"), Mockito.any(Object[].class))).thenAnswer(
+        	new Answer<ActResponse>() {
+			@Override
+			public ActResponse answer(InvocationOnMock invocation) throws Throwable {
+				TestSnaFunction.this.setState("TURN_ON");
+				return actionResponse;
+			}        	
+        });
+
+        Mockito.when(session.act(Mockito.eq("SimulatedTV_001"), Mockito.eq("DisplayService_SimulatedTV_001"), Mockito.eq("DISPLAY"), Mockito.any(Object[].class))).thenAnswer(
+        	new Answer<ActResponse>() {
+			@Override
+			public ActResponse answer(InvocationOnMock invocation) throws Throwable {
+				Object[] objects = (Object[]) invocation.getArguments()[3];
+				TestSnaFunction.this.setDisplay((String) objects[0], (Integer)objects[1]);
+				return actionResponse;
+			}        	
+        });
+
+        final SetResponse setResponse = Mockito.mock(SetResponse.class);
+        Mockito.when(session.set(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("DIM"),Mockito.anyString(), Mockito.any(Object[].class))).thenAnswer(
+        	new Answer<SetResponse>() {
+			@Override
+			public SetResponse answer(InvocationOnMock invocation) throws Throwable {
+				Object[] objects = invocation.getArguments();
+				TestSnaFunction.this.dimResource.set(objects[4]);
+				return setResponse;
+			}        	
+        });
     }
 
     public void testActActionNoParameters() {

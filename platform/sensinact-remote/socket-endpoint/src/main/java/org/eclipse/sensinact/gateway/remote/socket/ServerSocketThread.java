@@ -50,9 +50,13 @@ class ServerSocketThread implements Runnable {
     @Override
     public void run() {
         try {
-            this.server = this.createServer();
-            mediator.debug("ServerSocket initialized... wait for socket connection");
-
+        	if(this.server == null) {
+        		this.server = this.createServer();
+        		mediator.debug("ServerSocket initialized... ");
+        	} else {
+        		mediator.debug("ServerSocket already exists...");
+        	}
+    		mediator.debug("... wait for socket connection");
         } catch (IOException e) {
             mediator.error(e);
 
@@ -66,6 +70,8 @@ class ServerSocketThread implements Runnable {
     private void run(ServerSocket server) {
         try {
             Socket socket = server.accept();
+            socket.setSoTimeout(0);
+            socket.setKeepAlive(true);
             this.holder = new SocketHolder(mediator, socket);
             mediator.debug("%s: Socket initialized", this);
 
@@ -94,6 +100,7 @@ class ServerSocketThread implements Runnable {
 
             } catch (SocketException e) {
                 mediator.error(e);
+                e.printStackTrace();
                 //the broken pipe exception does not conduct
                 //into an invalid socket status - So we enforce
                 //the loop exit
@@ -124,6 +131,7 @@ class ServerSocketThread implements Runnable {
 
     private ServerSocket createServer() throws IOException {
         ServerSocket server = new ServerSocket();
+        server.setSoTimeout(0);
         server.setReuseAddress(true);
         LOG.debug("Trying to bind server address socket on {}:{}",endpoint.getLocalAddress(), endpoint.getLocalPort());
         server.bind(new InetSocketAddress(localAddress, localPort));

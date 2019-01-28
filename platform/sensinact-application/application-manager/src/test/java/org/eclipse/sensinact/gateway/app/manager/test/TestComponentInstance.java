@@ -44,9 +44,13 @@ import org.eclipse.sensinact.gateway.core.TypeConfig;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod.DescribeType;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -148,10 +152,20 @@ public class TestComponentInstance extends TestCase implements TestResult {
                 return new JSONObject(message.getJSON()).getJSONObject("notification").getInt(DataResource.VALUE);
             }
         });
+        Mockito.when(getResponse.getStatusCode()).thenReturn(200);
         Mockito.when(getResponse.getResponse(DataResource.TYPE)).thenReturn("int");
         Mockito.when(resource.get(DataResource.TYPE)).thenReturn(getResponse);
         Mockito.when(resource.get(DataResource.VALUE)).thenReturn(getResponse);
         Mockito.when(session.resource(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(resource);
+
+        Mockito.when(session.get(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(getResponse);
+
+        Mockito.when(session.getResource(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(
+    		new DescribeResponse<JSONObject>(mediator, "/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider", Status.SUCCESS, DescribeType.RESOURCE) {});
+
+        Mockito.when(session.subscribe(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Recipient.class), Mockito.any(JSONArray.class))).thenReturn(
+    		subscribeResponse);
+        
         Mockito.when(subscribeResponse.getResponse(String.class, SnaConstants.SUBSCRIBE_ID_KEY)).thenReturn("id");
         Mockito.when(resource.subscribe(Mockito.anyString(), Mockito.any(Recipient.class), Mockito.anySet())).thenReturn(subscribeResponse);
         Mockito.when(device.getName()).thenReturn("TestAppDevice");

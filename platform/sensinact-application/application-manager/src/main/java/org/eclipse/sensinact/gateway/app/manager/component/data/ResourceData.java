@@ -13,10 +13,14 @@ package org.eclipse.sensinact.gateway.app.manager.component.data;
 import org.eclipse.sensinact.gateway.app.api.function.DataItf;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Metadata;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.Session;
+import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.json.JSONObject;
 
 /**
  * This class acts as a proxy to a sNa resource
@@ -41,26 +45,59 @@ public class ResourceData implements DataItf {
         return uri;
     }
 
-    /**
-     * The resource registered in the OSGi registry.
-     *
-     * @return the resource. Null if the resource does not exist
-     */
-    public Resource getResource() {
-        String[] uriElements = UriUtils.getUriElements(getSourceUri());
+    private DescribeResponse<JSONObject> describe() {
+    	String[] uriElements = UriUtils.getUriElements(getSourceUri());
         if (uriElements.length != 3) {
             return null;
         }
-        return session.resource(uriElements[0], uriElements[1], uriElements[2]);
-    }
+        DescribeResponse<JSONObject> response = this.session.getResource(uriElements[0], uriElements[1], uriElements[2]);
+        if(response == null || response.getStatusCode()!=200) {
+        	 return null;
+        }
+        return response;
+    } 
+    
+    private GetResponse get() {
+    	String[] uriElements = UriUtils.getUriElements(getSourceUri());
+        if (uriElements.length != 3) {
+            return null;
+        }
+        GetResponse response = this.session.get(uriElements[0], uriElements[1], uriElements[2],DataResource.VALUE);
+        if(response == null || response.getStatusCode()!=200) {
+        	 return null;
+        }
+        return response;
+    } 
 
+    public SetResponse set(Object value) {
+    	String[] uriElements = UriUtils.getUriElements(getSourceUri());
+        if (uriElements.length != 3) {
+            return null;
+        }
+        SetResponse response = this.session.set(uriElements[0], uriElements[1], uriElements[2],DataResource.VALUE, value);
+        return response;
+    } 
+
+    public ActResponse act(Object[] parameters) {
+    	String[] uriElements = UriUtils.getUriElements(getSourceUri());
+        if (uriElements.length != 3) {
+            return null;
+        }
+        ActResponse response = this.session.act(uriElements[0], uriElements[1], uriElements[2],parameters);
+        return response;
+    } 
+    
     /**
      * Get the value of the {@link Resource}
      *
      * @return the value
      */
     public Object getValue() {
-        return getResource().get(DataResource.VALUE).getResponse(DataResource.VALUE);
+    	GetResponse response = get();
+    	if(response == null) {
+    		return null;
+    	}
+        return response.getResponse(DataResource.VALUE);
     }
 
     /**
@@ -69,7 +106,24 @@ public class ResourceData implements DataItf {
      * @return the Java type
      */
     public Class<?> getType() {
-        return CastUtils.jsonTypeToJavaType((String) getResource().get(DataResource.VALUE).getResponse(DataResource.TYPE));
+    	GetResponse response = get();
+    	if(response == null) {
+    		return null;
+    	}
+        return CastUtils.jsonTypeToJavaType((String) response.getResponse(DataResource.TYPE));
+    }
+
+    /**
+     * Get the ResourceType of the {@link Resource}
+     *
+     * @return the String ResourceType
+     */
+    public String getResourceType() {
+    	DescribeResponse<JSONObject> response = describe();
+    	if(response == null) {
+    		return null;
+    	}
+        return (String) response.getResponse().get(DataResource.TYPE);
     }
 
     /**
@@ -78,6 +132,10 @@ public class ResourceData implements DataItf {
      * @return the timestamp of the data
      */
     public long getTimestamp() {
-        return getResource().get(DataResource.VALUE).getResponse(Long.class, Metadata.TIMESTAMP);
+    	GetResponse response = get();
+    	if(response == null) {
+    		return 0;
+    	}
+        return response.getResponse(Long.class, Metadata.TIMESTAMP);
     }
 }

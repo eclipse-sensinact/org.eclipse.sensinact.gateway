@@ -128,6 +128,9 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
         LOG.info("Incoming request {}",request.toString());
         String response = null;
         JSONObject accessMethodResponse = null;
+        System.out.println(".......................................");
+        System.out.println(request);
+        System.out.println(".......................................");
         if (request == null) {
             return null;
         }
@@ -341,6 +344,9 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
 
             messagesArray.put(object);
         }
+        System.out.println(".......................................");
+        System.out.println("CALLBACK ["+callbackId+"]:\n"+messagesArray);
+        System.out.println(".......................................");
         String response = this.client.request(new JSONObject().put("uri", uri).put("messages", messagesArray));
         if (!JSONObject.NULL.equals(response)) {
             mediator.debug(response.toString());
@@ -418,7 +424,9 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
                     }
                     if (SocketEndpoint.this.namespace() != null) {
                         mediator.debug("Client socket thread connected - \n\tremote namespace : %s", SocketEndpoint.this.remoteNamespace);
-                        SocketEndpoint.this.connectionTimer.cancel();
+                        if(SocketEndpoint.this.connectionTimer!=null) {
+                        	SocketEndpoint.this.connectionTimer.cancel();
+                        }
                     }
                 } catch (Exception e) {
                     mediator.error(e);

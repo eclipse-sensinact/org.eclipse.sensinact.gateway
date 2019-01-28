@@ -48,6 +48,7 @@ public class SocketInputStreamReader {
         while (true) {
         	read = input.read();
         	if(read == -1) {
+        		System.out.println("=========>>>>>>    READ -1 ");
         		throw new ConnectException();
         	}
             eof = ( read == '\0') ;

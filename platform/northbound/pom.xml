@@ -27,7 +27,7 @@
 
 	<modules>
 	    <module>rest-access</module>
-        <module>jsonpath-filtering</module>
+        <!--  <module>jsonpath-filtering</module>-->
         <module>geo-filtering</module>
         <module>ldap-filtering</module>
         <module>mqtt</module>

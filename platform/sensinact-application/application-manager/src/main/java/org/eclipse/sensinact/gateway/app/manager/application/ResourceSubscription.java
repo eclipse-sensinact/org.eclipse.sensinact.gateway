@@ -10,9 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.application;
 
-import org.eclipse.sensinact.gateway.app.manager.json.AppCondition;
-
 import java.util.Set;
+
+import org.eclipse.sensinact.gateway.app.manager.json.AppCondition;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * @author Rémi Druilhe
@@ -26,7 +28,7 @@ public class ResourceSubscription {
         this.resourceUri = resourceUri;
         this.conditions = conditions;
     }
-
+    
     public String getResourceUri() {
         return resourceUri;
     }
@@ -42,4 +44,14 @@ public class ResourceSubscription {
     void setSubscriptionId(String subscriptionId) {
         this.subscriptionId = subscriptionId;
     }
+
+	public JSONArray getConditionsAsJSONArray() {
+        JSONArray constraints = new JSONArray();
+        if (this.conditions != null) {
+            for (AppCondition condition : getConditions()) {
+                constraints.put(new JSONObject(condition.getConstraint().getJSON()));
+            }
+        }
+        return constraints;
+	}
 }
