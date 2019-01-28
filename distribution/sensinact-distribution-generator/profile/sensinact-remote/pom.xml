@@ -64,5 +64,10 @@
             <artifactId>socket-endpoint</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.sensinact.gateway.remote</groupId>
+            <artifactId>socket-endpoint-sample</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>
