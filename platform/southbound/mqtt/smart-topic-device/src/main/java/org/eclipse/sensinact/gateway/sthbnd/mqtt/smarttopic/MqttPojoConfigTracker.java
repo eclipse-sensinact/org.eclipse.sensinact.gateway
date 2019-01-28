@@ -100,6 +100,7 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
                         if (resource.getTopic() != null) {
                             MqttTopic topic = new MqttTopic(resource.getTopic(), listener);
                             broker.subscribeToTopic(topic);
+                            broker.connect();
                         } else {
                             LOG.warn("Failed to register device {}, topic assigned cannot be null", provider.getName());
                         }

@@ -12,7 +12,7 @@ package org.eclipse.sensinact.gateway.sthbnd.mqtt.api;
 
 public class MqttSession {
     private static final Boolean DEFAULT_CLEAN_SESSION = Boolean.TRUE;
-    private static final Boolean DEFAULT_AUTO_RECONNECT = Boolean.TRUE;
+    private static final Boolean DEFAULT_AUTO_RECONNECT = Boolean.FALSE;
     private Integer maxInFlight;
     private Integer keepAliveInterval;
     private Boolean cleanSession;

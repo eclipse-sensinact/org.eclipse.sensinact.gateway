@@ -27,41 +27,14 @@ import static org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfigura
  *
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
-public abstract class MqttActivator extends AbstractActivator<Mediator> {
-    protected MqttProtocolStackEndpoint endPoint;
+public abstract class MqttActivator extends GenericProtocolStackendpoint {
 
     @Override
-    public void doStart() throws Exception {
-        ExtModelConfiguration<MqttPacket> configuration = ExtModelConfigurationBuilder.instance(
-    		mediator, MqttPacket.class
-    		).withServiceBuildPolicy((byte) (BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
-    		).withResourceBuildPolicy((byte) (BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
-    		).withStartAtInitializationTime(true
-    		).build("mqtt-resource.xml", Collections.emptyMap());
-        endPoint = new MqttProtocolStackEndpoint(mediator);
-        this.connect(configuration);
+    public MqttProtocolStackEndpoint getEndPoint() {
+        return new MqttProtocolStackEndpoint(mediator);
     }
 
-    /**
-     * @param configuration the configuration for the bridge
-     * @throws InvalidProtocolStackException
-     */
-    protected void connect( ExtModelConfiguration<MqttPacket> configuration) throws InvalidProtocolStackException {
-        endPoint.connect(configuration);
-        endPoint.connectBrokers();
-    }
-
-    @Override
-    public void doStop() {
-        try {
-            endPoint.stop();
-        } finally {
-            endPoint = null;
-        }
-    }
-
-    @Override
-    public Mediator doInstantiate(BundleContext context) {
-        return new Mediator(context);
+    public Class getPacketClass(){
+        return MqttPacket.class;
     }
 }

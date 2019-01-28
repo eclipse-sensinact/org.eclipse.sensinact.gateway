@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.api;
 
+import org.eclipse.sensinact.gateway.generic.annotation.Get;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.Data;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.GoodbyeMessage;

@@ -10,10 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttActivator;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttAuthentication;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttBroker;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.listener.MqttConnectionHandler;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.device.MqttPropertyFileConfig;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Resource;
@@ -65,7 +67,9 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
             authentication=new MqttAuthentication.Builder().username(configFile.getUsername()).password(configFile.getPassword()).build();
         }
         MqttBroker broker = new MqttBroker.Builder().host(configFile.getHost()).port(configFile.getPort()).protocol(MqttBroker.Protocol.valueOf(configFile.getProtocol())).authentication(authentication).build();
+
         provider.setBroker(broker);
+
         provider.setIsDiscoveryOnFirstMessage(configFile.getDiscoveryOnFirstMessage());
         if (configFile != null && configFile.getLatitude() != null && configFile.getLongitude() != null) {
             try {

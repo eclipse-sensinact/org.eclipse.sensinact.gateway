@@ -48,15 +48,8 @@ public class MqttBroker {
     private MqttConnectionHandler handler;
     private MqttClient client;
 
-    private MqttBroker(Builder builder) {
+    private MqttBroker() {
         this.clientId = UUID.randomUUID().toString();
-        this.host = builder.host;
-        this.port = builder.port;
-        this.protocol = builder.protocol;
-        this.session = builder.session;
-        this.authentication = builder.authentication;
-        this.topics = builder.topics;
-        this.handler = builder.handler;
     }
 
     public String getClientId() {
@@ -84,13 +77,8 @@ public class MqttBroker {
     }
 
     public void subscribeToTopic(MqttTopic topic) {
-        try {
-            client.subscribe(topic.getTopic(), topic.getListener());
-            topics.add(topic);
-            LOG.info("Subscription to the topic {} done", topic.getTopic());
-        } catch (MqttException e) {
-            LOG.error("Unable to subscribe to the topic {}", topic.getTopic());
-        }
+        topics.add(topic);
+        LOG.info("Subscription to the topic {} added to the list", topic.getTopic());
     }
 
     public void unsubscribeFromTopic(MqttTopic topic) {
@@ -137,10 +125,16 @@ public class MqttBroker {
                 connectOptions.setSSLProperties(authentication.getSslProperties());
             }
         }
-        LOG.info("Connecting to broker: {}", brokerUrl);
-        if (handler != null) {
-            client.setCallback(handler);
+
+        if (handler == null) {
+            LOG.info("Custom Connection Handler not defined, using default reconnection for {}", brokerUrl);
+            this.handler=new MqttConnectionHandlerImpl(this);
         }
+
+        client.setCallback(handler);
+
+        LOG.info("Connecting to broker: {}", brokerUrl);
+
         try {
             if (!client.isConnected()) {
                 client.connect(connectOptions);
@@ -154,7 +148,6 @@ public class MqttBroker {
             if (handler != null) {
                 handler.connectionFailed(this);
             }
-            client = null;
             LOG.error("Failed to connect to MQTT broker", e);
         }
         LOG.info("Connected to broker: {}:{}", this.host, this.port);
@@ -169,18 +162,26 @@ public class MqttBroker {
     }
 
     public synchronized void disconnect() throws MqttException {
-        if (client.isConnected()) {
-            for (java.util.Iterator it = topics.iterator(); it.hasNext();) {
-                MqttTopic topic=null;
-                try {
-                    topic=(MqttTopic) it.next();
-                    client.unsubscribe(topic.getTopic());
-                    it.remove();
-                    LOG.info("Unsubscription to the topic {} done", topic.getTopic());
-                } catch (MqttException e) {
-                    LOG.error("Unable to unsubscribe from the topic {}", topic.getTopic());
-                }
+
+        List<MqttTopic> removalTopic=new ArrayList<>();
+        //Avoid reconnection on voluntary disconnection
+        setHandler(null);
+        for (java.util.Iterator it = topics.iterator(); it.hasNext();) {
+            MqttTopic topic=null;
+            try {
+                topic=(MqttTopic) it.next();
+                LOG.info("Unsubscribing from topic {} done", topic.getTopic());
+                client.unsubscribe(topic.getTopic());
+                removalTopic.add(topic);
+                LOG.info("Unsubscription to the topic {} done", topic.getTopic());
+            } catch (MqttException e) {
+                LOG.error("Unable to unsubscribe from the topic {}", topic.getTopic());
             }
+        }
+
+        topics.removeAll(removalTopic);
+
+        if (client!=null&&client.isConnected()) {
             client.disconnect();
             client = null;
             LOG.info("Disconnected from MQTT broker: {}", this.host);
@@ -195,6 +196,26 @@ public class MqttBroker {
 
     public void setSession(MqttSession session) {
         this.session = session;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public void setProtocol(Protocol protocol) {
+        this.protocol = protocol;
+    }
+
+    public void setAuthentication(MqttAuthentication authentication) {
+        this.authentication = authentication;
+    }
+
+    public void setHandler(MqttConnectionHandler handler) {
+        this.handler = handler;
     }
 
     /**
@@ -251,7 +272,60 @@ public class MqttBroker {
         }
 
         public MqttBroker build() {
-            return new MqttBroker(this);
+            MqttBroker broker=new MqttBroker();
+            broker.handler=handler;
+            broker.topics=topics;
+            broker.authentication=authentication;
+            broker.host=this.host;
+            broker.port=this.port;
+            broker.protocol=this.protocol;
+            broker.session=this.session;
+            broker.authentication=this.authentication;
+            broker.topics=this.topics;
+            broker.handler=this.handler;
+            return broker;
+        }
+    }
+
+    private class MqttConnectionHandlerImpl extends MqttConnectionHandler {
+        public MqttConnectionHandlerImpl(MqttBroker broker) {
+            super(broker);
+        }
+
+        @Override
+        public void connectionFailed(MqttBroker broker) {
+            try {
+                Thread.sleep(5000);
+                broker.connect();
+            } catch (MqttException e) {
+                LOG.debug("Connection Failed with {}://{}:{}",broker.getProtocol().name(),broker.getHost(),broker.getPort());
+            } catch (InterruptedException e) {
+                LOG.error("Connection Failed with {}://{}:{}",broker.getProtocol().name(),broker.getHost(),broker.getPort());
+            }
+        }
+
+        @Override
+        public void connectionEstablished(MqttBroker broker) {
+            LOG.debug("Connection with {}://{}:{} established",broker.getProtocol().name(),broker.getHost(),broker.getPort());
+            for(MqttTopic topic:topics){
+                try {
+                    LOG.info("Subscription to the topic {} done", topic.getTopic());
+                    client.subscribe(topic.getTopic(),topic.getListener());
+                } catch (Exception e) {
+                    LOG.error("Unable to subscribe to the topic {}", topic.getTopic());
+                }
+
+            }
+
+        }
+
+        @Override
+        public void connectionLost(MqttBroker broker) {
+            try {
+                broker.connect();
+            } catch (MqttException e) {
+                LOG.debug("Connection Lost with {}://{}:{}",broker.getProtocol().name(),broker.getHost(),broker.getPort());
+            }
         }
     }
 }

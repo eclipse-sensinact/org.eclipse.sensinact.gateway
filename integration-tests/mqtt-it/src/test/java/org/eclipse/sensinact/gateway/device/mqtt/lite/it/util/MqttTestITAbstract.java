@@ -29,6 +29,7 @@ import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttBroker;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.listener.MqttConnectionHandler;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Resource;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Service;
