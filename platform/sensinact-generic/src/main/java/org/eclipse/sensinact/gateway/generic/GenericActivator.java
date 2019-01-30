@@ -1,18 +1,15 @@
-package org.eclipse.sensinact.gateway.sthbnd.mqtt;
+package org.eclipse.sensinact.gateway.generic;
 
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration;
-import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
-import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
-import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 
 import org.osgi.framework.BundleContext;
 
 import java.util.Collections;
 
-public abstract class GenericProtocolStackendpoint extends AbstractActivator<Mediator> {
+public abstract class GenericActivator extends AbstractActivator<Mediator> {
 
     protected LocalProtocolStackEndpoint endPoint;
 

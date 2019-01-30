@@ -8,26 +8,21 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.sthbnd.mqtt;
-
+package org.eclipse.sensinact.gateway.sthbnd.inovallee;
 
 import org.eclipse.sensinact.gateway.generic.GenericActivator;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttPacket;
-
 
 /**
  * sensiNact bundle activator
- *
- * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
-public abstract class MqttActivator extends GenericActivator {
+public abstract class InovalleeActivator extends GenericActivator {
 
     @Override
-    public MqttProtocolStackEndpoint getEndPoint() {
-        return new MqttProtocolStackEndpoint(mediator);
+    public InovalleeProtocolStackEndpoint getEndPoint() {
+        return new InovalleeProtocolStackEndpoint(mediator);
     }
 
     public Class getPacketClass(){
-        return MqttPacket.class;
+        return InovalleePacket.class;
     }
 }
