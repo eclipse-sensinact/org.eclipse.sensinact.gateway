@@ -228,7 +228,7 @@ public abstract class MidOSGiTest implements BundleContextProvider {
         configuration.put("felix.cache.rootdir", felixDir.getPath());
         configuration.put("org.osgi.framework.storage", "felix-cache");
         configuration.put("org.osgi.framework.bootdelegation", "*");
-        configuration.put("org.osgi.framework.system.packages.extra", "org.eclipse.sensinact.gateway.test," + "com.sun.net.httpserver," + "javax.activation," + "javax.net.ssl," + "javax.xml.parsers," + "javax.imageio," + "javax.management," + "javax.naming," + "javax.sql," + "javax.swing," + "javax.swing.border," + "javax.swing.event," + "javax.management.modelmbean," + "javax.management.remote," + "javax.security.auth," + "javax.security.cert," + "org.w3c.dom," + "org.xml.sax," + "org.xml.sax.helpers," + "sun.misc," + "javax.mail," + "javax.mail.internet," + "sun.security.action");
+        configuration.put("org.osgi.framework.system.packages.extra", "org.eclipse.sensinact.gateway.test,org.slf4j," + "com.sun.net.httpserver," + "javax.activation," + "javax.net.ssl," + "javax.xml.parsers," + "javax.imageio," + "javax.management," + "javax.naming," + "javax.sql," + "javax.swing," + "javax.swing.border," + "javax.swing.event," + "javax.management.modelmbean," + "javax.management.remote," + "javax.security.auth," + "javax.security.cert," + "org.w3c.dom," + "org.xml.sax," + "org.xml.sax.helpers," + "sun.misc," + "javax.mail," + "javax.mail.internet," + "sun.security.action");
         configuration.put("org.osgi.framework.storage.clean", "onFirstInit");
         configuration.put("felix.auto.deploy.action", "install");
         configuration.put("felix.log.level", "4");

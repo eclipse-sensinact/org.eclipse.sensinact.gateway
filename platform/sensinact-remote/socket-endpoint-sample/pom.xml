@@ -83,7 +83,13 @@
 			<artifactId>org.apache.felix.http.jetty</artifactId>
 			<version>3.0.0</version>
 			<scope>test</scope>
-		</dependency>	
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	
 	<build>
@@ -273,6 +279,20 @@
 									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>light.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.slf4j</groupId>
+									<artifactId>slf4j-api</artifactId>
+									<version>${slf4j.version}</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>slf4j-api.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.slf4j</groupId>
+									<artifactId>slf4j-simple</artifactId>
+									<version>${slf4j.version}</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>slf4j-impl.jar</destFileName>
 								</artifactItem>
 							</artifactItems>
 						</configuration>

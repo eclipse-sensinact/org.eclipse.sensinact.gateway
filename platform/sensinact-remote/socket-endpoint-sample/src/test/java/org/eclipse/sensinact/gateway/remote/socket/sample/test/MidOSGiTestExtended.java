@@ -161,10 +161,11 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         if (System.getSecurityManager() == null) {
             configuration.put("org.osgi.framework.security", "osgi");
         }
+
         configuration.put("felix.cache.rootdir", felixDir.getPath());
         configuration.put("org.osgi.framework.storage", cacheDir.getName());
         configuration.put("org.osgi.framework.bootdelegation", "*");
-        configuration.put("org.osgi.framework.system.packages.extra", "org.eclipse.sensinact.gateway.test," + "com.sun.net.httpserver," + "javax.activation," + "javax.net.ssl," + "javax.xml.parsers," + "javax.imageio," + "javax.management," + "javax.naming," + "javax.sql," + "javax.swing," + "javax.swing.border," + "javax.swing.event," + "javax.management.modelmbean," + "javax.management.remote," + "javax.security.auth," + "javax.security.cert," + "org.w3c.dom," + "org.xml.sax," + "org.xml.sax.helpers," + "sun.misc," + "javax.mail," + "javax.mail.internet," + "sun.security.action");
+        configuration.put("org.osgi.framework.system.packages.extra", "org.eclipse.sensinact.gateway.test,org.slf4j,org.slf4j.impl," + "com.sun.net.httpserver," + "javax.activation," + "javax.net.ssl," + "javax.xml.parsers," + "javax.imageio," + "javax.management," + "javax.naming," + "javax.sql," + "javax.swing," + "javax.swing.border," + "javax.swing.event," + "javax.management.modelmbean," + "javax.management.remote," + "javax.security.auth," + "javax.security.cert," + "org.w3c.dom," + "org.xml.sax," + "org.xml.sax.helpers," + "sun.misc," + "javax.mail," + "javax.mail.internet," + "sun.security.action");
         configuration.put("org.osgi.framework.storage.clean", "onFirstInit");
         configuration.put("felix.auto.deploy.action", "install");
         configuration.put("felix.log.level", "4");
@@ -252,7 +253,7 @@ public class MidOSGiTestExtended extends MidOSGiTest {
     @SuppressWarnings("unchecked")
     protected void doInit(Map configuration) {
         configuration.put("felix.auto.start.1", "file:target/felix/bundle/org.osgi.compendium.jar " + "file:target/felix/bundle/org.apache.felix.configadmin.jar " + "file:target/felix/bundle/org.apache.felix.framework.security.jar ");
-        configuration.put("felix.auto.install.2", "file:target/felix/bundle/sensinact-utils.jar " + "file:target/felix/bundle/sensinact-common.jar " + "file:target/felix/bundle/sensinact-datastore-api.jar " + "file:target/felix/bundle/sensinact-framework-extension.jar " + "file:target/felix/bundle/sensinact-security-none.jar " + "file:target/felix/bundle/sensinact-generic.jar ");
+        configuration.put("felix.auto.install.2", "file:target/felix/bundle/slf4j-api.jar file:target/felix/bundle/slf4j-impl.jar  file:target/felix/bundle/sensinact-utils.jar " + "file:target/felix/bundle/sensinact-common.jar " + "file:target/felix/bundle/sensinact-datastore-api.jar " + "file:target/felix/bundle/sensinact-framework-extension.jar " + "file:target/felix/bundle/sensinact-security-none.jar " + "file:target/felix/bundle/sensinact-generic.jar ");
 
         configuration.put("felix.auto.start.2", "file:target/felix/bundle/sensinact-test-configuration.jar " + "file:target/felix/bundle/org.apache.felix.fileinstall.jar " + "file:target/felix/bundle/sensinact-signature-validator.jar " + "file:target/felix/bundle/sensinact-core.jar ");
         configuration.put("felix.auto.start.3", "file:target/felix/bundle/javax.servlet-api.jar " + "file:target/felix/bundle/org.apache.felix.http.api.jar " + "file:target/felix/bundle/org.apache.felix.http.jetty.jar " + "file:target/felix/bundle/http.jar " + "file:target/felix/bundle/sensinact-northbound-access.jar " + "file:target/felix/bundle/rest-access.jar " + "file:target/felix/bundle/socket-endpoint.jar ");

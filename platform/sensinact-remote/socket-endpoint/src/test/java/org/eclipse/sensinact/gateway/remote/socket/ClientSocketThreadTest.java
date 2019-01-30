@@ -10,11 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.remote.socket;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -51,7 +47,8 @@ public class ClientSocketThreadTest {
     public void testUUIDtoTimeStamp() {
         final long timestamp = System.currentTimeMillis();
         try {
-            ClientSocketThread instance = new ClientSocketThread(null, null, "localhost", 80);
+            SocketEndpoint se=new SocketEndpoint(null,"","",8,"",8);
+            ClientSocketThread instance = new ClientSocketThread(null, se, "localhost", 80);
             final String uuid = instance.generateUUID(timestamp);
             System.out.print("at " + timestamp);
             System.out.println(" generated uuid= " + uuid);

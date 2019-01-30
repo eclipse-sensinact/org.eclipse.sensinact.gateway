@@ -24,6 +24,8 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import static org.junit.Assert.assertEquals;
 
@@ -31,6 +33,9 @@ import static org.junit.Assert.assertEquals;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class SocketEndpointManagerTest {
+
+    private static Logger LOG=LoggerFactory.getLogger(SocketEndpointManagerTest.class);
+
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
@@ -226,6 +231,7 @@ public class SocketEndpointManagerTest {
     }
 
     private int waitStackSize(int limit){
+        LOG.debug("Waiting {}",limit);
         int wait = 60*1000;
         int size = 0;
         while(true) {
