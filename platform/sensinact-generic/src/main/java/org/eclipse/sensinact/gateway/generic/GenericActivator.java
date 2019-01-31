@@ -4,10 +4,12 @@ import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
-
+import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
+import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.osgi.framework.BundleContext;
 
 import java.util.Collections;
+import java.util.List;
 
 public abstract class GenericActivator extends AbstractActivator<Mediator> {
 
@@ -54,4 +56,8 @@ public abstract class GenericActivator extends AbstractActivator<Mediator> {
 
     public abstract Class getPacketClass();
 
+	protected void processPackets(List<? extends Packet> packets) throws InvalidPacketException {
+		for (Packet p : packets)
+			endPoint.process(p);
+	}   
 }

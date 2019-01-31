@@ -21,13 +21,13 @@ import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID
 public class InovalleePacket implements Packet {
 
     @ServiceProviderID
-    protected String providerId;
+    private String providerId;
     @ServiceID
-    protected String serviceId;
+    private String serviceId;
     @ResourceID
-    protected String resourceId;
+    private String resourceId;
     @Data
-    protected String payload;
+    private String payload;
     @HelloMessage
     private boolean helloMessage;
     @GoodbyeMessage
@@ -37,6 +37,10 @@ public class InovalleePacket implements Packet {
         this.providerId = providerId;
     }
 
+    public InovalleePacket(String providerId, String serviceId, String resourceId, Object data) {
+    	this(providerId, serviceId, resourceId, data.toString());
+    }
+    
     public InovalleePacket(String providerId, String serviceId, String resourceId, String data) {
         this.providerId = providerId;
         this.serviceId = serviceId;
@@ -62,7 +66,7 @@ public class InovalleePacket implements Packet {
 
     @Override
     public byte[] getBytes() {
-        //return payload.getBytes();
+        // legacy. No need.
         return null;
     }
 
@@ -72,5 +76,5 @@ public class InovalleePacket implements Packet {
 
     public void setGoodbyeMessage(boolean goodbyeMessage) {
         this.goodbyeMessage = goodbyeMessage;
-    }
+    }   
 }
