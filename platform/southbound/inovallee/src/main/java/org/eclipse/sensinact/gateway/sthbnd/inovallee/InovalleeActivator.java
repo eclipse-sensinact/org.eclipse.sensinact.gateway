@@ -36,6 +36,9 @@ public class InovalleeActivator extends GenericActivator {
 	}
 	
 	private List<InovalleePacket> treeToPackets(Tree tree) {
+		
+		System.out.println(tree.toString());
+		
 		List<InovalleePacket> list = new ArrayList<>();
 		for (Resource r : tree.getResources())
 			list.add(new InovalleePacket(r.getProvider().getId(), r.getService().getId(), r.getId(), r.getValue()));

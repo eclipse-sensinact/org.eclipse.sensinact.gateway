@@ -37,7 +37,7 @@ public class Provider {
     }
     
     public Service getOrCreateService(String serviceId) {
-    	 Service service = servicesById.get(providerId);
+    	 Service service = servicesById.get(serviceId);
          if (service == null) {
              service = new Service(this, serviceId);
              servicesById.put(serviceId, service);
