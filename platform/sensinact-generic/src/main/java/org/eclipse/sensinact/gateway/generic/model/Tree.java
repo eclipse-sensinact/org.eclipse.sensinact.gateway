@@ -69,4 +69,19 @@ public class Tree {
     public void clearProviders() {
     	providersById.clear();
     }
+    
+    public String toString() {
+    	StringBuilder sb = new StringBuilder();
+    	
+    	for (Entry<String, Provider> providerEntity : providersById.entrySet()) {
+    		sb.append(providerEntity.getValue().getId()).append("\n");
+    		for (Service service : providerEntity.getValue().getServices()) {
+    			sb.append("  ").append(service.getId()).append("\n");
+    			for (Resource resource : service.getResources())
+    				sb.append("    ").append(resource.getId()).append(" [").append(resource.getValue()).append("]\n");	
+    		}
+    	}
+    	
+    	return sb.toString();
+    }
 }
