@@ -10,9 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.generic.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map.Entry;
 
 
 public class Provider {
@@ -29,7 +30,10 @@ public class Provider {
 	}
     
     public List<Service> getServices() {
-		return servicesById.entrySet().stream().map(s -> s.getValue()).collect(Collectors.toList());
+    	List<Service> list = new ArrayList<>();
+    	for (Entry<String, Service> entity : servicesById.entrySet())
+    		list.add(entity.getValue());
+    	return list;
     }
     
     public Service getOrCreateService(String serviceId) {

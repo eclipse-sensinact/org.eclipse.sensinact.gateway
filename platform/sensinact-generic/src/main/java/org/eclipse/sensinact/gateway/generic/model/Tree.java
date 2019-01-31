@@ -10,24 +10,35 @@
  */
 package org.eclipse.sensinact.gateway.generic.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map.Entry;
 
 public class Tree {
 
 	private final HashMap<String, Provider> providersById = new HashMap<>();
 
 	public List<Provider> getProviders() {
-		return providersById.entrySet().stream().map(e -> e.getValue()).collect(Collectors.toList());
+    	List<Provider> list = new ArrayList<>();
+    	for (Entry<String, Provider> entity : providersById.entrySet())
+    		list.add(entity.getValue());
+    	return list;
 	}
 
 	public List<Service> getServices() {
-		return getProviders().stream().flatMap(p -> p.getServices().stream()).collect(Collectors.toList());
+    	List<Service> list = new ArrayList<>();
+		for (Entry<String, Provider> providerEntity : providersById.entrySet())
+   			list.addAll(providerEntity.getValue().getServices());
+    	return list;
 	}
 	
 	public List<Resource> getResources() {
-		return getServices().stream().flatMap(p -> p.getResources().stream()).collect(Collectors.toList());
+    	List<Resource> list = new ArrayList<>();
+		for (Entry<String, Provider> providerEntity : providersById.entrySet())
+    		for (Service service : providerEntity.getValue().getServices())
+    			list.addAll(service.getResources());
+    	return list;
 	}
 	
 	public Provider getOrCreateProvider(String providerId) {
