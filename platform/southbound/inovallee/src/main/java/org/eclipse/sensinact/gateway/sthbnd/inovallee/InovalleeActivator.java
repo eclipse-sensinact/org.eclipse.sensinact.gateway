@@ -11,13 +11,12 @@
 package org.eclipse.sensinact.gateway.sthbnd.inovallee;
 
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.gateway.generic.GenericActivator;
 import org.eclipse.sensinact.gateway.generic.model.Resource;
 import org.eclipse.sensinact.gateway.generic.model.Tree;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,11 +36,10 @@ public class InovalleeActivator extends GenericActivator {
 	}
 	
 	private List<InovalleePacket> treeToPackets(Tree tree) {
-		return tree.getResources().stream().map(this::toPacket).collect(Collectors.toList());
-	}
-
-	private InovalleePacket toPacket(Resource r) {
-		return new InovalleePacket(r.getProvider().getId(), r.getService().getId(), r.getId(), r.getValue());
+		List<InovalleePacket> list = new ArrayList<>();
+		for (Resource r : tree.getResources())
+			list.add(new InovalleePacket(r.getProvider().getId(), r.getService().getId(), r.getId(), r.getValue()));
+		return list;
 	}
 
 	@Override
