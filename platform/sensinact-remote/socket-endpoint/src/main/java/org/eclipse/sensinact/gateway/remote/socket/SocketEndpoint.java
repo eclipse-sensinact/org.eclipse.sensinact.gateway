@@ -158,7 +158,6 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
                             object = request.optJSONObject("message");
                             if (JSONObject.NULL.equals(object)) {
                                 super.remoteCore.unregisterAgent(agentId);
-
                             } else {
                                 super.remoteCore.dispatch(agentId, AbstractSnaMessage.fromJSON(mediator, object.toString()));
                             }
@@ -167,8 +166,7 @@ public class SocketEndpoint extends AbstractRemoteEndpoint {
                             JSONObject f = object.optJSONObject("filter");
                             if (!JSONObject.NULL.equals(f)) {
                                 filter = new SnaFilter(mediator, f.getString("sender"), f.optBoolean("pattern"), f.optBoolean("complement"), f.optJSONArray("conditions"));
-
-                                JSONArray t = object.optJSONArray("types");
+                                JSONArray t = f.optJSONArray("types");
                                 int i = 0;
                                 int l = t == null ? 0 : t.length();
                                 for (; i < l; i++) {

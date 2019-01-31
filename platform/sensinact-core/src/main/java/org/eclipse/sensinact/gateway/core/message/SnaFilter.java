@@ -17,6 +17,7 @@ import java.util.ListIterator;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -284,9 +285,23 @@ public class SnaFilter implements JSONable {
 		String uri = message.getPath();
 		if (!this.isPattern) {
 			matchSender = this.sender.equals(uri);
-
 		} else {
 			matchSender = pattern.matcher(uri).matches();
+		}
+		if(!matchSender) {
+			String namespace = (String) ((AbstractSnaMessage<?>)message
+			).get("namespace");
+			if(namespace!=null) {
+				String[] uriElements = UriUtils.getUriElements(uri);
+				uriElements[0] = new StringBuilder().append(namespace).append(
+						":").append(uriElements[0]).toString();
+				String resolvedUri=UriUtils.getUri(uriElements);
+				if (!this.isPattern) {
+					matchSender = this.sender.equals(resolvedUri);
+				} else {
+					matchSender = pattern.matcher(resolvedUri).matches();
+				}
+			}
 		}
 		return matchSender;
 	}

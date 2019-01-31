@@ -23,11 +23,7 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
 import org.eclipse.sensinact.gateway.core.ServiceProvider.LifecycleStatus;
-import org.eclipse.sensinact.gateway.core.message.MessageHandler;
-import org.eclipse.sensinact.gateway.core.message.MidCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaMessageListener;
+import org.eclipse.sensinact.gateway.core.message.*;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
@@ -46,6 +42,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ModelInstance<C extends ModelConfiguration> implements SensiNactResourceModel<C>, LifecycleStatusListener {
+
 	/**
 	 * Returns the initial location of the sensiNact gateway and so of the service
 	 * providers for which it is not specified. This method should be called once at
@@ -101,6 +98,11 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	private final String identifier;
 
 	/**
+	 * Remote ID of the sensiNact instance
+	 */
+	private String namespace;
+
+	/**
 	 * the {@link MesssageHandler} handling messages coming from this
 	 * SensiNactResourceModel
 	 */
@@ -153,7 +155,14 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 				return service.check(mediator.getContext().getBundle());
 			}
 		});
+		this.namespace = this.mediator.callService(Core.class, new Executable<Core, String>() {
+			@Override
+			public String execute(Core core) throws Exception {
+				return core.namespace();
+			}
+		});
 	}
+
 
 	/**
 	 * @inheritDoc
@@ -318,6 +327,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 		if (this.messageHandler == null) {
 			return;
 		}
+		((AbstractSnaMessage<?>)message).put("namespace", this.namespace, true);
 		this.messageHandler.handle(message);
 	}
 
