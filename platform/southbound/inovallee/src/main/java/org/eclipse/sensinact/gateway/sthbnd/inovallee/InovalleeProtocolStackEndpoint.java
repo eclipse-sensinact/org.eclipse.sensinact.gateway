@@ -12,12 +12,8 @@ package org.eclipse.sensinact.gateway.sthbnd.inovallee;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class InovalleeProtocolStackEndpoint extends LocalProtocolStackEndpoint<InovalleePacket> {
-    private static final Logger LOG = LoggerFactory.getLogger(InovalleeProtocolStackEndpoint.class);
-
     public InovalleeProtocolStackEndpoint(Mediator mediator) {
         super(mediator);
     }

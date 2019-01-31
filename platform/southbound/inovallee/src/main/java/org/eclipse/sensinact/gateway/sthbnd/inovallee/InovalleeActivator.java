@@ -10,19 +10,64 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.inovallee;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.generic.GenericActivator;
+import org.eclipse.sensinact.gateway.generic.model.Resource;
+import org.eclipse.sensinact.gateway.generic.model.Tree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * sensiNact bundle activator
  */
-public abstract class InovalleeActivator extends GenericActivator {
+public class InovalleeActivator extends GenericActivator {
 
-    @Override
-    public InovalleeProtocolStackEndpoint getEndPoint() {
-        return new InovalleeProtocolStackEndpoint(mediator);
-    }
+	private static final Logger LOG = LoggerFactory.getLogger(InovalleeActivator.class);
+	private Periodic periodic;
+	
+	@Override
+	public void doStart() throws Exception {
+		super.doStart();
+		periodic = new Periodic(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					updateData();
+				} catch (Exception e) {
+					LOG.error("Error during periodic update : " + e.getMessage());
+				}
+			}
+		}, 1, 60, SECONDS);
+	}
 
-    public Class getPacketClass(){
-        return InovalleePacket.class;
-    }
+	@Override
+	public void doStop() {
+		super.doStop();
+		periodic.stop();
+	}
+	
+	void updateData() throws Exception {
+		Tree tree = new Fetcher().fetch();
+		processPackets(treeToPackets(tree));
+	}
+
+	private List<InovalleePacket> treeToPackets(Tree tree) {
+		List<InovalleePacket> list = new ArrayList<>();
+		for (Resource r : tree.getResources())
+			list.add(new InovalleePacket(r.getProvider().getId(), r.getService().getId(), r.getId(), r.getValue()));
+		return list;
+	}
+
+	@Override
+	public InovalleeProtocolStackEndpoint getEndPoint() {
+		return new InovalleeProtocolStackEndpoint(mediator);
+	}
+
+	public Class getPacketClass() {
+		return InovalleePacket.class;
+	}
 }

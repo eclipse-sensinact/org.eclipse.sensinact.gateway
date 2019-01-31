@@ -1,6 +1,20 @@
-package org.eclipse.sensinact.gateway.device.openhab.common;
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
+ */
+package org.eclipse.sensinact.gateway.generic.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class Service {
 
@@ -16,6 +30,13 @@ public class Service {
     public Provider getProvider() {
 		return provider;
 	}
+
+    public List<Resource> getResources() {
+    	List<Resource> list = new ArrayList<>();
+    	for (Entry<String, Resource> entity : resourcesById.entrySet())
+    		list.add(entity.getValue());
+    	return list;
+    }
     
     public String getId() {
 		return serviceId;
@@ -28,6 +49,12 @@ public class Service {
             resourcesById.put(resourceId, resource);
         }
         return resource;
+    }
+    
+    public Resource getOrCreateResource(String resourceId, Object value) {
+    	Resource resource = getOrCreateResource(resourceId);
+    	resource.setValue(value);
+    	return resource;
     }
     
     public boolean setResourceValue(String resourceId, Object value) {

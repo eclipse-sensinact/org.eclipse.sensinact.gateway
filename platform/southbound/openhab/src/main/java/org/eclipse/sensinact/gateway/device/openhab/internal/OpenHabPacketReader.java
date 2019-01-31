@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.device.openhab.internal;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.device.openhab.sensinact.OpenHabMediator;
+import org.eclipse.sensinact.gateway.generic.model.Provider;
+import org.eclipse.sensinact.gateway.generic.model.Resource;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
@@ -28,8 +30,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.device.openhab.common.Provider;
-import org.eclipse.sensinact.gateway.device.openhab.common.Resource;
 import org.eclipse.sensinact.gateway.device.openhab.sensinact.Activator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
