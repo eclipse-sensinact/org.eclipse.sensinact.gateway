@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.inovallee;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,19 +27,35 @@ import org.slf4j.LoggerFactory;
 public class InovalleeActivator extends GenericActivator {
 
 	private static final Logger LOG = LoggerFactory.getLogger(InovalleeActivator.class);
-
+	private Periodic periodic;
+	
 	@Override
 	public void doStart() throws Exception {
 		super.doStart();
-		Tree tree = new Fetcher().fetch();
-		List<InovalleePacket> packets = treeToPackets(tree);
-		processPackets(packets);
+		periodic = new Periodic(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					updateData();
+				} catch (Exception e) {
+					LOG.error("Error during periodic update : " + e.getMessage());
+				}
+			}
+		}, 1, 60, SECONDS);
+	}
+
+	@Override
+	public void doStop() {
+		super.doStop();
+		periodic.stop();
 	}
 	
+	void updateData() throws Exception {
+		Tree tree = new Fetcher().fetch();
+		processPackets(treeToPackets(tree));
+	}
+
 	private List<InovalleePacket> treeToPackets(Tree tree) {
-		
-		System.out.println(tree.toString());
-		
 		List<InovalleePacket> list = new ArrayList<>();
 		for (Resource r : tree.getResources())
 			list.add(new InovalleePacket(r.getProvider().getId(), r.getService().getId(), r.getId(), r.getValue()));

@@ -22,24 +22,25 @@ import org.slf4j.LoggerFactory;
 
 public class Fetcher {
 
-	private static final Logger LOG = LoggerFactory.getLogger(Fetcher.class);
-	
     private final BasicHttpClient client = new BasicHttpClient(); 
 	private final String url = "http://193.48.18.251:8095/restaurants/aggregated";
 	
-	public Tree fetch() throws IOException {
-		Tree tree = new Tree();
-		registerRestaurents(tree, client, url);       	
-       	return tree;
-	}
-
+	private static final Logger LOG = LoggerFactory.getLogger(Fetcher.class);
 	
-	private static void registerRestaurents(Tree tree, BasicHttpClient client, String url) throws IOException {
-       	Response response = client.get(url);
+	public Tree fetch() throws IOException {
+		Response response = null;
+		try {
+			response = client.get(url);
+		} catch (Exception e) {
+			String msg = "Can't fetch " + url + " : " + e.getMessage(); 
+			LOG.error(msg);
+			throw new IOException(msg);
+		}
        	if (! response.isHttp2XX())
        		throw new IOException("http " + response.getHttpCode() + " when fetching " + url);
        	JSONArray array = new JSONArray(response.getPayload());
        	
+       	Tree tree = new Tree();
        	for (int i=0; i< array.length(); i++) {
        		JSONObject root = array.getJSONObject(i);
        		
@@ -72,5 +73,6 @@ public class Fetcher {
        			tree.getOrCreateResource(providerName, "menus", "menus", menus.getString("data"));
        		}
        	}
+       	return tree;
 	}
 }

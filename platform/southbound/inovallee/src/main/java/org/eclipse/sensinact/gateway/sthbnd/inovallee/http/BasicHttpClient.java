@@ -29,7 +29,7 @@ public class BasicHttpClient {
 		con.setRequestMethod("GET");
 
 		// add request header
-		// con.setRequestProperty("User-Agent", USER_AGENT);
+		// con.setRequestProperty("key", "value");
 
 		int httpCode = con.getResponseCode();
 
