@@ -8,7 +8,17 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.sthbnd.inovallee;
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
+ */
+package org.eclipse.sensinact.gateway.sthbnd.inovallee.fetcher;
 
 import java.io.IOException;
 
@@ -17,29 +27,17 @@ import org.eclipse.sensinact.gateway.sthbnd.inovallee.http.BasicHttpClient;
 import org.eclipse.sensinact.gateway.sthbnd.inovallee.http.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class Fetcher {
+public class EliorFetcher extends Fetcher {
 
     private final BasicHttpClient client = new BasicHttpClient(); 
 	private final String url = "http://193.48.18.251:8095/restaurants/aggregated";
 	
-	private static final Logger LOG = LoggerFactory.getLogger(Fetcher.class);
-	
 	public Tree fetch() throws IOException {
-		Response response = null;
-		try {
-			response = client.get(url);
-		} catch (Exception e) {
-			String msg = "Can't fetch " + url + " : " + e.getMessage(); 
-			LOG.error(msg);
-			throw new IOException(msg);
-		}
-       	if (! response.isHttp2XX())
-       		throw new IOException("http " + response.getHttpCode() + " when fetching " + url);
+
+		Response response = get(client, url);
        	JSONArray array = new JSONArray(response.getPayload());
-       	
+
        	Tree tree = new Tree();
        	for (int i=0; i< array.length(); i++) {
        		JSONObject root = array.getJSONObject(i);
