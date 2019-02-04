@@ -14,6 +14,8 @@ import org.eclipse.sensinact.gateway.common.interpolator.Interpolator;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import java.util.Map;
+
 /**
  * Abstract implementation of the {@link BundleActivator} interface
  */
@@ -59,7 +61,16 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
     private void injectPropertyFields() throws Exception {
         this.mediator.debug("Starting introspection in bundle %s", mediator.getContext().getBundle().getSymbolicName());
         //This line creates an interpolator and inject the properties into the activator
-        new Interpolator(this.mediator.getProperties()).getInstance(this);
+        Interpolator interpolator=new Interpolator(this.mediator.getProperties());
+        interpolator.getInstance(this);
+        for(Map.Entry<String,String> entry:interpolator.getPropertiesInjected().entrySet()){
+            //This will allow to define default properties directly in the abstract madiator
+            if(!mediator.properties.containsKey(entry.getKey())){
+                mediator.properties.put(entry.getKey(),entry.getValue());
+            }
+
+        }
+
     }
 
     /**

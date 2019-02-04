@@ -17,10 +17,7 @@ import org.eclipse.sensinact.gateway.common.interpolator.exception.InvalidValueE
 import org.eclipse.sensinact.gateway.common.interpolator.exception.ObjectInstantiationException;
 
 import java.lang.reflect.Field;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -33,6 +30,7 @@ import java.util.regex.Pattern;
 public class Interpolator {
     private static final Logger LOG = Logger.getLogger(Interpolator.class.getName());
     private final Map propertyValues;
+    private final Map<String,String> propertiesInjected=new HashMap<>();
 
     public Interpolator(Dictionary propertyValues) {
         this.propertyValues = valueOf(propertyValues);
@@ -73,6 +71,7 @@ public class Interpolator {
                     }
                     if (value != null) {
                         try {
+                            propertiesInjected.put(propertyName,value.toString());
                             String typeClass = field.getType().getCanonicalName();
                             if (typeClass.equals("java.lang.String")) {
                                 field.set(object, value);
@@ -123,5 +122,9 @@ public class Interpolator {
             map.put(key, dictionary.get(key));
         }
         return map;
+    }
+
+    public Map<String, String> getPropertiesInjected() {
+        return Collections.unmodifiableMap(propertiesInjected);
     }
 }
