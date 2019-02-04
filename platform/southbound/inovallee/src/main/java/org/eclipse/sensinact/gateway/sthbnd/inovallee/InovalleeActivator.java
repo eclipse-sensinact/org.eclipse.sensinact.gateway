@@ -18,6 +18,8 @@ import java.util.List;
 import org.eclipse.sensinact.gateway.generic.GenericActivator;
 import org.eclipse.sensinact.gateway.generic.model.Resource;
 import org.eclipse.sensinact.gateway.generic.model.Tree;
+import org.eclipse.sensinact.gateway.sthbnd.inovallee.fetcher.EliorFetcher;
+import org.eclipse.sensinact.gateway.sthbnd.inovallee.fetcher.MobilityFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,10 +34,12 @@ public class InovalleeActivator extends GenericActivator {
 	@Override
 	public void doStart() throws Exception {
 		super.doStart();
+		LOG.info("Thread created for " + InovalleeActivator.class.getName());
 		periodic = new Periodic(new Runnable() {
 			@Override
 			public void run() {
 				try {
+					LOG.info("Periodic update triggered " + InovalleeActivator.class.getName());
 					updateData();
 				} catch (Exception e) {
 					LOG.error("Error during periodic update : " + e.getMessage());
@@ -47,12 +51,17 @@ public class InovalleeActivator extends GenericActivator {
 	@Override
 	public void doStop() {
 		super.doStop();
+		LOG.info("Thread killed for " + InovalleeActivator.class.getName());
 		periodic.stop();
 	}
 	
 	void updateData() throws Exception {
-		Tree tree = new Fetcher().fetch();
-		processPackets(treeToPackets(tree));
+		List<InovalleePacket> eliorPackets = treeToPackets(new EliorFetcher().fetch());
+		LOG.info("Processing " + eliorPackets.size() + " Elior packets");
+		processPackets(eliorPackets);
+		List<InovalleePacket> mobilityPackets = treeToPackets(new MobilityFetcher().fetch());
+		LOG.info("Processing " + mobilityPackets.size() + " mobility packets");
+		processPackets(mobilityPackets);
 	}
 
 	private List<InovalleePacket> treeToPackets(Tree tree) {

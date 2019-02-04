@@ -48,7 +48,7 @@ public class InovalleePacket implements Packet {
         this.payload = data;
     }
 
-    public String getProviderId() {
+	public String getProviderId() {
         return providerId;
     }
 
@@ -76,5 +76,10 @@ public class InovalleePacket implements Packet {
 
     public void setGoodbyeMessage(boolean goodbyeMessage) {
         this.goodbyeMessage = goodbyeMessage;
-    }   
+    }
+    
+    @Override
+	public String toString() {
+		return "InovalleePacket [" + providerId + "/" + serviceId + "/" + resourceId + " = " + payload + "]";
+	}
 }
