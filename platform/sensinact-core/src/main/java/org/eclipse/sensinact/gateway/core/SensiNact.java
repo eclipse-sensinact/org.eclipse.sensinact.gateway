@@ -1488,7 +1488,13 @@ public class SensiNact implements Core {
 	}
 
 	private static final String namespace(Mediator mediator) {
-		String prop = (String) mediator.getProperty(Core.NAMESPACE_PROP);
+
+		String prop = System.getProperty(Core.NAMESPACE_PROP);
+
+		if(prop==null){
+			prop = (String) mediator.getProperty(Core.NAMESPACE_PROP);
+		}
+
 		if (prop == null) {
 			prop = new StringBuilder().append("sNa")
 					.append(Math.round((float) (System.currentTimeMillis() / 100000L)) + mediator.hashCode())

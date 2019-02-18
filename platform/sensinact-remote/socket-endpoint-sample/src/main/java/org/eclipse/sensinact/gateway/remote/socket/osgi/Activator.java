@@ -14,13 +14,30 @@ import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.remote.socket.sample.SocketEndpointManager;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.*;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class Activator extends AbstractActivator<Mediator> {
+/*
+    public Activator(BundleContext bc){
+
+    }
+
+    public Activator(){
+
+    }
+*/
+    private static final Logger LOG= LoggerFactory.getLogger(Activator.class.getName());
+
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
@@ -41,10 +58,43 @@ public class Activator extends AbstractActivator<Mediator> {
      */
     @Override
     public void doStart() throws Exception {
+
+        String endPointConfigStr=System.getProperty("endpoint.config");
+
         this.manager = new SocketEndpointManager(super.mediator);
-        this.manager.updated(valueOf(super.mediator.getProperties()));
+
+        if(endPointConfigStr!=null){
+            Properties configProperties=new Properties();
+
+            StringBuilder sb=new StringBuilder();
+
+            for(char charValue:endPointConfigStr.toCharArray()){
+                if(charValue==';'){
+                    sb.append('\n');
+                }else {
+                    sb.append(charValue);
+                }
+
+            }
+            InputStream is = new ByteArrayInputStream(sb.toString().getBytes());
+            configProperties.load(new BufferedReader(new InputStreamReader(is)));
+            logProperties(configProperties);
+            this.manager.updated((Dictionary) configProperties);
+        }else {
+
+            this.manager.updated(valueOf(super.mediator.getProperties()));
+        }
+
         super.mediator.addListener(this.manager);
 
+    }
+
+    private void logProperties(Properties properties){
+        LOG.info("<ENDPOINT:Properties>");
+        for(Map.Entry entry:properties.entrySet()){
+            LOG.info("{}:{}",entry.getKey(),entry.getValue());
+        }
+        LOG.info("</ENDPOINT:Properties>");
     }
 
     /**
