@@ -17,7 +17,13 @@
         <method type="ACT">
             <parameter name="message" type="string"/>
             <references>
-                <reference reference="MESSAGE" passOn="true" xsi:type="copyReference" index="0"/>
+                <reference reference="MESSAGE" passOn="true" xsi:type="copyReference">
+                    <builder type="PARAMETER">
+                        <argument type="int">
+                            <value>0</value>
+                        </argument>
+                    </builder>
+                </reference>
             </references>
         </method>
       </methods>
