@@ -43,7 +43,7 @@
                                     <type>zip</type>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.main.distribution</artifactId>
-                                    <version>4.4.1</version>
+                                    <version>${felix.version}</version>
                                     <outputDirectory>${project.build.directory}/</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
@@ -93,21 +93,31 @@
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.gogo.runtime</artifactId>
-                                    <version>${gogo.version}</version>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.felix</groupId>
-                                    <artifactId>org.apache.felix.gogo.shell</artifactId>
-                                    <version>${gogo.version}</version>
+                                    <version>${org.apache.felix.gogo.runtime.version}</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.gogo.command</artifactId>
-                                    <version>${gogo.version}</version>
+                                    <version>${org.apache.felix.gogo.command.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.jline</groupId>
+                                    <artifactId>jline</artifactId>
+                                    <version>${org.jline.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.fusesource.jansi</groupId>
+                                    <artifactId>jansi</artifactId>
+                                    <version>${org.fusesource.jansi.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.gogo.jline</artifactId>
+                                    <version>${org.apache.felix.gogo.jline.version}</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
@@ -121,13 +131,13 @@
                                 <artifactItem>
                                     <groupId>ch.qos.logback</groupId>
                                     <artifactId>logback-classic</artifactId>
-                                    <version>1.1.7</version>
+                                    <version>1.2.3</version>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>ch.qos.logback</groupId>
                                     <artifactId>logback-core</artifactId>
-                                    <version>1.1.7</version>
+                                    <version>1.2.3</version>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                             </artifactItems>
@@ -145,7 +155,7 @@
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.fileinstall</artifactId>
-                                    <version>3.5.0</version>
+                                    <version>${felix.fileinstall.version}</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
@@ -159,7 +169,7 @@
                                 <artifactItem>
                                     <groupId>org.osgi</groupId>
                                     <artifactId>org.osgi.compendium</artifactId>
-                                    <version>5.0.0</version>
+                                    <version>${osgi.compendium.version}</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
@@ -310,7 +320,7 @@
                             <outputDirectory>${project.build.directory}/sensinact</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.build.directory}/felix-framework-4.4.1/</directory>
+                                    <directory>${project.build.directory}/felix-framework-6.0.2/</directory>
                                     <filtering>false</filtering>
                                     <excludes>
                                         <exclude>bundle/</exclude>

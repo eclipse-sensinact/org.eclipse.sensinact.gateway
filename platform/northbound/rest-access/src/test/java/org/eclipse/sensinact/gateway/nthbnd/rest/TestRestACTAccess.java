@@ -14,11 +14,13 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.rest.ws.test.WsServiceTestClient;
 import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@Ignore
 public class TestRestACTAccess extends TestRestAccess {
     public TestRestACTAccess() throws Exception {
         super();

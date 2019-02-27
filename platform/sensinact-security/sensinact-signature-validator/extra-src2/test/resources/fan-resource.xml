@@ -41,9 +41,11 @@
 	    <method type="ACT">
 	    	<references>
 	    		<reference reference="STATUS" passOn="true" xsi:type="constantReference">
-	    			<constant type="string">
-	    				<value>ON</value>
-	    			</constant>
+					<builder type="EMPTY">
+						<argument type="string">
+							<value>ON</value>
+						</argument>
+					</builder>
 	    		</reference>
 	    	</references>
 	    </method>
@@ -55,9 +57,11 @@
 	    <method type="ACT">
 	    	<references>
 	    		<reference reference="STATUS" passOn="true" xsi:type="constantReference">
-	    			<constant type="string">
-	    				<value>OFF</value>
-	    			</constant>
+					<builder type="EMPTY">
+						<argument type="string">
+							<value>OFF</value>
+						</argument>
+					</builder>
 	    		</reference>
 	    	</references>
 	    </method>
@@ -74,7 +78,13 @@
 	    		</constraints>
 	    	</parameter>
 	    	<references>
-	    		<reference reference="SPEED" passOn="true" xsi:type="copyReference" index="0"/>
+	    		<reference reference="SPEED" passOn="true" xsi:type="copyReference">
+					<builder type="PARAMETER">
+						<argument type="int">
+							<value>0</value>
+						</argument>
+					</builder>
+				</reference>
 	    	</references>
 	    </method>
     </methods>      

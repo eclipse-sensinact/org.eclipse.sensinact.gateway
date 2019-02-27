@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.nthbnd.rest;
 
 import org.eclipse.sensinact.gateway.test.MidOSGiTest;
+import org.junit.Ignore;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -19,6 +20,7 @@ import java.util.Map;
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
+@Ignore
 public class TestRestAccess extends MidOSGiTest {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
@@ -72,6 +74,7 @@ public class TestRestAccess extends MidOSGiTest {
         configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
         configuration.put("org.osgi.service.http.port", "8898");
+        //configuration.put("org.osgi.framework.security", "osgi");
         configuration.put("org.apache.felix.http.jettyEnabled", "true");
         configuration.put("org.apache.felix.http.whiteboardEnabled", "true");
     }

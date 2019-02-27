@@ -17,11 +17,13 @@ import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
 import org.eclipse.sensinact.gateway.test.MidProxy;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import static org.junit.Assert.assertTrue;
 
+@Ignore
 public class TestRestGETAccess extends TestRestAccess {
     public TestRestGETAccess() throws Exception {
         super();

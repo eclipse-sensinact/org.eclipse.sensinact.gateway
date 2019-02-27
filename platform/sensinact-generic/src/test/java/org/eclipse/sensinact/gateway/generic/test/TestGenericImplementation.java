@@ -28,6 +28,7 @@ import org.eclipse.sensinact.gateway.test.StarterService;
 import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -45,6 +46,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
+@Ignore
 public class TestGenericImplementation extends MidOSGiTest {
 
     Method getDescription = null;
