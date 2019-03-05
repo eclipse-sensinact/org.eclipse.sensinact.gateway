@@ -22,7 +22,8 @@ public class MobilityFetcher extends Fetcher {
 
 	private final BasicHttpClient client = new BasicHttpClient();
 	private final String urlStations = "http://193.48.18.251:8095/mobilite/stations";
-
+	//private final String urlStations = "http://localhost:8095/mobilite/stations";
+	
 	public Tree fetch() throws IOException {
 		Response response = get(client, urlStations);
 		JSONArray array = new JSONArray(response.getPayload());

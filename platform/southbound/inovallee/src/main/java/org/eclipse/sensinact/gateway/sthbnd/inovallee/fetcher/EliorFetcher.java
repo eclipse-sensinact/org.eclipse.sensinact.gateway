@@ -32,6 +32,8 @@ public class EliorFetcher extends Fetcher {
 
     private final BasicHttpClient client = new BasicHttpClient(); 
 	private final String url = "http://193.48.18.251:8095/restaurants/aggregated";
+	//private final String url = "http://localhost:8095/restaurants/aggregated";
+	
 	
 	public Tree fetch() throws IOException {
 

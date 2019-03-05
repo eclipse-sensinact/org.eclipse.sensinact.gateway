@@ -15,6 +15,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.GenericActivator;
 import org.eclipse.sensinact.gateway.generic.model.Resource;
 import org.eclipse.sensinact.gateway.generic.model.Tree;
@@ -48,6 +49,11 @@ public class InovalleeActivator extends GenericActivator {
 		}, 1, 60, SECONDS);
 	}
 
+	@Override
+	protected ExtModelConfigurationBuilder configureBuilder(ExtModelConfigurationBuilder builder) {
+		return builder.withResourceImplementationType(InoResourceImpl.class);
+	}
+	
 	@Override
 	public void doStop() {
 		super.doStop();

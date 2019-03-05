@@ -115,8 +115,8 @@ public class StorageAgent extends AbstractMidAgentCallback {
         jsonObject.put("resource", resource);
         jsonObject.put(DataResource.VALUE, initialValue);
         jsonObject.put("timestamp", timestampStr);
-        LOG.debug("pushing to database {}/{}/{}/{}...", serviceProvider, service, resource, initialValue);
-        this.storageConnection.push(jsonObject);
+        LOG.debug("pushing to stack {}/{}/{}/{}...", serviceProvider, service, resource, initialValue);
+        this.storageConnection.stack.push(jsonObject);
         LOG.debug("...done");
     }
 
