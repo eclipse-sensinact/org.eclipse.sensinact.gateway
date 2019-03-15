@@ -10,21 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
-import java.security.AccessController;
-import java.security.InvalidKeyException;
-import java.security.PrivilegedAction;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
@@ -32,70 +17,49 @@ import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefiniti
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractor;
 import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractorType;
-import org.eclipse.sensinact.gateway.core.message.LocalAgent;
-import org.eclipse.sensinact.gateway.core.message.LocalAgentImpl;
-import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.ResourceIntent;
-import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.api.Sensinact;
+import org.eclipse.sensinact.gateway.core.api.SensinactCoreBaseIface;
+import org.eclipse.sensinact.gateway.core.message.*;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.eclipse.sensinact.gateway.core.method.RemoteAccessMethodExecutable;
-import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod;
+import org.eclipse.sensinact.gateway.core.method.legacy.*;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod.DescribeType;
-import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponseBuilder;
-import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 import org.eclipse.sensinact.gateway.core.remote.AbstractRemoteEndpoint;
 import org.eclipse.sensinact.gateway.core.remote.LocalEndpoint;
 import org.eclipse.sensinact.gateway.core.remote.RemoteCore;
 import org.eclipse.sensinact.gateway.core.remote.RemoteSensiNact;
-import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
-import org.eclipse.sensinact.gateway.core.security.AccessNode;
-import org.eclipse.sensinact.gateway.core.security.AccessTree;
-import org.eclipse.sensinact.gateway.core.security.AccountConnector;
-import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
-import org.eclipse.sensinact.gateway.core.security.Credentials;
-import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
-import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
-import org.eclipse.sensinact.gateway.core.security.SecurityDataStoreServiceFactory;
-import org.eclipse.sensinact.gateway.core.security.User;
-import org.eclipse.sensinact.gateway.core.security.UserKey;
-import org.eclipse.sensinact.gateway.core.security.UserManager;
-import org.eclipse.sensinact.gateway.core.security.UserManagerFactory;
-import org.eclipse.sensinact.gateway.core.security.UserUpdater;
+import org.eclipse.sensinact.gateway.core.security.*;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+import java.security.AccessController;
+import java.security.InvalidKeyException;
+import java.security.PrivilegedAction;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@link Core} service implementation
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class SensiNact implements Core {
+//@Component//(immediate = true)
+public class SensiNact implements Sensinact,Core {
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
 	// ********************************************************************//
+
+
+	public List<SensinactCoreBaseIface> sensinactRemote=Collections.synchronizedList(new ArrayList<SensinactCoreBaseIface>());
 
 	/**
 	 * Abstract {@link Session} service implementation
@@ -1644,6 +1608,74 @@ public class SensiNact implements Core {
 				});
 		this.mediator = mediator;
 		this.registry = new RegistryEndpoint();
+
+		//.SensinactCoreBaseIface.class
+		//(objectClass=org.eclipse.sensinact.gateway.core
+		//"(org.eclipse.sensinact.gateway.namespace!="+this.namespace+")"
+
+
+		//String filterMain=null;String.format("(&(objectClass=%s)(org.eclipse.sensinact.gateway.namespace=%s))",SensinactCoreBaseIface.class.getCanonicalName(),this.namespace).toString();
+		String filterMain="org.eclipse.sensinact.gateway.core.api.SensinactCoreBaseIface";
+		System.out.println("---->"+filterMain);
+/*
+		Filter f=new Filter() {
+				@Override
+				public boolean match(ServiceReference<?> serviceReference) {
+					return false;
+				}
+
+				@Override
+				public boolean match(Dictionary<String, ?> dictionary) {
+					return false;
+				}
+
+				@Override
+				public boolean matchCase(Dictionary<String, ?> dictionary) {
+					return false;
+				}
+
+				@Override
+				public boolean matches(Map<String, ?> map) {
+					return false;
+				}
+
+				public String toString(){
+					return String.format("(&(objectClass=org.eclipse.sensinact.gateway.core.api.SensinactCoreBaseIface)(org.eclipse.sensinact.gateway.namespace!=%s))",namespace);
+				}
+			};
+*/
+		final BundleContext context=FrameworkUtil.getBundle(SensinactCoreBase.class).getBundleContext();
+
+		ServiceTracker st=new ServiceTracker<SensinactCoreBaseIface,SensinactCoreBaseIface>(context,filterMain,new ServiceTrackerCustomizer<SensinactCoreBaseIface,SensinactCoreBaseIface>(){
+
+			@Override
+			public SensinactCoreBaseIface addingService(ServiceReference<SensinactCoreBaseIface> reference) {
+
+				SensinactCoreBaseIface sna=context.getService(reference);
+
+				if(sna.namespace().equals(namespace)) return null;
+
+				System.out.println("*************** Core received instance of: "+sna.namespace());
+
+				sensinactRemote.add(sna);
+
+				return sna;
+			}
+
+			@Override
+			public void modifiedService(ServiceReference<SensinactCoreBaseIface> reference, SensinactCoreBaseIface service) {
+
+			}
+
+			@Override
+			public void removedService(ServiceReference<SensinactCoreBaseIface> reference, SensinactCoreBaseIface service) {
+				sensinactRemote.remove(service);
+			}
+		});
+
+		//ServiceTracker st=new ServiceTracker<Sensinact,Sensinact>(mediator.getContext(),Sensinact.class,new Tracker(mediator.getContext()));
+		st.open(true);
+
 	}
 
 	/**
@@ -2582,7 +2614,17 @@ public class SensiNact implements Core {
 	 * 
 	 * @return the JSON formated list of available service providers
 	 */
-	protected String getProviders(String identifier, String filter) {
+
+	public String getProvidersRemote(String identifier, String filter) {
+		final StringBuilder content = new StringBuilder();
+		for(SensinactCoreBaseIface remote:sensinactRemote){
+			String providersFromRemote=remote.getProviders(identifier,filter);
+			content.append(providersFromRemote);
+		}
+		return content.toString();
+	}
+
+	public String getProvidersLocal(String identifier, String filter){
 		final SessionKey sessionKey = sessions
 				.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
 
@@ -2605,6 +2647,15 @@ public class SensiNact implements Core {
 		if (local != null && local.length() > 0) {
 			content.append(local);
 		}
+		return content.toString();
+	}
+
+	public String getProviders(String identifier, String filter) {
+
+		StringBuilder content=new StringBuilder(getProvidersLocal(identifier, filter));
+		content.append(getProvidersRemote(identifier,filter));
+
+/*
 		SensiNact.this.doPrivilegedVoidServices(RemoteCore.class, null, new Executable<RemoteCore, Void>() {
 			@Override
 			public Void execute(RemoteCore core) throws Exception {
@@ -2619,6 +2670,7 @@ public class SensiNact implements Core {
 				return null;
 			}
 		});
+*/
 		return content.toString();
 	}
 

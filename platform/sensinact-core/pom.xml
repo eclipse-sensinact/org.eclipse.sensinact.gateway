@@ -64,10 +64,12 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
+                    <obrRepository>NONE</obrRepository>
                     <instructions>
                         <Bundle-Activator>org.eclipse.sensinact.gateway.core.osgi.Activator</Bundle-Activator>
                         <Export-Package>
                             org.eclipse.sensinact.gateway.core,
+                            org.eclipse.sensinact.gateway.core.api,
                             org.eclipse.sensinact.gateway.core.message,
                             org.eclipse.sensinact.gateway.core.method,
                             org.eclipse.sensinact.gateway.core.method.legacy,
@@ -96,6 +98,7 @@
                         <Include-Resource>
                             about.html
                         </Include-Resource>
+
                     </instructions>
                 </configuration>
             </plugin>

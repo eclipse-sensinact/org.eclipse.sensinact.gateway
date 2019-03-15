@@ -15,6 +15,7 @@ import java.util.Collection;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.core.api.Sensinact;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.remote.AbstractRemoteEndpoint;
@@ -27,19 +28,12 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface Core {
+public interface Core extends Sensinact {
+
 	/**
 	 * Namespace property key
 	 */
 	public static final String NAMESPACE_PROP = "org.eclipse.sensinact.gateway.namespace";
-
-	/**
-	 * Returns this Core's String namespace. The namespace will be used to prefix
-	 * the identifiers of the service providers that are handled by this Core
-	 * 
-	 * @return this Core's String namespace
-	 */
-	String namespace();
 
 	/**
 	 * Instantiates a new {@link RemoteCore} that will be connected to a remote

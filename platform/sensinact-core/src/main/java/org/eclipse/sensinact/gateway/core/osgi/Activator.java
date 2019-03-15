@@ -19,6 +19,7 @@ import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.SensiNact;
+import org.eclipse.sensinact.gateway.core.api.Sensinact;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -27,6 +28,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Bundle Activator
@@ -65,43 +67,52 @@ public class Activator extends AbstractActivator<Mediator> {
 
 		ConditionalPermissionUpdate cpu = cpa.newConditionalPermissionUpdate();
 		List piList = cpu.getConditionalPermissionInfos();
-
+/*
 		ConditionalPermissionInfo cpiDeny = cpa.newConditionalPermissionInfo(
 			String.format("DENY { [org.eclipse.sensinact.gateway.core.security.perm.StrictCodeBaseCondition \"%s\" \"!\"]"
-				+ " (org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.Core\" \"register\")"
+				//+ " (org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.Core\" \"register\")"
 				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModel\" \"register,get\")"
 				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement\" \"register,get\")"
 				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.LocalAgent\" \"register,get\")"
 				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.RemoteAgent\" \"register,get\")"
+				//+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.api.SensinactCoreBaseIface\" \"register,get\")"
+				//	+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensinactCoreBase\" \"register,get\")"
+				//+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.api.Sensinact\" \"register,get\")"
 				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.remote.RemoteCore\" \"register,get\")"
 				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecuredAccess\" \"register,get\")"
 				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.UserManager\" \"register,get\")"
 				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService\" \"register,get\")"
 				+ "} null", builder.toString()));
 		piList.add(cpiDeny);
-
+*/
+/*
 		ConditionalPermissionInfo cpiAllow = null;
 
 		cpiAllow = cpa.newConditionalPermissionInfo(
 			"ALLOW {[org.eclipse.sensinact.gateway.core.security.perm.CodeBaseCondition \"*\"](java.security.AllPermission \"\" \"\")} null");
 		
 		piList.add(cpiAllow);
-
+*/
 		if (!cpu.commit()) {
 			throw new ConcurrentModificationException("Permissions changed during update");
 		}
+
 		registration = AccessController.doPrivileged(new PrivilegedAction<ServiceRegistration>() {
 			@Override
 			public ServiceRegistration run() {
 				try {
-					return mediator.getContext().registerService(Core.class.getCanonicalName(), 
+					return mediator.getContext().registerService(new String[]{Core.class.getCanonicalName(),Sensinact.class.getName()},
 							new SensiNact(mediator), null);
 				} catch (Exception e) {
+					e.printStackTrace();
 					mediator.error(e);
 				}
 				return null;
 			}
 		});
+
+
+
 	}
 
 	/**
