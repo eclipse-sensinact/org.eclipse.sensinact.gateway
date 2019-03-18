@@ -38,6 +38,7 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osgi.framework.*;
+import org.osgi.service.component.annotations.Component;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -52,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-//@Component//(immediate = true)
+@Component(immediate = false)
 public class SensiNact implements Sensinact,Core {
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
@@ -64,7 +65,7 @@ public class SensiNact implements Sensinact,Core {
 	/**
 	 * Abstract {@link Session} service implementation
 	 */
-	abstract class SensiNactSession extends AbstractSession {
+	public abstract class SensiNactSession extends AbstractSession {
 		/**
 		 * Constructor
 		 * 
@@ -1071,348 +1072,7 @@ public class SensiNact implements Sensinact,Core {
 	/**
 	 * Endpoint of the local OSGi host environment
 	 */
-	final class RegistryEndpoint {
 
-		private Collection<ServiceReference<SensiNactResourceModel>> getReferences(String publicKey, String filter) {
-			return getReferences(SensiNact.this.getUserAccessTree(publicKey),filter);
-		}
-
-		private Collection<ServiceReference<SensiNactResourceModel>> getReferences(SessionKey sessionKey, String filter) {
-			return getReferences(sessionKey.getAccessTree(),filter);
-		}
-		
-		private Collection<ServiceReference<SensiNactResourceModel>> getReferences(AccessTree<? extends AccessNode> tree, String filter) {
-			AccessMethod.Type describe = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
-			Collection<ServiceReference<SensiNactResourceModel>> result = new ArrayList<ServiceReference<SensiNactResourceModel>>();
-			Collection<ServiceReference<SensiNactResourceModel>> references = null;
-			try {
-				references = SensiNact.this.mediator.getContext().getServiceReferences(SensiNactResourceModel.class, filter);
-				Iterator<ServiceReference<SensiNactResourceModel>> iterator = references.iterator();
-
-				while (iterator.hasNext()) {
-					ServiceReference<SensiNactResourceModel> reference = iterator.next();
-					String name = (String) reference.getProperty("name");
-					Integer level = (Integer) reference.getProperty(name.concat(".DESCRIBE"));
-					if (level == null) {
-						level = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
-					}
-					AccessNode node = tree.getRoot().get(UriUtils.getUri(new String[] { name }));
-					if (node == null) {
-						node = tree.getRoot();
-					}
-					if (node.getAccessLevelOption(describe).getAccessLevel().getLevel() >= level.intValue()) {
-						result.add(reference);
-					}
-				}
-			} catch (InvalidSyntaxException e) {
-				mediator.error(e.getMessage(), e);
-			}
-			return result;
-		}
-
-		private Set<ServiceProvider> serviceProviders(final SessionKey sessionKey, String filter) {
-			String activeFilter = "(lifecycle.status=ACTIVE)";
-			String providersFilter = null;
-
-			if (filter == null) {
-				providersFilter = activeFilter;
-
-			} else {
-				StringBuilder filterBuilder = new StringBuilder().append("(&");
-				if (!filter.startsWith("(")) {
-					filterBuilder.append("(");
-				}
-				filterBuilder.append(filter);
-				if (!filter.endsWith(")")) {
-					filterBuilder.append(")");
-				}
-				filterBuilder.append(activeFilter);
-				filterBuilder.append(")");
-				providersFilter = filterBuilder.toString();
-			}
-			final String fltr = providersFilter;
-
-			Set<ServiceProvider> serviceProviders = AccessController.<Set<ServiceProvider>>doPrivileged(
-				new PrivilegedAction<Set<ServiceProvider>>() {
-					@SuppressWarnings("unchecked")
-					@Override
-					public Set<ServiceProvider> run() {
-						Collection<ServiceReference<SensiNactResourceModel>> references = 
-							RegistryEndpoint.this.getReferences(sessionKey, fltr);
-
-						Iterator<ServiceReference<SensiNactResourceModel>> iterator = 
-								references.iterator();
-
-						Set<ServiceProvider> providers = new HashSet<ServiceProvider>();
-
-						while (iterator.hasNext()) {
-							ServiceReference<SensiNactResourceModel> ref = iterator.next();
-							SensiNactResourceModel model = SensiNact.this.mediator.getContext().getService(ref);
-							ServiceProvider provider = null;
-							try {
-								provider = (ServiceProvider) model.getRootElement()
-										.getProxy(sessionKey.getAccessTree());
-
-							} catch (ModelElementProxyBuildException e) {
-								SensiNact.this.mediator.error(e);
-							}
-							if (provider != null && provider.isAccessible()) {
-								providers.add(provider);
-							}
-						}
-						return providers;
-					}
-				});
-			return serviceProviders;
-		}
-
-		private ServiceProvider serviceProvider(SessionKey sessionKey, final String serviceProviderName) {
-			ServiceProvider provider = null;
-
-			Set<ServiceProvider> providers = this.serviceProviders(sessionKey,
-					new StringBuilder().append("(name=").append(serviceProviderName).append(")").toString());
-
-			if (providers == null || providers.size() != 1) {
-				return provider;
-			}
-			provider = providers.iterator().next();
-			return provider;
-		}
-		
-		private Service service(SessionKey sessionKey, String serviceProviderName, String serviceName) {
-			ServiceProvider serviceProvider = serviceProvider(sessionKey, serviceProviderName);
-			Service service = null;
-			if (serviceProvider != null) {
-				service = serviceProvider.getService(serviceName);
-			}
-			return service;
-		}
-		
-		private Resource resource(SessionKey sessionKey, String serviceProviderName, String serviceName,
-				String resourceName) {
-			Service service = this.service(sessionKey, serviceProviderName, serviceName);
-			Resource resource = null;
-			if (service != null) {
-				resource = service.getResource(resourceName);
-			}
-			return resource;
-		}
-
-		private boolean isAccessible(String publicKey, String path) {
-			return this.isAccessible(SensiNact.this.getUserAccessTree(publicKey), path);		
-		}
-
-		private boolean isAccessible(SessionKey sessionKey, String path) {
-			return this.isAccessible(sessionKey.getAccessTree(), path);		
-		}
-		
-		private boolean isAccessible(AccessTree<? extends AccessNode> tree, String path) {
-			String[] uriElements = UriUtils.getUriElements(path);
-			String providerName = uriElements[0];
-			String serviceName = uriElements.length>1?uriElements[1]:null;
-			String resourceName = uriElements.length>2?uriElements[2]:null;
-			
-			String filter = new StringBuilder().append("(&(name=").append(providerName
-					).append(")(lifecycle.status=ACTIVE))").toString();
-			
-			Collection<ServiceReference<SensiNactResourceModel>> references = 
-					this.getReferences(tree, filter);
-			if(references.size()!=1) {
-				return false;
-			}
-			ServiceReference<SensiNactResourceModel> reference = references.iterator().next();
-			
-			AccessMethod.Type describe = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
-			AccessNode node = tree.getRoot();
-			
-			int index = 0;
-			String pa = null;
-			String key = null;
-			
-			Integer inheritedObjectDescribeLevel = Integer.valueOf(
-					AccessLevelOption.OWNER.getAccessLevel().getLevel());
-						
-			while(true) {
-				switch(index) {
-				case 0:
-					pa = UriUtils.getUri(new String[] {providerName});
-					key = providerName.concat(".DESCRIBE");
-					break;
-				case 1:	
-					List<String> services = (List<String>) reference.getProperty("services");
-					if(services == null || !services.contains(serviceName)) {
-						return false;
-					}
-					pa = UriUtils.getUri(new String[] {pa,serviceName});
-					key =  new StringBuilder().append(serviceName).append(".DESCRIBE").toString();
-					break;
-				case 2:
-					List<String> resources = (List<String>) reference.getProperty(serviceName.concat(".resources"));
-					if(resources == null || !resources.contains(resourceName)) {
-						return false;
-					}
-					pa = UriUtils.getUri(new String[] {pa,resourceName});
-					key =  new StringBuilder().append(serviceName).append(".").append(resourceName).append(".DESCRIBE").toString();
-					break;
-				default:
-					return false;
-				}
-				AccessNode tmpNode = tree.getRoot().get(pa);
-				if (tmpNode == null) {
-					tmpNode = node;
-				} else{
-					node = tmpNode;
-				}
-				Integer level =  (Integer) reference.getProperty(key);
-				if(level == null) {
-					level = inheritedObjectDescribeLevel;
-				}else {
-					inheritedObjectDescribeLevel = level;	
-				}
-				if (node.getAccessLevelOption(describe).getAccessLevel().getLevel() < inheritedObjectDescribeLevel.intValue()) {
-					return false;
-				}
-				if(++index == uriElements.length) {					
-					return true;
-				}
-			}			
-		}
-		
-		private String getAll(SessionKey sessionKey, boolean resolveNamespace, String filter) {
-			StringBuilder builder = new StringBuilder();
-			String prefix = resolveNamespace
-					? new StringBuilder().append(SensiNact.this.namespace()).append(":").toString()
-					: "";
-			int index = -1;
-
-			Collection<ServiceReference<SensiNactResourceModel>> references = RegistryEndpoint.this
-					.getReferences(sessionKey, filter);
-			Iterator<ServiceReference<SensiNactResourceModel>> iterator = references.iterator();
-
-			AccessTree<? extends AccessNode> tree = sessionKey.getAccessTree();
-			AccessMethod.Type describe = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
-
-			while (iterator.hasNext()) {
-				index++;
-				ServiceReference<SensiNactResourceModel> reference = iterator.next();
-				String name = (String) reference.getProperty("name");
-
-				String provider = new StringBuilder().append(prefix).append(name).toString();
-				String location = (String) reference
-						.getProperty(ModelInstanceRegistration.LOCATION_PROPERTY.concat(".value"));
-				location = (location == null || location.length() == 0) ? defaultLocation : location;
-				List<String> serviceList = (List<String>) reference.getProperty("services");
-
-				builder.append(index > 0 ? ',' : "");
-				builder.append('{');
-				builder.append("\"name\":");
-				builder.append('"');
-				builder.append(provider);
-				builder.append('"');
-				builder.append(",\"location\":");
-				builder.append('"');
-				builder.append(location);
-				builder.append('"');
-				builder.append(",\"services\":");
-				builder.append('[');
-
-				int sindex = 0;
-				int slength = serviceList == null ? 0 : serviceList.size();
-				for (; sindex < slength; sindex++) {
-					String service = serviceList.get(sindex);
-					String serviceUri = UriUtils.getUri(new String[] { name, service });
-					Integer serviceLevel = (Integer) reference.getProperty(service.concat(".DESCRIBE"));
-					if (serviceLevel == null) {
-						serviceLevel = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
-					}
-					AccessNode node = sessionKey.getAccessTree().getRoot().get(serviceUri);
-					if (node == null) {
-						node = tree.getRoot();
-					}
-					int describeAccessLevel = node.getAccessLevelOption(describe).getAccessLevel().getLevel();
-					int serviceLevelLevel = serviceLevel.intValue();
-
-					if (node.getAccessLevelOption(describe).getAccessLevel().getLevel() < serviceLevel.intValue()) {
-						continue;
-					}
-					List<String> resourceList = (List<String>) reference.getProperty(service.concat(".resources"));
-
-					builder.append(sindex > 0 ? ',' : "");
-					builder.append('{');
-					builder.append("\"name\":");
-					builder.append('"');
-					builder.append(service);
-					builder.append('"');
-					builder.append(",\"resources\":");
-					builder.append('[');
-
-					int rindex = 0;
-					int rlength = resourceList == null ? 0 : resourceList.size();
-					for (; rindex < rlength; rindex++) {
-						String resource = resourceList.get(rindex);
-						String resolvedResource = new StringBuilder().append(service).append(".").append(resource)
-								.toString();
-						String resourceUri = UriUtils.getUri(new String[] { name, service, resource });
-						Integer resourceLevel = (Integer) reference.getProperty(resolvedResource.concat(".DESCRIBE"));
-						if (resourceLevel == null) {
-							resourceLevel = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
-						}
-						node = sessionKey.getAccessTree().getRoot().get(resourceUri);
-						if (node == null) {
-							node = tree.getRoot();
-						}
-						if (node.getAccessLevelOption(describe).getAccessLevel().getLevel() < resourceLevel
-								.intValue()) {
-							continue;
-						}
-						String type = (String) reference.getProperty(resolvedResource.concat(".type"));
-						builder.append(rindex > 0 ? ',' : "");
-						builder.append('{');
-						builder.append("\"name\":");
-						builder.append('"');
-						builder.append(resource);
-						builder.append('"');
-						builder.append(",\"type\":");
-						builder.append('"');
-						builder.append(type);
-						builder.append('"');
-						builder.append('}');
-					}
-					builder.append(']');
-					builder.append('}');
-				}
-				builder.append(']');
-				builder.append('}');
-			}
-			String content = builder.toString();
-			return content;
-		}
-
-		private String getProviders(SessionKey sessionKey, boolean resolveNamespace, String filter) {
-			String prefix = resolveNamespace
-					? new StringBuilder().append(SensiNact.this.namespace()).append(":").toString()
-					: "";
-			Collection<ServiceReference<SensiNactResourceModel>> references = this.getReferences(sessionKey, filter);
-			Iterator<ServiceReference<SensiNactResourceModel>> iterator = references.iterator();
-
-			StringBuilder builder = new StringBuilder();
-			int index = 0;
-			while (iterator.hasNext()) {
-				ServiceReference<SensiNactResourceModel> reference = iterator.next();
-				String name = (String) reference.getProperty("name");
-				String provider = new StringBuilder().append(prefix).append(name).toString();
-				if (index > 0) {
-					builder.append(",");
-				}
-				builder.append('"');
-				builder.append(provider);
-				builder.append('"');
-				index++;
-			}
-			String content = builder.toString();
-			return content;
-		}
-	};
 
 	// ********************************************************************//
 	// ABSTRACT DECLARATIONS //
@@ -1476,12 +1136,12 @@ public class SensiNact implements Sensinact,Core {
 	private final AccessTree<? extends AccessNode> anonymousTree;
 	private final Sessions sessions;
 
-	private Mediator mediator;
+	public Mediator mediator;
 	private RegistryEndpoint registry;
 
 	private volatile AtomicInteger count = new AtomicInteger(LOCAL_ID + 1);
 	private final String namespace;
-	private final String defaultLocation;
+	public final String defaultLocation;
 
 	private final <R, P> R doPrivilegedService(final Class<P> p, final String f, final Executable<P, R> e) {
 		R r = AccessController.<R>doPrivileged(new PrivilegedAction<R>() {
@@ -1513,7 +1173,7 @@ public class SensiNact implements Sensinact,Core {
 		return tree;
 	}
 
-	private final AccessTree<?> getUserAccessTree(final String publicKey) {
+	public final AccessTree<?> getUserAccessTree(final String publicKey) {
 		AccessTree<? extends AccessNode> tree = null;
 		if (publicKey != null && !publicKey.startsWith(UserManager.ANONYMOUS_PKEY)) {
 			tree = doPrivilegedService(SecuredAccess.class, null,
@@ -1541,6 +1201,15 @@ public class SensiNact implements Sensinact,Core {
 	 * @throws SecuredAccessException
 	 * @throws BundleException
 	 */
+/*
+	public SensiNact(){
+		this.defaultLocation = ModelInstance.defaultLocation(mediator);
+		this.sessions = new Sessions();
+		this.namespace="SERVER";
+		this.anonymousTree = null;
+		this.registry = new RegistryEndpoint(this);
+	}
+*/
 	public SensiNact(final Mediator mediator) throws SecuredAccessException, BundleException, DataStoreException {
 		this.namespace = SensiNact.namespace(mediator);
 
@@ -1607,7 +1276,7 @@ public class SensiNact implements Sensinact,Core {
 					}
 				});
 		this.mediator = mediator;
-		this.registry = new RegistryEndpoint();
+		registry = new RegistryEndpoint(this);
 
 		//.SensinactCoreBaseIface.class
 		//(objectClass=org.eclipse.sensinact.gateway.core
@@ -1745,6 +1414,7 @@ public class SensiNact implements Sensinact,Core {
 		SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, sessionToken, 
 				this.getAnonymousTree(), null);
 		sessionKey.setUserKey(new UserKey(pkey));
+
 		AnonymousSession session = new SensiNactAnonymousSession(sessionToken);
 		this.sessions.put(sessionKey, session);
 		return session;
@@ -2195,7 +1865,7 @@ public class SensiNact implements Sensinact,Core {
 	 * 	<li>false otherwise</li>
 	 * </ul>
 	 */
-	protected boolean isAccessible(final String publicKey , final String path) {
+	public boolean isAccessible(final String publicKey , final String path) {
 		return isAccessible(publicKey, getUserAccessTree(publicKey),path);
 	}
 	
@@ -2625,7 +2295,7 @@ public class SensiNact implements Sensinact,Core {
 	}
 
 	public String getProvidersLocal(String identifier, String filter){
-		final SessionKey sessionKey = sessions
+		SessionKey sessionKey = sessions
 				.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
 
 		String effectiveFilter = null;
@@ -2638,7 +2308,10 @@ public class SensiNact implements Sensinact,Core {
 				effectiveFilter = null;
 			}
 		}
-		String local = this.registry.getProviders(sessionKey, sessionKey.localID() != 0, effectiveFilter);
+		System.out.println("BING!!!!!");
+		//System.out.println("Local ID1 --->"+sessionKey);
+		//System.out.println("Local ID2 --->"+sessionKey.localID());
+		String local = registry.getProviders(sessionKey, false, effectiveFilter);//sessionKey.localID() != 0
 
 		if (sessionKey.localID() != 0) {
 			return local;
@@ -2652,9 +2325,10 @@ public class SensiNact implements Sensinact,Core {
 
 	public String getProviders(String identifier, String filter) {
 
-		StringBuilder content=new StringBuilder(getProvidersLocal(identifier, filter));
-		content.append(getProvidersRemote(identifier,filter));
-
+		try{
+			StringBuilder content=new StringBuilder(getProvidersLocal(identifier, filter));//
+			content.append(getProvidersRemote(identifier,filter));
+			System.out.println("-------------->"+content.toString());
 /*
 		SensiNact.this.doPrivilegedVoidServices(RemoteCore.class, null, new Executable<RemoteCore, Void>() {
 			@Override
@@ -2671,7 +2345,13 @@ public class SensiNact implements Sensinact,Core {
 			}
 		});
 */
-		return content.toString();
+			return content.toString();
+
+		}catch(Exception e){
+			e.printStackTrace();
+			return "";
+		}
+
 	}
 
 	/**

@@ -1,5 +1,7 @@
 package org.eclipse.sensinact.gateway.core.api;
 
+import org.eclipse.sensinact.gateway.core.AnonymousSession;
+
 public interface Sensinact {
 
     /**
@@ -10,5 +12,6 @@ public interface Sensinact {
      */
     public String namespace();
     public String getProvidersLocal(String identifier, String filter);
+    public AnonymousSession getAnonymousSession();
 
 }

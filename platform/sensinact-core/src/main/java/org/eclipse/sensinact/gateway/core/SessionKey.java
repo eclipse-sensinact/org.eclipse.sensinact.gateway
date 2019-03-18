@@ -26,11 +26,13 @@ import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.UserKey;
+import org.osgi.service.component.annotations.Component;
 
 /**
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
+@Component(immediate = false)
 public class SessionKey {
 	private Mediator mediator;
 

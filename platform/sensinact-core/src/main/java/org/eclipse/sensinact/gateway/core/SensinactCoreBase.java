@@ -23,7 +23,7 @@ import java.util.Collection;
 public class SensinactCoreBase implements SensinactCoreBaseIface {
 
 
-    private Sensinact sensinact;
+    volatile private Sensinact sensinact;
 
     ConfigurationAdmin admin;
 /*
@@ -32,7 +32,7 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
         this.admin = admin;
     }
 */
-    @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE,policy = ReferencePolicy.DYNAMIC,policyOption = ReferencePolicyOption.RELUCTANT)
+    @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE,policy = ReferencePolicy.STATIC,policyOption = ReferencePolicyOption.RELUCTANT)
     public void setSensiNact(Sensinact sensinact) {
         this.sensinact = sensinact;
     }
@@ -83,11 +83,15 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
 
         StringBuilder sb=new StringBuilder();
 
-        //sb.append("jan:temps");
+        //sb.append("\""+namespace()+":temps\"");
 
+        SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
 
-        for(String prov:sensinact.getProvidersLocal(identifier,filter).split(",")){
-            sb.append(namespace()+":"+prov);
+        //String localProv=sensinact.getProvidersLocal(identifier,filter);
+        //if(localProv.contains(","))
+        for(String prov:sensinact.getProvidersLocal(session.identifier,filter).split(",")){
+            String providerNameRemote=prov.replace("\"","");
+            sb.append(",\""+namespace()+":"+providerNameRemote+"\"");
         }
 
         System.out.println("******** "+sb.toString());
