@@ -29,7 +29,7 @@
 		<module>sensinact-test-configuration</module>
 		<module>sensinact-test</module>
 		<!--<module>studio-web</module>-->
-        <!--<module>swagger</module>-->
+        <module>swagger</module>
         <module>mqtt-server</module>
 	</modules>
 </project>

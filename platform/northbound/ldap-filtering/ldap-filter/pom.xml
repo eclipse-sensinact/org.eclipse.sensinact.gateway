@@ -41,7 +41,7 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.main</artifactId>
-			<version>4.4.1</version>
+			<version>${felix.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -166,21 +166,21 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.fileinstall</artifactId>
-									<version>3.5.0</version>
+									<version>${felix.fileinstall.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.fileinstall.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.configadmin</artifactId>
-									<version>1.8.2</version>
+									<version>${felix.configadmin.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.configadmin.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.osgi</groupId>
 									<artifactId>org.osgi.compendium</artifactId>
-									<version>5.0.0</version>
+									<version>${osgi.compendium.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.osgi.compendium.jar</destFileName>
 								</artifactItem>

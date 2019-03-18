@@ -20,11 +20,13 @@ import org.eclipse.sensinact.gateway.test.MidProxy;
 import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 
 import static org.junit.Assert.assertTrue;
 
+@Ignore
 public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
     private static JettyTestServer server = null;

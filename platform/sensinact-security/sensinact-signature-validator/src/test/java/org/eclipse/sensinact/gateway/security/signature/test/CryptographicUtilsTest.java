@@ -25,6 +25,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
+@Ignore
 public class CryptographicUtilsTest {
     static CryptographicUtils cutils = null;
     String fileName4hash = "src/test/resources/textFile.txt.bis";

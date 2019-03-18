@@ -142,10 +142,18 @@
 	</developers>
 
 	<properties>
-		<osgi.version>5.0.0</osgi.version>
+		<osgi.version>6.0.0</osgi.version>
+		<felix.fileinstall.version>3.6.4</felix.fileinstall.version>
+		<felix.version>6.0.2</felix.version>
+		<logback.version>1.2.3</logback.version>
+		<felix.configadmin.version>1.9.10</felix.configadmin.version>
+		<osgi.compendium.version>5.0.0</osgi.compendium.version>
 		<junit.version>4.8.1</junit.version>
-		<ipojo.version>1.12.0</ipojo.version>
-		<gogo.version>0.12.0</gogo.version>
+		<org.apache.felix.gogo.runtime.version>1.1.0</org.apache.felix.gogo.runtime.version>
+		<org.jline.version>3.7.0</org.jline.version>
+		<org.fusesource.jansi.version>1.17.1</org.fusesource.jansi.version>
+		<org.apache.felix.gogo.jline.version>1.1.0</org.apache.felix.gogo.jline.version>
+		<org.apache.felix.gogo.command.version>1.0.2</org.apache.felix.gogo.command.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.build.timestamp.format>yyyyMMd</maven.build.timestamp.format>
@@ -166,7 +174,7 @@
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.compendium</artifactId>
-				<version>${osgi.version}</version>
+				<version>${osgi.compendium.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

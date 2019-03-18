@@ -35,7 +35,7 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>5.0.0</version>
+            <version>${osgi.version}</version>
         </dependency>
         <dependency>
             <groupId>io.moquette</groupId>
