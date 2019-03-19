@@ -60,8 +60,8 @@ public class SensiNact implements Sensinact,Core {
 	// ********************************************************************//
 
 
-	public List<SensinactCoreBaseIface> sensinactRemote=Collections.synchronizedList(new ArrayList<SensinactCoreBaseIface>());
-
+	//public List<SensinactCoreBaseIface> sensinactRemote=Collections.synchronizedList(new ArrayList<SensinactCoreBaseIface>());
+	public Map<String,SensinactCoreBaseIface> sensinactRemote=Collections.synchronizedMap(new HashMap<String,SensinactCoreBaseIface>());
 	/**
 	 * Abstract {@link Session} service implementation
 	 */
@@ -247,31 +247,12 @@ public class SensiNact implements Sensinact,Core {
 					KeyExtractorType.TOKEN, this.getSessionId()));			
 			String uri = getUri((sessionKey.localID() != 0), SensiNact.this.namespace(), 
 				serviceProviderId, serviceId, resourceId);
-
 			Resource resource = this.resource(serviceProviderId, serviceId, resourceId);
 
 			GetResponse response = null;
 
-			if (resource != null) {
-				if (attributeId == null) {
-					if (!resource.getType().equals(Resource.Type.ACTION)) {
-						response = ((DataResource) resource).get();
 
-					} else {
-						response = SensiNact.<JSONObject, GetResponse>createErrorResponse(mediator, AccessMethod.GET,
-								uri, 404, "Unknown Method", null);
-					}
-				} else {
-					response = resource.get(attributeId);
-				}
-				return tatooRequestId(requestId, response);
-			}
-			if (sessionKey.localID() != 0) {
-				response = SensiNact.<JSONObject, GetResponse>createErrorResponse(mediator, AccessMethod.GET, uri,
-						SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found", null);
-
-				return tatooRequestId(requestId, response);
-			}
+			/*
 			JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
 				@Override
 				public JSONObject run() {
@@ -279,12 +260,51 @@ public class SensiNact implements Sensinact,Core {
 							resourceId, attributeId);
 				}
 			});
-			try {
-				response = this.<GetResponse>responseFromJSONObject(mediator, uri, AccessMethod.GET, object);
-			} catch (Exception e) {
-				response = SensiNact.<JSONObject, GetResponse>createErrorResponse(mediator, AccessMethod.GET, uri,
-						SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, "Internal server error", e);
+			*/
+
+			final boolean isRemoteProvider=serviceProviderId.contains(":");
+
+			if(isRemoteProvider){
+				final String remoteNamespace=serviceProviderId.split(":")[0];
+				SensinactCoreBaseIface sensinactRemoteRef=sensinactRemote.get(remoteNamespace);
+				final String remoteProviderName=serviceProviderId.split(":")[1];
+				String jsonInStringRemote=sensinactRemoteRef.get(SensiNactSession.this.getSessionId(), remoteProviderName, serviceId,resourceId, attributeId);
+				System.out.println("Received from remote "+jsonInStringRemote);
+				try {
+					GetResponseBuilder builder = new GetResponseBuilder(mediator, uri,null);
+					builder.setAccessMethodObjectResult(new JSONObject(jsonInStringRemote));
+
+					return builder.createAccessMethodResponse();
+				} catch (Exception e) {
+					e.printStackTrace();
+					response = SensiNact.<JSONObject, GetResponse>createErrorResponse(mediator, AccessMethod.GET, uri,
+							SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, "Internal server error", e);
+				}
+
+			}else {
+				if (resource != null) {
+					if (attributeId == null) {
+						if (!resource.getType().equals(Resource.Type.ACTION)) {
+							response = ((DataResource) resource).get();
+
+						} else {
+							response = SensiNact.<JSONObject, GetResponse>createErrorResponse(mediator, AccessMethod.GET,
+									uri, 404, "Unknown Method", null);
+						}
+					} else {
+						response = resource.get(attributeId);
+					}
+					return tatooRequestId(requestId, response);
+				}
+				if (sessionKey.localID() != 0) {
+					response = SensiNact.<JSONObject, GetResponse>createErrorResponse(mediator, AccessMethod.GET, uri,
+							SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found", null);
+
+					return tatooRequestId(requestId, response);
+				}
 			}
+
+
 			return tatooRequestId(requestId, response);
 		}
 
@@ -677,10 +697,19 @@ public class SensiNact implements Sensinact,Core {
 			DescribeResponse<String> response = null;
 			DescribeMethod<String> method = new DescribeMethod<String>(mediator, uri, null, DescribeType.SERVICES_LIST);
 			DescribeResponseBuilder<String> builder = method.createAccessMethodResponseBuilder(null);
-			ServiceProvider provider = this.serviceProvider(serviceProviderId);
+			ServiceProvider provider = null;
 			String services = null;
 
-			if (provider == null) {
+			final boolean isRemoteProvider=serviceProviderId.contains(":");
+
+			if(!isRemoteProvider){
+				provider = this.serviceProvider(serviceProviderId);
+				services = this.joinElementNames(provider);
+			}else {
+				final String remoteNamespace=serviceProviderId.split(":")[0];
+				final String remoteProviderName=serviceProviderId.split(":")[1];
+				services=sensinactRemote.get(remoteNamespace).getServices(SensiNactSession.this.getSessionId(),remoteProviderName);
+				/*
 				if (sessionKey.localID() != 0) {
 					response = SensiNact.<String, DescribeResponse<String>>createErrorResponse(mediator,
 							DescribeType.SERVICES_LIST, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
@@ -694,9 +723,9 @@ public class SensiNact implements Sensinact,Core {
 						return SensiNact.this.getServices(SensiNactSession.this.getSessionId(), serviceProviderId);
 					}
 				});
-			} else {
-				services = this.joinElementNames(provider);
+				*/
 			}
+
 			if (services == null) {
 				response = SensiNact.<String, DescribeResponse<String>>createErrorResponse(mediator,
 						DescribeType.SERVICES_LIST, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
@@ -789,51 +818,71 @@ public class SensiNact implements Sensinact,Core {
 
 			DescribeResponseBuilder<String> builder = method.createAccessMethodResponseBuilder(null);
 
-			Service service = this.service(serviceProviderId, serviceId);
-			String resources = null;
+			final boolean isRemoteProvider=serviceProviderId.contains(":");
 
-			if (service == null) {
-				if (sessionKey.localID() != 0) {
+			if(!isRemoteProvider){
+
+				Service service = this.service(serviceProviderId, serviceId);
+				String resources = null;
+
+				if (service == null) {
+					if (sessionKey.localID() != 0) {
+						response = SensiNact.<String, DescribeResponse<String>>createErrorResponse(mediator,
+								DescribeType.RESOURCES_LIST, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+								"Service not found", null);
+
+						return tatooRequestId(requestId, response);
+					}
+					resources = AccessController.doPrivileged(new PrivilegedAction<String>() {
+						@Override
+						public String run() {
+							return SensiNact.this.getResources(SensiNactSession.this.getSessionId(), serviceProviderId,
+									serviceId);
+						}
+					});
+				} else {
+					resources = this.joinElementNames(service);
+				}
+				if (resources == null) {
 					response = SensiNact.<String, DescribeResponse<String>>createErrorResponse(mediator,
-							DescribeType.RESOURCES_LIST, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
-							"Service not found", null);
+							DescribeType.RESOURCES_LIST, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Service not found",
+							null);
 
 					return tatooRequestId(requestId, response);
 				}
-				resources = AccessController.doPrivileged(new PrivilegedAction<String>() {
-					@Override
-					public String run() {
-						return SensiNact.this.getResources(SensiNactSession.this.getSessionId(), serviceProviderId,
-								serviceId);
-					}
-				});
-			} else {
-				resources = this.joinElementNames(service);
-			}
-			if (resources == null) {
-				response = SensiNact.<String, DescribeResponse<String>>createErrorResponse(mediator,
-						DescribeType.RESOURCES_LIST, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Service not found",
-						null);
+				if (sessionKey.localID() != 0) {
+					builder.setAccessMethodObjectResult(resources);
+					response = builder.createAccessMethodResponse(Status.SUCCESS);
+					return tatooRequestId(requestId, response);
+				}
+				String result = new StringBuilder().append("[").append(resources).append("]").toString();
 
-				return tatooRequestId(requestId, response);
-			}
-			if (sessionKey.localID() != 0) {
-				builder.setAccessMethodObjectResult(resources);
+				if (filterCollection != null) {
+					result = filterCollection.apply(result);
+				}
+				builder.setAccessMethodObjectResult(result);
 				response = builder.createAccessMethodResponse(Status.SUCCESS);
-				return tatooRequestId(requestId, response);
-			}
-			String result = new StringBuilder().append("[").append(resources).append("]").toString();
 
-			if (filterCollection != null) {
-				result = filterCollection.apply(result);
-			}
-			builder.setAccessMethodObjectResult(result);
-			response = builder.createAccessMethodResponse(Status.SUCCESS);
+				if (filterCollection != null) {
+					response.put("filters", new JSONArray(filterCollection.filterJsonDefinition()),
+							filterCollection.hideFilter());
+				}
 
-			if (filterCollection != null) {
-				response.put("filters", new JSONArray(filterCollection.filterJsonDefinition()),
-						filterCollection.hideFilter());
+			}else {
+				final String remoteNamespace=serviceProviderId.split(":")[0];
+				final String remoteProviderName=serviceProviderId.split(":")[1];
+
+				SensinactCoreBaseIface corebase=sensinactRemote.get(remoteNamespace);
+
+				System.out.println("Found remote reference:"+corebase);
+
+				String resources=corebase.getResources("none", remoteProviderName,
+						serviceId);
+				String result = new StringBuilder().append("[").append(resources).append("]").toString();
+				builder.setAccessMethodObjectResult(result);
+				response = builder.createAccessMethodResponse(Status.SUCCESS);
 			}
+
 			return tatooRequestId(requestId, response);
 		}
 
@@ -1326,7 +1375,7 @@ public class SensiNact implements Sensinact,Core {
 
 				System.out.println("*************** Core received instance of: "+sna.namespace());
 
-				sensinactRemote.add(sna);
+				sensinactRemote.put(sna.namespace(),sna);
 
 				return sna;
 			}
@@ -1598,6 +1647,7 @@ public class SensiNact implements Sensinact,Core {
 		synchronized(this.count) {
 			sessionCount = count.incrementAndGet();
 		}
+
 		final RemoteSensiNact remoteCore = new RemoteSensiNact(mediator, new LocalEndpoint(sessionCount) {
 			private Map<String, Session> remoteSessions = new HashMap<String, Session>();
 
@@ -1795,7 +1845,7 @@ public class SensiNact implements Sensinact,Core {
 	 *            the String identifier of the {@link Session} requiring the service
 	 * @param serviceProviderId
 	 *            the String identifier of the service provider holding the service
-	 * @param servideId
+	 * @param serviceId
 	 *            the String identifier of the service
 	 * 
 	 * @return the {@link Service}
@@ -1815,7 +1865,7 @@ public class SensiNact implements Sensinact,Core {
 	 * @param serviceProviderId
 	 *            the String identifier of the service provider holding the service
 	 *            providing the resource
-	 * @param servideId
+	 * @param serviceId
 	 *            the String identifier of the service providing the resource
 	 * @param resourceId
 	 *            the String identifier of the resource
@@ -1990,8 +2040,17 @@ public class SensiNact implements Sensinact,Core {
 	 * @return the JSON formated list of available resources for the specified
 	 *         service and service provider
 	 */
-	protected String getResources(String identifier, final String serviceProviderId, final String serviceId) {
+	public String getResources(String identifier, final String serviceProviderId, final String serviceId) {
 		final SessionKey sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
+
+		SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)getAnonymousSession();
+
+		String object=session.getResources(serviceProviderId,serviceId).getResponse();
+
+
+		object=object.substring(1,object.length()-1);
+
+		/*
 		String object = remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore, String>() {
 			@Override
 			public String execute(RemoteCore connector) throws Exception {
@@ -2002,6 +2061,7 @@ public class SensiNact implements Sensinact,Core {
 						serviceProviderId.substring(serviceProviderId.indexOf(':') + 1), serviceId);
 			}
 		});
+		*/
 		return object;
 	}
 
@@ -2023,6 +2083,10 @@ public class SensiNact implements Sensinact,Core {
 		final SessionKey sessionKey = sessions
 				.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
 
+		SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)getAnonymousSession();
+		JSONObject object=session.getService(serviceProviderId,serviceId).getResponse();
+		/*
+
 		JSONObject object = remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore, JSONObject>() {
 			@Override
 			public JSONObject execute(RemoteCore connector) throws Exception {
@@ -2033,6 +2097,9 @@ public class SensiNact implements Sensinact,Core {
 						serviceProviderId.substring(serviceProviderId.indexOf(':') + 1), serviceId));
 			}
 		});
+
+		*/
+
 		return object;
 	}
 
@@ -2049,10 +2116,18 @@ public class SensiNact implements Sensinact,Core {
 	 * @return the JSON formated list of available services for the specified
 	 *         service provider
 	 */
-	protected String getServices(String identifier, final String serviceProviderId) {
+	public String getServices(String identifier, final String serviceProviderId) {
 		final SessionKey sessionKey = sessions
 				.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
+		String object = null;
 
+		SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)getAnonymousSession();
+
+		String response=session.getServices(serviceProviderId).getResponse();
+
+		object=response.substring(1,response.length()-1);
+
+		/*
 		String object = remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore, String>() {
 			@Override
 			public String execute(RemoteCore connector) throws Exception {
@@ -2063,6 +2138,7 @@ public class SensiNact implements Sensinact,Core {
 						serviceProviderId.substring(serviceProviderId.indexOf(':') + 1));
 			}
 		});
+		*/
 		return object;
 	}
 
@@ -2079,10 +2155,40 @@ public class SensiNact implements Sensinact,Core {
 	 * 
 	 * @return the JSON formated description of the specified service provider
 	 */
-	protected JSONObject getProvider(String identifier, final String serviceProviderId) {
+	public JSONObject getProvider(String identifier, final String serviceProviderId) {
 		final SessionKey sessionKey = sessions
 				.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
 
+		SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)getAnonymousSession();
+		ServiceProvider provider = null;
+		String services = null;
+		JSONObject object=null;
+		final boolean isRemoteProvider=serviceProviderId.contains(":");
+
+		if(!isRemoteProvider){
+			object=new JSONObject(session.getProvider(serviceProviderId));//SensiNact.this.getProvider(session.identifier,serviceProviderId));//session.getProvider(serviceProviderId).getResponse();
+		}else {
+			final String remoteNamespace=serviceProviderId.split(":")[0];
+			final String remoteProviderName=serviceProviderId.split(":")[1];
+			object=new JSONObject(sensinactRemote.get(remoteNamespace).getProvider(session.identifier,remoteProviderName));
+				/*
+				if (sessionKey.localID() != 0) {
+					response = SensiNact.<String, DescribeResponse<String>>createErrorResponse(mediator,
+							DescribeType.SERVICES_LIST, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+							"Service provider not found", null);
+
+					return tatooRequestId(requestId, response);
+				}
+				services = AccessController.doPrivileged(new PrivilegedAction<String>() {
+					@Override
+					public String run() {
+						return SensiNact.this.getServices(SensiNactSession.this.getSessionId(), serviceProviderId);
+					}
+				});
+				*/
+		}
+
+		/*
 		JSONObject object = remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore, JSONObject>() {
 			@Override
 			public JSONObject execute(RemoteCore connector) throws Exception {
@@ -2093,6 +2199,7 @@ public class SensiNact implements Sensinact,Core {
 						serviceProviderId.substring(serviceProviderId.indexOf(':') + 1)));
 			}
 		});
+		*/
 		return object;
 	}
 
@@ -2260,7 +2367,7 @@ public class SensiNact implements Sensinact,Core {
 	 * 
 	 * @return the JSON formated response of the GET access method invocation
 	 */
-	protected JSONObject get(String identifier, final String serviceProviderId, final String serviceId,
+	public JSONObject get(String identifier, final String serviceProviderId, final String serviceId,
 			final String resourceId, final String attributeId) {
 		final SessionKey sessionKey = sessions
 				.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
@@ -2287,7 +2394,7 @@ public class SensiNact implements Sensinact,Core {
 
 	public String getProvidersRemote(String identifier, String filter) {
 		final StringBuilder content = new StringBuilder();
-		for(SensinactCoreBaseIface remote:sensinactRemote){
+		for(SensinactCoreBaseIface remote:sensinactRemote.values()){
 			String providersFromRemote=remote.getProviders(identifier,filter);
 			content.append(providersFromRemote);
 		}

@@ -2,13 +2,11 @@ package org.eclipse.sensinact.gateway.core;
 
 import org.eclipse.sensinact.gateway.core.api.Sensinact;
 import org.eclipse.sensinact.gateway.core.api.SensinactCoreBaseIface;
+import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.*;
-
-import java.util.Collection;
 
 @Component(
         immediate = false,
@@ -98,6 +96,34 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
 
 
         return sb.toString();
+    }
+
+    @Override
+    public String getServices(String identifier, String serviceProviderId) {
+        SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
+        String value=sensinact.getServices(session.identifier,serviceProviderId);
+        return value;
+    }
+
+    @Override
+    public String getResources(String identifier, String serviceProviderId, String serviceId) {
+        SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
+        String value=sensinact.getResources(session.identifier,serviceProviderId,serviceId);
+        return value;
+    }
+
+    @Override
+    public String getProvider(String identifier, String serviceProviderId) {
+        SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
+        JSONObject value=sensinact.getProvider(session.identifier,serviceProviderId);
+        return value.toString();
+    }
+
+    @Override
+    public String get(String identifier, String serviceProviderId, String serviceId, String resourceId, String attributeId) {
+        SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
+        JSONObject value=session.get(serviceProviderId,serviceId,resourceId,attributeId).getResponse();
+        return value.toString();
     }
 
 }

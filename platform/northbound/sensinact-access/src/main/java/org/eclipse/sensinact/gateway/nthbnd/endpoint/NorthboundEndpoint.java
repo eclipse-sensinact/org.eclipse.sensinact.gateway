@@ -92,6 +92,7 @@ public class NorthboundEndpoint {
             result = (AccessMethodResponse<?>) method.invoke(this, Argument.getParameters(arguments));
 
         } catch (Exception e) {
+            e.printStackTrace();
             this.mediator.error(e);
         }
         return result;
