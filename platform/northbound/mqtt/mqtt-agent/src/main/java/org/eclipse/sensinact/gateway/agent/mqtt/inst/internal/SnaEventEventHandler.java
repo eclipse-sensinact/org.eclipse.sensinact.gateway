@@ -31,16 +31,18 @@ import java.util.UUID;
  * Instance = sNa Attribute
  */
 public class SnaEventEventHandler extends AbstractMqttHandler {
+    private final String payloadType;
     Logger LOG= LoggerFactory.getLogger(SnaEventEventHandler.class.getName());
     private final String broker;
     private final Integer qos;
     private final String prefix;
 
-    public SnaEventEventHandler(String broker,Integer qos,String prefix) throws IOException {
+    public SnaEventEventHandler(String broker,Integer qos,String prefix,String payloadType) throws IOException {
         super();
         this.broker=broker;
         this.qos=qos;
         this.prefix=prefix;
+        this.payloadType=payloadType;
     }
 
     /**
@@ -49,26 +51,41 @@ public class SnaEventEventHandler extends AbstractMqttHandler {
      * @param event the RegisteredUpdatedSnaEvent to process
      */
     public void doHandle(SnaUpdateMessageImpl event) {
-        try {
-            LOG.debug("Event received update:"+event.getJSON().toString());
-            JSONObject eventJson = new JSONObject(event.getJSON()).getJSONObject("notification");
-            String provider = event.getPath().split("/")[1];
-            String service = event.getPath().split("/")[2];
-            String resource = event.getPath().split("/")[3];
-            String valueProperty = event.getPath().split("/")[4];
-            String value=eventJson.getString(valueProperty);
+        if(payloadType.equals("humanreadable")){
+            try {
+                LOG.debug("Event received update:"+event.getJSON().toString());
+                JSONObject eventJson = new JSONObject(event.getJSON()).getJSONObject("notification");
+                String provider = event.getPath().split("/")[1];
+                String service = event.getPath().split("/")[2];
+                String resource = event.getPath().split("/")[3];
+                String valueProperty = event.getPath().split("/")[4];
+                String value=eventJson.getString(valueProperty);
+                switch (event.getType()) {
+                    // Create contentInstance
+                    case ATTRIBUTE_VALUE_UPDATED:
+                        this.agent.publish(String.format("%s%s/%s/%s",prefix,provider,service,resource),value);
+                        break;
+                    default:
+                        return;
+                }
+
+            }catch (Exception e){
+                LOG.error("Failed",e);
+            }
+        }else {
+            this.agent.publish(String.format("%s",prefix),event.getJSON().toString());
+            /*
             switch (event.getType()) {
                 // Create contentInstance
                 case ATTRIBUTE_VALUE_UPDATED:
-                    this.agent.publish(String.format("%s%s/%s/%s",prefix,provider,service,resource),value);
+                    this.agent.publish(String.format("%s",prefix),event.getJSON().toString());
                     break;
                 default:
                     return;
             }
-
-        }catch (Exception e){
-            LOG.error("Failed",e);
+            */
         }
+
 
     }
 
@@ -78,6 +95,9 @@ public class SnaEventEventHandler extends AbstractMqttHandler {
      * @param event the ServiceRegisteredSnaEvent to process
      */
     public void doHandle(SnaLifecycleMessageImpl event) {
+        if(!payloadType.equals("humanreadable")){
+            this.agent.publish(String.format("%s",prefix),event.getJSON().toString());
+        }
         /*
         String aeName = event.getPath().split("/")[1];
         JSONObject request = new JSONObject().put("fr", aeName).put("rqi", UUID.randomUUID().toString());

@@ -22,7 +22,7 @@ public class SnaUpdateMessageImpl extends SnaNotificationMessageImpl<SnaUpdateMe
 	/**
 	 * Constructor
 	 */
-	protected SnaUpdateMessageImpl(Mediator mediator, String uri, Update type) {
+	public SnaUpdateMessageImpl(Mediator mediator, String uri, Update type) {
 		super(mediator, uri, type);
 	}
 }

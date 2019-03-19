@@ -29,6 +29,8 @@ public class Activator extends AbstractMqttActivator {
     public String prefix;
     @Property(defaultValue = "tcp",mandatory = false)
     public String protocol;
+    @Property(defaultValue = "humanreadable",mandatory = false)
+    public String payloadType;
     @Property(mandatory = false)
     String username;
     @Property(mandatory = false)
@@ -47,6 +49,6 @@ public class Activator extends AbstractMqttActivator {
             mediator.setProperty("username",username);
             mediator.setProperty("password",password);
         }
-        doStart(new SnaEventEventHandler(broker,new Integer(qos),prefix));
+        doStart(new SnaEventEventHandler(broker,new Integer(qos),prefix,payloadType));
     }
 }

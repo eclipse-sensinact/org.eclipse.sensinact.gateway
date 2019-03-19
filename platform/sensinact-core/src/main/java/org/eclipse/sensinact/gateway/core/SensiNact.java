@@ -10,6 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
@@ -53,15 +58,39 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@Component(immediate = false)
+//@Component(immediate = false)
 public class SensiNact implements Sensinact,Core {
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
 	// ********************************************************************//
 
+	List<MessageRegisterer> messageRegisterers =Collections.synchronizedList(new ArrayList<MessageRegisterer>());
+	List<MidAgentCallback> messageAgentCallback =Collections.synchronizedList(new ArrayList<MidAgentCallback>());
 
 	//public List<SensinactCoreBaseIface> sensinactRemote=Collections.synchronizedList(new ArrayList<SensinactCoreBaseIface>());
 	public Map<String,SensinactCoreBaseIface> sensinactRemote=Collections.synchronizedMap(new HashMap<String,SensinactCoreBaseIface>());
+
+	public void notifyCallbacks(SnaMessage message){
+
+		for(MessageRegisterer registerer: messageRegisterers){
+			registerer.register(message);
+		}
+
+		for(MidAgentCallback callback: messageAgentCallback){
+			try{
+				if(message instanceof SnaLifecycleMessage){
+					callback.doHandle((SnaLifecycleMessageImpl)message);
+				}else if(message instanceof SnaUpdateMessage) {
+					callback.doHandle((SnaUpdateMessageImpl) message);
+				}
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+
+
+		}
+
+	}
 	/**
 	 * Abstract {@link Session} service implementation
 	 */
@@ -118,6 +147,11 @@ public class SensiNact implements Sensinact,Core {
 		@Override
 		public SubscribeResponse registerSessionAgent(String requestId, 
 				final MidAgentCallback callback, final SnaFilter filter) {
+
+			System.out.println("Register Session*****");
+
+
+
 			boolean registered = AccessController.<Boolean>doPrivileged(new PrivilegedAction<Boolean>() {
 				@Override
 				public Boolean run() {
@@ -126,6 +160,7 @@ public class SensiNact implements Sensinact,Core {
 					return sessionKey.registerAgent(callback, filter);
 				}
 			});
+
 			String uri = null;
 			if (filter != null) {
 				uri = filter.getSender();
@@ -136,6 +171,7 @@ public class SensiNact implements Sensinact,Core {
 			if (registered) {
 				response = new SubscribeResponse(mediator, uri, Status.SUCCESS, 200);
 				response.setResponse(new JSONObject().put("subscriptionId", callback.getName()));
+				messageAgentCallback.add(callback);
 			} else {
 				response = SensiNact.<JSONObject, SubscribeResponse>createErrorResponse(
 					mediator, AccessMethod.SUBSCRIBE, uri, 520, "Unable to subscribe", 
@@ -454,6 +490,19 @@ public class SensiNact implements Sensinact,Core {
 						null);
 				return tatooRequestId(requestId, response);
 			}
+			/*
+			final boolean isRemoteProvider=serviceProviderId.contains(":");
+
+			if(!isRemoteProvider){
+
+			}else {
+				final String remoteNamespace=serviceProviderId.split(":")[0];
+				final String remoteProviderName=serviceProviderId.split(":")[1];
+				new JSONObject(sensinactRemote.get(remoteNamespace).sub
+			}
+			*/
+
+
 			JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
 				@Override
 				public JSONObject run() {
@@ -469,6 +518,7 @@ public class SensiNact implements Sensinact,Core {
 						AccessMethod.SUBSCRIBE, uri, SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE,
 						"Internal server error", e);
 			}
+
 			return tatooRequestId(requestId, response);
 		}
 
@@ -661,7 +711,10 @@ public class SensiNact implements Sensinact,Core {
 			if (provider != null) {
 				builder.setAccessMethodObjectResult(new JSONObject(provider.getDescription().getJSON()));
 
-				return tatooRequestId(requestId, builder.createAccessMethodResponse());
+				DescribeResponse<JSONObject> responseB=builder.createAccessMethodResponse();
+
+				System.out.println("On the session="+responseB.getJSON().toString());
+				return tatooRequestId(requestId, responseB);
 			}
 			if (sessionKey.localID() != 0) {
 				response = SensiNact.<JSONObject, DescribeResponse<JSONObject>>createErrorResponse(mediator,
@@ -670,13 +723,25 @@ public class SensiNact implements Sensinact,Core {
 
 				return tatooRequestId(requestId, response);
 			}
+			/*
 			JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
 				@Override
 				public JSONObject run() {
 					return SensiNact.this.getProvider(SensiNactSession.this.getSessionId(), serviceProviderId);
 				}
 			});
-			response = describeFromJSONObject(mediator, builder, DescribeType.PROVIDER, object);
+			*/
+			JSONObject object=SensiNact.this.getProvider(SensiNactSession.this.getSessionId(), serviceProviderId);
+			System.out.println("AFTER:"+object);
+
+			response = builder.createAccessMethodResponse();//describeFromJSONObject(mediator, builder, DescribeType.PROVIDER,new JSONObject(object));//object
+			//response.remove("statusCode");
+			//response.put("statusCode",200);
+			response.setResponse(object.getJSONObject("response"));
+
+			System.out.println("RESPONSE:"+response.getJSON());
+
+			System.out.println("ENCORE:"+tatooRequestId(requestId, response).getJSON().toString());
 			return tatooRequestId(requestId, response);
 		}
 
@@ -918,6 +983,10 @@ public class SensiNact implements Sensinact,Core {
 						null);
 				return tatooRequestId(requestId, response);
 			}
+			final String remoteNamespace=serviceProviderId.split(":")[0];
+			final String remoteProviderName=serviceProviderId.split(":")[1];
+			JSONObject object=new JSONObject(sensinactRemote.get(remoteNamespace).getProvider("none",remoteProviderName));
+			/*
 			JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
 				@Override
 				public JSONObject run() {
@@ -925,7 +994,14 @@ public class SensiNact implements Sensinact,Core {
 							serviceId, resourceId);
 				}
 			});
-			return tatooRequestId(requestId, describeFromJSONObject(mediator, builder, DescribeType.RESOURCE, object));
+			*/
+
+
+			response = builder.createAccessMethodResponse();//describeFromJSONObject(mediator, builder, DescribeType.PROVIDER,new JSONObject(object));//object
+			//response.remove("statusCode");
+			//response.put("statusCode",200);
+			response.setResponse(object.getJSONObject("response"));
+			return tatooRequestId(requestId, response);
 		}
 
 		/**
@@ -1369,11 +1445,56 @@ public class SensiNact implements Sensinact,Core {
 			@Override
 			public SensinactCoreBaseIface addingService(ServiceReference<SensinactCoreBaseIface> reference) {
 
-				SensinactCoreBaseIface sna=context.getService(reference);
+				final SensinactCoreBaseIface sna=context.getService(reference);
 
 				if(sna.namespace().equals(namespace)) return null;
 
 				System.out.println("*************** Core received instance of: "+sna.namespace());
+
+				try {
+					MqttClient client = new MqttClient("tcp://localhost:1883", MqttClient.generateClientId(), new MemoryPersistence());
+					client.connect();
+					client.subscribe(String.format("/%s",sna.namespace()), new IMqttMessageListener() {
+						@Override
+						public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+							System.out.println(s+" - Received ----> "+new String(mqttMessage.getPayload()));
+
+							//message.setNotification(new JSONObject("{\"name\":\"state\",\"type\":\"boolean\",\"value\":"+new String(mqttMessage.getPayload())+",\"timestamp\":1553074635780}"));
+							JSONObject event=new JSONObject(new String(mqttMessage.getPayload()));
+							JSONObject eventJson = event.getJSONObject("notification");
+							String path=event.getString("uri");
+							String provider = path.split("/")[1];
+
+							//String service = path.split("/")[2];
+							//String resource = path.split("/")[3];
+							//String valueProperty = path.split("/")[4];
+							//*String value=eventJson.getString(valueProperty);
+
+
+							//SnaUpdateMessageImpl message=new SnaUpdateMessageImpl(mediator, "/PI", SnaUpdateMessage.Update.ATTRIBUTE_VALUE_UPDATED);
+							//message.remove("uri");
+							//final String uriTranslated=String.format("/%s/%s/%s/%s","PI:"+provider,service,resource,valueProperty);
+							String uriTranslated=path.replace("/"+provider,String.format("/%s:%s",sna.namespace(),provider));
+							//message.put("uri",uriTranslated);
+							//event.remove("notification");
+							event.remove("uri");
+							//event.put("notification",eventJson);
+							event.put("uri",uriTranslated);
+
+							//message.setNotification(message);
+
+							System.out.println("Sending on the bus3:"+event.toString());
+
+							SnaMessage message=AbstractSnaMessage.fromJSON(mediator,event.toString());
+
+							SensiNact.this.notifyCallbacks(message);
+						}
+					});
+
+
+				} catch (MqttException e) {
+					e.printStackTrace();
+				}
 
 				sensinactRemote.put(sna.namespace(),sna);
 
@@ -1528,6 +1649,7 @@ public class SensiNact implements Sensinact,Core {
 	 */
 	@Override
 	public String registerAgent(final Mediator mediator, final MidAgentCallback callback, final SnaFilter filter) {
+
 		final Bundle bundle = mediator.getContext().getBundle();
 
 		final String bundleIdentifier = this.doPrivilegedService(BundleValidation.class, null,
@@ -1545,10 +1667,12 @@ public class SensiNact implements Sensinact,Core {
 					}
 				});
 		final LocalAgent agent = LocalAgentImpl.createAgent(mediator, callback, filter, agentKey);
+
 		AccessController.<Void>doPrivileged(new PrivilegedAction<Void>() {
 			@Override
 			public Void run() {
 				agent.start();
+				messageRegisterers.add(agent);
 				return null;
 			}
 		});
@@ -2007,21 +2131,73 @@ public class SensiNact implements Sensinact,Core {
 	 * 
 	 * @return the JSON formated description of the specified resource
 	 */
+
+	public JSONObject translateRemoteCallResponseToLocal(String remoteNamespace,String remoteProviderName,JSONObject objectIncome){
+
+		System.out.println("input:"+objectIncome.toString());
+
+		JSONObject object=new JSONObject(objectIncome.toString());
+
+		final String localURI=object.getString("uri");
+		final String remoteURI=localURI.replace("/"+remoteProviderName,String.format("/%s:%s",remoteNamespace,remoteProviderName));
+		try{
+			object.remove("uri");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+		object.put("uri",remoteURI);
+
+		final JSONObject responsePayload=object.getJSONObject("response");
+
+		try{
+			responsePayload.remove("name");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+		responsePayload.put("name",String.format("%s:%s",remoteNamespace,remoteProviderName));
+
+		try{
+			object.remove("response");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+		object.put("response",responsePayload);
+		System.out.println("LOCAL:"+object.toString());
+
+		return object;
+
+	}
+
 	protected JSONObject getResource(String identifier, final String serviceProviderId, final String serviceId,
 			final String resourceId) {
 		final SessionKey sessionKey = sessions
 				.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
 
-		JSONObject object = remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore, JSONObject>() {
-			@Override
-			public JSONObject execute(RemoteCore connector) throws Exception {
-				if (connector == null) {
-					return null;
+		final boolean isRemoteProvider=serviceProviderId.contains(":");
+		JSONObject object=new JSONObject();
+		if(isRemoteProvider) {
+
+			final String remoteNamespace=serviceProviderId.split(":")[0];
+			final String remoteProviderName=serviceProviderId.split(":")[1];
+			object=new JSONObject(sensinactRemote.get(remoteNamespace).getProvider("none",remoteProviderName));
+			object=translateRemoteCallResponseToLocal(remoteNamespace,remoteProviderName,object);
+			/*
+			object = remoteCoreInvocation(serviceProviderId, new Executable<RemoteCore, JSONObject>() {
+				@Override
+				public JSONObject execute(RemoteCore connector) throws Exception {
+					if (connector == null) {
+						return null;
+					}
+					return new JSONObject(connector.endpoint().getResource(sessionKey.getPublicKey(),
+							serviceProviderId.substring(serviceProviderId.indexOf(':') + 1), serviceId, resourceId));
 				}
-				return new JSONObject(connector.endpoint().getResource(sessionKey.getPublicKey(),
-						serviceProviderId.substring(serviceProviderId.indexOf(':') + 1), serviceId, resourceId));
-			}
-		});
+			});
+			*/
+
+		}
 		return object;
 	}
 
@@ -2166,11 +2342,30 @@ public class SensiNact implements Sensinact,Core {
 		final boolean isRemoteProvider=serviceProviderId.contains(":");
 
 		if(!isRemoteProvider){
-			object=new JSONObject(session.getProvider(serviceProviderId));//SensiNact.this.getProvider(session.identifier,serviceProviderId));//session.getProvider(serviceProviderId).getResponse();
+			object=new JSONObject(session.getProvider(serviceProviderId).getJSON());//SensiNact.this.getProvider(session.identifier,serviceProviderId));//session.getProvider(serviceProviderId).getResponse();
+			System.out.println("Object returned="+object.toString());
 		}else {
 			final String remoteNamespace=serviceProviderId.split(":")[0];
 			final String remoteProviderName=serviceProviderId.split(":")[1];
+
 			object=new JSONObject(sensinactRemote.get(remoteNamespace).getProvider(session.identifier,remoteProviderName));
+
+			/*
+			final String localURI=object.getString("uri");
+			final String remoteURI=localURI.replace("/"+remoteProviderName,String.format("/%s:%s",remoteNamespace,remoteProviderName));
+			object.remove("uri");
+			object.put("uri",remoteURI);
+
+			final JSONObject responsePayload=object.getJSONObject("response");
+			responsePayload.remove("name");
+			responsePayload.put("name",serviceProviderId);
+			object.remove("response");
+			object.put("response",responsePayload);
+			System.out.println("LOCAL:"+object.toString());
+			*/
+			object=translateRemoteCallResponseToLocal(remoteNamespace,remoteProviderName,object);
+
+
 				/*
 				if (sessionKey.localID() != 0) {
 					response = SensiNact.<String, DescribeResponse<String>>createErrorResponse(mediator,

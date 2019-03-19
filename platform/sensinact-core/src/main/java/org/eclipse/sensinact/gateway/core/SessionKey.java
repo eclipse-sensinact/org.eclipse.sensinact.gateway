@@ -14,18 +14,19 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Sessions.SessionObserver;
-import org.eclipse.sensinact.gateway.core.message.LocalAgentImpl;
-import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.RemoteAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.RemoteAgentImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.message.*;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.UserKey;
+import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -103,16 +104,16 @@ public class SessionKey {
 	 * @return
 	 */
 	public boolean registerAgent(MidAgentCallback callback, SnaFilter filter) {
+		System.out.println("***dd***************");
 		if(this.agents.contains(callback.getName())){
 			this.mediator.warn("Agent '%s' already registered",callback.getName());
 			return false;
 		}
-		SnaAgent agent = null; 
+		SnaAgent agent = null;
 		if(RemoteAgentCallback.class.isAssignableFrom(callback.getClass())) {
 			agent = new RemoteAgentImpl(mediator, (RemoteAgentCallback) callback, filter, getPublicKey());
 		} else {
-			agent = LocalAgentImpl.createAgent(mediator, callback, filter, getPublicKey());
-		}
+			agent = LocalAgentImpl.createAgent(mediator, callback, filter, getPublicKey());		}
 		return registerAgent(callback.getName(), agent);
 	}
 	
