@@ -129,6 +129,13 @@
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.slf4j</groupId>
+                                    <artifactId>slf4j-simple</artifactId>
+                                    <version>1.7.25</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>ch.qos.logback</groupId>
                                     <artifactId>logback-classic</artifactId>
                                     <version>1.2.3</version>
@@ -156,13 +163,6 @@
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.fileinstall</artifactId>
                                     <version>${felix.fileinstall.version}</version>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.platform</groupId>
-                                    <artifactId>org.eclipse.equinox.cm</artifactId>
-                                    <version>1.1.200</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
