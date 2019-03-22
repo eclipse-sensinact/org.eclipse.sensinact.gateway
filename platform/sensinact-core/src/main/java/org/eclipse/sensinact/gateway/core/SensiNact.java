@@ -456,7 +456,7 @@ public class SensiNact implements Sensinact,Core {
 		 *      org.json.JSONArray)
 		 */
 		@Override
-		public SubscribeResponse subscribe(String requestId, final String serviceProviderId, final String serviceId,
+		public SubscribeResponse subscribe(final String requestId, final String serviceProviderId, final String serviceId,
 				final String resourceId, final Recipient recipient, final JSONArray conditions, final String policy) {
 			SubscribeResponse response = null;
 			SessionKey sessionKey = SensiNact.this.sessions.get(new KeyExtractor<KeyExtractorType>(
@@ -490,7 +490,7 @@ public class SensiNact implements Sensinact,Core {
 						null);
 				return tatooRequestId(requestId, response);
 			}
-			/*
+
 			final boolean isRemoteProvider=serviceProviderId.contains(":");
 
 			if(!isRemoteProvider){
@@ -498,11 +498,26 @@ public class SensiNact implements Sensinact,Core {
 			}else {
 				final String remoteNamespace=serviceProviderId.split(":")[0];
 				final String remoteProviderName=serviceProviderId.split(":")[1];
-				new JSONObject(sensinactRemote.get(remoteNamespace).sub
+				//new JSONObject(sensinactRemote.get(remoteNamespace).subscribe(remoteProviderName,serviceId,resourceId,"none")
+				SubscribeResponse subscribeResponse=new SubscribeResponse(mediator,String.format("/%s/%s/%s",serviceProviderId,serviceId,resourceId),Status.SUCCESS);
+				SensiNact.this.messageRegisterers.add(new MessageRegisterer() {
+					@Override
+					public void register(SnaMessage<?> message) {
+						try {
+							JSONObject oj=new JSONObject(message.getJSON());
+
+							if(oj.getString("type").equals("ATTRIBUTE_VALUE_UPDATED"))//||oj.getString("type").contains("RESOURCE_"))
+								recipient.callback(requestId,new SnaMessage[]{message});
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+				return subscribeResponse;
 			}
-			*/
 
 
+/*
 			JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
 				@Override
 				public JSONObject run() {
@@ -518,6 +533,7 @@ public class SensiNact implements Sensinact,Core {
 						AccessMethod.SUBSCRIBE, uri, SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE,
 						"Internal server error", e);
 			}
+*/
 
 			return tatooRequestId(requestId, response);
 		}

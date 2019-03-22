@@ -1,12 +1,16 @@
 package org.eclipse.sensinact.gateway.core;
 
+import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.core.api.Sensinact;
 import org.eclipse.sensinact.gateway.core.api.SensinactCoreBaseIface;
+import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.*;
+
+import java.util.Set;
 
 @Component(
         immediate = false,
@@ -124,6 +128,14 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
         SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
         JSONObject value=session.get(serviceProviderId,serviceId,resourceId,attributeId).getResponse();
         return value.toString();
+    }
+
+    @Override
+    public String subscribe(String providerName, String serviceName, String resourceName, Recipient recipient, Set<Constraint> conditions, String policy) {
+        SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
+        //Resource resource = session.getResource(providerName,serviceName,resourceName);
+
+        return null;
     }
 
 }
