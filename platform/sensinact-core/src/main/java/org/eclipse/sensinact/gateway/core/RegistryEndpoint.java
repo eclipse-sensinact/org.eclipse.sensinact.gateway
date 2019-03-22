@@ -13,7 +13,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
 
-@Component(immediate = false)
+//@Component(immediate = false)
 public final class RegistryEndpoint {
     final SensiNact sensinact;
     public RegistryEndpoint(SensiNact sensinact){

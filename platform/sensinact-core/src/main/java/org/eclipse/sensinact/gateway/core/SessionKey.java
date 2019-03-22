@@ -33,7 +33,7 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@Component(immediate = false)
+//@Component(immediate = false)
 public class SessionKey {
 	private Mediator mediator;
 
