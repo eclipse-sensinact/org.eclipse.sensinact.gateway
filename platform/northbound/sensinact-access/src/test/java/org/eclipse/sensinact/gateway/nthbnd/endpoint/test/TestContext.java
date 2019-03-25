@@ -379,7 +379,7 @@ public class TestContext<R extends ModelInstance> {
         Mockito.when(bundle.getState()).thenReturn(Bundle.ACTIVE);
 
         mediator = new NorthboundMediator(context);
-        sensinact = new SensiNact(mediator);
+        sensinact = new SensiNact("SERVER",mediator);
         instance = (MyModelInstance) new ModelInstanceBuilder(mediator).build(
         	"serviceProvider", null, new ModelConfigurationBuilder(mediator,
         	  ModelConfiguration.class,MyModelInstance.class
