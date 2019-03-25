@@ -37,7 +37,7 @@
             json,
             asm-all
         </excludeArtifactId>
-        <excludeGroupId>org.osgi</excludeGroupId> <!-- org.apache.felix,-->
+        <excludeGroupId>org.osgi.core</excludeGroupId> <!-- org.apache.felix,-->
         <excludeTransitive>true</excludeTransitive>
     </properties>
 
