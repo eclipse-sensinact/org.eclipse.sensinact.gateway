@@ -43,10 +43,11 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osgi.framework.*;
-import org.osgi.service.component.annotations.Component;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.AccessController;
 import java.security.InvalidKeyException;
 import java.security.PrivilegedAction;
@@ -999,9 +1000,21 @@ public class SensiNact implements Sensinact,Core {
 						null);
 				return tatooRequestId(requestId, response);
 			}
+
 			final String remoteNamespace=serviceProviderId.split(":")[0];
 			final String remoteProviderName=serviceProviderId.split(":")[1];
-			JSONObject object=new JSONObject(sensinactRemote.get(remoteNamespace).getProvider("none",remoteProviderName));
+
+			SensinactCoreBaseIface remoteReference=sensinactRemote.get(remoteNamespace);
+
+			if(remoteReference==null){
+				response = SensiNact.<JSONObject, DescribeResponse<JSONObject>>createErrorResponse(mediator,
+						DescribeType.RESOURCE, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found",
+						null);
+				return tatooRequestId(requestId, response);
+			}
+
+
+			JSONObject object=new JSONObject(remoteReference.getProvider("none",remoteProviderName));
 			/*
 			JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
 				@Override
@@ -1257,7 +1270,15 @@ public class SensiNact implements Sensinact,Core {
 		String prop = System.getProperty(Core.NAMESPACE_PROP);
 
 		if(prop==null){
-			prop = (String) mediator.getProperty(Core.NAMESPACE_PROP);
+
+			try {
+				Properties properties=new Properties();
+				properties.load(new FileInputStream("cfgs/sensinact.config"));
+				//prop = (String) mediator.getProperty(Core.NAMESPACE_PROP);
+				prop=properties.getProperty("namespace");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		if (prop == null) {
@@ -1351,9 +1372,9 @@ public class SensiNact implements Sensinact,Core {
 		this.registry = new RegistryEndpoint(this);
 	}
 */
-	public SensiNact(final Mediator mediator) throws SecuredAccessException, BundleException, DataStoreException {
-		this.namespace = SensiNact.namespace(mediator);
-
+	public SensiNact(final String namespace, final Mediator mediator) throws SecuredAccessException, BundleException, DataStoreException {
+		this.namespace = SensiNact.namespace(mediator);//namespace;//namespace;//
+		System.out.println("JANDER -------------------- "+this.namespace);
 		SecuredAccess securedAccess = null;
 
 		ServiceLoader<SecurityDataStoreServiceFactory> dataStoreServiceFactoryLoader = ServiceLoader
@@ -1418,42 +1439,8 @@ public class SensiNact implements Sensinact,Core {
 				});
 		this.mediator = mediator;
 		registry = new RegistryEndpoint(this);
-
-		//.SensinactCoreBaseIface.class
-		//(objectClass=org.eclipse.sensinact.gateway.core
-		//"(org.eclipse.sensinact.gateway.namespace!="+this.namespace+")"
-
-
-		//String filterMain=null;String.format("(&(objectClass=%s)(org.eclipse.sensinact.gateway.namespace=%s))",SensinactCoreBaseIface.class.getCanonicalName(),this.namespace).toString();
 		String filterMain="org.eclipse.sensinact.gateway.core.api.SensinactCoreBaseIface";
-		System.out.println("---->"+filterMain);
-/*
-		Filter f=new Filter() {
-				@Override
-				public boolean match(ServiceReference<?> serviceReference) {
-					return false;
-				}
 
-				@Override
-				public boolean match(Dictionary<String, ?> dictionary) {
-					return false;
-				}
-
-				@Override
-				public boolean matchCase(Dictionary<String, ?> dictionary) {
-					return false;
-				}
-
-				@Override
-				public boolean matches(Map<String, ?> map) {
-					return false;
-				}
-
-				public String toString(){
-					return String.format("(&(objectClass=org.eclipse.sensinact.gateway.core.api.SensinactCoreBaseIface)(org.eclipse.sensinact.gateway.namespace!=%s))",namespace);
-				}
-			};
-*/
 		final BundleContext context=FrameworkUtil.getBundle(SensinactCoreBase.class).getBundleContext();
 
 		ServiceTracker st=new ServiceTracker<SensinactCoreBaseIface,SensinactCoreBaseIface>(context,filterMain,new ServiceTrackerCustomizer<SensinactCoreBaseIface,SensinactCoreBaseIface>(){
@@ -1463,7 +1450,7 @@ public class SensiNact implements Sensinact,Core {
 
 				final SensinactCoreBaseIface sna=context.getService(reference);
 
-				if(sna.namespace().equals(namespace)) return null;
+				if(sna.namespace().equals(SensiNact.this.namespace)) return null;
 
 				System.out.println("*************** Core received instance of: "+sna.namespace());
 
@@ -1490,7 +1477,7 @@ public class SensiNact implements Sensinact,Core {
 							//SnaUpdateMessageImpl message=new SnaUpdateMessageImpl(mediator, "/PI", SnaUpdateMessage.Update.ATTRIBUTE_VALUE_UPDATED);
 							//message.remove("uri");
 							//final String uriTranslated=String.format("/%s/%s/%s/%s","PI:"+provider,service,resource,valueProperty);
-							String uriTranslated=path.replace("/"+provider,String.format("/%s:%s",sna.namespace(),provider));
+							String uriTranslated=path.replaceFirst("/"+provider,String.format("/%s:%s",sna.namespace(),provider));
 							//message.put("uri",uriTranslated);
 							//event.remove("notification");
 							event.remove("uri");

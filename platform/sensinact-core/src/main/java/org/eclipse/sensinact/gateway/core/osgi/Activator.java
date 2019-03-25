@@ -10,21 +10,32 @@
  */
 package org.eclipse.sensinact.gateway.core.osgi;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ConcurrentModificationException;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Properties;
 
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.SensiNact;
+import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.api.Sensinact;
+import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ConfigurationEvent;
+import org.osgi.service.cm.ConfigurationListener;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
@@ -97,19 +108,67 @@ public class Activator extends AbstractActivator<Mediator> {
 			throw new ConcurrentModificationException("Permissions changed during update");
 		}
 
+
 		registration = AccessController.doPrivileged(new PrivilegedAction<ServiceRegistration>() {
 			@Override
 			public ServiceRegistration run() {
+
 				try {
-					return mediator.getContext().registerService(new String[]{Core.class.getCanonicalName(),Sensinact.class.getName()},
-							new SensiNact(mediator), null);
-				} catch (Exception e) {
+
+					return mediator.getContext().registerService(new String[]{Core.class.getCanonicalName(), Sensinact.class.getName()},
+							new SensiNact(null, mediator), null);
+				} catch (SecuredAccessException e) {
 					e.printStackTrace();
-					mediator.error(e);
+				} catch (BundleException e) {
+					e.printStackTrace();
+				} catch (DataStoreException e) {
+					e.printStackTrace();
 				}
 				return null;
 			}
 		});
+
+		/*
+
+		mediator.getContext().registerService(ConfigurationListener.class.getCanonicalName(),new ConfigurationListener(){
+
+			@Override
+			public void configurationEvent(ConfigurationEvent event) {
+
+				System.out.println("------------>"+event.getPid());
+
+
+				if(event.getPid().equals("sensinact")) {
+
+					System.out.println("..... Starting sensinact ....");
+
+					registration = AccessController.doPrivileged(new PrivilegedAction<ServiceRegistration>() {
+						@Override
+						public ServiceRegistration run() {
+							try {
+
+								ServiceReference configadminsr=mediator.getContext().getServiceReferences(ConfigurationAdmin.class.getCanonicalName(),null)[0];
+
+								ConfigurationAdmin configurationAdmin=(ConfigurationAdmin)mediator.getContext().getService(configadminsr);
+
+								return mediator.getContext().registerService(new String[]{Core.class.getCanonicalName(), Sensinact.class.getName()},
+										new SensiNact(configurationAdmin.getConfiguration("sensinact").getProperties().get("namespace").toString(),mediator), null);
+							} catch (Exception e) {
+								e.printStackTrace();
+								mediator.error(e);
+							}
+							return null;
+						}
+					});
+
+				}
+
+
+
+			}
+		},new Hashtable<String,String>());
+
+		*/
 
 
 

@@ -11,16 +11,20 @@
 package org.eclipse.sensinact.gateway.system.invoker;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskCommand;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskExecution;
 import org.json.JSONArray;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Properties;
 
 @TaskExecution
 public class SystemInvoker {
@@ -32,7 +36,15 @@ public class SystemInvoker {
 
     @TaskCommand(target = "/sensiNact/system/name", method = CommandType.GET)
     public String getName(String uri, String attributeName) {
-        return (String) mediator.getProperty("org.eclipse.sensinact.gateway.system.name");
+        try {
+            Properties properties=new Properties();
+            properties.load(new FileInputStream("cfgs/sensinact.config"));
+            String namespace=properties.getProperty("namespace").toString();
+            return namespace;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return (String) mediator.getProperty(Core.NAMESPACE_PROP);
     }
 
     @TaskCommand(target = "/sensiNact/system/datetime", method = CommandType.GET)

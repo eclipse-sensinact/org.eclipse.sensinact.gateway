@@ -33,7 +33,7 @@ public interface Core extends Sensinact {
 	/**
 	 * Namespace property key
 	 */
-	public static final String NAMESPACE_PROP = "org.eclipse.sensinact.gateway.namespace";
+	public static final String NAMESPACE_PROP = "namespace";
 
 	/**
 	 * Instantiates a new {@link RemoteCore} that will be connected to a remote

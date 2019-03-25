@@ -12,12 +12,11 @@ package org.eclipse.sensinact.gateway.agent.mqtt.inst.internal;
 
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.AbstractMqttHandler;
 import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
+import org.eclipse.sensinact.gateway.core.message.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,17 +31,19 @@ import java.util.UUID;
  */
 public class SnaEventEventHandler extends AbstractMqttHandler {
     private final String payloadType;
+    private final ConfigurationAdmin conf;
     Logger LOG= LoggerFactory.getLogger(SnaEventEventHandler.class.getName());
     private final String broker;
     private final Integer qos;
     private final String prefix;
 
-    public SnaEventEventHandler(String broker,Integer qos,String prefix,String payloadType) throws IOException {
+    public SnaEventEventHandler(String broker,Integer qos,String prefix,String payloadType,ConfigurationAdmin conf) throws IOException {
         super();
         this.broker=broker;
         this.qos=qos;
         this.prefix=prefix;
         this.payloadType=payloadType;
+        this.conf=conf;
     }
 
     /**
@@ -73,17 +74,12 @@ public class SnaEventEventHandler extends AbstractMqttHandler {
                 LOG.error("Failed",e);
             }
         }else {
-            this.agent.publish(String.format("%s",prefix),event.getJSON().toString());
-            /*
-            switch (event.getType()) {
-                // Create contentInstance
-                case ATTRIBUTE_VALUE_UPDATED:
-                    this.agent.publish(String.format("%s",prefix),event.getJSON().toString());
-                    break;
-                default:
-                    return;
+            try {
+                publicRawMessage(event);
+            } catch (Exception e) {
+                LOG.error("Failed",e);
             }
-            */
+
         }
 
 
@@ -96,71 +92,25 @@ public class SnaEventEventHandler extends AbstractMqttHandler {
      */
     public void doHandle(SnaLifecycleMessageImpl event) {
         if(!payloadType.equals("humanreadable")){
-            this.agent.publish(String.format("%s",prefix),event.getJSON().toString());
+            publicRawMessage(event);
         }
-        /*
-        String aeName = event.getPath().split("/")[1];
-        JSONObject request = new JSONObject().put("fr", aeName).put("rqi", UUID.randomUUID().toString());
-        JSONObject content = new JSONObject();
-        switch (event.getType()) {
-            // Create AE
-            case PROVIDER_APPEARING:
-                request.put("op", 1);
-                request.put("ty", 2);
-                request.put("to", "/" + cseBase);
-                content.put("rn", aeName);
-                content.put("api", "0.2.481.2.0001.001.000111");
-                content.put("lbl", new JSONArray().put("key1").put("key2"));
-                content.put("rr", true);
-                request.put("pc", new JSONObject().put("m2m:ae", content));
-                break;
-            // Delete AE
-            case PROVIDER_DISAPPEARING:
-                request.put("op", 4);
-                request.put("ty", 2);
-                request.put("to", "/" + cseBase);
-                content.put("rn", aeName);
-                request.put("pc", new JSONObject().put("m2m:ae", content));
-                break;
-            // Create container
-            case SERVICE_APPEARING:
-                request.put("op", 1);
-                request.put("ty", 3);
-                request.put("to", "/" + cseBase + "/" + aeName);
-                content.put("rn", event.getPath().split("/")[2]);
-                content.put("lbl", new JSONArray().put(aeName));
-                request.put("pc", new JSONObject().put("m2m:cnt", content));
-                break;
-            // Delete container
-            case SERVICE_DISAPPEARING:
-                request.put("op", 4);
-                request.put("ty", 3);
-                request.put("to", "/" + cseBase + "/" + aeName);
-                content.put("rn", event.getPath().split("/")[2]);
-                request.put("pc", new JSONObject().put("m2m:cnt", content));
-                break;
-            // Create container
-            case RESOURCE_APPEARING:
-                request.put("op", 1);
-                request.put("ty", 3);
-                request.put("to", "/" + cseBase + "/" + aeName + "/" + event.getPath().split("/")[2]);
-                content.put("rn", event.getPath().split("/")[3]);
-                content.put("lbl", new JSONArray().put(aeName));
-                request.put("pc", new JSONObject().put("m2m:cnt", content));
-                break;
-            // Delete container
-            case RESOURCE_DISAPPEARING:
-                request.put("op", 4);
-                request.put("ty", 3);
-                request.put("to", "/" + cseBase + "/" + aeName + "/" + event.getPath().split("/")[2]);
-                content.put("rn", event.getPath().split("/")[3]);
-                request.put("pc", new JSONObject().put("m2m:cnt", content));
-                break;
-            default:
-                return;
+    }
+
+    private void publicRawMessage(SnaMessage event){
+        try {
+            Configuration configuration=conf.getConfiguration("sensinact");
+            String namespace=configuration.getProperties().get("namespace").toString();
+            if(!new JSONObject(event.getJSON()).getString("uri").contains(":")){
+                LOG.debug("Using as namespace {}",namespace);
+                this.agent.publish(String.format("%s%s",prefix,namespace),event.getJSON().toString());
+                LOG.debug("Sending from namespace {} the message {}",namespace,event.getJSON().toString());
+            }else {
+                LOG.debug("Not propagating message to remote Sensinact instance {} ",namespace,event.getJSON().toString());
+            }
+
+        } catch (Exception e) {
+            LOG.error("Failed",e);
         }
-        this.agent.publish(REQUEST_TOPIC + aeName + "/" + cseBase + "/json", new JSONObject().put("m2m:rqp", request).toString());
-        */
     }
 
     /**
