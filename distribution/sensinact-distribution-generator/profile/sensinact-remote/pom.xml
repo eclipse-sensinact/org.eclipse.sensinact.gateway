@@ -53,22 +53,6 @@
     </build>
 
     <dependencies>
-        <!-- This is an example of the dependency to provide to generate the profile -->
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.remote</groupId>
-            <artifactId>http-endpoint</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.remote</groupId>
-            <artifactId>socket-endpoint</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.remote</groupId>
-            <artifactId>socket-endpoint-sample</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <!-- BEGIN: Dependencies for apache aries -->
 
