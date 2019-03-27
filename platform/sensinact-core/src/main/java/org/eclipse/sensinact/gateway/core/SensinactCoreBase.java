@@ -112,6 +112,14 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
     }
 
     @Override
+    public String getService(String identifier, String serviceProviderId, String serviceId) {
+
+        SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
+        JSONObject value=sensinact.getService(session.identifier,serviceProviderId,serviceId);
+        return value.toString();
+    }
+
+    @Override
     public String getResources(String identifier, String serviceProviderId, String serviceId) {
         SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
         String value=sensinact.getResources(session.identifier,serviceProviderId,serviceId);

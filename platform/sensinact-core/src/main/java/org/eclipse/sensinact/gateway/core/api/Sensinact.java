@@ -13,6 +13,7 @@ public interface Sensinact {
      */
     public String namespace();
     public JSONObject getProvider(String identifier, final String serviceProviderId);
+    public JSONObject getService(String identifier, final String serviceProviderId, final String serviceId);
     public String getProvidersLocal(String identifier, String filter);
     public AnonymousSession getAnonymousSession();
     public String getServices(String identifier, final String serviceProviderId);
