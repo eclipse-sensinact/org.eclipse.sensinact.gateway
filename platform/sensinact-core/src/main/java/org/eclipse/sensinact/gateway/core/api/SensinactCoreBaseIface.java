@@ -13,8 +13,14 @@ public interface SensinactCoreBaseIface {
     public String getServices(String identifier, final String serviceProviderId);
     public String getResources(String identifier, final String serviceProviderId, final String serviceId);
     public String getProvider(String identifier, final String serviceProviderId);
+    public String getResource(String identifier, final String serviceProviderId, final String serviceId,
+                                     final String resourceId);
     public String get(String identifier, final String serviceProviderId, final String serviceId,
                           final String resourceId, final String attributeId);
     public String subscribe(String provider, String service, String resource,Recipient recipient, Set<Constraint> conditions, String policy);
+    public String set(String requestId, final String serviceProviderId, final String serviceId,
+                      final String resourceId, final String attributeId, final String parameter);
+    public String act(String requestId, final String serviceProviderId, final String serviceId,
+                      final String resourceId, final String parameters);
 
 }

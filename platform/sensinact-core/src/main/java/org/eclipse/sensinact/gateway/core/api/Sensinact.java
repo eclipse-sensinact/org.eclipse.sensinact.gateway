@@ -17,7 +17,5 @@ public interface Sensinact {
     public AnonymousSession getAnonymousSession();
     public String getServices(String identifier, final String serviceProviderId);
     public String getResources(String identifier, final String serviceProviderId, final String serviceId);
-    public JSONObject get(String identifier, final String serviceProviderId, final String serviceId,
-                          final String resourceId, final String attributeId);
 
 }

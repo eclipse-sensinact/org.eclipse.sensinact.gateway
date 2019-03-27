@@ -36,36 +36,6 @@ public interface Core extends Sensinact {
 	public static final String NAMESPACE_PROP = "namespace";
 
 	/**
-	 * Instantiates a new {@link RemoteCore} that will be connected to a remote
-	 * instance of the sensiNact gateway by the way of the extended
-	 * {@link AbstractRemoteEndpoint} passed as parameter
-	 * 
-	 * @param remoteEndpoint
-	 *            the extended {@link AbstractRemoteEndpoint} to attach to the
-	 *            {@link RemoteCore} to be instantiated
-	 */
-	void createRemoteCore(AbstractRemoteEndpoint remoteEndpoint);
-
-	/**
-	 * Instantiates a new {@link RemoteCore} that will be connected to a remote
-	 * instance of the sensiNact gateway by the way of the extended
-	 * {@link AbstractRemoteEndpoint} passed as parameter
-	 * 
-	 * @param remoteEndpoint
-	 *            the extended {@link AbstractRemoteEndpoint} to attach to the
-	 *            {@link RemoteCore} to be instantiated
-	 * @param onConnectedCallbacks
-	 *            the collection of {@link Executable}s to be executed after the
-	 *            connection to the specified {@link RemoteEndpoint}
-	 * @param onDisconnectedCallbacks
-	 *            the collection of {@link Executable}s to be executed after the
-	 *            disconnection from the specified {@link RemoteEndpoint}
-	 */
-	void createRemoteCore(AbstractRemoteEndpoint remoteEndpoint,
-			Collection<Executable<String, Void>> onConnectedCallbacks,
-			Collection<Executable<String, Void>> onDisconnectedCallbacks);
-
-	/**
 	 * Instantiates and registers a new agent, connected to the {@link MidAgentCallback} 
 	 * and whose received messages are filtered by the {@link SnaFilter} passed as
 	 * parameters 

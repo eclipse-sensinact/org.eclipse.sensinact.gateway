@@ -4,12 +4,14 @@ import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.core.api.Sensinact;
 import org.eclipse.sensinact.gateway.core.api.SensinactCoreBaseIface;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.*;
 
+import java.util.Iterator;
 import java.util.Set;
 
 @Component(
@@ -124,18 +126,50 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
     }
 
     @Override
+    public String getResource(String identifier, String serviceProviderId, String serviceId, String resourceId) {
+        SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
+
+        String value=session.getResource(identifier,serviceProviderId,serviceId,resourceId).getJSON();
+
+        return value.toString();
+    }
+
+    @Override
     public String get(String identifier, String serviceProviderId, String serviceId, String resourceId, String attributeId) {
         SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
-        JSONObject value=session.get(serviceProviderId,serviceId,resourceId,attributeId).getResponse();
-        return value.toString();
+        String value=session.get(serviceProviderId,serviceId,resourceId,attributeId).getJSON();
+        return value;
     }
 
     @Override
     public String subscribe(String providerName, String serviceName, String resourceName, Recipient recipient, Set<Constraint> conditions, String policy) {
         SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
         //Resource resource = session.getResource(providerName,serviceName,resourceName);
-
         return null;
+    }
+
+    @Override
+    public String set(String requestId, String serviceProviderId, String serviceId, String resourceId, String attributeId, String parameter) {
+        SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
+        String resultResponse=session.set(serviceProviderId,serviceId,resourceId,attributeId,createObjectArrayParamFromJSON(parameter)).getJSON();
+        return resultResponse;
+    }
+
+    @Override
+    public String act(String requestId, String serviceProviderId, String serviceId, String resourceId, String parameters) {
+        SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
+        String resultResponse=session.act(requestId,serviceProviderId,serviceId,resourceId,createObjectArrayParamFromJSON(parameters)).getJSON();
+        return resultResponse;
+    }
+
+    private Object[] createObjectArrayParamFromJSON(String parameters){
+        JSONArray parameterJSONArray=new JSONArray(parameters);
+        String[] parametersObjectArray=new String[parameterJSONArray.length()];
+        Iterator it=parameterJSONArray.iterator();
+        for(int x=0;parameters!=null&&(x<parameters.length())&&it.hasNext();x++){
+            parametersObjectArray[x]=it.next().toString();
+        }
+        return parametersObjectArray;
     }
 
 }

@@ -27,7 +27,7 @@ public class SubscribeResponseBuilder extends AccessMethodResponseBuilder<JSONOb
 	 * @param uri
 	 * @param parameters
 	 */
-	protected SubscribeResponseBuilder(Mediator mediator, String uri, Object[] parameters) {
+	public SubscribeResponseBuilder(Mediator mediator, String uri, Object[] parameters) {
 		super(mediator, uri, parameters);
 	}
 
