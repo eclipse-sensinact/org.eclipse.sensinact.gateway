@@ -69,38 +69,37 @@
         <dependency>
             <groupId>org.apache.aries.rsa</groupId>
             <artifactId>org.apache.aries.rsa.core</artifactId>
-            <version>1.14.0-SNAPSHOT</version>
+            <version>1.13.0</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.aries.rsa.discovery</groupId>
             <artifactId>org.apache.aries.rsa.discovery.local</artifactId>
-            <version>1.14.0-SNAPSHOT</version>
+            <version>1.13.0</version>
         </dependency>
 
 
         <dependency>
             <groupId>org.apache.aries.rsa.discovery</groupId>
             <artifactId>org.apache.aries.rsa.discovery.zookeeper</artifactId>
-            <version>1.14.0-SNAPSHOT</version>
+            <version>1.13.0</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.aries.rsa.provider</groupId>
             <artifactId>org.apache.aries.rsa.provider.fastbin</artifactId>
-            <version>1.14.0-SNAPSHOT</version>
+            <version>1.13.0</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.aries.rsa</groupId>
             <artifactId>org.apache.aries.rsa.spi</artifactId>
-            <version>1.14.0-SNAPSHOT</version>
+            <version>1.13.0</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.aries.rsa</groupId>
             <artifactId>org.apache.aries.rsa.topology-manager</artifactId>
-            <version>1.14.0-SNAPSHOT</version>
+            <version>1.13.0</version>
         </dependency>
 
         <dependency>
