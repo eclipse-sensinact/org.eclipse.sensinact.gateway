@@ -40,6 +40,8 @@ import org.json.JSONObject;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -59,6 +61,7 @@ public class SensiNact implements Sensinact,Core {
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
 	// ********************************************************************//
+	private static final Logger LOG=LoggerFactory.getLogger(SensiNact.class);
 
 	List<MessageRegisterer> messageRegisterers =Collections.synchronizedList(new ArrayList<MessageRegisterer>());
 	List<MidAgentCallback> messageAgentCallback =Collections.synchronizedList(new ArrayList<MidAgentCallback>());
@@ -143,10 +146,6 @@ public class SensiNact implements Sensinact,Core {
 		@Override
 		public SubscribeResponse registerSessionAgent(String requestId, 
 				final MidAgentCallback callback, final SnaFilter filter) {
-
-			System.out.println("Register Session*****");
-
-
 
 			boolean registered = AccessController.<Boolean>doPrivileged(new PrivilegedAction<Boolean>() {
 				@Override
@@ -301,28 +300,19 @@ public class SensiNact implements Sensinact,Core {
 				SensinactCoreBaseIface sensinactRemoteRef=sensinactRemote.get(remoteNamespace);
 				final String remoteProviderName=serviceProviderId.split(":")[1];
 				String jsonInStringRemote=sensinactRemoteRef.get(SensiNactSession.this.getSessionId(), remoteProviderName, serviceId,resourceId, attributeId);
-				System.out.println("Received from remote "+jsonInStringRemote);
-
 				try {
 					GetResponseBuilder builder = new GetResponseBuilder(mediator, uri,null);
 					builder.createAccessMethodResponse(AccessMethodResponse.Status.SUCCESS);
 					//builder.setAccessMethodObjectResult(translateRemoteCallResponseToLocal(remoteNamespace,remoteProviderName,new JSONObject(jsonInStringRemote)));
-
 					JSONObject object=new JSONObject(jsonInStringRemote);//SensiNact.this.getProvider(SensiNactSession.this.getSessionId(), serviceProviderId);
-					System.out.println("AFTER:"+object);
 					response = builder.createAccessMethodResponse(Status.SUCCESS);//describeFromJSONObject(mediator, builder, DescribeType.PROVIDER,new JSONObject(object));//object
-
 					response.setResponse(object.getJSONObject("response"));
-					System.out.println("RESPONSE:"+response.getJSON());
-					System.out.println("ENCORE:"+tatooRequestId(requestId, response).getJSON().toString());
-
 					//translateRemoteCallResponseToLocal(remoteNamespace,remoteProviderName,object)
 
 					return tatooRequestId(requestId, response);//describeFromJSONObject(mediator, builder, DescribeType.SERVICE, object)
 					/** sample **/
 
 				} catch (Exception e) {
-					e.printStackTrace();
 					response = SensiNact.<JSONObject, GetResponse>createErrorResponse(mediator, AccessMethod.GET, uri,
 							SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, "Internal server error", e);
 				}
@@ -537,11 +527,11 @@ public class SensiNact implements Sensinact,Core {
 							JSONObject oj=new JSONObject(message.getJSON());
 							//System.out.println("URI REMOTE "+uriRemote+"  ACTUAL URI "+oj.getString("uri"));
 							if(oj.getString("uri").startsWith(uriRemote)&&oj.getString("type").equals("ATTRIBUTE_VALUE_UPDATED")) { //||oj.getString("type").contains("RESOURCE_"))
-								System.out.println("Sending to app manager subscribers "+oj.toString());
+								LOG.info("remote: Subscription response {}",oj.toString());
 								recipient.callback(requestId, new SnaMessage[]{message});
 							}
 						} catch (Exception e) {
-							e.printStackTrace();
+							LOG.error("Error",e);
 						}
 					}
 				});
@@ -767,8 +757,6 @@ public class SensiNact implements Sensinact,Core {
 				builder.setAccessMethodObjectResult(new JSONObject(provider.getDescription().getJSON()));
 
 				DescribeResponse<JSONObject> responseB=builder.createAccessMethodResponse();
-
-				System.out.println("On the session="+responseB.getJSON().toString());
 				return tatooRequestId(requestId, responseB);
 			}
 			if (sessionKey.localID() != 0) {
@@ -787,16 +775,10 @@ public class SensiNact implements Sensinact,Core {
 			});
 			*/
 			JSONObject object=SensiNact.this.getProvider(SensiNactSession.this.getSessionId(), serviceProviderId);
-			System.out.println("AFTER:"+object);
-
 			response = builder.createAccessMethodResponse(AccessMethodResponse.Status.SUCCESS);//describeFromJSONObject(mediator, builder, DescribeType.PROVIDER,new JSONObject(object));//object
 			//response.remove("statusCode");
 			//response.put("statusCode",200);
 			response.setResponse(object.getJSONObject("response"));
-
-			System.out.println("RESPONSE:"+response.getJSON());
-
-			System.out.println("ENCORE:"+tatooRequestId(requestId, response).getJSON().toString());
 			return tatooRequestId(requestId, response);
 		}
 
@@ -926,16 +908,10 @@ public class SensiNact implements Sensinact,Core {
 				/** sample **/
 				JSONObject object=new JSONObject(stringObjectResponse);//SensiNact.this.getProvider(SensiNactSession.this.getSessionId(), serviceProviderId);
 				//Remote case
-				System.out.println("AFTER:"+object);
 				response = builder.createAccessMethodResponse(Status.SUCCESS);//describeFromJSONObject(mediator, builder, DescribeType.PROVIDER,new JSONObject(object));//object
 				//response.remove("statusCode");
 				//response.put("statusCode",200);
 				response.setResponse(object);
-				System.out.println("RESPONSE:"+response.getJSON());
-				System.out.println("ENCORE:"+tatooRequestId(requestId, response).getJSON().toString());
-
-				//translateRemoteCallResponseToLocal(remoteNamespace,remoteProviderName,object)
-
 				return tatooRequestId(requestId, response);//describeFromJSONObject(mediator, builder, DescribeType.SERVICE, object)
 
 				/** sample **/
@@ -1021,8 +997,6 @@ public class SensiNact implements Sensinact,Core {
 				final String remoteProviderName=serviceProviderId.split(":")[1];
 
 				SensinactCoreBaseIface corebase=sensinactRemote.get(remoteNamespace);
-
-				System.out.println("Found remote reference:"+corebase);
 
 				String resources=corebase.getResources("none", remoteProviderName,
 						serviceId);
@@ -1431,9 +1405,8 @@ public class SensiNact implements Sensinact,Core {
 	 */
 	public SensiNact(final String namespace, final Mediator mediator) throws SecuredAccessException, BundleException, DataStoreException {
 		this.namespace = SensiNact.namespace(mediator);//namespace;//namespace;//
-		System.out.println("JANDER -------------------- "+this.namespace);
+		LOG.info("Using {} as namespace for the sensinact instance",this.namespace);
 		SecuredAccess securedAccess = null;
-
 		ServiceLoader<SecurityDataStoreServiceFactory> dataStoreServiceFactoryLoader = ServiceLoader
 				.load(SecurityDataStoreServiceFactory.class, mediator.getClassLoader());
 
@@ -1507,16 +1480,16 @@ public class SensiNact implements Sensinact,Core {
 
 				final SensinactCoreBaseIface sna=context.getService(reference);
 
-				System.out.println("Receiving service notification from "+sna.namespace());
+				LOG.info("Receiving RSA discovery notification about remote instance {}",sna.namespace());
 
 				if(sna.namespace().equals(SensiNact.this.namespace)) return null;
 
 				if(sensinactRemote.keySet().contains(sna.namespace())){
-					System.out.println("The remote sensinact namespace already exists, ignoring entry: "+sna.namespace());
+					LOG.info("RSA remote sensinact instance with namespace {} already exists, ignoring entry",sna.namespace());
 					return null;
 				}
 
-				System.out.println("*************** Core received instance of: "+sna.namespace());
+				LOG.info("Connecting to RSA remote sensinact instance with namespace {}",sna.namespace());
 
 				try {
 					MqttClient client = new MqttClient("tcp://localhost:1883", MqttClient.generateClientId(), new MemoryPersistence());
@@ -1524,7 +1497,8 @@ public class SensiNact implements Sensinact,Core {
 					client.subscribe(String.format("/%s",sna.namespace()), new IMqttMessageListener() {
 						@Override
 						public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-							System.out.println(s+" - Received ----> "+new String(mqttMessage.getPayload()));
+
+							LOG.debug("Received remote notification from namespace {} on topic {} with message {}",sna.namespace(),s,new String(mqttMessage.getPayload()));
 
 							//message.setNotification(new JSONObject("{\"name\":\"state\",\"type\":\"boolean\",\"value\":"+new String(mqttMessage.getPayload())+",\"timestamp\":1553074635780}"));
 							JSONObject event=new JSONObject(new String(mqttMessage.getPayload()));
@@ -1550,7 +1524,7 @@ public class SensiNact implements Sensinact,Core {
 
 							//message.setNotification(message);
 
-							System.out.println("Sending on the bus3:"+event.toString());
+							LOG.debug("Forwarding message received in local sensinact as {}",event.toString());
 
 							SnaMessage message=AbstractSnaMessage.fromJSON(mediator,event.toString());
 
@@ -1560,7 +1534,7 @@ public class SensiNact implements Sensinact,Core {
 
 
 				} catch (MqttException e) {
-					e.printStackTrace();
+					LOG.error("Error",e);
 				}
 
 				sensinactRemote.put(sna.namespace(),sna);
@@ -1575,9 +1549,9 @@ public class SensiNact implements Sensinact,Core {
 
 			@Override
 			public void removedService(ServiceReference<SensinactCoreBaseIface> reference, SensinactCoreBaseIface service) {
-				System.out.println("Remote: Bye bye "+service.namespace());
+				LOG.info("Removing RSA sensinact remote instance {} from the pool",service.namespace());
 				sensinactRemote.remove(service);
-				System.out.println("Remaining remote instances: "+sensinactRemote.keySet().size());
+				LOG.info("RSA sensinact remote instance removed from the pool {} instances remain in the pool",sensinactRemote.keySet().size());
 			}
 		});
 
@@ -1707,9 +1681,6 @@ public class SensiNact implements Sensinact,Core {
 	 */
 	@Override
 	public String namespace() {
-
-		System.out.println("FOUND NAMESPACE:"+this.namespace);
-
 		return this.namespace;
 	}
 
@@ -1999,8 +1970,6 @@ public class SensiNact implements Sensinact,Core {
 
 	public JSONObject translateRemoteCallResponseToLocal(String remoteNamespace,String remoteProviderName,JSONObject objectIncome){
 
-		System.out.println("input:"+objectIncome.toString());
-
 		JSONObject object=new JSONObject(objectIncome.toString());
 
 		final String localURI=object.getString("uri");
@@ -2008,7 +1977,7 @@ public class SensiNact implements Sensinact,Core {
 		try{
 			object.remove("uri");
 		}catch(Exception e){
-			e.printStackTrace();
+			LOG.error("Error when translating URI from remote to local",e);
 		}
 
 		object.put("uri",remoteURI);
@@ -2027,11 +1996,10 @@ public class SensiNact implements Sensinact,Core {
 		try{
 			object.remove("response");
 		}catch(Exception e){
-			e.printStackTrace();
+			LOG.error("Error when translating response from remote to local",e);
 		}
 
 		object.put("response",responsePayload);
-		System.out.println("LOCAL:"+object.toString());
 
 		return object;
 
@@ -2208,7 +2176,7 @@ public class SensiNact implements Sensinact,Core {
 
 		if(!isRemoteProvider){
 			object=new JSONObject(session.getProvider(serviceProviderId).getJSON());//SensiNact.this.getProvider(session.identifier,serviceProviderId));//session.getProvider(serviceProviderId).getResponse();
-			System.out.println("Object returned="+object.toString());
+
 		}else {
 			final String remoteNamespace=serviceProviderId.split(":")[0];
 			final String remoteProviderName=serviceProviderId.split(":")[1];
@@ -2284,10 +2252,8 @@ public class SensiNact implements Sensinact,Core {
 				String providersFromRemote=entry.getValue().getProviders(identifier,filter);
 				content.append(providersFromRemote);
 			}catch(Exception e){
-				System.out.println("Remote: removing "+entry.getKey());
+				LOG.error("Error when retrieving list of remoteProviders",e);
 				sensinactRemote.remove(entry.getKey());
-				System.out.println("Remote: "+sensinactRemote.entrySet().size()+" entries remaining");
-				e.printStackTrace();
 			}
 		}
 		return content.toString();
