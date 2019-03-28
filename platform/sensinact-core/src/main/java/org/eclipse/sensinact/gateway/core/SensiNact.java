@@ -1471,7 +1471,7 @@ public class SensiNact implements Sensinact,Core {
 		registry = new RegistryEndpoint(this);
 		String filterMain="org.eclipse.sensinact.gateway.core.api.SensinactCoreBaseIface";
 
-		final BundleContext context=FrameworkUtil.getBundle(SensinactCoreBase.class).getBundleContext();
+		final BundleContext context=mediator.getContext();
 
 		ServiceTracker st=new ServiceTracker<SensinactCoreBaseIface,SensinactCoreBaseIface>(context,filterMain,new ServiceTrackerCustomizer<SensinactCoreBaseIface,SensinactCoreBaseIface>(){
 
