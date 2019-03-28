@@ -104,7 +104,6 @@ public class SessionKey {
 	 * @return
 	 */
 	public boolean registerAgent(MidAgentCallback callback, SnaFilter filter) {
-		System.out.println("***dd***************");
 		if(this.agents.contains(callback.getName())){
 			this.mediator.warn("Agent '%s' already registered",callback.getName());
 			return false;
