@@ -525,8 +525,10 @@ public class SensiNact implements Sensinact,Core {
 					public void register(SnaMessage<?> message) {
 						try {
 							JSONObject oj=new JSONObject(message.getJSON());
+
 							//System.out.println("URI REMOTE "+uriRemote+"  ACTUAL URI "+oj.getString("uri"));
-							if(oj.getString("uri").startsWith(uriRemote)&&oj.getString("type").equals("ATTRIBUTE_VALUE_UPDATED")) { //||oj.getString("type").contains("RESOURCE_"))
+							if(oj.getString("uri").startsWith(uriRemote)&&oj.getString("type").equals("ATTRIBUTE_VALUE_UPDATED")
+									||oj.getString("type").equals("RESOURCE_APPEARING")||oj.getString("type").equals("RESOURCE_DISAPPEARING")) { //||oj.getString("type").contains("RESOURCE_"))
 								LOG.info("remote: Subscription response {}",oj.toString());
 								recipient.callback(requestId, new SnaMessage[]{message});
 							}
@@ -1316,6 +1318,9 @@ public class SensiNact implements Sensinact,Core {
 				properties.load(new FileInputStream("cfgs/sensinact.config"));
 				//prop = (String) mediator.getProperty(Core.NAMESPACE_PROP);
 				prop=properties.getProperty("namespace");
+				String broker=properties.getProperty("broker");
+				mediator.setProperty("namespace",prop.toString());
+				mediator.setProperty("broker",broker.toString());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -1492,7 +1497,8 @@ public class SensiNact implements Sensinact,Core {
 				LOG.info("Connecting to RSA remote sensinact instance with namespace {}",sna.namespace());
 
 				try {
-					MqttClient client = new MqttClient("tcp://localhost:1883", MqttClient.generateClientId(), new MemoryPersistence());
+					final String brokerAddr=mediator.getProperty("broker").toString();
+					MqttClient client = new MqttClient(brokerAddr, MqttClient.generateClientId(), new MemoryPersistence());
 					client.connect();
 					client.subscribe(String.format("/%s",sna.namespace()), new IMqttMessageListener() {
 						@Override
