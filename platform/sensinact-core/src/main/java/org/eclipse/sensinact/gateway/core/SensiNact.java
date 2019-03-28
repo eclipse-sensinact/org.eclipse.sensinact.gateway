@@ -68,6 +68,7 @@ public class SensiNact implements Sensinact,Core {
 
 	//public List<SensinactCoreBaseIface> sensinactRemote=Collections.synchronizedList(new ArrayList<SensinactCoreBaseIface>());
 	public Map<String,SensinactCoreBaseIface> sensinactRemote=Collections.synchronizedMap(new HashMap<String,SensinactCoreBaseIface>());
+	public Map<String,String> sensinactRemoteServiceDomainMap =Collections.synchronizedMap(new HashMap<String,String>());
 
 	public void notifyCallbacks(SnaMessage message){
 
@@ -1544,6 +1545,7 @@ public class SensiNact implements Sensinact,Core {
 				}
 
 				sensinactRemote.put(sna.namespace(),sna);
+				sensinactRemoteServiceDomainMap.put(sna.toString(),sna.namespace());
 
 				return sna;
 			}
@@ -1555,8 +1557,9 @@ public class SensiNact implements Sensinact,Core {
 
 			@Override
 			public void removedService(ServiceReference<SensinactCoreBaseIface> reference, SensinactCoreBaseIface service) {
-				LOG.info("Removing RSA sensinact remote instance {} from the pool",service.namespace());
-				sensinactRemote.remove(service);
+				String key= sensinactRemoteServiceDomainMap.remove(service.toString());
+				LOG.info("Removing RSA sensinact remote instance {} from the pool",key.toString());//,
+				sensinactRemote.remove(key);
 				LOG.info("RSA sensinact remote instance removed from the pool {} instances remain in the pool",sensinactRemote.keySet().size());
 			}
 		});
