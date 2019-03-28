@@ -99,14 +99,21 @@ public class SnaEventEventHandler extends AbstractMqttHandler {
     private void publicRawMessage(SnaMessage event){
         try {
             Configuration configuration=conf.getConfiguration("sensinact");
-            String namespace=configuration.getProperties().get("namespace").toString();
-            if(!new JSONObject(event.getJSON()).getString("uri").contains(":")){
-                LOG.debug("Using as namespace {}",namespace);
-                this.agent.publish(String.format("%s%s",prefix,namespace),event.getJSON().toString());
-                LOG.debug("Sending from namespace {} the message {}",namespace,event.getJSON().toString());
+            boolean isEmptyConfig=configuration.getProperties()==null;
+            if(!isEmptyConfig){
+                String namespace=configuration.getProperties().get("namespace").toString();
+                if(!new JSONObject(event.getJSON()).getString("uri").contains(":")){
+                    LOG.debug("Using as namespace {}",namespace);
+                    this.agent.publish(String.format("%s%s",prefix,namespace),event.getJSON().toString());
+                    LOG.debug("Sending from namespace {} the message {}",namespace,event.getJSON().toString());
+                }else {
+                    LOG.debug("Not propagating message to remote Sensinact instance {} ",namespace,event.getJSON().toString());
+                }
             }else {
-                LOG.debug("Not propagating message to remote Sensinact instance {} ",namespace,event.getJSON().toString());
+                LOG.debug("Skipping message publication, namespace was not yet read by config listener");
             }
+
+
 
         } catch (Exception e) {
             LOG.error("Failed",e);
