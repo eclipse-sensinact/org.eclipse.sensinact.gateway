@@ -22,7 +22,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
  */
 public class DescribeMethod<T> extends AbstractAccessMethod<T, DescribeResponse<T>> {
 	public static enum DescribeType {
-		COMPLETE_LIST("COMPLETE_LIST", "providers"), PROVIDERS_LIST("PROVIDERS_LIST", "providers"), PROVIDER(
+		FILTER_LIST("FILTER_LIST", "namespaces"),COMPLETE_LIST("COMPLETE_LIST", "providers"), PROVIDERS_LIST("PROVIDERS_LIST", "providers"), PROVIDER(
 				"DESCRIBE_PROVIDER", "response"), SERVICES_LIST("SERVICES_LIST",
 						"services"), SERVICE("DESCRIBE_SERVICE", "response"), RESOURCES_LIST("RESOURCES_LIST",
 								"resources"), RESOURCE("DESCRIBE_RESOURCE", "response");
@@ -70,6 +70,7 @@ public class DescribeMethod<T> extends AbstractAccessMethod<T, DescribeResponse<
 	@SuppressWarnings("unchecked")
 	public DescribeResponseBuilder<T> createAccessMethodResponseBuilder(Object[] parameters) {
 		switch (this.describeType) {
+		case FILTER_LIST:
 		case COMPLETE_LIST:
 		case PROVIDERS_LIST:
 		case RESOURCES_LIST:

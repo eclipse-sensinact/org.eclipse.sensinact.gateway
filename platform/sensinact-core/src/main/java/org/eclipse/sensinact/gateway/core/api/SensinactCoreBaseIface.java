@@ -9,6 +9,7 @@ import java.util.Set;
 public interface SensinactCoreBaseIface {
 
     public String namespace();
+    public String getAll(String identifier, final String filter);
     public String getProviders(String identifier, String filter);
     public String getProvider(String identifier, final String serviceProviderId);
     public String getServices(String identifier, final String serviceProviderId);

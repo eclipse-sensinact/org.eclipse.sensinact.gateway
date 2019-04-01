@@ -635,7 +635,7 @@ public class SensiNact implements Sensinact,Core {
 			
 			DescribeResponse<String> response = null;
 			DescribeMethod<String> method = new DescribeMethod<String>(mediator, UriUtils.PATH_SEPARATOR, null,
-					DescribeType.COMPLETE_LIST);
+					DescribeType.FILTER_LIST);
 
 			DescribeResponseBuilder<String> builder = method.createAccessMethodResponseBuilder(null);
 
@@ -663,11 +663,39 @@ public class SensiNact implements Sensinact,Core {
 				response = builder.createAccessMethodResponse(Status.SUCCESS);
 				return tatooRequestId(requestId, response);
 			}
+
 			String result = new StringBuilder().append("[").append(all).append("]").toString();
 
-			if (filterCollection != null) {
-				result = filterCollection.apply(result);
+			JSONArray namesspacesArray=new JSONArray();
+			JSONObject namespaceLocal=new JSONObject();
+			namespaceLocal.put("name",namespace);
+			namespaceLocal.put("providers",new JSONArray(result));
+			namesspacesArray.put(namespaceLocal);
+
+
+			for(Map.Entry<String,SensinactCoreBaseIface> entry:sensinactRemote.entrySet()){
+				try {
+					LOG.info("Dispatching a getAll to the remote instance of sensinact {} with filter {}",entry.getValue().namespace(),filter);
+					String allFromRemote=entry.getValue().getAll(identifier,filter);
+					LOG.info("Filter result {}",allFromRemote);
+					String resultRemote = new StringBuilder().append("[").append(allFromRemote).append("]").toString();
+					JSONObject namespaceRemote=new JSONObject();
+					namespaceRemote.put("name",entry.getValue().namespace());
+					namespaceRemote.put("providers",new JSONArray(resultRemote));
+					namesspacesArray.put(namespaceRemote);
+
+				}catch(Exception e){
+					LOG.error("Error when retrieving list of remoteProviders",e);
+					sensinactRemote.remove(entry.getKey());
+				}
 			}
+
+			result=namesspacesArray.toString();
+
+			if (filterCollection != null) {
+				result = filterCollection.apply(namesspacesArray.toString());
+			}
+
 			builder.setAccessMethodObjectResult(result);
 			response = builder.createAccessMethodResponse(Status.SUCCESS);
 
@@ -2318,7 +2346,7 @@ public class SensiNact implements Sensinact,Core {
 	 * @return the JSON formated list of the resource model instances for the
 	 *         specified {@link Session} and compliant to the specified filter.
 	 */
-	protected String getAll(String identifier, final String filter) {
+	public String getAll(String identifier, final String filter) {
 		final SessionKey sessionKey = sessions
 				.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
 

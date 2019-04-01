@@ -83,6 +83,12 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
     }
 
     @Override
+    public String getAll(String identifier, String filter) {
+        SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
+        return sensinact.getAll(session.identifier,filter);
+    }
+
+    @Override
     public String getProviders(String identifier, String filter) {
 
         StringBuilder sb=new StringBuilder();
