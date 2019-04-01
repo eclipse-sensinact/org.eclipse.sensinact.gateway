@@ -540,25 +540,6 @@ public class SensiNact implements Sensinact,Core {
 				return subscribeResponse;
 			}
 
-
-/*
-			JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
-				@Override
-				public JSONObject run() {
-					return SensiNact.this.subscribe(SensiNactSession.this.getSessionId(), serviceProviderId, serviceId,
-							resourceId, recipient, conditions);
-				}
-			});
-			try {
-				response = this.<SubscribeResponse>responseFromJSONObject(mediator, uri, AccessMethod.SUBSCRIBE,
-						object);
-			} catch (Exception e) {
-				response = SensiNact.<JSONObject, SubscribeResponse>createErrorResponse(mediator,
-						AccessMethod.SUBSCRIBE, uri, SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE,
-						"Internal server error", e);
-			}
-*/
-
 			return tatooRequestId(requestId, response);
 		}
 
@@ -796,18 +777,9 @@ public class SensiNact implements Sensinact,Core {
 
 				return tatooRequestId(requestId, response);
 			}
-			/*
-			JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
-				@Override
-				public JSONObject run() {
-					return SensiNact.this.getProvider(SensiNactSession.this.getSessionId(), serviceProviderId);
-				}
-			});
-			*/
+
 			JSONObject object=SensiNact.this.getProvider(SensiNactSession.this.getSessionId(), serviceProviderId);
-			response = builder.createAccessMethodResponse(AccessMethodResponse.Status.SUCCESS);//describeFromJSONObject(mediator, builder, DescribeType.PROVIDER,new JSONObject(object));//object
-			//response.remove("statusCode");
-			//response.put("statusCode",200);
+			response = builder.createAccessMethodResponse(AccessMethodResponse.Status.SUCCESS);
 			response.setResponse(object.getJSONObject("response"));
 			return tatooRequestId(requestId, response);
 		}
@@ -841,21 +813,6 @@ public class SensiNact implements Sensinact,Core {
 				final String remoteNamespace=serviceProviderId.split(":")[0];
 				final String remoteProviderName=serviceProviderId.split(":")[1];
 				services=sensinactRemote.get(remoteNamespace).getServices(SensiNactSession.this.getSessionId(),remoteProviderName);
-				/*
-				if (sessionKey.localID() != 0) {
-					response = SensiNact.<String, DescribeResponse<String>>createErrorResponse(mediator,
-							DescribeType.SERVICES_LIST, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
-							"Service provider not found", null);
-
-					return tatooRequestId(requestId, response);
-				}
-				services = AccessController.doPrivileged(new PrivilegedAction<String>() {
-					@Override
-					public String run() {
-						return SensiNact.this.getServices(SensiNactSession.this.getSessionId(), serviceProviderId);
-					}
-				});
-				*/
 			}
 
 			if (services == null) {
@@ -1083,22 +1040,8 @@ public class SensiNact implements Sensinact,Core {
 				return tatooRequestId(requestId, response);
 			}
 
-
 			JSONObject object=new JSONObject(remoteReference.getResource("none",remoteProviderName,serviceId,resourceId));
-			/*
-			JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
-				@Override
-				public JSONObject run() {
-					return SensiNact.this.getResource(SensiNactSession.this.getSessionId(), serviceProviderId,
-							serviceId, resourceId);
-				}
-			});
-			*/
-			//translateRemoteCallResponseToLocal()
-
-			response = builder.createAccessMethodResponse();//describeFromJSONObject(mediator, builder, DescribeType.PROVIDER,new JSONObject(object));//object
-			//response.remove("statusCode");
-			//response.put("statusCode",200);
+			response = builder.createAccessMethodResponse();
 			response.setResponse(object.getJSONObject("response"));
 			return tatooRequestId(requestId, response);
 		}
@@ -1534,39 +1477,18 @@ public class SensiNact implements Sensinact,Core {
 
 							LOG.debug("Received remote notification from namespace {} on topic {} with message {}",sna.namespace(),s,new String(mqttMessage.getPayload()));
 
-							//message.setNotification(new JSONObject("{\"name\":\"state\",\"type\":\"boolean\",\"value\":"+new String(mqttMessage.getPayload())+",\"timestamp\":1553074635780}"));
 							JSONObject event=new JSONObject(new String(mqttMessage.getPayload()));
 							JSONObject eventJson = event.getJSONObject("notification");
 							String path=event.getString("uri");
 							String provider = path.split("/")[1];
-
-							//String service = path.split("/")[2];
-							//String resource = path.split("/")[3];
-							//String valueProperty = path.split("/")[4];
-							//*String value=eventJson.getString(valueProperty);
-
-
-							//SnaUpdateMessageImpl message=new SnaUpdateMessageImpl(mediator, "/PI", SnaUpdateMessage.Update.ATTRIBUTE_VALUE_UPDATED);
-							//message.remove("uri");
-							//final String uriTranslated=String.format("/%s/%s/%s/%s","PI:"+provider,service,resource,valueProperty);
 							String uriTranslated=path.replaceFirst("/"+provider,String.format("/%s:%s",sna.namespace(),provider));
-							//message.put("uri",uriTranslated);
-							//event.remove("notification");
 							event.remove("uri");
-							//event.put("notification",eventJson);
 							event.put("uri",uriTranslated);
-
-							//message.setNotification(message);
-
 							LOG.debug("Forwarding message received in local sensinact as {}",event.toString());
-
 							SnaMessage message=AbstractSnaMessage.fromJSON(mediator,event.toString());
-
 							SensiNact.this.notifyCallbacks(message);
 						}
 					});
-
-
 				} catch (MqttException e) {
 					LOG.error("Error",e);
 				}
