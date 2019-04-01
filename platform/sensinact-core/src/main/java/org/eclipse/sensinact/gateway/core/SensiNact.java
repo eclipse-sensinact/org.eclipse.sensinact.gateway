@@ -804,9 +804,7 @@ public class SensiNact implements Sensinact,Core {
 			ServiceProvider provider = null;
 			String services = null;
 
-			final boolean isRemoteProvider=serviceProviderId.contains(":");
-
-			if(!isRemoteProvider){
+			if(!isRemoteProvider(serviceProviderId)){
 				provider = this.serviceProvider(serviceProviderId);
 				services = this.joinElementNames(provider);
 			}else {
@@ -929,9 +927,7 @@ public class SensiNact implements Sensinact,Core {
 
 			DescribeResponseBuilder<String> builder = method.createAccessMethodResponseBuilder(null);
 
-			final boolean isRemoteProvider=serviceProviderId.contains(":");
-
-			if(!isRemoteProvider){
+			if(!isRemoteProvider(serviceProviderId)){
 
 				Service service = this.service(serviceProviderId, serviceId);
 				String resources = null;
@@ -1287,13 +1283,12 @@ public class SensiNact implements Sensinact,Core {
 			try {
 				Properties properties=new Properties();
 				properties.load(new FileInputStream("cfgs/sensinact.config"));
-				//prop = (String) mediator.getProperty(Core.NAMESPACE_PROP);
-				prop=properties.getProperty("namespace");
-				String broker=properties.getProperty("broker");
+				prop=properties.getProperty(Core.NAMESPACE_PROP);
+				final String broker=properties.getProperty("broker");
 				mediator.setProperty("namespace",prop.toString());
 				mediator.setProperty("broker",broker.toString());
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOG.debug("Error while loading namespace",e);
 			}
 		}
 
