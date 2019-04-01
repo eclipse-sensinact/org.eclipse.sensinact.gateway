@@ -66,7 +66,6 @@ public class SensiNact implements Sensinact,Core {
 	List<MessageRegisterer> messageRegisterers =Collections.synchronizedList(new ArrayList<MessageRegisterer>());
 	List<MidAgentCallback> messageAgentCallback =Collections.synchronizedList(new ArrayList<MidAgentCallback>());
 
-	//public List<SensinactCoreBaseIface> sensinactRemote=Collections.synchronizedList(new ArrayList<SensinactCoreBaseIface>());
 	public Map<String,SensinactCoreBaseIface> sensinactRemote=Collections.synchronizedMap(new HashMap<String,SensinactCoreBaseIface>());
 	public Map<String,String> sensinactRemoteServiceDomainMap =Collections.synchronizedMap(new HashMap<String,String>());
 
@@ -84,7 +83,7 @@ public class SensiNact implements Sensinact,Core {
 					callback.doHandle((SnaUpdateMessageImpl) message);
 				}
 			}catch(Exception e){
-				e.printStackTrace();
+				LOG.error("Failed to notify callback",e);
 			}
 
 
