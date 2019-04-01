@@ -450,7 +450,7 @@ public class SensiNact implements Sensinact,Core {
 				JSONArray array=new JSONArray();
 
 				for(int x=0;parameters!=null&&x<parameters.length;x++){
-					array.put(parameters.toString());
+					array.put(parameters[x].toString());
 				}
 
 				String responseString=remote.act("none", remoteProviderName, serviceId,
