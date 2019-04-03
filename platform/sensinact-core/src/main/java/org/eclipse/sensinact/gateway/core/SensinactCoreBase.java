@@ -30,22 +30,15 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
     volatile private Sensinact sensinact;
 
     ConfigurationAdmin admin;
-/*
-    @Reference
-    void setConfigurationAdmin(ConfigurationAdmin admin) {
-        this.admin = admin;
-    }
-*/
+
     @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE,policy = ReferencePolicy.STATIC,policyOption = ReferencePolicyOption.RELUCTANT)
     public void setSensiNact(Sensinact sensinact) {
         this.sensinact = sensinact;
     }
 
-
     BundleContext bc;
 
     @Activate
-    //public void act(BundleContext bc){
     public void act(ComponentContext cc){
         this.bc=cc.getBundleContext();
       /*
@@ -93,19 +86,12 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
 
         StringBuilder sb=new StringBuilder();
 
-        //sb.append("\""+namespace()+":temps\"");
-
         SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
 
-        //String localProv=sensinact.getProvidersLocal(identifier,filter);
-        //if(localProv.contains(","))
         for(String prov:sensinact.getProvidersLocal(session.identifier,filter).split(",")){
             String providerNameRemote=prov.replace("\"","");
             sb.append(",\""+namespace()+":"+providerNameRemote+"\"");
         }
-
-        System.out.println("******** "+sb.toString());
-
 
         return sb.toString();
     }
