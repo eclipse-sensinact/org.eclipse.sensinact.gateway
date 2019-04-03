@@ -1,5 +1,6 @@
 package org.eclipse.sensinact.gateway.core;
 
+import org.eclipse.sensinact.gateway.core.api.Sensinact;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
@@ -256,6 +257,10 @@ public final class RegistryEndpoint {
             builder.append("\"name\":");
             builder.append('"');
             builder.append(provider);
+            builder.append('"');
+            builder.append(",\"namespace\":");
+            builder.append('"');
+            builder.append(this.sensinact.namespace());
             builder.append('"');
             builder.append(",\"location\":");
             builder.append('"');
