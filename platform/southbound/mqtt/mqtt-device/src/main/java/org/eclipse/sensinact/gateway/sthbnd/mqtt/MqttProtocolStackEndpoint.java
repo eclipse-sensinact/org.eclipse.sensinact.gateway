@@ -47,7 +47,7 @@ public class MqttProtocolStackEndpoint extends LocalProtocolStackEndpoint<MqttPa
         for (Map.Entry<String, MqttBroker> map : brokers.entrySet()) {
             try {
                 map.getValue().connect();
-            } catch (MqttException e) {
+            } catch (Exception e) {
                 LOG.error("Unable to connect from MQTT broker: {}, {}", map.getValue().getHost(), e);
             }
         }

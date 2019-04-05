@@ -99,8 +99,9 @@ public class MqttBroker {
         return handler;
     }
 
-    public void connect() throws MqttException {
+    public void connect() throws Exception {
         final String brokerUrl = String.format("%s://%s:%d", protocol, host, port);
+        LOG.info("Connecting to broker {}",brokerUrl);
         client = new MqttClient(brokerUrl, UUID.randomUUID().toString(), new MemoryPersistence());
         MqttConnectOptions connectOptions = new MqttConnectOptions();
         if (session != null) {
@@ -159,9 +160,10 @@ public class MqttBroker {
                 LOG.error("Unable to subscribe to the topic {}", topic.getTopic());
             }
         }
+        LOG.info("Connected to broker {}",brokerUrl);
     }
 
-    public synchronized void disconnect() throws MqttException {
+    public synchronized void disconnect() throws Exception {
 
         List<MqttTopic> removalTopic=new ArrayList<>();
         //Avoid reconnection on voluntary disconnection
@@ -297,10 +299,8 @@ public class MqttBroker {
             try {
                 Thread.sleep(5000);
                 broker.connect();
-            } catch (MqttException e) {
+            } catch (Exception e) {
                 LOG.debug("Connection Failed with {}://{}:{}",broker.getProtocol().name(),broker.getHost(),broker.getPort());
-            } catch (InterruptedException e) {
-                LOG.error("Connection Failed with {}://{}:{}",broker.getProtocol().name(),broker.getHost(),broker.getPort());
             }
         }
 
@@ -323,7 +323,7 @@ public class MqttBroker {
         public void connectionLost(MqttBroker broker) {
             try {
                 broker.connect();
-            } catch (MqttException e) {
+            } catch (Exception e) {
                 LOG.debug("Connection Lost with {}://{}:{}",broker.getProtocol().name(),broker.getHost(),broker.getPort());
             }
         }
