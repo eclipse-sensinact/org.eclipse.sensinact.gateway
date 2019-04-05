@@ -26,39 +26,10 @@
 	<name>sensiNact IoT Gateway - MQTT Protocol Devices parent</name>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.eclipse.sensinact.gateway</groupId>
-			<artifactId>sensinact-utils</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.sensinact.gateway</groupId>
-			<artifactId>sensinact-core</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.sensinact.gateway</groupId>
-			<artifactId>sensinact-common</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.sensinact.gateway</groupId>
-			<artifactId>sensinact-generic</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
-			<artifactId>http</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
 	</dependencies>
 	
     <modules>
+		<module>mqtt-utils</module>
         <module>mqtt-device</module>
 		<module>smart-topic-device</module>
     </modules>

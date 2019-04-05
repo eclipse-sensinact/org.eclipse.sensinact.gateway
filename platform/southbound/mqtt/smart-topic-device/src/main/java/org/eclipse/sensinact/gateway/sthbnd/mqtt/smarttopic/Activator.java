@@ -10,8 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic;
 
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttActivator;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttProtocolStackEndpoint;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttActivator;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.device.MqttPropertyFileConfig;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.interpolator.MqttManagedService;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider;

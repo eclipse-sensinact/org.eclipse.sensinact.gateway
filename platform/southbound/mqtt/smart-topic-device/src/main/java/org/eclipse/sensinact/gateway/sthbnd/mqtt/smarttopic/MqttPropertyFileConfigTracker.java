@@ -10,16 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic;
 
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttActivator;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttProtocolStackEndpoint;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttAuthentication;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttBroker;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.listener.MqttConnectionHandler;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.device.MqttPropertyFileConfig;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Resource;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Service;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttAuthentication;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -38,7 +35,7 @@ import java.util.Map;
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
-    private static final Logger LOG = LoggerFactory.getLogger(MqttActivator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MqttPropertyFileConfigTracker.class);
     private final BundleContext bundleContext;
     private final MqttProtocolStackEndpoint endpoint;
     private Map<String, ServiceRegistration> registration = new HashMap<>();

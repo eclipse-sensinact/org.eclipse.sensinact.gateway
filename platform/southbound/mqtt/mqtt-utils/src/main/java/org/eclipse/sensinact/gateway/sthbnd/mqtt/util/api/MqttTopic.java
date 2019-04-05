@@ -8,9 +8,9 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.sthbnd.mqtt.api;
+package org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api;
 
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.listener.MqttTopicMessage;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.listener.MqttTopicMessage;
 
 public class MqttTopic {
     private final String topic;

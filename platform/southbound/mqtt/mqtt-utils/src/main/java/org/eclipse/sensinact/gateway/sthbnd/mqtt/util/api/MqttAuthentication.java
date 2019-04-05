@@ -8,7 +8,7 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.sthbnd.mqtt.api;
+package org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api;
 
 import java.util.Properties;
 

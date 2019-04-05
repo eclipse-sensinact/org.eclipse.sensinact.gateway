@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats;
 
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttActivator;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.exception.ProcessorFormatException;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.iface.ProcessorFormatIface;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.selector.SelectorIface;
@@ -26,7 +25,7 @@ import java.io.IOException;
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class ProcessorFormatBase64 implements ProcessorFormatIface {
-    private static final Logger LOG = LoggerFactory.getLogger(MqttActivator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProcessorFormatBase64.class);
 
     @Override
     public String getName() {

@@ -10,31 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic;
 
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttActivator;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttProtocolStackEndpoint;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttBroker;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttPacket;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttTopic;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.listener.MqttTopicMessage;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttPacket;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Resource;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Service;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.ProcessorExecutor;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.ProcessorUtil;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatArray;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatBase64;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatDivide;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatJSON;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatMinus;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatMultiply;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatPlus;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatToFloat;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatToInteger;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatToString;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.ProcessorFormatURLEncode;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.*;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.iface.ProcessorFormatIface;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttTopic;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.listener.MqttTopicMessage;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -49,7 +36,7 @@ import java.util.ArrayList;
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
-    private static final Logger LOG = LoggerFactory.getLogger(MqttActivator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MqttPojoConfigTracker.class);
     private final BundleContext bundleContext;
     private MqttProtocolStackEndpoint endpoint;
     private static final Object locker=new Object();
@@ -148,9 +135,7 @@ public class MqttPojoConfigTracker implements ServiceTrackerCustomizer {
                 LOG.info("sensiNact device {} removed", provider.getName());
                 LOG.info("Detaching devices {} MQTT Bus service", provider.getName());
                 provider.getBroker().disconnect();
-            } catch (InvalidPacketException e) {
-                LOG.error("Failed to read internal package", e);
-            } catch (MqttException e) {
+            } catch (Exception e) {
                 LOG.error("Failed to disconnect", e);
             }
         }

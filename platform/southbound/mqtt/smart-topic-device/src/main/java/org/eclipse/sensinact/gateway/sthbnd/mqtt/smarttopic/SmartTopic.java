@@ -12,14 +12,14 @@ package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.MqttProtocolStackEndpoint;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttBroker;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttPacket;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttTopic;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.listener.MqttTopicMessage;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttPacket;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.exception.MessageInvalidSmartTopicException;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.SmartTopicInterpolator;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.ProcessorUtil;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttTopic;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.listener.MqttTopicMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +82,7 @@ public class SmartTopic extends MqttTopicMessage {
         LOG.info("Subscribing smarttopic {} from topic {}", smartTopicInterpolator.getSmartTopic(), smartTopicInterpolator.getTopic());
         try {
             this.broker.connect();
-        } catch (MqttException e) {
+        } catch (Exception e) {
             LOG.error("Failed to connect broker {}", broker.toString(), e);
             e.printStackTrace();
         }
@@ -102,7 +102,7 @@ public class SmartTopic extends MqttTopicMessage {
         }
         try {
             broker.disconnect();
-        } catch (MqttException e) {
+        } catch (Exception e) {
             LOG.error("Failed to disconnect broker {}", broker.toString(), e);
         }
     }

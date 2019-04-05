@@ -8,13 +8,13 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.sthbnd.mqtt.api;
+package org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.listener.MqttConnectionHandler;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.listener.MqttConnectionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

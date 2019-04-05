@@ -8,7 +8,7 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.sthbnd.mqtt.ssl;
+package org.eclipse.sensinact.gateway.sthbnd.mqtt.util.ssl;
 
 /*
 import java.io.*;

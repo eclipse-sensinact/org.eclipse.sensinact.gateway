@@ -10,11 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
-import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
@@ -22,6 +17,7 @@ import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefiniti
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractor;
 import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractorType;
+import org.eclipse.sensinact.gateway.core.api.MQTTURLExtract;
 import org.eclipse.sensinact.gateway.core.api.Sensinact;
 import org.eclipse.sensinact.gateway.core.api.SensinactCoreBaseIface;
 import org.eclipse.sensinact.gateway.core.message.*;
@@ -33,6 +29,10 @@ import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod.DescribeT
 import org.eclipse.sensinact.gateway.core.security.*;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
+
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttTopic;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.listener.MqttTopicMessage;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
@@ -1444,10 +1444,10 @@ public class SensiNact implements Sensinact,Core {
 
 		final BundleContext context=mediator.getContext();
 
-		ServiceTracker st=new ServiceTracker<SensinactCoreBaseIface,SensinactCoreBaseIface>(context,filterMain,new ServiceTrackerCustomizer<SensinactCoreBaseIface,SensinactCoreBaseIface>(){
+		ServiceTracker st=new ServiceTracker<SensinactCoreBaseIface,MqttBroker>(context,filterMain,new ServiceTrackerCustomizer<SensinactCoreBaseIface,MqttBroker>(){
 
 			@Override
-			public SensinactCoreBaseIface addingService(ServiceReference<SensinactCoreBaseIface> reference) {
+			public MqttBroker addingService(ServiceReference<SensinactCoreBaseIface> reference) {
 
 				final SensinactCoreBaseIface sna=context.getService(reference);
 
@@ -1462,49 +1462,57 @@ public class SensiNact implements Sensinact,Core {
 
 				LOG.info("Connecting to RSA remote sensinact instance with namespace {}",sna.namespace());
 
+				final String brokerAddr=mediator.getProperty("broker").toString();
+
+				MQTTURLExtract mqttURL=new MQTTURLExtract(brokerAddr);
+
+				MqttBroker mb=new MqttBroker.Builder().host(mqttURL.getHost()).port(mqttURL.getPort()).protocol(MqttBroker.Protocol.valueOf(mqttURL.getProtocol().toUpperCase())).build();
+
+				MqttTopic topic=new MqttTopic(String.format("/%s",sna.namespace()),new MqttTopicMessage(){
+					@Override
+					protected void messageReceived(String topic, String mqttMessage) {
+						LOG.info("Received remote notification from namespace {} on topic {} with message {}",sna.namespace(),topic,mqttMessage);
+
+						JSONObject event=new JSONObject(mqttMessage);
+						String path=event.getString("uri");
+						String provider = path.split("/")[1];
+						String uriTranslated=path.replaceFirst("/"+provider,String.format("/%s:%s",sna.namespace(),provider));
+						event.remove("uri");
+						event.put("uri",uriTranslated);
+						LOG.debug("Forwarding message received in local sensinact as {}",event.toString());
+						SnaMessage message=AbstractSnaMessage.fromJSON(mediator,event.toString());
+						SensiNact.this.notifyCallbacks(message);
+					}
+				});
+
 				try {
-					final String brokerAddr=mediator.getProperty("broker").toString();
-					MqttClient client = new MqttClient(brokerAddr, MqttClient.generateClientId(), new MemoryPersistence());
-					client.connect();
-					client.subscribe(String.format("/%s",sna.namespace()), new IMqttMessageListener() {
-						@Override
-						public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-
-							LOG.debug("Received remote notification from namespace {} on topic {} with message {}",sna.namespace(),s,new String(mqttMessage.getPayload()));
-
-							JSONObject event=new JSONObject(new String(mqttMessage.getPayload()));
-							JSONObject eventJson = event.getJSONObject("notification");
-							String path=event.getString("uri");
-							String provider = path.split("/")[1];
-							String uriTranslated=path.replaceFirst("/"+provider,String.format("/%s:%s",sna.namespace(),provider));
-							event.remove("uri");
-							event.put("uri",uriTranslated);
-							LOG.debug("Forwarding message received in local sensinact as {}",event.toString());
-							SnaMessage message=AbstractSnaMessage.fromJSON(mediator,event.toString());
-							SensiNact.this.notifyCallbacks(message);
-						}
-					});
-				} catch (MqttException e) {
-					LOG.error("Error",e);
+					mb.subscribeToTopic(topic);
+					mb.connect();
+					sensinactRemote.put(sna.namespace(),sna);
+					sensinactRemoteServiceDomainMap.put(mb.toString(),sna.namespace());
+				} catch (Exception e) {
+					LOG.error("Failed to connect to broker {}",brokerAddr,e);
 				}
 
-				sensinactRemote.put(sna.namespace(),sna);
-				sensinactRemoteServiceDomainMap.put(sna.toString(),sna.namespace());
-
-				return sna;
+				return mb;
 			}
 
 			@Override
-			public void modifiedService(ServiceReference<SensinactCoreBaseIface> reference, SensinactCoreBaseIface service) {
+			public void modifiedService(ServiceReference<SensinactCoreBaseIface> reference, MqttBroker service) {
 
 			}
 
 			@Override
-			public void removedService(ServiceReference<SensinactCoreBaseIface> reference, SensinactCoreBaseIface service) {
+			public void removedService(ServiceReference<SensinactCoreBaseIface> reference, MqttBroker service) {
 				String key= sensinactRemoteServiceDomainMap.remove(service.toString());
 				LOG.info("Removing RSA sensinact remote instance {} from the pool",key.toString());//,
 				sensinactRemote.remove(key);
 				LOG.info("RSA sensinact remote instance removed from the pool {} instances remain in the pool",sensinactRemote.keySet().size());
+				try {
+					service.disconnect();
+				} catch (Exception e) {
+					LOG.error("Failing disconnecting from broker {}",service.getHost());
+				}
 			}
 		});
 

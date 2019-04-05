@@ -10,8 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.device;
 
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttBroker;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Service;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
 
 import java.util.List;
 

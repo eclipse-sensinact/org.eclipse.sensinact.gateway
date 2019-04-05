@@ -9,6 +9,7 @@
  *    CEA - initial API and implementation
  */
 package org.eclipse.sensinact.gateway.device.mqtt.lite.it.util;
+
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
@@ -27,19 +28,20 @@ import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttBroker;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.listener.MqttConnectionHandler;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Resource;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Service;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.ops4j.pax.exam.*;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.options.FrameworkPropertyOption;
 import org.ops4j.pax.exam.options.MavenArtifactProvisionOption;
-import org.ops4j.pax.exam.options.SystemPropertyOption;
+
 import java.util.*;
+
 import static org.ops4j.pax.exam.CoreOptions.*;
 /**
  * Abstract class used to configure the base for the integration tests
@@ -196,7 +198,7 @@ public abstract class MqttTestITAbstract {
                 getBundleRequiredByURLResolvers()
         );
     }
-    protected Provider createDevicePojo(String providerString, String serviceString, String resourceString, String topic) throws MqttException {
+    protected Provider createDevicePojo(String providerString, String serviceString, String resourceString, String topic) throws Exception {
         MqttBroker broker = new MqttBroker.Builder()
                 .host(MQTT_HOST)
                 .port(MQTT_PORT)
@@ -221,7 +223,7 @@ public abstract class MqttTestITAbstract {
         service.getResources().add(resource);
         return provider;
     }
-    public MqttClient getMqttConnection(String host, int port) throws MqttException {
+    public MqttClient getMqttConnection(String host, int port) throws Exception {
         MqttBroker broker = new MqttBroker.Builder()
                 .host(host)
                 .port(port)

@@ -8,13 +8,12 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.sthbnd.mqtt;
+package org.eclipse.sensinact.gateway.sthbnd.mqtt.device;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttBroker;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.api.MqttPacket;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +37,7 @@ public class MqttProtocolStackEndpoint extends LocalProtocolStackEndpoint<MqttPa
         MqttBroker broker = brokers.remove(clientId);
         try {
             broker.disconnect();
-        } catch (MqttException e) {
+        } catch (Exception e) {
             LOG.error("Unable to disconnect from MQTT broker: {}, {}", broker.getHost(), e);
         }
     }
@@ -57,7 +56,7 @@ public class MqttProtocolStackEndpoint extends LocalProtocolStackEndpoint<MqttPa
         for (Map.Entry<String, MqttBroker> map : brokers.entrySet()) {
             try {
                 map.getValue().disconnect();
-            } catch (MqttException e) {
+            } catch (Exception e) {
                 LOG.error("Unable to disconnect from MQTT broker: {}, {}", map.getValue().getHost(), e);
             }
         }
