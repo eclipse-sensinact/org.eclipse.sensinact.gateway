@@ -17,16 +17,21 @@ public abstract class GenericActivator extends AbstractActivator<Mediator> {
 
     @Override
     public void doStart() throws Exception {
-        ExtModelConfiguration<?> configuration = ExtModelConfigurationBuilder.instance(
-                mediator, getPacketClass()
-        ).withServiceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
-        ).withResourceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
-        ).withStartAtInitializationTime(true
-        ).build(this.getClass().getName()+".xml", Collections.emptyMap());
+    	ExtModelConfigurationBuilder builder = ExtModelConfigurationBuilder.instance(mediator, getPacketClass());
+    	
+    	ExtModelConfiguration configuration = configureBuilder(builder)
+        	.withServiceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy()))
+        	.withResourceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy()))
+        	.withStartAtInitializationTime(true)
+        	.build(this.getClass().getName()+".xml", Collections.emptyMap());
         endPoint = getEndPoint();
         this.connect(configuration);
     }
 
+    protected ExtModelConfigurationBuilder configureBuilder(ExtModelConfigurationBuilder builder) {
+    	return builder;
+    }
+    
     @Override
     public void doStop() {
         try {

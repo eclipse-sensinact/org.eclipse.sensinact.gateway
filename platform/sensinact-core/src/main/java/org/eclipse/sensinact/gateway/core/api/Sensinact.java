@@ -20,4 +20,5 @@ public interface Sensinact {
     public String getResources(String identifier, final String serviceProviderId, final String serviceId);
     public String getAll(String identifier, final String filter,Boolean attacheNamespace);
 
+
 }
