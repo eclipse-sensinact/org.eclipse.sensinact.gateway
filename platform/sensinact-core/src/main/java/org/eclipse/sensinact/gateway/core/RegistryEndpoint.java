@@ -227,7 +227,7 @@ public final class RegistryEndpoint {
         }
     }
 
-    public String getAll(SessionKey sessionKey, boolean resolveNamespace, String filter) {
+    public String getAll(SessionKey sessionKey, boolean resolveNamespace, String filter,Boolean attachNamespace) {
         StringBuilder builder = new StringBuilder();
         String prefix = resolveNamespace
                 ? new StringBuilder().append(sensinact.namespace()).append(":").toString()
@@ -256,6 +256,7 @@ public final class RegistryEndpoint {
             builder.append('{');
             builder.append("\"name\":");
             builder.append('"');
+            if(attachNamespace) builder.append(this.sensinact.namespace()+":");
             builder.append(provider);
             builder.append('"');
             builder.append(",\"namespace\":");

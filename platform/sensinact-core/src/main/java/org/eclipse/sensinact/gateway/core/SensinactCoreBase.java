@@ -78,7 +78,7 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
     @Override
     public String getAll(String identifier, String filter) {
         SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
-        return sensinact.getAll(session.identifier,filter);
+        return sensinact.getAll(session.identifier,filter,true);
     }
 
     @Override
@@ -151,7 +151,7 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
     @Override
     public String set(String requestId, String serviceProviderId, String serviceId, String resourceId, String attributeId, String parameter) {
         SensiNact.SensiNactAnonymousSession session=(SensiNact.SensiNactAnonymousSession)sensinact.getAnonymousSession();
-        String resultResponse=session.set(serviceProviderId,serviceId,resourceId,attributeId,createObjectArrayParamFromJSON(parameter)).getJSON();
+        String resultResponse=session.set(serviceProviderId,serviceId,resourceId,attributeId,parameter).getJSON();
         return resultResponse;
     }
 

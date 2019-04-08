@@ -616,7 +616,7 @@ public class SensiNact implements Sensinact,Core {
 			
 			DescribeResponse<String> response = null;
 			DescribeMethod<String> method = new DescribeMethod<String>(mediator, UriUtils.PATH_SEPARATOR, null,
-					DescribeType.FILTER_LIST);
+					DescribeType.COMPLETE_LIST);
 
 			DescribeResponseBuilder<String> builder = method.createAccessMethodResponseBuilder(null);
 
@@ -630,7 +630,7 @@ public class SensiNact implements Sensinact,Core {
 			String all = AccessController.doPrivileged(new PrivilegedAction<String>() {
 				@Override
 				public String run() {
-					return SensiNact.this.getAll(SensiNactSession.this.getSessionId(), ldapFilter);
+					return SensiNact.this.getAll(SensiNactSession.this.getSessionId(), ldapFilter,false);
 				}
 			});
 			if (all == null) {
@@ -647,11 +647,11 @@ public class SensiNact implements Sensinact,Core {
 
 			String result = new StringBuilder().append("[").append(all).append("]").toString();
 
-			JSONArray namesspacesArray=new JSONArray();
-			JSONObject namespaceLocal=new JSONObject();
-			namespaceLocal.put("name",namespace);
-			namespaceLocal.put("providers",new JSONArray(result));
-			namesspacesArray.put(namespaceLocal);
+			JSONArray namesspacesArray=new JSONArray(result);
+			//JSONObject namespaceLocal=new JSONObject();
+			//namespaceLocal.put("name",namespace);
+			//namespaceLocal.put("providers",new JSONArray(result));
+			//namesspacesArray.put(new JSONArray(result));
 
 
 			for(Map.Entry<String,SensinactCoreBaseIface> entry:sensinactRemote.entrySet()){
@@ -660,10 +660,10 @@ public class SensiNact implements Sensinact,Core {
 					String allFromRemote=entry.getValue().getAll(identifier,filter);
 					LOG.info("Filter result {}",allFromRemote);
 					String resultRemote = new StringBuilder().append("[").append(allFromRemote).append("]").toString();
-					JSONObject namespaceRemote=new JSONObject();
-					namespaceRemote.put("name",entry.getValue().namespace());
-					namespaceRemote.put("providers",new JSONArray(resultRemote));
-					namesspacesArray.put(namespaceRemote);
+					JSONArray remoteArray=new JSONArray(resultRemote);
+					for (int i = 0; i < remoteArray.length(); i++) {
+						namesspacesArray.put(remoteArray.getJSONObject(i));
+					}
 
 				}catch(Exception e){
 					LOG.error("Error when retrieving list of remoteProviders",e);
@@ -2271,7 +2271,7 @@ public class SensiNact implements Sensinact,Core {
 	 * @return the JSON formated list of the resource model instances for the
 	 *         specified {@link Session} and compliant to the specified filter.
 	 */
-	public String getAll(String identifier, final String filter) {
+	public String getAll(String identifier, final String filter,Boolean attachNamespace) {
 		final SessionKey sessionKey = sessions
 				.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
 
@@ -2285,7 +2285,7 @@ public class SensiNact implements Sensinact,Core {
 				effectiveFilter = null;
 			}
 		}
-		String local = this.registry.getAll(sessionKey, sessionKey.localID() != 0, effectiveFilter);
+		String local = this.registry.getAll(sessionKey, sessionKey.localID() != 0, effectiveFilter,attachNamespace);
 
 		if (sessionKey.localID() != 0) {
 			return local;
