@@ -11,20 +11,6 @@
 
 package org.eclipse.sensinact.gateway.common.bundle;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.util.PropertyUtils;
 import org.osgi.framework.BundleContext;
@@ -32,6 +18,12 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.*;
 
 /**
  * Mediator Pattern Architecture purpose
@@ -113,7 +105,6 @@ public class Mediator {
 		info("Bundle symbolic name %s", symbolicName);
 
 		final String bundlePropertyFileName = String.format("%s/%s.properties", fileInstallDir, symbolicName);
-		final String bundlePropertyFileNameFallback = String.format("%s/%s.property", fileInstallDir, symbolicName);
 		Boolean propertiesLoaded = Boolean.FALSE;
 		Properties bundleProperties = new Properties();
 
@@ -129,21 +120,11 @@ public class Mediator {
 			// Log message will be aggregated with the fallback result and given later
 		}
 
-		if (!propertiesLoaded) {
-			try {
-				bundleProperties.load(new FileInputStream(bundlePropertyFileNameFallback));
-				logBundleProperties(symbolicName, bundlePropertyFileNameFallback, bundleProperties);
-				debug("File %s loaded successfully", bundlePropertyFileNameFallback);
-				propertiesLoaded = true;
-			} catch (IOException ex) {
-				// Log message will be aggregated with the fallback result and given later
-			}
-		}
 		// If not even the fallback didnt manage to get loaded, display message in the
 		// log
 		if (!propertiesLoaded) {
-			debug("bundle %s does not have custom configuration, using default values (either %s or %s respectively).", symbolicName,
-					bundlePropertyFileName, bundlePropertyFileNameFallback);
+			debug("bundle %s does not have custom configuration %s, using default values.", symbolicName,
+					bundlePropertyFileName);
 		}
 
 		for (Map.Entry<Object, Object> name : bundleProperties.entrySet()) {
