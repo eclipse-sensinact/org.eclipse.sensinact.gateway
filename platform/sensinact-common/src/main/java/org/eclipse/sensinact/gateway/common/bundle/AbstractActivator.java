@@ -13,7 +13,12 @@ package org.eclipse.sensinact.gateway.common.bundle;
 import org.eclipse.sensinact.gateway.common.interpolator.Interpolator;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import java.util.Dictionary;
 import java.util.Map;
 
 /**
@@ -50,15 +55,62 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
      * @see org.osgi.framework.BundleActivator#
      * start(org.osgi.framework.BundleContext)
      */
-    public void start(BundleContext context) throws Exception {
-        this.mediator = this.initMediator(context);
-        injectPropertyFields();
-
+    public void start(final BundleContext context) throws Exception {
         //complete starting process
-        this.doStart();
+        ServiceTracker st=new ServiceTracker(context,new Filter(){
+            @Override
+            public boolean match(ServiceReference<?> serviceReference) {
+                return false;
+            }
+
+            @Override
+            public boolean match(Dictionary<String, ?> dictionary) {
+                return false;
+            }
+
+            @Override
+            public boolean matchCase(Dictionary<String, ?> dictionary) {
+                return false;
+            }
+
+            @Override
+            public boolean matches(Map<String, ?> map) {
+                return false;
+            }
+
+            @Override
+            public String toString() {
+                return "(objectClass=org.eclipse.sensinact.gateway.core.Core)";
+            }
+        },new ServiceTrackerCustomizer(){
+
+            @Override
+            public Object addingService(ServiceReference serviceReference) {
+                try {
+                    AbstractActivator.this.mediator = AbstractActivator.this.initMediator(context);
+                    injectPropertyFields();
+                    AbstractActivator.this.doStart();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return serviceReference;
+
+            }
+
+            @Override
+            public void modifiedService(ServiceReference serviceReference, Object o) {
+
+            }
+
+            @Override
+            public void removedService(ServiceReference serviceReference, Object o) {
+
+            }
+        });
+        st.open();
     }
 
-    private void injectPropertyFields() throws Exception {
+    protected void injectPropertyFields() throws Exception {
         this.mediator.debug("Starting introspection in bundle %s", mediator.getContext().getBundle().getSymbolicName());
         //This line creates an interpolator and inject the properties into the activator
         Interpolator interpolator=new Interpolator(this.mediator.getProperties());
