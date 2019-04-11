@@ -1,6 +1,9 @@
 package org.eclipse.sensinact.gateway.core.api;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.AnonymousSession;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.json.JSONObject;
 
 public interface Sensinact {
@@ -19,6 +22,7 @@ public interface Sensinact {
     public String getServices(String identifier, final String serviceProviderId);
     public String getResources(String identifier, final String serviceProviderId, final String serviceId);
     public String getAll(String identifier, final String filter,Boolean attacheNamespace);
+    public String registerAgent(Mediator mediator, MidAgentCallback callback, SnaFilter filter);
 
 
 }

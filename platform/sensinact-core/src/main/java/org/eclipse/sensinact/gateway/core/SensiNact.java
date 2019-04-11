@@ -1463,12 +1463,13 @@ public class SensiNact implements Sensinact,Core {
 				LOG.info("Connecting to RSA remote sensinact instance with namespace {}",sna.namespace());
 
 				final String brokerAddr=mediator.getProperty("broker").toString();
+				final String brokerTopicPrefix=mediator.getProperty("broker.topic.prefix").toString();
 
 				MQTTURLExtract mqttURL=new MQTTURLExtract(brokerAddr);
 
 				MqttBroker mb=new MqttBroker.Builder().host(mqttURL.getHost()).port(mqttURL.getPort()).protocol(MqttBroker.Protocol.valueOf(mqttURL.getProtocol().toUpperCase())).build();
 
-				MqttTopic topic=new MqttTopic(String.format("/%s",sna.namespace()),new MqttTopicMessage(){
+				MqttTopic topic=new MqttTopic(String.format("%s%s",brokerTopicPrefix,sna.namespace()),new MqttTopicMessage(){
 					@Override
 					protected void messageReceived(String topic, String mqttMessage) {
 						LOG.info("Received remote notification from namespace {} on topic {} with message {}",sna.namespace(),topic,mqttMessage);

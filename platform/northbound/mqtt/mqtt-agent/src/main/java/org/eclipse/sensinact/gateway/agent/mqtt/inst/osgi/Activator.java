@@ -40,8 +40,6 @@ public class Activator extends AbstractMqttActivator {
     public String prefix;
     @Property(defaultValue = "tcp",mandatory = false)
     public String protocol;
-    @Property(defaultValue = "humanreadable",mandatory = false)
-    public String payloadType;
     @Property(mandatory = false)
     String username;
     @Property(mandatory = false)
@@ -74,7 +72,7 @@ public class Activator extends AbstractMqttActivator {
             public ConfigurationAdmin addingService(ServiceReference<ConfigurationAdmin> reference) {
                 try {
                     ConfigurationAdmin configAdmin=(ConfigurationAdmin) FrameworkUtil.getBundle(Activator.class).getBundleContext().getService(reference);
-                    doStart(new SnaEventEventHandler(broker,new Integer(qos),prefix,payloadType,configAdmin));
+                    doStart(new SnaEventEventHandler(broker,new Integer(qos),prefix,configAdmin));
                     return configAdmin;
                 } catch (Exception e) {
                     e.printStackTrace();
