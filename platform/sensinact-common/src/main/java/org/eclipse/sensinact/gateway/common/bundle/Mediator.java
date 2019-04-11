@@ -104,7 +104,7 @@ public class Mediator {
 		final String symbolicName = context.getBundle().getSymbolicName();
 		info("Bundle symbolic name %s", symbolicName);
 
-		final String bundlePropertyFileName = String.format("%s/%s.properties", fileInstallDir, symbolicName);
+		final String bundlePropertyFileName = String.format("%s/%s.config", fileInstallDir, symbolicName);
 		Boolean propertiesLoaded = Boolean.FALSE;
 		Properties bundleProperties = new Properties();
 
