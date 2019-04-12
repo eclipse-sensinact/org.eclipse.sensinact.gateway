@@ -1274,8 +1274,9 @@ public class SensiNact implements Sensinact,Core {
 		return response;
 	}
 
-	private static final String namespace(Mediator mediator) {
-
+	private final String namespace(Mediator mediator) {
+		return namespace;
+		/*
 		String prop = System.getProperty(Core.NAMESPACE_PROP);
 
 		if(prop==null){
@@ -1298,6 +1299,7 @@ public class SensiNact implements Sensinact,Core {
 					.toString();
 		}
 		return prop;
+		*/
 	}
 
 	protected static final int LOCAL_ID = 0;
@@ -1375,8 +1377,8 @@ public class SensiNact implements Sensinact,Core {
 	 * @throws BundleException
 	 */
 	public SensiNact(final String namespace, final Mediator mediator) throws SecuredAccessException, BundleException, DataStoreException {
-		this.namespace = SensiNact.namespace(mediator);//namespace;//namespace;//
-		LOG.info("Using {} as namespace for the sensinact instance",this.namespace);
+		this.namespace = namespace;
+		LOG.info("Using {} as namespace for the SensiNact instance",this.namespace);
 		SecuredAccess securedAccess = null;
 		ServiceLoader<SecurityDataStoreServiceFactory> dataStoreServiceFactoryLoader = ServiceLoader
 				.load(SecurityDataStoreServiceFactory.class, mediator.getClassLoader());
@@ -1453,9 +1455,7 @@ public class SensiNact implements Sensinact,Core {
 
 				LOG.info("Receiving RSA discovery notification about remote instance {}",sna.namespace());
 
-				if(sna.namespace().equals(SensiNact.this.namespace)) return null;
-
-				if(sensinactRemote.keySet().contains(sna.namespace())){
+				if(sensinactRemote.keySet().contains(sna.namespace())||sna.namespace().equals(namespace())){
 					LOG.info("RSA remote sensinact instance with namespace {} already exists, ignoring entry",sna.namespace());
 					return null;
 				}
@@ -1463,12 +1463,13 @@ public class SensiNact implements Sensinact,Core {
 				LOG.info("Connecting to RSA remote sensinact instance with namespace {}",sna.namespace());
 
 				final String brokerAddr=mediator.getProperty("broker").toString();
+				final String brokerTopicPrefix=mediator.getProperty("broker.topic.prefix").toString();
 
 				MQTTURLExtract mqttURL=new MQTTURLExtract(brokerAddr);
 
 				MqttBroker mb=new MqttBroker.Builder().host(mqttURL.getHost()).port(mqttURL.getPort()).protocol(MqttBroker.Protocol.valueOf(mqttURL.getProtocol().toUpperCase())).build();
 
-				MqttTopic topic=new MqttTopic(String.format("/%s",sna.namespace()),new MqttTopicMessage(){
+				MqttTopic topic=new MqttTopic(String.format("%s%s",brokerTopicPrefix,sna.namespace()),new MqttTopicMessage(){
 					@Override
 					protected void messageReceived(String topic, String mqttMessage) {
 						LOG.info("Received remote notification from namespace {} on topic {} with message {}",sna.namespace(),topic,mqttMessage);

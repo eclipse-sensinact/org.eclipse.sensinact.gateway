@@ -15,10 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ConcurrentModificationException;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -33,6 +30,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
 import org.osgi.service.cm.ConfigurationListener;
@@ -40,6 +38,8 @@ import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Bundle Activator
@@ -48,16 +48,16 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class Activator extends AbstractActivator<Mediator> {
 
-	private ServiceRegistration registration;
+	private final Logger LOG= LoggerFactory.getLogger(Activator.class);
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator# doStart()
-	 */
+	private ServiceRegistration registration;
+	private ServiceRegistration registrationConfiguration;
+
 	@Override
-	public void doStart() throws Exception {
-		ServiceReference<ConditionalPermissionAdmin> sRef = super.mediator.getContext()
+	public void start(final BundleContext context) throws Exception {
+		//super.start(context);
+/*
+		ServiceReference<ConditionalPermissionAdmin> sRef = context
 				.getServiceReference(ConditionalPermissionAdmin.class);
 
 		ConditionalPermissionAdmin cpa = null;
@@ -65,7 +65,7 @@ public class Activator extends AbstractActivator<Mediator> {
 		if (sRef == null) {
 			throw new BundleException("ConditionalPermissionAdmin services needed");
 		}
-		List<String> types = ReflectUtils.getAllStringTypes(mediator.getContext().getBundle());
+		List<String> types = ReflectUtils.getAllStringTypes(context.getBundle());
 
 		StringBuilder builder = new StringBuilder();
 
@@ -74,11 +74,12 @@ public class Activator extends AbstractActivator<Mediator> {
 				builder.append("\\,");
 			builder.append(types.get(index));
 		}
-		cpa = super.mediator.getContext().getService(sRef);
+		cpa = context.getService(sRef);
 
 		ConditionalPermissionUpdate cpu = cpa.newConditionalPermissionUpdate();
+
 		List piList = cpu.getConditionalPermissionInfos();
-/*
+
 		ConditionalPermissionInfo cpiDeny = cpa.newConditionalPermissionInfo(
 			String.format("DENY { [org.eclipse.sensinact.gateway.core.security.perm.StrictCodeBaseCondition \"%s\" \"!\"]"
 				//+ " (org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.Core\" \"register\")"
@@ -95,20 +96,20 @@ public class Activator extends AbstractActivator<Mediator> {
 				+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService\" \"register,get\")"
 				+ "} null", builder.toString()));
 		piList.add(cpiDeny);
-*/
-/*
+
 		ConditionalPermissionInfo cpiAllow = null;
 
 		cpiAllow = cpa.newConditionalPermissionInfo(
 			"ALLOW {[org.eclipse.sensinact.gateway.core.security.perm.CodeBaseCondition \"*\"](java.security.AllPermission \"\" \"\")} null");
-		
+
 		piList.add(cpiAllow);
-*/
+
 		if (!cpu.commit()) {
 			throw new ConcurrentModificationException("Permissions changed during update");
 		}
+		*/
 
-
+/*
 		registration = AccessController.doPrivileged(new PrivilegedAction<ServiceRegistration>() {
 			@Override
 			public ServiceRegistration run() {
@@ -127,35 +128,48 @@ public class Activator extends AbstractActivator<Mediator> {
 				return null;
 			}
 		});
+*/
 
-		/*
 
-		mediator.getContext().registerService(ConfigurationListener.class.getCanonicalName(),new ConfigurationListener(){
+		this.registrationConfiguration=context.registerService(ConfigurationListener.class.getCanonicalName(),new ConfigurationListener(){
 
 			@Override
 			public void configurationEvent(ConfigurationEvent event) {
 
-				System.out.println("------------>"+event.getPid());
+				LOG.debug("Receiving Configuration notification for {}",event.getPid());
 
-
+				//Waits for the sensinact configuration is available in config admin
 				if(event.getPid().equals("sensinact")) {
-
-					System.out.println("..... Starting sensinact ....");
 
 					registration = AccessController.doPrivileged(new PrivilegedAction<ServiceRegistration>() {
 						@Override
 						public ServiceRegistration run() {
 							try {
 
-								ServiceReference configadminsr=mediator.getContext().getServiceReferences(ConfigurationAdmin.class.getCanonicalName(),null)[0];
+								ServiceReference configadminsr=context.getServiceReferences(ConfigurationAdmin.class.getCanonicalName(),null)[0];
 
-								ConfigurationAdmin configurationAdmin=(ConfigurationAdmin)mediator.getContext().getService(configadminsr);
+								ConfigurationAdmin configurationAdmin=(ConfigurationAdmin)context.getService(configadminsr);
+								Configuration confSensinact=configurationAdmin.getConfiguration("sensinact");
 
-								return mediator.getContext().registerService(new String[]{Core.class.getCanonicalName(), Sensinact.class.getName()},
-										new SensiNact(configurationAdmin.getConfiguration("sensinact").getProperties().get("namespace").toString(),mediator), null);
+								final String namespaceLocal=confSensinact.getProperties().get("namespace").toString();
+
+								LOG.info("SensiNact configuration is available, starting up SensiNact core with namespace {}..",namespaceLocal);
+
+								Activator.this.mediator = Activator.this.initMediator(context);
+
+								// Transfer sensinact config admin property into Mediator in order to be used by the other bundles
+								Enumeration keysEnumeration=confSensinact.getProperties().keys();
+								while(keysEnumeration.hasMoreElements()){
+									String key=(String)keysEnumeration.nextElement();
+									Activator.this.mediator.setProperty(key,confSensinact.getProperties().get(key).toString());
+								}
+
+								Activator.this.injectPropertyFields();
+								return context.registerService(new String[]{Core.class.getCanonicalName(), Sensinact.class.getName()},
+										new SensiNact(namespaceLocal,Activator.this.mediator), null);
 							} catch (Exception e) {
 								e.printStackTrace();
-								mediator.error(e);
+								Activator.this.mediator.error(e);
 							}
 							return null;
 						}
@@ -168,10 +182,17 @@ public class Activator extends AbstractActivator<Mediator> {
 			}
 		},new Hashtable<String,String>());
 
-		*/
 
+	}
 
-
+	/**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator# doStart()
+	 */
+	@Override
+	public void doStart() throws Exception {
+		//Core cannot rely on this method, since it will only be called only by AbstractActivator when a SensiNact core itself is available in the registry
 	}
 
 	/**

@@ -30,19 +30,17 @@ import java.util.UUID;
  * Instance = sNa Attribute
  */
 public class SnaEventEventHandler extends AbstractMqttHandler {
-    private final String payloadType;
     private final ConfigurationAdmin conf;
     Logger LOG= LoggerFactory.getLogger(SnaEventEventHandler.class.getName());
     private final String broker;
     private final Integer qos;
     private final String prefix;
 
-    public SnaEventEventHandler(String broker,Integer qos,String prefix,String payloadType,ConfigurationAdmin conf) throws IOException {
+    public SnaEventEventHandler(String broker,Integer qos,String prefix,ConfigurationAdmin conf) throws IOException {
         super();
         this.broker=broker;
         this.qos=qos;
         this.prefix=prefix;
-        this.payloadType=payloadType;
         this.conf=conf;
     }
 
@@ -52,34 +50,25 @@ public class SnaEventEventHandler extends AbstractMqttHandler {
      * @param event the RegisteredUpdatedSnaEvent to process
      */
     public void doHandle(SnaUpdateMessageImpl event) {
-        if(payloadType.equals("humanreadable")){
-            try {
-                LOG.debug("Event received update:"+event.getJSON().toString());
-                JSONObject eventJson = new JSONObject(event.getJSON()).getJSONObject("notification");
-                String provider = event.getPath().split("/")[1];
-                String service = event.getPath().split("/")[2];
-                String resource = event.getPath().split("/")[3];
-                String valueProperty = event.getPath().split("/")[4];
-                String value=eventJson.getString(valueProperty);
-                switch (event.getType()) {
-                    // Create contentInstance
-                    case ATTRIBUTE_VALUE_UPDATED:
-                        this.agent.publish(String.format("%s%s/%s/%s",prefix,provider,service,resource),value);
-                        break;
-                    default:
-                        return;
-                }
-
-            }catch (Exception e){
-                LOG.error("Failed",e);
-            }
-        }else {
-            try {
-                publicRawMessage(event);
-            } catch (Exception e) {
-                LOG.error("Failed",e);
+        try {
+            LOG.debug("Event received update:"+event.getJSON().toString());
+            JSONObject eventJson = new JSONObject(event.getJSON()).getJSONObject("notification");
+            String provider = event.getPath().split("/")[1];
+            String service = event.getPath().split("/")[2];
+            String resource = event.getPath().split("/")[3];
+            String valueProperty = event.getPath().split("/")[4];
+            String value=eventJson.getString(valueProperty);
+            switch (event.getType()) {
+                // Create contentInstance
+                case ATTRIBUTE_VALUE_UPDATED:
+                    this.agent.publish(String.format("%s%s/%s/%s",prefix,provider,service,resource),value);
+                    break;
+                default:
+                    return;
             }
 
+        }catch (Exception e){
+            LOG.error("Failed",e);
         }
 
 
@@ -91,34 +80,9 @@ public class SnaEventEventHandler extends AbstractMqttHandler {
      * @param event the ServiceRegisteredSnaEvent to process
      */
     public void doHandle(SnaLifecycleMessageImpl event) {
-        if(!payloadType.equals("humanreadable")){
-            publicRawMessage(event);
-        }
     }
 
-    private void publicRawMessage(SnaMessage event){
-        try {
-            Configuration configuration=conf.getConfiguration("sensinact");
-            boolean isEmptyConfig=configuration.getProperties()==null;
-            if(!isEmptyConfig){
-                String namespace=configuration.getProperties().get("namespace").toString();
-                if(!new JSONObject(event.getJSON()).getString("uri").contains(":")){
-                    LOG.debug("Using as namespace {}",namespace);
-                    this.agent.publish(String.format("%s%s",prefix,namespace),event.getJSON().toString());
-                    LOG.debug("Sending from namespace {} the message {}",namespace,event.getJSON().toString());
-                }else {
-                    LOG.debug("Not propagating message to remote Sensinact instance {} ",namespace,event.getJSON().toString());
-                }
-            }else {
-                LOG.debug("Skipping message publication, namespace was not yet read by config listener");
-            }
 
-
-
-        } catch (Exception e) {
-            LOG.error("Failed",e);
-        }
-    }
 
     /**
      * @see MidAgentCallback#stop()

@@ -31,7 +31,7 @@ import java.util.HashMap;
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class MqttManagedService implements ManagedServiceFactory {
-    public static final String MANAGER_NAME = "mqtt";
+    public static final String MANAGER_NAME = "bridge.sb.mqtt";
     private static final String OSGI_PROPERTY_FOR_FILENAME = "felix.fileinstall.filename";
     private static final Logger LOG = LoggerFactory.getLogger(MqttManagedService.class);
     private final BundleContext context;

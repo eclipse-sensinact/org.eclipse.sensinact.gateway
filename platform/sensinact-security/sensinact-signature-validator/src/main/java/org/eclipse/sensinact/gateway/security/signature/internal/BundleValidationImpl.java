@@ -138,7 +138,7 @@ public class BundleValidationImpl implements BundleValidation {
                     entry = (Map.Entry) signers.next();
                     signer = (String) entry.getKey();
 
-                    this.mediator.info("signers: %s", signers);
+                    this.mediator.debug("signers: %s", signers);
                     currentCert = (Certificate) validCertificates.get(signer);
                     SignatureFile signatureFile = sjar.getSignatureFile(signer);
 
@@ -148,16 +148,16 @@ public class BundleValidationImpl implements BundleValidation {
                     if (sjar.checkCoherence(signer, currentCert, signatureFile.getHashAlgo())) {
                         certs4validSig.add(currentCert);
                         if (this.mediator.isInfoLoggable()) {
-                            this.mediator.info("certificate for " + signer + " valid");
+                            this.mediator.debug("certificate for " + signer + " valid");
                         }
                     }
                     if (certs4validSig.size() == 0) {
                         System.out.println("checkCoherence returned false");
                         sha1 = null;
-                        this.mediator.info("no valid certificate found");
+                        this.mediator.debug("no valid certificate found");
                     } else {
                         sha1 = signatureFile.getManifestHash();
-                        this.mediator.info("%s certificate(s) found", certs4validSig.size());
+                        this.mediator.debug("%s certificate(s) found", certs4validSig.size());
                     }
                 }
             } catch (Exception e) {
@@ -166,7 +166,7 @@ public class BundleValidationImpl implements BundleValidation {
         } else {
             this.mediator.debug("%s %s is not signed", FILE, bundle.getLocation());
         }
-        this.mediator.info("%s %s is valid? %s", FILE, bundle.getLocation(), sha1 != null);
+        this.mediator.debug("%s %s is valid? %s", FILE, bundle.getLocation(), sha1 != null);
         this.validated.put(bundleName, new ValidBundleKey(hashcode, bundleName, sha1));
         return sha1;
     }

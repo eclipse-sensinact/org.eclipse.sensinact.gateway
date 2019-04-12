@@ -14,6 +14,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.listener.MqttConnectionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +75,17 @@ public class MqttBroker {
 
     public MqttAuthentication getAuthentication() {
         return authentication;
+    }
+
+    public void publish(String topic, String message){
+        try {
+            LOG.info("Publishing message {} on the topic {}", message,topic);
+            MqttMessage mqMessage = new MqttMessage(message.getBytes());
+            mqMessage.setQos(0);
+            client.publish(topic, mqMessage);
+        } catch (MqttException e) {
+            LOG.error("Unable to publishing message {} on the topic {}", message,topic);
+        }
     }
 
     public void subscribeToTopic(MqttTopic topic) {
