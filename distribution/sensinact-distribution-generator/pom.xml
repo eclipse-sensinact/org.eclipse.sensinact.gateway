@@ -168,7 +168,7 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.osgi</groupId>
-                                    <artifactId>org.osgi.compendium</artifactId>
+                                    <artifactId>osgi.cmpn</artifactId>
                                     <version>${osgi.compendium.version}</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>

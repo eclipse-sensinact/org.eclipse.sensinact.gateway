@@ -18,7 +18,7 @@
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-core</artifactId>
 			<version>${project.version}</version>
-            <scope>provided</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
@@ -212,7 +212,7 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.compendium</artifactId>
+									<artifactId>osgi.cmpn</artifactId>
 									<version>${osgi.compendium.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.osgi.compendium.jar</destFileName>

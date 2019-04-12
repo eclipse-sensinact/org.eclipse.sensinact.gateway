@@ -51,8 +51,8 @@
                 <configuration>
                     <checkoutDirectory>${tmp.repository}/JsonPath</checkoutDirectory>
                     <connectionType>connection</connectionType>
-                    <scmVersion>master</scmVersion>
-                    <scmVersionType>branch</scmVersionType>
+                    <scmVersionType>revision</scmVersionType>
+					<scmVersion>03c9514c5d22808821dec7de8884f65ba0eabe97</scmVersion>
                     <excludes>
                     	.git,
                     	json-provider,

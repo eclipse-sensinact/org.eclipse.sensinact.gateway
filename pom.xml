@@ -22,6 +22,7 @@
 	<name>sensiNact IoT Gateway - Gateway Project</name>
 
 	<distributionManagement>
+<!--
 		<repository>
 			<id>repo.eclipse.org</id>
 			<name>sensiNact Repository - Releases</name>
@@ -33,6 +34,7 @@
 			<url>https://repo.eclipse.org/content/repositories/sensinact-snapshots/</url>
 			<uniqueVersion>true</uniqueVersion>
 		</snapshotRepository>
+-->
 	</distributionManagement>
 
 	<repositories>
@@ -147,7 +149,7 @@
 		<felix.version>6.0.2</felix.version>
 		<logback.version>1.2.3</logback.version>
 		<felix.configadmin.version>1.9.10</felix.configadmin.version>
-		<osgi.compendium.version>5.0.0</osgi.compendium.version>
+		<osgi.compendium.version>6.0.0</osgi.compendium.version>
 		<junit.version>4.8.1</junit.version>
 		<org.apache.felix.gogo.runtime.version>1.1.0</org.apache.felix.gogo.runtime.version>
 		<org.jline.version>3.7.0</org.jline.version>
@@ -173,7 +175,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.compendium</artifactId>
+				<artifactId>osgi.cmpn</artifactId>
 				<version>${osgi.compendium.version}</version>
 			</dependency>
 			<dependency>
@@ -190,6 +192,14 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.cmpn</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+		</dependency>
     </dependencies>
 
 	<profiles>

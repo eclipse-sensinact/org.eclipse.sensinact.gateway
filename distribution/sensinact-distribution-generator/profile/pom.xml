@@ -29,6 +29,8 @@
     <properties>
         <excludeArtifactId>
             slf4j-api,
+            org.osgi.core,
+            osgi.cmpn,
             sensinact-generic,
             sensinact-core,
             sensinact-utils,
@@ -37,7 +39,7 @@
             json,
             asm-all
         </excludeArtifactId>
-        <excludeGroupId>org.osgi.core</excludeGroupId> <!-- org.apache.felix,-->
+        <excludeGroupId></excludeGroupId> <!-- org.apache.felix,-->
         <excludeTransitive>true</excludeTransitive>
     </properties>
 
