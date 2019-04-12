@@ -80,81 +80,15 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+		    <groupId>com.jayway.jsonpath</groupId>
+		    <artifactId>json-path</artifactId>
+		    <version>2.4.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
-        <plugins>			
-	        <plugin>
-	          <groupId>org.codehaus.gmaven</groupId>
-	          <artifactId>groovy-maven-plugin</artifactId>
-	          <executions>
-	            <execution>
-	              <id>search-dependency</id>
-	              <phase>validate</phase>
-	              <goals>
-	                <goal>execute</goal>
-	              </goals>
-	              <configuration>
-	                <source>
-		                String basedir = project.basedir.absolutePath.replace('\\','/');	                
-		                File dependencyFile = new File(new File(basedir).getParentFile(), "json-path/target/json-path-2.4.0.jar");	
-		                
-		                if(!dependencyFile.exists())
-		                {	              	
-		                	project.getCompileSourceRoots().clear();
-		                	project.getTestCompileSourceRoots().clear();
-		                	
-		                	
-		                	org.apache.maven.plugin.internal.DefaultPluginManager 
-		                	manager = session.getContainer().lookup(
-		                	org.apache.maven.plugin.PluginManager.class.getName());
-		                	
-		                	log.info('{}',manager);
-		                	
-		                } else
-		                {   
-		                	org.apache.maven.artifact.Artifact artifact = 
-		                	new  org.apache.maven.artifact.DefaultArtifact('com.jayway.jsonpath',
-		                	'json-path', 
-		                	 org.apache.maven.artifact.versioning.VersionRange.createFromVersionSpec('2.4.0'),
-		                	 org.apache.maven.artifact.Artifact.SCOPE_SYSTEM,
-		                	 'jar', '', 
-                             new org.apache.maven.artifact.handler.DefaultArtifactHandler('jar')
-                             {
-                             	@Override
-                             	public boolean isAddedToClasspath()
-    							{
-        							return true;
-    							}
-    							
-    							@Override
-							    public boolean isIncludesDependencies()
-							    {
-							        return true;
-							    }							    
-    							
-    							@Override
-							    public String getDirectory()
-							    {
-							        return dependencyFile.getParentFile().getAbsolutePath();
-							    }
-                             },
-                             false);                      
-                             artifact.setFile(dependencyFile);                             
-                             project.getDependencyArtifacts().add(artifact); 
-		                }
-	                </source>
-	              </configuration>
-	            </execution>
-	          </executions>
-	        </plugin>
-	        <plugin>
-	        	<artifactId>maven-compiler-plugin</artifactId>
-	        	<configuration>
-	        		<source>1.7</source>
-	        		<target>1.7</target>
-	        	</configuration>
-	        </plugin>
+        <plugins>
             <plugin>
               <groupId>org.apache.felix</groupId>
               <artifactId>maven-bundle-plugin</artifactId>
@@ -252,13 +186,13 @@
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-core.jar</destFileName>
 								</artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.sensinact.gateway</groupId>
-                                    <artifactId>sensinact-signature-validator</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
-                                    <destFileName>sensinact-signature-validator.jar</destFileName>
-                                </artifactItem>
+								<artifactItem>
+								    <groupId>org.eclipse.sensinact.gateway</groupId>
+								    <artifactId>sensinact-signature-validator</artifactId>
+								    <version>${project.version}</version>
+								    <outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+								    <destFileName>sensinact-signature-validator.jar</destFileName>
+								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-framework-extension</artifactId>
@@ -300,28 +234,21 @@
 									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>rest-access.jar</destFileName>
-								</artifactItem>
+								</artifactItem>							
 								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-									<artifactId>json-provider-minimal</artifactId>
-									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
-									<destFileName>json-provider-minimal.jar</destFileName>
+								    <groupId>org.slf4j</groupId>
+								    <artifactId>slf4j-api</artifactId>
+								    <version>1.7.25</version>
+										<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+										<destFileName>slf4j-api.jar</destFileName>
 								</artifactItem>								
-						        <artifactItem>
-						            <groupId>org.slf4j</groupId>
-						            <artifactId>slf4j-api</artifactId>
-						            <version>1.7.25</version>
-									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
-									<destFileName>slf4j-api.jar</destFileName>
-						        </artifactItem>								
-						        <artifactItem>
-						            <groupId>org.slf4j</groupId>
-						            <artifactId>slf4j-simple</artifactId>
-						            <version>1.7.16</version>
-									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
-									<destFileName>slf4j-simple.jar</destFileName>
-						        </artifactItem>
+								<artifactItem>
+								    <groupId>org.slf4j</groupId>
+								    <artifactId>slf4j-simple</artifactId>
+								    <version>1.7.16</version>
+										<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+										<destFileName>slf4j-simple.jar</destFileName>
+								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
 									<artifactId>http</artifactId>
@@ -364,55 +291,26 @@
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>light.jar</destFileName>
 								</artifactItem>
+								<artifactItem>
+								    <groupId>com.jayway.jsonpath</groupId>
+								    <artifactId>json-path</artifactId>
+								    <version>2.4.0</version>
+								    <outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+								    <destFileName>json-path.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+								    <groupId>net.minidev</groupId>
+								    <artifactId>json-smart</artifactId>
+								    <version>2.3</version>
+								    <outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+								    <destFileName>json-smart.jar</destFileName>
+								</artifactItem>
 							</artifactItems>
 						</configuration>
 					</execution>
 				</executions>
 				<extensions>true</extensions>
-			</plugin>					
-	        <plugin>
-	          <groupId>org.codehaus.gmaven</groupId>
-	          <artifactId>groovy-maven-plugin</artifactId>
-	          <executions>
-	            <execution>
-	              <id>copy-dependency</id>
-	              <phase>generate-test-resources</phase>
-	              <goals>
-	                <goal>execute</goal>
-	              </goals>
-	              <configuration>
-	                <source>
-		                String basedir = project.basedir.absolutePath.replace('\\','/');	                
-		                File dependencyFile = new File(new File(basedir).getParentFile(), "json-path/target/json-path-2.4.0.jar");	
-		                
-<!-- 		                File dir = new File(new File(basedir),'target'); -->
-<!-- 		                if(!dir.exists()) -->
-<!-- 		                { -->
-<!-- 		                	dir.mkdir();		                	 -->
-<!-- 		                } -->
-<!-- 		                dir = new File(new File(basedir),'target/felix'); -->
-<!-- 		                if(!dir.exists()) -->
-<!-- 		                { -->
-<!-- 		                	dir.mkdir();		                	 -->
-<!-- 		                } -->
-		                File dir = new File(new File(basedir),'target/felix/bundle');
-		                if(!dir.exists())
-		                {
-		                	dir.mkdirs();		                	
-		                }
-		                
-		                def newFile = new File(new File(basedir),'target/felix/bundle/json-path.jar');
-					    newFile.createNewFile(); 
-                             
-                        output = newFile.newOutputStream();
-						dependencyFile.newInputStream().eachByte(1024, 
-				         {data, lenth -> output.write(data, 0, lenth)});
-						output.close();
-	                </source>
-	              </configuration>
-	            </execution>
-	          </executions>
-	        </plugin>	        
+			</plugin>	        
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>

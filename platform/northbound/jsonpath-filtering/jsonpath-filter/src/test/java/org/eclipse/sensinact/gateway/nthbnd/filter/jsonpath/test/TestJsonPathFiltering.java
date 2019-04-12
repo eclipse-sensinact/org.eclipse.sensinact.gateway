@@ -76,8 +76,8 @@ public class TestJsonPathFiltering extends MidOSGiTest {
 
         configuration.put("felix.auto.start.2", "file:target/felix/bundle/sensinact-test-configuration.jar " + "file:target/felix/bundle/sensinact-signature-validator.jar " + "file:target/felix/bundle/sensinact-core.jar ");
         configuration.put("felix.auto.start.3", "file:target/felix/bundle/javax.servlet-api.jar " + "file:target/felix/bundle/org.apache.felix.http.api.jar " + "file:target/felix/bundle/org.apache.felix.http.jetty.jar " + "file:target/felix/bundle/http.jar " + "file:target/felix/bundle/sensinact-northbound-access.jar " + "file:target/felix/bundle/rest-access.jar");
-        configuration.put("felix.auto.install.4", "file:target/felix/bundle/json-provider-minimal.jar");
-        configuration.put("felix.auto.start.4", "file:target/felix/bundle/json-path.jar " + "file:target/felix/bundle/dynamicBundle.jar " + "file:target/felix/bundle/slider.jar " + "file:target/felix/bundle/light.jar ");
+        configuration.put("felix.auto.install.4", "file:target/felix/bundle/json-path.jar " + "file:target/felix/bundle/json-smart.jar "); 
+        configuration.put("felix.auto.start.4", "file:target/felix/bundle/dynamicBundle.jar " + "file:target/felix/bundle/slider.jar " + "file:target/felix/bundle/light.jar ");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
         configuration.put("org.osgi.service.http.port", "8898");
