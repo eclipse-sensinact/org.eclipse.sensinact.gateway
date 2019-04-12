@@ -267,14 +267,7 @@
 									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>rest-access.jar</destFileName>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-									<artifactId>json-provider-minimal</artifactId>
-									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
-									<destFileName>json-provider-minimal.jar</destFileName>
-								</artifactItem>								
+								</artifactItem>							
 						        <artifactItem>
 						            <groupId>org.slf4j</groupId>
 						            <artifactId>slf4j-api</artifactId>
