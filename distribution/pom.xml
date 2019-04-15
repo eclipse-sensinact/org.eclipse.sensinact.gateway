@@ -28,8 +28,8 @@
     <name>sensiNact IoT Gateway - Distribution</name>
 
     <modules>
-        <module>sensinact-distribution-generator</module>
-        <module>sensinact-distribution-template</module>
+        <module>generator</module>
+        <module>template</module>
     </modules>
 </project>
 
