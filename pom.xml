@@ -22,7 +22,6 @@
 	<name>sensiNact IoT Gateway - Gateway Project</name>
 
 	<distributionManagement>
-<!--
 		<repository>
 			<id>repo.eclipse.org</id>
 			<name>sensiNact Repository - Releases</name>
@@ -34,7 +33,6 @@
 			<url>https://repo.eclipse.org/content/repositories/sensinact-snapshots/</url>
 			<uniqueVersion>true</uniqueVersion>
 		</snapshotRepository>
--->
 	</distributionManagement>
 
 	<repositories>
