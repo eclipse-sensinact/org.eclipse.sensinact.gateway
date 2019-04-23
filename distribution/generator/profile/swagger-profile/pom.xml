@@ -26,6 +26,38 @@
     <name>sensiNact IoT Gateway - sensiNact Runtime (${project.artifactId} bridge dependencies)</name>
 
     <dependencies>
+        <!-- BEGIN: HTTP Dependencies -->
+        <dependency>
+            <groupId>org.eclipse.sensinact.gateway.protocol</groupId>
+            <artifactId>http</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+            <artifactId>http-tools</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
+            <artifactId>http-device</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.api</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.jetty</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <!-- END: HTTP Dependencies -->
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.tools</groupId>
             <artifactId>swagger</artifactId>

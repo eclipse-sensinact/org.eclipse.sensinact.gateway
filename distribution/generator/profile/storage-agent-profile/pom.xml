@@ -28,6 +28,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.eclipse.sensinact.gateway.protocol</groupId>
+            <artifactId>http</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
             <artifactId>storage-agent</artifactId>
             <version>${project.version}</version>
