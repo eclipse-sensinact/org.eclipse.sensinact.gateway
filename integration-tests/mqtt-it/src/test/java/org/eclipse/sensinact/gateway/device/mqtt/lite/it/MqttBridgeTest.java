@@ -9,6 +9,7 @@
  *    CEA - initial API and implementation
  */
 package org.eclipse.sensinact.gateway.device.mqtt.lite.it;
+
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.sensinact.gateway.core.Core;
@@ -23,6 +24,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
@@ -30,25 +32,55 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.sensinact.mqtt.server.MQTTException;
 import org.sensinact.mqtt.server.MQTTServerService;
+
 import javax.inject.Inject;
 import java.util.Hashtable;
 import java.util.Set;
+
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class MqttBridgeTest extends MqttTestITAbstract {
+
     @Inject
     BundleContext bc;
+
     @Inject
     Core sensinactCore;
+
     @Inject
-    MQTTServerService mqtt;
+    MQTTServerService mqttServerService;
+
+
     private Session sensinactSession;
+
+
     @Before
     public void before() {
-        sensinactSession = sensinactCore.getAnonymousSession();
+        sensinactSession=sensinactCore.getAnonymousSession();
+
+        try {
+            mqttServerService.startService("127.0.0.1","1883");
+        }catch(MQTTException e){
+            e.printStackTrace();
+        }
+
     }
+
+    @After
+    public void after(){
+        try {
+            mqttServerService.stopService("127.0.0.1:1883");
+        }catch(MQTTException e){
+            e.printStackTrace();
+        }
+    }
+
     @Test
     public void providerCreation() throws Exception {
+
         Object provider = createDevicePojo("myprovider","myservice","myresource","/myresource");
         ServiceRegistration sr=bc.registerService("org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider", provider, new Hashtable<String, Object>());
         JSONObject obj = new JSONObject(sensinactSession.getProviders().getJSON());
@@ -62,6 +94,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         MqttClient mqttClient = getMqttConnection(MQTT_HOST, MQTT_PORT);
         final String messageString1 = new Double(Math.random()).toString();
         MqttMessage message1 = new MqttMessage(messageString1.getBytes());
+        message1.setQos(0);
         mqttClient.publish("/myresource",message1 );
         final Integer maxRetries=3;
         Integer currentRetry=0;
@@ -116,6 +149,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         MqttClient mqttClient = getMqttConnection(MQTT_HOST, MQTT_PORT);
         final String messageString1 = new Double(Math.random()).toString();
         MqttMessage message1 = new MqttMessage(messageString1.getBytes());
+        message1.setQos(0);
         mqttClient.publish("/myresource",message1 );
         final RecipientCustom rtc = new RecipientCustom();
         sensinactSession.subscribe("myprovider", "myservice", "myresource", rtc, new JSONArray());
@@ -125,6 +159,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         Assert.assertEquals("Value should be updated on new message arrival, and was not the case", messageString1,value);
         final String messageString2=new Double(Math.random()).toString();
         MqttMessage message2=new MqttMessage(messageString2.getBytes());
+        message2.setQos(0);
         mqttClient.publish("/myresource",message2 );
         waitForCallbackNotification();
         String value2=sensinactSession.get(
@@ -140,17 +175,29 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         MqttClient mqttClient=getMqttConnection(MQTT_HOST, MQTT_PORT);
         final String messageString1=new Double(Math.random()).toString();
         MqttMessage message1=new MqttMessage(messageString1.getBytes());
+        message1.setQos(0);
         mqttClient.publish("/myresource",message1 );
         waitForCallbackNotification();
         Assert.assertEquals("Sensinact Core did not dispatch any notification message for the subscription", 1,rtc.getMessages().length);
         Assert.assertEquals("The notification value does not correspond to the value sent", messageString1,new JSONObject(rtc.getMessages()[0].getJSON()).getJSONObject("notification").getString("value"));
         final String messageString2=new Double(Math.random()).toString();
         MqttMessage message2=new MqttMessage(messageString2.getBytes());
+        message2.setQos(0);
         mqttClient.publish("/myresource",message2 );
         waitForCallbackNotification();
         Assert.assertEquals("Sensinact Core did not dispatch any notification message for the subscription", 1,rtc.getMessages().length);
         Assert.assertEquals("The notification value does not correspond to the value sent", messageString2,new JSONObject(rtc.getMessages()[0].getJSON()).getJSONObject("notification").getString("value"));
     }
+
+    @Override
+    @org.ops4j.pax.exam.Configuration
+    public Option[] config() {
+        return combine(super.config(),
+                options(
+                mavenBundle("org.eclipse.sensinact.integration.tests", "mqtt-it", SENSINACT_VERSION))
+                );
+    }
+
     private void waitForCallbackNotification() throws InterruptedException {
         synchronized (this){
             wait();

@@ -322,7 +322,7 @@ public class MqttBroker {
             for(MqttTopic topic:topics){
                 try {
                     LOG.info("Subscription to the topic {} done", topic.getTopic());
-                    client.subscribe(topic.getTopic(),topic.getListener());
+                    client.subscribe(topic.getTopic(),0,topic.getListener());
                 } catch (Exception e) {
                     LOG.error("Unable to subscribe to the topic {}", topic.getTopic());
                 }

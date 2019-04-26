@@ -10,9 +10,8 @@
  */
 package org.sensinact.mqtt.server.osgi;
 
-import org.eclipse.sensinact.gateway.common.annotation.Property;
-import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.sensinact.mqtt.server.MQTTException;
@@ -23,17 +22,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Hashtable;
 
-public class Activator extends AbstractActivator {
-    @Property(defaultValue = "true")
-    private Boolean autoStart;
-    @Property(defaultValue = "1883")
-    private Integer port;
+public class Activator implements BundleActivator {//extends AbstractActivator
+    private Boolean autoStart=false;
+    private Integer port=1883;
     private Logger LOG = LoggerFactory.getLogger(Activator.class);
     private MQTTServerService service;
     private ServiceRegistration sr;
 
-    public void doStart() throws Exception {
-        BundleContext bundleContext = super.mediator.getContext();
+    public void start(BundleContext bundleContext) throws Exception {
         service = new MQTTServerImpl(bundleContext);
         if (autoStart) {
             LOG.debug("Start MQTT Service autoStart enabled.");
@@ -48,13 +44,9 @@ public class Activator extends AbstractActivator {
         sr = bundleContext.registerService(MQTTServerService.class.getName(), service, new Hashtable<String, String>());
     }
 
-    public void doStop() throws Exception {
+    public void stop(BundleContext bundleContext) throws Exception {
         sr.unregister();
         service.stopServer();
     }
-
-    @Override
-    public Mediator doInstantiate(BundleContext context) {
-        return new Mediator(context);
-    }
+    
 }

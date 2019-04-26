@@ -39,6 +39,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.options.FrameworkPropertyOption;
 import org.ops4j.pax.exam.options.MavenArtifactProvisionOption;
+import org.ops4j.pax.exam.options.SystemPropertyOption;
 
 import java.util.*;
 
@@ -63,38 +64,55 @@ public abstract class MqttTestITAbstract {
         return options(
                 systemProperty("org.ops4j.pax.url.mvn.repositories").value("http://central.maven.org/maven2/@snapshots@id=ops4j-snapshotkok"),
                 mavenBundle("org.apache.felix", "org.apache.felix.framework.security", "2.4.0"),
-                mavenBundle("org.apache.felix", "org.apache.felix.gogo.runtime", "1.1.0"),
+                //mavenBundle("org.apache.felix", "org.apache.felix.gogo.runtime", "1.1.0"),
                 //mavenBundle("org.apache.felix", "org.apache.felix.gogo.shell", "0.12.0"),
-                mavenBundle("org.apache.felix", "org.apache.felix.gogo.command", "1.0.2"),
+                //mavenBundle("org.apache.felix", "org.apache.felix.gogo.command", "1.0.2"),
+                mavenBundle("org.slf4j", "slf4j-api", "1.7.25").noStart(),
+                mavenBundle("org.slf4j", "slf4j-simple", "1.7.25").noStart(),
+                mavenBundle("ch.qos.logback", "logback-classic", "1.2.3"),
                 mavenBundle("ch.qos.logback", "logback-core", "1.2.3"),
-                mavenBundle("org.slf4j", "slf4j-api", "1.7.25"),
-                mavenBundle("ch.qos.logback", "logback-classic", "1.2.3")
+                mavenBundle("org.slf4j", "osgi-over-slf4j", "1.7.25"),
+                mavenBundle("org.apache.felix", "org.apache.felix.gogo.command", "1.0.2"),
+                mavenBundle("org.apache.felix", "org.apache.felix.gogo.runtime", "1.1.0"),
+                //mavenBundle("jline", "jline", "3.7.0"),
+                mavenBundle("org.fusesource.jansi", "jansi", "1.17.1")
+                //mavenBundle("org.apache.felix", "org.apache.felix.gogo.jline", "1.1.0")
         );
     }
     protected Option[] depProfile2(){
         return options(
-                mavenBundle("org.eclipse.platform", "org.eclipse.equinox.cm", "1.1.200"),
-                mavenBundle("org.osgi", "org.osgi.compendium", "5.0.0"),
+                mavenBundle("org.osgi", "osgi.cmpn", "6.0.0").noStart(),
+                mavenBundle("org.apache.felix", "org.apache.felix.configadmin", "1.9.10"),
+                mavenBundle("org.apache.felix", "org.apache.felix.fileinstall", "3.6.4"),
+                mavenBundle("org.osgi", "org.osgi.service.event", "1.4.0"),
+                mavenBundle("org.eclipse.sensinact.gateway", "sensinact-framework-extension", SENSINACT_VERSION),
+                mavenBundle("org.apache.felix", "org.apache.felix.bundlerepository", "2.0.10"),
+                mavenBundle("org.apache.felix", "org.apache.felix.scr", "2.1.14"),
+                mavenBundle("org.osgi", "org.osgi.service.component", "1.4.0"),
+                mavenBundle("org.osgi", "org.osgi.service.remoteserviceadmin", "1.1.0"),
+                mavenBundle("org.osgi", "org.osgi.util.function", "1.1.0"),
+                mavenBundle("org.osgi", "org.osgi.util.promise", "1.1.1"),
+                mavenBundle("org.eclipse.sensinact.gateway.sthbnd.mqtt", "mqtt-utils", SENSINACT_VERSION),
+                mavenBundle("org.eclipse.paho", "org.eclipse.paho.client.mqttv3", "1.2.0"),
                 mavenBundle("org.eclipse.sensinact.gateway", "sensinact-framework-extension", SENSINACT_VERSION)
         );
     }
     protected Option[] depProfile3(){
         return options(
-                mavenBundle("org.eclipse.sensinact.gateway", "sensinact-utils", SENSINACT_VERSION),
-                mavenBundle("org.eclipse.sensinact.gateway", "sensinact-common", SENSINACT_VERSION),
-                mavenBundle("org.eclipse.sensinact.gateway", "sensinact-datastore-api", SENSINACT_VERSION),
-                mavenBundle("org.eclipse.sensinact.gateway", "sensinact-signature-validator", SENSINACT_VERSION),
+                mavenBundle("org.eclipse.sensinact.gateway", "sensinact-utils", SENSINACT_VERSION).noStart(),
+                mavenBundle("org.eclipse.sensinact.gateway", "sensinact-common", SENSINACT_VERSION).noStart(),
+                mavenBundle("org.eclipse.sensinact.gateway", "sensinact-datastore-api", SENSINACT_VERSION).noStart(),
+                mavenBundle("org.eclipse.sensinact.gateway", "sensinact-signature-validator", SENSINACT_VERSION).noStart(),
                 mavenBundle("org.eclipse.sensinact.gateway", "sensinact-security-none", SENSINACT_VERSION).noStart(),
                 mavenBundle("org.eclipse.sensinact.gateway", "sensinact-core", SENSINACT_VERSION),
                 mavenBundle("org.eclipse.sensinact.gateway", "sensinact-generic", SENSINACT_VERSION),
-                mavenBundle("org.eclipse.sensinact.gateway", "sensinact-shell", SENSINACT_VERSION),
+                //mavenBundle("org.eclipse.sensinact.gateway", "sensinact-shell", SENSINACT_VERSION),
                 mavenBundle("org.eclipse.sensinact.gateway", "sensinact-system", SENSINACT_VERSION),
                 mavenBundle("org.eclipse.sensinact.gateway.nthbnd", "sensinact-northbound-access", SENSINACT_VERSION)
         );
     }
     protected Option[] depProfile4(){
         return options(
-                mavenBundle("org.apache.felix", "org.apache.felix.ipojo", "1.12.0"),
                 wrappedBundle(mavenJar("org.apache.maven", "maven-aether-provider", "3.3.9")),
                 wrappedBundle(mavenJar("org.eclipse.aether", "aether-connector-basic", "1.1.0")),
                 wrappedBundle(mavenJar("org.eclipse.aether", "aether-spi", "1.1.0")),
@@ -134,8 +152,8 @@ public abstract class MqttTestITAbstract {
     protected Option[] depProfileMqtt(){
         return options(
                 mavenBundle("org.eclipse.paho", "org.eclipse.paho.client.mqttv3", "1.2.0"),
-                //mavenBundle("org.eclipse.paho", "org.eclipse.paho.api.mqttv3", "1.2.0"),
                 mavenBundle("org.eclipse.sensinact.gateway.tools", "mqtt-server", SENSINACT_VERSION),
+                mavenBundle("org.eclipse.sensinact.gateway.sthbnd.mqtt", "mqtt-utils", SENSINACT_VERSION).noStart(),
                 mavenBundle("org.eclipse.sensinact.gateway.sthbnd.mqtt", "mqtt-device", SENSINACT_VERSION),
                 mavenBundle("org.eclipse.sensinact.gateway.sthbnd.mqtt", "smart-topic-device", SENSINACT_VERSION)
         );
@@ -144,6 +162,7 @@ public abstract class MqttTestITAbstract {
         return options(
                 mavenBundle("org.eclipse.sensinact.gateway.protocol", "http",SENSINACT_VERSION),
                 mavenBundle("org.eclipse.sensinact.gateway.sthbnd.http", "http-device", SENSINACT_VERSION),
+                mavenBundle("org.eclipse.sensinact.gateway.nthbnd", "http-tools", SENSINACT_VERSION),
                 mavenBundle("org.apache.felix", "org.apache.felix.http.api", "2.3.2"),
                 mavenBundle("org.apache.felix", "org.apache.felix.http.jetty", "3.0.0"),
                 mavenBundle("javax.servlet", "javax.servlet-api", "3.1.0")
@@ -156,21 +175,27 @@ public abstract class MqttTestITAbstract {
     }
     protected Option[] getBundleRequiredByURLResolvers(){
         return options(OptionUtils.expand(
-                mavenBundle("org.ops4j.pax.url", "pax-url-mvn", "1.3.7"),
-                mavenBundle("org.ops4j.pax.url", "pax-url-wrap", "2.5.3"),
-                mavenBundle("org.ops4j.pax.url", "pax-url-commons", "2.5.3"),
-                mavenBundle("org.ops4j.pax.swissbox", "pax-swissbox-bnd", "1.8.2"),
-                mavenBundle("org.ops4j.pax.swissbox", "pax-swissbox-property", "1.8.2"),
-                mavenBundle("org.ops4j.pax.swissbox", "pax-swissbox-extender", "1.8.2"),
-                mavenBundle("biz.aQute.bnd", "bndlib", "2.4.0")
+                mavenBundle("org.ops4j.pax.url", "pax-url-mvn").versionAsInProject(),
+                mavenBundle("org.ops4j.pax.url", "pax-url-wrap").versionAsInProject(),
+                mavenBundle("org.ops4j.pax.url", "pax-url-commons").versionAsInProject(),
+                mavenBundle("org.ops4j.pax.swissbox", "pax-swissbox-bnd").versionAsInProject(),
+                mavenBundle("org.ops4j.pax.swissbox", "pax-swissbox-property").versionAsInProject(),
+                mavenBundle("org.ops4j.pax.swissbox", "pax-swissbox-extender").versionAsInProject(),
+                mavenBundle("biz.aQute.bnd", "bndlib").versionAsInProject()
         ));
     }
+
     protected Option[] getProperties(){
         return options(
                 new FrameworkPropertyOption("org.osgi.framework.system.packages.extra").value("com.google.common.base,javax.net.ssl,javax.smartcardio,sun.security.action,com.sun.net.httpserver,javax.mail,javax.mail.internet,javax.cache.spi,javax.cache,javax.cache.integration,javax.cache.empiry,javax.cache.expiry,javax.cache.configuration,javax.cache.processor,javax.cache.management,javax.cache.event,sun.misc")
                 ,new FrameworkPropertyOption("felix.shutdown.hook").value("false")
-                ,new FrameworkPropertyOption("org.osgi.framework.security").value("null")
+                //,new FrameworkPropertyOption("org.osgi.framework.security").value("null")
+                ,new SystemPropertyOption("org.slf4j.simpleLogger.defaultLogLevel").value("debug")
                 ,new FrameworkPropertyOption("org.osgi.service.http.port").value(SENSINACT_HTTP_PORT)
+                ,new FrameworkPropertyOption("felix.log.level").value("3")
+                ,new FrameworkPropertyOption("sensinact.log.mode").value("debug")
+                ,new FrameworkPropertyOption("sensinact.log.service.filter.property.key").value("description")
+                ,new FrameworkPropertyOption("sensinact.log.service.filter.property.value").value("An SLF4J LogService implementation.")
                 //,new FrameworkPropertyOption("org.eclipse.sensinact.gateway.security.jks.filename").value("/home/nj246216/projects/sensinact-eclipse/distribution/sensinact-distribution-generator/target/sensinact/datastore/keystore/keystore.jks")
                 //,new FrameworkPropertyOption("org.eclipse.sensinact.gateway.security.jks.filename").value("/keystore/keystore.jks")
                 //,new FrameworkPropertyOption("org.eclipse.sensinact.gateway.security.jks.password").value("sensiNact_team")
