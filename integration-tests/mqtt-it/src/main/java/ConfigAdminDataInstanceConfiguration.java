@@ -21,13 +21,25 @@ public class ConfigAdminDataInstanceConfiguration {
             Configuration configSensinact=configurationAdmin.getConfiguration("sensinact","?");
             Properties props = new Properties();
             props.put( "namespace", "sna1" );
-            props.put( "broker", "tcp://sensinact-cea.ddns.net:5269" );
+            props.put( "broker", "tcp://localhost:1883" );
             props.put( "broker.topic.prefix", "/unittests/" );
             configSensinact.setBundleLocation("?");
             configSensinact.update((Dictionary) props);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        try {
+            Configuration configSensinactMQTT=configurationAdmin.getConfiguration("mqtt.server","?");
+            Properties props = new Properties();
+            props.put( "port", "1883" );
+            props.put( "autoStart", "false" );
+            configSensinactMQTT.setBundleLocation("?");
+            configSensinactMQTT.update((Dictionary) props);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 }
