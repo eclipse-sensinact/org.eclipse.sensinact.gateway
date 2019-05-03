@@ -50,8 +50,8 @@ import static org.ops4j.pax.exam.CoreOptions.*;
 public abstract class MqttTestITAbstract {
     protected static final String SENSINACT_HTTP_PORT="8097";
     protected static final String SENSINACT_VERSION="2.0-SNAPSHOT";
-    protected static final String MQTT_HOST ="127.0.0.1";
-    protected static final Integer MQTT_PORT =1883;
+    protected static final String MQTT_HOST ="127.0.0.1";//sensinact-cea.ddns.net
+    protected static final Integer MQTT_PORT =1883;//5269
     protected static Option[] combine(Option[]...options){
         List<Option> optionsnew=new ArrayList<Option>();
         for(Option[] optionsit:options){
@@ -69,9 +69,9 @@ public abstract class MqttTestITAbstract {
                 //mavenBundle("org.apache.felix", "org.apache.felix.gogo.command", "1.0.2"),
                 mavenBundle("org.slf4j", "slf4j-api", "1.7.25").noStart(),
                 mavenBundle("org.slf4j", "slf4j-simple", "1.7.25").noStart(),
-                mavenBundle("ch.qos.logback", "logback-classic", "1.2.3"),
-                mavenBundle("ch.qos.logback", "logback-core", "1.2.3"),
-                mavenBundle("org.slf4j", "osgi-over-slf4j", "1.7.25"),
+                //mavenBundle("ch.qos.logback", "logback-classic", "1.2.3"),
+                //mavenBundle("ch.qos.logback", "logback-core", "1.2.3"),
+                //mavenBundle("org.slf4j", "osgi-over-slf4j", "1.7.25"),
                 mavenBundle("org.apache.felix", "org.apache.felix.gogo.command", "1.0.2"),
                 mavenBundle("org.apache.felix", "org.apache.felix.gogo.runtime", "1.1.0"),
                 //mavenBundle("jline", "jline", "3.7.0"),
@@ -191,6 +191,7 @@ public abstract class MqttTestITAbstract {
                 ,new FrameworkPropertyOption("felix.shutdown.hook").value("false")
                 //,new FrameworkPropertyOption("org.osgi.framework.security").value("null")
                 ,new SystemPropertyOption("org.slf4j.simpleLogger.defaultLogLevel").value("debug")
+                ,new FrameworkPropertyOption("org.slf4j.simpleLogger.defaultLogLevel").value("debug")
                 ,new FrameworkPropertyOption("org.osgi.service.http.port").value(SENSINACT_HTTP_PORT)
                 ,new FrameworkPropertyOption("felix.log.level").value("3")
                 ,new FrameworkPropertyOption("sensinact.log.mode").value("debug")
@@ -258,6 +259,7 @@ public abstract class MqttTestITAbstract {
         return broker.getClient();
     }
     protected JSONObject invokeRestAPI(String URL) throws Exception {
+        Thread.yield();
         HTTP http = new HTTP();
         String result = http.submit(String.format("http://localhost:%s/%s", SENSINACT_HTTP_PORT, URL));
         JSONObject jo = new JSONObject(result);

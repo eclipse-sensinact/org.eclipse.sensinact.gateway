@@ -17,6 +17,7 @@ import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.device.mqtt.lite.it.util.MqttTestITAbstract;
+import org.eclipse.sensinact.gateway.test.integration.mqtt.ConfigAdminDataInstanceConfiguration;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -53,16 +54,17 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     @Inject
     MQTTServerService mqttServerService;
 
+    @Inject
+    ConfigAdminDataInstanceConfiguration configAdminDataInstanceConfiguration;
 
     private Session sensinactSession;
-
 
     @Before
     public void before() {
         sensinactSession=sensinactCore.getAnonymousSession();
 
         try {
-            mqttServerService.startService("127.0.0.1","1883");
+            mqttServerService.startService(MQTT_HOST,MQTT_PORT.toString());
         }catch(MQTTException e){
             e.printStackTrace();
         }
@@ -71,11 +73,13 @@ public class MqttBridgeTest extends MqttTestITAbstract {
 
     @After
     public void after(){
+
         try {
-            mqttServerService.stopService("127.0.0.1:1883");
+            mqttServerService.stopService(String.format("%s:%s",MQTT_HOST,MQTT_PORT.toString()));
         }catch(MQTTException e){
             e.printStackTrace();
         }
+
     }
 
     @Test
@@ -83,8 +87,10 @@ public class MqttBridgeTest extends MqttTestITAbstract {
 
         Object provider = createDevicePojo("myprovider","myservice","myresource","/myresource");
         ServiceRegistration sr=bc.registerService("org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider", provider, new Hashtable<String, Object>());
+        Thread.yield();
         JSONObject obj = new JSONObject(sensinactSession.getProviders().getJSON());
         JSONArray providers = obj.getJSONArray("providers");
+        System.out.println("-->"+providers.toString());
         final Set<String> providersSet = parseJSONArrayIntoSet(providers);
         Assert.assertTrue("Provider was not created, or at least is not shown via REST api", providersSet.contains("myprovider"));
     }
@@ -94,7 +100,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         MqttClient mqttClient = getMqttConnection(MQTT_HOST, MQTT_PORT);
         final String messageString1 = new Double(Math.random()).toString();
         MqttMessage message1 = new MqttMessage(messageString1.getBytes());
-        message1.setQos(0);
+        message1.setQos(1);
         mqttClient.publish("/myresource",message1 );
         final Integer maxRetries=3;
         Integer currentRetry=0;
@@ -115,6 +121,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         Object provider = createDevicePojo("myprovider","myservice","myresource","/myresource");
         ServiceRegistration sr=bc.registerService("org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider", provider, new Hashtable<String, Object>());
         sr.unregister();
+        Thread.yield();
         JSONObject obj = new JSONObject(sensinactSession.getProviders().getJSON());
         JSONArray providers = obj.getJSONArray("providers");
         final Set<String> providersSetNo = parseJSONArrayIntoSet(providers);
@@ -123,6 +130,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     @Test
     public void serviceCreation() throws Exception {
         providerCreation();
+        Thread.yield();
         JSONObject obj = new JSONObject(sensinactSession.getServices("myprovider").getJSON());
         JSONArray services = obj.getJSONArray("services");
         final Set<String> servicesSet = parseJSONArrayIntoSet(services);
@@ -131,6 +139,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     @Test
     public void resourceCreation() throws Exception {
         serviceCreation();
+        Thread.yield();
         JSONObject obj = new JSONObject(sensinactSession.getResources("myprovider", "myservice").getJSON());
         JSONArray resources = obj.getJSONArray("resources");
         final Set<String> resourcesSet = parseJSONArrayIntoSet(resources);
@@ -139,6 +148,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
     @Test
     public void resourceValueQuery() throws Exception {
         resourceCreation();
+        Thread.yield();
         String value=sensinactSession.get("myprovider", "myservice", "myresource", "value"
         		).getResponse(String.class,"value");
         Assert.assertTrue("Initial Resource value should be empty ", value.equals(""));
@@ -162,6 +172,7 @@ public class MqttBridgeTest extends MqttTestITAbstract {
         message2.setQos(0);
         mqttClient.publish("/myresource",message2 );
         waitForCallbackNotification();
+        Thread.yield();
         String value2=sensinactSession.get(
         "myprovider", "myservice", "myresource", "value"
         ).getResponse(String.class,"value");
