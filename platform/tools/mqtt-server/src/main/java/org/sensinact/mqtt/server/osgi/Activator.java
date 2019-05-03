@@ -26,8 +26,9 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 public class Activator implements BundleActivator,SynchronousConfigurationListener {
-    private Boolean autoStart=false;
-    private Integer port=1883;
+    private final static String CONFIGURATION_PID="mqtt.server";
+    private Boolean autoStart=null;
+    private Integer port=null;
     private Logger LOG = LoggerFactory.getLogger(Activator.class);
     private MQTTServerService service;
     private ServiceRegistration sr;
@@ -36,57 +37,73 @@ public class Activator implements BundleActivator,SynchronousConfigurationListen
     public void start(final BundleContext bundleContext) throws Exception {
         this.bundleContext=bundleContext;
 
-        //ServiceReference configadminsr=bundleContext.getServiceReferences(ConfigurationAdmin.class.getCanonicalName(),null)[0];
+        bundleContext.registerService(SynchronousConfigurationListener.class.getCanonicalName(),this,new Hashtable<String,String>());
+        updateConfig();
 
-        bundleContext.registerService(ConfigurationListener.class.getCanonicalName(),this,new Hashtable<String,String>());
+        service = new MQTTServerImpl(bundleContext);
+        sr = bundleContext.registerService(MQTTServerService.class.getName(), service, new Hashtable<String, String>());
 
     }
 
-    protected void startService(BundleContext bundleContext){
-        service = new MQTTServerImpl(bundleContext);
-        if (autoStart) {
-            LOG.debug("Start MQTT Service autoStart enabled.");
+    private void publishService(){
+        if(this.autoStart){
             try {
-                LOG.info("Start MQTT Service on port {}", port);
-                service.startService(port.toString());
-                LOG.info("MQTT Service on port {} started.", port);
+                service.startService();
             } catch (MQTTException e) {
-                LOG.warn("Failed to start MQTT Service on port {}", port);
+                LOG.error("Failed to start MQTT service",e);
             }
         }
-        sr = bundleContext.registerService(MQTTServerService.class.getName(), service, new Hashtable<String, String>());
+
     }
 
+    private void updateConfig(){
+        ConfigurationAdmin configurationAdmin=bundleContext.getService(bundleContext.getServiceReference(ConfigurationAdmin.class));
+        Configuration mqttServerConfig= null;
+        try {
+            mqttServerConfig = configurationAdmin.getConfiguration(CONFIGURATION_PID,"?");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if(mqttServerConfig.getProperties()!=null){
+            Object autoStartObject=mqttServerConfig.getProperties().get("autoStart");
+            Object portObject=mqttServerConfig.getProperties().get("port");
+            if(autoStartObject!=null){
+                this.autoStart=Boolean.parseBoolean(autoStartObject.toString());
+            }
+
+            if(autoStartObject!=null){
+                this.port=Integer.parseInt(portObject.toString());
+            }
+
+            if(this.port!=null&&this.autoStart!=null){
+                publishService();
+            }
+
+        }
+    }
+
+
     public void stop(BundleContext bundleContext) throws Exception {
-        sr.unregister();
-        service.stopServer();
+        try  {
+            sr.unregister();
+        }catch (Exception e){
+            LOG.warn("Failed to stop service",e);
+        }
+
+        try  {
+            service.stopServer();
+        }catch (Exception e){
+            LOG.warn("Failed to stop service",e);
+        }
+
     }
 
     @Override
     public void configurationEvent(ConfigurationEvent configurationEvent) {
+        LOG.info("ConfigAdmin configuration pid {} received",configurationEvent.getPid());
 
-        if(configurationEvent.getPid().equals("mqtt.server")) {
-
-            try {
-
-                ConfigurationAdmin configurationAdmin=bundleContext.getService(configurationEvent.getReference());
-                Configuration confSensinact= configurationAdmin.getConfiguration("mqtt.server");;
-                final Dictionary<String, Object> prop=confSensinact.getProperties();
-
-                final Object autoStartString=confSensinact.getProperties().get("autoStart");
-                final Object portString=confSensinact.getProperties().get("port");
-
-                autoStart=Boolean.parseBoolean(autoStartString!=null?autoStartString.toString():"false");
-                port=Integer.parseInt(portString!=null?portString.toString():"1883");
-
-                if(prop!=null&&prop.get("port")!=null&&prop.get("autoStart")!=null){
-                    startService(bundleContext);
-                }
-            } catch (Exception e) {
-
-                e.printStackTrace();
-            }
-
+        if(configurationEvent.getPid().equals(CONFIGURATION_PID)) {
+            updateConfig();
         }
     }
 }
