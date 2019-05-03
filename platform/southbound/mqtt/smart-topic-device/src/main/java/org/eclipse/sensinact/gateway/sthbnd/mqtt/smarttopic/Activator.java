@@ -18,6 +18,8 @@ import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Hashtable;
 
@@ -25,6 +27,7 @@ public class Activator extends MqttActivator {
     private ServiceTracker mqttBusConfigFileServiceTracker;
     private ServiceTracker mqttBusPojoServiceTracker;
     private ServiceRegistration<ManagedServiceFactory> managedServiceFactory;
+    private static final Logger LOG= LoggerFactory.getLogger(Activator.class);
 
     @Override
     public void doStart() throws Exception {
@@ -44,7 +47,12 @@ public class Activator extends MqttActivator {
 
     @Override
     public void doStop() {
-        super.doStop();
-        mqttBusConfigFileServiceTracker.close();
+        try {
+            super.doStop();
+            mqttBusConfigFileServiceTracker.close();
+        }catch(Exception e){
+            LOG.warn("Failed to stop SmartTopic Device",e);
+        }
+
     }
 }
