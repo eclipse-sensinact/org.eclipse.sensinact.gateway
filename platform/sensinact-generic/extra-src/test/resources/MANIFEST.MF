@@ -24,4 +24,4 @@ Import-Package:  org.eclipse.sensinact.gateway.generic;version="[2,3)",org.eclip
  y.core.security;version="[2,3)",org.eclipse.sensinact.gateway.util;version="
  [2,3)",org.eclipse.sensinact.gateway.util.xml;version="[2,3)",javax.xml.pa
  rsers,org.json;version="20080701",org.osgi.framework;version="[1.7,2
- )",org.xml.sax,org.eclipse.sensinact.gateway.test
+ )",org.eclipse.sensinact.gateway.core.api

@@ -46,14 +46,12 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-@Ignore
 public class TestGenericImplementation extends MidOSGiTest {
 
     Method getDescription = null;
     Method getMethod = null;
     Method setMethod = null;
     Method actMethod = null;
-
     public TestGenericImplementation() throws Exception {
         super();
         getDescription = Describable.class.getDeclaredMethod("getDescription");
@@ -67,9 +65,11 @@ public class TestGenericImplementation extends MidOSGiTest {
      * @see MidOSGiTest#isExcluded(java.lang.String)
      */
     public boolean isExcluded(String fileName) {
-        if ("org.apache.felix.framework.security.jar".equals(fileName)) {
+
+        if ("org.apache.felix.framework.security-2.6.1.jar".equals(fileName)) {
             return true;
         }
+
         return false;
     }
 
@@ -78,9 +78,11 @@ public class TestGenericImplementation extends MidOSGiTest {
         this.initializeMoke(new File("src/test/resources/st-resource.xml").toURI().toURL(), null, false);
         ServiceReference reference = super.getBundleContext().getServiceReference(StarterService.class);
 
+        //Thread.sleep(3000);
+
         StarterService starter = (StarterService) super.getBundleContext().getService(reference);
         starter.start("SmartPlug");
-        Thread.sleep(2000);
+
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
         Core core = mid.buildProxy();
 
@@ -176,6 +178,7 @@ public class TestGenericImplementation extends MidOSGiTest {
     }
 
     @Test
+	@Ignore
     public void testFactory() throws Throwable {
         this.initializeMoke(new File("src/test/resources/test-resource.xml").toURI().toURL(), new HashMap<String, String>() {{
             this.put("pir", "VALUE");
@@ -281,6 +284,7 @@ public class TestGenericImplementation extends MidOSGiTest {
     }
 
     @Test
+	@Ignore
     public void testExtraCatalogs() throws Throwable {
     	String all = "{"+
     			   "\"providers\": ["+
@@ -592,8 +596,26 @@ public class TestGenericImplementation extends MidOSGiTest {
 
     @Override
     protected void doInit(Map configuration) {
+
+    	//shell stuff
+		//file:target/felix/bundle/1/org.apache.felix.gogo.runtime-1.1.0.jar file:target/felix/bundle/1/org.apache.felix.gogo.command-1.0.2.jar file:target/felix/bundle/1/org.apache.felix.gogo.jline-1.1.0.jar
+		//file:target/felix/bundle/1/osgi-over-slf4j-1.7.25.jar
+		//file:target/felix/bundle/1/jline-3.7.0.jar file:target/felix/bundle/1/jansi-1.17.1.jar
+        configuration.put("felix.auto.start.1","file:target/felix/bundle/1/org.osgi.service.log-1.3.0.jar file:target/felix/bundle/1/logback-classic-1.2.3.jar file:target/felix/bundle/1/logback-core-1.2.3.jar file:target/felix/bundle/1/org.apache.felix.framework.security-2.6.1.jar file:target/felix/bundle/1/slf4j-api-1.7.25.jar file:target/felix/bundle/1/slf4j-simple-1.7.25.jar");
+
+        configuration.put("felix.auto.install.2","file:target/felix/bundle/2/osgi.cmpn-6.0.0.jar");
+
+        configuration.put("felix.auto.start.2","file:target/felix/bundle/2/org.apache.felix.fileinstall-3.6.4.jar file:target/felix/bundle/2/org.apache.felix.configadmin-1.9.10.jar file:target/felix/bundle/2/org.osgi.service.event-1.4.0.jar file:target/felix/bundle/2/sensinact-framework-extension-2.0-SNAPSHOT.jar file:target/felix/bundle/2/org.apache.felix.bundlerepository-2.0.10.jar file:target/felix/bundle/2/org.apache.felix.scr-2.1.14.jar file:target/felix/bundle/2/org.osgi.service.component-1.4.0.jar file:target/felix/bundle/2/org.osgi.service.remoteserviceadmin-1.1.0.jar file:target/felix/bundle/2/org.osgi.util.function-1.1.0.jar file:target/felix/bundle/2/org.osgi.util.promise-1.1.1.jar file:target/felix/bundle/2/mqtt-utils-2.0-SNAPSHOT.jar file:target/felix/bundle/2/org.eclipse.paho.client.mqttv3-1.2.0.jar");
+        configuration.put("felix.auto.install.3","file:target/felix/bundle/3/sensinact-common-2.0-SNAPSHOT.jar file:target/felix/bundle/3/sensinact-datastore-api-2.0-SNAPSHOT.jar file:target/felix/bundle/3/sensinact-security-none-2.0-SNAPSHOT.jar file:target/felix/bundle/3/sensinact-utils-2.0-SNAPSHOT.jar");
+        //3 - file:target/felix/bundle/3/sensinact-shell-2.0-SNAPSHOT.jar
+        configuration.put("felix.auto.start.3","file:target/felix/bundle/3/sensinact-core-2.0-SNAPSHOT.jar file:target/felix/bundle/3/javax.servlet-api-3.1.0.jar file:target/felix/bundle/3/org.apache.felix.http.api-2.3.2.jar file:target/felix/bundle/3/http-2.0-SNAPSHOT.jar file:target/felix/bundle/3/org.apache.felix.http.jetty-3.0.0.jar file:target/felix/bundle/3/sensinact-northbound-access-2.0-SNAPSHOT.jar  file:target/felix/bundle/3/rest-access-2.0-SNAPSHOT.jar file:target/felix/bundle/3/sensinact-signature-validator-2.0-SNAPSHOT.jar file:target/felix/bundle/3/sensinact-system-2.0-SNAPSHOT.jar");
+		//file:target/felix/bundle/sensinact-test-2.0-SNAPSHOT.jar
+        configuration.put("felix.auto.start.4","file:target/felix/bundle/sensinact-test-configuration-2.0-SNAPSHOT.jar file:target/felix/bundle/dynamicBundle.jar");
+
+
+/*
         configuration.put("felix.auto.start.1", 
-        	"file:target/felix/bundle/org.osgi.compendium.jar " + 
+        	"file:target/felix/bundle/org.osgi.compendium.jar " +
         	"file:target/felix/bundle/org.apache.felix.configadmin.jar " + 
         	"file:target/felix/bundle/org.apache.felix.framework.security.jar ");
         configuration.put("felix.auto.install.2", 
@@ -608,9 +630,12 @@ public class TestGenericImplementation extends MidOSGiTest {
         	"file:target/felix/bundle/sensinact-core.jar ");
         configuration.put("felix.auto.install.3", 
         	"file:target/felix/bundle/dynamicBundle.jar ");
-        
+  */
         configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
+        configuration.put("org.osgi.framework.system.packages.extra","com.sun.net.httpserver,sun.security.action,javax.smartcardio,javax.net.ssl,javax.mail,javax.microedition.io,javax.mail.internet,com.google.common.base,sun.misc");
+        configuration.put("org.osgi.framework.system.capabilities","osgi.ee; osgi.ee=\"JavaSE\";version:List=\"1.0,1.1,1.2,1.3,1.3.0,1.4,1.4.0,1.5,1.5.0,1.6,1.6.0,1.7,1.8\"");
+
     }
 
     private void initializeMoke(URL resource, Map defaults, boolean startAtInitializationTime) throws Exception {
@@ -655,7 +680,9 @@ public class TestGenericImplementation extends MidOSGiTest {
         Thread.currentThread().setContextClassLoader(classloader);
         try {
             bundle.start();
-        } finally {
+        } catch(Exception e){
+        	e.printStackTrace();
+		} finally {
             Thread.currentThread().setContextClassLoader(current);
         }
         Thread.sleep(7000);

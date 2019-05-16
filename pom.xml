@@ -175,6 +175,7 @@
 				<groupId>org.osgi</groupId>
 				<artifactId>osgi.cmpn</artifactId>
 				<version>${osgi.compendium.version}</version>
+				<scope>compile</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>

@@ -8,7 +8,7 @@ Bundle-Vendor: Eclipse
 Bundle-Version: 1.2.0.20160820
 Bundle-Activator: org.eclipse.sensinact.gateway.generic.test.moke3.Activator
 Export-Package: org.eclipse.sensinact.gateway.generic.test.moke;version="2.0.0"
-Import-Package: org.eclipse.sensinact.gateway.generic;version="[2,3)",org.eclipse.
+Import-Package: org.eclipse.sensinact.gateway.core.api,org.eclipse.sensinact.gateway.generic;version="[2,3)",org.eclipse.
  sensinact.gateway.generic.packet;version="[2,3)",org.eclipse.sensinact.gateway.gen
  eric.packet.annotation;version="[2,3)",org.eclipse.sensinact.gateway.generic
  .stream;version="[2,3)",org.eclipse.sensinact.gateway.generic.uri;version="[
@@ -24,4 +24,4 @@ Import-Package: org.eclipse.sensinact.gateway.generic;version="[2,3)",org.eclips
  y.core.security;version="[2,3)",org.eclipse.sensinact.gateway.util;version="
  [2,3)",org.eclipse.sensinact.gateway.util.xml;version="[2,3)",javax.xml.pa
  rsers,org.json;version="20080701",org.osgi.framework;version="[1.7,2
- )",org.xml.sax,org.eclipse.sensinact.gateway.test
+ )",org.xml.sax

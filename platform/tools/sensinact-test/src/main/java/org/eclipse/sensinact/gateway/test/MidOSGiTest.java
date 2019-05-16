@@ -17,10 +17,7 @@ import org.junit.Before;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -97,6 +94,19 @@ public abstract class MidOSGiTest implements BundleContextProvider {
         if (!loadDir.exists()) {
             loadDir.mkdir();
         }
+
+
+
+        File sensinactConfig=new File("target/felix/load","sensinact.config");
+        Boolean configCreated=sensinactConfig.createNewFile();
+        BufferedWriter bwSensinactConfig=new BufferedWriter(new FileWriter(sensinactConfig));
+        bwSensinactConfig.write("namespace=SERVER");
+        bwSensinactConfig.newLine();
+        bwSensinactConfig.write("broker=tcp://127.0.0.1:1883");
+        bwSensinactConfig.newLine();
+        bwSensinactConfig.write("broker.topic.prefix=/");
+        bwSensinactConfig.close();
+
         cacheDir = new File(felixDir, "felix-cache");
         if (!cacheDir.exists()) {
             cacheDir.mkdir();
@@ -223,16 +233,18 @@ public abstract class MidOSGiTest implements BundleContextProvider {
     public void init() throws Exception {
         final Map configuration = new HashMap();
         if (System.getSecurityManager() == null) {
-            configuration.put("org.osgi.framework.security", "osgi");
+            //configuration.put("org.osgi.framework.security", "osgi");
         }
+        System.setProperty("gosh.args","--nointeractive");
         configuration.put("felix.cache.rootdir", felixDir.getPath());
         configuration.put("org.osgi.framework.storage", "felix-cache");
         configuration.put("org.osgi.framework.bootdelegation", "*");
-        configuration.put("org.osgi.framework.system.packages.extra", "org.eclipse.sensinact.gateway.test,org.slf4j," + "com.sun.net.httpserver," + "javax.activation," + "javax.net.ssl," + "javax.xml.parsers," + "javax.imageio," + "javax.management," + "javax.naming," + "javax.sql," + "javax.swing," + "javax.swing.border," + "javax.swing.event," + "javax.management.modelmbean," + "javax.management.remote," + "javax.security.auth," + "javax.security.cert," + "org.w3c.dom," + "org.xml.sax," + "org.xml.sax.helpers," + "sun.misc," + "javax.mail," + "javax.mail.internet," + "sun.security.action");
+        //org.eclipse.sensinact.gateway.test,
+        configuration.put("org.osgi.framework.system.packages.extra", "org.slf4j," + "com.sun.net.httpserver," + "javax.activation," + "javax.net.ssl," + "javax.xml.parsers," + "javax.imageio," + "javax.management," + "javax.naming," + "javax.sql," + "javax.swing," + "javax.swing.border," + "javax.swing.event," + "javax.management.modelmbean," + "javax.management.remote," + "javax.security.auth," + "javax.security.cert," + "org.w3c.dom," + "org.xml.sax," + "org.xml.sax.helpers," + "sun.misc," + "javax.mail," + "javax.mail.internet," + "sun.security.action");
         configuration.put("org.osgi.framework.storage.clean", "onFirstInit");
         configuration.put("felix.auto.deploy.action", "install");
-        configuration.put("felix.log.level", "4");
-        configuration.put("felix.fileinstall.log.level", "4");
+        //configuration.put("felix.log.level", "4");
+        //configuration.put("felix.fileinstall.log.level", "4");
         configuration.put("felix.fileinstall.dir", loadDir.getPath());
         configuration.put("felix.fileinstall.bundles.new.start", "true");
         configuration.put("org.osgi.framework.startlevel.beginning", "5");
@@ -266,9 +278,14 @@ public abstract class MidOSGiTest implements BundleContextProvider {
         felix = factoryClass.getDeclaredMethod(FRAMEWORK_FACTORY_INIT_FRAMEWORK, FRAMEWORK_FACTORY_INIT_FRAMEWORK_TYPES).invoke(factory, new Object[]{configuration});
         frameworkClass.getDeclaredMethod(FRAMEWORK_INIT).invoke(felix);
 
-        context = (BundleContext) bundleClass.getDeclaredMethod(BUNDLE_GET_CONTEXT).invoke(felix);
-        autoProcessorClass.getDeclaredMethod("process", new Class<?>[]{Map.class, BundleContext.class}).invoke(null, new Object[]{configuration, context});
+        Thread.sleep(2000);
+
+        context  = (BundleContext) bundleClass.getDeclaredMethod(BUNDLE_GET_CONTEXT).invoke(felix);
+
         frameworkClass.getDeclaredMethod(FRAMEWORK_START).invoke(felix);
+
+        autoProcessorClass.getDeclaredMethod("process", new Class<?>[]{Map.class, BundleContext.class}).invoke(null, new Object[]{configuration, context});
+
 
         Assert.assertTrue(bundleClass == Bundle.class);
         Assert.assertTrue(((Integer) bundleClass.getDeclaredMethod(BUNDLE_STATE).invoke(felix)) == Bundle.ACTIVE);

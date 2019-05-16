@@ -46,7 +46,7 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.main</artifactId>
-            <version>4.2.1</version>
+            <version>${felix.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

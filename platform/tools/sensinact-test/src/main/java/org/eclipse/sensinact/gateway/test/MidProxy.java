@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.test;
 
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 import java.io.IOException;
@@ -37,14 +38,38 @@ public class MidProxy<T> implements InvocationHandler {
         }
     }
 
-    public T buildProxy() throws ClassNotFoundException {
+    public T buildProxy() throws ClassNotFoundException, InvalidSyntaxException {
         String classname = this.serviceType.getCanonicalName();
         Class<?> contextualizedClazz = this.omnipotentclassloader.loadClass(classname);
-
+        if (contextualizedClazz == null ) {
+            return null;
+        }
         ServiceReference reference = null;
-
-        if (contextualizedClazz != null && (reference = this.contextProvider.getBundleContext().getServiceReference(contextualizedClazz)) != null) {
+        if((reference = this.contextProvider.getBundleContext().getServiceReference(contextualizedClazz)) != null) {
             return this.buildProxy(this.contextProvider.getBundleContext().getService(reference));
+        }
+        ServiceReference<?>[] fs = this.contextProvider.getBundleContext().getAllServiceReferences(this.serviceType.getCanonicalName(), null);
+        if(fs == null || fs.length == 0) {
+            return null;
+        }
+        for(ServiceReference<?> f:fs) {
+            Object obj = this.contextProvider.getBundleContext().getService(f);
+            if(obj == null) {
+                this.contextProvider.getBundleContext().ungetService(f);
+                continue;
+            }
+            Class<?>[] interfaces = obj.getClass().getInterfaces();
+            if(interfaces == null || interfaces.length == 0) {
+                this.contextProvider.getBundleContext().ungetService(f);
+                continue;
+            }
+            for(Class<?> itf:interfaces) {
+                if(itf != contextualizedClazz) {
+                    continue;
+                }
+                return this.buildProxy(obj);
+            }
+            this.contextProvider.getBundleContext().ungetService(f);
         }
         return null;
     }
