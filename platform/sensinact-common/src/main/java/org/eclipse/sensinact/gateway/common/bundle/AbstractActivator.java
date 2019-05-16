@@ -131,7 +131,12 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
      * stop(org.osgi.framework.BundleContext)
      */
     public void stop(BundleContext context) throws Exception {
-        doStop();
+        try{
+            doStop();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
         if (this.mediator != null) {
             this.mediator.deactivate();
         }
