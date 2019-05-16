@@ -354,18 +354,6 @@
 									<outputDirectory>${project.build.directory}/felix/bundle/</outputDirectory>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway</groupId>
-									<artifactId>sensinact-system</artifactId>
-									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-									<artifactId>rest-access</artifactId>
-									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
 									<groupId>javax.servlet</groupId>
 									<artifactId>javax.servlet-api</artifactId>
 									<version>3.1.0</version>
