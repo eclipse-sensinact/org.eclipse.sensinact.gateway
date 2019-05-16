@@ -83,7 +83,7 @@ public class MqttBroker {
             MqttMessage mqMessage = new MqttMessage(message.getBytes());
             mqMessage.setQos(0);
             client.publish(topic, mqMessage);
-        } catch (MqttException e) {
+        } catch (Exception e) {
             LOG.error("Unable to publishing message {} on the topic {}", message,topic);
         }
     }
@@ -98,7 +98,7 @@ public class MqttBroker {
             client.unsubscribe(topic.getTopic());
             topics.remove(topic);
             LOG.info("Unsubscription to the topic {} done", topic.getTopic());
-        } catch (MqttException e) {
+        } catch (Exception e) {
             LOG.error("Unable to unsubscribe from the topic {}", topic.getTopic());
         }
     }
