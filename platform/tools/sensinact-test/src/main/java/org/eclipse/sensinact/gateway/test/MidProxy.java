@@ -19,6 +19,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 public class MidProxy<T> implements InvocationHandler {
@@ -42,35 +43,35 @@ public class MidProxy<T> implements InvocationHandler {
         String classname = this.serviceType.getCanonicalName();
         Class<?> contextualizedClazz = this.omnipotentclassloader.loadClass(classname);
         if (contextualizedClazz == null ) {
-            return null;
+        	return null;
         }
         ServiceReference reference = null;
-        if((reference = this.contextProvider.getBundleContext().getServiceReference(contextualizedClazz)) != null) {
-            return this.buildProxy(this.contextProvider.getBundleContext().getService(reference));
-        }
-        ServiceReference<?>[] fs = this.contextProvider.getBundleContext().getAllServiceReferences(this.serviceType.getCanonicalName(), null);
+    	if((reference = this.contextProvider.getBundleContext().getServiceReference(contextualizedClazz)) != null) {
+    		return this.buildProxy(this.contextProvider.getBundleContext().getService(reference));
+    	} 
+		ServiceReference<?>[] fs = this.contextProvider.getBundleContext().getAllServiceReferences(this.serviceType.getCanonicalName(), null);
         if(fs == null || fs.length == 0) {
-            return null;
+        	return null;
         }
-        for(ServiceReference<?> f:fs) {
-            Object obj = this.contextProvider.getBundleContext().getService(f);
-            if(obj == null) {
-                this.contextProvider.getBundleContext().ungetService(f);
-                continue;
+    	for(ServiceReference<?> f:fs) {
+    		Object obj = this.contextProvider.getBundleContext().getService(f);
+    	    if(obj == null) {
+    	    	this.contextProvider.getBundleContext().ungetService(f);
+    	    	continue;
+    	    }
+    		Class<?>[] interfaces = obj.getClass().getInterfaces();
+    		if(interfaces == null || interfaces.length == 0) {
+    			this.contextProvider.getBundleContext().ungetService(f);
+            	continue;
             }
-            Class<?>[] interfaces = obj.getClass().getInterfaces();
-            if(interfaces == null || interfaces.length == 0) {
-                this.contextProvider.getBundleContext().ungetService(f);
-                continue;
-            }
-            for(Class<?> itf:interfaces) {
-                if(itf != contextualizedClazz) {
-                    continue;
-                }
-                return this.buildProxy(obj);
-            }
-            this.contextProvider.getBundleContext().ungetService(f);
-        }
+    		for(Class<?> itf:interfaces) {
+    			if(itf != contextualizedClazz) {
+    				continue;
+    			}
+    			return this.buildProxy(obj);
+    		}
+    		this.contextProvider.getBundleContext().ungetService(f);
+    	}
         return null;
     }
 
