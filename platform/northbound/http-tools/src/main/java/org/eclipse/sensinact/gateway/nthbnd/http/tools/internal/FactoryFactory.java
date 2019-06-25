@@ -10,30 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.http.tools.internal;
 
-import org.apache.felix.http.api.ExtHttpService;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.internal.CallbackFactory;
 import org.eclipse.sensinact.gateway.nthbnd.http.forward.internal.ForwardingFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 /**
- * A FactoryFactory is in charge of creating {@link CallbackFactory}s and
- * {@link ForwardingFactory}s to be attached to registered {@link
- * ExtHttpService}s
+ * A FactoryFactory is in charge of creating {@link CallbackFactory} and
+ * {@link ForwardingFactory}
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class FactoryFactory {
     private Mediator mediator;
-    private String appearingKey;
-    private String disappearingKey;
-    private Map<ExtHttpService, ForwardingFactory> forwarders;
-    private Map<ExtHttpService, CallbackFactory> callbacks;
+    private ForwardingFactory forwarderFactory;
+    private CallbackFactory callbackFactory;
 
     /**
      * Constructor
@@ -43,74 +33,26 @@ public class FactoryFactory {
      */
     public FactoryFactory(Mediator mediator) {
         this.mediator = mediator;
-        this.callbacks = Collections.synchronizedMap(new HashMap<ExtHttpService, CallbackFactory>());
-        this.forwarders = Collections.synchronizedMap(new HashMap<ExtHttpService, ForwardingFactory>());
     }
 
     /**
-     * Starts this ForwardingInstallerFActory and starts to observe the registration and
-     * the unregistration of the {@link ExtHttpService}s
+     *  Starts this FactoryFactory's CallbackFactory and ForwardingFactory
      */
     public void start() throws Exception {
-        appearingKey = mediator.attachOnServiceAppearing(ExtHttpService.class, null, new Executable<ExtHttpService, Void>() {
-            /**
-             * @inheritDoc
-             *
-             * @see org.eclipse.sensinact.gateway.common.execution.Executable#
-             * execute(java.lang.Object)
-             */
-            public Void execute(ExtHttpService service) {
-                CallbackFactory callback = new CallbackFactory(mediator, service);
-                FactoryFactory.this.callbacks.put(service, callback);
-                callback.start();
+        callbackFactory = new CallbackFactory(mediator);
+        callbackFactory.start();
 
-                ForwardingFactory forwarder = new ForwardingFactory(mediator, service);
-                FactoryFactory.this.forwarders.put(service, forwarder);
-                forwarder.start();
-                return null;
-            }
-        });
-        disappearingKey = mediator.attachOnServiceDisappearing(ExtHttpService.class, null, new Executable<ExtHttpService, Void>() {
-            /**
-             * @inheritDoc
-             *
-             * @see org.eclipse.sensinact.gateway.common.execution.Executable#
-             * execute(java.lang.Object)
-             */
-            public Void execute(ExtHttpService service) {
-                CallbackFactory callback = FactoryFactory.this.callbacks.remove(service);
-                if (callback != null) {
-                    callback.stop();
-                }
-                ForwardingFactory forwarder = FactoryFactory.this.forwarders.remove(service);
-                if (forwarder != null) {
-                    forwarder.stop();
-                }
-                return null;
-            }
-        });
+        forwarderFactory = new ForwardingFactory(mediator);
+        forwarderFactory.start();
     }
 
     /**
-     * Stops this ForwardingInstallerFactory and stops to observe the registration and
-     * the unregistration of the {@link ExtHttpService}s
+     * Stops this FactoryFactory's CallbackFactory and ForwardingFactory
      */
     public void stop() throws Exception {
-        mediator.detachOnServiceAppearing(ExtHttpService.class, null, appearingKey);
-        mediator.detachOnServiceDisappearing(ExtHttpService.class, null, disappearingKey);
-        synchronized (this.callbacks) {
-            Iterator<CallbackFactory> it = this.callbacks.values().iterator();
-            while (it.hasNext()) {
-                it.next().stop();
-                it.remove();
-            }
-        }
-        synchronized (this.forwarders) {
-            Iterator<ForwardingFactory> it = this.forwarders.values().iterator();
-            while (it.hasNext()) {
-                it.next().stop();
-                it.remove();
-            }
-        }
+    	callbackFactory.stop();
+    	callbackFactory = null;
+        forwarderFactory.stop();
+        forwarderFactory = null;
     }
 }

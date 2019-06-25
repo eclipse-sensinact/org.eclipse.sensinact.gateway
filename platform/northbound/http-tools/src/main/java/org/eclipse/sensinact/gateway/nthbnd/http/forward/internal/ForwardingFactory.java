@@ -10,17 +10,21 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.http.forward.internal;
 
-import org.apache.felix.http.api.ExtHttpService;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.nthbnd.http.forward.ForwardingService;
-import org.osgi.service.http.HttpContext;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.servlet.Filter;
+
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.nthbnd.http.forward.ForwardingService;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /**
  * A ForwardingFactory is in charge of creating the {@link ForwardingFilter}s attached
@@ -34,10 +38,8 @@ public class ForwardingFactory {
     private String appearingKey;
     private String disappearingKey;
 
-    private ExtHttpService extHttpService;
-    private Map<String, ForwardingFilter> filters;
+    private Map<String, ServiceRegistration> registrations;
 
-    private volatile int ranking;
     private final AtomicBoolean running;
 
     /**
@@ -45,14 +47,10 @@ public class ForwardingFactory {
      *
      * @param mediator       the {@link Mediator} allowing the ForwardingFactory
      *                       to be instantiated to interact with the OSGi host environment
-     * @param extHttpService the {@link ExtHttpService} to which the
-     *                       ForwardingFactory to be instantiated will register {@link ForwardingFilter}s
-     *                       according to the registered {@link ForwardingService}
      */
-    public ForwardingFactory(Mediator mediator, ExtHttpService extHttpService) {
+    public ForwardingFactory(Mediator mediator) {
         this.mediator = mediator;
-        this.extHttpService = extHttpService;
-        this.filters = Collections.synchronizedMap(new HashMap<String, ForwardingFilter>());
+        this.registrations = Collections.synchronizedMap(new HashMap<String, ServiceRegistration>());
         this.running = new AtomicBoolean(false);
     }
 
@@ -142,7 +140,8 @@ public class ForwardingFactory {
      *
      * @param forwardingService the {@link ForwardingService} to be attached
      */
-    public final void attach(ForwardingService forwardingService) {
+    @SuppressWarnings("unchecked")
+	public final void attach(ForwardingService forwardingService) {
         if (forwardingService == null || !this.running.get()) {
             return;
         }
@@ -154,22 +153,21 @@ public class ForwardingFactory {
         if (!endpoint.startsWith("/")) {
             endpoint = "/".concat(endpoint);
         }
-        if (filters.containsKey(endpoint)) {
+        if (registrations.containsKey(endpoint)) {
             mediator.error("A forwarding service is already registered at '%s'", endpoint);
             return;
         }
-        ForwardingFilter forwardingFilter = new ForwardingFilter(mediator, forwardingService.getUriBuilder(), forwardingService.getQueryBuilder());
-
+        ForwardingFilter forwardingFilter = new ForwardingFilter(mediator, forwardingService);
+        
         Dictionary props = forwardingService.getProperties();
-        HttpContext context = extHttpService.createDefaultHttpContext();
-        try {
-            extHttpService.registerFilter(forwardingFilter, endpoint, props, ranking++, context);
-            mediator.info("Forwarding filter '%s' registered", endpoint);
-            filters.put(endpoint, forwardingFilter);
-        } catch (Exception e) {
-            mediator.error(e);
-        }
+        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, endpoint);
+        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=*)");
+        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED, true );
+        
+	    ServiceRegistration registration = mediator.getContext().registerService(Filter.class, forwardingFilter, props);
+	    this.registrations.put(endpoint,registration);
     }
+	    
 
     /**
      * Detaches the {@link ForwardingService} passed as parameter by
@@ -182,17 +180,15 @@ public class ForwardingFactory {
             return;
         }
         String endpoint = forwardingService.getPattern();
-        ForwardingFilter forwardingFilter = filters.get(endpoint);
-        if (forwardingFilter == null) {
-            mediator.warn("The specified forwarding service '%s' was not registered", endpoint);
-            return;
-        }
-        try {
-            extHttpService.unregisterFilter(forwardingFilter);
-            mediator.info("Forwarding filter '%s' unregistered", endpoint);
-        } catch (Exception e) {
-            mediator.error(e);
-        }
-        return;
+        ServiceRegistration registration = this.registrations.get(endpoint);
+    	if(registration != null) {
+    		try {
+    			registration.unregister();
+                mediator.info("Forwarding filter '%s' unregistered", endpoint);
+    		}catch(IllegalStateException e) {
+    			//do nothing
+    		}
+    		registration = null;
+    	}
     }
 }

@@ -10,17 +10,22 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.http.callback.internal;
 
-import org.apache.felix.http.api.ExtHttpService;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
-import org.osgi.service.http.HttpContext;
-
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.servlet.Servlet;
+
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /**
  * A CallbackFactory is in charge of creating the {@link CallbackServlet}s attached
@@ -34,8 +39,7 @@ public class CallbackFactory {
     private String appearingKey;
     private String disappearingKey;
 
-    private ExtHttpService extHttpService;
-    private Map<String, CallbackServlet> callbacks;
+    private Map<String, ServiceRegistration> registrations;
 
     private final AtomicBoolean running;
 
@@ -44,14 +48,10 @@ public class CallbackFactory {
      *
      * @param mediator       the {@link Mediator} allowing the CallbackFactory
      *                       to be instantiated to interact with the OSGi host environment
-     * @param extHttpService the {@link ExtHttpService} to which the
-     *                       CallbackFactory to be instantiated will register {@link CallbackServlet}s
-     *                       according to the registered {@link CallbackService}
      */
-    public CallbackFactory(Mediator mediator, ExtHttpService extHttpService) {
+    public CallbackFactory(Mediator mediator) {
         this.mediator = mediator;
-        this.extHttpService = extHttpService;
-        this.callbacks = Collections.synchronizedMap(new HashMap<String, CallbackServlet>());
+        this.registrations = Collections.synchronizedMap(new HashMap<String, ServiceRegistration>());
         this.running = new AtomicBoolean(false);
     }
 
@@ -141,7 +141,8 @@ public class CallbackFactory {
      *
      * @param callbackService the {@link CallbackService} to be attached
      */
-    public final void attach(CallbackService callbackService) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public final void attach(CallbackService callbackService) {
         if (callbackService == null || !this.running.get()) {
             return;
         }
@@ -153,21 +154,19 @@ public class CallbackFactory {
         if (!endpoint.startsWith("/")) {
             endpoint = "/".concat(endpoint);
         }
-        if (callbacks.containsKey(endpoint)) {
+        if (registrations.containsKey(endpoint)) {
             mediator.error("A callback service is already registered at '%s'", endpoint);
             return;
         }
-        CallbackServlet CallbackServlet = new CallbackServlet(mediator, callbackService.getCallbackProcessor());
+        CallbackServlet callbackServlet = new CallbackServlet(mediator, callbackService);
 
         Dictionary props = callbackService.getProperties();
-        HttpContext context = extHttpService.createDefaultHttpContext();
-        try {
-            extHttpService.registerServlet(endpoint, CallbackServlet, props, context);
-            mediator.info("Callback servlet '%s' registered", endpoint);
-            callbacks.put(endpoint, CallbackServlet);
-        } catch (Exception e) {
-            mediator.error(e);
-        }
+        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, endpoint);
+        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
+        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.osgi.service.http)");
+        
+        ServiceRegistration registration = mediator.getContext().registerService(Servlet.class, callbackServlet, props);
+	    this.registrations.put(endpoint, registration);
     }
 
     /**
@@ -180,18 +179,16 @@ public class CallbackFactory {
         if (callbackService == null) {
             return;
         }
-        String endpoint = callbackService.getPattern();
-        CallbackServlet CallbackServlet = callbacks.remove(endpoint);
-        if (CallbackServlet == null) {
-            mediator.warn("The specified callback service '%s' was not registered", endpoint);
-            return;
-        }
-        try {
-            extHttpService.unregisterServlet(CallbackServlet);
-            mediator.info("Callback servlet '%s' unregistered", endpoint);
-        } catch (Exception e) {
-            mediator.error(e);
-        }
-        return;
+        String endpoint = callbackService.getPattern();        
+        ServiceRegistration registration = this.registrations.get(endpoint);
+    	if(registration != null) {
+    		try {
+    			registration.unregister();
+                mediator.info("Callback servlet '%s' unregistered", endpoint);
+    		}catch(IllegalStateException e) {
+    			//do nothing
+    		}
+    		registration = null;
+    	}
     }
 }

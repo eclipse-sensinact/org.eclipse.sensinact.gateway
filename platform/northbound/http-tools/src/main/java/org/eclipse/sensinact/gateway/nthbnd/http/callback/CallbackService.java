@@ -42,5 +42,5 @@ public interface CallbackService {
      *
      * @return the {@link Executable} processing the callback
      */
-    Executable<CallbackContext, Void> getCallbackProcessor();
+    void process(CallbackContext context);
 }

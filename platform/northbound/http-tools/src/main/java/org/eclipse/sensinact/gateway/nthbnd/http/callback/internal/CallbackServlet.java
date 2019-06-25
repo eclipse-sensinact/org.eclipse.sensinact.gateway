@@ -11,10 +11,13 @@
 package org.eclipse.sensinact.gateway.nthbnd.http.callback.internal;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackContext;
+import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.WriteListener;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -29,30 +32,41 @@ import java.io.IOException;
  */
 @SuppressWarnings("serial")
 @WebServlet(asyncSupported = true)
-public class CallbackServlet extends HttpServlet {
+public class CallbackServlet extends HttpServlet implements Servlet{
+		
     public static enum CALLBACK_METHOD {
         GET, POST, PUT, DELETE;
     }
 
     private Mediator mediator;
-    private Executable<CallbackContext, Void> callbackProcessor;
+
+	private CallbackService callbackService;
 
     /**
      * Constructor
      *
-     * @param mediator          the {@link Mediator} allowing the CallbackServlet
-     *                          to be instantiated to interact with the OSGi host environment
-     * @param callbackProcessor the {@link Executable} allowing the
-     *                          CallbackServlet to be instantiated to process the callback request
+     * @param mediator the {@link Mediator} allowing the CallbackServlet
+     * to be instantiated to interact with the OSGi host environment
+     * @param callbackService the {@link CallbackService} allowing the
+     * CallbackServlet to be instantiated to process the callback request
      */
-    public CallbackServlet(Mediator mediator, Executable<CallbackContext, Void> callbackProcessor) {
+    public CallbackServlet(Mediator mediator, CallbackService callbackService) {
         this.mediator = mediator;
-        this.callbackProcessor = callbackProcessor;
+        this.callbackService = callbackService;
+    }
+    
+    public void init(ServletConfig config) throws ServletException {
+    	try {
+    		super.init(config);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    		throw new ServletException(e);
+    	} 
     }
 
     private final void doCall(final CALLBACK_METHOD method, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (response.isCommitted()) {
-            return;
+    	if (response.isCommitted()) {       	
+    		return;
         }
         final AsyncContext asyncContext;
         if (request.isAsyncStarted()) {
@@ -69,8 +83,8 @@ public class CallbackServlet extends HttpServlet {
                 HttpServletRequest request = (HttpServletRequest) asyncContext.getRequest();
                 HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
                 try {
-                    if (CallbackServlet.this.callbackProcessor != null) {
-                        CallbackServlet.this.callbackProcessor.execute(context);
+                    if (CallbackServlet.this.callbackService != null) {
+                    	CallbackServlet.this.callbackService.process(context);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -91,7 +105,6 @@ public class CallbackServlet extends HttpServlet {
             public void onError(Throwable t) {
                 mediator.error(t);
             }
-
         });
     }
 

@@ -15,6 +15,8 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 
 import java.util.Dictionary;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * A ForwardingService provides the information allowing to create a
  * {@link ForwardingFilter}
@@ -22,6 +24,7 @@ import java.util.Dictionary;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface ForwardingService {
+	
     /**
      * Returns the String pattern of a {@link ForwardingFilter}
      * based on this ForwardingService
@@ -37,6 +40,15 @@ public interface ForwardingService {
      * @return the set of properties of this ForwardingService
      */
     Dictionary getProperties();
+    
+    /**
+     * Returns the {@link Executable} in charge of building the query to
+     * be forwarded by the {@link ForwardingFilter} based on this ForwardingService,
+     * and according to the {@link Request} parameterizing its execution
+     *
+     * @return the forwarding query of this ForwardingService
+     */
+	String getQuery(HttpServletRequest baseRequest);
 
     /**
      * Returns the {@link Executable} in charge of building the forwarding
@@ -45,14 +57,23 @@ public interface ForwardingService {
      *
      * @return the forwarding URI builder of this ForwardingService
      */
-    Executable<Request, String> getUriBuilder();
-
-    /**
-     * Returns the {@link Executable} in charge of building the query to
-     * be forwarded by the {@link ForwardingFilter} based on this ForwardingService,
-     * and according to the {@link Request} parameterizing its execution
+	String getUri(HttpServletRequest baseRequest);
+	
+	/**
+     * Returns the {@link Executable} in charge of building the forwarding
+     * URI of a {@link ForwardingFilter} based on this ForwardingService,
+     * according to the {@link Request} parameterizing its execution
      *
-     * @return the forwarding query of this ForwardingService
+     * @return the forwarding URI builder of this ForwardingService
      */
-    Executable<Request, String> getQueryBuilder();
+	String getParam(HttpServletRequest baseRequest);
+	
+	/**
+     * Returns the {@link Executable} in charge of building the forwarding
+     * URI of a {@link ForwardingFilter} based on this ForwardingService,
+     * according to the {@link Request} parameterizing its execution
+     *
+     * @return the forwarding URI builder of this ForwardingService
+     */
+	String getFragment(HttpServletRequest baseRequest);
 }
