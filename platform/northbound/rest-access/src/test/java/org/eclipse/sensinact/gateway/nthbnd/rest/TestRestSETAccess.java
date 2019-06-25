@@ -14,12 +14,10 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.rest.ws.test.WsServiceTestClient;
 import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-@Ignore
 public class TestRestSETAccess extends TestRestAccess {
     public TestRestSETAccess() throws Exception {
         super();
@@ -28,13 +26,14 @@ public class TestRestSETAccess extends TestRestAccess {
     @Test
     public void testHttpAccessMethodSET() throws Exception {
         Mediator mediator = new Mediator(context);
+        Thread.sleep(5000);
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/GET", null, "GET");
 
         JSONObject response = new JSONObject(simulated);
 
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/admin/location"));
-        assertTrue(response.getJSONObject("response").get("value").equals("45.19334890078532:5.706474781036377"));
+        assertTrue(response.getJSONObject("response").get("value").equals("45.2:5.7"));
         simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/SET", "{\"parameters\":[{\"name\": \"location\",\"value\": \"0.0,0.0\",\"type\": \"string\"}]}", "POST");
 
         response = new JSONObject(simulated);
@@ -50,6 +49,7 @@ public class TestRestSETAccess extends TestRestAccess {
     public void testWsAccessMethodSET() throws Exception {
         JSONObject response;
         String simulated;
+        Thread.sleep(5000);
         WsServiceTestClient client = new WsServiceTestClient();
 
         new Thread(client).start();
@@ -60,7 +60,7 @@ public class TestRestSETAccess extends TestRestAccess {
 
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/admin/location"));
-        assertTrue(response.getJSONObject("response").get("value").equals("45.19334890078532:5.706474781036377"));
+        assertTrue(response.getJSONObject("response").get("value").equals("45.2:5.7"));
         simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/slider/services/admin/resources/location/SET", "[{\"name\": \"location\",\"value\": \"0.0,0.0\",\"type\": \"string\"}]");
 
         response = new JSONObject(simulated);

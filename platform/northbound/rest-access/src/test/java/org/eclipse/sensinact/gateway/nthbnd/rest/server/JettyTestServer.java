@@ -11,7 +11,8 @@
 package org.eclipse.sensinact.gateway.nthbnd.rest.server;
 
 import java.io.IOException;
-import java.util.concurrent.Executors;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.WriteListener;
@@ -32,7 +33,6 @@ import org.eclipse.sensinact.gateway.util.IOUtils;
 
 public class JettyTestServer implements Runnable {
 
-
     private final Server server;
     private ServerConnector connector ;
 	private int port;
@@ -42,7 +42,7 @@ public class JettyTestServer implements Runnable {
     public JettyTestServer(int port) throws Exception {
 
     	this.port = port;      
-        this.server = new Server(new ExecutorThreadPool(Executors.newFixedThreadPool(10)));
+        this.server = new Server(new ExecutorThreadPool(10));
     }
 
     public boolean isStarted() {
@@ -68,9 +68,12 @@ public class JettyTestServer implements Runnable {
 
 			@Override
 			public Connection newConnection(Connector connector, EndPoint endpoint) {
-				System.out.println(connector);
-				System.out.println(endpoint);
 				return endpoint.getConnection();
+			}
+
+			@Override
+			public List<String> getProtocols() {
+				return Arrays.asList("HTTP");
 			}
         	
         });
@@ -119,14 +122,11 @@ public class JettyTestServer implements Runnable {
             } else {
                 asyncContext = request.startAsync(request, response);
             }
-            //System.out.println(request);
             response.getOutputStream().setWriteListener(new WriteListener() {
                 @Override
                 public void onWritePossible() throws IOException {
                     HttpServletRequest request = (HttpServletRequest) asyncContext.getRequest();
                     HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
-                    System.out.println("REQUEST " + request);
-                    System.out.println("RESPONSE " + response);
                      try {
                     	JettyTestServer.this.message = null;
              	        JettyTestServer.this.setAvailable(true);
@@ -139,8 +139,7 @@ public class JettyTestServer implements Runnable {
                     } finally {                        
                         if (request.isAsyncStarted()) {
                             asyncContext.complete();
-                        }  
-                        System.out.println("...GOT");
+                        }
                     }
                 }
 
@@ -160,7 +159,6 @@ public class JettyTestServer implements Runnable {
          */
         @Override
         public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        	System.out.println("POSTING ...");
         	if (response.isCommitted()) {
                 return;
             }
@@ -177,8 +175,6 @@ public class JettyTestServer implements Runnable {
                 public void onWritePossible() throws IOException {
                     HttpServletRequest request = (HttpServletRequest) asyncContext.getRequest();
                     HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
-                    System.out.println("REQUEST " + request);
-                    System.out.println("RESPONSE " + response);
                     try {
                     	JettyTestServer.this.message = null;
              	        int length = request.getContentLength();
@@ -199,8 +195,7 @@ public class JettyTestServer implements Runnable {
                     } finally {                        
                         if (request.isAsyncStarted()) {
                             asyncContext.complete();
-                        }	                   
-                        System.out.println("...POSTED");
+                        }
                     	
                     }
                 }

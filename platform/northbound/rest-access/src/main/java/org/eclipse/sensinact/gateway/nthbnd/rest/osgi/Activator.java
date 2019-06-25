@@ -10,12 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.rest.osgi;
 
-import org.apache.felix.http.api.ExtHttpService;
+import java.io.IOException;
+import java.util.Hashtable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.CorsFilter;
@@ -23,35 +31,14 @@ import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpLoginEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpRegisteringEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws.WebSocketConnectionFactory;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.service.http.HttpContext;
-
-import java.util.Dictionary;
-import java.util.Hashtable;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /**
  * @see AbstractActivator
  */
 public class Activator extends AbstractActivator<NorthboundMediator> {
-    private static final ClassLoader getJettyBundleClassLoader(BundleContext context) {
-        Bundle[] bundles = context.getBundles();
-        int index = 0;
-        int length = bundles == null ? 0 : bundles.length;
-
-        ClassLoader loader = null;
-
-        for (; index < length; index++) {
-            if ("org.apache.felix.http.jetty".equals(bundles[index].getSymbolicName())) {
-                BundleWiring wiring = bundles[index].adapt(BundleWiring.class);
-                loader = wiring.getClassLoader();
-                break;
-            }
-        }
-        return loader;
-    }
-
+    
     private CorsFilter corsFilter = null;
     private boolean corsHeader = false;
 
@@ -60,72 +47,89 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
      * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#
      * doStart()
      */
-    public void doStart() throws Exception {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public void doStart() throws Exception {
         this.corsHeader = Boolean.valueOf((String) super.mediator.getProperty(RestAccessConstants.CORS_HEADER));
 
-        mediator.attachOnServiceAppearing(ExtHttpService.class, null, new Executable<ExtHttpService, Void>() {
-            /**
-             * @inheritDoc
-             *
-             * @see org.eclipse.sensinact.gateway.common.execution.Executable#execute(java.lang.Object)
-             */
-            public Void execute(ExtHttpService service) {
-                if (Activator.this.corsHeader) {
-                    Activator.this.corsFilter = new CorsFilter(mediator);
-                    try {
-                        service.registerFilter(corsFilter, ".*", null, 0, null);
-                        Activator.this.mediator.info("CORS filter registered");
-                    } catch (Exception e) {
-                        mediator.error(e);
-                    }
+        if (Activator.this.corsHeader) {
+            Activator.this.corsFilter = new CorsFilter(mediator);                    
+            mediator.register(Activator.this.corsFilter, Filter.class, new Hashtable() {{
+                	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/");
+                	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, HttpWhiteboardConstants.DISPATCHER_ASYNC);
                 }
-                try {
-                    Dictionary<String, Object> params = new Hashtable<String, Object>();
-                    params.put(Mediator.class.getCanonicalName(), Activator.this.mediator);
-                    
-                    HttpContext context = service.createDefaultHttpContext();
-                    service.registerServlet(RestAccessConstants.LOGIN_ENDPOINT, new HttpLoginEndpoint(mediator), params, context);
-                    Activator.this.mediator.info(String.format("%s servlet registered", RestAccessConstants.LOGIN_ENDPOINT));
+            });
+        } 
+        mediator.register(new HttpLoginEndpoint(mediator), Servlet.class, new Hashtable() {{
+        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.LOGIN_ENDPOINT);
+        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
+        	}
+        });
+        Activator.this.mediator.info(String.format("%s servlet registered", RestAccessConstants.LOGIN_ENDPOINT));
+        mediator.register(new HttpRegisteringEndpoint(mediator), Servlet.class, new Hashtable() {{
+        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.REGISTERING_ENDPOINT);
+        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
+        	}
+        });
+        Activator.this.mediator.info(String.format("%s servlet registered", RestAccessConstants.REGISTERING_ENDPOINT));
+        mediator.register(new HttpEndpoint(mediator), Servlet.class, new Hashtable() {{
+        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.HTTP_ROOT);
+        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
+        	}
+        });
+        Activator.this.mediator.info(String.format("%s servlet registered", RestAccessConstants.HTTP_ROOT));
+        mediator.register(new WebSocketServlet() { 			
+				private static final long serialVersionUID = 1L;			
+				private WebSocketConnectionFactory sessionPool = new WebSocketConnectionFactory(Activator.this.mediator);
+				
+		        private final AtomicBoolean firstCall = new AtomicBoolean(true); 
+		    
+		        private final CountDownLatch initBarrier = new CountDownLatch(1); 
+				@Override
+		        public void init() throws ServletException {
+		            mediator.info("The Echo servlet has been initialized, but we delay initialization until the first request so that a Jetty Context is available");	
+		        }
+			
+		        @Override
+		        public void service(ServletRequest arg0, ServletResponse arg1) throws ServletException, IOException {
+		            if(firstCall.compareAndSet(true, false)) {
+		                try {
+		                    delayedInit();
+		                } finally {
+		                    initBarrier.countDown();
+		                }
+		            } else {
+		                try {
+		                    initBarrier.await();
+		                } catch (InterruptedException e) {
+		                    throw new ServletException("Timed out waiting for initialisation", e);
+		                }
+		            }
+				
+		            super.service(arg0, arg1);
+		        }
 
-                    params = new Hashtable<String, Object>();
-                    params.put(Mediator.class.getCanonicalName(), Activator.this.mediator);
-                    
-                    context = service.createDefaultHttpContext();
-                    service.registerServlet(RestAccessConstants.REGISTERING_ENDPOINT, new HttpRegisteringEndpoint(mediator), params, context);
-                    Activator.this.mediator.info(String.format("%s servlet registered", RestAccessConstants.REGISTERING_ENDPOINT));
-                    
-                    params = new Hashtable<String, Object>();
-                    params.put(Mediator.class.getCanonicalName(), Activator.this.mediator);
-
-                    context = service.createDefaultHttpContext();
-                    service.registerServlet(RestAccessConstants.HTTP_ROOT, new HttpEndpoint(mediator), params, context);
-                    Activator.this.mediator.info(String.format("%s servlet registered", RestAccessConstants.HTTP_ROOT));
-
-                    final WebSocketConnectionFactory sessionPool = new WebSocketConnectionFactory(Activator.this.mediator);
-                    //define the current thread classloader to avoid ServiceLoader error
-                    ClassLoader current = Thread.currentThread().getContextClassLoader();
-                    Thread.currentThread().setContextClassLoader(Activator.getJettyBundleClassLoader(mediator.getContext()));
-                    try {
-                        service.registerServlet(RestAccessConstants.WS_ROOT, new WebSocketServlet() {
-                            @Override
-                            public void configure(WebSocketServletFactory factory) {
-                                factory.getPolicy().setIdleTimeout(1000 * 3600);
-                                factory.setCreator(sessionPool);
-                            }
-
-                            ;
-                        }, params, context);
-
-                    } finally {
-                        Thread.currentThread().setContextClassLoader(current);
-                    }
-                    mediator.info(String.format("%s servlet registered", RestAccessConstants.WS_ROOT));
-                } catch (Exception e) {
-                    mediator.error(e);
-                }
-                return null;
+		        private void delayedInit() throws ServletException {
+		            Thread currentThread = Thread.currentThread();
+		            ClassLoader tccl = currentThread.getContextClassLoader();
+		            currentThread.setContextClassLoader(WebSocketServlet.class.getClassLoader());
+		            try {
+		                super.init();
+		            } finally {
+		                currentThread.setContextClassLoader(tccl);
+		            }
+		        }
+				
+				@Override
+                public void configure(WebSocketServletFactory factory) {
+                    factory.getPolicy().setIdleTimeout(1000 * 3600);
+                    factory.setCreator(sessionPool);
+                };
+            }, Servlet.class, new Hashtable() {{
+            	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.WS_ROOT);
+            	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
             }
         });
+        mediator.info(String.format("%s servlet registered", RestAccessConstants.WS_ROOT));
     }
 
     /**
@@ -134,30 +138,6 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
      * doStop()
      */
     public void doStop() throws Exception {
-        mediator.callServices(ExtHttpService.class, new Executable<ExtHttpService, Void>() {
-            @Override
-            public Void execute(ExtHttpService service) throws Exception {
-                try {
-                    service.unregister(RestAccessConstants.HTTP_ROOT);
-
-                } catch (Exception e) {
-                    mediator.error(e);
-                }
-                try {
-                    service.unregister(RestAccessConstants.WS_ROOT);
-
-                } catch (Exception e) {
-                    mediator.error(e);
-                }
-                try {
-                    service.unregisterFilter(corsFilter);
-
-                } catch (Exception e) {
-                    mediator.error(e);
-                }
-                return null;
-            }
-        });
     }
 
     /**

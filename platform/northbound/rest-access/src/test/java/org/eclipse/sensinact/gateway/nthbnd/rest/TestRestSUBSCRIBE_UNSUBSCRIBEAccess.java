@@ -20,13 +20,11 @@ import org.eclipse.sensinact.gateway.test.MidProxy;
 import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 
 import static org.junit.Assert.assertTrue;
 
-@Ignore
 public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
     private static JettyTestServer server = null;
@@ -60,6 +58,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
     @Test
     public void testHttpAccessMethodSUBSCRIBE_UNSUBSCIBE() throws Exception {
+        Thread.sleep(5000);
         Mediator mediator = new Mediator(context);
         JSONObject response;
         String simulated;
@@ -119,6 +118,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
     @Test
     public void testHttpAccessMethodConditionalSUBSCRIBE_UNSUBSCIBE() throws Exception {
+        Thread.sleep(5000);
         Mediator mediator = new Mediator(context);
         JSONObject response;
         String simulated;
@@ -180,6 +180,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
     @Test
     public void testWsAccessMethodSUBSCRIBE_UNSUBSCIBE() throws Exception {
+        Thread.sleep(5000);
         MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
         SliderSetterItf slider = sliderProxy.buildProxy();
         JSONObject response;
@@ -231,6 +232,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
     @Test
     public void testWsAccessMethodConditionalSUBSCRIBE_UNSUBSCIBE() throws Exception {
+        Thread.sleep(5000);
         MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
         SliderSetterItf slider = sliderProxy.buildProxy();
         JSONObject response;
