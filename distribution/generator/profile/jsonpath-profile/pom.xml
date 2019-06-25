@@ -27,11 +27,11 @@
     <name>sensiNact IoT Gateway - sensiNact Runtime (${project.artifactId} bridge dependencies)</name>
 
     <dependencies>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-            <artifactId>jsonpath-filter</artifactId>
-            <version>2.0-SNAPSHOT</version>
-        </dependency>
+		<dependency>
+		    <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+		    <artifactId>jsonpath-filter</artifactId>
+		    <version>2.0-SNAPSHOT</version>
+		</dependency> 
     </dependencies>
 
     <scm>
@@ -39,14 +39,14 @@
     </scm>
     
     <build>
-        <plugins>            
+        <plugins>        	
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-plugin</artifactId>
                 <version>1.9.4</version>
                 <executions>
                     <execution>
-                        <id>checkout-jpath</id>
+                    	<id>checkout-jpath</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>checkout</goal>
@@ -67,7 +67,7 @@
                         jpath-assert
                     </excludes>
                 </configuration>
-            </plugin>
+            </plugin> 
             <plugin>
                 <groupId>org.fortasoft</groupId>
                 <artifactId>gradle-maven-plugin</artifactId>
@@ -83,7 +83,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>jpath-build-libs</id>
+                    	<id>jpath-build-libs</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>invoke</goal>
@@ -92,41 +92,41 @@
                 </executions>
             </plugin>
              <plugin>
-              <groupId>org.codehaus.gmaven</groupId>
-              <artifactId>groovy-maven-plugin</artifactId>
-              <executions>
-                <execution>
-                  <id>copy-dependency</id>
+	          <groupId>org.codehaus.gmaven</groupId>
+	          <artifactId>groovy-maven-plugin</artifactId>
+	          <executions>
+	            <execution>
+	              <id>copy-dependency</id>
                   <phase>validate</phase>
-                  <goals>
-                    <goal>execute</goal>
-                  </goals>
-                  <configuration>
-                    <source>
-                        String basedir = project.basedir.absolutePath.replace('\\','/');                    
-                        File jpathDependencyFile = new File(new File(basedir),'target/JsonPath/jpath/build/libs/jpath-1.0.0.jar');
-                        File dir = new File(new File(basedir),'target/sensinact/load/json-path');
-                        if(!dir.exists()){
-                            dir.mkdirs();                            
-                        }                        
-                        def newFile = new File(dir,'jpath-1.0.0.jar');
-                        newFile.createNewFile();                             
+	              <goals>
+	                <goal>execute</goal>
+	              </goals>
+	              <configuration>
+	                <source>
+		                String basedir = project.basedir.absolutePath.replace('\\','/');	                
+		                File jpathDependencyFile = new File(new File(basedir),'target/JsonPath/jpath/build/libs/jpath-1.0.0.jar');
+		                File dir = new File(new File(basedir),'target/sensinact/load/json-path');
+		                if(!dir.exists()){
+		                	dir.mkdirs();		                	
+		                }		                
+		                def newFile = new File(dir,'jpath-1.0.0.jar');
+					    newFile.createNewFile();                             
                         output = newFile.newOutputStream();                        
-                        jpathDependencyFile.newInputStream().eachByte(1024, {data, lenth -> output.write(data, 0, lenth)});
-                        output.close();
-                        
-                        File providerDependencyFile = new File(new File(basedir),'target/JsonPath/json-provider-jsonorg/build/libs/json-provider-jsonorg-1.0.0.jar');                    
-                        newFile = new File(dir,'json-provider-jsonorg-1.0.0.jar');
-                        newFile.createNewFile();                             
+						jpathDependencyFile.newInputStream().eachByte(1024, {data, lenth -> output.write(data, 0, lenth)});
+						output.close();
+						
+						File providerDependencyFile = new File(new File(basedir),'target/JsonPath/json-provider-jsonorg/build/libs/json-provider-jsonorg-1.0.0.jar');	                
+		                newFile = new File(dir,'json-provider-jsonorg-1.0.0.jar');
+					    newFile.createNewFile();                             
                         output = newFile.newOutputStream();
-                        providerDependencyFile.newInputStream().eachByte(1024, {data, lenth -> output.write(data, 0, lenth)});
-                        output.close();
-                    </source>
-                  </configuration>
-                </execution>
-              </executions>
-            </plugin>
-            <plugin>
+						providerDependencyFile.newInputStream().eachByte(1024, {data, lenth -> output.write(data, 0, lenth)});
+						output.close();
+	                </source>
+	              </configuration>
+	            </execution>
+	          </executions>
+	        </plugin>
+	        <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <inherited>false</inherited>
                 <executions>
@@ -147,8 +147,7 @@
                     </execution>
                 </executions>
             </plugin>
-        </plugins>
-    </build>
+    	</plugins>
+    </build> 
 
 </project>
-
