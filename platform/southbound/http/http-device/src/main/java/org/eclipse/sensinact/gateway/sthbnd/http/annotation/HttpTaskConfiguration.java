@@ -13,6 +13,7 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.annotation;
 
+import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskConfigurator;
 
 import java.lang.annotation.Documented;
@@ -22,8 +23,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Documented
 @Retention(RUNTIME)
-/**
- */ public @interface HttpTaskConfiguration {
+public @interface HttpTaskConfiguration {
     public static final String DEFAULT_ACCEPT_TYPE = "text/plain";
     public static final String DEFAULT_CONTENT_TYPE = "text/plain";
     public static final String DEFAULT_SCHEME = "http";
@@ -47,9 +47,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
     boolean direct() default false;
 
-    Class<? extends HttpTaskConfigurator> content() default HttpTaskConfigurator.class;
-
     KeyValuePair[] query() default {};
 
     KeyValuePair[] headers() default {};
+
+    Class<? extends HttpTaskConfigurator> content() default HttpTaskConfigurator.class;
+    
+    Class<? extends HttpPacket> packet() default HttpPacket.class;
 }

@@ -152,6 +152,7 @@ public class TestHttpDevice extends MidOSGiTest {
 
     @Test
     public void testHttpTask() throws Throwable {
+    	Thread.sleep(5000);
         callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
 
         this.initializeMoke(new File("src/test/resources/resources.xml").toURI().toURL(), new File("./extra-src/test/resources/MANIFEST.MF"), new File("./extra-src/test/resources/meta"), new File("./target/extra-test-classes"));
@@ -178,10 +179,13 @@ public class TestHttpDevice extends MidOSGiTest {
         response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
+
+        core.close();
     }
 
     @Test
     public void testHttpTaskWithProcessingContext() throws Throwable {
+    	Thread.sleep(5000);
         callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway5").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
 
         this.initializeMoke(new File("src/test/resources/resources5.xml").toURI().toURL(), new File("./extra-src5/test/resources/MANIFEST.MF"), new File("./extra-src5/test/resources/meta"), new File("./target/extra-test-classes5"));
@@ -207,10 +211,13 @@ public class TestHttpDevice extends MidOSGiTest {
         response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
+
+        core.close();
     }
 
     @Test
     public void testHttpTaskWithServicesEnumeration() throws Throwable {
+    	Thread.sleep(5000);
         callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway4").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
 
         this.initializeMoke(new File("src/test/resources/resources4.xml").toURI().toURL(), new File("./extra-src4/test/resources/MANIFEST.MF"), new File("./extra-src4/test/resources/meta"), new File("./target/extra-test-classes4"));
@@ -236,10 +243,13 @@ public class TestHttpDevice extends MidOSGiTest {
         response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
+
+        core.close();
     }
 
     @Test
     public void testChainedHttpTask() throws Throwable {
+    	Thread.sleep(5000);
         callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway3").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
 
         this.initializeMoke(new File("src/test/resources/resources3.xml").toURI().toURL(), new File("./extra-src3/test/resources/MANIFEST.MF"), new File("./extra-src3/test/resources/meta"), new File("./target/extra-test-classes3"));
@@ -256,10 +266,13 @@ public class TestHttpDevice extends MidOSGiTest {
         SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
         JSONObject jsonObject = new JSONObject(response.getJSON());
         assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
+
+        core.close();
     }
 
     @Test
     public void testHttpDeviceReccurrent() throws Throwable {
+    	Thread.sleep(5000);
         callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway2").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
 
         this.initializeMoke(new File("src/test/resources/resources2.xml").toURI().toURL(), new File("./extra-src2/test/resources/MANIFEST.MF"), new File("./extra-src2/test/resources/meta"), new File("./target/extra-test-classes2"));
@@ -294,6 +307,8 @@ public class TestHttpDevice extends MidOSGiTest {
         response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(32, (int) jsonObject.getJSONObject("response").getInt("value"));
+        
+        core.close();
     }
 
     /**
@@ -302,21 +317,69 @@ public class TestHttpDevice extends MidOSGiTest {
      */
     @Override
     protected void doInit(Map configuration) {
-        configuration.put("felix.auto.start.1", "file:target/felix/bundle/org.osgi.compendium.jar " + "file:target/felix/bundle/org.apache.felix.configadmin.jar " + "file:target/felix/bundle/org.apache.felix.framework.security.jar ");
-
-        configuration.put("felix.auto.install.2", "file:target/felix/bundle/sensinact-utils.jar " + "file:target/felix/bundle/sensinact-common.jar " + "file:target/felix/bundle/sensinact-datastore-api.jar " + "file:target/felix/bundle/sensinact-framework-extension.jar " + "file:target/felix/bundle/sensinact-security-none.jar " + "file:target/felix/bundle/sensinact-generic.jar " + "file:target/felix/bundle/http.jar " + "file:target/felix/bundle/sensinact-northbound-access.jar ");
-
-        configuration.put("felix.auto.start.2", "file:target/felix/bundle/sensinact-test-configuration.jar " + "file:target/felix/bundle/sensinact-core.jar " + "file:target/felix/bundle/sensinact-signature-validator.jar ");
-        configuration.put("felix.auto.start.3", "file:target/felix/bundle/dynamicBundle.jar");
+       
+        configuration.put("felix.auto.start.1",  
+                "file:target/felix/bundle/org.osgi.service.component.jar "+  
+                "file:target/felix/bundle/org.osgi.service.cm.jar "+  
+                "file:target/felix/bundle/org.osgi.service.metatype.jar "+  
+                "file:target/felix/bundle/org.osgi.namespace.extender.jar "+  
+                "file:target/felix/bundle/org.osgi.util.promise.jar "+  
+                "file:target/felix/bundle/org.osgi.util.function.jar "+  
+                "file:target/felix/bundle/org.osgi.service.log.jar "  +
+                "file:target/felix/bundle/org.apache.felix.log.jar " + 
+                "file:target/felix/bundle/org.apache.felix.scr.jar " +
+        		"file:target/felix/bundle/org.apache.felix.fileinstall.jar " +
+        		"file:target/felix/bundle/org.apache.felix.configadmin.jar " + 
+        		"file:target/felix/bundle/org.apache.felix.framework.security.jar ");
+        configuration.put("felix.auto.install.2",  
+        	    "file:target/felix/bundle/org.eclipse.paho.client.mqttv3.jar " + 
+                "file:target/felix/bundle/mqtt-utils.jar " + 
+        	    "file:target/felix/bundle/sensinact-utils.jar " + 
+                "file:target/felix/bundle/sensinact-common.jar " + 
+        	    "file:target/felix/bundle/sensinact-datastore-api.jar " + 
+                "file:target/felix/bundle/sensinact-security-none.jar " + 
+                "file:target/felix/bundle/sensinact-generic.jar " + 
+                "file:target/felix/bundle/slf4j-api.jar " + 
+                "file:target/felix/bundle/slf4j-simple.jar");
+        configuration.put("felix.auto.start.2", 
+        		"file:target/felix/bundle/sensinact-signature-validator.jar " + 
+        		"file:target/felix/bundle/sensinact-core.jar ");
+        configuration.put("felix.auto.start.3", 
+        		"file:target/felix/bundle/http.jar " +
+        		"file:target/felix/bundle/sensinact-northbound-access.jar ");
+        configuration.put("felix.auto.start.4", 
+        		"file:target/felix/bundle/dynamicBundle.jar ");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
+
+        configuration.put("org.eclipse.sensinact.gateway.location.latitude", "45.2d");
+        configuration.put("org.eclipse.sensinact.gateway.location.longitude", "5.7d");
+
+        configuration.put("org.osgi.service.http.port", "8898");
+        configuration.put("org.apache.felix.http.jettyEnabled", true);
+        configuration.put("org.apache.felix.http.whiteboardEnabled", true);
+
+        try {
+        	String fileName = "sensinact.config";
+            File testFile = new File(new File("src/test/resources"), fileName);
+            URL testFileURL = testFile.toURI().toURL();
+            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
+            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
+            IOUtils.write(testCng, output);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    
     }
 
     private void initializeMoke(URL resource, File manifestFile, File... sourceDirectories) throws Exception {
         File tmpDirectory = new File("./target/felix/tmp");
-        new File(tmpDirectory, "resources.xml").delete();
-        new File(tmpDirectory, "dynamicBundle.jar").delete();
-
+        if(!tmpDirectory.exists()) {
+        	tmpDirectory.mkdir();
+        } else {
+        	new File(tmpDirectory, "resources.xml").delete();
+        	new File(tmpDirectory, "dynamicBundle.jar").delete();
+        }
         FileOutputStream output = null;
         byte[] resourcesBytes = IOUtils.read(resource.openStream());
         output = new FileOutputStream(new File(tmpDirectory, "resources.xml"));

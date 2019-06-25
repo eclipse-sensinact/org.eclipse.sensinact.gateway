@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
+import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpChildTaskConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTaskConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.KeyValuePair;
@@ -70,6 +71,8 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
     private Map<String, List<String>> query = null;
     private Map<String, List<String>> headers = null;
 
+    private Class<? extends HttpPacket> packetType = null;
+    
     private HttpTaskConfigurator contentBuilder = null;
     private HttpTaskConfigurator urlBuilder = null;
 
@@ -111,9 +114,10 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
         this.urlBuilder = urlBuilder;
         this.command = command;
         this.direct = annotation != null ? annotation.direct() : parent.direct();
+        this.packetType = annotation != null && HttpPacket.class != annotation.packet() ? annotation.packet() : parent.packet();
 
         this.query = new HashMap<String, List<String>>();
-
+        
         KeyValuePair[] queryParameters = join(annotation == null ? null : annotation.query(), parent.query());
 
         int index = 0;
@@ -146,13 +150,12 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
         }
         Class<? extends HttpTaskConfigurator> taskContentConfigurationType = annotation != null && HttpTaskConfigurator.class != annotation.content() ? annotation.content() : parent.content();
 
-        if (taskContentConfigurationType == null || taskContentConfigurationType == HttpTaskConfigurator.class) {
-            return;
-        }
-        try {
-            this.contentBuilder = taskContentConfigurationType.newInstance();
-        } catch (Exception e) {
-            this.endpoint.getMediator().error(e);
+        if (taskContentConfigurationType != null && taskContentConfigurationType != HttpTaskConfigurator.class) {
+             try {
+	            this.contentBuilder = taskContentConfigurationType.newInstance();
+	        } catch (Exception e) {
+	            this.endpoint.getMediator().error(e);
+	        }
         }
     }
 
@@ -253,6 +256,9 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
             for (; index < length; index++) {
                 task.addHeader(this.resolve(task, entry.getKey()), this.resolve(task, values.get(index)));
             }
+        }
+        if(this.packetType!=HttpPacket.class) {
+        	task.setPacketType(this.packetType);
         }
         task.setAccept(this.resolve(task, acceptType));
         task.setContentType(this.resolve(task, contentType));

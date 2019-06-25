@@ -52,6 +52,7 @@ public class SimpleHttpResponse extends HttpResponse {
 
             }
         } catch (Exception e) {
+        	e.printStackTrace();
             return new HttpPacket(this.getHeaders(), this.content);
         }
     }
