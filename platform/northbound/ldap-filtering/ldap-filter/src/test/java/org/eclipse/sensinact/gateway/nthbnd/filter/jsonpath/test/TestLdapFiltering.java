@@ -10,14 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.test;
 
+import org.eclipse.sensinact.gateway.util.IOUtils;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,12 +77,42 @@ public class TestLdapFiltering extends MidOSGiTest {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void doInit(Map configuration) {
-        configuration.put("felix.auto.start.1", "file:target/felix/bundle/org.osgi.compendium.jar " + "file:target/felix/bundle/org.apache.felix.configadmin.jar " + "file:target/felix/bundle/org.apache.felix.framework.security.jar ");
-        configuration.put("felix.auto.install.2", "file:target/felix/bundle/sensinact-utils.jar " + "file:target/felix/bundle/sensinact-common.jar " + "file:target/felix/bundle/sensinact-datastore-api.jar " + "file:target/felix/bundle/sensinact-framework-extension.jar " + "file:target/felix/bundle/sensinact-security-none.jar " + "file:target/felix/bundle/sensinact-generic.jar " + "file:target/felix/bundle/slf4j-api.jar " + "file:target/felix/bundle/slf4j-simple.jar");
-
-        configuration.put("felix.auto.start.2", "file:target/felix/bundle/sensinact-test-configuration.jar " + "file:target/felix/bundle/sensinact-signature-validator.jar " + "file:target/felix/bundle/sensinact-core.jar ");
-        configuration.put("felix.auto.start.3", "file:target/felix/bundle/javax.servlet-api.jar " + "file:target/felix/bundle/org.apache.felix.http.api.jar " + "file:target/felix/bundle/org.apache.felix.http.jetty.jar " + "file:target/felix/bundle/http.jar " + "file:target/felix/bundle/sensinact-northbound-access.jar " + "file:target/felix/bundle/rest-access.jar");
-        configuration.put("felix.auto.start.4", "file:target/felix/bundle/dynamicBundle.jar " + "file:target/felix/bundle/slider.jar " + "file:target/felix/bundle/light.jar ");
+        configuration.put("felix.auto.start.1",  
+                "file:target/felix/bundle/org.osgi.service.component.jar "+  
+                "file:target/felix/bundle/org.osgi.service.cm.jar "+  
+                "file:target/felix/bundle/org.osgi.service.metatype.jar "+  
+                "file:target/felix/bundle/org.osgi.namespace.extender.jar "+  
+                "file:target/felix/bundle/org.osgi.util.promise.jar "+  
+                "file:target/felix/bundle/org.osgi.util.function.jar "+  
+                "file:target/felix/bundle/org.osgi.service.log.jar "  +
+                "file:target/felix/bundle/org.apache.felix.log.jar " + 
+                "file:target/felix/bundle/org.apache.felix.scr.jar " +
+        		"file:target/felix/bundle/org.apache.felix.fileinstall.jar " +
+        		"file:target/felix/bundle/org.apache.felix.configadmin.jar " + 
+        		"file:target/felix/bundle/org.apache.felix.framework.security.jar ");
+        configuration.put("felix.auto.install.2",  
+        	    "file:target/felix/bundle/org.eclipse.paho.client.mqttv3.jar " + 
+                "file:target/felix/bundle/mqtt-utils.jar " + 
+        	    "file:target/felix/bundle/sensinact-utils.jar " + 
+                "file:target/felix/bundle/sensinact-common.jar " + 
+        	    "file:target/felix/bundle/sensinact-datastore-api.jar " + 
+                "file:target/felix/bundle/sensinact-security-none.jar " + 
+                "file:target/felix/bundle/sensinact-generic.jar " + 
+                "file:target/felix/bundle/slf4j-api.jar " + 
+                "file:target/felix/bundle/slf4j-simple.jar");
+        configuration.put("felix.auto.start.2", 
+        		"file:target/felix/bundle/sensinact-signature-validator.jar " + 
+        		"file:target/felix/bundle/sensinact-core.jar ");
+        configuration.put("felix.auto.start.3", 
+        		"file:target/felix/bundle/org.apache.felix.http.servlet-api.jar " + 
+                "file:target/felix/bundle/org.apache.felix.http.jetty.jar " + 
+        		"file:target/felix/bundle/http.jar " +
+        		"file:target/felix/bundle/sensinact-northbound-access.jar " + 
+                "file:target/felix/bundle/rest-access.jar");
+        configuration.put("felix.auto.start.4", 
+        		"file:target/felix/bundle/dynamicBundle.jar " + 
+                "file:target/felix/bundle/slider.jar " + 
+        		"file:target/felix/bundle/light.jar ");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
 
@@ -86,14 +120,24 @@ public class TestLdapFiltering extends MidOSGiTest {
         configuration.put("org.eclipse.sensinact.gateway.location.longitude", "5.7d");
 
         configuration.put("org.osgi.service.http.port", "8898");
-        configuration.put("org.apache.felix.http.jettyEnabled", "true");
-        configuration.put("org.apache.felix.http.whiteboardEnabled", "true");
-        configuration.put("felix.log.level", "4");
+        configuration.put("org.apache.felix.http.jettyEnabled", true);
+        configuration.put("org.apache.felix.http.whiteboardEnabled", true);
+
+        try {
+        	String fileName = "sensinact.config";
+            File testFile = new File(new File("src/test/resources"), fileName);
+            URL testFileURL = testFile.toURI().toURL();
+            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
+            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
+            IOUtils.write(testCng, output);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
-    @Ignore
     public void testLdapFilter() throws Exception {
+    	Thread.sleep(5000);
         File tmpDirectory = new File("./target/felix/tmp");
 
         new File(tmpDirectory, "props.xml").delete();

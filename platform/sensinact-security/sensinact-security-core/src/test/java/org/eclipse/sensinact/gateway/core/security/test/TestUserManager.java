@@ -32,6 +32,7 @@ import org.eclipse.sensinact.gateway.util.CryptoUtils;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -223,6 +224,7 @@ public class TestUserManager extends MidOSGiTest {
 		configuration.put("org.apache.felix.http.enable","true");
 	}
 
+	@Ignore
 	@Test
 	public void testUserManager() throws Exception {
 		this.initializeMoke(

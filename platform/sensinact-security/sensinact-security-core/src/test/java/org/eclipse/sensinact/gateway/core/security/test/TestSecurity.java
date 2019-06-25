@@ -27,6 +27,7 @@ import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import org.eclipse.sensinact.gateway.common.primitive.Describable;
 import org.eclipse.sensinact.gateway.test.MidOSGiTest;
@@ -127,6 +128,7 @@ public class TestSecurity extends MidOSGiTest {
 				+ "file:target/felix/bundle/fan.jar " + "file:target/felix/bundle/button.jar ");
 	}
 
+	@Ignore
 	@Test
 	public void testSecurityAccessInitialization() throws Throwable {
 		MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);

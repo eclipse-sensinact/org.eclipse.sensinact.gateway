@@ -11,6 +11,8 @@
 package org.eclipse.sensinact.gateway.agent.storage.internal;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.DefaultErrorHandler;
+import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.LocationResource;
 import org.eclipse.sensinact.gateway.core.Resource;
@@ -46,6 +48,7 @@ public class StorageAgent extends AbstractMidAgentCallback {
     public StorageAgent(String login, String password, String broker, Mediator mediator) throws IOException {
         super();
         this.storageConnection = new StorageConnection(mediator, broker, login, password);
+        super.setErrorHandler(new DefaultErrorHandler(ErrorHandler.Policy.LOG|ErrorHandler.Policy.IGNORE));
     }
 
     /**

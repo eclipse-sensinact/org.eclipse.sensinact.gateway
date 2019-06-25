@@ -55,8 +55,11 @@ public class MailAccountCallbackMoke implements CallbackService{
 	}
 
 	@Override
-	public Executable<CallbackContext, Void> getCallbackProcessor() {
-		return this.processor;
+	public void process(CallbackContext context) {
+		try {
+			this.processor.execute(context);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
-
 }

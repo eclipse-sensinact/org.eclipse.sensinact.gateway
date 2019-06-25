@@ -80,10 +80,6 @@ public class LdapFiltering implements Filtering {
         if (ldapFilter.endsWith("'")) {
             ldapFilter = ldapFilter.substring(0, ldapFilter.length() - 1);
         }
-
-//		System.out.println("*************************");
-//		System.out.println(ldapFilter);
-//		System.out.println("*************************");
         return ldapFilter;
     }
 }

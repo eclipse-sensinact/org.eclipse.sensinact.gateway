@@ -10,23 +10,25 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.test;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.ws.test.WsServiceTestClient;
 import org.eclipse.sensinact.gateway.test.MidOSGiTest;
+import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.Map;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@Ignore
 public class TestJsonPathFiltering extends MidOSGiTest {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
@@ -71,25 +73,72 @@ public class TestJsonPathFiltering extends MidOSGiTest {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void doInit(Map configuration) {
-        configuration.put("felix.auto.start.1", "file:target/felix/bundle/org.osgi.compendium.jar " + "file:target/felix/bundle/org.apache.felix.configadmin.jar " + "file:target/felix/bundle/org.apache.felix.framework.security.jar ");
-        configuration.put("felix.auto.install.2", "file:target/felix/bundle/sensinact-utils.jar " + "file:target/felix/bundle/sensinact-common.jar " + "file:target/felix/bundle/sensinact-datastore-api.jar " + "file:target/felix/bundle/sensinact-framework-extension.jar " + "file:target/felix/bundle/sensinact-security-none.jar " + "file:target/felix/bundle/sensinact-generic.jar " + "file:target/felix/bundle/slf4j-api.jar " + "file:target/felix/bundle/slf4j-simple.jar");
-
-        configuration.put("felix.auto.start.2", "file:target/felix/bundle/sensinact-test-configuration.jar " + "file:target/felix/bundle/sensinact-signature-validator.jar " + "file:target/felix/bundle/sensinact-core.jar ");
-        configuration.put("felix.auto.start.3", "file:target/felix/bundle/javax.servlet-api.jar " + "file:target/felix/bundle/org.apache.felix.http.api.jar " + "file:target/felix/bundle/org.apache.felix.http.jetty.jar " + "file:target/felix/bundle/http.jar " + "file:target/felix/bundle/sensinact-northbound-access.jar " + "file:target/felix/bundle/rest-access.jar");
-        configuration.put("felix.auto.install.4", "file:target/felix/bundle/json-path.jar " + "file:target/felix/bundle/json-smart.jar "); 
-        configuration.put("felix.auto.start.4", "file:target/felix/bundle/dynamicBundle.jar " + "file:target/felix/bundle/slider.jar " + "file:target/felix/bundle/light.jar ");
+        configuration.put("felix.auto.start.1",  
+                "file:target/felix/bundle/org.osgi.service.component.jar "+  
+                "file:target/felix/bundle/org.osgi.service.cm.jar "+  
+                "file:target/felix/bundle/org.osgi.service.metatype.jar "+  
+                "file:target/felix/bundle/org.osgi.namespace.extender.jar "+  
+                "file:target/felix/bundle/org.osgi.util.promise.jar "+  
+                "file:target/felix/bundle/org.osgi.util.function.jar "+  
+                "file:target/felix/bundle/org.osgi.service.log.jar "  +
+                "file:target/felix/bundle/org.apache.felix.log.jar " + 
+                "file:target/felix/bundle/org.apache.felix.scr.jar " +
+        		"file:target/felix/bundle/org.apache.felix.fileinstall.jar " +
+        		"file:target/felix/bundle/org.apache.felix.configadmin.jar " + 
+        		"file:target/felix/bundle/org.apache.felix.framework.security.jar ");
+        configuration.put("felix.auto.install.2",  
+        	    "file:target/felix/bundle/org.eclipse.paho.client.mqttv3.jar " + 
+                "file:target/felix/bundle/mqtt-utils.jar " + 
+        	    "file:target/felix/bundle/sensinact-utils.jar " + 
+                "file:target/felix/bundle/sensinact-common.jar " + 
+        	    "file:target/felix/bundle/sensinact-datastore-api.jar " + 
+                "file:target/felix/bundle/sensinact-security-none.jar " + 
+                "file:target/felix/bundle/sensinact-generic.jar " + 
+                "file:target/felix/bundle/slf4j-api.jar " + 
+                "file:target/felix/bundle/slf4j-simple.jar");
+        configuration.put("felix.auto.start.2", 
+        		"file:target/felix/bundle/sensinact-signature-validator.jar " + 
+        		"file:target/felix/bundle/sensinact-core.jar ");
+        configuration.put("felix.auto.start.3", 
+        		"file:target/felix/bundle/org.apache.felix.http.servlet-api.jar " + 
+                "file:target/felix/bundle/org.apache.felix.http.jetty.jar " + 
+        		"file:target/felix/bundle/http.jar " +
+        		"file:target/felix/bundle/sensinact-northbound-access.jar " + 
+                "file:target/felix/bundle/rest-access.jar");
+        configuration.put("felix.auto.start.4",
+                "file:target/felix/bundle/slider.jar " + 
+        		"file:target/felix/bundle/light.jar " +
+                "file:target/felix/bundle/jpath.jar " + 
+        		"file:target/felix/bundle/json-provider-jsonorg.jar " +
+        		"file:target/felix/bundle/dynamicBundle.jar ");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
+
+        configuration.put("org.eclipse.sensinact.gateway.location.latitude", "45.2d");
+        configuration.put("org.eclipse.sensinact.gateway.location.longitude", "5.7d");
+
         configuration.put("org.osgi.service.http.port", "8898");
-        configuration.put("org.apache.felix.http.jettyEnabled", "true");
-        configuration.put("org.apache.felix.http.whiteboardEnabled", "true");
+        configuration.put("org.apache.felix.http.jettyEnabled", true);
+        configuration.put("org.apache.felix.http.whiteboardEnabled", true);
+
+        try {
+        	String fileName = "sensinact.config";
+            File testFile = new File(new File("src/test/resources"), fileName);
+            URL testFileURL = testFile.toURI().toURL();
+            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
+            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
+            IOUtils.write(testCng, output);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     public void testHttpFiltered() throws Exception {
+    	Thread.sleep(5000);
         Mediator mediator = new Mediator(context);
         String simulated3 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/jsonpath:sensinact?jsonpath=$.[?(@.name=='slider')]", null, "GET");
-        JSONObject response = new JSONObject("{\"filters\":[{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"}]," + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," + "{\"name\":\"cursor\",\"resources\":" + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" + "}]" + ",\"location\":\"45.19334890078532:5.706474781036377\"}]}");
+        JSONObject response = new JSONObject("{\"filters\":[{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"}]," + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," + "{\"name\":\"cursor\",\"resources\":" + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" + "}]" + ",\"location\":\"45.2:5.7\"}]}");
         JSONAssert.assertEquals(response, new JSONObject(simulated3), false);
 
         String simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/providers", null, "GET");
@@ -103,6 +152,7 @@ public class TestJsonPathFiltering extends MidOSGiTest {
 
     @Test
     public void testWsFiltered() throws Exception {
+    	Thread.sleep(5000);
         JSONObject response;
         WsServiceTestClient client = new WsServiceTestClient();
 
@@ -111,7 +161,7 @@ public class TestJsonPathFiltering extends MidOSGiTest {
 
         //System.out.println(simulated3);
 
-        response = new JSONObject("{\"filters\":[{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"}]," + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," + "{\"name\":\"cursor\"," + "\"resources\":" + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]}]" + ",\"location\":\"45.19334890078532:5.706474781036377\"}]}");
+        response = new JSONObject("{\"filters\":[{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"}]," + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," + "{\"name\":\"cursor\"," + "\"resources\":" + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]}]" + ",\"location\":\"45.2:5.7\"}]}");
         JSONObject obj = new JSONObject(simulated3);
         JSONAssert.assertEquals(response, obj, false);
 

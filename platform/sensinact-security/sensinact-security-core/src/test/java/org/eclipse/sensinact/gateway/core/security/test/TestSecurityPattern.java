@@ -32,6 +32,7 @@ import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.eclipse.sensinact.gateway.test.MidProxy;
 import org.junit.Test;
+import org.junit.Ignore;
 
 /**
  *
@@ -134,6 +135,7 @@ public class TestSecurityPattern extends MidOSGiTest {
 		configuration.put("felix.log.level", "4");
 	}
 
+	@Ignore
 	@Test
 	public void testSecurityAccessWithPattern() throws Throwable {
 		// slider[0-9]{2} - authenticated access level
