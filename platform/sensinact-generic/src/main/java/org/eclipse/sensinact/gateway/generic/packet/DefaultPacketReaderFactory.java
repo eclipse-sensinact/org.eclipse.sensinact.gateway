@@ -64,7 +64,6 @@ public class DefaultPacketReaderFactory implements PacketReaderFactory {
         int index = 0;
         int length = packetReaders == null ? 0 : packetReaders.size();
         PacketReader<P> packetReader = null;
-
         for (; index < length; index++) {
             try {
                 Class<? extends PacketReader<P>> packetReaderType = (Class<? extends PacketReader<P>>) packetReaders.get(index);

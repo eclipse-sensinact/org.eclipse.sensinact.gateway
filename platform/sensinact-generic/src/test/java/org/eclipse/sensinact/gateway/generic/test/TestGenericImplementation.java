@@ -28,7 +28,6 @@ import org.eclipse.sensinact.gateway.test.StarterService;
 import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -52,6 +51,7 @@ public class TestGenericImplementation extends MidOSGiTest {
     Method getMethod = null;
     Method setMethod = null;
     Method actMethod = null;
+
     public TestGenericImplementation() throws Exception {
         super();
         getDescription = Describable.class.getDeclaredMethod("getDescription");
@@ -65,11 +65,9 @@ public class TestGenericImplementation extends MidOSGiTest {
      * @see MidOSGiTest#isExcluded(java.lang.String)
      */
     public boolean isExcluded(String fileName) {
-
-        if ("org.apache.felix.framework.security-2.6.1.jar".equals(fileName)) {
+        if ("org.apache.felix.framework.security.jar".equals(fileName)) {
             return true;
         }
-
         return false;
     }
 
@@ -78,11 +76,9 @@ public class TestGenericImplementation extends MidOSGiTest {
         this.initializeMoke(new File("src/test/resources/st-resource.xml").toURI().toURL(), null, false);
         ServiceReference reference = super.getBundleContext().getServiceReference(StarterService.class);
 
-        //Thread.sleep(3000);
-
         StarterService starter = (StarterService) super.getBundleContext().getService(reference);
         starter.start("SmartPlug");
-
+        Thread.sleep(2000);
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
         Core core = mid.buildProxy();
 
@@ -126,6 +122,7 @@ public class TestGenericImplementation extends MidOSGiTest {
         jsonObject = new JSONObject(response.getJSON());
 
         assertEquals(0.2f, (float) jsonObject.getJSONObject("response").getDouble("value"), 0.0f);
+        core.close();
     }
 
     @Test
@@ -156,18 +153,19 @@ public class TestGenericImplementation extends MidOSGiTest {
         response = (SnaMessage) midTemperature.toOSGi(setMethod, new Object[]{DataResource.VALUE, 45.1f});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(520, (int) jsonObject.getInt("statusCode"));
+        core.close();
     }
 
     @Test
     public void testResourceModel() throws Throwable {
         this.initializeMoke(new File("src/test/resources/genova-resource.xml").toURI().toURL(), null, false);
+        Thread.sleep(5000);
+        
         ServiceReference reference = super.getBundleContext().getServiceReference(StarterService.class);
-
         StarterService starter = (StarterService) super.getBundleContext().getService(reference);
-
-        starter.start("weather_5");
-        Thread.sleep(4000);
-
+        starter.start("weather_5");        
+        Thread.sleep(2000);
+        
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
         Core core = mid.buildProxy();
         Session session = core.getAnonymousSession();
@@ -175,10 +173,10 @@ public class TestGenericImplementation extends MidOSGiTest {
         Service service = provider.getService("admin");
         Description description = service.getDescription();
         JSONObject jsonObject = new JSONObject(description.getJSON());
+        core.close();
     }
 
     @Test
-	@Ignore
     public void testFactory() throws Throwable {
         this.initializeMoke(new File("src/test/resources/test-resource.xml").toURI().toURL(), new HashMap<String, String>() {{
             this.put("pir", "VALUE");
@@ -186,11 +184,14 @@ public class TestGenericImplementation extends MidOSGiTest {
             this.put("gpr", "VALUE");
 
         }}, true);
-
+        Thread.sleep(5000);
+        
         ServiceReference reference = super.getBundleContext().getServiceReference(ProcessorService.class);
         ProcessorService processor = (ProcessorService) super.getBundleContext().getService(reference);
         processor.process("device1");
+        
         Thread.sleep(2000);
+        
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
         Core core = mid.buildProxy();
         Session session = core.getAnonymousSession();
@@ -215,18 +216,22 @@ public class TestGenericImplementation extends MidOSGiTest {
             }
         }
         JSONAssert.assertEquals(new JSONObject("{\"name\":\"value\",\"type\":\"float\",\"metadata\":" + "[{\"name\":\"modifiable\",\"value\":" + "\"UPDATABLE\",\"type\":\"org.eclipse.sensinact.gateway.common.primitive.Modifiable\"}," + "{\"name\":\"nickname\",\"value\":\"value\",\"type\":\"string\"}," + "{\"name\":\"Description\",\"value\":" + "\"Detected light/darkness\",\"type\":\"string\"}," + "{\"name\":\"Unit\"," + "\"value\":\"LUX\",\"type\":\"string\"}]}"), valueDescription, false);
+        core.close();
     }
 
     @Test
     public void testAnnotationResolver() throws Throwable {
+    	Thread.sleep(5000);    
         File tmpDirectory = new File("./target/felix/tmp");
-
-        new File(tmpDirectory, "props.xml").delete();
-        new File(tmpDirectory, "resources.xml").delete();
-        new File(tmpDirectory, "dynamicBundle.jar").delete();
-
+        File confDirectory = new File("./target/felix/conf");
+        new File(confDirectory, "props.xml").delete();
+        if(!tmpDirectory.exists()) {
+        	tmpDirectory.mkdir();
+        } else {
+        	new File(tmpDirectory, "resources.xml").delete();
+        	new File(tmpDirectory, "dynamicBundle.jar").delete();
+        }
         super.createDynamicBundle(new File("./extra-src2/test/resources/MANIFEST.MF"), tmpDirectory, new File("./extra-src2/test/resources/meta"), new File("./extra-src2/test/resources/test-resource.xml"), new File("./target/extra-test-classes2"));
-
         super.installDynamicBundle(new File(tmpDirectory, "dynamicBundle.jar").toURI().toURL()).start();
         Thread.sleep(5000);
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
@@ -236,16 +241,20 @@ public class TestGenericImplementation extends MidOSGiTest {
         Resource resource = session.resource("providerTest", "measureTest", "condition");
         MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(resource);
         Description description = (Description) midResource.toOSGi(getDescription, null);
+        core.close();
     }
 
     @Test
     public void testAnnotatedPacket() throws Throwable {
         File tmpDirectory = new File("./target/felix/tmp");
-
-        new File(tmpDirectory, "props.xml").delete();
-        new File(tmpDirectory, "resources.xml").delete();
-        new File(tmpDirectory, "dynamicBundle.jar").delete();
-
+        File confDirectory = new File("./target/felix/conf");
+        new File(confDirectory, "props.xml").delete();
+        if(!tmpDirectory.exists()) {
+        	tmpDirectory.mkdir();
+        } else {
+        	new File(tmpDirectory, "resources.xml").delete();
+        	new File(tmpDirectory, "dynamicBundle.jar").delete();
+        }
         super.createDynamicBundle(new File("./extra-src3/test/resources/MANIFEST.MF"), tmpDirectory, new File("./extra-src3/test/resources/meta"), new File("./src/test/resources/genova-resource.xml"), new File("./target/extra-test-classes3"));
 
         super.installDynamicBundle(new File(tmpDirectory, "dynamicBundle.jar").toURI().toURL()).start();
@@ -281,16 +290,16 @@ public class TestGenericImplementation extends MidOSGiTest {
         jsonObject.getJSONObject("response").remove("timestamp");
 
         JSONAssert.assertEquals(new JSONObject("{\"statusCode\":200,\"response\":{\"name\":\"location\",\"value\":\"45.900002:6.11667\"," + "\"type\":\"string\"},\"type\":\"GET_RESPONSE\",\"uri\":\"/weather_7/admin/location\"}"), jsonObject, false);
+        core.close();
     }
 
     @Test
-	@Ignore
     public void testExtraCatalogs() throws Throwable {
     	String all = "{"+
     			   "\"providers\": ["+
     			     "{"+
     			       "\"name\": \"weather_0\","+
-    			       "\"location\": \"45.19334890078532:5.706474781036377\","+
+    			       "\"location\": \"45.2:5.7\","+
     			       "\"services\": ["+
     			         "{"+
     			           "\"name\": \"admin\","+
@@ -375,7 +384,7 @@ public class TestGenericImplementation extends MidOSGiTest {
     			     "},"+
     			     "{"+
     			       "\"name\": \"weather_2\","+
-    			       "\"location\": \"45.19334890078532:5.706474781036377\","+
+    			       "\"location\": \"45.2:5.7\","+
     			       "\"services\": ["+
     			         "{"+
     			           "\"name\": \"admin\","+
@@ -473,7 +482,7 @@ public class TestGenericImplementation extends MidOSGiTest {
     			     "},"+
     			     "{"+
     			       "\"name\": \"weather_1\","+
-    			       "\"location\": \"45.19334890078532:5.706474781036377\","+
+    			       "\"location\": \"45.2:5.7\","+
     			       "\"services\": ["+
     			         "{"+
     			           "\"name\": \"admin\","+
@@ -544,16 +553,26 @@ public class TestGenericImplementation extends MidOSGiTest {
         File tmpDirectory = new File("target/felix/tmp");
         File tmpDirectory1 = new File("target/felix/tmp1");
         File tmpDirectory2 = new File("target/felix/tmp2");
-
-        new File(tmpDirectory, "props.xml").delete();
-        new File(tmpDirectory, "resources.xml").delete();
-        new File(tmpDirectory, "dynamicBundle.jar").delete();
-
+        
+        File confDirectory = new File("target/felix/conf");
+        new File(confDirectory, "props.xml").delete();
+        
+        if(!tmpDirectory1.exists()) {
+        	tmpDirectory1.mkdir();
+        }
+        if(!tmpDirectory2.exists()) {
+        	tmpDirectory2.mkdir();
+        }
+        if(!tmpDirectory.exists()) {
+        	tmpDirectory.mkdir();
+        } else {
+        	new File(tmpDirectory, "resources.xml").delete();
+        	new File(tmpDirectory, "dynamicBundle.jar").delete();
+        }
         super.createDynamicBundle(
         	new File("./extra-src6/test/resources/MANIFEST.MF"), 
         	tmpDirectory2, 
-        	new File("./extra-src6/test/resources/meta"), 
-        	new File("./extra-src6/test/resources/genova-resource_2.xml"), 
+        	new File("./extra-src6/test/resources/meta"),  
         	new File("./target/extra-test-classes6"));
         
         super.installDynamicBundle(new File(tmpDirectory2, 
@@ -564,8 +583,7 @@ public class TestGenericImplementation extends MidOSGiTest {
         super.createDynamicBundle(
         	new File("./extra-src5/test/resources/MANIFEST.MF"), 
         	tmpDirectory1, 
-        	new File("./extra-src5/test/resources/meta"), 
-        	new File("./extra-src5/test/resources/genova-resource_1.xml"), 
+        	new File("./extra-src5/test/resources/meta"),  
         	new File("./target/extra-test-classes5"));
         
         super.installDynamicBundle(new File(tmpDirectory1, 
@@ -591,51 +609,61 @@ public class TestGenericImplementation extends MidOSGiTest {
 
         MidProxy midSession = (MidProxy) Proxy.getInvocationHandler(session);
         SnaMessage response = (SnaMessage) midSession.toOSGi(Session.class.getDeclaredMethod("getAll"), null);
+        
         JSONAssert.assertEquals(all, response.getJSON(), false);
+        core.close();
     }
 
     @Override
     protected void doInit(Map configuration) {
 
-    	//shell stuff
-		//file:target/felix/bundle/1/org.apache.felix.gogo.runtime-1.1.0.jar file:target/felix/bundle/1/org.apache.felix.gogo.command-1.0.2.jar file:target/felix/bundle/1/org.apache.felix.gogo.jline-1.1.0.jar
-		//file:target/felix/bundle/1/osgi-over-slf4j-1.7.25.jar
-		//file:target/felix/bundle/1/jline-3.7.0.jar file:target/felix/bundle/1/jansi-1.17.1.jar
-        configuration.put("felix.auto.start.1","file:target/felix/bundle/1/org.osgi.service.log-1.3.0.jar file:target/felix/bundle/1/logback-classic-1.2.3.jar file:target/felix/bundle/1/logback-core-1.2.3.jar file:target/felix/bundle/1/org.apache.felix.framework.security-2.6.1.jar file:target/felix/bundle/1/slf4j-api-1.7.25.jar file:target/felix/bundle/1/slf4j-simple-1.7.25.jar");
-
-        configuration.put("felix.auto.install.2","file:target/felix/bundle/2/osgi.cmpn-6.0.0.jar");
-
-        configuration.put("felix.auto.start.2","file:target/felix/bundle/2/org.apache.felix.fileinstall-3.6.4.jar file:target/felix/bundle/2/org.apache.felix.configadmin-1.9.10.jar file:target/felix/bundle/2/org.osgi.service.event-1.4.0.jar file:target/felix/bundle/2/sensinact-framework-extension-2.0-SNAPSHOT.jar file:target/felix/bundle/2/org.apache.felix.bundlerepository-2.0.10.jar file:target/felix/bundle/2/org.apache.felix.scr-2.1.14.jar file:target/felix/bundle/2/org.osgi.service.component-1.4.0.jar file:target/felix/bundle/2/org.osgi.service.remoteserviceadmin-1.1.0.jar file:target/felix/bundle/2/org.osgi.util.function-1.1.0.jar file:target/felix/bundle/2/org.osgi.util.promise-1.1.1.jar file:target/felix/bundle/2/mqtt-utils-2.0-SNAPSHOT.jar file:target/felix/bundle/2/org.eclipse.paho.client.mqttv3-1.2.0.jar");
-        configuration.put("felix.auto.install.3","file:target/felix/bundle/3/sensinact-common-2.0-SNAPSHOT.jar file:target/felix/bundle/3/sensinact-datastore-api-2.0-SNAPSHOT.jar file:target/felix/bundle/3/sensinact-security-none-2.0-SNAPSHOT.jar file:target/felix/bundle/3/sensinact-utils-2.0-SNAPSHOT.jar");
-        //3 - file:target/felix/bundle/3/sensinact-shell-2.0-SNAPSHOT.jar
-        configuration.put("felix.auto.start.3","file:target/felix/bundle/3/sensinact-core-2.0-SNAPSHOT.jar file:target/felix/bundle/3/javax.servlet-api-3.1.0.jar file:target/felix/bundle/3/org.apache.felix.http.api-2.3.2.jar file:target/felix/bundle/3/http-2.0-SNAPSHOT.jar file:target/felix/bundle/3/org.apache.felix.http.jetty-3.0.0.jar file:target/felix/bundle/3/sensinact-northbound-access-2.0-SNAPSHOT.jar file:target/felix/bundle/3/sensinact-signature-validator-2.0-SNAPSHOT.jar ");
-		//file:target/felix/bundle/sensinact-test-2.0-SNAPSHOT.jar
-        configuration.put("felix.auto.start.4","file:target/felix/bundle/sensinact-test-configuration-2.0-SNAPSHOT.jar file:target/felix/bundle/dynamicBundle.jar");
-
-
-/*
-        configuration.put("felix.auto.start.1", 
-        	"file:target/felix/bundle/org.osgi.compendium.jar " +
-        	"file:target/felix/bundle/org.apache.felix.configadmin.jar " + 
-        	"file:target/felix/bundle/org.apache.felix.framework.security.jar ");
-        configuration.put("felix.auto.install.2", 
-        	"file:target/felix/bundle/sensinact-utils.jar " + 
-            "file:target/felix/bundle/sensinact-common.jar " + 
-        	"file:target/felix/bundle/sensinact-datastore-api.jar " + 
-            "file:target/felix/bundle/sensinact-framework-extension.jar " + 
-        	"file:target/felix/bundle/sensinact-security-none.jar ");
+        configuration.put("felix.auto.start.1",  
+                "file:target/felix/bundle/org.osgi.service.component.jar "+  
+                "file:target/felix/bundle/org.osgi.service.cm.jar "+  
+                "file:target/felix/bundle/org.osgi.service.metatype.jar "+  
+                "file:target/felix/bundle/org.osgi.namespace.extender.jar "+  
+                "file:target/felix/bundle/org.osgi.util.promise.jar "+  
+                "file:target/felix/bundle/org.osgi.util.function.jar "+  
+                "file:target/felix/bundle/org.osgi.service.log.jar "  +
+                "file:target/felix/bundle/org.apache.felix.log.jar " + 
+                "file:target/felix/bundle/org.apache.felix.scr.jar " +
+        		"file:target/felix/bundle/org.apache.felix.fileinstall.jar " +
+        		"file:target/felix/bundle/org.apache.felix.configadmin.jar " + 
+        		"file:target/felix/bundle/org.apache.felix.framework.security.jar ");
+        configuration.put("felix.auto.install.2",  
+        	    "file:target/felix/bundle/org.eclipse.paho.client.mqttv3.jar " + 
+                "file:target/felix/bundle/mqtt-utils.jar " + 
+        	    "file:target/felix/bundle/sensinact-utils.jar " + 
+                "file:target/felix/bundle/sensinact-common.jar " + 
+        	    "file:target/felix/bundle/sensinact-datastore-api.jar " + 
+                "file:target/felix/bundle/sensinact-security-none.jar " + 
+                "file:target/felix/bundle/slf4j-api.jar " + 
+                "file:target/felix/bundle/slf4j-simple.jar");
         configuration.put("felix.auto.start.2", 
-        	"file:target/felix/bundle/sensinact-test-configuration.jar " + 
-            "file:target/felix/bundle/sensinact-signature-validator.jar " + 
-        	"file:target/felix/bundle/sensinact-core.jar ");
-        configuration.put("felix.auto.install.3", 
-        	"file:target/felix/bundle/dynamicBundle.jar ");
-  */
+        		"file:target/felix/bundle/sensinact-signature-validator.jar " + 
+        		"file:target/felix/bundle/sensinact-core.jar ");
+        configuration.put("felix.auto.start.3", 
+        		"file:target/felix/bundle/dynamicBundle.jar ");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
         configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
-        configuration.put("org.osgi.framework.system.packages.extra","com.sun.net.httpserver,sun.security.action,javax.smartcardio,javax.net.ssl,javax.mail,javax.microedition.io,javax.mail.internet,com.google.common.base,sun.misc");
-        configuration.put("org.osgi.framework.system.capabilities","osgi.ee; osgi.ee=\"JavaSE\";version:List=\"1.0,1.1,1.2,1.3,1.3.0,1.4,1.4.0,1.5,1.5.0,1.6,1.6.0,1.7,1.8\"");
 
+        configuration.put("org.eclipse.sensinact.gateway.location.latitude", "45.2d");
+        configuration.put("org.eclipse.sensinact.gateway.location.longitude", "5.7d");
+
+        configuration.put("org.osgi.service.http.port", "8898");
+        configuration.put("org.apache.felix.http.jettyEnabled", true);
+        configuration.put("org.apache.felix.http.whiteboardEnabled", true);
+
+        try {
+        	String fileName = "sensinact.config";
+            File testFile = new File(new File("src/test/resources"), fileName);
+            URL testFileURL = testFile.toURI().toURL();
+            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
+            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
+            IOUtils.write(testCng, output);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void initializeMoke(URL resource, Map defaults, boolean startAtInitializationTime) throws Exception {
@@ -661,18 +689,23 @@ public class TestGenericImplementation extends MidOSGiTest {
         builder.append("</properties>");
 
         File tmpDirectory = new File("./target/felix/tmp");
+        if(!tmpDirectory.exists()) {
+        	tmpDirectory.mkdir();
+        } else {
+        	new File(tmpDirectory, "resources.xml").delete();
+        	new File(tmpDirectory, "dynamicBundle.jar").delete();
+        }
+        File confDirectory = new File("./target/felix/conf");
+        new File(confDirectory, "props.xml").delete();
 
-        new File(tmpDirectory, "props.xml").delete();
-        new File(tmpDirectory, "resources.xml").delete();
-        new File(tmpDirectory, "dynamicBundle.jar").delete();
-
-        FileOutputStream output = new FileOutputStream(new File(tmpDirectory, "props.xml"));
+        FileOutputStream output = new FileOutputStream(new File(confDirectory, "props.xml"));
         IOUtils.write(builder.toString().getBytes(), output);
-        byte[] resourcesBytes = IOUtils.read(resource.openStream());
+        
+        byte[] resourcesBytes = IOUtils.read(resource.openStream());        
         output = new FileOutputStream(new File(tmpDirectory, "resources.xml"));
         IOUtils.write(resourcesBytes, output);
 
-        super.createDynamicBundle(new File("./extra-src/test/resources/MANIFEST.MF"), tmpDirectory, new File("./extra-src/test/resources/meta"), new File(tmpDirectory, "props.xml"), new File(tmpDirectory, "resources.xml"), new File("./target/extra-test-classes"));
+        super.createDynamicBundle(new File("./extra-src/test/resources/MANIFEST.MF"), tmpDirectory, new File("./extra-src/test/resources/meta"), new File(confDirectory, "props.xml"), new File(tmpDirectory, "resources.xml"), new File("./target/extra-test-classes"));
 
         Bundle bundle = super.installDynamicBundle(new File(tmpDirectory, "dynamicBundle.jar").toURI().toURL());
 
@@ -682,7 +715,7 @@ public class TestGenericImplementation extends MidOSGiTest {
             bundle.start();
         } catch(Exception e){
         	e.printStackTrace();
-		} finally {
+        }finally {
             Thread.currentThread().setContextClassLoader(current);
         }
         Thread.sleep(7000);

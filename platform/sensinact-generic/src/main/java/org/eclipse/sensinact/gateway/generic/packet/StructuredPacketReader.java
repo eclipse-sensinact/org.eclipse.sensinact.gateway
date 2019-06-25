@@ -99,13 +99,13 @@ public class StructuredPacketReader<P extends Packet> extends SimplePacketReader
                 Class<? extends Annotation> annotationType = annotations[annotationIndex].annotationType();
 
                 int ind = ANNOTATIONS.indexOf(annotationType.getCanonicalName());
-
                 if (ind < 0) {
                     continue;
                 }
                 String annotationName = annotationType.getSimpleName();
-
-                annotationName = new StringBuilder().append(annotationName.substring(0, 1).toLowerCase()).append(annotationName.substring(1)).append("Annotated").toString();
+                annotationName = new StringBuilder().append(annotationName.substring(0, 1).toLowerCase()
+                	).append(annotationName.substring(1)).append("Annotated").toString();
+                
                 try {
                     Field annotationField = PojoPacketWrapper.class.getDeclaredField(annotationName);
                     annotationField.setAccessible(true);

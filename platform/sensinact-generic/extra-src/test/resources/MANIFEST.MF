@@ -3,7 +3,7 @@ Bnd-LastModified: 1471684503753
 Bundle-Description: sensiNact IoT Gateway - Generic Moke Test
 Bundle-ManifestVersion: 2
 Bundle-Name: sensiNact IoT Gateway - Generic Moke Test
-Bundle-SymbolicName: sensinact-generic-test-moke
+Bundle-SymbolicName: sensinact-generic-test-moke-1
 Bundle-Vendor: Eclipse
 Bundle-Version: 1.2.0.20160820
 Bundle-Activator: org.eclipse.sensinact.gateway.generic.test.moke.Activator
@@ -24,4 +24,4 @@ Import-Package:  org.eclipse.sensinact.gateway.generic;version="[2,3)",org.eclip
  y.core.security;version="[2,3)",org.eclipse.sensinact.gateway.util;version="
  [2,3)",org.eclipse.sensinact.gateway.util.xml;version="[2,3)",javax.xml.pa
  rsers,org.json;version="20080701",org.osgi.framework;version="[1.7,2
- )",org.eclipse.sensinact.gateway.core.api
+ )",org.xml.sax,org.eclipse.sensinact.gateway.test

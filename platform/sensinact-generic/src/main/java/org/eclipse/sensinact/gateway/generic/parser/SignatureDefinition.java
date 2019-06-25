@@ -10,21 +10,23 @@
  */
 package org.eclipse.sensinact.gateway.generic.parser;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
-import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.core.ServiceImpl;
-import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-import org.eclipse.sensinact.gateway.core.method.Parameter;
-import org.eclipse.sensinact.gateway.core.method.Shortcut;
-import org.eclipse.sensinact.gateway.core.method.Signature;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
+import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
+import org.eclipse.sensinact.gateway.core.ResourceConfig;
+import org.eclipse.sensinact.gateway.core.ResourceImpl;
+import org.eclipse.sensinact.gateway.core.ServiceImpl;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.core.method.Parameter;
+import org.eclipse.sensinact.gateway.core.method.Shortcut;
+import org.eclipse.sensinact.gateway.core.method.Signature;
 
 /**
  * Act method
@@ -78,10 +80,11 @@ public class SignatureDefinition implements Comparable<SignatureDefinition> {
     }
 
     /**
+     * @param resourceImpl 
      * @return
      * @throws InvalidValueException
      */
-    public Signature getSignature(Mediator mediator, ServiceImpl service) throws InvalidValueException {
+    public Signature getSignature(Mediator mediator, ResourceImpl resource, ServiceImpl service) throws InvalidValueException {
         Map<Integer, Parameter> fixedParameters = new HashMap<Integer, Parameter>();
         List<Parameter> parameters = new ArrayList<Parameter>();
 
@@ -93,10 +96,9 @@ public class SignatureDefinition implements Comparable<SignatureDefinition> {
 
         while (parameterIterator.hasNext()) {
             ParameterDefinition parameterDefinition = parameterIterator.next();
-            Parameter parameter = parameterDefinition.getParameter(service);
+            Parameter parameter = parameterDefinition.getParameter(resource, service);
             if (Modifiable.FIXED.equals(parameter.getModifiable())) {
                 fixedParameters.put(position, parameter);
-
             } else {
                 parameters.add(parameter);
             }
@@ -104,9 +106,9 @@ public class SignatureDefinition implements Comparable<SignatureDefinition> {
         }
         Parameter[] parametersArray = parameters.toArray(new Parameter[parameters.size()]);
         if (fixedParameters.isEmpty()) {
-            signature = new Signature(mediator, AccessMethod.ACT, parametersArray);
+            signature = new Signature(mediator, type.name(), parametersArray);
         } else {
-            signature = new Shortcut(mediator, AccessMethod.ACT, parametersArray, fixedParameters);
+            signature = new Shortcut(mediator, type.name(), parametersArray, fixedParameters);
         }
         return signature;
     }

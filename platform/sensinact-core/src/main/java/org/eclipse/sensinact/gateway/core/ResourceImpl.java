@@ -20,6 +20,7 @@ import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.execution.DefaultErrorHandler;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
@@ -365,7 +366,30 @@ public class ResourceImpl extends
 			e.printStackTrace();
 		}
 	}
+	/**
+	 * Returns an {@link Executable} whose execution returns the value of this
+	 * {@link ResourceImpl}'s attribute whose name is passed as parameter.
+	 * 
+	 * @param attributeName the name of the {@link Attribute} of this {@link ResourceImpl} for 
+	 * which to create a value extractor
+	 * 
+	 * @return an {@link Executable} value extractor for the specified {@link Attribute}
+	 */
+	public Executable<Void, Object> getResourceValueExtractor(String attributeName) {
+		String defaultAttributeName = attributeName==null?getDefault():attributeName;
+		final Attribute attribute = getAttribute(defaultAttributeName);
 
+		return new Executable<Void, Object>() {
+			@Override
+			public Object execute(Void parameter) throws Exception {
+				if (attribute != null) {
+					return attribute.getValue();
+				}
+				return null;
+			}
+		};
+	}
+	
 	/**
 	 * @inheritDoc
 	 * 

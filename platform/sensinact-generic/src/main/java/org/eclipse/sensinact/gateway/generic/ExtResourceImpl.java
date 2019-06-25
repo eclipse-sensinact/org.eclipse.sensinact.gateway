@@ -14,7 +14,6 @@
 package org.eclipse.sensinact.gateway.generic;
 
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
-import org.eclipse.sensinact.gateway.core.Resource.Type;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
@@ -120,7 +119,7 @@ public class ExtResourceImpl extends ResourceImpl {
             final Class<?> clazz = getClass();
             final ExtResourceImpl self = this;
 
-            AbstractAccessMethod method = (AbstractAccessMethod) super.getAccessMethod(methodDefinition.getType());
+            AbstractAccessMethod<?,?> method = (AbstractAccessMethod<?,?>) super.getAccessMethod(methodDefinition.getType());
 
             SignatureDefinition definition = null;
 
@@ -130,7 +129,7 @@ public class ExtResourceImpl extends ResourceImpl {
                 definition = signatureIterator.next();
                 Signature signature;
                 try {
-                    signature = definition.getSignature(super.modelInstance.mediator(), service);
+                    signature = definition.getSignature(super.modelInstance.mediator(), this, service);
                 } catch (InvalidValueException e) {
                     continue;
                 }
@@ -141,9 +140,7 @@ public class ExtResourceImpl extends ResourceImpl {
                     continue;
                 }
                 Map<Method, ? extends Annotation> methods = ReflectUtils.getAnnotatedMethods(clazz, annotationClass);
-
                 Set<Method> methodSet = methods.keySet();
-
                 Method javaMethod = ReflectUtils.getDeclaredMethod(methodSet.toArray(new Method[0]), JSONObject.class, null, parameterTypes, true);
 
                 final Method reflectionMethod = javaMethod;

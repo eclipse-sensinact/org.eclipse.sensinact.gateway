@@ -28,7 +28,8 @@ import java.util.List;
  * Manages IO between a {@link ProtocolStackEndpoint} and
  * a set of {@link ServiceProvider}s
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:christophe.munil
+ * la@cea.fr">Christophe Munilla</a>
  */
 public class Connector<P extends Packet> extends TaskManager {
     /**
@@ -231,17 +232,21 @@ public class Connector<P extends Packet> extends TaskManager {
     }
 
     /**
-     * Creates, adds and returns a new {@link ExtServiceProviderImpl}
-     * instance with the identifier passed as parameter
+     * Creates and returns a new {@link ExtModelInstance} holding 
+     * an {@link ExtServiceProviderImpl} instance whose profile and 
+     * name string are passed as parameter
      *
-     * @param serviceProviderName
-     * @param serviceProviderName a String key identifier of the
-     *                            {@link ExtServiceProviderImpl} to instantiate
-     * @param services            the array of
-     * @return a new {@link ExtServiceProviderImpl} instance
+     * @param profileId string identifier of the
+     * profile of the {@link ExtServiceProviderImpl} held by
+     * the {@link ExtModelInstance} to be instantiated
+     * @param serviceProviderName string name of the
+     * {@link ExtServiceProviderImpl} held by
+     * the {@link ExtModelInstance} to be instantiated
+     * @return a new {@link ExtModelInstance} instance
      * @throws InvalidServiceProviderException
      */
-    protected ExtModelInstance<?> addModelInstance(String profileId, 
+    @SuppressWarnings({ "unchecked", "rawtypes", "unused" })
+	protected synchronized ExtModelInstance<?> addModelInstance(String profileId, 
     	final String serviceProviderName) throws InvalidServiceProviderException {
     	ExtModelInstance<?> instance = this.extModelInstanceBuilder.<ExtModelConfiguration, 
     		ExtModelInstance>build(serviceProviderName, profileId,this.extModelConfiguration);

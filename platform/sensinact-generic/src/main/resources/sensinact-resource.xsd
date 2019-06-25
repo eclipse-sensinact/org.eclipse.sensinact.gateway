@@ -635,18 +635,22 @@ elementFormDefault="qualified" attributeFormDefault="unqualified">
 	    	<field xpath="@profile"/>
 	    	<field xpath="@policy"/>
 	  	</key>
+	  	<!--TODO: add the 'attribute' attribute to be allow reflexive lookup
 	  	<keyref name="resourceInfoVariableRef" refer="sensinact:resourceInfoNameAndTypeAndProfile">
-	    	<selector xpath="./sensinact:resourceInfo/sensinact:parameters/sensinact:references/sensinact:reference"/>
+	    	<selector xpath="xpath="./sensinact:resourceInfo/sensinact:methods/sensinact:method/sensinact:references/sensinact:reference"/>
 	    	<field xpath="@reference"/>
+	    	<field xpath="@attribute"/>
 	    	<field xpath="@profile"/>
 	    	<field xpath="@policy"/>
 	  	</keyref>
 	  	<keyref name="resourceInfoBuilderRef" refer="sensinact:resourceInfoNameAndTypeAndProfile">
-	    	<selector xpath="./sensinact:resourceInfo/sensinact:parameters/sensinact:builders/sensinact:builder"/>
+	    	<selector xpath="./sensinact:resourceInfo/sensinact:methods/sensinact:method/sensinact:parameter/sensinact:builder"/>
 	    	<field xpath="@reference"/>
+	    	<field xpath="@attribute"/>
 	    	<field xpath="@profile"/>
 	    	<field xpath="@policy"/>
 	  	</keyref>
+	  	-->
 	  	<unique name="policyRef">
 		   	<selector xpath="./sensinact:policies/sensinact:policy"/>
 		   	<field xpath="@name"/>

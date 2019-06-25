@@ -53,14 +53,15 @@ extends ModelInstanceBuilder<C,I> {
      *
      * @return the new created {@link SensiNactResourceModel}
      */
-    @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
     public I build(String name, String profileId, C modelConfiguration) {
     	I instance = null;
         if (modelConfiguration != null) {
             super.buildAccessNode(modelConfiguration.getAccessTree(), name);
             Class<I> ci = modelConfiguration.<C,I>getModelInstanceType();
             if(ci != null) {
-            	instance = ReflectUtils.<ExtModelInstance, I>getInstance(
+            	instance = ReflectUtils.<ExtModelInstance,I>getInstance(
             		ExtModelInstance.class, ci,  this.mediator, modelConfiguration, 
             		   name, profileId, this.connector);
             } else {

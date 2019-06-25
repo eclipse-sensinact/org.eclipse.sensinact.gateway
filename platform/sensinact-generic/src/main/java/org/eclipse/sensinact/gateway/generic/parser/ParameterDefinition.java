@@ -14,7 +14,9 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.Fixed;
 import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
+import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.method.DynamicParameter;
 import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
@@ -67,12 +69,13 @@ public class ParameterDefinition extends ResolvedNameTypeValueDefinition impleme
     /**
      * Creates and returns the {@link Parameter} described by
      * this ParameterDefinition
+     * @param resource 
      *
      * @return the {@link Parameter} described by this
      * ParameterDefinition
      * @throws InvalidValueException
      */
-    public Parameter getParameter(ServiceImpl service) throws InvalidValueException {
+    public Parameter getParameter(ResourceImpl resource, ServiceImpl service) throws InvalidValueException {
         Parameter parameter = null;
         try {
             if (builder != null) {
@@ -82,7 +85,15 @@ public class ParameterDefinition extends ResolvedNameTypeValueDefinition impleme
                     DynamicParameterValueFactory factory = loader.load(mediator, builder.getName());
                     JSONObject builderDefinitionJSON = new JSONObject(builder.getJSON());
                     JSONObject builderJSON = builderDefinitionJSON.getJSONObject(DynamicParameterValue.BUILDER_KEY);
-                    dynamic = factory.newInstance(mediator, service.getResourceValueExtractor(builder.getReference()), builderJSON);
+                    String reference = builder.getReference();
+                    Executable<Void,Object> valueExtractor = null;
+                    if(reference.startsWith("./")) {
+                    	String attributeReference = reference.substring(2);
+                    	valueExtractor = resource.getResourceValueExtractor(attributeReference);
+                    } else {
+                    	valueExtractor = service.getResourceValueExtractor(builder.getReference());
+                    }
+                    dynamic = factory.newInstance(mediator, valueExtractor, builderJSON);
                 } finally {
                     DynamicParameterValueFactory.LOADER.remove();
                 }

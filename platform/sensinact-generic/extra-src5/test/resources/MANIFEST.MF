@@ -7,7 +7,7 @@ Bundle-SymbolicName: sensinact-generic-test-moke-5
 Bundle-Vendor: Eclipse
 Bundle-Version: 1.2.0.20160820
 Fragment-Host: sensinact-generic-test-moke-4
-Import-Package: org.eclipse.sensinact.gateway.core.api,org.eclipse.sensinact.gateway.generic;version="[2,3)",org.eclipse.
+Import-Package: org.eclipse.sensinact.gateway.generic;version="[2,3)",org.eclipse.
  sensinact.gateway.generic.packet;version="[2,3)",org.eclipse.sensinact.gateway.gen
  eric.packet.annotation;version="[2,3)",org.eclipse.sensinact.gateway.generic
  .stream;version="[2,3)",org.eclipse.sensinact.gateway.generic.uri;version="[
@@ -23,4 +23,4 @@ Import-Package: org.eclipse.sensinact.gateway.core.api,org.eclipse.sensinact.gat
  y.core.security;version="[2,3)",org.eclipse.sensinact.gateway.util;version="
  [2,3)",org.eclipse.sensinact.gateway.util.xml;version="[2,3)",javax.xml.pa
  rsers,org.json;version="20080701",org.osgi.framework;version="[1.7,2
- )",org.xml.sax
+ )",org.xml.sax,org.eclipse.sensinact.gateway.test

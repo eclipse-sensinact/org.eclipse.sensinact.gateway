@@ -117,319 +117,167 @@
 						<phase>generate-test-resources</phase>
 						<configuration>
 							<artifactItems>
-								<!-- BEGIN:1 -->
-								<artifactItem>
-									<groupId>org.slf4j</groupId>
-									<artifactId>osgi-over-slf4j</artifactId>
-									<version>1.7.25</version>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/felix/bundle/1/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.framework.security</artifactId>
-									<version>2.6.1</version>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/felix/bundle/1/</outputDirectory>
-								</artifactItem>
-								<!--
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.log</artifactId>
-									<version>1.0.1</version>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-								</artifactItem>
-								-->
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.log</artifactId>
-									<version>1.3.0</version>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/felix/bundle/1/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.gogo.runtime</artifactId>
-									<version>${org.apache.felix.gogo.runtime.version}</version>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/felix/bundle/1/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.gogo.command</artifactId>
-									<version>${org.apache.felix.gogo.command.version}</version>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/felix/bundle/1/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.jline</groupId>
-									<artifactId>jline</artifactId>
-									<version>${org.jline.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/1/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.fusesource.jansi</groupId>
-									<artifactId>jansi</artifactId>
-									<version>${org.fusesource.jansi.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/1/</outputDirectory>
-								</artifactItem>
+						        <artifactItem>
+						            <groupId>org.osgi</groupId>
+						            <artifactId>osgi.annotation</artifactId>
+						            <version>6.0.1</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>osgi.annotation.jar</destFileName>
+						        </artifactItem>
+						        <artifactItem>
+						            <groupId>org.osgi</groupId>
+						            <artifactId>org.osgi.service.component</artifactId>
+						            <version>1.4.0</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.osgi.service.component.jar</destFileName>
+						        </artifactItem>
+						        <artifactItem>
+						            <groupId>org.osgi</groupId>
+						            <artifactId>org.osgi.service.cm</artifactId>
+						            <version>1.6.0</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.osgi.service.cm.jar</destFileName>
+						        </artifactItem>
+						        <artifactItem>
+						            <groupId>org.osgi</groupId>
+						            <artifactId>org.osgi.service.metatype</artifactId>
+						            <version>1.3.0</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.osgi.service.metatype.jar</destFileName>
+						        </artifactItem>
+						        <artifactItem>
+						            <groupId>org.osgi</groupId>
+						            <artifactId>org.osgi.namespace.extender</artifactId>
+						            <version>1.0.1</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.osgi.namespace.extender.jar</destFileName>
+						        </artifactItem>
+						        <artifactItem>
+						            <groupId>org.osgi</groupId>
+						            <artifactId>org.osgi.util.promise</artifactId>
+						            <version>1.0.0</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.osgi.util.promise.jar</destFileName>
+						        </artifactItem>
+						        <artifactItem>
+						            <groupId>org.osgi</groupId>
+						            <artifactId>org.osgi.util.function</artifactId>
+						            <version>1.0.0</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.osgi.util.function.jar</destFileName>
+						        </artifactItem>	
+						        <artifactItem>
+							        <groupId>org.osgi</groupId>
+						            <artifactId>org.osgi.service.log</artifactId>
+						            <version>1.3.0</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.osgi.service.log.jar</destFileName>	
+					            </artifactItem>	
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.gogo.jline</artifactId>
-									<version>${org.apache.felix.gogo.jline.version}</version>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/felix/bundle/1/</outputDirectory>
+  									<artifactId>org.apache.felix.log</artifactId>
+									<version>1.2.0</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.apache.felix.log.jar</destFileName>
 								</artifactItem>
-								<artifactItem>
-									<groupId>org.slf4j</groupId>
-									<artifactId>slf4j-api</artifactId>
-									<version>1.7.25</version>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/felix/bundle/1/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.slf4j</groupId>
-									<artifactId>slf4j-simple</artifactId>
-									<version>1.7.25</version>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/felix/bundle/1/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>ch.qos.logback</groupId>
-									<artifactId>logback-classic</artifactId>
-									<version>1.2.3</version>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/felix/bundle/1/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>ch.qos.logback</groupId>
-									<artifactId>logback-core</artifactId>
-									<version>1.2.3</version>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/felix/bundle/1/</outputDirectory>
-								</artifactItem>
-								<!-- END:1 -->
-								<!-- BEGIN:2 -->
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.fileinstall</artifactId>
-									<version>${felix.fileinstall.version}</version>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/felix/bundle/2/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>osgi.cmpn</artifactId>
-									<version>${osgi.compendium.version}</version>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/felix/bundle/2/</outputDirectory>
+									<version>3.6.4</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.apache.felix.fileinstall.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.configadmin</artifactId>
-									<version>1.9.10</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/2/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.event</artifactId>
-									<version>1.4.0</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/2/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway</groupId>
-									<artifactId>sensinact-framework-extension</artifactId>
-									<version>${project.version}</version>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/felix/bundle/2/</outputDirectory>
-								</artifactItem>
+									<version>1.9.12</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.apache.felix.configadmin.jar</destFileName>
+								</artifactItem>	
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.bundlerepository</artifactId>
-									<version>2.0.10</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/2/</outputDirectory>
+									<artifactId>org.apache.felix.framework.security</artifactId>
+									<version>2.6.1</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.apache.felix.framework.security.jar</destFileName>
 								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.scr</artifactId>
-									<version>2.1.14</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/2/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.component</artifactId>
-									<version>1.4.0</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/2/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.remoteserviceadmin</artifactId>
-									<version>1.1.0</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/2/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.util.function</artifactId>
-									<version>1.1.0</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/2/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.util.promise</artifactId>
-									<version>1.1.1</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/2/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
-									<artifactId>mqtt-utils</artifactId>
-									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/2/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.paho</groupId>
-									<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-									<version>1.2.0</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/2/</outputDirectory>
-								</artifactItem>
-								<!-- END:2 -->
-								<!-- BEGIN:3 -->
+    							<artifactItem>
+						            <groupId>org.apache.felix</groupId>
+						            <artifactId>org.apache.felix.scr</artifactId>
+						            <version>2.1.16</version>
+        							<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.apache.felix.scr.jar</destFileName>    
+    							</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-utils</artifactId>
 									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>sensinact-utils.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-common</artifactId>
 									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>sensinact-common.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-datastore-api</artifactId>
 									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>sensinact-datastore-api.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway</groupId>
-									<artifactId>sensinact-signature-validator</artifactId>
-									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway</groupId>
-									<artifactId>sensinact-security-none</artifactId>
-									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
-								</artifactItem>
+        							<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
+        							<artifactId>mqtt-utils</artifactId>
+        							<version>2.0-SNAPSHOT</version>
+        							<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>mqtt-utils.jar</destFileName>    
+    							</artifactItem>
+    							<artifactItem>
+						            <groupId>org.eclipse.paho</groupId>
+						            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+						            <version>1.2.0</version>
+        							<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.eclipse.paho.client.mqttv3.jar</destFileName>    
+    							</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-core</artifactId>
 									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>sensinact-core.jar</destFileName>
 								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway.tools</groupId>
-									<artifactId>sensinact-test-configuration</artifactId>
-									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway.tools</groupId>
-									<artifactId>sensinact-test</artifactId>
-									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>javax.servlet</groupId>
-									<artifactId>javax.servlet-api</artifactId>
-									<version>3.1.0</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.http.api</artifactId>
-									<version>2.3.2</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-									<artifactId>sensinact-northbound-access</artifactId>
-									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.http.jetty</artifactId>
-									<version>3.0.0</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
-									<artifactId>http</artifactId>
-									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
-								</artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.sensinact.gateway</groupId>
+                                    <artifactId>sensinact-signature-validator</artifactId>
+                                    <version>${project.version}</version>
+                                    <outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+                                    <destFileName>sensinact-signature-validator.jar</destFileName>
+                                </artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
-									<artifactId>sensinact-framework-extension</artifactId>
+									<artifactId>sensinact-security-none</artifactId>
 									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/</outputDirectory>
-								</artifactItem>
-
-
-								<!--
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway</groupId>
-									<artifactId>sensinact-generic</artifactId>
-									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway</groupId>
-									<artifactId>sensinact-shell</artifactId>
-									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway</groupId>
-									<artifactId>sensinact-system</artifactId>
-									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-									<artifactId>sensinact-northbound-access</artifactId>
-									<version>${project.version}</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/3/</outputDirectory>
-								</artifactItem>
-								-->
-								<!-- END:3 -->
-								<!-- BEGIN:4 -->
-								<!--
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.shell.remote</artifactId>
-									<version>1.1.2</version>
-									<outputDirectory>${project.build.directory}/felix/bundle/4/</outputDirectory>
-								</artifactItem>
-								-->
-								<!-- END:4 -->
-
-
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>sensinact-security-none.jar</destFileName>
+								</artifactItem>						
+						        <artifactItem>
+						            <groupId>org.slf4j</groupId>
+						            <artifactId>slf4j-api</artifactId>
+						            <version>1.7.25</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>slf4j-api.jar</destFileName>
+						        </artifactItem>								
+						        <artifactItem>
+						            <groupId>org.slf4j</groupId>
+						            <artifactId>slf4j-simple</artifactId>
+						            <version>1.7.16</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>slf4j-simple.jar</destFileName>
+						        </artifactItem>								
 							</artifactItems>
 						</configuration>
 					</execution>
@@ -459,7 +307,6 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
 				<configuration>
 					<instructions>
 						<_exportcontents>*</_exportcontents>
@@ -470,6 +317,7 @@
 						</Include-Resource>
 					</instructions>
 				</configuration>
+				<extensions>true</extensions>
 				<executions>
 					<execution>
 						<goals>
@@ -481,7 +329,6 @@
 							<instructions>
 								<_noee>true</_noee>
 								<_exportcontents>*</_exportcontents>
-								<Import-Package>org.eclipse.sensinact.gateway.core.api,org.eclipse.sensinact.gateway.core,*</Import-Package>
 								<_nouses>true</_nouses>
 							</instructions>
 						</configuration>
