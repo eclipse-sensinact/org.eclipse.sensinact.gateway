@@ -32,4 +32,20 @@ public class MqttTopic {
     public void setListener(MqttTopicMessage listener) {
         this.listener = listener;
     }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    public boolean equals(Object o) {
+    	if(o == null) {
+    		return false;
+    	}
+    	if(o.getClass() == String.class) {
+    		return o.equals(this.topic);
+    	}
+    	if(MqttTopic.class.isAssignableFrom(o.getClass())) {
+    		return ((MqttTopic)o).getTopic().equals(this.topic);
+    	}
+    	return false;
+    }
 }
