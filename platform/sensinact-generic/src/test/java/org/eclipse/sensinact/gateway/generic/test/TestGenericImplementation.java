@@ -650,7 +650,7 @@ public class TestGenericImplementation extends MidOSGiTest {
         configuration.put("org.eclipse.sensinact.gateway.location.latitude", "45.2d");
         configuration.put("org.eclipse.sensinact.gateway.location.longitude", "5.7d");
 
-        configuration.put("org.osgi.service.http.port", "8898");
+        configuration.put("org.osgi.service.http.port", "54460");
         configuration.put("org.apache.felix.http.jettyEnabled", true);
         configuration.put("org.apache.felix.http.whiteboardEnabled", true);
 

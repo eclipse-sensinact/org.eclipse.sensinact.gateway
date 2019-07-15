@@ -52,7 +52,8 @@ public class TestHttpDevice extends MidOSGiTest {
     //********************************************************************//
     //						STATIC DECLARATIONS							  //
     //********************************************************************//
-    public static int HTTP_PORT = 8898;
+    public static int HTTP_PORT = 54460;
+    public static int SERVER_PORT = 54461;
     public static String HTTP_ROOTURL = "http://127.0.0.1:" + HTTP_PORT;
 
     public static String newRequest(String configuration) throws IOException {
@@ -108,7 +109,7 @@ public class TestHttpDevice extends MidOSGiTest {
             }
             server = null;
         }
-        server = new JettyTestServer(HTTP_PORT);
+        server = new JettyTestServer(SERVER_PORT);
         new Thread(server).start();
 
         server.join();
@@ -355,7 +356,7 @@ public class TestHttpDevice extends MidOSGiTest {
         configuration.put("org.eclipse.sensinact.gateway.location.latitude", "45.2d");
         configuration.put("org.eclipse.sensinact.gateway.location.longitude", "5.7d");
 
-        configuration.put("org.osgi.service.http.port", "8898");
+        configuration.put("org.osgi.service.http.port", "54460");
         configuration.put("org.apache.felix.http.jettyEnabled", true);
         configuration.put("org.apache.felix.http.whiteboardEnabled", true);
 
