@@ -31,7 +31,7 @@ import java.util.HashMap;
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class MqttManagedService implements ManagedServiceFactory {
-    public static final String MANAGER_NAME = "bridge.sb.mqtt";
+    public static final String MANAGER_NAME = "mqtt";
     private static final String OSGI_PROPERTY_FOR_FILENAME = "felix.fileinstall.filename";
     private static final Logger LOG = LoggerFactory.getLogger(MqttManagedService.class);
     private final BundleContext context;
@@ -59,23 +59,32 @@ public class MqttManagedService implements ManagedServiceFactory {
 
     @Override
     public void updated(String servicePID, Dictionary dictionary) throws ConfigurationException {
-        LOG.debug("Instantiating mosquitto managed service pid {} ..", servicePID);
-        logDictionnary(dictionary);
-        if (tablepidServiceRegistration.get(servicePID) == null) {
-            LOG.debug("new registration for file {}", dictionary.get(OSGI_PROPERTY_FOR_FILENAME).toString());
-            register(servicePID, dictionary);
-        } else {
-            LOG.debug("update information received, the instance will be distroyed and re-created for file {}", dictionary.get(OSGI_PROPERTY_FOR_FILENAME).toString());
-            deleted(servicePID);
-            register(servicePID, dictionary);
-        }
+    	try {
+	        LOG.debug("Instantiating mosquitto managed service pid {} ..", servicePID);
+	        logDictionnary(dictionary);
+	    	
+	        if (tablepidServiceRegistration.get(servicePID) == null) {
+	            LOG.debug("new registration for file {}", dictionary.get(OSGI_PROPERTY_FOR_FILENAME).toString());
+	            register(servicePID, dictionary);
+	        } else {
+	            LOG.debug("update information received, the instance will be distroyed and re-created for file {}", dictionary.get(OSGI_PROPERTY_FOR_FILENAME).toString());
+	            deleted(servicePID);
+	            register(servicePID, dictionary);
+	        }
+    	}catch(Exception e) {
+    		LOG.error(e.Message(), e);
+    	}
     }
 
     private void register(String servicePID, Dictionary dictionary) {
         try {
             MqttPropertyFileConfig config = new Interpolator(dictionary).getNewInstance(MqttPropertyFileConfigImpl.class);
             LOG.debug("Interpolation result of service PID {} with POJO {}", config.toString(), config.getClass().getCanonicalName());
-            ServiceRegistration<MqttPropertyFileConfig> registration = (ServiceRegistration<MqttPropertyFileConfig>) context.registerService(MqttPropertyFileConfig.class.getCanonicalName(), config, dictionary);
+            
+            @SuppressWarnings("unchecked")
+			ServiceRegistration<MqttPropertyFileConfig> registration = (ServiceRegistration<MqttPropertyFileConfig>) 
+			context.registerService(MqttPropertyFileConfig.class.getCanonicalName(), config, dictionary);
+            
             LOG.info("Service registered for id {}", config.getId());
             tablepidServiceRegistration.put(servicePID, registration);
         } catch (InterpolationException e) {

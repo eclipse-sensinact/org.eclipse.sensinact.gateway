@@ -78,19 +78,14 @@ public class SmartTopic extends MqttTopicMessage {
         }
     }
 
-    public void activate() throws MqttException {
+    public void activate() throws MqttException {    	
         LOG.info("Subscribing smarttopic {} from topic {}", smartTopicInterpolator.getSmartTopic(), smartTopicInterpolator.getTopic());
-        try {
-            this.broker.connect();
-        } catch (Exception e) {
-            LOG.error("Failed to connect broker {}", broker.toString(), e);
-            e.printStackTrace();
-        }
         MqttTopic topic = new MqttTopic(smartTopicInterpolator.getTopic(), this);
         this.broker.subscribeToTopic(topic);
     }
 
     public void desactivate() {
+        this.broker.unsubscribeFromTopic(new MqttTopic(smartTopicInterpolator.getTopic(), this));
         for (String provider : providers) {
             try {
                 MqttPacket packet = new MqttPacket(provider);
@@ -99,11 +94,6 @@ public class SmartTopic extends MqttTopicMessage {
             } catch (Exception e) {
                 LOG.error("Unable to remove provider {}", provider, e);
             }
-        }
-        try {
-            broker.disconnect();
-        } catch (Exception e) {
-            LOG.error("Failed to disconnect broker {}", broker.toString(), e);
         }
     }
 

@@ -10,6 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic;
 
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
+
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttActivator;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.device.MqttPropertyFileConfig;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider;
@@ -24,18 +30,13 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-
 /**
  * Tracker responsible for detecting when new OSGi Service instance that configures an MQTT topic monitoring
  *
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
-    private static final Logger LOG = LoggerFactory.getLogger(MqttPropertyFileConfigTracker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MqttActivator.class);
     private final BundleContext bundleContext;
     private final MqttProtocolStackEndpoint endpoint;
     private Map<String, ServiceRegistration> registration = new HashMap<>();
@@ -64,7 +65,6 @@ public class MqttPropertyFileConfigTracker implements ServiceTrackerCustomizer {
             authentication=new MqttAuthentication.Builder().username(configFile.getUsername()).password(configFile.getPassword()).build();
         }
         MqttBroker broker = new MqttBroker.Builder().host(configFile.getHost()).port(configFile.getPort()).protocol(MqttBroker.Protocol.valueOf(configFile.getProtocol())).authentication(authentication).build();
-
         provider.setBroker(broker);
 
         provider.setIsDiscoveryOnFirstMessage(configFile.getDiscoveryOnFirstMessage());
