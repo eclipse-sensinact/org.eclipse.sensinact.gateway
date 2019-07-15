@@ -72,7 +72,7 @@ public class MqttManagedService implements ManagedServiceFactory {
 	            register(servicePID, dictionary);
 	        }
     	}catch(Exception e) {
-    		LOG.error(e.Message(), e);
+    		LOG.error(e.getMessage(), e);
     	}
     }
 
