@@ -118,6 +118,10 @@ public class JSONValidator {
         return false;
     }
 
+    public void clear() {
+    	this.tokens.clear();
+    }
+    
     /**
      * Returns the last identified JSONToken :
      * <ul>
