@@ -99,17 +99,82 @@ public abstract class JdbcDataStoreService implements DataStoreService {
 
         while (resultSet.next()) {
             JSONObject obj = new JSONObject();
-
             for (int index = 1; index <= columnCount; index++) {
                 String column = rsmd.getColumnName(index);
                 Object value = resultSet.getObject(column);
-                obj.put(column, value);
+                if(value == null) {
+                	continue;
+                }
+                String[] columnElements = column.split("#");
+            	JSONObject parent = obj;                
+            	Object subObj = null;
+            	int n=0;
+            	for(;n < columnElements.length-1;n++) {
+            		subObj = parent.opt(columnElements[n]);
+                	if(subObj==null) {
+                		subObj=new JSONObject();
+                		parent.put(columnElements[n], subObj);
+                	}
+                	parent=(JSONObject)subObj;
+            	}
+            	parent.put(columnElements[n], value);
             }
             result.put(obj);
         }
         return result;
     }
 
+    /**
+     * Converts the {@link ResultSet} passed as parameter into
+     * a JSON formated String
+     *
+     * @param resultSet the {@link ResultSet} object to be converted
+     * 
+     * @return the result set as a JSON formated String
+     * 
+     * @throws SQLException
+     */
+    protected String resultSetToJSonString(ResultSet resultSet) throws SQLException {
+        ResultSetMetaData rsmd = resultSet.getMetaData();
+        int columnCount = rsmd.getColumnCount();
+
+        StringBuilder builder = new StringBuilder();
+        int line = 0;
+        builder.append("[");
+
+        while (resultSet.next()) {
+            JSONObject obj = new JSONObject();
+            for (int index = 1; index <= columnCount; index++) {
+                String column = rsmd.getColumnName(index);
+                Object value = resultSet.getObject(column);
+                if(value == null) {
+                	continue;
+                }
+                String[] columnElements = column.split("#");
+            	JSONObject parent = obj;                
+            	Object subObj = null;
+            	int n=0;
+            	for(;n < columnElements.length-1;n++) {
+            		subObj = parent.opt(columnElements[n]);
+                	if(subObj==null) {
+                		subObj=new JSONObject();
+                		parent.put(columnElements[n], subObj);
+                	}
+                	parent=(JSONObject)subObj;
+            	}
+            	parent.put(columnElements[n], value);                
+            }
+            if(line > 0) {
+                builder.append(',');
+            }
+            builder.append(obj.toString());
+            line+=1;
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
+    
     /**
      * @param executor
      * @return
@@ -133,6 +198,7 @@ public abstract class JdbcDataStoreService implements DataStoreService {
             result = executor.execute(statement);
 
         } catch (Exception e) {
+        	e.printStackTrace();
             mediator.error(e);
 
         } finally {
@@ -150,7 +216,31 @@ public abstract class JdbcDataStoreService implements DataStoreService {
         }
         return result;
     }
+    
+    /**
+     * @inheritDoc
+     * @see DataStoreService#select(java.lang.String)
+     */
+    public String selectAsString(final String query) {
+        return this.<String>executeStatement(new Executable<Statement, String>() {
+            @Override
+            public String execute(Statement statement) throws Exception {
+                try {
+                    ResultSet rs = null;
+                    synchronized (lock) {
+                        rs = statement.executeQuery(query);
+                    }
+                    String result = resultSetToJSonString(rs);
+                    return result;
 
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw e;
+                }
+            }
+        });
+    }
+    
     /**
      * @inheritDoc
      * @see DataStoreService#select(java.lang.String)
