@@ -14,6 +14,7 @@ import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -199,7 +200,8 @@ public final class NorthboundEndpoints {
         } else {
             this.lifetime = l.longValue();
         }
-        this.endpoints = new WeakHashMap<Term, NorthboundEndpoint>();
+        this.endpoints = Collections.<Term, NorthboundEndpoint>synchronizedMap(
+        		new WeakHashMap<Term, NorthboundEndpoint>());
         this.schedule = new Schedule();
         this.mediator = mediator;
         new Thread(this.schedule).start();

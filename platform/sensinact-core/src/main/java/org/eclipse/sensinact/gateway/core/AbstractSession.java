@@ -78,6 +78,9 @@ public abstract class AbstractSession implements Session {
 	}
 
 	protected <T, R extends AccessMethodResponse<T>> R tatooRequestId(String requestId, R response) {
+		if(response == null){
+		    return null;
+		}
 		response.put(AccessMethod.REQUEST_ID_KEY, requestId, requestId == null);
 		return response;
 	}
