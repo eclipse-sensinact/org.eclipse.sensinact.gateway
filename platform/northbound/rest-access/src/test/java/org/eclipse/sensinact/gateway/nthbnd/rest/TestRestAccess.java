@@ -88,7 +88,7 @@ public class TestRestAccess extends MidOSGiTest {
         	    "file:target/felix/bundle/sensinact-datastore-api.jar " + 
                 "file:target/felix/bundle/sensinact-security-none.jar " + 
                 "file:target/felix/bundle/sensinact-generic.jar " + 
-        		"file:target/felix/bundle/sensinact-remote-osgi.jar "+
+        	//  "file:target/felix/bundle/sensinact-remote-osgi.jar "+
                 "file:target/felix/bundle/slf4j-api.jar " + 
                 "file:target/felix/bundle/slf4j-simple.jar");
         configuration.put("felix.auto.start.2", 
