@@ -47,7 +47,7 @@ public class WsServiceTestClient implements Runnable {
 
             Future<Session> future = client.connect(this, echoUri, request);
             /*Session session = */
-            future.get(2, TimeUnit.SECONDS);
+            future.get(60, TimeUnit.SECONDS);
             //this.socket.onConnect(session);
 
         } catch (Throwable t) {
@@ -86,9 +86,7 @@ public class WsServiceTestClient implements Runnable {
     protected void send(String message) {
         try {
             Future<Void> future = this.session.getRemote().sendStringByFuture(message);
-
             future.get(1, TimeUnit.SECONDS);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
