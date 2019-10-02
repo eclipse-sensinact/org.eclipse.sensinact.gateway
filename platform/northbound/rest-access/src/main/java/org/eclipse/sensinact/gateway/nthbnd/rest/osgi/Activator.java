@@ -77,7 +77,11 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
         	}
         });
         Activator.this.mediator.info(String.format("%s servlet registered", RestAccessConstants.HTTP_ROOT));
-        mediator.register(new WebSocketServlet() { 			
+        mediator.register(
+        	new Hashtable() {{
+        		this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.WS_ROOT);
+        		this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);}}, 
+        	new WebSocketServlet() { 			
 				private static final long serialVersionUID = 1L;			
 				private WebSocketConnectionFactory sessionPool = new WebSocketConnectionFactory(Activator.this.mediator);
 				
@@ -103,8 +107,7 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
 		                } catch (InterruptedException e) {
 		                    throw new ServletException("Timed out waiting for initialisation", e);
 		                }
-		            }
-				
+		            }				
 		            super.service(arg0, arg1);
 		        }
 
@@ -121,15 +124,11 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
 				
 				@Override
                 public void configure(WebSocketServletFactory factory) {
-					System.out.println("<<<<<<<<<<<<<<<     WebSocketServlet Configuration   >>>>>>>>>>>>>>>>>>>>>>");
                     factory.getPolicy().setIdleTimeout(1000 * 3600);
                     factory.setCreator(sessionPool);
                 };
-            }, Servlet.class, new Hashtable() {{
-            	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.WS_ROOT);
-            	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
-            }
-        });
+            }, 
+        	new Class[]{ Servlet.class, WebSocketServlet.class });
         mediator.info(String.format("%s servlet registered", RestAccessConstants.WS_ROOT));
     }
 

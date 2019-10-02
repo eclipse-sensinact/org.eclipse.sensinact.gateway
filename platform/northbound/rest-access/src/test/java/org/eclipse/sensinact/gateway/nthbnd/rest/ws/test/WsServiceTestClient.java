@@ -78,6 +78,9 @@ public class WsServiceTestClient implements Runnable {
      * @param message
      */
     protected void send(String message) {
+    	if(this.session == null) {
+    		throw new NullPointerException("Null webSocket session");
+    	}
         try {
             Future<Void> future = this.session.getRemote().sendStringByFuture(message);
             future.get(1, TimeUnit.SECONDS);
@@ -89,7 +92,6 @@ public class WsServiceTestClient implements Runnable {
     @OnWebSocketConnect
     public void onConnect(Session session) {
         this.session = session;
-    	System.out.println("==========================> "+ this.session);
     }
 
     /**

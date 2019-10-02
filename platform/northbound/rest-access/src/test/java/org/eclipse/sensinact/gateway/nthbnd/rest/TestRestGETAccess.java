@@ -119,7 +119,7 @@ public class TestRestGETAccess extends TestRestAccess {
 
     @Test
     public void testWsAccessMethodRawDescription() throws Exception {
-    	Thread.sleep(5000);
+    	Thread.sleep(5000);    	
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
 
