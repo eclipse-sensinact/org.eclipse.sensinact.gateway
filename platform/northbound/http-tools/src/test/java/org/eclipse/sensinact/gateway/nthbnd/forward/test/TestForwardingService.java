@@ -133,7 +133,6 @@ public class TestForwardingService extends MidOSGiTest {
 
     @Test
     public void testForwarding() throws Exception {
-        Thread.sleep(5000);
         Mediator mediator = new Mediator(context);
         this.initializeMoke(new File("./extra-src/test/resources/MANIFEST.MF"), new File("./extra-src/test/resources/meta"), new File("./target/extra-test-classes"));
         
@@ -156,7 +155,6 @@ public class TestForwardingService extends MidOSGiTest {
 
     @Test
     public void testCallback() throws Exception {
-        Thread.sleep(5000);
         Mediator mediator = new Mediator(context);
         this.initializeMoke(new File("./extra-src2/test/resources/MANIFEST.MF"), new File("./extra-src2/test/resources/meta"), new File("./target/extra-test-classes2"));
         try {

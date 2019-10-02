@@ -352,7 +352,7 @@ public class TestContext<R extends ModelInstance> {
 
 		mediator = new Mediator(context);
 
-		sensinact = new SensiNact("core",mediator);
+		sensinact = new SensiNact(mediator);
 		
 		instance = (MyModelInstance) new ModelInstanceBuilder(mediator
 			).build("serviceProvider", null, new ModelConfigurationBuilder(

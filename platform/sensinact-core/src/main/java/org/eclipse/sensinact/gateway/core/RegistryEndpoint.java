@@ -1,31 +1,32 @@
 package org.eclipse.sensinact.gateway.core;
 
-import org.eclipse.sensinact.gateway.core.api.Sensinact;
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.core.remote.SensinactCoreBaseIFaceManager;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.annotations.Component;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
 
-//@Component(immediate = false)
+@SuppressWarnings({"rawtypes","unchecked"}) 
 public final class RegistryEndpoint {
-    final SensiNact sensinact;
-    public RegistryEndpoint(SensiNact sensinact){
-        this.sensinact=sensinact;
+	
+	private Mediator mediator;
+	private final String defaultLocation;
+	
+    public RegistryEndpoint(Mediator mediator){
+        this.mediator = mediator;
+		this.defaultLocation = ModelInstance.defaultLocation(mediator);
     }
 
-    private Collection<ServiceReference<SensiNactResourceModel>> getReferences(String publicKey, String filter) {
-        return getReferences(sensinact.getUserAccessTree(publicKey),filter);
-    }
-
-    private Collection<ServiceReference<SensiNactResourceModel>> getReferences(SessionKey sessionKey, String filter) {
+	private Collection<ServiceReference<SensiNactResourceModel>> getReferences(SessionKey sessionKey, String filter) {
         return getReferences(sessionKey.getAccessTree(),filter);
     }
 
@@ -34,7 +35,7 @@ public final class RegistryEndpoint {
         Collection<ServiceReference<SensiNactResourceModel>> result = new ArrayList<ServiceReference<SensiNactResourceModel>>();
         Collection<ServiceReference<SensiNactResourceModel>> references = null;
         try {
-            references = sensinact.mediator.getContext().getServiceReferences(SensiNactResourceModel.class, filter);
+            references = mediator.getContext().getServiceReferences(SensiNactResourceModel.class, filter);
             Iterator<ServiceReference<SensiNactResourceModel>> iterator = references.iterator();
 
             while (iterator.hasNext()) {
@@ -83,7 +84,6 @@ public final class RegistryEndpoint {
 
         Set<ServiceProvider> serviceProviders = AccessController.<Set<ServiceProvider>>doPrivileged(
                 new PrivilegedAction<Set<ServiceProvider>>() {
-                    @SuppressWarnings("unchecked")
                     @Override
                     public Set<ServiceProvider> run() {
                         Collection<ServiceReference<SensiNactResourceModel>> references =
@@ -96,14 +96,14 @@ public final class RegistryEndpoint {
 
                         while (iterator.hasNext()) {
                             ServiceReference<SensiNactResourceModel> ref = iterator.next();
-                            SensiNactResourceModel model = sensinact.mediator.getContext().getService(ref);
+                            SensiNactResourceModel model = mediator.getContext().getService(ref);
                             ServiceProvider provider = null;
                             try {
                                 provider = (ServiceProvider) model.getRootElement()
                                         .getProxy(sessionKey.getAccessTree());
 
                             } catch (ModelElementProxyBuildException e) {
-                                sensinact.mediator.error(e);
+                                mediator.error(e);
                             }
                             if (provider != null && provider.isAccessible()) {
                                 providers.add(provider);
@@ -145,14 +145,6 @@ public final class RegistryEndpoint {
             resource = service.getResource(resourceName);
         }
         return resource;
-    }
-
-    private boolean isAccessible(String publicKey, String path) {
-        return this.isAccessible(sensinact.getUserAccessTree(publicKey), path);
-    }
-
-    private boolean isAccessible(SessionKey sessionKey, String path) {
-        return this.isAccessible(sessionKey.getAccessTree(), path);
     }
 
     public boolean isAccessible(AccessTree<? extends AccessNode> tree, String path) {
@@ -227,42 +219,52 @@ public final class RegistryEndpoint {
         }
     }
 
-    public String getAll(SessionKey sessionKey, boolean resolveNamespace, String filter,Boolean attachNamespace) {
+    public String getAll(SessionKey sessionKey, boolean resolveNamespace, String filter) {
         StringBuilder builder = new StringBuilder();
-        String prefix = resolveNamespace
-                ? new StringBuilder().append(sensinact.namespace()).append(":").toString()
-                : "";
         int index = -1;
 
-        Collection<ServiceReference<SensiNactResourceModel>> references = RegistryEndpoint.this
-                .getReferences(sessionKey, filter);
-        Iterator<ServiceReference<SensiNactResourceModel>> iterator = references.iterator();
+        Collection<ServiceReference<SensiNactResourceModel>> references = 
+        		RegistryEndpoint.this.getReferences(sessionKey, filter);
+        Iterator<ServiceReference<SensiNactResourceModel>> iterator = 
+        		references.iterator();
 
         AccessTree<? extends AccessNode> tree = sessionKey.getAccessTree();
         AccessMethod.Type describe = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
-
+        
+        String namespace = namespace();
+        String prefix = "";
+        
         while (iterator.hasNext()) {
             index++;
             ServiceReference<SensiNactResourceModel> reference = iterator.next();
             String name = (String) reference.getProperty("name");
 
             String provider = new StringBuilder().append(prefix).append(name).toString();
-            String location = (String) reference
-                    .getProperty(ModelInstanceRegistration.LOCATION_PROPERTY.concat(".value"));
-            location = (location == null || location.length() == 0) ? this.sensinact.defaultLocation : location;
+            
+            String location = null;
+            Object obj = reference.getProperty(ModelInstanceRegistration.LOCATION_PROPERTY.concat(".value"));
+            if (obj != null) {
+                location = String.valueOf(obj).replace('"', '\'');
+            }
+            location = (location == null || location.length() == 0) ? defaultLocation : location;
             List<String> serviceList = (List<String>) reference.getProperty("services");
 
             builder.append(index > 0 ? ',' : "");
             builder.append('{');
             builder.append("\"name\":");
             builder.append('"');
-            if(attachNamespace) builder.append(this.sensinact.namespace()+":");
+            if(!SensinactCoreBaseIFaceManager.EMPTY_NAMESPACE.equals(namespace) && sessionKey.localID()!=0) { 
+            	builder.append(namespace);
+            	builder.append(":");
+            }
             builder.append(provider);
             builder.append('"');
-            builder.append(",\"namespace\":");
-            builder.append('"');
-            builder.append(this.sensinact.namespace());
-            builder.append('"');
+            if(!SensinactCoreBaseIFaceManager.EMPTY_NAMESPACE.equals(namespace)) {
+	            builder.append(",\"namespace\":");
+	            builder.append('"');
+	            builder.append(namespace);
+	            builder.append('"');
+            }
             builder.append(",\"location\":");
             builder.append('"');
             builder.append(location);
@@ -345,7 +347,7 @@ public final class RegistryEndpoint {
     public String getProviders(SessionKey sessionKey, boolean resolveNamespace, String filter) {
         try{
             String prefix = resolveNamespace
-                    ? new StringBuilder().append(sensinact.namespace()).append(":").toString()
+                    ? new StringBuilder().append(namespace()).append(":").toString()
                     : "";
             Collection<ServiceReference<SensiNactResourceModel>> references = this.getReferences(sessionKey, filter);
             Iterator<ServiceReference<SensiNactResourceModel>> iterator = references.iterator();
@@ -370,6 +372,22 @@ public final class RegistryEndpoint {
             e.printStackTrace();
             return "";
         }
-
     }
+    
+    /**
+	 * @inheritDoc
+	 *
+	 * @see org.eclipse.sensinact.gateway.core.Core#namespace()
+	 */
+	protected String namespace() {
+		String namespace = this.mediator.callService(SensinactCoreBaseIFaceManager.class, 
+			new Executable<SensinactCoreBaseIFaceManager,String>() {
+				@Override
+				public String execute(SensinactCoreBaseIFaceManager sensinactCoreBaseIFaceManager) throws Exception {							
+					return sensinactCoreBaseIFaceManager.namespace();
+				}
+			}
+		);
+		return namespace==null?SensinactCoreBaseIFaceManager.EMPTY_NAMESPACE:namespace;
+	}
 };

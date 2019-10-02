@@ -1,4 +1,4 @@
-package org.eclipse.sensinact.gateway.core.api;
+package org.eclipse.sensinact.gateway.core.remote;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

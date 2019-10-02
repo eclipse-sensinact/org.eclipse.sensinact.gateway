@@ -137,7 +137,6 @@ public class TestLdapFiltering extends MidOSGiTest {
 
     @Test
     public void testLdapFilter() throws Exception {
-    	Thread.sleep(5000);
         File tmpDirectory = new File("./target/felix/tmp");
 
         new File(tmpDirectory, "props.xml").delete();

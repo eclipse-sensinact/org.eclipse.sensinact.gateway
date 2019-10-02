@@ -26,7 +26,6 @@ public class TestRestSETAccess extends TestRestAccess {
     @Test
     public void testHttpAccessMethodSET() throws Exception {
         Mediator mediator = new Mediator(context);
-        Thread.sleep(5000);
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/GET", null, "GET");
 
         JSONObject response = new JSONObject(simulated);
@@ -49,7 +48,6 @@ public class TestRestSETAccess extends TestRestAccess {
     public void testWsAccessMethodSET() throws Exception {
         JSONObject response;
         String simulated;
-        Thread.sleep(5000);
         WsServiceTestClient client = new WsServiceTestClient();
 
         new Thread(client).start();

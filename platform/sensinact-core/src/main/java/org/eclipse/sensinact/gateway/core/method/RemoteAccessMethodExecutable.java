@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.core.method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.props.TypedKey;
@@ -20,6 +21,8 @@ import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
 import org.eclipse.sensinact.gateway.core.remote.RemoteCore;
 import org.eclipse.sensinact.gateway.core.remote.RemoteEndpoint;
+import org.eclipse.sensinact.gateway.core.remote.SensinactCoreBaseIface;
+import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -27,7 +30,7 @@ import org.json.JSONObject;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class RemoteAccessMethodExecutable implements Executable<RemoteCore, JSONObject> {
+public class RemoteAccessMethodExecutable implements Executable<SensinactCoreBaseIface, String> {
 	public static final String ARGUMENTS = "arguments";
 	public static final String SUBSCRIPTION_ID = "subscriptionId";
 	public static final String CONDITIONS = "conditions";
@@ -50,8 +53,10 @@ public class RemoteAccessMethodExecutable implements Executable<RemoteCore, JSON
 	private String attribute;
 
 	private Map<TypedKey<?>, Object> props;
+	private Mediator mediator;
 
-	public RemoteAccessMethodExecutable(Type method, String publicKey) {
+	public RemoteAccessMethodExecutable(Mediator mediator,Type method, String publicKey) {
+		this.mediator = mediator;
 		this.method = method;
 		this.publicKey = publicKey;
 		this.props = new HashMap<TypedKey<?>, Object>();
@@ -113,30 +118,27 @@ public class RemoteAccessMethodExecutable implements Executable<RemoteCore, JSON
 	 * @see org.eclipse.sensinact.gateway.common.execution.Executable#execute(java.lang.Object)
 	 */
 	@Override
-	public JSONObject execute(RemoteCore core) throws Exception {
-		JSONObject json = null;
+	public String execute(SensinactCoreBaseIface core) throws Exception {
+		String json = null;
 		if (core == null) {
 			return json;
 		}
-		RemoteEndpoint endpoint = core.endpoint();
 		String provider = serviceProvider.substring(serviceProvider.indexOf(':') + 1);
 
 		switch (this.method.name()) {
 		case "ACT":
-			json = endpoint.act(publicKey, provider, service, resource, this.<Object[]>get(ARGUMENTS_TK));
+			json = core.act(publicKey, provider, service, resource, CastUtils.cast(mediator.getClassLoader(), 
+					JSONArray.class, this.<Object[]>get(ARGUMENTS_TK)).toString());
 			break;
 		case "GET":
-			json = endpoint.get(publicKey, provider, service, resource, attribute);
+			json = core.get(publicKey, provider, service, resource, attribute);
 			break;
 		case "SET":
-			json = endpoint.set(publicKey, provider, service, resource, attribute, this.<Object>get(VALUE_TK));
+			json = core.set(publicKey, provider, service, resource, attribute, CastUtils.cast(mediator.getClassLoader(), 
+					JSONArray.class, this.<Object>get(VALUE_TK)).toString());
 			break;
 		case "SUBSCRIBE":
-			json = endpoint.subscribe(publicKey, provider, service, resource, this.<Recipient>get(RECIPIENT_TK),
-					this.<JSONArray>get(CONDITIONS_TK));
-			break;
 		case "UNSUBSCRIBE":
-			json = endpoint.unsubscribe(publicKey, provider, service, resource, this.<String>get(SUBSCRIPTION_ID_TK));
 			break;
 		default:
 			break;

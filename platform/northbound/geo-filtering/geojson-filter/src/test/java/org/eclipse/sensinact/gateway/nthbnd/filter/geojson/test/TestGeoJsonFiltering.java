@@ -133,7 +133,6 @@ public class TestGeoJsonFiltering extends MidOSGiTest {
 
     @Test
     public void testHttpFiltered() throws Exception {
-        Thread.sleep(5000);
         Mediator mediator = new Mediator(context);
         //(&(latitude <= 45.20899800276024)(latitude >= 45.191001997239766)(longitude <= 5.712727172127145)(longitude >= 5.687272827872856))
 
@@ -164,7 +163,6 @@ public class TestGeoJsonFiltering extends MidOSGiTest {
 
     @Test
     public void testWsFiltered() throws Exception {
-    	Thread.sleep(3000);
         WsServiceTestClient client = new WsServiceTestClient();
         new Thread(client).start();
         String simulated3 = this.synchronizedRequest(client, "/geojson:sensinact", "[{\"name\":\"geojson\",\"type\":\"string\",\"value\":\"{'latitude':45.2,'longitude':5.7,'distance':1000}\"}]");

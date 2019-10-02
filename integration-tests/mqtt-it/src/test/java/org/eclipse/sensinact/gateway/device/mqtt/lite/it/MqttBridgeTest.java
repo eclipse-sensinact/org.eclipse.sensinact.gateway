@@ -85,7 +85,6 @@ public class MqttBridgeTest extends MqttTestITAbstract {
 	    		break;
 	    	}
     	}
-    	Thread.sleep(5000);
 	    sensinactCore = bc.getService(bc.getServiceReference(Core.class));
 	    sensinactSession=sensinactCore.getAnonymousSession();
     }

@@ -1,10 +1,4 @@
-package org.eclipse.sensinact.gateway.core.api;
-
-import org.eclipse.sensinact.gateway.common.constraint.Constraint;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.json.JSONObject;
-
-import java.util.Set;
+package org.eclipse.sensinact.gateway.core.remote;
 
 public interface SensinactCoreBaseIface {
 
@@ -18,10 +12,9 @@ public interface SensinactCoreBaseIface {
     public String getResource(String identifier, final String serviceProviderId, final String serviceId,final String resourceId);
     public String get(String identifier, final String serviceProviderId, final String serviceId,
                           final String resourceId, final String attributeId);
-    public String subscribe(String provider, String service, String resource,Recipient recipient, Set<Constraint> conditions, String policy);
-    public String set(String requestId, final String serviceProviderId, final String serviceId,
+    public String set(String identifier,final String serviceProviderId, final String serviceId,
                       final String resourceId, final String attributeId, final String parameter);
-    public String act(String requestId, final String serviceProviderId, final String serviceId,
+    public String act(String identifier, final String serviceProviderId, final String serviceId,
                       final String resourceId, final String parameters);
 
 }

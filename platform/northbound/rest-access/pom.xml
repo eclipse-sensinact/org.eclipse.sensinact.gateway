@@ -298,6 +298,13 @@
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-core.jar</destFileName>
 								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.sensinact.gateway</groupId>
+									<artifactId>sensinact-remote-osgi</artifactId>
+									<version>${project.version}</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>sensinact-remote-osgi.jar</destFileName>
+								</artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.sensinact.gateway</groupId>
                                     <artifactId>sensinact-signature-validator</artifactId>

@@ -221,7 +221,6 @@ public class TestGenericImplementation extends MidOSGiTest {
 
     @Test
     public void testAnnotationResolver() throws Throwable {
-    	Thread.sleep(5000);    
         File tmpDirectory = new File("./target/felix/tmp");
         File confDirectory = new File("./target/felix/conf");
         new File(confDirectory, "props.xml").delete();
@@ -718,6 +717,6 @@ public class TestGenericImplementation extends MidOSGiTest {
         }finally {
             Thread.currentThread().setContextClassLoader(current);
         }
-        Thread.sleep(7000);
+        Thread.sleep(5000);
     }
 }

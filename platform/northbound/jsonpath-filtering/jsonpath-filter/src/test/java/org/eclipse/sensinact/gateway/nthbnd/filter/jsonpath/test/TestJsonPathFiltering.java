@@ -135,7 +135,6 @@ public class TestJsonPathFiltering extends MidOSGiTest {
 
     @Test
     public void testHttpFiltered() throws Exception {
-    	Thread.sleep(5000);
         Mediator mediator = new Mediator(context);
         String simulated3 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/jsonpath:sensinact?jsonpath=$.[?(@.name=='slider')]", null, "GET");
         JSONObject response = new JSONObject("{\"filters\":[{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"}]," + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," + "{\"name\":\"cursor\",\"resources\":" + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" + "}]" + ",\"location\":\"45.2:5.7\"}]}");
@@ -152,7 +151,6 @@ public class TestJsonPathFiltering extends MidOSGiTest {
 
     @Test
     public void testWsFiltered() throws Exception {
-    	Thread.sleep(5000);
         JSONObject response;
         WsServiceTestClient client = new WsServiceTestClient();
 

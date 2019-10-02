@@ -11,14 +11,12 @@
 package org.eclipse.sensinact.gateway.core;
 
 import java.security.InvalidKeyException;
-import java.util.Collection;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.api.Sensinact;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.ResourceIntent;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.remote.AbstractRemoteEndpoint;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
@@ -28,13 +26,21 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface Core extends Sensinact {
+public interface Core {
 
 	/**
 	 * Namespace property key
 	 */
 	public static final String NAMESPACE_PROP = "namespace";
-
+	
+	/**
+	 * Returns this Core's String namespace. The namespace will be used to prefix
+	 * the identifiers of the service providers that are handled by this Core
+	 * 
+	 * @return this Core's String namespace
+	 */
+	String namespace();
+	
 	/**
 	 * Instantiates and registers a new agent, connected to the {@link MidAgentCallback} 
 	 * and whose received messages are filtered by the {@link SnaFilter} passed as
@@ -109,7 +115,18 @@ public interface Core extends Sensinact {
 	DataStoreException, InvalidCredentialException;
 	
 	/**
+	 * Returns the {@link Session} for the user whose String public key is 
+	 * passed as parameter
+	 * 
+	 * @param publicKey the String public key
+	 * 
+	 * @return the {@link Session} for the specified user
+	 */
+	Session getRemoteSession(String publicKey);
+	
+	/**
 	 * Closes this Core
 	 */
 	void close();
+
 }

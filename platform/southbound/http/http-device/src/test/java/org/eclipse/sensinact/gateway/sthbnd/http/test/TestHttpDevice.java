@@ -153,7 +153,6 @@ public class TestHttpDevice extends MidOSGiTest {
 
     @Test
     public void testHttpTask() throws Throwable {
-    	Thread.sleep(5000);
         callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
 
         this.initializeMoke(new File("src/test/resources/resources.xml").toURI().toURL(), new File("./extra-src/test/resources/MANIFEST.MF"), new File("./extra-src/test/resources/meta"), new File("./target/extra-test-classes"));
@@ -186,7 +185,6 @@ public class TestHttpDevice extends MidOSGiTest {
 
     @Test
     public void testHttpTaskWithProcessingContext() throws Throwable {
-    	Thread.sleep(5000);
         callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway5").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
 
         this.initializeMoke(new File("src/test/resources/resources5.xml").toURI().toURL(), new File("./extra-src5/test/resources/MANIFEST.MF"), new File("./extra-src5/test/resources/meta"), new File("./target/extra-test-classes5"));
@@ -218,7 +216,6 @@ public class TestHttpDevice extends MidOSGiTest {
 
     @Test
     public void testHttpTaskWithServicesEnumeration() throws Throwable {
-    	Thread.sleep(5000);
         callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway4").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
 
         this.initializeMoke(new File("src/test/resources/resources4.xml").toURI().toURL(), new File("./extra-src4/test/resources/MANIFEST.MF"), new File("./extra-src4/test/resources/meta"), new File("./target/extra-test-classes4"));
@@ -250,7 +247,6 @@ public class TestHttpDevice extends MidOSGiTest {
 
     @Test
     public void testChainedHttpTask() throws Throwable {
-    	Thread.sleep(5000);
         callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway3").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
 
         this.initializeMoke(new File("src/test/resources/resources3.xml").toURI().toURL(), new File("./extra-src3/test/resources/MANIFEST.MF"), new File("./extra-src3/test/resources/meta"), new File("./target/extra-test-classes3"));
@@ -273,7 +269,6 @@ public class TestHttpDevice extends MidOSGiTest {
 
     @Test
     public void testHttpDeviceReccurrent() throws Throwable {
-    	Thread.sleep(5000);
         callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway2").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
 
         this.initializeMoke(new File("src/test/resources/resources2.xml").toURI().toURL(), new File("./extra-src2/test/resources/MANIFEST.MF"), new File("./extra-src2/test/resources/meta"), new File("./target/extra-test-classes2"));
@@ -407,6 +402,6 @@ public class TestHttpDevice extends MidOSGiTest {
         } finally {
             Thread.currentThread().setContextClassLoader(current);
         }
-        Thread.sleep(10 * 1000);
+        Thread.sleep(5000);
     }
 }
