@@ -119,6 +119,7 @@ public class TestRestGETAccess extends TestRestAccess {
 
     @Test
     public void testWsAccessMethodRawDescription() throws Exception {
+    	Thread.sleep(5000);
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
 
@@ -132,6 +133,7 @@ public class TestRestGETAccess extends TestRestAccess {
 
     @Test
     public void testWsAccessMethodGET() throws Exception {
+    	Thread.sleep(5000);
         JSONObject response;
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();

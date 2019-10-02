@@ -46,6 +46,7 @@ public class TestRestSETAccess extends TestRestAccess {
 
     @Test
     public void testWsAccessMethodSET() throws Exception {
+    	Thread.sleep(5000);
         JSONObject response;
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();

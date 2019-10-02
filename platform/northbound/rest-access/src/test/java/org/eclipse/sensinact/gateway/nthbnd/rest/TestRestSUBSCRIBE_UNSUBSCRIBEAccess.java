@@ -178,6 +178,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
     @Test
     public void testWsAccessMethodSUBSCRIBE_UNSUBSCIBE() throws Exception {
+    	Thread.sleep(5000);
         MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
         SliderSetterItf slider = sliderProxy.buildProxy();
         JSONObject response;
@@ -229,6 +230,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
     @Test
     public void testWsAccessMethodConditionalSUBSCRIBE_UNSUBSCIBE() throws Exception {
+    	Thread.sleep(5000);
         MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
         SliderSetterItf slider = sliderProxy.buildProxy();
         JSONObject response;

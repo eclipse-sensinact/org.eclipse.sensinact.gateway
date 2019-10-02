@@ -121,6 +121,7 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
 				
 				@Override
                 public void configure(WebSocketServletFactory factory) {
+					System.out.println("<<<<<<<<<<<<<<<     WebSocketServlet Configuration   >>>>>>>>>>>>>>>>>>>>>>");
                     factory.getPolicy().setIdleTimeout(1000 * 3600);
                     factory.setCreator(sessionPool);
                 };

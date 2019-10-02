@@ -10,22 +10,21 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.rest.ws.test;
 
+import java.net.URI;
+import java.util.Stack;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import java.net.URI;
-import java.util.Stack;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @WebSocket(maxTextMessageSize = 64 * 1024)
 public class WsServiceTestClient implements Runnable {
@@ -40,15 +39,10 @@ public class WsServiceTestClient implements Runnable {
         try {
             client = new WebSocketClient();
             client.setMaxIdleTimeout(1000 * 3600);
-
             client.start();
-            URI echoUri = new URI(destUri);
-            ClientUpgradeRequest request = new ClientUpgradeRequest();
-
-            Future<Session> future = client.connect(this, echoUri, request);
-            /*Session session = */
-            future.get(60, TimeUnit.SECONDS);
-            //this.socket.onConnect(session);
+            URI echoUri = new URI(destUri);            
+            Future<Session> future = client.connect(this, echoUri);
+            future.get();
 
         } catch (Throwable t) {
             t.printStackTrace();
@@ -95,6 +89,7 @@ public class WsServiceTestClient implements Runnable {
     @OnWebSocketConnect
     public void onConnect(Session session) {
         this.session = session;
+    	System.out.println("==========================> "+ this.session);
     }
 
     /**

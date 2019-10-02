@@ -57,6 +57,7 @@ public class WebSocketConnection {
     @OnWebSocketConnect
     public void onConnect(Session session) {
         this.session = session;
+    	System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< " + this.session);
     }
 
 

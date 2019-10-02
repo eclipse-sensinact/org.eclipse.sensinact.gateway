@@ -96,6 +96,7 @@ public class TestRestACTAccess extends TestRestAccess {
 
     @Test
     public void testWsACTWithoutParameters() throws Exception {
+    	Thread.sleep(5000);
         JSONObject response;
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
