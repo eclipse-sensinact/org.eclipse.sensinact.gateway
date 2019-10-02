@@ -150,11 +150,15 @@ public class WsServiceTestClient implements Runnable {
                 if (request.content != null) {
                     json.put("parameters", new JSONArray(request.content));
                 }
-                this.send(json.toString());
+                try {
+                	this.send(json.toString());
+                } catch(NullPointerException e){
+                	e.printStackTrace();
+                	this.stack.push(request);
+                }
             } else {
                 try {
                     Thread.sleep(200);
-
                 } catch (InterruptedException e) {
                     Thread.interrupted();
                     break;

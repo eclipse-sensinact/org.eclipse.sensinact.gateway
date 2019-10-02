@@ -14,6 +14,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.rest.ws.test.WsServiceTestClient;
 import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
@@ -44,6 +45,7 @@ public class TestRestSETAccess extends TestRestAccess {
         assertTrue(response.getJSONObject("response").get("value").equals("0.0,0.0"));
     }
 
+    @Ignore
     @Test
     public void testWsAccessMethodSET() throws Exception {
     	Thread.sleep(5000);

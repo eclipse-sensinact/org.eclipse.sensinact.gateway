@@ -14,6 +14,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.rest.ws.test.WsServiceTestClient;
 import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -94,6 +95,7 @@ public class TestRestACTAccess extends TestRestAccess {
         assertEquals(5,response.getJSONObject("response").getInt("value"));
     }
 
+    @Ignore
     @Test
     public void testWsACTWithoutParameters() throws Exception {
     	Thread.sleep(5000);
@@ -122,6 +124,7 @@ public class TestRestACTAccess extends TestRestAccess {
         assertTrue(response.getJSONObject("response").get("value").equals("ON"));
     }
 
+    @Ignore
     @Test
     public void testWsACTWithParameters() throws Exception {
         Thread.sleep(5000);

@@ -20,6 +20,7 @@ import org.eclipse.sensinact.gateway.test.MidProxy;
 import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -176,6 +177,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
         Assert.assertNull(message);
     }
 
+    @Ignore
     @Test
     public void testWsAccessMethodSUBSCRIBE_UNSUBSCIBE() throws Exception {
     	Thread.sleep(5000);
@@ -228,6 +230,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
         Assert.assertNull(message);
     }
 
+    @Ignore
     @Test
     public void testWsAccessMethodConditionalSUBSCRIBE_UNSUBSCIBE() throws Exception {
     	Thread.sleep(5000);

@@ -17,6 +17,7 @@ import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
 import org.eclipse.sensinact.gateway.test.MidProxy;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -117,6 +118,7 @@ public class TestRestGETAccess extends TestRestAccess {
         assertTrue(response.getJSONObject("response").get("value").equals(1));
     }
 
+    @Ignore
     @Test
     public void testWsAccessMethodRawDescription() throws Exception {
     	Thread.sleep(5000);    	
@@ -131,6 +133,7 @@ public class TestRestGETAccess extends TestRestAccess {
         JSONAssert.assertEquals(response, new JSONArray(simulated), false);
     }
 
+    //@Ignore
     @Test
     public void testWsAccessMethodGET() throws Exception {
     	Thread.sleep(5000);
@@ -168,6 +171,7 @@ public class TestRestGETAccess extends TestRestAccess {
         client.close();
     }
 
+    @Ignore
     @Test
     public void testSimplifiedWsAccessMethodGET() throws Exception {
         JSONObject response;
