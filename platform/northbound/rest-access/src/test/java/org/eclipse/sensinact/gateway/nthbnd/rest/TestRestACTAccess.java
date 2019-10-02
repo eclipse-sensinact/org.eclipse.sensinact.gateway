@@ -157,11 +157,12 @@ public class TestRestACTAccess extends TestRestAccess {
     }
 
     private String synchronizedRequest(WsServiceTestClient client, String url, String content) {
-        String simulated = null;
+    	String simulated = null;
         long wait = 1000;
         client.newRequest(url, content);
 
         while (!client.isAvailable() && wait > 0) {
+            wait-=100;
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {

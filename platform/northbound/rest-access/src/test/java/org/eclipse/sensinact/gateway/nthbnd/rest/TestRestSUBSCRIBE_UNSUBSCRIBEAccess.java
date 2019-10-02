@@ -320,11 +320,10 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
     private String waitForAvailableMessage(WsServiceTestClient client, long delay) {
         String message = null;
         long wait = delay;
-
         while (!client.isAvailable() && wait > 0) {
+            wait -= 100;
             try {
                 Thread.sleep(100);
-                wait -= 100;
             } catch (InterruptedException e) {
                 Thread.interrupted();
             }

@@ -171,7 +171,7 @@ public class TestRestGETAccess extends TestRestAccess {
         client.close();
     }
 
-    @Ignore
+    //@Ignore
     @Test
     public void testSimplifiedWsAccessMethodGET() throws Exception {
         JSONObject response;
@@ -207,6 +207,7 @@ public class TestRestGETAccess extends TestRestAccess {
         client.newRequest(url, content);
 
         while (!client.isAvailable() && wait > 0) {
+            wait-=100;
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
