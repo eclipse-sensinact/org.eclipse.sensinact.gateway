@@ -31,6 +31,7 @@ public class TestRestGETAccess extends TestRestAccess {
 
     @Test
     public void testHttpAccessMethodRawDescription() throws Exception {
+    	Thread.sleep(5000);
     	Mediator mediator = new Mediator(context);
 
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers?rawDescribe=true", null, "GET");
@@ -43,6 +44,7 @@ public class TestRestGETAccess extends TestRestAccess {
 
     @Test
     public void testHttpAccessMethodGET() throws Exception {
+    	Thread.sleep(5000);
         Mediator mediator = new Mediator(context);
 
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers", null, "GET");
@@ -85,6 +87,7 @@ public class TestRestGETAccess extends TestRestAccess {
 
     @Test
     public void testSimplifiedHttpAccessMethodGET() throws Exception {
+    	Thread.sleep(5000);
     	Mediator mediator = new Mediator(context);
 
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/slider", null, "GET");
@@ -118,7 +121,6 @@ public class TestRestGETAccess extends TestRestAccess {
         assertTrue(response.getJSONObject("response").get("value").equals(1));
     }
 
-    @Ignore
     @Test
     public void testWsAccessMethodRawDescription() throws Exception {
     	Thread.sleep(5000);    	
@@ -133,9 +135,9 @@ public class TestRestGETAccess extends TestRestAccess {
         JSONAssert.assertEquals(response, new JSONArray(simulated), false);
     }
 
-    //@Ignore
     @Test
     public void testWsAccessMethodGET() throws Exception {
+    	Thread.sleep(5000);
         JSONObject response;
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
@@ -170,9 +172,9 @@ public class TestRestGETAccess extends TestRestAccess {
         client.close();
     }
 
-    //@Ignore
     @Test
     public void testSimplifiedWsAccessMethodGET() throws Exception {
+    	Thread.sleep(5000);
         JSONObject response;
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();

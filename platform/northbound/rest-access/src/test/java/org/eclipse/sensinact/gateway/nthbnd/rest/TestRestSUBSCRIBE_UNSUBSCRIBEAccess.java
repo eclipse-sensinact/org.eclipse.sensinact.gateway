@@ -59,6 +59,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
     @Test
     public void testHttpAccessMethodSUBSCRIBE_UNSUBSCIBE() throws Exception {
+    	Thread.sleep(5000);
         Mediator mediator = new Mediator(context);
         JSONObject response;
         String simulated;
@@ -118,6 +119,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
     @Test
     public void testHttpAccessMethodConditionalSUBSCRIBE_UNSUBSCIBE() throws Exception {
+    	Thread.sleep(5000);
         Mediator mediator = new Mediator(context);
         JSONObject response;
         String simulated;
@@ -177,7 +179,6 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
         Assert.assertNull(message);
     }
 
-    @Ignore
     @Test
     public void testWsAccessMethodSUBSCRIBE_UNSUBSCIBE() throws Exception {
     	Thread.sleep(5000);
@@ -230,7 +231,6 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
         Assert.assertNull(message);
     }
 
-    @Ignore
     @Test
     public void testWsAccessMethodConditionalSUBSCRIBE_UNSUBSCIBE() throws Exception {
     	Thread.sleep(5000);
