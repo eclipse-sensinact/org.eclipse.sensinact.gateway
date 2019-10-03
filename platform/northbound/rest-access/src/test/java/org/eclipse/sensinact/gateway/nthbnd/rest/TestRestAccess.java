@@ -34,7 +34,7 @@ public class TestRestAccess extends MidOSGiTest {
     //						STATIC DECLARATIONS							  //
     //********************************************************************//
 
-    protected static final String HTTP_ROOTURL = "http://localhost:54460/sensinact";
+    protected static final String HTTP_ROOTURL = "http://127.0.0.1:54460/sensinact";
     protected static final String WS_ROOTURL = "/sensinact";
 
     //********************************************************************//

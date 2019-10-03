@@ -136,7 +136,6 @@ public class TestRestGETAccess extends TestRestAccess {
     //@Ignore
     @Test
     public void testWsAccessMethodGET() throws Exception {
-    	Thread.sleep(5000);
         JSONObject response;
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();

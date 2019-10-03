@@ -31,7 +31,9 @@ import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpLoginEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.HttpRegisteringEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws.WebSocketConnectionFactory;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /**
@@ -41,7 +43,20 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
     
     private CorsFilter corsFilter = null;
     private boolean corsHeader = false;
-
+    
+    private static ClassLoader loader = null;
+    
+    private static void findJettyClassLoader(BundleContext context) {
+    	Bundle[] bundles = context.getBundles();
+    	for(Bundle bundle:bundles) {
+    		if("org.apache.felix.http.jetty".equals(bundle.getSymbolicName())) {
+    			BundleWiring wire = bundle.adapt(BundleWiring.class);
+    			loader = wire.getClassLoader();
+    			break;
+    		}
+    	}
+    }
+    
     /**
      * @inheritDoc
      * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#
@@ -49,41 +64,24 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
 	public void doStart() throws Exception {
+    	findJettyClassLoader(super.mediator.getContext());
         this.corsHeader = Boolean.valueOf((String) super.mediator.getProperty(RestAccessConstants.CORS_HEADER));
 
-        if (Activator.this.corsHeader) {
-            Activator.this.corsFilter = new CorsFilter(mediator);                    
+        if (this.corsHeader) {
+            this.corsFilter = new CorsFilter(mediator);                    
             mediator.register(Activator.this.corsFilter, Filter.class, new Hashtable() {{
                 	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/");
                 	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER, HttpWhiteboardConstants.DISPATCHER_ASYNC);
                 }
             });
         } 
-        mediator.register(new HttpLoginEndpoint(mediator), Servlet.class, new Hashtable() {{
-        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.LOGIN_ENDPOINT);
-        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
-        	}
-        });
-        Activator.this.mediator.info(String.format("%s servlet registered", RestAccessConstants.LOGIN_ENDPOINT));
-        mediator.register(new HttpRegisteringEndpoint(mediator), Servlet.class, new Hashtable() {{
-        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.REGISTERING_ENDPOINT);
-        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
-        	}
-        });
-        Activator.this.mediator.info(String.format("%s servlet registered", RestAccessConstants.REGISTERING_ENDPOINT));
-        mediator.register(new HttpEndpoint(mediator), Servlet.class, new Hashtable() {{
-        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.HTTP_ROOT);
-        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
-        	}
-        });
-        Activator.this.mediator.info(String.format("%s servlet registered", RestAccessConstants.HTTP_ROOT));
-        mediator.register(
+        super.mediator.register(
         	new Hashtable() {{
         		this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.WS_ROOT);
         		this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);}}, 
         	new WebSocketServlet() { 			
 				private static final long serialVersionUID = 1L;			
-				private WebSocketConnectionFactory sessionPool = new WebSocketConnectionFactory(Activator.this.mediator);
+				private WebSocketConnectionFactory sessionPool = new WebSocketConnectionFactory(Activator.super.mediator);
 				
 		        private final AtomicBoolean firstCall = new AtomicBoolean(true); 
 		    
@@ -96,7 +94,7 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
 		        @Override
 		        public void service(ServletRequest arg0, ServletResponse arg1) throws ServletException, IOException {
 		            if(firstCall.compareAndSet(true, false)) {
-		                try {
+		                try {         		        	
 		                    delayedInit();
 		                } finally {
 		                    initBarrier.countDown();
@@ -114,9 +112,11 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
 		        private void delayedInit() throws ServletException {
 		            Thread currentThread = Thread.currentThread();
 		            ClassLoader tccl = currentThread.getContextClassLoader();
-		            currentThread.setContextClassLoader(WebSocketServlet.class.getClassLoader());
+		            currentThread.setContextClassLoader(loader);
 		            try {
 		                super.init();
+		            } catch(Exception e) {
+		            	e.printStackTrace();		            
 		            } finally {
 		                currentThread.setContextClassLoader(tccl);
 		            }
@@ -129,7 +129,25 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
                 };
             }, 
         	new Class[]{ Servlet.class, WebSocketServlet.class });
-        mediator.info(String.format("%s servlet registered", RestAccessConstants.WS_ROOT));
+        super.mediator.info(String.format("%s servlet registered", RestAccessConstants.WS_ROOT));
+        super.mediator.register(new HttpLoginEndpoint(mediator), Servlet.class, new Hashtable() {{
+        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.LOGIN_ENDPOINT);
+        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
+        	}
+        });
+        super.mediator.info(String.format("%s servlet registered", RestAccessConstants.LOGIN_ENDPOINT));
+        mediator.register(new HttpRegisteringEndpoint(mediator), Servlet.class, new Hashtable() {{
+        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.REGISTERING_ENDPOINT);
+        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
+        	}
+        });
+        super.mediator.info(String.format("%s servlet registered", RestAccessConstants.REGISTERING_ENDPOINT));
+        mediator.register(new HttpEndpoint(mediator), Servlet.class, new Hashtable() {{
+        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.HTTP_ROOT);
+        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
+        	}
+        });      
+        super.mediator.info(String.format("%s servlet registered", RestAccessConstants.HTTP_ROOT));  
     }
 
     /**

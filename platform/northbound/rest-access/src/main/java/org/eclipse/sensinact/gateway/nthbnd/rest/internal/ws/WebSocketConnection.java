@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * WebSocket connection endpoint
  */
-@WebSocket(maxTextMessageSize = 64 * 1024)
+@WebSocket(maxIdleTime = 0, maxTextMessageSize = 64 * 1024)
 public class WebSocketConnection {
     protected static final String LOGIN_PATH = "login";
     protected static final String LOGIN_URI = "/" + LOGIN_PATH;
@@ -137,9 +137,7 @@ public class WebSocketConnection {
         }
         try {
             Future<Void> future = this.session.getRemote().sendStringByFuture(message);
-
             future.get(1, TimeUnit.SECONDS);
-
         } catch (Exception e) {
             this.mediator.error(new StringBuilder().append("Session ").append(session.getLocalAddress()).append("seems to be invalid, removing from the pool.").toString(), e);
         }
