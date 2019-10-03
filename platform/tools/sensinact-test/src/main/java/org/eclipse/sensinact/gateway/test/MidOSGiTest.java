@@ -242,6 +242,8 @@ public abstract class MidOSGiTest implements BundleContextProvider {
     	}
     	new File(prefix,"load").mkdir();
     	System.out.println("Felix stopped [" + (System.currentTimeMillis() - start) + "]");
+    	//let the environment finalize
+        Thread.sleep(5000);
     }
 
     /**
@@ -303,6 +305,8 @@ public abstract class MidOSGiTest implements BundleContextProvider {
 
         Assert.assertTrue(bundleClass == Bundle.class);
         Assert.assertTrue(((Integer) bundleClass.getDeclaredMethod(BUNDLE_STATE).invoke(felix)) == Bundle.ACTIVE);
+        //let the environment initialize
+        Thread.sleep(5000);
     }
 
     /**

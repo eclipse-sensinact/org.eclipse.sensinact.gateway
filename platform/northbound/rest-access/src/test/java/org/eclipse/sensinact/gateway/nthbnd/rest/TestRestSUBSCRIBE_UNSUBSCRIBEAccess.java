@@ -59,7 +59,6 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
     @Test
     public void testHttpAccessMethodSUBSCRIBE_UNSUBSCIBE() throws Exception {
-    	Thread.sleep(5000);
         Mediator mediator = new Mediator(context);
         JSONObject response;
         String simulated;
@@ -119,8 +118,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
     @Test
     public void testHttpAccessMethodConditionalSUBSCRIBE_UNSUBSCIBE() throws Exception {
-    	Thread.sleep(5000);
-        Mediator mediator = new Mediator(context);
+    	Mediator mediator = new Mediator(context);
         JSONObject response;
         String simulated;
 
@@ -181,8 +179,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
     @Test
     public void testWsAccessMethodSUBSCRIBE_UNSUBSCIBE() throws Exception {
-    	Thread.sleep(5000);
-        MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
+    	MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
         SliderSetterItf slider = sliderProxy.buildProxy();
         JSONObject response;
         String simulated;
@@ -233,8 +230,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
     @Test
     public void testWsAccessMethodConditionalSUBSCRIBE_UNSUBSCIBE() throws Exception {
-    	Thread.sleep(5000);
-        MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
+    	MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
         SliderSetterItf slider = sliderProxy.buildProxy();
         JSONObject response;
         String simulated;

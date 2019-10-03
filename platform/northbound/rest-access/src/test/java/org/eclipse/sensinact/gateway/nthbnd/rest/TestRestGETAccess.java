@@ -17,7 +17,6 @@ import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
 import org.eclipse.sensinact.gateway.test.MidProxy;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -31,7 +30,6 @@ public class TestRestGETAccess extends TestRestAccess {
 
     @Test
     public void testHttpAccessMethodRawDescription() throws Exception {
-    	Thread.sleep(5000);
     	Mediator mediator = new Mediator(context);
 
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers?rawDescribe=true", null, "GET");
@@ -44,7 +42,6 @@ public class TestRestGETAccess extends TestRestAccess {
 
     @Test
     public void testHttpAccessMethodGET() throws Exception {
-    	Thread.sleep(5000);
         Mediator mediator = new Mediator(context);
 
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers", null, "GET");
@@ -87,7 +84,6 @@ public class TestRestGETAccess extends TestRestAccess {
 
     @Test
     public void testSimplifiedHttpAccessMethodGET() throws Exception {
-    	Thread.sleep(5000);
     	Mediator mediator = new Mediator(context);
 
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/slider", null, "GET");
@@ -123,7 +119,6 @@ public class TestRestGETAccess extends TestRestAccess {
 
     @Test
     public void testWsAccessMethodRawDescription() throws Exception {
-    	Thread.sleep(5000);    	
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
 
@@ -137,7 +132,6 @@ public class TestRestGETAccess extends TestRestAccess {
 
     @Test
     public void testWsAccessMethodGET() throws Exception {
-    	Thread.sleep(5000);
         JSONObject response;
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
@@ -174,7 +168,6 @@ public class TestRestGETAccess extends TestRestAccess {
 
     @Test
     public void testSimplifiedWsAccessMethodGET() throws Exception {
-    	Thread.sleep(5000);
         JSONObject response;
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();

@@ -14,7 +14,6 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.rest.ws.test.WsServiceTestClient;
 import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -27,7 +26,6 @@ public class TestRestACTAccess extends TestRestAccess {
 
     @Test
     public void testHttpACTWithoutParameters() throws Exception {
-    	Thread.sleep(5000);
         Mediator mediator = new Mediator(context);
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/light/services/switch/resources/status/GET", null, "GET");
         //System.out.println(simulated);
@@ -50,7 +48,6 @@ public class TestRestACTAccess extends TestRestAccess {
 
     @Test
     public void testSimplifiedHttpACTWithoutParameters() throws Exception {
-    	Thread.sleep(5000);
         Mediator mediator = new Mediator(context);
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/light/switch/status/GET", null, "GET");
 
@@ -74,7 +71,6 @@ public class TestRestACTAccess extends TestRestAccess {
 
     @Test
     public void testHttpACTWithParameters() throws Exception {
-    	Thread.sleep(5000);
         Mediator mediator = new Mediator(context);
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null, "GET");
 
@@ -100,7 +96,6 @@ public class TestRestACTAccess extends TestRestAccess {
 
     @Test
     public void testWsACTWithoutParameters() throws Exception {
-    	Thread.sleep(5000);
         JSONObject response;
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
@@ -128,7 +123,6 @@ public class TestRestACTAccess extends TestRestAccess {
 
     @Test
     public void testWsACTWithParameters() throws Exception {
-        Thread.sleep(5000);
         JSONObject response;
         String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
@@ -159,7 +153,7 @@ public class TestRestACTAccess extends TestRestAccess {
 
     private String synchronizedRequest(WsServiceTestClient client, String url, String content) {
     	String simulated = null;
-        long wait = 1000;
+        long wait = 10000;
         client.newRequest(url, content);
 
         while (!client.isAvailable() && wait > 0) {
