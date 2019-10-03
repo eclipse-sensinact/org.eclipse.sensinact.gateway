@@ -75,9 +75,9 @@ public class TestRestGETAccess extends TestRestAccess {
         MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
         SliderSetterItf slider = sliderProxy.buildProxy();
         slider.move(1);
+        Thread.sleep(1000);
         simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/" + "cursor/resources/position/GET", null, "GET");
         response = new JSONObject(simulated);
-
         System.out.println(response);
 
         assertTrue(response.get("statusCode").equals(200));
@@ -129,7 +129,7 @@ public class TestRestGETAccess extends TestRestAccess {
 
         new Thread(client).start();
         simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers?rawDescribe=true", null);
-
+        
         System.out.println(simulated);
         JSONArray response = new JSONArray("[\"slider\",\"light\"]");
         JSONAssert.assertEquals(response, new JSONArray(simulated), false);
@@ -163,12 +163,12 @@ public class TestRestGETAccess extends TestRestAccess {
         MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
         SliderSetterItf slider = sliderProxy.buildProxy();
         slider.move(1);
+        Thread.sleep(1000);
         simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/slider/services/cursor/resources/position/GET", null);
         response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/cursor/position"));
         assertTrue(response.getJSONObject("response").get("value").equals(1));
-
         client.close();
     }
 
@@ -193,18 +193,18 @@ public class TestRestGETAccess extends TestRestAccess {
         MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
         SliderSetterItf slider = sliderProxy.buildProxy();
         slider.move(1);
+        Thread.sleep(1000);
         simulated = this.synchronizedRequest(client, WS_ROOTURL + "/slider/cursor/position/GET", null);
         response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/cursor/position"));
         assertTrue(response.getJSONObject("response").get("value").equals(1));
-
         client.close();
     }
 
     private String synchronizedRequest(WsServiceTestClient client, String url, String content) {
         String simulated = null;
-        long wait = 1000;
+        long wait = 10000;
         client.newRequest(url, content);
 
         while (!client.isAvailable() && wait > 0) {

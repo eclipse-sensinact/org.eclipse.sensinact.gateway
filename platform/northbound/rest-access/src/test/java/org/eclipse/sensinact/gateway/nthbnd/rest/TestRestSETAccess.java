@@ -74,7 +74,7 @@ public class TestRestSETAccess extends TestRestAccess {
 
     private String synchronizedRequest(WsServiceTestClient client, String url, String content) {
     	String simulated = null;
-        long wait = 1000;
+        long wait = 10000;
         client.newRequest(url, content);
 
         while (!client.isAvailable() && wait > 0) {

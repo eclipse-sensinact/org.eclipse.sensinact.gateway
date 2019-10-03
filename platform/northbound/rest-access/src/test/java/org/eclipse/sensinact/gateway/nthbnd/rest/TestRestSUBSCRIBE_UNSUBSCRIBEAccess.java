@@ -313,7 +313,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
     private String synchronizedRequest(WsServiceTestClient client, String url, String content) {
         client.newRequest(url, content);
-        String message = waitForAvailableMessage(client, 1000);
+        String message = waitForAvailableMessage(client, 10000);
         return message;
     }
 
