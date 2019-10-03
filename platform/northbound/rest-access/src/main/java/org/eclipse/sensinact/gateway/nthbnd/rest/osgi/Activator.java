@@ -50,8 +50,13 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
     	Bundle[] bundles = context.getBundles();
     	for(Bundle bundle:bundles) {
     		if("org.apache.felix.http.jetty".equals(bundle.getSymbolicName())) {
-    			BundleWiring wire = bundle.adapt(BundleWiring.class);
-    			loader = wire.getClassLoader();
+    			try {
+    				BundleWiring wire = bundle.adapt(BundleWiring.class);
+    				loader = wire.getClassLoader();
+    			}catch(Exception e) {
+    				e.printStackTrace();
+    				loader = WebSocketServlet.class.getClassLoader();
+    			}
     			break;
     		}
     	}

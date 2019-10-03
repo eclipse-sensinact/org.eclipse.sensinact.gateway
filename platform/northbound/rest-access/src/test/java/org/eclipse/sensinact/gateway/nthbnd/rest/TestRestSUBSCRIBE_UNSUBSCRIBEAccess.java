@@ -42,7 +42,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
             }
             server = null;
         }
-        server = new JettyTestServer(54461);
+        server = new JettyTestServer(8898);
         new Thread(server).start();
         server.join();
     }
@@ -64,7 +64,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
         String simulated;
         simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + 
         	"/providers/slider/services/cursor/resources/position/SUBSCRIBE",
-        	"{\"parameters\" : [{\"name\":\"callback\", \"type\":\"string\",\"value\":\"http://localhost:54461\"}]}", "POST");
+        	"{\"parameters\" : [{\"name\":\"callback\", \"type\":\"string\",\"value\":\"http://localhost:8898\"}]}", "POST");
         //System.out.println(simulated);
 
         response = new JSONObject(simulated);
@@ -125,7 +125,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
         MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
         SliderSetterItf slider = sliderProxy.buildProxy();
 
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/cursor/resources/position/SUBSCRIBE", "{\"parameters\" : [{\"name\":\"callback\", \"type\":\"string\",\"value\":\"http://127.0.0.1:54461\"}," + "{\"name\":\"conditions\",\"type\":\"array\",\"value\":" + "[{\"operator\":\"<\",\"operand\":200, \"type\":\"int\", \"complement\":false}]}]}", "POST");
+        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/cursor/resources/position/SUBSCRIBE", "{\"parameters\" : [{\"name\":\"callback\", \"type\":\"string\",\"value\":\"http://127.0.0.1:8898\"}," + "{\"name\":\"conditions\",\"type\":\"array\",\"value\":" + "[{\"operator\":\"<\",\"operand\":200, \"type\":\"int\", \"complement\":false}]}]}", "POST");
 
         //System.out.println(simulated);
 

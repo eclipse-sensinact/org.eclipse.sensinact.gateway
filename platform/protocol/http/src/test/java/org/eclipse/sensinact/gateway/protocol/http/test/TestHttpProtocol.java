@@ -35,7 +35,7 @@ public class TestHttpProtocol {
     //********************************************************************//
     //						STATIC DECLARATIONS							  //
     //********************************************************************//
-    public static int HTTP_PORT = 54468;
+    public static int HTTP_PORT = 8898;
     public static String HTTP_ROOTURL = "http://127.0.0.1:" + HTTP_PORT;
 
     public static String newRequest(String configuration) throws IOException {
@@ -170,9 +170,9 @@ public class TestHttpProtocol {
     @Test
     public void testHttpProtocolPost() throws Exception {
         String simulated;
-        simulated = TestHttpProtocol.newRequest(HTTP_ROOTURL + "/providers/slider/services/cursor/resources/position/SUBSCRIBE", "{\"parameters\" : [{\"name\":\"callback\", \"type\":\"string\",\"value\":\"http://127.0.0.1:54468/\"}," + "{\"name\":\"conditions\",\"type\":\"array\",\"value\":" + "[{\"operator\":\"<\",\"operand\":200, \"type\":\"int\", \"complement\":false}]}]}", "POST");
+        simulated = TestHttpProtocol.newRequest(HTTP_ROOTURL + "/providers/slider/services/cursor/resources/position/SUBSCRIBE", "{\"parameters\" : [{\"name\":\"callback\", \"type\":\"string\",\"value\":\"http://127.0.0.1:8898/\"}," + "{\"name\":\"conditions\",\"type\":\"array\",\"value\":" + "[{\"operator\":\"<\",\"operand\":200, \"type\":\"int\", \"complement\":false}]}]}", "POST");
 
-        JSONAssert.assertEquals(getExpected(new URL(HTTP_ROOTURL + "/providers/slider/services/cursor/resources/position/SUBSCRIBE"), "{\"parameters\":[{\"name\":\"callback\",\"type\":\"string\",\"value\":\"http://127.0.0.1:54468/\"}," + "{\"name\":\"conditions\",\"type\":\"array\",\"value\":" + "[{\"operator\":\"<\",\"operand\":200,\"type\":\"int\",\"complement\":false}]}]}", "POST"), new JSONObject(simulated), false);
+        JSONAssert.assertEquals(getExpected(new URL(HTTP_ROOTURL + "/providers/slider/services/cursor/resources/position/SUBSCRIBE"), "{\"parameters\":[{\"name\":\"callback\",\"type\":\"string\",\"value\":\"http://127.0.0.1:8898/\"}," + "{\"name\":\"conditions\",\"type\":\"array\",\"value\":" + "[{\"operator\":\"<\",\"operand\":200,\"type\":\"int\",\"complement\":false}]}]}", "POST"), new JSONObject(simulated), false);
     }
 
 }

@@ -28,7 +28,7 @@ import org.json.JSONObject;
 
 @WebSocket(maxTextMessageSize = 64 * 1024)
 public class WsServiceTestClient implements Runnable {
-    String destUri = "ws://127.0.0.1:54460/ws";
+    String destUri = "ws://127.0.0.1:8899/ws";
     WebSocketClient client = null;
     Session session;
     AtomicBoolean available;

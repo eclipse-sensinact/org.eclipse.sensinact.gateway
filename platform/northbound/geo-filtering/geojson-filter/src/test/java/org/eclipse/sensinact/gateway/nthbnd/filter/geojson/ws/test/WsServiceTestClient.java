@@ -16,7 +16,6 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -29,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @WebSocket(maxTextMessageSize = 64 * 1024)
 public class WsServiceTestClient implements Runnable {
-    String destUri = "ws://localhost:54460/ws";
+	String destUri = "ws://127.0.0.1:8899/ws";
     WebSocketClient client = null;
     Session session;
     AtomicBoolean available;
@@ -40,15 +39,10 @@ public class WsServiceTestClient implements Runnable {
         try {
             client = new WebSocketClient();
             client.setMaxIdleTimeout(1000 * 3600);
-
             client.start();
-            URI echoUri = new URI(destUri);
-            ClientUpgradeRequest request = new ClientUpgradeRequest();
-
-            Future<Session> future = client.connect(this, echoUri, request);
-            /*Session session = */
-            future.get(2, TimeUnit.SECONDS);
-            //this.socket.onConnect(session);
+            URI echoUri = new URI(destUri);            
+            Future<Session> future = client.connect(this, echoUri);
+            future.get();
 
         } catch (Throwable t) {
             t.printStackTrace();
@@ -84,11 +78,12 @@ public class WsServiceTestClient implements Runnable {
      * @param message
      */
     protected void send(String message) {
+    	if(this.session == null) {
+    		throw new NullPointerException("Null webSocket session");
+    	}
         try {
             Future<Void> future = this.session.getRemote().sendStringByFuture(message);
-
             future.get(1, TimeUnit.SECONDS);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -101,7 +96,7 @@ public class WsServiceTestClient implements Runnable {
 
     /**
      * @inheritDoc
-     * @see WebSocketWrapper#onClose(int, java.lang.String)
+     * @see WebSocketEndpoint#onClose(int, java.lang.String)
      */
     @OnWebSocketClose
     public void onClose(int statusCode, String reason) {
@@ -115,7 +110,7 @@ public class WsServiceTestClient implements Runnable {
 
     /**
      * @inheritDoc
-     * @see WebSocketWrapper#onMessage(java.lang.String)
+     * @see WebSocketEndpoint#onMessage(java.lang.String)
      */
     @OnWebSocketMessage
     public void onMessage(String message) {
@@ -155,11 +150,17 @@ public class WsServiceTestClient implements Runnable {
                 if (request.content != null) {
                     json.put("parameters", new JSONArray(request.content));
                 }
-                this.send(json.toString());
+                try {
+                	this.send(json.toString());
+                } catch(NullPointerException e){
+                	//e.printStackTrace(); 
+                	synchronized (this.stack) {
+                		this.stack.push(request);
+                	}
+                }
             } else {
                 try {
                     Thread.sleep(200);
-
                 } catch (InterruptedException e) {
                     Thread.interrupted();
                     break;
