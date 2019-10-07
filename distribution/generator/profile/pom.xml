@@ -100,5 +100,6 @@
         <module>sensinact-remote</module>
         <module>sensinact-datastore</module>
         <module>ldapfilter</module>
+	<module>jersey-client</module>
     </modules>
 </project>
