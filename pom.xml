@@ -149,6 +149,7 @@
 		<felix.configadmin.version>1.9.10</felix.configadmin.version>
 		<osgi.compendium.version>6.0.0</osgi.compendium.version>
 		<junit.version>4.8.1</junit.version>
+		<jersey.version>1.19.4</jersey.version>
 		<org.apache.felix.gogo.runtime.version>1.1.0</org.apache.felix.gogo.runtime.version>
 		<org.jline.version>3.7.0</org.jline.version>
 		<org.fusesource.jansi.version>1.17.1</org.fusesource.jansi.version>
