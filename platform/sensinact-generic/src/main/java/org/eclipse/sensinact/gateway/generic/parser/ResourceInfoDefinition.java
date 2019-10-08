@@ -240,10 +240,12 @@ public class ResourceInfoDefinition extends XmlModelParsingContext  {
     public ResourceConfig asResourceConfig() {
     	ExtResourceConfig resourceConfig = new ExtResourceConfig(attributeDefinitions,methodDefinitions);
     	String target = getTarget();
-        target = (target == null || target.length() == 0 || "ANY_TARGET".equals(target)) ? ResourceConfig.ALL_TARGETS:target;
+        String[] targets = (target == null || target.length() == 0 || "ANY_TARGET".equals(target)) 
+        		? new String[] {ResourceConfig.ALL_TARGETS}:this.target;
 
         String profile = getProfile();
-        profile = (profile == null || profile.length() == 0 || "ANY_PROFILE".equals(profile)) ? ResourceConfig.ALL_PROFILES:profile;
+        String[] profiles = (profile == null || profile.length() == 0 || "ANY_PROFILE".equals(profile)) 
+        		?new String[] {ResourceConfig.ALL_PROFILES}:this.profile;
 
         RequirementBuilder requirementBuilder = new RequirementBuilder(Requirement.VALUE, Resource.NAME);
         requirementBuilder.put(ResourceConfig.ALL_TARGETS, name);
@@ -255,7 +257,7 @@ public class ResourceInfoDefinition extends XmlModelParsingContext  {
         
     	PolicyDefinition registered = this.root.getPolicy(type.getPolicy().name());
     	
-        this.root.registerProfile(profile, ResourceConfig.ALL_TARGETS.equals(target)?null:target);       
+        this.root.registerProfile(profiles, ResourceConfig.ALL_TARGETS.equals(target)?null:targets);       
         resourceConfig.setUpdatePolicy(type.getUpdatePolicy());
 
         TypeConfig resourceTypeConfig = new TypeConfig(type.getPolicy());

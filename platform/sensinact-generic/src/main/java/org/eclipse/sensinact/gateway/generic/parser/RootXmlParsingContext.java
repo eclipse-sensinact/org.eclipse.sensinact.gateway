@@ -17,7 +17,7 @@ public interface RootXmlParsingContext {
     public static final String RESOURCE_INFO_TYPE_VARIABLE = "resourceInfoVariable".intern();
     public static final String RESOURCE_INFO_TYPE_ACTION = "resourceInfoAction".intern();
     
-	void registerProfile(String profile, String string);
+	void registerProfile(String[] profiles, String[] targets);
 
 	PolicyDefinition getPolicy(String name);
 

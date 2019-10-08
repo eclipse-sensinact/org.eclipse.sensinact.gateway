@@ -405,31 +405,32 @@ RootXmlParsingContext{
         return parent;
     }    
 
-    public void registerProfile(String profile, String target) {
-        String prfl = profile;
-        if (prfl == null || "ANY_PROFILE".equals(prfl) 
-        	|| (ResourceConfig.ALL_PROFILES.equals(prfl) && !this.handleNoProfile)) {
-            return;
+    public void registerProfile(String[] profiles, String[] targets) {
+        if (profiles == null || profiles.length==0) {
+        	return;
         }
-        String[] targetArray = null;
-        if (target != null) {
-            targetArray = target.split(",");
+        for(String profile :profiles) {
+        	if("ANY_PROFILE".equals(profile)||(ResourceConfig.ALL_PROFILES.equals(profile) && !this.handleNoProfile)){
+        		return;
+        	}
         }
-        List<String> targets = this.profiles.get(prfl);
-        if (targets == null) {
-            targets = new ArrayList<String>();
-            this.profiles.put(prfl, targets);
-        }
-        int targetIndex = 0;
-        int targetLength = targetArray == null ? 0 : targetArray.length;
-
-        for (; targetIndex < targetLength; targetIndex++) {
-            if (ServiceProvider.ADMINISTRATION_SERVICE_NAME.equals(targetArray[targetIndex]) 
-            		|| targets.contains(targetArray[targetIndex])) {
-                continue;
-            }
-            targets.add(targetArray[targetIndex]);
-        }
+        for(String profile :profiles) {
+        	List<String> services = this.profiles.get(profile);
+        	if (services == null) {
+        		services = new ArrayList<String>();
+        		this.profiles.put(profile, services);
+        	}
+	        int targetIndex = 0;
+	        int targetLength = targets == null ? 0 : targets.length;
+	
+	        for (; targetIndex < targetLength; targetIndex++) {
+	            if (ServiceProvider.ADMINISTRATION_SERVICE_NAME.equals(targets[targetIndex]) 
+	            		|| services.contains(targets[targetIndex])) {
+	                continue;
+	            }
+	            services.add(targets[targetIndex]);
+	        }
+        } 
     }
     
     /**

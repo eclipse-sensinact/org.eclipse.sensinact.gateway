@@ -24,8 +24,7 @@ xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../sensinact-
     	<attribute name="value" type="string" modifiable="UPDATABLE"/>
     </attributes>
   </resourceInfo>
-  <resourceInfo xsi:type="resourceInfoProperty" name="THRESHOLD" policy="PROPERTY"  
-  	target="measureTest" profile="measurement"> 
+  <resourceInfo xsi:type="resourceInfoProperty" name="THRESHOLD" policy="PROPERTY" target="measureTest" profile="measurement,fake0,fake1"> 
     <identifier xsi:type="binaryHexContent">34</identifier>
     <attributes>
     	<attribute name="value" type="float">
@@ -33,8 +32,7 @@ xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../sensinact-
     	</attribute>
     </attributes>
   </resourceInfo>
-  <resourceInfo xsi:type="resourceInfoAction" name="ACTIVATE" policy="ACTION"  
-  	target="measureTest" profile="measurement"> 
+  <resourceInfo xsi:type="resourceInfoAction" name="ACTIVATE" policy="ACTION" target="measureTest" profile="measurement,fake1"> 
     <identifier xsi:type="binaryHexContent">3136</identifier>
     <methods>
     	<method type="ACT">

@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +30,8 @@ public class ResourceConfig implements Nameable {
 	public static final String ALL_TARGETS = "#ANY_TARGET#";
 	public static final String ALL_PROFILES = "#ANY_PROFILE#";
 
-	protected String profile;
-	protected String[] targets;
+	protected List<String> profiles;
+	protected List<String> targets;
 
 	protected TypeConfig typeConfig;
 	protected List<RequirementBuilder> requirementBuilders;
@@ -143,16 +144,11 @@ public class ResourceConfig implements Nameable {
 		if (serviceId == null || serviceId.length() == 0) {
 			return this.isTargeted(ResourceConfig.ALL_TARGETS);
 		}
-		if (this.targets == null || this.targets.length == 0) {
+		if (this.targets == null || this.targets.size() == 0) {
 			return !serviceId.equals(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 		}
-		for (int index = 0; index < this.targets.length; index++) {
-			if (serviceId.equals(targets[index]) || (!serviceId.equals(ServiceProvider.ADMINISTRATION_SERVICE_NAME)
-					&& targets[index].equals(ResourceConfig.ALL_TARGETS))) {
-				return true;
-			}
-		}
-		return false;
+		return targets.indexOf(serviceId) > -1 || (targets.indexOf(ResourceConfig.ALL_TARGETS) > -1 
+				&& !ServiceProvider.ADMINISTRATION_SERVICE_NAME.equals(serviceId));
 	}
 
 	/**
@@ -162,28 +158,10 @@ public class ResourceConfig implements Nameable {
 	 *            specific {@link Service} targets for this ResourceConfig
 	 */
 	public void setTarget(String target) {
-		String[] targets = target == null ? new String[0] : target.split(",");
-		this.targets = new String[targets.length];
-		if (this.targets.length > 0) {
-			for (int index = 0; index < this.targets.length; index++) {
-				this.targets[index] = targets[index];
-			}
+		if(target==null){
+			return;
 		}
-	}
-
-	/**
-	 * Defines specific profile for this XmlResourceConfig
-	 * 
-	 * @param policy
-	 *            specific profile for this XmlResourceConfig
-	 */
-	public String[] getTargets() {
-		int length = this.targets == null ? 0 : this.targets.length;
-		String[] targets = new String[length];
-		if (length > 0) {
-			System.arraycopy(this.targets, 0, targets, 0, length);
-		}
-		return targets;
+		this.targets = Arrays.asList(target.split(","));
 	}
 
 	/**
@@ -198,20 +176,10 @@ public class ResourceConfig implements Nameable {
 		if (profileId == null) {
 			return this.isProfiled(ResourceConfig.ALL_PROFILES);
 		}
-		if (this.profile == null) {
+		if (this.profiles == null) {
 			return ResourceConfig.ALL_PROFILES.equals(profileId);
 		}
-		return (this.profile.equals(profileId) || this.profile.equals(ResourceConfig.ALL_PROFILES));
-	}
-
-	/**
-	 * Defines specific profile for this XmlResourceConfig
-	 * 
-	 * @param policy
-	 *            specific profile for this XmlResourceConfig
-	 */
-	public String getProfile() {
-		return this.profile;
+		return this.profiles.indexOf(profileId) > -1 || this.profiles.indexOf(ResourceConfig.ALL_PROFILES) > -1;
 	}
 
 	/**
@@ -221,7 +189,10 @@ public class ResourceConfig implements Nameable {
 	 *            specific profile for this XmlResourceConfig
 	 */
 	public void setProfile(String profile) {
-		this.profile = profile;
+		if(profile == null) {
+			return;
+		}
+		this.profiles = Arrays.asList(profile.split(","));
 	}
 
 	/**
