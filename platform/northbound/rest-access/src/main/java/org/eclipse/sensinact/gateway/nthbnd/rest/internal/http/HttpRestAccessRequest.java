@@ -124,7 +124,7 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
             if (tokenHeader != null) {
                 this.authentication = new AuthenticationToken(tokenHeader);
 
-            } else if (authorizationHeader != null) {
+            } else if (authorizationHeader != null && super.getAttribute("token")==null) {
                 this.authentication = new Credentials(authorizationHeader);
             }
         }

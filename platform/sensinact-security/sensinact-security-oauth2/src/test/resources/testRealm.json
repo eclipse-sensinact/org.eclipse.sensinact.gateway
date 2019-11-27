@@ -1,0 +1,129 @@
+{   
+	"realm": "test",   
+	"enabled": true,   
+	"sslRequired": "none",   
+	"registrationAllowed": true,   
+	"requiredCredentials": [ "password" ],   
+	"users": 
+	[   
+		{   
+			"username": "testRealmAdmin",   
+			"enabled": true,   
+			"credentials": 
+			[   
+				{   
+					"type": "password",   
+					"value": "testRealmAdminPassword"   
+				}   
+			],   
+			"clientRoles": 
+			{   
+				"realm-management": [ "realm-admin" ],   
+				"account": [ "manage-account"]   
+			}   
+		},  
+		{   
+			"username": "anonymousTester",   
+			"enabled": true,   
+			"credentials": 
+			[   
+				{   
+					"type": "password",   
+					"value": "anonymousTester"   
+				}   
+			],
+            "groups": [
+                "/anonymousGroup"
+            ]
+		},  
+		{   
+			"username": "adminTester",   
+			"enabled": true,   
+			"credentials": 
+			[   
+				{   
+					"type": "password",   
+					"value": "adminTester"   
+				}   
+			],
+            "groups": [
+                "/adminGroup"
+            ]
+		}   
+	],
+	"roles" : 
+	{   
+		"realm" : 
+		[   
+			{   
+				"name": "anonymous",   
+				"description": "Have anonymous privileges"   
+			},   
+			{   
+				"name": "admin",   
+				"description": "Have Administrator privileges"   
+			}
+		]   
+	},
+    "groups" : [
+        {
+            "name": "anonymousGroup",
+            "attributes": {
+                "topAttribute": ["true"]
+            },
+            "clientRoles": {
+                "testClient": [ "anonymous" ]
+            }
+        }, 
+        {
+            "name": "adminGroup",
+            "attributes": {
+                "topAttribute": ["true"]
+            },
+            "clientRoles": {
+                "testClient": [ "admin", "anonymous" ]
+            }
+        }
+    ],
+	"clients": 
+	[   
+		{       
+			"clientId": "testClient",    
+			"secret": "testClient", 
+			"enabled": true,   
+			"fullScopeAllowed": true,   
+			"baseUrl": "http://localhost:8899",
+		    "bearerOnly": false,
+		    "consentRequired": false,
+		    "standardFlowEnabled": true,
+		    "directAccessGrantsEnabled": true,
+		    "publicClient": false,
+		    "frontchannelLogout": false,
+		    "protocol": "openid-connect",
+		    "nodeReRegistrationTimeout": -1,		      
+			"redirectUris": 
+			[   
+				"http://localhost:8899/auth",
+				"http://localhost:8899/sensinact",
+				"http://localhost:8899/sensinact/*"   
+			],   
+			"protocolMappers": [
+		     {
+		         "name": "UserClientRoleMapper",
+		         "protocol": "openid-connect",
+		         "protocolMapper": "oidc-usermodel-client-role-mapper",
+		         "consentRequired": false,
+		         "config": {
+		              "multivalued": "true",
+		              "userinfo.token.claim": "true",
+		              "id.token.claim": "true",
+		              "access.token.claim": "true",
+		              "claim.name": "roles",
+		              "jsonType.label": "String",
+		              "usermodel.clientRoleMapping.clientId": "testClient"
+		            }
+		          }
+		    ]  
+		}
+	]   
+}
