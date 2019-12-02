@@ -94,53 +94,7 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
-                    	<id>copy-schemas</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-		                <configuration>
-		                	<outputDirectory>${project.build.directory}/swagger-api/dist/schemas</outputDirectory>
-		                	<overwrite>true</overwrite>
-		                	<resources>
-		                		<resource>
-		                			<directory>src/client/schemas</directory>
-		                			<filtering>true</filtering>
-		                		</resource>
-		                	</resources>
-		                </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                    	<id>copy-images</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-		                <configuration>
-		                	<outputDirectory>${project.build.directory}/swagger-api/dist/images</outputDirectory>
-		                	<overwrite>true</overwrite>
-		                	<resources>
-		                		<resource>
-		                			<directory>src/client/images</directory>
-		                			<filtering>true</filtering>
-		                		</resource>
-		                	</resources>
-		                </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                    	<id>copy-html</id>
+                    	<id>copy-swagger</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>copy-resources</goal>
@@ -150,18 +104,35 @@
 		                	<overwrite>true</overwrite>
 		                	<resources>
 		                		<resource>
-		                		<directory>src/client</directory>
-		                		<includes>
-		                			<include>*.html</include>
-		                			<include>*.yaml</include>
-		                		</includes>
-		                		<filtering>true</filtering>
+		                			<targetPath>schemas</targetPath>
+		                			<directory>src/client/schemas</directory>
+		                			<filtering>true</filtering>
+		                		</resource>
+		                		<resource>
+		                			<targetPath>images</targetPath>
+		                			<directory>src/client/images</directory>
+		                			<filtering>true</filtering>
+		                		</resource>
+		                		<resource>
+		                			<directory>src/client</directory>
+			                		<includes>
+			                			<include>*.html</include>
+			                			<include>*.yaml</include>
+			                		</includes>
+			                		<filtering>true</filtering>
+		                		</resource>
+		                		<resource>
+		                			<directory>${project.build.directory}/swagger-api/dist/images</directory>
+			                		<includes>
+			                			<include>favicon.ico</include>
+			                		</includes>
+			                		<filtering>true</filtering>
 		                		</resource>
 		                	</resources>
 		                </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>            
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -177,31 +148,35 @@
                 </configuration>
             </plugin>
         </plugins>
-    </build>
-    
+    </build>    
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
-            <scope>provided</scope>
         </dependency>        
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-common</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>       
         <dependency>
             <groupId>org.eclipse.sensinact.gateway</groupId>
             <artifactId>sensinact-utils</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.http.jetty</artifactId>
-            <version>3.0.0</version>
-            <scope>provided</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+		    <artifactId>org.apache.felix.http.servlet-api</artifactId>
+		    <version>1.1.2</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.http.jetty</artifactId>
+			<version>4.0.8</version>
+			<scope>provided</scope>
+		</dependency>
     </dependencies>
 </project>

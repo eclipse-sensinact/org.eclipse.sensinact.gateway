@@ -32,15 +32,15 @@
             <artifactId>rest-access</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.http.jetty</artifactId>
-			<version>4.0.8</version>
-		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
 			<artifactId>http</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+        <dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.http.jetty</artifactId>
+			<version>4.0.8</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
