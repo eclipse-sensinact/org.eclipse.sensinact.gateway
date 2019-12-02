@@ -40,9 +40,10 @@ public class SecurityFilterTest extends MidOSGiTest {
 			KeycloakSession session = server.getSessionFactory().create();
 	        session.getTransactionManager().begin();
 	        try {
+	        	
 	            RealmManager manager = new RealmManager(session);
 	            assertNull(manager.getRealmByName("test"));
-	            manager.setContextPath(representation.getClients().get(0).getBaseUrl());
+	            //manager.setContextPath(representation.getClients().get(0).getBaseUrl());
 	            RealmModel realm = manager.importRealm(representation);
 	            System.out.println("Imported realm " + realm.getName());
 	            session.getTransactionManager().commit();
