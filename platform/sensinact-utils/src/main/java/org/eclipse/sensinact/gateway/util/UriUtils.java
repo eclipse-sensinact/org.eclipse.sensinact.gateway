@@ -47,7 +47,7 @@ public class UriUtils {
 
         StringBuilder uriBuilder = new StringBuilder();
         for (; index < length; index++) {
-            if (uriElements[index].trim().length() == 0) {
+            if (uriElements[index]==null || uriElements[index].trim().length() == 0) {
                 continue;
             }
             uriBuilder.append(uriElements[index].startsWith("/") ? "" : PATH_SEPARATOR);

@@ -103,7 +103,6 @@ public class CryptographicUtilsTest {
         byte[] data = getData(fileName4hash);
         String trueHashValue = this.getTrueHashValue(data, defaultAlgo);
         boolean result = cutils.checkHashValue(data, trueHashValue, "SHA1-Digest");
-        ;
         Assert.assertTrue(result);
     }
 

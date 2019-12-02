@@ -64,6 +64,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.tools</groupId>
+			<artifactId>sensinact-test</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<scope>provided</scope>
@@ -83,8 +89,22 @@
 	</dependencies>
 
 	<build>
-		<plugins>
-		
+		<plugins>		
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<classpathDependencyScopeExclude>provided</classpathDependencyScopeExclude>
+					<forkCount>1</forkCount>
+					<reuseForks>false</reuseForks>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<artifactId>common-junit48</artifactId>
+						<version>2.18.1</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 			<plugin>
 			    <groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-antrun-plugin</artifactId>

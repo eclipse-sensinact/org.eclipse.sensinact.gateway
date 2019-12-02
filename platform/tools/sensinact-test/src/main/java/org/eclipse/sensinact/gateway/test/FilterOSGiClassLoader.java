@@ -113,6 +113,9 @@ public class FilterOSGiClassLoader extends ClassLoader {
         JarInputStream jarInputStream = new JarInputStream(url.openStream());
 
         Manifest manifest = jarInputStream.getManifest();
+        if(manifest == null) {
+        	return;
+        }
         Attributes attributes = manifest.getMainAttributes();
 
         String bundleName = attributes.getValue("Bundle-SymbolicName");

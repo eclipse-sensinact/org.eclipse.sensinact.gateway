@@ -10,58 +10,35 @@
  */
 package org.eclipse.sensinact.gateway.security.signature.test;
 
-import org.apache.felix.framework.FrameworkFactory;
+import java.security.NoSuchAlgorithmException;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.security.signature.internal.BundleValidationImpl;
 import org.eclipse.sensinact.gateway.security.signature.internal.KeyStoreManagerException;
-import org.junit.After;
+import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.launch.Framework;
-
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
 
 /*
  * signature validation with embedded archive: embedded archives are to be signed by the same signer as the main archive
  * testCheckNOKWithEmbeddedArchive not performed
  */
-public class BundleValidationTest {
-    private static final Map<String, String> CONFIGURATION = new HashMap<String, String>();
-
-    static {
-        CONFIGURATION.put("felix.cache.rootdir", "./target/felix");
-        CONFIGURATION.put("org.osgi.framework.storage", "felix-cache");
-        CONFIGURATION.put("felix.auto.deploy.dir", "./target/felix/bundle");
-        CONFIGURATION.put("felix.auto.deploy.action", "install,start");
-        CONFIGURATION.put("felix.log.level", "4");
-        CONFIGURATION.put("org.osgi.framework.system.packages.extra", "org.eclipse.sensinact.gateway.generic.core;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.generic.core.impl;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.generic.core.packet;version=\"2.0.0\"," + "org.eclipse.sensinact.gateway.generic.stream;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.generic.uri;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.generic.parser;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.generic.automata;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.generic.annotation;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.generic.local;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.util;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.util.constraint;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.util.crypto;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.util.json;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.util.mediator;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.util.properties;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.util.reflect;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.util.rest;version= \"2.0.0\"," + "org.eclipse.sensinact.gateway.util.xml;version= \"2.0.0\"," + "json-20140107.jar;version= \"2.0.0\"," + "org.json;version;version= \"2.0.0\"," + "org.json.zip;version=\"2.0.0\"");
-    }
-
-    private Framework felix = new FrameworkFactory().newFramework(CONFIGURATION);
-    private Mediator mediator = null;
-    private BundleValidation jval = null;
-    private Bundle fan = null;
-    private Bundle failer = null;
-    private Bundle button = null;
-    private static final String DEFAULT_KEYSTORE_FILE_PATH = "../cert/keystore.jks";
+public class BundleValidationTest extends MidOSGiTest{
+	
+	private static final String DEFAULT_KEYSTORE_FILE_PATH = "../cert/keystore.jks";
     private static final String DEFAULT_KEYSTORE_PASSWORD = "sensiNact_team";
+    
+	public BundleValidationTest() throws Exception {
+		super();
+	}
 
-    @Before
-    public void init() throws NoSuchAlgorithmException, KeyStoreManagerException, BundleException {
-        felix = new FrameworkFactory().newFramework(CONFIGURATION);
-        felix.init();
-        felix.start();
+    private BundleValidation validator( ) throws NoSuchAlgorithmException, KeyStoreManagerException {
 
-        Assert.assertTrue(felix.getState() == Bundle.ACTIVE);
-        this.mediator = new Mediator(felix.getBundleContext());
-
-        this.jval = new BundleValidationImpl(this.mediator) {
+		BundleValidation jval = new BundleValidationImpl(new Mediator(super.context)) {
             @Override
             protected String getKeyStoreFileName() {
                 return BundleValidationTest.DEFAULT_KEYSTORE_FILE_PATH;
@@ -77,71 +54,78 @@ public class BundleValidationTest {
                 return BundleValidationTest.DEFAULT_KEYSTORE_PASSWORD;
             }
         };
-    }
-
-    @After
-    public void tearDown() {
-        try {
-            felix.stop();
-
-
-        } catch (BundleException e) {
-            e.printStackTrace();
-        }
-        this.mediator = null;
-        this.jval = null;
-        this.fan = null;
-        this.failer = null;
-        this.button = null;
+        return jval;
     }
 
     @Test
-    public void testCheckFanOK() throws BundleException {
-        this.fan = felix.getBundleContext().installBundle("file:./target/extra/fan.jar");
+    public void testCheckFanOK() throws BundleException, NoSuchAlgorithmException, KeyStoreManagerException {
+    	BundleValidation jval = validator();
+        Bundle fan = super.context.installBundle("file:./target/extra/fan.jar");
         ////logger.log(Level.INFO, "testCheckOK");
         String result = null;
         try {
-            result = jval.check(this.fan);
+            result = jval.check(fan);
         } catch (Exception e) {
             e.printStackTrace();
 
         } finally {
-            this.fan.uninstall();
+            fan.uninstall();
         }
         Assert.assertTrue(result != null);
     }
 
     @Test
-    public void testCheckFanKO() throws BundleException {
-        this.failer = felix.getBundleContext().installBundle("file:./src/test/resources/failer-fan.jar");
+    public void testCheckFanKO() throws BundleException, NoSuchAlgorithmException, KeyStoreManagerException {
+    	BundleValidation jval = validator();
+        Bundle failer = super.context.installBundle("file:./src/test/resources/failer-fan.jar");
 
         ////logger.log(Level.INFO, "testCheckOK");
         String result = null;
         try {
-            result = jval.check(this.failer);
+            result = jval.check(failer);
         } catch (Exception e) {
             e.printStackTrace();
 
         } finally {
-            this.failer.uninstall();
+           failer.uninstall();
         }
         Assert.assertTrue(result == null);
     }
 
     @Test
-    public void testCheckButtonOK() throws BundleException {
-        this.button = felix.getBundleContext().installBundle("file:./target/extra/button.jar");
+    public void testCheckButtonOK() throws BundleException, NoSuchAlgorithmException, KeyStoreManagerException {
+    	BundleValidation jval = validator();
+        Bundle button = super.context.installBundle("file:./target/extra/button.jar");
 
         ////logger.log(Level.INFO, "testCheckOK");
         String result = null;
         try {
-            result = jval.check(this.button);
+            result = jval.check(button);
         } catch (Exception e) {
             e.printStackTrace();
 
         } finally {
-            this.button.uninstall();
+           button.uninstall();
         }
         Assert.assertTrue(result != null);
     }
+
+	@Override
+	protected void doInit(Map configuration) {		
+		configuration.put("org.osgi.framework.system.packages.extra", 
+		"org.eclipse.sensinact.gateway.generic;version= \"2.0.0\","+
+		"org.eclipse.sensinact.gateway.generic.*;version= \"2.0.0\"," +
+		"org.eclipse.sensinact.gateway.common;version= \"2.0.0\"," +  
+		"org.eclipse.sensinact.gateway.common.*;version= \"2.0.0\"," + 
+		"org.eclipse.sensinact.gateway.util;version= \"2.0.0\"," + 
+		"org.eclipse.sensinact.gateway.util.*;version= \"2.0.0\"," + 
+		"json-20140107.jar;version= \"2.0.0\"," + 
+		"org.json;version;version= \"2.0.0\"," + 
+		"org.json.zip;version=\"2.0.0\"");
+	}
+
+	@Override
+	protected boolean isExcluded(String name) {
+		return false;
+	}
 }

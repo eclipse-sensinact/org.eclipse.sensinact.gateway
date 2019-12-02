@@ -19,6 +19,7 @@ import org.osgi.framework.BundleContext;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -137,8 +138,16 @@ public abstract class MidOSGiTest implements BundleContextProvider {
         File dynamicBundleFile = new File(destDirectory, "dynamicBundle.jar");
     	//Assume all necessary imports and variables are declared
         FileOutputStream fOut = new FileOutputStream(dynamicBundleFile);
-        Manifest manifest = new Manifest(new FileInputStream(manifestFile));
-        
+        Manifest manifest = null;
+        try {
+            manifest = new Manifest(new FileInputStream(manifestFile));
+        } catch(FileNotFoundException e) {
+        	e.printStackTrace();
+        	try {
+        		fOut.close();
+        	}catch(IOException ex) {}
+        	return;
+        }    
     	// Create a buffer for reading the files
         byte[] buf = new byte[1024];
 
