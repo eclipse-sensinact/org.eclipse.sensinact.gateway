@@ -2,12 +2,21 @@ package org.eclipse.sensinact.gateway.device.openhab.common;
 
 public class ServerLocation {
 	
+	private static final String DEFAULT_SCHEME = "http";
 	private final String host;
 	private final int port;
-	
+	private final String scheme;
+
 	public ServerLocation(String host, int port) {
 		this.host = host;
 		this.port = port;
+		this.scheme = DEFAULT_SCHEME;
+	}
+
+	public ServerLocation(String scheme, String host, int port) {
+		this.host = host;
+		this.port = port;
+		this.scheme = scheme;
 	}
 	
 	public String getHost() {
@@ -17,6 +26,13 @@ public class ServerLocation {
 	public int getPort() {
 		return port;
 	}
+	
+	public String getScheme() {
+		if(this.scheme == null) {
+			return DEFAULT_SCHEME;
+		}
+		return this.scheme;
+	}	
 	
 	@Override
 	public int hashCode() {
@@ -49,5 +65,5 @@ public class ServerLocation {
 	@Override
 	public String toString() {
 		return "OpenHabServer [host=" + host + ", port=" + port + "]";
-	}	
+	}
 }

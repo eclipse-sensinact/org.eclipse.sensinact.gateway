@@ -71,6 +71,12 @@ public class OpenHabMediator extends HttpMediator {
     class OpenHabTaskProcessingContext extends DefaultHttpTaskProcessingContext {
         public OpenHabTaskProcessingContext(Mediator mediator, HttpTaskConfigurator httpTaskConfigurator, final String endpointId, final HttpTask<?, ?> task) {
             super(mediator, httpTaskConfigurator, endpointId, task);
+            properties.put("openhab.scheme", new Executable<Void, String>() {
+                @Override
+                public String execute(Void parameter) throws Exception {
+                    return brokerById.get(endpointId).getServer().getScheme();
+                }
+            });
             properties.put("openhab.host", new Executable<Void, String>() {
                 @Override
                 public String execute(Void parameter) throws Exception {

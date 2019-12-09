@@ -43,6 +43,7 @@ import java.util.Map;
             delay = 1000 * 5, 
             period = 1000 * 2, 
             recurrence = @HttpTaskConfiguration(
+                scheme = "@context[openhab.scheme]", 
                 host = "@context[openhab.host]", 
                 port = "@context[openhab.port]", 
                 path = "/rest/items/", 
@@ -54,6 +55,7 @@ import java.util.Map;
             delay = 1000 * 5, 
             period = 1000 * 10, 
             recurrence = @HttpTaskConfiguration(
+                scheme = "@context[openhab.scheme]", 
                 host = "@context[openhab.host]", 
                 port = "@context[openhab.port]", 
                 path = "/rest/things/", 
@@ -68,6 +70,7 @@ import java.util.Map;
                 Task.CommandType.ACT
             }, 
             configuration = @HttpTaskConfiguration(
+                scheme = "@context[openhab.scheme]", 
                 host = "@context[openhab.host]", 
                 port = "@context[openhab.port]", 
                 path = "/rest/items/@context[task.serviceProvider]_@context[task.service]_binary", 
@@ -83,6 +86,7 @@ import java.util.Map;
                 Task.CommandType.SET
             }, 
             configuration = @HttpTaskConfiguration(
+                scheme = "@context[openhab.scheme]", 
                 host = "@context[openhab.host]", 
                 port = "@context[openhab.port]", 
                 path = "/rest/items/@context[task.serviceProvider]_@context[task.service]_@context[task.resource]", 

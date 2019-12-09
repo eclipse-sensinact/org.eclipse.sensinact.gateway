@@ -15,15 +15,20 @@ public class OpenHabServerFinder {
 
 	private static final Logger LOG = LoggerFactory.getLogger(OpenHabServerFinder.class);
 	
-    private static final String OPENHAB_SERVICE_TYPE_PROPERTY_NAME = "org.eclipse.sensinact.gateway.device.openhab.type";
-    private static final String OPENHAB_SERVICE_NAME_PROPERTY_NAME = "org.eclipse.sensinact.gateway.device.openhab.name";
-    private static final String OPENHAB_IP_PROPERTY_NAME           = "org.eclipse.sensinact.gateway.device.openhab.ip";
-    private static final String OPENHAB_PORT_PROPERTY_NAME         = "org.eclipse.sensinact.gateway.device.openhab.port";
-    private static final String DEFAULT_OPENHAB_SERVICE_TYPE       = "_openhab-server._tcp.local.";
-    private static final String DEFAULT_OPENHAB_SERVICE_NAME       = "openhab";
-    private static final String DEFAULT_OPENHAB_IP                 = "127.0.0.1";
-    private static final int    DEFAULT_OPENHAB_PORT               = 8080;
-    private static final String ACTIVATE_DISCOVERY_PROPERTY_NAME   = "org.eclipse.sensinact.gateway.device.openhab.OpenHabDiscovery2.disabled";
+    public static final String  OPENHAB_SERVICE_TYPE_PROPERTY_NAME = "org.eclipse.sensinact.gateway.device.openhab.type";
+    public static final String  OPENHAB_SERVICE_NAME_PROPERTY_NAME = "org.eclipse.sensinact.gateway.device.openhab.name";
+    public static final String  OPENHAB_SCHEME_PROPERTY_NAME       = "org.eclipse.sensinact.gateway.device.openhab.scheme";
+    public static final String  OPENHAB_IP_PROPERTY_NAME           = "org.eclipse.sensinact.gateway.device.openhab.ip";
+    public static final String  OPENHAB_PORT_PROPERTY_NAME         = "org.eclipse.sensinact.gateway.device.openhab.port";
+    public static final String  DEFAULT_OPENHAB_SERVICE_TYPE       = "_openhab-server._tcp.local.";
+    public static final String  DEFAULT_OPENHAB_SERVICE_SSL_TYPE   = "_openhab-server-ssl._tcp local.";    
+    public static final String  DEFAULT_OPENHAB_SERVICE_NAME       = "openhab";   
+    public static final String  DEFAULT_OPENHAB_SERVICE_SSL_NAME   = "openhab-ssl";
+    public static final String  DEFAULT_OPENHAB_SCHEME             = "http";
+    public static final String  DEFAULT_OPENHAB_SSL_SCHEME         = "https";
+    public static final String  DEFAULT_OPENHAB_IP                 = "127.0.0.1";
+    public static final int     DEFAULT_OPENHAB_PORT               = 8080;
+    public static final String  ACTIVATE_DISCOVERY_PROPERTY_NAME   = "org.eclipse.sensinact.gateway.device.openhab.OpenHabDiscovery2.disabled";
    
     public static ServerLocation getServerLocation(OpenHabMediator mediator, ServiceListener serviceListener) throws IOException {
         if (isDiscoveryActivated(mediator)) {
@@ -36,10 +41,20 @@ public class OpenHabServerFinder {
 	}
 
     private static ServerLocation loadServerLocatioFromProperties(OpenHabMediator mediator) {
-    	String openhabIP = DEFAULT_OPENHAB_IP;
-        int openhabPort = DEFAULT_OPENHAB_PORT;	
+        String openhabScheme = null;	
+    	String openhabIP = null;
+        int openhabPort = 0;	
     	
         mediator.warn("The openhab2 discovery service was disabled by system property. Using openhab configuration found inside conf/config.properties:");
+
+        final String openhabSchemePropertyValue = (String) mediator.getProperty(OPENHAB_SCHEME_PROPERTY_NAME);
+        if (openhabSchemePropertyValue != null) {
+        	openhabScheme = openhabSchemePropertyValue;
+            mediator.info("Openhab2 port configurated by %s property set to %s", OPENHAB_SCHEME_PROPERTY_NAME, openhabScheme);
+        } else {
+        	openhabScheme =  DEFAULT_OPENHAB_SERVICE_SSL_TYPE.startsWith(getOpenhabServiceType(mediator))?DEFAULT_OPENHAB_SSL_SCHEME:DEFAULT_OPENHAB_SCHEME;
+            mediator.info("No openhab2 port configurated with %s. Using default port: ", OPENHAB_SCHEME_PROPERTY_NAME, openhabScheme);
+        }
         
         final String openhabIPPropertyValue = (String) mediator.getProperty(OPENHAB_IP_PROPERTY_NAME);
         if (openhabIPPropertyValue != null) {
@@ -59,11 +74,12 @@ public class OpenHabServerFinder {
             mediator.info("No openhab2 port configurated with %s. Using default port: ", OPENHAB_PORT_PROPERTY_NAME, openhabPort);
         }
         
-        return new ServerLocation(openhabIP, openhabPort);
+        return new ServerLocation(openhabScheme, openhabIP, openhabPort);
 	}
 
 	private static ServerLocation findServerLocationUsingDiscovery(OpenHabMediator mediator, ServiceListener serviceListener, String openhabServiceType, String openhabServiceName) throws IOException {
-    	String openhabIP = DEFAULT_OPENHAB_IP;
+    	String openhabScheme = DEFAULT_OPENHAB_SERVICE_SSL_TYPE.startsWith(openhabServiceType)?DEFAULT_OPENHAB_SSL_SCHEME:DEFAULT_OPENHAB_SCHEME;
+		String openhabIP = DEFAULT_OPENHAB_IP;
         int openhabPort = DEFAULT_OPENHAB_PORT;
                
     	mediator.info("Starting openhab2 discovery...");
@@ -79,6 +95,7 @@ public class OpenHabServerFinder {
         if (list.length == 0) {
             mediator.warn("...no service info found by dns for type " + openhabServiceType);
         }
+        
         final ServiceInfo info = dns.getServiceInfo(openhabServiceType, openhabServiceName);
         if (info == null) {
             mediator.error("among the " + list.length + " found openhab2 service(s), unable to find one available with name " + openhabServiceName);
@@ -94,9 +111,8 @@ public class OpenHabServerFinder {
                 LOG.warn("unexpected more than one address for openhab2 host: {}. Several openhab2 instances running?. Will use first {}", Arrays.asList(openhabHostAddresses), openhabIP);
             }
             LOG.debug("Openhab2 binded to ip {} and port {}", openhabIP, openhabPort);
-        }
-        
-        return new ServerLocation(openhabIP, openhabPort);
+        }        
+        return new ServerLocation(openhabScheme, openhabIP, openhabPort);
     }
     
 	private static String getOpenhabServiceType(OpenHabMediator mediator) {
