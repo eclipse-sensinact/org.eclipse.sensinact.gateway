@@ -24,4 +24,13 @@ public abstract class AbstractMqttHandler extends AbstractMidAgentCallback {
     public void setAgent(GenericMqttAgent agent) {
         this.agent = agent;
     }
+    
+    /* (non-Javadoc)
+     * @see org.eclipse.sensinact.gateway.core.message.AbstractMidCallback#stop()
+     */
+    @Override
+    public void stop() {
+    	super.stop();
+    	this.agent.close();
+    }
 }

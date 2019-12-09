@@ -10,29 +10,34 @@
  */
 package org.sensinact.mqtt.server.osgi;
 
+import java.io.IOException;
+import java.util.Hashtable;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.*;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ConfigurationEvent;
+import org.osgi.service.cm.SynchronousConfigurationListener;
 import org.sensinact.mqtt.server.MQTTException;
 import org.sensinact.mqtt.server.MQTTServerService;
 import org.sensinact.mqtt.server.impl.MQTTServerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Hashtable;
-
 public class Activator implements BundleActivator,SynchronousConfigurationListener {
+	
     private final static String CONFIGURATION_PID="mqtt.server";
+    
+    private Logger LOG = LoggerFactory.getLogger(Activator.class);
+    
     private Boolean autoStart=null;
     private Integer port=null;
-    private Logger LOG = LoggerFactory.getLogger(Activator.class);
     private MQTTServerService service;
-    private ServiceRegistration sr;
     private BundleContext bundleContext;
+    
+    private ServiceRegistration sr;
 
     public void start(final BundleContext bundleContext) throws Exception {
         this.bundleContext=bundleContext;
@@ -48,7 +53,11 @@ public class Activator implements BundleActivator,SynchronousConfigurationListen
     private void publishService(){
         if(this.autoStart){
             try {
-                service.startService();
+            	if(port!=null) {
+            		service.startService(String.valueOf(port.intValue()));
+            	} else {
+            		service.startService();
+            	}
             } catch (MQTTException e) {
                 LOG.error("Failed to start MQTT service",e);
             }

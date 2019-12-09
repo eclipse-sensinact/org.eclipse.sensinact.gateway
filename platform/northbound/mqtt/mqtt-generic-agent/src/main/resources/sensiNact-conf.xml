@@ -13,7 +13,5 @@
 
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-    <entry key="mqtt.host">$(org.eclipse.sensinact.gateway.northbound.mqtt.host)</entry>
-    <entry key="mqtt.port">$(org.eclipse.sensinact.gateway.northbound.mqtt.port)</entry>
-    <entry key="mqtt.qos">$(org.eclipse.sensinact.gateway.northbound.mqtt.qos)</entry>
+   <!-- <entry key="key">value</entry>-->
 </properties>

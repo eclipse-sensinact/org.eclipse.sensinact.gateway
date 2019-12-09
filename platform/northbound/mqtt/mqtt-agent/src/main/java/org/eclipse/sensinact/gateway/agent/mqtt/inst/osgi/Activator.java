@@ -10,86 +10,44 @@
  */
 package org.eclipse.sensinact.gateway.agent.mqtt.inst.osgi;
 
-import org.eclipse.sensinact.gateway.agent.mqtt.generic.osgi.AbstractMqttActivator;
-import org.eclipse.sensinact.gateway.agent.mqtt.inst.internal.SnaEventEventHandler;
-import org.eclipse.sensinact.gateway.common.annotation.Property;
+import java.util.Hashtable;
+
+import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
-import java.io.IOException;
-import java.util.Dictionary;
+import org.osgi.framework.Constants;
+import org.osgi.service.cm.ManagedServiceFactory;
 
 /**
  * Extended {@link AbstractActivator}
  */
-public class Activator extends AbstractMqttActivator {
+public class Activator extends AbstractActivator<Mediator> {
 
-    @Property(defaultValue = "127.0.0.1")
-    public String host;
-    @Property(defaultValue = "1883",validationRegex = Property.INTEGER)
-    public String port;
-    @Property(defaultValue = "0",validationRegex = Property.INTEGER)
-    public String qos;
-    @Property(defaultValue = "/",mandatory = false)
-    public String prefix;
-    @Property(defaultValue = "tcp",mandatory = false)
-    public String protocol;
-    @Property(mandatory = false)
-    String username;
-    @Property(mandatory = false)
-    String password;
-    private BundleContext context;
-    /**
-     * @inheritDoc
-     * @see AbstractActivator#doStart()
+    /* (non-Javadoc)
+     * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#doStart()
      */
-
-    protected Mediator initMediator(BundleContext context){
-        this.context=context;
-        return super.initMediator(context);
-    }
-
     @Override
     public void doStart() throws Exception {
-        final String broker = String.format("%s://%s:%s",protocol,host,port);
-        mediator.setProperty("broker",broker);
-        mediator.setProperty("qos",qos);
-        mediator.setProperty("prefix",prefix);
-        if(username!=null){
-            mediator.setProperty("username",username);
-            mediator.setProperty("password",password);
-        }
-        //ServiceReference[] ca=mediator.getContext().getServiceReferences(ConfigurationAdmin.class.getCanonicalName(),null);
-        ServiceTracker st=new ServiceTracker<ConfigurationAdmin,ConfigurationAdmin>(FrameworkUtil.getBundle(Activator.class).getBundleContext(), ConfigurationAdmin.class.getCanonicalName(), new ServiceTrackerCustomizer<ConfigurationAdmin, ConfigurationAdmin>() {
+    	mediator.info("Starting MQTT Agents factory");
+        super.mediator.register(new NorthboundBrokerManagedServiceFactory(super.mediator),
+        	ManagedServiceFactory.class, new Hashtable() {{
+        		this.put(Constants.SERVICE_PID, NorthboundBrokerManagedServiceFactory.MANAGER_NAME);
+        	}});
+    }
+    
+    /* (non-Javadoc)
+     * @see org.eclipse.sensinact.gateway.agent.mqtt.generic.osgi.AbstractMqttActivator#doStop()
+     */
+    @Override
+    public void doStop() throws Exception {
+    	mediator.info("Stopping MQTT Agents factory");
+    }
 
-            @Override
-            public ConfigurationAdmin addingService(ServiceReference<ConfigurationAdmin> reference) {
-                try {
-                    ConfigurationAdmin configAdmin=(ConfigurationAdmin) FrameworkUtil.getBundle(Activator.class).getBundleContext().getService(reference);
-                    doStart(new SnaEventEventHandler(broker,new Integer(qos),prefix,configAdmin));
-                    return configAdmin;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-
-            @Override
-            public void modifiedService(ServiceReference<ConfigurationAdmin> reference, ConfigurationAdmin service) {
-
-            }
-
-            @Override
-            public void removedService(ServiceReference<ConfigurationAdmin> reference, ConfigurationAdmin service) {
-
-            }
-        });
-        st.open();
+    /* (non-Javadoc)
+     * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#doInstantiate(org.osgi.framework.BundleContext)
+     */
+    @Override
+    public Mediator doInstantiate(BundleContext context) {
+        return new Mediator(context);
     }
 }

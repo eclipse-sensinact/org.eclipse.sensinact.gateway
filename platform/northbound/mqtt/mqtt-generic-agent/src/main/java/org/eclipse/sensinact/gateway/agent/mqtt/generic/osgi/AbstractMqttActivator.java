@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.agent.mqtt.generic.osgi;
 
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.AbstractMqttHandler;
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.GenericMqttAgent;
-import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
@@ -20,8 +19,6 @@ import org.eclipse.sensinact.gateway.core.Core;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
 
 public abstract class AbstractMqttActivator extends AbstractActivator<Mediator> {
     private final Logger LOG= LoggerFactory.getLogger(AbstractMqttActivator.class);
@@ -37,11 +34,11 @@ public abstract class AbstractMqttActivator extends AbstractActivator<Mediator> 
      */
     protected void doStart(AbstractMqttHandler handler) throws Exception {
         LOG.debug("Starting MQTT Agent");
-        final String broker =mediator.getProperty("broker").toString();
-        final String prefix =mediator.getProperty("prefix").toString();
-        final Object username=mediator.getProperty("username");
-        final Object password=mediator.getProperty("password");
-        final Integer qos =new Integer(mediator.getProperty("qos").toString());
+        final String broker = mediator.getProperty("broker").toString();
+        final String prefix = mediator.getProperty("prefix").toString();
+        final Object username= mediator.getProperty("username");
+        final Object password= mediator.getProperty("password");
+        final Integer qos = new Integer(mediator.getProperty("qos").toString());
         LOG.debug("Starting MQTT Agent point to server {} with prefix {} and qos {}",broker,prefix,qos);
         this.handler = handler;
 

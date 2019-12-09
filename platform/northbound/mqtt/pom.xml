@@ -71,6 +71,6 @@
     <modules>
         <module>mqtt-generic-agent</module>
         <module>mqtt-onem2m-agent</module>
-        <module>mqtt-agent</module>
+        <!--<module>mqtt-agent</module>-->
     </modules>
 </project>

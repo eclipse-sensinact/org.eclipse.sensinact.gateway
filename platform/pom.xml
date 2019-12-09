@@ -98,6 +98,7 @@
 		<module>northbound/sensinact-access</module>
         <module>sensinact-generic</module>
         <module>../simulated-devices</module>
+		<module>northbound/mqtt/mqtt-agent</module>
         <module>sensinact-datastore</module>
 		<module>northbound</module>
 		<module>sensinact-security/sensinact-mail-connector</module>

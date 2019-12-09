@@ -10,18 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.agent.mqtt.inst.internal;
 
+import java.io.IOException;
+
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.AbstractMqttHandler;
-import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.message.*;
-import org.json.JSONArray;
+import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.json.JSONObject;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.UUID;
 
 /**
  * AE = sNa Provider
@@ -30,18 +25,14 @@ import java.util.UUID;
  * Instance = sNa Attribute
  */
 public class SnaEventEventHandler extends AbstractMqttHandler {
-    private final ConfigurationAdmin conf;
+	
     Logger LOG= LoggerFactory.getLogger(SnaEventEventHandler.class.getName());
-    private final String broker;
-    private final Integer qos;
+    
     private final String prefix;
 
-    public SnaEventEventHandler(String broker,Integer qos,String prefix,ConfigurationAdmin conf) throws IOException {
+    public SnaEventEventHandler(String prefix) throws IOException {
         super();
-        this.broker=broker;
-        this.qos=qos;
         this.prefix=prefix;
-        this.conf=conf;
     }
 
     /**
@@ -66,39 +57,8 @@ public class SnaEventEventHandler extends AbstractMqttHandler {
                 default:
                     return;
             }
-
         }catch (Exception e){
             LOG.error("Failed",e);
         }
-
-
-    }
-
-    /**
-     * Treats the ServiceRegisteredSnaEvent passed as parameter
-     *
-     * @param event the ServiceRegisteredSnaEvent to process
-     */
-    public void doHandle(SnaLifecycleMessageImpl event) {
-    }
-
-
-
-    /**
-     * @see MidAgentCallback#stop()
-     */
-    public void stop() {
-    }
-
-    /**
-     * @see AbstractMidAgentCallback#doHandle(SnaErrorMessageImpl)
-     */
-    public void doHandle(SnaErrorMessageImpl event) {
-    }
-
-    /**
-     * @see AbstractMidAgentCallback#doHandle(SnaResponseMessage)
-     */
-    public void doHandle(SnaResponseMessage event) {
     }
 }

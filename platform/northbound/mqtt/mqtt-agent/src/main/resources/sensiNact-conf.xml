@@ -13,5 +13,5 @@
 
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-    <entry key="mqtt.csebase">$(org.eclipse.sensinact.gateway.northbound.mqtt.onem2m.csebase)</entry>
+    <!--<entry key="${key}">${value}</entry>-->
 </properties>
