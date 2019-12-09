@@ -10,17 +10,21 @@
  */
 package org.eclipse.sensinact.gateway.common.interpolator;
 
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+
 import org.eclipse.sensinact.gateway.common.annotation.Property;
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.interpolator.exception.IncompleteDataException;
 import org.eclipse.sensinact.gateway.common.interpolator.exception.InterpolationException;
 import org.eclipse.sensinact.gateway.common.interpolator.exception.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.interpolator.exception.ObjectInstantiationException;
-
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 /**
  * Creates instance (or re-use an already existant instance) annotated with {@link Property} and interpolates with a dictionary of properties
@@ -29,17 +33,23 @@ import java.util.regex.Pattern;
  */
 public class Interpolator {
     private static final Logger LOG = Logger.getLogger(Interpolator.class.getName());
-    private final Map propertyValues;
+    
     private final Map<String,String> propertiesInjected=new HashMap<>();
+	private PropertyBucket propertyBucket;
 
-    public Interpolator(Dictionary propertyValues) {
-        this.propertyValues = valueOf(propertyValues);
+    public Interpolator(Mediator mediator) {
+    	this.propertyBucket = new MediatorPropertyBucket(mediator);
     }
 
-    public Interpolator(Map propertyValues) {
-        this.propertyValues = propertyValues;
+    public Interpolator(Map map) {
+    	this.propertyBucket = new MapPropertyBucket(map);
+    }    
+
+    public Interpolator(Dictionary dictionary) {
+    	this.propertyBucket = new DictionaryPropertyBucket(dictionary);
     }
 
+    
     public <E> E getInstance(E object) throws InterpolationException {
         try {
             for (Field field : object.getClass().getDeclaredFields()) {
@@ -56,9 +66,8 @@ public class Interpolator {
                     if (!annotation.defaultValue().trim().equals("")) {
                         value = annotation.defaultValue();
                     }
-                    if (propertyValues.get(propertyName) != null) {
-                        value = propertyValues.get(propertyName);
-                    }
+                    value = propertyBucket.get(propertyName);
+
                     if (annotation.mandatory() && value == null) {
                         throw new IncompleteDataException(String.format("mandatory field \"%s\" is missing in property table", field.getName()));
                     }
@@ -110,21 +119,56 @@ public class Interpolator {
             throw new ObjectInstantiationException(e);
         }
     }
-
-    private static Map valueOf(Dictionary dictionary) {
-        if (dictionary == null) {
-            return null;
-        }
-        Map map = new HashMap(dictionary.size());
-        Enumeration keys = dictionary.keys();
-        while (keys.hasMoreElements()) {
-            Object key = keys.nextElement();
-            map.put(key, dictionary.get(key));
-        }
-        return map;
-    }
+    
 
     public Map<String, String> getPropertiesInjected() {
         return Collections.unmodifiableMap(propertiesInjected);
+    }
+    
+    private interface PropertyBucket {
+    	
+    	Object get(String name);
+    }
+    
+    private class MediatorPropertyBucket implements PropertyBucket {
+    	
+    	private final Mediator mediator;
+    	
+    	MediatorPropertyBucket(Mediator mediator) {
+    		this.mediator = mediator;
+    	}
+
+		@Override
+		public Object get(String property) {
+			return this.mediator.getProperty(property);
+		}
+    }
+
+    private class MapPropertyBucket implements PropertyBucket {
+    	
+    	private final Map map;
+    	
+    	MapPropertyBucket(Map map) {
+    		this.map = map;
+    	}
+
+		@Override
+		public Object get(String property) {
+			return this.map.get(property);
+		}
+    }
+
+    private class DictionaryPropertyBucket implements PropertyBucket {
+    	
+    	private final Dictionary dictionary;
+    	
+    	DictionaryPropertyBucket(Dictionary dictionary) {
+    		this.dictionary = dictionary;
+    	}
+
+		@Override
+		public Object get(String property) {
+			return this.dictionary.get(property);
+		}
     }
 }
