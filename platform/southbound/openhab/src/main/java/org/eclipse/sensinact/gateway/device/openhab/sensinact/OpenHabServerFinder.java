@@ -17,17 +17,24 @@ public class OpenHabServerFinder {
 	
     public static final String  OPENHAB_SERVICE_TYPE_PROPERTY_NAME = "org.eclipse.sensinact.gateway.device.openhab.type";
     public static final String  OPENHAB_SERVICE_NAME_PROPERTY_NAME = "org.eclipse.sensinact.gateway.device.openhab.name";
+    
     public static final String  OPENHAB_SCHEME_PROPERTY_NAME       = "org.eclipse.sensinact.gateway.device.openhab.scheme";
     public static final String  OPENHAB_IP_PROPERTY_NAME           = "org.eclipse.sensinact.gateway.device.openhab.ip";
     public static final String  OPENHAB_PORT_PROPERTY_NAME         = "org.eclipse.sensinact.gateway.device.openhab.port";
+    
     public static final String  DEFAULT_OPENHAB_SERVICE_TYPE       = "_openhab-server._tcp.local.";
     public static final String  DEFAULT_OPENHAB_SERVICE_SSL_TYPE   = "_openhab-server-ssl._tcp local.";    
+    
     public static final String  DEFAULT_OPENHAB_SERVICE_NAME       = "openhab";   
     public static final String  DEFAULT_OPENHAB_SERVICE_SSL_NAME   = "openhab-ssl";
+    
     public static final String  DEFAULT_OPENHAB_SCHEME             = "http";
     public static final String  DEFAULT_OPENHAB_SSL_SCHEME         = "https";
+    
     public static final String  DEFAULT_OPENHAB_IP                 = "127.0.0.1";
     public static final int     DEFAULT_OPENHAB_PORT               = 8080;
+    public static final int     DEFAULT_OPENHAB_SSL_PORT           = 8443;
+    
     public static final String  ACTIVATE_DISCOVERY_PROPERTY_NAME   = "org.eclipse.sensinact.gateway.device.openhab.OpenHabDiscovery2.disabled";
    
     public static ServerLocation getServerLocation(OpenHabMediator mediator, ServiceListener serviceListener) throws IOException {
@@ -45,6 +52,7 @@ public class OpenHabServerFinder {
     	String openhabIP = null;
         int openhabPort = 0;	
     	
+        String openhabServiceType =  getOpenhabServiceType(mediator);
         mediator.warn("The openhab2 discovery service was disabled by system property. Using openhab configuration found inside conf/config.properties:");
 
         final String openhabSchemePropertyValue = (String) mediator.getProperty(OPENHAB_SCHEME_PROPERTY_NAME);
@@ -52,7 +60,7 @@ public class OpenHabServerFinder {
         	openhabScheme = openhabSchemePropertyValue;
             mediator.info("Openhab2 port configurated by %s property set to %s", OPENHAB_SCHEME_PROPERTY_NAME, openhabScheme);
         } else {
-        	openhabScheme =  DEFAULT_OPENHAB_SERVICE_SSL_TYPE.startsWith(getOpenhabServiceType(mediator))?DEFAULT_OPENHAB_SSL_SCHEME:DEFAULT_OPENHAB_SCHEME;
+        	openhabScheme =  DEFAULT_OPENHAB_SERVICE_SSL_TYPE.startsWith(openhabServiceType)?DEFAULT_OPENHAB_SSL_SCHEME:DEFAULT_OPENHAB_SCHEME;
             mediator.info("No openhab2 port configurated with %s. Using default port: ", OPENHAB_SCHEME_PROPERTY_NAME, openhabScheme);
         }
         
@@ -70,18 +78,17 @@ public class OpenHabServerFinder {
             openhabPort = Integer.parseInt(openhabPortPropertyValue);
             mediator.info("Openhab2 port configurated by %s property set to %s", OPENHAB_PORT_PROPERTY_NAME, openhabPort);
         } else {
-            openhabPort = DEFAULT_OPENHAB_PORT;
+            openhabPort = DEFAULT_OPENHAB_SERVICE_SSL_TYPE.startsWith(openhabServiceType)?DEFAULT_OPENHAB_SSL_PORT:DEFAULT_OPENHAB_PORT;
             mediator.info("No openhab2 port configurated with %s. Using default port: ", OPENHAB_PORT_PROPERTY_NAME, openhabPort);
         }
-        
         return new ServerLocation(openhabScheme, openhabIP, openhabPort);
 	}
 
 	private static ServerLocation findServerLocationUsingDiscovery(OpenHabMediator mediator, ServiceListener serviceListener, String openhabServiceType, String openhabServiceName) throws IOException {
     	String openhabScheme = DEFAULT_OPENHAB_SERVICE_SSL_TYPE.startsWith(openhabServiceType)?DEFAULT_OPENHAB_SSL_SCHEME:DEFAULT_OPENHAB_SCHEME;
-		String openhabIP = DEFAULT_OPENHAB_IP;
-        int openhabPort = DEFAULT_OPENHAB_PORT;
-               
+		String openhabIP = null;
+        int openhabPort = 0;
+                           
     	mediator.info("Starting openhab2 discovery...");
     	JmDNS dns = JmDNS.create();
         mediator.info("...dns created...");
@@ -117,11 +124,12 @@ public class OpenHabServerFinder {
     
 	private static String getOpenhabServiceType(OpenHabMediator mediator) {
 		final String openhabServiceTypePropertyValue = (String) mediator.getProperty(OPENHAB_SERVICE_TYPE_PROPERTY_NAME);
-        String openhabServiceType = DEFAULT_OPENHAB_SERVICE_TYPE;
+        String openhabServiceType = null;
         if (openhabServiceTypePropertyValue != null) {
             openhabServiceType = openhabServiceTypePropertyValue;
             mediator.info("Openhab2 service type configurated by %s property set to %s", OPENHAB_SERVICE_TYPE_PROPERTY_NAME, openhabServiceType);
         } else {
+        	openhabServiceType = DEFAULT_OPENHAB_SERVICE_TYPE;
             mediator.info("No openhab2 service type configurated. Using default type: " + openhabServiceType);
         }
 		return openhabServiceType;
@@ -129,11 +137,12 @@ public class OpenHabServerFinder {
     
 	private static String getOpenhabServiceName(OpenHabMediator mediator) {
 		final String openhabServiceNamePropertyValue = (String) mediator.getProperty(OPENHAB_SERVICE_NAME_PROPERTY_NAME);
-        String openhabServiceName = DEFAULT_OPENHAB_SERVICE_NAME;
+        String openhabServiceName = null;
         if (openhabServiceNamePropertyValue != null) {
             openhabServiceName = openhabServiceNamePropertyValue;
             mediator.info("Openhab2 service name configurated by %s property set to %s", OPENHAB_SERVICE_NAME_PROPERTY_NAME, openhabServiceName);
         } else {
+        	openhabServiceName = DEFAULT_OPENHAB_SERVICE_SSL_TYPE.startsWith(getOpenhabServiceType(mediator))?DEFAULT_OPENHAB_SERVICE_SSL_NAME:DEFAULT_OPENHAB_SERVICE_NAME;
             mediator.info("No openhab2 service name configurated. Using default type: " + openhabServiceName);
         }
 		return openhabServiceName;
@@ -148,6 +157,6 @@ public class OpenHabServerFinder {
         } else {
             mediator.info("No openhab2 discovery configurated. Default configuration is enabled...");
         }
-		return ! discoveryDescativated;
+		return !discoveryDescativated;
 	}
 }

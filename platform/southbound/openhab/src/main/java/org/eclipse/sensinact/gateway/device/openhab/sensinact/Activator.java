@@ -116,8 +116,8 @@ public class Activator extends HttpActivator implements ServiceListener {
         		.withServiceBuildPolicy(getServiceBuildPolicy())
         		.withResourceBuildPolicy(getResourceBuildPolicy())
         		.build(getResourceDescriptionFile(), getDefaults());
+        
         endpoints = new HashMap<String, SimpleHttpProtocolStackEndpoint>();
-
         ServerLocation server = OpenHabServerFinder.getServerLocation((OpenHabMediator) mediator, this);
 
         try {
