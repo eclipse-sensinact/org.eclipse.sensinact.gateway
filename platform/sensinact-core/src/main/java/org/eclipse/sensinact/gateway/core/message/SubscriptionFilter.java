@@ -13,20 +13,21 @@ package org.eclipse.sensinact.gateway.core.message;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.props.TypedProperties;
-import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 
 /**
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
-public class SubscriptionFilter extends SnaFilter {
+public class SubscriptionFilter extends MessageFilter {
 	/**
 	 * Constructor
 	 * 
@@ -58,7 +59,7 @@ public class SubscriptionFilter extends SnaFilter {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see SnaFilter# matches(SnaMessage)
+	 * @see MessageFilter# matches(SnaMessage)
 	 */
 	@Override
 	public	boolean matches(SnaMessage message) {
@@ -68,7 +69,7 @@ public class SubscriptionFilter extends SnaFilter {
 		if (this.conditions.isEmpty()) {
 			return true;
 		}
-		JSONObject jsonObject = (JSONObject) ((TypedProperties<SnaUpdateMessage.Update>) message)
+		JSONObject jsonObject = (JSONObject) ((TypedProperties<UpdateMessage.Update>) message)
 				.get(SnaConstants.NOTIFICATION_KEY);
 
 		String type = jsonObject.getString(Resource.TYPE);

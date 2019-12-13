@@ -10,8 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.system.invoker;
 
+import org.eclipse.sensinact.gateway.api.core.Core;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskCommand;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskExecution;

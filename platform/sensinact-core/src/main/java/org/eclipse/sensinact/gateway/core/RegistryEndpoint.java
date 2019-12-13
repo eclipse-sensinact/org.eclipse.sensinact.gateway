@@ -1,5 +1,18 @@
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
+ */
 package org.eclipse.sensinact.gateway.core;
 
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.core.Service;
+import org.eclipse.sensinact.gateway.api.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
@@ -13,9 +26,13 @@ import org.osgi.framework.ServiceReference;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
-@SuppressWarnings({"rawtypes","unchecked"}) 
 public final class RegistryEndpoint {
 	
 	private Mediator mediator;
@@ -377,7 +394,7 @@ public final class RegistryEndpoint {
     /**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Core#namespace()
+	 * @see org.eclipse.sensinact.gateway.api.core.Core#namespace()
 	 */
 	protected String namespace() {
 		String namespace = this.mediator.callService(SensinactCoreBaseIFaceManager.class, 

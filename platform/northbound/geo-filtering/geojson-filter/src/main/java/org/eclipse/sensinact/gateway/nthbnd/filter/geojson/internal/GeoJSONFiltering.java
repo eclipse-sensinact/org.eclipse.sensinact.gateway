@@ -10,10 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.filter.geojson.internal;
 
+import org.eclipse.sensinact.gateway.api.core.Filtering;
+import org.eclipse.sensinact.gateway.api.core.LocationResource;
+import org.eclipse.sensinact.gateway.api.core.Resource;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.Filtering;
-import org.eclipse.sensinact.gateway.core.LocationResource;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.util.LocationUtils;
 import org.eclipse.sensinact.gateway.util.json.JSONObjectStatement;
 import org.eclipse.sensinact.gateway.util.json.JSONTokenerStatement;
@@ -75,7 +75,7 @@ public class GeoJSONFiltering implements Filtering {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Filtering#handle(java.lang.String)
+     * @see org.eclipse.sensinact.gateway.api.core.Filtering#handle(java.lang.String)
      */
     @Override
     public boolean handle(String type) {
@@ -85,7 +85,7 @@ public class GeoJSONFiltering implements Filtering {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Filtering#apply(java.lang.String, java.lang.Object)
+     * @see org.eclipse.sensinact.gateway.api.core.Filtering#apply(java.lang.String, java.lang.Object)
      */
     @Override
     public String apply(String definition, Object result) {
@@ -173,7 +173,7 @@ public class GeoJSONFiltering implements Filtering {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Filtering#getLDAPComponent()
+     * @see org.eclipse.sensinact.gateway.api.core.Filtering#getLDAPComponent()
      */
     @Override
     public String getLDAPComponent(String definition) {

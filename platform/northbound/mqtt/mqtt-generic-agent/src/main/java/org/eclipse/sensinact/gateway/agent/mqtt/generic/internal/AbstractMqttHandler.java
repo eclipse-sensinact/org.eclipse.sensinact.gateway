@@ -10,11 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.agent.mqtt.generic.internal;
 
-import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
-
 import java.io.IOException;
 
-public abstract class AbstractMqttHandler extends AbstractMidAgentCallback {
+import org.eclipse.sensinact.gateway.api.message.AbstractMessageAgentCallback;
+
+public abstract class AbstractMqttHandler extends AbstractMessageAgentCallback {
     protected GenericMqttAgent agent;
 
     public AbstractMqttHandler() throws IOException {

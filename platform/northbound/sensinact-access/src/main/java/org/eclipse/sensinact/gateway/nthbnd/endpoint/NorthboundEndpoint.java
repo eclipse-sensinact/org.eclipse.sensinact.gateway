@@ -10,11 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import org.eclipse.sensinact.gateway.api.message.AbstractMessageAgentCallback;
 import org.eclipse.sensinact.gateway.core.AnonymousSession;
 import org.eclipse.sensinact.gateway.core.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.Session;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
@@ -133,7 +133,7 @@ public class NorthboundEndpoint {
      * @param filter
      * @return the {@link SnaAgent} registration response
      */
-    public SubscribeResponse registerAgent(String requestIdentifier, AbstractMidAgentCallback callback, SnaFilter filter) {
+    public SubscribeResponse registerAgent(String requestIdentifier, AbstractMessageAgentCallback callback, MessageFilter filter) {
         return session.registerSessionAgent(requestIdentifier, callback, filter);
     }
 

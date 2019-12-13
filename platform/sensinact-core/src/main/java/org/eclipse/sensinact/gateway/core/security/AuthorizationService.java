@@ -14,7 +14,7 @@ package org.eclipse.sensinact.gateway.core.security;
  * Provides the set of authorized access methods for a specific user and a
  * specific resource
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface AuthorizationService {
 	/**

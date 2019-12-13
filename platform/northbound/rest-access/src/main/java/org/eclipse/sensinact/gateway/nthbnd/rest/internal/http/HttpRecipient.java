@@ -12,8 +12,8 @@ package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 
 import java.io.IOException;
 
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfiguration;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
@@ -54,7 +54,7 @@ public class HttpRecipient extends NorthboundRecipient {
      * @throws IOException 
      * @inheritDoc
      * 
-     * @see org.eclipse.sensinact.gateway.core.message.Recipient#callback(java.lang.String, org.eclipse.sensinact.gateway.core.message.SnaMessage[])
+     * @see org.eclipse.sensinact.gateway.api.message.Recipient#callback(java.lang.String, org.eclipse.sensinact.gateway.api.message.SnaMessage[])
      */
     public void callback(String callbackId, SnaMessage[] messages) throws IOException {
         int index = 0;

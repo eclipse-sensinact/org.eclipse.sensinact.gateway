@@ -18,12 +18,21 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.api.core.AttributeBuilder;
+import org.eclipse.sensinact.gateway.api.core.Core;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.core.ServiceProvider;
+import org.eclipse.sensinact.gateway.api.core.ServiceProvider.LifecycleStatus;
+import org.eclipse.sensinact.gateway.api.message.AbstractSnaMessage;
+import org.eclipse.sensinact.gateway.api.message.MessageCallback;
+import org.eclipse.sensinact.gateway.api.message.MessagePropagator;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
-import org.eclipse.sensinact.gateway.core.ServiceProvider.LifecycleStatus;
-import org.eclipse.sensinact.gateway.core.message.*;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
+import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
@@ -39,7 +48,7 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * A sensiNact Resource Model instance
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class ModelInstance<C extends ModelConfiguration> implements SensiNactResourceModel<C>, LifecycleStatusListener {
 
@@ -106,7 +115,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 * the {@link MesssageHandler} handling messages coming from this
 	 * SensiNactResourceModel
 	 */
-	protected MessageHandler messageHandler;
+	protected MessagePropagator messageHandler;
 
 	/**
 	 * the String identifier of the profile of this SnaServiceProvider
@@ -317,7 +326,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	}
 
 	/**
-	 * Posts the {@link SnaMessage} past as parameter to the {@link MessageHandler}
+	 * Posts the {@link SnaMessage} past as parameter to the {@link MessagePropagator}
 	 * of this SensiNactResourceModel
 	 * 
 	 * @param message
@@ -328,7 +337,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 			return;
 		}
 		((AbstractSnaMessage<?>)message).put("namespace", this.namespace, true);
-		this.messageHandler.handle(message);
+		this.messageHandler.propagate(message);
 	}
 
 	/**
@@ -369,7 +378,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 		String location = null;
 		try {
 			location = this.getRootElement().getLocation();
-			props.put(LocationResource.LOCATION, location);
+			props.put(SnaConstants.LOCATION, location);
 
 		} catch (NullPointerException e) {
 			mediator.debug(String.format("No initial location defined for %s", name));
@@ -401,7 +410,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 			List<String> observed = this.configuration.getObserved();
 
 			this.registration = new ModelInstanceRegistration(uri, observed, instanceRegistration, this.configuration);
-			this.messageHandler = new SnaMessageListener(mediator, this.configuration());
+			this.messageHandler = new ModelInstanceMessagePropagator(mediator, this.configuration());
 			
 			boolean pattern = false;
 
@@ -433,12 +442,12 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 			} else {
 				observedBuilder.append("/admin/location/value");
 			}
-			SnaFilter filter = new SnaFilter(mediator, observedBuilder.toString(), pattern, false);
+			MessageFilter filter = new MessageFilter(mediator, observedBuilder.toString(), pattern, false);
 
 			filter.addHandledType(SnaMessage.Type.UPDATE);
 			this.messageHandler.addCallback(filter, registration);
 
-			filter = new SnaFilter(mediator, "(\\/[^\\/]+)+", true, false);
+			filter = new MessageFilter(mediator, "(\\/[^\\/]+)+", true, false);
 			filter.addHandledType(SnaMessage.Type.LIFECYCLE);
 			this.messageHandler.addCallback(filter, registration);
 
@@ -530,7 +539,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 * @param filter
 	 * @param callback
 	 */
-	public void registerCallback(SnaFilter filter, MidCallback callback) {
+	public void registerCallback(MessageFilter filter, MessageCallback callback) {
 		if (this.messageHandler == null) {
 			return;
 		}

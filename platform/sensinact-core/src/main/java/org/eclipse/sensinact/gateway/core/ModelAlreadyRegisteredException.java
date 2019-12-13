@@ -14,7 +14,7 @@ package org.eclipse.sensinact.gateway.core;
  * Exception thrown if a ResourceModel is asked for registration when it is
  * already
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
 public class ModelAlreadyRegisteredException extends IllegalStateException {

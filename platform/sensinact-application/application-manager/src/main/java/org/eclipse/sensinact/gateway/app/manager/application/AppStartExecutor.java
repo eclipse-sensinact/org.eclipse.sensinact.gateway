@@ -10,13 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.application;
 
+import org.eclipse.sensinact.gateway.api.core.Attribute;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.message.ErrorMessage;
 import org.eclipse.sensinact.gateway.app.api.exception.ResourceNotFoundException;
 import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
-import org.eclipse.sensinact.gateway.core.Attribute;
-import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.json.JSONObject;
@@ -39,8 +39,8 @@ class AppStartExecutor implements AccessMethodExecutor {
         ApplicationStatus status = getApplicationState(service.getResource(AppConstant.STATUS));
         if (ApplicationStatus.RESOLVING.equals(status) || ApplicationStatus.UNRESOLVED.equals(status)) {
             Application application = service.getApplication();
-            SnaErrorMessage message = application.start();
-            if (message.getType() == SnaErrorMessage.Error.NO_ERROR) {
+            ErrorMessage message = application.start();
+            if (message.getType() == ErrorMessage.Error.NO_ERROR) {
                 jsonObjects.push(new JSONObject().put("message", "Application " + service.getName() + " started"));
             } else {
                 jsonObjects.registerException(new ResourceNotFoundException("Unable to start the application: " + message.getJSON()));

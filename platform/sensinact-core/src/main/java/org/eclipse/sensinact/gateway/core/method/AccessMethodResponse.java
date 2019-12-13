@@ -17,15 +17,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.sensinact.gateway.api.message.AbstractSnaErrorfulMessage;
+import org.eclipse.sensinact.gateway.api.message.ErrorfulMessage;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
+import org.eclipse.sensinact.gateway.api.message.MessageSubType;
+import org.eclipse.sensinact.gateway.api.message.ResponseMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 import org.eclipse.sensinact.gateway.common.props.TypedKey;
-import org.eclipse.sensinact.gateway.core.message.AbstractSnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaMessageSubType;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeJSONResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod;
@@ -41,14 +41,14 @@ import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
  * Extended {@link SnaMessage} dedicated to the responses to the
  * {@link AccessMethod}s invocation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public abstract class AccessMethodResponse<T> extends AbstractSnaErrorfulMessage<AccessMethodResponse.Response>
-		implements SnaResponseMessage<T, AccessMethodResponse.Response> {
+		implements ResponseMessage<T, AccessMethodResponse.Response> {
 	
-	public static final int SUCCESS_CODE = SnaErrorfulMessage.NO_ERROR;
+	public static final int SUCCESS_CODE = ErrorfulMessage.NO_ERROR;
 
-	public enum Response implements SnaMessageSubType, KeysCollection {
+	public enum Response implements MessageSubType, KeysCollection {
 		DESCRIBE_RESPONSE, 
 		GET_RESPONSE, 
 		SET_RESPONSE, 
@@ -70,11 +70,11 @@ public abstract class AccessMethodResponse<T> extends AbstractSnaErrorfulMessage
 		/**
 		 * @inheritDoc
 		 * 
-		 * @see SnaMessageSubType#getSnaMessageType()
+		 * @see MessageSubType#getSnaMessageType()
 		 */
 		@Override
 		public SnaMessage.Type getSnaMessageType() {
-			return SnaResponseMessage.TYPE;
+			return ResponseMessage.TYPE;
 		}
 
 		/**
@@ -144,7 +144,7 @@ public abstract class AccessMethodResponse<T> extends AbstractSnaErrorfulMessage
 	 */
 	private static final <T, R extends AccessMethodResponse<T>> R error(Mediator mediator, String uri, String method,
 			int statusCode, String message, Throwable throwable) {
-		int code = statusCode == AccessMethodResponse.SUCCESS_CODE ? SnaErrorfulMessage.UNKNOWN_ERROR_CODE : statusCode;
+		int code = statusCode == AccessMethodResponse.SUCCESS_CODE ? ErrorfulMessage.UNKNOWN_ERROR_CODE : statusCode;
 
 		AccessMethodResponse<?> response = null;
 		switch (method) {
@@ -193,7 +193,7 @@ public abstract class AccessMethodResponse<T> extends AbstractSnaErrorfulMessage
 	@SuppressWarnings("unchecked")
 	public static final <T, R extends DescribeResponse<T>> R error(Mediator mediator, String uri,
 			DescribeType describeType, int statusCode, String message, Throwable throwable) {
-		int code = statusCode == AccessMethodResponse.SUCCESS_CODE ? SnaErrorfulMessage.UNKNOWN_ERROR_CODE : statusCode;
+		int code = statusCode == AccessMethodResponse.SUCCESS_CODE ? ErrorfulMessage.UNKNOWN_ERROR_CODE : statusCode;
 
 		DescribeMethod.DescribeType type = describeType == null ? DescribeMethod.DescribeType.COMPLETE_LIST
 				: describeType;
@@ -258,7 +258,7 @@ public abstract class AccessMethodResponse<T> extends AbstractSnaErrorfulMessage
 
 	/**
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.SnaResponseMessage#getResponse()
+	 * @see org.eclipse.sensinact.gateway.api.message.ResponseMessage#getResponse()
 	 */
 	public T getResponse() {
 		return super.<T>get(SnaConstants.RESPONSE_KEY);

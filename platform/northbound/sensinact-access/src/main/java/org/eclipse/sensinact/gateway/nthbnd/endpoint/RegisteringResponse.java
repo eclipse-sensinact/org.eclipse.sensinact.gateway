@@ -10,13 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import org.eclipse.sensinact.gateway.api.message.AbstractSnaErrorfulMessage;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
+import org.eclipse.sensinact.gateway.api.message.MessageSubType;
+import org.eclipse.sensinact.gateway.api.message.ResponseMessage;
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 import org.eclipse.sensinact.gateway.common.props.TypedKey;
-import org.eclipse.sensinact.gateway.core.message.AbstractSnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaMessageSubType;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 
 import java.util.Arrays;
@@ -34,7 +34,7 @@ import java.util.Set;
  */
 public class RegisteringResponse extends AbstractSnaErrorfulMessage<RegisteringResponse.RegisteringRequest> implements RegisteringMessage {
     
-	public enum RegisteringRequest implements SnaMessageSubType, KeysCollection {
+	public enum RegisteringRequest implements MessageSubType, KeysCollection {
         USER_CREATION, PASSWORD_RENEW;
         final Set<TypedKey<?>> keys;
 
@@ -48,11 +48,11 @@ public class RegisteringResponse extends AbstractSnaErrorfulMessage<RegisteringR
 
         /**
          * @inheritDoc
-         * @see SnaMessageSubType#getSnaMessageType()
+         * @see MessageSubType#getSnaMessageType()
          */
         @Override
         public SnaMessage.Type getSnaMessageType() {
-            return SnaResponseMessage.TYPE;
+            return ResponseMessage.TYPE;
         }
 
         /**

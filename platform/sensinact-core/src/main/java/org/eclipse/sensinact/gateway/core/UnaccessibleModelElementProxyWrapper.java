@@ -13,13 +13,13 @@ package org.eclipse.sensinact.gateway.core;
 import java.util.Collections;
 import java.util.Enumeration;
 
+import org.eclipse.sensinact.gateway.api.message.ErrorfulMessage;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 
 /**
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class UnaccessibleModelElementProxyWrapper
 		extends ElementsProxyWrapper<UnaccessibleModelElementProxy, Nameable> {
@@ -100,7 +100,7 @@ public class UnaccessibleModelElementProxyWrapper
 			public String getJSONDescription() {
 				StringBuilder builder = new StringBuilder();
 				builder.append("{\"type\":\"DESCRIBE_ERROR\",\"statusCode\":");
-				builder.append(SnaErrorfulMessage.FORBIDDEN_ERROR_CODE);
+				builder.append(ErrorfulMessage.FORBIDDEN_ERROR_CODE);
 				builder.append(",\"errors\":[");
 				builder.append("{\"message\":\"Unaccessible object\",\"trace\":[]}]}");
 				return builder.toString();

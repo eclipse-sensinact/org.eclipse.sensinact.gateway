@@ -17,7 +17,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod;
  * An MethodAccessibility defines whether an {@link AccessMethod.Type} is
  * accessible for a specific {@link AccessLevelOption}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface MethodAccessibility extends Nameable {
 	/**

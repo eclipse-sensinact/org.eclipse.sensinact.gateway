@@ -10,29 +10,29 @@
  */
 package org.eclipse.sensinact.gateway.core.osgi;
 
+import org.eclipse.sensinact.gateway.api.core.Core;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.SensiNact;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+//import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationEvent;
-import org.osgi.service.cm.ConfigurationListener;
+//import org.osgi.service.cm.Configuration;
+//import org.osgi.service.cm.ConfigurationAdmin;
+//import org.osgi.service.cm.ConfigurationEvent;
+//import org.osgi.service.cm.ConfigurationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.Enumeration;
-import java.util.Hashtable;
+//import java.util.Enumeration;
+//import java.util.Hashtable;
 
 /**
  * Bundle Activator
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class Activator extends AbstractActivator<Mediator> {
 

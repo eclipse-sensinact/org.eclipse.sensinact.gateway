@@ -21,7 +21,7 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
 /**
  * An {@link AccessMethod} {@link Description}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class AccessMethodDescription implements Description, Iterable<Signature> {
 	private final Set<Signature> signatures;

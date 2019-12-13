@@ -11,11 +11,11 @@
 package org.eclipse.sensinact.gateway.agent.storage.osgi;
 
 import org.eclipse.sensinact.gateway.agent.storage.internal.StorageAgent;
+import org.eclipse.sensinact.gateway.api.core.Core;
 import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.Core;
 import org.osgi.framework.BundleContext;
 
 /**

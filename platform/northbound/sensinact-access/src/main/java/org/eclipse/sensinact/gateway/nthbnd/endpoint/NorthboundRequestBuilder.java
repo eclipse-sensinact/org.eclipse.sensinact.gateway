@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.core.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.FilteringDefinition;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONArray;
 
@@ -273,7 +273,7 @@ public class NorthboundRequestBuilder {
                     	(arguments.length > 1 ? ((JSONArray) arguments[1]) : new JSONArray()),(arguments.length > 2 ? ((String) arguments[2]) : String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY)));
                 } else {
                     request = new RegisterAgentRequest(mediator, getRequestIdentifier(), serviceProvider, service, (NorthboundRecipient) arguments[0], 
-                    	(SnaFilter) (arguments.length > 1 ? arguments[1] : null),(arguments.length > 2 ? ((String) arguments[2]) : String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY)));
+                    	(MessageFilter) (arguments.length > 1 ? arguments[1] : null),(arguments.length > 2 ? ((String) arguments[2]) : String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY)));
                 }
                 break;
             case "UNSUBSCRIBE":

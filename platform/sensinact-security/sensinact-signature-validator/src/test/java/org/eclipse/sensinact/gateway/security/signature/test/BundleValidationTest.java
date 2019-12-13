@@ -113,15 +113,15 @@ public class BundleValidationTest extends MidOSGiTest{
 	@Override
 	protected void doInit(Map configuration) {		
 		configuration.put("org.osgi.framework.system.packages.extra", 
-		"org.eclipse.sensinact.gateway.generic;version= \"2.0.0\","+
-		"org.eclipse.sensinact.gateway.generic.*;version= \"2.0.0\"," +
-		"org.eclipse.sensinact.gateway.common;version= \"2.0.0\"," +  
-		"org.eclipse.sensinact.gateway.common.*;version= \"2.0.0\"," + 
-		"org.eclipse.sensinact.gateway.util;version= \"2.0.0\"," + 
-		"org.eclipse.sensinact.gateway.util.*;version= \"2.0.0\"," + 
-		"json-20140107.jar;version= \"2.0.0\"," + 
-		"org.json;version;version= \"2.0.0\"," + 
-		"org.json.zip;version=\"2.0.0\"");
+		"org.eclipse.sensinact.gateway.generic;version= \"2.1.0\","+
+		"org.eclipse.sensinact.gateway.generic.*;version= \"2.1.0\"," +
+		"org.eclipse.sensinact.gateway.common;version= \"2.1.0\"," +  
+		"org.eclipse.sensinact.gateway.common.*;version= \"2.1.0\"," + 
+		"org.eclipse.sensinact.gateway.util;version= \"2.1.0\"," + 
+		"org.eclipse.sensinact.gateway.util.*;version= \"2.1.0\"," + 
+		"json-20140107.jar;version= \"2.1.0\"," + 
+		"org.json;version;version= \"2.1.0\"," + 
+		"org.json.zip;version=\"2.1.0\"");
 	}
 
 	@Override

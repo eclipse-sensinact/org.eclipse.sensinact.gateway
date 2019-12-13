@@ -12,8 +12,9 @@ package org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.internal;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+
+import org.eclipse.sensinact.gateway.api.core.Filtering;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.Filtering;
 
 /**
  * {@link Filtering} implementation allowing to apply a JsonPath expression to
@@ -45,7 +46,7 @@ public class JsonPathFiltering implements Filtering {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Filtering#handle(java.lang.String)
+     * @see org.eclipse.sensinact.gateway.api.core.Filtering#handle(java.lang.String)
      */
     @Override
     public boolean handle(String type) {
@@ -54,7 +55,7 @@ public class JsonPathFiltering implements Filtering {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Filtering#apply(java.lang.String, java.lang.Object)
+     * @see org.eclipse.sensinact.gateway.api.core.Filtering#apply(java.lang.String, java.lang.Object)
      */
     @Override
     public String apply(String definition, Object result) {
@@ -77,7 +78,7 @@ public class JsonPathFiltering implements Filtering {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Filtering#getLDAPComponent()
+     * @see org.eclipse.sensinact.gateway.api.core.Filtering#getLDAPComponent()
      */
     @Override
     public String getLDAPComponent(String definition) {

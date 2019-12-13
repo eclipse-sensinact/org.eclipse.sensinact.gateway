@@ -14,6 +14,12 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.api.core.ActionResource;
+import org.eclipse.sensinact.gateway.api.core.AttributeBuilder;
+import org.eclipse.sensinact.gateway.api.core.PropertyResource;
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.core.SensorDataResource;
+import org.eclipse.sensinact.gateway.api.core.StateVariableResource;
 import org.eclipse.sensinact.gateway.common.primitive.Typable;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 
@@ -21,7 +27,7 @@ import org.eclipse.sensinact.gateway.util.ReflectUtils;
  * Configuration of the implemented type and interfaces of a
  * {@link ResourceImpl} instance
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class TypeConfig implements Typable<TypeConfig.Type> {
 	private final static Class<? extends ResourceImpl> DEFAULT_IMPLEMENTATION_CLASS = ResourceImpl.class;
@@ -65,13 +71,7 @@ public class TypeConfig implements Typable<TypeConfig.Type> {
 		Resource.Type type = this.<Resource.Type>getConstantValue(Resource.TYPE_PROPERTY, true);
 
 		String typeName = type.name();
-
-		if (type == Resource.Type.PROPERTY && LocationResource.class.isAssignableFrom(implementationInterface)) {
-			this.type = TypeConfig.Type.LOCATION;
-
-		} else {
-			this.type = TypeConfig.Type.valueOf(typeName);
-		}
+		this.type = TypeConfig.Type.valueOf(typeName);
 	}
 
 	/**
@@ -87,8 +87,6 @@ public class TypeConfig implements Typable<TypeConfig.Type> {
 			this.implementationInterface = ActionResource.class;
 			break;
 		case LOCATION:
-			this.implementationInterface = LocationResource.class;
-			break;
 		case PROPERTY:
 			this.implementationInterface = PropertyResource.class;
 			break;
@@ -192,10 +190,6 @@ public class TypeConfig implements Typable<TypeConfig.Type> {
 			}
 			break;
 		case LOCATION:
-			if (!LocationResource.class.isAssignableFrom(implementedInterface)) {
-				return;
-			}
-			break;
 		case PROPERTY:
 			if (!PropertyResource.class.isAssignableFrom(implementedInterface)) {
 				return;

@@ -16,7 +16,7 @@ import org.eclipse.sensinact.gateway.util.ReflectUtils;
 /**
  * Builder of a {@link ServiceImpl}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class ServiceBuilder {
 	private Mediator mediator;

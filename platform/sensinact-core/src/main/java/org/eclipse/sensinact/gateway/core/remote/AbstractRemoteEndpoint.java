@@ -13,16 +13,16 @@ package org.eclipse.sensinact.gateway.core.remote;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.api.message.Recipient;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Sessions.SessionObserver;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
  * Abstract implementation of a {@link RemoteEndpoint} service.
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionObserver {
 	// ********************************************************************//

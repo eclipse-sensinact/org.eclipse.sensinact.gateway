@@ -10,15 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import org.eclipse.sensinact.gateway.api.message.ErrorfulMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 
 /**
  * An unaccessible {@link ModelElement} proxy
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class UnaccessibleModelElementProxy extends ModelElementProxy {
 	/**
@@ -48,7 +48,7 @@ public class UnaccessibleModelElementProxy extends ModelElementProxy {
 	@Override
 	public AccessMethodResponse<?> invoke(String type, Object[] parameters) throws Throwable {
 		return AccessMethodResponse.error(super.mediator, super.path, AccessMethod.Type.valueOf(type.toUpperCase()),
-				SnaErrorfulMessage.FORBIDDEN_ERROR_CODE, "Unaccessible object", null);
+				ErrorfulMessage.FORBIDDEN_ERROR_CODE, "Unaccessible object", null);
 	}
 
 	/**

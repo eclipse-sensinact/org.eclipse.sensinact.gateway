@@ -10,16 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import org.eclipse.sensinact.gateway.api.message.AbstractMessageAgentCallback;
+import org.eclipse.sensinact.gateway.api.message.ErrorMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
+import org.eclipse.sensinact.gateway.api.message.ResponseMessage;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessageImpl;
 import org.eclipse.sensinact.gateway.common.execution.DefaultErrorHandler;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 
@@ -29,7 +29,7 @@ public class RegisterAgentRequest extends NorthboundRequest {
 
     private String serviceProvider;
     private String service;
-    private SnaFilter filter;
+    private MessageFilter filter;
 	private String policy ;
 
     /**
@@ -42,7 +42,7 @@ public class RegisterAgentRequest extends NorthboundRequest {
      * @param constraints
      */
     public RegisterAgentRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider,
-    		String service, NorthboundRecipient recipient, SnaFilter filter, String policy) {
+    		String service, NorthboundRecipient recipient, MessageFilter filter, String policy) {
         super(mediator, requestIdentifier, null);
         this.serviceProvider = serviceProvider;
         this.service = service;
@@ -60,9 +60,9 @@ public class RegisterAgentRequest extends NorthboundRequest {
      */
     @Override
     protected Argument[] getExecutionArguments() {
-        AbstractMidAgentCallback callback = new AbstractMidAgentCallback() {
+        AbstractMessageAgentCallback callback = new AbstractMessageAgentCallback() {
             @Override
-            public void doHandle(SnaLifecycleMessageImpl message) throws MidCallbackException  {
+            public void doHandle(LifecycleMessageImpl message) throws MidCallbackException  {
                 try {
 					RegisterAgentRequest.this.recipient.callback(
 							this.getName(), new SnaMessage[] {message});
@@ -72,7 +72,7 @@ public class RegisterAgentRequest extends NorthboundRequest {
             }
 
             @Override
-            public void doHandle(SnaUpdateMessageImpl message) throws MidCallbackException {
+            public void doHandle(UpdateMessageImpl message) throws MidCallbackException {
             	try {
 					RegisterAgentRequest.this.recipient.callback(
 							this.getName(), new SnaMessage[] {message});
@@ -82,7 +82,7 @@ public class RegisterAgentRequest extends NorthboundRequest {
             }
 
             @Override
-            public void doHandle(SnaErrorMessageImpl message) throws MidCallbackException {
+            public void doHandle(ErrorMessageImpl message) throws MidCallbackException {
             	try {
 					RegisterAgentRequest.this.recipient.callback(
 							this.getName(), new SnaMessage[] {message});
@@ -92,7 +92,7 @@ public class RegisterAgentRequest extends NorthboundRequest {
             }
 
             @Override
-            public void doHandle(SnaResponseMessage<?, ?> message) throws MidCallbackException {
+            public void doHandle(ResponseMessage<?, ?> message) throws MidCallbackException {
             	try {
 					RegisterAgentRequest.this.recipient.callback(
 							this.getName(), new SnaMessage[] {message});
@@ -130,8 +130,8 @@ public class RegisterAgentRequest extends NorthboundRequest {
         if (length > 0) {
             System.arraycopy(superArguments, 0, arguments, 0, length);
         }
-        arguments[length] = new Argument(AbstractMidAgentCallback.class, callback);
-        arguments[length + 1] = new Argument(SnaFilter.class, filter);
+        arguments[length] = new Argument(AbstractMessageAgentCallback.class, callback);
+        arguments[length + 1] = new Argument(MessageFilter.class, filter);
         return arguments;
     }
 

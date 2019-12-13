@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.core.method;
 /**
  * Exception thrown if an error occurred while creating a new {@link Parameter}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
 public class InvalidReflectiveExecutorException extends InvalidSignatureException {

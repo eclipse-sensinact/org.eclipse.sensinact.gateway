@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.agent.mqtt.inst.internal;
 import java.io.IOException;
 
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.AbstractMqttHandler;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessageImpl;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ public class SnaEventEventHandler extends AbstractMqttHandler {
      *
      * @param event the RegisteredUpdatedSnaEvent to process
      */
-    public void doHandle(SnaUpdateMessageImpl event) {
+    public void doHandle(UpdateMessageImpl event) {
         try {
             LOG.debug("Event received update:"+event.getJSON().toString());
             JSONObject eventJson = new JSONObject(event.getJSON()).getJSONObject("notification");

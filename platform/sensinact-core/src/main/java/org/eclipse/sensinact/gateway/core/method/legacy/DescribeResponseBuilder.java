@@ -17,7 +17,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
  * Extended {@link AccessMethodResponseBuilder} dedicated to
  * {@link DescribeMethod} execution and {@link DescribeResponse} creation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
 public abstract class DescribeResponseBuilder<T> extends AccessMethodResponseBuilder<T, DescribeResponse<T>> {

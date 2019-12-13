@@ -10,11 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.watchdog;
 
+import org.eclipse.sensinact.gateway.api.message.ErrorMessage;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
 import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.core.Session;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 
 /**
@@ -41,14 +41,14 @@ abstract class AbstractAppWatchDog {
      *
      * @param session the session used to start the application
      */
-    public abstract SnaErrorMessage start(Session session);
+    public abstract ErrorMessage start(Session session);
 
     /**
      * Stop the watchdog
      *
      * @param session the session used to stop the application
      */
-    public abstract SnaErrorMessage stop(Session session);
+    public abstract ErrorMessage stop(Session session);
 
     /**
      * This function is used byt the various watchdogs in order to

@@ -10,13 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.core.method.legacy;
 
+import org.eclipse.sensinact.gateway.api.message.ErrorfulMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 /**
  * Extended {@link AccessMethodResponse} returned by an {@link DescribeMethod}
  * invocation and holding a String as result object
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class DescribeStringResponse extends DescribeResponse<String> {
 	/**
@@ -30,7 +30,7 @@ public class DescribeStringResponse extends DescribeResponse<String> {
 	public DescribeStringResponse(Mediator mediator, String uri, Status status,
 			DescribeMethod.DescribeType describeType) {
 		this(mediator, uri, status,
-				Status.SUCCESS.equals(status) ? SnaErrorfulMessage.NO_ERROR : SnaErrorfulMessage.UNKNOWN_ERROR_CODE,
+				Status.SUCCESS.equals(status) ? ErrorfulMessage.NO_ERROR : ErrorfulMessage.UNKNOWN_ERROR_CODE,
 				describeType);
 	}
 

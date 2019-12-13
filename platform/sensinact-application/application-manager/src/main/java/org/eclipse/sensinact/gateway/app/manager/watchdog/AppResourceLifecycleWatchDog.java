@@ -15,6 +15,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.api.core.Attribute;
+import org.eclipse.sensinact.gateway.api.core.Core;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.message.AbstractMessageAgentCallback;
+import org.eclipse.sensinact.gateway.api.message.AgentMessageCallback;
+import org.eclipse.sensinact.gateway.api.message.ErrorMessage;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
 import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
 import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
@@ -22,17 +31,8 @@ import org.eclipse.sensinact.gateway.app.manager.json.AppSnaMessage;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.Attribute;
-import org.eclipse.sensinact.gateway.core.Core;
-import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.Session;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
 /**
@@ -44,7 +44,7 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  */
 public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
     private Collection<String> resourceUris;
-    private Map<String,MidAgentCallback> registrations;
+    private Map<String,AgentMessageCallback> registrations;
 
     /**
      * Constructor
@@ -56,7 +56,7 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
     public AppResourceLifecycleWatchDog(AppServiceMediator mediator, ApplicationService service, Collection<String> resourceUris) {
         super(mediator, service);
         this.resourceUris = resourceUris;
-        this.registrations = new HashMap<String,MidAgentCallback>();
+        this.registrations = new HashMap<String,AgentMessageCallback>();
     }
 
     private Resource getResource(Session session, String uri) {
@@ -70,7 +70,7 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
     /**
      * @see AbstractAppWatchDog#start(Session)
      */
-    public SnaErrorMessage start(Session session) {
+    public ErrorMessage start(Session session) {
         // Testing that all resources exist at start
         for (String resourceUri : resourceUris) {
             try {
@@ -80,14 +80,14 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
                      throw new NullPointerException();
                  }
             } catch (NullPointerException e) {
-                return new AppSnaMessage(this.mediator, "/AppManager", SnaErrorMessage.Error.SYSTEM_ERROR, "Resource " + resourceUri + " does not exist or you are not allowed to access it.");
+                return new AppSnaMessage(this.mediator, "/AppManager", ErrorMessage.Error.SYSTEM_ERROR, "Resource " + resourceUri + " does not exist or you are not allowed to access it.");
             }
         }
         mediator.callService(Core.class, new Executable<Core, Void>() {
             @Override
             public Void execute(Core service) throws Exception {
                 for (String resourceUri : resourceUris) {
-                    final SnaFilter filter = new SnaFilter(mediator, resourceUri);
+                    final MessageFilter filter = new MessageFilter(mediator, resourceUri);
                     filter.addHandledType(SnaMessage.Type.LIFECYCLE);
                     AppResourceLifeCycleSnaAgent callback = new AppResourceLifeCycleSnaAgent(mediator, AppResourceLifecycleWatchDog.this);
                     AppResourceLifecycleWatchDog.this.registrations.put(service.registerAgent(mediator,callback , filter), callback);
@@ -101,8 +101,8 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
     /**
      * @see AbstractAppWatchDog#stop(Session)
      */
-    public SnaErrorMessage stop(Session session) {
-    	Iterator<MidAgentCallback> iterator = this.registrations.values().iterator();
+    public ErrorMessage stop(Session session) {
+    	Iterator<AgentMessageCallback> iterator = this.registrations.values().iterator();
     	while(iterator.hasNext()) {
     		iterator.next().stop();
     	}
@@ -110,9 +110,9 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
     }
 
     /**
-     * @see AbstractMidAgentCallback
+     * @see AbstractMessageAgentCallback
      */
-    private class AppResourceLifeCycleSnaAgent extends AbstractMidAgentCallback {
+    private class AppResourceLifeCycleSnaAgent extends AbstractMessageAgentCallback {
         private AbstractAppWatchDog watchDog;
 
         AppResourceLifeCycleSnaAgent(Mediator mediator, AbstractAppWatchDog watchDog) {
@@ -121,10 +121,10 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
         }
 
         /**
-         * @see AbstractMidAgentCallback#doHandle(SnaLifecycleMessageImpl)
+         * @see AbstractMessageAgentCallback#doHandle(LifecycleMessageImpl)
          */
         @Override
-        public void doHandle(SnaLifecycleMessageImpl message) {
+        public void doHandle(LifecycleMessageImpl message) {
             try {
                 Attribute attribute = service.getResource(AppConstant.STATUS).getAttribute(DataResource.VALUE);
                 ApplicationStatus status = (ApplicationStatus) attribute.getValue();

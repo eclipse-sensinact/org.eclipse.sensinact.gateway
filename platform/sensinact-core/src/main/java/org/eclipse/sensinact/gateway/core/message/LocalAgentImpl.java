@@ -10,6 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
+import org.eclipse.sensinact.gateway.api.message.AbstractAgent;
+import org.eclipse.sensinact.gateway.api.message.AgentMessageCallback;
+import org.eclipse.sensinact.gateway.api.message.LocalAgent;
+import org.eclipse.sensinact.gateway.api.message.RemoteAgent;
+import org.eclipse.sensinact.gateway.api.message.SnaAgent;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.remote.RemoteCore;
@@ -17,7 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 /**
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class LocalAgentImpl extends AbstractAgent implements LocalAgent,RemoteAgent {
 
@@ -31,18 +37,18 @@ public class LocalAgentImpl extends AbstractAgent implements LocalAgent,RemoteAg
 	 * 
 	 * @param mediator the {@link Mediator} allowing the {@link LocalAgent} 
 	 * to be created to interact with the OSGi host environment
-	 * @param callback the {@link MidAgentCallback} being the local
+	 * @param callback the {@link AgentMessageCallback} being the local
 	 * recipient of the messages registered by the {@link LocalAgent} to be 
 	 * instantiated 
-	 * @param filter the {@link SnaFilter} allowing to discriminate the messages
+	 * @param filter the {@link MessageFilter} allowing to discriminate the messages
 	 * registered by the {@link LocalAgent} to be instantiated
 	 * @param publicKey the String public key of the {@link LocalAgent} to be 
 	 * instantiated
 	 * 
 	 * @return the newly created {@link LocalAgent}
 	 */
-	public static LocalAgent createAgent(Mediator mediator, MidAgentCallback callback, 
-		SnaFilter filter, String agentKey) {
+	public static LocalAgent createAgent(Mediator mediator, AgentMessageCallback callback, 
+		MessageFilter filter, String agentKey) {
 		String suffix = (String) mediator.getProperty(SNAFILTER_AGENT_SUFFIX_PROPERTY);
 
 		if (filter == null && suffix != null) {
@@ -59,7 +65,7 @@ public class LocalAgentImpl extends AbstractAgent implements LocalAgent,RemoteAg
 			JSONArray conditions = LocalAgentImpl.getConditions(mediator, suffix);
 			SnaMessage.Type[] types = LocalAgentImpl.getTypes(mediator, suffix);
 
-			filter = new SnaFilter(mediator, sender, isPattern, isComplement, conditions);
+			filter = new MessageFilter(mediator, sender, isPattern, isComplement, conditions);
 			int index = 0;
 			int length = types.length;
 
@@ -153,13 +159,13 @@ public class LocalAgentImpl extends AbstractAgent implements LocalAgent,RemoteAg
 	 * @param filter
 	 * @param publicKey
 	 */
-	protected LocalAgentImpl(Mediator mediator, MidAgentCallback callback, SnaFilter filter, String publicKey) {
+	protected LocalAgentImpl(Mediator mediator, AgentMessageCallback callback, MessageFilter filter, String publicKey) {
 		super(mediator,callback,filter,publicKey);
 	}
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.AbstractAgent#doStart()
+	 * @see org.eclipse.sensinact.gateway.api.message.AbstractAgent#doStart()
 	 */
 	@Override
 	public void doStart() {
@@ -169,7 +175,7 @@ public class LocalAgentImpl extends AbstractAgent implements LocalAgent,RemoteAg
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.AbstractAgent#doStop()
+	 * @see org.eclipse.sensinact.gateway.api.message.AbstractAgent#doStop()
 	 */
 	@Override
 	public void doStop() {
@@ -187,7 +193,7 @@ public class LocalAgentImpl extends AbstractAgent implements LocalAgent,RemoteAg
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.LocalAgent#registerRemote(org.eclipse.sensinact.gateway.core.remote.RemoteCore)
+	 * @see org.eclipse.sensinact.gateway.api.message.LocalAgent#registerRemote(org.eclipse.sensinact.gateway.core.remote.RemoteCore)
 	 */
 	public void registerRemote(RemoteCore remoteCore) {
 		if(!this.callback.propagate() || remoteCore == null){
@@ -217,7 +223,7 @@ public class LocalAgentImpl extends AbstractAgent implements LocalAgent,RemoteAg
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.AbstractAgent#getAgentInterfaces()
+	 * @see org.eclipse.sensinact.gateway.api.message.AbstractAgent#getAgentInterfaces()
 	 */
 	@Override
 	public String[] getAgentInterfaces() {

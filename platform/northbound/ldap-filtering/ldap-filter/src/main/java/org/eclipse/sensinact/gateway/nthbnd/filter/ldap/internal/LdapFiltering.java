@@ -10,8 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.filter.ldap.internal;
 
+import org.eclipse.sensinact.gateway.api.core.Filtering;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.Filtering;
 
 /**
  * {@link Filtering} implementation allowing to apply an LDAP filter
@@ -48,7 +48,7 @@ public class LdapFiltering implements Filtering {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Filtering#
+     * @see org.eclipse.sensinact.gateway.api.core.Filtering#
      * handle(java.lang.String)
      */
     @Override
@@ -59,7 +59,7 @@ public class LdapFiltering implements Filtering {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Filtering#
+     * @see org.eclipse.sensinact.gateway.api.core.Filtering#
      * apply(java.lang.String, java.lang.Object)
      */
     @Override
@@ -69,7 +69,7 @@ public class LdapFiltering implements Filtering {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Filtering#getLDAPComponent()
+     * @see org.eclipse.sensinact.gateway.api.core.Filtering#getLDAPComponent()
      */
     @Override
     public String getLDAPComponent(String definition) {

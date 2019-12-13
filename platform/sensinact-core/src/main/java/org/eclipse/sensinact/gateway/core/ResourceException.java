@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.core;
 /**
  * Thrown to indicate a resource related exception.
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class ResourceException extends RuntimeException {
 

@@ -17,7 +17,7 @@ package org.eclipse.sensinact.gateway.core.security;
  * Extended {@link AccessTree} gathering access rights to a sensiNact gateway's
  * data model instances using an hierarchical data structure
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface MutableAccessTree<A extends MutableAccessNode> extends AccessTree<A>, Cloneable {
 	// ********************************************************************//

@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessage;
+import org.eclipse.sensinact.gateway.api.message.NotificationMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Elements;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
@@ -27,9 +30,6 @@ import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
-import org.eclipse.sensinact.gateway.core.message.SnaNotificationMessageImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
@@ -43,7 +43,7 @@ import org.json.JSONObject;
  * Abstract sensiNact resource model element (service provider, service &
  * resource) implementation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelElementProxy, P extends ProcessableData, E extends Nameable, R extends Nameable>
 		extends Elements<E> implements SensiNactResourceModelElement<M> {
@@ -413,8 +413,8 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 			String path = super.getPath();
 			Lifecycle event = this.getRegisteredEvent();
 
-			SnaLifecycleMessage notification = SnaNotificationMessageImpl.Builder
-					.<SnaLifecycleMessage>notification(this.modelInstance.mediator(), event, path);
+			LifecycleMessage notification = NotificationMessageImpl.Builder
+					.<LifecycleMessage>notification(this.modelInstance.mediator(), event, path);
 
 			JSONObject notificationObject = new JSONObject();
 			notificationObject.put(SnaConstants.ADDED_OR_REMOVED, event.name());
@@ -463,8 +463,8 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 		Lifecycle event = this.getUnregisteredEvent();
 		String path = super.getPath();
 
-		SnaLifecycleMessage notification = SnaNotificationMessageImpl.Builder
-				.<SnaLifecycleMessage>notification(this.modelInstance.mediator(), event, path);
+		LifecycleMessage notification = NotificationMessageImpl.Builder
+				.<LifecycleMessage>notification(this.modelInstance.mediator(), event, path);
 
 		JSONObject notificationObject = new JSONObject();
 		notificationObject.put(SnaConstants.ADDED_OR_REMOVED, event.name());

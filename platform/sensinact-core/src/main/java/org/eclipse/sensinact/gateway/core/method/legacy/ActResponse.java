@@ -13,9 +13,9 @@ package org.eclipse.sensinact.gateway.core.method.legacy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.api.message.ErrorfulMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodJSONResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
@@ -25,7 +25,7 @@ import org.json.JSONArray;
  * Extended {@link AccessMethodJSONResponse} returned by an {@link ActMethod}
  * invocation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class ActResponse extends AccessMethodJSONResponse {
 	/**
@@ -34,7 +34,7 @@ public class ActResponse extends AccessMethodJSONResponse {
 	 */
 	protected ActResponse(Mediator mediator, String uri, Status status) {
 		this(mediator, uri, status,
-				Status.SUCCESS.equals(status) ? SnaErrorfulMessage.NO_ERROR : SnaErrorfulMessage.UNKNOWN_ERROR_CODE);
+				Status.SUCCESS.equals(status) ? ErrorfulMessage.NO_ERROR : ErrorfulMessage.UNKNOWN_ERROR_CODE);
 	}
 
 	/**

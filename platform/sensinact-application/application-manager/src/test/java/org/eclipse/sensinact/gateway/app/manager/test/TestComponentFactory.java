@@ -11,6 +11,11 @@
 package org.eclipse.sensinact.gateway.app.manager.test;
 
 import junit.framework.TestCase;
+
+import org.eclipse.sensinact.gateway.api.core.ActionResource;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.app.api.exception.ApplicationFactoryException;
 import org.eclipse.sensinact.gateway.app.api.plugin.PluginInstaller;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
@@ -24,17 +29,13 @@ import org.eclipse.sensinact.gateway.app.manager.json.AppFunction;
 import org.eclipse.sensinact.gateway.app.manager.json.AppJsonConstant;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
-import org.eclipse.sensinact.gateway.core.ActionResource;
-import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.InvalidResourceException;
 import org.eclipse.sensinact.gateway.core.ModelConfiguration;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceBuilder;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.ResourceDescriptor;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
-import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.TypeConfig;

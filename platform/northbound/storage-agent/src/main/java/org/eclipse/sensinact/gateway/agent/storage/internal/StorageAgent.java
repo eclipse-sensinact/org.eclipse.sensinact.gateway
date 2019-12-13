@@ -10,18 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.agent.storage.internal;
 
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.core.LocationResource;
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.message.AbstractMessageAgentCallback;
+import org.eclipse.sensinact.gateway.api.message.ErrorMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.ResponseMessage;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.DefaultErrorHandler;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
-import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.LocationResource;
-import org.eclipse.sensinact.gateway.core.Resource;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONObject;
 
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class StorageAgent extends AbstractMidAgentCallback {
+public class StorageAgent extends AbstractMessageAgentCallback {
     private static final Logger LOG = LoggerFactory.getLogger(StorageAgent.class);
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private final StorageConnection storageConnection;
@@ -53,10 +53,10 @@ public class StorageAgent extends AbstractMidAgentCallback {
 
     /**
      * @inheritDoc
-     * @see AbstractMidAgentCallback#doHandle(SnaUpdateMessageImpl)
+     * @see AbstractMessageAgentCallback#doHandle(UpdateMessageImpl)
      */
     @Override
-    public void doHandle(SnaUpdateMessageImpl message) {
+    public void doHandle(UpdateMessageImpl message) {
         String path = message.getPath();
         LOG.debug("storage agent informed of an update on {}...", path);
         String[] elements = UriUtils.getUriElements(path);
@@ -69,10 +69,10 @@ public class StorageAgent extends AbstractMidAgentCallback {
 
     /**
      * @inheritDoc
-     * @see AbstractMidAgentCallback#doHandle(SnaLifecycleMessageImpl)
+     * @see AbstractMessageAgentCallback#doHandle(LifecycleMessageImpl)
      */
     @Override
-    public void doHandle(SnaLifecycleMessageImpl message) {
+    public void doHandle(LifecycleMessageImpl message) {
         String path = message.getPath();
         if (!Lifecycle.RESOURCE_APPEARING.equals(message.getType()) || Resource.Type.ACTION.equals(message.getNotification(Resource.Type.class, "type"))) {
             return;
@@ -125,21 +125,21 @@ public class StorageAgent extends AbstractMidAgentCallback {
 
     /**
      * @inheritDoc
-     * @see AbstractMidAgentCallback#doHandle(SnaErrorMessageImpl)
+     * @see AbstractMessageAgentCallback#doHandle(ErrorMessageImpl)
      */
-    public void doHandle(SnaErrorMessageImpl message) {
+    public void doHandle(ErrorMessageImpl message) {
     }
 
     /**
      * @inheritDoc
-     * @see AbstractMidAgentCallback#doHandle(SnaResponseMessage)
+     * @see AbstractMessageAgentCallback#doHandle(ResponseMessage)
      */
-    public synchronized void doHandle(SnaResponseMessage message) {
+    public synchronized void doHandle(ResponseMessage message) {
     }
 
     /**
      * @inheritDoc
-     * @see AbstractMidAgentCallback#stop()
+     * @see AbstractMessageAgentCallback#stop()
      */
     public void stop() {
         this.storageConnection.close();

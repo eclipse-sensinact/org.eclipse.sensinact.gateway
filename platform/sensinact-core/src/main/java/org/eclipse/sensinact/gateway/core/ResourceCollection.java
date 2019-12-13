@@ -12,10 +12,12 @@ package org.eclipse.sensinact.gateway.core;
 
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.api.core.Resource;
+
 /**
  * A collection of {@link Resource} service
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface ResourceCollection {
 	/**

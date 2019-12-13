@@ -17,7 +17,7 @@ import org.osgi.framework.ServiceRegistration;
  * it is validated by the appropriate String token : by simply creating it, or
  * by updating the value of one of its fields
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface UserUpdater {
 	

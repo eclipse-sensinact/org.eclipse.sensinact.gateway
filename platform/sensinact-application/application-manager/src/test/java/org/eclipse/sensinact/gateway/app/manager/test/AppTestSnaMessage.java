@@ -10,20 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.test;
 
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.core.Metadata;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessageImpl;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.Metadata;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.json.JSONObject;
 
-class AppTestSnaMessage extends SnaUpdateMessageImpl {
+class AppTestSnaMessage extends UpdateMessageImpl {
     /**
      * Constructor of the AppSnaMessage
      *
      * @param uri   the URI of the service
      * @param type  the type of the value
      * @param value the object value
-     * @see SnaUpdateMessageImpl
+     * @see UpdateMessageImpl
      */
     AppTestSnaMessage(Mediator mediator, String uri, Class type, Object value) {
         super(mediator, uri, Update.ATTRIBUTE_VALUE_UPDATED);

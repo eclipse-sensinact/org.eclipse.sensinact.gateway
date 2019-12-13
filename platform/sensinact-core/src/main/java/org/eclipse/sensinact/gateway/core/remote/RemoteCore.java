@@ -12,10 +12,10 @@ package org.eclipse.sensinact.gateway.core.remote;
 
 import java.util.Collection;
 
+import org.eclipse.sensinact.gateway.api.core.Endpoint;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.Endpoint;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -29,7 +29,7 @@ import org.json.JSONObject;
  * connected one. It is also in charge of deleting them when their remote
  * counterpart disappear
  * <p/>
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface RemoteCore extends Endpoint {
 	/**
@@ -134,12 +134,12 @@ public interface RemoteCore extends Endpoint {
 	 * @param identifier
 	 *            the String identifier of the remote related {@link SnaAgent}
 	 * @param filter
-	 *            the {@link SnaFilter} applying on the remote related
+	 *            the {@link MessageFilter} applying on the remote related
 	 *            {@link SnaAgent}
 	 * @param agentKey
 	 *            the public key of the remote related {@link SnaAgent}
 	 */
-	void registerAgent(String identifier, SnaFilter filter, String agentKey);
+	void registerAgent(String identifier, MessageFilter filter, String agentKey);
 
 	/**
 	 * Unregisters the {@link SnaAgent} whose identifier is passed as parameter

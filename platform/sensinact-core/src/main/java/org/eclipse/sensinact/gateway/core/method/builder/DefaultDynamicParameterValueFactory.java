@@ -26,13 +26,13 @@ import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
 /**
  * Default core's {@link DynamicParameterValueFactory} implementation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class DefaultDynamicParameterValueFactory implements DynamicParameterValueFactory {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see AccessMethodTriggerFactory# handle(java.lang.String)
+	 * @see AccessMethodTriggerFactory# propagate(java.lang.String)
 	 */
 	@Override
 	public boolean handle(String type) {

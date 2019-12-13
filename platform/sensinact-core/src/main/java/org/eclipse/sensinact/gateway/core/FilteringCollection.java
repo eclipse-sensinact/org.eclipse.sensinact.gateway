@@ -22,7 +22,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
  * provided by each {@link FilteringAccessor}, on the other hand it can be used
  * to apply all the filters, using the output of one as input of the next.
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class FilteringCollection {
 	private Iterable<FilteringAccessor> accessors;

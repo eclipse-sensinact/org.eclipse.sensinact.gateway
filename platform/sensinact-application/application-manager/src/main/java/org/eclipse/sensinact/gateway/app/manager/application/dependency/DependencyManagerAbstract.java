@@ -10,15 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.application.dependency;
 
-import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.AbstractMessageAgentCallback;
+import org.eclipse.sensinact.gateway.api.message.ErrorMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.ResponseMessage;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessageImpl;
 
 /**
  * Class that avoid the DependencyManager to implement empty methods that may create some noisy to understand its real role
  */
-public abstract class DependencyManagerAbstract extends AbstractMidAgentCallback {
+public abstract class DependencyManagerAbstract extends AbstractMessageAgentCallback {
     private String id;
 
     public DependencyManagerAbstract(String id) {
@@ -27,17 +27,17 @@ public abstract class DependencyManagerAbstract extends AbstractMidAgentCallback
     }
 
     @Override
-    public void doHandle(SnaErrorMessageImpl message) {
+    public void doHandle(ErrorMessageImpl message) {
         //Handle not used
     }
 
     @Override
-    public void doHandle(SnaResponseMessage<?, ?> message) {
+    public void doHandle(ResponseMessage<?, ?> message) {
         //Handle not used
     }
 
     @Override
-    public void doHandle(SnaUpdateMessageImpl message) {
+    public void doHandle(UpdateMessageImpl message) {
         //Handle not used
     }
 }

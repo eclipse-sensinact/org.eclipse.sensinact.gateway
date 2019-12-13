@@ -18,7 +18,7 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
  * Extended {@link DynamicParameterValue} returning the value of the Primitive
  * parameter when executed
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class Copy extends AbstractDynamicParameterValue {
 	public static final String NAME = "COPY";

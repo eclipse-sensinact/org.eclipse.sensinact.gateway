@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.core.security;
 /**
  * Authentication service
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface AuthenticationService {
 	/**

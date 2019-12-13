@@ -10,11 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.generic.parser;
 
+import org.eclipse.sensinact.gateway.api.core.Metadata;
+import org.eclipse.sensinact.gateway.api.core.MetadataBuilder;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.core.Metadata;
-import org.eclipse.sensinact.gateway.core.MetadataBuilder;
 import org.xml.sax.Attributes;
 
 /**

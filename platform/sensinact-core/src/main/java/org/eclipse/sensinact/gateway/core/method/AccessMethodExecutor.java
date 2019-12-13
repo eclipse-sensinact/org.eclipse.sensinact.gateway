@@ -19,7 +19,7 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
  * @param <V>
  *            the executor returned type
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface AccessMethodExecutor extends Executable<AccessMethodResponseBuilder<?, ?>, Void> {
 	enum ExecutionPolicy {

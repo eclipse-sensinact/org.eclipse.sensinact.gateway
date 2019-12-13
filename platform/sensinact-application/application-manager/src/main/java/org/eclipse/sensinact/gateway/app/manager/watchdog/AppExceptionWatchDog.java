@@ -10,10 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.watchdog;
 
+import org.eclipse.sensinact.gateway.api.message.ErrorMessage;
 import org.eclipse.sensinact.gateway.app.manager.application.ApplicationService;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.core.Session;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,14 +39,14 @@ public class AppExceptionWatchDog extends AbstractAppWatchDog implements Thread.
     /**
      * @see AbstractAppWatchDog#start(Session)
      */
-    public SnaErrorMessage start(Session session) {
+    public ErrorMessage start(Session session) {
         return null;
     }
 
     /**
      * @see AbstractAppWatchDog#stop(Session)
      */
-    public SnaErrorMessage stop(Session session) {
+    public ErrorMessage stop(Session session) {
         return null;
     }
 

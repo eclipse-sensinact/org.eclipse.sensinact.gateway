@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 2.0-SNAPSHOT
+  version: 2.1-SNAPSHOT
   title: sensiNact REST API
 host: localhost:8080
 basePath: /sensinact

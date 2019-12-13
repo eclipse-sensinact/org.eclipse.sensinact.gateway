@@ -10,8 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import org.eclipse.sensinact.gateway.api.message.Recipient;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
 
 /**
  * Abstract {@link Recipient} type implementation to be extended to

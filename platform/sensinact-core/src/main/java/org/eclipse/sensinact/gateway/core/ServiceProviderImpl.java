@@ -16,6 +16,13 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.api.core.Attribute;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.core.PropertyResource;
+import org.eclipse.sensinact.gateway.api.core.Service;
+import org.eclipse.sensinact.gateway.api.core.ServiceProvider;
+import org.eclipse.sensinact.gateway.api.core.Resource.UpdatePolicy;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessage;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
@@ -23,8 +30,7 @@ import org.eclipse.sensinact.gateway.common.primitive.Localizable;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.Stateful;
-import org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
@@ -35,7 +41,7 @@ import org.json.JSONObject;
 /**
  * This class represents a ServiceProvider on the sensiNact gateway.
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class ServiceProviderImpl extends
 		ModelElement<ModelInstance<?>, ServiceProviderProxy, ServiceProviderProcessableData<?>, ServiceImpl, Service>
@@ -78,7 +84,7 @@ public class ServiceProviderImpl extends
 			String location = null;
 			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 			if (admin != null) {
-				JSONObject response = admin.get(LocationResource.LOCATION).getResponse();
+				JSONObject response = admin.get(SnaConstants.LOCATION).getResponse();
 				location = String.valueOf(response.opt(DataResource.VALUE));
 			}
 			return location;
@@ -95,7 +101,7 @@ public class ServiceProviderImpl extends
 			String setLocation = null;
 			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 			if (admin != null) {
-				JSONObject response = admin.set(LocationResource.LOCATION, location).getResponse();
+				JSONObject response = admin.set(SnaConstants.LOCATION, location).getResponse();
 				setLocation = String.valueOf(response.opt(DataResource.VALUE));
 			}
 			return setLocation;
@@ -341,7 +347,7 @@ public class ServiceProviderImpl extends
 	 * @return the string value of the location resource
 	 */
 	public String getLocation() {
-		return (String) this.getAdminService().getResource(LocationResource.LOCATION).getAttribute(DataResource.VALUE)
+		return (String) this.getAdminService().getResource(SnaConstants.LOCATION).getAttribute(DataResource.VALUE)
 				.getValue();
 	}
 
@@ -355,7 +361,7 @@ public class ServiceProviderImpl extends
 	 * @throws InvalidValueException
 	 */
 	public String setLocation(String location) throws InvalidValueException {
-		return (String) this.getAdminService().getResource(LocationResource.LOCATION).getAttribute(DataResource.VALUE)
+		return (String) this.getAdminService().getResource(SnaConstants.LOCATION).getAttribute(DataResource.VALUE)
 				.setValue(location);
 	}
 
@@ -445,21 +451,21 @@ public class ServiceProviderImpl extends
 			friendlyNameResourceBuilder.configureName(ServiceProvider.FRIENDLY_NAME);
 			admin.addResource(friendlyNameResourceBuilder);
 		}
-		if (admin.getResource(LocationResource.LOCATION) == null) {
+		if (admin.getResource(SnaConstants.LOCATION) == null) {
 			ResourceBuilder locationResourceBuilder = null;
 			ResourceConfig rc = null;
-			if ((index = resourceConfigs.indexOf(new Name<ResourceConfig>(LocationResource.LOCATION, true))) > -1) {
+			if ((index = resourceConfigs.indexOf(new Name<ResourceConfig>(SnaConstants.LOCATION, true))) > -1) {
 				rc = resourceConfigs.get(index);
 				locationResourceBuilder = super.getModelInstance().getResourceBuilder(rc);
 				index = -1;
 			} else {
 				locationResourceBuilder = super.getModelInstance().getResourceBuilder(super.getModelInstance()
-						.configuration().getResourceDescriptor().withResourceType(LocationResource.class)
-						.withResourceName(LocationResource.LOCATION).withDataType(String.class)
+						.configuration().getResourceDescriptor().withResourceType(PropertyResource.class)
+						.withResourceName(SnaConstants.LOCATION).withDataType(String.class)
 						.withDataValue(ModelInstance.defaultLocation(super.modelInstance.mediator())).withHidden(false)
 						.withModifiable(Modifiable.MODIFIABLE), buildPolicy);
 			}
-			locationResourceBuilder.configureName(LocationResource.LOCATION);
+			locationResourceBuilder.configureName(SnaConstants.LOCATION);
 			admin.addResource(locationResourceBuilder);
 		}
 		if (admin.getResource(ServiceProvider.BRIDGE) == null) {
@@ -702,8 +708,8 @@ public class ServiceProviderImpl extends
 	 * @see ModelElement#getRegisteredEvent()
 	 */
 	@Override
-	protected SnaLifecycleMessage.Lifecycle getRegisteredEvent() {
-		return SnaLifecycleMessage.Lifecycle.PROVIDER_APPEARING;
+	protected LifecycleMessage.Lifecycle getRegisteredEvent() {
+		return LifecycleMessage.Lifecycle.PROVIDER_APPEARING;
 	}
 
 	/**
@@ -712,8 +718,8 @@ public class ServiceProviderImpl extends
 	 * @see ModelElement#getUnregisteredEvent()
 	 */
 	@Override
-	protected SnaLifecycleMessage.Lifecycle getUnregisteredEvent() {
-		return SnaLifecycleMessage.Lifecycle.PROVIDER_DISAPPEARING;
+	protected LifecycleMessage.Lifecycle getUnregisteredEvent() {
+		return LifecycleMessage.Lifecycle.PROVIDER_DISAPPEARING;
 	}
 
 	/**

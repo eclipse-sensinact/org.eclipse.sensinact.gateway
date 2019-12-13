@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.internal;
 
+import org.eclipse.sensinact.gateway.api.core.Attribute;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
 import org.eclipse.sensinact.gateway.app.api.exception.ApplicationFactoryException;
 import org.eclipse.sensinact.gateway.app.api.exception.InvalidApplicationException;
 import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
@@ -30,8 +32,6 @@ import org.eclipse.sensinact.gateway.app.manager.json.AppParameter;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.app.manager.osgi.PluginsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
-import org.eclipse.sensinact.gateway.core.Attribute;
-import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.InvalidResourceException;
 import org.eclipse.sensinact.gateway.core.InvalidServiceException;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;

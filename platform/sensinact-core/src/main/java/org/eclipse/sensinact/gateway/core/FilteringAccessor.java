@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.core;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
+import org.eclipse.sensinact.gateway.api.core.Filtering;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -21,7 +22,7 @@ import org.osgi.framework.ServiceReference;
  * Intermediate helper to use a {@link Filtering} service registered in the OSGi
  * host environment
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class FilteringAccessor extends FilteringDefinition {
 	private ServiceReference<Filtering> reference;

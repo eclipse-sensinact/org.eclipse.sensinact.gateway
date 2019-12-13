@@ -19,7 +19,7 @@ import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 /**
  * An unaccessible {@link AccessMethod} implementation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class UnaccessibleAccessMethod implements AccessMethod<String, AccessMethodResponse<String>> {
 	private final AccessMethod.Type method;

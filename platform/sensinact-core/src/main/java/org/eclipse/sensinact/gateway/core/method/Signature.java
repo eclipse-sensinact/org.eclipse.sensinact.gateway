@@ -25,7 +25,7 @@ import org.eclipse.sensinact.gateway.common.primitive.JSONable;
  * @param <T>
  *            the type of the described {@link AccessMethod}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 	/**

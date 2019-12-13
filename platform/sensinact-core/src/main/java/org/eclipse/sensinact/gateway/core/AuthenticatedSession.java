@@ -16,7 +16,7 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
  * A Session allows to invoke access method on resources, and to access to
  * available service providers, services, and/or resources
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface AuthenticatedSession extends Session {
 	/**

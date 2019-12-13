@@ -10,14 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
+import org.eclipse.sensinact.gateway.api.message.Recipient;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 
 /**
- * Extended {@link MidCallback} managing a buffer to store received events
+ * Extended {@link MessageCallback} managing a buffer to store received events
  * before transmission
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class BufferMidCallback extends UnaryMidCallback {
 	/**

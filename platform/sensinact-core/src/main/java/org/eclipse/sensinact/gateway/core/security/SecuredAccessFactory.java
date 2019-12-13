@@ -15,7 +15,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 /**
  * Factory providing a {@link SecuredAccess} instance
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface SecuredAccessFactory {
 	/**

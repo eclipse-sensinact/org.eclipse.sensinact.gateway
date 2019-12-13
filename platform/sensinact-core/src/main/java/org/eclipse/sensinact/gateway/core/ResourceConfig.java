@@ -16,15 +16,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.api.core.AttributeBuilder;
+import org.eclipse.sensinact.gateway.api.core.RequirementBuilder;
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.core.ServiceProvider;
+import org.eclipse.sensinact.gateway.api.core.AttributeBuilder.Requirement;
+import org.eclipse.sensinact.gateway.api.core.Resource.UpdatePolicy;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
-import org.eclipse.sensinact.gateway.core.AttributeBuilder.Requirement;
-import org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy;
 
 /**
  * Resource configuration
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class ResourceConfig implements Nameable {
 	public static final String ALL_TARGETS = "#ANY_TARGET#";

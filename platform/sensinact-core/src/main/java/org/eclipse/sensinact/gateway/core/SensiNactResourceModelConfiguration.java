@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.api.core.Resource;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
@@ -20,14 +21,14 @@ import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 /**
  * Configuration of a sensiNact Resource Model instance
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface SensiNactResourceModelConfiguration {
 	/**
 	 * Defines the policy applying on the build of resources according to their
 	 * previously defined description
 	 * 
-	 * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+	 * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
 	 */
 	public enum BuildPolicy {
 		// The existing description is used to build the resources

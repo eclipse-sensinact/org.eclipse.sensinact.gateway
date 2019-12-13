@@ -10,13 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import org.eclipse.sensinact.gateway.api.core.ActionResource;
+import org.eclipse.sensinact.gateway.api.core.Resource;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 
 /**
  * The default {@link ResourceConfigBuilder} is in charge of create the
  * previously non-described {@link ResourceConfig}s
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class DefaultResourceConfigBuilder implements ResourceConfigBuilder {
 	private Class<? extends Resource> defaultResourceType;

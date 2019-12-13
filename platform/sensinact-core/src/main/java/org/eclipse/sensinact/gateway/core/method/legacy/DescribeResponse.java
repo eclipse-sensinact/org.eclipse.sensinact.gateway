@@ -13,9 +13,9 @@ package org.eclipse.sensinact.gateway.core.method.legacy;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.api.message.ErrorfulMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.props.TypedKey;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 
@@ -23,7 +23,7 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
  * Extended {@link AccessMethodResponse} returned by an {@link DescribeMethod}
  * invocation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public abstract class DescribeResponse<T> extends AccessMethodResponse<T> {
 	protected DescribeMethod.DescribeType describeType;
@@ -36,7 +36,7 @@ public abstract class DescribeResponse<T> extends AccessMethodResponse<T> {
 	 */
 	protected DescribeResponse(Mediator mediator, String uri, Status status, DescribeMethod.DescribeType describeType) {
 		this(mediator, uri, status,
-				Status.SUCCESS.equals(status) ? SnaErrorfulMessage.NO_ERROR : SnaErrorfulMessage.UNKNOWN_ERROR_CODE,
+				Status.SUCCESS.equals(status) ? ErrorfulMessage.NO_ERROR : ErrorfulMessage.UNKNOWN_ERROR_CODE,
 				describeType);
 	}
 

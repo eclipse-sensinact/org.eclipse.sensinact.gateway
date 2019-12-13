@@ -10,12 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.agent.http.onem2m.internal;
 
-import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.message.AbstractMessageAgentCallback;
+import org.eclipse.sensinact.gateway.api.message.ErrorMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.ResponseMessage;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessageImpl;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ import java.io.IOException;
  * Container = sNa Resource
  * Instance = sNa Attribute
  */
-public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
+public class SnaEventOneM2MHttpHandler extends AbstractMessageAgentCallback {
     private static Logger LOG = LoggerFactory.getLogger(SnaEventOneM2MHttpHandler.class.getCanonicalName());
     private final String cseBase;
 
@@ -41,7 +41,7 @@ public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
      *
      * @param event the RegisteredUpdatedSnaEvent to process
      */
-    public void doHandle(SnaUpdateMessageImpl event) {
+    public void doHandle(UpdateMessageImpl event) {
 
         LOG.debug("Received event {}", event.getJSON().toString());
 
@@ -96,7 +96,7 @@ public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
      *
      * @param event the ServiceRegisteredSnaEvent to process
      */
-    public void doHandle(SnaLifecycleMessageImpl event) {
+    public void doHandle(LifecycleMessageImpl event) {
         LOG.debug("Received Lifecycle event {}", event.getJSON().toString());
         JSONObject eventJson = new JSONObject(event.getJSON());
 
@@ -114,21 +114,21 @@ public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
     }
 
     /**
-     * @see MidAgentCallback#stop()
+     * @see AgentMessageCallback#stop()
      */
     public void stop() {
     }
 
     /**
-     * @see AbstractMidAgentCallback#doHandle(SnaErrorMessageImpl)
+     * @see AbstractMessageAgentCallback#doHandle(ErrorMessageImpl)
      */
-    public void doHandle(SnaErrorMessageImpl event) {
+    public void doHandle(ErrorMessageImpl event) {
     }
 
     /**
-     * @see AbstractMidAgentCallback#doHandle(SnaResponseMessage)
+     * @see AbstractMessageAgentCallback#doHandle(ResponseMessage)
      */
-    public void doHandle(SnaResponseMessage event) {
+    public void doHandle(ResponseMessage event) {
     }
 
 }

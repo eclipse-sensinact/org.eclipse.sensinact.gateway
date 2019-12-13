@@ -152,7 +152,7 @@ public class BundleValidationImpl implements BundleValidation {
                         }
                     }
                     if (certs4validSig.size() == 0) {
-                        System.out.println("checkCoherence returned false");
+                        //System.out.println("checkCoherence returned false");
                         sha1 = null;
                         this.mediator.debug("no valid certificate found");
                     } else {
@@ -161,6 +161,7 @@ public class BundleValidationImpl implements BundleValidation {
                     }
                 }
             } catch (Exception e) {
+            	e.printStackTrace();
                 throw new BundleValidationException(e);
             }
         } else {

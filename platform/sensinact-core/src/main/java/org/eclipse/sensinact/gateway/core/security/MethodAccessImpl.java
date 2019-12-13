@@ -14,7 +14,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 
 /**
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class MethodAccessImpl implements MethodAccess {
 	private final AccessLevel accessLevel;

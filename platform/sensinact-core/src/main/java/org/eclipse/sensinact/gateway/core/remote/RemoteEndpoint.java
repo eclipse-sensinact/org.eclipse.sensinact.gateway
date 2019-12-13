@@ -10,17 +10,17 @@
  */
 package org.eclipse.sensinact.gateway.core.remote;
 
-import org.eclipse.sensinact.gateway.core.Endpoint;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.api.core.Endpoint;
+import org.eclipse.sensinact.gateway.api.message.Recipient;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
 
 /**
  * Extended {@link Endpoint} in charge of realizing and maintaining the
  * connection to another RemoteEndpoint provided by a remote instance of the
  * sensiNact gateway to be connected to
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface RemoteEndpoint extends Endpoint, Recipient {
 	/**
@@ -56,14 +56,14 @@ public interface RemoteEndpoint extends Endpoint, Recipient {
 	 * @param identifier
 	 *            the String identifier of the {@link SnaAgent} to be registered
 	 * @param filter
-	 *            the {@link SnaFilter} allowing the {@link SnaAgent}s to be
+	 *            the {@link MessageFilter} allowing the {@link SnaAgent}s to be
 	 *            registered to discriminate through the messages to be dispatched
 	 *            or not
 	 * @param agentKey
 	 *            the public String key allowing to retrieve access rights of the
 	 *            {@link SnaAgent}s to be registered
 	 */
-	void registerAgent(String identifier, SnaFilter filter, String agentKey);
+	void registerAgent(String identifier, MessageFilter filter, String agentKey);
 
 	/**
 	 * Unregisters the remote instances of the {@link SnaAgent} whose String

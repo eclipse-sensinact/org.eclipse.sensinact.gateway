@@ -16,7 +16,7 @@ import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 /**
  * The sensiNact resource model element definition
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface SensiNactResourceModelElement<M extends ModelElementProxy> {
 	/**

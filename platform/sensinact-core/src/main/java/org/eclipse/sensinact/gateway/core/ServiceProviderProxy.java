@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import org.eclipse.sensinact.gateway.api.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.util.UriUtils;
@@ -17,7 +18,7 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 /**
  * {@link ServiceProvider} proxy
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class ServiceProviderProxy extends ModelElementProxy {
 	/**

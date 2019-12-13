@@ -18,12 +18,12 @@ import java.util.Map;
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.AbstractMqttHandler;
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.GenericMqttAgent;
 import org.eclipse.sensinact.gateway.agent.mqtt.inst.internal.SnaEventEventHandler;
+import org.eclipse.sensinact.gateway.api.core.Core;
+import org.eclipse.sensinact.gateway.api.message.AgentMessageCallback;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.Core;
-import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.osgi.service.cm.ConfigurationException;
@@ -34,13 +34,13 @@ import org.osgi.service.cm.ManagedServiceFactory;
 public class NorthboundBrokerManagedServiceFactory implements ManagedServiceFactory {
 	
     public static final String MANAGER_NAME = "mqtt.agent.broker";
-	private Map<String, MidAgentCallback> pids;
+	private Map<String, AgentMessageCallback> pids;
 
 	private Mediator mediator ;
     
     public NorthboundBrokerManagedServiceFactory(Mediator mediator) {
     	this.mediator = mediator;
-    	this.pids = Collections.synchronizedMap(new HashMap<String,MidAgentCallback>());
+    	this.pids = Collections.synchronizedMap(new HashMap<String,AgentMessageCallback>());
     }
 
     /* (non-Javadoc)
@@ -135,12 +135,12 @@ public class NorthboundBrokerManagedServiceFactory implements ManagedServiceFact
     	    		mediator.error("Unable to build the constraint expession",e);
     	    	}
     	    }
-    	    SnaFilter filter = null;
+    	    MessageFilter filter = null;
     	    if(defined) {
-    	    	filter = new SnaFilter(mediator,sender,isPattern,isComplement,constraints); 
+    	    	filter = new MessageFilter(mediator,sender,isPattern,isComplement,constraints); 
     	    	filter.addHandledType(handled);
     	    }
-    	    final SnaFilter flt = filter;
+    	    final MessageFilter flt = filter;
     	    final String broker = String.format("%s://%s:%s",protocol,host,port);    	    
     	    
     	    final AbstractMqttHandler  handler = new SnaEventEventHandler(prefix);
@@ -172,7 +172,7 @@ public class NorthboundBrokerManagedServiceFactory implements ManagedServiceFact
 	@Override
     public void deleted(String servicePID) {
     	try {
-    		MidAgentCallback callback = this.pids.remove(servicePID);
+    		AgentMessageCallback callback = this.pids.remove(servicePID);
         	callback.stop();    		
     	} catch (Exception e) {
 			mediator.error(e);
@@ -180,7 +180,7 @@ public class NorthboundBrokerManagedServiceFactory implements ManagedServiceFact
     }
 	
 	public void stop() {
-		for(MidAgentCallback callback :this.pids.values()) {
+		for(AgentMessageCallback callback :this.pids.values()) {
 			callback.stop();
 		}
 		this.pids.clear();

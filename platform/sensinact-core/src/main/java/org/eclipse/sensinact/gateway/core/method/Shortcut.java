@@ -22,7 +22,7 @@ import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 /**
  * Shortcut to a {@link Signature} of an {@link AccessMethod}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class Shortcut extends Signature {
 	private final Map<Integer, Parameter> fixedParameters;

@@ -16,7 +16,7 @@ import java.util.List;
  * Stores and provides the set of available {@link ResourceConfig}s for a
  * specific southbound bridge
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface ResourceConfigCatalog {
 	/**

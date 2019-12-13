@@ -59,22 +59,27 @@ public class SignedBundleChecker {
         boolean signatureFileValid = false;
         boolean signatureBlockValid = false;
         resourcesOrderValid = this.checkResourcesOrderValid(signedJar);
+        //System.out.println("resourcesOrderValid " + resourcesOrderValid);
         if (this.mediator.isInfoLoggable()) {
             this.mediator.info("resourcesOrderValid " + resourcesOrderValid);
         }
         signatureBlockValid = this.checkSignatureBlockValidity(signedJar, signer, cryptoUtils, algo);
+        //System.out.println("signatureBlockValid " + signatureBlockValid);
         if (this.mediator.isInfoLoggable()) {
             this.mediator.info("signatureBlockValid " + signatureBlockValid);
         }
         signatureFileValid = this.checkSignatureFileValidity(signedJar, signer, cryptoUtils);
+        //System.out.println("signatureFileValid " + signatureFileValid);
         if (this.mediator.isInfoLoggable()) {
             this.mediator.info("signatureFileValid " + signatureFileValid);
         }
         manifestValid = this.checkManifestValidity(signedJar, cryptoUtils);
+        //System.out.println("manifestValid " + manifestValid);
         if (this.mediator.isWarningLoggable()) {
             this.mediator.info("manifestValid " + manifestValid);
         }
         coherent = resourcesOrderValid && signatureBlockValid && signatureFileValid && manifestValid;
+        //System.out.println("coherent " + coherent);
         if (this.mediator.isWarningLoggable()) {
             this.mediator.info("coherent " + coherent);
         }
@@ -125,8 +130,10 @@ public class SignedBundleChecker {
             final String hashAlgo = sigFile.getHashAlgo();
             manifestHashValid = cryptoUtils.checkHashValue(mediator, signedJar.getEntry(METADATA_DIR + MF_FILE), hashValue, hashAlgo);
             this.mediator.debug("manifest hash valid: %s", manifestHashValid);
+            //System.out.println(String.format("\tmanifest hash valid: %s", manifestHashValid));
             // check the validity of the hashes for the manifest entries
             manifestEntriesValid = SignatureFileChecker.checkEntriesValidity(mediator, signedJar, sigFile, cryptoUtils);
+            //System.out.println("\tentries hash valid: " + manifestEntriesValid);
             if (this.mediator.isWarningLoggable()) {
                 this.mediator.debug("entries hash valid: " + manifestEntriesValid);
             }

@@ -10,10 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
+import org.eclipse.sensinact.gateway.api.core.AttributeBuilder;
+import org.eclipse.sensinact.gateway.api.core.RequirementBuilder;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
-import org.eclipse.sensinact.gateway.core.AttributeBuilder;
-import org.eclipse.sensinact.gateway.core.RequirementBuilder;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.generic.parser.AttributeDefinition;
 import org.eclipse.sensinact.gateway.generic.parser.MethodDefinition;

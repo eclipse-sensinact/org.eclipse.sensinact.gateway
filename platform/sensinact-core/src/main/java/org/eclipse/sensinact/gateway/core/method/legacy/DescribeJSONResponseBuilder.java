@@ -18,7 +18,7 @@ import org.json.JSONObject;
  * Extended {@link AccessMethodResponseBuilder} dedicated to
  * {@link DescribeMethod} returning a JSONObject response
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
 public class DescribeJSONResponseBuilder extends DescribeResponseBuilder<JSONObject> {

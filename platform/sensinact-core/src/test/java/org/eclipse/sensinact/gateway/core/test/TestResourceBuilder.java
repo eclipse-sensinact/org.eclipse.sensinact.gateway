@@ -23,6 +23,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.sensinact.gateway.api.core.ActionResource;
+import org.eclipse.sensinact.gateway.api.core.Attribute;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.core.Metadata;
+import org.eclipse.sensinact.gateway.api.core.PropertyResource;
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.core.Service;
+import org.eclipse.sensinact.gateway.api.core.ServiceProvider;
+import org.eclipse.sensinact.gateway.api.core.StateVariableResource;
+import org.eclipse.sensinact.gateway.api.message.AbstractMessageAgentCallback;
+import org.eclipse.sensinact.gateway.api.message.Recipient;
+import org.eclipse.sensinact.gateway.api.message.ErrorMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
+import org.eclipse.sensinact.gateway.api.message.ResponseMessage;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessageImpl;
 import org.eclipse.sensinact.gateway.common.constraint.Changed;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.MaxLength;
@@ -31,31 +47,15 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.props.TypedProperties;
-import org.eclipse.sensinact.gateway.core.ActionResource;
-import org.eclipse.sensinact.gateway.core.Attribute;
-import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
-import org.eclipse.sensinact.gateway.core.LocationResource;
-import org.eclipse.sensinact.gateway.core.Metadata;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
-import org.eclipse.sensinact.gateway.core.PropertyResource;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
-import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
-import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.Session;
-import org.eclipse.sensinact.gateway.core.StateVariableResource;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
+import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
@@ -175,8 +175,8 @@ public class TestResourceBuilder<R extends ModelInstance> {
 				session.get("serviceProvider", "testService", "TestProperty", DataResource.VALUE).getResponse(),
 				session.get("serviceProvider", "testService", "LinkedProperty", null).getResponse(), false);
 
-		service.addLinkedResource(LocationResource.LOCATION, this.testContext.getModelInstance().getRootElement()
-				.getAdminService().getResource(LocationResource.LOCATION));
+		service.addLinkedResource(SnaConstants.LOCATION, this.testContext.getModelInstance().getRootElement()
+				.getAdminService().getResource(SnaConstants.LOCATION));
 
 		ResourceImpl r4impl = service.getResource("location");
 
@@ -324,8 +324,8 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		ResourceImpl r3impl = service.addLinkedResource("LinkedProperty", r1impl);
 		PropertyResource r3 = r3impl.<PropertyResource>getProxy(this.tree);
 
-		service.addLinkedResource(LocationResource.LOCATION, this.testContext.getModelInstance().getRootElement()
-				.getAdminService().getResource(LocationResource.LOCATION));
+		service.addLinkedResource(SnaConstants.LOCATION, this.testContext.getModelInstance().getRootElement()
+				.getAdminService().getResource(SnaConstants.LOCATION));
 
 		// test linked resource
 		JSONAssert.assertEquals(((GetResponse) r1.get()).getResponse(), ((GetResponse) r3.get()).getResponse(), false);
@@ -351,7 +351,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 				}, AccessMethodExecutor.ExecutionPolicy.AFTER);
 
 		String attributeValue = (String) r4impl.getAttribute("value").getValue();
-		LocationResource r4 = r4impl.<LocationResource>getProxy(this.tree);
+		PropertyResource r4 = r4impl.<PropertyResource>getProxy(this.tree);
 
 		Thread.sleep(250);
 
@@ -434,12 +434,12 @@ public class TestResourceBuilder<R extends ModelInstance> {
 
 		// wait for the previously generated events to be consumed
 		Thread.sleep(1000);
-		SnaFilter filter = new SnaFilter(this.testContext.getMediator(), "/serviceProvider/(test).*", true, false);
+		MessageFilter filter = new MessageFilter(this.testContext.getMediator(), "/serviceProvider/(test).*", true, false);
 
 		filter.addHandledType(SnaMessage.Type.UPDATE);
-		String agentId = this.testContext.getSensiNact().registerAgent(this.testContext.getMediator(), new AbstractMidAgentCallback() {
+		String agentId = this.testContext.getSensiNact().registerAgent(this.testContext.getMediator(), new AbstractMessageAgentCallback() {
 			@Override
-			public void doHandle(SnaUpdateMessageImpl message) {
+			public void doHandle(UpdateMessageImpl message) {
 				TestResourceBuilder.this.testContext.agentCallbackInc();
 				// System.out.println("TestResourceBuilder.this.agentCallbackCount++");
 			}
@@ -486,23 +486,23 @@ public class TestResourceBuilder<R extends ModelInstance> {
 					}
 				});
 		TestResourceBuilder.this.testContext.agentCallbackCountReset();
-		this.testContext.getSensiNact().registerAgent(this.testContext.getMediator(), new AbstractMidAgentCallback() {
+		this.testContext.getSensiNact().registerAgent(this.testContext.getMediator(), new AbstractMessageAgentCallback() {
 			@Override
-			public void doHandle(SnaLifecycleMessageImpl message) {
+			public void doHandle(LifecycleMessageImpl message) {
 
 				TestResourceBuilder.this.testContext.agentCallbackInc();
 			}
 
 			@Override
-			public void doHandle(SnaErrorMessageImpl message) {
+			public void doHandle(ErrorMessageImpl message) {
 			}
 
 			@Override
-			public void doHandle(SnaResponseMessage message) {
+			public void doHandle(ResponseMessage message) {
 			}
 
 			@Override
-			public void doHandle(SnaUpdateMessageImpl message) {
+			public void doHandle(UpdateMessageImpl message) {
 			}
 
 			@Override
@@ -528,8 +528,8 @@ public class TestResourceBuilder<R extends ModelInstance> {
 	public void testSecuredAccess() throws Exception {
 		ServiceImpl service = this.testContext.getModelInstance().getRootElement().addService("testService");
 
-		service.addLinkedResource(LocationResource.LOCATION, this.testContext.getModelInstance().getRootElement()
-				.getAdminService().getResource(LocationResource.LOCATION));
+		service.addLinkedResource(SnaConstants.LOCATION, this.testContext.getModelInstance().getRootElement()
+				.getAdminService().getResource(SnaConstants.LOCATION));
 
 		ResourceImpl r4impl = service.getResource("location");
 

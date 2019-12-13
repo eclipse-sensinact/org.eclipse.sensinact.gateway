@@ -10,9 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.core.remote;
 
-import org.eclipse.sensinact.gateway.core.Endpoint;
+import org.eclipse.sensinact.gateway.api.core.Endpoint;
+import org.eclipse.sensinact.gateway.api.message.Recipient;
 import org.eclipse.sensinact.gateway.core.Session;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -20,7 +20,7 @@ import org.json.JSONObject;
  * Extended {@link Endpoint} in charge of connecting a {@link RemoteCore} to the
  * local sensiNact instance's {@link Core}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public abstract class LocalEndpoint implements Endpoint {
 	/**
@@ -85,7 +85,7 @@ public abstract class LocalEndpoint implements Endpoint {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getAll(java.lang.String)
+	 * @see org.eclipse.sensinact.gateway.api.core.Endpoint#getAll(java.lang.String)
 	 */
 	@Override
 	public String getAll(String publicKey) {
@@ -95,7 +95,7 @@ public abstract class LocalEndpoint implements Endpoint {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getAll(java.lang.String,
+	 * @see org.eclipse.sensinact.gateway.api.core.Endpoint#getAll(java.lang.String,
 	 *      java.lang.String)
 	 */
 	@Override
@@ -106,7 +106,7 @@ public abstract class LocalEndpoint implements Endpoint {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getProviders(java.lang.String)
+	 * @see org.eclipse.sensinact.gateway.api.core.Endpoint#getProviders(java.lang.String)
 	 */
 	@Override
 	public String getProviders(String publicKey) {
@@ -116,7 +116,7 @@ public abstract class LocalEndpoint implements Endpoint {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getProvider(java.lang.String,
+	 * @see org.eclipse.sensinact.gateway.api.core.Endpoint#getProvider(java.lang.String,
 	 *      java.lang.String)
 	 */
 	@Override
@@ -127,7 +127,7 @@ public abstract class LocalEndpoint implements Endpoint {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getServices(java.lang.String,
+	 * @see org.eclipse.sensinact.gateway.api.core.Endpoint#getServices(java.lang.String,
 	 *      java.lang.String)
 	 */
 	@Override
@@ -138,7 +138,7 @@ public abstract class LocalEndpoint implements Endpoint {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getService(java.lang.String,
+	 * @see org.eclipse.sensinact.gateway.api.core.Endpoint#getService(java.lang.String,
 	 *      java.lang.String, java.lang.String)
 	 */
 	@Override
@@ -149,7 +149,7 @@ public abstract class LocalEndpoint implements Endpoint {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getResources(java.lang.String,
+	 * @see org.eclipse.sensinact.gateway.api.core.Endpoint#getResources(java.lang.String,
 	 *      java.lang.String, java.lang.String)
 	 */
 	@Override
@@ -160,7 +160,7 @@ public abstract class LocalEndpoint implements Endpoint {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getResource(java.lang.String,
+	 * @see org.eclipse.sensinact.gateway.api.core.Endpoint#getResource(java.lang.String,
 	 *      java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
@@ -171,7 +171,7 @@ public abstract class LocalEndpoint implements Endpoint {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#get(java.lang.String,
+	 * @see org.eclipse.sensinact.gateway.api.core.Endpoint#get(java.lang.String,
 	 *      java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
@@ -184,7 +184,7 @@ public abstract class LocalEndpoint implements Endpoint {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#set(java.lang.String,
+	 * @see org.eclipse.sensinact.gateway.api.core.Endpoint#set(java.lang.String,
 	 *      java.lang.String, java.lang.String, java.lang.String, java.lang.String,
 	 *      java.lang.Object)
 	 */
@@ -198,7 +198,7 @@ public abstract class LocalEndpoint implements Endpoint {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#act(java.lang.String,
+	 * @see org.eclipse.sensinact.gateway.api.core.Endpoint#act(java.lang.String,
 	 *      java.lang.String, java.lang.String, java.lang.String,
 	 *      java.lang.Object[])
 	 */
@@ -212,9 +212,9 @@ public abstract class LocalEndpoint implements Endpoint {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#subscribe(java.lang.String,
+	 * @see org.eclipse.sensinact.gateway.api.core.Endpoint#subscribe(java.lang.String,
 	 *      java.lang.String, java.lang.String, java.lang.String,
-	 *      org.eclipse.sensinact.gateway.core.message.Recipient,
+	 *      org.eclipse.sensinact.gateway.api.message.Recipient,
 	 *      org.json.JSONArray)
 	 */
 	@Override
@@ -227,7 +227,7 @@ public abstract class LocalEndpoint implements Endpoint {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#unsubscribe(java.lang.String,
+	 * @see org.eclipse.sensinact.gateway.api.core.Endpoint#unsubscribe(java.lang.String,
 	 *      java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override

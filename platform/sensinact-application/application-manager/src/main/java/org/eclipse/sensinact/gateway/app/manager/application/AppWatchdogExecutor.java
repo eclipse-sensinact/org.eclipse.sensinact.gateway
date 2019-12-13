@@ -10,15 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.application;
 
+import org.eclipse.sensinact.gateway.api.core.Attribute;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.message.ErrorMessage;
 import org.eclipse.sensinact.gateway.app.api.exception.ResourceNotFoundException;
 import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
 import org.eclipse.sensinact.gateway.app.manager.AppConstant;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.app.manager.watchdog.AppResourceLifecycleWatchDog;
-import org.eclipse.sensinact.gateway.core.Attribute;
-import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 
@@ -42,7 +42,7 @@ class AppWatchdogExecutor implements AccessMethodExecutor {
         if (uri.endsWith(AppConstant.START)) {
             if (!snaResult.hasError()) {
                 if (ApplicationStatus.INSTALLED.equals(status)) {
-                    SnaErrorMessage message = resourceWatchDog.start(service.getApplication().getSession());
+                    ErrorMessage message = resourceWatchDog.start(service.getApplication().getSession());
                     if (message != null) {
                         snaResult.registerException(new ResourceNotFoundException("Unable to start the application: " + message.getJSON()));
                     }
@@ -50,7 +50,7 @@ class AppWatchdogExecutor implements AccessMethodExecutor {
             }
         } else if (uri.endsWith(AppConstant.STOP)) {
             if (ApplicationStatus.ACTIVE.equals(status)) {
-                SnaErrorMessage message = this.resourceWatchDog.stop(service.getApplication().getSession());
+                ErrorMessage message = this.resourceWatchDog.stop(service.getApplication().getSession());
                 if (message != null) {
                     snaResult.registerException(new ResourceNotFoundException("Unable to stop the application: " + message.getJSON()));
                 }

@@ -21,7 +21,7 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
  * Extended {@link AccessMethodTrigger} whose execution result depends on the
  * validation of a {@link Constraint}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class ConditionalConstant extends AbstractAccessMethodTrigger {
 	public static final String NAME = "CONDITIONAL";

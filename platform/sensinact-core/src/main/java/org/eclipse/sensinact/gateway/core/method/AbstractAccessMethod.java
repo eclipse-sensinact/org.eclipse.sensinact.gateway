@@ -20,17 +20,17 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.sensinact.gateway.api.message.ErrorfulMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Fixed;
 import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 
 /**
  * Abstract {@link AccessMethod} implementation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>> implements AccessMethod<T, R> {
 	/**
@@ -399,7 +399,7 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 	 */
 	public synchronized <A extends AccessMethodResponseBuilder<T, R>> R invoke(Signature signature) {
 		if (signature == null) {
-			return this.error(SnaErrorfulMessage.BAD_REQUEST_ERROR_CODE, "Null signature");
+			return this.error(ErrorfulMessage.BAD_REQUEST_ERROR_CODE, "Null signature");
 		}
 		Deque<AccessMethodExecutor> executors = null;
 		Signature current = signature;
@@ -419,7 +419,7 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 			((Shortcut) signature).push((Shortcut) current);
 		}
 		if (executors == null) {
-			return this.error(SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Unknown signature");
+			return this.error(ErrorfulMessage.NOT_FOUND_ERROR_CODE, "Unknown signature");
 		}
 		Object[] parameters = signature.values();
 		A result = this.createAccessMethodResponseBuilder(parameters);

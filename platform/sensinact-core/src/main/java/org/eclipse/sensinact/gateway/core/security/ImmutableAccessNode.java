@@ -28,7 +28,7 @@ import org.eclipse.sensinact.gateway.util.tree.PathNodeList;
 /**
  * Extended {@link ImmutablePathNode}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public final class ImmutableAccessNode extends ImmutablePathNode<ImmutableAccessNode> implements AccessNode {
 	// ********************************************************************//

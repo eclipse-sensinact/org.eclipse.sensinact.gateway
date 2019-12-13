@@ -10,16 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.generic.test;
 
+import org.eclipse.sensinact.gateway.api.core.ActionResource;
+import org.eclipse.sensinact.gateway.api.core.Core;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.core.Service;
+import org.eclipse.sensinact.gateway.api.core.ServiceProvider;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
 import org.eclipse.sensinact.gateway.common.primitive.Describable;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
-import org.eclipse.sensinact.gateway.core.ActionResource;
-import org.eclipse.sensinact.gateway.core.Core;
-import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.Resource;
-import org.eclipse.sensinact.gateway.core.Service;
-import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.Session;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
 import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.eclipse.sensinact.gateway.test.MidProxy;

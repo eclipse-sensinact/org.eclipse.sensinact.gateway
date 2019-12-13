@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.core.method.trigger;
 /**
  * Extended {@link AccessMethodTrigger} whose execution result is a constant
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class Constant extends AbstractAccessMethodTrigger {
 	public static final String NAME = "CONSTANT";

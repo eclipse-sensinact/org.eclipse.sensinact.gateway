@@ -11,13 +11,13 @@
 package org.eclipse.sensinact.gateway.agent.http.onem2m.osgi;
 
 import org.eclipse.sensinact.gateway.agent.http.onem2m.internal.SnaEventOneM2MHttpHandler;
+import org.eclipse.sensinact.gateway.api.core.Core;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
 import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.Core;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -45,7 +45,7 @@ public class Activator extends AbstractActivator<Mediator> {
             @Override
             public String execute(Core core) throws Exception {
                 //Expression used in tests: "(\\/slider\\/cursor\\/position(\\/[^\\/]+)*)|(\\/(slider|(lora\\-tracker\\-[0-9]+))\\/admin\\/location(\\/[^\\/]+)*)"
-                SnaFilter filter = new SnaFilter(mediator, ".*", true, false);
+                MessageFilter filter = new MessageFilter(mediator, ".*", true, false);
                 filter.addHandledType(SnaMessage.Type.values());
                 return core.registerAgent(mediator, handler, filter);
             }

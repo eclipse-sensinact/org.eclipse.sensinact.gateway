@@ -14,7 +14,7 @@ package org.eclipse.sensinact.gateway.core;
  * A set of {@link ProcessableData} processable by one {@link ResourceImpl} and
  * targeting one identified {@link ServiceImpl}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface ServiceProcessableData<R extends ResourceProcessableData> extends ResourceProcessableContainer<R> {
 	/**

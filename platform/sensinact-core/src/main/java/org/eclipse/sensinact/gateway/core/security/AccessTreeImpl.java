@@ -24,7 +24,7 @@ import org.eclipse.sensinact.gateway.util.tree.PathTree;
  * {@link AccessTree} implementation whose nodes define access rights to an
  * instance of the sensiNact's data model
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class AccessTreeImpl<N extends AccessNodeImpl<N>> extends PathTree<N>
 		implements MutableAccessTree<AccessNodeImpl<N>> {
@@ -35,7 +35,7 @@ public class AccessTreeImpl<N extends AccessNodeImpl<N>> extends PathTree<N>
 	/**
 	 * {@link PathNodeFactory} dedicated to {@link AccessNodeImpl} instantiation
 	 * 
-	 * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+	 * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
 	 */
 	private static class AccessNodeFactory<N extends AccessNodeImpl<N>> implements PathNodeFactory<N> {
 		private Mediator mediator;

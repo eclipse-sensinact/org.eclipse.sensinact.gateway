@@ -18,7 +18,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 /**
  * Describe {@link AccessMethod}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class DescribeMethod<T> extends AbstractAccessMethod<T, DescribeResponse<T>> {
 	public static enum DescribeType {

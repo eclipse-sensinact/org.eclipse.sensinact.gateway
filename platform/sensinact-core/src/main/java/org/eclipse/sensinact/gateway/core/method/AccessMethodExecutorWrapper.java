@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.core.method;
 /**
  * {@link AccessMethodExecutor} wrapper
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class AccessMethodExecutorWrapper extends AbstractAccessMethodExecutor {
 	/**

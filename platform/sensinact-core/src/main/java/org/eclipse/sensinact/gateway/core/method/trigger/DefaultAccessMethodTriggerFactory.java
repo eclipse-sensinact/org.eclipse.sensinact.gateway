@@ -24,7 +24,7 @@ import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 /**
  * Default core's {@link AccessMethodTriggerFactory} implementation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class DefaultAccessMethodTriggerFactory implements AccessMethodTriggerFactory {
 	/**

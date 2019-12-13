@@ -10,14 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.generic.parser;
 
+import org.eclipse.sensinact.gateway.api.core.AttributeBuilder;
+import org.eclipse.sensinact.gateway.api.core.MetadataBuilder;
+import org.eclipse.sensinact.gateway.api.core.RequirementBuilder;
+import org.eclipse.sensinact.gateway.api.core.AttributeBuilder.Requirement;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.core.AttributeBuilder;
-import org.eclipse.sensinact.gateway.core.AttributeBuilder.Requirement;
-import org.eclipse.sensinact.gateway.core.MetadataBuilder;
-import org.eclipse.sensinact.gateway.core.RequirementBuilder;
 import org.xml.sax.Attributes;
 
 import java.util.ArrayList;

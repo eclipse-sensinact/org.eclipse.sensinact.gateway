@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.core.security;
 /**
  * Pre-defined set of {@link AccessLevel} policies
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public enum AccessLevelOption {
 	UNAUTHORIZED(0), ANONYMOUS(1), AUTHENTICATED(2), ADMIN(3), OWNER(4);

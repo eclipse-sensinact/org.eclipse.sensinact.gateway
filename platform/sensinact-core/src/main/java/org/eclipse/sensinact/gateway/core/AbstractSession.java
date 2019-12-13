@@ -13,15 +13,18 @@ package org.eclipse.sensinact.gateway.core;
 import java.util.Enumeration;
 import java.util.Set;
 
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.core.Service;
+import org.eclipse.sensinact.gateway.api.core.ServiceProvider;
+import org.eclipse.sensinact.gateway.api.message.AgentMessageCallback;
+import org.eclipse.sensinact.gateway.api.message.Recipient;
+import org.eclipse.sensinact.gateway.api.message.ErrorfulMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
@@ -39,7 +42,7 @@ import org.json.JSONObject;
 /**
  * Abstract {@link Session} implementation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public abstract class AbstractSession implements Session {
 	// ********************************************************************//
@@ -90,7 +93,7 @@ public abstract class AbstractSession implements Session {
 		A response = null;
 		if (object == null) {
 			response = AccessMethodResponse.<JSONObject, A>error(mediator, uri, AccessMethod.Type.valueOf(method),
-					SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Not found", null);
+					ErrorfulMessage.NOT_FOUND_ERROR_CODE, "Not found", null);
 
 		} else {
 			object.remove("type");
@@ -146,7 +149,7 @@ public abstract class AbstractSession implements Session {
 			String suite = element.substring(1);
 
 			response = AccessMethodResponse.<JSONObject, DescribeResponse<JSONObject>>error(mediator, builder.getPath(),
-					describeType, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+					describeType, ErrorfulMessage.NOT_FOUND_ERROR_CODE,
 					new StringBuilder().append(first).append(suite).append(" not found").toString(), null);
 
 		} else {
@@ -256,11 +259,11 @@ public abstract class AbstractSession implements Session {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session#registerSessionAgent(org.eclipse.sensinact.gateway.core.message.MidAgentCallback, 
-	 * org.eclipse.sensinact.gateway.core.message.SnaFilter)
+	 * @see org.eclipse.sensinact.gateway.core.Session#registerSessionAgent(org.eclipse.sensinact.gateway.api.message.AgentMessageCallback, 
+	 * org.eclipse.sensinact.gateway.core.message.MessageFilter)
 	 */
 	@Override
-	public SubscribeResponse registerSessionAgent(MidAgentCallback callback, SnaFilter filter) {
+	public SubscribeResponse registerSessionAgent(AgentMessageCallback callback, MessageFilter filter) {
 		return registerSessionAgent(null, callback, filter);
 	}
 
@@ -313,7 +316,7 @@ public abstract class AbstractSession implements Session {
 	 * @inheritDoc
 	 * 
 	 * @see org.eclipse.sensinact.gateway.core.Session# subscribe(java.lang.String,
-	 *      java.lang.String, java.lang.String,org.eclipse.sensinact.gateway.core.message.Recipient,
+	 *      java.lang.String, java.lang.String,org.eclipse.sensinact.gateway.api.message.Recipient,
 	 *      org.json.JSONArray)
 	 */
 	@Override
@@ -326,7 +329,7 @@ public abstract class AbstractSession implements Session {
 	 * @inheritDoc
 	 * 
 	 * @see org.eclipse.sensinact.gateway.core.Session#subscribe(java.lang.String, java.lang.String, 
-	 * java.lang.String, org.eclipse.sensinact.gateway.core.message.Recipient, org.json.JSONArray, 
+	 * java.lang.String, org.eclipse.sensinact.gateway.api.message.Recipient, org.json.JSONArray, 
 	 * java.lang.String)
 	 */
 	@Override
@@ -339,7 +342,7 @@ public abstract class AbstractSession implements Session {
 	 * @inheritDoc
 	 * 
 	 * @see org.eclipse.sensinact.gateway.core.Session#subscribe(java.lang.String, java.lang.String, 
-	 * java.lang.String, java.lang.String, org.eclipse.sensinact.gateway.core.message.Recipient, 
+	 * java.lang.String, java.lang.String, org.eclipse.sensinact.gateway.api.message.Recipient, 
 	 * org.json.JSONArray)
 	 */
 	@Override

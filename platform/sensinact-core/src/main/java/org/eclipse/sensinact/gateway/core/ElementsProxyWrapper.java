@@ -20,7 +20,7 @@ import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 /**
  * Abstract extended {@link ElementsProxyWrapper} implementation
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public abstract class ElementsProxyWrapper<M extends ModelElementProxy, P extends Nameable>
 		implements ElementsProxy<P>, InvocationHandler, Nameable, PathElement {

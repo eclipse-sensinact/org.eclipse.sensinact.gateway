@@ -21,7 +21,7 @@ import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
  * A extended {@link Parameter} whose value is build dynamically using a
  * {@link DynamicParameterValue}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class DynamicParameter extends Parameter {
 	/**

@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core.method.trigger;
 
-import org.eclipse.sensinact.gateway.core.AttributeDescription;
+import org.eclipse.sensinact.gateway.api.core.AttributeDescription;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;

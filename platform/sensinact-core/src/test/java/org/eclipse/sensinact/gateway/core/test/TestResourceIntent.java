@@ -15,10 +15,10 @@ import static org.junit.Assert.assertEquals;
 import java.util.Dictionary;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.sensinact.gateway.api.core.PropertyResource;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
-import org.eclipse.sensinact.gateway.core.PropertyResource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;

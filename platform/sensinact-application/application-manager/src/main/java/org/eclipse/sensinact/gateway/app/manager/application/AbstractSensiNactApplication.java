@@ -10,12 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.application;
 
+import org.eclipse.sensinact.gateway.api.core.Core;
+import org.eclipse.sensinact.gateway.api.message.MessageCallback;
+import org.eclipse.sensinact.gateway.api.message.ErrorMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.Session;
-import org.eclipse.sensinact.gateway.core.message.MidCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -32,13 +32,13 @@ public abstract class AbstractSensiNactApplication implements SensiNactApplicati
     /**
      * @return
      */
-    protected abstract SnaErrorMessage doStart();
+    protected abstract ErrorMessage doStart();
 
 
     /**
      * @return
      */
-    protected abstract SnaErrorMessage doStop();
+    protected abstract ErrorMessage doStop();
 
     //********************************************************************//
     //						STATIC DECLARATIONS							  //
@@ -95,7 +95,7 @@ public abstract class AbstractSensiNactApplication implements SensiNactApplicati
      * @see org.eclipse.sensinact.gateway.app.manager.application.SensiNactApplication#start()
      */
     @Override
-    public SnaErrorMessage start() {
+    public ErrorMessage start() {
         //this.session = mediator.callService(Core.class,
         //		new Executable<Core,Session>()
         //{
@@ -114,8 +114,8 @@ public abstract class AbstractSensiNactApplication implements SensiNactApplicati
      * @see org.eclipse.sensinact.gateway.app.manager.application.SensiNactApplication#stop()
      */
     @Override
-    public SnaErrorMessage stop() {
-        SnaErrorMessage message = this.doStop();
+    public ErrorMessage stop() {
+        ErrorMessage message = this.doStop();
         //this.session = null;
         return message;
     }
@@ -140,23 +140,23 @@ public abstract class AbstractSensiNactApplication implements SensiNactApplicati
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.message.Recipient#getSnaCallBackType()
+     * @see org.eclipse.sensinact.gateway.api.message.Recipient#getSnaCallBackType()
      */
-    public MidCallback.Type getSnaCallBackType() {
-        return MidCallback.Type.UNARY;
+    public MessageCallback.Type getSnaCallBackType() {
+        return MessageCallback.Type.UNARY;
     }
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.message.Recipient#getLifetime()
+     * @see org.eclipse.sensinact.gateway.api.message.Recipient#getLifetime()
      */
     public long getLifetime() {
-        return MidCallback.ENDLESS;
+        return MessageCallback.ENDLESS;
     }
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.message.Recipient#getBufferSize()
+     * @see org.eclipse.sensinact.gateway.api.message.Recipient#getBufferSize()
      */
     public int getBufferSize() {
         return 0;
@@ -164,7 +164,7 @@ public abstract class AbstractSensiNactApplication implements SensiNactApplicati
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.message.Recipient#getSchedulerDelay()
+     * @see org.eclipse.sensinact.gateway.api.message.Recipient#getSchedulerDelay()
      */
     public int getSchedulerDelay() {
         return 0;

@@ -17,7 +17,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
 /**
  * An node of an {@link AccessTree}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface AccessNode {
 	/**

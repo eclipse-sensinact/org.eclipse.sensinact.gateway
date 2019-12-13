@@ -16,7 +16,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 /**
  * Factory of {@link SecurityDataStoreService}
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface SecurityDataStoreServiceFactory<S extends SecurityDataStoreService> {
 	/**

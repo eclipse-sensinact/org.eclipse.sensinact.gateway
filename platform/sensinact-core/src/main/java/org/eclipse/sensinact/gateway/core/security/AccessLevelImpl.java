@@ -12,7 +12,7 @@ package org.eclipse.sensinact.gateway.core.security;
 
 /**
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class AccessLevelImpl implements AccessLevel {
 	private final int level;

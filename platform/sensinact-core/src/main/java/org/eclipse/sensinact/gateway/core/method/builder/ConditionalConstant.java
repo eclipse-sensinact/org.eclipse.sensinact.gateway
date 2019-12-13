@@ -23,7 +23,7 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
  * Extended {@link DynamicParameterValue} whose execution result depends on the
  * validation of a {@link Constraint}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class ConditionalConstant extends AbstractDynamicParameterValue {
 	public static final String NAME = "CONDITIONAL";

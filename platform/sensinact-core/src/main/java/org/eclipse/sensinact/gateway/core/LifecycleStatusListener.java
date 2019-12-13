@@ -10,13 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
-import org.eclipse.sensinact.gateway.core.ServiceProvider.LifecycleStatus;
+import org.eclipse.sensinact.gateway.api.core.ServiceProvider.LifecycleStatus;
 
 /**
  * Listener service of the updates of the lifecycle status of a
  * {@link ServiceProvider}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface LifecycleStatusListener {
 	void update(LifecycleStatus status);

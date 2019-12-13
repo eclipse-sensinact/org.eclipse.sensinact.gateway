@@ -10,10 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
+import org.eclipse.sensinact.gateway.api.message.AbstractAgent;
+import org.eclipse.sensinact.gateway.api.message.RemoteAgent;
+import org.eclipse.sensinact.gateway.api.message.SnaAgent;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 
 /**
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class RemoteAgentImpl extends AbstractAgent implements RemoteAgent {
 	
@@ -37,14 +40,14 @@ public class RemoteAgentImpl extends AbstractAgent implements RemoteAgent {
 	 * @param filter
 	 * @param publicKey
 	 */
-	public RemoteAgentImpl(Mediator mediator, RemoteAgentCallback callback, SnaFilter filter, String publicKey) {		
+	public RemoteAgentImpl(Mediator mediator, RemoteAgentCallback callback, MessageFilter filter, String publicKey) {		
 		super(mediator, callback, filter, publicKey);
 	}
 
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.AbstractAgent#doStart()
+	 * @see org.eclipse.sensinact.gateway.api.message.AbstractAgent#doStart()
 	 */
 	@Override
 	public void doStart() {
@@ -54,7 +57,7 @@ public class RemoteAgentImpl extends AbstractAgent implements RemoteAgent {
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.AbstractAgent#doStop()
+	 * @see org.eclipse.sensinact.gateway.api.message.AbstractAgent#doStop()
 	 */
 	@Override
 	public void doStop() {
@@ -64,7 +67,7 @@ public class RemoteAgentImpl extends AbstractAgent implements RemoteAgent {
 	/** 
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.AbstractAgent#getAgentInterfaces()
+	 * @see org.eclipse.sensinact.gateway.api.message.AbstractAgent#getAgentInterfaces()
 	 */
 	@Override
 	public String[] getAgentInterfaces() {

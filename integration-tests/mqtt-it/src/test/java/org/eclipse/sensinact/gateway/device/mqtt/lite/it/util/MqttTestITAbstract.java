@@ -54,7 +54,7 @@ import static org.ops4j.pax.exam.CoreOptions.*;
  */
 public abstract class MqttTestITAbstract {
     protected static final String SENSINACT_HTTP_PORT="8097";
-    protected static final String SENSINACT_VERSION="2.0-SNAPSHOT";
+    protected static final String SENSINACT_VERSION="2.1-SNAPSHOT";
     protected static final String MQTT_HOST ="127.0.0.1";//sensinact-cea.ddns.net
     protected static final Integer MQTT_PORT =1883;//5269
     protected static Option[] combine(Option[]...options){

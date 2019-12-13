@@ -10,9 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
+import org.eclipse.sensinact.gateway.api.message.AbstractMessageAgentCallback;
+import org.eclipse.sensinact.gateway.api.message.ErrorMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.ResponseMessage;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessageImpl;
 import org.eclipse.sensinact.gateway.core.remote.RemoteCore;
 
-public class RemoteAgentCallback extends AbstractMidAgentCallback {
+public class RemoteAgentCallback extends AbstractMessageAgentCallback {
 	
 	private final RemoteCore remoteCore;
 
@@ -24,44 +29,44 @@ public class RemoteAgentCallback extends AbstractMidAgentCallback {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.MidAgentCallback#
-	 * doHandle(org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl)
+	 * @see org.eclipse.sensinact.gateway.api.message.AgentMessageCallback#
+	 * doHandle(org.eclipse.sensinact.gateway.api.message.LifecycleMessageImpl)
 	 */
 	@Override
-	public void doHandle(SnaLifecycleMessageImpl message) {
+	public void doHandle(LifecycleMessageImpl message) {
 		this.remoteCore.endpoint().dispatch(super.identifier, message);
 	}
 
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.MidAgentCallback#
-	 * doHandle(org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl)
+	 * @see org.eclipse.sensinact.gateway.api.message.AgentMessageCallback#
+	 * doHandle(org.eclipse.sensinact.gateway.api.message.UpdateMessageImpl)
 	 */
 	@Override
-	public void doHandle(SnaUpdateMessageImpl message) {
+	public void doHandle(UpdateMessageImpl message) {
 		this.remoteCore.endpoint().dispatch(super.identifier, message);
 	}
 
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.MidAgentCallback#
-	 * doHandle(org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl)
+	 * @see org.eclipse.sensinact.gateway.api.message.AgentMessageCallback#
+	 * doHandle(org.eclipse.sensinact.gateway.api.message.ErrorMessageImpl)
 	 */
 	@Override
-	public void doHandle(SnaErrorMessageImpl message) {
+	public void doHandle(ErrorMessageImpl message) {
 		this.remoteCore.endpoint().dispatch(super.identifier, message);
 	}
 
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.MidAgentCallback#
-	 * doHandle(org.eclipse.sensinact.gateway.core.message.SnaResponseMessage)
+	 * @see org.eclipse.sensinact.gateway.api.message.AgentMessageCallback#
+	 * doHandle(org.eclipse.sensinact.gateway.api.message.ResponseMessage)
 	 */
 	@Override
-	public void doHandle(SnaResponseMessage<?, ?> message) {
+	public void doHandle(ResponseMessage<?, ?> message) {
 		this.remoteCore.endpoint().dispatch(super.identifier, message);
 	}
 }

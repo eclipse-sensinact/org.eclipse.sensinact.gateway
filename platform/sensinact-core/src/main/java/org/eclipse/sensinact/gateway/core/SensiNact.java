@@ -10,6 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import org.eclipse.sensinact.gateway.api.core.ActionResource;
+import org.eclipse.sensinact.gateway.api.core.Core;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.core.Service;
+import org.eclipse.sensinact.gateway.api.core.ServiceProvider;
+import org.eclipse.sensinact.gateway.api.message.AbstractMessageAgentCallback;
+import org.eclipse.sensinact.gateway.api.message.AgentMessageCallback;
+import org.eclipse.sensinact.gateway.api.message.LocalAgent;
+import org.eclipse.sensinact.gateway.api.message.Recipient;
+import org.eclipse.sensinact.gateway.api.message.SnaAgent;
+import org.eclipse.sensinact.gateway.api.message.ErrorfulMessage;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessageImpl;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
@@ -17,47 +31,72 @@ import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefiniti
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractor;
 import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractorType;
-import org.eclipse.sensinact.gateway.core.message.*;
+import org.eclipse.sensinact.gateway.core.message.LocalAgentImpl;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
+import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
+import org.eclipse.sensinact.gateway.core.message.ResourceIntent;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.eclipse.sensinact.gateway.core.method.RemoteAccessMethodExecutable;
-import org.eclipse.sensinact.gateway.core.method.legacy.*;
+import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod.DescribeType;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponseBuilder;
+import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
 import org.eclipse.sensinact.gateway.core.remote.SensinactCoreBaseIFaceManager;
 import org.eclipse.sensinact.gateway.core.remote.SensinactCoreBaseIFaceManagerFactory;
 import org.eclipse.sensinact.gateway.core.remote.SensinactCoreBaseIface;
-import org.eclipse.sensinact.gateway.core.security.*;
+import org.eclipse.sensinact.gateway.core.security.AccessNode;
+import org.eclipse.sensinact.gateway.core.security.AccessTree;
+import org.eclipse.sensinact.gateway.core.security.AccountConnector;
+import org.eclipse.sensinact.gateway.core.security.Authentication;
+import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
+import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
+import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
+import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
+import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
+import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
+import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
+import org.eclipse.sensinact.gateway.core.security.SecurityDataStoreServiceFactory;
+import org.eclipse.sensinact.gateway.core.security.User;
+import org.eclipse.sensinact.gateway.core.security.UserKey;
+import org.eclipse.sensinact.gateway.core.security.UserManager;
+import org.eclipse.sensinact.gateway.core.security.UserManagerFactory;
+import org.eclipse.sensinact.gateway.core.security.UserUpdater;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttTopic;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.listener.MqttTopicMessage;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.osgi.framework.*;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.AccessController;
 import java.security.InvalidKeyException;
 import java.security.PrivilegedAction;
-import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.ServiceLoader;
+import java.util.Set;
 /**
  * {@link Core} service implementation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
-@SuppressWarnings({"unchecked","rawtypes","unused"})
 public class SensiNact implements Core {
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
@@ -109,7 +148,7 @@ public class SensiNact implements Core {
 		 */
 		@Override
 		public SubscribeResponse registerSessionAgent(String requestId, 
-				final MidAgentCallback callback, final SnaFilter filter) {
+				final AgentMessageCallback callback, final MessageFilter filter) {
 
 			final SessionKey sessionKey;
 			synchronized(SensiNact.this.sessions) {
@@ -117,7 +156,10 @@ public class SensiNact implements Core {
 			}	
 			
 			boolean registered = AccessController.<Boolean>doPrivileged(new PrivilegedAction<Boolean>() {
-				@Override public Boolean run() {return sessionKey.registerAgent(callback, filter);}});
+				@Override public Boolean run() {
+					return sessionKey.registerAgent(callback, filter);
+				}
+			});
 
 			String uri = null;
 			if (filter != null) {
@@ -266,7 +308,7 @@ public class SensiNact implements Core {
 			}
 			if (sessionKey.localID() != 0) {
 				response = SensiNact.<JSONObject, GetResponse>createErrorResponse(mediator, AccessMethod.GET, uri,
-						SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found", null);
+						ErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found", null);
 
 				return tatooRequestId(requestId, response);
 			}
@@ -281,7 +323,7 @@ public class SensiNact implements Core {
 				response = this.<GetResponse>responseFromJSONObject(mediator, uri, AccessMethod.GET, object);
 			} catch (Exception e) {
 				response = SensiNact.<JSONObject, GetResponse>createErrorResponse(mediator, AccessMethod.GET, uri,
-						SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, "Internal server error", e);
+						ErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, "Internal server error", e);
 			}
 			return tatooRequestId(requestId, response);
 		}
@@ -320,7 +362,7 @@ public class SensiNact implements Core {
 			}
 			if (sessionKey.localID() != 0) {
 				response = SensiNact.<JSONObject, SetResponse>createErrorResponse(mediator, AccessMethod.SET, uri,
-						SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found", null);
+						ErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found", null);
 				return tatooRequestId(requestId, response);
 			}
 			JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
@@ -334,7 +376,7 @@ public class SensiNact implements Core {
 				response = this.<SetResponse>responseFromJSONObject(mediator, uri, AccessMethod.SET, object);
 			} catch (Exception e) {
 				response = SensiNact.<JSONObject, SetResponse>createErrorResponse(mediator, AccessMethod.SET, uri,
-						SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, "Internal server error", e);
+						ErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, "Internal server error", e);
 			}
 			return tatooRequestId(requestId, response);
 		}
@@ -374,7 +416,7 @@ public class SensiNact implements Core {
 			}
 			if (sessionKey.localID() != 0) {
 				response = SensiNact.<JSONObject, ActResponse>createErrorResponse(mediator, AccessMethod.ACT, uri,
-						SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found", null);
+						ErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found", null);
 				return tatooRequestId(requestId, response);
 			}
 			JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
@@ -388,7 +430,7 @@ public class SensiNact implements Core {
 				response = this.<ActResponse>responseFromJSONObject(mediator, uri, AccessMethod.ACT, object);
 			} catch (Exception e) {
 				response = SensiNact.<JSONObject, ActResponse>createErrorResponse(mediator, AccessMethod.ACT, uri,
-						SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, "Internal server error", e);
+						ErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, "Internal server error", e);
 			}
 			return tatooRequestId(requestId, response);
 		}
@@ -399,7 +441,7 @@ public class SensiNact implements Core {
 		 * 
 		 * @see org.eclipse.sensinact.gateway.core.Session# subscribe(java.lang.String,
 		 *      java.lang.String, java.lang.String,
-		 *      org.eclipse.sensinact.gateway.core.message.Recipient,
+		 *      org.eclipse.sensinact.gateway.api.message.Recipient,
 		 *      org.json.JSONArray)
 		 */
 		@Override
@@ -435,15 +477,15 @@ public class SensiNact implements Core {
 			}
 			if (sessionKey.localID() != 0) {
 				response = SensiNact.<JSONObject, SubscribeResponse>createErrorResponse(mediator,
-					AccessMethod.SUBSCRIBE, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found", null);
+					AccessMethod.SUBSCRIBE, uri, ErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found", null);
 				return tatooRequestId(requestId, response);
 			}			
 			final String uriRemote=String.format("/%s/%s/%s",serviceProviderId,serviceId,resourceId);
 			response=new SubscribeResponse(mediator,uriRemote,Status.SUCCESS);
 			response.setResponse(new JSONObject().put("subscriptionId",recipient.toString()));				
-			MidAgentCallback cb = new AbstractMidAgentCallback(true,true,recipient.toString()){					
+			AgentMessageCallback cb = new AbstractMessageAgentCallback(true,true,recipient.toString()){					
 				@Override
-				public void doHandle(SnaUpdateMessageImpl message) throws MidCallbackException {
+				public void doHandle(UpdateMessageImpl message) throws MidCallbackException {
 					JSONObject oj=new JSONObject(message.getJSON());
 					if(oj.getString("uri").startsWith(uriRemote)) {
 						LOG.info("remote: Subscription response {}",oj.toString());
@@ -455,7 +497,7 @@ public class SensiNact implements Core {
 					}
 				}
 			};
-			SnaFilter filter = new SnaFilter(mediator, uriRemote.concat("/value"), true, false);
+			MessageFilter filter = new MessageFilter(mediator, uriRemote.concat("/value"), true, false);
 			filter.addHandledType(SnaMessage.Type.UPDATE);
 			Constraint constraint = null;
 			if (conditions != null && conditions.length() > 0) {
@@ -503,7 +545,7 @@ public class SensiNact implements Core {
 			}
 			if (sessionKey.localID() != 0) {
 				response = SensiNact.<JSONObject, UnsubscribeResponse>createErrorResponse(mediator,
-					AccessMethod.UNSUBSCRIBE, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found",null);
+					AccessMethod.UNSUBSCRIBE, uri, ErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found",null);
 				return tatooRequestId(requestId, response);
 			}
 			final String uriRemote=String.format("/%s/%s/%s",serviceProviderId,serviceId,resourceId);
@@ -557,7 +599,7 @@ public class SensiNact implements Core {
 			if (all == null) {
 				response = SensiNact.<String, DescribeResponse<String>>createErrorResponse(mediator,
 						DescribeType.COMPLETE_LIST, UriUtils.PATH_SEPARATOR,
-						SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, "Internal server error", null);
+						ErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, "Internal server error", null);
 				return tatooRequestId(requestId, response);
 			}
 			if (sessionKey.localID() != 0) {
@@ -611,7 +653,7 @@ public class SensiNact implements Core {
 			});
 			if (providers == null) {
 				response = SensiNact.<String, DescribeResponse<String>>createErrorResponse(mediator,
-						DescribeType.PROVIDERS_LIST, UriUtils.PATH_SEPARATOR, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+						DescribeType.PROVIDERS_LIST, UriUtils.PATH_SEPARATOR, ErrorfulMessage.NOT_FOUND_ERROR_CODE,
 						"Internal server error", null);
 
 				return tatooRequestId(requestId, response);
@@ -664,7 +706,7 @@ public class SensiNact implements Core {
 			}
 			if (sessionKey.localID() != 0) {
 				response = SensiNact.<JSONObject, DescribeResponse<JSONObject>>createErrorResponse(mediator,
-						DescribeType.PROVIDER, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+						DescribeType.PROVIDER, uri, ErrorfulMessage.NOT_FOUND_ERROR_CODE,
 						"Service provider not found", null);
 
 				return tatooRequestId(requestId, response);
@@ -702,7 +744,7 @@ public class SensiNact implements Core {
 			if (provider == null) {
 				if (sessionKey.localID() != 0) {
 					response = SensiNact.<String, DescribeResponse<String>>createErrorResponse(mediator,
-							DescribeType.SERVICES_LIST, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+							DescribeType.SERVICES_LIST, uri, ErrorfulMessage.NOT_FOUND_ERROR_CODE,
 							"Service provider not found", null);
 
 					return tatooRequestId(requestId, response);
@@ -718,7 +760,7 @@ public class SensiNact implements Core {
 			}
 			if (services == null) {
 				response = SensiNact.<String, DescribeResponse<String>>createErrorResponse(mediator,
-						DescribeType.SERVICES_LIST, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+						DescribeType.SERVICES_LIST, uri, ErrorfulMessage.NOT_FOUND_ERROR_CODE,
 						"Service provider not found", null);
 
 				return tatooRequestId(requestId, response);
@@ -746,7 +788,7 @@ public class SensiNact implements Core {
 		/**
 		 * @inheritDoc
 		 *
-		 * @see org.eclipse.sensinact.gateway.core.Endpoint#
+		 * @see org.eclipse.sensinact.gateway.api.core.Endpoint#
 		 *      jsonService(java.lang.String, java.lang.String)
 		 */
 		@Override
@@ -773,7 +815,7 @@ public class SensiNact implements Core {
 			}
 			if (sessionKey.localID() != 0) {
 				response = SensiNact.<JSONObject, DescribeResponse<JSONObject>>createErrorResponse(mediator,
-						DescribeType.SERVICE, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Service not found", null);
+						DescribeType.SERVICE, uri, ErrorfulMessage.NOT_FOUND_ERROR_CODE, "Service not found", null);
 				return tatooRequestId(requestId, response);
 			}
 			JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
@@ -814,7 +856,7 @@ public class SensiNact implements Core {
 			if (service == null) {
 				if (sessionKey.localID() != 0) {
 					response = SensiNact.<String, DescribeResponse<String>>createErrorResponse(mediator,
-							DescribeType.RESOURCES_LIST, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+							DescribeType.RESOURCES_LIST, uri, ErrorfulMessage.NOT_FOUND_ERROR_CODE,
 							"Service not found", null);
 
 					return tatooRequestId(requestId, response);
@@ -831,7 +873,7 @@ public class SensiNact implements Core {
 			}
 			if (resources == null) {
 				response = SensiNact.<String, DescribeResponse<String>>createErrorResponse(mediator,
-						DescribeType.RESOURCES_LIST, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Service not found",
+						DescribeType.RESOURCES_LIST, uri, ErrorfulMessage.NOT_FOUND_ERROR_CODE, "Service not found",
 						null);
 
 				return tatooRequestId(requestId, response);
@@ -884,7 +926,7 @@ public class SensiNact implements Core {
 			}
 			if (sessionKey.localID() != 0) {
 				response = SensiNact.<JSONObject, DescribeResponse<JSONObject>>createErrorResponse(mediator,
-						DescribeType.RESOURCE, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found",
+						DescribeType.RESOURCE, uri, ErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found",
 						null);
 				return tatooRequestId(requestId, response);
 			}
@@ -1371,7 +1413,7 @@ public class SensiNact implements Core {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Core#getAnonymousSession()
+	 * @see org.eclipse.sensinact.gateway.api.core.Core#getAnonymousSession()
 	 */
 	@Override
 	public AnonymousSession getAnonymousSession() {
@@ -1398,7 +1440,7 @@ public class SensiNact implements Core {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Core#
+	 * @see org.eclipse.sensinact.gateway.api.core.Core#
 	 *      getApplicationSession(java.lang.String)
 	 */
 	@Override
@@ -1441,7 +1483,7 @@ public class SensiNact implements Core {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Core#namespace()
+	 * @see org.eclipse.sensinact.gateway.api.core.Core#namespace()
 	 */
 	@Override
 	public String namespace() {
@@ -1451,11 +1493,11 @@ public class SensiNact implements Core {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Core#
-	 * registerAgent(org.eclipse.sensinact.gateway.common.bundle.Mediator,org.eclipse.sensinact.gateway.core.message.MidAgentCallback,org.eclipse.sensinact.gateway.core.message.SnaFilter)
+	 * @see org.eclipse.sensinact.gateway.api.core.Core#
+	 * registerAgent(org.eclipse.sensinact.gateway.common.bundle.Mediator,org.eclipse.sensinact.gateway.api.message.AgentMessageCallback,org.eclipse.sensinact.gateway.core.message.MessageFilter)
 	 */
 	@Override
-	public String registerAgent(final Mediator mediator, final MidAgentCallback callback, final SnaFilter filter) {
+	public String registerAgent(final Mediator mediator, final AgentMessageCallback callback, final MessageFilter filter) {
 
 		final Bundle bundle = mediator.getContext().getBundle();
 
@@ -1488,7 +1530,7 @@ public class SensiNact implements Core {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Core#registerIntent(org.eclipse.sensinact.gateway.common.bundle.Mediator, org.eclipse.sensinact.gateway.common.execution.Executable, String...)
+	 * @see org.eclipse.sensinact.gateway.api.core.Core#registerIntent(org.eclipse.sensinact.gateway.common.bundle.Mediator, org.eclipse.sensinact.gateway.common.execution.Executable, String...)
 	 */
 	@Override
 	public String registerIntent(Mediator mediator, Executable<Boolean,Void> onAccessible, final String... path) {
@@ -2153,7 +2195,7 @@ public class SensiNact implements Core {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Core#close()
+	 * @see org.eclipse.sensinact.gateway.api.core.Core#close()
 	 */
 	public void close() {
 		mediator.debug("closing sensiNact core");

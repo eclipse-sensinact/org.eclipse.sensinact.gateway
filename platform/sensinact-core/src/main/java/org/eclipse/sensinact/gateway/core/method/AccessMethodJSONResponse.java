@@ -18,7 +18,7 @@ import org.json.JSONObject;
  * Extended {@link SnaMessage} dedicated to the responses to the
  * {@link AccessMethod}s invocation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public abstract class AccessMethodJSONResponse extends AccessMethodResponse<JSONObject> {
 	/**

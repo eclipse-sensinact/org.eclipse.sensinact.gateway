@@ -10,12 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import org.eclipse.sensinact.gateway.api.core.PropertyResource;
+import org.eclipse.sensinact.gateway.api.core.Resource;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 
 /**
  * Creates {@link ResourceConfig}s for a specific southbound bridge
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface ResourceConfigBuilder {
 	public static final Class<? extends Resource> RESOURCE_TYPE = PropertyResource.class;

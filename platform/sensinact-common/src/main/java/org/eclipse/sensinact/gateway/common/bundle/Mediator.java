@@ -23,7 +23,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.Properties;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Dictionary;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
 
 /**
  * Mediator Pattern Architecture purpose
@@ -37,12 +45,11 @@ public class Mediator {
 	 * ThreadLocal {@link ServiceCaller} used to interact with the OSGi host
 	 * environment by calling and registering services
 	 */
-	public final ThreadLocal<ServiceCaller> CALLERS = new ThreadLocal<ServiceCaller>() {
-		/**
-		 * @inheritedDoc
-		 * 
+	public final ThreadLocal<ServiceCaller> CALLERS = new ThreadLocal<ServiceCaller>() {		
+		/* (non-Javadoc)
 		 * @see java.lang.ThreadLocal#initialValue()
 		 */
+		@Override
 		public ServiceCaller initialValue() {
 			return new ServiceCaller(Mediator.this.getContext());
 		}
@@ -86,7 +93,7 @@ public class Mediator {
 
 		if (managed != null && Boolean.parseBoolean(managed)) {
 			this.configuration = new MediatorManagedConfiguration(this,
-					context.getBundle().getSymbolicName().replace('-', '.'));
+			    context.getBundle().getSymbolicName().replace('-', '.'));
 			this.configuration.register();
 		}
 	}

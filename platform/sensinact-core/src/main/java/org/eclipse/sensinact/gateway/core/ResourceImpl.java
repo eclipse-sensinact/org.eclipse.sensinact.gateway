@@ -18,6 +18,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.sensinact.gateway.api.core.Attribute;
+import org.eclipse.sensinact.gateway.api.core.AttributeBuilder;
+import org.eclipse.sensinact.gateway.api.core.AttributeDescription;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.core.Metadata;
+import org.eclipse.sensinact.gateway.api.core.MetadataDescription;
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.message.AbstractSnaMessage;
+import org.eclipse.sensinact.gateway.api.message.MessageCallback;
+import org.eclipse.sensinact.gateway.api.message.Recipient;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessage;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.NotificationMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessage;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.execution.DefaultErrorHandler;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
@@ -27,17 +41,10 @@ import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
 import org.eclipse.sensinact.gateway.common.primitive.Typable;
-import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
 import org.eclipse.sensinact.gateway.core.message.BufferMidCallback;
-import org.eclipse.sensinact.gateway.core.message.MidCallback;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.ScheduledBufferMidCallback;
 import org.eclipse.sensinact.gateway.core.message.ScheduledMidCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaNotificationMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
 import org.eclipse.sensinact.gateway.core.message.SubscriptionFilter;
 import org.eclipse.sensinact.gateway.core.message.UnaryMidCallback;
 import org.eclipse.sensinact.gateway.core.method.AbstractAccessMethod;
@@ -54,7 +61,7 @@ import org.json.JSONObject;
 /**
  * Basis {@link Resource} implementation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class ResourceImpl extends
 		ModelElement<ModelInstance<?>, ResourceProxy, ResourceProcessableContainer<?>, Attribute, AttributeDescription>
@@ -588,7 +595,7 @@ public class ResourceImpl extends
 	 *         properly; null otherwise
 	 */
 	protected String listen(String attributeName, Recipient recipient, Set<Constraint> conditions,
-			int policy, MidCallback.Type type, long lifetime, int buffer, int delay) {
+			int policy, MessageCallback.Type type, long lifetime, int buffer, int delay) {
 		StringBuilder builder = new StringBuilder();
 		builder = new StringBuilder();
 		builder.append(this.getPath());
@@ -596,12 +603,12 @@ public class ResourceImpl extends
 		builder.append(attributeName);
 		String filter = builder.toString();
 
-		MidCallback.Type callbackType = type == null ? MidCallback.Type.UNARY : type;
-		long timeout = lifetime <= 10000 ? MidCallback.ENDLESS : System.currentTimeMillis() + lifetime;
+		MessageCallback.Type callbackType = type == null ? MessageCallback.Type.UNARY : type;
+		long timeout = lifetime <= 10000 ? MessageCallback.ENDLESS : System.currentTimeMillis() + lifetime;
 		int schedulerDelay = delay < 1000 ? 1000 : delay;
 		int bufferSize = buffer < 10 ? 10 : buffer;
 
-		MidCallback callback = null;
+		MessageCallback callback = null;
 
 		switch (callbackType) {
 		case BUFFERERIZED_AND_SCHEDULED:
@@ -721,7 +728,7 @@ public class ResourceImpl extends
 	 * @param hasChanged
 	 */
 	@SuppressWarnings("rawtypes")
-	protected void updated(Attribute attribute, Object value, boolean hasChanged) {
+	public void updated(Attribute attribute, Object value, boolean hasChanged) {
 		if (!super.started.get() || attribute.isHidden()) {
 			return;
 		}
@@ -745,8 +752,8 @@ public class ResourceImpl extends
 
 			String path = buffer.toString();
 
-			SnaUpdateMessage message = SnaNotificationMessageImpl.Builder.<SnaUpdateMessage>notification(
-					super.modelInstance.mediator(), SnaUpdateMessage.Update.ATTRIBUTE_VALUE_UPDATED, path);
+			UpdateMessage message = NotificationMessageImpl.Builder.<UpdateMessage>notification(
+					super.modelInstance.mediator(), UpdateMessage.Update.ATTRIBUTE_VALUE_UPDATED, path);
 
 			message.setNotification(attributeDescription);
 			((AbstractSnaMessage) message).put("hasChanged", hasChanged, true);
@@ -787,12 +794,12 @@ public class ResourceImpl extends
 
 		String path = this.getPath();
 
-		SnaLifecycleMessage notification = SnaNotificationMessageImpl.Builder.<SnaLifecycleMessage>notification(
-				super.modelInstance.mediator(), SnaLifecycleMessage.Lifecycle.RESOURCE_APPEARING, path);
+		LifecycleMessage notification = NotificationMessageImpl.Builder.<LifecycleMessage>notification(
+				super.modelInstance.mediator(), LifecycleMessage.Lifecycle.RESOURCE_APPEARING, path);
 
 		JSONObject notificationObject = new JSONObject();
 
-		notificationObject.put(SnaConstants.ADDED_OR_REMOVED, SnaLifecycleMessage.Lifecycle.RESOURCE_APPEARING.name());
+		notificationObject.put(SnaConstants.ADDED_OR_REMOVED, LifecycleMessage.Lifecycle.RESOURCE_APPEARING.name());
 		notificationObject.put(Resource.TYPE, this.getType());
 
 		notification.setNotification(notificationObject);
@@ -818,7 +825,7 @@ public class ResourceImpl extends
 							PrimitiveDescription.toJson(metadataDescription.getType(), metadataDescription.getValue()));
 				}
 			}
-			((SnaLifecycleMessageImpl) notification).put("initial", jsonAttribute);
+			((LifecycleMessageImpl) notification).put("initial", jsonAttribute);
 		}
 		super.modelInstance.postMessage(notification);
 	}
@@ -894,8 +901,8 @@ public class ResourceImpl extends
 	 * @see ModelElement#getRegisteredEvent()
 	 */
 	@Override
-	protected SnaLifecycleMessage.Lifecycle getRegisteredEvent() {
-		return SnaLifecycleMessage.Lifecycle.RESOURCE_APPEARING;
+	protected LifecycleMessage.Lifecycle getRegisteredEvent() {
+		return LifecycleMessage.Lifecycle.RESOURCE_APPEARING;
 	}
 
 	/**
@@ -904,8 +911,8 @@ public class ResourceImpl extends
 	 * @see ModelElement#getUnregisteredEvent()
 	 */
 	@Override
-	protected SnaLifecycleMessage.Lifecycle getUnregisteredEvent() {
-		return SnaLifecycleMessage.Lifecycle.RESOURCE_DISAPPEARING;
+	protected LifecycleMessage.Lifecycle getUnregisteredEvent() {
+		return LifecycleMessage.Lifecycle.RESOURCE_DISAPPEARING;
 	}
 
 	/**

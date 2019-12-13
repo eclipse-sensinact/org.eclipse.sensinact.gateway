@@ -10,10 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import org.eclipse.sensinact.gateway.api.message.ErrorfulMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.util.UriUtils;
@@ -21,7 +21,7 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 /**
  * Abstract {@link SensiNactResourceModelElementProxy} implementation
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public abstract class ModelElementProxy implements Nameable, PathElement {
 	/**
@@ -119,7 +119,7 @@ public abstract class ModelElementProxy implements Nameable, PathElement {
 		AccessMethod<?, ?> accessMethod = this.getAccessMethod(type);
 		if (accessMethod == null) {
 			AccessMethodResponse<?> message = AccessMethodResponse.error(this.mediator, path,
-					AccessMethod.Type.valueOf(type), SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+					AccessMethod.Type.valueOf(type), ErrorfulMessage.NOT_FOUND_ERROR_CODE,
 					new StringBuilder().append(type).append(" method not found").toString(), null);
 			return message;
 		}

@@ -19,7 +19,7 @@ import org.json.JSONObject;
  * Extended {@link AccessMethodResponseBuilder} dedicated to {@link GetMethod}
  * execution
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
 public class GetResponseBuilder extends AccessMethodResponseBuilder<JSONObject, GetResponse> {

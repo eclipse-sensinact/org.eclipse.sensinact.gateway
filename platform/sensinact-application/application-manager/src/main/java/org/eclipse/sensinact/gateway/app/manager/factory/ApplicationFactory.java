@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.factory;
 
+import org.eclipse.sensinact.gateway.api.core.SensorDataResource;
 import org.eclipse.sensinact.gateway.app.api.exception.ApplicationFactoryException;
 import org.eclipse.sensinact.gateway.app.api.exception.FunctionNotFoundException;
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
@@ -32,7 +33,6 @@ import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.app.manager.osgi.PluginsProxy;
 import org.eclipse.sensinact.gateway.app.manager.watchdog.AppExceptionWatchDog;
 import org.eclipse.sensinact.gateway.core.InvalidResourceException;
-import org.eclipse.sensinact.gateway.core.SensorDataResource;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.osgi.framework.ServiceRegistration;
 

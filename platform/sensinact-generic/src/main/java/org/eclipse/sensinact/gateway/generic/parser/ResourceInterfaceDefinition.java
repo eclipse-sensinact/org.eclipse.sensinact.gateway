@@ -10,8 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.generic.parser;
 
+import org.eclipse.sensinact.gateway.api.core.Resource;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.xml.sax.Attributes;
 
 /**

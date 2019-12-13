@@ -10,21 +10,21 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.json;
 
+import org.eclipse.sensinact.gateway.api.message.ErrorMessageImpl;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 
 /**
  * @author Remi Druilhe
  * @see AbstractSnaMessage
  */
-public class AppSnaMessage extends SnaErrorMessageImpl {
+public class AppSnaMessage extends ErrorMessageImpl {
     /**
      * Constructor of the AppSnaMessage
      *
      * @param uri     the URI of the service
      * @param type    the type of the message
      * @param message the string message
-     * @see SnaErrorMessageImpl#SnaErrorMessageImpl(Mediator, String, Error, int)
+     * @see ErrorMessageImpl#SnaErrorMessageImpl(Mediator, String, Error, int)
      */
     public AppSnaMessage(Mediator mediator, String uri, Error type, String message) {
         super(mediator, uri, type);

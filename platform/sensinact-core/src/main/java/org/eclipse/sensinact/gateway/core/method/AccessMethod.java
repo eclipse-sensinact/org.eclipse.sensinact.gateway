@@ -28,7 +28,7 @@ import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 /**
  * A method provided by an {@link ModelElementProxy}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface AccessMethod<T, R extends AccessMethodResponse<T>> extends Nameable, Describable, PathElement {
 	public static final String REQUEST_ID_KEY = "rid";

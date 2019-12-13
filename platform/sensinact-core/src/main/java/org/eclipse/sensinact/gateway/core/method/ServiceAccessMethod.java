@@ -18,17 +18,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.message.ErrorfulMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.ResourceImpl.ResourceProxyWrapper;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 
 /**
  * Extended {@link AccessMethod} dedicated to Services
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class ServiceAccessMethod implements AccessMethod {
 	private final Mediator mediator;
@@ -133,7 +133,7 @@ public class ServiceAccessMethod implements AccessMethod {
 
 		} catch (Throwable e) {
 			return AccessMethodResponse.error(this.mediator, uri, this.getType(),
-					SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, e.getMessage(), e);
+					ErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, e.getMessage(), e);
 		}
 	}
 

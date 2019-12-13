@@ -10,14 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.application.dependency;
 
+import org.eclipse.sensinact.gateway.api.core.Core;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessage;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
 import org.eclipse.sensinact.gateway.app.manager.application.Application;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.Core;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
 import org.json.JSONObject;
@@ -92,15 +92,15 @@ public class DependencyManager extends DependencyManagerAbstract {
     }
 
     @Override
-    public void doHandle(SnaLifecycleMessageImpl message) {
+    public void doHandle(LifecycleMessageImpl message) {
         LOG.debug("Application deployed '{}' reading event {}", application.getName(), message.getJSON());
         JSONObject messageJson = new JSONObject(message.getJSON());
         final String messageType = messageJson.getString("type");
-        if (messageType.equals(SnaLifecycleMessage.Lifecycle.RESOURCE_APPEARING.toString())) {
+        if (messageType.equals(LifecycleMessage.Lifecycle.RESOURCE_APPEARING.toString())) {
             LOG.debug("Application '{}' taking into account the availability of resource '{}'", application.getName(), message.getPath());
             dependenciesURIMap.put(message.getPath(), true);
             evaluateDependencySatisfied();
-        } else if (messageType.equals(SnaLifecycleMessage.Lifecycle.RESOURCE_DISAPPEARING.toString())) {
+        } else if (messageType.equals(LifecycleMessage.Lifecycle.RESOURCE_DISAPPEARING.toString())) {
             LOG.debug("Application '{}' taking into account the unavailability of resource '{}'", application.getName(), message.getPath());
             dependenciesURIMap.put(message.getPath(), false);
             evaluateDependencySatisfied();
@@ -130,7 +130,7 @@ public class DependencyManager extends DependencyManagerAbstract {
         active = true;
         LOG.debug("Starting to Application Dependency Manager for application '{}'", application.getName());
         for (String resourceUri : dependenciesURIMap.keySet()) {
-            final SnaFilter filter = new SnaFilter(mediator, resourceUri, false, false);
+            final MessageFilter filter = new MessageFilter(mediator, resourceUri, false, false);
             filter.addHandledType(SnaMessage.Type.LIFECYCLE);
             //The next line can be interesting for debug purposes
             //filter.addHandledType(SnaMessage.Type.UPDATE);

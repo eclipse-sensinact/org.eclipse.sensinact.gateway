@@ -10,10 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.internal;
 
+import org.eclipse.sensinact.gateway.api.core.DataResource;
 import org.eclipse.sensinact.gateway.app.api.plugin.PluginInstaller;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
-import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.json.JSONArray;
 import org.json.JSONObject;

@@ -14,7 +14,7 @@ package org.eclipse.sensinact.gateway.core.security;
  * Exception thrown if an error occurred while instantiating the singleton
  * {@link SecuredAccess} service
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
 public class AuthorizationServiceException extends SecuredAccessException {

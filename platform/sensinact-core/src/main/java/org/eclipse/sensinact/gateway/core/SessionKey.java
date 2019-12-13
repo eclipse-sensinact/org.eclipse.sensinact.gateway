@@ -14,19 +14,23 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.api.message.AgentMessageCallback;
+import org.eclipse.sensinact.gateway.api.message.SnaAgent;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Sessions.SessionObserver;
-import org.eclipse.sensinact.gateway.core.message.*;
+import org.eclipse.sensinact.gateway.core.message.LocalAgentImpl;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
+import org.eclipse.sensinact.gateway.core.message.RemoteAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.RemoteAgentImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.UserKey;
 
 /**
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
-//@Component(immediate = false)
 public class SessionKey {
 	private Mediator mediator;
 
@@ -96,7 +100,7 @@ public class SessionKey {
 	 * @param filter
 	 * @return
 	 */
-	public boolean registerAgent(MidAgentCallback callback, SnaFilter filter) {
+	public boolean registerAgent(AgentMessageCallback callback, MessageFilter filter) {
 		if(this.agents.contains(callback.getName())){
 			this.mediator.warn("Agent '%s' already registered",callback.getName());
 			return false;

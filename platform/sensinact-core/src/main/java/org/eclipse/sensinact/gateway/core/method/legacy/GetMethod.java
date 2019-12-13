@@ -19,7 +19,7 @@ import org.json.JSONObject;
 /**
  * Getter {@link AccessMethod}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class GetMethod extends AbstractAccessMethod<JSONObject, GetResponse> {
 	/**

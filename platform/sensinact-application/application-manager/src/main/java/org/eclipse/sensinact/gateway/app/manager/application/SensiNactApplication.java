@@ -10,9 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.application;
 
+import org.eclipse.sensinact.gateway.api.message.Recipient;
+import org.eclipse.sensinact.gateway.api.message.ErrorMessage;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 
 /**
  * sensiNact Application service
@@ -23,13 +23,13 @@ public interface SensiNactApplication extends Nameable, Recipient {
      *
      * @return
      */
-    SnaErrorMessage start();
+    ErrorMessage start();
 
     /**
      * Stops this SensiNactApplication
      *
      * @return
      */
-    SnaErrorMessage stop();
+    ErrorMessage stop();
 
 }

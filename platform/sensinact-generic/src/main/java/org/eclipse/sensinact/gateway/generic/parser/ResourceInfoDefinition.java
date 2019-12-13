@@ -13,10 +13,10 @@ package org.eclipse.sensinact.gateway.generic.parser;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.api.core.RequirementBuilder;
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.core.AttributeBuilder.Requirement;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.AttributeBuilder.Requirement;
-import org.eclipse.sensinact.gateway.core.RequirementBuilder;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.TypeConfig;
 import org.eclipse.sensinact.gateway.generic.ExtResourceConfig;

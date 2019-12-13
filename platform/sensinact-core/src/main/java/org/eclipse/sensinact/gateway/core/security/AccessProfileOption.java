@@ -21,7 +21,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 /**
  * Pre-defined set of {@link AccessProfile} policies
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
 public enum AccessProfileOption {

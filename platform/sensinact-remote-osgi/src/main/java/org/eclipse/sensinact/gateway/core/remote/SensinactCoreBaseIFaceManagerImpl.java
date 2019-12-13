@@ -1,17 +1,27 @@
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
+ */
 package org.eclipse.sensinact.gateway.core.remote;
 
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.eclipse.sensinact.gateway.api.message.AbstractSnaMessage;
+import org.eclipse.sensinact.gateway.api.message.SnaAgent;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
+import org.eclipse.sensinact.gateway.api.message.RemoteMessage;
+import org.eclipse.sensinact.gateway.api.message.RemoteMessageImpl;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaRemoteMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaRemoteMessageImpl;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttTopic;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.listener.MqttTopicMessage;
@@ -74,7 +84,7 @@ public class SensinactCoreBaseIFaceManagerImpl implements SensinactCoreBaseIFace
 			try {
 				mb.subscribeToTopic(topic);
 				mb.connect();
-				SnaRemoteMessageImpl message = new SnaRemoteMessageImpl(mediator, "/", SnaRemoteMessage.Remote.CONNECTED);
+				RemoteMessageImpl message = new RemoteMessageImpl(mediator, "/", RemoteMessage.Remote.CONNECTED);
 				message.setNotification(new JSONObject().append(SnaConstants.NAMESPACE, remoteNamespace));
 				notifyCallbacks(message);
 			} catch (Exception e) {
@@ -90,7 +100,7 @@ public class SensinactCoreBaseIFaceManagerImpl implements SensinactCoreBaseIFace
 			LOG.info("Removing RSA sensinact remote instance {} from the pool", key.toString());
 			try {
 				service.disconnect();
-				SnaRemoteMessageImpl message = new SnaRemoteMessageImpl(mediator, "/", SnaRemoteMessage.Remote.DISCONNECTED);
+				RemoteMessageImpl message = new RemoteMessageImpl(mediator, "/", RemoteMessage.Remote.DISCONNECTED);
 				message.setNotification(new JSONObject().append(SnaConstants.NAMESPACE, key));
 				notifyCallbacks(message);
 			} catch (Exception e) {

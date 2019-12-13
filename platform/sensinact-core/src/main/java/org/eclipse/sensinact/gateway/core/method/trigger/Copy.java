@@ -14,7 +14,7 @@ package org.eclipse.sensinact.gateway.core.method.trigger;
  * Extended {@link AccessMethodTrigger} returning the value of the Primitive
  * parameter when executed
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class Copy extends AbstractAccessMethodTrigger {
 	public static final String NAME = "COPY";

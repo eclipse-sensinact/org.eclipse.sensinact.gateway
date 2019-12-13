@@ -10,8 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws;
 
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 

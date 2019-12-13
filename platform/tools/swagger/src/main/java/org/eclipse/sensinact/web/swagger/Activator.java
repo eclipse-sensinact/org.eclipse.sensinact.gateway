@@ -13,13 +13,11 @@ package org.eclipse.sensinact.web.swagger;
 import java.util.Hashtable;
 
 import javax.servlet.Filter;
-import javax.servlet.Servlet;
 
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /**

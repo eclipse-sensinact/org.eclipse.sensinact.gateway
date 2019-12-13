@@ -13,8 +13,8 @@ package org.eclipse.sensinact.gateway.app.basic.sna;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.eclipse.sensinact.gateway.api.core.Resource;
 import org.eclipse.sensinact.gateway.app.manager.component.data.ResourceData;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.osgi.framework.BundleContext;

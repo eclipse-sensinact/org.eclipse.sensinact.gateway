@@ -11,10 +11,10 @@
 package org.eclipse.sensinact.gateway.commands.gogo.internal;
 
 import org.apache.felix.service.command.Descriptor;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
 import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccess;
 import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccessRequest;
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
-import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;

@@ -24,10 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import org.eclipse.sensinact.gateway.core.Core;
-import org.eclipse.sensinact.gateway.core.DataResource;
+import org.eclipse.sensinact.gateway.api.core.Core;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.message.Recipient;
 import org.eclipse.sensinact.gateway.core.Session;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
 import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.eclipse.sensinact.gateway.test.MidProxy;
@@ -246,7 +246,7 @@ public class MidOSGiTestExtended extends MidOSGiTest {
             return (String) j;
 
         } catch (Throwable e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
         return null;
     }

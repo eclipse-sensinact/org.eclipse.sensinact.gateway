@@ -19,7 +19,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
 /**
  * Basis {@link MethodAccessibility} interface implementation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class MethodAccessibilityImpl implements MethodAccessibility {
 	// ********************************************************************//

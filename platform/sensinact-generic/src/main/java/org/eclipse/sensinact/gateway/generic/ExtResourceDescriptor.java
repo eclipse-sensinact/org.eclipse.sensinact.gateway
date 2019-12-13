@@ -13,9 +13,9 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.core.Resource.UpdatePolicy;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.core.Resource;
-import org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.ResourceDescriptor;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;

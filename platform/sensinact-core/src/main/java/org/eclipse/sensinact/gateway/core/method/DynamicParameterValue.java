@@ -17,7 +17,7 @@ import org.eclipse.sensinact.gateway.common.primitive.JSONable;
  * Extended {@link Executable} whose execution is parameterized by an Object and
  * returning an Object
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface DynamicParameterValue extends JSONable {
 	/**

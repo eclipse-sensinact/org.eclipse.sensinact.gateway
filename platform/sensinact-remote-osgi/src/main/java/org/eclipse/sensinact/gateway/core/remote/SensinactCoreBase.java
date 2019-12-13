@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2017 CEA.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    CEA - initial API and implementation
+ */
 package org.eclipse.sensinact.gateway.core.remote;
 
 import java.io.IOException;
@@ -5,15 +15,15 @@ import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.sensinact.gateway.api.core.Core;
+import org.eclipse.sensinact.gateway.api.core.ServiceProvider;
+import org.eclipse.sensinact.gateway.api.message.AbstractMessageAgentCallback;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessageImpl;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.Core;
-import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.Session;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -51,14 +61,14 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
 
             mb=new MqttBroker.Builder().host(mqttURL.getHost()).port(mqttURL.getPort()).protocol(MqttBroker.Protocol.valueOf(
             		mqttURL.getProtocol().toUpperCase())).build();
-            sensinact.registerAgent(this.mediator, new AbstractMidAgentCallback(){
+            sensinact.registerAgent(this.mediator, new AbstractMessageAgentCallback(){
                 @Override
-                public void doHandle(SnaLifecycleMessageImpl message) throws MidCallbackException {
+                public void doHandle(LifecycleMessageImpl message) throws MidCallbackException {
                     publicRawMessage(message);
                 }
 
                 @Override
-                public void doHandle(SnaUpdateMessageImpl message) throws MidCallbackException {
+                public void doHandle(UpdateMessageImpl message) throws MidCallbackException {
                     publicRawMessage(message);
                 }
 

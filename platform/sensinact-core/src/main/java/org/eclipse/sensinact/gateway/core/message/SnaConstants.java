@@ -11,7 +11,7 @@
 package org.eclipse.sensinact.gateway.core.message;
 
 /**
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public abstract class SnaConstants {
 	public static final String TYPE_KEY = "type";
@@ -36,5 +36,6 @@ public abstract class SnaConstants {
 	public static final String MESSAGE_KEY = "message";
 	public static final String NAMESPACE = "namespace";
 	public static final String REMOTE = "remote";
+	public static final String LOCATION = "location";
 
 }

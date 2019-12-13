@@ -10,15 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
+import org.eclipse.sensinact.gateway.api.message.AbstractMessageCallback;
+import org.eclipse.sensinact.gateway.api.message.Recipient;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 
 /**
- * Abstract {@link MidCallback} implementation
+ * Abstract {@link MessageCallback} implementation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
-public class UnaryMidCallback extends AbstractMidCallback {
+public class UnaryMidCallback extends AbstractMessageCallback {
 	/**
 	 * Mediator used to interact with the OSGi host environment
 	 */
@@ -29,9 +32,9 @@ public class UnaryMidCallback extends AbstractMidCallback {
 	 * Constructor
 	 * 
 	 * @param identifier
-	 *            the identifier of the {@link MidCallback} to instantiate
+	 *            the identifier of the {@link MessageCallback} to instantiate
 	 * @param errorHandler
-	 *            the {@link SnaCallbackErrorHandler} of the {@link MidCallback} to
+	 *            the {@link SnaCallbackErrorHandler} of the {@link MessageCallback} to
 	 *            instantiate
 	 * @param lifetime
 	 */

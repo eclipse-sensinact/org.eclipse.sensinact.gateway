@@ -13,6 +13,9 @@ package org.eclipse.sensinact.gateway.core.message;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.eclipse.sensinact.gateway.api.message.AbstractMessageCallback;
+import org.eclipse.sensinact.gateway.api.message.Recipient;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 
@@ -20,9 +23,9 @@ import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
  * Extended {@link BufferMidCallback} allowing to schedule the transmission of
  * the associated buffer's content independently of its filling state
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
-public class ScheduledMidCallback extends AbstractMidCallback {
+public class ScheduledMidCallback extends AbstractMessageCallback {
 	/**
 	 * Mediator used to interact with the OSGi host environment
 	 */
@@ -57,7 +60,7 @@ public class ScheduledMidCallback extends AbstractMidCallback {
 	}
 
 	/**
-	 * Starts this extended {@link MidCallback}
+	 * Starts this extended {@link MessageCallback}
 	 */
 	public void start() {
 		TimerTask task = new TimerTask() {
@@ -93,7 +96,7 @@ public class ScheduledMidCallback extends AbstractMidCallback {
 	}
 
 	/**
-	 * Stops this {@link MidCallback} and frees the associated {@link Timer}
+	 * Stops this {@link MessageCallback} and frees the associated {@link Timer}
 	 */
 	public void stop() {
 		super.stop();
@@ -105,7 +108,7 @@ public class ScheduledMidCallback extends AbstractMidCallback {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see MidCallback# register(SnaMessage)
+	 * @see MessageCallback# register(SnaMessage)
 	 */
 	@Override
 	public void doCallback(SnaMessage<?> message) throws MidCallbackException {

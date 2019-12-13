@@ -17,7 +17,7 @@ import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
 /**
  * Abstract implementation of a {@link DynamicParameterValue}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public abstract class AbstractDynamicParameterValue implements DynamicParameterValue {
 	protected final String resourceName;

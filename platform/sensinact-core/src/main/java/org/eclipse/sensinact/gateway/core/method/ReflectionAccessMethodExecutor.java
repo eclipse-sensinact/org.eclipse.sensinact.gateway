@@ -18,7 +18,7 @@ import org.json.JSONObject;
  * Extended {@link AbstractAccessMethodExecutor} implementation referring to a
  * java {@link Method}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class ReflectionAccessMethodExecutor extends AbstractAccessMethodExecutor {
 

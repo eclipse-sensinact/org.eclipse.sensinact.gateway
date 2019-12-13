@@ -100,8 +100,6 @@ public class MQTTAgentTest {
             Thread.sleep(2 * 1000);
         }
         
-        Thread.sleep(10 * 1000);
-
         for (int n = 1; n < INSTANCES_COUNT; n++) {
         	final int C = n; 
         	
@@ -133,6 +131,8 @@ public class MQTTAgentTest {
 	        client.connect();
 	        client.subscribe("/slider/cursor/position");
         }
+        Thread.sleep(20 * 1000);
+
         instances.get(3).moveSlider(0);
         String s = instances.get(3).get("slider", "cursor", "position");
         JSONObject j = new JSONObject(s);

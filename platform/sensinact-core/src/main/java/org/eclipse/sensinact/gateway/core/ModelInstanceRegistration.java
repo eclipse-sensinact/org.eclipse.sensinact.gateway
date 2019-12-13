@@ -21,15 +21,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.core.ServiceProvider.LifecycleStatus;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaMessageSubType;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage.Update;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.core.ServiceProvider.LifecycleStatus;
+import org.eclipse.sensinact.gateway.api.message.AbstractMessageCallback;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessage;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
+import org.eclipse.sensinact.gateway.api.message.MessageSubType;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessage;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessage.Lifecycle;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessage.Update;
+import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
@@ -43,10 +46,10 @@ import org.osgi.framework.ServiceRegistration;
  * instance and updates the properties of its associated
  * {@link ServiceReference}.
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
-public class ModelInstanceRegistration extends AbstractMidCallback {
-	public static final String LOCATION_PROPERTY = "admin.".concat(LocationResource.LOCATION);
+public class ModelInstanceRegistration extends AbstractMessageCallback {
+	public static final String LOCATION_PROPERTY = "admin.".concat(SnaConstants.LOCATION);
 
 	private boolean registered;
 	private ServiceRegistration<?> instanceRegistration;
@@ -243,7 +246,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 
 	/**
 	 */
-	public void updateContent(SnaLifecycleMessage.Lifecycle lifecycle, String uri, JSONObject initial, String type) {
+	public void updateContent(LifecycleMessage.Lifecycle lifecycle, String uri, JSONObject initial, String type) {
 		if (!registered) {
 			return;
 		}
@@ -406,19 +409,19 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidCallback#
-	 *      doCallback(org.eclipse.sensinact.gateway.core.message.SnaMessage)
+	 * @see org.eclipse.sensinact.gateway.api.message.AbstractMessageCallback#
+	 *      doCallback(org.eclipse.sensinact.gateway.api.message.SnaMessage)
 	 */
 	@Override
 	public void doCallback(SnaMessage<?> message) {
 
 		String uri = message.getPath();
-		switch (((SnaMessageSubType) message.getType()).getSnaMessageType()) {
+		switch (((MessageSubType) message.getType()).getSnaMessageType()) {
 		case UPDATE:
 			if (!Update.ATTRIBUTE_VALUE_UPDATED.equals(message.getType())) {
 				break;
 			}
-			SnaUpdateMessage m = (SnaUpdateMessage) message;
+			UpdateMessage m = (UpdateMessage) message;
 			String path = m.getPath();
 			JSONObject notification = m.getNotification();
 			String[] uriElements = UriUtils.getUriElements(path);
@@ -431,13 +434,13 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 			}
 			break;
 		case LIFECYCLE:
-			SnaLifecycleMessage l = (SnaLifecycleMessage) message;
+			LifecycleMessage l = (LifecycleMessage) message;
 			String type = null;
 			JSONObject initial = null;
 			switch (l.getType()) {
 				case RESOURCE_APPEARING:
-					initial = (JSONObject) ((SnaLifecycleMessageImpl) l).get("initial");
-					type = ((SnaLifecycleMessageImpl) l).getNotification().optString("type");
+					initial = (JSONObject) ((LifecycleMessageImpl) l).get("initial");
+					type = ((LifecycleMessageImpl) l).getNotification().optString("type");
 				case SERVICE_APPEARING:
 				case PROVIDER_DISAPPEARING:
 				case RESOURCE_DISAPPEARING:

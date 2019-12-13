@@ -16,7 +16,7 @@ import java.util.Set;
  * An AccessProfile maps {@link AccessLevel}s to the set of existing
  * {@link AccessMethod.Type}s
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface AccessProfile {
 	/**

@@ -12,10 +12,13 @@ package org.eclipse.sensinact.gateway.core;
 
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.core.Service;
+import org.eclipse.sensinact.gateway.api.core.ServiceProvider;
+import org.eclipse.sensinact.gateway.api.message.AgentMessageCallback;
+import org.eclipse.sensinact.gateway.api.message.Recipient;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
 import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
 import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
@@ -29,7 +32,7 @@ import org.json.JSONObject;
  * A Session allows to invoke access method on resources, and to access to
  * available service providers, services, and/or resources
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface Session {
 	/**
@@ -419,15 +422,15 @@ public interface Session {
 	 * will be unregistered when this last one will disappear
 	 * 
 	 * @param callback
-	 *            the {@link MidAgentCallback} of the {@link SnaAgent} to be created
+	 *            the {@link AgentMessageCallback} of the {@link SnaAgent} to be created
 	 * @param filter
-	 *            the {@link SnaFilter} of the {@link SnaAgent} to be created
+	 *            the {@link MessageFilter} of the {@link SnaAgent} to be created
 	 * 
 	 * @return the JSON formated result of the {@link SnaAgent} registration,
 	 *         including its String identifier, wrapped into a
 	 *         {@link SubscribeResponse}
 	 */
-	SubscribeResponse registerSessionAgent(MidAgentCallback callback, SnaFilter filter);
+	SubscribeResponse registerSessionAgent(AgentMessageCallback callback, MessageFilter filter);
 
 	/**
 	 * Creates and registers an {@link SnaAgent} attached to this Session and that
@@ -437,15 +440,15 @@ public interface Session {
 	 *            the String identifier of the request, and to be reported into the
 	 *            response
 	 * @param callback
-	 *            the {@link MidAgentCallback} of the {@link SnaAgent} to be created
+	 *            the {@link AgentMessageCallback} of the {@link SnaAgent} to be created
 	 * @param filter
-	 *            the {@link SnaFilter} of the {@link SnaAgent} to be created
+	 *            the {@link MessageFilter} of the {@link SnaAgent} to be created
 	 * 
 	 * @return the JSON formated result of the {@link SnaAgent} registration,
 	 *         including its String identifier, tagged by the specified request
 	 *         identifier, wrapped into a {@link SubscribeResponse}
 	 */
-	SubscribeResponse registerSessionAgent(String requestId, final MidAgentCallback callback, final SnaFilter filter);
+	SubscribeResponse registerSessionAgent(String requestId, final AgentMessageCallback callback, final MessageFilter filter);
 
 	/**
 	 * Unregisters the {@link SnaAgent} attached to this Session and whose String

@@ -11,11 +11,11 @@
 package org.eclipse.sensinact.gateway.agent.mqtt.onem2m.internal;
 
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.AbstractMqttHandler;
-import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.message.ErrorMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.ResponseMessage;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessageImpl;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -43,7 +43,7 @@ public class SnaEventOneM2MMqttHandler extends AbstractMqttHandler {
      *
      * @param event the RegisteredUpdatedSnaEvent to process
      */
-    public void doHandle(SnaUpdateMessageImpl event) {
+    public void doHandle(UpdateMessageImpl event) {
         JSONObject eventJson = new JSONObject(event.getJSON()).getJSONObject("notification");
         String aeName = event.getPath().split("/")[1];
         String containerServiceName = event.getPath().split("/")[2];
@@ -69,7 +69,7 @@ public class SnaEventOneM2MMqttHandler extends AbstractMqttHandler {
      *
      * @param event the ServiceRegisteredSnaEvent to process
      */
-    public void doHandle(SnaLifecycleMessageImpl event) {
+    public void doHandle(LifecycleMessageImpl event) {
         String aeName = event.getPath().split("/")[1];
         JSONObject request = new JSONObject().put("fr", aeName).put("rqi", UUID.randomUUID().toString());
         JSONObject content = new JSONObject();
@@ -134,20 +134,20 @@ public class SnaEventOneM2MMqttHandler extends AbstractMqttHandler {
     }
 
     /**
-     * @see MidAgentCallback#stop()
+     * @see AgentMessageCallback#stop()
      */
     public void stop() {
     }
 
     /**
-     * @see AbstractMidAgentCallback#doHandle(SnaErrorMessageImpl)
+     * @see AbstractMessageAgentCallback#doHandle(ErrorMessageImpl)
      */
-    public void doHandle(SnaErrorMessageImpl event) {
+    public void doHandle(ErrorMessageImpl event) {
     }
 
     /**
-     * @see AbstractMidAgentCallback#doHandle(SnaResponseMessage)
+     * @see AbstractMessageAgentCallback#doHandle(ResponseMessage)
      */
-    public void doHandle(SnaResponseMessage event) {
+    public void doHandle(ResponseMessage event) {
     }
 }

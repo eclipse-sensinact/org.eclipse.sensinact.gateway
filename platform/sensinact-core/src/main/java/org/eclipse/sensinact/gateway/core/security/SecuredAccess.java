@@ -15,7 +15,7 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 /**
  * A secured {@link Session}s provider service
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface SecuredAccess {
 	/**

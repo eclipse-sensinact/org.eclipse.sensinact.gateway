@@ -10,10 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.test;
 
+import org.eclipse.sensinact.gateway.api.core.AttributeBuilder;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.core.Resource;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
-import org.eclipse.sensinact.gateway.core.AttributeBuilder;
-import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceBuilder;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.ResourceDescriptor;

@@ -10,13 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import org.eclipse.sensinact.gateway.api.message.AbstractSnaErrorfulMessage;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
+import org.eclipse.sensinact.gateway.api.message.MessageSubType;
+import org.eclipse.sensinact.gateway.api.message.ResponseMessage;
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 import org.eclipse.sensinact.gateway.common.props.TypedKey;
-import org.eclipse.sensinact.gateway.core.message.AbstractSnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaMessageSubType;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 
 import java.util.Arrays;
@@ -35,7 +35,7 @@ import java.util.Set;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class LoginResponse extends AbstractSnaErrorfulMessage<LoginResponse.TokenMode> implements LoginMessage {
-    public enum TokenMode implements SnaMessageSubType, KeysCollection {
+    public enum TokenMode implements MessageSubType, KeysCollection {
         TOKEN_CREATION, TOKEN_RENEW;
         final Set<TypedKey<?>> keys;
 
@@ -49,11 +49,11 @@ public class LoginResponse extends AbstractSnaErrorfulMessage<LoginResponse.Toke
 
         /**
          * @inheritDoc
-         * @see SnaMessageSubType#getSnaMessageType()
+         * @see MessageSubType#getSnaMessageType()
          */
         @Override
         public SnaMessage.Type getSnaMessageType() {
-            return SnaResponseMessage.TYPE;
+            return ResponseMessage.TYPE;
         }
 
         /**

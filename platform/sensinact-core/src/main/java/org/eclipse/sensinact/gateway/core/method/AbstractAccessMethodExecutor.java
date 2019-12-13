@@ -21,7 +21,7 @@ import org.eclipse.sensinact.gateway.common.constraint.Fixed;
  * its execution to the validation of a set of {@link Fixed} constraints which
  * apply to the parameters of the call
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public abstract class AbstractAccessMethodExecutor implements AccessMethodExecutor {
 	/**

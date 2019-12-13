@@ -17,7 +17,7 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
 /**
  * handled subscription mode
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public enum SubscriptionMode {
 	NONE((byte) 0x00), ON_CHANGE((byte) 0x01), SCHEDULED((byte) 0x02), CONDITIONAL((byte) 0x04), BUFFERIZED(

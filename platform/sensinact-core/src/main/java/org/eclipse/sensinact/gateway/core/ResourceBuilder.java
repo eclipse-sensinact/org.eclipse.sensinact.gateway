@@ -16,17 +16,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.core.message.MidCallback;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaNotificationMessageImpl;
 import org.json.JSONObject;
-
+import org.eclipse.sensinact.gateway.api.core.ActionResource;
+import org.eclipse.sensinact.gateway.api.core.Attribute;
+import org.eclipse.sensinact.gateway.api.core.AttributeBuilder;
+import org.eclipse.sensinact.gateway.api.core.AttributeDescription;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.core.Metadata;
+import org.eclipse.sensinact.gateway.api.core.RequirementBuilder;
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.message.MessageCallback;
+import org.eclipse.sensinact.gateway.api.message.Recipient;
+import org.eclipse.sensinact.gateway.api.message.NotificationMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.UpdateMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
@@ -44,7 +51,7 @@ import org.eclipse.sensinact.gateway.util.ReflectUtils;
 /**
  * Builder of a {@link ResourceImpl}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class ResourceBuilder {
 	private final AccessMethod.Type GET = AccessMethod.Type.valueOf(AccessMethod.GET);
@@ -455,8 +462,8 @@ public class ResourceBuilder {
 		return new AccessMethodExecutor() {
 			@Override
 			public Void execute(AccessMethodResponseBuilder parameter) throws Exception {
-				SnaUpdateMessage message = SnaNotificationMessageImpl.Builder.<SnaUpdateMessage>notification(mediator,
-						SnaUpdateMessage.Update.ACTUATED, resource.getPath());
+				UpdateMessage message = NotificationMessageImpl.Builder.<UpdateMessage>notification(mediator,
+						UpdateMessage.Update.ACTUATED, resource.getPath());
 
 				JSONObject notification = new JSONObject();
 				notification.put(Metadata.TIMESTAMP, System.currentTimeMillis());
@@ -541,7 +548,7 @@ public class ResourceBuilder {
 				}
 				Recipient recipient = null;
 				Set<Constraint> conditions = null;
-				MidCallback.Type type = null;
+				MessageCallback.Type type = null;
 				int policy = ErrorHandler.Policy.DEFAULT_POLICY;
 				long lifetime = 0;
 				int buffer = 0;
@@ -554,7 +561,7 @@ public class ResourceBuilder {
 					case 6:
 						lifetime = ((Long) parameters[5]).longValue();
 					case 5:
-						type = (MidCallback.Type) parameters[4];
+						type = (MessageCallback.Type) parameters[4];
 					case 4:
 						if(parameters[3].getClass() == String.class) {
 							try {

@@ -10,9 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.filter.ldap.osgi;
 
+import org.eclipse.sensinact.gateway.api.core.Filtering;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.Filtering;
 import org.eclipse.sensinact.gateway.nthbnd.filter.ldap.internal.LdapFiltering;
 import org.osgi.framework.BundleContext;
 

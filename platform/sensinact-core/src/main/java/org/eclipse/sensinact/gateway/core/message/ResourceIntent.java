@@ -19,6 +19,13 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.eclipse.sensinact.gateway.api.message.LocalAgent;
+import org.eclipse.sensinact.gateway.api.message.SnaAgent;
+import org.eclipse.sensinact.gateway.api.message.LifecycleMessage;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
+import org.eclipse.sensinact.gateway.api.message.MessageSubType;
+import org.eclipse.sensinact.gateway.api.message.NotificationMessageImpl;
+import org.eclipse.sensinact.gateway.api.message.RemoteMessage;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
@@ -159,7 +166,7 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 	private String identifier;
 	
 	private ExecutorService executor;
-	private SnaFilter filter;
+	private MessageFilter filter;
 	private Executable<Boolean,Void> onAccessible;
 
 	private Map<ResolvedPath,Boolean> accessibility;
@@ -236,7 +243,7 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 		} else {
 			this.commonPath = UriUtils.PATH_SEPARATOR;
 		} 
-		this.filter = new SnaFilter(mediator, filterBuilder.toString(), pattern, complement);
+		this.filter = new MessageFilter(mediator, filterBuilder.toString(), pattern, complement);
 		filter.addHandledType(SnaMessage.Type.LIFECYCLE);
 		filter.addHandledType(SnaMessage.Type.REMOTE);
 		
@@ -300,7 +307,7 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 	/**
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.MessageRegisterer#register(org.eclipse.sensinact.gateway.core.message.SnaMessage)
+	 * @see org.eclipse.sensinact.gateway.api.message.MessageRegisterer#register(org.eclipse.sensinact.gateway.api.message.SnaMessage)
 	 */
 	@Override
 	public void register(final SnaMessage<?> message) {
@@ -314,12 +321,12 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 	 */
 	@Override
 	public void doHandle(final SnaMessage<?> message) {
-		switch(((SnaMessageSubType)message.getType()).getSnaMessageType()){		
+		switch(((MessageSubType)message.getType()).getSnaMessageType()){		
 			case LIFECYCLE:
 				if(!this.filter.matches(message)) {
 					return;
 				}
-				switch(((SnaLifecycleMessage.Lifecycle)message.getType())) {				
+				switch(((LifecycleMessage.Lifecycle)message.getType())) {				
 					case RESOURCE_APPEARING:
 							setAccessible(setAccessible(message.getPath(),true));
 						break;
@@ -338,7 +345,7 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 				if(this.filters.isEmpty()) {
 					return;
 				}
-				String namespace = ((SnaNotificationMessageImpl<?>)message
+				String namespace = ((NotificationMessageImpl<?>)message
 					).getNotification(String.class, SnaConstants.NAMESPACE);
 				
 				if(!this.filters.containsKey(namespace)) {
@@ -352,7 +359,7 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 					if(!namespace.equals(path.getNamespace().getName())) {
 						continue;
 					}
-					switch(((SnaRemoteMessage.Remote)message.getType())) {
+					switch(((RemoteMessage.Remote)message.getType())) {
 						case CONNECTED:
 							setAccessible(path.getName(), this.isAccessible(path.getName()));
 							break;
@@ -386,7 +393,7 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.SnaAgent#getPublicKey()
+	 * @see org.eclipse.sensinact.gateway.api.message.SnaAgent#getPublicKey()
 	 */
 	public String getPublicKey() {
 		return this.publicKey;
@@ -414,14 +421,14 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 	 * 
 	 * @param remoteCore the {@link RemoteCore} into which register this ResourceIntent
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.LocalAgent#registerRemote(org.eclipse.sensinact.gateway.core.remote.RemoteCore)
+	 * @see org.eclipse.sensinact.gateway.api.message.LocalAgent#registerRemote(org.eclipse.sensinact.gateway.core.remote.RemoteCore)
 	 */
 	public void registerRemote(RemoteCore remoteCore) {		
 		if (remoteCore != null && this.filters.size()>0 && this.filters.containsKey(remoteCore.endpoint().namespace())) {		
 			String sender = this.filters.get(remoteCore.endpoint().namespace());
 			boolean pattern = sender.endsWith("))");
 			boolean complement = false;
-			SnaFilter filter = new SnaFilter(mediator,sender,pattern,complement);
+			MessageFilter filter = new MessageFilter(mediator,sender,pattern,complement);
 			filter.addHandledType(SnaMessage.Type.LIFECYCLE);
 			remoteCore.endpoint().registerAgent(identifier,filter , publicKey);
 		}
@@ -431,7 +438,7 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 	 * Starts this ResourceIntent, registers it into the registry of the OSGi host
 	 * environment, and in the appropriate {@link RemoteCore} if it is registered
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.SnaAgent#start()
+	 * @see org.eclipse.sensinact.gateway.api.message.SnaAgent#start()
 	 */
 	public void start() {
 		Dictionary properties = new Hashtable();
@@ -460,7 +467,7 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.SnaAgent#stop()
+	 * @see org.eclipse.sensinact.gateway.api.message.SnaAgent#stop()
 	 */
 	@Override
 	public void stop() {

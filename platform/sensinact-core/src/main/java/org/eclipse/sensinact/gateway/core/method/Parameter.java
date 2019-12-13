@@ -16,11 +16,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.core.Metadata;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
+import org.eclipse.sensinact.gateway.api.core.Metadata;
+import org.eclipse.sensinact.gateway.api.message.Recipient;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
@@ -37,7 +36,7 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
 /**
  * A Parameter of an {@link AccessMethod} on which can apply set of constraints
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class Parameter extends Primitive implements JSONable, Cloneable {
 	public static final String FIXED_PARAMETER_KEY = "fixed";

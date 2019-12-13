@@ -17,7 +17,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod;
  * An MethodAccess defines an {@link AccessLevel} for an
  * {@link AccessMethod.Type}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public interface MethodAccess extends Nameable {
 	/**

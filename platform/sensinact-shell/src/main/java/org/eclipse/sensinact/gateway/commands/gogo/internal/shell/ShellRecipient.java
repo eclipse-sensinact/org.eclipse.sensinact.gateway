@@ -10,8 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.commands.gogo.internal.shell;
 
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.json.JSONObject;
@@ -34,8 +34,8 @@ public class ShellRecipient extends NorthboundRecipient {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.message.Recipient#
-     * callback(java.lang.String, org.eclipse.sensinact.gateway.core.message.SnaMessage[])
+     * @see org.eclipse.sensinact.gateway.api.message.Recipient#
+     * callback(java.lang.String, org.eclipse.sensinact.gateway.api.message.SnaMessage[])
      */
     public void callback(String callbackId, SnaMessage[] messages) {
         int index = 0;

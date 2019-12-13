@@ -28,7 +28,7 @@ import org.json.JSONObject;
  * @param <V>
  *            result data type
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
 public abstract class AccessMethodResponseBuilder<T, A extends AccessMethodResponse<T>> extends Stack<T>

@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.core.test;
 
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.api.message.MessagePropagator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
@@ -22,14 +23,13 @@ import org.eclipse.sensinact.gateway.core.ModelElementProxy;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.SessionKey;
-import org.eclipse.sensinact.gateway.core.message.MessageHandler;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 
 /**
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class MyModelInstance extends ModelInstance<ModelConfiguration> {
 	/**
@@ -44,7 +44,7 @@ public class MyModelInstance extends ModelInstance<ModelConfiguration> {
 		super(mediator, modelConfiguration, name, profile);
 	}
 
-	public MessageHandler getHandler() {
+	public MessagePropagator getHandler() {
 		return super.messageHandler;
 	}
 

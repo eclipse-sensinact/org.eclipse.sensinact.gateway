@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * A collection of {@link Session}s
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
  */
 public class Sessions {
 	// ********************************************************************//
@@ -28,7 +28,7 @@ public class Sessions {
 	/**
 	 * A SessionObserver is informed about the disappearance of a {@link Session}
 	 * 
-	 * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+	 * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
 	 */
 	public static interface SessionObserver {
 		/**
@@ -44,7 +44,7 @@ public class Sessions {
 	/**
 	 * Possible {@link KeyExtractor}'s search index type
 	 * 
-	 * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+	 * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
 	 */
 	public static enum KeyExtractorType {
 		TOKEN, PUBLIC
@@ -57,7 +57,7 @@ public class Sessions {
 	 * @param <E>
 	 *            the extended KeyExtractorType
 	 * 
-	 * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+	 * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
 	 */
 	public static class KeyExtractor<E extends Enum<KeyExtractorType>> {
 		private E e;

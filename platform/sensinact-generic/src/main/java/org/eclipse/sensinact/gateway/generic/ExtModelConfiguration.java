@@ -10,12 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
+import org.eclipse.sensinact.gateway.api.core.Resource;
+import org.eclipse.sensinact.gateway.api.core.Resource.UpdatePolicy;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.DefaultResourceConfigBuilder;
 import org.eclipse.sensinact.gateway.core.ModelConfiguration;
-import org.eclipse.sensinact.gateway.core.Resource;
-import org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy;
 import org.eclipse.sensinact.gateway.core.ResourceConfigBuilder;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
@@ -358,7 +358,7 @@ public class ExtModelConfiguration<P extends Packet> extends ModelConfiguration 
     /**
      * @inheritDoc
      * @see org.eclipse.sensinact.gateway.core.ModelConfiguration#
-     * setDefaultUpdatePolicy(org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy)
+     * setDefaultUpdatePolicy(org.eclipse.sensinact.gateway.api.core.Resource.UpdatePolicy)
      */
     @Override
     public ExtModelConfiguration<P> setDefaultUpdatePolicy(UpdatePolicy defaultUpdatePolicy) {

@@ -11,11 +11,11 @@
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
+import org.eclipse.sensinact.gateway.api.core.DataResource;
+import org.eclipse.sensinact.gateway.api.message.SnaMessage;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
-import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.FilteringDefinition;
-import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.message.MessageFilter;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.util.CastUtils;
@@ -595,7 +595,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
                 Object argument = null;
 
                 if (this.resource == null) {
-                    SnaFilter snaFilter = new SnaFilter(mediator, sender, isPattern, isComplement, conditions);
+                    MessageFilter snaFilter = new MessageFilter(mediator, sender, isPattern, isComplement, conditions);
                     snaFilter.addHandledType(types);
                     argument = snaFilter;                    
                     builder.withArgument(new Object[]{recipient, argument});
