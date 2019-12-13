@@ -10,9 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.http.forward;
 
-import org.eclipse.jetty.server.Request;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-
 import java.util.Dictionary;
 
 import javax.servlet.http.HttpServletRequest;

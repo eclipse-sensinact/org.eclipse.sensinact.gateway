@@ -179,8 +179,6 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	 * @param connected
 	 */
 	private void setConnected(boolean connected) {
-		System.out.println("SET CONNECTED "+connected);
-		Thread.dumpStack();
 		synchronized(lock) {			
 			this.connected = connected;
 		}

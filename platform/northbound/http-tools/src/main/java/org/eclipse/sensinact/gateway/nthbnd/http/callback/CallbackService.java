@@ -10,8 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.http.callback;
 
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-
 import java.util.Dictionary;
 
 /**

@@ -11,9 +11,9 @@
 package org.eclipse.sensinact.gateway.nthbnd.filter.geojson.internal;
 
 import org.eclipse.sensinact.gateway.api.core.Filtering;
-import org.eclipse.sensinact.gateway.api.core.LocationResource;
 import org.eclipse.sensinact.gateway.api.core.Resource;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.util.LocationUtils;
 import org.eclipse.sensinact.gateway.util.json.JSONObjectStatement;
 import org.eclipse.sensinact.gateway.util.json.JSONTokenerStatement;
@@ -131,7 +131,7 @@ public class GeoJSONFiltering implements Filtering {
                     index++;
                 }
             }
-            if (token.ordinal() == JSONToken.JSON_OBJECT_ITEM.ordinal() && token.getContext().key.equals(LocationResource.LOCATION)) {
+            if (token.ordinal() == JSONToken.JSON_OBJECT_ITEM.ordinal() && token.getContext().key.equals(SnaConstants.LOCATION)) {
                 Integer ind = new Integer(count);
                 String location = (String) token.getContext().value;
                 if (location != null) {

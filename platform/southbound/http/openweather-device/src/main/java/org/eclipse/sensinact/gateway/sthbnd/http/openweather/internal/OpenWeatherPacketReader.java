@@ -10,9 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.openweather.internal;
 
-import org.eclipse.sensinact.gateway.api.core.LocationResource;
 import org.eclipse.sensinact.gateway.api.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
@@ -79,7 +79,7 @@ public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
         if (coord != null) {
             super.setServiceProviderId(station);
             super.setServiceId(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
-            super.setResourceId(LocationResource.LOCATION);
+            super.setResourceId(SnaConstants.LOCATION);
             super.setData(new StringBuilder().append(coord.optDouble("lat")).append(JSONUtils.COLON).append(coord.optDouble("lon")).toString());
             super.setCommand(CommandType.GET);
             super.configure();

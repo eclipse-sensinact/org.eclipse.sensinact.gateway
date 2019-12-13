@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.device;
 
-import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;

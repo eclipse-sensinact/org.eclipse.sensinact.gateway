@@ -131,11 +131,15 @@ public class MQTTAgentTest {
 	        client.connect();
 	        client.subscribe("/slider/cursor/position");
         }
-        Thread.sleep(20 * 1000);
+        Thread.sleep(10 * 1000);
 
-        instances.get(3).moveSlider(0);
-        String s = instances.get(3).get("slider", "cursor", "position");
+        String s = instances.get(3).providers();
         JSONObject j = new JSONObject(s);
+        System.out.println(j);
+        
+        instances.get(3).moveSlider(0);
+        s = instances.get(3).get("slider", "cursor", "position");
+        j = new JSONObject(s);
 
         assertEquals(0, j.getJSONObject("response").getInt("value"));
         Thread.sleep(2000);

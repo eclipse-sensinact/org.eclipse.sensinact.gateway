@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.agent.storage.internal;
 
 import org.eclipse.sensinact.gateway.api.core.DataResource;
-import org.eclipse.sensinact.gateway.api.core.LocationResource;
 import org.eclipse.sensinact.gateway.api.core.Resource;
 import org.eclipse.sensinact.gateway.api.message.AbstractMessageAgentCallback;
 import org.eclipse.sensinact.gateway.api.message.ErrorMessageImpl;
@@ -22,6 +21,7 @@ import org.eclipse.sensinact.gateway.api.message.LifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.DefaultErrorHandler;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
+import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONObject;
 
@@ -103,7 +103,7 @@ public class StorageAgent extends AbstractMessageAgentCallback {
             timestamp = System.currentTimeMillis();
         }
         String timestampStr = FORMAT.format(new Date(timestamp));
-        if (LocationResource.LOCATION.equalsIgnoreCase(resource)) {
+        if (SnaConstants.LOCATION.equalsIgnoreCase(resource)) {
             //set location and escape
             try {
                 super.setLocation(serviceProvider, String.valueOf(initialValue));

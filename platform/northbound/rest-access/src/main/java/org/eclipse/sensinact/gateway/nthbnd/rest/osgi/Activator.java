@@ -12,8 +12,6 @@ package org.eclipse.sensinact.gateway.nthbnd.rest.osgi;
 
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.ServiceLoader;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 

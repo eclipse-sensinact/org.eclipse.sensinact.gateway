@@ -64,9 +64,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 		double systemLongitude = 0d;
 		try {
 			systemLatitude = Double.parseDouble(mediator.getContext().getProperty(ServiceProvider.LATITUDE_PROPERTY));
-
 			systemLongitude = Double.parseDouble(mediator.getContext().getProperty(ServiceProvider.LONGITUDE_PROPERTY));
-
 		} catch (Exception e) {
 			systemLatitude = ServiceProvider.DEFAULT_CEA_LOCATION_LATITUDE;
 			systemLongitude = ServiceProvider.DEFAULT_CEA_LOCATION_LONGITUDE;
@@ -151,8 +149,9 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 		List<String> initialSetOfServices = this.configuration.getFixedServices(name);
 		initialSetOfServices.addAll(this.configuration.getServices(profileId));
 
-		this.provider = ReflectUtils.getInstance(ServiceProviderImpl.class,
-				this.configuration.getProviderImplementationType(), new Object[] { this, name, initialSetOfServices });
+		this.provider = ReflectUtils.getInstance(ServiceProviderImpl.class, 
+			this.configuration.getProviderImplementationType(), 
+			new Object[] { this, name, initialSetOfServices });
 
 		if (this.provider == null) {
 			throw new InvalidServiceProviderException("Unable to instantiate the root services provider");
@@ -269,7 +268,6 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 */
 	public ResourceBuilder createResourceBuilder(ResourceDescriptor descriptor) {
 		ResourceConfig resourceConfig = this.configuration().createResourceConfig(descriptor);
-
 		if (resourceConfig == null) {
 			return null;
 		}
@@ -359,8 +357,8 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 				Collection<ServiceReference<SensiNactResourceModel>> references = null;
 				try {
 					references = ModelInstance.this.mediator.getContext().getServiceReferences(
-							SensiNactResourceModel.class,
-							new StringBuilder().append("(name=").append(name).append(")").toString());
+						SensiNactResourceModel.class, new StringBuilder().append("(name="
+							).append(name).append(")").toString());
 				} catch (InvalidSyntaxException e) {
 					ModelInstance.this.mediator.error(e);
 				}

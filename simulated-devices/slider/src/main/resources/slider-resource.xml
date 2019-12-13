@@ -16,7 +16,7 @@
   <policies>
   	<policy name="SENSOR" update="AUTO"/>
   </policies>
-  <resourceInfo xsi:type="resourceInfoSensor" name="POSITION"  target="cursor">
+  <resourceInfo xsi:type="resourceInfoSensor" policy="SENSOR" name="POSITION"  target="cursor">
     <identifier xsi:type="stringContent">POSITION</identifier>
     <attributes>
     	<attribute name="value" type="int"  modifiable="UPDATABLE">

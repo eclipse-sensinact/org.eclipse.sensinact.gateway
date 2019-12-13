@@ -588,7 +588,6 @@ public abstract class ReflectUtils {
                 LOGGER.log(Level.CONFIG, baseClass.getName() + " is not assignable from " + implementationClass.getName());
             }
         } catch (Exception e) {
-            e.printStackTrace();
             LOGGER.log(Level.CONFIG, e.getMessage(), e);
         }
         return instance;
@@ -626,7 +625,6 @@ public abstract class ReflectUtils {
                 instance = implementationClass.newInstance();
             }
         } catch (Exception e) {
-            e.printStackTrace();
             LOGGER.log(Level.CONFIG, e.getMessage(), e);
         }
         return instance;

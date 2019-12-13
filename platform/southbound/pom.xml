@@ -57,6 +57,5 @@
         <module>mqtt</module>
         <module>openhab</module>
         <module>http</module>
-        <module>inovallee</module>
     </modules>
 </project>
