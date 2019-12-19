@@ -41,7 +41,7 @@ import org.eclipse.sensinact.gateway.nthbnd.http.forward.ForwardingService;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@WebFilter(asyncSupported = true)
+@WebFilter(/*asyncSupported = true*/)
 public class ForwardingFilter implements Filter {
 
 	public static final java.lang.String __INCLUDE_PREFIX = "javax.servlet.include.";

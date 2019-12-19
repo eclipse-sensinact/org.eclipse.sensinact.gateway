@@ -160,7 +160,7 @@ public class ForwardingFactory {
         Dictionary props = forwardingService.getProperties();
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, endpoint);
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");
-        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED, true );
+        //props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED, true );
         
 	    ServiceRegistration registration = mediator.getContext().registerService(Filter.class, forwardingFilter, props);
 	    this.registrations.put(endpoint,registration);

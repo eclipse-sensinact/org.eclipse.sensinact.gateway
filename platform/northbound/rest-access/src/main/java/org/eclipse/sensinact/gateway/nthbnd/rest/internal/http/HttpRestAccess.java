@@ -46,7 +46,6 @@ public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest> {
         Authentication<?> authentication = request.getAuthentication();
         if (authentication == null) {
             this.endpoint = request.getMediator().getNorthboundEndpoints().getEndpoint();
-
             response.setHeader("X-Auth-Token", this.endpoint.getSessionToken());
         } else if (AuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
             this.endpoint = request.getMediator().getNorthboundEndpoints().getEndpoint((AuthenticationToken) authentication);

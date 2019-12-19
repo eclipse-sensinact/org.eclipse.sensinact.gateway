@@ -88,9 +88,7 @@ public class NorthboundEndpoint {
         Class<?>[] parameterTypes = Argument.getParameterTypes(arguments);
         try {
             Method method = getClass().getDeclaredMethod(request.getMethod(), parameterTypes);
-
             result = (AccessMethodResponse<?>) method.invoke(this, Argument.getParameters(arguments));
-
         } catch (Exception e) {
             e.printStackTrace();
             this.mediator.error(e);

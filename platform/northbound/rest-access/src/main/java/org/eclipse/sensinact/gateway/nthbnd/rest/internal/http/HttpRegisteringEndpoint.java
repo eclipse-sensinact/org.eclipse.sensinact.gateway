@@ -34,7 +34,7 @@ import org.json.JSONObject;
  * that perform a task and jersey
  */
 @SuppressWarnings("serial")
-@WebServlet(asyncSupported = true)
+@WebServlet(/*asyncSupported = true*/)
 public class HttpRegisteringEndpoint extends HttpServlet {
     private NorthboundMediator mediator;
 
@@ -64,23 +64,23 @@ public class HttpRegisteringEndpoint extends HttpServlet {
         if (response.isCommitted()) {
             return;
         }
-        final AsyncContext asyncContext;
-        if (request.isAsyncStarted()) {
-            asyncContext = request.getAsyncContext();
-
-        } else {
-            asyncContext = request.startAsync(request, response);
-        }
-        response.getOutputStream().setWriteListener(new WriteListener() {
-            /**
-             * @inheritDoc
-             *
-             * @see javax.servlet.WriteListener#onWritePossible()
-             */
-            @Override
-            public void onWritePossible() throws IOException {
-                HttpServletRequest request = (HttpServletRequest) asyncContext.getRequest();
-                HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
+//        final AsyncContext asyncContext;
+//        if (request.isAsyncStarted()) {
+//            asyncContext = request.getAsyncContext();
+//
+//        } else {
+//            asyncContext = request.startAsync(request, response);
+//        }
+//        response.getOutputStream().setWriteListener(new WriteListener() {
+//            /**
+//             * @inheritDoc
+//             *
+//             * @see javax.servlet.WriteListener#onWritePossible()
+//             */
+//            @Override
+//            public void onWritePossible() throws IOException {
+//                HttpServletRequest request = (HttpServletRequest) asyncContext.getRequest();
+//                HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
                 try {
                     String queryString = request.getQueryString();
                     if(queryString == null) {
@@ -135,22 +135,23 @@ public class HttpRegisteringEndpoint extends HttpServlet {
                     mediator.error(e);
                     response.sendError(520, "Internal server error");
 
-                } finally {
-                    if (request.isAsyncStarted()) {
-                        asyncContext.complete();
-                    }
-                }
-            }
-
-            /**
-             * @inheritDoc
-             *
-             * @see javax.servlet.WriteListener#onError(java.lang.Throwable)
-             */
-            @Override
-            public void onError(Throwable t) {
-                mediator.error(t);
-            }
-        });
+                } 
+//                finally {
+//                    if (request.isAsyncStarted()) {
+//                        asyncContext.complete();
+//                    }
+//                }
+//            }
+//
+//            /**
+//             * @inheritDoc
+//             *
+//             * @see javax.servlet.WriteListener#onError(java.lang.Throwable)
+//             */
+//            @Override
+//            public void onError(Throwable t) {
+//                mediator.error(t);
+//            }
+//        });
     }
 }

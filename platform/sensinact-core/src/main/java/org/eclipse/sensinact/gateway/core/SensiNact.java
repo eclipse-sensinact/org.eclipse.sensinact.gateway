@@ -1840,7 +1840,7 @@ public class SensiNact implements Core {
 	 * @return the JSON formated response of the GET access method invocation
 	 */
 	private JSONObject get(String identifier, final String serviceProviderId, final String serviceId,
-			final String resourceId, final String attributeId) {
+	final String resourceId, final String attributeId) {
 		final SessionKey sessionKey;
 		synchronized(this.sessions){
 			sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));

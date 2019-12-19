@@ -29,7 +29,7 @@ import org.eclipse.sensinact.gateway.security.oauth2.UserInfo;
 
 import java.io.IOException;
 
-@WebFilter(asyncSupported = true)
+@WebFilter(/*asyncSupported = true*/)
 public class SecurityFilter implements Filter {
 	private IdentityServer idServer;
 	private oAuthServer authServer;
@@ -44,25 +44,25 @@ public class SecurityFilter implements Filter {
      * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)
      */
     public void doFilter(final ServletRequest req, final ServletResponse res, final FilterChain chain) throws IOException, ServletException {
-        if (res.isCommitted()) {
-            return;
-        }
-        final AsyncContext asyncContext;
-
-        if (req.isAsyncStarted()) {
-            asyncContext = req.getAsyncContext();
-        } else {
-            asyncContext = req.startAsync();
-        }
-        asyncContext.start(new Runnable() {
-            @Override
-            public void run() {
-                final HttpServletRequest req = (HttpServletRequest) asyncContext.getRequest();
-                final HttpServletResponse res = (HttpServletResponse) asyncContext.getResponse();
+//        if (res.isCommitted()) {
+//            return;
+//        }
+//        final AsyncContext asyncContext;
+//
+//        if (req.isAsyncStarted()) {
+//            asyncContext = req.getAsyncContext();
+//        } else {
+//            asyncContext = req.startAsync();
+//        }
+//        asyncContext.start(new Runnable() {
+//            @Override
+//            public void run() {
+                final HttpServletRequest request = (HttpServletRequest) req;// asyncContext.getRequest();
+                final HttpServletResponse response = (HttpServletResponse) res;//asyncContext.getResponse();
                 
-        		HttpSession session = req.getSession();
+        		HttpSession session = request.getSession();
         		String token = (String) session.getAttribute("token");
-        		String authorization = req.getHeader("Authorization");
+        		String authorization = request.getHeader("Authorization");
         		
         		boolean authorizationExists = authorization!=null;
         		boolean tokenExists = token!=null && token.length()>0;
@@ -73,25 +73,25 @@ public class SecurityFilter implements Filter {
 	        				token = authorization.substring(7);
 	        			}
 	        			if (authorization.matches("^Basic .*")) {
-	        				token = authServer.basicToken(req, authorization);
+	        				token = authServer.basicToken(request, authorization);
 	        			}
 	        			tokenExists = token!=null && token.length()>0;
 	        		}
 	        		if (tokenExists) {
 	        			UserInfo user = authServer.check(token);
-	        			if (user != null && idServer.check(user, req)) {
-	        				req.setAttribute("token", token);
-	        				chain.doFilter(req, res);
+	        			if (user != null && idServer.check(user, request)) {
+	        				request.setAttribute("token", token);
+	        				chain.doFilter(request, response);
 	        				return;
 	        			} else {
 	        				session.setAttribute("token", null);
-	        				res.sendError(401, "unauthorized");
+	        				response.sendError(401, "unauthorized");
 	        				return;
 	        			}
 	        		} else {
 	        			UserInfo user = authServer.anonymous();	    
-	        			if (user != null && idServer.check(user, req)) {
-	        				chain.doFilter(req, res);
+	        			if (user != null && idServer.check(user, request)) {
+	        				chain.doFilter(request, response);
 	        				return;
 	        			}
 	        		}
@@ -100,19 +100,20 @@ public class SecurityFilter implements Filter {
 	        			//if it is not the case it means that he/her
 	        			//has no right access
 	        			session.setAttribute("token", null);
-        				res.sendError(401, "unauthorized");
-	        		} else if (authServer.handleSecurity(req, res)) {
-	        			chain.doFilter(req, res);
+        				response.sendError(401, "unauthorized");
+	        		} else if (authServer.handleSecurity(request, response)) {
+	        			chain.doFilter(request, response);
 	        		}
         		} catch(Exception e){
         			e.printStackTrace();
-        		} finally {
-	                if (req.isAsyncStarted()) {
-	                    asyncContext.complete();
-	                }
-        		}
-            }
-        });
+        		} 
+//	        	finally {
+//	                if (req.isAsyncStarted()) {
+//	                    asyncContext.complete();
+//	                }
+//        		}
+//            }
+//        });
     }
     
 	@Override

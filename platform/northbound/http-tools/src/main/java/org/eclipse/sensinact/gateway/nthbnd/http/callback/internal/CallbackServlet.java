@@ -14,11 +14,11 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackContext;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
 
-import javax.servlet.AsyncContext;
+//import javax.servlet.AsyncContext;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.WriteListener;
+//import javax.servlet.WriteListener;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +31,7 @@ import java.io.IOException;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
-@WebServlet(asyncSupported = true)
+@WebServlet(/*asyncSupported = true*/)
 public class CallbackServlet extends HttpServlet implements Servlet{
 		
     public static enum CALLBACK_METHOD {
@@ -68,44 +68,44 @@ public class CallbackServlet extends HttpServlet implements Servlet{
     	if (response.isCommitted()) {       	
     		return;
         }
-        final AsyncContext asyncContext;
-        if (request.isAsyncStarted()) {
-            asyncContext = request.getAsyncContext();
+//        final AsyncContext asyncContext;
+//        if (request.isAsyncStarted()) {
+//            asyncContext = request.getAsyncContext();
+//
+//        } else {
+//            asyncContext = request.startAsync(request, response);
+//        }
+        final CallbackContext context = new CallbackContext(mediator, method.name(), request, response/*, asyncContext*/);
 
-        } else {
-            asyncContext = request.startAsync(request, response);
-        }
-        final CallbackContext context = new CallbackContext(mediator, method.name(), asyncContext);
-
-        response.getOutputStream().setWriteListener(new WriteListener() {
-            @Override
-            public void onWritePossible() throws IOException {
-                HttpServletRequest request = (HttpServletRequest) asyncContext.getRequest();
-                HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
+//        response.getOutputStream().setWriteListener(new WriteListener() {
+//            @Override
+//            public void onWritePossible() throws IOException {
+//                HttpServletRequest request = (HttpServletRequest) asyncContext.getRequest();
+//                HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
                 try {
                     if (CallbackServlet.this.callbackService != null) {
                     	CallbackServlet.this.callbackService.process(context);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    onError(e);
+                    //onError(e);
                     response.sendError(520, "Internal server error");
 
                 } catch (Error e) {
                     e.printStackTrace();
-
-                } finally {
-                    if (request.isAsyncStarted()) {
-                        asyncContext.complete();
-                    }
-                }
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                mediator.error(t);
-            }
-        });
+                } 
+//                finally {
+//                    if (request.isAsyncStarted()) {
+//                        asyncContext.complete();
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onError(Throwable t) {
+//                mediator.error(t);
+//            }
+//        });
     }
 
     /**

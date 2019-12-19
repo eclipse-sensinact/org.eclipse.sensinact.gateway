@@ -28,8 +28,9 @@ public class CallbackContext {
     private static final int BUFFER_SIZE = 64 * 1024;
 
     private Mediator mediator;
-    private AsyncContext asyncContext;
-
+    //private AsyncContext asyncContext;
+    private HttpServletRequest request;
+    private HttpServletResponse response;
     private String method;
     private byte[] content;
 
@@ -41,12 +42,14 @@ public class CallbackContext {
      * @param method       the String name of the HTTP method
      * @param asyncContext the {@link AsyncContext}
      */
-    public CallbackContext(Mediator mediator, String method, AsyncContext asyncContext) {
-        this.asyncContext = asyncContext;
+    public CallbackContext(Mediator mediator, String method, HttpServletRequest request, HttpServletResponse response /*, AsyncContext asyncContext*/) {
+        //this.asyncContext = asyncContext;
         this.method = method;
-        if (this.asyncContext == null) {
-            throw new NullPointerException("Null AsyncContext");
-        }
+        this.request = request;
+        this.response = response;
+//        if (this.asyncContext == null) {
+//            throw new NullPointerException("Null AsyncContext");
+//        }
     }
 
     /**
@@ -59,14 +62,14 @@ public class CallbackContext {
         return this.method;
     }
 
-    /**
-     * Returns the {@link AsyncContext} of this CallbackContext
-     *
-     * @return this CallbackContext's {@link AsyncContext}
-     */
-    public AsyncContext getAsyncContext() {
-        return this.asyncContext;
-    }
+//    /**
+//     * Returns the {@link AsyncContext} of this CallbackContext
+//     *
+//     * @return this CallbackContext's {@link AsyncContext}
+//     */
+//    public AsyncContext getAsyncContext() {
+//        return this.asyncContext;
+//    }
 
     /**
      * Returns the {@link HttpServletRequest} of the {@link AsyncContext}
@@ -76,7 +79,8 @@ public class CallbackContext {
      * {@link AsyncContext}
      */
     public HttpServletRequest getRequest() {
-        return (HttpServletRequest) getAsyncContext().getRequest();
+        //return (HttpServletRequest) getAsyncContext().getRequest();
+    	return request;
     }
 
     /**
@@ -87,7 +91,8 @@ public class CallbackContext {
      * {@link AsyncContext}
      */
     public HttpServletResponse getResponse() {
-        return (HttpServletResponse) getAsyncContext().getResponse();
+        //return (HttpServletResponse) getAsyncContext().getResponse();
+    	return response;
     }
 
     /**

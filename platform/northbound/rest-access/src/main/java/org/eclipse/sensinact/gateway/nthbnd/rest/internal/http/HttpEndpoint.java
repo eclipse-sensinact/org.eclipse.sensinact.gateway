@@ -17,6 +17,7 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -32,7 +33,7 @@ import java.util.Map;
  * that perform a task and jersey
  */
 @SuppressWarnings("serial")
-@WebServlet(asyncSupported = true)
+@WebServlet(displayName="sensiNact"/*, asyncSupported = true*/)
 public class HttpEndpoint extends HttpServlet {
 
     private NorthboundMediator mediator;
@@ -46,10 +47,8 @@ public class HttpEndpoint extends HttpServlet {
         this.anonymous = new HashMap<String, String>();
     }
 
-    /**
-     * @inheritDoc
-     * @see javax.servlet.http.HttpServlet#
-     * doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+    /* (non-Javadoc)
+     * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -59,10 +58,8 @@ public class HttpEndpoint extends HttpServlet {
         this.doExecute(request, response);
     }
 
-    /**
-     * @inheritDoc
-     * @see javax.servlet.http.HttpServlet#
-     * doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+    /* (non-Javadoc)
+     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -79,66 +76,73 @@ public class HttpEndpoint extends HttpServlet {
         if (response.isCommitted()) {
             return;
         }
-        final AsyncContext asyncContext;
-        if (request.isAsyncStarted()) {
-            asyncContext = request.getAsyncContext();
-
-        } else {
-            asyncContext = request.startAsync(request, response);
-        }
-        response.getOutputStream().setWriteListener(new WriteListener() {
-            @Override
-            public void onWritePossible() throws IOException {
-                HttpServletRequest request = (HttpServletRequest) asyncContext.getRequest();
-                HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
-
-                Authentication<?> authentication = null;
-                String client = null;
-
-                try {
-                    HttpRestAccessRequest rar = new HttpRestAccessRequest(mediator, request);
-                    authentication = rar.getAuthentication();
-                    if (authentication == null) {
-                        String clientAddress = rar.getRemoteAddr();
-                        int clientPort = rar.getRemotePort();
-
-                        client = /*new StringBuilder().append(*/clientAddress/*).append(":").append(clientPort).toString()*/;
-
-                        String sid = HttpEndpoint.this.anonymous.get(client);
-                        if (sid != null) {
-                            authentication = new AuthenticationToken(sid);
-                            if (HttpEndpoint.this.mediator.getNorthboundEndpoints().getEndpoint(new AuthenticationToken(sid)) != null) {
-                                rar.setAuthentication(authentication);
-                            }
-                        }
-                    }
-                    HttpRestAccess restAccess = new HttpRestAccess(rar, new HttpServletResponseWrapper(response));
-                    restAccess.proceed();
-
-                } catch (InvalidCredentialException e) {
-                    mediator.error(e);
-                    response.sendError(403, e.getMessage());
-
-                } catch (Exception e) {
-                    mediator.error(e);
-                    response.sendError(520, "Internal server error");
-
-                } finally {
-                    String token = null;
-                    if (authentication == null && client != null && (token = response.getHeader("X-Auth-Token")) != null) {
-                        HttpEndpoint.this.anonymous.put(client, token);
-                    }
-                    if (request.isAsyncStarted()) {
-                        asyncContext.complete();
-                    }
-                }
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                mediator.error(t);
-            }
-
-        });
+//        final AsyncContext asyncContext;
+//        if (request.isAsyncStarted()) {
+//            asyncContext = request.getAsyncContext();
+//        } else {
+//            asyncContext = request.startAsync(request, response);
+//        }
+//    	final ServletOutputStream out = response.getOutputStream();
+//    	out.setWriteListener(new WriteListener() {
+//            @Override
+//            public void onWritePossible() throws IOException {            	
+//	            System.out.println("**********************************");
+//	            System.out.println("WRITE IS POSSIBLE");
+//	            System.out.println("**********************************");
+//	            
+//    	        HttpServletRequest request = (HttpServletRequest) asyncContext.getRequest();
+//	            HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
+//	
+//            	if(out.isReady()) {
+//    	            System.out.println("**********************************");
+//    	            System.out.println("OUT IS READY");
+//    	            System.out.println("**********************************");
+	                
+	                Authentication<?> authentication = null;
+	                String client = null;
+	
+	                try {
+	                    HttpRestAccessRequest rar = new HttpRestAccessRequest(mediator, request);
+	                    authentication = rar.getAuthentication();
+	                    if (authentication == null) {
+	                        String clientAddress = rar.getRemoteAddr();
+	                        //int clientPort = rar.getRemotePort();	
+	                        client = /*new StringBuilder().append(*/clientAddress/*).append(":").append(clientPort).toString()*/;
+	                        String sid = HttpEndpoint.this.anonymous.get(client);
+	                        if (sid != null) {
+	                            authentication = new AuthenticationToken(sid);
+	                            if (HttpEndpoint.this.mediator.getNorthboundEndpoints().getEndpoint(new AuthenticationToken(sid)) != null) {
+	                                rar.setAuthentication(authentication);
+	                            }
+	                        }
+	                    }
+	                    HttpRestAccess restAccess = new HttpRestAccess(rar, new HttpServletResponseWrapper(response));
+	                    restAccess.proceed();
+	
+	                } catch (InvalidCredentialException e) {
+	                    mediator.error(e);
+	                    response.sendError(403, e.getMessage());
+	
+	                } catch (Exception e) {
+	                    mediator.error(e);
+	                    response.sendError(520, "Internal server error");
+	
+	                } finally {
+	                    String token = null;
+	                    if (authentication == null && client != null && (token = response.getHeader("X-Auth-Token")) != null) {
+	                        HttpEndpoint.this.anonymous.put(client, token);
+	                    }
+	                }
+//            	}
+//                if (request.isAsyncStarted()) {
+//                    asyncContext.complete();
+//                }
+//            }
+//
+//            @Override
+//            public void onError(Throwable t) {
+//                mediator.error(t);
+//            }
+//        });
     }
 }

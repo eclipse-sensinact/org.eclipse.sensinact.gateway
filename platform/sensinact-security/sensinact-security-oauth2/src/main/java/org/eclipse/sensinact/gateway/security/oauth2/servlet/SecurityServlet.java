@@ -12,9 +12,9 @@ package org.eclipse.sensinact.gateway.security.oauth2.servlet;
 
 import java.io.IOException;
 
-import javax.servlet.AsyncContext;
+//import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
-import javax.servlet.WriteListener;
+//import javax.servlet.WriteListener;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -27,7 +27,7 @@ import org.eclipse.sensinact.gateway.security.oauth2.UserInfo;
 
 import org.json.JSONObject;
 
-@WebServlet(asyncSupported = true)
+@WebServlet(/*asyncSupported = true*/)
 public class SecurityServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private IdentityServer idServer;
@@ -52,23 +52,23 @@ public class SecurityServlet extends HttpServlet {
         if (response.isCommitted()) {
             return;
         }
-        final AsyncContext asyncContext;
-        if (request.isAsyncStarted()) {
-            asyncContext = request.getAsyncContext();
-        } else {
-            asyncContext = request.startAsync(request, response);
-        }
-        response.getOutputStream().setWriteListener(new WriteListener() {
-            @Override
-            public void onWritePossible() throws IOException {
-                HttpServletRequest req = (HttpServletRequest) asyncContext.getRequest();
-                HttpServletResponse res = (HttpServletResponse) asyncContext.getResponse();
+//        final AsyncContext asyncContext;
+//        if (request.isAsyncStarted()) {
+//            asyncContext = request.getAsyncContext();
+//        } else {
+//            asyncContext = request.startAsync(request, response);
+//        }
+//        response.getOutputStream().setWriteListener(new WriteListener() {
+//            @Override
+//            public void onWritePossible() throws IOException {
+//                HttpServletRequest req = (HttpServletRequest) asyncContext.getRequest();
+//                HttpServletResponse res = (HttpServletResponse) asyncContext.getResponse();
 
-                String code = req.getParameter("code");
+                String code = request.getParameter("code");
         		if (code != null) {
         			int status = 401;
-        			HttpSession session = req.getSession();
-        			JSONObject tokens = authServer.verify(code, req);
+        			HttpSession session = request.getSession();
+        			JSONObject tokens = authServer.verify(code, request);
         			if (tokens != null) {
         				String id_token;
         				String access_token;
@@ -85,22 +85,22 @@ public class SecurityServlet extends HttpServlet {
         			} else {
         				session.setAttribute("token", "");
         			}
-    				res.setStatus(status);
+    				response.setStatus(status);
         			String uri = (String) session.getAttribute("redirect_uri");
         			if (uri != null) {
-        				res.sendRedirect(uri);
+        				response.sendRedirect(uri);
         			}
         		} 
-        		if (req.isAsyncStarted()) {
-                    asyncContext.complete();
-                }
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                t.printStackTrace();
-            }
-
-        });
+//        		if (req.isAsyncStarted()) {
+//                    asyncContext.complete();
+//                }
+//            }
+//
+//            @Override
+//            public void onError(Throwable t) {
+//                t.printStackTrace();
+//            }
+//
+//        });
     }
 }

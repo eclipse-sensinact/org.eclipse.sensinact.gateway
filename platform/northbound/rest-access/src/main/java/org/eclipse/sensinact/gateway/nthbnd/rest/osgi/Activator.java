@@ -97,7 +97,7 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
         super.mediator.register(
         	new Hashtable() {{
         		this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.WS_ROOT);
-        		this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
+        		//this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
         		this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");}}, 
         	new WebSocketServlet() { 			
 				private static final long serialVersionUID = 1L;			
@@ -153,7 +153,7 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
         
         super.mediator.register(new HttpLoginEndpoint(mediator), Servlet.class, new Hashtable() {{
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.LOGIN_ENDPOINT);
-        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
+        	//this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");
         	}
         });
@@ -161,7 +161,7 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
         
         mediator.register(new HttpRegisteringEndpoint(mediator), Servlet.class, new Hashtable() {{
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.REGISTERING_ENDPOINT);
-        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
+        	//this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");
         	}
         });
@@ -169,7 +169,7 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
         
         mediator.register(new HttpEndpoint(mediator), Servlet.class, new Hashtable() {{
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.HTTP_ROOT);
-        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
+        	//this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");
         	}
         });      
