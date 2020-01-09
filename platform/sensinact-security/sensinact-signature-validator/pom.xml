@@ -83,7 +83,7 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.main</artifactId>
-			<version>${felix.version}</version>
+			<version>${org.apache.felix.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

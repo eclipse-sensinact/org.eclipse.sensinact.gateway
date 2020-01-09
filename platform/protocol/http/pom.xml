@@ -40,25 +40,26 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
+			<version>${javax.servlet-api.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.jetty</artifactId>
+<!-- DEPENDENCY : -->
 			<version>3.0.0</version>
 			<scope>test</scope>
 		</dependency>
 	    <dependency>
 	      <groupId>org.apache.felix</groupId>
 	      <artifactId>org.apache.felix.main</artifactId>
-	      <version>${felix.version}</version>
+	      <version>${org.apache.felix.version}</version>
 	      <scope>test</scope>
 	    </dependency>
 	    <dependency>
 	      <groupId>org.skyscreamer</groupId>
 	      <artifactId>jsonassert</artifactId>
-	      <version>1.2.3</version>
+	      <version>${jsonassert.version}</version>
 	      <scope>test</scope>
 	    </dependency>
 	</dependencies>

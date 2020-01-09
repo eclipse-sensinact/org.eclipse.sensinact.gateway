@@ -72,7 +72,7 @@
 		<dependency>
 			<groupId>org.skyscreamer</groupId>
 			<artifactId>jsonassert</artifactId>
-			<version>1.2.3</version>
+			<version>${jsonassert.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -84,7 +84,7 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.main</artifactId>
-			<version>${felix.version}</version>
+			<version>${org.apache.felix.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -106,14 +106,14 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.fileinstall</artifactId>
-									<version>${felix.fileinstall.version}</version>
+									<version>${org.apache.felix.fileinstall.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.fileinstall.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.framework.security</artifactId>
-									<version>2.4.0</version>
+									<version>2.4.0</version><!-- DEPENDENCY : to be moved to 2.6.1 -->
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.framework.security.jar</destFileName>
 								</artifactItem>
@@ -211,35 +211,35 @@
 								<artifactItem>
 									<groupId>javax.servlet</groupId>
 									<artifactId>javax.servlet-api</artifactId>
-									<version>3.1.0</version>
+									<version>${javax.servlet-api.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>javax.servlet-api.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.http.api</artifactId>
-									<version>2.3.2</version>
+									<version>${org.apache.felix.http.api.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.http.api.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.http.jetty</artifactId>
-									<version>3.0.0</version>
+									<version>3.0.0</version><!-- DEPENDENCY : -->
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.http.jetty.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.configadmin</artifactId>
-									<version>1.8.2</version>
+									<version>1.8.2</version><!-- DEPENDENCY : move to 1.9.12-->
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.configadmin.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.osgi</groupId>
 									<artifactId>osgi.cmpn</artifactId>
-									<version>${osgi.compendium.version}</version>
+									<version>${org.osgi.compendium.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.osgi.compendium.jar</destFileName>
 								</artifactItem>
@@ -273,7 +273,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.8</version>
+				<version>${maven-antrun-plugin.version}</version>
 				<executions>
 					<execution>
 						<phase>generate-test-resources</phase>

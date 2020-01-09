@@ -43,7 +43,7 @@
                                     <type>zip</type>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.main.distribution</artifactId>
-                                    <version>${felix.version}</version>
+                                    <version>${org.apache.felix.version}</version>
                                     <outputDirectory>${project.build.directory}/</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
@@ -75,11 +75,10 @@
                         </goals>
                         <configuration>
                             <artifactItems>
-                                <!-- felix 4.4.1 bundles -->
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.framework.security</artifactId>
-									<version>2.6.1</version>
+									<version>${org.apache.felix.framework.security.version}</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
 								</artifactItem>
@@ -117,27 +116,27 @@
                                 <artifactItem>
                                     <groupId>org.slf4j</groupId>
                                     <artifactId>slf4j-api</artifactId>
-                                    <version>1.7.25</version>
+				    <version>${slf4j.version}</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.slf4j</groupId>
                                     <artifactId>slf4j-simple</artifactId>
-                                    <version>1.7.16</version>
+                                    <version>${slf4j.simple.version}</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>ch.qos.logback</groupId>
                                     <artifactId>logback-classic</artifactId>
-                                    <version>1.2.3</version>
+                                    <version>${logback.version}</version>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>ch.qos.logback</groupId>
                                     <artifactId>logback-core</artifactId>
-                                    <version>1.2.3</version>
+				    <version>${logback.version}</version>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                             </artifactItems>
@@ -162,79 +161,79 @@
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.fileinstall</artifactId>
-                                    <version>${felix.fileinstall.version}</version>
+                                    <version>${org.apache.felix.fileinstall.version}</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                                 <artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.configadmin</artifactId>
-									<version>1.9.12</version>
+									<version>${org.apache.felix.configadmin.version}</version>
                                 </artifactItem>
 						        <artifactItem>
 						            <groupId>org.osgi</groupId>
 						            <artifactId>org.osgi.service.component</artifactId>
-						            <version>1.4.0</version>
+						            <version>${org.osgi.service.component.version}</version>
 						        </artifactItem>
 						        <artifactItem>
 						            <groupId>org.osgi</groupId>
 						            <artifactId>org.osgi.service.cm</artifactId>
-						            <version>1.6.0</version>
+						            <version>${org.osgi.service.cm.version}</version>
 						        </artifactItem>
 						        <artifactItem>
 						            <groupId>org.osgi</groupId>
 						            <artifactId>org.osgi.service.metatype</artifactId>
-						            <version>1.3.0</version>
+						            <version>${org.osgi.service.metatype.version}</version>
 						        </artifactItem>
 						        <artifactItem>
 						            <groupId>org.osgi</groupId>
 						            <artifactId>org.osgi.namespace.extender</artifactId>
-						            <version>1.0.1</version>
+						            <version>${org.osgi.namespace.extender.version}</version>
 						        </artifactItem>
 						        <artifactItem>
 						            <groupId>org.osgi</groupId>
 						            <artifactId>org.osgi.util.promise</artifactId>
-						            <version>1.0.0</version>
+							    <version>${org.osgi.util.promise.version}</version>
 						        </artifactItem>
 						        <artifactItem>
 						            <groupId>org.osgi</groupId>
 						            <artifactId>org.osgi.util.function</artifactId>
-						            <version>1.0.0</version>
+						            <version>${org.osgi.util.function.version}</version>
 						        </artifactItem>	
 						        <artifactItem>
-							        <groupId>org.osgi</groupId>
+							    <groupId>org.osgi</groupId>
 						            <artifactId>org.osgi.service.log</artifactId>
-						            <version>1.3.0</version>	
+						            <version>${org.osgi.service.log.version}</version>	
 					            </artifactItem>	
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
   									<artifactId>org.apache.felix.log</artifactId>
-									<version>1.2.0</version>
+									<version>${org.apache.felix.log.version}</version>
 								</artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.bundlerepository</artifactId>
-                                    <version>2.0.10</version> 
+                                    <version>${org.apache.felix.bundlerepository.version}</version> 
                                 </artifactItem>
     							<artifactItem>
 						            <groupId>org.apache.felix</groupId>
 						            <artifactId>org.apache.felix.scr</artifactId>
-						            <version>2.1.16</version> 
+						            <version>${org.apache.felix.scr.version}</version> 
     							</artifactItem>
                                 <artifactItem>
                                     <groupId>org.osgi</groupId>
                                     <artifactId>org.osgi.service.component</artifactId>
-                                    <version>1.4.0</version>
+                                    <version>${org.osgi.service.component.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.osgi</groupId>
                                     <artifactId>org.osgi.service.remoteserviceadmin</artifactId>
-                                    <version>1.1.0</version>
+                                    <version>${org.osgi.service.remoteserviceadmin.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.paho</groupId>
                                     <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-                                    <version>1.2.0</version>
+                                    <version>${org.eclipse.paho.client.mqttv3.version}</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}/dependencies/bundle/2</outputDirectory>
@@ -313,7 +312,7 @@
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.shell.remote</artifactId>
-                                    <version>1.1.2</version>
+                                    <version>${org.apache.felix.shell.remote.version}</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}/dependencies/bundle/4</outputDirectory>
@@ -324,7 +323,7 @@
 
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.7</version>
+                <version>${maven-resources-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>copy-resources-merge</id>

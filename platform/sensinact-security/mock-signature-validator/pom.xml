@@ -52,13 +52,13 @@
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.13</version>
+			<version>${log4j.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.main</artifactId>
-			<version>${felix.version}</version>
+			<version>${org.apache.felix.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -76,14 +76,14 @@
 					<dependency>
 						<groupId>org.apache.maven.surefire</groupId>
 						<artifactId>common-junit48</artifactId>
-						<version>2.18.1</version>
+						<version>${org.apache.maven.surefire.junit48.version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>
 			<plugin>
 			    <groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-antrun-plugin</artifactId>
-			    <version>1.8</version>
+			    <version>${maven-antrun-plugin.version}</version>
 			    <executions>
 			        <execution>
 			            <id>signTestJar</id>

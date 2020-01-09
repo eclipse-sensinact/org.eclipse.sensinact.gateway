@@ -46,12 +46,12 @@
         <dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.jetty</artifactId>
-			<version>4.0.8</version>
+			<version>${org.apache.felix.http.jetty.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.servlet-api</artifactId>
-			<version>1.1.2</version>
+			<version>${org.apache.felix.http.servlet-api.version}</version>
 		</dependency>
         <!-- END: HTTP Dependencies -->
         <!-- BEGIN: Websocket -->

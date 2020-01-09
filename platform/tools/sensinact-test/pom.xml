@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20080701</version>
+			<version>${org.json.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -40,13 +40,13 @@
 		<dependency>
 		    <groupId>junit</groupId>
 		    <artifactId>junit</artifactId>
-		    <version>4.8.1</version>
+		    <version>${junit.version}</version>
 		    <scope>compile</scope>
 	    </dependency>	
 		<dependency>
 			<groupId>org.skyscreamer</groupId>
 			<artifactId>jsonassert</artifactId>
-			<version>1.2.3</version>
+			<version>${jsonassert.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

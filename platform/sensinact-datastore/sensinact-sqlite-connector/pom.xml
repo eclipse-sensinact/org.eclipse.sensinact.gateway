@@ -50,7 +50,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 		<dependency>
 			<groupId>org.xerial</groupId>
 			<artifactId>sqlite-jdbc</artifactId>
-			<version>3.8.10.1</version>
+			<version>${org.xerial.sqlite-jdbc.version}</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
@@ -83,7 +83,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.7</version>
+				<version>${maven-resources-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>copy-sample-db</id>

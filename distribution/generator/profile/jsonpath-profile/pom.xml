@@ -43,7 +43,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-plugin</artifactId>
-                <version>1.9.4</version>
+                <version>${maven-scm-plugin.version}</version>
                 <executions>
                     <execution>
                     	<id>checkout-jpath</id>
@@ -71,7 +71,7 @@
             <plugin>
                 <groupId>org.fortasoft</groupId>
                 <artifactId>gradle-maven-plugin</artifactId>
-                <version>1.0.8</version>
+                <version>${gradle-maven-plugin.version}</version>
                 <configuration>
                     <tasks>
                         <task>:jpath:compileJava</task>

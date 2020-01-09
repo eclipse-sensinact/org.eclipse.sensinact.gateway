@@ -54,12 +54,12 @@
         <dependency>
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast</artifactId>
-            <version>3.2.1</version>
+            <version>${com.hazelcast.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mapdb</groupId>
             <artifactId>mapdb</artifactId>
-            <version>1.0.8</version>
+            <version>${org.mapdb.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway</groupId>
