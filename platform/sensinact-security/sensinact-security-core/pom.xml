@@ -239,7 +239,6 @@
 								<artifactItem>
 									<groupId>org.osgi</groupId>
 									<artifactId>osgi.cmpn</artifactId>
-									<version>${org.osgi.compendium.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.osgi.compendium.jar</destFileName>
 								</artifactItem>

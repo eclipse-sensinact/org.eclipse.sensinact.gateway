@@ -120,7 +120,6 @@
 						        <artifactItem>
 						            <groupId>org.osgi</groupId>
 						            <artifactId>osgi.annotation</artifactId>
-						            <version>${org.osgi.annotation.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>osgi.annotation.jar</destFileName>
 						        </artifactItem>

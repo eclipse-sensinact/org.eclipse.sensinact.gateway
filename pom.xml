@@ -243,23 +243,131 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<!-- <org.osgi.version> -->
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.core</artifactId>
 				<version>${org.osgi.version}</version>
 			</dependency>
+
+			<!-- <org.osgi.compendium.version> -->
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>osgi.cmpn</artifactId>
 				<version>${org.osgi.compendium.version}</version>
 				<scope>compile</scope>
 			</dependency>
+
+
+			<!-- <org.osgi.annotation.version> -->
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>osgi.annotation</artifactId>
+				<version>${org.osgi.annotation.version}</version>
+			</dependency>
+			<!-- <org.osgi.namespace.extender.version> -->
+			<!-- <org.osgi.service.cm.version> -->
+			<!-- <org.osgi.service.component.version> -->
+			<!-- <org.osgi.service.log.version> -->
+			<!-- <org.osgi.service.metatype.version> -->
+			<!-- <org.osgi.service.remoteserviceadmin.version> -->
+			<!-- <org.osgi.util.function.version> -->
+			<!-- <org.osgi.util.promise.version> -->
+
+
+			<!-- <org.apache.felix.version> -->
+
+
+			<!-- <org.apache.felix.bundlerepository.version> -->
+			<!-- <org.apache.felix.configadmin.version> -->
+			<!-- <org.apache.felix.fileinstall.version> -->
+			<!-- <org.apache.felix.framework.security.version> -->
+			<!-- <org.apache.felix.gogo.command.version> -->
+			<!-- <org.apache.felix.gogo.jline.version> -->
+			<!-- <org.apache.felix.gogo.runtime.version> -->
+			<!-- <org.apache.felix.http.api.version> -->
+			<!-- <org.apache.felix.http.servlet-api.version> -->
+			<!-- <org.apache.felix.log.version> -->
+			<!-- <org.apache.felix.scr.version> -->
+			<!-- <org.apache.felix.shell.remote.version> -->
+
+
+			<!-- <org.apache.felix.http.jetty.version> -->
+			<!-- <org.eclipse.jetty.version> -->
+
+
+			<!-- <build-helper-maven-plugin.version> -->
+			<!-- <depends-maven-plugin.version> -->
+			<!-- <download-maven-plugin> -->
+			<!-- <gradle-maven-plugin.version> -->
+			<!-- <groovy-maven-plugin.version> -->
+			<!-- <license-maven-plugin.version> -->
+			<!-- <maven-antrun-plugin.version> -->
+			<!-- <maven-assembly-plugin.version> -->
+			<!-- <maven-dependency-plugin.version> -->
+			<!-- <maven-resources-plugin.version> -->
+			<!-- <maven-scm-plugin.version> -->
+			<!-- <xml-maven-plugin.version> -->
+			<!-- <maven-surefire-plugin.version> -->
+			<!-- <maven-failsafe-plugin.version> -->
+			<!-- <org.jacoco.maven-plugin.version> -->
+			<!-- <sql-maven-plugin.version> -->
+			<!-- <sonar-maven-plugin.version> -->
+			<!-- <maven-compiler-plugin.version> -->
+			<!-- <maven-bundle-plugin.version> -->
+			<!-- <maven-javadoc-plugin.version> -->
+			<!-- <maven-checkstyle-plugin.version> -->
+
+
+			<!-- <logback.version> -->
+			<!-- <log4j.version> -->
+			<!-- <slf4j.version> -->
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
 				<version>${slf4j.version}</version>
 				<scope>provided</scope>
 			</dependency>
+			<!-- <slf4j.simple.version> -->
+			<!-- <commons-logging.version> -->
+
+
+			<!-- <junit.version> -->
+			<!-- <jsonassert.version> -->
+			<!-- <org.apache.maven.surefire.junit48.version> -->
+			<!-- <com.puppycrawl.tools.checkstyle.version> -->
+			<!-- <com.h2database.version> -->
+
+
+			<!-- <bnd.version> -->
+			<!-- <com.hazelcast.version> -->
+			<!-- <commons-codec.version> -->
+			<!-- <javax.jmdns.version> -->
+			<!-- <javax.servlet-api.version> -->
+			<!-- <javax.mail.version> -->
+			<!-- <jsr311-api.version> -->
+			<!-- <maven-aether-provider.version> -->
+			<!-- <org.apache.aries.rsa.version> -->
+			<!-- <org.apache.httpcomponents.version> -->
+			<!-- <org.apache.zookeeper.version> -->
+			<!-- <org.eclipse.aether.version> -->
+			<!-- <org.eclipse.paho.client.mqttv3.version> -->
+			<!-- <org.fusesource.hawtbuf.version> -->
+			<!-- <org.fusesource.hawtdispatch.version> -->
+			<!-- <org.fusesource.jansi.version> -->
+			<!-- <org.jline.version> -->
+			<!-- <org.json.version> -->
+			<!-- <org.mapdb.version> -->
+			<!-- <org.xerial.sqlite-jdbc.version> -->
+
+
+			<!-- <project.build.sourceEncoding> -->
+			<!-- <maven.build.timestamp.format> -->
+			<!-- <sonar.jacoco.itReportPath> -->
+			<!-- <signer.path> -->
+			<!-- <checkstyle.suppressions.file> -->
+			<!-- <checkstyle.header.file> -->
+			<!-- <timestamp> -->
 		</dependencies>
 	</dependencyManagement>
 
@@ -282,7 +390,7 @@
 		<profile>
 			<id>sonar</id>
 			<build>
-				<pluginManagement>
+				<pluginManagement>			
 					<plugins>
 						<plugin>
 							<groupId>org.apache.maven.plugins</groupId>
@@ -408,7 +516,7 @@
 
 	<build>
 		<pluginManagement>
-			<plugins>
+			<plugins>		
 				<plugin>
 					<groupId>org.codehaus.gmaven</groupId>
 					<artifactId>groovy-maven-plugin</artifactId>
