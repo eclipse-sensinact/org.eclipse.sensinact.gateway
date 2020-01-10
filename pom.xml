@@ -211,9 +211,7 @@
 		<com.puppycrawl.tools.checkstyle.version>6.18</com.puppycrawl.tools.checkstyle.version>
 		<com.h2database.version>1.4.193</com.h2database.version>
 
-		<org.ops4j.pax.exam.version>3.4.0</org.ops4j.pax.exam.version>
-		<org.ops4j.pax.url.link.version>2.5.3</org.ops4j.pax.url.link.version>
-
+		<bnd.version>2.4.0</bnd.version>
 		<com.hazelcast.version>3.2.1</com.hazelcast.version>
 		<commons-codec.version>1.11</commons-codec.version>
 		<javax.jmdns.version>3.4.1</javax.jmdns.version>
