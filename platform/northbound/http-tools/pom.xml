@@ -46,13 +46,13 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>9.4.15.v20190215</version><!-- DEPENDENCY : JETTY org.eclipse.jetty-server -->
+			<version>${org.eclipse.jetty.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-http</artifactId>
-			<version>9.4.15.v20190215</version> <!-- DEPENDENCY : JETTY org.eclipse.jetty-http -->
+			<version>${org.eclipse.jetty.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -441,5 +441,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
