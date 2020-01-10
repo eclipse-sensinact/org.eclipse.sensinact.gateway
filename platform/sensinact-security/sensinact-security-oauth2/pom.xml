@@ -458,7 +458,7 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.http.jetty</artifactId>
-									<version>${org.apache.felix.http.jetty.version}</version><!-- DEPENDENCY : JETTY org.apache.felix.http.jetty -->
+									<version>${org.apache.felix.http.jetty.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.http.jetty.jar</destFileName>
 								</artifactItem>
