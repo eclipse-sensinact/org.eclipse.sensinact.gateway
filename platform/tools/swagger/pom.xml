@@ -51,8 +51,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-		<!-- DEPENDENCY : -->
-                <version>1.6</version>
+                <version>1.6</version> <!-- DEPENDENCY : maven-antrun-plugin to be updated to 1.8-->
                 <executions>
                     <execution>
                         <id>prepare</id>
@@ -170,13 +169,13 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 		    <artifactId>org.apache.felix.http.servlet-api</artifactId>
-		    <version>1.1.2</version>
+		    <version>${org.apache.felix.http.servlet-api.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.jetty</artifactId>
-			<version>4.0.8</version>
+			<version>${org.apache.felix.http.jetty.version}</version><!-- DEPENDENCY : JETTY org.apache.felix.http.jetty -->
 			<scope>provided</scope>
 		</dependency>
     </dependencies>

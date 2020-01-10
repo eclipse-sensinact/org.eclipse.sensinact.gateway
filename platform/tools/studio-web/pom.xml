@@ -70,8 +70,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-		<!-- DEPENDENCY : -->
-            <version>1.7.7</version>
+            <version>1.7.7</version> <!-- DEPENDENCY : slf4j-api to be updated to v1.7.25 -->
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -88,8 +87,7 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.http.jetty</artifactId>
-		<!-- DEPENDENCY : -->
-            <version>3.0.0</version>
+            <version>3.0.0</version> <!-- DEPENDENCY : JETTY org.apache.felix.http.jetty -->
             <scope>provided</scope>
         </dependency>
     </dependencies>

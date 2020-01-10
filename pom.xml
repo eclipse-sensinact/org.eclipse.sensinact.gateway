@@ -207,6 +207,7 @@
 		<jsonassert.version>1.2.3</jsonassert.version>
 		<org.apache.maven.surefire.junit48.version>2.18.1</org.apache.maven.surefire.junit48.version>
 		<com.puppycrawl.tools.checkstyle.version>6.18</com.puppycrawl.tools.checkstyle.version>
+		<com.h2database.version>1.4.193</com.h2database.version>
 
 		<org.ops4j.pax.exam.version>3.4.0</org.ops4j.pax.exam.version>
 		<org.ops4j.pax.url.link.version>2.5.3</org.ops4j.pax.url.link.version>
@@ -215,6 +216,7 @@
 		<commons-codec.version>1.11</commons-codec.version>
 		<javax.jmdns.version>3.4.1</javax.jmdns.version>
 		<javax.servlet-api.version>3.1.0</javax.servlet-api.version>
+		<javax.mail.version>1.5.5</javax.mail.version>
 		<jsr311-api.version>1.1.1</jsr311-api.version>
 		<maven-aether-provider.version>3.3.9</maven-aether-provider.version>
 		<org.apache.aries.rsa.version>1.13.0</org.apache.aries.rsa.version>

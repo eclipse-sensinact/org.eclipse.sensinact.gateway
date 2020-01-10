@@ -51,8 +51,7 @@
 		<dependency>
 			<groupId>org.eclipse.paho</groupId>
 			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-<!-- DEPENDENCY : -->
-			<version>1.1.0</version>
+			<version>1.1.0</version><!-- DEPENDENCY : org.eclipse.paho.client.mqttv3 to be moved to 1.2.0-->
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -123,8 +122,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-		<!-- DEPENDENCY : -->
-                <version>2.4</version>
+                <version>2.4</version> <!-- DEPENDENCY : maven-resources-plugin to be updated to 2.7-->
                 <executions>
                     <execution>
                         <id>generate-test-resources</id>

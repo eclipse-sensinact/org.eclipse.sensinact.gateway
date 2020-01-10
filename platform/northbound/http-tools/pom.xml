@@ -46,13 +46,13 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>9.4.15.v20190215</version>
+			<version>9.4.15.v20190215</version><!-- DEPENDENCY : JETTY org.eclipse.jetty-server -->
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-http</artifactId>
-			<version>9.4.15.v20190215</version> <!-- DEPENDENCY : New Jetty version ! -->
+			<version>9.4.15.v20190215</version> <!-- DEPENDENCY : JETTY org.eclipse.jetty-http -->
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -352,14 +352,14 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.http.jetty</artifactId>
-									<version>${org.apache.felix.http.jetty.version}</version>
+									<version>${org.apache.felix.http.jetty.version}</version><!-- DEPENDENCY : JETTY org.apache.felix.http.jetty -->
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.http.jetty.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.http.api</artifactId>
-									<version>3.0.0</version>
+									<version>3.0.0</version> <!-- DEPENDENCY : org.apache.felix.http.api v2.3.2 elsewhere -->
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.http.api.jar</destFileName>
 								</artifactItem>
