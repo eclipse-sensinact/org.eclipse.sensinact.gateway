@@ -225,7 +225,7 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.http.jetty</artifactId>
-									<version>3.0.0</version><!-- DEPENDENCY : JETTY org.apache.felix.http.jetty -->
+									<version>3.0.0</version><!-- DEPENDENCY : JETTY org.apache.felix.http.jetty to be moved to 4.0.8-->
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.http.jetty.jar</destFileName>
 								</artifactItem>
