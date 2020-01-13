@@ -186,7 +186,6 @@
 								<artifactItem>
 									<groupId>org.osgi</groupId>
 									<artifactId>org.osgi.namespace.extender</artifactId>
-									<version>${org.osgi.namespace.extender.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.osgi</groupId>

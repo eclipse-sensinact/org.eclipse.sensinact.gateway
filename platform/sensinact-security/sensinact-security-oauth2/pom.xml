@@ -297,7 +297,6 @@
 								<artifactItem>
 									<groupId>org.osgi</groupId>
 									<artifactId>org.osgi.namespace.extender</artifactId>
-									<version>${org.osgi.namespace.extender.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.osgi.namespace.extender.jar</destFileName>
 								</artifactItem>

@@ -266,6 +266,12 @@
 				<version>${org.osgi.annotation.version}</version>
 			</dependency>
 			<!-- <org.osgi.namespace.extender.version> -->
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.namespace.extender</artifactId>
+				<version>${org.osgi.namespace.extender.version} </version>
+			</dependency>
+
 			<!-- <org.osgi.service.cm.version> -->
 			<!-- <org.osgi.service.component.version> -->
 			<!-- <org.osgi.service.log.version> -->
