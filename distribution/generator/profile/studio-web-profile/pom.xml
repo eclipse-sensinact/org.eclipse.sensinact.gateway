@@ -45,12 +45,10 @@
         <dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.jetty</artifactId>
-			<version>${org.apache.felix.http.jetty.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.servlet-api</artifactId>
-			<version>${org.apache.felix.http.servlet-api.version}</version>
 		</dependency>
         <!-- END: HTTP Dependencies -->
         <dependency>

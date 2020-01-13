@@ -9,97 +9,98 @@
   ~ Contributors:
   ~    CEA - initial API and implementation
   -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.eclipse.sensinact.gateway.distribution</groupId>
-        <artifactId>sensinact-distribution-generator</artifactId>
-        <version>2.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
+		<artifactId>sensinact-distribution-generator</artifactId>
+		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
-    <artifactId>profile</artifactId>
-    <packaging>pom</packaging>
+	<artifactId>profile</artifactId>
+	<packaging>pom</packaging>
 
-    <name>sensiNact IoT Gateway - sensiNact Runtime (bridge profile generator)</name>
+	<name>sensiNact IoT Gateway - sensiNact Runtime (bridge profile generator)</name>
 
-    <properties>
-        <excludeArtifactId>
-            slf4j-api,
-            org.osgi.core,
-            osgi.cmpn,
-            sensinact-generic,
-            sensinact-core,
-            sensinact-utils,
-            sensinact-condperm,
-            sensinact-datastore-api,
-            json,
-            asm-all
-        </excludeArtifactId>
-        <excludeGroupId></excludeGroupId> <!-- org.apache.felix,-->
-        <excludeTransitive>true</excludeTransitive>
-    </properties>
+	<properties>
+		<excludeArtifactId>
+			slf4j-api,
+			org.osgi.core,
+			osgi.cmpn,
+			sensinact-generic,
+			sensinact-core,
+			sensinact-utils,
+			sensinact-condperm,
+			sensinact-datastore-api,
+			json,
+			asm-all
+		</excludeArtifactId>
+		<excludeGroupId></excludeGroupId> <!-- org.apache.felix, -->
+		<excludeTransitive>true</excludeTransitive>
+	</properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.distribution</groupId>
-            <artifactId>sensinact-distribution-template</artifactId>
-            <version>${project.version}</version>
-            <type>pom</type>
-        </dependency>
-    </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
+			<artifactId>sensinact-distribution-template</artifactId>
+			<version>${project.version}</version>
+			<type>pom</type>
+		</dependency>
+	</dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>${maven-resources-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>copy-resources-this-build</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/../../../target/sensinact</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.build.directory}/sensinact/</directory>
-                                    <filtering>false</filtering>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>${maven-resources-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>copy-resources-this-build</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/../../../target/sensinact</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}/sensinact/</directory>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
-    <modules>
-        <module>android-imu-profile</module>
-        <module>application-profile</module>
-        <module>free-sms</module>
-        <module>kodi-profile</module>
-        <module>mqtt-sb-profile</module>
-        <module>mqtt-nb-profile</module>
-        <module>mqtt-server</module>
-        <module>openhab-profile</module>
-        <module>inovallee</module>
-        <module>openweather-profile</module>
-        <module>onem2m</module>
-        <module>onem2m-mqttbinding</module>
-        <module>rest-profile</module>
-        <module>jsonpath-profile</module>
-        <module>simulation-profile</module>
-        <module>storage-agent-profile</module>
-        <module>swagger-profile</module>
-        <module>sensinact-remote</module>
-        <module>sensinact-datastore</module>
-        <module>ldapfilter</module>
-	<module>http-client</module>
-    </modules>
+	<modules>
+		<module>android-imu-profile</module>
+		<module>application-profile</module>
+		<module>free-sms</module>
+		<module>kodi-profile</module>
+		<module>mqtt-sb-profile</module>
+		<module>mqtt-nb-profile</module>
+		<module>mqtt-server</module>
+		<module>openhab-profile</module>
+		<module>inovallee</module>
+		<module>openweather-profile</module>
+		<module>onem2m</module>
+		<module>onem2m-mqttbinding</module>
+		<module>rest-profile</module>
+		<module>jsonpath-profile</module>
+		<module>simulation-profile</module>
+		<module>storage-agent-profile</module>
+		<module>swagger-profile</module>
+		<module>sensinact-remote</module>
+		<module>sensinact-datastore</module>
+		<module>ldapfilter</module>
+		<module>http-client</module>
+	</modules>
 </project>

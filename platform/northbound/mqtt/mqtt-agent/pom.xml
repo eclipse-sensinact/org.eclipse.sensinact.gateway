@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (c) 2017 CEA.
   ~ All rights reserved. This program and the accompanying materials
@@ -9,21 +10,22 @@
   ~    CEA - initial API and implementation
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-        <artifactId>mqtt</artifactId>
-        <version>2.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+		<artifactId>mqtt</artifactId>
+		<version>2.0-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>mqtt-agent</artifactId>
-    <packaging>bundle</packaging>
-    <name>sensiNact IoT Gateway - MQTT Northbound Agent Instance</name>
+	<artifactId>mqtt-agent</artifactId>
+	<packaging>bundle</packaging>
+	<name>sensiNact IoT Gateway - MQTT Northbound Agent Instance</name>
 
-    <dependencies>
+	<dependencies>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-utils</artifactId>
@@ -42,28 +44,28 @@
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-            <artifactId>mqtt-generic-agent</artifactId>
-            <version>2.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
 		<dependency>
-			<groupId>org.eclipse.paho</groupId>
-			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-			<version>1.1.0</version><!-- DEPENDENCY : org.eclipse.paho.client.mqttv3 to be moved to 1.2.0-->
+			<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+			<artifactId>mqtt-generic-agent</artifactId>
+			<version>2.0-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-	    	<groupId>org.eclipse.sensinact.gateway.tools</groupId>
-	    	<artifactId>sensinact-test</artifactId>
-	        <version>${project.version}</version>
+			<groupId>org.eclipse.paho</groupId>
+			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+			<version>1.1.0</version><!-- DEPENDENCY : org.eclipse.paho.client.mqttv3 
+				to be moved to 1.2.0 -->
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.tools</groupId>
+			<artifactId>sensinact-test</artifactId>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.main</artifactId>
-			<version>${org.apache.felix.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -78,30 +80,30 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-    </dependencies>
+	</dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Embed-Transitive>false</Embed-Transitive>
-                        <Bundle-Activator>
-                            org.eclipse.sensinact.gateway.agent.mqtt.inst.osgi.Activator
-                        </Bundle-Activator>
-                        <Include-Resource>
-                            about.html,
-                            src/main/resources/
-                        </Include-Resource>
-                        <Import-Package>
-                            org.json,
-                            *
-                        </Import-Package>
-                    </instructions>
-                </configuration>                
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Embed-Transitive>false</Embed-Transitive>
+						<Bundle-Activator>
+							org.eclipse.sensinact.gateway.agent.mqtt.inst.osgi.Activator
+						</Bundle-Activator>
+						<Include-Resource>
+							about.html,
+							src/main/resources/
+						</Include-Resource>
+						<Import-Package>
+							org.json,
+							*
+						</Import-Package>
+					</instructions>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>
@@ -118,30 +120,30 @@
 						</configuration>
 					</execution>
 				</executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.4</version> <!-- DEPENDENCY : maven-resources-plugin to be updated to 2.7-->
-                <executions>
-                    <execution>
-                        <id>generate-test-resources</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.basedir}/target/felix/load</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.basedir}/src/test/resources/</directory>
-                                    <filtering>true</filtering>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>                	
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.4</version> <!-- DEPENDENCY : maven-resources-plugin to be updated to 2.7 -->
+				<executions>
+					<execution>
+						<id>generate-test-resources</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.basedir}/target/felix/load</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.basedir}/src/test/resources/</directory>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
@@ -153,10 +155,10 @@
 							<goal>run</goal>
 						</goals>
 						<configuration>
-							<tasks>								
-			                    <mkdir dir="${project.build.directory}/felix/tmp" />
+							<tasks>
+								<mkdir dir="${project.build.directory}/felix/tmp" />
 								<copy file="../../../sensinact-security/cert/keystore.jks"
-                                      tofile="${project.build.directory}/felix/bundle/keystore.jks"/>
+									tofile="${project.build.directory}/felix/bundle/keystore.jks" />
 							</tasks>
 						</configuration>
 					</execution>
@@ -174,64 +176,64 @@
 						<phase>generate-test-resources</phase>
 						<configuration>
 							<artifactItems>
-						        <artifactItem>
-						            <groupId>org.osgi</groupId>
-						            <artifactId>osgi.annotation</artifactId>
+								<artifactItem>
+									<groupId>org.osgi</groupId>
+									<artifactId>osgi.annotation</artifactId>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>osgi.annotation.jar</destFileName>
-						        </artifactItem>
-						        <artifactItem>
-						            <groupId>org.osgi</groupId>
-						            <artifactId>org.osgi.service.component</artifactId>
-						            <version>${org.osgi.service.component.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.osgi</groupId>
+									<artifactId>org.osgi.service.component</artifactId>
+									<version>${org.osgi.service.component.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.osgi.service.component.jar</destFileName>
-						        </artifactItem>
-						        <artifactItem>
-						            <groupId>org.osgi</groupId>
-						            <artifactId>org.osgi.service.cm</artifactId>
-						            <version>${org.osgi.service.cm.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.osgi</groupId>
+									<artifactId>org.osgi.service.cm</artifactId>
+									<version>${org.osgi.service.cm.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.osgi.service.cm.jar</destFileName>
-						        </artifactItem>
-						        <artifactItem>
-						            <groupId>org.osgi</groupId>
-						            <artifactId>org.osgi.service.metatype</artifactId>
-						            <version>${org.osgi.service.metatype.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.osgi</groupId>
+									<artifactId>org.osgi.service.metatype</artifactId>
+									<version>${org.osgi.service.metatype.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.osgi.service.metatype.jar</destFileName>
-						        </artifactItem>
-						        <artifactItem>
-						            <groupId>org.osgi</groupId>
-						            <artifactId>org.osgi.namespace.extender</artifactId>
-						            <version>${org.osgi.namespace.extender.version} </version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.osgi</groupId>
+									<artifactId>org.osgi.namespace.extender</artifactId>
+									<version>${org.osgi.namespace.extender.version} </version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.osgi.namespace.extender.jar</destFileName>
-						        </artifactItem>
-						        <artifactItem>
-						            <groupId>org.osgi</groupId>
-						            <artifactId>org.osgi.util.promise</artifactId>
-						            <version>${org.osgi.util.promise.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.osgi</groupId>
+									<artifactId>org.osgi.util.promise</artifactId>
+									<version>${org.osgi.util.promise.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.osgi.util.promise.jar</destFileName>
-						        </artifactItem>
-						        <artifactItem>
-						            <groupId>org.osgi</groupId>
-						            <artifactId>org.osgi.util.function</artifactId>
-						            <version>${org.osgi.util.function.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.osgi</groupId>
+									<artifactId>org.osgi.util.function</artifactId>
+									<version>${org.osgi.util.function.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.osgi.util.function.jar</destFileName>
-						        </artifactItem>	
-						        <artifactItem>
-							        <groupId>org.osgi</groupId>
-						            <artifactId>org.osgi.service.log</artifactId>
-						            <version>${org.osgi.service.log.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.osgi</groupId>
+									<artifactId>org.osgi.service.log</artifactId>
+									<version>${org.osgi.service.log.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
-									<destFileName>org.osgi.service.log.jar</destFileName>	
-					            </artifactItem>	
+									<destFileName>org.osgi.service.log.jar</destFileName>
+								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
-  									<artifactId>org.apache.felix.log</artifactId>
+									<artifactId>org.apache.felix.log</artifactId>
 									<version>${org.apache.felix.log.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.log.jar</destFileName>
@@ -249,7 +251,7 @@
 									<version>${org.apache.felix.configadmin.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.configadmin.jar</destFileName>
-								</artifactItem>	
+								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.framework.security</artifactId>
@@ -257,13 +259,13 @@
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.framework.security.jar</destFileName>
 								</artifactItem>
-    							<artifactItem>
-						            <groupId>org.apache.felix</groupId>
-						            <artifactId>org.apache.felix.scr</artifactId>
-						            <version>${org.apache.felix.scr.version}</version>
-        							<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
-									<destFileName>org.apache.felix.scr.jar</destFileName>    
-    							</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.felix</groupId>
+									<artifactId>org.apache.felix.scr</artifactId>
+									<version>${org.apache.felix.scr.version}</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.apache.felix.scr.jar</destFileName>
+								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-utils</artifactId>
@@ -292,13 +294,13 @@
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-core.jar</destFileName>
 								</artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.sensinact.gateway</groupId>
-                                    <artifactId>sensinact-signature-validator</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
-                                    <destFileName>sensinact-signature-validator.jar</destFileName>
-                                </artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.sensinact.gateway</groupId>
+									<artifactId>sensinact-signature-validator</artifactId>
+									<version>${project.version}</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>sensinact-signature-validator.jar</destFileName>
+								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-framework-extension</artifactId>
@@ -329,32 +331,32 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.tools</groupId>
-    								<artifactId>mqtt-server</artifactId>
+									<artifactId>mqtt-server</artifactId>
 									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>mqtt-server.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-       								<artifactId>mqtt-generic-agent</artifactId>
+									<artifactId>mqtt-generic-agent</artifactId>
 									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>mqtt-generic-agent.jar</destFileName>
-								</artifactItem>	
+								</artifactItem>
 								<artifactItem>
-        							<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
-        							<artifactId>mqtt-utils</artifactId>
-        							<version>2.0-SNAPSHOT</version>
-        							<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
-									<destFileName>mqtt-utils.jar</destFileName>    
-    							</artifactItem>
-    							<artifactItem>
-						            <groupId>org.eclipse.paho</groupId>
-						            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-						            <version>${org.eclipse.paho.client.mqttv3.version}</version>
-        							<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
-									<destFileName>org.eclipse.paho.client.mqttv3.jar</destFileName>    
-    							</artifactItem>
+									<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
+									<artifactId>mqtt-utils</artifactId>
+									<version>2.0-SNAPSHOT</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>mqtt-utils.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.paho</groupId>
+									<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+									<version>${org.eclipse.paho.client.mqttv3.version}</version>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.eclipse.paho.client.mqttv3.jar</destFileName>
+								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.simulated.devices</groupId>
 									<artifactId>slider</artifactId>
@@ -365,14 +367,12 @@
 								<artifactItem>
 									<groupId>org.slf4j</groupId>
 									<artifactId>slf4j-api</artifactId>
-									<version>${slf4j.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>slf4j-api.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.slf4j</groupId>
 									<artifactId>slf4j-simple</artifactId>
-									<version>${slf4j.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>slf4j-impl.jar</destFileName>
 								</artifactItem>
@@ -382,6 +382,6 @@
 				</executions>
 				<extensions>true</extensions>
 			</plugin>
-	    </plugins>
-    </build>
+		</plugins>
+	</build>
 </project>

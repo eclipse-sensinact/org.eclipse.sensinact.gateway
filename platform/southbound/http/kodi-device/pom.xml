@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (c) 2017 CEA.
   ~ All rights reserved. This program and the accompanying materials
@@ -9,59 +10,60 @@
   ~    CEA - initial API and implementation
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
-        <artifactId>parent</artifactId>
-        <version>2.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
+		<artifactId>parent</artifactId>
+		<version>2.0-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>kodi-device</artifactId>
+	<artifactId>kodi-device</artifactId>
 
-    <packaging>bundle</packaging>
+	<packaging>bundle</packaging>
 
-    <name>sensiNact IoT Gateway - Kodi Device</name>
+	<name>sensiNact IoT Gateway - Kodi Device</name>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-Activator>org.eclipse.sensinact.gateway.sthbnd.http.kodi.osgi.Activator</Bundle-Activator>
-                        <Include-Resource>
-                            about.html,
-                            src/main/resources/
-                        </Include-Resource>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-Activator>org.eclipse.sensinact.gateway.sthbnd.http.kodi.osgi.Activator</Bundle-Activator>
+						<Include-Resource>
+							about.html,
+							src/main/resources/
+						</Include-Resource>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
-            <artifactId>http-device</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>${javax.servlet-api.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.protocol</groupId>
-            <artifactId>ssdp</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
+			<artifactId>http-device</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>${javax.servlet-api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
+			<artifactId>ssdp</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
 </project>

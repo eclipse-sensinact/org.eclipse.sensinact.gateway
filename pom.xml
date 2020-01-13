@@ -276,7 +276,21 @@
 
 
 			<!-- <org.apache.felix.version> -->
-
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+            	<artifactId>org.apache.felix.framework</artifactId>
+            	<version>${org.apache.felix.version}</version>
+        	</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.main</artifactId>
+				<version>${org.apache.felix.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.main.distribution</artifactId>
+				<version>${org.apache.felix.version}</version>
+			</dependency>
 
 			<!-- <org.apache.felix.bundlerepository.version> -->
 			<!-- <org.apache.felix.configadmin.version> -->
@@ -287,12 +301,22 @@
 			<!-- <org.apache.felix.gogo.runtime.version> -->
 			<!-- <org.apache.felix.http.api.version> -->
 			<!-- <org.apache.felix.http.servlet-api.version> -->
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.http.servlet-api</artifactId>
+				<version>${org.apache.felix.http.servlet-api.version}</version>
+			</dependency>
 			<!-- <org.apache.felix.log.version> -->
 			<!-- <org.apache.felix.scr.version> -->
 			<!-- <org.apache.felix.shell.remote.version> -->
 
 
 			<!-- <org.apache.felix.http.jetty.version> -->
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.http.jetty</artifactId>
+				<version>${org.apache.felix.http.jetty.version}</version>
+			</dependency>
 			<!-- <org.eclipse.jetty.version> -->
 
 
@@ -326,9 +350,13 @@
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
 				<version>${slf4j.version}</version>
-				<scope>provided</scope>
 			</dependency>
 			<!-- <slf4j.simple.version> -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-simple</artifactId>
+				<version>${slf4j.simple.version}</version>
+			</dependency>
 			<!-- <commons-logging.version> -->
 
 
@@ -516,7 +544,7 @@
 
 	<build>
 		<pluginManagement>
-			<plugins>		
+			<plugins>
 				<plugin>
 					<groupId>org.codehaus.gmaven</groupId>
 					<artifactId>groovy-maven-plugin</artifactId>

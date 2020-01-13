@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (c) 2017 CEA.
   ~ All rights reserved. This program and the accompanying materials
@@ -9,19 +10,20 @@
   ~    CEA - initial API and implementation
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-   
-    <parent>
-    	<groupId>org.eclipse.sensinact.gateway.tools</groupId>
-    	<artifactId>platform.tools</artifactId>
-        <version>2.0-SNAPSHOT</version>
-    </parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway.tools</groupId>
+		<artifactId>platform.tools</artifactId>
+		<version>2.0-SNAPSHOT</version>
+	</parent>
 
 	<artifactId>sensinact-test</artifactId>
 	<packaging>jar</packaging>
-	
+
 	<name>sensiNact IoT Gateway - sensiNact Test helper</name>
 
 	<dependencies>
@@ -34,15 +36,14 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-		    <groupId>junit</groupId>
-		    <artifactId>junit</artifactId>
-		    <version>${junit.version}</version>
-		    <scope>compile</scope>
-	    </dependency>	
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.skyscreamer</groupId>
 			<artifactId>jsonassert</artifactId>
@@ -50,10 +51,10 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-    		<groupId>org.eclipse.sensinact.gateway</groupId>
-    		<artifactId>sensinact-utils</artifactId>
-        	<version>${project.version}</version>
-        	<scope>provided</scope>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-utils</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

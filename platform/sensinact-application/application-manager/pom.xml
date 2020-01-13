@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (c) 2017 CEA.
   ~ All rights reserved. This program and the accompanying materials
@@ -10,88 +10,87 @@
   ~    CEA - initial API and implementation
   -->
 
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.eclipse.sensinact.gateway</groupId>
-        <artifactId>sensinact-application</artifactId>
-        <version>2.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway</groupId>
+		<artifactId>sensinact-application</artifactId>
+		<version>2.0-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>application-manager</artifactId>
-    <packaging>bundle</packaging>
+	<artifactId>application-manager</artifactId>
+	<packaging>bundle</packaging>
 
-    <name>sensiNact IoT AppManager - Core</name>
+	<name>sensiNact IoT AppManager - Core</name>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                	<unpackBundle>true</unpackBundle>
-                    <instructions>
-                        <Export-Package>
-                            org.eclipse.sensinact.gateway.app.api.*,
-                            org.eclipse.sensinact.gateway.app.manager.component.data,
-                            org.eclipse.sensinact.gateway.app.manager.json
-                        </Export-Package>
-                        <Bundle-Activator>org.eclipse.sensinact.gateway.app.manager.osgi.Activator</Bundle-Activator>
-                        <Include-Resource>
-                            about.html,
-                            src/main/resources/
-                        </Include-Resource>
-                    </instructions>
-                </configuration>
-            </plugin>
-           	<plugin>
-	            <groupId>org.codehaus.mojo</groupId>
-	            <artifactId>sql-maven-plugin</artifactId>
-		        <executions>
-		          <execution>
-		            <id>insert-bundle-signature</id>
-		            <phase>install</phase>
-		            <goals>
-		              <goal>execute</goal>
-		            </goals>
-		            <configuration>
-		              <sqlCommand>UPDATE BUNDLE SET BSHA = '${sha}' WHERE BNAME = '${project.artifactId}'</sqlCommand>
-		            </configuration>
-		          </execution>
-		        </executions>
-       		</plugin>
-        </plugins>
-    </build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<unpackBundle>true</unpackBundle>
+					<instructions>
+						<Export-Package>
+							org.eclipse.sensinact.gateway.app.api.*,
+							org.eclipse.sensinact.gateway.app.manager.component.data,
+							org.eclipse.sensinact.gateway.app.manager.json
+						</Export-Package>
+						<Bundle-Activator>org.eclipse.sensinact.gateway.app.manager.osgi.Activator</Bundle-Activator>
+						<Include-Resource>
+							about.html,
+							src/main/resources/
+						</Include-Resource>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>sql-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>insert-bundle-signature</id>
+						<phase>install</phase>
+						<goals>
+							<goal>execute</goal>
+						</goals>
+						<configuration>
+							<sqlCommand>UPDATE BUNDLE SET BSHA = '${sha}' WHERE BNAME = '${project.artifactId}'</sqlCommand>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-core</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-utils</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-security-none</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-core</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-utils</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-security-none</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
 </project>
-  

@@ -1,89 +1,102 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
 
-    <parent>
-        <groupId>org.eclipse.sensinact.gateway.tools</groupId>
-        <artifactId>platform.tools</artifactId>
-        <version>2.0-SNAPSHOT</version>
-    </parent>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mqtt-server</artifactId>
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway.tools</groupId>
+		<artifactId>platform.tools</artifactId>
+		<version>2.0-SNAPSHOT</version>
+	</parent>
 
-    <packaging>bundle</packaging>
+	<artifactId>mqtt-server</artifactId>
 
-    <name>sensiNact IoT Gateway - MQTT Server</name>
+	<packaging>bundle</packaging>
 
-    <properties>
-        <netty.version>4.1.5.Final</netty.version>
-        <moquette.version>0.9</moquette.version>
-    </properties>
+	<name>sensiNact IoT Gateway - MQTT Server</name>
 
-    <repositories>
-        <repository>
-            <id>bintray</id>
-            <url>https://jcenter.bintray.com</url>
-        </repository>
-        <repository>
-            <id>gnuio</id>
-            <url>https://nexus.arcsmed.at/content/repositories/homer.core</url>
-        </repository>
-    </repositories>
+	<properties>
+		<netty.version>4.1.5.Final</netty.version>
+		<moquette.version>0.9</moquette.version>
+	</properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.moquette</groupId>
-            <artifactId>moquette-broker</artifactId>
-            <version>${moquette.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.moquette</groupId>
-            <artifactId>moquette-netty-parser</artifactId>
-            <version>${moquette.version}</version>
-        </dependency>
-        <!-- Specific subproducts used are netty-transport,netty-common,netty-buffer,netty-handler,netty-codec -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>${netty.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast</artifactId>
-            <version>${com.hazelcast.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mapdb</groupId>
-            <artifactId>mapdb</artifactId>
-            <version>${org.mapdb.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
+	<repositories>
+		<repository>
+			<id>bintray</id>
+			<url>https://jcenter.bintray.com</url>
+		</repository>
+		<repository>
+			<id>gnuio</id>
+			<url>https://nexus.arcsmed.at/content/repositories/homer.core</url>
+		</repository>
+	</repositories>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Embed-Dependency>*;inline=false;artifactId=!org.osgi.core</Embed-Dependency>
-                        <Bundle-Activator>org.sensinact.mqtt.server.osgi.Activator</Bundle-Activator>
-                        <Export-Package>org.sensinact.mqtt.server,org.sensinact.mqtt.server.osgi</Export-Package>
-                        <Import-Package>org.osgi.service.cm,sun.misc,org.eclipse.sensinact.*,org.osgi.util.tracker,org.osgi.framework.wiring,javax.net.ssl,javax.net,org.osgi.framework;version="1.9",org.slf4j,javax.security.cert</Import-Package>
-                        <_nouses>false</_nouses>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+	<dependencies>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.moquette</groupId>
+			<artifactId>moquette-broker</artifactId>
+			<version>${moquette.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.moquette</groupId>
+			<artifactId>moquette-netty-parser</artifactId>
+			<version>${moquette.version}</version>
+		</dependency>
+		<!-- Specific subproducts used are netty-transport,netty-common,netty-buffer,netty-handler,netty-codec -->
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>${netty.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.hazelcast</groupId>
+			<artifactId>hazelcast</artifactId>
+			<version>${com.hazelcast.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mapdb</groupId>
+			<artifactId>mapdb</artifactId>
+			<version>${org.mapdb.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Embed-Dependency>*;inline=false;artifactId=!org.osgi.core</Embed-Dependency>
+						<Bundle-Activator>org.sensinact.mqtt.server.osgi.Activator</Bundle-Activator>
+						<Export-Package>org.sensinact.mqtt.server,org.sensinact.mqtt.server.osgi</Export-Package>
+						<Import-Package>org.osgi.service.cm,sun.misc,org.eclipse.sensinact.*,org.osgi.util.tracker,org.osgi.framework.wiring,javax.net.ssl,javax.net,org.osgi.framework;version="1.9",org.slf4j,javax.security.cert</Import-Package>
+						<_nouses>false</_nouses>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

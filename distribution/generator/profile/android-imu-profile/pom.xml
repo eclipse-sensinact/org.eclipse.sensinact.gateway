@@ -9,89 +9,88 @@
   ~ Contributors:
   ~    CEA - initial API and implementation
   -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.eclipse.sensinact.gateway.distribution</groupId>
-        <artifactId>profile</artifactId>
-        <version>2.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
+		<artifactId>profile</artifactId>
+		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
-    <artifactId>android-imu</artifactId>
-    <packaging>pom</packaging>
+	<artifactId>android-imu</artifactId>
+	<packaging>pom</packaging>
 
-    <name>sensiNact IoT Gateway - sensiNact Runtime (${project.artifactId} bridge dependencies)</name>
+	<name>sensiNact IoT Gateway - sensiNact Runtime (${project.artifactId} bridge dependencies)</name>
 
-    <dependencies>
-        <!-- BEGIN: HTTP Dependencies -->
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.protocol</groupId>
-            <artifactId>http</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-            <artifactId>http-tools</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
-            <artifactId>http-device</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
+	<dependencies>
+		<!-- BEGIN: HTTP Dependencies -->
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
+			<artifactId>http</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+			<artifactId>http-tools</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
+			<artifactId>http-device</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.jetty</artifactId>
-			<version>${org.apache.felix.http.jetty.version}</version>
 
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.servlet-api</artifactId>
-			<version>${org.apache.felix.http.servlet-api.version}</version>
 		</dependency>
-        <!-- END: HTTP Dependencies -->
-        <!-- BEGIN: Websocket -->
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-            <artifactId>rest-access</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!-- END: Websocket -->
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
-            <artifactId>http-android</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
+		<!-- END: HTTP Dependencies -->
+		<!-- BEGIN: Websocket -->
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+			<artifactId>rest-access</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<!-- END: Websocket -->
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
+			<artifactId>http-android</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <inherited>false</inherited>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/sensinact/load/${project.artifactId}</outputDirectory>
-                            <excludeArtifactIds>${excludeArtifactId}</excludeArtifactIds>
-                            <excludeGroupIds>${excludeGroupId}</excludeGroupIds>
-                            <excludeTransitive>${excludeTransitive}</excludeTransitive>
-                            <excludeTypes>pom</excludeTypes>
-                        </configuration>
-                        <inherited>false</inherited>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<inherited>false</inherited>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/sensinact/load/${project.artifactId}</outputDirectory>
+							<excludeArtifactIds>${excludeArtifactId}</excludeArtifactIds>
+							<excludeGroupIds>${excludeGroupId}</excludeGroupIds>
+							<excludeTransitive>${excludeTransitive}</excludeTransitive>
+							<excludeTypes>pom</excludeTypes>
+						</configuration>
+						<inherited>false</inherited>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

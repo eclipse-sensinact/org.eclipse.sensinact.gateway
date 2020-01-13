@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (c) 2017 CEA.
   ~ All rights reserved. This program and the accompanying materials
@@ -10,19 +11,19 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.eclipse.sensinact</groupId>
-        <artifactId>gateway</artifactId>
-        <version>2.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>org.eclipse.sensinact</groupId>
+		<artifactId>gateway</artifactId>
+		<version>2.0-SNAPSHOT</version>
+	</parent>
 
-    <groupId>org.eclipse.sensinact.gateway</groupId>
+	<groupId>org.eclipse.sensinact.gateway</groupId>
 	<artifactId>parent</artifactId>
-    <packaging>pom</packaging>
+	<packaging>pom</packaging>
 
 	<name>sensiNact IoT Gateway - Platform</name>
 
@@ -31,7 +32,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>license-maven-plugin</artifactId>
-                <version>${license-maven-plugin.version}</version>
+				<version>${license-maven-plugin.version}</version>
 				<configuration>
 					<licenseName>sensinact</licenseName>
 					<licenseResolver>classpath://fr/license</licenseResolver>
@@ -60,53 +61,53 @@
 	</build>
 
 	<properties>
-	    <powermock.version>1.5.2</powermock.version>
-        <coap.version>0.8.3-SNAPSHOT</coap.version>
-    </properties>
+		<powermock.version>1.5.2</powermock.version>
+		<coap.version>0.8.3-SNAPSHOT</coap.version>
+	</properties>
 
-	<dependencies>		
+	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
-	    <dependency>
-	      <groupId>org.powermock</groupId>
-	      <artifactId>powermock-module-junit4</artifactId>
-	      <version>${powermock.version}</version>
-	      <scope>test</scope>
-	    </dependency>
-	    <dependency>
-	      <groupId>org.powermock</groupId>
-	      <artifactId>powermock-api-mockito</artifactId>
-	      <version>${powermock.version}</version>
-	      <scope>test</scope>
-	    </dependency> 	
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<version>${powermock.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito</artifactId>
+			<version>${powermock.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-    
+
 	<modules>
-        <module>sensinact-utils</module>
-        <module>sensinact-common</module>
+		<module>sensinact-utils</module>
+		<module>sensinact-common</module>
 		<module>tools</module>
-        <module>sensinact-datastore/sensinact-datastore-api</module>
-        <module>sensinact-security/sensinact-signature-validator</module>
-        <module>sensinact-core</module>
-        <module>sensinact-remote-osgi</module>
-        <module>sensinact-security</module>
-        <module>protocol</module>
+		<module>sensinact-datastore/sensinact-datastore-api</module>
+		<module>sensinact-security/sensinact-signature-validator</module>
+		<module>sensinact-core</module>
+		<module>sensinact-remote-osgi</module>
+		<module>sensinact-security</module>
+		<module>protocol</module>
 		<module>northbound/sensinact-access</module>
-        <module>sensinact-generic</module>
-        <module>../simulated-devices</module>
+		<module>sensinact-generic</module>
+		<module>../simulated-devices</module>
 		<module>northbound/mqtt/mqtt-agent</module>
-        <module>sensinact-datastore</module>
+		<module>sensinact-datastore</module>
 		<module>northbound</module>
 		<module>sensinact-security/sensinact-mail-connector</module>
-        <module>sensinact-security/sensinact-security-core</module>
-        <module>sensinact-security/sensinact-security-oauth2</module>
-        <module>southbound</module>
-        <module>sensinact-system</module>
+		<module>sensinact-security/sensinact-security-core</module>
+		<module>sensinact-security/sensinact-security-oauth2</module>
+		<module>southbound</module>
+		<module>sensinact-system</module>
 		<module>sensinact-shell</module>
-        <module>sensinact-application</module>
+		<module>sensinact-application</module>
 	</modules>
 </project>

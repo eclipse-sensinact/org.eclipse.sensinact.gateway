@@ -1,108 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
-~ Copyright (c) 2017 CEA.
-~ All rights reserved. This program and the accompanying materials
-~ are made available under the terms of the Eclipse Public License v1.0
-~ which accompanies this distribution, and is available at
-~ http://www.eclipse.org/legal/epl-v10.html
-~
-~ Contributors:
-~    CEA - initial API and implementation
--->
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.eclipse.sensinact.gateway.sthbnd</groupId>
-        <artifactId>parent</artifactId>
-        <version>2.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway.sthbnd</groupId>
+		<artifactId>parent</artifactId>
+		<version>2.0-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>sensinact-openhab</artifactId>
+	<artifactId>sensinact-openhab</artifactId>
 
-    <packaging>bundle</packaging>
+	<packaging>bundle</packaging>
 
-    <name>sensiNact IoT Gateway - OpenHab Protocol Device</name>
+	<name>sensiNact IoT Gateway - OpenHab Protocol Device</name>
 
-    <build>
+	<build>
 
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-SymbolicName>
-                            ${project.artifactId}
-                        </Bundle-SymbolicName>
-                        <Bundle-Activator>org.eclipse.sensinact.gateway.device.openhab.sensinact.Activator</Bundle-Activator>
-                        <Import-Package>
-                            org.json,
-                            *
-                        </Import-Package>
-                        <Include-Resource>
-                            about.html,
-                            src/main/resources/
-                        </Include-Resource>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>
+							${project.artifactId}
+						</Bundle-SymbolicName>
+						<Bundle-Activator>org.eclipse.sensinact.gateway.device.openhab.sensinact.Activator</Bundle-Activator>
+						<Import-Package>
+							org.json,
+							*
+						</Import-Package>
+						<Include-Resource>
+							about.html,
+							src/main/resources/
+						</Include-Resource>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-generic</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>    
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.protocol</groupId>
-            <artifactId>http</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
-            <artifactId>http-device</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.gogo.runtime</artifactId>
-            <version>0.10.0</version> <!-- DEPENDENCY : org.apache.felix.gogo.runtime - strange version -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.eclipse.osgi</groupId>
-                    <artifactId>org.eclipse.osgi</artifactId>
-                </exclusion>
-            </exclusions>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.jmdns</groupId>
-            <artifactId>jmdns</artifactId>
-            <version>${javax.jmdns.version}</version>
-        </dependency>
+	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-generic</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-utils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
+			<artifactId>http</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
+			<artifactId>http-device</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.gogo.runtime</artifactId>
+			<version>0.10.0</version> <!-- DEPENDENCY : org.apache.felix.gogo.runtime - strange version -->
+			<exclusions>
+				<exclusion>
+					<groupId>org.eclipse.osgi</groupId>
+					<artifactId>org.eclipse.osgi</artifactId>
+				</exclusion>
+			</exclusions>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.jmdns</groupId>
+			<artifactId>jmdns</artifactId>
+			<version>${javax.jmdns.version}</version>
+		</dependency>
 
-    </dependencies>
+	</dependencies>
 </project>

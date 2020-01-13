@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (c) 2017 CEA.
   ~ All rights reserved. This program and the accompanying materials
@@ -9,111 +10,106 @@
   ~    CEA - initial API and implementation
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.eclipse.sensinact.gateway</groupId>
-        <artifactId>parent</artifactId>
-        <version>2.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway</groupId>
+		<artifactId>parent</artifactId>
+		<version>2.0-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>sensinact-core</artifactId>
-    <packaging>bundle</packaging>
-    	
-    <name>sensiNact IoT Gateway - Core</name>
+	<artifactId>sensinact-core</artifactId>
+	<packaging>bundle</packaging>
+
+	<name>sensiNact IoT Gateway - Core</name>
 
 	<dependencies>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-signature-validator</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-common</artifactId>
-            <version>${project.version}</version>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-signature-validator</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-common</artifactId>
+			<version>${project.version}</version>
 			<scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-utils</artifactId>
-            <version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-utils</artifactId>
+			<version>${project.version}</version>
 			<scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-datastore-api</artifactId>
-            <version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-datastore-api</artifactId>
+			<version>${project.version}</version>
 			<scope>compile</scope>
-        </dependency>
+		</dependency>
 		<dependency>
 			<groupId>org.skyscreamer</groupId>
 			<artifactId>jsonassert</artifactId>
 			<version>${jsonassert.version}</version>
 			<scope>test</scope>
 		</dependency>
-       <dependency>
-           <groupId>org.slf4j</groupId>
-           <artifactId>slf4j-api</artifactId>
-           <version>${slf4j.version}</version>
-           <scope>provided</scope>
-       </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
-            <artifactId>mqtt-utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-       </dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
+			<artifactId>mqtt-utils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 
-       <!-- Build -->
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <obrRepository>NONE</obrRepository>
-                    <instructions>
-                        <Bundle-Activator>org.eclipse.sensinact.gateway.core.osgi.Activator</Bundle-Activator>
-                        <Export-Package>
-                            org.eclipse.sensinact.gateway.core,
-                            org.eclipse.sensinact.gateway.core.api,
-                            org.eclipse.sensinact.gateway.core.message,
-                            org.eclipse.sensinact.gateway.core.method,
-                            org.eclipse.sensinact.gateway.core.method.legacy,
-                            org.eclipse.sensinact.gateway.core.method.trigger,
-                            org.eclipse.sensinact.gateway.core.method.builder,
-                            org.eclipse.sensinact.gateway.core.osgi,
-                            org.eclipse.sensinact.gateway.core.security,
-                            org.eclipse.sensinact.gateway.core.remote
-                        </Export-Package>
-                        <!--
-                        <Import-Package>
-                        	org.osgi.service.condpermadmin,
-                        	org.osgi.service.permissionadmin,
-                        	org.eclipse.sensinact.gateway.common.execution,
-                        	org.eclipse.sensinact.gateway.datastore.api
-                        </Import-Package>
-                        -->
-                        <DynamicImport-Package>
-                        	org.eclipse.sensinact.gateway.core.security.impl
-                        </DynamicImport-Package>
-                        <Require-Capability>
-                            org.eclipse.sensinact.security,
-                            org.eclipse.sensinact.data.store,
-                            org.eclipse.sensinact.signature.validator
-                        </Require-Capability>
-                        <Include-Resource>
-                            about.html
-                        </Include-Resource>
+	<!-- Build -->
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<obrRepository>NONE</obrRepository>
+					<instructions>
+						<Bundle-Activator>org.eclipse.sensinact.gateway.core.osgi.Activator</Bundle-Activator>
+						<Export-Package>
+							org.eclipse.sensinact.gateway.core,
+							org.eclipse.sensinact.gateway.core.api,
+							org.eclipse.sensinact.gateway.core.message,
+							org.eclipse.sensinact.gateway.core.method,
+							org.eclipse.sensinact.gateway.core.method.legacy,
+							org.eclipse.sensinact.gateway.core.method.trigger,
+							org.eclipse.sensinact.gateway.core.method.builder,
+							org.eclipse.sensinact.gateway.core.osgi,
+							org.eclipse.sensinact.gateway.core.security,
+							org.eclipse.sensinact.gateway.core.remote
+						</Export-Package>
+						<!-- <Import-Package> org.osgi.service.condpermadmin, org.osgi.service.permissionadmin, 
+							org.eclipse.sensinact.gateway.common.execution, org.eclipse.sensinact.gateway.datastore.api 
+							</Import-Package> -->
+						<DynamicImport-Package>
+							org.eclipse.sensinact.gateway.core.security.impl
+						</DynamicImport-Package>
+						<Require-Capability>
+							org.eclipse.sensinact.security,
+							org.eclipse.sensinact.data.store,
+							org.eclipse.sensinact.signature.validator
+						</Require-Capability>
+						<Include-Resource>
+							about.html
+						</Include-Resource>
 
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

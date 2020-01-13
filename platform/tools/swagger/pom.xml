@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (c) 2017 CEA.
   ~ All rights reserved. This program and the accompanying materials
@@ -9,174 +10,175 @@
   ~    CEA - initial API and implementation
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.eclipse.sensinact.gateway.tools</groupId>
-        <artifactId>platform.tools</artifactId>
-        <version>2.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway.tools</groupId>
+		<artifactId>platform.tools</artifactId>
+		<version>2.0-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>swagger</artifactId>
-    <name>sensiNact IoT Gateway - Swagger API</name>
-    <packaging>bundle</packaging>
+	<artifactId>swagger</artifactId>
+	<name>sensiNact IoT Gateway - Swagger API</name>
+	<packaging>bundle</packaging>
 
-    <properties>
-        <swagger.url>https://codeload.github.com/swagger-api/swagger-ui/zip/v2.1.4</swagger.url>
-    </properties>
+	<properties>
+		<swagger.url>https://codeload.github.com/swagger-api/swagger-ui/zip/v2.1.4</swagger.url>
+	</properties>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>com.googlecode.maven-download-plugin</groupId>
-                <artifactId>download-maven-plugin</artifactId>
-                <version>${download-maven-plugin}</version>
-                <executions>
-                    <execution>
-                        <!-- the wget goal actually binds itself to this phase by default -->
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>${swagger.url}</url>
-                            <outputFileName>swagger-ui.zip</outputFileName>
-                            <!-- default target location, just to demonstrate the parameter -->
-                            <outputDirectory>${project.build.directory}</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.6</version> <!-- DEPENDENCY : maven-antrun-plugin to be updated to 1.8-->
-                <executions>
-                    <execution>
-                        <id>prepare</id>
-                        <phase>validate</phase>
-                        <configuration>
-                            <tasks>
-                                <unzip src="${project.build.directory}/swagger-ui.zip" dest="${project.build.directory}/swagger-ui/" />
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-swagger-ui-dist</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/swagger-api/dist</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.build.directory}/swagger-ui/swagger-ui-2.1.4/dist</directory>
-                                    <filtering>true</filtering>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                    	<id>copy-swagger</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-		                <configuration>
-		                	<outputDirectory>${project.build.directory}/swagger-api/dist</outputDirectory>
-		                	<overwrite>true</overwrite>
-		                	<resources>
-		                		<resource>
-		                			<targetPath>schemas</targetPath>
-		                			<directory>src/client/schemas</directory>
-		                			<filtering>true</filtering>
-		                		</resource>
-		                		<resource>
-		                			<targetPath>images</targetPath>
-		                			<directory>src/client/images</directory>
-		                			<filtering>true</filtering>
-		                		</resource>
-		                		<resource>
-		                			<directory>src/client</directory>
-			                		<includes>
-			                			<include>*.html</include>
-			                			<include>*.yaml</include>
-			                		</includes>
-			                		<filtering>true</filtering>
-		                		</resource>
-		                		<resource>
-		                			<directory>${project.build.directory}/swagger-api/dist/images</directory>
-			                		<includes>
-			                			<include>favicon.ico</include>
-			                		</includes>
-			                		<filtering>true</filtering>
-		                		</resource>
-		                	</resources>
-		                </configuration>
-                    </execution>
-                </executions>
-            </plugin>            
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-Activator>org.eclipse.sensinact.web.swagger.Activator</Bundle-Activator>
-                        <Include-Resource>
-                            swagger-api=${project.build.directory}/swagger-api/dist,
-                            about.html
-                        </Include-Resource>                                
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>    
-    <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>        
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.googlecode.maven-download-plugin</groupId>
+				<artifactId>download-maven-plugin</artifactId>
+				<version>${download-maven-plugin}</version>
+				<executions>
+					<execution>
+						<!-- the wget goal actually binds itself to this phase by default -->
+						<phase>validate</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>${swagger.url}</url>
+							<outputFileName>swagger-ui.zip</outputFileName>
+							<!-- default target location, just to demonstrate the parameter -->
+							<outputDirectory>${project.build.directory}</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.6</version> <!-- DEPENDENCY : maven-antrun-plugin to be updated to 1.8 -->
+				<executions>
+					<execution>
+						<id>prepare</id>
+						<phase>validate</phase>
+						<configuration>
+							<tasks>
+								<unzip src="${project.build.directory}/swagger-ui.zip"
+									dest="${project.build.directory}/swagger-ui/" />
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-swagger-ui-dist</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/swagger-api/dist</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}/swagger-ui/swagger-ui-2.1.4/dist</directory>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-swagger</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/swagger-api/dist</outputDirectory>
+							<overwrite>true</overwrite>
+							<resources>
+								<resource>
+									<targetPath>schemas</targetPath>
+									<directory>src/client/schemas</directory>
+									<filtering>true</filtering>
+								</resource>
+								<resource>
+									<targetPath>images</targetPath>
+									<directory>src/client/images</directory>
+									<filtering>true</filtering>
+								</resource>
+								<resource>
+									<directory>src/client</directory>
+									<includes>
+										<include>*.html</include>
+										<include>*.yaml</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+								<resource>
+									<directory>${project.build.directory}/swagger-api/dist/images</directory>
+									<includes>
+										<include>favicon.ico</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-Activator>org.eclipse.sensinact.web.swagger.Activator</Bundle-Activator>
+						<Include-Resource>
+							swagger-api=${project.build.directory}/swagger-api/dist,
+							about.html
+						</Include-Resource>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-common</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
-		</dependency>       
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-utils</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-utils</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
-		    <artifactId>org.apache.felix.http.servlet-api</artifactId>
-		    <version>${org.apache.felix.http.servlet-api.version}</version>
+			<artifactId>org.apache.felix.http.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.jetty</artifactId>
-			<version>${org.apache.felix.http.jetty.version}</version>
 			<scope>provided</scope>
 		</dependency>
-    </dependencies>
+	</dependencies>
 </project>

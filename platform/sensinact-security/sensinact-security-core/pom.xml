@@ -1,8 +1,14 @@
-<!-- ~ Copyright (c) 2017 CEA. ~ All rights reserved. This program and the 
-	accompanying materials ~ are made available under the terms of the Eclipse 
-	Public License v1.0 ~ which accompanies this distribution, and is available 
-	at ~ http://www.eclipse.org/legal/epl-v10.html ~ ~ Contributors: ~ CEA - 
-	initial API and implementation -->
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2017 CEA.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+  ~    CEA - initial API and implementation
+  -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -84,12 +90,10 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.main</artifactId>
-			<version>${org.apache.felix.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
-	<!-- Build -->
 	<build>
 		<plugins>
 			<plugin>
@@ -113,7 +117,8 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.framework.security</artifactId>
-									<version>2.4.0</version><!-- DEPENDENCY : org.apache.felix.framework.security to be moved to 2.6.1 -->
+									<version>2.4.0</version><!-- DEPENDENCY : org.apache.felix.framework.security 
+										to be moved to 2.6.1 -->
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.framework.security.jar</destFileName>
 								</artifactItem>
@@ -225,14 +230,14 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.http.jetty</artifactId>
-									<version>3.0.0</version><!-- DEPENDENCY : JETTY org.apache.felix.http.jetty to be moved to 4.0.8-->
+									<version>3.0.0</version><!-- DEPENDENCY : JETTY org.apache.felix.http.jetty to be moved to 4.0.8 -->
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.http.jetty.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.configadmin</artifactId>
-									<version>1.8.2</version><!-- DEPENDENCY : org.apache.felix.configadmin to be moved to 1.9.12-->
+									<version>1.8.2</version><!-- DEPENDENCY : org.apache.felix.configadmin to be moved to 1.9.12 -->
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.configadmin.jar</destFileName>
 								</artifactItem>
@@ -286,25 +291,25 @@
 									tofile="${project.build.directory}/felix/bundle/keystore.jks" />
 							</tasks>
 						</configuration>
-					</execution>					
-			        <execution>
-			            <id>createClassesDir</id>
-			            <phase>test-compile</phase>
-			            <configuration>
-			                <target>
-			                    <mkdir dir="${project.build.directory}/felix/tmp" />
-			                    <mkdir dir="${project.build.directory}/extra-test-classes" />
-		                	    <javac fork="true" executable="${env.JAVA_HOME}/bin/javac"
-		                	     srcdir="${project.basedir}/extra-src/test/java" 
-		                	     destdir="${project.basedir}/target/extra-test-classes">
-   									<classpath refid="maven.test.classpath"/>
-   								</javac>
-			                </target>
-			            </configuration>
-			            <goals>
-			                <goal>run</goal>
-			            </goals>
-			        </execution>
+					</execution>
+					<execution>
+						<id>createClassesDir</id>
+						<phase>test-compile</phase>
+						<configuration>
+							<target>
+								<mkdir dir="${project.build.directory}/felix/tmp" />
+								<mkdir dir="${project.build.directory}/extra-test-classes" />
+								<javac fork="true" executable="${env.JAVA_HOME}/bin/javac"
+									srcdir="${project.basedir}/extra-src/test/java"
+									destdir="${project.basedir}/target/extra-test-classes">
+									<classpath refid="maven.test.classpath" />
+								</javac>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
