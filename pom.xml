@@ -146,9 +146,11 @@
 		<!-- some version numbers are duplicated here: -->
 		<!-- integration-tests/mqtt-it/src/test/java/org/eclipse/sensinact/gateway/device/mqtt/lite/it/util/MqttTestITAbstract.java -->
 
+		<!-- OSGi release -->
 		<org.osgi.version>6.0.0</org.osgi.version>
 		<org.osgi.compendium.version>6.0.0</org.osgi.compendium.version>
 
+		<!-- OSGi specifications -->
 		<org.osgi.annotation.version>6.0.1</org.osgi.annotation.version>
 		<org.osgi.namespace.extender.version>1.0.1</org.osgi.namespace.extender.version>
 		<org.osgi.service.cm.version>1.6.0</org.osgi.service.cm.version>
@@ -159,8 +161,10 @@
 		<org.osgi.util.function.version>1.0.0</org.osgi.util.function.version>
 		<org.osgi.util.promise.version>1.0.0</org.osgi.util.promise.version>
 
+		<!-- Apache Felix Version -->
 		<org.apache.felix.version>6.0.2</org.apache.felix.version>
 
+		<!-- Apache Felix Dependencies -->
 		<org.apache.felix.bundlerepository.version>2.0.10</org.apache.felix.bundlerepository.version>
 		<org.apache.felix.configadmin.version>1.9.12</org.apache.felix.configadmin.version>
 		<org.apache.felix.fileinstall.version>3.6.4</org.apache.felix.fileinstall.version>
@@ -174,6 +178,7 @@
 		<org.apache.felix.scr.version>2.1.16</org.apache.felix.scr.version>
 		<org.apache.felix.shell.remote.version>1.1.2</org.apache.felix.shell.remote.version>
 
+		<!-- Jetty -->
 		<org.apache.felix.http.jetty.version>4.0.8</org.apache.felix.http.jetty.version>
 		<org.eclipse.jetty.version>9.4.15.v20190215</org.eclipse.jetty.version>
 
@@ -243,14 +248,16 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<!-- <org.osgi.version> -->
+
+			<!-- ============ -->
+			<!-- OSGi release -->
+			<!-- ============ -->
+
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.core</artifactId>
 				<version>${org.osgi.version}</version>
 			</dependency>
-
-			<!-- <org.osgi.compendium.version> -->
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>osgi.cmpn</artifactId>
@@ -259,34 +266,62 @@
 			</dependency>
 
 
-			<!-- <org.osgi.annotation.version> -->
+			<!-- =================== -->
+			<!-- OSGi specifications -->
+			<!-- =================== -->
+
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>osgi.annotation</artifactId>
 				<version>${org.osgi.annotation.version}</version>
 			</dependency>
-			<!-- <org.osgi.namespace.extender.version> -->
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.namespace.extender</artifactId>
 				<version>${org.osgi.namespace.extender.version} </version>
 			</dependency>
-
-			<!-- <org.osgi.service.cm.version> -->
-			<!-- <org.osgi.service.component.version> -->
-			<!-- <org.osgi.service.log.version> -->
-			<!-- <org.osgi.service.metatype.version> -->
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.cm</artifactId>
+				<version>${org.osgi.service.cm.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.component</artifactId>
+				<version>${org.osgi.service.component.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.log</artifactId>
+				<version>${org.osgi.service.log.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.metatype</artifactId>
+				<version>${org.osgi.service.metatype.version}</version>
+			</dependency>
 			<!-- <org.osgi.service.remoteserviceadmin.version> -->
-			<!-- <org.osgi.util.function.version> -->
-			<!-- <org.osgi.util.promise.version> -->
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.util.function</artifactId>
+				<version>${org.osgi.util.function.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.util.promise</artifactId>
+				<version>${org.osgi.util.promise.version}</version>
+			</dependency>
 
 
-			<!-- <org.apache.felix.version> -->
+			<!-- ==================== -->
+			<!-- Apache Felix Version -->
+			<!-- ==================== -->
+
 			<dependency>
 				<groupId>org.apache.felix</groupId>
-            	<artifactId>org.apache.felix.framework</artifactId>
-            	<version>${org.apache.felix.version}</version>
-        	</dependency>
+				<artifactId>org.apache.felix.framework</artifactId>
+				<version>${org.apache.felix.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.main</artifactId>
@@ -298,26 +333,45 @@
 				<version>${org.apache.felix.version}</version>
 			</dependency>
 
+
+			<!-- ========================= -->
+			<!-- Apache Felix Dependencies -->
+			<!-- ========================= -->
+
 			<!-- <org.apache.felix.bundlerepository.version> -->
 			<!-- <org.apache.felix.configadmin.version> -->
-			<!-- <org.apache.felix.fileinstall.version> -->
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.fileinstall</artifactId>
+				<version>${org.apache.felix.fileinstall.version}</version>
+			</dependency>
 			<!-- <org.apache.felix.framework.security.version> -->
 			<!-- <org.apache.felix.gogo.command.version> -->
 			<!-- <org.apache.felix.gogo.jline.version> -->
 			<!-- <org.apache.felix.gogo.runtime.version> -->
 			<!-- <org.apache.felix.http.api.version> -->
-			<!-- <org.apache.felix.http.servlet-api.version> -->
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.http.servlet-api</artifactId>
 				<version>${org.apache.felix.http.servlet-api.version}</version>
 			</dependency>
-			<!-- <org.apache.felix.log.version> -->
-			<!-- <org.apache.felix.scr.version> -->
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.log</artifactId>
+				<version>${org.apache.felix.log.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.scr</artifactId>
+				<version>${org.apache.felix.scr.version}</version>
+			</dependency>
 			<!-- <org.apache.felix.shell.remote.version> -->
 
 
-			<!-- <org.apache.felix.http.jetty.version> -->
+			<!-- ===== -->
+			<!-- Jetty -->
+			<!-- ===== -->
+
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.http.jetty</artifactId>
