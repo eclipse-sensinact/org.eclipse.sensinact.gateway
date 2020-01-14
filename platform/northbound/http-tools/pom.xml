@@ -48,13 +48,11 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>${org.eclipse.jetty.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-http</artifactId>
-			<version>${org.eclipse.jetty.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

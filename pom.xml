@@ -404,12 +404,22 @@
 			<!-- Jetty -->
 			<!-- ===== -->
 
+			<!-- <org.apache.felix.http.jetty.version> -->
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.http.jetty</artifactId>
 				<version>${org.apache.felix.http.jetty.version}</version>
 			</dependency>
-			<!-- <org.eclipse.jetty.version> -->
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-server</artifactId>
+				<version>${org.eclipse.jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-http</artifactId>
+				<version>${org.eclipse.jetty.version}</version>
+			</dependency>
 
 
 			<!-- ============= -->
