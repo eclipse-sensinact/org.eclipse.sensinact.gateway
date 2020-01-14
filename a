@@ -1,0 +1,97 @@
+./platform/northbound/geo-filtering/geojson-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/geojson-filter/pom.xml-					<dependency>
+./platform/northbound/geo-filtering/geojson-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/geojson-filter/pom.xml-						<groupId>org.apache.maven.surefire</groupId>
+./platform/northbound/geo-filtering/geojson-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/geojson-filter/pom.xml-						<artifactId>common-junit48</artifactId>
+./platform/northbound/geo-filtering/geojson-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/geojson-filter/pom.xml:						<version>${org.apache.maven.surefire.junit48.version}</version>
+./platform/northbound/geo-filtering/geojson-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/geojson-filter/pom.xml-					</dependency>
+./platform/northbound/geo-filtering/geojson-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/geojson-filter/pom.xml-				</dependencies>
+--
+./platform/northbound/geo-filtering/geojson-filter/pom.xml-					<dependency>
+./platform/northbound/geo-filtering/geojson-filter/pom.xml-						<groupId>org.apache.maven.surefire</groupId>
+./platform/northbound/geo-filtering/geojson-filter/pom.xml-						<artifactId>common-junit48</artifactId>
+./platform/northbound/geo-filtering/geojson-filter/pom.xml:						<version>${org.apache.maven.surefire.junit48.version}</version>
+./platform/northbound/geo-filtering/geojson-filter/pom.xml-					</dependency>
+./platform/northbound/geo-filtering/geojson-filter/pom.xml-				</dependencies>
+--
+./platform/northbound/ldap-filtering/ldap-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/ldap-filter/pom.xml-					<dependency>
+./platform/northbound/ldap-filtering/ldap-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/ldap-filter/pom.xml-						<groupId>org.apache.maven.surefire</groupId>
+./platform/northbound/ldap-filtering/ldap-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/ldap-filter/pom.xml-						<artifactId>common-junit48</artifactId>
+./platform/northbound/ldap-filtering/ldap-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/ldap-filter/pom.xml:						<version>${org.apache.maven.surefire.junit48.version}</version>
+./platform/northbound/ldap-filtering/ldap-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/ldap-filter/pom.xml-					</dependency>
+./platform/northbound/ldap-filtering/ldap-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/ldap-filter/pom.xml-				</dependencies>
+--
+./platform/northbound/ldap-filtering/ldap-filter/pom.xml-					<dependency>
+./platform/northbound/ldap-filtering/ldap-filter/pom.xml-						<groupId>org.apache.maven.surefire</groupId>
+./platform/northbound/ldap-filtering/ldap-filter/pom.xml-						<artifactId>common-junit48</artifactId>
+./platform/northbound/ldap-filtering/ldap-filter/pom.xml:						<version>${org.apache.maven.surefire.junit48.version}</version>
+./platform/northbound/ldap-filtering/ldap-filter/pom.xml-					</dependency>
+./platform/northbound/ldap-filtering/ldap-filter/pom.xml-				</dependencies>
+--
+./platform/northbound/jsonpath-filtering/jsonpath-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/jsonpath-filter/pom.xml-					<dependency>
+./platform/northbound/jsonpath-filtering/jsonpath-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/jsonpath-filter/pom.xml-						<groupId>org.apache.maven.surefire</groupId>
+./platform/northbound/jsonpath-filtering/jsonpath-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/jsonpath-filter/pom.xml-						<artifactId>common-junit48</artifactId>
+./platform/northbound/jsonpath-filtering/jsonpath-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/jsonpath-filter/pom.xml:						<version>${org.apache.maven.surefire.junit48.version}</version>
+./platform/northbound/jsonpath-filtering/jsonpath-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/jsonpath-filter/pom.xml-					</dependency>
+./platform/northbound/jsonpath-filtering/jsonpath-filter/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/jsonpath-filter/pom.xml-				</dependencies>
+--
+./platform/northbound/jsonpath-filtering/jsonpath-filter/pom.xml-					<dependency>
+./platform/northbound/jsonpath-filtering/jsonpath-filter/pom.xml-						<groupId>org.apache.maven.surefire</groupId>
+./platform/northbound/jsonpath-filtering/jsonpath-filter/pom.xml-						<artifactId>common-junit48</artifactId>
+./platform/northbound/jsonpath-filtering/jsonpath-filter/pom.xml:						<version>${org.apache.maven.surefire.junit48.version}</version>
+./platform/northbound/jsonpath-filtering/jsonpath-filter/pom.xml-					</dependency>
+./platform/northbound/jsonpath-filtering/jsonpath-filter/pom.xml-				</dependencies>
+--
+./platform/northbound/http-tools/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/http-tools/pom.xml-					<dependency>
+./platform/northbound/http-tools/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/http-tools/pom.xml-						<groupId>org.apache.maven.surefire</groupId>
+./platform/northbound/http-tools/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/http-tools/pom.xml-						<artifactId>common-junit48</artifactId>
+./platform/northbound/http-tools/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/http-tools/pom.xml:						<version>${org.apache.maven.surefire.junit48.version}</version>
+./platform/northbound/http-tools/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/http-tools/pom.xml-					</dependency>
+./platform/northbound/http-tools/target/classes/META-INF/maven/org.eclipse.sensinact.gateway.nthbnd/http-tools/pom.xml-				</dependencies>
+--
+./platform/northbound/http-tools/pom.xml-					<dependency>
+./platform/northbound/http-tools/pom.xml-						<groupId>org.apache.maven.surefire</groupId>
+./platform/northbound/http-tools/pom.xml-						<artifactId>common-junit48</artifactId>
+./platform/northbound/http-tools/pom.xml:						<version>${org.apache.maven.surefire.junit48.version}</version>
+./platform/northbound/http-tools/pom.xml-					</dependency>
+./platform/northbound/http-tools/pom.xml-				</dependencies>
+--
+./platform/sensinact-security/mock-signature-validator/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/mock-signature-validator/pom.xml-					<dependency>
+./platform/sensinact-security/mock-signature-validator/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/mock-signature-validator/pom.xml-						<groupId>org.apache.maven.surefire</groupId>
+./platform/sensinact-security/mock-signature-validator/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/mock-signature-validator/pom.xml-						<artifactId>common-junit48</artifactId>
+./platform/sensinact-security/mock-signature-validator/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/mock-signature-validator/pom.xml:						<version>${org.apache.maven.surefire.junit48.version}</version>
+./platform/sensinact-security/mock-signature-validator/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/mock-signature-validator/pom.xml-					</dependency>
+./platform/sensinact-security/mock-signature-validator/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/mock-signature-validator/pom.xml-				</dependencies>
+--
+./platform/sensinact-security/mock-signature-validator/pom.xml-					<dependency>
+./platform/sensinact-security/mock-signature-validator/pom.xml-						<groupId>org.apache.maven.surefire</groupId>
+./platform/sensinact-security/mock-signature-validator/pom.xml-						<artifactId>common-junit48</artifactId>
+./platform/sensinact-security/mock-signature-validator/pom.xml:						<version>${org.apache.maven.surefire.junit48.version}</version>
+./platform/sensinact-security/mock-signature-validator/pom.xml-					</dependency>
+./platform/sensinact-security/mock-signature-validator/pom.xml-				</dependencies>
+--
+./platform/sensinact-security/sensinact-security-oauth2/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/sensinact-security-oauth2/pom.xml-					<dependency>
+./platform/sensinact-security/sensinact-security-oauth2/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/sensinact-security-oauth2/pom.xml-						<groupId>org.apache.maven.surefire</groupId>
+./platform/sensinact-security/sensinact-security-oauth2/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/sensinact-security-oauth2/pom.xml-						<artifactId>common-junit48</artifactId>
+./platform/sensinact-security/sensinact-security-oauth2/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/sensinact-security-oauth2/pom.xml:						<version>${org.apache.maven.surefire.junit48.version}</version>
+./platform/sensinact-security/sensinact-security-oauth2/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/sensinact-security-oauth2/pom.xml-					</dependency>
+./platform/sensinact-security/sensinact-security-oauth2/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/sensinact-security-oauth2/pom.xml-				</dependencies>
+--
+./platform/sensinact-security/sensinact-security-oauth2/pom.xml-					<dependency>
+./platform/sensinact-security/sensinact-security-oauth2/pom.xml-						<groupId>org.apache.maven.surefire</groupId>
+./platform/sensinact-security/sensinact-security-oauth2/pom.xml-						<artifactId>common-junit48</artifactId>
+./platform/sensinact-security/sensinact-security-oauth2/pom.xml:						<version>${org.apache.maven.surefire.junit48.version}</version>
+./platform/sensinact-security/sensinact-security-oauth2/pom.xml-					</dependency>
+./platform/sensinact-security/sensinact-security-oauth2/pom.xml-				</dependencies>
+--
+./platform/sensinact-security/sensinact-signature-validator/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/sensinact-signature-validator/pom.xml-					<dependency>
+./platform/sensinact-security/sensinact-signature-validator/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/sensinact-signature-validator/pom.xml-						<groupId>org.apache.maven.surefire</groupId>
+./platform/sensinact-security/sensinact-signature-validator/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/sensinact-signature-validator/pom.xml-						<artifactId>common-junit48</artifactId>
+./platform/sensinact-security/sensinact-signature-validator/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/sensinact-signature-validator/pom.xml:						<version>${org.apache.maven.surefire.junit48.version}</version>
+./platform/sensinact-security/sensinact-signature-validator/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/sensinact-signature-validator/pom.xml-					</dependency>
+./platform/sensinact-security/sensinact-signature-validator/target/classes/META-INF/maven/org.eclipse.sensinact.gateway/sensinact-signature-validator/pom.xml-				</dependencies>
+--
+./platform/sensinact-security/sensinact-signature-validator/pom.xml-					<dependency>
+./platform/sensinact-security/sensinact-signature-validator/pom.xml-						<groupId>org.apache.maven.surefire</groupId>
+./platform/sensinact-security/sensinact-signature-validator/pom.xml-						<artifactId>common-junit48</artifactId>
+./platform/sensinact-security/sensinact-signature-validator/pom.xml:						<version>${org.apache.maven.surefire.junit48.version}</version>
+./platform/sensinact-security/sensinact-signature-validator/pom.xml-					</dependency>
+./platform/sensinact-security/sensinact-signature-validator/pom.xml-				</dependencies>
