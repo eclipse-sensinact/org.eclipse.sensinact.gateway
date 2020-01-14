@@ -342,7 +342,11 @@
 			<!-- Apache Felix Dependencies -->
 			<!-- ========================= -->
 
-			<!-- <org.apache.felix.bundlerepository.version> -->
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.bundlerepository</artifactId>
+				<version>${org.apache.felix.bundlerepository.version}</version>
+			</dependency>
 			<!-- <org.apache.felix.configadmin.version> -->
 			<dependency>
 				<groupId>org.apache.felix</groupId>
@@ -350,8 +354,16 @@
 				<version>${org.apache.felix.fileinstall.version}</version>
 			</dependency>
 			<!-- <org.apache.felix.framework.security.version> -->
-			<!-- <org.apache.felix.gogo.command.version> -->
-			<!-- <org.apache.felix.gogo.jline.version> -->
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.gogo.command</artifactId>
+				<version>${org.apache.felix.gogo.command.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.gogo.jline</artifactId>
+				<version>${org.apache.felix.gogo.jline.version}</version>
+			</dependency>
 			<!-- <org.apache.felix.gogo.runtime.version> -->
 			<!-- <org.apache.felix.http.api.version> -->
 			<dependency>
@@ -369,7 +381,11 @@
 				<artifactId>org.apache.felix.scr</artifactId>
 				<version>${org.apache.felix.scr.version}</version>
 			</dependency>
-			<!-- <org.apache.felix.shell.remote.version> -->
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.shell.remote</artifactId>
+				<version>${org.apache.felix.shell.remote.version}</version>
+			</dependency>
 
 
 			<!-- ===== -->

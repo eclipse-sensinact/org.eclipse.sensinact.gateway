@@ -92,7 +92,6 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.gogo.command</artifactId>
-									<version>${org.apache.felix.gogo.command.version}</version>
 									<type>jar</type>
 									<overWrite>true</overWrite>
 								</artifactItem>
@@ -109,7 +108,6 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.gogo.jline</artifactId>
-									<version>${org.apache.felix.gogo.jline.version}</version>
 									<type>jar</type>
 									<overWrite>true</overWrite>
 								</artifactItem>
@@ -202,7 +200,6 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.bundlerepository</artifactId>
-									<version>${org.apache.felix.bundlerepository.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
@@ -298,7 +295,6 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.shell.remote</artifactId>
-									<version>${org.apache.felix.shell.remote.version}</version>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.build.directory}/dependencies/bundle/4</outputDirectory>
