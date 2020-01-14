@@ -204,6 +204,8 @@
 		<maven-bundle-plugin.version>3.5.1</maven-bundle-plugin.version>
 		<maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
 		<maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
+		<org.apache.maven.surefire.junit48.version>2.18.1</org.apache.maven.surefire.junit48.version>
+		<com.h2database.version>1.4.193</com.h2database.version>
 
 		<!-- Logs -->
 		<logback.version>1.2.3</logback.version>
@@ -215,9 +217,7 @@
 		<!-- Tests -->
 		<junit.version>4.8.1</junit.version>
 		<jsonassert.version>1.2.3</jsonassert.version>
-		<org.apache.maven.surefire.junit48.version>2.18.1</org.apache.maven.surefire.junit48.version>
 		<com.puppycrawl.tools.checkstyle.version>6.18</com.puppycrawl.tools.checkstyle.version>
-		<com.h2database.version>1.4.193</com.h2database.version>
 
 		<!-- Misc -->
 		<bnd.version>2.4.0</bnd.version>
@@ -430,6 +430,8 @@
 			<!-- <maven-bundle-plugin.version> -->
 			<!-- <maven-javadoc-plugin.version> -->
 			<!-- <maven-checkstyle-plugin.version> -->
+			<!-- <org.apache.maven.surefire.junit48.version> -->
+			<!-- <com.puppycrawl.tools.checkstyle.version> -->
 
 
 			<!-- ==== -->
@@ -472,11 +474,21 @@
 			<!-- Tests -->
 			<!-- ===== -->
 
-			<!-- <junit.version> -->
-			<!-- <jsonassert.version> -->
-			<!-- <org.apache.maven.surefire.junit48.version> -->
-			<!-- <com.puppycrawl.tools.checkstyle.version> -->
-			<!-- <com.h2database.version> -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.skyscreamer</groupId>
+				<artifactId>jsonassert</artifactId>
+				<version>${jsonassert.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.h2database</groupId>
+				<artifactId>h2</artifactId>
+				<version>${com.h2database.version}</version>
+			</dependency>
 
 
 			<!-- ==== -->
