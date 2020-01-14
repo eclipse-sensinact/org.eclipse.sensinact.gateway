@@ -215,7 +215,6 @@
 								<artifactItem>
 									<groupId>org.osgi</groupId>
 									<artifactId>org.osgi.service.remoteserviceadmin</artifactId>
-									<version>${org.osgi.service.remoteserviceadmin.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.paho</groupId>

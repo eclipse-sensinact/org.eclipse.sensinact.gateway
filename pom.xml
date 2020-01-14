@@ -300,7 +300,11 @@
 				<artifactId>org.osgi.service.metatype</artifactId>
 				<version>${org.osgi.service.metatype.version}</version>
 			</dependency>
-			<!-- <org.osgi.service.remoteserviceadmin.version> -->
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.remoteserviceadmin</artifactId>
+				<version>${org.osgi.service.remoteserviceadmin.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.util.function</artifactId>
