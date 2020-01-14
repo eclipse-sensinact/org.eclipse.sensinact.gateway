@@ -219,6 +219,12 @@
 		<jsonassert.version>1.2.3</jsonassert.version>
 		<com.puppycrawl.tools.checkstyle.version>6.18</com.puppycrawl.tools.checkstyle.version>
 
+		<!-- Apache Aries -->
+		<org.fusesource.hawtbuf.version>1.11</org.fusesource.hawtbuf.version>
+		<org.fusesource.hawtdispatch.version>1.22</org.fusesource.hawtdispatch.version>
+		<org.apache.aries.rsa.version>1.13.0</org.apache.aries.rsa.version>
+		<org.apache.zookeeper.version>3.4.10</org.apache.zookeeper.version>
+
 		<!-- Misc -->
 		<bnd.version>2.4.0</bnd.version>
 		<com.hazelcast.version>3.2.1</com.hazelcast.version>
@@ -229,12 +235,8 @@
 		<jsr311-api.version>1.1.1</jsr311-api.version>
 		<org.eclipse.aether.version>1.1.0</org.eclipse.aether.version>
 		<maven-aether-provider.version>3.3.9</maven-aether-provider.version>
-		<org.apache.aries.rsa.version>1.13.0</org.apache.aries.rsa.version>
 		<org.apache.httpcomponents.version>4.4.1</org.apache.httpcomponents.version>
-		<org.apache.zookeeper.version>3.4.10</org.apache.zookeeper.version>
 		<org.eclipse.paho.client.mqttv3.version>1.2.0</org.eclipse.paho.client.mqttv3.version>
-		<org.fusesource.hawtbuf.version>1.11</org.fusesource.hawtbuf.version>
-		<org.fusesource.hawtdispatch.version>1.22</org.fusesource.hawtdispatch.version>
 		<org.fusesource.jansi.version>1.17.1</org.fusesource.jansi.version>
 		<org.jline.version>3.7.0</org.jline.version>
 		<org.json.version>20080701</org.json.version>
@@ -491,6 +493,57 @@
 			</dependency>
 
 
+			<!-- ============ -->
+			<!-- Apache Aries -->
+			<!-- ============ -->
+
+			<dependency>
+				<groupId>org.fusesource.hawtbuf</groupId>
+				<artifactId>hawtbuf</artifactId>
+				<version>${org.fusesource.hawtbuf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.fusesource.hawtdispatch</groupId>
+				<artifactId>hawtdispatch</artifactId>
+				<version>${org.fusesource.hawtdispatch.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.aries.rsa</groupId>
+				<artifactId>org.apache.aries.rsa.core</artifactId>
+				<version>${org.apache.aries.rsa.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.aries.rsa.discovery</groupId>
+				<artifactId>org.apache.aries.rsa.discovery.local</artifactId>
+				<version>${org.apache.aries.rsa.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.aries.rsa.discovery</groupId>
+				<artifactId>org.apache.aries.rsa.discovery.zookeeper</artifactId>
+				<version>${org.apache.aries.rsa.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.aries.rsa.provider</groupId>
+				<artifactId>org.apache.aries.rsa.provider.fastbin</artifactId>
+				<version>${org.apache.aries.rsa.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.aries.rsa</groupId>
+				<artifactId>org.apache.aries.rsa.spi</artifactId>
+				<version>${org.apache.aries.rsa.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.aries.rsa</groupId>
+				<artifactId>org.apache.aries.rsa.topology-manager</artifactId>
+				<version>${org.apache.aries.rsa.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.zookeeper</groupId>
+				<artifactId>zookeeper</artifactId>
+				<version>${org.apache.zookeeper.version}</version>
+			</dependency>
+
+
 			<!-- ==== -->
 			<!-- Misc -->
 			<!-- ==== -->
@@ -575,12 +628,8 @@
 				<artifactId>maven-aether-provider</artifactId>
 				<version>${maven-aether-provider.version}</version>
 			</dependency>
-			<!-- <org.apache.aries.rsa.version> -->
 			<!-- <org.apache.httpcomponents.version> -->
-			<!-- <org.apache.zookeeper.version> -->
 			<!-- <org.eclipse.paho.client.mqttv3.version> -->
-			<!-- <org.fusesource.hawtbuf.version> -->
-			<!-- <org.fusesource.hawtdispatch.version> -->
 			<!-- <org.fusesource.jansi.version> -->
 			<!-- <org.jline.version> -->
 			<!-- <org.json.version> -->

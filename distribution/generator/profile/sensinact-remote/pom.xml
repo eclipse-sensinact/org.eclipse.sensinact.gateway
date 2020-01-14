@@ -60,49 +60,40 @@
 		<dependency>
 			<groupId>org.fusesource.hawtbuf</groupId>
 			<artifactId>hawtbuf</artifactId>
-			<version>${org.fusesource.hawtbuf.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.fusesource.hawtdispatch</groupId>
 			<artifactId>hawtdispatch</artifactId>
-			<version>${org.fusesource.hawtdispatch.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.aries.rsa</groupId>
 			<artifactId>org.apache.aries.rsa.core</artifactId>
-			<version>${org.apache.aries.rsa.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.aries.rsa.discovery</groupId>
 			<artifactId>org.apache.aries.rsa.discovery.local</artifactId>
-			<version>${org.apache.aries.rsa.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.aries.rsa.discovery</groupId>
 			<artifactId>org.apache.aries.rsa.discovery.zookeeper</artifactId>
-			<version>${org.apache.aries.rsa.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.aries.rsa.provider</groupId>
 			<artifactId>org.apache.aries.rsa.provider.fastbin</artifactId>
-			<version>${org.apache.aries.rsa.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.aries.rsa</groupId>
 			<artifactId>org.apache.aries.rsa.spi</artifactId>
-			<version>${org.apache.aries.rsa.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.aries.rsa</groupId>
 			<artifactId>org.apache.aries.rsa.topology-manager</artifactId>
-			<version>${org.apache.aries.rsa.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.zookeeper</groupId>
 			<artifactId>zookeeper</artifactId>
-			<version>${org.apache.zookeeper.version}</version>
 		</dependency>
 
 		<!-- END:Dependencies for apache aries -->
