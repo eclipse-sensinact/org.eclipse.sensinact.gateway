@@ -129,7 +129,6 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>${org.json.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
