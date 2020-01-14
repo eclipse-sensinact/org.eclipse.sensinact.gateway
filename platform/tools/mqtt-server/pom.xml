@@ -67,7 +67,6 @@
 		<dependency>
 			<groupId>com.hazelcast</groupId>
 			<artifactId>hazelcast</artifactId>
-			<version>${com.hazelcast.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mapdb</groupId>

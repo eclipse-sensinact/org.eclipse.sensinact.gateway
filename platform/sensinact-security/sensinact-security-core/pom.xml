@@ -214,7 +214,6 @@
 								<artifactItem>
 									<groupId>javax.servlet</groupId>
 									<artifactId>javax.servlet-api</artifactId>
-									<version>${javax.servlet-api.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>javax.servlet-api.jar</destFileName>
 								</artifactItem>

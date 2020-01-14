@@ -227,11 +227,11 @@
 		<javax.servlet-api.version>3.1.0</javax.servlet-api.version>
 		<javax.mail.version>1.5.5</javax.mail.version>
 		<jsr311-api.version>1.1.1</jsr311-api.version>
+		<org.eclipse.aether.version>1.1.0</org.eclipse.aether.version>
 		<maven-aether-provider.version>3.3.9</maven-aether-provider.version>
 		<org.apache.aries.rsa.version>1.13.0</org.apache.aries.rsa.version>
 		<org.apache.httpcomponents.version>4.4.1</org.apache.httpcomponents.version>
 		<org.apache.zookeeper.version>3.4.10</org.apache.zookeeper.version>
-		<org.eclipse.aether.version>1.1.0</org.eclipse.aether.version>
 		<org.eclipse.paho.client.mqttv3.version>1.2.0</org.eclipse.paho.client.mqttv3.version>
 		<org.fusesource.hawtbuf.version>1.11</org.fusesource.hawtbuf.version>
 		<org.fusesource.hawtdispatch.version>1.22</org.fusesource.hawtdispatch.version>
@@ -495,25 +495,100 @@
 			<!-- Misc -->
 			<!-- ==== -->
 
-			<!-- <bnd.version> -->
-			<!-- <com.hazelcast.version> -->
-			<!-- <commons-codec.version> -->
-			<!-- <javax.jmdns.version> -->
-			<!-- <javax.servlet-api.version> -->
-			<!-- <javax.mail.version> -->
-			<!-- <jsr311-api.version> -->
-			<!-- <maven-aether-provider.version> -->
+			<dependency>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bndlib</artifactId>
+				<version>${bnd.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.hazelcast</groupId>
+				<artifactId>hazelcast</artifactId>
+				<version>${com.hazelcast.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>${commons-codec.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.jmdns</groupId>
+				<artifactId>jmdns</artifactId>
+				<version>${javax.jmdns.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>${javax.servlet-api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.mail</groupId>
+				<artifactId>javax.mail-api</artifactId>
+				<version>${javax.mail.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.mail</groupId>
+				<artifactId>javax.mail</artifactId>
+				<version>${javax.mail.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.ws.rs</groupId>
+				<artifactId>jsr311-api</artifactId>
+				<version>${jsr311-api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.aether</groupId>
+				<artifactId>aether-api</artifactId>
+				<version>${org.eclipse.aether.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.aether</groupId>
+				<artifactId>aether-impl</artifactId>
+				<version>${org.eclipse.aether.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.aether</groupId>
+				<artifactId>aether-util</artifactId>
+				<version>${org.eclipse.aether.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.aether</groupId>
+				<artifactId>aether-transport-http</artifactId>
+				<version>${org.eclipse.aether.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.aether</groupId>
+				<artifactId>aether-transport-file</artifactId>
+				<version>${org.eclipse.aether.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.aether</groupId>
+				<artifactId>aether-spi</artifactId>
+				<version>${org.eclipse.aether.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.aether</groupId>
+				<artifactId>aether-connector-basic</artifactId>
+				<version>${org.eclipse.aether.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-aether-provider</artifactId>
+				<version>${maven-aether-provider.version}</version>
+			</dependency>
 			<!-- <org.apache.aries.rsa.version> -->
 			<!-- <org.apache.httpcomponents.version> -->
 			<!-- <org.apache.zookeeper.version> -->
-			<!-- <org.eclipse.aether.version> -->
 			<!-- <org.eclipse.paho.client.mqttv3.version> -->
 			<!-- <org.fusesource.hawtbuf.version> -->
 			<!-- <org.fusesource.hawtdispatch.version> -->
 			<!-- <org.fusesource.jansi.version> -->
 			<!-- <org.jline.version> -->
 			<!-- <org.json.version> -->
-			<!-- <org.mapdb.version> -->
+			<dependency>
+				<groupId>org.mapdb</groupId>
+				<artifactId>mapdb</artifactId>
+				<version>${org.mapdb.version}</version>
+			</dependency>
 			<!-- <org.xerial.sqlite-jdbc.version> -->
 
 		</dependencies>

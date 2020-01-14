@@ -102,7 +102,6 @@
 		<dependency>
 			<groupId>javax.jmdns</groupId>
 			<artifactId>jmdns</artifactId>
-			<version>${javax.jmdns.version}</version>
 		</dependency>
 
 	</dependencies>

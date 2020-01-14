@@ -93,49 +93,41 @@
 		<dependency>
 			<groupId>org.eclipse.aether</groupId>
 			<artifactId>aether-api</artifactId>
-			<version>${org.eclipse.aether.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.aether</groupId>
 			<artifactId>aether-impl</artifactId>
-			<version>${org.eclipse.aether.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.aether</groupId>
 			<artifactId>aether-util</artifactId>
-			<version>${org.eclipse.aether.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.aether</groupId>
 			<artifactId>aether-transport-http</artifactId>
-			<version>${org.eclipse.aether.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.aether</groupId>
 			<artifactId>aether-transport-file</artifactId>
-			<version>${org.eclipse.aether.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.aether</groupId>
 			<artifactId>aether-spi</artifactId>
-			<version>${org.eclipse.aether.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.aether</groupId>
 			<artifactId>aether-connector-basic</artifactId>
-			<version>${org.eclipse.aether.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-aether-provider</artifactId>
-			<version>${maven-aether-provider.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -219,7 +211,6 @@
 		<dependency>
 			<groupId>biz.aQute.bnd</groupId>
 			<artifactId>bndlib</artifactId>
-			<version>${bnd.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
