@@ -222,6 +222,7 @@
 		<org.json.version>20080701</org.json.version>
 		<org.mapdb.version>1.0.8</org.mapdb.version>
 		<org.xerial.sqlite-jdbc.version>3.8.10.1</org.xerial.sqlite-jdbc.version>
+		<keycloak.version>9.0.0-SNAPSHOT-stage-20191219-003332</keycloak.version>
 
 		<!-- Build -->
 		<maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
@@ -683,6 +684,16 @@
 				<artifactId>sqlite-jdbc</artifactId>
 				<version>${org.xerial.sqlite-jdbc.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-testsuite-utils</artifactId>
+				<version>${keycloak.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.keycloak</groupId>
+				<artifactId>keycloak-admin-client</artifactId>
+				<version>${keycloak.version}</version>
+			</dependency>
 
 		</dependencies>
 	</dependencyManagement>
@@ -1075,6 +1086,11 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>xml-maven-plugin</artifactId>
 					<version>${xml-maven-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>${maven-resources-plugin.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

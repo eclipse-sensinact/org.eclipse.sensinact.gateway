@@ -115,8 +115,7 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.framework.security</artifactId>
-									<version>2.4.0</version><!-- DEPENDENCY : org.apache.felix.framework.security 
-										to be moved to 2.6.1 -->
+									<version>2.4.0</version><!-- DEPENDENCY : org.apache.felix.framework.security to be moved to 2.6.1 -->
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.framework.security.jar</destFileName>
 								</artifactItem>

@@ -30,7 +30,6 @@
 		<freemarker.version>2.3.26-incubating</freemarker.version>
 		<google.zxing.version>3.2.1</google.zxing.version>
 		<bouncycastle.version>1.60</bouncycastle.version>
-		<keycloack.version>9.0.0-SNAPSHOT-stage-20191219-003332</keycloack.version>
 	</properties>
 
 	<repositories>
@@ -139,13 +138,11 @@
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-testsuite-utils</artifactId>
-			<version>${keycloack.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-admin-client</artifactId>
-			<version>${keycloack.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

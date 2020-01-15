@@ -87,8 +87,8 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 				</configuration>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>${maven-resources-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>copy-sample-db</id>
