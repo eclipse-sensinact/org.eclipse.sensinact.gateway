@@ -31,7 +31,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-plugin</artifactId>
-                <version>${maven-scm-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>validate</phase>
@@ -70,7 +69,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version> <!-- DEPENDENCY : slf4j-api to be updated to v1.7.25 -->
+	    <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

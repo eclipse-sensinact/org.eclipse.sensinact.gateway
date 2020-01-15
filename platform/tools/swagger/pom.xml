@@ -34,7 +34,6 @@
 			<plugin>
 				<groupId>com.googlecode.maven-download-plugin</groupId>
 				<artifactId>download-maven-plugin</artifactId>
-				<version>${download-maven-plugin}</version>
 				<executions>
 					<execution>
 						<!-- the wget goal actually binds itself to this phase by default -->
