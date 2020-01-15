@@ -676,12 +676,6 @@
 				<artifactId>mapdb</artifactId>
 				<version>${org.mapdb.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.xerial</groupId>
-				<artifactId>sqlite-jdbc</artifactId>
-				<version>${org.xerial.sqlite-jdbc.version}</version>
-			</dependency>
-
 
 			<!-- ============= -->
 			<!-- Build plugins -->
@@ -726,6 +720,12 @@
 
 	<profiles>
 		<profile>
+			<id>default</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+		<profile>
 			<id>sonar</id>
 			<build>
 				<pluginManagement>			
@@ -749,6 +749,7 @@
 							</dependencies>
 						</plugin>
 						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-failsafe-plugin</artifactId>
 							<version>${maven-failsafe-plugin.version}</version>
 							<executions>
@@ -813,12 +814,6 @@
 			</build>
 		</profile>
 		<profile>
-			<id>default</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-		</profile>
-		<profile>
 			<id>internet</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -839,6 +834,7 @@
 							</dependencies>
 						</plugin>
 						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-failsafe-plugin</artifactId>
 							<version>${maven-failsafe-plugin.version}</version>
 							<executions>
