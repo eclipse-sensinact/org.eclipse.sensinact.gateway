@@ -194,6 +194,7 @@
 		<jsonassert.version>1.2.3</jsonassert.version>
 		<com.h2database.version>1.4.193</com.h2database.version>
 		<com.puppycrawl.tools.checkstyle.version>6.18</com.puppycrawl.tools.checkstyle.version>
+		<org.powermock.version>1.5.2</org.powermock.version>
 
 		<!-- Apache Aries -->
 		<org.fusesource.hawtbuf.version>1.11</org.fusesource.hawtbuf.version>
@@ -223,6 +224,8 @@
 		<org.mapdb.version>1.0.8</org.mapdb.version>
 		<org.xerial.sqlite-jdbc.version>3.8.10.1</org.xerial.sqlite-jdbc.version>
 		<keycloak.version>9.0.0-SNAPSHOT-stage-20191219-003332</keycloak.version>
+		<io.netty.version>4.1.5.Final</io.netty.version>
+		<io.moquette.version>0.9</io.moquette.version>
 
 		<!-- Build -->
 		<maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
@@ -479,6 +482,16 @@
 				<artifactId>h2</artifactId>
 				<version>${com.h2database.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.powermock</groupId>
+				<artifactId>powermock-module-junit4</artifactId>
+				<version>${org.powermock.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.powermock</groupId>
+				<artifactId>powermock-api-mockito</artifactId>
+				<version>${org.powermock.version}</version>
+			</dependency>
 
 
 			<!-- ============ -->
@@ -694,7 +707,22 @@
 				<artifactId>keycloak-admin-client</artifactId>
 				<version>${keycloak.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>io.moquette</groupId>
+				<artifactId>moquette-broker</artifactId>
+				<version>${io.moquette.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.moquette</groupId>
+				<artifactId>moquette-netty-parser</artifactId>
+				<version>${io.moquette.version}</version>
+			</dependency>
+			<!-- Specific subproducts used are netty-transport,netty-common,netty-buffer,netty-handler,netty-codec -->
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-all</artifactId>
+				<version>${io.netty.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
