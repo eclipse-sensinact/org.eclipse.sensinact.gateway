@@ -59,10 +59,6 @@
 		</plugins>
 	</build>
 
-	<properties>
-		<coap.version>0.8.3-SNAPSHOT</coap.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
