@@ -341,7 +341,6 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.http.api</artifactId>
-									<version>3.0.0</version> <!-- DEPENDENCY : org.apache.felix.http.api v2.3.2 elsewhere -->
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.http.api.jar</destFileName>
 								</artifactItem>

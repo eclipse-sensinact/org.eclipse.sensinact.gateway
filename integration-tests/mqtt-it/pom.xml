@@ -242,7 +242,6 @@
 		<dependency>
 			<groupId>org.eclipse.paho</groupId>
 			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-			<version>${org.eclipse.paho.client.mqttv3.version}</version> <!-- DEPENDENCY: /integration-tests/mqtt-it/pom.xml -->
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.tools</groupId>

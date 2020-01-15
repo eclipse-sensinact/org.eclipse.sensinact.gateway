@@ -172,7 +172,7 @@
 		<org.apache.felix.gogo.command.version>1.0.2</org.apache.felix.gogo.command.version>
 		<org.apache.felix.gogo.jline.version>1.1.0</org.apache.felix.gogo.jline.version>
 		<org.apache.felix.gogo.runtime.version>1.1.0</org.apache.felix.gogo.runtime.version>
-		<org.apache.felix.http.api.version>2.3.2</org.apache.felix.http.api.version>
+		<org.apache.felix.http.api.version>3.0.0</org.apache.felix.http.api.version>
 		<org.apache.felix.http.servlet-api.version>1.1.2</org.apache.felix.http.servlet-api.version>
 		<org.apache.felix.log.version>1.2.0</org.apache.felix.log.version>
 		<org.apache.felix.scr.version>2.1.16</org.apache.felix.scr.version>
@@ -381,13 +381,21 @@
 				<artifactId>org.apache.felix.bundlerepository</artifactId>
 				<version>${org.apache.felix.bundlerepository.version}</version>
 			</dependency>
-			<!-- <org.apache.felix.configadmin.version> -->
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.configadmin</artifactId>
+				<version>${org.apache.felix.configadmin.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.fileinstall</artifactId>
 				<version>${org.apache.felix.fileinstall.version}</version>
 			</dependency>
-			<!-- <org.apache.felix.framework.security.version> -->
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.framework.security</artifactId>
+				<version>${org.apache.felix.framework.security.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.gogo.command</artifactId>
@@ -399,7 +407,11 @@
 				<version>${org.apache.felix.gogo.jline.version}</version>
 			</dependency>
 			<!-- <org.apache.felix.gogo.runtime.version> -->
-			<!-- <org.apache.felix.http.api.version> -->
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.http.api</artifactId>
+				<version>${org.apache.felix.http.api.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.http.servlet-api</artifactId>
@@ -426,7 +438,6 @@
 			<!-- Jetty -->
 			<!-- ===== -->
 
-			<!-- <org.apache.felix.http.jetty.version> -->
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.http.jetty</artifactId>
@@ -768,7 +779,11 @@
 				<artifactId>jsr311-api</artifactId>
 				<version>${jsr311-api.version}</version>
 			</dependency>
-			<!-- <org.eclipse.paho.client.mqttv3.version> -->
+			<dependency>
+				<groupId>org.eclipse.paho</groupId>
+				<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+				<version>${org.eclipse.paho.client.mqttv3.version}</version>			
+			</dependency>
 			<dependency>
 				<groupId>org.fusesource.jansi</groupId>
 				<artifactId>jansi</artifactId>
