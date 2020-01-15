@@ -27,13 +27,6 @@
 
 	<name>sensiNact IoT Gateway - MQTT Integration Tests</name>
 
-	<repositories>
-		<repository>
-			<id>bintray</id>
-			<url>https://jcenter.bintray.com</url>
-		</repository>
-	</repositories>
-
 	<build>
 		<plugins>
 			<plugin>

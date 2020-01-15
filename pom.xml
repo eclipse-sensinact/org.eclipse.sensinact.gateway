@@ -38,7 +38,61 @@
 	<repositories>
 		<repository>
 			<id>main</id>
-			<url>http://central.maven.org/maven2/</url>
+			<url>https://repo1.maven.org/maven2/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>central</id>
+			<url>https://repo.maven.apache.org/maven2/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>bintray</id>
+			<url>https://jcenter.bintray.com</url>
+		</repository>
+		<repository>
+			<id>Eclipse Paho Repo</id>
+			<url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
+		</repository>
+		<repository>
+			<id>andsel</id>
+			<url>https://dl.bintray.com/andsel/maven/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>gnuio</id>
+			<url>https://nexus.arcsmed.at/content/repositories/homer.core</url>
+		</repository>
+		<repository>
+			<id>jboss-ea</id>
+			<url>https://repository.jboss.org/nexus/content/repositories/ea</url>
+			<name>jboss repository ea</name>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>jbosss-staging</id>
+			<url>https://repository.jboss.org/nexus/content/groups/staging</url>
+			<name>jboss repository staging</name>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -51,7 +105,7 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>main</id>
-			<url>http://central.maven.org/maven2/</url>
+			<url>https://repo1.maven.org/maven2/</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>

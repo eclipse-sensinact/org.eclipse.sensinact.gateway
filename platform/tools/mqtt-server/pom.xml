@@ -27,17 +27,6 @@
 
 	<name>sensiNact IoT Gateway - MQTT Server</name>
 
-	<repositories>
-		<repository>
-			<id>bintray</id>
-			<url>https://jcenter.bintray.com</url>
-		</repository>
-		<repository>
-			<id>gnuio</id>
-			<url>https://nexus.arcsmed.at/content/repositories/homer.core</url>
-		</repository>
-	</repositories>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>

@@ -26,57 +26,6 @@
 
 	<name>sensiNact IoT Gateway - oAuth2 Security</name>
 
-	<repositories>
-		<repository>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<id>main</id>
-			<url>http://central.maven.org/maven2/</url>
-		</repository>
-		<repository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>central</id>
-			<name>Central Repository</name>
-			<url>https://repo.maven.apache.org/maven2</url>
-		</repository>
-		<repository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>central01</id>
-			<name>Central Repository 01</name>
-			<url>https://repo1.maven.org/maven2</url>
-		</repository>
-		<repository>
-			<id>jboss-ea</id>
-			<url>https://repository.jboss.org/nexus/content/repositories/ea</url>
-			<name>jboss repository ea</name>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>jbosss-staging</id>
-			<url>https://repository.jboss.org/nexus/content/groups/staging</url>
-			<name>jboss repository staging</name>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
