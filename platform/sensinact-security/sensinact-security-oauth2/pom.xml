@@ -26,12 +26,6 @@
 
 	<name>sensiNact IoT Gateway - oAuth2 Security</name>
 
-	<properties>
-		<freemarker.version>2.3.26-incubating</freemarker.version>
-		<google.zxing.version>3.2.1</google.zxing.version>
-		<bouncycastle.version>1.60</bouncycastle.version>
-	</properties>
-
 	<repositories>
 		<repository>
 			<releases>

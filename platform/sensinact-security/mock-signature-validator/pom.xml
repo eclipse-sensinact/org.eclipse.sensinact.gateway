@@ -29,7 +29,6 @@
 
 	<properties>
 		<bnd.path>${java.home}/../bin/jarsigner</bnd.path>
-		<bouncycastle.version>1.47</bouncycastle.version>
 	</properties>
 
 	<dependencies>

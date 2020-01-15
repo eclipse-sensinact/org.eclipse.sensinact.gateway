@@ -30,26 +30,22 @@
 
 	<properties>
 		<bnd.path>${java.home}/../bin/jarsigner</bnd.path>
-		<bouncycastle.version>1.47</bouncycastle.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
-			<version>${bouncycastle.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcmail-jdk15on</artifactId>
-			<version>${bouncycastle.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk15on</artifactId>
-			<version>${bouncycastle.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

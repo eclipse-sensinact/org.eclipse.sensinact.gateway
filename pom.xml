@@ -240,8 +240,9 @@
 		<org.mapdb.version>1.0.8</org.mapdb.version>
 		<org.xerial.sqlite-jdbc.version>3.8.10.1</org.xerial.sqlite-jdbc.version>
 		<keycloak.version>9.0.0-SNAPSHOT-stage-20191219-003332</keycloak.version>
-		<io.netty.version>4.1.5.Final</io.netty.version>
 		<io.moquette.version>0.9</io.moquette.version>
+		<io.netty.version>4.1.5.Final</io.netty.version>
+		<org.bouncycastle.version>1.47</org.bouncycastle.version>
 
 		<!-- Build -->
 		<maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
@@ -819,6 +820,22 @@
 				<artifactId>netty-all</artifactId>
 				<version>${io.netty.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk15on</artifactId>
+				<version>${org.bouncycastle.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcmail-jdk15on</artifactId>
+				<version>${org.bouncycastle.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-jdk15on</artifactId>
+				<version>${org.bouncycastle.version}</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
