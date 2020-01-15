@@ -67,8 +67,8 @@ public abstract class MqttTestITAbstract {
     }
     protected Option[] depProfile1(){
         return options(
-                systemProperty("org.ops4j.pax.url.mvn.repositories").value("http://central.maven.org/maven2/@snapshots@id=ops4j-snapshotkok"),
-                mavenBundle("org.apache.felix", "org.apache.felix.framework.security", "2.4.0"),
+                systemProperty("org.ops4j.pax.url.mvn.repositories").value("https://repo1.maven.org/maven2/@snapshots@id=ops4j-snapshotkok"),
+                mavenBundle("org.apache.felix", "org.apache.felix.framework.security", "2.6.1"),
                 mavenBundle("org.slf4j", "slf4j-api", "1.7.25").noStart(),
                 mavenBundle("org.slf4j", "slf4j-simple", "1.7.25").noStart(),
                 mavenBundle("org.osgi", "org.osgi.service.log", "1.3.0"),
@@ -133,7 +133,7 @@ public abstract class MqttTestITAbstract {
         RepositorySystemSession session = MavenRepositorySystemUtils.newSession();
         ((DefaultRepositorySystemSession)session).setLocalRepositoryManager(system.newLocalRepositoryManager(session, new LocalRepository(System.getProperty("user.home")+"/.m2/repository/")));
         ArtifactRequest req = new ArtifactRequest();
-        req.addRepository(new RemoteRepository.Builder("central", "default", "http://central.maven.org/maven2").build());
+        req.addRepository(new RemoteRepository.Builder("central", "default", "https://repo1.maven.org/maven2").build());
         req.setArtifact(new DefaultArtifact(groupId, artifactId, "jar", version));
         try {
             ArtifactResult res = system.resolveArtifact(session, req);
