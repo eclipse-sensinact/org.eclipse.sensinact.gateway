@@ -78,14 +78,12 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.framework.security</artifactId>
-									<version>${org.apache.felix.framework.security.version}</version>
 									<type>jar</type>
 									<overWrite>true</overWrite>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.gogo.runtime</artifactId>
-									<version>${org.apache.felix.gogo.runtime.version}</version>
 									<type>jar</type>
 									<overWrite>true</overWrite>
 								</artifactItem>
@@ -159,7 +157,6 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.configadmin</artifactId>
-									<version>${org.apache.felix.configadmin.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.osgi</groupId>
@@ -212,7 +209,6 @@
 								<artifactItem>
 									<groupId>org.eclipse.paho</groupId>
 									<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-									<version>${org.eclipse.paho.client.mqttv3.version}</version>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.build.directory}/dependencies/bundle/2</outputDirectory>

@@ -213,14 +213,12 @@
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.configadmin</artifactId>
-									<version>${org.apache.felix.configadmin.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.configadmin.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.framework.security</artifactId>
-									<version>${org.apache.felix.framework.security.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.framework.security.jar</destFileName>
 								</artifactItem>
@@ -254,14 +252,13 @@
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
 									<artifactId>mqtt-utils</artifactId>
-									<version>2.0-SNAPSHOT</version>
+									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>mqtt-utils.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.paho</groupId>
 									<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-									<version>${org.eclipse.paho.client.mqttv3.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.eclipse.paho.client.mqttv3.jar</destFileName>
 								</artifactItem>

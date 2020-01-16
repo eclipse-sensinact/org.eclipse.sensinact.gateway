@@ -475,7 +475,11 @@
 				<artifactId>org.apache.felix.gogo.jline</artifactId>
 				<version>${org.apache.felix.gogo.jline.version}</version>
 			</dependency>
-			<!-- <org.apache.felix.gogo.runtime.version> -->
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.gogo.runtime</artifactId>
+				<version>${org.apache.felix.gogo.runtime.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.http.api</artifactId>
