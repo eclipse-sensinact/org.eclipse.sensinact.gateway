@@ -35,6 +35,21 @@
 		</snapshotRepository>
 	</distributionManagement>
 
+	<!--  ================================================================== -->
+	<!--  IMPORTANT !!!!                                                     -->
+	<!--  repo.gradle.org is HTTPS only since jan 15th, 2020                 -->
+	<!--  ADD THE FOLLOWING LINES TO ~/.m2/settings.xml                      -->
+	<!--  ================================================================== -->
+	<!--  <mirrors>                                                          -->
+	<!--    <mirror>                                                         -->
+	<!--      <id>gradle-proxy</id>                                          -->
+	<!--      <name>Proxy of gradle repo</name>                              -->
+	<!--      <url>https://repo.gradle.org/gradle/libs-releases-local/</url> -->
+	<!--      <mirrorOf>gradle</mirrorOf>                                    -->
+	<!--    </mirror>                                                        -->
+	<!--  </mirrors>                                                         -->
+	<!--  ================================================================== -->
+	
 	<repositories>
 		<repository>
 			<id>main</id>
