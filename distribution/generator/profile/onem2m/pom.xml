@@ -57,12 +57,10 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
 			<artifactId>onem2m-device</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 			<artifactId>http-onem2m-agent</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>

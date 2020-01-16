@@ -1,0 +1,42 @@
+ The project org.eclipse.sensinact.gateway.distribution:free-sms:2.0-SNAPSHOT (/home/eg244698/repositories/org.eclipse.sensinact.gateway/distribution/generator/profile/free-sms/pom.xml) has 1 error
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.sthbnd.http:free-sms-service:jar is missing. @ line 57, column 15
+[ERROR]   
+[ERROR]   The project org.eclipse.sensinact.gateway.distribution:kodi:2.0-SNAPSHOT (/home/eg244698/repositories/org.eclipse.sensinact.gateway/distribution/generator/profile/kodi-profile/pom.xml) has 1 error
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.sthbnd.http:kodi-device:jar is missing. @ line 31, column 15
+[ERROR]   
+[ERROR]   The project org.eclipse.sensinact.gateway.distribution:mqtt-nb:2.0-SNAPSHOT (/home/eg244698/repositories/org.eclipse.sensinact.gateway/distribution/generator/profile/mqtt-nb-profile/pom.xml) has 1 error
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.nthbnd:mqtt-agent:jar is missing. @ line 65, column 15
+[ERROR]   
+[ERROR]   The project org.eclipse.sensinact.gateway.distribution:openhab:2.0-SNAPSHOT (/home/eg244698/repositories/org.eclipse.sensinact.gateway/distribution/generator/profile/openhab-profile/pom.xml) has 1 error
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.sthbnd:sensinact-openhab:jar is missing. @ line 35, column 15
+[ERROR]   
+[ERROR]   The project org.eclipse.sensinact.gateway.distribution:inovallee:2.0-SNAPSHOT (/home/eg244698/repositories/org.eclipse.sensinact.gateway/distribution/generator/profile/inovallee/pom.xml) has 1 error
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.sthbnd.inovallee:sensinact-inovallee:jar is missing. @ line 58, column 15
+[ERROR]   
+[ERROR]   The project org.eclipse.sensinact.gateway.distribution:openweather:2.0-SNAPSHOT (/home/eg244698/repositories/org.eclipse.sensinact.gateway/distribution/generator/profile/openweather-profile/pom.xml) has 1 error
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.sthbnd.http:openweather-device:jar is missing. @ line 31, column 15
+[ERROR]   
+[ERROR]   The project org.eclipse.sensinact.gateway.distribution:onem2m:2.0-SNAPSHOT (/home/eg244698/repositories/org.eclipse.sensinact.gateway/distribution/generator/profile/onem2m/pom.xml) has 2 errors
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.sthbnd.http:onem2m-device:jar is missing. @ line 57, column 15
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.nthbnd:http-onem2m-agent:jar is missing. @ line 61, column 15
+[ERROR]   
+[ERROR]   The project org.eclipse.sensinact.gateway.distribution:onem2m-mqttbinding:2.0-SNAPSHOT (/home/eg244698/repositories/org.eclipse.sensinact.gateway/distribution/generator/profile/onem2m-mqttbinding/pom.xml) has 1 error
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.nthbnd:mqtt-onem2m-agent:jar is missing. @ line 39, column 15
+[ERROR]   
+[ERROR]   The project org.eclipse.sensinact.gateway.distribution:json-path:2.0-SNAPSHOT (/home/eg244698/repositories/org.eclipse.sensinact.gateway/distribution/generator/profile/jsonpath-profile/pom.xml) has 1 error
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.nthbnd:jsonpath-filter:jar is missing. @ line 30, column 15
+[ERROR]   
+[ERROR]   The project org.eclipse.sensinact.gateway.distribution:simulation:2.0-SNAPSHOT (/home/eg244698/repositories/org.eclipse.sensinact.gateway/distribution/generator/profile/simulation-profile/pom.xml) has 4 errors
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.simulated.devices:button:jar is missing. @ line 39, column 21
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.simulated.devices:fan:jar is missing. @ line 43, column 21
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.simulated.devices:temperatures-generator:jar is missing. @ line 47, column 21
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.simulated.devices:billboard:jar is missing. @ line 51, column 21
+[ERROR]   
+[ERROR]   The project org.eclipse.sensinact.gateway.distribution:storage-agent:2.0-SNAPSHOT (/home/eg244698/repositories/org.eclipse.sensinact.gateway/distribution/generator/profile/storage-agent-profile/pom.xml) has 1 error
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.nthbnd:storage-agent:jar is missing. @ line 34, column 21
+[ERROR]   
+[ERROR]   The project org.eclipse.sensinact.gateway.distribution:swagger:2.0-SNAPSHOT (/home/eg244698/repositories/org.eclipse.sensinact.gateway/distribution/generator/profile/swagger-profile/pom.xml) has 1 error
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.tools:swagger:jar is missing. @ line 51, column 21
+[ERROR]   
+[ERROR]   The project org.eclipse.sensinact.gateway.distribution:ldapfilter:2.0-SNAPSHOT (/home/eg244698/repositories/org.eclipse.sensinact.gateway/distribution/generator/profile/ldapfilter/pom.xml) has 1 error
+[ERROR]     'dependencies.dependency.version' for org.eclipse.sensinact.gateway.nthbnd:ldap-filter:jar is missing. @ line 58, column 15

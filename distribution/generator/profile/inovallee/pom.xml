@@ -58,7 +58,6 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.sthbnd.inovallee</groupId>
 			<artifactId>sensinact-inovallee</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>

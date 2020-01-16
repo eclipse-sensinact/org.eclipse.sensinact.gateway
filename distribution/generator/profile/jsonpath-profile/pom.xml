@@ -30,7 +30,6 @@
 		<dependency>
 		    <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 		    <artifactId>jsonpath-filter</artifactId>
-		    <version>${project.version}</version>
 		</dependency> 
     </dependencies>
 

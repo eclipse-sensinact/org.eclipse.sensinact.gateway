@@ -31,17 +31,14 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
 			<artifactId>mqtt-utils</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
 			<artifactId>mqtt-device</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
 			<artifactId>smart-topic-device</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.paho</groupId>

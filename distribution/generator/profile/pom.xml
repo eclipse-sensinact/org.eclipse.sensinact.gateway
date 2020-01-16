@@ -48,7 +48,6 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
 			<artifactId>sensinact-distribution-template</artifactId>
-			<version>${project.version}</version>
 			<type>pom</type>
 		</dependency>
 	</dependencies>

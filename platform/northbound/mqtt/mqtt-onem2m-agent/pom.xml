@@ -29,7 +29,6 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 			<artifactId>mqtt-generic-agent</artifactId>
-			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

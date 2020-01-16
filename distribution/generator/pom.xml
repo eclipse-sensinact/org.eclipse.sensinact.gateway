@@ -61,7 +61,6 @@
 									<type>zip</type>
 									<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
 									<artifactId>sensinact-distribution-template</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/</outputDirectory>
 								</artifactItem>
 							</artifactItems>
@@ -144,7 +143,6 @@
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
 									<artifactId>mqtt-utils</artifactId>
-									<version>${project.version}</version>
 									<type>jar</type>
 									<overWrite>true</overWrite>
 								</artifactItem>
@@ -225,52 +223,42 @@
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-utils</artifactId>
-									<version>${project.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-common</artifactId>
-									<version>${project.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-datastore-api</artifactId>
-									<version>${project.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-signature-validator</artifactId>
-									<version>${project.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-security-none</artifactId>
-									<version>${project.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-core</artifactId>
-									<version>${project.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-generic</artifactId>
-									<version>${project.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-shell</artifactId>
-									<version>${project.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-system</artifactId>
-									<version>${project.version}</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 									<artifactId>sensinact-northbound-access</artifactId>
-									<version>${project.version}</version>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.build.directory}/dependencies/bundle/3</outputDirectory>

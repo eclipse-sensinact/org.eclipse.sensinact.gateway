@@ -55,7 +55,6 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-common</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 

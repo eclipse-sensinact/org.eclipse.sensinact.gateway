@@ -31,12 +31,10 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>application-manager</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>basic-plugin</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 

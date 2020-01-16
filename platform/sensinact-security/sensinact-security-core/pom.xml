@@ -30,49 +30,41 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-core</artifactId>
-			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-signature-validator</artifactId>
-			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-utils</artifactId>
-			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-common</artifactId>
-			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-datastore-api</artifactId>
-			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.tools</groupId>
 			<artifactId>sensinact-test</artifactId>
-			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 			<artifactId>http-tools</artifactId>
-			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
 			<artifactId>http</artifactId>
-			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -83,7 +75,6 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-sqlite-connector</artifactId>
-			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -121,91 +112,78 @@
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-utils</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-utils.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-datastore-api</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-datastore-api.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-sqlite-connector</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-sqlite-connector.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-common</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-common.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-framework-extension</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-framework-extension.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.tools</groupId>
 									<artifactId>sensinact-test-configuration</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-test-configuration.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-signature-validator</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-signature-validator.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-core</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-core.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-generic</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-generic.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 									<artifactId>sensinact-northbound-access</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-northbound-access.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 									<artifactId>rest-access</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>rest-access.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 									<artifactId>http-tools</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>http-tools.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
 									<artifactId>http</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>http.jar</destFileName>
 								</artifactItem>
@@ -242,21 +220,18 @@
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.simulated.devices</groupId>
 									<artifactId>slider</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>slider.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.simulated.devices</groupId>
 									<artifactId>fan</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>fan.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.simulated.devices</groupId>
 									<artifactId>button</artifactId>
-									<version>${project.version}</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>button.jar</destFileName>
 								</artifactItem>

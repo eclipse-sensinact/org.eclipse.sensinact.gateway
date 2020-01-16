@@ -52,18 +52,15 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-generic</artifactId>
-			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-utils</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
 			<artifactId>mqtt-utils</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>

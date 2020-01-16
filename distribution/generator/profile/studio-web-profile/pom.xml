@@ -30,17 +30,14 @@
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.protocol</groupId>
             <artifactId>http</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
             <artifactId>http-tools</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
             <artifactId>http-device</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
 			<groupId>org.apache.felix</groupId>
@@ -54,7 +51,6 @@
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.tools</groupId>
             <artifactId>studio-web</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

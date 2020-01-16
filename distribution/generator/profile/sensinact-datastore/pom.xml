@@ -57,12 +57,10 @@
         <dependency>
 		<groupId>org.eclipse.sensinact.gateway</groupId>
 		<artifactId>sensinact-datastore-api</artifactId>
-		<version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway</groupId>
             <artifactId>sensinact-sqlite-connector</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

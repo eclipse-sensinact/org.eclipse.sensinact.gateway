@@ -58,7 +58,6 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 			<artifactId>ldap-filter</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>
