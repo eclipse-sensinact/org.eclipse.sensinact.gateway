@@ -58,13 +58,13 @@
 		</dependency>
 	</dependencies>
 	
-    <modules>
-        <module>http-device</module>
-        <module>http-android</module>
-        <module>free-sms</module>
-        <module>openweather-device</module>
+	<modules>
+		<module>http-device</module>
+		<!-- <module>http-android</module> -->
+		<module>free-sms</module>
+		<module>openweather-device</module>
 		<module>kodi-device</module>
-        <module>live-objects</module>
+		<module>live-objects</module>
 		<module>onem2m-device</module>
     </modules>
 </project>

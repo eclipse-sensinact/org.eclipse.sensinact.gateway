@@ -81,7 +81,7 @@
 	</build>
 
 	<modules>
-		<module>android-imu-profile</module>
+		<!--<module>android-imu-profile</module>-->
 		<module>application-profile</module>
 		<module>free-sms</module>
 		<module>kodi-profile</module>
