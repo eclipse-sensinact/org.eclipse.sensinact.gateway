@@ -37,10 +37,11 @@ enum OpenhabType {
     
     private static OpenhabType getType(final String type$) {
         final String openhabType$ = type$.replaceAll(":", "_");
-        OpenhabType openhabType = Default;
+        OpenhabType openhabType = null;
         try {
             openhabType = OpenhabType.valueOf(openhabType$);
         } catch (Exception e) {
+        	openhabType = Default;
             OpenHabPacketReader.LOG.error("unsupported openhab type {}. Using {}...", type$, openhabType, e);
         }
         return openhabType;
