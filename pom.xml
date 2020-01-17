@@ -21,24 +21,31 @@
 	<packaging>pom</packaging>
 	<name>sensiNact IoT Gateway - Gateway Project</name>
 
-	<!--  ================================================================== -->
-	<!--  IMPORTANT !!!!                                                     -->
-	<!--  repo.gradle.org is HTTPS only since jan 15th, 2020                 -->
-	<!--  ADD THE FOLLOWING LINES TO ~/.m2/settings.xml                      -->
-	<!--  ================================================================== -->
-	<!--  <mirrors>                                                          -->
-	<!--    <mirror>                                                         -->
-	<!--      <id>gradle-proxy</id>                                          -->
-	<!--      <name>Proxy of gradle repo</name>                              -->
-	<!--      <url>https://repo.gradle.org/gradle/libs-releases-local/</url> -->
-	<!--      <mirrorOf>gradle</mirrorOf>                                    -->
-	<!--    </mirror>                                                        -->
-	<!--  </mirrors>                                                         -->
-	<!--  ================================================================== -->
+	<!-- ================================================================== -->
+	<!-- IMPORTANT !!!!                                                     -->
+	<!-- repo.gradle.org is HTTPS only since jan 15th, 2020                 -->
+	<!-- ADD THE FOLLOWING LINES TO ~/.m2/settings.xml                      -->
+	<!-- ================================================================== -->
+	<!-- <mirrors>                                                          -->
+	<!--   <mirror>                                                         -->
+	<!--     <id>gradle-proxy</id>                                          -->
+	<!--     <name>Proxy of gradle repo</name>                              -->
+	<!--     <url>https://repo.gradle.org/gradle/libs-releases-local/</url> -->
+	<!--     <mirrorOf>gradle</mirrorOf>                                    -->
+	<!--   </mirror>                                                        -->
+	<!-- </mirrors>                                                         -->
+	<!-- ================================================================== -->
 	
+	<!-- ================================================================== -->
+	<!-- MAVEN GOALS                                                        -->
+	<!-- ================================================================== -->
+	<!-- versions:display-dependency-updates                                -->
+	<!-- versions:display-plugin-updates                                    -->
+	<!-- ================================================================== -->
+
 	<repositories>
 		<repository>
-			<id>main</id>
+			<id>repo1.maven.org</id>
 			<url>https://repo1.maven.org/maven2/</url>
 			<releases>
 				<enabled>true</enabled>
@@ -48,7 +55,7 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>central</id>
+			<id>repo.maven.apache.org</id>
 			<url>https://repo.maven.apache.org/maven2/</url>
 			<releases>
 				<enabled>true</enabled>
@@ -57,14 +64,7 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-		<repository>
-			<id>bintray</id>
-			<url>https://jcenter.bintray.com</url>
-		</repository>
-		<repository>
-			<id>Eclipse Paho Repo</id>
-			<url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
-		</repository>
+		<!-- provides moquette -->
 		<repository>
 			<id>andsel</id>
 			<url>https://dl.bintray.com/andsel/maven/</url>
@@ -74,10 +74,6 @@
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
-		</repository>
-		<repository>
-			<id>gnuio</id>
-			<url>https://nexus.arcsmed.at/content/repositories/homer.core</url>
 		</repository>
 		<repository>
 			<id>jboss-ea</id>
@@ -105,7 +101,7 @@
 
 	<pluginRepositories>
 		<pluginRepository>
-			<id>main</id>
+			<id>repo1.maven.org</id>
 			<url>https://repo1.maven.org/maven2/</url>
 			<releases>
 				<enabled>true</enabled>
@@ -168,6 +164,24 @@
 			</roles>
 		</developer>
 		<developer>
+			<name>Stéphane Bergeon</name>
+			<email>stephane.bergeon@cea.fr</email>
+			<organization>CEA</organization>
+			<roles>
+				<role>Developer</role>
+				<role>Documentation</role>
+			</roles>
+		</developer>
+		<developer>
+			<name>Sofia Kleisarchaki</name>
+			<email>Sofia.KLEISARCHAKI@cea.fr</email>
+			<organization>CEA</organization>
+			<roles>
+				<role>Developer</role>
+				<role>Documentation</role>
+			</roles>
+		</developer>
+		<developer>
 			<name>Jander Botelho do Nascimento</name>
 			<email>jander.botelhodonascimento@cea.fr</email>
 			<organization>CEA</organization>
@@ -211,6 +225,9 @@
 	</developers>
 
 	<properties>
+		<!-- Maven enforcer plugin configuration -->
+		<minimum.maven.version>3.0.5</minimum.maven.version>
+
 		<!-- IMPORTANT -->
 		<!-- some version numbers are duplicated here: -->
 		<!-- integration-tests/mqtt-it/src/test/java/org/eclipse/sensinact/gateway/device/mqtt/lite/it/util/MqttTestITAbstract.java -->
@@ -302,7 +319,7 @@
 		<javax.servlet-api.version>3.1.0</javax.servlet-api.version>
 		<javax.mail.version>1.5.5</javax.mail.version>
 		<jsr311-api.version>1.1.1</jsr311-api.version>
-		<org.eclipse.paho.client.mqttv3.version>1.2.0</org.eclipse.paho.client.mqttv3.version>
+		<org.eclipse.paho.client.mqttv3.version>1.2.2</org.eclipse.paho.client.mqttv3.version>
 		<org.fusesource.jansi.version>1.17.1</org.fusesource.jansi.version>
 		<org.jline.version>3.7.0</org.jline.version>
 		<org.json.version>20080701</org.json.version>
@@ -326,6 +343,7 @@
 		<maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
 		<maven-compiler-plugin.version>3.0</maven-compiler-plugin.version>
 		<maven-dependency-plugin.version>2.8</maven-dependency-plugin.version>
+		<maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
 		<maven-failsafe-plugin.version>2.12</maven-failsafe-plugin.version>
 		<maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
 		<maven-resources-plugin.version>2.7</maven-resources-plugin.version>
@@ -335,6 +353,7 @@
 		<org.jacoco.maven-plugin.version>0.7.4.201502262128</org.jacoco.maven-plugin.version>
 		<sonar-maven-plugin.version>3.2</sonar-maven-plugin.version>
 		<sql-maven-plugin.version>1.5</sql-maven-plugin.version>
+		<versions-maven-plugin.version>2.7</versions-maven-plugin.version>
 		<xml-maven-plugin.version>1.0.1</xml-maven-plugin.version>
 
 		<!-- Properties -->
@@ -1490,6 +1509,11 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>${maven-enforcer-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
 					<version>${maven-javadoc-plugin.version}</version>
 					<executions>
@@ -1574,10 +1598,36 @@
 						</dependency>
 					</dependencies>
 				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>versions-maven-plugin</artifactId>
+					<version>${versions-maven-plugin.version}</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<banDuplicatePomDependencyVersions/>
+								<requireMavenVersion>
+									<version>${minimum.maven.version}</version>
+									<message>INVALID MAVEN VERSION: It must be at least ${minimum.maven.version}</message>
+								</requireMavenVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.codehaus.gmaven</groupId>
 				<artifactId>groovy-maven-plugin</artifactId>
@@ -1585,6 +1635,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
