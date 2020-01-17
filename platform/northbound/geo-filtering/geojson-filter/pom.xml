@@ -330,17 +330,17 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>keystoreCopy</id>
 						<phase>generate-test-resources</phase>
+						<configuration>
+							<target description="Copying keystore.jks">
+								<copy file="../../../sensinact-security/cert/keystore.jks"
+									tofile="${project.build.directory}/felix/bundle/keystore.jks" />
+							</target>
+						</configuration>
 						<goals>
 							<goal>run</goal>
 						</goals>
-						<configuration>
-							<tasks>
-								<echo>Copying keystore.jks</echo>
-								<copy file="../../../sensinact-security/cert/keystore.jks"
-									tofile="${project.build.directory}/felix/bundle/keystore.jks" />
-							</tasks>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>

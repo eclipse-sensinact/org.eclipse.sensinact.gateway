@@ -58,36 +58,14 @@
 						<id>prepare</id>
 						<phase>validate</phase>
 						<configuration>
-							<tasks>
+							<target>
 								<unzip src="${project.build.directory}/swagger-ui.zip"
 									dest="${project.build.directory}/swagger-ui/" />
-							</tasks>
+							</target>
 						</configuration>
 						<goals>
 							<goal>run</goal>
 						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy-swagger-ui-dist</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/swagger-api/dist</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${project.build.directory}/swagger-ui/swagger-ui-2.1.4/dist</directory>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -105,6 +83,10 @@
 							<outputDirectory>${project.build.directory}/swagger-api/dist</outputDirectory>
 							<overwrite>true</overwrite>
 							<resources>
+								<resource>
+									<directory>${project.build.directory}/swagger-ui/swagger-ui-2.1.4/dist</directory>
+									<filtering>true</filtering>
+								</resource>
 								<resource>
 									<targetPath>schemas</targetPath>
 									<directory>src/client/schemas</directory>

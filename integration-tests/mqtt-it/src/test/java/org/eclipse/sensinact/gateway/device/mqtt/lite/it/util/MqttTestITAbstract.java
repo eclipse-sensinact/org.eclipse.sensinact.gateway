@@ -69,27 +69,27 @@ public abstract class MqttTestITAbstract {
         return options(
                 systemProperty("org.ops4j.pax.url.mvn.repositories").value("https://repo1.maven.org/maven2/@snapshots@id=ops4j-snapshotkok"),
                 mavenBundle("org.apache.felix", "org.apache.felix.framework.security", "2.6.1"),
-                mavenBundle("org.slf4j", "slf4j-api", "1.7.25").noStart(),
-                mavenBundle("org.slf4j", "slf4j-simple", "1.7.25").noStart(),
-                mavenBundle("org.osgi", "org.osgi.service.log", "1.3.0"),
-                mavenBundle("org.apache.felix", "org.apache.felix.gogo.command", "1.0.2"),
-                mavenBundle("org.apache.felix", "org.apache.felix.gogo.runtime", "1.1.0"),
-                mavenBundle("org.fusesource.jansi", "jansi", "1.17.1")
+                mavenBundle("org.slf4j", "slf4j-api", "1.7.30").noStart(),
+                mavenBundle("org.slf4j", "slf4j-simple", "1.7.30").noStart(),
+                mavenBundle("org.osgi", "org.osgi.service.log", "1.4.0"),
+                mavenBundle("org.apache.felix", "org.apache.felix.gogo.command", "1.1.0"),
+                mavenBundle("org.apache.felix", "org.apache.felix.gogo.runtime", "1.1.2"),
+                mavenBundle("org.fusesource.jansi", "jansi", "1.18")
         );
     }
     protected Option[] depProfile2(){
         return options(
                 mavenBundle("org.apache.felix", "org.apache.felix.fileinstall", "3.6.4"),
                 mavenBundle("org.apache.felix", "org.apache.felix.scr", "2.1.16"),
-                mavenBundle("org.apache.felix", "org.apache.felix.configadmin", "1.9.12"),
+                mavenBundle("org.apache.felix", "org.apache.felix.configadmin", "1.9.16"),
                 mavenBundle("org.osgi", "org.osgi.service.component", "1.4.0"),
                 mavenBundle("org.osgi", "org.osgi.service.cm", "1.6.0"),
-                mavenBundle("org.osgi", "org.osgi.service.metatype", "1.3.0"),
+                mavenBundle("org.osgi", "org.osgi.service.metatype", "1.4.0"),
                 mavenBundle("org.osgi", "org.osgi.namespace.extender", "1.0.1"),
-                mavenBundle("org.osgi", "org.osgi.util.function", "1.0.0"),
-                mavenBundle("org.osgi", "org.osgi.util.promise", "1.0.0"),
+                mavenBundle("org.osgi", "org.osgi.util.function", "1.1.0"),
+                mavenBundle("org.osgi", "org.osgi.util.promise", "1.1.1"),
                 mavenBundle("org.eclipse.sensinact.gateway.sthbnd.mqtt", "mqtt-utils", SENSINACT_VERSION),
-                mavenBundle("org.eclipse.paho", "org.eclipse.paho.client.mqttv3", "1.2.0")
+                mavenBundle("org.eclipse.paho", "org.eclipse.paho.client.mqttv3", "1.2.2")
         );
     }
     protected Option[] depProfile3(){
@@ -156,7 +156,7 @@ public abstract class MqttTestITAbstract {
                 mavenBundle("org.eclipse.sensinact.gateway.nthbnd", "http-tools", SENSINACT_VERSION),
                 mavenBundle("org.apache.felix","org.apache.felix.http.servlet-api","1.1.2").noStart(),
                 mavenBundle("org.apache.felix", "org.apache.felix.http.api", "3.0.0"),
-                mavenBundle("org.apache.felix", "org.apache.felix.http.jetty", "4.0.8")
+                mavenBundle("org.apache.felix", "org.apache.felix.http.jetty", "4.0.14")
         );
     }
     protected Option[] depProfileREST(){

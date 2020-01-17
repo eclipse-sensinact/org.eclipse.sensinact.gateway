@@ -97,6 +97,19 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>keystoreCopy</id>
+						<phase>generate-test-resources</phase>
+						<configuration>
+							<target description="Copying keystore.jks">
+								<copy file="../../sensinact-security/cert/keystore.jks"
+									tofile="${project.build.directory}/felix/bundle/keystore.jks" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
 						<id>createClassesDir</id>
 						<phase>test-compile</phase>
 						<configuration>
@@ -329,25 +342,6 @@
 					</execution>
 				</executions>
 				<extensions>true</extensions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>generate-test-resources</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<echo>Copying keystore.jks</echo>
-								<copy file="../../sensinact-security/cert/keystore.jks"
-									tofile="${project.build.directory}/felix/bundle/keystore.jks" />
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.felix</groupId>

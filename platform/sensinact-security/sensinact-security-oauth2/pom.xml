@@ -358,16 +358,15 @@
 				<executions>
 					<execution>
 						<phase>generate-test-resources</phase>
+						<configuration>
+							<target description="Copying keystore.jks">
+								<copy file="../cert/keystore.jks"
+									tofile="${project.build.directory}/felix/bundle/keystore.jks" />
+							</target>
+						</configuration>
 						<goals>
 							<goal>run</goal>
 						</goals>
-						<configuration>
-							<tasks>
-								<echo>Copying keystore.jks</echo>
-								<copy file="../cert/keystore.jks"
-									tofile="${project.build.directory}/felix/bundle/keystore.jks" />
-							</tasks>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
