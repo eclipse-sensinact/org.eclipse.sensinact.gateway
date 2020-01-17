@@ -53,7 +53,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.6</version> <!-- DEPENDENCY : maven-antrun-plugin to be updated to 1.8 -->
 				<executions>
 					<execution>
 						<id>prepare</id>
@@ -73,7 +72,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.4</version> <!-- DEPENDENCY : maven-resource-plugin to be updated to 2.7 -->
 				<executions>
 					<execution>
 						<id>copy-swagger-ui-dist</id>
