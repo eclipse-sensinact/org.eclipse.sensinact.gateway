@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (c) 2017 CEA.
   ~ All rights reserved. This program and the accompanying materials
@@ -26,36 +27,6 @@
 
     <build>
         <plugins>
-            <!--
-                <plugin>
-                    <groupId>org.codehaus.gmaven</groupId>
-                    <artifactId>groovy-maven-plugin</artifactId>
-                    <version>2.0</version>
-                    <executions>
-                        <execution>
-                            <id>search-sha</id>
-                            <phase>install</phase>
-                            <goals>
-                                <goal>execute</goal>
-                            </goals>
-                            <configuration>
-                                <defaults>
-                                    <name>extract-sha</name>
-                                </defaults>
-                                <source>
-                                    File basedir = new File(project.basedir.absolutePath.replace('\\','/'));
-                                    String fileContents = new File(basedir,
-                                    "/target/classes/META-INF/SELFSIGN.SF").getText('UTF-8')
-                                    matcher = (fileContents =~ /(?s)SHA1-Digest-Manifest\s*:\s*([^\s]+)\s*$?/)
-                                    String sha = matcher.getAt(0).getAt(1)
-                                    project.properties.setProperty('sha',sha)
-                                    log.info('SHA: {}', sha)
-                                </source>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>sql-maven-plugin</artifactId>
@@ -115,19 +86,16 @@
         <dependency>
             <groupId>org.eclipse.sensinact.gateway</groupId>
             <artifactId>sensinact-core</artifactId>
-            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway</groupId>
             <artifactId>sensinact-common</artifactId>
-            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway</groupId>
             <artifactId>sensinact-generic</artifactId>
-            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

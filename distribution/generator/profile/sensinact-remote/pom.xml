@@ -9,106 +9,94 @@
   ~ Contributors:
   ~    CEA - initial API and implementation
   -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.eclipse.sensinact.gateway.distribution</groupId>
-        <artifactId>profile</artifactId>
-        <version>2.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
+		<artifactId>profile</artifactId>
+		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
-    <artifactId>sensinact-remote</artifactId>
-    <packaging>pom</packaging>
+	<artifactId>sensinact-remote</artifactId>
+	<packaging>pom</packaging>
 
-    <name>sensiNact IoT Gateway - sensiNact Runtime (${project.artifactId} bridge dependencies)</name>
+	<name>sensiNact IoT Gateway - sensiNact Runtime (${project.artifactId} bridge dependencies)</name>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <inherited>false</inherited>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/sensinact/load/${artifactId}</outputDirectory>
-                            <excludeArtifactIds>${excludeArtifactId}</excludeArtifactIds>
-                            <excludeGroupIds>${excludeGroupId}</excludeGroupIds>
-                            <excludeTransitive>${excludeTransitive}</excludeTransitive>
-                            <excludeTypes>pom</excludeTypes>
-                        </configuration>
-                        <inherited>false</inherited>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<inherited>false</inherited>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/sensinact/load/${project.artifactId}</outputDirectory>
+							<excludeArtifactIds>${excludeArtifactId}</excludeArtifactIds>
+							<excludeGroupIds>${excludeGroupId}</excludeGroupIds>
+							<excludeTransitive>${excludeTransitive}</excludeTransitive>
+							<excludeTypes>pom</excludeTypes>
+						</configuration>
+						<inherited>false</inherited>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
-    <dependencies>
+	<dependencies>
 
-        <!-- BEGIN: Dependencies for apache aries -->
+		<!-- BEGIN: Dependencies for apache aries -->
 
-        <dependency>
-            <groupId>org.fusesource.hawtbuf</groupId>
-            <artifactId>hawtbuf</artifactId>
-            <version>1.11</version>
-        </dependency>
-        <dependency>
-            <groupId>org.fusesource.hawtdispatch</groupId>
-            <artifactId>hawtdispatch</artifactId>
-            <version>1.22</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.rsa</groupId>
-            <artifactId>org.apache.aries.rsa.core</artifactId>
-            <version>1.13.0</version>
-        </dependency>
+		<dependency>
+			<groupId>org.fusesource.hawtbuf</groupId>
+			<artifactId>hawtbuf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.fusesource.hawtdispatch</groupId>
+			<artifactId>hawtdispatch</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.aries.rsa.discovery</groupId>
-            <artifactId>org.apache.aries.rsa.discovery.local</artifactId>
-            <version>1.13.0</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.aries.rsa</groupId>
+			<artifactId>org.apache.aries.rsa.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.aries.rsa.discovery</groupId>
+			<artifactId>org.apache.aries.rsa.discovery.local</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.aries.rsa.discovery</groupId>
+			<artifactId>org.apache.aries.rsa.discovery.zookeeper</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.aries.rsa.provider</groupId>
+			<artifactId>org.apache.aries.rsa.provider.fastbin</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.aries.rsa</groupId>
+			<artifactId>org.apache.aries.rsa.spi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.aries.rsa</groupId>
+			<artifactId>org.apache.aries.rsa.topology-manager</artifactId>
+		</dependency>
 
+		<dependency>
+			<groupId>org.apache.zookeeper</groupId>
+			<artifactId>zookeeper</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.aries.rsa.discovery</groupId>
-            <artifactId>org.apache.aries.rsa.discovery.zookeeper</artifactId>
-            <version>1.13.0</version>
-        </dependency>
+		<!-- END:Dependencies for apache aries -->
 
-        <dependency>
-            <groupId>org.apache.aries.rsa.provider</groupId>
-            <artifactId>org.apache.aries.rsa.provider.fastbin</artifactId>
-            <version>1.13.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.rsa</groupId>
-            <artifactId>org.apache.aries.rsa.spi</artifactId>
-            <version>1.13.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.aries.rsa</groupId>
-            <artifactId>org.apache.aries.rsa.topology-manager</artifactId>
-            <version>1.13.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.zookeeper</groupId>
-            <artifactId>zookeeper</artifactId>
-            <version>3.4.10</version>
-        </dependency>
-
-        <!-- END:Dependencies for apache aries -->
-
-    </dependencies>
+	</dependencies>
 </project>

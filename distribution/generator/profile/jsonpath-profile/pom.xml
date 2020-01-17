@@ -30,7 +30,6 @@
 		<dependency>
 		    <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 		    <artifactId>jsonpath-filter</artifactId>
-		    <version>2.0-SNAPSHOT</version>
 		</dependency> 
     </dependencies>
 
@@ -43,7 +42,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-plugin</artifactId>
-                <version>1.9.4</version>
                 <executions>
                     <execution>
                     	<id>checkout-jpath</id>
@@ -71,7 +69,6 @@
             <plugin>
                 <groupId>org.fortasoft</groupId>
                 <artifactId>gradle-maven-plugin</artifactId>
-                <version>1.0.8</version>
                 <configuration>
                     <tasks>
                         <task>:jpath:compileJava</task>
@@ -137,7 +134,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/sensinact/load/${artifactId}</outputDirectory>
+                            <outputDirectory>${project.build.directory}/sensinact/load/${project.artifactId}</outputDirectory>
                             <excludeArtifactIds>${excludeArtifactId}</excludeArtifactIds>
                             <excludeGroupIds>${excludeGroupId}</excludeGroupIds>
                             <excludeTransitive>${excludeTransitive}</excludeTransitive>

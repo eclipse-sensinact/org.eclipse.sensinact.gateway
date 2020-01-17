@@ -30,33 +30,27 @@
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.protocol</groupId>
             <artifactId>http</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
             <artifactId>http-tools</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
             <artifactId>http-device</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.jetty</artifactId>
-			<version>4.0.8</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.servlet-api</artifactId>
-			<version>1.1.2</version>
 		</dependency>
         <!-- END: HTTP Dependencies -->
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.tools</groupId>
             <artifactId>swagger</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

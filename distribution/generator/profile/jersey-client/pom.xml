@@ -21,7 +21,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>sensinact-datastore</artifactId>
+    <artifactId>jersey-client</artifactId>
     <packaging>pom</packaging>
 
     <name>sensiNact IoT Gateway - sensiNact Runtime (${project.artifactId} bridge dependencies)</name>
@@ -53,14 +53,18 @@
     </build>
 
     <dependencies>
-        <!-- This is an example of the dependency to provide to generate the profile -->
-        <dependency>
-		<groupId>org.eclipse.sensinact.gateway</groupId>
-		<artifactId>sensinact-datastore-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-sqlite-connector</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>jsr311-api</artifactId>
+		</dependency>
     </dependencies>
 </project>
+

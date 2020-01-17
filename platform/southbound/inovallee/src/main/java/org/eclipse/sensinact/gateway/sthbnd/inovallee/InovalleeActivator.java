@@ -82,7 +82,7 @@ public class InovalleeActivator extends GenericActivator {
 		return new InovalleeProtocolStackEndpoint(mediator);
 	}
 
-	public Class getPacketClass() {
+	public Class<InovalleePacket> getPacketClass() {
 		return InovalleePacket.class;
 	}
 }

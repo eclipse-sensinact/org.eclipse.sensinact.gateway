@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (c) 2017 CEA.
   ~ All rights reserved. This program and the accompanying materials
@@ -9,73 +10,68 @@
   ~    CEA - initial API and implementation
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-    	<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
-        <artifactId>parent</artifactId>
-        <version>2.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
+		<artifactId>parent</artifactId>
+		<version>2.0-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>http</artifactId>
-    <packaging>bundle</packaging>
+	<artifactId>http</artifactId>
+	<packaging>bundle</packaging>
 
-    <name>sensiNact IoT Gateway - HTTP Protocol</name>
-	
+	<name>sensiNact IoT Gateway - HTTP Protocol</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-utils</artifactId>
-			<version>${project.version}</version>
 			<scope>provided</scope>
-		</dependency>	  	
+		</dependency>
 		<dependency>
-	    	<groupId>org.eclipse.sensinact.gateway.tools</groupId>
-	    	<artifactId>sensinact-test</artifactId>
-	        <version>${project.version}</version>
+			<groupId>org.eclipse.sensinact.gateway.tools</groupId>
+			<artifactId>sensinact-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.jetty</artifactId>
-			<version>3.0.0</version>
 			<scope>test</scope>
 		</dependency>
-	    <dependency>
-	      <groupId>org.apache.felix</groupId>
-	      <artifactId>org.apache.felix.main</artifactId>
-	      <version>${felix.version}</version>
-	      <scope>test</scope>
-	    </dependency>
-	    <dependency>
-	      <groupId>org.skyscreamer</groupId>
-	      <artifactId>jsonassert</artifactId>
-	      <version>1.2.3</version>
-	      <scope>test</scope>
-	    </dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.main</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.skyscreamer</groupId>
+			<artifactId>jsonassert</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-	
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
 				<configuration>
 					<instructions>
 						<Include-Resource>
 							about.html
 						</Include-Resource>
 					</instructions>
-				</configuration>								
+				</configuration>
 				<executions>
 					<execution>
 						<goals>
@@ -92,7 +88,7 @@
 						</configuration>
 					</execution>
 				</executions>
-            </plugin>
-        </plugins>
-    </build>
+			</plugin>
+		</plugins>
+	</build>
 </project>

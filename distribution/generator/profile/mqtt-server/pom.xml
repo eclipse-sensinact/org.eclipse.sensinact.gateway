@@ -39,7 +39,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/sensinact/load/${artifactId}</outputDirectory>
+                            <outputDirectory>${project.build.directory}/sensinact/load/${project.artifactId}</outputDirectory>
                             <excludeArtifactIds>${excludeArtifactId}</excludeArtifactIds>
                             <excludeGroupIds>${excludeGroupId}</excludeGroupIds>
                             <excludeTransitive>${excludeTransitive}</excludeTransitive>
@@ -57,7 +57,6 @@
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.tools</groupId>
             <artifactId>mqtt-server</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>
