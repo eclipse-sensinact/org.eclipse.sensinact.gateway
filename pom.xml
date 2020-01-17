@@ -20,21 +20,6 @@
 
 	<packaging>pom</packaging>
 	<name>sensiNact IoT Gateway - Gateway Project</name>
-
-	<!-- ================================================================== -->
-	<!-- IMPORTANT !!!!                                                     -->
-	<!-- repo.gradle.org is HTTPS only since jan 15th, 2020                 -->
-	<!-- ADD THE FOLLOWING LINES TO ~/.m2/settings.xml                      -->
-	<!-- ================================================================== -->
-	<!-- <mirrors>                                                          -->
-	<!--   <mirror>                                                         -->
-	<!--     <id>gradle-proxy</id>                                          -->
-	<!--     <name>Proxy of gradle repo</name>                              -->
-	<!--     <url>https://repo.gradle.org/gradle/libs-releases-local/</url> -->
-	<!--     <mirrorOf>gradle</mirrorOf>                                    -->
-	<!--   </mirror>                                                        -->
-	<!-- </mirrors>                                                         -->
-	<!-- ================================================================== -->
 	
 	<!-- ================================================================== -->
 	<!-- MAVEN GOALS                                                        -->
@@ -96,6 +81,11 @@
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
+		</repository>
+		<!-- provide gradle-tooling-api -->
+		<repository>
+			<id>gradle</id>
+			<url>https://repo.gradle.org/gradle/libs-releases-local/</url>
 		</repository>
 	</repositories>
 
@@ -335,6 +325,7 @@
 		<depends-maven-plugin.version>1.3.1</depends-maven-plugin.version>
 		<download-maven-plugin>1.3.0</download-maven-plugin>
 		<gradle-maven-plugin.version>1.0.8</gradle-maven-plugin.version>
+		<gradle-tooling.version>2.13</gradle-tooling.version>
 		<groovy-maven-plugin.version>2.0</groovy-maven-plugin.version>
 		<license-maven-plugin.version>1.12</license-maven-plugin.version>
 		<maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
@@ -921,8 +912,16 @@
 				<artifactId>bcpkix-jdk15on</artifactId>
 				<version>${org.bouncycastle.version}</version>
 			</dependency>
-
-
+			
+			<!--  Gradle  -->
+			<!-- dirty trick to avoid to change the settings.xml file -->
+			<!-- @see  jsonpath-filtering:jsonpath-filter module      -->
+			<dependency>		
+				<groupId>org.gradle</groupId>
+				<artifactId>gradle-tooling-api</artifactId>
+				<version>${gradle-tooling.version}</version>
+			</dependency>
+			
 			<!-- ===================== -->
 			<!-- Internal dependencies -->
 			<!-- ===================== -->
