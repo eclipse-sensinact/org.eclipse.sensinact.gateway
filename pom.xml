@@ -20,21 +20,6 @@
 
 	<packaging>pom</packaging>
 	<name>sensiNact IoT Gateway - Gateway Project</name>
-
-	<!-- ================================================================== -->
-	<!-- IMPORTANT !!!!                                                     -->
-	<!-- repo.gradle.org is HTTPS only since jan 15th, 2020                 -->
-	<!-- ADD THE FOLLOWING LINES TO ~/.m2/settings.xml                      -->
-	<!-- ================================================================== -->
-	<!-- <mirrors>                                                          -->
-	<!--   <mirror>                                                         -->
-	<!--     <id>gradle-proxy</id>                                          -->
-	<!--     <name>Proxy of gradle repo</name>                              -->
-	<!--     <url>https://repo.gradle.org/gradle/libs-releases-local/</url> -->
-	<!--     <mirrorOf>gradle</mirrorOf>                                    -->
-	<!--   </mirror>                                                        -->
-	<!-- </mirrors>                                                         -->
-	<!-- ================================================================== -->
 	
 	<!-- ================================================================== -->
 	<!-- MAVEN GOALS                                                        -->
@@ -240,6 +225,11 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
+		<!-- provides gradle-tooling-api -->
+		<repository>
+			<id>gradle</id>
+			<url>https://repo.gradle.org/gradle/libs-releases-local/</url>
+		</repository>
 	</repositories>
 
 	<pluginRepositories>
@@ -366,7 +356,6 @@
 			</roles>
 		</developer>
 	</developers>
-
 
 	<dependencyManagement>
 		<dependencies>
@@ -923,8 +912,16 @@
 				<artifactId>bcpkix-jdk15on</artifactId>
 				<version>${org.bouncycastle.version}</version>
 			</dependency>
-
-
+			
+			<!--  Gradle  -->
+			<!-- dirty trick to avoid to change the settings.xml file -->
+			<!-- @see  jsonpath-filtering:jsonpath-filter module      -->
+			<dependency>		
+				<groupId>org.gradle</groupId>
+				<artifactId>gradle-tooling-api</artifactId>
+				<version>${gradle-tooling.version}</version>
+			</dependency>
+			
 			<!-- ===================== -->
 			<!-- Internal dependencies -->
 			<!-- ===================== -->

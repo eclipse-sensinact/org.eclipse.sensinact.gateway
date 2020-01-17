@@ -143,11 +143,11 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
 					
 			setServiceProviderId(providerId);
 			setServiceId(serviceId);
-			setResourceId(resourceId);
+			setResourceId(resource.getId());
 			setTimestamp(System.currentTimeMillis());
 			setData(data);		
 			configure();
-			OpenHabPacketReader.LOG.debug("processed {}/{}/{}={}:{}", providerId, serviceId, resourceId, data, type);
+			OpenHabPacketReader.LOG.debug("processed {}/{}/{}={}:{}", providerId, serviceId, resource.getId(), data, type);
 		}
 	}
 

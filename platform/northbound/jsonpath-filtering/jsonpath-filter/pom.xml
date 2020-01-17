@@ -83,6 +83,11 @@
 			<artifactId>light</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- dirty trick to avoid to change the global settings.xml file-->
+		<dependency>		
+			<groupId>org.gradle</groupId>
+			<artifactId>gradle-tooling-api</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

@@ -12,48 +12,5 @@
 -->
 
 <resourceInfos xmlns="http://org.eclipse.sensinact/resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-               xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../../sensinact-generic/src/main/resources/sensinact-resource.xsd"
-               empty_profile="true">
-               
-    <resourceInfo xsi:type="resourceInfoProperty" name="comment" target="info">
-        <identifier xsi:type="stringContent">comment</identifier>
-        <attributes>
-            <attribute name="value" type="string" modifiable="MODIFIABLE">
-            </attribute>
-        </attributes>
-    </resourceInfo>
-
-    <resourceInfo xsi:type="resourceInfoAction" name="TURN_ON" policy="ACTION" target="switch">
-        <identifier xsi:type="stringContent">ON</identifier>
-        <methods>
-            <method type="ACT">
-                <references>
-                    <reference reference="POWER" passOn="true" xsi:type="constantReference">
-                        <builder type="EMPTY">
-                            <argument type="string">
-                                <value>ON</value>
-                            </argument>
-                        </builder>
-                    </reference>
-                </references>
-            </method>
-        </methods>
-    </resourceInfo>
-
-    <resourceInfo xsi:type="resourceInfoAction" name="TURN_OFF" policy="ACTION" target="switch">
-        <identifier xsi:type="stringContent">OFF</identifier>
-        <methods>
-            <method type="ACT">
-                <references>
-                    <reference reference="POWER" passOn="true" xsi:type="constantReference">
-                        <builder type="EMPTY">
-                            <argument type="string">
-                                <value>OFF</value>
-                            </argument>
-                        </builder>
-                    </reference>
-                </references>
-            </method>
-        </methods>
-    </resourceInfo>
+ xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../../sensinact-generic/src/main/resources/sensinact-resource.xsd">
 </resourceInfos>
