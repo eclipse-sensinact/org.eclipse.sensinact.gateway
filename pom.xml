@@ -154,7 +154,7 @@
 		<maven-resources-plugin.version>2.7</maven-resources-plugin.version>
 		<maven-scm-plugin.version>1.9.4</maven-scm-plugin.version>
 		<maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
-		<org.apache.maven.surefire.junit48.version>2.22.2</org.apache.maven.surefire.junit48.version>
+		<org.apache.maven.surefire.junit48.version>2.18.1</org.apache.maven.surefire.junit48.version>
 		<org.jacoco.maven-plugin.version>0.7.4.201502262128</org.jacoco.maven-plugin.version>
 		<sonar-maven-plugin.version>3.2</sonar-maven-plugin.version>
 		<sql-maven-plugin.version>1.5</sql-maven-plugin.version>
