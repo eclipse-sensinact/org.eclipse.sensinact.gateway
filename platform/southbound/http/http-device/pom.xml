@@ -170,6 +170,12 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.osgi</groupId>
+									<artifactId>org.osgi.util.pushstream</artifactId>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.osgi.util.pushstream.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.osgi</groupId>
 									<artifactId>org.osgi.service.log</artifactId>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.osgi.service.log.jar</destFileName>
@@ -299,14 +305,20 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.http.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.jetty</artifactId>
-			<scope>provided</scope>
+			<scope>provided</scope>			
+			<exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>javax.servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>

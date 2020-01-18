@@ -56,7 +56,7 @@ class JettyServerTestCallback {
                     response.setContentLength(this.remoteEntity.toString().length());
 
                     if (response.getOutputStream().isReady()) {
-                        response.getOutputStream().println(this.remoteEntity.toString());
+                        response.getOutputStream().write(this.remoteEntity.toString().getBytes());
                     }
                     response.setStatus(200);
                     break;
@@ -72,7 +72,7 @@ class JettyServerTestCallback {
                         response.setContentLength(object.toString().length());
 
                         if (response.getOutputStream().isReady()) {
-                            response.getOutputStream().println(object.toString());
+                            response.getOutputStream().write(object.toString().getBytes());
                         }
                         response.setStatus(200);
                     } catch (IOException e) {
@@ -87,7 +87,7 @@ class JettyServerTestCallback {
                     response.setContentLength(object.toString().length());
 
                     if (response.getOutputStream().isReady()) {
-                        response.getOutputStream().println(object.toString());
+                        response.getOutputStream().write(object.toString().getBytes());
                     }
                     response.setStatus(200);
                     break;
@@ -96,7 +96,7 @@ class JettyServerTestCallback {
                     response.setContentLength(this.remoteEntity.getString("serviceId").length());
 
                     if (response.getOutputStream().isReady()) {
-                        response.getOutputStream().println(this.remoteEntity.getString("serviceId"));
+                        response.getOutputStream().write(this.remoteEntity.getString("serviceId").getBytes());
                     }
                     response.setStatus(200);
                     break;
@@ -108,7 +108,7 @@ class JettyServerTestCallback {
                     response.setContentLength(array.toString().length());
 
                     if (response.getOutputStream().isReady()) {
-                        response.getOutputStream().println(array.toString());
+                        response.getOutputStream().write(array.toString().getBytes());
                     }
                     response.setStatus(200);
                     break;
