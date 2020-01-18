@@ -182,6 +182,10 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.osgi</groupId>
+									<artifactId>org.osgi.util.pushstream</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.osgi</groupId>
 									<artifactId>org.osgi.service.log</artifactId>
 								</artifactItem>
 								<artifactItem>

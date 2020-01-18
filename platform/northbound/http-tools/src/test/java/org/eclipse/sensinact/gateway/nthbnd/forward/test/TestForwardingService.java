@@ -79,6 +79,7 @@ public class TestForwardingService extends MidOSGiTest {
                 "file:target/felix/bundle/org.osgi.namespace.extender.jar "+  
                 "file:target/felix/bundle/org.osgi.util.promise.jar "+  
                 "file:target/felix/bundle/org.osgi.util.function.jar "+  
+                "file:target/felix/bundle/org.osgi.util.pushstream.jar "+
                 "file:target/felix/bundle/org.osgi.service.log.jar "  +
                 "file:target/felix/bundle/org.apache.felix.log.jar " + 
                 "file:target/felix/bundle/org.apache.felix.scr.jar " +
@@ -99,8 +100,7 @@ public class TestForwardingService extends MidOSGiTest {
         		"file:target/felix/bundle/sensinact-signature-validator.jar " + 
         		"file:target/felix/bundle/sensinact-core.jar ");
         configuration.put("felix.auto.start.3", 
-        		"file:target/felix/bundle/org.apache.felix.http.servlet-api.jar " + 
-        		"file:target/felix/bundle/org.apache.felix.http.api.jar "+
+        		"file:target/felix/bundle/org.apache.felix.http.servlet-api.jar " +
         		"file:target/felix/bundle/org.apache.felix.http.jetty.jar " + 
         		"file:target/felix/bundle/http.jar " +
         		"file:target/felix/bundle/sensinact-northbound-access.jar " + 

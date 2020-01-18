@@ -46,6 +46,12 @@
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
 			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>javax.servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -194,6 +200,12 @@
 									<destFileName>org.osgi.service.log.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
+									<groupId>org.osgi</groupId>
+									<artifactId>org.osgi.util.pushstream</artifactId>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.osgi.util.pushstream.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.log</artifactId>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
@@ -318,12 +330,6 @@
 									<artifactId>org.apache.felix.http.jetty</artifactId>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.http.jetty.jar</destFileName>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.http.api</artifactId>
-									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
-									<destFileName>org.apache.felix.http.api.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.simulated.devices</groupId>
