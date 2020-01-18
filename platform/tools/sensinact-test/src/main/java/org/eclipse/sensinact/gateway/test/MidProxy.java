@@ -47,7 +47,7 @@ public class MidProxy<T> implements InvocationHandler {
         }
         ServiceReference reference = null;
     	if((reference = this.contextProvider.getBundleContext().getServiceReference(contextualizedClazz)) != null) {
-    		return this.buildProxy(this.contextProvider.getBundleContext().getService(reference));
+    		return (T)this.buildProxy(this.contextProvider.getBundleContext().getService(reference));
     	} 
 		ServiceReference<?>[] fs = this.contextProvider.getBundleContext().getAllServiceReferences(this.serviceType.getCanonicalName(), null);
         if(fs == null || fs.length == 0) {
