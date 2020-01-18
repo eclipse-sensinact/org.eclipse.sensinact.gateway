@@ -177,6 +177,12 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.osgi</groupId>
+									<artifactId>org.osgi.util.pushstream</artifactId>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.osgi.util.pushstream.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.osgi</groupId>
 									<artifactId>org.osgi.service.log</artifactId>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.osgi.service.log.jar</destFileName>

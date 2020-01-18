@@ -329,11 +329,12 @@
 							<outputDirectory>${project.build.directory}/sensinact</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${project.build.directory}/felix-framework-6.0.2/</directory>
+									<directory>${project.build.directory}/felix-framework-${org.apache.felix.version}/</directory>
 									<filtering>false</filtering>
 									<excludes>
 										<exclude>bundle/</exclude>
 										<exclude>doc/</exclude>
+										<exclude>conf/</exclude>
 										<exclude>DEPENDENCIES</exclude>
 										<exclude>LICENSE</exclude>
 										<exclude>LICENSE.kxml2</exclude>

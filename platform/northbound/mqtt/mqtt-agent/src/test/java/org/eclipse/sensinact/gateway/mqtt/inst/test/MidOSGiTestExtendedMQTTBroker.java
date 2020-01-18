@@ -61,6 +61,7 @@ public class MidOSGiTestExtendedMQTTBroker extends MidOSGiTestExtended{
         "file:target/felix/bundle/org.osgi.namespace.extender.jar "+  
         "file:target/felix/bundle/org.osgi.util.promise.jar "+  
         "file:target/felix/bundle/org.osgi.util.function.jar "+  
+        "file:target/felix/bundle/org.osgi.util.pushstream.jar "+
         "file:target/felix/bundle/org.osgi.service.log.jar "  +
         "file:target/felix/bundle/org.apache.felix.log.jar " + 
         "file:target/felix/bundle/org.apache.felix.scr.jar " +

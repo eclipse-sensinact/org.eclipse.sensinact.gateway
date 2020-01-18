@@ -61,7 +61,7 @@
 		<org.apache.felix.fileinstall.version>3.6.4</org.apache.felix.fileinstall.version>
 		<org.apache.felix.framework.security.version>2.6.1</org.apache.felix.framework.security.version>
 		<org.apache.felix.gogo.command.version>1.1.0</org.apache.felix.gogo.command.version>
-		<org.apache.felix.gogo.jline.version>1.1.4</org.apache.felix.gogo.jline.version>
+		<org.apache.felix.gogo.jline.version>1.1.0</org.apache.felix.gogo.jline.version>
 		<org.apache.felix.gogo.runtime.version>1.1.2</org.apache.felix.gogo.runtime.version>
 		<org.apache.felix.http.api.version>3.0.0</org.apache.felix.http.api.version>
 		<org.apache.felix.http.servlet-api.version>1.1.2</org.apache.felix.http.servlet-api.version>
@@ -1503,8 +1503,8 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>${maven-compiler-plugin.version}</version>
 					<configuration>
-						<source>1.7</source>
-						<target>1.7</target>
+						<source>1.8</source>
+						<target>1.8</target>
 					</configuration>
 				</plugin>
 				<plugin>
