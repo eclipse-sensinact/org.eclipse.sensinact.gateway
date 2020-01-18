@@ -89,16 +89,16 @@ public class ServiceBuilder {
 	 * 
 	 * @throws InvalidServiceException
 	 */
-	public final ServiceImpl build(ModelInstance<?> snaModelInstance, ServiceProviderImpl provider)
+	public final <E extends ServiceImpl,F extends ServiceImpl> ServiceImpl build(ModelInstance<?> snaModelInstance, ServiceProviderImpl provider)
 			throws InvalidServiceException {
 		if (name == null) {
 			throw new InvalidServiceException("Service's name is needed");
 		}
 		ServiceImpl serviceImpl = null;
 		try {
-			serviceImpl = ReflectUtils.getInstance(baseClass,
-					implementationClass == null ? ServiceImpl.class : implementationClass,
-					new Object[] { snaModelInstance, name, provider });
+			serviceImpl = ReflectUtils.<E,F>getInstance((Class<E>)baseClass,
+			(Class<F>) (implementationClass == null ? ServiceImpl.class : implementationClass),
+			new Object[] { snaModelInstance, name, provider });
 		} catch (Exception e) {
 			this.mediator.error(e);
 			throw new InvalidServiceException(e.getMessage(), e);
