@@ -71,7 +71,7 @@ public abstract class MqttTestITAbstract {
                 mavenBundle("org.apache.felix", "org.apache.felix.framework.security", "2.6.1"),
                 mavenBundle("org.slf4j", "slf4j-api", "1.7.30").noStart(),
                 mavenBundle("org.slf4j", "slf4j-simple", "1.7.30").noStart(),
-                mavenBundle("org.osgi", "org.osgi.util.pushstream", "1.0.0"),
+                mavenBundle("org.osgi", "org.osgi.util.pushstream", "1.0.1"),
                 mavenBundle("org.osgi", "org.osgi.service.log", "1.4.0"),
                 mavenBundle("org.apache.felix", "org.apache.felix.gogo.command", "1.1.0"),
                 mavenBundle("org.apache.felix", "org.apache.felix.gogo.runtime", "1.1.2"),
