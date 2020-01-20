@@ -155,7 +155,7 @@
 		<maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
 
 		<!-- BUILD: Mojos -->
-		<mojo-build-helper-maven-plugin.version>1.8</mojo-build-helper-maven-plugin.version>
+		<mojo-build-helper-maven-plugin.version>3.0.0</mojo-build-helper-maven-plugin.version>
 		<mojo-license-maven-plugin.version>1.20</mojo-license-maven-plugin.version>
 		<mojo-sql-maven-plugin.version>1.5</mojo-sql-maven-plugin.version>
 		<mojo-versions-maven-plugin.version>2.7</mojo-versions-maven-plugin.version>
