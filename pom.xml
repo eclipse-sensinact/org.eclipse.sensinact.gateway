@@ -30,7 +30,7 @@
 
 	<properties>
 		<!-- Maven enforcer plugin configuration -->
-		<minimum.maven.version>3.0.5</minimum.maven.version>
+		<minimum.maven.version>3.3.9</minimum.maven.version>
 
 		<!-- IMPORTANT -->
 		<!-- some version numbers are duplicated here: -->
@@ -61,7 +61,7 @@
 		<org.apache.felix.fileinstall.version>3.6.4</org.apache.felix.fileinstall.version>
 		<org.apache.felix.framework.security.version>2.6.1</org.apache.felix.framework.security.version>
 		<org.apache.felix.gogo.command.version>1.1.0</org.apache.felix.gogo.command.version>
-		<org.apache.felix.gogo.jline.version>1.1.0</org.apache.felix.gogo.jline.version>
+		<org.apache.felix.gogo.jline.version>1.1.0</org.apache.felix.gogo.jline.version> <!-- Do NOT move to 1.1.4 #0edd6ad296adb630142776c43ad8635a98517d96 -->
 		<org.apache.felix.gogo.runtime.version>1.1.2</org.apache.felix.gogo.runtime.version>
 		<org.apache.felix.http.api.version>3.0.0</org.apache.felix.http.api.version>
 		<org.apache.felix.http.servlet-api.version>1.1.2</org.apache.felix.http.servlet-api.version>
@@ -135,32 +135,39 @@
 		<io.netty.version>4.1.45.Final</io.netty.version>
 		<org.bouncycastle.version>1.64</org.bouncycastle.version>
 
-		<!-- Build -->
+		<!-- BUILD: org.apache.maven.plugins -->
+		<maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+		<maven-assembly-plugin.version>2.5.3</maven-assembly-plugin.version>
+		<maven-bundle-plugin.version>3.5.1</maven-bundle-plugin.version>
+		<maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
+		<maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
+		<maven-compiler-plugin.version>3.0</maven-compiler-plugin.version>
+		<maven-dependency-plugin.version>2.8</maven-dependency-plugin.version>
+		<maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
+		<maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
+		<maven-failsafe-plugin.version>2.12</maven-failsafe-plugin.version>
+		<maven-install-plugin.version>3.0.0-M1</maven-install-plugin.version>
+		<maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
+		<maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
+		<maven-resources-plugin.version>2.7</maven-resources-plugin.version>
+		<maven-scm-plugin.version>1.11.2</maven-scm-plugin.version>
+		<maven-site-plugin.version>3.8.2</maven-site-plugin.version>
+		<maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
+
+		<!-- BUILD: other plugins -->
 		<build-helper-maven-plugin.version>1.8</build-helper-maven-plugin.version>
-		<depends-maven-plugin.version>1.3.1</depends-maven-plugin.version>
+		<depends-maven-plugin.version>1.4.0</depends-maven-plugin.version>
 		<download-maven-plugin>1.3.0</download-maven-plugin>
 		<gradle-maven-plugin.version>1.0.8</gradle-maven-plugin.version>
 		<groovy-maven-plugin.version>2.0</groovy-maven-plugin.version>
 		<gradle-tooling.version>2.13</gradle-tooling.version>
-		<license-maven-plugin.version>1.12</license-maven-plugin.version>
-		<maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
-		<maven-assembly-plugin.version>2.5.3</maven-assembly-plugin.version>
-		<maven-bundle-plugin.version>3.5.1</maven-bundle-plugin.version>
-		<maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
-		<maven-compiler-plugin.version>3.0</maven-compiler-plugin.version>
-		<maven-dependency-plugin.version>2.8</maven-dependency-plugin.version>
-		<maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
-		<maven-failsafe-plugin.version>2.12</maven-failsafe-plugin.version>
-		<maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
-		<maven-resources-plugin.version>2.7</maven-resources-plugin.version>
-		<maven-scm-plugin.version>1.9.4</maven-scm-plugin.version>
-		<maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
+		<license-maven-plugin.version>1.20</license-maven-plugin.version>
 		<org.apache.maven.surefire.junit48.version>2.18.1</org.apache.maven.surefire.junit48.version>
-		<org.jacoco.maven-plugin.version>0.7.4.201502262128</org.jacoco.maven-plugin.version>
-		<sonar-maven-plugin.version>3.2</sonar-maven-plugin.version>
+		<org.jacoco.maven-plugin.version>0.8.5</org.jacoco.maven-plugin.version>
+		<sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
 		<sql-maven-plugin.version>1.5</sql-maven-plugin.version>
 		<versions-maven-plugin.version>2.7</versions-maven-plugin.version>
-		<xml-maven-plugin.version>1.0.1</xml-maven-plugin.version>
+		<xml-maven-plugin.version>1.0.1</xml-maven-plugin.version><!-- Moving to 1.0.2 breaks the build --> 
 
 		<!-- Properties -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -1320,6 +1327,183 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+
+				<!-- BUILD: org.apache.maven.plugins -->
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>${maven-antrun-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>${maven-assembly-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<version>${maven-checkstyle-plugin.version}</version>
+					<executions>
+<!--
+						<execution>
+							<id>validate</id>
+							<phase>validate</phase>
+							<configuration>
+								<configLocation>${sensinact.rootdir}/checkstyle-sun.xml</configLocation>
+								<suppressionsLocation>${sensinact.rootdir}/checkstyle-suppressions.xml</suppressionsLocation>
+								<encoding>UTF-8</encoding>
+								<consoleOutput>false</consoleOutput>
+								<failsOnError>false</failsOnError>
+							</configuration>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+-->
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>com.puppycrawl.tools</groupId>
+							<artifactId>checkstyle</artifactId>
+							<version>${com.puppycrawl.tools.checkstyle.version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>${maven-clean-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${maven-compiler-plugin.version}</version>
+					<configuration>
+						<source>1.8</source>
+						<target>1.8</target>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>${maven-dependency-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>${maven-deploy-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>${maven-enforcer-plugin.version}</version>
+					<executions>
+						<execution>
+							<id>enforce</id>
+							<goals>
+								<goal>enforce</goal>
+							</goals>
+							<configuration>
+								<rules>
+									<banDuplicatePomDependencyVersions/>
+									<requireMavenVersion>
+										<version>${minimum.maven.version}</version>
+										<message>INVALID MAVEN VERSION: It must be at least ${minimum.maven.version}</message>
+									</requireMavenVersion>
+								</rules>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>${maven-failsafe-plugin.version}</version>
+					<executions>
+						<execution>
+							<id>default-integration-test</id>
+							<goals>
+								<goal>integration-test</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>${maven-install-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>${maven-jar-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>${maven-javadoc-plugin.version}</version>
+					<executions>
+						<execution>
+							<id>attach-javadocs</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<excludePackageNames>*.internal:*.internal.*</excludePackageNames>
+						<links>
+							<link>https://docs.oracle.com/javase/7/docs/api/</link>
+						</links>
+						<version>true</version>
+						<show>protected</show>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>${maven-resources-plugin.version}</version>
+					<!-- This maven-filtering has been added for maven-resources-plugin v2.7 -->
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.maven.shared</groupId>
+							<artifactId>maven-filtering</artifactId>
+							<version>1.3</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-scm-plugin</artifactId>
+					<version>${maven-scm-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>${maven-site-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>${maven-surefire-plugin.version}</version>
+					<configuration>
+						<classpathDependencyScopeExclude>provided</classpathDependencyScopeExclude>
+						<forkCount>1</forkCount>
+						<reuseForks>false</reuseForks>
+					</configuration>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.maven.surefire</groupId>
+							<artifactId>common-junit48</artifactId>
+							<version>${org.apache.maven.surefire.junit48.version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+
+	
+				<!-- BUILD: Other plugins -->
+
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
@@ -1435,16 +1619,6 @@
 					<version>${license-maven-plugin.version}</version>
 				</plugin>
 				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>${maven-antrun-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-assembly-plugin</artifactId>
-					<version>${maven-assembly-plugin.version}</version>
-				</plugin>
-				<plugin>
 					<groupId>org.apache.felix</groupId>
 					<artifactId>maven-bundle-plugin</artifactId>
 					<version>${maven-bundle-plugin.version}</version>
@@ -1469,6 +1643,7 @@
 					</configuration>
 				</plugin>
 				<plugin>
+<<<<<<< HEAD
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
 					<version>${maven-checkstyle-plugin.version}</version>
@@ -1557,6 +1732,8 @@
 					<version>${maven-scm-plugin.version}</version>
 				</plugin>
 				<plugin>
+=======
+>>>>>>> pom.xml build dependencies updated
 					<groupId>org.sonarsource.scanner.maven</groupId>
 					<artifactId>sonar-maven-plugin</artifactId>
 					<version>${sonar-maven-plugin.version}</version>
@@ -1587,23 +1764,6 @@
 					<version>${xml-maven-plugin.version}</version>
 				</plugin>
 				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>${maven-surefire-plugin.version}</version>
-					<configuration>
-						<classpathDependencyScopeExclude>provided</classpathDependencyScopeExclude>
-						<forkCount>1</forkCount>
-						<reuseForks>false</reuseForks>
-					</configuration>
-					<dependencies>
-						<dependency>
-							<groupId>org.apache.maven.surefire</groupId>
-							<artifactId>common-junit48</artifactId>
-							<version>${org.apache.maven.surefire.junit48.version}</version>
-						</dependency>
-					</dependencies>
-				</plugin>
-				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>versions-maven-plugin</artifactId>
 					<version>${versions-maven-plugin.version}</version>
@@ -1615,23 +1775,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>enforce</id>
-						<goals>
-							<goal>enforce</goal>
-						</goals>
-						<configuration>
-							<rules>
-								<banDuplicatePomDependencyVersions/>
-								<requireMavenVersion>
-									<version>${minimum.maven.version}</version>
-									<message>INVALID MAVEN VERSION: It must be at least ${minimum.maven.version}</message>
-								</requireMavenVersion>
-							</rules>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.gmaven</groupId>
@@ -1678,19 +1821,6 @@
 									<version>${org.apache.maven.surefire.junit48.version}</version>
 								</dependency>
 							</dependencies>
-						</plugin>
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-failsafe-plugin</artifactId>
-							<version>${maven-failsafe-plugin.version}</version>
-							<executions>
-								<execution>
-									<id>default-integration-test</id>
-									<goals>
-										<goal>integration-test</goal>
-									</goals>
-								</execution>
-							</executions>
 						</plugin>
 					</plugins>
 				</pluginManagement>
@@ -1742,30 +1872,6 @@
 						<artifactId>maven-javadoc-plugin</artifactId>
 					</plugin>
 				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>internet</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-failsafe-plugin</artifactId>
-							<version>${maven-failsafe-plugin.version}</version>
-							<executions>
-								<execution>
-									<goals>
-										<goal>integration-test</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					</plugins>
-				</pluginManagement>
 			</build>
 		</profile>
 	</profiles>
