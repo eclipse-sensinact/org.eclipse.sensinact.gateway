@@ -180,90 +180,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.gmaven</groupId>
-				<artifactId>groovy-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>integrate-jpath-build-libs</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>execute</goal>
-						</goals>
-						<configuration>
-							<source>
-								String basedir = project.basedir.absolutePath.replace('\\','/');							
-								File jpathDependencyFile = new File(new File(basedir),"target/jpath-1.0.0.jar");	
-								
-								if(!jpathDependencyFile.exists())
-								{							
-									project.getCompileSourceRoots().clear();
-									project.getTestCompileSourceRoots().clear();
-									
-									org.apache.maven.plugin.internal.DefaultPluginManager manager = session.getContainer().lookup(org.apache.maven.plugin.PluginManager.class.getName());								
-									log.info('{}',manager);
-									
-								} else {	 
-									org.apache.maven.artifact.Artifact artifact = 
-									new org.apache.maven.artifact.DefaultArtifact('com.jayway.jsonpath','jpath', 
-									org.apache.maven.artifact.versioning.VersionRange.createFromVersionSpec('1.0.0'),
-									org.apache.maven.artifact.Artifact.SCOPE_SYSTEM,
-									'jar', '', new org.apache.maven.artifact.handler.DefaultArtifactHandler('jar') {
-								 	@Override
-								 	public boolean isAddedToClasspath()
-									{
-											return true;
-									}
-									
-									@Override
-									public boolean isIncludesDependencies()
-									{
-											return true;
-									}									
-									
-									@Override
-									public String getDirectory()
-									{
-											return jpathDependencyFile.getParentFile().getAbsolutePath();
-									}
-									}, false);
-									artifact.setFile(jpathDependencyFile);
-									project.getDependencyArtifacts().add(artifact); 
-														 
-									File providerDependencyFile = new File(new File(basedir),"target/json-provider-jsonorg-1.0.0.jar");	
-									artifact = new org.apache.maven.artifact.DefaultArtifact('com.jayway.jsonpath', 'json-provider-jsonorg', 
-									org.apache.maven.artifact.versioning.VersionRange.createFromVersionSpec('1.0.0'),
-									org.apache.maven.artifact.Artifact.SCOPE_SYSTEM,
-									'jar', '', 
-									new org.apache.maven.artifact.handler.DefaultArtifactHandler('jar')
-									{
-									@Override
-									public boolean isAddedToClasspath()
-									{
-										return true;
-									}
-									
-									@Override
-									public boolean isIncludesDependencies()
-									{
-										return true;
-									}
-									
-									@Override
-									public String getDirectory()
-									{
-										return providerDependencyFile.getParentFile().getAbsolutePath();
-									}
-									},
-									false);
-									artifact.setFile(providerDependencyFile);
-									project.getDependencyArtifacts().add(artifact); 
-								}
-							</source>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 			</plugin>
@@ -504,11 +420,89 @@
 					</execution>
 				</executions>
 				<extensions>true</extensions>
-			</plugin>							
+			</plugin>
 			<plugin>
 				<groupId>org.codehaus.gmaven</groupId>
 				<artifactId>groovy-maven-plugin</artifactId>
 				<executions>
+					<execution>
+						<id>integrate-jpath-build-libs</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>execute</goal>
+						</goals>
+						<configuration>
+							<source>
+								String basedir = project.basedir.absolutePath.replace('\\','/');							
+								File jpathDependencyFile = new File(new File(basedir),"target/jpath-1.0.0.jar");	
+								
+								if(!jpathDependencyFile.exists())
+								{							
+									project.getCompileSourceRoots().clear();
+									project.getTestCompileSourceRoots().clear();
+									
+									org.apache.maven.plugin.internal.DefaultPluginManager manager = session.getContainer().lookup(org.apache.maven.plugin.PluginManager.class.getName());								
+									log.info('{}',manager);
+									
+								} else {	 
+									org.apache.maven.artifact.Artifact artifact = 
+									new org.apache.maven.artifact.DefaultArtifact('com.jayway.jsonpath','jpath', 
+									org.apache.maven.artifact.versioning.VersionRange.createFromVersionSpec('1.0.0'),
+									org.apache.maven.artifact.Artifact.SCOPE_SYSTEM,
+									'jar', '', new org.apache.maven.artifact.handler.DefaultArtifactHandler('jar') {
+								 	@Override
+								 	public boolean isAddedToClasspath()
+									{
+											return true;
+									}
+									
+									@Override
+									public boolean isIncludesDependencies()
+									{
+											return true;
+									}									
+									
+									@Override
+									public String getDirectory()
+									{
+											return jpathDependencyFile.getParentFile().getAbsolutePath();
+									}
+									}, false);
+									artifact.setFile(jpathDependencyFile);
+									project.getDependencyArtifacts().add(artifact); 
+														 
+									File providerDependencyFile = new File(new File(basedir),"target/json-provider-jsonorg-1.0.0.jar");	
+									artifact = new org.apache.maven.artifact.DefaultArtifact('com.jayway.jsonpath', 'json-provider-jsonorg', 
+									org.apache.maven.artifact.versioning.VersionRange.createFromVersionSpec('1.0.0'),
+									org.apache.maven.artifact.Artifact.SCOPE_SYSTEM,
+									'jar', '', 
+									new org.apache.maven.artifact.handler.DefaultArtifactHandler('jar')
+									{
+									@Override
+									public boolean isAddedToClasspath()
+									{
+										return true;
+									}
+									
+									@Override
+									public boolean isIncludesDependencies()
+									{
+										return true;
+									}
+									
+									@Override
+									public String getDirectory()
+									{
+										return providerDependencyFile.getParentFile().getAbsolutePath();
+									}
+									},
+									false);
+									artifact.setFile(providerDependencyFile);
+									project.getDependencyArtifacts().add(artifact); 
+								}
+							</source>
+						</configuration>
+					</execution>
 					<execution>
 						<id>copy-dependency</id>
 						<phase>generate-test-resources</phase>
