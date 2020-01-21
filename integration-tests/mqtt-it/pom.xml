@@ -70,6 +70,12 @@
 	</build>
 
 	<dependencies>
+		<!-- Mandatory for using Pax -->
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.url</groupId>
 			<artifactId>pax-url-link</artifactId>

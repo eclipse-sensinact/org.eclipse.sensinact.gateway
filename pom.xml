@@ -81,19 +81,19 @@
 		<commons-logging.version>1.2</commons-logging.version>
 
 		<!-- org.ops4j.pax -->
-		<org.ops4j.pax.exam.container.forked.version>4.11.0</org.ops4j.pax.exam.container.forked.version>
-		<org.ops4j.pax.exam.spi.version>3.4.0</org.ops4j.pax.exam.spi.version>
-		<org.ops4j.pax.exam.junit4.version>3.4.0</org.ops4j.pax.exam.junit4.version>
-		<org.ops4j.pax.exam.link.assembly.version>4.11.0</org.ops4j.pax.exam.link.assembly.version>
+		<org.ops4j.pax.exam.container.forked.version>4.13.1</org.ops4j.pax.exam.container.forked.version>
+		<org.ops4j.pax.exam.junit4.version>4.13.1</org.ops4j.pax.exam.junit4.version>
+		<org.ops4j.pax.exam.link.assembly.version>4.13.1</org.ops4j.pax.exam.link.assembly.version>
+		<org.ops4j.pax.exam.spi.version>4.13.1</org.ops4j.pax.exam.spi.version>
 		<org.ops4j.pax.swissbox.bnd.version>1.8.3</org.ops4j.pax.swissbox.bnd.version>
 		<org.ops4j.pax.swissbox.property.version>1.8.3</org.ops4j.pax.swissbox.property.version>
 		<org.ops4j.pax.swissbox.extender.version>1.8.3</org.ops4j.pax.swissbox.extender.version>
+		<org.ops4j.pax.url.aether.version>2.6.1</org.ops4j.pax.url.aether.version>
+		<org.ops4j.pax.url.classpath.version>2.6.1</org.ops4j.pax.url.classpath.version>
 		<org.ops4j.pax.url.commons.version>2.6.1</org.ops4j.pax.url.commons.version>
-		<org.ops4j.pax.url.link.version>2.5.3</org.ops4j.pax.url.link.version>
+		<org.ops4j.pax.url.link.version>2.6.1</org.ops4j.pax.url.link.version>
 		<org.ops4j.pax.url.wrap.version>2.6.1</org.ops4j.pax.url.wrap.version>
-		<org.ops4j.pax.url.classpath.version>2.5.3</org.ops4j.pax.url.classpath.version>
 		<org.ops4j.pax.url.mvn.version>1.3.7</org.ops4j.pax.url.mvn.version>
-		<org.ops4j.pax.url.aether.version>1.6.0</org.ops4j.pax.url.aether.version>
 
 		<!-- Tests -->
 		<junit.version>4.13</junit.version>
@@ -125,6 +125,7 @@
 		<bnd.version>2.4.0</bnd.version>
 		<com.hazelcast.version>3.12.5</com.hazelcast.version>
 		<commons-codec.version>1.14</commons-codec.version>
+		<javax.inject.version>1</javax.inject.version>
 		<javax.jmdns.version>3.4.1</javax.jmdns.version>
 		<javax.servlet-api.version>4.0.1</javax.servlet-api.version>
 		<javax.mail.version>1.6.2</javax.mail.version>
@@ -593,11 +594,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.exam</groupId>
-				<artifactId>pax-exam-spi</artifactId>
-				<version>${org.ops4j.pax.exam.spi.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-junit4</artifactId>
 				<version>${org.ops4j.pax.exam.junit4.version}</version>
 			</dependency>
@@ -605,6 +601,11 @@
 				<groupId>org.ops4j.pax.exam</groupId>
 				<artifactId>pax-exam-link-assembly</artifactId>
 				<version>${org.ops4j.pax.exam.link.assembly.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>pax-exam-spi</artifactId>
+				<version>${org.ops4j.pax.exam.spi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.swissbox</groupId>
@@ -623,6 +624,16 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.url</groupId>
+				<artifactId>pax-url-aether</artifactId>
+				<version>${org.ops4j.pax.url.aether.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.url</groupId>
+				<artifactId>pax-url-classpath</artifactId>
+				<version>${org.ops4j.pax.url.classpath.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-commons</artifactId>
 				<version>${org.ops4j.pax.url.commons.version}</version>
 			</dependency>
@@ -633,23 +644,13 @@
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.url</groupId>
-				<artifactId>pax-url-wrap</artifactId>
-				<version>${org.ops4j.pax.url.wrap.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.url</groupId>
-				<artifactId>pax-url-classpath</artifactId>
-				<version>${org.ops4j.pax.url.classpath.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j.pax.url</groupId>
 				<artifactId>pax-url-mvn</artifactId>
 				<version>${org.ops4j.pax.url.mvn.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ops4j.pax.url</groupId>
-				<artifactId>pax-url-aether</artifactId>
-				<version>${org.ops4j.pax.url.aether.version}</version>
+				<artifactId>pax-url-wrap</artifactId>
+				<version>${org.ops4j.pax.url.wrap.version}</version>
 			</dependency>
 
 
@@ -835,6 +836,11 @@
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
 				<version>${commons-codec.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.inject</groupId>
+				<artifactId>javax.inject</artifactId>
+				<version>${javax.inject.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.jmdns</groupId>
