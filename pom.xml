@@ -100,7 +100,8 @@
 		<jsonassert.version>1.5.0</jsonassert.version>
 		<com.h2database.version>1.4.200</com.h2database.version>
 		<com.puppycrawl.tools.checkstyle.version>6.18</com.puppycrawl.tools.checkstyle.version>
-		<org.powermock.version>1.7.4</org.powermock.version>
+		<powermock-api-mockito.version>1.7.4</powermock-api-mockito.version>
+		<powermock-module-junit4.version>2.0.4</powermock-module-junit4.version>
 
 		<!-- Apache Aries -->
 		<org.fusesource.hawtbuf.version>1.11</org.fusesource.hawtbuf.version>
@@ -673,13 +674,13 @@
 			</dependency>
 			<dependency>
 				<groupId>org.powermock</groupId>
-				<artifactId>powermock-module-junit4</artifactId>
-				<version>${org.powermock.version}</version>
+				<artifactId>powermock-api-mockito</artifactId>
+				<version>${powermock-api-mockito.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.powermock</groupId>
-				<artifactId>powermock-api-mockito</artifactId>
-				<version>${org.powermock.version}</version>
+				<artifactId>powermock-module-junit4</artifactId>
+				<version>${powermock-module-junit4.version}</version>
 			</dependency>
 
 
