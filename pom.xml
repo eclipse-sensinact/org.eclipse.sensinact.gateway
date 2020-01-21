@@ -101,7 +101,7 @@
 		<com.h2database.version>1.4.200</com.h2database.version>
 		<com.puppycrawl.tools.checkstyle.version>8.28</com.puppycrawl.tools.checkstyle.version>
 		<powermock-api-mockito.version>1.7.4</powermock-api-mockito.version>
-		<powermock-module-junit4.version>2.0.4</powermock-module-junit4.version>
+		<powermock-module-junit4.version>1.7.4</powermock-module-junit4.version>
 
 		<!-- Apache Aries -->
 		<org.fusesource.hawtbuf.version>1.11</org.fusesource.hawtbuf.version>
