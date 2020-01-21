@@ -138,7 +138,7 @@
 		<!-- BUILD: org.apache.maven.plugins -->
 		<maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
 		<maven-assembly-plugin.version>3.2.0</maven-assembly-plugin.version>
-		<maven-bundle-plugin.version>3.5.1</maven-bundle-plugin.version>
+		<maven-bundle-plugin.version>4.0.0</maven-bundle-plugin.version>
 		<maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
 		<maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
 		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
