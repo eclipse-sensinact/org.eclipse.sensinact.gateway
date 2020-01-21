@@ -114,7 +114,12 @@
 
 		<!-- HTTP -->
 		<com.sun.jersey.version>1.19.4</com.sun.jersey.version>
-		<org.apache.httpcomponents.version>4.4.1</org.apache.httpcomponents.version>
+		<org.apache.httpcomponents.fluent-hc.version>4.5.11</org.apache.httpcomponents.fluent-hc.version>
+		<org.apache.httpcomponents.httpclient.version>4.5.11</org.apache.httpcomponents.httpclient.version>
+		<org.apache.httpcomponents.httpclient-cache.version>4.5.11</org.apache.httpcomponents.httpclient-cache.version>
+		<org.apache.httpcomponents.httpclient-osgi.version>4.5.11</org.apache.httpcomponents.httpclient-osgi.version>
+		<org.apache.httpcomponents.httpcore-osgi.version>4.4.13</org.apache.httpcomponents.httpcore-osgi.version>
+		<org.apache.httpcomponents.httpmime.version>4.5.11</org.apache.httpcomponents.httpmime.version>
 
 		<!-- Misc -->
 		<bnd.version>2.4.0</bnd.version>
@@ -784,33 +789,33 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpclient-osgi</artifactId>
-				<version>${org.apache.httpcomponents.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpcore-osgi</artifactId>
-				<version>${org.apache.httpcomponents.version}</version>
+				<artifactId>fluent-hc</artifactId>
+				<version>${org.apache.httpcomponents.fluent-hc.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>${org.apache.httpcomponents.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpmime</artifactId>
-				<version>${org.apache.httpcomponents.version}</version>
+				<version>${org.apache.httpcomponents.httpclient.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient-cache</artifactId>
-				<version>${org.apache.httpcomponents.version}</version>
+				<version>${org.apache.httpcomponents.httpclient-cache.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>fluent-hc</artifactId>
-				<version>${org.apache.httpcomponents.version}</version>
+				<artifactId>httpclient-osgi</artifactId>
+				<version>${org.apache.httpcomponents.httpclient-osgi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-osgi</artifactId>
+				<version>${org.apache.httpcomponents.httpcore-osgi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpmime</artifactId>
+				<version>${org.apache.httpcomponents.httpmime.version}</version>
 			</dependency>
 
 
