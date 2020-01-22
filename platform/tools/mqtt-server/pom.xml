@@ -52,13 +52,12 @@
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-common</artifactId>
 		</dependency>
-
+		<!-- Removing this dependency causes an error while reading XML files -->
 		<dependency>
 			<groupId>org.mapdb</groupId>
 			<artifactId>mapdb</artifactId>
-			<version>1.0.8</version>
+			<version>${org.mapdb.version}</version>
 		</dependency>
-
 	</dependencies>
 
 	<build>
