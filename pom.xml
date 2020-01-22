@@ -174,7 +174,7 @@
 		<gradle-maven-plugin.version>1.0.8</gradle-maven-plugin.version>
 		<groovy-maven-plugin.version>2.0</groovy-maven-plugin.version>
 		<gradle-tooling.version>2.13</gradle-tooling.version>
-		<org.apache.maven.surefire.junit48.version>2.18.1</org.apache.maven.surefire.junit48.version>
+		<org.apache.maven.surefire.junit48.version>2.22.2</org.apache.maven.surefire.junit48.version>
 		<org.jacoco.maven-plugin.version>0.8.5</org.jacoco.maven-plugin.version>
 		<sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
 
@@ -887,6 +887,11 @@
 				<groupId>org.json</groupId>
 				<artifactId>json</artifactId>
 				<version>${org.json.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mapdb</groupId>
+				<artifactId>mapdb</artifactId>
+				<version>${org.mapdb.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.xerial</groupId>
