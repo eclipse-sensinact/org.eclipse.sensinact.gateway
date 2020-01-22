@@ -174,7 +174,7 @@
 		<download-maven-plugin>1.5.0</download-maven-plugin>
 		<gradle-maven-plugin.version>1.0.8</gradle-maven-plugin.version>
 		<groovy-maven-plugin.version>2.0</groovy-maven-plugin.version>
-		<gradle-tooling.version>2.13</gradle-tooling.version>
+		<gradle-tooling-api.version>6.1</gradle-tooling-api.version>
 		<org.apache.maven.surefire.junit48.version>2.22.2</org.apache.maven.surefire.junit48.version>
 		<org.jacoco.maven-plugin.version>0.8.5</org.jacoco.maven-plugin.version>
 		<sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
@@ -947,7 +947,7 @@
 			<dependency>		
 				<groupId>org.gradle</groupId>
 				<artifactId>gradle-tooling-api</artifactId>
-				<version>${gradle-tooling.version}</version>
+				<version>${gradle-tooling-api.version}</version>
 			</dependency>
 			
 			<!-- ===================== -->
