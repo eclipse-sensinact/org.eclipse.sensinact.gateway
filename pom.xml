@@ -156,7 +156,7 @@
 		<maven-install-plugin.version>3.0.0-M1</maven-install-plugin.version>
 		<maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
 		<maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
-		<maven-resources-plugin.version>2.7</maven-resources-plugin.version>
+		<maven-resources-plugin.version>3.1.0</maven-resources-plugin.version><!-- Moving to 3.1.0 breaks the build --> 
 		<org.apache.maven.shared.maven-filtering.version>3.1.1</org.apache.maven.shared.maven-filtering.version>
 		<maven-scm-plugin.version>1.11.2</maven-scm-plugin.version>
 		<maven-site-plugin.version>3.8.2</maven-site-plugin.version>
