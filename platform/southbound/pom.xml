@@ -25,37 +25,11 @@
 
     <name>sensiNact IoT Gateway - Southbound parent module</name>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>xml-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>validate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <validationSets>
-                        <validationSet>
-                            <dir>src/main/resources/</dir>
-                            <includes>
-                                <include>*-resource.xml</include>
-                            </includes>
-                            <systemId>${sensinact.rootdir}/platform/sensinact-generic/src/main/resources/sensinact-resource.xsd</systemId>
-                        </validationSet>
-                    </validationSets>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
     <modules>
         <module>mqtt</module>
         <module>openhab</module>
         <module>http</module>
         <module>inovallee</module>
     </modules>
+
 </project>

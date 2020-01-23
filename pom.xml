@@ -156,7 +156,7 @@
 		<maven-install-plugin.version>3.0.0-M1</maven-install-plugin.version>
 		<maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
 		<maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
-		<maven-resources-plugin.version>3.1.0</maven-resources-plugin.version><!-- Moving to 3.1.0 breaks the build --> 
+		<maven-resources-plugin.version>3.1.0</maven-resources-plugin.version> 
 		<org.apache.maven.shared.maven-filtering.version>3.1.1</org.apache.maven.shared.maven-filtering.version>
 		<maven-scm-plugin.version>1.11.2</maven-scm-plugin.version>
 		<maven-site-plugin.version>3.8.2</maven-site-plugin.version>
@@ -167,7 +167,7 @@
 		<mojo-license-maven-plugin.version>1.20</mojo-license-maven-plugin.version>
 		<mojo-sql-maven-plugin.version>1.5</mojo-sql-maven-plugin.version>
 		<mojo-versions-maven-plugin.version>2.7</mojo-versions-maven-plugin.version>
-		<mojo-xml-maven-plugin.version>1.0.1</mojo-xml-maven-plugin.version><!-- Moving to 1.0.2 breaks the build --> 
+		<mojo-xml-maven-plugin.version>1.0.2</mojo-xml-maven-plugin.version>
 
 		<!-- BUILD: other plugins -->
 		<depends-maven-plugin.version>1.4.0</depends-maven-plugin.version>
@@ -1558,6 +1558,25 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>xml-maven-plugin</artifactId>
 					<version>${mojo-xml-maven-plugin.version}</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>validate</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<validationSets>
+							<validationSet>
+								<dir>src/main/resources/</dir>
+								<includes>
+									<include>resources.xml</include>
+									<include>*-resource.xml</include>
+								</includes>
+								<systemId>${sensinact.rootdir}/platform/sensinact-generic/src/main/resources/sensinact-resource.xsd</systemId>
+							</validationSet>
+						</validationSets>
+					</configuration>
 				</plugin>
 
 	
@@ -1650,8 +1669,7 @@
 								</defaults>
 								<source>
 									File basedir = new File(project.basedir.absolutePath.replace('\\','/'));
-									File signature = new File(basedir,
-									"/target/classes/META-INF/SELFSIGN.SF")
+									File signature = new File(basedir, "/target/classes/META-INF/SELFSIGN.SF")
 
 									if(signature.exists())
 									{

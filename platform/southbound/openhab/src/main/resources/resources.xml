@@ -12,5 +12,5 @@
 -->
 
 <resourceInfos xmlns="http://org.eclipse.sensinact/resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../../sensinact-generic/src/main/resources/sensinact-resource.xsd">
+	xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../../sensinact-generic/src/main/resources/sensinact-resource.xsd">
 </resourceInfos>
