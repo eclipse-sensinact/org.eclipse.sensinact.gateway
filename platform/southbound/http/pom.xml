@@ -55,7 +55,7 @@
 	
 	<modules>
 		<module>http-device</module>
-		<!-- <module>http-android</module> -->
+		<module>http-android</module>
 		<module>free-sms</module>
 		<module>openweather-device</module>
 		<module>kodi-device</module>
