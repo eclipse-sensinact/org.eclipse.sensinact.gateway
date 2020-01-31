@@ -10,7 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.android;
 
-import org.apache.felix.http.api.ExtHttpService;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
@@ -18,79 +29,124 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
+import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.NamespaceException;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
-import javax.servlet.ServletException;
-import java.util.Collections;
-import java.util.Hashtable;
+public class Activator extends AbstractActivator<Mediator> {
+	
+	private static ClassLoader loader = null;
+    
+    private static void findJettyClassLoader(BundleContext context) {
+    	Bundle[] bundles = context.getBundles();
+    	for(Bundle bundle:bundles) {
+    		if("org.apache.felix.http.jetty".equals(bundle.getSymbolicName())) {
+    			try {
+    				BundleWiring wire = bundle.adapt(BundleWiring.class);
+    				loader = wire.getClassLoader();
+    			}catch(Exception e) {
+    				e.printStackTrace();
+    				loader = WebSocketServlet.class.getClassLoader();
+    			}
+    			break;
+    		}
+    	}
+    }
 
-public class Activator extends AbstractActivator {
     public LocalProtocolStackEndpoint<DevGenPacket> connector;
-    public AndroidWebSocketPool pool;
-    private BundleContext context;
 
-    @Override
+    @SuppressWarnings({ "unchecked","serial"})
+	@Override
     public void doStart() {
+    	findJettyClassLoader(super.mediator.getContext());
+        ExtModelConfiguration<DevGenPacket> configuration = ExtModelConfigurationBuilder.instance(mediator, DevGenPacket.class
+        		).withServiceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
+        		).withResourceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
+        		).withStartAtInitializationTime(true
+        		).build("resources.xml", Collections.emptyMap());
+        connector = new LocalProtocolStackEndpoint<DevGenPacket>(mediator);
         try {
-            ExtModelConfiguration<DevGenPacket> configuration = ExtModelConfigurationBuilder.instance(mediator, DevGenPacket.class
-            		).withServiceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
-            		).withResourceBuildPolicy((byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy() | SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy())
-            		).withStartAtInitializationTime(true
-            		).build("devgen-resource.xml", Collections.emptyMap());
-            connector = new LocalProtocolStackEndpoint<DevGenPacket>(mediator);
-            connector.connect(configuration);
-            pool = new AndroidWebSocketPool(mediator, connector);
-            ServiceTracker st = new ServiceTracker(mediator.getContext(), ExtHttpService.class.getName(), new ServiceTrackerCustomizer() {
-                @Override
-                public Object addingService(ServiceReference serviceReference) {
-                    BundleContext useContext = mediator.getContext();
-                    ClassLoader current = Thread.currentThread().getContextClassLoader();
-                    ClassLoader targetClassloader = useContext.getBundle().adapt(BundleWiring.class).getClassLoader();
-                    Thread.currentThread().setContextClassLoader(targetClassloader);
-                    //ExtHttpService service= (ExtHttpService) mediator.getContext().getService(serviceReference);
-                    ExtHttpService service = (ExtHttpService) useContext.getService(serviceReference);
-                    HttpContext httpContext = service.createDefaultHttpContext();
-                    Hashtable params = new Hashtable<String, Object>();
-                    try {
-                        service.registerServlet("/androidws", new WebSocketServlet() {
-                            @Override
-                            public void configure(WebSocketServletFactory factory) {
-                                factory.getPolicy().setIdleTimeout(1000 * 3600);
-                                factory.setCreator(pool);
-                            }
+			connector.connect(configuration);
+		} catch (InvalidProtocolStackException e) {
+			mediator.error(e);
+			return;
+		}
 
-                            ;
-                        }, params, httpContext);
-                        service.registerResources("/android", "/android", httpContext);
-                    } catch (NamespaceException e) {
-                        mediator.error(e);
-                    } catch (ServletException e) {
-                        mediator.error(e);
-                    } finally {
-                        Thread.currentThread().setContextClassLoader(current);
-                    }
-                    return new Object();
-                }
+        super.mediator.register(
+            	new Hashtable() {{
+            		this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/androidws");
+            		this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");}}, 
+            	new WebSocketServlet() { 			
+    				private static final long serialVersionUID = 1L;	
+    				private AndroidWebSocketPool pool = new AndroidWebSocketPool(mediator, connector);    				
+    		        private final AtomicBoolean firstCall = new AtomicBoolean(true); 
+    		    
+					private final CountDownLatch initBarrier = new CountDownLatch(1); 
+    				@Override
+    		        public void init() throws ServletException {
+    		            mediator.info("The Echo servlet has been initialized, but we delay initialization until the first request so that a Jetty Context is available");	
+    		        }
+    			
+    		        @Override
+    		        public void service(ServletRequest arg0, ServletResponse arg1) throws ServletException, IOException {
+    		            if(firstCall.compareAndSet(true, false)) {
+    		                try {         		        	
+    		                    delayedInit();
+    		                } finally {
+    		                    initBarrier.countDown();
+    		                }
+    		            } else {
+    		                try {
+    		                    initBarrier.await();
+    		                } catch (InterruptedException e) {
+    		                    throw new ServletException("Timed out waiting for initialisation", e);
+    		                }
+    		            }				
+    		            super.service(arg0, arg1);
+    		        }
 
-                @Override
-                public void modifiedService(ServiceReference serviceReference, Object o) {
-                }
-
-                @Override
-                public void removedService(ServiceReference serviceReference, Object o) {
+    		        private void delayedInit() throws ServletException {
+    		            Thread currentThread = Thread.currentThread();
+    		            ClassLoader tccl = currentThread.getContextClassLoader();
+    		            currentThread.setContextClassLoader(loader);
+    		            try {
+    		                super.init();
+    		            } catch(Exception e) {
+    		            	e.printStackTrace();		            
+    		            } finally {
+    		                currentThread.setContextClassLoader(tccl);
+    		            }
+    		        }
+    				
+    				@Override
+                    public void configure(WebSocketServletFactory factory) {
+                        factory.getPolicy().setIdleTimeout(1000 * 3600);
+                        factory.setCreator(pool);
+                    };
+                }, 
+            	new Class[]{ Servlet.class, WebSocketServlet.class }
+            );
+            super.mediator.info(String.format("%s servlet registered", "/androidws"));
+            
+            super.mediator.register(new IndexFilter("/android"), Filter.class, new Hashtable() {{
+            	this.put(Constants.SERVICE_RANKING, 3);
+                this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/android");
+                this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");
                 }
             });
-            st.open(false);
-        } catch (Exception e) {
-            mediator.error(e);
-        }
+            super.mediator.info(String.format("%s filter registered", "/android"));
+            
+            super.mediator.register(new ResourceFilter(super.mediator), Filter.class, new Hashtable() {{
+            	this.put(Constants.SERVICE_RANKING, 2);
+                this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/android/*");
+                this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");
+                }
+            });
+            super.mediator.info(String.format("%s filter registered", "/android/*"));
     }
 
     @Override
@@ -100,7 +156,6 @@ public class Activator extends AbstractActivator {
 
     @Override
     public Mediator doInstantiate(BundleContext context) {
-        this.context = context;
         return new Mediator(context);
     }
 }
