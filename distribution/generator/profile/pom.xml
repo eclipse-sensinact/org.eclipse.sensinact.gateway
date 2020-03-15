@@ -80,7 +80,7 @@
 	</build>
 
 	<modules>
-		<!--<module>android-imu-profile</module>-->
+		<module>android-imu-profile</module>
 		<module>application-profile</module>
 		<module>free-sms</module>
 		<module>kodi-profile</module>
@@ -100,6 +100,8 @@
 		<module>sensinact-remote</module>
 		<module>sensinact-datastore</module>
 		<module>ldapfilter</module>
+		<module>geojsonfilter</module>
 		<module>http-client</module>
+		<module>oauth2-profile</module>
 	</modules>
 </project>

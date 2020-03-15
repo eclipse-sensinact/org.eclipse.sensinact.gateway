@@ -1035,6 +1035,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.sensinact.gateway</groupId>
+				<artifactId>sensinact-security-oauth2</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.sensinact.gateway</groupId>
 				<artifactId>sensinact-signature-validator</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -1157,6 +1162,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+				<artifactId>geojson-filter</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 				<artifactId>ldap-filter</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -1197,6 +1207,11 @@
 			<dependency>
 				<groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
 				<artifactId>http-device</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
+				<artifactId>http-android</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
