@@ -62,12 +62,11 @@ public class Interpolator {
                     } else {
                         propertyName = annotation.name();
                     }
-                    Object value = null;
-                    if (!annotation.defaultValue().trim().equals("")) {
+                    Object value = propertyBucket.get(propertyName);
+                    
+                    if (!annotation.defaultValue().trim().equals("") && value==null) {
                         value = annotation.defaultValue();
                     }
-                    value = propertyBucket.get(propertyName);
-
                     if (annotation.mandatory() && value == null) {
                         throw new IncompleteDataException(String.format("mandatory field \"%s\" is missing in property table", field.getName()));
                     }
