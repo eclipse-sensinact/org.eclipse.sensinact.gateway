@@ -22,6 +22,7 @@ fi
 
 REPOSITORY="sensinact"
 TAG="latest"
+PORT="8080"
 
 while [[ $# -gt 0 ]]
 do
@@ -34,6 +35,11 @@ do
 	    ;;
 	    -t|--tag)
 		    TAG="$2"
+		    shift # past argument
+		    shift # past value
+	    ;;
+	    -p|--port)
+		    PORT="$2"
 		    shift # past argument
 		    shift # past value
 	    ;;
@@ -68,7 +74,7 @@ fi
 echo "FROM ubuntu:latest" > Dockerfile
 echo "ENV DEBIAN_FRONTEND noninteractive" >> Dockerfile
 echo "RUN apt-get update" >> Dockerfile
-echo "RUN apt-get install -y apt-utils curl iptables telnet bsdtar sqlite3 openjdk-8-jre" >> Dockerfile
+echo "RUN apt-get install -y apt-utils curl iptables telnet libarchive-tools sqlite3 openjdk-8-jre" >> Dockerfile
 echo "WORKDIR /opt" >> Dockerfile
 echo "RUN mkdir sensiNact" >> Dockerfile
 echo "ADD ./sensiNact-gateway-latest.zip /opt/sensiNact" >> Dockerfile
@@ -83,10 +89,11 @@ do
 done
 
 echo "RUN echo \"org.eclipse.sensinact.simulated.gui.enabled=false\" >> conf/config.properties" >> Dockerfile
-echo "EXPOSE 8080" >> Dockerfile
+echo "RUN echo \"org.osgi.service.http.port=$PORT\" >> conf/config.properties" >> Dockerfile
+echo "EXPOSE $PORT" >> Dockerfile
 echo "ENTRYPOINT [\"/opt/sensiNact/sensinact\"]" >> Dockerfile
 echo "Creating $REPOSITORY:$TAG"
 sudo docker build . -t $REPOSITORY:$TAG
 rm ./sensiNact-gateway-latest.zip
-#rm Dockerfile
+rm Dockerfile
 cd $CURRENT_DIR
