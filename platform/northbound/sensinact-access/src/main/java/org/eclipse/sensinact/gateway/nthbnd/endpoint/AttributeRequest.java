@@ -24,9 +24,9 @@ public abstract class AttributeRequest extends ResourceRequest {
         super(mediator, requestIdentifier, serviceProvider, service, resource);
 
         this.attribute = attribute;
-        if (this.attribute == null) {
-            throw new NullPointerException("Attribute missing");
-        }
+//        if (this.attribute == null) {
+//            throw new NullPointerException("Attribute missing");
+//        }
     }
 
     /**

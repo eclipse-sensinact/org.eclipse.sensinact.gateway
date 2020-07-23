@@ -253,14 +253,10 @@ public class NorthboundRequestBuilder {
                 }
                 break;
             case "GET":
-                if (this.attribute != null) {
-                    request = new AttributeGetRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, attribute);
-                }
+                request = new AttributeGetRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, attribute);
                 break;
             case "SET":
-                if (this.attribute != null) {
-                    request = new AttributeSetRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, attribute, argument);
-                }
+                request = new AttributeSetRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, attribute, argument);
                 break;
             case "SUBSCRIBE":
                 Object[] arguments = this.argument != null ? (this.argument.getClass().isArray() ? (Object[]) this.argument : new Object[]{this.argument}) : null;

@@ -19,9 +19,9 @@ public class ServiceProviderRequest extends ServiceProvidersRequest {
     public ServiceProviderRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, FilteringCollection filteringCollection) {
         super(mediator, requestIdentifier, filteringCollection);
         this.serviceProvider = serviceProvider;
-        if (this.serviceProvider == null) {
-            throw new NullPointerException("ServiceProvider missing");
-        }
+//        if (this.serviceProvider == null) {
+//            throw new NullPointerException("ServiceProvider missing");
+//        }
     }
 
     /**

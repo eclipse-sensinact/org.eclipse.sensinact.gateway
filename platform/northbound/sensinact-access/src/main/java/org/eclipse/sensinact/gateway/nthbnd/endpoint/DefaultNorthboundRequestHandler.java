@@ -418,12 +418,10 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
                 attribute = list.get(0);
             }
         }
-        if (attribute != null) {
+        if (attribute != null) 
             builder.withAttribute(attribute);
-
-        } else {
-            builder.withAttribute(DataResource.VALUE);
-        }
+//        else 
+//            builder.withAttribute(DataResource.VALUE);
     }
 
     /**
