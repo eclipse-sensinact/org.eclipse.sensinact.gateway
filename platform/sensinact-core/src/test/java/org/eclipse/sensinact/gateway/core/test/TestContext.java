@@ -187,8 +187,8 @@ public class TestContext<R extends ModelInstance> {
 					return null;
 				}
 			});
-		Mockito.when(context.getServiceReferences(Mockito.anyString(), Mockito.anyString()))
-			.then(new Answer<ServiceReference[]>() {
+		Mockito.when(context.getServiceReferences(Mockito.anyString(), Mockito.anyString())).then(
+			new Answer<ServiceReference[]>() {
 				@Override
 				public ServiceReference[] answer(InvocationOnMock invocation) throws Throwable {
 					Object[] arguments = invocation.getArguments();

@@ -26,11 +26,11 @@ public final class RegistryEndpoint {
 		this.defaultLocation = ModelInstance.defaultLocation(mediator);
     }
 
-	private Collection<ServiceReference<SensiNactResourceModel>> getReferences(SessionKey sessionKey, String filter) {
+	protected Collection<ServiceReference<SensiNactResourceModel>> getReferences(SessionKey sessionKey, String filter) {
         return getReferences(sessionKey.getAccessTree(),filter);
     }
 
-    private Collection<ServiceReference<SensiNactResourceModel>> getReferences(AccessTree<? extends AccessNode> tree, String filter) {
+    protected Collection<ServiceReference<SensiNactResourceModel>> getReferences(AccessTree<? extends AccessNode> tree, String filter) {
         AccessMethod.Type describe = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
         Collection<ServiceReference<SensiNactResourceModel>> result = new ArrayList<ServiceReference<SensiNactResourceModel>>();
         Collection<ServiceReference<SensiNactResourceModel>> references = null;
@@ -54,8 +54,7 @@ public final class RegistryEndpoint {
                 }
             }
         } catch (InvalidSyntaxException e) {
-            e.printStackTrace();
-            //mediator.error(e.getMessage(), e);
+           mediator.error(e.getMessage(), e);
         }
         return result;
     }

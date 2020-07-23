@@ -513,7 +513,7 @@ public class ServiceImpl
 					break;
 				case TriggerArgumentBuilder.MODEL:
 					result = trigger.execute(new TriggerArgumentBuilder.Model(
-						trigger.<String>getArgument()).build(ServiceImpl.this));
+						trigger.<String>getArgument()).build(ServiceImpl.this).getValue());
 					break;
 				default:
 					break;

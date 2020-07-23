@@ -36,7 +36,7 @@ public class GetMethod extends AbstractAccessMethod<JSONObject, GetResponse> {
 	 *      createAccessMethodResponseBuilder(java.lang.Object[])
 	 */
 	@Override
-	protected GetResponseBuilder createAccessMethodResponseBuilder(Object[] parameters) {
+	public GetResponseBuilder createAccessMethodResponseBuilder(Object[] parameters) {
 		return new GetResponseBuilder(super.mediator, uri, parameters);
 	}
 }
