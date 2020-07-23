@@ -99,6 +99,22 @@ public interface Session {
 	Resource resource(String serviceProviderName, String serviceName, String resourceName);
 
 	/**
+	 * Returns true if the {@link Resource} with the specified name, that belongs to the specified service, 
+	 * itself held by the specified service provider is accessible by this Session, because it exists 
+	 * and the owner of this Session as enough access rights; otherwise returns false  
+	 * 
+	 * @param serviceProviderId the String identifier of the service provider holding the service
+	 * providing the resource
+	 * @param servideId the String identifier of the service providing the resource
+	 * @param resourceId the String identifier of the resource
+	 * 
+	 * @return true if the {@link Resource} whose String identifier is passed as parameter,
+	 * provided by the specified service, itself held by the specified service provider, is 
+	 * accessible by this Session  
+	 */
+	boolean isAccessible(String serviceProviderName, String serviceName, String resourceName);
+	
+	/**
 	 * Invokes the GET access method on the resource whose String identifier is
 	 * passed as parameter, held by the specified service provider and service
 	 * 
