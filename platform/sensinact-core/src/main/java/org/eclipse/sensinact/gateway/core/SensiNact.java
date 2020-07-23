@@ -50,6 +50,13 @@ import java.security.AccessController;
 import java.security.InvalidKeyException;
 import java.security.PrivilegedAction;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -231,13 +238,7 @@ public class SensiNact implements Core {
 			}
 			return tatooRequestId(requestId, response);
 		}
-		
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.core.Session# get(java.lang.String,
-		 *      java.lang.String, java.lang.String, java.lang.String)
-		 */
+
 		@Override
 		public GetResponse get(String requestId, final String serviceProviderId, final String serviceId,
 				final String resourceId, final String attributeId) {
@@ -252,28 +253,25 @@ public class SensiNact implements Core {
 
 			if (resource != null) {
 				if (attributeId == null) {
-					if (!resource.getType().equals(Resource.Type.ACTION)) {
+					if (!resource.getType().equals(Resource.Type.ACTION))
 						response = ((DataResource) resource).get();
-
-					} else {
-						response = SensiNact.<JSONObject, GetResponse>createErrorResponse(mediator, AccessMethod.GET,
-								uri, 404, "Unknown Method", null);
-					}
-				} else {
+					else 
+						response = SensiNact.<JSONObject, GetResponse>createErrorResponse(mediator, AccessMethod.GET, uri, 404, "Unknown Method", null);
+				} else 
 					response = resource.get(attributeId);
-				}
 				return tatooRequestId(requestId, response);
 			}
-			if (sessionKey.localID() != 0) {
+			if (serviceProviderId.indexOf('(') < 0 && sessionKey.localID() != 0) {
+				
 				response = SensiNact.<JSONObject, GetResponse>createErrorResponse(mediator, AccessMethod.GET, uri,
 						SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found", null);
-
+				
 				return tatooRequestId(requestId, response);
 			}
 			JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
 				@Override
 				public JSONObject run() {
-					return SensiNact.this.get(sessionKey.getPublicKey(), serviceProviderId, serviceId,
+					return SensiNact.this.get(sessionKey.getToken(), serviceProviderId, serviceId,
 							resourceId, attributeId);
 				}
 			});
@@ -284,14 +282,8 @@ public class SensiNact implements Core {
 						SnaErrorfulMessage.INTERNAL_SERVER_ERROR_CODE, "Internal server error", e);
 			}
 			return tatooRequestId(requestId, response);
-		}
-
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.core.Session# set(java.lang.String,
-		 *      java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
-		 */
+		}		
+		
 		@Override
 		public SetResponse set(String requestId, final String serviceProviderId, final String serviceId,
 				final String resourceId, final String attributeId, final Object parameter) {
@@ -433,7 +425,15 @@ public class SensiNact implements Core {
 				}
 				return tatooRequestId(requestId, response);
 			}
-			if (sessionKey.localID() != 0) {
+			Boolean acc = SensiNact.this.remoteCoreInvocation(uri, new Executable<SensinactCoreBaseIface,Boolean>(){
+				@Override
+				public Boolean execute(SensinactCoreBaseIface core) throws Exception {
+					return core.isAccessible(sessionKey.getPublicKey(), serviceProviderId, serviceId, resourceId);
+				}
+			});
+			boolean accessible = acc==null?false:acc.booleanValue();
+			
+			if (sessionKey.localID() != 0 || !accessible) {
 				response = SensiNact.<JSONObject, SubscribeResponse>createErrorResponse(mediator,
 					AccessMethod.SUBSCRIBE, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found", null);
 				return tatooRequestId(requestId, response);
@@ -501,7 +501,15 @@ public class SensiNact implements Core {
 				}
 				return tatooRequestId(requestId, response);
 			}
-			if (sessionKey.localID() != 0) {
+			Boolean acc = SensiNact.this.remoteCoreInvocation(uri, new Executable<SensinactCoreBaseIface,Boolean>(){
+				@Override
+				public Boolean execute(SensinactCoreBaseIface core) throws Exception {
+					return core.isAccessible(sessionKey.getPublicKey(), serviceProviderId, serviceId, resourceId);
+				}
+			});
+			boolean accessible = acc==null?false:acc.booleanValue();
+			
+			if (sessionKey.localID() != 0 || !accessible) {
 				response = SensiNact.<JSONObject, UnsubscribeResponse>createErrorResponse(mediator,
 					AccessMethod.UNSUBSCRIBE, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found",null);
 				return tatooRequestId(requestId, response);
@@ -884,8 +892,7 @@ public class SensiNact implements Core {
 			}
 			if (sessionKey.localID() != 0) {
 				response = SensiNact.<JSONObject, DescribeResponse<JSONObject>>createErrorResponse(mediator,
-						DescribeType.RESOURCE, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found",
-						null);
+				DescribeType.RESOURCE, uri, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Resource not found", null);
 				return tatooRequestId(requestId, response);
 			}
 			JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
@@ -898,6 +905,11 @@ public class SensiNact implements Core {
 			return tatooRequestId(requestId, describeFromJSONObject(mediator, builder, DescribeType.RESOURCE, object));
 		}
 
+		@Override
+		public boolean isAccessible(String serviceProviderId, String serviceId, String resourceId) {
+			return isAccessible(UriUtils.getUri(new String[] {serviceProviderId, serviceId, resourceId}));
+		}
+		
 		/**
 		 * Returns true if the model element targeted by the String path argument
 		 * exists and is accessible to this {@link Session}. Returns false if the 
@@ -915,15 +927,30 @@ public class SensiNact implements Core {
 		private final boolean isAccessible(final String path) {
 			final SessionKey sessionKey = SensiNact.this.sessions.get(new KeyExtractor<KeyExtractorType>(
 					KeyExtractorType.TOKEN, this.getSessionId()));
-			Boolean exists = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+			Boolean accessible = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
 				@Override
 				public Boolean run() {
-					return SensiNact.this.isAccessible(sessionKey, path);
-				}
-			});
-			return exists.booleanValue();
+					boolean isAccessible =  SensiNact.this.isAccessible(sessionKey, path);				
+					if(!isAccessible && sessionKey.localID() == 0){
+						String[] uriElements = UriUtils.getUriElements(path);
+						if(uriElements.length < 3)
+							return false;	
+						final String[] providerElements = uriElements[0].split(":");				
+						Boolean bool = remoteCoreInvocation(uriElements[0], new Executable<SensinactCoreBaseIface, Boolean>() {
+							@Override
+							public Boolean execute(SensinactCoreBaseIface core) throws Exception {
+								if(core.isAccessible(sessionKey.getPublicKey(), providerElements.length>1?providerElements[1]:providerElements[0], 
+									uriElements[1], uriElements[2]))
+									return true;
+								return false;
+							}
+						});
+						return bool==null?false:bool.booleanValue();
+					}
+					return isAccessible;
+				}});
+			return accessible==null?false:accessible.booleanValue();
 		}
-
 	};
 
 	/**
@@ -1702,13 +1729,12 @@ public class SensiNact implements Core {
 	protected boolean isAccessible(final String publicKey, AccessTree<?> tree, final String path) {
 		String[] uriElements = UriUtils.getUriElements(path);
 		String[] providerElements = uriElements[0].split(":");
-		String namespace = providerElements.length>1?providerElements[0]:null;
-
 		String[] uri = new String[uriElements.length];
-		if(uriElements.length > 1) {
-			System.arraycopy(uriElements, 1, uri, 1, uriElements.length -1);
-		}
-		uri[0] = providerElements.length > 1?providerElements[1]:providerElements[0];
+		
+		if(uriElements.length > 1) 
+			System.arraycopy(uriElements, 1, uri, 1, uriElements.length -1);		
+		
+		uri[0] = providerElements.length > 1?providerElements[1]:providerElements[0];		
 		return this.registry.isAccessible(tree, UriUtils.getUri(uri));
 	}
 
@@ -1728,12 +1754,11 @@ public class SensiNact implements Core {
 		String[] serviceProviderIdElements = serviceProviderId.split(":");
 		String remoteNamespace = serviceProviderIdElements[0];
 		F f = null;
-		if (serviceProviderIdElements.length == 1 || remoteNamespace.length() == 0) {
+		if (serviceProviderIdElements.length == 1 || remoteNamespace.length() == 0 || remoteNamespace.equals(this.namespace()) ) {
 			return f;
 		}
-		f = mediator.callService(SensinactCoreBaseIface.class, new StringBuilder().append("(").append(
-			SensinactCoreBaseIFaceManager.REMOTE_NAMESPACE_PROPERTY).append("=").append(remoteNamespace
-				).append(")").toString(), executable);
+		f = mediator.callService(SensinactCoreBaseIface.class, String.format("(%s=%s)",
+			SensinactCoreBaseIFaceManager.REMOTE_NAMESPACE_PROPERTY, remoteNamespace), executable);
 		return f;
 	}
 
@@ -1844,16 +1869,113 @@ public class SensiNact implements Core {
 		final SessionKey sessionKey;
 		synchronized(this.sessions){
 			sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
+		}		
+		if(serviceProviderId.indexOf('(') < 0) {			
+			String response = remoteCoreInvocation(serviceProviderId, 
+				new RemoteAccessMethodExecutable(mediator, AccessMethod.Type.valueOf(AccessMethod.GET
+				), sessionKey.getPublicKey()
+				).withServiceProvider(serviceProviderId
+				).withService(serviceId
+				).withResource(resourceId
+				).withAttribute(attributeId));
+		    JSONObject object = null;
+		    if(response != null)
+		    	object = new JSONObject(response);
+		    return object;
 		}
-		String response = remoteCoreInvocation(serviceProviderId, 
-			new RemoteAccessMethodExecutable(mediator, AccessMethod.Type.valueOf(AccessMethod.GET
-			), sessionKey.getPublicKey()
-			).withServiceProvider(serviceProviderId
-			).withService(serviceId
-			).withResource(resourceId
-			).withAttribute(attributeId));
-	    JSONObject object = new JSONObject(response);
-	    return object;
+		List<Future<String>> results = new ArrayList<Future<String>>();		
+		ExecutorService executor = Executors.newFixedThreadPool(10);
+		
+		if (sessionKey.localID() == 0) {
+			Collection<ServiceReference<SensinactCoreBaseIface>> references = null;
+			try {
+				references = mediator.getContext().getServiceReferences(SensinactCoreBaseIface.class, String.format("(!(%s=%s))",
+					SensinactCoreBaseIFaceManager.REMOTE_NAMESPACE_PROPERTY,namespace()));
+			} catch (InvalidSyntaxException e) {
+				mediator.debug(e.getMessage());
+			}
+			if(references!=null) {
+				for (ServiceReference<SensinactCoreBaseIface> reference : references) {
+					final SensinactCoreBaseIface core;
+					if (reference == null || (core = mediator.getContext().getService(reference)) == null)
+						continue;					
+					results.add(executor.submit(new Callable<String>() {
+						@Override
+						public String call() throws Exception {
+							return core.get(sessionKey.getPublicKey(), serviceProviderId, serviceId, resourceId, attributeId);
+						}
+					}));
+				}
+			}
+		}
+		Collection<ServiceReference<SensiNactResourceModel>> modelReferences = this.registry.getReferences(
+				sessionKey.getAccessTree(), serviceProviderId);
+		try {
+			for (ServiceReference<SensiNactResourceModel> modelReference : modelReferences) {
+				SensiNactResourceModel resourceModel;
+				if (modelReference == null || (resourceModel = mediator.getContext().getService(modelReference)) == null)
+					continue;
+				
+				ServiceProvider p = null;
+				try {
+					p = ((ServiceProviderImpl) resourceModel.getRootElement()).<ServiceProvider>getProxy(sessionKey);
+				} catch (ModelElementProxyBuildException e) {
+					continue;
+				}
+				List<Service> services = p.getServices();
+				for (Service s : services) {
+					if (s == null || !s.isAccessible() || (serviceId != null && !s.getName().equals(serviceId)))
+						continue;
+					
+					List<Resource> resources = s.getResources();
+					for (Resource r : resources) {
+						if (r == null || !r.isAccessible() || (resourceId != null && !r.getName().equals(resourceId)))
+							continue;
+						final Resource resource = r;
+						final Resource.Type type = resource.getType();
+						if (attributeId == null && Resource.Type.ACTION.equals(type)) {
+							continue;
+						}
+						results.add(executor.submit(new Callable<String>() {
+							@Override
+							public String call() throws Exception {
+								if (attributeId == null) 
+									return ((DataResource) resource).get().getJSON();								
+								return resource.get(attributeId).getJSON();
+							}
+						}));
+					}
+				}
+			}
+			StringBuilder builder = new StringBuilder();
+			String name = String.format("/%s/%s/%s/%s", serviceProviderId,
+					serviceId==null?"*":serviceId,
+					resourceId==null?"*":resourceId,
+					attributeId==null?"{default-attribute}":attributeId);
+			builder.append("{\"statusCode\":200,\"response\":{\"name\":\"");
+			builder.append(name);
+			builder.append("\",\"type\":\"array\",\"value\":[");
+			int index = 0;
+			for (Future<String> future : results) {
+				try {
+					String result = future.get();
+					if (index > 0) {
+						builder.append(",");
+					}
+					builder.append(result);
+					index++;
+				} catch (CancellationException | ExecutionException | InterruptedException e) {
+					continue;
+				}
+			}
+			builder.append("]}}");
+			return new JSONObject(builder.toString());
+		} finally {
+			for (ServiceReference<SensiNactResourceModel> modelReference : modelReferences) {
+				if (modelReference != null) 
+					mediator.getContext().ungetService(modelReference);
+			}
+		}
 	}
 	
 	/**
