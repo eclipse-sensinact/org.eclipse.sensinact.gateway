@@ -193,4 +193,9 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
         return parametersObjectArray;
     }
 
+	@Override
+	public boolean isAccessible(String identifier, String serviceProviderId, String serviceId, String resourceId) {
+		return getSession(identifier).isAccessible(serviceProviderId, serviceId, resourceId);
+	}
+
 }
