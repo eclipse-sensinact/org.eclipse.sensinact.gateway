@@ -11,7 +11,8 @@
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.device;
 
 
-import org.eclipse.sensinact.gateway.generic.GenericActivator;
+import org.eclipse.sensinact.gateway.generic.BasisActivator;
+import org.eclipse.sensinact.gateway.generic.annotation.SensiNactBridgeConfiguration;
 
 
 /**
@@ -19,14 +20,7 @@ import org.eclipse.sensinact.gateway.generic.GenericActivator;
  *
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
-public abstract class MqttActivator extends GenericActivator {
+@SensiNactBridgeConfiguration(endpointType=MqttProtocolStackEndpoint.class)
+public class MqttActivator extends BasisActivator<MqttPacket> {
 
-    @Override
-    public MqttProtocolStackEndpoint getEndPoint() {
-        return new MqttProtocolStackEndpoint(mediator);
-    }
-
-    public Class getPacketClass(){
-        return MqttPacket.class;
-    }
 }

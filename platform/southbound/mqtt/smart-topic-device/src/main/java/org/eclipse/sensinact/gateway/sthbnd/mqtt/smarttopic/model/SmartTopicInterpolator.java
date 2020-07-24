@@ -85,19 +85,4 @@ public class SmartTopicInterpolator {
     public String getSmartTopic() {
         return smartTopic;
     }
-
-    public static void main(String[] args) throws MessageInvalidSmartTopicException {
-        String smartTopic = "/+/blah/aaa-{provider}/{service}/{resource}";
-        SmartTopicInterpolator m = new SmartTopicInterpolator(smartTopic);
-        System.out.println("SmartTopic:" + smartTopic);
-        System.out.println("Regex:" + m.getRegex());
-        System.out.println("Topic:" + m.getTopic());
-        System.out.println(m.getGroup("/me/blah/aaa-pi/air/co2", "provider"));
-        /*
-        Pattern p=Pattern.compile("/blah/(?<provider>.*)/(?<service>.*)/(?<resource>.*)");
-        Matcher matcher=p.matcher("/blah/pi/air/co2");
-        System.out.println(matcher.matches());
-        System.out.println(matcher.group("service"));
-*/
-    }
 }

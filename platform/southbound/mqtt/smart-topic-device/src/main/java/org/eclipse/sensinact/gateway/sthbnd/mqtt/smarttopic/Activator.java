@@ -10,43 +10,27 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.generic.ManagedBasisActivator;
+import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpointConfigurator;
+import org.osgi.framework.BundleContext;
 
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttActivator;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttProtocolStackEndpoint;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.device.MqttPropertyFileConfig;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.interpolator.MqttManagedService;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.ManagedServiceFactory;
-import org.osgi.util.tracker.ServiceTracker;
+public class Activator extends ManagedBasisActivator<Mediator> {
+	
+    public static final String MQTT_PREFIX = "mqtt";
+	
+	@Override
+	protected String name() {
+		return MQTT_PREFIX;
+	}
 
-import java.util.Hashtable;
+	@Override
+	protected ProtocolStackEndpointConfigurator configurator() {
+		return new SmartTopicConfigurator();
+	}
 
-public class Activator extends MqttActivator {
-    private ServiceTracker mqttBusConfigFileServiceTracker;
-    private ServiceTracker mqttBusPojoServiceTracker;
-    private ServiceRegistration<ManagedServiceFactory> managedServiceFactory;
-
-    @Override
-    public void doStart() throws Exception {
-        super.doStart();
-        managedServiceFactory = super.mediator.getContext().registerService(ManagedServiceFactory.class, new MqttManagedService(super.mediator.getContext()), new Hashtable<String, String>() {{
-            put("service.pid", MqttManagedService.MANAGER_NAME);
-        }});
-        // Monitor the deployment of a Provider POJO that specifies relation between topic and provider/service/resource,
-        // this is the entry point for any MQTT device
-        mqttBusPojoServiceTracker = new ServiceTracker(super.mediator.getContext(), Provider.class.getName(), 
-        		new MqttPojoConfigTracker((MqttProtocolStackEndpoint)endPoint, super.mediator.getContext()));
-        mqttBusPojoServiceTracker.open(true);
-        // Monitors the deployment of the file "mqtt-*.cfg" file to create
-        mqttBusConfigFileServiceTracker = new ServiceTracker(super.mediator.getContext(), MqttPropertyFileConfig.class.getName(), new MqttPropertyFileConfigTracker(super.mediator.getContext(), (MqttProtocolStackEndpoint)endPoint));
-        mqttBusConfigFileServiceTracker.open(true);
-        // Smarttopic declaration
-    }
-
-    @Override
-    public void doStop() {
-        super.doStop();
-        mqttBusConfigFileServiceTracker.close();
-    }
+	@Override
+	public Mediator doInstantiate(BundleContext context) {
+		return new Mediator(context);
+	}
 }

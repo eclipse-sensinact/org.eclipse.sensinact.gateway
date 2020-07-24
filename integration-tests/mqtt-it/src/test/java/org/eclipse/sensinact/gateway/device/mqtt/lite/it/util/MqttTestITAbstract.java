@@ -28,9 +28,6 @@ import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Provider;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Resource;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.model.Service;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -43,6 +40,8 @@ import org.ops4j.pax.exam.options.SystemPropertyOption;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -86,6 +85,7 @@ public abstract class MqttTestITAbstract {
                 mavenBundle("org.osgi", "org.osgi.service.component", "1.4.0"),
                 mavenBundle("org.osgi", "org.osgi.service.cm", "1.6.0"),
                 mavenBundle("org.osgi", "org.osgi.service.metatype", "1.4.0"),
+                mavenBundle("org.osgi", "org.osgi.service.event", "1.4.0"),
                 mavenBundle("org.osgi", "org.osgi.namespace.extender", "1.0.1"),
                 mavenBundle("org.osgi", "org.osgi.util.function", "1.1.0"),
                 mavenBundle("org.osgi", "org.osgi.util.promise", "1.1.1"),
@@ -190,7 +190,7 @@ public abstract class MqttTestITAbstract {
                 ,new FrameworkPropertyOption("sensinact.log.mode").value("debug")
                 ,new FrameworkPropertyOption("sensinact.log.service.filter.property.key").value("description")
                 ,new FrameworkPropertyOption("sensinact.log.service.filter.property.value").value("An SLF4J LogService implementation.")
-                ,new FrameworkPropertyOption("felix.fileinstall.log.level").value("4")
+                ,new FrameworkPropertyOption("felix.fileinstall.log.level").value("3")
                 ,new FrameworkPropertyOption("felix.fileinstall.dir").value(new File("target/conf").getAbsolutePath())
                 ,new FrameworkPropertyOption("felix.fileinstall.noInitialDelay").value("true")
                 ,new FrameworkPropertyOption("felix.fileinstall.poll").value("1000")
@@ -216,31 +216,27 @@ public abstract class MqttTestITAbstract {
                 getBundleRequiredByURLResolvers());
     }
     
-    protected Provider createDevicePojo(String providerString, String serviceString, String resourceString, String topic) throws Exception {
-        MqttBroker broker = new MqttBroker.Builder()
-                .host(MQTT_HOST)
-                .port(MQTT_PORT)
-                .build();
-        broker.connect();
-        while(broker.getClient()==null||!broker.getClient().isConnected()){
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    protected void createConfigurationFile(String providerString, String topic) throws Exception {
+        File f = new File("target/conf/mqtt-test.cfg");
+        if(f.exists()) {
+        	f.delete();
         }
-        Provider provider = new Provider();
-        provider.setName(providerString);
-        provider.setBroker(broker);
-        Service service=new Service(provider);
-        service.setName(serviceString);
-        provider.getServices().add(service);
-        Resource resource = new Resource(service);
-        resource.setName(resourceString);
-        resource.setTopic(topic);
-        service.getResources().add(resource);
-        return provider;
+    	FileWriter fw = new FileWriter(f);
+    	fw.write("id="+providerString+"\n");
+    	fw.write("topic="+topic+"\n");
+    	fw.flush();
+    	fw.close();
+    	Thread.sleep(5000);
     }
+
+    protected void deleteConfigurationFile() throws Exception {
+        File f = new File("target/conf/mqtt-test.cfg");
+        if(f.exists()) {
+        	f.delete();
+        }
+    	Thread.sleep(1000);
+    }
+    
     public MqttClient getMqttConnection(String host, int port) throws Exception {
         MqttBroker broker = new MqttBroker.Builder()
                 .host(host)

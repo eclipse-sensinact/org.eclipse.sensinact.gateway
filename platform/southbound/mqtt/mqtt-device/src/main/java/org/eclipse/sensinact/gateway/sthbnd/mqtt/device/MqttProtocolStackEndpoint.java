@@ -10,15 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.device;
 
-import org.eclipse.paho.client.mqttv3.MqttException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
+import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class MqttProtocolStackEndpoint extends LocalProtocolStackEndpoint<MqttPacket> {
     private static final Logger LOG = LoggerFactory.getLogger(MqttProtocolStackEndpoint.class);
@@ -64,5 +67,11 @@ public class MqttProtocolStackEndpoint extends LocalProtocolStackEndpoint<MqttPa
 
     public Map<String, MqttBroker> getBrokers() {
         return brokers;
+    }
+
+    @Override
+	public void connect(ExtModelConfiguration<MqttPacket> manager) throws InvalidProtocolStackException {
+        super.connect(manager);
+        connectBrokers();
     }
 }
