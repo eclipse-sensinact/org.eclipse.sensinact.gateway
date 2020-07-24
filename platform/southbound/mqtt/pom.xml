@@ -30,6 +30,7 @@
 		<module>mqtt-utils</module>
         <module>mqtt-device</module>
 		<module>smart-topic-device</module>
+		<module>ttn-device</module>
     </modules>
 
 </project>

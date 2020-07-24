@@ -1,0 +1,50 @@
+<resourceInfos xmlns="http://org.eclipse.sensinact/resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../../../sensinact-generic/src/main/resources/sensinact-resource.xsd"
+               empty_profile="true">
+
+    <resourceInfo xsi:type="resourceInfoSensor" name="FREQUENCY" target="system">
+        <policy name="SENSOR"/>
+        <identifier xsi:type="stringContent">description</identifier>
+        <attributes>
+            <attribute name="value" type="double">
+                <metadata>
+                    <meta name="Unit" type="string">
+                        <value>Hz</value>
+                    </meta>
+                </metadata>
+            </attribute>
+        </attributes>
+    </resourceInfo>
+
+    <resourceInfo xsi:type="resourceInfoSensor" name="MODULATION" target="system">
+        <policy name="SENSOR"/>
+        <identifier xsi:type="stringContent">description</identifier>
+        <attributes>
+            <attribute name="value" type="string"/>
+        </attributes>
+    </resourceInfo>
+    
+    <resourceInfo xsi:type="resourceInfoProperty" name="DATA" target="system">
+        <policy name="SENSOR"/>
+        <identifier xsi:type="stringContent">data</identifier>
+        <attributes>
+            <attribute name="value" type="Array of byte"/>
+        </attributes>
+    </resourceInfo>
+
+    <resourceInfo xsi:type="resourceInfoSensor" name="DATA_RATE" target="system">
+        <policy name="SENSOR"/>
+        <identifier xsi:type="stringContent">description</identifier>
+        <attributes>
+            <attribute name="value" type="string"/>
+        </attributes>
+    </resourceInfo>
+
+    <resourceInfo xsi:type="resourceInfoSensor" name="CODING_RATE" target="system">
+        <policy name="SENSOR"/>
+        <identifier xsi:type="stringContent">description</identifier>
+        <attributes>
+            <attribute name="value" type="string"/>
+        </attributes>
+    </resourceInfo>
+</resourceInfos>
