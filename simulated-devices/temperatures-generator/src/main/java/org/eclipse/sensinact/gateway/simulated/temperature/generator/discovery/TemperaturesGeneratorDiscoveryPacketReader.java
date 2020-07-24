@@ -14,6 +14,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacket;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacketReader;
+import org.eclipse.sensinact.gateway.simulated.temperature.generator.reader.TemperaturesGeneratorPacket;
 
 public class TemperaturesGeneratorDiscoveryPacketReader extends TemperaturesGeneratorAbstractPacketReader {
     /**
@@ -32,11 +33,17 @@ public class TemperaturesGeneratorDiscoveryPacketReader extends TemperaturesGene
         super.setServiceId("admin");
         super.setResourceId("location");
         super.setData(((TemperaturesGeneratorDiscoveryPacket) packet).getLocation());
+        super.configure();       
+        super.setServiceProviderId(((TemperaturesGeneratorPacket) packet).getServiceProvider());
+        super.setServiceId("sensor");
+        super.setResourceId("temperature");
+        super.setAttributeId("floor");
+        super.setData(((TemperaturesGeneratorDiscoveryPacket) packet).getFloor());
         super.configure();
         super.setServiceProviderId(((TemperaturesGeneratorDiscoveryPacket) packet).getServiceProvider());
         super.setServiceId("sensor");
         super.setResourceId("temperature");
         super.setData(((TemperaturesGeneratorDiscoveryPacket) packet).getValue());
-        super.configure();
+        super.configure(); 
     }
 }

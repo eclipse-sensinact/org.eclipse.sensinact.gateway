@@ -12,9 +12,10 @@
 <resourceInfos xmlns="http://org.eclipse.sensinact/resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../../platform/sensinact-generic/src/main/resources/sensinact-resource.xsd">
   <resourceInfo xsi:type="resourceInfoSensor" name="TEMPERATURE"  target="sensor">
-    <identifier xsi:type="stringContent">POSITION</identifier>
+    <identifier xsi:type="stringContent">TEMPERATURE</identifier>
     <attributes>
-    	<attribute name="value" type="double"/>
+    	<attribute name="value" type="double"></attribute>
+    	<attribute name="floor" type="int"></attribute>
     </attributes>
   </resourceInfo>
 </resourceInfos>

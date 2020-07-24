@@ -11,8 +11,8 @@
 package org.eclipse.sensinact.gateway.simulated.temperature.generator.thread;
 
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
-import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacket;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.parser.DeviceInfo;
+import org.eclipse.sensinact.gateway.simulated.temperature.generator.reader.TemperaturesGeneratorPacket;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -20,7 +20,7 @@ import java.util.Set;
 public class TemperaturesGeneratorThreadManager {
     private Set<TemperaturesGeneratorThread> threadList;
 
-    public TemperaturesGeneratorThreadManager(LocalProtocolStackEndpoint<TemperaturesGeneratorAbstractPacket> connector, Set<DeviceInfo> deviceInfos) {
+    public TemperaturesGeneratorThreadManager(LocalProtocolStackEndpoint<TemperaturesGeneratorPacket> connector, Set<DeviceInfo> deviceInfos) {
         this.threadList = new HashSet<TemperaturesGeneratorThread>();
         for (DeviceInfo deviceInfo : deviceInfos) {
             TemperaturesGeneratorThread thread = new TemperaturesGeneratorThread(connector, deviceInfo);

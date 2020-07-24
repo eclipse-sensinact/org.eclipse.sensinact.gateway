@@ -37,7 +37,7 @@ public class DataParser {
         try {
             for (int i = 0; i < number; i++) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(mediator.getContext().getBundle().getResource("data.csv").openStream()));
-                DeviceInfo deviceInfo = choose(new BufferedReader(reader));
+                DeviceInfo deviceInfo = choose(new BufferedReader(reader),i%3);
                 if (!map.containsKey(deviceInfo.getServiceProviderId())) {
                     map.put(deviceInfo.getServiceProviderId(), 0);
                 }
@@ -51,7 +51,7 @@ public class DataParser {
         return deviceInfoSet;
     }
 
-    private static DeviceInfo choose(BufferedReader reader) throws IOException {
+    private static DeviceInfo choose(BufferedReader reader, int floor) throws IOException {
         DeviceInfo result = null;
         Random rand = new Random();
         Integer sleepTimeRandom = new Random().nextInt(60000) + 1000;
@@ -64,7 +64,7 @@ public class DataParser {
             for (int i = 0; i < 12; i++) {
                 temperatures[i] = Double.parseDouble(splittedLine[i + 2]);
             }
-            DeviceInfo deviceInfo = new DeviceInfo(splittedLine[0], splittedLine[1] + "," + splittedLine[2], temperatures, sleepTimeRandom);
+            DeviceInfo deviceInfo = new DeviceInfo(splittedLine[0], splittedLine[1] + "," + splittedLine[2], floor, temperatures, sleepTimeRandom);
             if (rand.nextInt(n) == 0) {
                 result = deviceInfo;
             }

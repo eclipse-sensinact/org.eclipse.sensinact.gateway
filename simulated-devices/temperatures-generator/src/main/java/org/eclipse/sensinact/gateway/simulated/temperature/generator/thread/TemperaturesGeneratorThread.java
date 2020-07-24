@@ -13,19 +13,18 @@ package org.eclipse.sensinact.gateway.simulated.temperature.generator.thread;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.discovery.TemperaturesGeneratorDiscoveryPacket;
-import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacket;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.parser.DeviceInfo;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.reader.TemperaturesGeneratorPacket;
 
 public class TemperaturesGeneratorThread extends Thread implements Runnable {
-    private LocalProtocolStackEndpoint<TemperaturesGeneratorAbstractPacket> connector;
+    private LocalProtocolStackEndpoint<TemperaturesGeneratorPacket> connector;
     private DeviceInfo deviceInfo;
 
-    public TemperaturesGeneratorThread(LocalProtocolStackEndpoint<TemperaturesGeneratorAbstractPacket> connector, DeviceInfo deviceInfo) {
+    public TemperaturesGeneratorThread(LocalProtocolStackEndpoint<TemperaturesGeneratorPacket> connector, DeviceInfo deviceInfo) {
         this.connector = connector;
         this.deviceInfo = deviceInfo;
         try {
-            this.connector.process(new TemperaturesGeneratorDiscoveryPacket(deviceInfo.getServiceProviderId(), deviceInfo.getLocation(), deviceInfo.getTemperatures()[0]));
+            this.connector.process(new TemperaturesGeneratorDiscoveryPacket(deviceInfo.getServiceProviderId(), deviceInfo.getLocation(), deviceInfo.getFloor(), deviceInfo.getTemperatures()[0]));
         } catch (InvalidPacketException e) {
             e.printStackTrace();
         }

@@ -14,17 +14,23 @@ import org.eclipse.sensinact.gateway.simulated.temperature.generator.reader.Temp
 
 public class TemperaturesGeneratorDiscoveryPacket extends TemperaturesGeneratorPacket {
     private final String location;
+	private int floor;
 
     /**
      * @param serviceProviderId the id of the device
      * @param value             the value of the sensor
      */
-    public TemperaturesGeneratorDiscoveryPacket(String serviceProviderId, String location, double value) {
+    public TemperaturesGeneratorDiscoveryPacket(String serviceProviderId, String location, int floor, double value) {
         super(serviceProviderId,value);
     	this.location = location;
+    	this.floor = floor;
     }
 
     public String getLocation() {
         return this.location;
     }
+
+	public int getFloor() {
+		return this.floor;
+	}
 }

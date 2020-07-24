@@ -31,7 +31,7 @@ public class Activator extends AbstractActivator<Mediator> {
     public void doStart() throws Exception {
         config = new LightConfig();
 
-        ExtModelConfiguration<?> manager = ExtModelConfigurationBuilder.instance(super.mediator
+        ExtModelConfiguration<Packet> manager = ExtModelConfigurationBuilder.instance(super.mediator
         	).withStartAtInitializationTime(true
         	).build("light-resource.xml", Collections.<String, String>emptyMap());
 

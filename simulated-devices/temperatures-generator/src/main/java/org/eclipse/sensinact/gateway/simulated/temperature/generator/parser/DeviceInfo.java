@@ -18,12 +18,14 @@ public class DeviceInfo {
     private String location;
     private double[] temperatures;
     private long sleepTime;
+	private int floor;
 
-    public DeviceInfo(String serviceProviderId, String location, double[] temperatures, long sleepTime) {
+    public DeviceInfo(String serviceProviderId, String location, int floor, double[] temperatures, long sleepTime) {
         this.serviceProviderId = DEVICE_NAME + serviceProviderId;
         this.location = location;
         this.temperatures = temperatures;
         this.sleepTime = sleepTime;
+        this.floor = floor;
     }
 
     public String getServiceProviderId() {
@@ -40,6 +42,10 @@ public class DeviceInfo {
 
     public long getSleepTime() {
         return sleepTime;
+    }
+
+    public int getFloor() {
+        return floor;
     }
 
     public String toString() {

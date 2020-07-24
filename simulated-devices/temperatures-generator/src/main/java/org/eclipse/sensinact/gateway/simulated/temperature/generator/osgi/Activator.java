@@ -26,9 +26,9 @@ import org.osgi.framework.BundleContext;
 import java.util.Collections;
 
 public class Activator extends AbstractActivator<Mediator> {
-    @Property(name = "org.eclipse.sensinact.simulated.generator.amount", defaultValue = "10")
+    @Property(name = "org.eclipse.sensinact.simulated.generator.amount", defaultValue = "30")
     Integer DEVICES_NUMBER;
-    private LocalProtocolStackEndpoint<TemperaturesGeneratorAbstractPacket> connector;
+    private LocalProtocolStackEndpoint<TemperaturesGeneratorPacket> connector;
     private ExtModelConfiguration<TemperaturesGeneratorPacket> manager;
     private TemperaturesGeneratorThreadManager threadManager;
 
@@ -39,9 +39,11 @@ public class Activator extends AbstractActivator<Mediator> {
         	).withServiceBuildPolicy((byte) (BuildPolicy.BUILD_NON_DESCRIBED.getPolicy() | BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy())
         	).withStartAtInitializationTime(true
         	).build("temperature-resource.xml", Collections.<String, String>emptyMap());
+            manager.setObserved(Collections.singletonList("/sensor/temperature/floor"));
         }
+        
         if (connector == null) {
-            connector = new LocalProtocolStackEndpoint<TemperaturesGeneratorAbstractPacket>(super.mediator);
+            connector = new LocalProtocolStackEndpoint<TemperaturesGeneratorPacket>(super.mediator);
         }
         connector.connect(manager);
         DataParser dataParser = new DataParser(mediator);

@@ -26,7 +26,7 @@ import java.util.Collections;
 public class Activator extends AbstractActivator<Mediator> {
     private static final String GUI_ENABLED = "org.eclipse.sensinact.simulated.gui.enabled";
     private LocalProtocolStackEndpoint<Packet> connector;
-    private ExtModelConfiguration<?> manager;
+    private ExtModelConfiguration<Packet> manager;
     private FanConfig config;
     private FanPanel fanPanel;
 
