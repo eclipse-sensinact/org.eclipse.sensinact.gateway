@@ -77,12 +77,8 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
         this.buildExecutors();
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint#
-     * connect(org.eclipse.sensinact.gateway.generic.ExtModelConfiguration)
-     */
-    public void connect(ExtModelConfiguration manager) throws InvalidProtocolStackException {
+    @Override
+    public void connect(ExtModelConfiguration<P> manager) throws InvalidProtocolStackException {
         this.resolver.addInjectableInstance(Mediator.class, super.mediator);
         this.resolver.addInjectableInstance(LocalProtocolStackEndpoint.class, this);
         this.resolver.addInjectableInstance(ExtModelConfiguration.class, manager);
@@ -90,21 +86,11 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
         super.connect(manager);
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.generic.TaskTranslator#
-     * getRequestType()
-     */
     @Override
     public RequestType getRequestType() {
         return REQUEST_TYPE;
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.generic.TaskTranslator#
-     * send(org.eclipse.sensinact.gateway.generic.Task)
-     */
     @Override
     public void send(Task task) {
         try {
@@ -309,18 +295,6 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
             cache.put(key, executor);
         }
         return executor.execute(task);
-    }
-
-    /**
-     * Stops this {@link ProtocolStackEndpoint} and its
-     * associated {@link SnaPocessor}
-     */
-    public void stop() {
-        if (super.connector != null) {
-            super.connector.stop();
-        } else {
-            this.mediator.debug("No processor connected");
-        }
     }
 
     /**

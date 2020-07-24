@@ -66,9 +66,9 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
      *                connect to
      * @throws InvalidProtocolStackException
      */
-    public void connect(ExtModelConfiguration manager) throws InvalidProtocolStackException {
+	public void connect(ExtModelConfiguration<P> manager) throws InvalidProtocolStackException {
         this.commands = manager.getCommands();
-        if ((this.connector = manager.<P>connect(this)) != null) {
+        if ((this.connector = manager.connect(this)) != null) {
             Iterator<Map.Entry<String, String>> iterator = manager.getFixedProviders().entrySet().iterator();
 
             while (iterator.hasNext()) {
@@ -199,5 +199,16 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
             valueBytes = String.valueOf(parameter).getBytes();
         }
         return valueBytes;
+    }
+
+    /**
+     * Stops this ProtocolStackEndpoint and its associated {@link Connector}
+     */
+    public void stop() {
+        if (this.connector != null) {
+            this.connector.stop();
+        } else {
+            this.mediator.debug("No processor connected");
+        }
     }
 }
