@@ -21,8 +21,8 @@ import org.junit.Test;
  * @author Stéphane Bergeon <stephane.bergeon@cea.fr
  */
 public class OpenHabPacketReaderTest {
-
-    @Test
+	
+ 	@Test
     public void testParseOpenhabPath_zwave_device_07150a2a_node21_alarm_general() {
         testParseOpenhabPath("zwave_device_07150a2a_node21_alarm_general");
     }
@@ -75,8 +75,5 @@ public class OpenHabPacketReaderTest {
     private void testCreateProvider(final String openhabDeviceId) {
         String[] parsedOpenhabPath = testParseOpenhabPath(openhabDeviceId);
         assertNotNull("unexpected null path", parsedOpenhabPath);
-        Object createdProvider = OpenHabPacketReader.createProvider(parsedOpenhabPath);
-        assertNotNull("unexpected null provider", createdProvider);
-        System.out.println("provider= " + createdProvider.toString());
     }
 }

@@ -8,9 +8,7 @@ public class ServerLocation {
 	private final String scheme;
 
 	public ServerLocation(String host, int port) {
-		this.host = host;
-		this.port = port;
-		this.scheme = DEFAULT_SCHEME;
+		this(DEFAULT_SCHEME,host,port);
 	}
 
 	public ServerLocation(String scheme, String host, int port) {

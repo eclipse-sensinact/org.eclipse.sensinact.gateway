@@ -10,27 +10,22 @@
  */
 package org.eclipse.sensinact.gateway.device.openhab.internal;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.MessageFormat;
+import java.text.ParseException;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.device.openhab.sensinact.Activator;
 import org.eclipse.sensinact.gateway.device.openhab.sensinact.OpenHabMediator;
-import org.eclipse.sensinact.gateway.generic.model.Provider;
-import org.eclipse.sensinact.gateway.generic.model.Resource;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.text.MessageFormat;
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.eclipse.sensinact.gateway.device.openhab.sensinact.Activator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,17 +36,26 @@ import org.slf4j.LoggerFactory;
  * @author sb252289
  */
 public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
-    
-    static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+	static final Logger LOG = LoggerFactory.getLogger(Activator.class);
     static final MessageFormat TEMPERATURE_FORMAT = new MessageFormat("{0} °C");
     
     private static final String OPENHAB_ZWAVE_PROVIDER_ID_PATTERN = "{0}_node{1}";                                                          //zwave_device_07150a2a_node21
     private static final String OPENHAB_ZWAVE_DEVICE_ID_PATTERN = OPENHAB_ZWAVE_PROVIDER_ID_PATTERN + "_{2}_{3}";                         //zwave_device_07150a2a_node21_alarm_general
     protected static final MessageFormat OPENHAB_ZWAVE_PROVIDER_ID_FORMAT = new MessageFormat(OPENHAB_ZWAVE_PROVIDER_ID_PATTERN);
     private static final MessageFormat OPENHAB_ZWAVE_DEVICE_ID_FORMAT = new MessageFormat(OPENHAB_ZWAVE_DEVICE_ID_PATTERN);
-    private static final Map<String, Provider> providers = new HashMap<String, Provider>();
     private static final String DEFAULT_OPENHAB_SERVICE_ID = "info";
     private static final String DEFAULT_OPENHAB_RESOURCE_ID = "value";
+    
+    private static final Set<String> providers = new HashSet<String>();
+    
+	static String[] parseOpenhabPath(final String openhabDeviceId) throws ParseException {
+        final String[] path = new String[4];
+        Object[] parsedOpenhabPath = OPENHAB_ZWAVE_DEVICE_ID_FORMAT.parse(openhabDeviceId);
+        for (int i = 0; i < 4; i++) {
+            path[i] = parsedOpenhabPath[i].toString();
+        }
+        return path;
+    }
     
     public OpenHabPacketReader(Mediator mediator) {
         super(mediator);
@@ -78,20 +82,9 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
                 }
             }
             if (openHabId != null) {
-                Set<String> toBeRemoved = ((OpenHabMediator) super.mediator).updateBroker(openHabId, devices);
-                for (String providerId : toBeRemoved) {
-                    setServiceProviderId(providerId);
-                    isGoodbyeMessage(true);
-                    configure();
-                    Provider toBeDestroyedProvider = providers.get(providerId);
-                    if (toBeDestroyedProvider == null) {
-                        LOG.error("cannot destroy removed openhab provider {}: is not referenced?", providerId);
-                    } else {
-                        toBeDestroyedProvider.clearServices();
-                        toBeDestroyedProvider = null;
-                        LOG.warn("destroyed removed openhab provider {}", providerId);
-                    }
-                }
+                ((OpenHabMediator) super.mediator).updateBroker(openHabId, devices
+                	).stream(
+                	).forEach(providerId -> {this.processGoodbye(providerId);});
             }
         } catch (JSONException e) {
             throw new InvalidPacketException(e);
@@ -109,10 +102,10 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
                 openHabId = "openHab".concat(String.valueOf((url.getHost() + url.getPort()).hashCode()));
             } catch (MalformedURLException e) {
             }
-        }
-        devices.add(openhaDeviceId);
-        final Resource resource = getResource(openhaDeviceId);
-        process(resource, type, value);
+        }        
+        processHello(openhaDeviceId);
+        HierarchyDTO hierarchy = getHierarchy(openhaDeviceId);
+        process(hierarchy.provider,hierarchy.service,hierarchy.resource, type, value);
         return openHabId;
     }
 
@@ -123,75 +116,68 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
         final String status = statusInfo.getString("status");
         final String statusDetail = statusInfo.getString("statusDetail");
         final String openhaDeviceId = uuid.replaceAll(":", "_");
-        final Resource resourceFriendlyName = getResource(openhaDeviceId, "admin", "friendlyName");
-        process(resourceFriendlyName, label);
-        final Resource resourceStatus = getResource(openhaDeviceId, "status", "connected");
-        process(resourceStatus, status.equals("ONLINE"));
-        final Resource resourceDetail = getResource(openhaDeviceId, "status", "detail");
-        process(resourceDetail, statusDetail);
-    }
-    
-	private void process(Resource resource, Object value) {
-		process(resource, OpenhabType.Default.name(), value);
-	}
 
-	private void process(Resource resource, String type, final Object value) {
-		if (resource.setValue(value)) {
-			String providerId = resource.getService().getProvider().getId();
-			String serviceId = resource.getService().getId();
-			Object data = OpenhabType.parseValue(type, value);
-					
-			setServiceProviderId(providerId);
-			setServiceId(serviceId);
-			setResourceId(resource.getId());
-			setTimestamp(System.currentTimeMillis());
-			setData(data);		
-			configure();
-			OpenHabPacketReader.LOG.debug("processed {}/{}/{}={}:{}", providerId, serviceId, resource.getId(), data, type);
-		}
-	}
-
-	static String[] parseOpenhabPath(final String openhabDeviceId) throws ParseException {
-        final String[] path = new String[4];
-        Object[] parsedOpenhabPath = OPENHAB_ZWAVE_DEVICE_ID_FORMAT.parse(openhabDeviceId);
-        for (int i = 0; i < 4; i++) {
-            path[i] = parsedOpenhabPath[i].toString();
+        if (!providers.contains(openhaDeviceId)) {
+        	providers.add(openhaDeviceId);
+            processHello(openhaDeviceId);
         }
-        return path;
+        process(openhaDeviceId, "admin", "friendlyName", null, label);
+        process(openhaDeviceId, "status", "connected", null, status.equals("ONLINE"));
+        process(openhaDeviceId, "status", "detail", null, statusDetail);
     }
     
-    
-    private Resource getResource(final String openhabDeviceId) {
-        Resource resource = null;
+
+	private void process(String providerId, String serviceId, String resource, String type, final Object value) {
+		Object data = OpenhabType.parseValue(type==null?OpenhabType.Default.name():type, value);					
+		setServiceProviderId(providerId);
+		setServiceId(serviceId);
+		setResourceId(resource);
+		setTimestamp(System.currentTimeMillis());
+		setData(data);		
+		configure();
+	}
+	
+	private void processHello(String providerId) {				
+		setServiceProviderId(providerId);
+		super.isHelloMessage(true);
+		setTimestamp(System.currentTimeMillis());
+		configure();
+	}
+
+	private void processGoodbye(String providerId) {				
+		setServiceProviderId(providerId);
+		super.isGoodbyeMessage(true);
+		setTimestamp(System.currentTimeMillis());
+		configure();
+	}
+        
+    private HierarchyDTO getHierarchy(final String openhabDeviceId) {
         try {
             final String[] parsedOpenhabPath = parseOpenhabPath(openhabDeviceId);
-            resource = getResource(parsedOpenhabPath);
+            final String providerId = OPENHAB_ZWAVE_PROVIDER_ID_FORMAT.format(parsedOpenhabPath);
+            if(!providers.contains(providerId)){
+                providers.add(providerId);
+                processHello(providerId);
+            }
+            return new HierarchyDTO(providerId,parsedOpenhabPath[2],parsedOpenhabPath[3]);
         } catch (Exception ex) {
-            LOG.warn("not a *node* openhab device id: creating {}/{}/{}", openhabDeviceId, DEFAULT_OPENHAB_SERVICE_ID, DEFAULT_OPENHAB_RESOURCE_ID);
-            resource = getResource(openhabDeviceId, DEFAULT_OPENHAB_SERVICE_ID, DEFAULT_OPENHAB_RESOURCE_ID);
+            if(!providers.contains(openhabDeviceId)) {
+                providers.add(openhabDeviceId);
+                processHello(openhabDeviceId);
+            }
+            return new HierarchyDTO(openhabDeviceId,DEFAULT_OPENHAB_SERVICE_ID, DEFAULT_OPENHAB_RESOURCE_ID);
         }
-        return resource;
     }
-
-    private Resource getResource(final String[] openhabPath) {
-        final String providerId = OPENHAB_ZWAVE_PROVIDER_ID_FORMAT.format(openhabPath);
-        final Resource resource = getResource(providerId, openhabPath[2], openhabPath[3]);
-        return resource;
-    }
-
-    static Provider createProvider(final String[] openhabPath) {
-        final String providerId = OPENHAB_ZWAVE_PROVIDER_ID_FORMAT.format(openhabPath);
-        final Provider provider = new Provider(providerId);
-        provider.getOrCreateResource(openhabPath[2], openhabPath[3]);
-        return provider;
-    }
-
-    private Resource getResource(final String providerId, final String serviceId, final String resourceId) {
-        Provider provider = providers.get(providerId);
-        if (provider == null) {
-            provider = new Provider(providerId);
-            providers.put(providerId, provider);
-        }
-        return provider.getOrCreateResource(serviceId, resourceId);
+    
+    private class HierarchyDTO {
+    	public final String provider;
+    	public final String service;
+    	public final String resource;
+    	
+    	HierarchyDTO( String provider, String service, String resource){
+    		this.provider = provider;
+    		this.service = service;
+    		this.resource = resource;
+    	}
     }
 }
