@@ -140,7 +140,6 @@ public abstract class ManagedProtocolStackEndpointFactory implements ManagedServ
 	 * the maintained {@link ProtocolStackEndpoint}s
 	 */
 	public void stop() {
-		System.out.println("STOPPING MANAGED PROTOCOL STACK ENDPOINT FACTORY");
 		for(ProtocolStackEndpoint<?> endpoint :this.pids.values()) {
 			endpoint.stop();
 		}
