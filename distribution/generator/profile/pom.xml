@@ -88,7 +88,6 @@
 		<module>mqtt-nb-profile</module>
 		<module>mqtt-server</module>
 		<module>openhab-profile</module>
-		<module>inovallee</module>
 		<module>openweather-profile</module>
 		<module>onem2m</module>
 		<module>onem2m-mqttbinding</module>
