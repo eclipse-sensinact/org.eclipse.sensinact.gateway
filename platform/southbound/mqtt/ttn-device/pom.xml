@@ -80,6 +80,7 @@
                         <_plugin>aQute.bnd.signing.JartoolSigner;alias="selfsigned";path="${signer.path}";keystore="${sensinact.rootdir}/platform/sensinact-security/cert/keystore.jks";storepass="sensiNact_team"</_plugin>
                         <_sign>selfsigned</_sign>
                         <_failok>true</_failok>
+                        <Service-Components>OSGI-INF/*.xml</Service-Components> 
                     </instructions>
                 </configuration> 
             </plugin>

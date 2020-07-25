@@ -122,8 +122,7 @@ public class TtnUplinkPayload extends TtnPacketPayload {
         this.isRetry = isRetry;
         this.metadata = metadata;
         if(payloadRaw != null) {
-	        Object parse64BinaryObj = mediator.getProperty("parseBase64Binary");
-	        System.out.println("parse64Binary PROPERTY FOUND : " + parse64BinaryObj);	        
+	        Object parse64BinaryObj = mediator.getProperty("parseBase64Binary");	        
 	        boolean parse64Binary = parse64BinaryObj==null?false:Boolean.valueOf(String.valueOf(parse64BinaryObj));
 	        if(parse64Binary)
 	        	this.payloadRaw =  parseBase64Binary(payloadRaw);
@@ -148,7 +147,6 @@ public class TtnUplinkPayload extends TtnPacketPayload {
         String payload = json.optString("payload_raw");
         if(payload != null) {
 	        Object parse64BinaryObj = mediator.getProperty("parseBase64Binary");
-	        System.out.println("parse64Binary PROPERTY FOUND : " + parse64BinaryObj);
 	        boolean parse64Binary = parse64BinaryObj==null?false:Boolean.valueOf(String.valueOf(parse64BinaryObj));
 	        if(parse64Binary)
 	        	this.payloadRaw =  parseBase64Binary(json.optString("payload_raw"));
