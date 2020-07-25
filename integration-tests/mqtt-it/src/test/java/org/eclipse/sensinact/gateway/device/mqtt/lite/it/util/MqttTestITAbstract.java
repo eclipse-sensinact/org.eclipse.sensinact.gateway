@@ -85,7 +85,6 @@ public abstract class MqttTestITAbstract {
                 mavenBundle("org.osgi", "org.osgi.service.component", "1.4.0"),
                 mavenBundle("org.osgi", "org.osgi.service.cm", "1.6.0"),
                 mavenBundle("org.osgi", "org.osgi.service.metatype", "1.4.0"),
-                mavenBundle("org.osgi", "org.osgi.service.event", "1.4.0"),
                 mavenBundle("org.osgi", "org.osgi.namespace.extender", "1.0.1"),
                 mavenBundle("org.osgi", "org.osgi.util.function", "1.1.0"),
                 mavenBundle("org.osgi", "org.osgi.util.promise", "1.1.1"),
