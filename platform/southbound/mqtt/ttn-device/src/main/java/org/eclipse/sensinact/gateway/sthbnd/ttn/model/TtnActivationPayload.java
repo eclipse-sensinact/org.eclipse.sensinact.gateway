@@ -56,10 +56,10 @@ public class TtnActivationPayload extends TtnPacketPayload {
     public List<TtnSubPacket> getSubPackets() {
         List<TtnSubPacket> subPackets = new ArrayList<>();
 
-        subPackets.add(new TtnSubPacket<>("system", "frequency", metadata.getFrequency()));
-        subPackets.add(new TtnSubPacket<>("system", "modulation", metadata.getModulation()));
-        subPackets.add(new TtnSubPacket<>("system", "data_rate", metadata.getDataRate()));
-        subPackets.add(new TtnSubPacket<>("system", "coding_rate", metadata.getCodingRate()));
+        subPackets.add(new TtnSubPacket<>("system", "frequency", null, null,metadata.getFrequency()));
+        subPackets.add(new TtnSubPacket<>("system", "modulation",  null, null,metadata.getModulation()));
+        subPackets.add(new TtnSubPacket<>("system", "data_rate",  null, null,metadata.getDataRate()));
+        subPackets.add(new TtnSubPacket<>("system", "coding_rate",  null, null,metadata.getCodingRate()));
 
         return subPackets;
     }

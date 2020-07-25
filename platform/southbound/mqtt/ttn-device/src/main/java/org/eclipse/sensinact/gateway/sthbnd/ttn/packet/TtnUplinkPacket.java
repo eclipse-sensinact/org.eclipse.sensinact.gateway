@@ -13,9 +13,11 @@ package org.eclipse.sensinact.gateway.sthbnd.ttn.packet;
 
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.generic.packet.annotation.AttributeID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.Data;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.HelloMessage;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.Iteration;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.MetadataID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.ResourceID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID;
@@ -55,6 +57,16 @@ public class TtnUplinkPacket extends MqttPacket {
         return subPackets.get(index).getResource();
     }
 
+    @AttributeID
+    public String getAttribute() {
+        return subPackets.get(index).getAttribute();
+    }
+
+    @MetadataID
+    public String getMetadata() {
+        return subPackets.get(index).getMetadata();
+    }
+    
     @Data
     public Object getData() {
         return subPackets.get(index).getValue();

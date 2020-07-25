@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.sthbnd.ttn.model;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.packet.PayloadDecoder;
+import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.InvalidSyntaxException;
@@ -26,7 +27,7 @@ public class TtnUplinkPayload extends TtnPacketPayload {
 
     private static final String PAYLOAD_DECODER = "(objectClass=" + PayloadDecoder.class.getCanonicalName() + ")";
 
-    private static final byte ESCAPE = 127;
+    private static final byte PADDING = 127;
     private static final byte[] decodeMap = new byte[128]; 
 
     static {
@@ -36,7 +37,7 @@ public class TtnUplinkPayload extends TtnPacketPayload {
 	    for (i = 0; i < 128; i++) {
 	      	map[i] = (byte) RAW.indexOf(i);
 	    }
-	    map['='] = ESCAPE;
+	    map['='] = PADDING;
 	    System.arraycopy(map,0,decodeMap,0,128);
 	 }
     
@@ -45,7 +46,7 @@ public class TtnUplinkPayload extends TtnPacketPayload {
         int j = len - 1;
         for (; j >= 0;) {
             byte code = decodeMap[text.charAt(j)];
-            if (code == ESCAPE){
+            if (code == PADDING){
             	j-=1;
                 continue;
         	}
@@ -53,6 +54,7 @@ public class TtnUplinkPayload extends TtnPacketPayload {
                 return text.length() / 4 * 3;
             break;
         }
+        j++;
         int padSize = len - j;
         if (padSize > 2)
             return text.length() / 4 * 3;
@@ -81,10 +83,10 @@ public class TtnUplinkPayload extends TtnPacketPayload {
             if (q == 4) {
                 // quadruplet is now filled.
                 out[o++] = (byte) ((quadruplet[0] << 2) | (quadruplet[1] >> 4));
-                if (quadruplet[2] != ESCAPE) {
+                if (quadruplet[2] != PADDING) {
                     out[o++] = (byte) ((quadruplet[1] << 4) | (quadruplet[2] >> 2));
                 }
-                if (quadruplet[3] != ESCAPE) {
+                if (quadruplet[3] != PADDING) {
                     out[o++] = (byte) ((quadruplet[2] << 6) | (quadruplet[3]));
                 }
                 q = 0;
@@ -108,8 +110,8 @@ public class TtnUplinkPayload extends TtnPacketPayload {
     private final byte[] payloadRaw;
     private final TtnMetadata metadata;
 
-    public TtnUplinkPayload(Mediator mediator, String applicationId, String deviceId, String hardwareSerial, int port, int counter,
-                            boolean confirmed, boolean isRetry, String payloadRaw, TtnMetadata metadata) {
+    public TtnUplinkPayload(Mediator mediator, String applicationId, String deviceId, String hardwareSerial, 
+        int port, int counter,  boolean confirmed, boolean isRetry, String payloadRaw, TtnMetadata metadata) {
         this.mediator = mediator;
         this.applicationId = applicationId;
         this.deviceId = deviceId;
@@ -118,8 +120,18 @@ public class TtnUplinkPayload extends TtnPacketPayload {
         this.counter = counter;
         this.confirmed = confirmed;
         this.isRetry = isRetry;
-        this.payloadRaw = parseBase64Binary(payloadRaw);
         this.metadata = metadata;
+        if(payloadRaw != null) {
+	        Object parse64BinaryObj = mediator.getProperty("parseBase64Binary");
+	        System.out.println("parse64Binary PROPERTY FOUND : " + parse64BinaryObj);	        
+	        boolean parse64Binary = parse64BinaryObj==null?false:Boolean.valueOf(String.valueOf(parse64BinaryObj));
+	        if(parse64Binary)
+	        	this.payloadRaw =  parseBase64Binary(payloadRaw);
+	        else {
+	        	this.payloadRaw = payloadRaw.getBytes();
+	        }  
+        } else
+        	this.payloadRaw = null;
     }
 
     public TtnUplinkPayload(Mediator mediator, JSONObject json) throws JSONException {
@@ -131,8 +143,19 @@ public class TtnUplinkPayload extends TtnPacketPayload {
         this.counter = json.getInt("counter");
         this.confirmed = json.optBoolean("confirmed");
         this.isRetry = json.optBoolean("is_retry");
-        this.payloadRaw = parseBase64Binary(json.optString("payload_raw"));
         this.metadata = new TtnMetadata(json.getJSONObject("metadata"));
+        
+        String payload = json.optString("payload_raw");
+        if(payload != null) {
+	        Object parse64BinaryObj = mediator.getProperty("parseBase64Binary");
+	        System.out.println("parse64Binary PROPERTY FOUND : " + parse64BinaryObj);
+	        boolean parse64Binary = parse64BinaryObj==null?false:Boolean.valueOf(String.valueOf(parse64BinaryObj));
+	        if(parse64Binary)
+	        	this.payloadRaw =  parseBase64Binary(json.optString("payload_raw"));
+	        else 
+	        	this.payloadRaw = payload.getBytes();
+        } else 
+        	this.payloadRaw = null;
     }
 
     public String getApplicationId() {
@@ -176,11 +199,11 @@ public class TtnUplinkPayload extends TtnPacketPayload {
     public List<TtnSubPacket> getSubPackets() {
         List<TtnSubPacket> subPackets = new ArrayList<>();
 
-        subPackets.add(new TtnSubPacket<>("system", "frequency", metadata.getFrequency()));
-        subPackets.add(new TtnSubPacket<>("system", "modulation", metadata.getModulation()));
-        subPackets.add(new TtnSubPacket<>("system", "data_rate", metadata.getDataRate()));
-        subPackets.add(new TtnSubPacket<>("system", "coding_rate", metadata.getCodingRate()));
-        subPackets.add(new TtnSubPacket<>("system", "data", payloadRaw));
+        subPackets.add(new TtnSubPacket<>("system", "frequency", null,null,metadata.getFrequency()));
+        subPackets.add(new TtnSubPacket<>("system", "modulation", null,null,metadata.getModulation()));
+        subPackets.add(new TtnSubPacket<>("system", "data_rate", null,null,metadata.getDataRate()));
+        subPackets.add(new TtnSubPacket<>("system", "coding_rate", null,null,metadata.getCodingRate()));
+        subPackets.add(new TtnSubPacket<>("system", "data", null, null, payloadRaw));
 
         if (payloadRaw != null) {
             try {
@@ -193,9 +216,12 @@ public class TtnUplinkPayload extends TtnPacketPayload {
                         if(!decodedPayload.isEmpty()) {
                             for(Map.Entry<String, Object> payloadMap : decodedPayload.entrySet()) {
                                 if(payloadMap.getKey().equals("position")){
-                                    subPackets.add(new TtnSubPacket<>("admin", "location", String.valueOf(payloadMap.getValue())));
+                                    subPackets.add(new TtnSubPacket<>("admin", "location", null,null,String.valueOf(payloadMap.getValue())));
                                 }
-                                subPackets.add(new TtnSubPacket<>("content", payloadMap.getKey(), String.valueOf(payloadMap.getValue())));
+                                String key = payloadMap.getKey();
+                                String[] keyElements = UriUtils.getUriElements(key);
+                                subPackets.add(new TtnSubPacket<>("content", keyElements[0],keyElements.length>1?keyElements[1]:null,
+                                	keyElements.length>2?keyElements[2]:null,String.valueOf(payloadMap.getValue())));
                             }
                             break;
                         }
@@ -205,7 +231,6 @@ public class TtnUplinkPayload extends TtnPacketPayload {
                 e.printStackTrace();
             }
         }
-
         return subPackets;
     }
 }
