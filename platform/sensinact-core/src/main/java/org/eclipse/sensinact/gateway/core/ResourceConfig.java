@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -240,5 +241,17 @@ public class ResourceConfig implements Nameable {
 			iterator.next().apply(service, builders);
 		}
 		return builders;
+	}
+	
+	/**
+	 * Returns the List of observed Attributes of the Resources based on this ResourceConfig,
+	 * and for the service whose String name is passed as parameter 
+	 * 
+	 * @param service the String name of the service for which Attributes may be observed
+	 * @return the List of observed Attributes of the Resources based on this ResourceConfig
+	 * for the specified service
+	 */
+	public List<String> getObserveds(String service){
+		return Collections.emptyList();
 	}
 }

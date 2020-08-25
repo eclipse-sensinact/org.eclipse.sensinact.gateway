@@ -387,10 +387,10 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 			services.add(service);
 		} else {
 			services.remove(service);
-			List<String> tobeRemoved = new ArrayList<String>();
-			Enumeration enumeration = properties.keys();
+			List<String> tobeRemoved = new ArrayList<>();
+			Enumeration<String> enumeration = properties.keys();
 			while (enumeration.hasMoreElements()) {
-				String key = (String) enumeration.nextElement();
+				String key = enumeration.nextElement();
 				if (key != null && key.startsWith(service.concat("."))) {
 					tobeRemoved.add(key);
 				}
@@ -413,15 +413,14 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 	public void doCallback(SnaMessage<?> message) {
 
 		String uri = message.getPath();
+		String[] uriElements = UriUtils.getUriElements(uri);
 		switch (((SnaMessageSubType) message.getType()).getSnaMessageType()) {
 		case UPDATE:
-			if (!Update.ATTRIBUTE_VALUE_UPDATED.equals(message.getType())) {
+			if (!Update.ATTRIBUTE_VALUE_UPDATED.equals((SnaMessageSubType) message.getType())) {
 				break;
 			}
 			SnaUpdateMessage m = (SnaUpdateMessage) message;
-			String path = m.getPath();
 			JSONObject notification = m.getNotification();
-			String[] uriElements = UriUtils.getUriElements(path);
 			String key = new StringBuilder().append(uriElements[1]).append(".").append(uriElements[2]).toString();
 			List<String> obs = this.observed.get(key);
 			if (obs != null && !obs.isEmpty() && obs.contains(uriElements[3])) {
@@ -438,6 +437,42 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 				case RESOURCE_APPEARING:
 					initial = (JSONObject) ((SnaLifecycleMessageImpl) l).get("initial");
 					type = ((SnaLifecycleMessageImpl) l).getNotification().optString("type");
+					ResourceConfig config = configuration.getResourceConfig(new ResourceDescriptor(
+							).withResourceName(uriElements[2]
+							).withServiceName(uriElements[1]));
+					List<String> observeds = null;
+					if(config!=null)
+						observeds = config.getObserveds(uriElements[1]);
+					if (observeds != null && !observeds.isEmpty()) {
+						Iterator<String> it = observeds.iterator();
+						while (it.hasNext()) {			
+							String attr = null;
+							String s = it.next();
+							String[] obsEls = UriUtils.getUriElements(s);
+							int length = obsEls == null ? 0 : obsEls.length;
+							switch (length) {
+							case 0:
+							case 1:
+								continue;
+							case 2:
+								attr = DataResource.VALUE;
+								break;
+							case 3:
+								attr = obsEls[2];
+								break;
+							default:
+								continue;
+							}
+							String observedKey = new StringBuilder().append(obsEls[0]).append(".").append(obsEls[1]).toString();
+							List<String> list = this.observed.get(observedKey);
+							if (list == null) {
+								list = new ArrayList<>();
+								this.observed.put(observedKey, list);
+							}
+							if (!list.contains(attr)) 
+								list.add(attr);
+						}
+					}				
 				case SERVICE_APPEARING:
 				case PROVIDER_DISAPPEARING:
 				case RESOURCE_DISAPPEARING:
