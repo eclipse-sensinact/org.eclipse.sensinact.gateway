@@ -34,6 +34,7 @@ public class Activator implements BundleActivator,SynchronousConfigurationListen
     
     private Boolean autoStart=null;
     private Integer port=null;
+    private String host=null;
     private MQTTServerService service;
     private BundleContext bundleContext;
     
@@ -54,7 +55,7 @@ public class Activator implements BundleActivator,SynchronousConfigurationListen
         if(this.autoStart){
             try {
             	if(port!=null) {
-            		service.startService(String.valueOf(port.intValue()));
+            		service.startService(host,String.valueOf(port.intValue()));
             	} else {
             		service.startService();
             	}
@@ -76,18 +77,19 @@ public class Activator implements BundleActivator,SynchronousConfigurationListen
         if(mqttServerConfig.getProperties()!=null){
             Object autoStartObject=mqttServerConfig.getProperties().get("autoStart");
             Object portObject=mqttServerConfig.getProperties().get("port");
+            Object hostObject=mqttServerConfig.getProperties().get("host");
             if(autoStartObject!=null){
                 this.autoStart=Boolean.parseBoolean(autoStartObject.toString());
             }
-
-            if(autoStartObject!=null){
-                this.port=Integer.parseInt(portObject.toString());
+            if(portObject!=null){
+                this.port=Integer.parseInt(String.valueOf(portObject));
             }
-
-            if(this.port!=null&&this.autoStart!=null){
+            if(hostObject!=null){
+                this.host=String.valueOf(hostObject);
+            }
+            if(this.autoStart!=null && this.autoStart.booleanValue()){
                 publishService();
             }
-
         }
     }
 
