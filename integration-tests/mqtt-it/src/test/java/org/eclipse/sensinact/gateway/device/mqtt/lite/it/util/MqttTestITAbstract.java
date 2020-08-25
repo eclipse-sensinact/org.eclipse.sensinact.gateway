@@ -216,7 +216,7 @@ public abstract class MqttTestITAbstract {
     }
     
     protected void createConfigurationFile(String providerString, String topic) throws Exception {
-        File f = new File("target/conf/mqtt-test.cfg");
+        File f = new File("target/conf/smarttopic-test.cfg");
         if(f.exists()) {
         	f.delete();
         }
@@ -229,11 +229,11 @@ public abstract class MqttTestITAbstract {
     }
 
     protected void deleteConfigurationFile() throws Exception {
-        File f = new File("target/conf/mqtt-test.cfg");
+        File f = new File("target/conf/smarttopic-test.cfg");
         if(f.exists()) {
         	f.delete();
         }
-    	Thread.sleep(1000);
+    	Thread.sleep(2000);
     }
     
     public MqttClient getMqttConnection(String host, int port) throws Exception {
