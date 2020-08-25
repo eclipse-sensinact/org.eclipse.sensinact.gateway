@@ -30,19 +30,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
-			<artifactId>mqtt-utils</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
 			<artifactId>mqtt-device</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
 			<artifactId>smart-topic-device</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.paho</groupId>
-			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
 		</dependency>
 	</dependencies>
 
