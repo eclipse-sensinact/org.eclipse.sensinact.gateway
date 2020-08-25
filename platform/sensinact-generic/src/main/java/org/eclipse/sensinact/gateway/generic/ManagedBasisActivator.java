@@ -48,7 +48,7 @@ public abstract class ManagedBasisActivator<M extends Mediator> extends Abstract
      */
     @Override
     public void doStart() throws Exception {
-    	mediator.info("Registering ManagedProtocolStackEndpointFactory");
+    	super.mediator.info("Registering ManagedProtocolStackEndpointFactory");
     	this.factory = new ManagedProtocolStackEndpointFactory(super.mediator, name()) {
 			@Override
 			protected ProtocolStackEndpointConfigurator configurator() {

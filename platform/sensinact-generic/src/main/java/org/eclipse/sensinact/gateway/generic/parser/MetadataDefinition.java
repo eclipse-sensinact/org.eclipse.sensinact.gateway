@@ -22,7 +22,11 @@ import org.xml.sax.Attributes;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
+@XmlAttributes({@XmlAttribute(attribute = "modifiable", field = "modifiable")})
 public class MetadataDefinition extends ResolvedNameTypeValueDefinition implements MetadataBuilder {
+
+    protected Modifiable modifiable;
+    
 	/**
      * Constructor
      *
@@ -36,6 +40,30 @@ public class MetadataDefinition extends ResolvedNameTypeValueDefinition implemen
     }
 
     /**
+     * Defines the modifiable policy of the {@link Metadata}s
+     * based on this MetadataDefinition
+     *
+     * @param modifiable the string formated Modifiable value
+     */
+    public void setModifiable(String modifiable) {
+        if (modifiable == null) {
+            return;
+        }
+        this.modifiable = Modifiable.valueOf(modifiable);
+    }
+
+    /**
+     * Returns the modifiable policy of the {@link Metadata}s
+     * based on this MetadataDefinition
+     *
+     * @return modifiable policy of the {@link Metadata} base
+     * on this MetadataDefinition
+     */
+    public Modifiable getModifiable() {
+        return this.modifiable;
+    }
+    
+    /**
      * Creates and returns the {@link Metadata} described by
      * this MetadataDefinition, according to the name of the
      * target passed as parameter
@@ -48,7 +76,7 @@ public class MetadataDefinition extends ResolvedNameTypeValueDefinition implemen
      */
     public Metadata getMetadata() throws InvalidValueException {
         Metadata metadata = new Metadata(super.mediator, super.getName(),super.getType(), 
-        	valueDefinition != null ? valueDefinition.getValue() : null, Modifiable.FIXED);
+        valueDefinition != null ? valueDefinition.getValue() : null, this.modifiable);
         return metadata;
     }
 }

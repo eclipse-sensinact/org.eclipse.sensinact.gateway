@@ -18,6 +18,7 @@ import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.generic.parser.AttributeDefinition;
 import org.eclipse.sensinact.gateway.generic.parser.MethodDefinition;
 import org.eclipse.sensinact.gateway.generic.parser.XmlResourceConfigHandler;
+import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.eclipse.sensinact.gateway.util.xml.XMLUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -170,6 +171,23 @@ public class ExtResourceConfig extends ResourceConfig implements Iterable<Method
             }
         }
         return builders;
+    }
+    
+    @Override
+    public List<String> getObserveds(String service) {
+        List<String> observeds = new ArrayList<>();
+        observeds.addAll(super.getObserveds(service));
+
+        Iterator<AttributeDefinition> iterator = this.attributeDefinitions.iterator();
+
+        while (iterator.hasNext()) {
+            AttributeDefinition attributeDefinition = iterator.next();
+            if (!attributeDefinition.isObserved(service)) {
+                continue;
+            }
+            observeds.add(UriUtils.getUri(new String[] {service,this.getName(service),attributeDefinition.getName()}));
+        }
+        return observeds;
     }
 
     /**

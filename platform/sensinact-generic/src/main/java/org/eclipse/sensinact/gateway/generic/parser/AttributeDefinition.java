@@ -33,7 +33,8 @@ import java.util.List;
  */
 @XmlAttributes({
 	@XmlAttribute(attribute = "modifiable", field = "modifiable"), 
-	@XmlAttribute(attribute = "hidden", field = "hidden")})
+	@XmlAttribute(attribute = "hidden", field = "hidden"), 
+	@XmlAttribute(attribute = "observed", field = "observed")})
 @XmlEscaped(value = {"metadata","constraints"})
 public class AttributeDefinition extends TargetedResolvedNameTypeValueDefinition 
 implements ConstrainableDefinition {
@@ -42,6 +43,7 @@ implements ConstrainableDefinition {
     private List<MetadataBuilder> metadataDefinitions;
     protected Modifiable modifiable;
     protected boolean hidden;
+    protected boolean observed;
 
     /**
      * Constructor
@@ -160,6 +162,18 @@ implements ConstrainableDefinition {
     }
 
     /**
+     * Returns true if this attribute is observed, for the service whose name
+     * is passed as parameter; otherwise returns false
+     * @param service the service for which this attribute may be observed
+     * @return true if observed for the specified service; otherwise return false
+     */
+    public boolean isObserved(String service) {
+    	if(!isTargeted(service)) 
+    		return false;
+    	return this.observed;
+    }
+    
+    /**
      * Converts this AttributeDefinition into an {@link AttributeBuilder}
      * returns it
      *
@@ -167,7 +181,8 @@ implements ConstrainableDefinition {
      * describes
      */
     public AttributeBuilder getAttributeBuilder(String service) {
-        TypeValuePair nameTypePair = this.getTypeValuePair(service);
+        
+    	TypeValuePair nameTypePair = this.getTypeValuePair(service);        
 
         if (nameTypePair == null || nameTypePair.type == null) {
             return null;
