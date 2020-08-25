@@ -17,7 +17,7 @@ import org.osgi.framework.BundleContext;
 
 public class Activator extends ManagedBasisActivator<Mediator> {
 	
-    public static final String MQTT_PREFIX = "mqtt";
+    public static final String MQTT_PREFIX = "smarttopic";
 	
 	@Override
 	protected String name() {

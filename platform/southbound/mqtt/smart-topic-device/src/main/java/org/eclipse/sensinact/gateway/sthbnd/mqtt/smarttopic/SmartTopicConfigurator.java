@@ -113,7 +113,7 @@ class SmartTopicConfigurator extends ProtocolStackEndpointConfiguratorAdapter {
 		}
 		this.longitude = interpolatedLongitude;
 		this.startAtInitializationTime = configuration.getStartAtInitializationTime();
-		        
+
         String interpolatedProvider = null;
         String interpolatedService = null;
 		String interpolatedResource = null; 
@@ -158,8 +158,6 @@ class SmartTopicConfigurator extends ProtocolStackEndpointConfiguratorAdapter {
             @Override
             public void messageReceived(String topic, String message) {
                 try {
-                	System.out.println("TOPIC : "+ topic);
-                	System.out.println("MESSAGE : "+ message);
                 	if(!started && !startAtInitializationTime) {
         				MqttPacket packet = new MqttPacket(provider, service, resource, null);
         				packet.setHelloMessage(true);
