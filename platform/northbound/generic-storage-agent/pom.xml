@@ -1,0 +1,36 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+		<artifactId>parent</artifactId>
+		<version>2.0-SNAPSHOT</version>
+	</parent>
+
+    <artifactId>generic-storage-agent</artifactId>
+    <packaging>bundle</packaging>
+
+    <name>sensiNact IoT Gateway - Generic Historical Storage Agent</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.sensinact.gateway</groupId>
+            <artifactId>sensinact-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.sensinact.gateway</groupId>
+            <artifactId>sensinact-core</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

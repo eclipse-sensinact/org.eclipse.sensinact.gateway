@@ -21,9 +21,9 @@
 		<version>2.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>storage-agent</artifactId>
+	<artifactId>http-storage-agent</artifactId>
 	<packaging>bundle</packaging>
-	<name>sensiNact IoT Gateway - Historical Storage Northbound Agent</name>
+	<name>sensiNact IoT Gateway - HTTP Historical Storage Agent</name>
 
 	<dependencies>
 		<dependency>
@@ -31,13 +31,24 @@
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+			<artifactId>generic-storage-agent</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
-			<artifactId>sensinact-core</artifactId>
+			<artifactId>sensinact-common</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-utils</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-core</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -55,9 +66,8 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<_exportcontents>*</_exportcontents>
 						<Bundle-Activator>
-							org.eclipse.sensinact.gateway.agent.storage.osgi.Activator
+							org.eclipse.sensinact.gateway.agent.storage.http.osgi.Activator
 						</Bundle-Activator>
 						<Include-Resource>
 							about.html,

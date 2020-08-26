@@ -8,8 +8,9 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.agent.storage.internal;
+package org.eclipse.sensinact.gateway.agent.storage.http.internal;
 
+import org.eclipse.sensinact.gateway.agent.storage.generic.StorageConnection;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfiguration;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
@@ -33,14 +34,11 @@ import java.util.Map;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-class StorageConnection {
-	private static final Logger LOG = LoggerFactory.getLogger(StorageConnection.class);
+public class HttpStorageConnection extends StorageConnection {
+	private static final Logger LOG = LoggerFactory.getLogger(HttpStorageConnection.class);
 
-	private String authorization;
-	private String uri;
-	private Mediator mediator;
-	Stack stack;
-	private boolean running = false;
+    protected String uri;
+    protected String authorization;
 
 	/**
 	 * Constructor
@@ -51,42 +49,17 @@ class StorageConnection {
 	 * @param password the user password
 	 * @throws IOException Exception on connection problem
 	 */
-	StorageConnection(Mediator mediator, String uri, String login, String password) throws IOException {
-		this.mediator = mediator;
+	public HttpStorageConnection(Mediator mediator, String uri, String login, String password) throws IOException {
+		super(mediator, login, password);
 		this.uri = uri;
-		this.authorization = Base64.encodeBytes((login + ":" + password).getBytes());
-		this.stack = new Stack();
-		this.running = true;
-		
-		Runnable runner = new Runnable() {
-			@Override
-			public void run() {
-				LOG.info("POP thread started");
-				while (running) {
-					try {
-						JSONObject element = stack.pop();
-						if (element != null) {
-							sendRequest(element);
-						} else {
-							if (! shortSleep(200)) {
-								running = false;
-							}
-						}
-					} catch (Exception e) {
-						LOG.error("POP thread error", e);
-					}
-				}
-				LOG.info("POP thread terminated");
-			}
-		};
-		new Thread(runner).start();
+		this.authorization = Base64.encodeBytes((super.login + ":" + super.password).getBytes());
 	}
 
 	/**
 	 * Executes the HTTP request defined by the method, target, headers and entity
 	 * arguments
 	 */
-	private void sendRequest(JSONObject object) {
+	protected void sendRequest(JSONObject object) {
 		ConnectionConfiguration<SimpleResponse, SimpleRequest> configuration = new ConnectionConfigurationImpl<>();
 		try {
 			configuration.setContentType("application/json");
@@ -115,27 +88,6 @@ class StorageConnection {
 			if (this.mediator.isErrorLoggable()) {
 				this.mediator.error(e.getMessage(), e);
 			}
-		}
-	}
-
-	void close() {
-		for (int i=0; i< 10_000 && !this.stack.isEmpty(); i++) {
-			if (! shortSleep(200)) {
-				return;
-			}
-		}
-		LOG.info("close operation ended");
-		this.running = false;	
-	}
-	
-	private boolean shortSleep(long millis) {
-		try {
-			Thread.sleep(millis);
-			return true;
-		} catch (InterruptedException e) {
-			LOG.error("Sleep operation error", e);
-			Thread.interrupted();
-			return false;
 		}
 	}
 }

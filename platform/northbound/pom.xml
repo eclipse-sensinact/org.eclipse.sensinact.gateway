@@ -31,9 +31,11 @@
 		<module>geo-filtering</module>
 		<module>ldap-filtering</module>
 		<module>mqtt</module>
-		<module>storage-agent</module>
-		<module>http-tools</module>
+		<module>generic-storage-agent</module>
+		<module>http-storage-agent</module>
+		<module>influxdb-storage-agent</module>
 		<module>http-onem2m-agent</module>
+		<module>http-tools</module>
 	</modules>
 </project>
 

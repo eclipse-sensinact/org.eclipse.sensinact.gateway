@@ -8,9 +8,10 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.agent.storage.osgi;
+package org.eclipse.sensinact.gateway.agent.storage.http.osgi;
 
-import org.eclipse.sensinact.gateway.agent.storage.internal.StorageAgent;
+import org.eclipse.sensinact.gateway.agent.storage.http.internal.HttpStorageConnection;
+import org.eclipse.sensinact.gateway.agent.storage.generic.StorageAgent;
 import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -31,17 +32,12 @@ public class Activator extends AbstractActivator<Mediator> {
     private StorageAgent handler;
     private String registration;
 
-    /**
-     * @inheritDoc
-     * @see AbstractActivator#doStart() (org.osgi.framework.BundleContext)
-     */
     @Override
     public void doStart() throws Exception {
         try {
-            if (super.mediator.isDebugLoggable()) {
-                super.mediator.debug("Starting storage agent.");
-            }
-            this.handler = new StorageAgent(login, password, broker, super.mediator);
+            if (super.mediator.isDebugLoggable()) 
+                super.mediator.debug("Starting storage agent.");            
+            this.handler = new StorageAgent(new HttpStorageConnection(super.mediator, broker, login, password));
             this.registration = mediator.callService(Core.class, new Executable<Core, String>() {
                 @Override
                 public String execute(Core service) throws Exception {
@@ -53,25 +49,11 @@ public class Activator extends AbstractActivator<Mediator> {
         }
     }
 
-    /**
-     * @inheritDoc
-     * @see AbstractActivator#doStop()
-     */
     @Override
     public void doStop() throws Exception {
         if (super.mediator.isDebugLoggable()) {
             super.mediator.debug("Stopping storage agent.");
-        }
-        /**
-         * Check this later to perform this operation differently
-        mediator.callService(Core.class, new Executable<Core, Void>() {
-            @Override
-            public Void execute(Core service) throws Exception {
-                service.unregisterAgent(Activator.this.registration);
-                return null;
-            }
-        });
-         **/
+        }        
         if(this.handler!=null){
             this.handler.stop();
         }
@@ -79,10 +61,6 @@ public class Activator extends AbstractActivator<Mediator> {
         this.handler = null;
     }
 
-    /**
-     * @inheritDoc
-     * @see AbstractActivator#doInstantiate(BundleContext)
-     */
     @Override
     public Mediator doInstantiate(BundleContext context) {
         return new Mediator(context);
