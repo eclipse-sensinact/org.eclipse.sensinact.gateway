@@ -41,10 +41,12 @@ public class AppContainer implements JSONable {
      */
     public AppContainer(AppServiceMediator mediator, String applicationName, JSONObject content) {
         this.applicationName = applicationName;
-        this.initialize = new AppInitialize(content.getJSONObject(AppJsonConstant.INITIALIZE));
+        this.initialize = new AppInitialize(content.has(AppJsonConstant.INITIALIZE)
+        		?content.optJSONObject(AppJsonConstant.INITIALIZE):new JSONObject());
         this.components = new ArrayList<AppComponent>();
-        this.finalize = new AppFinalize(content.getJSONObject(AppJsonConstant.FINALIZE));
-        JSONArray componentArray = content.getJSONArray("application");
+        this.finalize = new AppFinalize(content.has(AppJsonConstant.FINALIZE)
+        		?content.optJSONObject(AppJsonConstant.FINALIZE):new JSONObject());
+        JSONArray componentArray = content.optJSONArray("application");
         for (int i = 0; i < componentArray.length(); i++) {
             AppComponent component;
             try {

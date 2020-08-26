@@ -159,13 +159,11 @@ public class Application extends AbstractSensiNactApplication {
             Collection<ResourceSubscription> resourceSubscriptions = map.getValue();
             for (ResourceSubscription resourceSubscription : resourceSubscriptions) {
             	String[] uriElements = UriUtils.getUriElements(resourceSubscription.getResourceUri());
-                if (uriElements.length != 3) {
+                if (uriElements.length != 3) 
                     continue;
-                }
                 DescribeResponse<JSONObject> response = super.getSession().getResource(uriElements[0], uriElements[1], uriElements[2]);
-                if(response.getStatusCode()!=200) {
-                	 continue;
-                }
+                if(response.getStatusCode()!=200)
+                	 continue;                
                 super.getSession().unsubscribe(uriElements[0], uriElements[1], uriElements[2], 
                 		resourceSubscription.getSubscriptionId());
             }
@@ -203,7 +201,6 @@ public class Application extends AbstractSensiNactApplication {
      * @see Recipient#callback(String, SnaMessage[])
      */
     public void callback(String callbackId, SnaMessage[] messages) throws Exception {
-    	System.out.println("CALLING BACK :" + messages[0].getJSON());
         waitingEvents.put(messages[0]);
         triggerNextEvent();
     }

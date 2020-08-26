@@ -30,6 +30,8 @@ import org.json.JSONObject;
 public class ResourceData implements DataItf {
     private final Session session;
     private final String uri;
+    
+    private GetResponse last;
 
     public ResourceData(Session session, String uri) {
         this.session = session;
@@ -57,15 +59,17 @@ public class ResourceData implements DataItf {
         return response;
     } 
     
-    private GetResponse get() {
+    public GetResponse get() {
     	String[] uriElements = UriUtils.getUriElements(getSourceUri());
         if (uriElements.length != 3) {
             return null;
         }
         GetResponse response = this.session.get(uriElements[0], uriElements[1], uriElements[2],DataResource.VALUE);
         if(response == null || response.getStatusCode()!=200) {
+        	this.last = null;
         	 return null;
         }
+        this.last = response;
         return response;
     } 
 
@@ -95,8 +99,10 @@ public class ResourceData implements DataItf {
     public Object getValue() {
     	GetResponse response = get();
     	if(response == null) {
+    		this.last = null;
     		return null;
     	}
+    	this.last = response;
         return response.getResponse(DataResource.VALUE);
     }
 
@@ -106,11 +112,13 @@ public class ResourceData implements DataItf {
      * @return the Java type
      */
     public Class<?> getType() {
-    	GetResponse response = get();
-    	if(response == null) {
-    		return null;
+    	if(this.last == null) {
+	    	get();
     	}
-        return CastUtils.jsonTypeToJavaType((String) response.getResponse(DataResource.TYPE));
+    	if(last == null) {
+    		return Object.class;
+    	}
+        return CastUtils.jsonTypeToJavaType((String) last.getResponse(DataResource.TYPE));
     }
 
     /**
@@ -132,10 +140,12 @@ public class ResourceData implements DataItf {
      * @return the timestamp of the data
      */
     public long getTimestamp() {
-    	GetResponse response = get();
-    	if(response == null) {
-    		return 0;
+    	if(this.last == null) {
+	    	get();
     	}
-        return response.getResponse(Long.class, Metadata.TIMESTAMP);
+    	if(last == null) {
+    		return 0l;
+    	}
+        return last.getResponse(Long.class, Metadata.TIMESTAMP);
     }
 }

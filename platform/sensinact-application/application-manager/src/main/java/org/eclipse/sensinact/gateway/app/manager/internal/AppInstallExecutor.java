@@ -212,6 +212,8 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
                 LOG.warn("Application {} did not activate SAR service", name);
             }
         } catch (ApplicationFactoryException e) {
+        	Thread.dumpStack();
+        	e.printStackTrace();
             if (mediator.isErrorLoggable()) {
                 mediator.error("Unable to create the application " + name + " > " + e.getMessage());
             }

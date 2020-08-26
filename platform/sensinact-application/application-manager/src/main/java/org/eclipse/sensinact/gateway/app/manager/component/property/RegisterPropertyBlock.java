@@ -14,6 +14,7 @@ import org.eclipse.sensinact.gateway.app.manager.component.AbstractDataProvider;
 import org.eclipse.sensinact.gateway.app.manager.component.DataListenerItf;
 import org.eclipse.sensinact.gateway.app.manager.component.Event;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
+import org.eclipse.sensinact.gateway.core.Attribute;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 
@@ -44,9 +45,11 @@ public class RegisterPropertyBlock extends AbstractPropertyBlock implements Data
     /**
      * @see DataListenerItf#eventNotification(Event)
      */
-    public void eventNotification(Event event) {
+    public void eventNotification(Event event) {    	
         try {
-            resource.getAttribute(DataResource.VALUE).setValue(event.getData().getValue());
+        	Attribute attr = resource.getAttribute(DataResource.VALUE);
+        	if(attr!=null)
+            	attr.setValue(event.getData().getValue());
         } catch (InvalidValueException e) {
             e.printStackTrace();
         }

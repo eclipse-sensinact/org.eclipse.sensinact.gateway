@@ -81,8 +81,10 @@ public class SNAPersistApplicationInMemory implements ApplicationPersistenceServ
     }
 
     private void notifyInclusion(Application application) {
+    	if(application == null)
+    		return;
         try {
-            LOG.info("Notifying application '{}' deployment ", application.getName());
+            LOG.info("Notifying application '{}' inclusion ", application.getName());
             for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listener)) {
                 try {
                     synchronized (list) {
@@ -98,8 +100,10 @@ public class SNAPersistApplicationInMemory implements ApplicationPersistenceServ
     }
 
     private void notifyModification(Application application) {
+    	if(application == null)
+    		return;
         try {
-            LOG.info("Notifying application '{}' deployment ", application.getName());
+            LOG.info("Notifying application '{}' modification ", application.getName());
             for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listener)) {
                 try {
                     synchronized (list) {
@@ -115,8 +119,10 @@ public class SNAPersistApplicationInMemory implements ApplicationPersistenceServ
     }
 
     private void notifyRemoval(Application application) {
+    	if(application == null)
+    		return;
         try {
-            LOG.info("Notifying application '{}' deployment ", application.getName());
+            LOG.info("Notifying application '{}' removal ", application.getName());
             for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listener)) {
                 try {
                     synchronized (list) {

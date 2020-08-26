@@ -72,9 +72,11 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
      */
     public SnaErrorMessage start(Session session) {
         // Testing that all resources exist at start
-        for (String resourceUri : resourceUris) {
+        for (String resourceUri : resourceUris) {        	
             try {
             	 String[] uriElements = UriUtils.getUriElements(resourceUri);
+            	 if(uriElements[0].indexOf('(')>-1)
+            		 continue;
                  if (uriElements.length != 3 || session.getResource(uriElements[0], 
                 		 uriElements[1], uriElements[2]).getStatusCode()!=200) {
                      throw new NullPointerException();
@@ -87,6 +89,9 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
             @Override
             public Void execute(Core service) throws Exception {
                 for (String resourceUri : resourceUris) {
+               	 	String[] uriElements = UriUtils.getUriElements(resourceUri);
+               	 	if(uriElements[0].indexOf('(')>-1)
+               		 continue;
                     final SnaFilter filter = new SnaFilter(mediator, resourceUri);
                     filter.addHandledType(SnaMessage.Type.LIFECYCLE);
                     AppResourceLifeCycleSnaAgent callback = new AppResourceLifeCycleSnaAgent(mediator, AppResourceLifecycleWatchDog.this);

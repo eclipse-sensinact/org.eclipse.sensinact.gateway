@@ -53,9 +53,11 @@ class ActionHookQueue implements DataListenerItf {
 //            if (caller.release() == 0) {
 //                mediator.CALLERS.remove();
 //            }
-            for (ServiceReference serviceReference : serviceReferences) {
-                DataProviderItf dataProviderItf = ((DataProviderItf) mediator.getService(serviceReference));
-                dataProviderItf.addListener(this, null);
+            if(serviceReferences!=null) {
+	            for (ServiceReference serviceReference : serviceReferences) {
+	                DataProviderItf dataProviderItf = ((DataProviderItf) mediator.getService(serviceReference));
+	                dataProviderItf.addListener(this, null);
+	            }
             }
         } catch (Exception e) {
             e.printStackTrace();
