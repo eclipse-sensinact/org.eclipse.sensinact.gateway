@@ -81,7 +81,7 @@ public final class ProxyConfiguration {
     public Proxy getProxy() {
         if (proxyHost != null) {
             return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
-        }
+        }        
         return Proxy.NO_PROXY;
     }
 }

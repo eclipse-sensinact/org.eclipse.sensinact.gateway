@@ -37,6 +37,8 @@ public class ConnectionConfigurationImpl<RESPONSE extends Response, REQUEST exte
     protected String httpMethod;
     protected ProxyConfiguration proxyConfiguration;
     protected Map<String, String> parameters;
+	private String serverCertificate;
+	private String clientCertificate;
 
     /**
      * Constructor
@@ -274,6 +276,27 @@ public class ConnectionConfigurationImpl<RESPONSE extends Response, REQUEST exte
         this.proxyConfiguration.setProxyPort(proxyPort);
         return this;
     }
+
+    @Override
+	public void setServerSSLCertificate(String serverCertificate) {
+		this.serverCertificate = serverCertificate;
+	}
+
+	@Override
+	public String getServerSSLCertificate() {
+		return this.serverCertificate;
+	}
+
+	@Override
+	public void setClientSSLCertificate(String clientCertificate) {
+		this.clientCertificate = clientCertificate;
+	}
+	
+	@Override
+	public String getClientSSLCertificate() {
+		return this.clientCertificate;
+	}
+
 
     /**
      * Returns a new {@link Proxy} instance using

@@ -10,20 +10,32 @@
  */
 package org.eclipse.sensinact.gateway.protocol.http.client;
 
-import org.eclipse.sensinact.gateway.protocol.http.Headers;
-import org.eclipse.sensinact.gateway.util.IOUtils;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+
+import org.eclipse.sensinact.gateway.protocol.http.Headers;
+import org.eclipse.sensinact.gateway.util.IOUtils;
 
 /**
  * A Request configuration data structure
@@ -48,51 +60,12 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
 
     public static final int DEFAULT_CONNECTION_TIMEOUT = 5000;
     public static final int DEFAULT_READ_TIMEOUT = 5000;
-
-    //TODO: handle secured connection for true
-    //****************************************
-    //Thread safe lazy singleton pattern
-    //****************************************
-    final class SSLInitializer {
-        public static final Boolean getSSLInitializer() {
-            return SSLInitializerHolder.INITIALIZER;
-        }
-
-        private final static class SSLInitializerHolder {
-            public static final Boolean INITIALIZER = new Boolean(new BooleanProvider() {
-                boolean init() {
-                    TrustManager[] TRUST_ALL_CERTS = new TrustManager[]{new X509TrustManager() {
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                            return null;
-                        }
-
-                        public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-                        }
-
-                        public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-                        }
-                    }};
-                    HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
-                        @Override
-                        public boolean verify(String hostname, SSLSession session) {
-                            return true;
-                        }
-                    };
-                    try {
-                        SSLContext sc = SSLContext.getInstance("SSL"); // "TLS" "SSL"
-                        sc.init(null, TRUST_ALL_CERTS, null);
-                        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-                        HttpsURLConnection.setDefaultHostnameVerifier(DO_NOT_VERIFY);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return false;
-                    }
-                    return true;
-                }
-            }.init());
-        }
-    }
-
+    
+    public final String TRUST_ALL = "TRUST_ALL";
+    
+    final static Map<String,TrustManager[]> TRUST_MANAGERS = new HashMap<>();
+    final static Map<String, KeyManager[]> KEY_MANAGERS = new HashMap<>();  
+    
     abstract class BooleanProvider {
         abstract boolean init();
     }
@@ -107,7 +80,7 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
          * to the specified  {@link URL}'s protocol
          */
         public static <RESPONSE extends Response, REQUEST extends Request<RESPONSE>> HttpURLConnection build(ConnectionConfiguration<RESPONSE, REQUEST> config) throws IOException {
-            HttpURLConnection connection = null;
+            HttpURLConnection connection = null;            
             String uri = config.getUri();
             if (uri == null || uri.length() == 0) {
                 return null;
@@ -115,8 +88,72 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
             URL url = new URL(uri);
             Proxy proxy = config.getProxy();
 
-            if (!url.getProtocol().toLowerCase().equals("https") || SSLInitializer.getSSLInitializer()) {
-                connection = (HttpURLConnection) url.openConnection(proxy);
+            if (url.getProtocol().toLowerCase().equals("https")) {
+                connection = (HttpsURLConnection) url.openConnection(proxy);
+                String host = url.getHost();
+                
+            	TrustManager[] trusteds = TRUST_MANAGERS.get(host);
+            	KeyManager[] keys = KEY_MANAGERS.get(host);
+            	
+                if(trusteds == null) {
+	            	URL serverCertificate = new URL(config.getServerSSLCertificate());
+	            	if(serverCertificate != null) {
+	            		try {
+	            			InputStream is = serverCertificate.openStream();
+	               		 	CertificateFactory cf = CertificateFactory.getInstance("X.509");
+	               		 	X509Certificate cert = (X509Certificate)cf.generateCertificate(is);
+	               		 	TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+	               		 	KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+	               		 	ks.load(null);
+	               		 	ks.setCertificateEntry("caCert", cert);              		 
+	               		 	tmf.init(ks);                		 
+	               		 	trusteds = tmf.getTrustManagers();
+	               		    TRUST_MANAGERS.put(host,trusteds);	               		    
+	            		} catch(Exception e) {
+	            			trusteds = null;
+	            		}
+	                	if(trusteds == null && TRUST_ALL.equals(serverCertificate)) {
+	                       trusteds = new TrustManager[]{new X509TrustManager() {
+	                            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+	                                return null;
+	                            }
+
+	                            public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+	                            }
+
+	                            public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+	                            }
+	                        }};
+	                	}
+	            	}
+                }
+                if(keys == null) {
+                    URL clientCertificate = new URL(config.getClientSSLCertificate());
+                	if(clientCertificate != null) {
+                		try {
+                		 InputStream is = clientCertificate.openStream();                		 
+                		 KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                		 KeyStore ks = KeyStore.getInstance("PKCS12");
+                		 ks.load(is,new char[] {});              		 
+                		 kmf.init(ks, new char[] {});
+                		 keys = kmf.getKeyManagers();
+                		 KEY_MANAGERS.put(host,keys);
+                		} catch(NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException | UnrecoverableKeyException e) {
+                			e.printStackTrace();
+                			keys = null;
+                		}                		  
+                	}
+                }                
+                try {
+                    SSLContext sc = SSLContext.getInstance("TLS"); // "TLS" "SSL"
+                    sc.init(keys, trusteds, null);
+                    ((HttpsURLConnection)connection).setSSLSocketFactory(sc.getSocketFactory());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }                
+            } else {
+            	connection = (HttpURLConnection) url.openConnection(proxy);
             }
             connection.setConnectTimeout(config.getConnectTimeout());
             connection.setReadTimeout(config.getReadTimeout());
@@ -142,8 +179,6 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
                 String header = iterator.next();
                 connection.setRequestProperty(header, config.getHeaderAsString(header));
             }
-            //define by default ?
-            //connection.setRequestProperty("Connection", "close");
             connection.connect();
 
             if (data != null) {
@@ -152,7 +187,6 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
             return connection;
         }
     }
-
 
     /**
      * Adds a query parameter whose key and value are passed as
@@ -164,6 +198,40 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
     ConnectionConfiguration<RESPONSE, REQUEST> queryParameter(String key, String value);
 
     /**
+     * Returns the String path to the server certificate to be used for TLS configuration.
+     * A TRUST_ALL constant return means that all server certificates will be considered as 
+     * valid
+     * 
+     * @return the String path to the server certificate or TRUST_ALL constant value to 
+     * configure TLS connection
+     */
+    String getServerSSLCertificate();
+    
+    /**
+     * Defines the String path to the server certificate to be used for TLS configuration.
+     * If set to TRUST_ALL constant, all server certificates will be considered as 
+     * valid
+     * 
+     * @param serverCertificate the String path to the server certificate to configure TLS connection
+     */
+    void setServerSSLCertificate(String serverCertificate);
+
+    /**
+     * Returns the String path to the client certificate to be used for TLS configuration and 
+     * validation by the remote connected server.
+     * 
+     * @return the String path to the client certificate to configure TLS connection if any
+     */
+	String getClientSSLCertificate();
+
+    /**
+     * Defines the String path to the client certificate to be used for TLS configuration
+     * 
+     * @param clientCertificate the String path to the client certificate to configure TLS connection
+     */
+    void setClientSSLCertificate(String clientCertificate);
+
+	/**
      * Defines the string uri targeted by requests build from {@link
      * HttpDiscoveryTask}s configured by this HttpTaskConfiguration
      *
@@ -323,4 +391,23 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
      * @throws IOException
      */
     HttpURLConnection connect() throws IOException;
+    
+    
+    
+    public static void main(String[] args) {
+        try {
+    	ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> builder = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
+    	builder.setClientSSLCertificate(new java.io.File("src/test/resources/api-smartsantander-eu.p12").toURI().toURL().toExternalForm());
+    	builder.setServerSSLCertificate(new java.io.File("src/test/resources/api-smartsantander-eu.pem").toURI().toURL().toExternalForm());
+    	builder.setUri("https://api.smartsantander.eu/v2/subscriptions");
+    	builder.setAccept("*/*");
+    	builder.setHttpMethod("GET");
+    	SimpleRequest request = new SimpleRequest(builder);
+			SimpleResponse response = request.send();
+			System.out.println(response);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
 }
