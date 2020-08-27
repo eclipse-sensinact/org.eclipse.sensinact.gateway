@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
+import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpChildTaskConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTaskConfiguration;
@@ -65,6 +66,8 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
     private String port = null;
     private String path = null;
     private String profile = null;
+    private String clientCertificate = null;
+    private String serverCertificate = null;
     private boolean direct = false;
     private CommandType command = null;
 
@@ -110,6 +113,11 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
         this.port = annotation != null && !HttpChildTaskConfiguration.DEFAULT_PORT.equals(annotation.port()) ? annotation.port() : parent.port();
 
         this.path = annotation != null && !HttpChildTaskConfiguration.DEFAULT_PATH.equals(annotation.path()) ? annotation.path() : parent.path();
+        
+        this.clientCertificate =  annotation != null && !HttpTaskConfiguration.DEFAULT_CLIENT_SSL_CERTIFICATE.equals(annotation.clientSSLCertificate()) ?annotation.clientSSLCertificate():parent.clientSSLCertificate();
+        
+        this.serverCertificate =  annotation != null && !HttpTaskConfiguration.DEFAULT_SERVER_SSL_CERTIFICATE.equals(annotation.serverSSLCertificate()) ?annotation.serverSSLCertificate():parent.serverSSLCertificate();
+        
         this.profile = profile;
         this.urlBuilder = urlBuilder;
         this.command = command;
@@ -239,6 +247,8 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
         if (this.urlBuilder != null) {
             this.urlBuilder.configure(task);
         }
+        task.setClientSSLCertificate(HttpTaskConfiguration.NO_CERTIFICATE.equals(clientCertificate)?null:clientCertificate);
+        task.setServerSSLCertificate(HttpTaskConfiguration.NO_CERTIFICATE.equals(serverCertificate)?ConnectionConfiguration.TRUST_ALL:serverCertificate);
         task.setDirect(direct);
         iterator = headers.entrySet().iterator();
         entry = null;

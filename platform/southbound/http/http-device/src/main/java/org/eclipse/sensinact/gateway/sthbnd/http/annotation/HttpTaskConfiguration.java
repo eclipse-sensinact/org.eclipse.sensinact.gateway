@@ -13,17 +13,20 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.annotation;
 
-import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
-import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskConfigurator;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
+import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskConfigurator;
 
 @Documented
 @Retention(RUNTIME)
 public @interface HttpTaskConfiguration {
+	public static final String NO_CERTIFICATE = "#NO_CERTIFICATE#";
+    public static final String DEFAULT_CLIENT_SSL_CERTIFICATE = NO_CERTIFICATE;
+    public static final String DEFAULT_SERVER_SSL_CERTIFICATE = NO_CERTIFICATE;
     public static final String DEFAULT_ACCEPT_TYPE = "text/plain";
     public static final String DEFAULT_CONTENT_TYPE = "text/plain";
     public static final String DEFAULT_SCHEME = "http";
@@ -37,13 +40,17 @@ public @interface HttpTaskConfiguration {
 
     String httpMethod() default DEFAULT_HTTP_METHOD;
 
-    String scheme() default "http";
+    String scheme() default DEFAULT_SCHEME;
 
     String host();
 
-    String port() default "80";
+    String port() default DEFAULT_PORT;
 
-    String path() default "/";
+    String path() default DEFAULT_PATH;
+    
+    String clientSSLCertificate() default DEFAULT_CLIENT_SSL_CERTIFICATE;
+
+    String serverSSLCertificate() default DEFAULT_SERVER_SSL_CERTIFICATE;
 
     boolean direct() default false;
 

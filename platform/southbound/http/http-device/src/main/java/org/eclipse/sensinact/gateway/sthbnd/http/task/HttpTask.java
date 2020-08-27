@@ -46,6 +46,8 @@ public class HttpTask<RESPONSE extends HttpResponse, REQUEST extends Request<RES
     protected String acceptType;
     protected String uri;
     protected String httpMethod;
+	protected String serverCertificate;
+	protected String clientCertificate;
     protected ProxyConfiguration proxyConfiguration;
     protected Map<String, String> queries;
     protected HeadersCollection headers;
@@ -299,6 +301,28 @@ public class HttpTask<RESPONSE extends HttpResponse, REQUEST extends Request<RES
     public Proxy getProxy() {
         return this.proxyConfiguration.getProxy();
     }
+
+
+    @Override
+	public void setServerSSLCertificate(String serverCertificate) {
+		this.serverCertificate = serverCertificate;
+	}
+
+	@Override
+	public String getServerSSLCertificate() {
+		return this.serverCertificate;
+	}
+
+	@Override
+	public void setClientSSLCertificate(String clientCertificate) {
+		this.clientCertificate = clientCertificate;
+	}
+	
+	@Override
+	public String getClientSSLCertificate() {
+		return this.clientCertificate;
+	}
+
 
     /**
      * @inheritDoc

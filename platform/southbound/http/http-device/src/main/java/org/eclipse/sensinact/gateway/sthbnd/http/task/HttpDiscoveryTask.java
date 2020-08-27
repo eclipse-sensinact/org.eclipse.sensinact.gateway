@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.sthbnd.http.task;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
+import org.eclipse.sensinact.gateway.protocol.http.client.Response;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 

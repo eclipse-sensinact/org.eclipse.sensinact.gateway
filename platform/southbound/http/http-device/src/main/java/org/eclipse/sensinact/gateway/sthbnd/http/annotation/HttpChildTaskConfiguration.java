@@ -49,6 +49,10 @@ public @interface HttpChildTaskConfiguration {
     boolean direct() default false;
 
     String identifier();
+    
+    String clientSSLCertificate() default HttpTaskConfiguration.DEFAULT_CLIENT_SSL_CERTIFICATE;
+
+    String serverSSLCertificate() default HttpTaskConfiguration.DEFAULT_SERVER_SSL_CERTIFICATE;
 
     KeyValuePair[] query() default {};
 
