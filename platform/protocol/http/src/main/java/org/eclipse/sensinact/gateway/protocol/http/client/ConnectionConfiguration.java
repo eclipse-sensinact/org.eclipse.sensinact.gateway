@@ -392,22 +392,4 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
      */
     HttpURLConnection connect() throws IOException;
     
-    
-    
-    public static void main(String[] args) {
-        try {
-    	ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> builder = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
-    	builder.setClientSSLCertificate(new java.io.File("src/test/resources/api-smartsantander-eu.p12").toURI().toURL().toExternalForm());
-    	builder.setServerSSLCertificate(new java.io.File("src/test/resources/api-smartsantander-eu.pem").toURI().toURL().toExternalForm());
-    	builder.setUri("https://api.smartsantander.eu/v2/subscriptions");
-    	builder.setAccept("*/*");
-    	builder.setHttpMethod("GET");
-    	SimpleRequest request = new SimpleRequest(builder);
-			SimpleResponse response = request.send();
-			System.out.println(response);
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-    }
 }
