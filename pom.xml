@@ -1182,7 +1182,17 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-				<artifactId>storage-agent</artifactId>
+				<artifactId>generic-storage-agent</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+				<artifactId>http-storage-agent</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+				<artifactId>influxdb-storage-agent</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

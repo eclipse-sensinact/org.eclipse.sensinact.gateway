@@ -94,7 +94,8 @@
 		<module>rest-profile</module>
 		<module>jsonpath-profile</module>
 		<module>simulation-profile</module>
-		<module>storage-agent-profile</module>
+		<module>http-storage-agent-profile</module>
+		<module>influxdb-storage-agent-profile</module>
 		<module>swagger-profile</module>
 		<module>sensinact-remote</module>
 		<module>sensinact-datastore</module>
