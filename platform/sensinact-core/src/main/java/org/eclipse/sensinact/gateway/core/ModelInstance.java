@@ -106,7 +106,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 * the {@link MesssageHandler} handling messages coming from this
 	 * SensiNactResourceModel
 	 */
-	protected MessageHandler messageHandler;
+	protected MessageRouter messageHandler;
 
 	/**
 	 * the String identifier of the profile of this SnaServiceProvider
@@ -317,7 +317,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	}
 
 	/**
-	 * Posts the {@link SnaMessage} past as parameter to the {@link MessageHandler}
+	 * Posts the {@link SnaMessage} past as parameter to the {@link MessageRouter}
 	 * of this SensiNactResourceModel
 	 * 
 	 * @param message

@@ -22,7 +22,7 @@ import org.eclipse.sensinact.gateway.core.ModelElementProxy;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.SessionKey;
-import org.eclipse.sensinact.gateway.core.message.MessageHandler;
+import org.eclipse.sensinact.gateway.core.message.MessageRouter;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
@@ -44,7 +44,7 @@ public class MyModelInstance extends ModelInstance<ModelConfiguration> {
 		super(mediator, modelConfiguration, name, profile);
 	}
 
-	public MessageHandler getHandler() {
+	public MessageRouter getHandler() {
 		return super.messageHandler;
 	}
 

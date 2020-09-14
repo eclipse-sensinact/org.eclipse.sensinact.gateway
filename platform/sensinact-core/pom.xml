@@ -73,21 +73,6 @@
 					<obrRepository>NONE</obrRepository>
 					<instructions>
 						<Bundle-Activator>org.eclipse.sensinact.gateway.core.osgi.Activator</Bundle-Activator>
-						<Export-Package>
-							org.eclipse.sensinact.gateway.core,
-							org.eclipse.sensinact.gateway.core.api,
-							org.eclipse.sensinact.gateway.core.message,
-							org.eclipse.sensinact.gateway.core.method,
-							org.eclipse.sensinact.gateway.core.method.legacy,
-							org.eclipse.sensinact.gateway.core.method.trigger,
-							org.eclipse.sensinact.gateway.core.method.builder,
-							org.eclipse.sensinact.gateway.core.osgi,
-							org.eclipse.sensinact.gateway.core.security,
-							org.eclipse.sensinact.gateway.core.remote
-						</Export-Package>
-						<!-- <Import-Package> org.osgi.service.condpermadmin, org.osgi.service.permissionadmin, 
-							org.eclipse.sensinact.gateway.common.execution, org.eclipse.sensinact.gateway.datastore.api 
-							</Import-Package> -->
 						<DynamicImport-Package>
 							org.eclipse.sensinact.gateway.core.security.impl
 						</DynamicImport-Package>
@@ -99,7 +84,6 @@
 						<Include-Resource>
 							about.html
 						</Include-Resource>
-
 					</instructions>
 				</configuration>
 			</plugin>

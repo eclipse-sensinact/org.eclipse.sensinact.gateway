@@ -36,7 +36,7 @@ import org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>> implements MessageHandler {
+public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>> implements MessageRouter {
 	/**
 	 * The set of {@link MidCallback} mapped to {@link SnaFilter}s defining whether
 	 * to call them or not
@@ -77,7 +77,7 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.MessageHandler#
+	 * @see org.eclipse.sensinact.gateway.core.message.MessageRouter#
 	 *      addCallback(org.eclipse.sensinact.gateway.core.message.SnaFilter,
 	 *      org.eclipse.sensinact.gateway.core.message.MidCallback)
 	 */
@@ -99,7 +99,7 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.MessageHandler#
+	 * @see org.eclipse.sensinact.gateway.core.message.MessageRouter#
 	 *      deleteCallback(java.lang.String)
 	 */
 	@Override
@@ -124,7 +124,7 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 	/**
 	 * @inheritDoc
 	 *
-	 * @see MessageHandler#count(java.lang.String)
+	 * @see MessageRouter#count(java.lang.String)
 	 */
 	@Override
 	public int count(String uri) {
@@ -158,7 +158,7 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 	/**
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.MessageHandler#
+	 * @see org.eclipse.sensinact.gateway.core.message.MessageRouter#
 	 *      handle(org.eclipse.sensinact.gateway.core.message.SnaMessage)
 	 */
 	@Override
@@ -296,7 +296,7 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 	/**
 	 * @inheritDoc
 	 * 
-	 * @see MessageHandler#close(boolean)
+	 * @see MessageRouter#close(boolean)
 	 */
 	@Override
 	public void close(boolean wait) {

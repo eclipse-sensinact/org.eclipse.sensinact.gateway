@@ -10,61 +10,61 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
+import org.eclipse.sensinact.gateway.core.message.whiteboard.AgentFactory;
+
 /**
- * Handler of {@link SnaMessage}
+ * AgentRelay service is used by the {@link AgentFactory} to 
+ * instantiate {@link SnaAgent}
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public interface MessageHandler {
-	/**
-	 * Treats the {@link SnaMessage} passed as parameter
-	 * 
-	 * @param event
-	 *            the {@link SnaMessage} to treat
-	 */
-	void handle(SnaMessage message);
 
 	/**
-	 * Deletes the registered {@link MidCallback} identifiable using the callback
-	 * object passed as parameter
+	 * Processes the {@link SnaLifecycleMessageImpl} passed as parameter
 	 * 
-	 * @param callback
-	 *            string identifier of the {@link MidCallback} to delete
-	 * @return the number of {@link MidCallback}s that are still registered for the
-	 *         same filter than the deleted {@link MidCallback}
+	 * @param message
+	 *            the {@link SnaLifecycleMessageImpl} to be processed
 	 */
-	void deleteCallback(String callback);
+	void doHandle(SnaLifecycleMessageImpl message) throws MidCallbackException;
 
 	/**
-	 * Returns the number of registered {@link SnaFilter}s whose filter field is
-	 * equals to the one passed as parameter
+	 * Processes the {@link SnaUpdateMessageImpl} passed as parameter
 	 * 
-	 * @param filter
-	 *            the filter for which to calculate the number of registered
-	 *            SnaFilter
-	 * @return the number of registered {@link SnaFilter}s whose filter field is
-	 *         equals to the specified one
+	 * @param message
+	 *            the {@link SnaUpdateMessageImpl} to be processed
 	 */
-	public int count(String filter);
+	void doHandle(SnaUpdateMessageImpl message) throws MidCallbackException;
 
 	/**
-	 * Adds the {@link MidCallback} passed as parameter and maps it to the specified
-	 * {@link SnaFilter} allowing to discriminate {@link SnaMessage}s to transmit
+	 * Processes the {@link SnaRemoteMessageImpl} passed as parameter
 	 * 
-	 * @param filter
-	 *            the {@link SnaFilter} to map to the {@link MidCallback} to add
-	 * @param callback
-	 *            the {@link MidCallback} to add
+	 * @param message
+	 *            the {@link SnaRemoteMessageImpl} to be processed
 	 */
-	void addCallback(SnaFilter filter, MidCallback callback);
+	void doHandle(SnaRemoteMessageImpl message) throws MidCallbackException;
 
 	/**
-	 * Stops this MessageHandler.
-	 *
-	 * @param wait
-	 *            defines whether to wait for the entire stack of messages
-	 *            processing before closing or not
+	 * Processes the {@link SnaErrorMessageImpl} passed as parameter
 	 * 
+	 * @param message
+	 *            the {@link SnaErrorMessageImpl} to be processed
 	 */
-	void close(boolean wait);
+	void doHandle(SnaErrorMessageImpl message) throws MidCallbackException;
+
+	/**
+	 * Processes the {@link SnaResponseMessage} passed as parameter
+	 * 
+	 * @param message
+	 *            the {@link SnaResponseMessage} to be processed
+	 */
+	void doHandle(SnaResponseMessage<?, ?> message) throws MidCallbackException;
+
+	/**
+	 * Returns true if the {@link SnaAgent} attached to this
+	 * {@link MessageHandler} must be propagated through the 
+	 * connected remote sensiNact instance(s). False if the 
+	 * {@link SnaAgent} observes local events only.
+	 */
+	boolean propagate();
 }

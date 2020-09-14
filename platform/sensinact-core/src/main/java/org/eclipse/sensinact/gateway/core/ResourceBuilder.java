@@ -508,8 +508,8 @@ public class ResourceBuilder {
 			 */
 			@Override
 			public Void execute(AccessMethodResponseBuilder snaResult) throws Exception {
-				JSONObject result = new JSONObject(resource.set((String) snaResult.getParameter(0), 
-						snaResult.getParameter(1)).getJSON());
+				AttributeDescription desc = resource.set((String) snaResult.getParameter(0),snaResult.getParameter(1));
+				JSONObject result = new JSONObject(desc.getJSON());
 				snaResult.setAccessMethodObjectResult(result);
 				return null;
 			}

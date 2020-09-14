@@ -27,7 +27,9 @@ public class FilteringDefinition {
 	// ********************************************************************//
 	// STATIC DECLARATIONS //
 	// ********************************************************************//
-
+	
+	public static final int UNRANKED = -1; 
+	
 	// ********************************************************************//
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
@@ -39,20 +41,36 @@ public class FilteringDefinition {
 	/**
 	 * the String formated filter
 	 */
-	public final String filter;
+	public final String filter;	
+	/**
+	 * the int rank of this filter definition 
+	 */
+	public final int rank;
 
 	/**
 	 * Constructor
 	 * 
-	 * @param type
-	 *            the type of filter defined by the FilterDefinition to be
-	 *            instantiated
-	 * @param filter
-	 *            the String filter defined by the FilterDefinition to be
-	 *            instantiated
+	 * @param type the type of filter defined by the FilterDefinition to be
+	 * instantiated
+	 * @param filter the String filter defined by the FilterDefinition to be
+	 * instantiated
 	 */
 	public FilteringDefinition(String type, String filter) {
+		this(type, filter, UNRANKED);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param type the type of filter defined by the FilterDefinition to be
+	 * instantiated
+	 * @param filter the String filter defined by the FilterDefinition to be
+	 * instantiated
+	 * @param rank the int rank of the FilterDefinition to be instantiated
+	 */
+	public FilteringDefinition(String type, String filter, int rank) {
 		this.type = type;
 		this.filter = filter;
+		this.rank = rank;
 	}
 }
