@@ -12,8 +12,11 @@ package org.eclipse.sensinact.gateway.generic.uri;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
+import org.eclipse.sensinact.gateway.generic.SubscribeTaskWrapper;
 import org.eclipse.sensinact.gateway.generic.Task;
+import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.Task.RequestType;
+import org.eclipse.sensinact.gateway.generic.UnsubscribeTaskWrapper;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
@@ -25,33 +28,21 @@ public abstract class URIProtocolStackEndpoint<P extends Packet> extends Protoco
     /**
      * Constructor
      *
-     * @param mediator the {@link Mediator} that will be used
-     *                 by the StreamProtocolStackConnector to instantiate
-     *                 to interact with the OSGi host environment
+     * @param mediator the {@link Mediator} used by the StreamProtocolStackConnector to be 
+     * instantiated to interact with the OSGi host environment
      */
     public URIProtocolStackEndpoint(Mediator mediator) {
         super(mediator);
     }
 
-    /**
-     * @inheritDoc
-     * @see TaskTranslator#
-     * getRequestType()
-     */
     @Override
     public RequestType getRequestType() {
         return REQUEST_TYPE;
     }
 
-    /**
-     * @inheritDoc
-     * @see TaskTranslator#
-     * send(Task)
-     */
     @Override
     public void send(Task task) {
-        URITask uriTask = (URITask) task;
-
-        send(UriUtils.getRoot(task.getPath()).substring(1), uriTask.getUri(), uriTask.getContent(), uriTask.getOptions());
+       URITask _task = (URITask)task;
+       send(UriUtils.getRoot(_task.getPath()).substring(1), _task.getUri(), _task.getContent(), _task.getOptions());
     }
 }

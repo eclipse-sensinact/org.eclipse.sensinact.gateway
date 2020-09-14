@@ -10,6 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
@@ -20,50 +26,56 @@ import org.eclipse.sensinact.gateway.generic.parser.Commands;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Map;
-
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTranslator {
+	
     /**
-     * the {@link Mediator} that will be used by the
-     * ProtocolStackConnector to instantiate to interact with
-     * the OSGi host environment
+     * the {@link Mediator} that will be used by the ProtocolStackConnector to instantiate 
+     * to interact with the OSGi host environment
      */
     protected final Mediator mediator;
 
     /**
-     * the {@link Connector} connected to this
-     * ProtocolStackConnector instance
+     * the {@link Connector} connected to this ProtocolStackConnector instance
      */
     protected Connector<P> connector;
+    
     /**
      * the set of available commands for the
      * connected {@link Connector}
      */
     protected Commands commands;
-
+    
+	/**
+	 * Map of the subscription identifiers to the subscriber ones  
+	 */
+	protected Map<String,String> subscriptions;
+	
+	/**
+	 * {@link SubscriptionHandlerDelegate} in charge of providing the appropriate
+	 * and extended {@link AbstractSubscribeTaskWrapper} and {@link AbstractUnsubscribeTaskWrapper} types
+	 */
+	protected SubscriptionHandlerDelegate subscriptionHandlerDelegate;
+	
     /**
      * Constructor
      *
-     * @param mediator the {@link Mediator} that will be used by the
-     *                 ProtocolStackConnector to instantiate
-     *                 to interact with the OSGi host environment
+     * @param mediator the {@link Mediator} that will be used by the ProtocolStackConnector 
+     * to instantiate to interact with the OSGi host environment
      */
     public ProtocolStackEndpoint(Mediator mediator) {
         this.mediator = mediator;
+    	this.subscriptions = new HashMap<>();
     }
-
+    
     /**
-     * Connects this ProtocolStackConnector to the
-     * {@link ExtModelConfiguration} passed as parameter.
+     * Connects this ProtocolStackConnector to the {@link ExtModelConfiguration} passed 
+     * as parameter.
      *
-     * @param manager the {@link ExtModelConfiguration} to
-     *                connect to
+     * @param manager the {@link ExtModelConfiguration} to connect to
+     * 
      * @throws InvalidProtocolStackException
      */
 	public void connect(ExtModelConfiguration<P> manager) throws InvalidProtocolStackException {
@@ -82,13 +94,115 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
         }
     }
 
+	/**
+	 * Defines the {@link SubscriptionHandlerDelegate} in charge of providing wrapper types for subscribe and
+	 * unsubscribe tasks
+	 * 
+	 * @param subscriptionHandlerDelegate the {@link SubscriptionHandlerDelegate} to be used
+	 */
+	public void setSubscriptionHandlerDelegate(SubscriptionHandlerDelegate subscriptionHandlerDelegate) {
+		this.subscriptionHandlerDelegate = subscriptionHandlerDelegate;
+	}
+	
     /**
-     * Processes the {@link Packet} passed as
-     * parameter
+     * Defines the String subscription identifier of the {@link AbstractUnsubscribeTaskWrapper} 
+     * passed as parameter
+     * 
+     * @param task the {@link AbstractUnsubscribeTaskWrapper} to define the subscription identifier
+     * of
+     */
+    public void setSubsciptionIdentifier(UnsubscribeTaskWrapper task) {
+    	task.setSubscriptionId(this.subscriptions.get(task.getSubscriberId()));
+    }
+    
+    /**
+     * Returns the {@link AbstractUnsubscribeTaskWrapper} type to be used to wrapped unsubscribe 
+     * {@link Task}
+     * 
+     * @return the {@link AbstractUnsubscribeTaskWrapper} type to be used
+     */
+    protected Class<? extends UnsubscribeTaskWrapper> getUnsubscribeTaskWrapperType(){
+    	if(this.subscriptionHandlerDelegate!=null) 
+    		return this.subscriptionHandlerDelegate.getUnsubscribeTaskWrapperType();
+    	return null;
+    }
+    
+    /**
+     * Maps the String subscription identifier to the String subscriber one, both provided
+     * by the {@link AbstractSubscribeTaskWrapper} wrapping a subscribe {@link Task}
+     * 
+     * @param task the subscribe {@link Task} wrapped into an {@link AbstractSubscribeTaskWrapper}
+     */
+    public void registerSubsciptionIdentifier(SubscribeTaskWrapper task) {
+    	this.subscriptions.put(task.getSubscriberId(), task.getSubscriptionId());
+    }
+
+    /**
+     * Returns the {@link AbstractSubscribeTaskWrapper} type to be used to wrapped subscribe 
+     * {@link Task}
+     * 
+     * @return the {@link AbstractSubscribeTaskWrapper} type to be used
+     */
+    protected Class<? extends SubscribeTaskWrapper> getSubscribeTaskWrapperType(){
+    	if(this.subscriptionHandlerDelegate!=null) 
+    		return this.subscriptionHandlerDelegate.getSubscribeTaskWrapperType();
+    	return null;
+    }
+    
+    /**
+     * Returns the {@link Task} passed as parameter wrapped into the appropriate
+     * {@link TaskWrapper} if it holds an SUBSCRIBE or UNSUBSCRIBE {@link CommandType}
+     * and if it is not already an {@link TaskWrapper} instance
+     * 
+     * @param <T> the handled {@link Task} type
+     * 
+     * @param type the handled {@link Task} type
+     * @param task the {@link Task} to be wrapped 
+     * 
+     * @return the {@link Task} passed as parameter wrapped into the appropriate
+     * {@link TaskWrapper}
+     */
+    protected <T extends Task> T wrap(Class<T> type , T task) {
+    	if(task == null)
+    		return null;
+    	if(task instanceof TaskWrapper)
+    		return task;
+    	T _task = null;
+        if(task.getCommand().equals(CommandType.SUBSCRIBE)) {
+	       	Class<? extends SubscribeTaskWrapper> wrapperType = this.getSubscribeTaskWrapperType();
+	       	if(wrapperType != null) { 
+		         	try {
+		 				_task =  (T) wrapperType.getDeclaredConstructor(new Class<?>[]{Mediator.class, type, ProtocolStackEndpoint.class}
+		 				).newInstance(new Object[] {mediator,task,this});
+		 			} catch (Exception e) {
+		 				e.printStackTrace();
+		 				_task = null;
+		 			}
+	       	}
+       } else if(task.getCommand().equals(CommandType.UNSUBSCRIBE)) {
+	       	Class<? extends UnsubscribeTaskWrapper> wrapperType = this.getUnsubscribeTaskWrapperType();
+	       	if(wrapperType != null) { 
+		         	try {
+		 				_task =  (T) wrapperType.getDeclaredConstructor(new Class<?>[]{Mediator.class, type, ProtocolStackEndpoint.class}
+		 				).newInstance(new Object[] {mediator,task,this});
+		 			} catch (Exception e) {
+		 				e.printStackTrace();
+		 				_task = null;
+		 			}
+	       	}
+       } 
+       if(_task==null) 
+       	_task = task;
+       return _task;
+    }
+    
+    
+    /**
+     * Processes the {@link Packet} passed as parameter
      *
      * @param packet the {@link Packet} to process
+     * 
      * @throws InvalidPacketException
-     * @throws InvalidServiceProviderException
      */
     public void process(P packet) throws InvalidPacketException {
         if (connector == null) {
@@ -99,13 +213,11 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
     }
 
     /**
-     * Returns the bytes array command for the {@link
-     * CommandType} passed as parameter
+     * Returns the bytes array command for the {@link CommandType} passed as parameter
      *
-     * @param commandType the {@link CommandType} for which
-     *                    to retrieve the bytes array command
-     * @return the bytes array command for the specified {@link
-     * CommandType}
+     * @param commandType the {@link CommandType} for which to retrieve the bytes array command
+     * 
+     * @return the bytes array command for the specified {@link CommandType}
      */
     public byte[] getCommand(CommandType commandType) {
         if (this.commands == null) {
@@ -115,15 +227,14 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
     }
 
     /**
-     * Joins each bytes array contained by the arrays argument
-     * into a single one delimiting each others by the delimiter
-     * argument bytes array
+     * Joins each bytes array contained by the arrays argument into a single one delimiting 
+     * each others by the delimiter argument bytes array
      *
      * @param arrays    the array of bytes arrays to join
      * @param delimiter the delimiters bytes array
-     * @return the bytes array resulting of the junction
-     * of the bytes arrays contained by the arrays
-     * argument
+     * 
+     * @return the bytes array resulting of the junction of the bytes arrays contained by the 
+     * arrays argument
      */
     public static byte[] join(byte[][] arrays, byte[] delimiter) {
         byte[] joined = new byte[0];
@@ -154,8 +265,8 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
      *
      * @param parameter the parameter object to convert into a bytes array
      * @param delimiter the array of byte delimiting the distinct elements
-     *                  of the parameter argument if this last one is of an
-     *                  {@link Array} type
+     * of the parameter argument if this last one is of an {@link Array} type
+     * 
      * @return the parameter argument object converted into a bytes array
      */
     public static byte[] formatParameter(Object parameter, byte[] delimiter) {
@@ -205,10 +316,9 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
      * Stops this ProtocolStackEndpoint and its associated {@link Connector}
      */
     public void stop() {
-        if (this.connector != null) {
+        if (this.connector != null) 
             this.connector.stop();
-        } else {
+        else 
             this.mediator.debug("No processor connected");
-        }
     }
 }

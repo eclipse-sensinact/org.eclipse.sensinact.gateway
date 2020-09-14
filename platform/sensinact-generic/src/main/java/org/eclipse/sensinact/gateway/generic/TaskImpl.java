@@ -228,9 +228,8 @@ public abstract class TaskImpl implements Task {
     @Override
     public void setResult(Object result, long timestamp) {
         if (isResultAvailable()) {
-            if (this.mediator.isWarningLoggable()) {
+            if (this.mediator.isWarningLoggable()) 
                 this.mediator.warn(new StringBuilder("result already set [").append(this).append("][current: ").append((this.result == AccessMethod.EMPTY ? "EMPTY" : this.result)).append("][new = ").append((result == AccessMethod.EMPTY ? "EMPTY" : result + "]")).toString());
-            }
             return;
         }
         this.result = result;

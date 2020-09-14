@@ -16,10 +16,11 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
 import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
+import org.eclipse.sensinact.gateway.generic.SubscribeTaskWrapper;
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.Task.RequestType;
-import org.eclipse.sensinact.gateway.generic.TaskImpl;
+import org.eclipse.sensinact.gateway.generic.UnsubscribeTaskWrapper;
 import org.eclipse.sensinact.gateway.generic.annotation.AnnotationResolver;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskCommand;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskCommand.SynchronizationPolicy;
@@ -64,9 +65,8 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
     /**
      * Constructor
      *
-     * @param mediator the {@link Mediator} that will be used
-     *                 by the LocalProtocolStackConnector to instantiate
-     *                 to interact with the OSGi host environment
+     * @param mediator the {@link Mediator} that will be used by the LocalProtocolStackConnector 
+     * to instantiate to interact with the OSGi host environment
      */
     public LocalProtocolStackEndpoint(Mediator mediator) {
         super(mediator);
@@ -92,51 +92,45 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
     }
 
     @Override
-    public void send(Task task) {
+    public void send(Task task) {    	   	 
         try {
-            this.execute((TaskImpl) task);
+            this.execute(task);
         } catch (Exception e) {
             task.abort(AccessMethod.EMPTY);
-            e.printStackTrace();
+            mediator.error(e);
         }
     }
 
     /**
-     * Adds the specified Object instance whose type is passed
-     * as parameter to this BasisProtocolStackConnector's {@link
-     * AnnotationResolver} to make it accessible to {@link
-     * TaskExecution} annotated types
+     * Adds the specified Object instance whose type is passed as parameter to this 
+     * BasisProtocolStackConnector's {@link AnnotationResolver} to make it accessible to 
+     * {@link TaskExecution} annotated types
      *
      * @param injectableType the Object instance type
      * @param injectable     the Object instance to make accessible to {@link
-     *                       TaskExecution} annotated types
+     * TaskExecution} annotated types
      */
     public <T> void addInjectableInstance(Class<T> injectableType, T injectable) {
         this.resolver.addInjectableInstance(injectableType, injectable);
     }
 
     /**
-     * Adds the Object instance passed as parameter to this
-     * BasisProtocolStackConnector's {@link AnnotationResolver}
-     * to make it accessible to {@link TaskExecution}
-     * annotated types
+     * Adds the Object instance passed as parameter to this BasisProtocolStackConnector's 
+     * {@link AnnotationResolver} to make it accessible to {@link TaskExecution} annotated types
      *
      * @param injectable the Object instance to make accessible to {@link
-     *                   TaskExecution} annotated types
+     * TaskExecution} annotated types
      */
     public <T> void addInjectableInstance(T injectable) {
         this.addInjectableInstance((Class<T>) injectable.getClass(), injectable);
     }
 
     /**
-     * Creates the {@link BasisExcutor}s to associate
-     * to {@link TaskCommand} annotated methods in
-     * the list of {@link TaskExecution} annotated types
-     * passed as parameter
+     * Creates the {@link BasisExcutor}s to associate to {@link TaskCommand} annotated methods in
+     * the list of {@link TaskExecution} annotated types passed as parameter
      *
-     * @param classes List of {@link TaskExecution} annotated types
-     *                to explore to search {@link TaskCommand}
-     *                annotated methods
+     * @param classes List of {@link TaskExecution} annotated types to explore to search 
+     * {@link TaskCommand} annotated methods
      */
     private void buildExecutors() {
         Iterator<Object> iterator = this.resolver.iterator();
@@ -172,12 +166,6 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
 
                 for (; index < length; index++) {
                     AnnotationExecutor executor = new AnnotationExecutor(target, command, sync, method.isVarArgs(), method.getParameterTypes(), profiles[index]) {
-                        /**
-                         * @inheritedDoc
-                         *
-                         * @see Executable#
-                         * execute(java.lang.Object)
-                         */
                         @Override
                         public Object execute(Task task) throws Exception {
                             method.setAccessible(true);
@@ -203,11 +191,6 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
             }
         }
         Collections.sort(this.executors, new Comparator<AnnotationExecutor>() {
-            /**
-             * @InheritedDoc
-             *
-             * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-             */
             @Override
             public int compare(AnnotationExecutor basis1, AnnotationExecutor basis2) {
                 boolean basis1AllProfile = basis1.isProfile(ResourceConfig.ALL_PROFILES);
@@ -226,24 +209,23 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
     }
 
     /**
-     * Executes the {@link TaskImpl} passed as parameter
-     * by retrieving and invoking the associated {@link
-     * AnnotationExecutor} if it exists
+     * Executes the {@link Task} passed as parameter by retrieving and invoking 
+     * the associated {@link AnnotationExecutor} if it exists
      *
-     * @param task the {@link TaskImpl} to execute
-     * @return the object result of the {@link AnnotationExecutor}
-     * invocation
+     * @param task the {@link Task} to execute
+     * 
+     * @return the object result of the {@link AnnotationExecutor} invocation
+     * 
      * @throws Exception if a {@link AnnotationExecutor} cannot be retrieved
-     *                   or the one thrown by its invocation
+     * or the one thrown by its invocation
      */
     protected Object execute(Task task) throws Exception {
         String path = task.getPath();
         CommandType commandType = task.getCommand();
         String profile = task.getProfile();
 
-        if (profile == null) {
+        if (profile == null) 
             profile = ResourceConfig.ALL_PROFILES;
-        }
 
         PathCommandKey key = new PathCommandKey(path, profile, commandType);
         AnnotationExecutor executor = cache.get(key);
@@ -281,8 +263,8 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
                     executor = null;
                     continue;
                 }
-                for (; index < thatLength && (thatPathElements[index].equals(UriUtils.WILDCARD) || thatPathElements[index].equals(thisPathElements[index])); index++)
-                    ;
+                for (; index < thatLength && (thatPathElements[index].equals(UriUtils.WILDCARD) || thatPathElements[index].equals(thisPathElements[index])); index++);
+                
                 if (index < thatLength) {
                     executor = null;
                     continue;
@@ -297,14 +279,10 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
         return executor.execute(task);
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.generic.TaskTranslator#
-     * createTask(org.eclipse.sensinact.gateway.common.bundle.Mediator, org.eclipse.sensinact.gateway.generic.Task.CommandType, java.lang.String, java.lang.String, org.eclipse.sensinact.gateway.core.ResourceConfig, java.lang.Object[])
-     */
     @Override
     public Task createTask(Mediator mediator, CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        return new GenericLocalTask(mediator, command, this, path, profileId, resourceConfig, parameters);
+    	Task task =  super.wrap(Task.class, new GenericLocalTask(mediator, command, this, path, profileId, resourceConfig, parameters)); 
+    	return task;
     }
 
     /**
