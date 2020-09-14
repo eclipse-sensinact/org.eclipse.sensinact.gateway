@@ -18,7 +18,7 @@ import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONArray;
 
 /**
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class NorthboundRequestBuilder {
     //********************************************************************//

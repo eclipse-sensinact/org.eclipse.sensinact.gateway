@@ -14,7 +14,7 @@ import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationServiceException;
 
-class MyAuthorization<R> implements AuthorizationService {
+class MyAuthorization implements AuthorizationService {
     /**
      * @inheritDoc
      * @see AuthorizationService#getAuthenticatedAccessLevelOption(java.lang.String, long)

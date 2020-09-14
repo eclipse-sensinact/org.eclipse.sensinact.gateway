@@ -41,6 +41,7 @@ public class TestForwardingService extends MidOSGiTest {
     //********************************************************************//
 
     protected static final String HTTP_ROOTURL = "http://localhost:8899";
+    protected static final String WS_ROOTURL = "ws://localhost:8899";
 
     //********************************************************************//
     //						INSTANCE DECLARATIONS						  //
@@ -169,6 +170,55 @@ public class TestForwardingService extends MidOSGiTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+
+    @Test
+    public void testCallbackHttpAndWebSocket() throws Exception {
+        Mediator mediator = new Mediator(context);
+        this.initializeMoke(new File("./extra-src3/test/resources/MANIFEST.MF"), new File("./extra-src3/test/resources/meta"), new File("./target/extra-test-classes3"));
+        String simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/callbackTest1", null, "GET");
+        System.out.println(simulated1);
+        
+        assertEquals("[GET]/callbackTest1", simulated1);            
+        String simulated2 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/callbackTest1/withContent", "MyContent", "POST");
+        System.out.println(simulated2);
+        assertEquals("[POST]/callbackTest1/withContent", simulated2);
+        
+        WsServiceTestClient client = new WsServiceTestClient();
+        new Thread(client).start();
+        
+        simulated1 = this.synchronizedRequest(client, "/callbackTest1", null);
+        System.out.println(simulated1);
+        assertEquals("[WEBSOCKET]/callbackTest1", simulated1); 
+
+        simulated1 = this.synchronizedRequest(client, "/callbackTest1/withContent", "{\"request\":\"MyContent\"}");
+        System.out.println(simulated1);
+        assertEquals("[WEBSOCKET]/callbackTest1/withContent", simulated1); 
+
+        simulated1 = this.synchronizedRequest(client, null, null);
+        System.out.println(simulated1);
+        assertEquals("[WEBSOCKET]", simulated1); 
+    }
+
+
+    private String synchronizedRequest(WsServiceTestClient client, String url, String content) {
+        String simulated = null;
+        long wait = 10000;
+        client.newRequest(url, content);
+
+        while (!client.isAvailable() && wait > 0) {
+            wait-=100;
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.interrupted();
+            }
+        }
+        if (client.isAvailable()) {
+            simulated = client.getResponseMessage();
+        }
+        return simulated;
     }
 
     private void initializeMoke(File manifestFile, File... sourceDirectories) throws Exception {

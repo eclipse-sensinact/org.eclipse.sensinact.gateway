@@ -13,10 +13,12 @@ package org.eclipse.sensinact.gateway.nthbnd.http.forward.internal;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.Filter;
+import javax.servlet.Servlet;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
@@ -29,14 +31,14 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  * to one specific {@link ExtHttpService}, and configured by the {@link ForwardingService}s
  * registered in the OSGi host environment
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class ForwardingFactory {
     private Mediator mediator;
     private String appearingKey;
     private String disappearingKey;
 
-    private Map<String, ServiceRegistration> registrations;
+    private Map<String, ServiceRegistration[]> registrations;
 
     private final AtomicBoolean running;
 
@@ -48,7 +50,7 @@ public class ForwardingFactory {
      */
     public ForwardingFactory(Mediator mediator) {
         this.mediator = mediator;
-        this.registrations = Collections.synchronizedMap(new HashMap<String, ServiceRegistration>());
+        this.registrations = Collections.synchronizedMap(new HashMap<String, ServiceRegistration[]>());
         this.running = new AtomicBoolean(false);
     }
 
@@ -159,11 +161,18 @@ public class ForwardingFactory {
         
         Dictionary props = forwardingService.getProperties();
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, endpoint);
-        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");
-        //props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED, true );
+        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
         
-	    ServiceRegistration registration = mediator.getContext().registerService(Filter.class, forwardingFilter, props);
-	    this.registrations.put(endpoint,registration);
+	    ServiceRegistration[] registrations = new ServiceRegistration[2];
+	    registrations[0] = mediator.getContext().registerService(Filter.class, forwardingFilter, props);
+	    
+        props = new Hashtable<>();
+        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, endpoint);
+        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
+        
+	    registrations[1] = mediator.getContext().registerService(Servlet.class, new ForwardingServlet(), props);
+	    
+	    this.registrations.put(endpoint,registrations);
     }
 	    
 
@@ -178,15 +187,16 @@ public class ForwardingFactory {
             return;
         }
         String endpoint = forwardingService.getPattern();
-        ServiceRegistration registration = this.registrations.get(endpoint);
-    	if(registration != null) {
-    		try {
-    			registration.unregister();
-                mediator.info("Forwarding filter '%s' unregistered", endpoint);
-    		}catch(IllegalStateException e) {
-    			//do nothing
+        ServiceRegistration[] registrations = this.registrations.remove(endpoint);
+    	if(registrations != null) {
+    		for(ServiceRegistration registration : registrations) {
+	    		try {
+	    			registration.unregister();
+	    		}catch(IllegalStateException e) {
+	    			//do nothing
+	    		}
     		}
-    		registration = null;
-    	}
+    		mediator.info("Forwarding filter and servlet  for '%s' pattern are unregistered", endpoint);
+    	}	        
     }
 }

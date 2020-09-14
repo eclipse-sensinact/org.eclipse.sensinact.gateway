@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * Extended {@link NorthboundAccess} dedicated to websocket connections
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest> {
     /**

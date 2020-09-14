@@ -16,7 +16,6 @@ import org.eclipse.sensinact.gateway.core.message.AbstractSnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaMessageSubType;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 
 import java.util.Arrays;
@@ -30,7 +29,7 @@ import java.util.Set;
 /**
  * A UserResponse 
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class RegisteringResponse extends AbstractSnaErrorfulMessage<RegisteringResponse.RegisteringRequest> implements RegisteringMessage {
     
@@ -40,20 +39,11 @@ public class RegisteringResponse extends AbstractSnaErrorfulMessage<RegisteringR
 
         RegisteringRequest() {
             List<TypedKey<?>> list = Arrays.asList(new SnaMessage.KeysBuilder(RegisteringResponse.class).keys());
-
             Set<TypedKey<?>> tmpKeys = new HashSet<TypedKey<?>>();
             tmpKeys.addAll(list);
             keys = Collections.unmodifiableSet(tmpKeys);
         }
 
-        /**
-         * @inheritDoc
-         * @see SnaMessageSubType#getSnaMessageType()
-         */
-        @Override
-        public SnaMessage.Type getSnaMessageType() {
-            return SnaResponseMessage.TYPE;
-        }
 
         /**
          * @inheritDoc
@@ -82,6 +72,12 @@ public class RegisteringResponse extends AbstractSnaErrorfulMessage<RegisteringR
             }
             return typedKey;
         }
+
+
+		@Override
+		public Type getSnaMessageType() {
+			return Type.RESPONSE;
+		}
     }
 
     /**

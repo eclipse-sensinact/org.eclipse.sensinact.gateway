@@ -41,6 +41,14 @@ public class TestRestGETAccess extends TestRestAccess {
     }
 
     @Test
+    public void testHttpRoot() throws Exception {
+    	Mediator mediator = new Mediator(context);
+        String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL, null, "GET");        
+        JSONObject response = new JSONObject("{\"providers\":[{\"name\":\"slider\",\"location\":\"45.2:5.7\",\"services\":[{\"name\":\"admin\",\"resources\":[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"},{\"name\":\"location\",\"type\":\"PROPERTY\"},{\"name\":\"bridge\",\"type\":\"PROPERTY\"},{\"name\":\"icon\",\"type\":\"PROPERTY\"}]},{\"name\":\"cursor\",\"resources\":[{\"name\":\"position\",\"type\":\"SENSOR\"}]}]},{\"name\":\"light\",\"location\":\"45.2:5.7\",\"services\":[{\"name\":\"admin\",\"resources\":[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"},{\"name\":\"location\",\"type\":\"PROPERTY\"},{\"name\":\"bridge\",\"type\":\"PROPERTY\"},{\"name\":\"icon\",\"type\":\"PROPERTY\"}]},{\"name\":\"switch\",\"resources\":[{\"name\":\"status\",\"type\":\"STATE_VARIABLE\"},{\"name\":\"brightness\",\"type\":\"STATE_VARIABLE\"},{\"name\":\"turn_on\",\"type\":\"ACTION\"},{\"name\":\"turn_off\",\"type\":\"ACTION\"},{\"name\":\"dim\",\"type\":\"ACTION\"}]}]}],\"type\":\"COMPLETE_LIST\",\"uri\":\"/\",\"statusCode\":200}");
+        JSONAssert.assertEquals(response, new JSONObject(simulated), false);
+    }
+
+    @Test
     public void testHttpAccessMethodGET() throws Exception {
         Mediator mediator = new Mediator(context);
 
@@ -65,7 +73,6 @@ public class TestRestGETAccess extends TestRestAccess {
 
         response = new JSONObject(simulated);
         array = response.getJSONArray("resources");
-        //JSONAssert.assertEquals(new JSONArray("[\"location\",\"position\"]"),array,false);
         JSONAssert.assertEquals(new JSONArray("[\"position\"]"), array, false);
 
         simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/cursor/resources/position", null, "GET");

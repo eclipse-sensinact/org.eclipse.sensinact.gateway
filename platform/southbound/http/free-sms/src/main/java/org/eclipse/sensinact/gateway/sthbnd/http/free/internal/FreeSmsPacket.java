@@ -58,7 +58,7 @@ public class FreeSmsPacket extends HttpPacket {
      */
     @Iteration
     public boolean iteration() {
-        return (++position) < 2;
+        return (++position) >= 2;
     }
 
     /**

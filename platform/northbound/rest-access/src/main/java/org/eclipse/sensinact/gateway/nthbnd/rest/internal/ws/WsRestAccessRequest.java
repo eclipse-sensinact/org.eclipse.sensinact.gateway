@@ -36,8 +36,7 @@ public class WsRestAccessRequest implements NorthboundRequestWrapper {
         this.wsConnection = wsConnection;
     }
 
-    /**
-     * @inheritDoc
+    /* (non-Javadoc)
      * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getMediator()
      */
     @Override
@@ -45,27 +44,23 @@ public class WsRestAccessRequest implements NorthboundRequestWrapper {
         return this.mediator;
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getRequestID(org.eclipse.sensinact.gateway.core.method.Parameter[])
+    /* (non-Javadoc)
+     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getRequestID()
      */
     @Override
-    public String getRequestID(Parameter[] parameters) {
-        String rid = (String) request.opt("rid");
-        if (rid == null) {
-            int index = 0;
-            int length = parameters == null ? 0 : parameters.length;
-            for (; index < length; index++) {
-                if ("rid".equals(parameters[index].getName())) {
-                    rid = (String) parameters[index].getValue();
-                }
-            }
-        }
-        return rid;
+    public String getRequestIdProperty() {
+       return "rid";
     }
 
-    /**
-     * @inheritDoc
+	/* (non-Javadoc)
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getRequestID()
+	 */
+	@Override
+	public String getRequestId() {
+		return (String) this.request.opt(getRequestIdProperty());
+	}
+
+    /* (non-Javadoc)
      * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getRequestURI()
      */
     @Override
@@ -75,8 +70,7 @@ public class WsRestAccessRequest implements NorthboundRequestWrapper {
         return uriElements[0];
     }
 
-    /**
-     * @inheritDoc
+    /* (non-Javadoc)
      * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getQueryMap()
      */
     @Override
@@ -93,8 +87,7 @@ public class WsRestAccessRequest implements NorthboundRequestWrapper {
         return Collections.<String, List<String>>emptyMap();
     }
 
-    /**
-     * @inheritDoc
+    /* (non-Javadoc)
      * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getContent()
      */
     @Override
@@ -109,8 +102,7 @@ public class WsRestAccessRequest implements NorthboundRequestWrapper {
         return this.content;
     }
 
-    /**
-     * @inheritDoc
+    /* (non-Javadoc)
      * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getAuthentication()
      */
     @Override
@@ -118,12 +110,11 @@ public class WsRestAccessRequest implements NorthboundRequestWrapper {
         return null;
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#createRecipient(org.eclipse.sensinact.gateway.core.method.Parameter[])
+    /* (non-Javadoc)
+     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#createRecipient(org.eclipse.sensinact.gateway.core.api.method.Parameter[])
      */
     @Override
-    public NorthboundRecipient createRecipient(Parameter[] parameters) {
+    public NorthboundRecipient createRecipient(List<Parameter> parameters) {
         return new WebSocketRecipient(mediator, wsConnection);
     }
 }

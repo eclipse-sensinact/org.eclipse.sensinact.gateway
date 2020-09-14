@@ -34,9 +34,10 @@ import java.lang.reflect.Method;
  * A NorthboundEndpoint is a connection point to a sensiNact instance
  * for an northbound access service
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class NorthboundEndpoint {
+	
     private Session session;
     private NorthboundMediator mediator;
 
@@ -90,7 +91,6 @@ public class NorthboundEndpoint {
             Method method = getClass().getDeclaredMethod(request.getMethod(), parameterTypes);
             result = (AccessMethodResponse<?>) method.invoke(this, Argument.getParameters(arguments));
         } catch (Exception e) {
-            e.printStackTrace();
             this.mediator.error(e);
         }
         return result;

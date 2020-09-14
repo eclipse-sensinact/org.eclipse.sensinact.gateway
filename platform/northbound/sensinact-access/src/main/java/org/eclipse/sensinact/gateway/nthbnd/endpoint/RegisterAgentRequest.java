@@ -24,9 +24,9 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 
 public class RegisterAgentRequest extends NorthboundRequest {
+	
     private NorthboundRecipient recipient;
     private JSONArray constraints;
-
     private String serviceProvider;
     private String service;
     private SnaFilter filter;

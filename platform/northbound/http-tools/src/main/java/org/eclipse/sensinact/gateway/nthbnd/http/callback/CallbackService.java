@@ -10,37 +10,54 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.http.callback;
 
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-
 import java.util.Dictionary;
 
+import org.eclipse.sensinact.gateway.nthbnd.http.callback.internal.CallbackServlet;
+import org.eclipse.sensinact.gateway.nthbnd.http.callback.internal.CallbackWebSocketServlet;
+
 /**
- * A CallbackService provides the information allowing to create a {@link CallbackServlet}
- *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * A CallbackService provides the information allowing to create 
+ * a {@link CallbackServlet} and/or a {@link CallbackWebSocketServlet} 
+ * to be registered and whose invocation triggers its processing
+ * 
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public interface CallbackService {
+
+	public static final int CALLBACK_SERVLET = 1;
+	public static final int CALLBACK_WEBSOCKET = 2;
+
     /**
-     * Returns the String pattern of the {@link CallbackServlet}
-     * based on this CallbackService
+     * Returns the int value defining whether this CallbackService requires
+     * a {@link CallbackServlet} and/or a {@link CallbackWebSocketServlet} 
+     * registration
      *
-     * @return the String pattern of this CallbackService
+     * @return the int value defining the type of servlet(s) to be registered
+     */
+    int getCallbackType();
+    
+    /**
+     * Returns the String path pattern of the servlet(s) to be registered
+     *
+     * @return the String path pattern
      */
     String getPattern();
 
     /**
      * Returns the initial set of properties of the {@link CallbackServlet}
-     * based on this CallbackService
+     * and/or a {@link CallbackWebSocketServlet} to be registered
      *
-     * @return the set of properties of this CallbackService
+     * @return the initial set of properties
      */
     Dictionary getProperties();
 
     /**
-     * Returns the {@link Executable} in charge of processing the
-     * callback, parameterized by a {@link CallbackContext}
+     * Processes the request wrapped by the {@link CallbackContext} passed 
+     * as parameter, to send back the response that is also wrapped by the 
+     * {@link CallbackContext} argument
      *
-     * @return the {@link Executable} processing the callback
+     * @param context the {@link CallbackContext} wrapping the request to be
+     * processed and the response to be sent back to the requirer
      */
     void process(CallbackContext context);
 }

@@ -24,6 +24,7 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskConfigurator;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskProcessingContext;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskProcessingContextFactory;
+import org.eclipse.sensinact.gateway.sthbnd.http.smpl.SimpleHttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
@@ -32,13 +33,27 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@HttpTasks(tasks = {@SimpleHttpTask(commands = {CommandType.ACT}, configuration = @HttpTaskConfiguration(scheme = "https", host = "smsapi.free-mobile.fr", path = "/sendmsg", query = {@KeyValuePair(key = "msg", value = "@context[task.msg]"), @KeyValuePair(key = "user", value = "@context[task.user]"), @KeyValuePair(key = "pass", value = "@context[task.pass]"),}))})
+@HttpTasks(tasks = {@SimpleHttpTask(commands = {CommandType.ACT}, 
+configuration = @HttpTaskConfiguration(
+		direct = true,
+		scheme = "https", 
+		port = "443",
+		host = "smsapi.free-mobile.fr", 
+		path = "/sendmsg", 
+		query = {
+			@KeyValuePair(key = "msg", value = "@context[task.msg]"),
+			@KeyValuePair(key = "user", value = "@context[task.user]"), 
+			@KeyValuePair(key = "pass", value = "@context[task.pass]")
+		}
+	)
+)})
 public class Activator extends HttpActivator {
-    /**
-     * @inheritDoc
-     * @see HttpActivator#
-     * getProcessingContextFactory()
-     */
+
+	@Override
+	public Class<? extends SimpleHttpProtocolStackEndpoint> getEndpointType(){
+		return FreeSmsProtocolStackEndpoint.class;		
+	}
+	
     @Override
     public HttpTaskProcessingContextFactory getTaskProcessingContextFactory() {
         return new DefaultHttpTaskProcessingContextFactory(mediator) {

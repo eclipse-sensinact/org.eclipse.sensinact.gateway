@@ -19,9 +19,9 @@ public class ServiceRequest extends ServicesRequest {
     public ServiceRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, FilteringCollection filteringCollection) {
         super(mediator, requestIdentifier, serviceProvider, filteringCollection);
         this.service = service;
-//        if (this.service == null) {
-//            throw new NullPointerException("Service missing");
-//        }
+//      if (this.service == null) {
+//      throw new NullPointerException("Service missing");
+//  }
     }
 
     /**

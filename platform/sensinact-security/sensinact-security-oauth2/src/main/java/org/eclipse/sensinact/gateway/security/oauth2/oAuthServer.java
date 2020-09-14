@@ -20,8 +20,8 @@ import org.json.JSONObject;
 public interface oAuthServer {
 
 	public static final String AUTH_BASEURL_PROP = "org.eclipse.sensinact.gateway.auth.server.baseurl";
-
-	public static final String AUTH_BASEURL_DEFAULT = "/auth";
+	
+	public static final String AUTH_BASEURL_DEFAULT = "/sensinact.auth";
 	
 	JSONObject verify(String code, ServletRequest request);
 

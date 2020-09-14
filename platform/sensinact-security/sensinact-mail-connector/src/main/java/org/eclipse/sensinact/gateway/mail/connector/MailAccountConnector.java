@@ -120,8 +120,8 @@ public class MailAccountConnector implements AccountConnector {
 				@Override
 				public Void execute(CallbackContext context) throws Exception {
 					String validation = userUpdater.validate(token);
-					context.setResponseContent(validation.getBytes());
-					context.setResponseStatus(200);
+					context.getResponse().setContent(validation.getBytes());
+					context.getResponse().setResponseStatus(200);
 					return null;
 				}
 			}

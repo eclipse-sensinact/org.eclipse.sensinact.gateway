@@ -51,7 +51,7 @@ public class SecurityFilterTest extends MidOSGiTest {
 	            session.close();
 	        }
 	        
-//			Keycloak kc = Keycloak.getInstance("http://localhost:8080/auth", 
+//			Keycloak kc = Keycloak.getInstance("http://localhost:8080/sensinact.auth", 
 //			    "test", "testRealmAdmin", "testRealmAdminPassword", "testClient", "testClient");
 //			CredentialRepresentation credential = new CredentialRepresentation();
 //			credential.setType(CredentialRepresentation.PASSWORD);

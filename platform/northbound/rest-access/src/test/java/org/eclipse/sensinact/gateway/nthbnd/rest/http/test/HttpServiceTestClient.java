@@ -49,6 +49,7 @@ public class HttpServiceTestClient {
             }
             SimpleRequest request = new SimpleRequest(builder);
             response = request.send();
+            //System.out.println(response.getHeaders());
             byte[] responseContent = response.getContent();
             String contentStr = (responseContent == null ? null : new String(responseContent));
             return contentStr;

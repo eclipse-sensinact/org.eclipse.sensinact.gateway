@@ -11,11 +11,14 @@
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import java.io.IOException;
+import java.util.Set;
+
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 
 /**
  * Northbound request handler service
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public interface NorthboundRequestHandler {
     /**
@@ -36,11 +39,12 @@ public interface NorthboundRequestHandler {
      * Initializes this handler using the request wrapper passed as
      * parameter to set the appropriate fields
      *
-     * @param request the request wrapper allowing to initialize
-     *                this handler
+     * @param request the request wrapper allowing to initialize this handler
+     * @param methods the Set of provided AccessMethods
+     * 
      * @throws IOException if an error occurred while initializing
      */
-    void init(NorthboundRequestWrapper request) throws IOException;
+    void init(NorthboundRequestWrapper request, Set<AccessMethod.Type> methods) throws IOException;
 
     /**
      * Checks whether the URI field value of the request handled by

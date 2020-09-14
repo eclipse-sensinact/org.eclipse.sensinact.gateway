@@ -63,4 +63,9 @@ public class MailAccountCallback implements CallbackService{
 		}
 	}
 
+	@Override
+	public int getCallbackType() {
+		return CallbackService.CALLBACK_SERVLET;
+	}
+
 }

@@ -8,37 +8,34 @@
  * Contributors:
  *    CEA - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.nthbnd.http.tools.internal;
+package org.eclipse.sensinact.gateway.nthbnd.http.tools;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.internal.CallbackFactory;
 import org.eclipse.sensinact.gateway.nthbnd.http.forward.internal.ForwardingFactory;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 
 /**
- * A FactoryFactory is in charge of creating {@link CallbackFactory} and
- * {@link ForwardingFactory}
+ * A FactoryFactory is in charge of creating {@link CallbackFactory} and {@link ForwardingFactory}
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
+@Component(immediate=true)
 public class FactoryFactory {
+	
     private Mediator mediator;
     private ForwardingFactory forwarderFactory;
     private CallbackFactory callbackFactory;
-
-    /**
-     * Constructor
-     *
-     * @param mediator the {@link Mediator} allowing the ForwardingIntallerFactory
-     *                 to be instantiated to interact with the OSGi host environment
-     */
-    public FactoryFactory(Mediator mediator) {
-        this.mediator = mediator;
-    }
-
+    
     /**
      *  Starts this FactoryFactory's CallbackFactory and ForwardingFactory
      */
-    public void start() throws Exception {
+    @Activate
+    public void activate(ComponentContext context) throws Exception {
+    	this.mediator = new Mediator(context.getBundleContext());
         callbackFactory = new CallbackFactory(mediator);
         callbackFactory.start();
 
@@ -49,10 +46,12 @@ public class FactoryFactory {
     /**
      * Stops this FactoryFactory's CallbackFactory and ForwardingFactory
      */
-    public void stop() throws Exception {
+    @Deactivate
+    public void deactivate() throws Exception {
     	callbackFactory.stop();
     	callbackFactory = null;
         forwarderFactory.stop();
         forwarderFactory = null;
+        this.mediator = null;
     }
 }

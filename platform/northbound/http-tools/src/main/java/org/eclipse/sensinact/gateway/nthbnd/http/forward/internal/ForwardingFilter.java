@@ -36,12 +36,11 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.nthbnd.http.forward.ForwardingService;
 
 /**
- * {@link Filter} Implementation in charge of forwarding a request in an
- * asynchronous context
+ * {@link Filter} Implementation in charge of forwarding a request
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
-@WebFilter(/*asyncSupported = true*/)
+@WebFilter()
 public class ForwardingFilter implements Filter {
 
 	public static final java.lang.String __INCLUDE_PREFIX = "javax.servlet.include.";

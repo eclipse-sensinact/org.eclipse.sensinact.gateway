@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
-import javax.servlet.AsyncContext;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -25,7 +24,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.WriteListener;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -134,71 +132,37 @@ public class ResourceFilter implements Filter {
     	 if (res.isCommitted()) {
              return;
          }
-    	 /*
-         final AsyncContext asyncContext;
-
-         if (req.isAsyncStarted()) {
-             asyncContext = req.getAsyncContext();
-         } else {
-             asyncContext = req.startAsync();
+         String target = ((HttpServletRequest)req).getRequestURI();                 
+         if (target == null) {
+             target = "";
          }
-         asyncContext.start(new Runnable() {
-             @Override
-             public void run() {
+         if (!target.startsWith("/")) {
+             target = "/" + target;
+         }
+         String resName = target;
          
-                 final HttpServletRequest req = (HttpServletRequest) asyncContext.getRequest();
-                 final HttpServletResponse res = (HttpServletResponse) asyncContext.getResponse();
-    	 */
-                 String target = ((HttpServletRequest)req).getRequestURI();                 
-                 if (target == null) {
-                     target = "";
-                 }
-                 if (!target.startsWith("/")) {
-                     target = "/" + target;
-                 }
-                 String resName = target;
-                 
-                 int index = resName.lastIndexOf('.');                 
-                 String contentType = MIME.get(resName.substring(index<0?0:index));
-                 
-    	         final URL url;
-    	         synchronized(ResourceFilter.this.bundle) {
-    	         	url = ResourceFilter.this.bundle.getEntry(resName); 
-    	         }
-    	         try {
-        	         if(url != null) {
-        	        	 if(contentType != null) {
-        	        		 ((HttpServletResponse)res).setHeader("Content-Type", contentType);
-        	        	 }
-                         final ServletOutputStream output = res.getOutputStream();
-                         /*
-                         output.setWriteListener(new WriteListener() {	                        	 
-                             @Override
-                             public void onWritePossible() throws IOException {                                     
-                    	 */       
-                            	byte[] resourceBytes = IOUtils.read(url.openStream());
-                    	        output.write(resourceBytes);
-                    	                                             
-                         /*    }	
-                             @Override
-                             public void onError(Throwable t) {
-                             }
-                         });
-                         */
-                    	 ((HttpServletResponse)res).setStatus(HttpServletResponse.SC_OK);                         
-        	         } else {
-        	        	 ((HttpServletResponse)res).setStatus(HttpServletResponse.SC_NOT_FOUND);
-        	         }
-        	         //chain.doFilter(req, res);
-    	         } catch (Exception e) {
-                     e.printStackTrace();
-                 }
-    	         /*finally {            
-	                 if (req.isAsyncStarted()) {
-	                     asyncContext.complete();
-	                 }
-                 }
-             }});*/
+         int index = resName.lastIndexOf('.');                 
+         String contentType = MIME.get(resName.substring(index<0?0:index));
+         
+         final URL url;
+         synchronized(ResourceFilter.this.bundle) {
+         	url = ResourceFilter.this.bundle.getEntry(resName); 
+         }
+         try {
+	         if(url != null) {
+	        	 if(contentType != null) {
+	        		 ((HttpServletResponse)res).setHeader("Content-Type", contentType);
+	        	 }
+                 final ServletOutputStream output = res.getOutputStream();
+            	 byte[] resourceBytes = IOUtils.read(url.openStream());
+    	         output.write(resourceBytes);
+            	 ((HttpServletResponse)res).setStatus(HttpServletResponse.SC_OK);                         
+	         } else {
+	        	 ((HttpServletResponse)res).setStatus(HttpServletResponse.SC_NOT_FOUND);
+	         }
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
     }
     
     /* (non-Javadoc)

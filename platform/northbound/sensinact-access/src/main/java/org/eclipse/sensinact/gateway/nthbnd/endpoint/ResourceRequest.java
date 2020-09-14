@@ -24,9 +24,9 @@ public class ResourceRequest extends ResourcesRequest {
     public ResourceRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, String resource) {
         super(mediator, requestIdentifier, serviceProvider, service, null);
         this.resource = resource;
-//        if (this.resource == null) {
-//            throw new NullPointerException("Resource missing");
-//        }
+//      if (this.resource == null) {
+//      throw new NullPointerException("Resource missing");
+//  }
     }
 
     /**

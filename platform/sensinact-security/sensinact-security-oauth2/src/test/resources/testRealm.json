@@ -103,7 +103,7 @@
 		    "nodeReRegistrationTimeout": -1,		      
 			"redirectUris": 
 			[   
-				"http://localhost:8899/auth",
+				"http://localhost:8899/sensinact.auth",
 				"http://localhost:8899/sensinact",
 				"http://localhost:8899/sensinact/*"   
 			],   

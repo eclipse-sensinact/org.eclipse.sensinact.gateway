@@ -137,7 +137,7 @@ public class TestJsonPathFiltering extends MidOSGiTest {
     @Test
     public void testHttpFiltered() throws Exception {
         Mediator mediator = new Mediator(context);
-        String simulated3 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/jsonpath:sensinact?jsonpath=$.[?(@.name=='slider')]", null, "GET");
+        String simulated3 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?jsonpath=$.[?(@.name=='slider')]", null, "GET");
         JSONObject response = new JSONObject("{\"filters\":[{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"}]," + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," + "{\"name\":\"cursor\",\"resources\":" + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" + "}]" + ",\"location\":\"45.2:5.7\"}]}");
         JSONAssert.assertEquals(response, new JSONObject(simulated3), false);
 
@@ -145,7 +145,7 @@ public class TestJsonPathFiltering extends MidOSGiTest {
         response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"]," + "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
         JSONAssert.assertEquals(response, new JSONObject(simulated1), false);
 
-        String simulated2 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/jsonpath:sensinact/providers?jsonpath=$.[:1]", null, "GET");
+        String simulated2 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/providers?jsonpath=$.[:1]", null, "GET");
         response = new JSONObject("{\"statusCode\":200,\"providers\":[\"" + new JSONObject(simulated1).getJSONArray("providers").getString(0) + "\"]," + "\"filters\":[{\"type\":\"jsonpath\", \"definition\":\"$.[:1]\"}], " + "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
         JSONAssert.assertEquals(response, new JSONObject(simulated2), false);
     }
@@ -156,7 +156,7 @@ public class TestJsonPathFiltering extends MidOSGiTest {
         WsServiceTestClient client = new WsServiceTestClient();
 
         new Thread(client).start();
-        String simulated3 = this.synchronizedRequest(client, "/jsonpath:sensinact", "[{\"name\":\"jsonpath\",\"type\":\"string\",\"value\":\"$.[?(@.name=='slider')]\"}]");
+        String simulated3 = this.synchronizedRequest(client, "/sensinact", "[{\"name\":\"jsonpath\",\"type\":\"string\",\"value\":\"$.[?(@.name=='slider')]\"}]");
 
         //System.out.println(simulated3);
 
@@ -171,7 +171,7 @@ public class TestJsonPathFiltering extends MidOSGiTest {
         obj = new JSONObject(simulated1);
         obj.remove("X-Auth-Token");
         JSONAssert.assertEquals(response, obj, false);
-        String simulated2 = this.synchronizedRequest(client, "/jsonpath:sensinact/providers", "[{\"name\":\"jsonpath\",\"type\":\"string\",\"value\":\"$.[:1]\"}]");
+        String simulated2 = this.synchronizedRequest(client, "/sensinact/providers", "[{\"name\":\"jsonpath\",\"type\":\"string\",\"value\":\"$.[:1]\"}]");
         response = new JSONObject("{\"statusCode\":200,\"providers\":[\"" + new JSONObject(simulated1).getJSONArray("providers").getString(0) + "\"]," + "\"filters\":[{\"type\":\"jsonpath\", \"definition\":\"$.[:1]\"}], " + "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
 
         obj = new JSONObject(simulated2);

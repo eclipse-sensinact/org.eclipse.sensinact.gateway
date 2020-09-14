@@ -51,20 +51,16 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
         this.mediator = mediator;
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#
-     * getMediator()
+    /* (non-Javadoc)
+     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getMediator()
      */
     @Override
     public NorthboundMediator getMediator() {
         return this.mediator;
     }
-
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#
-     * getQueryMap()
+    
+    /* (non-Javadoc)
+     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getQueryMap()
      */
     @Override
     public Map<String, List<String>> getQueryMap() {
@@ -79,10 +75,8 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
         return queryMap;
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#
-     * getContent()
+    /* (non-Javadoc)
+     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getContent()
      */
     @Override
     public String getContent() {
@@ -110,10 +104,8 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
         this.authentication = authentication;
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#
-     * getAuthentication()
+    /* (non-Javadoc)
+     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getAuthentication()
      */
     @Override
     public Authentication<?> getAuthentication() {
@@ -131,46 +123,38 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
         return this.authentication;
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#
-     * getRequestID(org.eclipse.sensinact.gateway.core.method.Parameter[])
+    /* (non-Javadoc)
+     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getRequestID()
      */
     @Override
-    public String getRequestID(Parameter[] parameters) {
-        String rid = null;
-
-        int index = 0;
-        int length = parameters == null ? 0 : parameters.length;
-        for (; index < length; index++) {
-            if ("rid".equals(parameters[index].getName())) {
-                rid = (String) parameters[index].getValue();
-            }
-        }
-        if (rid == null) {
-            rid = super.getHeader("rid");
-        }
-        return rid;
+    public String getRequestIdProperty() {
+       return "rid";
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#
-     * createRecipient(org.eclipse.sensinact.gateway.core.method.Parameter[])
+	/* (non-Javadoc)
+	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getRequestID()
+	 */
+	@Override
+	public String getRequestId() {
+		return super.getHeader(getRequestIdProperty());
+	}
+
+    /* (non-Javadoc)
+     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#createRecipient(org.eclipse.sensinact.gateway.core.api.method.Parameter[])
      */
     @Override
-    public NorthboundRecipient createRecipient(Parameter[] parameters) {
+    public NorthboundRecipient createRecipient(List<Parameter> parameters) {
         NorthboundRecipient recipient = null;
 
         int index = 0;
-        int length = parameters == null ? 0 : parameters.length;
+        int length = parameters == null ? 0 : parameters.size();
         String callback = null;
         JSONObject conditions = null;
 
         for (; index < length; index++) {
-            String name = parameters[index].getName();
+            String name = parameters.get(index).getName();
             if ("callback".equals(name)) {
-                callback = (String) parameters[index].getValue();
+                callback = (String) parameters.get(index).getValue();
                 break;
             }
         }
@@ -180,9 +164,6 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
         return recipient;
     }
 
-    /**
-     *
-     */
     public void destroy() {
         this.queryMap = null;
         this.authentication = null;

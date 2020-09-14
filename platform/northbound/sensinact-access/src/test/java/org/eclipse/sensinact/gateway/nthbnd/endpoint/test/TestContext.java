@@ -10,6 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint.test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.Filtering;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
@@ -40,21 +48,14 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.log.LogService;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.List;
 
 /**
  * Test Context
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class TestContext<R extends ModelInstance> {
+public class TestContext {
     private static final String CORE_FILTER = "(" + Constants.OBJECTCLASS + "=" + Core.class.getCanonicalName() + ")";
     private static final String LOG_FILTER = "(" + Constants.OBJECTCLASS + "=" + LogService.class.getCanonicalName() + ")";
     private static final String DATA_STORE_FILTER = "(" + Constants.OBJECTCLASS + "=" + DataStoreService.class.getCanonicalName() + ")";
@@ -107,6 +108,9 @@ public class TestContext<R extends ModelInstance> {
     private final ServiceReference yfilteringReference = Mockito.mock(ServiceReference.class);
 
     private final ServiceRegistration registrationFiltering = Mockito.mock(ServiceRegistration.class);
+
+	private final ComponentContext cpctx = Mockito.mock(ComponentContext.class);
+	
     private MyModelInstance instance;
     private SnaAgent agent;
     private volatile int callbackCount;
@@ -292,7 +296,7 @@ public class TestContext<R extends ModelInstance> {
                 if (arguments == null || arguments.length != 1) {
                     return null;
                 } else if (arguments[0] == referenceAuthorization) {
-                    return new MyAuthorization<R>();
+                    return new MyAuthorization();
                 } else if (arguments[0] == xfilteringReference) {
                     return new XFilter();
                 } else if (arguments[0] == yfilteringReference) {
@@ -378,8 +382,9 @@ public class TestContext<R extends ModelInstance> {
         Mockito.when(bundle.getBundleId()).thenReturn(MOCK_BUNDLE_ID);
         Mockito.when(bundle.getState()).thenReturn(Bundle.ACTIVE);
 
-        mediator = new NorthboundMediator(context);
-        sensinact = new SensiNact(mediator);
+		mediator = new NorthboundMediator(context);        
+		sensinact = new SensiNact(mediator);		
+		
         instance = (MyModelInstance) new ModelInstanceBuilder(mediator).build(
         	"serviceProvider", null, new ModelConfigurationBuilder(mediator,
         	  ModelConfiguration.class,MyModelInstance.class

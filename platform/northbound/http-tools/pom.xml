@@ -27,6 +27,7 @@
 	<name>sensiNact IoT Gateway - HTTP Forwarding and Callback Factories</name>
 
 	<dependencies>
+		
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-core</artifactId>
@@ -41,28 +42,17 @@
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-utils</artifactId>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>javax.servlet-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-http</artifactId>
-			<scope>provided</scope>
-		</dependency>
+		</dependency>		
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.http.jetty</artifactId>
+			<scope>provided</scope>
+		</dependency>		
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.tools</groupId>
 			<artifactId>sensinact-test</artifactId>
@@ -97,7 +87,6 @@
 
 	<build>
 		<plugins>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
@@ -122,8 +111,8 @@
 							<target>
 								<mkdir dir="${project.build.directory}/felix/tmp" />
 								<mkdir dir="${project.build.directory}/extra-test-classes" />
-								<mkdir
-									dir="${project.build.directory}/extra-test-classes2" />
+								<mkdir dir="${project.build.directory}/extra-test-classes2" />
+								<mkdir dir="${project.build.directory}/extra-test-classes3" />
 								<javac fork="true" executable="${env.JAVA_HOME}/bin/javac"
 									srcdir="${project.basedir}/extra-src/test/java"
 									destdir="${project.basedir}/target/extra-test-classes">
@@ -132,6 +121,11 @@
 								<javac fork="true" executable="${env.JAVA_HOME}/bin/javac"
 									srcdir="${project.basedir}/extra-src2/test/java"
 									destdir="${project.basedir}/target/extra-test-classes2">
+									<classpath refid="maven.test.classpath" />
+								</javac>
+								<javac fork="true" executable="${env.JAVA_HOME}/bin/javac"
+									srcdir="${project.basedir}/extra-src3/test/java"
+									destdir="${project.basedir}/target/extra-test-classes3">
 									<classpath refid="maven.test.classpath" />
 								</javac>
 							</target>
@@ -355,11 +349,8 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-Activator>
-							org.eclipse.sensinact.gateway.nthbnd.http.tools.osgi.Activator
-						</Bundle-Activator>
 						<Export-Package>
-							org.eclipse.sensinact.gateway.nthbnd.http.tools.osgi,
+							org.eclipse.sensinact.gateway.nthbnd.http.tools,
 							org.eclipse.sensinact.gateway.nthbnd.http.forward,
 							org.eclipse.sensinact.gateway.nthbnd.http.callback
 						</Export-Package>
@@ -377,9 +368,14 @@
 						<configuration>
 							<manifestLocation>${project.basedir}/target/generated-test-sources/META-INF</manifestLocation>
 							<instructions>
-								<_noee>true</_noee>
-								<_exportcontents>*</_exportcontents>
-								<_nouses>true</_nouses>
+								<Export-Package>
+									org.eclipse.sensinact.gateway.nthbnd.http.tools,
+									org.eclipse.sensinact.gateway.nthbnd.http.forward,
+									org.eclipse.sensinact.gateway.nthbnd.http.callback
+								</Export-Package>
+								<Include-Resource>
+									about.html
+								</Include-Resource>
 							</instructions>
 						</configuration>
 					</execution>

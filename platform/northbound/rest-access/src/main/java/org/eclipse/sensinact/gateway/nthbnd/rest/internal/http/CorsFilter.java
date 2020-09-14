@@ -30,7 +30,7 @@ import java.io.IOException;
 /**
  * CORS Filter
  */
-@WebFilter(/*asyncSupported = true*/)
+@WebFilter()
 public class CorsFilter implements Filter {
     private NorthboundMediator mediator;
 
@@ -62,70 +62,32 @@ public class CorsFilter implements Filter {
         if (res.isCommitted()) {
             return;
         }
-//        final AsyncContext asyncContext;
-//
-//        if (req.isAsyncStarted()) {
-//            asyncContext = req.getAsyncContext();
-//        } else {
-//            asyncContext = req.startAsync();
-//        }
-//
-//        asyncContext.start(new Runnable() {
-//            @Override
-//            public void run() {
-                final HttpServletRequest request = (HttpServletRequest) req;
-                final HttpServletResponse response = (HttpServletResponse) res;
+        final HttpServletRequest request = (HttpServletRequest) req;
+        final HttpServletResponse response = (HttpServletResponse) res;
 
-                if (RestAccessConstants.OPTIONS.equals(request.getMethod())) {
-                    ((HttpServletResponse)res).setHeader("Access-Control-Allow-Origin", "*");
-                    response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        if (RestAccessConstants.OPTIONS.equals(request.getMethod())) {
+            ((HttpServletResponse)res).setHeader("Access-Control-Allow-Origin", "*");
+            response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
 
-                    StringBuilder builder = new StringBuilder();
-                    String controlRequestHeaders = request.getHeader("Access-Control-Request-Headers");
+            StringBuilder builder = new StringBuilder();
+            String controlRequestHeaders = request.getHeader("Access-Control-Request-Headers");
 
-                    if (controlRequestHeaders != null && controlRequestHeaders.length() > 0) {
-                        builder.append(controlRequestHeaders);
-                        builder.append(",");
-                    }
-                    builder.append("Authorization, X-Auth-Token, X-Requested-With");
-                    response.setHeader("Access-Control-Allow-Headers", builder.toString());
+            if (controlRequestHeaders != null && controlRequestHeaders.length() > 0) {
+                builder.append(controlRequestHeaders);
+                builder.append(",");
+            }
+            builder.append("Authorization, X-Auth-Token, X-Requested-With");
+            response.setHeader("Access-Control-Allow-Headers", builder.toString());
 
-//                    try {
-                        final ServletOutputStream output = res.getOutputStream();
-//                        output.setWriteListener(new WriteListener() {
-//                            @Override
-//                            public void onWritePossible() throws IOException {
-                                //try {
-                                    output.println();
-
-//                                } 
-//                                finally {
-//                                    if (req.isAsyncStarted()) {
-//                                        asyncContext.complete();
-//                                    }
-//                                }
-//                            }
-//
-//                            @Override
-//                            public void onError(Throwable t) {
-//                            }
-//                        });
-//                    } catch (IOException e) {
-//                        mediator.error(e);
-//                    }
-                } else {
-                    try {
-                        chain.doFilter(req, res);
-
-                    } catch (Exception e) {
-                        mediator.error(e);
-                    }
-//                    if (req.isAsyncStarted()) {
-//                        asyncContext.complete();
-//                    }
-                }
-//            }
-//        });
+            final ServletOutputStream output = res.getOutputStream();
+            output.println();
+        } else {
+            try {
+                chain.doFilter(req, res);
+            } catch (Exception e) {
+                mediator.error(e);
+            }
+        }
     }
 
     /**

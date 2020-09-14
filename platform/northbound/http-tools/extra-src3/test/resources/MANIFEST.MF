@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Import-Package: org.eclipse.sensinact.gateway.nthbnd.http.tools;versio
+ n="2.0.0",org.eclipse.sensinact.gateway.nthbnd.http.forward;version="
+ 2.0.0",org.eclipse.sensinact.gateway.nthbnd.http.callback;version="2.
+ 0.0",org.eclipse.jetty.server,org.eclipse.jetty.http,org.eclipse.sens
+ inact.gateway.common.bundle;version="2.0.0",org.json;version="[200807
+ 01.0,20080702)",javax.servlet;version="[2.6,3)",javax.servlet.annotat
+ ion;version="[2.6,3)",javax.servlet.http;version="[2.6,3)",org.osgi.f
+ ramework;version="[1.8,2)",org.osgi.framework.wiring;version="[1.2,2)
+ ",org.osgi.service.component;version="[1.4,2)"
+Require-Capability: osgi.extender;filter:="(&(osgi.extender=osgi.compo
+ nent)(version>=1.3.0)(!(version>=2.0.0)))",osgi.extender;filter:="(&(
+ osgi.extender=osgi.component)(&(version>=1.4.0)(!(version>=2.0.0))))"
+ ,osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Export-Package: org.eclipse.sensinact.gateway.nthbnd.http.callback.test
+Service-Component: OSGI-INF/CallbackService.xml
+Tool: Bnd-2.3.0.201405100607
+Bundle-Name: sensiNact IoT Gateway - HTTP Callback Factory Test
+Created-By: 1.6.0_45 (Sun Microsystems Inc.)
+Bundle-Vendor: Eclipse
+Bundle-Version: 2.0.0.20200205
+Bnd-LastModified: 1486914830926
+Bundle-ManifestVersion: 2
+Bundle-Description: sensiNact IoT Gateway - HTTP Callback Factory Test
+Bundle-SymbolicName: http-callback-factory-test

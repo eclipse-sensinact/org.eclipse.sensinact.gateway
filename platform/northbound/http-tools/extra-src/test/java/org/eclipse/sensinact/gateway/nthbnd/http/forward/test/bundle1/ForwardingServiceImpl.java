@@ -34,7 +34,7 @@ public class ForwardingServiceImpl implements ForwardingService {
     @Override
     public Dictionary getProperties() {
         return new Hashtable() {{
-            this.put("osgi.http.whiteboard.filter.pattern", getPattern());
+            this.put("pattern", getPattern());
         }};
     }
 

@@ -50,12 +50,7 @@ public class HttpRecipient extends NorthboundRecipient {
         this.connectionBuilder.setHttpMethod(ConnectionConfiguration.POST);
     }
 
-    /**
-     * @throws IOException 
-     * @inheritDoc
-     * 
-     * @see org.eclipse.sensinact.gateway.core.message.Recipient#callback(java.lang.String, org.eclipse.sensinact.gateway.core.message.SnaMessage[])
-     */
+    @Override
     public void callback(String callbackId, SnaMessage[] messages) throws IOException {
         int index = 0;
         int length = messages == null ? 0 : messages.length;

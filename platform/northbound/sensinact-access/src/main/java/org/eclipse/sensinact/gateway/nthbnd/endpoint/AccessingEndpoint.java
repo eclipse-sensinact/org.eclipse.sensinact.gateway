@@ -23,7 +23,7 @@ import org.eclipse.sensinact.gateway.util.CryptoUtils;
  * one. It also allows to ask for a user creation, or the renewing of the 
  * password of an existing one
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class AccessingEndpoint {
     private NorthboundMediator mediator;

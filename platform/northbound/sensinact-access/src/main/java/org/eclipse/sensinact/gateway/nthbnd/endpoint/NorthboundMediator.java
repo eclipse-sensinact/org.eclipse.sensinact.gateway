@@ -22,7 +22,7 @@ import org.osgi.framework.BundleContext;
  * Extended {@link Mediator} type allowing to easily instantiate a
  * {@link Session}
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class NorthboundMediator extends Mediator {
     //********************************************************************//

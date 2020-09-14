@@ -18,19 +18,17 @@ import org.eclipse.sensinact.gateway.core.ModelConfiguration;
 import org.eclipse.sensinact.gateway.core.ModelElement;
 import org.eclipse.sensinact.gateway.core.ModelElementProxy;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
-import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.SessionKey;
-import org.eclipse.sensinact.gateway.core.message.MessageHandler;
-import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.core.message.MessageRouter;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 
 import java.util.List;
 
 /**
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
-public class MyModelInstance extends ModelInstance<ModelConfiguration> {
+public class MyModelInstance<C extends ModelConfiguration> extends ModelInstance<C>{
     /**
      * @param mediator
      * @param modelConfiguration
@@ -38,11 +36,11 @@ public class MyModelInstance extends ModelInstance<ModelConfiguration> {
      * @param profile
      * @throws InvalidServiceProviderException
      */
-    public MyModelInstance(Mediator mediator, ModelConfiguration modelConfiguration, String name, String profile) throws InvalidServiceProviderException {
+    public MyModelInstance(Mediator mediator, C modelConfiguration, String name, String profile) throws InvalidServiceProviderException {
         super(mediator, modelConfiguration, name, profile);
     }
 
-    public MessageHandler getHandler() {
+    public MessageRouter getHandler() {
         return super.messageHandler;
     }
 

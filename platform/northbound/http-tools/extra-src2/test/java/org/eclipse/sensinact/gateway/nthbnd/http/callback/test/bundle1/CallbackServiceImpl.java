@@ -3,6 +3,8 @@ package org.eclipse.sensinact.gateway.nthbnd.http.callback.test.bundle1;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import javax.servlet.http.HttpServletRequestWrapper;
+
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackContext;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
 
@@ -30,17 +32,23 @@ public class CallbackServiceImpl implements CallbackService {
     @Override
     public Dictionary getProperties() {
         return new Hashtable() {{
-            this.put("pattern", "/callbackTest1/*");
+            this.put("pattern", getPattern());
         }};
     }
 
 	@Override
 	public void process(CallbackContext context) {
 		try {
-            context.setResponseContent(("[" + context.getMethod() + "]" + context.getRequest().getRequestURI()).getBytes());
-            context.setResponseStatus(200);
+            context.getResponse().setContent(("[" + ((HttpServletRequestWrapper)context.getRequest()).getMethod() + "]" + context.getRequest().getRequestURI()).getBytes());
+            context.getResponse().setResponseStatus(200);
+            context.getResponse().flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
+	}
+
+	@Override
+	public int getCallbackType() {
+		return CallbackService.CALLBACK_SERVLET;
 	}
 }

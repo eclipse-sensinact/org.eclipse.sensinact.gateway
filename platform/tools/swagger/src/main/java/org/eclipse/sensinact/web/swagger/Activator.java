@@ -14,12 +14,12 @@ import java.util.Hashtable;
 
 import javax.servlet.Filter;
 //import javax.servlet.Servlet;
+import javax.servlet.Servlet;
 
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-//import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /**
@@ -41,8 +41,7 @@ public class Activator extends AbstractActivator<Mediator> {
         mediator.register(new IndexFilter(SWAGGER_ALIAS), Filter.class, new Hashtable() {{
         	this.put(Constants.SERVICE_RANKING, 3);
             this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, SWAGGER_ALIAS);
-            this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");
-            //this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED, false );
+            this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
             }
         });
         super.mediator.info(String.format("%s filter registered", SWAGGER_ALIAS));
@@ -50,11 +49,18 @@ public class Activator extends AbstractActivator<Mediator> {
         mediator.register(new ResourceFilter(super.mediator, SWAGGER_ALIAS), Filter.class, new Hashtable() {{
         	this.put(Constants.SERVICE_RANKING, 2);
             this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, SWAGGER_ALIAS+"/*");
-            this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");
-            //this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED, false );
+            this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
             }
         });
         super.mediator.info(String.format("%s filter registered", SWAGGER_ALIAS+"/*"));
+        
+	    mediator.register(new Hashtable() {{
+        	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, SWAGGER_ALIAS+"/*");
+            this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
+        	}
+	    }, new MirrorServlet(), 
+	    new Class<?>[] {Servlet.class});
+	    
     }
 
     /* (non-Javadoc)

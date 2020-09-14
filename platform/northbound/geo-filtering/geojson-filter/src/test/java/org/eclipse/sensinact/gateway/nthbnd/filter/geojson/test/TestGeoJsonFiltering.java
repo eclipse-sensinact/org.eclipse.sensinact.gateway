@@ -137,14 +137,14 @@ public class TestGeoJsonFiltering extends MidOSGiTest {
         Mediator mediator = new Mediator(context);
         //(&(latitude <= 45.20899800276024)(latitude >= 45.191001997239766)(longitude <= 5.712727172127145)(longitude >= 5.687272827872856))
 
-        String simulated3 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/geojson:sensinact?geojson={'latitude':45.2,'longitude':5.7,'distance':1000}", null, "GET");
+        String simulated3 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?geojson={'latitude':45.2,'longitude':5.7,'distance':1000}", null, "GET");
         System.out.println(simulated3);
         
         JSONObject response = new JSONObject("{\"providers\":[{\"name\":\"slider\",\"location\":\"45.2:5.7\"," + "\"services\":[{\"name\":\"admin\",\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," + "{\"name\":\"cursor\",\"resources\":" + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]}]}," + "{\"name\":\"light\",\"location\":\"45.2:5.7\",\"services\":" + "[{\"name\":\"admin\",\"resources\":[" + "{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," + "{\"name\":\"switch\",\"resources\":[" + "{\"name\":\"status\",\"type\":\"STATE_VARIABLE\"}," + "{\"name\":\"brightness\",\"type\":\"STATE_VARIABLE\"}," + "{\"name\":\"turn_on\",\"type\":\"ACTION\"}," + "{\"name\":\"turn_off\",\"type\":\"ACTION\"}," + "{\"name\":\"dim\",\"type\":\"ACTION\"}]}]}]," + "\"filters\":[{\"definition\":\"{'latitude':45.2,'longitude':5.7,'distance':1000}\"," + "\"type\":\"geojson\"}],\"type\":\"COMPLETE_LIST\"," + "\"uri\":\"/\",\"statusCode\":200}");
 
         JSONAssert.assertEquals(response, new JSONObject(simulated3), false);
 
-        simulated3 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/geojson:sensinact?geojson={'latitude':45.2,'longitude':5.7,'distance':1000,'output':true}", null, "GET");
+        simulated3 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?geojson={'latitude':45.2,'longitude':5.7,'distance':1000,'output':true}", null, "GET");
         System.out.println(simulated3);
         
         response = new JSONObject("{\"providers\":" + "{\"type\": \"FeatureCollection\", \"features\": [" + "{\"properties\":{\"name\":\"slider\"},\"type\":\"Feature\",\"geometry\":" + "{\"type\":\"Point\",\"coordinates\":[45.2,5.7]}}," + "{\"properties\":{\"name\":\"light\"},\"type\":\"Feature\",\"geometry\":" + "{\"type\":\"Point\",\"coordinates\":[45.2,5.7]}}]}," + "\"statusCode\":200,\"type\":\"COMPLETE_LIST\"," + "\"uri\":\"/\",\"filters\":[{\"definition\":" + "\"{'latitude':45.2,'longitude':5.7,'distance':1000,'output':true}\"," + "\"type\":\"geojson\"}]}");
@@ -155,7 +155,7 @@ public class TestGeoJsonFiltering extends MidOSGiTest {
         System.out.println(simulated3);
         Thread.sleep(1000);
 
-        simulated3 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/geojson:sensinact?geojson={'latitude':45.2,'longitude':5.7,'distance':1000}", null, "GET");
+        simulated3 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?geojson={'latitude':45.2,'longitude':5.7,'distance':1000}", null, "GET");
         System.out.println(simulated3);
         response = new JSONObject("{\"providers\":[{\"name\":\"light\",\"location\":\"45.2:5.7\",\"services\":" + "[{\"name\":\"admin\",\"resources\":[" + "{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," + "{\"name\":\"switch\",\"resources\":[" + "{\"name\":\"status\",\"type\":\"STATE_VARIABLE\"}," + "{\"name\":\"brightness\",\"type\":\"STATE_VARIABLE\"}," + "{\"name\":\"turn_on\",\"type\":\"ACTION\"}," + "{\"name\":\"turn_off\",\"type\":\"ACTION\"}," + "{\"name\":\"dim\",\"type\":\"ACTION\"}]}]}],\"type\":\"COMPLETE_LIST\"," + "\"uri\":\"/\",\"statusCode\":200}");
         JSONAssert.assertEquals(response, new JSONObject(simulated3), false);
@@ -166,14 +166,14 @@ public class TestGeoJsonFiltering extends MidOSGiTest {
     public void testWsFiltered() throws Exception {
         WsServiceTestClient client = new WsServiceTestClient();
         new Thread(client).start();
-        String simulated3 = this.synchronizedRequest(client, "/geojson:sensinact", "[{\"name\":\"geojson\",\"type\":\"string\",\"value\":\"{'latitude':45.2,'longitude':5.7,'distance':1000}\"}]");
+        String simulated3 = this.synchronizedRequest(client, "/sensinact", "[{\"name\":\"geojson\",\"type\":\"string\",\"value\":\"{'latitude':45.2,'longitude':5.7,'distance':1000}\"}]");
         System.out.println(simulated3);
         
         JSONObject response = new JSONObject("{\"providers\":[{\"name\":\"slider\",\"location\":\"45.2:5.7\"," + "\"services\":[{\"name\":\"admin\",\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," + "{\"name\":\"cursor\",\"resources\":" + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]}]}," + "{\"name\":\"light\",\"location\":\"45.2:5.7\",\"services\":" + "[{\"name\":\"admin\",\"resources\":[" + "{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," + "{\"name\":\"switch\",\"resources\":[" + "{\"name\":\"status\",\"type\":\"STATE_VARIABLE\"}," + "{\"name\":\"brightness\",\"type\":\"STATE_VARIABLE\"}," + "{\"name\":\"turn_on\",\"type\":\"ACTION\"}," + "{\"name\":\"turn_off\",\"type\":\"ACTION\"}," + "{\"name\":\"dim\",\"type\":\"ACTION\"}]}]}]," + "\"filters\":[{\"definition\":\"{'latitude':45.2,'longitude':5.7,'distance':1000}\"," + "\"type\":\"geojson\"}],\"type\":\"COMPLETE_LIST\"," + "\"uri\":\"/\",\"statusCode\":200}");
 
         JSONAssert.assertEquals(response, new JSONObject(simulated3), false);
 
-        simulated3 = this.synchronizedRequest(client, "/geojson:sensinact", "[{\"name\":\"geojson\",\"type\":\"string\",\"value\":\"{'latitude':45.2,'longitude':5.7,'distance':1000,'output':true}\"}]");
+        simulated3 = this.synchronizedRequest(client, "/sensinact", "[{\"name\":\"geojson\",\"type\":\"string\",\"value\":\"{'latitude':45.2,'longitude':5.7,'distance':1000,'output':true}\"}]");
         System.out.println(simulated3);
         
         response = new JSONObject("{\"providers\":" + "{\"type\": \"FeatureCollection\", \"features\": [" + "{\"properties\":{\"name\":\"slider\"},\"type\":\"Feature\",\"geometry\":" + "{\"type\":\"Point\",\"coordinates\":[45.2,5.7]}}," + "{\"properties\":{\"name\":\"light\"},\"type\":\"Feature\",\"geometry\":" + "{\"type\":\"Point\",\"coordinates\":[45.2,5.7]}}]}," + "\"statusCode\":200,\"type\":\"COMPLETE_LIST\"," + "\"uri\":\"/\",\"filters\":[{\"definition\":" + "\"{'latitude':45.2,'longitude':5.7,'distance':1000,'output':true}\"," + "\"type\":\"geojson\"}]}");
@@ -183,7 +183,7 @@ public class TestGeoJsonFiltering extends MidOSGiTest {
         System.out.println(simulated3);
         Thread.sleep(1000);
 
-        simulated3 = this.synchronizedRequest(client, "/geojson:sensinact", "[{\"name\":\"geojson\",\"type\":\"string\",\"value\":\"{'latitude':45.2,'longitude':5.7,'distance':1000}\"}]");
+        simulated3 = this.synchronizedRequest(client, "/sensinact", "[{\"name\":\"geojson\",\"type\":\"string\",\"value\":\"{'latitude':45.2,'longitude':5.7,'distance':1000}\"}]");
         System.out.println(simulated3);
         
         response = new JSONObject("{\"providers\":[{\"name\":\"light\",\"location\":\"45.2:5.7\",\"services\":" + "[{\"name\":\"admin\",\"resources\":[" + "{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," + "{\"name\":\"switch\",\"resources\":[" + "{\"name\":\"status\",\"type\":\"STATE_VARIABLE\"}," + "{\"name\":\"brightness\",\"type\":\"STATE_VARIABLE\"}," + "{\"name\":\"turn_on\",\"type\":\"ACTION\"}," + "{\"name\":\"turn_off\",\"type\":\"ACTION\"}," + "{\"name\":\"dim\",\"type\":\"ACTION\"}]}]}],\"type\":\"COMPLETE_LIST\"," + "\"uri\":\"/\",\"statusCode\":200}");

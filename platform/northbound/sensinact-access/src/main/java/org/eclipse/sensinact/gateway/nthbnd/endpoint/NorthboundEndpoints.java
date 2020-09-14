@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * A collection {@link NorthboundEndpoint}s with a limited lifetime,
  * but 'reactivable'
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public final class NorthboundEndpoints {
     /**
@@ -71,9 +71,7 @@ public final class NorthboundEndpoints {
 
         Term getTerm(String sessionIdentifier) {
             Term term = null;
-            synchronized (NorthboundEndpoints.this.lock) {
-                term = this.map.get(sessionIdentifier);
-            }
+            term = this.map.get(sessionIdentifier);
             return term;
         }
 
@@ -85,31 +83,30 @@ public final class NorthboundEndpoints {
                 return true;
             }
             return false;
+            
         }
 
         Term remove(String sessionIdentifier) {
-            synchronized (NorthboundEndpoints.this.lock) {
-                Term term = this.map.remove(sessionIdentifier);
+            Term term = this.map.remove(sessionIdentifier);
 
-                if (term == null) {
-                    return term;
-                }
-                if (term == this.head) {
-                    this.head = term.next;
-                }
-                if (term == this.queue) {
-                    this.queue = term.previous;
-                }
-                if (term.previous != null) {
-                    term.previous.next = term.next;
-                }
-                if (term.next != null) {
-                    term.next.previous = term.previous;
-                }
-                term.next = null;
-                term.previous = null;
+            if (term == null) {
                 return term;
             }
+            if (term == this.head) {
+                this.head = term.next;
+            }
+            if (term == this.queue) {
+                this.queue = term.previous;
+            }
+            if (term.previous != null) {
+                term.previous.next = term.next;
+            }
+            if (term.next != null) {
+                term.next.previous = term.previous;
+            }
+            term.next = null;
+            term.previous = null;
+            return term;
         }
 
         Term add(Term term) {
@@ -117,17 +114,15 @@ public final class NorthboundEndpoints {
             if (term == null || term.identifier == null) {
                 return old;
             }
-            synchronized (NorthboundEndpoints.this.lock) {
-                term.previous = this.queue;
-                if (this.queue != null) {
-                    this.queue.next = term;
+            term.previous = this.queue;
+            if (this.queue != null) {
+                this.queue.next = term;
 
-                } else {
-                    this.head = term;
-                }
-                this.queue = term;
-                old = this.map.put(term.identifier, term);
+            } else {
+                this.head = term;
             }
+            this.queue = term;
+            old = this.map.put(term.identifier, term);            
             return old;
         }
 
@@ -200,8 +195,7 @@ public final class NorthboundEndpoints {
         } else {
             this.lifetime = l.longValue();
         }
-        this.endpoints = Collections.<Term, NorthboundEndpoint>synchronizedMap(
-        		new WeakHashMap<Term, NorthboundEndpoint>());
+        this.endpoints = Collections.<Term, NorthboundEndpoint>synchronizedMap(new WeakHashMap<Term, NorthboundEndpoint>());
         this.schedule = new Schedule();
         this.mediator = mediator;
         new Thread(this.schedule).start();
@@ -219,8 +213,10 @@ public final class NorthboundEndpoints {
         NorthboundEndpoint endpoint = new NorthboundEndpoint(mediator, null);
         Term term = new Term(endpoint.getSessionToken());
         term.reactivate();
+        synchronized (this.lock) {
+        	this.schedule.add(term);
+        }
         this.endpoints.put(term, endpoint);
-        this.schedule.add(term);
         return endpoint;
     }
 
@@ -245,8 +241,13 @@ public final class NorthboundEndpoints {
             return null;
         }
         String sessionIdentifier = token.getAuthenticationMaterial();
-        if (this.schedule.update(sessionIdentifier)) {
-            Term t = this.schedule.getTerm(sessionIdentifier);
+        Term t = null;
+        synchronized (this.lock) {
+	        if (this.schedule.update(sessionIdentifier)) {
+	            t = this.schedule.getTerm(sessionIdentifier);
+	        }
+        }
+        if(t!=null) {
             return this.endpoints.get(t);
         }
         return null;
@@ -258,8 +259,7 @@ public final class NorthboundEndpoints {
      * if an existing {@link NorthboundEndpoint} linked to the
      * same {@link Session} already exists.
      *
-     * @param nothboundEndpoint the {@link NorthboundEndpoint} to be
-     *                          added
+     * @param nothboundEndpoint the {@link NorthboundEndpoint} to be added
      * @return the added {@link NorthboundEndpoint} or the existing
      * one linked to the same {@link Session}
      */
@@ -270,14 +270,22 @@ public final class NorthboundEndpoints {
         }
         //search for an already existing endpoint for the
         //specified session identifier
-        if (this.schedule.update(northboundEndpoint.getSessionToken())) {
-            Term t = this.schedule.getTerm(northboundEndpoint.getSessionToken());
-            return this.endpoints.get(t);
+        Term t = null;
+        synchronized (this.lock) {
+	        if (this.schedule.update(northboundEndpoint.getSessionToken())) {
+	            t = this.schedule.getTerm(northboundEndpoint.getSessionToken());
+	        }
         }
-        Term term = new Term(sessionToken);
-        term.reactivate();
-        this.endpoints.put(term, northboundEndpoint);
-        this.schedule.add(term);
+        if(t!=null) {
+            return this.endpoints.get(t);
+        }        
+        t = new Term(sessionToken);
+        t.reactivate();
+        
+        synchronized (this.lock) {
+        	this.schedule.add(t);
+        }
+        this.endpoints.put(t, northboundEndpoint);
         return northboundEndpoint;
     }
 
@@ -291,7 +299,10 @@ public final class NorthboundEndpoints {
      */
     public long getTimeout(String sessionToken) {
         long timeout = -1;
-        Term t = this.schedule.getTerm(sessionToken);
+        Term t = null;
+        synchronized (this.lock) {
+        	t = this.schedule.getTerm(sessionToken); 
+        }
         if (t != null) {
             timeout = t.timeout.get();
         }

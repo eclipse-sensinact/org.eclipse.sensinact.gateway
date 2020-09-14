@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
  * A ForwardingService provides the information allowing to create a
  * {@link ForwardingFilter}
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public interface ForwardingService {
 	

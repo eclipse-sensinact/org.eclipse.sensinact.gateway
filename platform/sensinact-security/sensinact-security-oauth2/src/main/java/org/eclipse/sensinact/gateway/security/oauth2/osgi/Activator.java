@@ -44,17 +44,15 @@ public class Activator extends AbstractActivator<Mediator> {
 			Filter.class,
 			new Hashtable() {{
 				this.put(Constants.SERVICE_RANKING, 0);
-				this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");	
-				this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");
-				this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED, true);}}
+				this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/sensinact/*");	
+				this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");}}
 			);		
 	    super.mediator.register(
 	    	new SecurityServlet(oidcServer, oidcServer), 
 	    	Servlet.class,
 	    	new Hashtable() {{
-	    	    this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/auth");
-				this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");
-	    	    this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_ASYNC_SUPPORTED,true);}}
+	    	    this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/sensinact.auth");
+				this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");}}
 	    	);
     }
 

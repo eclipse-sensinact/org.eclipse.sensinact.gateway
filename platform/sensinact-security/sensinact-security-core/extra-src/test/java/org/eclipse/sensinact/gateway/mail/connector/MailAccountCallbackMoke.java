@@ -62,4 +62,9 @@ public class MailAccountCallbackMoke implements CallbackService{
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public int getCallbackType() {
+		return CallbackService.CALLBACK_SERVLET;
+	}
 }

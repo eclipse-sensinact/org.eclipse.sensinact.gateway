@@ -11,7 +11,7 @@
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 /**
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class Argument {
     //********************************************************************//

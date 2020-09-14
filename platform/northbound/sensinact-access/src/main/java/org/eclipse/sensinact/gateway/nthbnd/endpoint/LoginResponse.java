@@ -16,7 +16,6 @@ import org.eclipse.sensinact.gateway.core.message.AbstractSnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaMessageSubType;
-import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 
 import java.util.Arrays;
@@ -32,7 +31,7 @@ import java.util.Set;
  * allowing to create an {@link NorthboundEndpoint} for a specific
  * user or to reactivate an existing one
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class LoginResponse extends AbstractSnaErrorfulMessage<LoginResponse.TokenMode> implements LoginMessage {
     public enum TokenMode implements SnaMessageSubType, KeysCollection {
@@ -45,15 +44,6 @@ public class LoginResponse extends AbstractSnaErrorfulMessage<LoginResponse.Toke
             Set<TypedKey<?>> tmpKeys = new HashSet<TypedKey<?>>();
             tmpKeys.addAll(list);
             keys = Collections.unmodifiableSet(tmpKeys);
-        }
-
-        /**
-         * @inheritDoc
-         * @see SnaMessageSubType#getSnaMessageType()
-         */
-        @Override
-        public SnaMessage.Type getSnaMessageType() {
-            return SnaResponseMessage.TYPE;
         }
 
         /**
@@ -83,6 +73,11 @@ public class LoginResponse extends AbstractSnaErrorfulMessage<LoginResponse.Toke
             }
             return typedKey;
         }
+
+		@Override
+		public Type getSnaMessageType() {
+			return Type.RESPONSE;
+		}
     }
 
     /**

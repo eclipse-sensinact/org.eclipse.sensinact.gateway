@@ -150,7 +150,7 @@ public class TestLdapFiltering extends MidOSGiTest {
         Thread.sleep(5000);
 
         Mediator mediator = new Mediator(context);
-        String simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/ldap:sensinact?ldap='(service1.humidity.accessible=false)'", null, "GET");
+        String simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?ldap='(service1.humidity.accessible=false)'", null, "GET");
 
         System.out.println(simulated1);
 
@@ -161,7 +161,7 @@ public class TestLdapFiltering extends MidOSGiTest {
 
         Thread.sleep(2000);
 
-        simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/ldap:sensinact?ldap='(service1.humidity.accessible=false)'", null, "GET");
+        simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?ldap='(service1.humidity.accessible=false)'", null, "GET");
         assertTrue(new JSONObject(simulated1).getJSONArray("providers").length() == 1);
         assertEquals("sensor0", new JSONObject(simulated1).getJSONArray("providers").getJSONObject(0).getString("name"));
 
@@ -171,7 +171,7 @@ public class TestLdapFiltering extends MidOSGiTest {
 
         Thread.sleep(2000);
 
-        simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/ldap:sensinact?ldap='(service1.humidity.accessible=false)'", null, "GET");
+        simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?ldap='(service1.humidity.accessible=false)'", null, "GET");
 
         System.out.println(simulated1);
         List<String> list = new ArrayList<String>();
@@ -186,7 +186,7 @@ public class TestLdapFiltering extends MidOSGiTest {
         System.out.println(simulated4);
 
         Thread.sleep(2000);
-        simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/ldap:sensinact?ldap='(service1.temperature.value%20<=%204.0)'", null, "GET");
+        simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?ldap='(service1.temperature.value%20<=%204.0)'", null, "GET");
 
         System.out.println(simulated1);
         assertTrue(new JSONObject(simulated1).getJSONArray("providers").length() == 1);
@@ -196,7 +196,7 @@ public class TestLdapFiltering extends MidOSGiTest {
         System.out.println(simulated5);
         Thread.sleep(2000);
 
-        simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/ldap:sensinact?ldap='(service1.temperature.value<=4.0)'", null, "GET");
+        simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?ldap='(service1.temperature.value<=4.0)'", null, "GET");
 
         list = new ArrayList<String>();
         list.add(new JSONObject(simulated1).getJSONArray("providers").getJSONObject(0).getString("name"));
@@ -207,7 +207,7 @@ public class TestLdapFiltering extends MidOSGiTest {
         assertTrue(list.contains("sensor3"));
         System.out.println(simulated1);
 
-        simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/ldap:sensinact?ldap='(%26(service1.humidity.accessible=false)(service1.temperature.value<=4))'", null, "GET");
+        simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?ldap='(%26(service1.humidity.accessible=false)(service1.temperature.value<=4))'", null, "GET");
         assertTrue(new JSONObject(simulated1).getJSONArray("providers").length() == 1);
         assertEquals("sensor3", new JSONObject(simulated1).getJSONArray("providers").getJSONObject(0).getString("name"));
 

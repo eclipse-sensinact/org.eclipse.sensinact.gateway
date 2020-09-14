@@ -25,6 +25,8 @@ import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
@@ -43,7 +45,10 @@ import org.eclipse.sensinact.gateway.util.IOUtils;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST extends Request<RESPONSE>> extends Headers {
-    public static final String READ_TIMEOUT = "Read-timeout";
+    
+	static final Logger LOG = Logger.getLogger(ConnectionConfiguration.class.getName());
+	
+	public static final String READ_TIMEOUT = "Read-timeout";
     public static final String GET = "GET";
     public static final String POST = "POST";
     public static final String PUT = "PUT";
@@ -96,7 +101,15 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
             	KeyManager[] keys = KEY_MANAGERS.get(host);
             	
                 if(trusteds == null) {
-	            	URL serverCertificate = new URL(config.getServerSSLCertificate());
+                	String serverCertificateStr = config.getServerSSLCertificate();
+                	URL serverCertificate = null;
+                	if(!TRUST_ALL.equals(serverCertificateStr)) {
+                		try {
+                			serverCertificate = new URL(config.getServerSSLCertificate());
+                		} catch(NullPointerException|IOException e) {
+                			LOG.log(Level.CONFIG, e.getMessage());
+                		}
+                	}
 	            	if(serverCertificate != null) {
 	            		try {
 	            			InputStream is = serverCertificate.openStream();
@@ -112,7 +125,7 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
 	            		} catch(Exception e) {
 	            			trusteds = null;
 	            		}
-	                	if(trusteds == null && TRUST_ALL.equals(serverCertificate)) {
+	                	if(trusteds == null && TRUST_ALL.equals(serverCertificateStr)) {
 	                       trusteds = new TrustManager[]{new X509TrustManager() {
 	                            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
 	                                return null;
@@ -128,7 +141,12 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
 	            	}
                 }
                 if(keys == null) {
-                    URL clientCertificate = new URL(config.getClientSSLCertificate());
+                    URL clientCertificate = null;
+            		try {
+            			clientCertificate = new URL(config.getClientSSLCertificate());
+            		} catch(NullPointerException|IOException e) {
+            			LOG.log(Level.CONFIG, e.getMessage());
+            		}                    
                 	if(clientCertificate != null) {
                 		try {
                 		 InputStream is = clientCertificate.openStream();                		 
@@ -139,8 +157,8 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
                 		 keys = kmf.getKeyManagers();
                 		 KEY_MANAGERS.put(host,keys);
                 		} catch(NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException | UnrecoverableKeyException e) {
-                			e.printStackTrace();
-                			keys = null;
+                			LOG.log(Level.SEVERE,e.getMessage(), e);
+                        	keys = null;
                 		}                		  
                 	}
                 }                
@@ -149,7 +167,7 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
                     sc.init(keys, trusteds, null);
                     ((HttpsURLConnection)connection).setSSLSocketFactory(sc.getSocketFactory());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                	LOG.log(Level.SEVERE,e.getMessage(), e);
                     return null;
                 }                
             } else {

@@ -49,7 +49,7 @@ class MySecuredAccess implements SecuredAccess {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.security.SecuredAccess#
+     * @see org.eclipse.sensinact.gateway.core.api.security.SecuredAccess#
      * getAccessTree(java.lang.String)
      */
     @Override

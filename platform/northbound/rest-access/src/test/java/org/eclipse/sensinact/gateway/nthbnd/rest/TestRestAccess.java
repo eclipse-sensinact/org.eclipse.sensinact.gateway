@@ -21,7 +21,7 @@ import java.net.URL;
 import java.util.Map;
 
 /**
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class TestRestAccess extends MidOSGiTest {
     //********************************************************************//
@@ -68,7 +68,7 @@ public class TestRestAccess extends MidOSGiTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void doInit(Map configuration) {
     	configuration.put("felix.auto.start.1",  
-                "file:target/felix/bundle/org.osgi.service.component.jar "+  
+                "file:target/felix/bundle/org.osgi.service.component.jar "+ 
                 "file:target/felix/bundle/org.osgi.service.cm.jar "+  
                 "file:target/felix/bundle/org.osgi.service.metatype.jar "+  
                 "file:target/felix/bundle/org.osgi.namespace.extender.jar "+  
@@ -89,7 +89,6 @@ public class TestRestAccess extends MidOSGiTest {
         	    "file:target/felix/bundle/sensinact-datastore-api.jar " + 
                 "file:target/felix/bundle/sensinact-security-none.jar " + 
                 "file:target/felix/bundle/sensinact-generic.jar " + 
-        	//  "file:target/felix/bundle/sensinact-remote-osgi.jar "+
                 "file:target/felix/bundle/slf4j-api.jar " + 
                 "file:target/felix/bundle/slf4j-simple.jar");
         configuration.put("felix.auto.start.2", 

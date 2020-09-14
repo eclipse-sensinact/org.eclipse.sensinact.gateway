@@ -10,15 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import org.eclipse.sensinact.gateway.core.method.Parameter;
-import org.eclipse.sensinact.gateway.core.security.Authentication;
-
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.core.method.Parameter;
+import org.eclipse.sensinact.gateway.core.security.Authentication;
+
 /**
  * Northbound request wrapper service.
- * <p>
+ * <br/>
  * It defines the methods allowing to retrieve the relevant
  * characteristics of the request, allowing to treat it
  */
@@ -42,15 +42,20 @@ public interface NorthboundRequestWrapper {
     String getRequestURI();
 
     /**
-     * Returns the String identifier of the request wrapped
-     * by this NorthboundAccessWrapper if it exists. Otherwise
-     * returns null
-     *
-     * @param parameters the Set of {@link Parameter}s held
-     *                   by the wrapped request
-     * @return the wrapped request's String identifier
+     * Returns the String name of the identifier of the request wrapped
+     * by this NorthboundAccessWrapper.
+     * 
+     * @return the String name of the wrapped request identifier
      */
-    String getRequestID(Parameter[] parameters);
+    String getRequestIdProperty();
+    
+    /**
+     * Returns the String identifier of the request wrapped
+     * by this NorthboundAccessWrapper.
+     * 
+     * @return the String identifier of the wrapped request
+     */
+    String getRequestId();
 
     /**
      * Returns the map of parameters built using the query String
@@ -73,11 +78,12 @@ public interface NorthboundRequestWrapper {
      * Returns a new {@link NorthboundRecipient} created using the
      * array of {@link Parameter}s passed as parameter
      *
-     * @param parameters the array of {@link Parameter}s used to
-     *                   parameterized the recipient to be returned
+     * @param parameters the List of {@link Parameter}s used to
+     * parameterized the recipient to be returned
+     * 
      * @return a newly created {@link NorthboundRecipient}
      */
-    NorthboundRecipient createRecipient(Parameter[] parameters);
+    NorthboundRecipient createRecipient(List<Parameter> parameters);
 
     /**
      * Returns the {@link Authentication} containing the identification

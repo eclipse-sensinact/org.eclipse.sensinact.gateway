@@ -67,15 +67,6 @@ public class ShellAccessRequest implements NorthboundRequestWrapper {
 
     /**
      * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getRequestID(org.eclipse.sensinact.gateway.core.method.Parameter[])
-     */
-    @Override
-    public String getRequestID(Parameter[] parameters) {
-        return null;
-    }
-
-    /**
-     * @inheritDoc
      * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getQueryMap()
      */
     @Override
@@ -129,13 +120,19 @@ public class ShellAccessRequest implements NorthboundRequestWrapper {
         return this.authentication;
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#createRecipient(org.eclipse.sensinact.gateway.core.method.Parameter[])
-     */
-    @Override
-    public NorthboundRecipient createRecipient(Parameter[] parameters) {
+	@Override
+	public String getRequestIdProperty() {
+		return null;
+	}
+
+	@Override
+	public String getRequestId() {
+		return null;
+	}
+
+	@Override
+	public NorthboundRecipient createRecipient(List<Parameter> parameters) {
         NorthboundRecipient recipient = new ShellRecipient((CommandServiceMediator) mediator);
         return recipient;
-    }
+	}
 }

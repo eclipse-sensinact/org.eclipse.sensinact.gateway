@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest> {
     private HttpServletResponseWrapper response;

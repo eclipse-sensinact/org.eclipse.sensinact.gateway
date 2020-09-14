@@ -32,7 +32,7 @@ import org.osgi.service.log.LogService;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.message.MessageHandler;
+import org.eclipse.sensinact.gateway.core.message.MessageRouter;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 
 /**
@@ -57,7 +57,7 @@ public class TestSecuredAccess {
 			+ ")";
 
 	private static final String MESSAGE_HANDLER_FILTER = "(&(" + Constants.OBJECTCLASS + "="
-			+ MessageHandler.class.getCanonicalName() + ")(uri=/serviceProvider)";
+			+ MessageRouter.class.getCanonicalName() + ")(uri=/serviceProvider)";
 
 	private static final String DATA_STORE_FILTER = "(" + Constants.OBJECTCLASS + "="
 			+ DataStoreService.class.getCanonicalName() + ")";
@@ -98,7 +98,7 @@ public class TestSecuredAccess {
 
 	private Mediator mediator;
 	private SensiNactResourceModel provider;
-	private MessageHandler handler;
+	private MessageRouter handler;
 	private SnaAgent agent;
 
 	private int callbackCount;
@@ -139,7 +139,7 @@ public class TestSecuredAccess {
 						if (arguments == null || arguments.length != 2) {
 							return null;
 						}
-						if (arguments[0] != null && arguments[0].equals(MessageHandler.class.getCanonicalName())
+						if (arguments[0] != null && arguments[0].equals(MessageRouter.class.getCanonicalName())
 								&& arguments[1] != null && arguments[1].equals("(uri=/serviceProvider)")) {
 							if (handler == null) {
 								return null;
@@ -192,8 +192,8 @@ public class TestSecuredAccess {
 				return null;
 			}
 		});
-		Mockito.when(context.registerService(Mockito.eq(MessageHandler.class.getCanonicalName()),
-				Mockito.any(MessageHandler.class), Mockito.any(Dictionary.class)))
+		Mockito.when(context.registerService(Mockito.eq(MessageRouter.class.getCanonicalName()),
+				Mockito.any(MessageRouter.class), Mockito.any(Dictionary.class)))
 				.thenAnswer(new Answer<ServiceRegistration>() {
 					@Override
 					public ServiceRegistration answer(InvocationOnMock invocation) throws Throwable {

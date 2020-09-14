@@ -23,7 +23,7 @@ public class StringResponseFormat implements ResponseFormat<String> {
             return ((JSONObject) object).toString();
         }
         if (AccessMethodResponse.class.isAssignableFrom(object.getClass())) {
-            return ((AccessMethodResponse) object).getJSON();
+            return ((AccessMethodResponse<?>) object).getJSON();
         }
         return object.toString();
     }

@@ -10,13 +10,17 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestHandler.NorthboundResponseBuildError;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -112,7 +116,7 @@ public abstract class NorthboundAccess<W extends NorthboundRequestWrapper> {
 
                     if (reference != null && (handler = mediator.getContext().getService(reference)) != null) {
                         try {
-                            handler.init(request);
+                        	handler.init(request, Arrays.stream(AccessMethod.Type.values()).collect(HashSet::new,Set::add,Set::addAll));                       	
                             if (handler.processRequestURI()) {
                                 builder = handler.handle();
                                 if (builder == null) {
