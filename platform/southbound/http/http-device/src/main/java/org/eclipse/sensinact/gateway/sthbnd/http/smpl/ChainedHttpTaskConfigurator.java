@@ -93,7 +93,8 @@ class ChainedHttpTaskConfigurator extends SimpleTaskConfigurator {
 
             while (iterator.hasNext()) {
                 Link link = iterator.next();
-                HttpChainedTask subTask = chained.addChainedTask(link.identifier);
+                @SuppressWarnings("rawtypes")
+				HttpChainedTask subTask = chained.addChainedTask(link.identifier);
 
                 HttpTaskProcessingContext context = super.endpoint.createChainedContext(link.configurator, chained, subTask);
 

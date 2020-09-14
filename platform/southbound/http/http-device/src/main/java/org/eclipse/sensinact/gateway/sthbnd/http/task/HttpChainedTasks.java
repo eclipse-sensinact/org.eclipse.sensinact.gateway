@@ -27,7 +27,8 @@ import java.util.Map;
 /**
  *
  */
-public abstract class HttpChainedTasks<REQUEST extends Request<SimpleHttpResponse>, HTTP_CHAINED_TASK extends HttpChainedTask<REQUEST>> extends HttpTask<SimpleHttpResponse, REQUEST> {
+public abstract class HttpChainedTasks<REQUEST extends Request<SimpleHttpResponse>, 
+HTTP_CHAINED_TASK extends HttpChainedTask<REQUEST>> extends HttpTaskImpl<SimpleHttpResponse, REQUEST> {
 
     /**
      * @param type

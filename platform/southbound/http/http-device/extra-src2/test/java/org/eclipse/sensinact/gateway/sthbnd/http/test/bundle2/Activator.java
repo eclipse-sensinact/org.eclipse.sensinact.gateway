@@ -36,8 +36,7 @@ public class Activator extends HttpActivator
 	 * @see HttpActivator#getPacketType()
 	 */
 	@Override
-	protected Class<? extends HttpPacket> getPacketType()
-	{
+	protected Class<? extends HttpPacket> getPacketType(){
 		return HttpTestPacket.class;
 	}
 

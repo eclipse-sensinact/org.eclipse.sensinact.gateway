@@ -15,14 +15,15 @@ import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.generic.TaskTranslator;
 import org.eclipse.sensinact.gateway.protocol.http.client.mid.Reusable;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
-import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTaskImpl;
 
 /**
  * Extended {@link URITask} dedicated to HTTP communication
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public abstract class MidHttpTask<RESPONSE extends HttpResponse, REQUEST extends MidHttpRequest<RESPONSE>> extends HttpTask<RESPONSE, REQUEST> implements Reusable {
+public abstract class MidHttpTask<RESPONSE extends HttpResponse, REQUEST extends MidHttpRequest<RESPONSE>> 
+extends HttpTaskImpl<RESPONSE, REQUEST> implements Reusable {
     /**
      * Constructor
      *

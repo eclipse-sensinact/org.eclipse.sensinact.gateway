@@ -23,7 +23,8 @@ import org.eclipse.sensinact.gateway.util.CastUtils;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class HttpSubscribingTask<RESPONSE extends HttpResponse, REQUEST extends Request<RESPONSE>> extends HttpDiscoveryTask<RESPONSE, REQUEST> {
+public class HttpSubscribingTask<RESPONSE extends HttpResponse, REQUEST extends Request<RESPONSE>> 
+extends HttpDiscoveryTask<RESPONSE, REQUEST> {
 
     private Executable<Object, String> subscriptionIdExtractor;
 	private String subscriptionId;
@@ -43,12 +44,7 @@ public class HttpSubscribingTask<RESPONSE extends HttpResponse, REQUEST extends 
     public HttpSubscribingTask(Mediator mediator, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType, Object[] parameters) {
         super(mediator, CommandType.SUBSCRIBE, transmitter, requestType, parameters);
     }
-
-    /**
-     * @inheritDoc
-     * 
-     * @see HttpTask#isDirect()
-     */
+    
     public boolean isDirect() {
         return true;
     }
@@ -80,11 +76,6 @@ public class HttpSubscribingTask<RESPONSE extends HttpResponse, REQUEST extends 
         this.subscriptionIdExtractor = subscriptionIdExtractor;
     }
 
-    /**
-     * @inheritDoc
-     * 
-     * @see TaskImpl#setResult(java.lang.Object, long)
-     */
     public void setResult(Object result, long timestamp) {
         super.setResult(result, timestamp);
         if (super.result != null && super.result == AccessMethod.EMPTY) {

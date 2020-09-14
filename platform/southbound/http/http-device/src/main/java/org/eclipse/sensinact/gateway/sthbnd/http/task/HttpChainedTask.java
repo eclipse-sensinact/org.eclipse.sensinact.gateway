@@ -20,12 +20,15 @@ import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpResponse;
 /**
  *
  */
-public abstract class HttpChainedTask<REQUEST extends Request<SimpleHttpResponse>> extends HttpTask<SimpleHttpResponse, REQUEST> implements Executable<Object, Void> {
+public abstract class HttpChainedTask<REQUEST extends Request<SimpleHttpResponse>> extends HttpTaskImpl<SimpleHttpResponse, REQUEST> implements Executable<Object, Void> {
+    
     /**
      * @param mediator
-     * @param requestType
+     * @param command
      * @param transmitter
+     * @param requestType
      * @param path
+     * @param profileId
      * @param resourceConfig
      * @param parameters
      */
@@ -33,10 +36,7 @@ public abstract class HttpChainedTask<REQUEST extends Request<SimpleHttpResponse
         super(mediator, command, transmitter, requestType, path, profileId, resourceConfig, parameters);
     }
 
-    /**
-     * @inheritDoc
-     * @see HttpTask#isDirect()
-     */
+    
     @Override
     public boolean isDirect() {
         return true;

@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.sthbnd.http.task;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
-import org.eclipse.sensinact.gateway.protocol.http.client.Response;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 
@@ -21,7 +20,8 @@ import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public abstract class HttpDiscoveryTask<RESPONSE extends HttpResponse, REQUEST extends Request<RESPONSE>> extends HttpTask<RESPONSE, REQUEST> {
+public abstract class HttpDiscoveryTask<RESPONSE extends HttpResponse, REQUEST extends Request<RESPONSE>> 
+extends HttpTaskImpl<RESPONSE, REQUEST> {
 
     /**
      * Constructor

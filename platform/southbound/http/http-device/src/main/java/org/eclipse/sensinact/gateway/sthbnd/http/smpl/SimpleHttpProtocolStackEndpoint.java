@@ -24,7 +24,9 @@ import org.eclipse.sensinact.gateway.sthbnd.http.annotation.RecurrentHttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.SimpleHttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTasks;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpDiscoveryTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTaskImpl;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.xml.sax.SAXException;
@@ -53,12 +55,12 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
     //********************************************************************//
     //						STATIC DECLARATIONS							  //
     //********************************************************************//
-    public static final Class<? extends HttpTask> GET_TASK = HttpTask.class;
-    public static final Class<? extends HttpTask> SET_TASK = HttpTask.class;
-    public static final Class<? extends HttpTask> ACT_TASK = HttpTask.class;
-    public static final Class<? extends HttpTask> SUBSCRIBE_TASK = HttpTask.class;
-    public static final Class<? extends HttpTask> UNSUBSCRIBE_TASK = HttpTask.class;
-    public static final Class<? extends HttpTask> SERVICES_ENUMERATION_TASK = HttpTask.class;
+    public static final Class<? extends HttpTask> GET_TASK = HttpTaskImpl.class;
+    public static final Class<? extends HttpTask> SET_TASK = HttpTaskImpl.class;
+    public static final Class<? extends HttpTask> ACT_TASK = HttpTaskImpl.class;
+    public static final Class<? extends HttpTask> SUBSCRIBE_TASK = HttpTaskImpl.class;
+    public static final Class<? extends HttpTask> UNSUBSCRIBE_TASK = HttpTaskImpl.class;
+    public static final Class<? extends HttpTask> SERVICES_ENUMERATION_TASK = HttpTaskImpl.class;
 
     //********************************************************************//
     //						INSTANCE DECLARATIONS						  //
@@ -241,36 +243,26 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
         this.endpointId = endpointId;
     }
 
-    /**
-     * @inheritDoc
-     * @see TaskTranslator#
-     * send(Task)
-     */
+    @Override
     public void send(Task task) {
+    	HttpTask<?,?> _task =  (HttpTask<?,?>)task;        
         try {
-            ((HttpMediator) mediator).configure((HttpTask<?, ?>) task);
-            super.send(task);
+            ((HttpMediator) mediator).configure(_task);
+            super.send(_task);
         } catch (Exception e) {
             mediator.error(e);
-
         } finally {
-            ((HttpMediator) mediator).unregisterProcessingContext((HttpTask<?, ?>) task);
+            ((HttpMediator) mediator).unregisterProcessingContext(_task);
         }
     }
 
-    /**
-     * @inheritDoc
-     * @see TaskTranslator#
-     * createTask(Mediator, Task.CommandType,
-     * java.lang.String, java.lang.String, ResourceConfig, java.lang.Object[])
-     */
     @Override
     public Task createTask(Mediator mediator, CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
         HttpTaskConfigurator configuration = this.adapters.get(command);
         if (configuration == null) {
             return null;
         }
-        HttpTask<?, ?> task = ReflectUtils.getInstance(this.getTaskType(command), new Object[]{mediator, command, this, SimpleHttpRequest.class, path, profileId, resourceConfig, parameters});
+        HttpTask<?, ?> task = super.wrap(HttpTask.class, ReflectUtils.getInstance(this.getTaskType(command), new Object[]{mediator, command, this, SimpleHttpRequest.class, path, profileId, resourceConfig, parameters}));
         try {
             if (task.getPacketType() == null) {
                 task.setPacketType(packetType);

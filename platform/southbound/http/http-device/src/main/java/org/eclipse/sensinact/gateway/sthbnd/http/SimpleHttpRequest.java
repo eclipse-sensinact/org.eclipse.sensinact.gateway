@@ -32,12 +32,6 @@ public class SimpleHttpRequest extends AbstractRequest<SimpleHttpResponse> {
         this.mediator = mediator;
     }
 
-    /**
-     * @throws IOException
-     * @inheritDoc
-     * @see Request#
-     * createResponse(java.net.HttpURLConnection)
-     */
     @Override
     public SimpleHttpResponse createResponse(HttpURLConnection connection) throws IOException {
         if (connection == null) {

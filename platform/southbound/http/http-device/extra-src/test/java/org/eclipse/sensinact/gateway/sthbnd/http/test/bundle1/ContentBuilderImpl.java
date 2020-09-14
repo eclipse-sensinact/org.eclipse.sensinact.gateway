@@ -40,17 +40,10 @@ public class ContentBuilderImpl implements HttpTaskConfigurator
 	public ContentBuilderImpl()
 	{}
 	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskUrlConfigurator#configure(HttpTask)
-	 */
+
 	@Override
-	public <T extends HttpTask<?,?>> void configure(T task)
-	{
+	public <T extends HttpTask<?,?>> void configure(T task){
 		if(Task.CommandType.SET.equals(task.getCommand()))
-		{
 			task.setContent("{\"value\": " + task.getParameters()[1]+"}");
-		}
 	}
 }

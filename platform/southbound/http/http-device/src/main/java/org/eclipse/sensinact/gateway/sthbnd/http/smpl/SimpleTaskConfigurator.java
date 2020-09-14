@@ -17,6 +17,7 @@ import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpChildTaskConfigu
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTaskConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.KeyValuePair;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
+import org.eclipse.sensinact.gateway.util.ReflectUtils;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -156,11 +157,12 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
             }
             values.add(value);
         }
-        Class<? extends HttpTaskConfigurator> taskContentConfigurationType = annotation != null && HttpTaskConfigurator.class != annotation.content() ? annotation.content() : parent.content();
+        Class<? extends HttpTaskConfigurator> taskContentConfigurationType = annotation != null && HttpTaskConfigurator.class != annotation.content() 
+        		? annotation.content() : parent.content();
 
         if (taskContentConfigurationType != null && taskContentConfigurationType != HttpTaskConfigurator.class) {
              try {
-	            this.contentBuilder = taskContentConfigurationType.newInstance();
+	            this.contentBuilder = ReflectUtils.getTheBestInstance(taskContentConfigurationType, new Object[] {this.endpoint.getMediator()});
 	        } catch (Exception e) {
 	            this.endpoint.getMediator().error(e);
 	        }

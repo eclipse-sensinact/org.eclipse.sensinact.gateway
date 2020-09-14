@@ -10,24 +10,29 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http;
 
+import java.io.IOException;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.LinkedList;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
 import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
+import org.eclipse.sensinact.gateway.generic.SubscribeTaskWrapper;
 import org.eclipse.sensinact.gateway.generic.Task;
+import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.Task.RequestType;
+import org.eclipse.sensinact.gateway.generic.TaskTranslator;
+import org.eclipse.sensinact.gateway.generic.UnsubscribeTaskWrapper;
 import org.eclipse.sensinact.gateway.protocol.http.Headers;
 import org.eclipse.sensinact.gateway.protocol.http.HeadersCollection;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpDiscoveryTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 /**
  * Extended abstract {@link ProtocolStackEndpoint} dedicated to devices using
@@ -40,6 +45,7 @@ public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<Ht
 //	 * HttpPackets stack
 //	 */
 //	private final HttpPacketStack stack;
+	
     /**
      * permanent header fields added to each request
      */
@@ -56,18 +62,20 @@ public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<Ht
     protected Deque<HttpTask<?, ?>> disconnexion;
 
     /**
+     * the extended handled {@link HttpPacket}
+     */
+    protected Class<? extends HttpPacket> packetType;
+    
+    /**
      * this HttpProtocolStackEndpoint's stopping status
      */
     private boolean stopping;
-    /**
-     *
-     */
-    protected Class<? extends HttpPacket> packetType;
 
     /**
      * Constructor
-     *
+     * 
      * @param mediator
+     * 
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException
@@ -79,51 +87,38 @@ public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<Ht
         this.permanentHeaders = new HeadersCollection();
         this.discovery = new LinkedList<HttpDiscoveryTask<?, ?>>();
         this.disconnexion = new LinkedList<HttpTask<?, ?>>();
-
 //		this.stack = new HttpPacketStack();
 //		new Thread(this.stack).start();
     }
 
-    /**
-     * @inheritDoc
-     * @see TaskTranslator#
-     * send(Task)
-     */
-    @SuppressWarnings("unchecked")
+    @Override
     public void send(Task task) {
-        HttpTask<HttpResponse, Request<HttpResponse>> httpTask = (HttpTask<HttpResponse, Request<HttpResponse>>) task;
-
-        httpTask.addHeaders(this.permanentHeaders.getHeaders());
-        if (httpTask.getPacketType() == null) {
-            httpTask.setPacketType(packetType);
-        }
+    	HttpTask<?,?> _task =  (HttpTask<?,?>)task;        
+        _task.addHeaders(this.permanentHeaders.getHeaders());
+        
+        if (_task.getPacketType() == null)
+            _task.setPacketType(packetType);
+        
         try {
-            Request<HttpResponse> request = httpTask.build();
+            Request<HttpResponse> request = (Request<HttpResponse>) _task.build();
             HttpResponse response = request.send();
-
             if (response == null) {
                 mediator.error("Unable to connect");
                 return;
             }
-            if (!httpTask.isDirect()) {
+            if (!_task.isDirect()) {
                 HttpPacket packet = response.createPacket();
                 this.process(packet);
-
-            } else {
-                task.setResult(new String(response.getContent()));
-            }
+            } else 
+            	_task.setResult(new String(response.getContent()));            
         } catch (Exception e) {
+        	e.printStackTrace();
             super.mediator.error(e);
         }
     }
 
-    /**
-     * @inheritDoc
-     * @see ProtocolStackEndpoint#
-     * connect(ExtModelConfiguration)
-     */
-    @SuppressWarnings("unchecked")
-    public void connect(ExtModelConfiguration manager) throws InvalidProtocolStackException {
+    @Override
+    public void connect(ExtModelConfiguration<HttpPacket> manager) throws InvalidProtocolStackException {
         this.packetType = (Class<? extends HttpPacket>) manager.getPacketType();
 
         super.connect(manager);
@@ -201,8 +196,8 @@ public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<Ht
         if (task != null) {
             this.discovery.add(task);
         }
-    }
-
+    }    
+    
     /**
      * Registers an {@link HttpTask} to this HttpProtocolStackEndpoint
      * the registered {@link HttpTask}s are the last executed at

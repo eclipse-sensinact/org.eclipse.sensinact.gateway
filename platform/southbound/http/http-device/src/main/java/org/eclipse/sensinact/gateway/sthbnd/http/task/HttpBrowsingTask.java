@@ -20,7 +20,8 @@ import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class HttpBrowsingTask<RESPONSE extends HttpResponse, REQUEST extends Request<RESPONSE>> extends HttpDiscoveryTask<RESPONSE, REQUEST> {
+public class HttpBrowsingTask<RESPONSE extends HttpResponse, REQUEST extends Request<RESPONSE>> 
+extends HttpDiscoveryTask<RESPONSE, REQUEST> {
     /**
      * Constructor
      *

@@ -44,13 +44,10 @@ public class SimpleHttpResponse extends HttpResponse {
             return new HttpResponsePacket(this);
         }
         try {
-            if (HttpResponsePacket.class.isAssignableFrom(packetType)) {
+            if (HttpResponsePacket.class.isAssignableFrom(packetType)) 
                 return packetType.getConstructor(HttpResponse.class).newInstance(this);
-
-            } else {
+            else 
                 return this.packetType.getConstructor(Map.class, byte[].class).newInstance(this.getHeaders(), this.content);
-
-            }
         } catch (Exception e) {
         	e.printStackTrace();
             return new HttpPacket(this.getHeaders(), this.content);
