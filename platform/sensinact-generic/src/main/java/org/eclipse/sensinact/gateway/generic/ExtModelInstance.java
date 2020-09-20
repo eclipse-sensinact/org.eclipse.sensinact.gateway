@@ -61,10 +61,6 @@ public class ExtModelInstance<C extends ExtModelConfiguration> extends ModelInst
         this.taskManager = processor;
     }
 
-    /**
-     * @inheritDoc
-     * @see SensiNactResourceModel#getRootElement()
-     */
     @SuppressWarnings("unchecked")
     @Override
     public ExtServiceProviderImpl getRootElement() {

@@ -36,7 +36,7 @@ import org.osgi.framework.BundleContext;
  * 
  * @param <P> the handled {@link Packet} type
  * 
- * @author <a href="mailto:cmunilla@cmssi.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public abstract class BasisActivator<P extends Packet> extends AbstractActivator<Mediator> {
 	

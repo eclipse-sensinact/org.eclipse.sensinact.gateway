@@ -42,6 +42,7 @@ import java.util.Set;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ExtResourceImpl extends ResourceImpl {
+	
     /**
      * @param mediator
      * @param resourceConfig
@@ -51,12 +52,6 @@ public class ExtResourceImpl extends ResourceImpl {
         super(modelInstance, resourceConfig, service);
     }
 
-    /**
-     * @throws Exception
-     * @inheritDoc
-     * @see ResourceImpl#
-     * passOn(AccessMethod.Type, java.lang.Object[])
-     */
     @Override
     protected JSONObject passOn(String type, String uri, Object[] parameters) throws Exception {
         Task task = super.<Task>passOn(type, uri, parameters);

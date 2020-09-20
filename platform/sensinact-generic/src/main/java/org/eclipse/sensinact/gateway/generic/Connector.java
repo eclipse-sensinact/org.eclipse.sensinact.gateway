@@ -28,8 +28,7 @@ import java.util.List;
  * Manages IO between a {@link ProtocolStackEndpoint} and
  * a set of {@link ServiceProvider}s
  *
- * @author <a href="mailto:christophe.munil
- * la@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class Connector<P extends Packet> extends TaskManager {
     /**
