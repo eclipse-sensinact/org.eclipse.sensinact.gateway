@@ -17,7 +17,12 @@ import java.util.List;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Sessions.SessionObserver;
-import org.eclipse.sensinact.gateway.core.message.*;
+import org.eclipse.sensinact.gateway.core.message.LocalAgentImpl;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.RemoteAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.RemoteAgentImpl;
+import org.eclipse.sensinact.gateway.core.message.SnaAgent;
+import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.UserKey;
@@ -26,7 +31,6 @@ import org.eclipse.sensinact.gateway.core.security.UserKey;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-//@Component(immediate = false)
 public class SessionKey {
 	private Mediator mediator;
 
@@ -133,8 +137,8 @@ public class SessionKey {
 	public boolean unregisterAgent(String agentId) {
 		if (!this.agents.remove(agentId)) {
 			return false;
-		}
-		return this.mediator.callService(SnaAgent.class, String.format("org.eclipse.sensinact.gateway.agent.id=%s",agentId), new Executable<SnaAgent, Boolean>() {
+		}		
+		return this.mediator.callService(SnaAgent.class, String.format("(org.eclipse.sensinact.gateway.agent.id=%s)",agentId), new Executable<SnaAgent, Boolean>() {
 			@Override
 			public Boolean execute(SnaAgent agent) throws Exception {
 				try {

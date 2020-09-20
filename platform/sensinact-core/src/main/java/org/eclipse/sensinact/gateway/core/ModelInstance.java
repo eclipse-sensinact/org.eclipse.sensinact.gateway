@@ -106,7 +106,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 * the {@link MesssageHandler} handling messages coming from this
 	 * SensiNactResourceModel
 	 */
-	protected MessageRouter messageHandler;
+	protected MessageRouter messageRouter;
 
 	/**
 	 * the String identifier of the profile of this SnaServiceProvider
@@ -324,11 +324,11 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 *            the {@link SnaMessage} to post
 	 */
 	public void postMessage(SnaMessage<?> message) {
-		if (this.messageHandler == null) {
+		if (this.messageRouter == null) {
 			return;
 		}
 		((AbstractSnaMessage<?>)message).put("namespace", this.namespace, true);
-		this.messageHandler.handle(message);
+		this.messageRouter.handle(message);
 	}
 
 	/**
@@ -401,7 +401,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 			List<String> observed = this.configuration.getObserved();
 
 			this.registration = new ModelInstanceRegistration(uri, observed, instanceRegistration, this.configuration);
-			this.messageHandler = new SnaMessageListener(mediator, this.configuration());
+			this.messageRouter = new SnaMessageListener(mediator, this.configuration());
 			
 			boolean pattern = false;
 
@@ -436,11 +436,11 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 			SnaFilter filter = new SnaFilter(mediator, observedBuilder.toString(), pattern, false);
 
 			filter.addHandledType(SnaMessage.Type.UPDATE);
-			this.messageHandler.addCallback(filter, registration);
+			this.messageRouter.addCallback(filter, registration);
 
-			filter = new SnaFilter(mediator, "(\\/[^\\/]+)+", true, false);
+			filter = new SnaFilter(mediator, "(/[^/]+)+", true, false);
 			filter.addHandledType(SnaMessage.Type.LIFECYCLE);
-			this.messageHandler.addCallback(filter, registration);
+			this.messageRouter.addCallback(filter, registration);
 
 			if (this.configuration().getStartAtInitializationTime()) {
 				this.provider.start();
@@ -466,8 +466,8 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 		} catch (Exception e) {
 			mediator.error(e);
 		}
-		this.messageHandler.close(true);
-		this.messageHandler = null;
+		this.messageRouter.close(true);
+		this.messageRouter = null;
 
 		AccessController.<Void>doPrivileged(new PrivilegedAction<Void>() {
 			@Override
@@ -531,10 +531,10 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 * @param callback
 	 */
 	public void registerCallback(SnaFilter filter, MidCallback callback) {
-		if (this.messageHandler == null) {
+		if (this.messageRouter == null) {
 			return;
 		}
-		this.messageHandler.addCallback(filter, callback);
+		this.messageRouter.addCallback(filter, callback);
 	}
 
 	/**
@@ -542,10 +542,10 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 * @param callback
 	 */
 	public void unregisterCallback(String callback) {
-		if (this.messageHandler == null) {
+		if (this.messageRouter == null) {
 			return;
 		}
-		this.messageHandler.deleteCallback(callback);
+		this.messageRouter.deleteCallback(callback);
 	}
 
 	/**

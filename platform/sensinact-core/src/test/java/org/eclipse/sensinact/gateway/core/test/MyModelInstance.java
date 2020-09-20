@@ -45,7 +45,7 @@ public class MyModelInstance extends ModelInstance<ModelConfiguration> {
 	}
 
 	public MessageRouter getHandler() {
-		return super.messageHandler;
+		return super.messageRouter;
 	}
 
 	/**

@@ -267,8 +267,8 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 			public Void run() {
 				mediator.callServices(SnaAgent.class, new Executable<SnaAgent, Void>() {
 					@Override
-					public Void execute(SnaAgent agent) throws Exception {
-						String agentKey = agent.getPublicKey();
+					public Void execute(SnaAgent agent) throws Exception {	
+						String agentKey = agent.getPublicKey();						
 						List<MethodAccessibility> methodAccessibilities = SnaMessageListener.this.agentsAccessibility.get(agentKey);
 						int index = -1;
 						if (methodAccessibilities == null) {
@@ -278,7 +278,7 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 							}
 							methodAccessibilities = SnaMessageListener.this.configuration.getAccessibleMethods(path, option);
 							SnaMessageListener.this.agentsAccessibility.put(agentKey, methodAccessibilities);
-						}
+						}						
 						if ((index = methodAccessibilities.indexOf(new Name<MethodAccessibility>(method))) > -1
 								&& methodAccessibilities.get(index).isAccessible()) {
 							agent.register(message);

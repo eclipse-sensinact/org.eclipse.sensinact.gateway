@@ -127,7 +127,8 @@ public abstract class AbstractAgent implements SnaAgent {
 			try {
 				this.registration = this.mediator.getContext().registerService(
 					getAgentInterfaces(),  this, properties);
-			} catch (IllegalStateException e) {
+			} catch (Exception e) {
+				e.printStackTrace();
 				this.mediator.error("The agent is not registered ", e);
 			}
 			doStart();

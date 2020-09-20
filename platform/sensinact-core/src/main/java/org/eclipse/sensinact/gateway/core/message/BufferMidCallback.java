@@ -54,9 +54,9 @@ public class BufferMidCallback extends UnaryMidCallback {
 		buffer = new SnaMessage[this.bufferSize];
 	}
 
-	/**
-	 * @inheritDoc
-	 *
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see StackEngineHandler#doHandle(java.lang.Object)
 	 */
 	@Override

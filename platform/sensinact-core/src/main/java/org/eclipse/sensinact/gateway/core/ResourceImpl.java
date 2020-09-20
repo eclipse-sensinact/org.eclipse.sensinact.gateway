@@ -554,21 +554,11 @@ public class ResourceImpl extends
 		return (Class<S>) this.resourceType;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see Elements#getName()
-	 */
 	@Override
 	public String getName() {
 		return (String) this.getAttribute(Resource.NAME).getValue();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see Typable#getType()
-	 */
 	@Override
 	public Resource.Type getType() {
 		return (Resource.Type) this.getAttribute(Resource.TYPE).getValue();
@@ -767,11 +757,6 @@ public class ResourceImpl extends
 		this.links.add(path);
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.SnaObject#isRegistered()
-	 */
 	@Override
 	public void start() {
 		if (!super.getModelInstance().isRegistered() || this.isHidden()) {
@@ -844,12 +829,6 @@ public class ResourceImpl extends
 		super.stop();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ModelElement# passOn(AccessMethod.Type, java.lang.String,
-	 *      java.lang.Object[])
-	 */
 	@Override
 	protected <TASK> TASK passOn(String type, String uri, Object[] parameters) throws Exception {
 		if (!type.equals(AccessMethod.GET) || this.getUpdatePolicy() == Resource.UpdatePolicy.NONE
@@ -878,31 +857,16 @@ public class ResourceImpl extends
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see ModelElement#getProxyType()
-	 */
 	@Override
 	protected Class<? extends ElementsProxy<AttributeDescription>> getProxyType() {
 		return this.resourceType;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ModelElement#getRegisteredEvent()
-	 */
 	@Override
 	protected SnaLifecycleMessage.Lifecycle getRegisteredEvent() {
 		return SnaLifecycleMessage.Lifecycle.RESOURCE_APPEARING;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ModelElement#getUnregisteredEvent()
-	 */
 	@Override
 	protected SnaLifecycleMessage.Lifecycle getUnregisteredEvent() {
 		return SnaLifecycleMessage.Lifecycle.RESOURCE_DISAPPEARING;
@@ -927,25 +891,12 @@ public class ResourceImpl extends
 		return this.updatePolicy;
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement#
-	 *      getProxy(java.util.List)
-	 */
 	@Override
 	public ResourceProxy getProxy(List<MethodAccessibility> methodAccessibilities) {
 		ResourceProxy proxy = new ResourceProxy(super.modelInstance.mediator(), this, methodAccessibilities);
 		return proxy;
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.ModelElement#
-	 *      getElementProxy(org.eclipse.sensinact.gateway.core.security.AccessTree,
-	 *      org.eclipse.sensinact.gateway.common.primitive.Nameable)
-	 */
 	@Override
 	protected AttributeDescription getElementProxy(AccessTree<?> tree, Attribute element)
 			throws ModelElementProxyBuildException {
@@ -955,13 +906,6 @@ public class ResourceImpl extends
 		return element.getDescription();
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.ModelElement#
-	 *      getWrapper(org.eclipse.sensinact.gateway.core.ModelElementProxy,
-	 *      org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree)
-	 */
 	@Override
 	protected ModelElementProxyWrapper getWrapper(ResourceProxy proxy, ImmutableAccessTree tree) {
 		ResourceProxyWrapper wrapper = new ResourceProxyWrapper(proxy, tree);
