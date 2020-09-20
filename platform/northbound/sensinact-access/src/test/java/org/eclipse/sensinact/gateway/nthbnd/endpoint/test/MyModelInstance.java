@@ -41,7 +41,7 @@ public class MyModelInstance<C extends ModelConfiguration> extends ModelInstance
     }
 
     public MessageRouter getHandler() {
-        return super.messageHandler;
+        return super.messageRouter;
     }
 
     /**

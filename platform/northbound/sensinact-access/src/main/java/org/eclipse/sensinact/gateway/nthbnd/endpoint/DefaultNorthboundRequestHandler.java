@@ -147,8 +147,10 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
                 this.isElementsList = true;	
                 break;
 	        case "sensinact":
-	            this.method = "ALL";
-	            this.multi = true;
+	        	if(this.method==null) {
+	        		this.method = "ALL";
+	        	}
+	        	this.multi = true;
                 break;
             default:
             	break;
@@ -440,7 +442,8 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
                     }
                 }
                 if (sender == null) {
-                    sender = "/[^/]+(/[^/]+)*";
+                    sender = "(/[^/]+)+";
+                    isPattern = true;
                 }
                 if (types == null) {
                     types = SnaMessage.Type.values();

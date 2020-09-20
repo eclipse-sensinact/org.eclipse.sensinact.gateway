@@ -26,12 +26,8 @@ public class WebSocketRecipient extends NorthboundRecipient {
         this.wsConnection = wsConnection;
     }
 
-    /**
-     * @inheritDoc
-     * @see MidNorthboundRecipient#
-     * doCallback(java.lang.String, SnaMessage)
-     */
-    public void callback(String callbackId, SnaMessage[] messages) {
+    @Override
+    public void callback(String callbackId, SnaMessage[] messages) throws Exception {
         int index = 0;
         int length = messages == null ? 0 : messages.length;
         StringBuilder builder = new StringBuilder();
@@ -53,11 +49,7 @@ public class WebSocketRecipient extends NorthboundRecipient {
         }
         builder.append(JSONUtils.CLOSE_BRACKET);
         builder.append(JSONUtils.CLOSE_BRACE);
-        try {
-            this.wsConnection.send(builder.toString());
-        } catch (Exception e) {
-            super.mediator.error(e);
-        }
+        this.wsConnection.send(builder.toString());
     }
 
 }

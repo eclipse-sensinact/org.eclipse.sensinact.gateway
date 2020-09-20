@@ -65,7 +65,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
         simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + 
         	"/providers/slider/services/cursor/resources/position/SUBSCRIBE",
         	"{\"parameters\" : [{\"name\":\"callback\", \"type\":\"string\",\"value\":\"http://localhost:8898\"}]}", "POST");
-        //System.out.println(simulated);
+        System.out.println(simulated);
 
         response = new JSONObject(simulated);
 
@@ -89,6 +89,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
         Thread.sleep(5000);
         slider.move(0);
         message = waitForAvailableMessage(10000);
+        System.out.println(message);
         Assert.assertNotNull(message);
         response = new JSONObject(message);
         response = response.getJSONArray("messages").getJSONObject(0);
@@ -105,7 +106,7 @@ public class TestRestSUBSCRIBE_UNSUBSCRIBEAccess extends TestRestAccess {
 
         simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/cursor/resources/position/UNSUBSCRIBE", "{\"parameters\" : [{\"name\":\"subscriptionId\", \"type\":\"string\", \"value\":\"" + subscriptionId + "\"}]}", "POST");
 
-        //System.out.println(simulated);
+        System.out.println(simulated);
         response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/cursor/position"));

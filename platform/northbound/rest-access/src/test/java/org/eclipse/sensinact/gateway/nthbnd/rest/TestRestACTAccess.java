@@ -57,7 +57,7 @@ public class TestRestACTAccess extends TestRestAccess {
         assertTrue(response.getString("uri").equals("/light/switch/status"));
         assertTrue(response.getJSONObject("response").get("value").equals("OFF"));
         simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/light/switch/turn_on/ACT", null, "POST");
-
+        System.out.println(simulated);
         response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
 
@@ -79,7 +79,8 @@ public class TestRestACTAccess extends TestRestAccess {
         assertTrue(response.getString("uri").equals("/light/switch/brightness"));
         assertTrue(response.getJSONObject("response").get("value").equals(10));
         simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/light/services/switch/resources/dim/ACT", "{\"parameters\":[{\"name\": \"brightness\",\"value\": 5,\"type\": \"int\"}]}", "POST");
-
+        System.out.println(simulated);
+        
         response = new JSONObject(simulated);
         System.out.println(response.toString());
 

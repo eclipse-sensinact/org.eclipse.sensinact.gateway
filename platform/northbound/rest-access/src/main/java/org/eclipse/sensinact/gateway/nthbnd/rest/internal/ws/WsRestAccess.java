@@ -20,6 +20,7 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -72,13 +73,17 @@ public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest> {
         }
         byte[] resultBytes;
         List<String> acceptEncoding = super.request.getQueryMap().get("Accept-Encoding");
-        if (acceptEncoding != null && acceptEncoding.contains("gzip")) {
-            resultBytes = NorthboundAccess.compress(result);
-            this.wsConnection.send(resultBytes);
-
-        } else {
-            resultBytes = result.getBytes("UTF-8");
-            this.wsConnection.send(new String(resultBytes));
+        try {
+	        if (acceptEncoding != null && acceptEncoding.contains("gzip")) {
+	            resultBytes = NorthboundAccess.compress(result);
+	            this.wsConnection.send(resultBytes);
+	
+	        } else {
+	            resultBytes = result.getBytes("UTF-8");
+	            this.wsConnection.send(new String(resultBytes));
+	        }
+        } catch(Exception e) {
+        	throw new IOException(e);
         }
         return true;
     }
@@ -92,6 +97,10 @@ public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest> {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("statusCode", i);
         jsonObject.put("message", message);
-        this.wsConnection.send(new String(jsonObject.toString().getBytes("UTF-8")));
+        try {
+			this.wsConnection.send(new String(jsonObject.toString().getBytes("UTF-8")));
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
     }
 }

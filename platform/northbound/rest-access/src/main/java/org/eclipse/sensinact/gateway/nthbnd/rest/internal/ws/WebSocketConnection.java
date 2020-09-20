@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Future;
@@ -99,13 +98,25 @@ public class WebSocketConnection {
             restAccess.proceed();
         } catch (IOException | JSONException e) {
             this.mediator.error(e);
-            this.send(new JSONObject().put("statusCode", 400).put("message", "Bad request").toString());
+            try {
+				this.send(new JSONObject().put("statusCode", 400).put("message", "Bad request").toString());
+			} catch (Exception e1) {
+	            this.mediator.error(e1);
+			}
         } catch (InvalidCredentialException e) {
             this.mediator.error(e);
-            this.send(new JSONObject().put("statusCode", 403).put("message", e.getMessage()).toString());
+            try {
+				this.send(new JSONObject().put("statusCode", 403).put("message", e.getMessage()).toString());
+			} catch (Exception e1) {
+	            this.mediator.error(e1);
+			}
         } catch (Exception e) {
             this.mediator.error(e);
-            this.send(new JSONObject().put("statusCode", 500).put("message", "Exception - Internal server error").toString());
+            try {
+				this.send(new JSONObject().put("statusCode", 500).put("message", "Exception - Internal server error").toString());
+			} catch (Exception e1) {
+	            this.mediator.error(e1);
+			}
         }
     }
 
@@ -113,25 +124,42 @@ public class WebSocketConnection {
 	private byte[] payload; 
 	
 	@OnWebSocketFrame
-	public void onFrame(Frame frame) {	
-		if(OpCode.CONTINUATION != frame.getOpCode() && frame.isFin()) {
-			partial = false;
-			return;
-		}
-		partial = true;
-		byte[] bytes = new byte[frame.getPayloadLength()];
-		frame.getPayload().get(bytes);
-		int length = payload==null?0:payload.length;
-		byte[] tmpArray = new byte[length+bytes.length] ;
-		if(bytes.length > 0)
-			System.arraycopy(bytes,0, tmpArray, length, bytes.length);
-		if(length > 0)
-			System.arraycopy(payload, 0, tmpArray, 0, length);
-		payload = tmpArray;	
-		tmpArray = null;
-		if(frame.isFin()) {
-			onMessage(new String(payload));
-			payload = null;
+	public void onFrame(Frame frame) {		
+		switch(frame.getOpCode()) {		
+			case OpCode.PING :
+				partial = true;
+				try {
+					this.session.getRemote().sendPong(ByteBuffer.allocate(0));
+				} catch (IOException e) {
+		            this.mediator.error(e);
+				}
+				break;
+			case OpCode.PONG :
+				partial = true;
+				break;
+			case OpCode.CONTINUATION:
+				partial = true;
+				byte[] bytes = new byte[frame.getPayloadLength()];
+				frame.getPayload().get(bytes);
+				int length = payload==null?0:payload.length;
+				byte[] tmpArray = new byte[length+bytes.length] ;
+				if(bytes.length > 0)
+					System.arraycopy(bytes,0, tmpArray, length, bytes.length);
+				if(length > 0)
+					System.arraycopy(payload, 0, tmpArray, 0, length);
+				payload = tmpArray;	
+				tmpArray = null;
+				if(frame.isFin()) {
+					partial = false;
+					onMessage(new String(payload));
+					partial = true;
+					payload = null;
+				}
+				break;
+			default:
+				if(frame.isFin())
+					partial = false;
+				break;
 		}
 	}
 	
@@ -140,7 +168,7 @@ public class WebSocketConnection {
         error.printStackTrace();
     }
     
-    protected void send(String message) {
+    protected void send(String message) throws Exception {
         if (this.session == null)
             return;
         try {
@@ -160,11 +188,17 @@ public class WebSocketConnection {
         		future.get(1, TimeUnit.SECONDS);
         	}
         } catch (Exception e) {
-            this.mediator.error(new StringBuilder().append("Session ").append(session.getLocalAddress()).append("seems to be invalid, removing from the pool.").toString(), e);
+            this.mediator.error(new StringBuilder(
+            	).append("Session "
+            	).append(session.getLocalAddress()
+            	).append("seems to be invalid, removing from the pool."
+            	).toString(), e);
+            pool.deleteSocketEndpoint(this);
+            throw e;
         }
     }
 
-    protected void send(byte[] message) {
+    protected void send(byte[] message) throws Exception {
         if (this.session == null)
             return;
         try {
@@ -183,7 +217,13 @@ public class WebSocketConnection {
 	    		future.get(1, TimeUnit.SECONDS);
 	    	}
         } catch (Exception e) {
-            this.mediator.error(new StringBuilder().append("Session ").append(session.getLocalAddress()).append("seems to be invalid, removing from the pool.").toString(), e);
+            this.mediator.error(new StringBuilder(
+            		).append("Session "
+            		).append(session.getLocalAddress()
+            		).append("seems to be invalid, removing from the pool."
+            		).toString(), e);
+            pool.deleteSocketEndpoint(this);
+            throw e;
         }
     }
 }

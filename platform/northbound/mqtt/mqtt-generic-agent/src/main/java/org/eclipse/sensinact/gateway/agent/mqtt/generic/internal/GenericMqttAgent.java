@@ -10,22 +10,22 @@
  */
 package org.eclipse.sensinact.gateway.agent.mqtt.generic.internal;
 
+import java.io.IOException;
+
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 /**
  * Generic MQTT Agent
  */
-public class GenericMqttAgent extends AbstractMidAgentCallback {
+public class GenericMqttAgent {
+	
     private static final Logger LOG = LoggerFactory.getLogger(GenericMqttAgent.class);
     private final String broker;
     private final int qos;

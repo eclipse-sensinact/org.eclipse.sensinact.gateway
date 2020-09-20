@@ -116,6 +116,7 @@ public class WsServiceTestClient implements Runnable {
     public void onMessage(String message) {
         this.setAvailable(true);
         this.lastMessage = message;
+        System.out.println(message);
     }
 
     @OnWebSocketError
