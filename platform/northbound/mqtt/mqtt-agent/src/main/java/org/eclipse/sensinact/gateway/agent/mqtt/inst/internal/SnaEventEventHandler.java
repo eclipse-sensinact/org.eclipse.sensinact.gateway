@@ -41,7 +41,7 @@ public class SnaEventEventHandler extends AbstractMqttHandler {
      * @param event the RegisteredUpdatedSnaEvent to process
      */
     public void doHandle(SnaUpdateMessageImpl event) {
-        try {
+        try {        	
             LOG.debug("Event received update:"+event.getJSON().toString());
             JSONObject eventJson = new JSONObject(event.getJSON()).getJSONObject("notification");
             String provider = event.getPath().split("/")[1];

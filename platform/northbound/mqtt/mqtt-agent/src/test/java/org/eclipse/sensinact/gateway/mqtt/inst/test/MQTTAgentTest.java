@@ -29,8 +29,6 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -138,7 +136,7 @@ public class MQTTAgentTest {
         JSONObject j = new JSONObject(s);
 
         assertEquals(0, j.getJSONObject("response").getInt("value"));
-        Thread.sleep(2000);
+        Thread.sleep(5000);
         
         instances.get(3).moveSlider(45);
         s = instances.get(3).get("slider", "cursor", "position");
