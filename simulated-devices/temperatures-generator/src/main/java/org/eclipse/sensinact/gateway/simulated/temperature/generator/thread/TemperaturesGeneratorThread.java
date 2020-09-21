@@ -24,7 +24,7 @@ public class TemperaturesGeneratorThread extends Thread implements Runnable {
         this.connector = connector;
         this.deviceInfo = deviceInfo;
         try {
-            this.connector.process(new TemperaturesGeneratorDiscoveryPacket(deviceInfo.getServiceProviderId(), deviceInfo.getLocation(), deviceInfo.getFloor(), deviceInfo.getTemperatures()[0]));
+            this.connector.process(new TemperaturesGeneratorDiscoveryPacket(deviceInfo.getServiceProviderId(), deviceInfo.getLocation(), deviceInfo.getTemperatures()[0]));
         } catch (InvalidPacketException e) {
             e.printStackTrace();
         }

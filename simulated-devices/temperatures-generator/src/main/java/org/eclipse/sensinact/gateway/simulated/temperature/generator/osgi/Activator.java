@@ -26,7 +26,7 @@ import org.osgi.framework.BundleContext;
 import java.util.Collections;
 
 public class Activator extends AbstractActivator<Mediator> {
-    @Property(name = "org.eclipse.sensinact.simulated.generator.amount", defaultValue = "30")
+    @Property(name = "org.eclipse.sensinact.simulated.generator.amount", defaultValue = "10")
     Integer DEVICES_NUMBER;
     private LocalProtocolStackEndpoint<TemperaturesGeneratorPacket> connector;
     private ExtModelConfiguration<TemperaturesGeneratorPacket> manager;

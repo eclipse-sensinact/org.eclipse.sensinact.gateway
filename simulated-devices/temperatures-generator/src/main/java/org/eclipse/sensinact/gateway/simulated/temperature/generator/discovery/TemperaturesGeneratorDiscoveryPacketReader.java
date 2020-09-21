@@ -33,13 +33,7 @@ public class TemperaturesGeneratorDiscoveryPacketReader extends TemperaturesGene
         super.setServiceId("admin");
         super.setResourceId("location");
         super.setData(((TemperaturesGeneratorDiscoveryPacket) packet).getLocation());
-        super.configure();       
-        super.setServiceProviderId(((TemperaturesGeneratorPacket) packet).getServiceProvider());
-        super.setServiceId("sensor");
-        super.setResourceId("temperature");
-        super.setAttributeId("floor");
-        super.setData(((TemperaturesGeneratorDiscoveryPacket) packet).getFloor());
-        super.configure();
+        super.configure();  
         super.setServiceProviderId(((TemperaturesGeneratorDiscoveryPacket) packet).getServiceProvider());
         super.setServiceId("sensor");
         super.setResourceId("temperature");
