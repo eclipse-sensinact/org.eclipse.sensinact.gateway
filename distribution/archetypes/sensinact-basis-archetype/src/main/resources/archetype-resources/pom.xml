@@ -30,9 +30,9 @@
 						<_exportcontents>!${package}.internal</_exportcontents>
 						<Import-Package>
 							org.eclipse.sensinact.gateway.core,
-							org.eclipse.sensinact.gateway.core.messsage,
-							org.eclipse.sensinact.gateway.core.messsage.annotation,
-							org.eclipse.sensinact.gateway.core.messsage.whiteboard,
+							org.eclipse.sensinact.gateway.core.message,
+							org.eclipse.sensinact.gateway.core.message.annotation,
+							org.eclipse.sensinact.gateway.core.message.whiteboard,
 							org.eclipse.sensinact.gateway.core.method,
 							org.eclipse.sensinact.gateway.core.method.builder,
 							org.eclipse.sensinact.gateway.core.method.trigger,
@@ -46,7 +46,6 @@
 							org.eclipse.sensinact.gateway.generic.packet.annotation,
 							org.eclipse.sensinact.gateway.generic.parser,
 							org.eclipse.sensinact.gateway.generic.stream,
-							org.eclipse.sensinact.gateway.common,
 							org.eclipse.sensinact.gateway.common.annotation,
 							org.eclipse.sensinact.gateway.common.bundle,
 							org.eclipse.sensinact.gateway.common.constraint,
@@ -62,7 +61,7 @@
 							org.eclipse.sensinact.gateway.util.stack,
 							org.eclipse.sensinact.gateway.util.tree,
 							org.eclipse.sensinact.gateway.util.xml,
-							*							
+							*					
 						</Import-Package>
 						<Bundle-Activator>${package}.osgi.Activator</Bundle-Activator>
 					</instructions>
