@@ -185,7 +185,7 @@ public class CallbackFactory {
         int callbackType = callbackService.getCallbackType();
         if((callbackType & CallbackService.CALLBACK_SERVLET) == CallbackService.CALLBACK_SERVLET) {
 	        
-        	CallbackServlet callbackServlet = new CallbackServlet(callbackService);
+        	CallbackServlet callbackServlet = new CallbackServlet(mediator, callbackService);
 
 	        Dictionary props = callbackService.getProperties();
 	        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, endpoint);
@@ -205,7 +205,7 @@ public class CallbackFactory {
         	
         	WebSocketServlet webSocketServlet = new WebSocketServlet() { 			
 				private static final long serialVersionUID = 1L;	
-				private CallbackWebSocketPool pool = new CallbackWebSocketPool(callbackService);    				
+				private CallbackWebSocketPool pool = new CallbackWebSocketPool(mediator, callbackService);    				
 		        private final AtomicBoolean firstCall = new AtomicBoolean(true); 
 		    
 				private final CountDownLatch initBarrier = new CountDownLatch(1); 

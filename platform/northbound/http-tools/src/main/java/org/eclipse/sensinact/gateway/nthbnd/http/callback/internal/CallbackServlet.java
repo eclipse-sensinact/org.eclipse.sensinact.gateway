@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.HttpRequestWrapper;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.HttpResponseWrapper;
@@ -33,15 +34,19 @@ import org.eclipse.sensinact.gateway.nthbnd.http.callback.ServletCallbackContext
 public class CallbackServlet extends HttpServlet implements Servlet{
 	
 	private CallbackService callbackService;
+	private Mediator mediator;
 
     /**
      * Constructor
-     *
+     * 
+     * @param mediator the {@link Mediator} allowing the CallbackServlet to be 
+     * instantiated to interact with the OSGi host environment
      * @param callbackService the {@link CallbackService} allowing the
      * CallbackServlet to be instantiated to process the callback request
      */
-    public CallbackServlet(CallbackService callbackService) {
+    public CallbackServlet(Mediator mediator, CallbackService callbackService) {
         this.callbackService = callbackService;
+        this.mediator = mediator;
     }
     
     /* (non-Javadoc)
@@ -61,7 +66,7 @@ public class CallbackServlet extends HttpServlet implements Servlet{
     	if (response.isCommitted()) {       	
     		return;
         }
-        final ServletCallbackContext context = new ServletCallbackContext(
+        final ServletCallbackContext context = new ServletCallbackContext(mediator,
         		new HttpRequestWrapper(request), new HttpResponseWrapper(response));
         try {
             if (CallbackServlet.this.callbackService != null) {

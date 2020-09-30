@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.http.callback;
 
+import org.eclipse.sensinact.gateway.core.Session;
+
 /**
  * {@link RequestWrapper} and {@link ResponseWrapper} holder
  * 
@@ -17,6 +19,13 @@ package org.eclipse.sensinact.gateway.nthbnd.http.callback;
  */
 public interface CallbackContext {
 
+    /**
+     * Returns an {@link Session} allowing to interact with the sensiNact instance
+     *
+     * @return an sensiNact {@link Session} instance - Null by default
+     */
+    Session getSession();
+    
     /**
      * Returns an {@link RequestWrapper} wrapping the underlying 
      * request whatever it is an Http or a websocket one.

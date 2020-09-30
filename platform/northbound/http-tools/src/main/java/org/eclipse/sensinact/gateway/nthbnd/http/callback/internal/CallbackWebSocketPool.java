@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
 
 /**
@@ -29,12 +30,14 @@ public class CallbackWebSocketPool implements WebSocketCreator {
 	
     private List<CallbackWebSocketServlet> sessions;
 	private CallbackService callbackService;
+	private Mediator mediator;
 
     /**
      * Constructor
      */
-    public CallbackWebSocketPool(CallbackService callbackService) {
+    public CallbackWebSocketPool(Mediator mediator, CallbackService callbackService) {
         this.callbackService = callbackService;
+        this.mediator = mediator;
         this.sessions = Collections.synchronizedList(new ArrayList<CallbackWebSocketServlet>());
     }
 
@@ -52,7 +55,7 @@ public class CallbackWebSocketPool implements WebSocketCreator {
 
     @Override
     public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
-        CallbackWebSocketServlet wrapper = new CallbackWebSocketServlet(callbackService);
+        CallbackWebSocketServlet wrapper = new CallbackWebSocketServlet(mediator,callbackService);
         if (wrapper != null) {
             this.sessions.add(wrapper);
         }

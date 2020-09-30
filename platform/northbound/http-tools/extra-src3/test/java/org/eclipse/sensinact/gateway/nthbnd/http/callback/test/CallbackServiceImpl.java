@@ -2,6 +2,8 @@ package org.eclipse.sensinact.gateway.nthbnd.http.callback.test;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequestWrapper;
 

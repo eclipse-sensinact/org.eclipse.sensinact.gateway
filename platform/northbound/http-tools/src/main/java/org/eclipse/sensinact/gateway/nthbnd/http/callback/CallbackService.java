@@ -60,4 +60,15 @@ public interface CallbackService {
      * processed and the response to be sent back to the requirer
      */
     void process(CallbackContext context);
+        
+//    /**
+//     * Returns this CallbackService's String identifier allowing to attach
+//     * an authenticated sensiNact's Session instance
+//     * 
+//     * @return this CallbackService's String identifier - Null by default 
+//     */
+//    default String getCallbackServiceIdentifier() {
+//    	return null;
+//    }
+    
 }

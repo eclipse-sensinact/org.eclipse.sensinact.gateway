@@ -18,6 +18,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.WebSocketCallbackContext;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.WebSocketRequestWrapper;
@@ -37,11 +38,20 @@ public class CallbackWebSocketServlet {
     private Logger LOG = LoggerFactory.getLogger(CallbackWebSocketServlet.class.getName());
     
 	private CallbackService callbackService;
-    
+	private Mediator mediator;
     protected Session session;
 
-    protected CallbackWebSocketServlet(CallbackService callbackService) {
+    /**
+     * Constructor
+     * 
+     * @param mediator the {@link Mediator} allowing the CallbackWebSocketServlet to be 
+     * instantiated to interact with the OSGi host environment
+     * @param callbackService the {@link CallbackService} allowing the
+     * CallbackWebSocketServlet to be instantiated to process the callback request
+     */ 
+    protected CallbackWebSocketServlet(Mediator mediator, CallbackService callbackService) {
         this.callbackService = callbackService;
+        this.mediator = mediator;
     }
     
     /**
@@ -73,7 +83,7 @@ public class CallbackWebSocketServlet {
      */
     @OnWebSocketMessage
     public void onMessage(String message) {
-        final WebSocketCallbackContext context = new WebSocketCallbackContext(
+        final WebSocketCallbackContext context = new WebSocketCallbackContext(mediator,
         new WebSocketRequestWrapper(message), new WebSocketResponseWrapper(this));
         try {
             if (this.callbackService != null) {
