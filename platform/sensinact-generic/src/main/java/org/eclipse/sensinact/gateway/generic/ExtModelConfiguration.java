@@ -531,7 +531,7 @@ public class ExtModelConfiguration<P extends Packet> extends ModelConfiguration 
             }  		
     	} else {
             if (this.customizer != null) {
-                return (N) new Connector<P>(mediator, endpoint, this, (ConnectorCustomizer<P>) this.customizer);
+                connector = (N) new Connector<P>(mediator, endpoint, this, (ConnectorCustomizer<P>) this.customizer);
             } else {
             	connector = (N) new Connector<P>(mediator, endpoint, this);
             }  		
