@@ -1077,8 +1077,7 @@ public class SensiNact implements Core {
 		/**
 		 * Constructor 
 		 * 
-		 * @param identifier
-		 * 		the String identifier of the Session to be created
+		 * @param identifier the String identifier of the Session to be created
 		 */
 		SensiNactAuthenticatedSession(String identifier) {
 			super(identifier);
@@ -1307,10 +1306,7 @@ public class SensiNact implements Core {
 			}
 		}
 	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.sensinact.gateway.core.Core#getSession(org.eclipse.sensinact.gateway.core.security.Authentication)
-	 */
+	
 	@Override
 	public AuthenticatedSession getSession(final Authentication<?> authentication)
 			throws InvalidKeyException, InvalidCredentialException {
@@ -1395,11 +1391,6 @@ public class SensiNact implements Core {
 		return session;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Core#getAnonymousSession()
-	 */
 	@Override
 	public AnonymousSession getAnonymousSession() {
 		int sessionCount = -1;
@@ -1421,13 +1412,7 @@ public class SensiNact implements Core {
 		}
 		return session;
 	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Core#
-	 *      getApplicationSession(java.lang.String)
-	 */
+	
 	@Override
 	public Session getApplicationSession(final Mediator mediator, final String privateKey) {
 
@@ -1465,43 +1450,15 @@ public class SensiNact implements Core {
 		return session;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Core#namespace()
-	 */
 	@Override
 	public String namespace() {
 		return this.registry.namespace();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Core#
-	 * registerAgent(org.eclipse.sensinact.gateway.common.bundle.Mediator,org.eclipse.sensinact.gateway.core.message.MidAgentCallback,org.eclipse.sensinact.gateway.core.message.SnaFilter)
-	 */
 	@Override
 	public String registerAgent(final Mediator mediator, final MidAgentCallback callback, final SnaFilter filter) {
-
-		final Bundle bundle = mediator.getContext().getBundle();
-
-		final String bundleIdentifier = this.doPrivilegedService(BundleValidation.class, null,
-				new Executable<BundleValidation, String>() {
-					@Override
-					public String execute(BundleValidation bundleValidation) throws Exception {
-						return bundleValidation.check(bundle);
-					}
-				});
-		final String agentKey = this.doPrivilegedService(SecuredAccess.class, null,
-				new Executable<SecuredAccess, String>() {
-					@Override
-					public String execute(SecuredAccess securedAccess) throws Exception {
-						return securedAccess.getAgentPublicKey(bundleIdentifier);
-					}
-				});
+		String agentKey = getAccessKey(mediator);		
 		final LocalAgent agent = LocalAgentImpl.createAgent(mediator, callback, filter, agentKey);
-
 		AccessController.<Void>doPrivileged(new PrivilegedAction<Void>() {
 			@Override
 			public Void run() {
@@ -1510,13 +1467,55 @@ public class SensiNact implements Core {
 			}
 		});
 		return callback.getName();
+	}	
+	
+	//Retrieves the access key attaches to a specific bundle and agent
+	private String getAccessKey(Mediator mediator) {
+		final Bundle bundle = mediator.getContext().getBundle();
+
+		final String bundleIdentifier = this.doPrivilegedService(BundleValidation.class, null,
+				new Executable<BundleValidation, String>() {
+					@Override
+					public String execute(BundleValidation bundleValidation) throws Exception {
+						return bundleValidation.check(bundle);
+					}
+				});		
+		String publicKey = this.doPrivilegedService(SecuredAccess.class, null,
+				new Executable<SecuredAccess, String>() {
+					@Override
+					public String execute(SecuredAccess securedAccess) throws Exception {
+						return securedAccess.getAgentPublicKey(bundleIdentifier);
+					}
+				});
+		return publicKey;
 	}
 	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Core#registerIntent(org.eclipse.sensinact.gateway.common.bundle.Mediator, org.eclipse.sensinact.gateway.common.execution.Executable, String...)
-	 */
+	//builds an AthenticatedSession based on the String public key passed as parameter 
+	private Session buildLocalSessionFromPublicKey(String publicKey) {
+		Session session = null;
+		Class<? extends Session> sessionClass = null;
+		String sessionToken;		
+		int sessionCount;
+		
+		synchronized(count) {
+			sessionCount = count.incrementAndGet();
+			sessionToken = this.nextToken();
+		}
+		AccessTree<? extends AccessNode> tree = SensiNact.this.getUserAccessTree(publicKey);
+		SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, sessionToken, tree, null);	
+		sessionKey.setUserKey(new UserKey(publicKey));	
+	
+		try {
+			session = new SensiNactAuthenticatedSession(sessionKey.getToken());
+			synchronized(SensiNact.this.sessions) {
+				SensiNact.this.sessions.put(sessionKey, session);
+			}
+		} catch (Exception e) {
+			mediator.error(e);
+		}
+		return session;
+	}
+
 	@Override
 	public String registerIntent(Mediator mediator, Executable<Boolean,Void> onAccessible, final String... path) {
 		

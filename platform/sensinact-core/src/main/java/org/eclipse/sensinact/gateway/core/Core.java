@@ -76,11 +76,9 @@ public interface Core {
 	 * Creates and returns a {@link Session} for the application whose private
 	 * String identifier is passed as parameter.
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
-	 * @param privateKey
-	 *            the application's private String identifier
+	 * @param mediator the {@link Mediator} allowing to interact with the OSGi 
+	 * host environment
+	 * @param privateKey the application's private String identifier
 	 * 
 	 * @return the {@link Session} for the specified application
 	 */
