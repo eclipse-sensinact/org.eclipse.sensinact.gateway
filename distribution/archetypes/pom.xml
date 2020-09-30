@@ -30,5 +30,6 @@
 	<modules>
 		<module>sensinact-basis-archetype</module>
 		<module>sensinact-http-archetype</module>
+		<module>sensinact-webapp-archetype</module>
 	</modules>
 </project>

@@ -10,6 +10,8 @@
    
    <properties>
    		<maven.build.timestamp.format>yyyy.mm.dd</maven.build.timestamp.format>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
    </properties>
    
    <build>
@@ -67,7 +69,7 @@
 						org.eclipse.sensinact.gateway.sthbnd.http.*,
 						*							
 				  </Import-Package> 
-	              <Bundle-Activator>${package}.osgi.Activator</Bundle-Activator> 
+	              <Bundle-Activator>${package}.osgi.Activator</Bundle-Activator>
 	            </instructions>
 	          </configuration>
 	      </plugin>
@@ -85,6 +87,12 @@
 		<groupId>org.osgi</groupId>
 		<artifactId>osgi.cmpn</artifactId>
 		<version>7.0.0</version>
+		<scope>provided</scope>
+	</dependency>
+	<dependency>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-api</artifactId>
+		<version>1.7.30</version>
 		<scope>provided</scope>
 	</dependency>
 	<dependency>
@@ -118,11 +126,23 @@
 		<scope>provided</scope>
 	</dependency> 	
 	<dependency>
-		<groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
-		<artifactId>http-device</artifactId>
+		<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+		<artifactId>http-tools</artifactId>
 		<version>${sensinactVersion}</version>
 		<scope>provided</scope>
 	</dependency>
+	<dependency>
+		<groupId>org.apache.felix</groupId>
+		<artifactId>org.apache.felix.http.servlet-api</artifactId>
+		<version>1.1.2</version>
+		<scope>provided</scope>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.felix</groupId>
+		<artifactId>org.apache.felix.http.jetty</artifactId>
+		<version>4.0.14</version>
+		<scope>provided</scope>
+		</dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
