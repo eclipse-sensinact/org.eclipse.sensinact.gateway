@@ -36,6 +36,8 @@ import javax.jmdns.ServiceListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 @HttpTasks(
     recurrences = {
@@ -114,21 +116,22 @@ public class Activator extends HttpActivator implements ServiceListener {
         configuration = ExtModelConfigurationBuilder.instance(mediator, getPacketType())
         		.withStartAtInitializationTime(isStartingAtInitializationTime())
         		.withServiceBuildPolicy(getServiceBuildPolicy())
-        		.withResourceBuildPolicy(getResourceBuildPolicy())
-        		.build(getResourceDescriptionFile(), getDefaults());
+        		.withResourceBuildPolicy(getResourceBuildPolicy()
+        		).build(getResourceDescriptionFile(), getDefaults());
         
         endpoints = new HashMap<String, SimpleHttpProtocolStackEndpoint>();
-        ServerLocation server = OpenHabServerFinder.getServerLocation((OpenHabMediator) mediator, this);
-
-        try {
-        	String endpointId = buildEndpointId(server);
-            SimpleHttpProtocolStackEndpoint endpoint = configureProtocolStackEndpoint();
-            endpoint.setEndpointIdentifier(endpointId);
-            endpoint.connect(configuration);
-            endpoints.put(endpointId, endpoint);
-            ((OpenHabMediator) mediator).addBroker(endpointId, new Broker(server));
-        } catch (Exception e) {
-            mediator.error(e);
+        List<ServerLocation> servers = OpenHabServerFinder.getServerLocation((OpenHabMediator) mediator, this);
+        for(ServerLocation server : servers) {
+	        try {
+	        	String endpointId = buildEndpointId(server);
+	            SimpleHttpProtocolStackEndpoint endpoint = configureProtocolStackEndpoint();
+	            endpoint.setEndpointIdentifier(endpointId);
+	            endpoint.connect(configuration);
+	            endpoints.put(endpointId, endpoint);
+	            ((OpenHabMediator) mediator).addBroker(endpointId, new Broker(server));
+	        } catch (Exception e) {
+	            mediator.error(e);
+	        }
         }
     }
 
