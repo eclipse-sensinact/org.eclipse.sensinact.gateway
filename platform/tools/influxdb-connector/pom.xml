@@ -1,0 +1,84 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.sensinact.gateway.tools</groupId>
+		<artifactId>platform.tools</artifactId>
+		<version>2.0-SNAPSHOT</version>
+	</parent>
+
+    <artifactId>influxdb-connector</artifactId>
+    <packaging>bundle</packaging>
+
+
+	<name>sensiNact IoT Gateway - Influxdb Connector</name>
+	
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.influxdb</groupId>
+            <artifactId>influxdb-java</artifactId>
+            <type>jar</type>
+        </dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<scope>provided</scope>
+		</dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                    	<Import-Package>                
+                    		javax.annotation,
+                    		javax.annotation.meta,
+                    		javax.crypto,
+                    		javax.crypto.spec,
+                    		javax.net,
+                    		javax.net.ssl,
+                    		javax.security.auth.x500,
+                    		org.slf4j;version="[1.7,2)",
+                    		sun.misc
+                    	</Import-Package>
+                    	<Export-Package>
+                    		org.influxdb,
+                    		org.influxdb.annotation,
+                    		org.influxdb.dto,
+                    		okhttp3,
+                    		okio,
+                    		org.eclipse.sensinact.gateway.tools.connector.influxdb                    		
+                    	</Export-Package>
+                    	<Private-Package> 
+                    		org.influxdb.impl,
+                    		org.influxdb.msgpack,
+                    		org.influxdb.querybuilder,
+                    		org.influxdb.querybuilder.clauses,
+                    		com.squareup.moshi,
+                    		okhttp3.*,
+                    		org.json,
+                    		org.msgpack.core,
+                    		org.msgpack.value,
+                    		org.msgpack.value.*,
+                    		retrofit2,
+                    		retrofit2.*,
+                    		org.msgpack.core.buffer
+                    	</Private-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
