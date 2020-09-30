@@ -15,7 +15,7 @@
     <identifier xsi:type="stringContent">TEMPERATURE</identifier>
     <attributes>
     	<attribute name="value" type="double"></attribute>
-    	<attribute name="floor" type="int" modifiable="MODIFIABLE"></attribute>
+    	<attribute name="floor" type="int" modifiable="MODIFIABLE" observed="true"></attribute>
     </attributes>
   </resourceInfo>
 </resourceInfos>
