@@ -12,7 +12,10 @@ package org.eclipse.sensinact.gateway.tools.connector.influxdb;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
@@ -56,6 +59,19 @@ public class InfluxDbDatabase {
 
         influxDB.setDatabase(database);
         influxDB.setRetentionPolicy("autogen");
+	}
+	
+	private boolean isValidDate(String datetime) {
+		try {
+			SimpleDateFormat format = THREAD_LOCAL_FORMAT.get();			
+			format.parse(datetime);
+		}catch(ParseException e) {
+			LOG.error(e.getMessage(),e);
+			return false;
+		}finally {
+			THREAD_LOCAL_FORMAT.remove();
+		}
+		return true;
 	}
 
     /**
@@ -213,7 +229,7 @@ public class InfluxDbDatabase {
      * @return the JSON formated String result of the research
      */
     public String get(String measurement, List<String> columns, Dictionary<String,String> tags, String start) {
-    	if(start == null)
+    	if(start == null || !isValidDate(start))
     		return get(measurement, columns, tags);
     	String select = null;
     	if(columns==null || columns.isEmpty())
@@ -226,19 +242,9 @@ public class InfluxDbDatabase {
     	select =select.substring(0,select.length()-1);
 
     	String from = String.format(" FROM %s " , measurement);
-    	long startTime = -1;
-
-		try {
-			SimpleDateFormat format = THREAD_LOCAL_FORMAT.get();			
-			startTime = format.parse(start).getTime();
-		}catch(ParseException e) {
-			LOG.error(e.getMessage(),e);
-		}finally {
-			THREAD_LOCAL_FORMAT.remove();
-		}
+    	
     	String where = null;
-    	if(tags != null && !tags.isEmpty()) {
-    		
+    	if(tags != null && !tags.isEmpty()) {    		
 	   		StringBuilder builder = new StringBuilder();
 	   		builder.append(" WHERE ");
 			for(Iterator<String> it = Collections.list(tags.keys()).iterator();it.hasNext();) {
@@ -250,15 +256,11 @@ public class InfluxDbDatabase {
 				if(it.hasNext())
 					builder.append(" AND ");
 			}
-			if(startTime > 0)
-				builder.append(String.format(" AND time > %s", startTime));
+			builder.append(String.format(" AND time > '%s'", start));
 			where = builder.toString();
-    	} else {
-			if(startTime > 0)
-				where = String.format(" WHERE time > %s", startTime);
-			else
-				where="";
-    	}
+    	} else 
+			where = String.format(" WHERE time > '%s'", start);
+    	
     	Query query = new Query(String.format("SELECT %s%s%s", select, from, where),database);
     	QueryResult result = this.influxDB.query(query);
     	return result.toString();
@@ -278,7 +280,7 @@ public class InfluxDbDatabase {
      * @return the JSON formated String result of the research
      */
     public String get(String measurement, List<String> columns, Dictionary<String,String> tags, String start, String end) {
-    	if(end == null)
+    	if(end == null || !isValidDate(end))
     		return get(measurement, columns, tags, start);
     	String select = null;
     	if(columns==null || columns.isEmpty())
@@ -291,19 +293,14 @@ public class InfluxDbDatabase {
     	select =select.substring(0,select.length()-1);
 
     	String from = String.format(" FROM %s " , measurement);
-
-    	long startTime = -1;
-    	long endTime = -1;
-    	try {
-			SimpleDateFormat format = THREAD_LOCAL_FORMAT.get();
-			startTime = format.parse(start).getTime();
-			endTime = format.parse(end).getTime();
-		} catch(ParseException e) {
-			LOG.error(e.getMessage(),e);
-		} finally {
-			THREAD_LOCAL_FORMAT.remove();
+    	if(start == null || !isValidDate(start)) {   
+			try { 		
+				    SimpleDateFormat format = THREAD_LOCAL_FORMAT.get();
+				    start = format.format(Date.from(Instant.ofEpochMilli(0)));
+				} finally {
+					 THREAD_LOCAL_FORMAT.remove();
+				}
 		}
-		
     	String where = null;
     	if(tags != null && !tags.isEmpty()) {
 	   		StringBuilder builder = new StringBuilder();
@@ -318,14 +315,9 @@ public class InfluxDbDatabase {
 					builder.append(" AND ");
 			}
 			where = builder.toString();
-			if(startTime > 0 && endTime > 0)
-				builder.append(String.format(" AND time > %s AND time < %s", startTime, endTime));
-    	} else {
-			if(startTime > 0 && endTime > 0)
-				where = String.format(" WHERE time > %s AND time < %s", startTime, endTime);
-			else
-				where="";
-    	}
+		    builder.append(String.format(" AND time > '%s' AND time < '%s'", start, end));
+    	} else 
+			where = String.format(" WHERE time > '%s' AND time < '%s'", start, end);
     	Query query = new Query(String.format("SELECT %s%s%s", select, from, where),database);
     	QueryResult result = this.influxDB.query(query);
     	return result.toString();
@@ -396,7 +388,7 @@ public class InfluxDbDatabase {
      * @return the List of resultType typed instances resulting of the search
      */
     public <T> List<T> get(Class<T> resultType, String measurement, List<String> columns, Dictionary<String,String> tags, String start) {
-    	if(start == null)
+    	if(start == null || !isValidDate(start))
     		return get(resultType, measurement, columns, tags);
     	String select = null;
     	if(columns.isEmpty())
@@ -409,16 +401,6 @@ public class InfluxDbDatabase {
     	select =select.substring(0,select.length()-1);
     	
     	String from = String.format(" FROM %s " , measurement);
-    	long startTime = -1;
-
-    	try {
-			SimpleDateFormat format = THREAD_LOCAL_FORMAT.get();
-			startTime = format.parse(start).getTime();
-		}catch(ParseException e) {
-			LOG.error(e.getMessage(),e);
-		} finally {
-			THREAD_LOCAL_FORMAT.remove();
-		}
 		
     	String where = null;
     	if(tags != null && !tags.isEmpty()) {
@@ -433,15 +415,10 @@ public class InfluxDbDatabase {
 				if(it.hasNext())
 					builder.append(" AND ");
 			}
-			if(startTime > 0)
-				builder.append(String.format(" AND time > %s", startTime));
+			builder.append(String.format(" AND time > '%s'", start));
 			where = builder.toString();
-    	} else {
-			if(startTime > 0)
-				where = String.format(" WHERE time > %s", startTime);
-			else
-				where="";
-    	}    	
+    	} else
+    		where = String.format(" WHERE time > '%s'", start);
     	Query query = new Query(String.format("SELECT %s%s%s", select, from, where),database);
     	QueryResult result = this.influxDB.query(query);
     	InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
@@ -465,7 +442,7 @@ public class InfluxDbDatabase {
      * @return the List of resultType typed instances resulting of the search
      */
     public <T> List<T> get(Class<T> resultType, String measurement, List<String> columns, Dictionary<String,String> tags, String start, String end) {
-    	if(end == null)
+    	if(end == null || !isValidDate(end))
     		return get(resultType, measurement, columns, tags, start);
     	String select = null;
     	if(columns.isEmpty())
@@ -479,16 +456,13 @@ public class InfluxDbDatabase {
     	
     	String from = String.format(" FROM %s " , measurement);
 
-    	long startTime = -1;
-    	long endTime = -1;
-		try {
-			SimpleDateFormat format = THREAD_LOCAL_FORMAT.get();
-			startTime = format.parse(start).getTime();
-			endTime = format.parse(end).getTime();
-		}catch(ParseException e) {
-			LOG.error(e.getMessage(),e);
-		} finally {
-			THREAD_LOCAL_FORMAT.remove();
+    	if(start == null || !isValidDate(start)) {   
+			try { 		
+				    SimpleDateFormat format = THREAD_LOCAL_FORMAT.get();
+				    start = format.format(Date.from(Instant.ofEpochMilli(0)));
+				} finally {
+					 THREAD_LOCAL_FORMAT.remove();
+				}
 		}
 		
     	String where = null;
@@ -504,14 +478,10 @@ public class InfluxDbDatabase {
 				if(it.hasNext())
 					builder.append(" AND ");
 			}
-			if(startTime > 0 && endTime > 0)
-				builder.append(String.format(" AND time > %s AND time < %s", startTime, endTime));
-    	} else {
-			if(startTime > 0 && endTime > 0)
-				where = String.format(" WHERE time > %s AND time < %s", startTime, endTime);
-			else
-				where="";
-    	}    	
+			builder.append(String.format(" AND time > '%s' AND time < '%s'", start, end));
+    	} else
+    		where = String.format(" WHERE time > '%s' AND time < '%s'", start, end);
+    	
     	Query query = new Query(String.format("SELECT %s%s%s", select, from, where),database);
     	QueryResult result = this.influxDB.query(query);
     	InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();

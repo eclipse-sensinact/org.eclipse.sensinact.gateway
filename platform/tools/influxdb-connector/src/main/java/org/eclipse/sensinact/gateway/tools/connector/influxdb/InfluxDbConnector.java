@@ -168,37 +168,4 @@ public class InfluxDbConnector  {
     public void close() {
     	this.influxDB.close();
     }
-    
-    
-    public static void main(String[] args) {
-    	try {
-			InfluxDbConnector connector = new InfluxDbConnector();
-			InfluxDbDatabase database = connector.createIfNotExists("sensinact");
-			database.add("test", new java.util.Hashtable<String,String>(){{
-				this.put("tag1","t1");
-				this.put("tag2","t2");
-				this.put("tag3","t3");				
-			}}, 25.21d);
-			database.add("test", new java.util.Hashtable<String,String>(){{
-				this.put("tag1","t0");
-				this.put("tag2","t2");
-				this.put("tag3","t0");				
-			}}, 25.0d);
-			database.add("test", new java.util.Hashtable<String,String>(){{
-				this.put("tag1","t0");
-				this.put("tag2","t2");
-				this.put("tag3","t3");				
-			}}, 24.2d);
-			database.add("test", new java.util.Hashtable<String,String>(){{
-				this.put("tag1","t1");
-				this.put("tag2","t0");
-				this.put("tag3","t0");				
-			}}, 20.0d);
-			System.out.println(database.get(Measure.class, "test", Arrays.asList("value"), new java.util.Hashtable<String,String>(){{
-				this.put("tag2","t2");}}));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}    	
-    }
-
 }
