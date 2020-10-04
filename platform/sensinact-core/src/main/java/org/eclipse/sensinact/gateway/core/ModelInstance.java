@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2017 CEA.
+* Copyright (c) 2020 Kentyou.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    CEA - initial API and implementation
+*    Kentyou - initial API and implementation
  */
 package org.eclipse.sensinact.gateway.core;
 
@@ -59,8 +59,8 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 			systemLongitude = Double.parseDouble(mediator.getContext().getProperty(ServiceProvider.LONGITUDE_PROPERTY));
 
 		} catch (Exception e) {
-			systemLatitude = ServiceProvider.DEFAULT_CEA_LOCATION_LATITUDE;
-			systemLongitude = ServiceProvider.DEFAULT_CEA_LOCATION_LONGITUDE;
+			systemLatitude = ServiceProvider.DEFAULT_Kentyou_LOCATION_LATITUDE;
+			systemLongitude = ServiceProvider.DEFAULT_Kentyou_LOCATION_LONGITUDE;
 		}
 		String locationStr = new StringBuilder().append(systemLatitude).append(":").append(systemLongitude).toString();
 		return locationStr;

@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2017 CEA.
+* Copyright (c) 2020 Kentyou.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    CEA - initial API and implementation
+*    Kentyou - initial API and implementation
  */
 package org.eclipse.sensinact.gateway.agent.http.onem2m.internal;
 
@@ -29,7 +29,7 @@ public class OneM2MModelResource {
     public OneM2MModelResource(String provider, String cseBase) {
         this.cseBase = cseBase;
         this.provider = provider;
-        this.origin = "CEA" + provider.toUpperCase();
+        this.origin = "Kentyou" + provider.toUpperCase();
     }
 
     public void addResourceInfo(String service, String resource, String value) {
@@ -43,7 +43,7 @@ public class OneM2MModelResource {
             content.put("lbl", new JSONArray().put(provider));
             resourceContainer.put("m2m:cnt", content);
             try {
-                Util.createRequest(cseBase, "POST", "CEA" + provider.toUpperCase(), "/" + provider, "application/json;ty=3", resourceContainer);
+                Util.createRequest(cseBase, "POST", "Kentyou" + provider.toUpperCase(), "/" + provider, "application/json;ty=3", resourceContainer);
             } catch (IOException e) {
                 LOG.error("Failed to process http request to OneM2M server {} to update device location", cseBase, e);
             }
@@ -53,7 +53,7 @@ public class OneM2MModelResource {
         content.put("con", value.toString());
         resourceValueContent.put("m2m:cin", content);
         try {
-            Util.createRequest(cseBase, "POST", "CEA" + provider.toUpperCase(), "/" + provider + "/" + resource, "application/json;ty=4", resourceValueContent);
+            Util.createRequest(cseBase, "POST", "Kentyou" + provider.toUpperCase(), "/" + provider + "/" + resource, "application/json;ty=4", resourceValueContent);
         } catch (IOException e) {
             LOG.error("Failed to process http request to OneM2M server {} to update device info", cseBase, e);
         }

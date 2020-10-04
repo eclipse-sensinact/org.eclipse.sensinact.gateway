@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2017 CEA.
+* Copyright (c) 2020 Kentyou.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    CEA - initial API and implementation
+*    Kentyou - initial API and implementation
  */
 package org.eclipse.sensinact.gateway.core;
 
@@ -25,8 +25,8 @@ public interface ServiceProvider
 
 	public static final String LONGITUDE_PROPERTY = "org.eclipse.sensinact.gateway.location.longitude";
 
-	public static final double DEFAULT_CEA_LOCATION_LATITUDE = 45.19334890078532d;
-	public static final double DEFAULT_CEA_LOCATION_LONGITUDE = 5.706474781036377d;
+	public static final double DEFAULT_Kentyou_LOCATION_LATITUDE = 45.19334890078532d;
+	public static final double DEFAULT_Kentyou_LOCATION_LONGITUDE = 5.706474781036377d;
 
 	/**
 	 * ServiceProvider's lifecycle possible states enumeration
