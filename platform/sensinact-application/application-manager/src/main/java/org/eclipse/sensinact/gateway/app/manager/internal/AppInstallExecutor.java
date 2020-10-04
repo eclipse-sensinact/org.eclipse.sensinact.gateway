@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2017 CEA.
+* Copyright (c) 2020 Kentyou.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    CEA - initial API and implementation
+*    Kentyou - initial API and implementation
  */
 package org.eclipse.sensinact.gateway.app.manager.internal;
 
@@ -101,7 +101,7 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
         return null;
     }
 
-    public Void install(final String name, JSONObject content) throws Exception {
+    public synchronized void install(final String name, JSONObject content) throws Exception {
         // Test the JSON parameters
         if (name == null) {
             throw new InvalidApplicationException("Unable to install the application: application 'name' is null");
@@ -159,7 +159,6 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
         } else {
             startApplication(name, appContainer, mediator);
         }
-        return null;
     }
 
     private void startApplication(String name, final AppContainer appContainer, AppServiceMediator mediator) {
@@ -212,18 +211,12 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
                 LOG.warn("Application {} did not activate SAR service", name);
             }
         } catch (ApplicationFactoryException e) {
-        	Thread.dumpStack();
-        	e.printStackTrace();
             if (mediator.isErrorLoggable()) {
                 mediator.error("Unable to create the application " + name + " > " + e.getMessage());
             }
             device.removeService(name);
             e.printStackTrace();
-        } catch (InvalidValueException e) {
-            e.printStackTrace();
-        } catch (InvalidServiceException e) {
-            e.printStackTrace();
-        } catch (InvalidResourceException e) {
+        } catch (InvalidValueException|InvalidServiceException|InvalidResourceException e) {
             e.printStackTrace();
         }
         if (mediator.isInfoLoggable()) {

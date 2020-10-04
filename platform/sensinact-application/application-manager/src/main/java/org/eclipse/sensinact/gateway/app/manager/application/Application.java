@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2017 CEA.
+* Copyright (c) 2020 Kentyou.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    CEA - initial API and implementation
+*    Kentyou - initial API and implementation
  */
 package org.eclipse.sensinact.gateway.app.manager.application;
 
@@ -117,8 +117,6 @@ public class Application extends AbstractSensiNactApplication {
                 return new AppSnaMessage(this.mediator, "/AppManager/" + getName(), SnaErrorMessage.Error.SYSTEM_ERROR, "Unable to start the application " + getName() + " > " + e.getMessage());
             }
         }
-
-
         try {
             for (Map.Entry<ResourceDataProvider, Collection<ResourceSubscription>> map : resourceSubscriptions.entrySet()) {
                 Collection<ResourceSubscription> resourceSubscriptions = map.getValue();
@@ -127,24 +125,14 @@ public class Application extends AbstractSensiNactApplication {
                     if (uriElements.length != 3) {
                         continue;
                     }
-
-                    /*
-                    DescribeResponse<JSONObject> response = super.getSession().getResource(uriElements[0], uriElements[1], uriElements[2]);
-                    if(response.getStatusCode()!=200) {
-                    	 throw new ResourceNotFoundException("The resource " + resourceSubscription.getResourceUri() + " is not accessible. Unable to subscribe to the resource.");
-                    }
-                    */
                     String subscriptionId = super.getSession().subscribe(uriElements[0], uriElements[1], uriElements[2], this,
                     		resourceSubscription.getConditionsAsJSONArray()).getSubscriptionId(); 
-                    System.out.println("SUBSCRIBING TO "+resourceSubscription.getResourceUri()+":" + subscriptionId);
                 	resourceSubscription.setSubscriptionId(subscriptionId);
-
                 }
             }
         } catch (Exception e) {
             return new AppSnaMessage(this.mediator, "/AppManager/" + getName(), SnaErrorMessage.Error.SYSTEM_ERROR, "Unable to start the application " + getName() + " > " + e.getMessage());
         }
-
         return new AppSnaMessage(this.mediator, "/AppManager/" + getName(), SnaErrorMessage.Error.NO_ERROR, "Application " + getName() + " started");
     }
 
