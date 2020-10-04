@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2017 CEA.
+* Copyright (c) 2020 Kentyou.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    CEA - initial API and implementation
+*    Kentyou - initial API and implementation
  */
 package org.eclipse.sensinact.gateway.core;
 
@@ -58,6 +58,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 /**
  * {@link Core} service implementation
@@ -1841,6 +1842,46 @@ public class SensiNact implements Core {
 		return object;
 	}
 
+	private boolean match(String expected, String found) {
+		if(expected == null)
+			return true;
+		if(found == null)
+			return false;
+		if(found.equals(expected))
+			return true;
+		if(!expected.startsWith("(") || !expected.endsWith(")"))
+			return false;		
+		String pattern = expected.substring(1,expected.length()-1);
+		boolean match = true;
+		if(pattern.startsWith("*")) {
+			int pos = found.length()-1;
+			for(int i=pattern.length()-1;i>0;i--) {
+				if(pattern.charAt(i)!=found.charAt(pos)) {					
+					match=false;
+					break;
+				}
+				pos--;
+			}
+	    } else if(pattern.endsWith("*")){
+			int pos = 0;
+			for(int i=0;i<pattern.length()-1;i++) {
+				if(pattern.charAt(i)!=found.charAt(pos)) {					
+					match=false;
+					break;
+				}
+				pos++;
+			}
+		} else {
+			try {
+				Pattern _pattern = Pattern.compile(pattern); 
+				match = _pattern.matcher(found).matches();
+			} catch(Exception e) {
+				match = false;
+			}
+		}
+		return match;
+	}
+	
 	/**
 	 * Invokes the GET access method on the resource whose String identifier is
 	 * passed as parameter, held by the specified service provider and service
@@ -1923,12 +1964,15 @@ public class SensiNact implements Core {
 				}
 				List<Service> services = p.getServices();
 				for (Service s : services) {
-					if (s == null || !s.isAccessible() || (serviceId != null && !s.getName().equals(serviceId)))
+					if (s == null || !s.isAccessible())
 						continue;
-					
+					if(!match(serviceId,s.getName()))
+						continue;
 					List<Resource> resources = s.getResources();
 					for (Resource r : resources) {
-						if (r == null || !r.isAccessible() || (resourceId != null && !r.getName().equals(resourceId)))
+						if (r == null || !r.isAccessible())
+							continue;
+						if(!match(resourceId,r.getName()))
 							continue;
 						final Resource resource = r;
 						final Resource.Type type = resource.getType();
