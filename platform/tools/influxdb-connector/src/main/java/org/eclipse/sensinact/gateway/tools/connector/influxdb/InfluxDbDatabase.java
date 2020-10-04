@@ -12,10 +12,8 @@ package org.eclipse.sensinact.gateway.tools.connector.influxdb;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
@@ -36,10 +34,23 @@ import org.slf4j.LoggerFactory;
  */
 public class InfluxDbDatabase {
 
-	private static final ThreadLocal<SimpleDateFormat> THREAD_LOCAL_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+	private interface SimpleDateFormatProvider {
+		Iterator<SimpleDateFormat> iterator();
+	}
+	
+	private static final ThreadLocal<SimpleDateFormatProvider> THREAD_LOCAL_FORMATS = new ThreadLocal<SimpleDateFormatProvider>() {
 		
-		protected SimpleDateFormat initialValue() {
-			return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		protected SimpleDateFormatProvider initialValue() {
+			return new SimpleDateFormatProvider(){
+
+				@Override
+				public Iterator<SimpleDateFormat> iterator() {
+					return Arrays.asList(
+						new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
+						new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+					).iterator();
+				}
+			};
 		}
 	};
 	
@@ -62,16 +73,20 @@ public class InfluxDbDatabase {
 	}
 	
 	private boolean isValidDate(String datetime) {
-		try {
-			SimpleDateFormat format = THREAD_LOCAL_FORMAT.get();			
-			format.parse(datetime);
-		}catch(ParseException e) {
-			LOG.error(e.getMessage(),e);
-			return false;
-		}finally {
-			THREAD_LOCAL_FORMAT.remove();
+		SimpleDateFormatProvider formatProvider = THREAD_LOCAL_FORMATS.get();
+		boolean valid = false;
+		for(Iterator<SimpleDateFormat> it = formatProvider.iterator();it.hasNext();) {
+			SimpleDateFormat format = it.next();
+			try {			
+				format.parse(datetime);
+				valid = true;
+				break;
+			}catch(ParseException e) {
+				LOG.error(e.getMessage(),e);
+			};			
 		}
-		return true;
+		THREAD_LOCAL_FORMATS.remove();
+		return valid;
 	}
 
     /**
@@ -293,14 +308,9 @@ public class InfluxDbDatabase {
     	select =select.substring(0,select.length()-1);
 
     	String from = String.format(" FROM %s " , measurement);
-    	if(start == null || !isValidDate(start)) {   
-			try { 		
-				    SimpleDateFormat format = THREAD_LOCAL_FORMAT.get();
-				    start = format.format(Date.from(Instant.ofEpochMilli(0)));
-				} finally {
-					 THREAD_LOCAL_FORMAT.remove();
-				}
-		}
+    	if(start == null || !isValidDate(start))   
+			start = "1970-01-01T00:00:00.001Z";
+		
     	String where = null;
     	if(tags != null && !tags.isEmpty()) {
 	   		StringBuilder builder = new StringBuilder();
@@ -314,8 +324,8 @@ public class InfluxDbDatabase {
 				if(it.hasNext())
 					builder.append(" AND ");
 			}
-			where = builder.toString();
 		    builder.append(String.format(" AND time > '%s' AND time < '%s'", start, end));
+			where = builder.toString();
     	} else 
 			where = String.format(" WHERE time > '%s' AND time < '%s'", start, end);
     	Query query = new Query(String.format("SELECT %s%s%s", select, from, where),database);
@@ -455,15 +465,8 @@ public class InfluxDbDatabase {
     	select =select.substring(0,select.length()-1);
     	
     	String from = String.format(" FROM %s " , measurement);
-
-    	if(start == null || !isValidDate(start)) {   
-			try { 		
-				    SimpleDateFormat format = THREAD_LOCAL_FORMAT.get();
-				    start = format.format(Date.from(Instant.ofEpochMilli(0)));
-				} finally {
-					 THREAD_LOCAL_FORMAT.remove();
-				}
-		}
+    	if(start == null || !isValidDate(start))   
+			start = "1970-01-01T00:00:00.001Z";
 		
     	String where = null;
     	if(tags != null && !tags.isEmpty()) {
@@ -479,6 +482,7 @@ public class InfluxDbDatabase {
 					builder.append(" AND ");
 			}
 			builder.append(String.format(" AND time > '%s' AND time < '%s'", start, end));
+			where = builder.toString();
     	} else
     		where = String.format(" WHERE time > '%s' AND time < '%s'", start, end);
     	

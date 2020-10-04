@@ -11,14 +11,9 @@
 package org.eclipse.sensinact.gateway.tools.connector.influxdb;
 
 import org.influxdb.annotation.Column;
-import org.influxdb.annotation.Measurement;
 
-@Measurement(name = "test")
-public class Measure {
+public abstract class Measure {
 
-	@Column(name="path")
-	private String path;
-	
 	@Column(name="value")
 	private String value;
 
@@ -43,17 +38,8 @@ public class Measure {
 		return this.time;
 	}
 	
-	public void setPath(String path) {
-		this.path = path;
-	}
-	
-	public String getPath() {
-		return this.path;
-	}
-	
 	@Override
 	public String toString() {		
-		return "{'path':'"+path+"','value':'"+value+"','time':'"+time+"'}";
+		return "{'value':'"+value+"','time':'"+time+"'}";
 	}
-
 }

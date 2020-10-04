@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.tools.connector.influxdb;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -168,4 +167,5 @@ public class InfluxDbConnector  {
     public void close() {
     	this.influxDB.close();
     }
+    
 }
