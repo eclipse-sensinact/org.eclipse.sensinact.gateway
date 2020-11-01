@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.generic;
 /**
  * A SubscriptionHandlerDelegate is in charge of providing the appropriate and extended {@link 
  * AbstractSubscribeTaskWrapper} and {@link AbstractUnsubscribeTaskWrapper} types to wrap respectively 
- * subscribe and unsubscribe {@link Tasks}
+ * subscribe and unsubscribe {@link Task}s
  */
 public interface SubscriptionHandlerDelegate {
 

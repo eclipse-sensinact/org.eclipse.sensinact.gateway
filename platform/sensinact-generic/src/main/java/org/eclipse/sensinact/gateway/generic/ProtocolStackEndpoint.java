@@ -112,7 +112,7 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
      * of
      */
     public void setSubsciptionIdentifier(UnsubscribeTaskWrapper task) {
-    	task.setSubscriptionId(this.subscriptions.get(task.getSubscriberId()));
+    	task.setSubscriptionId(this.subscriptions.get(task.getTargetId()));
     }
     
     /**
@@ -134,7 +134,7 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
      * @param task the subscribe {@link Task} wrapped into an {@link AbstractSubscribeTaskWrapper}
      */
     public void registerSubsciptionIdentifier(SubscribeTaskWrapper task) {
-    	this.subscriptions.put(task.getSubscriberId(), task.getSubscriptionId());
+    	this.subscriptions.put(task.getTargetId(), task.getSubscriptionId());
     }
 
     /**

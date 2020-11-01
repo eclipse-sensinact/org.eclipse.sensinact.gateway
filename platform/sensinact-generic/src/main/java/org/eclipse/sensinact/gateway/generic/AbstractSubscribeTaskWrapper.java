@@ -63,9 +63,9 @@ public abstract class AbstractSubscribeTaskWrapper implements SubscribeTaskWrapp
 	}
 
 	@Override
-	public String getSubscriberId() {
+	public String getTargetId() {
 		try {
-			return this.subscriberIdExtractor().execute(this.task);
+			return this.targetIdExtractor().execute(this.task);
 		} catch (Exception e) {
 			mediator.error("Error when extracting the subscriber identifier", e);
 		}

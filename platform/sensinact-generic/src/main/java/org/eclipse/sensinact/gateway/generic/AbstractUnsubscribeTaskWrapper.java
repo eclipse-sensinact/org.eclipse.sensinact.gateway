@@ -5,7 +5,6 @@ package org.eclipse.sensinact.gateway.generic;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
-import org.eclipse.sensinact.gateway.generic.Task.LifecycleStatus;
 
 /**
  *
@@ -56,9 +55,9 @@ public abstract class AbstractUnsubscribeTaskWrapper implements UnsubscribeTaskW
 		this.subscriptionId = subscriptionId;
 	}
 
-	public String getSubscriberId() {
+	public String getTargetId() {
 		try {
-			return this.subscriberIdExtractor().execute(this.task);
+			return this.targetIdExtractor().execute(this.task);
 		} catch (Exception e) {
 			mediator.error("Error when extracting the subscriber identifier", e);
 		}
