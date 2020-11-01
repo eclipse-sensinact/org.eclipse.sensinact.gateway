@@ -34,5 +34,7 @@
 		<module>swagger</module>
 		<module>mqtt-server</module>
 		<module>influxdb-connector</module>
+		<module>mongodb-connector</module>
+		<module>mixed-osgi-over-slf4j</module>
 	</modules>
 </project>
