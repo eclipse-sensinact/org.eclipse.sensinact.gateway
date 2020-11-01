@@ -15,10 +15,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 /**
- * HTTP Agent dedicated to storage service
+ * Processes the effective storage in the linked data store
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
@@ -27,44 +25,36 @@ public abstract class StorageConnection {
     private static final Logger LOG = LoggerFactory.getLogger(StorageConnection.class);
 
     protected Mediator mediator;
-    protected String login, password;
     protected Stack stack;
     
     private boolean running = false;
 
     /**
-     * Send the request described by the {@link JSONObject} passed as 
-     * parameter 
+     * Store the JSON formated data passed as parameter 
      *
-     * @param object the {@link JSONObject} describing the request to be sent
+     * @param object the {@link JSONObject} wrapping the data to be stored
      */
-    protected abstract void sendRequest(JSONObject object);
+    protected abstract void store(JSONObject object);
 
     /**
      * Constructor
      *
-     * @param mediator the associated {@link Mediator}
-     * @param uri the string URI of the storage server
-     * @param login the user login
-     * @param password the user password
-     * @throws IOException Exception on connection problem
+     * @param mediator the {@link Mediator} allowing the StorageConnection to be 
+     * instantiated to interact with the OSGi host environment 
      */
-    public StorageConnection(Mediator mediator, String login, String password) throws IOException {
+    public StorageConnection(Mediator mediator) {
         this.mediator = mediator;
-        this.login = login;
-        this.password = password;
         this.stack = new Stack();
         this.running = true;
 
         Runnable runner = new Runnable() {
             @Override
             public void run() {
-                LOG.info("POP thread started");
                 while (running) {
                     try {
                         JSONObject element = stack.pop();
                         if (element != null) {
-                            sendRequest(element);
+                            store(element);
                         } else {
                             if (!shortSleep(200)) {
                                 running = false;
@@ -74,7 +64,6 @@ public abstract class StorageConnection {
                         LOG.error("POP thread error", e);
                     }
                 }
-                LOG.info("POP thread terminated");
             }
         };
         new Thread(runner).start();
@@ -82,12 +71,11 @@ public abstract class StorageConnection {
 
     protected void close() {
         for (int i = 0; i < 10_000 && !this.stack.isEmpty(); i++) {
-            if (!shortSleep(200)) {
-                return;
-            }
+            if (!shortSleep(200))
+                break;
         }
-        LOG.info("close operation ended");
         this.running = false;
+        LOG.info("close operation ended");
     }
 
     private boolean shortSleep(long millis) {
@@ -95,7 +83,6 @@ public abstract class StorageConnection {
             Thread.sleep(millis);
             return true;
         } catch (InterruptedException e) {
-            LOG.error("Sleep operation error", e);
             Thread.interrupted();
             return false;
         }

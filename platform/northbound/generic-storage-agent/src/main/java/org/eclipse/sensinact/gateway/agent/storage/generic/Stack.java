@@ -32,7 +32,7 @@ public class Stack {
 	
 	public void push(JSONObject element) {
 		if (element == null)
-			throw new IllegalArgumentException("Can't Push a null element");
+			return;
 		synchronized (list) {
 			list.add(element);
 		}

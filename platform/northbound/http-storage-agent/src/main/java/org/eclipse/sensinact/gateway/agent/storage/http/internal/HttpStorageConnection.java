@@ -37,8 +37,11 @@ import java.util.Map;
 public class HttpStorageConnection extends StorageConnection {
 	private static final Logger LOG = LoggerFactory.getLogger(HttpStorageConnection.class);
 
-    protected String uri;
+    protected String broker;
     protected String authorization;
+
+	private String login;
+	private String password;
 
 	/**
 	 * Constructor
@@ -50,21 +53,23 @@ public class HttpStorageConnection extends StorageConnection {
 	 * @throws IOException Exception on connection problem
 	 */
 	public HttpStorageConnection(Mediator mediator, String uri, String login, String password) throws IOException {
-		super(mediator, login, password);
-		this.uri = uri;
-		this.authorization = Base64.encodeBytes((super.login + ":" + super.password).getBytes());
+		super(mediator);
+		this.login = login;
+		this.password = password;
+		this.broker = uri;
+		this.authorization = Base64.encodeBytes((this.login + ":" + this.password).getBytes());
 	}
 
 	/**
 	 * Executes the HTTP request defined by the method, target, headers and entity
 	 * arguments
 	 */
-	protected void sendRequest(JSONObject object) {
+	protected void store(JSONObject object) {
 		ConnectionConfiguration<SimpleResponse, SimpleRequest> configuration = new ConnectionConfigurationImpl<>();
 		try {
 			configuration.setContentType("application/json");
 			configuration.setAccept("application/json");
-			configuration.setUri(this.uri);
+			configuration.setUri(this.broker);
 			configuration.setContent(object.toString());
 			configuration.setHttpMethod("POST");
 			configuration.addHeader("Authorization", "Basic " + authorization);
