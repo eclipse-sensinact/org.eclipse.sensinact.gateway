@@ -78,7 +78,21 @@ public abstract class StorageAgent extends AbstractAgentRelay {
 		this.keyProcessors.put("path", new Executable<SnaMessage<?>,String>(){
 			@Override
 			public String execute(SnaMessage<?> message) throws Exception {
-				return message.getPath();
+				String path = message.getPath();
+				String[] pathElements = UriUtils.getUriElements(path);
+				if(pathElements.length==3)
+					return path.concat("/value");
+				return path;
+			}			
+		});	
+		this.keyProcessors.put("resource", new Executable<SnaMessage<?>,String>(){
+			@Override
+			public String execute(SnaMessage<?> message) throws Exception {
+				String path = message.getPath();
+				String[] pathElements = UriUtils.getUriElements(path);
+				if(pathElements.length > 2)
+					return pathElements[2];
+				return null;
 			}			
 		});	
 		this.keyProcessors.put("location", new Executable<SnaMessage<?>,String>(){

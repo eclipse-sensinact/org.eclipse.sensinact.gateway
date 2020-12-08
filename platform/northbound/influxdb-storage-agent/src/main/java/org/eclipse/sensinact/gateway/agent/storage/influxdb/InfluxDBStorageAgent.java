@@ -39,7 +39,7 @@ public class InfluxDBStorageAgent extends StorageAgent {
 	public void activate(ComponentContext context) {
 		BundleContext bc = context.getBundleContext();
 		this.mediator = new Mediator(bc);
-				
+		
 		String scheme =  (String) mediator.getProperty(INFLUX_AGENT_SCHEME_PROPS);
 		if(scheme == null)
 			scheme = InfluxDbConnectorConfiguration.DEFAULT_SCHEME;
@@ -81,7 +81,10 @@ public class InfluxDBStorageAgent extends StorageAgent {
 			this.measurement = INFLUX_AGENT_DEFAULT_MEASUREMENT;
 		
 		this.database = this.connector.createIfNotExists("sensinact");
+
+		super.setStorageKeys((String) mediator.getProperty(STORAGE_AGENT_KEYS_PROPS));
 		super.setStorageConnection(new InfluxDBStorageConnection(mediator, database, this.measurement));
+		
 	}
 
 	@Deactivate
