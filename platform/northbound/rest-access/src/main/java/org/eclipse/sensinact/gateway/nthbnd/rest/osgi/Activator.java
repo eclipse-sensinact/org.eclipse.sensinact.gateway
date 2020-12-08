@@ -12,8 +12,6 @@ package org.eclipse.sensinact.gateway.nthbnd.rest.osgi;
 
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.ServiceLoader;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -37,7 +35,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /**
@@ -165,19 +162,10 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
         super.mediator.info(String.format("%s servlet registered", RestAccessConstants.HTTP_ROOT));
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#
-     * doStop()
-     */
+    @Override
     public void doStop() throws Exception {
     }
 
-    /**
-     * @inheritDoc
-     * @see AbstractActivator#
-     * doInstantiate(org.osgi.framework.BundleContext, int, java.io.FileOutputStream)
-     */
     @Override
     public NorthboundMediator doInstantiate(BundleContext context) {
         NorthboundMediator mediator = new NorthboundMediator(context);

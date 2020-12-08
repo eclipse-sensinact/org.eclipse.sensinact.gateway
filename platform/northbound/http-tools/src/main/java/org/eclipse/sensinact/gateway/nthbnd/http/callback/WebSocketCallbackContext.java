@@ -58,8 +58,7 @@ public class WebSocketCallbackContext implements CallbackContext {
 			this.session = mediator.callService(Core.class, new Executable<Core,Session>(){
 				@Override
 				public Session execute(Core core) throws Exception {
-					core.getAnonymousSession();
-					return null;
+					return core.getAnonymousSession();
 				}
 			});
 		}
