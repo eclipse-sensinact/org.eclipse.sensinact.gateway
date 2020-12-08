@@ -173,8 +173,4 @@ public class InfluxDBStorageConnection extends StorageConnection {
 		if(this.enableGeoJSON && geolocation!=null)
 			fields.put("geolocation", geolocation);
 	}
-		
-	// Constants.EARTH_SPHERICAL_MODEL_RADIUS * 1000D 2* atan2(sqrt(sqrt(sin(((lat2 - lat1) * Constants.DEGREES_TO_RADIUS_COEF) / 2))+sqrt(sin(((lng2 - lng1) * Constants.DEGREES_TO_RADIUS_COEF) / 2))*cos(lat1 * Constants.DEGREES_TO_RADIUS_COEF)*cos(lat2 * Constants.DEGREES_TO_RADIUS_COEF))
-    // sqrt(1-(sqrt(sin(((lat2 - lat1) * Constants.DEGREES_TO_RADIUS_COEF) / 2))+sqrt(sin(((lng2 - lng1) * Constants.DEGREES_TO_RADIUS_COEF) / 2))*cos(lat1 * Constants.DEGREES_TO_RADIUS_COEF)*cos(lat2 * Constants.DEGREES_TO_RADIUS_COEF))))
-
 }
