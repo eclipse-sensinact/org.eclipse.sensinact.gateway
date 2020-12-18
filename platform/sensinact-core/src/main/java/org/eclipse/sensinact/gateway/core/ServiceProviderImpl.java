@@ -544,16 +544,15 @@ public class ServiceProviderImpl extends
 
 		if (service != null && SensiNactResourceModelConfiguration.BuildPolicy.isBuildPolicy(buildPolicy,
 				SensiNactResourceModelConfiguration.BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION)) {
-			List<ResourceConfig> resources = super.modelInstance.configuration()
-					.getResourceConfigs(super.modelInstance.getProfile(), serviceName);
+			List<ResourceConfig> resources = super.modelInstance.configuration().getResourceConfigs(
+					super.modelInstance.getProfile(), serviceName);
 
 			if (super.modelInstance.getProfile() != null
 					&& !ResourceConfig.ALL_PROFILES.equals(super.modelInstance.getProfile())) {
 				resources.addAll(super.modelInstance.configuration().getResourceConfigs(ResourceConfig.ALL_PROFILES,
 						serviceName));
 			}
-			ResourceConfig defaultResourceConfig = super.modelInstance.configuration()
-					.getDefaultResourceConfig(serviceName);
+			ResourceConfig defaultResourceConfig = super.modelInstance.configuration().getDefaultResourceConfig(serviceName);
 
 			if (defaultResourceConfig != null) {
 				defaultResourceConfig.configureName(serviceName, serviceName);

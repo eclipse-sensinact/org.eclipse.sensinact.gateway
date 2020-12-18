@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.core;
 
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
+import org.eclipse.sensinact.gateway.core.AttributeBuilder.Requirement;
 
 /**
  * The default {@link ResourceConfigBuilder} is in charge of create the
@@ -30,42 +31,49 @@ public class DefaultResourceConfigBuilder implements ResourceConfigBuilder {
 	 * @see org.eclipse.sensinact.gateway.core.ResourceConfigBuilder#getResourceConfig(org.eclipse.sensinact.gateway.core.ResourceDescriptor)
 	 */
 	@Override
-	public ResourceConfig getResourceConfig(ResourceDescriptor resourceConfigDescriptor) {
-		Class<? extends Resource> resourceType = (resourceConfigDescriptor.resourceType() == null)
+	public ResourceConfig getResourceConfig(ResourceDescriptor resourceDescriptor) {
+		Class<? extends Resource> resourceType = (resourceDescriptor.resourceType() == null)
 				? this.getDefaultResourceType()
-				: resourceConfigDescriptor.resourceType();
+				: resourceDescriptor.resourceType();
 
-		Class<? extends ResourceConfig> resourceConfigType = resourceConfigDescriptor.resourceConfigType();
-
-		Class<? extends ResourceImpl> resourceImplementationType = resourceConfigDescriptor
-				.resourceImplementationType();
+		Class<? extends ResourceConfig> resourceConfigType = resourceDescriptor.resourceConfigType();
+		Class<? extends ResourceImpl> resourceImplementationType = resourceDescriptor.resourceImplementationType();
 
 		ResourceConfig resourceConfig = null;
 		try {
 			resourceConfig = resourceConfigType.newInstance();
-
 		} catch (Exception e) {
 			return null;
 		}
 		TypeConfig typeConfig = new TypeConfig(resourceType);
 		typeConfig.setImplementationClass(resourceImplementationType);
-
+		
 		resourceConfig.setTypeConfig(typeConfig);
 
 		if (ActionResource.class.isAssignableFrom(resourceType)) {
 			return resourceConfig;
 		}
-		if (resourceConfigDescriptor.updatePolicy() != null) {
-			resourceConfig.setUpdatePolicy(resourceConfigDescriptor.updatePolicy());
-		} else {
+		if (resourceDescriptor.updatePolicy() != null) 
+			resourceConfig.setUpdatePolicy(resourceDescriptor.updatePolicy());
+		else 
 			resourceConfig.setUpdatePolicy(this.getDefaultUpdatePolicy());
-		}
-		if (resourceConfigDescriptor.modifiable() == null) {
-			resourceConfigDescriptor.withModifiable(this.getDefaultModifiable());
-		}
-		if (resourceConfigDescriptor.dataType() == null) {
-			resourceConfigDescriptor.withDataType(this.getDefaultDataType());
-		}
+		
+		RequirementBuilder requirementBuider  = new RequirementBuilder(Requirement.MODIFIABLE, resourceDescriptor.resourceName());
+		if (resourceDescriptor.modifiable() == null) {
+			requirementBuider.put(resourceDescriptor.serviceName(), this.getDefaultModifiable());
+			resourceDescriptor.withModifiable(this.getDefaultModifiable());
+		} else 
+			requirementBuider.put(resourceDescriptor.serviceName(), resourceDescriptor.modifiable());		
+		resourceConfig.addRequirementBuilder(requirementBuider);
+		
+		requirementBuider  = new RequirementBuilder(Requirement.TYPE, resourceDescriptor.resourceName());
+		if (resourceDescriptor.dataType() == null) {
+			requirementBuider.put(resourceDescriptor.serviceName(), this.getDefaultDataType());
+			resourceDescriptor.withDataType(this.getDefaultDataType());
+		} else
+			requirementBuider.put(resourceDescriptor.serviceName(), resourceDescriptor.dataType());
+		resourceConfig.addRequirementBuilder(requirementBuider);
+		
 		return resourceConfig;
 	}
 

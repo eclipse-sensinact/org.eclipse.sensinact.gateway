@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.core;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.execution.Executable;
@@ -231,10 +232,57 @@ public class ServiceImpl
 			return;
 		}
 		ResourceImpl resource = this.getResource(resourceId);
-		if (resource == null) {
-			ResourceDescriptor descriptor = super.getModelInstance().configuration().getResourceDescriptor()
-					.withServiceName(super.getName()).withResourceName(resourceId);
-
+		if (resource == null) {			
+			Class<?> dataType = null;
+			for(Iterator<?> it = data.iterator();it.hasNext();) {
+				ResourceProcessableData rpd = (ResourceProcessableData) it.next();
+				if(rpd.getAttributeId()!=null && !DataResource.VALUE.equals(rpd.getAttributeId())) 
+					continue;
+				Object obj = rpd.getData();
+				Class<?> clazz = obj==null?null:obj.getClass();
+				if(clazz == null)
+					break;
+				if(clazz.isPrimitive()) {
+		    		switch(clazz.getName()) {
+			    		case "byte":
+			    		case "short":
+			    		case "int":
+			    		case "long":
+			    		case "float":
+			    		case "double":
+			    			dataType = double.class;
+		    				break;
+			    		case "boolean":
+			    			dataType = boolean.class;
+		    				break;
+			    		case "char":
+			    			dataType = String.class;
+		    				break;
+		    		}
+		    	} else if (obj instanceof Number) {		    		
+		        	switch(clazz.getName()) {
+		    		case "java.lang.Byte":
+		    		case "java.lang.Short":
+		    		case "java.lang.Integer":
+		    		case "java.lang.Long":
+		    		case "java.lang.Float":
+		    		case "java.lang.Double":
+		    			dataType = double.class;
+						break;
+		    		default:
+		    			dataType = String.class;
+	    				break;
+		        	}			
+				} else 
+					dataType = String.class;
+				break;
+			}
+			ResourceDescriptor descriptor = super.getModelInstance().configuration(
+				).getResourceDescriptor(
+				).withServiceName(super.getName()
+				).withResourceName(resourceId
+				).withDataType(dataType);
+			
 			ResourceBuilder builder = super.getModelInstance().getResourceBuilder(descriptor,
 					this.modelInstance.configuration().getResourceBuildPolicy());
 

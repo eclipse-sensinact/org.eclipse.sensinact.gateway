@@ -238,10 +238,10 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 */
 	public ResourceBuilder getResourceBuilder(ResourceDescriptor descriptor) {
 		ResourceConfig resourceConfig = this.configuration().getResourceConfig(descriptor);
-
 		if (resourceConfig == null) {
 			return null;
 		}
+		descriptor.withDataType(null);
 		return configureResourceBuilder(resourceConfig, descriptor);
 	}
 

@@ -28,6 +28,7 @@ import org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ResourceConfig implements Nameable {
+	
 	public static final String ALL_TARGETS = "#ANY_TARGET#";
 	public static final String ALL_PROFILES = "#ANY_PROFILE#";
 
@@ -45,11 +46,6 @@ public class ResourceConfig implements Nameable {
 		this.requirementBuilders = new ArrayList<RequirementBuilder>();
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see Nameable#getName()
-	 */
 	@Override
 	public String getName() {
 		return this.getName(ResourceConfig.ALL_TARGETS);
@@ -73,21 +69,31 @@ public class ResourceConfig implements Nameable {
 	/**
 	 * Configures the name of the resource to build
 	 * 
-	 * @param name
-	 *            the name of the resource to build
+	 * @param service the String name of the service for which to define the name
+	 * @param name the name to be set
 	 */
 	public void configureName(String service, String name) {
+		this.configureName(service, name, false);
+	}
+
+	/**
+	 * Configures the name of the resource to build
+	 * 
+	 * @param service the String name of the service for which to define the name
+	 * @param name the name to be set
+	 */
+	public void configureName(String service, String name, boolean multiple) {
 		int index = -1;
 		if ((index = this.requirementBuilders.indexOf(new Name<RequirementBuilder>(Resource.NAME))) > -1) {
-			this.requirementBuilders.get(index).put(service, name);
+			this.requirementBuilders.get(index).put(service, name, multiple);
 
 		} else {
 			RequirementBuilder builder = new RequirementBuilder(Requirement.VALUE, Resource.NAME);
-			builder.put(service, name);
+			builder.put(service, name, multiple);
 			this.requirementBuilders.add(builder);
 		}
 	}
-
+	
 	/**
 	 * Returns the {@link TypeConfig} which applies on {@link ResourceImpl}
 	 * instances based on this ResourceConfig

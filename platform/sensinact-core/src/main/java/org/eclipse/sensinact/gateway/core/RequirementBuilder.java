@@ -47,19 +47,25 @@ public class RequirementBuilder implements Nameable, Iterable<Map.Entry<String, 
 	 * @param value
 	 */
 	public void put(String service, Object value) {
-		if (service == null || service.length() == 0) {
-			this.put(value);
-
-		} else {
+		this.put(service,value,false);
+	}
+	
+	/**
+	 * @param service
+	 * @param value
+	 */
+	public void put(String service, Object value, boolean multiple) {
+		if (service == null || service.length() == 0) 
+			this.values.put(ResourceConfig.ALL_TARGETS, value);
+		else 
 			this.values.put(service, value);
-		}
 	}
 
 	/**
 	 * @param value
 	 */
 	public void put(Object value) {
-		this.values.put(ResourceConfig.ALL_TARGETS, value);
+		this.put(ResourceConfig.ALL_TARGETS, value,false);
 	}
 
 	/**
