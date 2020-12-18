@@ -30,7 +30,6 @@ import org.json.JSONObject;
  */
 public class InfluxDBStorageConnection extends StorageConnection {
 	
-
 	private static final String STORAGE_AGENT_INFLUXDB_FIELDS         = "org.eclipse.sensinact.gateway.history.influxdb.fields";
 	private static final String STORAGE_AGENT_INFLUXDB_TAGS           = "org.eclipse.sensinact.gateway.history.influxdb.tags";
 	private static final String STORAGE_AGENT_INFLUXDB_ENABLE_DEFAULT = "org.eclipse.sensinact.gateway.history.influxdb.default";
@@ -116,7 +115,8 @@ public class InfluxDBStorageConnection extends StorageConnection {
 	}
 	
 	@Override
-	public void store(JSONObject obj)  {	
+	public void store(JSONObject obj)  {
+		String measurement = null;
 		final Dictionary<String,Object> fs = new Hashtable<>();		
 		final Dictionary<String,String> ts = new Hashtable<>();		
 		for(Iterator<String> it = obj.keys();it.hasNext();) {
@@ -128,8 +128,13 @@ public class InfluxDBStorageConnection extends StorageConnection {
 			if(this.tags.contains(key))
 				ts.put(key,String.valueOf(obj.get(key)));
 		}
-		this.extractLocation(fs, obj.opt("location"));		
-		this.database.add(measurement, ts, fs, obj.opt(DataResource.VALUE));	
+		this.extractLocation(fs, obj.opt("location"));
+		Object o = obj.opt(DataResource.VALUE);
+		if(o!=null && o.getClass()==String.class)
+			measurement=this.measurement.concat("_str");
+		else
+			measurement=this.measurement.concat("_num");		
+		this.database.add(measurement, ts, fs, o);	
 	}
 
 	private void extractLocation(Dictionary<String,Object> fields, Object location)  {		

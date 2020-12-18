@@ -51,7 +51,7 @@ public abstract class StorageAgent extends AbstractAgentRelay {
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 	
 	
-	private Map<String,Executable<SnaMessage<?>,String>> keyProcessors;
+	private Map<String,Executable<SnaMessage<?>,Object>> keyProcessors;
 	private Map<String,Object> storageKeyValuesMap;
 	private Map<String,String> storageKeyNamesMap;
 	
@@ -75,9 +75,9 @@ public abstract class StorageAgent extends AbstractAgentRelay {
 		this.storageKeyValuesMap = new HashMap<>();		
 		this.keyProcessors = new HashMap<>();		
 //		Key processor example		
-		this.keyProcessors.put("path", new Executable<SnaMessage<?>,String>(){
+		this.keyProcessors.put("path", new Executable<SnaMessage<?>,Object>(){
 			@Override
-			public String execute(SnaMessage<?> message) throws Exception {
+			public Object execute(SnaMessage<?> message) throws Exception {
 				String path = message.getPath();
 				String[] pathElements = UriUtils.getUriElements(path);
 				if(pathElements.length==3)
@@ -85,9 +85,9 @@ public abstract class StorageAgent extends AbstractAgentRelay {
 				return path;
 			}			
 		});	
-		this.keyProcessors.put("resource", new Executable<SnaMessage<?>,String>(){
+		this.keyProcessors.put("resource", new Executable<SnaMessage<?>,Object>(){
 			@Override
-			public String execute(SnaMessage<?> message) throws Exception {
+			public Object execute(SnaMessage<?> message) throws Exception {
 				String path = message.getPath();
 				String[] pathElements = UriUtils.getUriElements(path);
 				if(pathElements.length > 2)
@@ -95,9 +95,9 @@ public abstract class StorageAgent extends AbstractAgentRelay {
 				return null;
 			}			
 		});	
-		this.keyProcessors.put("location", new Executable<SnaMessage<?>,String>(){
+		this.keyProcessors.put("location", new Executable<SnaMessage<?>,Object>(){
 			@Override
-			public String execute(SnaMessage<?> message) throws Exception {
+			public Object execute(SnaMessage<?> message) throws Exception {
 		        String uri = message.getPath();
 				String[] pathElements = UriUtils.getUriElements(uri);
 				return StorageAgent.this.getLocation(pathElements[0]);
@@ -134,7 +134,7 @@ public abstract class StorageAgent extends AbstractAgentRelay {
 	 * @param executor the {@link Executable} allowing to process an SnaMessage to extract 
 	 * the value to be mapped to the specified key 
 	 */
-	public void addFixKeyProcessor(String key, Executable<SnaMessage<?>,String> executor) {
+	public void addFixKeyProcessor(String key, Executable<SnaMessage<?>,Object> executor) {
 		if(key !=null && executor !=null)
 			this.keyProcessors.put(key, executor);
 	}
@@ -184,7 +184,7 @@ public abstract class StorageAgent extends AbstractAgentRelay {
         
         for(Iterator<String> it = this.keyProcessors.keySet().iterator();it.hasNext();) {
 			String key = it.next();
-			String val = null; 
+			Object val = null; 
 			try {
 				val = this.keyProcessors.get(key).execute(message);
 			} catch (Exception e) {
@@ -232,18 +232,13 @@ public abstract class StorageAgent extends AbstractAgentRelay {
 		if(pathElements[2].equals(attribute))
 			attribute = "value";
 		
-		if(this.storageKeyNamesMap!=null) {
-			
+		if(this.storageKeyNamesMap!=null) {			
 			Set<String> keys = this.storageKeyNamesMap.keySet();				
 			String serviceUri = UriUtils.getUri(new String[] {pathElements[1],pathElements[2],attribute});
-			
-			if(keys.contains(serviceUri)) {
-				
+			if(keys.contains(serviceUri)) {				
 				this.storageKeyValuesMap.put(UriUtils.getUri(new String[] {pathElements[0], pathElements[1], pathElements[2], attribute}),value);
-				return;
-				
-			} else {
-				
+				return;				
+			} else {				
 				final String serviceProviderId = pathElements[0];
 				keys.forEach(s -> {
 					String p = UriUtils.getUri(new String[] {serviceProviderId, s});
