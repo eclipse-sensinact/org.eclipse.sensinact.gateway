@@ -17,7 +17,6 @@ import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.Bu
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
-import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacket;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.parser.DataParser;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.reader.TemperaturesGeneratorPacket;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.thread.TemperaturesGeneratorThreadManager;
@@ -26,7 +25,7 @@ import org.osgi.framework.BundleContext;
 import java.util.Collections;
 
 public class Activator extends AbstractActivator<Mediator> {
-    @Property(name = "org.eclipse.sensinact.simulated.generator.amount", defaultValue = "10")
+    @Property(name = "org.eclipse.sensinact.simulated.generator.amount", defaultValue = "100")
     Integer DEVICES_NUMBER;
     private LocalProtocolStackEndpoint<TemperaturesGeneratorPacket> connector;
     private ExtModelConfiguration<TemperaturesGeneratorPacket> manager;
