@@ -10,25 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.generic.local;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.ResourceConfig;
-import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
-import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
-import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
-import org.eclipse.sensinact.gateway.generic.SubscribeTaskWrapper;
-import org.eclipse.sensinact.gateway.generic.Task;
-import org.eclipse.sensinact.gateway.generic.Task.CommandType;
-import org.eclipse.sensinact.gateway.generic.Task.RequestType;
-import org.eclipse.sensinact.gateway.generic.UnsubscribeTaskWrapper;
-import org.eclipse.sensinact.gateway.generic.annotation.AnnotationResolver;
-import org.eclipse.sensinact.gateway.generic.annotation.TaskCommand;
-import org.eclipse.sensinact.gateway.generic.annotation.TaskCommand.SynchronizationPolicy;
-import org.eclipse.sensinact.gateway.generic.annotation.TaskExecution;
-import org.eclipse.sensinact.gateway.generic.packet.Packet;
-import org.eclipse.sensinact.gateway.util.ReflectUtils;
-import org.eclipse.sensinact.gateway.util.UriUtils;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -38,6 +19,24 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.core.ResourceConfig;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
+import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
+import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
+import org.eclipse.sensinact.gateway.generic.Task;
+import org.eclipse.sensinact.gateway.generic.Task.CommandType;
+import org.eclipse.sensinact.gateway.generic.Task.RequestType;
+import org.eclipse.sensinact.gateway.generic.annotation.AnnotationResolver;
+import org.eclipse.sensinact.gateway.generic.annotation.TaskCommand;
+import org.eclipse.sensinact.gateway.generic.annotation.TaskCommand.SynchronizationPolicy;
+import org.eclipse.sensinact.gateway.generic.annotation.TaskExecution;
+import org.eclipse.sensinact.gateway.generic.packet.Packet;
+import org.eclipse.sensinact.gateway.util.ReflectUtils;
+import org.eclipse.sensinact.gateway.util.UriUtils;
 
 /**
  * Basis {@link ProtocolStackEndpoint} implementation
@@ -192,18 +191,34 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
         }
         Collections.sort(this.executors, new Comparator<AnnotationExecutor>() {
             @Override
-            public int compare(AnnotationExecutor basis1, AnnotationExecutor basis2) {
-                boolean basis1AllProfile = basis1.isProfile(ResourceConfig.ALL_PROFILES);
-                boolean basis2AllProfile = basis2.isProfile(ResourceConfig.ALL_PROFILES);
-                if (basis1AllProfile == basis2AllProfile) {
-                    boolean basis1AllTargets = basis1.allTargets();
-                    boolean basis2AllTargets = basis2.allTargets();
-                    if (basis1AllTargets == basis2AllTargets) {
-                        return basis1.length() - basis2.length();
-                    }
-                    return basis1AllTargets ? 1 : -1;
-                }
-                return basis1AllProfile ? 1 : -1;
+            public int compare(AnnotationExecutor basis1, AnnotationExecutor basis2) {            	
+            	int basis1WildcardIndex = basis1.getName().indexOf('*');
+            	int basis2WildcardIndex = basis2.getName().indexOf('*');
+                
+                if(basis1WildcardIndex>-1 && basis2WildcardIndex==-1)
+                	return 1;
+                if(basis1WildcardIndex==-1 && basis2WildcardIndex>-1)
+                	return -1;
+            	if(basis1WildcardIndex>-1 && basis2WildcardIndex>-1) {            	
+            		String[] thisPathElements = UriUtils.getUriElements(basis1.getName());
+            		String[] thatPathElements = UriUtils.getUriElements(basis2.getName());
+            		int i=0;
+            		for(;i<thisPathElements.length && !"*".equals(thisPathElements[i]);i++);
+            		int j=0;
+            		for(;j<thatPathElements.length && !"*".equals(thatPathElements[j]);j++);
+            		if(i==j) {
+            			int k=i+1;
+                		for(;k<thisPathElements.length && !"*".equals(thisPathElements[k]);k++);
+                		k=k==thisPathElements.length?0:k;
+                		int l=j+1;
+                		for(;l<thatPathElements.length && !"*".equals(thatPathElements[l]);l++);
+                		l=l==thatPathElements.length?0:l;
+                		i=k;
+                		j=l;
+            		}
+            		return i<j?-1:1;            			
+            	}
+                return basis1.length() < basis2.length()?-1:1;
             }
         });
     }
@@ -271,9 +286,9 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
                 }
                 break;
             }
-            if (executor == null) {
+            if (executor == null)
                 executor = new EmptyAnnotationExecutor(path, commandType, parameterTypes, profile);
-            }
+            
             cache.put(key, executor);
         }
         return executor.execute(task);

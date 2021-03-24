@@ -45,10 +45,8 @@ public class ExtResourceConfigCatalog implements ResourceConfigCatalog {
     /**
      * Constructor
      *
-     * @param mediator          the {@link Mediator} allowing to interact
-     *                          with the OSGi host environment
-     * @param configurationFile the URL of the XML description
-     *                          file of the handled resources
+     * @param mediator the {@link Mediator} allowing to interact with the OSGi host environment
+     * @param configurationFile the URL of the XML description file of the handled resources
      */
     public ExtResourceConfigCatalog(XmlResourceConfigHandler handler) {
         this(handler, Collections.<String, String>emptyMap());
@@ -57,12 +55,9 @@ public class ExtResourceConfigCatalog implements ResourceConfigCatalog {
     /**
      * Constructor
      *
-     * @param mediator          the {@link Mediator} allowing to interact
-     *                          with the OSGi host environment
-     * @param configurationFile the URL of the XML description
-     *                          file of the handled resources
-     * @param defaults          mapping between service name and its default
-     *                          resource name
+     * @param mediator the {@link Mediator} allowing to interact with the OSGi host environment
+     * @param configurationFile the URL of the XML description file of the handled resources
+     * @param defaults mapping between service name and its default resource name
      */
     public ExtResourceConfigCatalog(XmlResourceConfigHandler handler, Map<String, String> defaults) {
         this.resourceConfigs = new ArrayList<ExtResourceConfig>();
@@ -75,10 +70,8 @@ public class ExtResourceConfigCatalog implements ResourceConfigCatalog {
             while (resourceIterator.hasNext()) {
                 ExtResourceConfig resourceConfig = resourceIterator.next();
                 this.resourceConfigs.add(resourceConfig);
-
-                if (defaults == null) {
+                if (defaults == null) 
                     continue;
-                }
                 String name = resourceConfig.getName();
                 Iterator<Map.Entry<String, String>> iterator = defaults.entrySet().iterator();
 
@@ -86,10 +79,8 @@ public class ExtResourceConfigCatalog implements ResourceConfigCatalog {
                     Map.Entry<String, String> entry = iterator.next();
                     String serviceId = null;
                     String config = null;
-
-                    if ((serviceId = entry.getKey()) == null || (config = entry.getValue()) == null || !config.equals(name)) {
+                    if ((serviceId = entry.getKey()) == null || (config = entry.getValue()) == null || !config.equals(name)) 
                         continue;
-                    }
                     tmpDefaults.put(serviceId, resourceConfig);
                 }
             }
@@ -97,47 +88,33 @@ public class ExtResourceConfigCatalog implements ResourceConfigCatalog {
         this.defaults = Collections.unmodifiableMap(tmpDefaults);
     }
 
-    /**
-     * @inheritDoc
-     * @see ResourceConfigCatalog#
-     * getResourceConfig(ResourceDescriptor)
-     */
     @Override
     public ExtResourceConfig getResourceConfig(ResourceDescriptor resourceConfigDescriptor) {
-        if (resourceConfigDescriptor == null) {
+        if (resourceConfigDescriptor == null)
             return null;
-        }
         ExtResourceConfig resourceConfig = null;
         String serviceName = resourceConfigDescriptor.serviceName();
         String resourceName = resourceConfigDescriptor.resourceName();
         byte[] identifier = null;
 
-        if (ExtResourceDescriptor.class.isAssignableFrom(resourceConfigDescriptor.getClass())) {
-            identifier = ((ExtResourceDescriptor) resourceConfigDescriptor).identifier();
-        }
+        if (ExtResourceDescriptor.class.isAssignableFrom(resourceConfigDescriptor.getClass())) 
+            identifier = ((ExtResourceDescriptor) resourceConfigDescriptor).identifier();        
         int index = -1;
-
-        if (serviceName != null && resourceName != null) {
+        if (resourceName != null) {
             Iterator<ExtResourceConfig> iterator = this.resourceConfigs.iterator();
             while (iterator.hasNext()) {
                 resourceConfig = iterator.next();
-
-                if (resourceName.equalsIgnoreCase(resourceConfig.getName(serviceName))) {
+                String rawName = serviceName!=null?resourceConfig.getRawName(serviceName):resourceConfig.getRawName();
+                if (resourceName.equalsIgnoreCase(rawName))
                     break;
-                }
                 resourceConfig = null;
             }
-        } else if (resourceName != null && (index = this.resourceConfigs.indexOf(new Name<ResourceConfig>(resourceName))) > -1) {
-            resourceConfig = this.resourceConfigs.get(index);
-
         } else if (identifier != null) {
             Iterator<ExtResourceConfig> iterator = this.resourceConfigs.iterator();
-
             while (iterator.hasNext()) {
                 resourceConfig = iterator.next();
-                if (ExtModelConfiguration.compareBytesArrays(identifier, resourceConfig.getIdentifier())) {
+                if (ExtModelConfiguration.compareBytesArrays(identifier, resourceConfig.getIdentifier()))
                     break;
-                }
                 resourceConfig = null;
             }
         }
@@ -176,30 +153,20 @@ public class ExtResourceConfigCatalog implements ResourceConfigCatalog {
         while (enumeration.hasNext()) {
             ExtResourceConfig resourceConfig = enumeration.next();
             if (resourceConfig.isProfiled(profileId) && resourceConfig.isTargeted(serviceId)) {
-                if (ActionResource.class.isAssignableFrom(resourceConfig.getTypeConfig().getResourceImplementedInterface())) {
+                if (ActionResource.class.isAssignableFrom(resourceConfig.getTypeConfig().getResourceImplementedInterface()))
                     actionslist.add(resourceConfig);
-
-                } else {
+                else
                     list.add(resourceConfig);
-                }
             }
         }
         list.addAll(actionslist);
         return list;
     }
 
-    /**
-     * @inheritDoc
-     * @see ResourceConfigCatalog#getDefaultResourceConfig(java.lang.String)
-     */
     public ExtResourceConfig getDefaultResourceConfig(String serviceName) {
         return this.getDefaultResourceConfig(ResourceConfig.ALL_PROFILES, serviceName);
     }
 
-    /**
-     * @inheritDoc
-     * @see ResourceConfigCatalog#getDefaultResourceConfig(java.lang.String)
-     */
     @Override
     public ExtResourceConfig getDefaultResourceConfig(String profile, String serviceName) {
         return this.defaults.get(serviceName);

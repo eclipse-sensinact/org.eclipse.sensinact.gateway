@@ -149,9 +149,8 @@ public class ExtResourceConfig extends ResourceConfig implements Iterable<Method
 
         while (iterator.hasNext()) {
             AttributeDefinition attributeDefinition = iterator.next();
-            if (!attributeDefinition.isTargeted(service)) {
+            if (!attributeDefinition.isTargeted(service))
                 continue;
-            }
             int builderIndex = -1;
             if ((builderIndex = builders.indexOf(new Name<AttributeBuilder>(attributeDefinition.getName()))) > -1) {
                 AttributeBuilder builder = builders.get(builderIndex);
@@ -182,9 +181,8 @@ public class ExtResourceConfig extends ResourceConfig implements Iterable<Method
 
         while (iterator.hasNext()) {
             AttributeDefinition attributeDefinition = iterator.next();
-            if (!attributeDefinition.isObserved(service)) {
+            if (!attributeDefinition.isObserved(service)) 
                 continue;
-            }
             observeds.add(UriUtils.getUri(new String[] {service,this.getName(service),attributeDefinition.getName()}));
         }
         return observeds;
@@ -198,4 +196,5 @@ public class ExtResourceConfig extends ResourceConfig implements Iterable<Method
     public Iterator<MethodDefinition> iterator() {
         return Collections.unmodifiableList(this.methodDefinitions).iterator();
     }
+
 }

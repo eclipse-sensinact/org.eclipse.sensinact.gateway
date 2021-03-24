@@ -17,6 +17,7 @@ import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskCommand;
 import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.eclipse.sensinact.gateway.util.UriUtils;
 
 import java.util.Arrays;
 
@@ -24,6 +25,7 @@ import java.util.Arrays;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class AnnotationExecutor implements Executable<Task, Object>, Nameable {
+	
     private final String target;
     private final Task.CommandType commandType;
     private final TaskCommand.SynchronizationPolicy synchronization;
@@ -45,26 +47,70 @@ public abstract class AnnotationExecutor implements Executable<Task, Object>, Na
 
         this.profile = profile;
 
-        if (profile != null) {
+        if (profile != null) 
             this.allProfiles = profile.equals(ResourceConfig.ALL_PROFILES);
-
-        } else {
+        else 
             this.allProfiles = true;
-        }
+    }
+
+    public boolean isSynchronous() {
+        return TaskCommand.SynchronizationPolicy.SYNCHRONOUS.equals(this.synchronization);
+    }
+
+    public Task.CommandType getCommandType() {
+        return this.commandType;
+    }
+
+    public int length() {
+        return this.parameterTypes.length;
     }
 
     /**
-     * @inheritDoc
-     * @see Nameable#getName()
+     * Returns true if this BasisExecutor has been
+     * defined for the profile passed as parameter;
+     * returns false otherwise
+     *
+     * @param profile the profile for which to test if this
+     *                BasisExecutor is registered
+     * @return true if this BasisExecutor has been
+     * defined for the profile passed as parameter;
+     * returns false otherwise
      */
+    public boolean isProfile(String profile) {
+        if (this.allProfiles) 
+            return true;
+        return this.profile.equals(profile);
+    }
+
+    /**
+     * Returns true if this BasisExecutor has been
+     * defined for one of the profiles defined in the
+     * array passed as parameter; returns false otherwise
+     *
+     * @param profile the array profiles for which to test if this
+     *                BasisExecutor is registered
+     * @return true if this BasisExecutor has been
+     * defined for one of the profiles defined in
+     * the array passed as parameter; false otherwise
+     */
+    public boolean isProfile(String[] profile) {
+        if (profile == null) {
+            return false;
+        }
+        int index = 0;
+        int length = profile.length;
+
+        for (; index < length && !this.isProfile(profile[index]); index++) ;
+
+        return index < length;
+    }
+
+    @Override
     public String getName() {
         return this.target;
     }
-
-    /**
-     * @inheritDoc
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
+    
+    @Override
     public boolean equals(Object object) {
         if (object == null) {
             return false;
@@ -98,79 +144,7 @@ public abstract class AnnotationExecutor implements Executable<Task, Object>, Na
         return false;
     }
 
-    /**
-     * @return
-     */
-    public boolean isSynchronous() {
-        return TaskCommand.SynchronizationPolicy.SYNCHRONOUS.equals(this.synchronization);
-    }
-
-    /**
-     * @return
-     */
-    public Task.CommandType getCommandType() {
-        return this.commandType;
-    }
-
-    /**
-     * @return
-     */
-    public boolean allTargets() {
-        return TaskCommand.ROOT.equals(this.getName());
-    }
-
-    /**
-     * @return
-     */
-    public int length() {
-        return this.parameterTypes.length;
-    }
-
-    /**
-     * Returns true if this BasisExecutor has been
-     * defined for the profile passed as parameter;
-     * returns false otherwise
-     *
-     * @param profile the profile for which to test if this
-     *                BasisExecutor is registered
-     * @return true if this BasisExecutor has been
-     * defined for the profile passed as parameter;
-     * returns false otherwise
-     */
-    public boolean isProfile(String profile) {
-        if (this.allProfiles) {
-            return true;
-        }
-        return this.profile.equals(profile);
-    }
-
-    /**
-     * Returns true if this BasisExecutor has been
-     * defined for one of the profiles defined in the
-     * array passed as parameter; returns false otherwise
-     *
-     * @param profile the array profiles for which to test if this
-     *                BasisExecutor is registered
-     * @return true if this BasisExecutor has been
-     * defined for one of the profiles defined in
-     * the array passed as parameter; false otherwise
-     */
-    public boolean isProfile(String[] profile) {
-        if (profile == null) {
-            return false;
-        }
-        int index = 0;
-        int length = profile.length;
-
-        for (; index < length && !this.isProfile(profile[index]); index++) ;
-
-        return index < length;
-    }
-
-    /**
-     * @inheritDoc
-     * @see java.lang.Object#toString()
-     */
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("\n*************************************");

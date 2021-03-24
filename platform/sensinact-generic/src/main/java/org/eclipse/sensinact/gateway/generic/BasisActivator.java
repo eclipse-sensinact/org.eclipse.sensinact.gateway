@@ -43,105 +43,66 @@ public abstract class BasisActivator<P extends Packet> extends AbstractActivator
 	private static final SensiNactBridgeConfiguration DEFAULT_SENSINACT_BRIDGE_CONFIGURATION = 
 		new SensiNactBridgeConfiguration() {
 		
-		/* (non-Javadoc)
-		 * @see java.lang.annotation.Annotation#annotationType()
-		 */
 		@Override
 		public Class<? extends Annotation> annotationType() {
 			return SensiNactBridgeConfiguration.class;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.generic.annotation.SensiNactBridgeConfiguration#resourceDefinition()
-		 */
 		@Override
 		public String resourceDefinition() {
 			return "resources.xml";
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.generic.annotation.SensiNactBridgeConfiguration#serviceBuildPolicy()
-		 */
 		@Override
 		public BuildPolicy[] serviceBuildPolicy() {
 			return new  BuildPolicy[] {BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION};
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.generic.annotation.SensiNactBridgeConfiguration#resourceBuildPolicy()
-		 */
 		@Override
 		public BuildPolicy[] resourceBuildPolicy() {
 			return new  BuildPolicy[] {BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION};
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.generic.annotation.SensiNactBridgeConfiguration#startAtInitializationTime()
-		 */
 		@Override
 		public boolean startAtInitializationTime() {
 			return true;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.generic.annotation.SensiNactBridgeConfiguration#packetType()
-		 */
 		@Override
 		public Class<? extends Packet> packetType() {
 			return Packet.class;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.generic.annotation.SensiNactBridgeConfiguration#endpointType()
-		 */
 		@Override
 		public Class<? extends ProtocolStackEndpoint> endpointType() {
 			return LocalProtocolStackEndpoint.class;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.generic.annotation.SensiNactBridgeConfiguration#initialProviders()
-		 */
 		@Override
 		public ServiceProviderDefinition[] initialProviders() {
 			return new ServiceProviderDefinition[] {};
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.generic.annotation.SensiNactBridgeConfiguration#observed()
-		 */
 		@Override
 		public String[] observed() {
 			return new String[] {};
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.generic.annotation.SensiNactBridgeConfiguration#outputOnly()
-		 */
 		@Override
 		public boolean outputOnly() {
 			return false;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.generic.annotation.SensiNactBridgeConfiguration#serviceProviderType()
-		 */
 		@Override
 		public Class<? extends ServiceProviderImpl> serviceProviderType() {
 			return ExtServiceProviderImpl.class;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.generic.annotation.SensiNactBridgeConfiguration#serviceType()
-		 */
 		@Override
 		public Class<? extends ServiceImpl> serviceType() {
 			return ExtServiceImpl.class;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.generic.annotation.SensiNactBridgeConfiguration#resourceType()
-		 */
 		@Override
 		public Class<? extends ResourceImpl> resourceType() {
 			return ExtResourceImpl.class;
@@ -150,9 +111,6 @@ public abstract class BasisActivator<P extends Packet> extends AbstractActivator
 	
 	protected ProtocolStackEndpoint<P> endpoint;
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#doStart()
-	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public void doStart() throws Exception {
@@ -211,19 +169,13 @@ public abstract class BasisActivator<P extends Packet> extends AbstractActivator
 		super.mediator.debug("BasisActivator configuration ... done !");
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#doStop()
-	 */
 	@Override
 	public void doStop() throws Exception {
 		if(this.endpoint != null) {
 			this.endpoint.stop();
 		}
 	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#doInstantiate(org.osgi.framework.BundleContext)
-	 */
+	
 	@Override
 	public Mediator doInstantiate(BundleContext context) {
 		return new Mediator(context);
