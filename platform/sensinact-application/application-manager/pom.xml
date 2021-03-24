@@ -41,7 +41,7 @@
 							org.eclipse.sensinact.gateway.app.manager.component.data,
 							org.eclipse.sensinact.gateway.app.manager.json
 						</Export-Package>
-						<Bundle-Activator>org.eclipse.sensinact.gateway.app.manager.osgi.Activator</Bundle-Activator>
+						<!-- <Bundle-Activator>org.eclipse.sensinact.gateway.app.manager.osgi.Activator</Bundle-Activator>-->
 						<Include-Resource>
 							about.html,
 							src/main/resources/
