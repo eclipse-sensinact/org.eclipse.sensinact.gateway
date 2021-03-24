@@ -23,6 +23,7 @@ import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttAuthentication;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttTopic;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.listener.TtnActivationListener;
+import org.eclipse.sensinact.gateway.sthbnd.ttn.listener.TtnDownlinkListener;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.listener.TtnUplinkListener;
 
 @SensiNactBridgeConfiguration(
@@ -58,12 +59,14 @@ public class TtnActivator extends BasisActivator<MqttPacket> {
                 .password(appKey)
                 .build();
 
-        final MqttTopic activationTopic = new MqttTopic("+/devices/+/events/activations",
-                new TtnActivationListener(mediator, (MqttProtocolStackEndpoint) super.endpoint));
+        final TtnDownlinkListener ttnDownlinkListener = new TtnDownlinkListener(mediator);
 
         final MqttTopic messageTopic = new MqttTopic("+/devices/+/up",
-                new TtnUplinkListener(mediator, (MqttProtocolStackEndpoint) super.endpoint));
+                new TtnUplinkListener(mediator, ttnDownlinkListener, (MqttProtocolStackEndpoint) super.endpoint));
 
+        final MqttTopic activationTopic = new MqttTopic("+/devices/+/events/activations",
+                new TtnActivationListener(mediator, (MqttProtocolStackEndpoint) super.endpoint));
+        
         MqttBroker broker = new MqttBroker.Builder()
             .host(brokerHost)
             .port(brokerPort)
@@ -72,8 +75,9 @@ public class TtnActivator extends BasisActivator<MqttPacket> {
             .topics(new ArrayList<MqttTopic>() {{
                 add(activationTopic);
                 add(messageTopic);
-            }}).build();        
+            }}).build();
         
+        ttnDownlinkListener.setBroker(broker);
         ((MqttProtocolStackEndpoint)super.endpoint).addBroker(broker);
     }
 }

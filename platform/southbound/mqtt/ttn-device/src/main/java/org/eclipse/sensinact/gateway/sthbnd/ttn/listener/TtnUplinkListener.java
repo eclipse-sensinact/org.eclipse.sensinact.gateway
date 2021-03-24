@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 Kentyou.
+* Copyright (c) 2020-2021 Kentyou.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.ttn.listener;
 
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttPacket;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.listener.MqttTopicMessage;
+import org.eclipse.sensinact.gateway.sthbnd.ttn.model.TtnSubPacket;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.model.TtnUplinkPayload;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.packet.TtnUplinkPacket;
 import org.json.JSONException;
@@ -22,12 +24,16 @@ import org.json.JSONObject;
 
 public class TtnUplinkListener extends MqttTopicMessage {
 
+	public static final String DOWNLINK_MARKER = "#DOWNLINK#";
+	
     private final Mediator mediator;
     private final MqttProtocolStackEndpoint endpoint;
+	private TtnDownlinkListener dowlinkListener;
 
-    public TtnUplinkListener(Mediator mediator, MqttProtocolStackEndpoint endpoint) {
+    public TtnUplinkListener(Mediator mediator, TtnDownlinkListener downlinkListener, MqttProtocolStackEndpoint endpoint) {
         this.mediator = mediator;
         this.endpoint = endpoint;
+        this.dowlinkListener = downlinkListener;
     }
 
     /* (non-Javadoc)
@@ -36,9 +42,9 @@ public class TtnUplinkListener extends MqttTopicMessage {
     @Override
     public void messageReceived(String topic, String message) {
 
-        if(mediator.isDebugLoggable()) {
+        if(mediator.isDebugLoggable()) 
             mediator.debug("Uplink message: " + message);
-        }
+        
         String device = topic.split("/")[2];
         JSONObject json = new JSONObject(message);
         TtnUplinkPayload payload = null;
@@ -46,10 +52,24 @@ public class TtnUplinkListener extends MqttTopicMessage {
         try {
             payload = new TtnUplinkPayload(mediator, json);
         } catch (JSONException e) {
-            e.printStackTrace();
+            if(mediator.isErrorLoggable()) 
+                mediator.error(e.getMessage(),e);
         }
         if (payload != null) {
-            TtnUplinkPacket packet = new TtnUplinkPacket(device, payload.getSubPackets());
+        	List<TtnSubPacket> subPackets = payload.getSubPackets();
+        	if(subPackets.isEmpty())
+        		return;
+        	int i=0;
+        	while(i<subPackets.size()) {
+        		TtnSubPacket subPacket = subPackets.get(i);
+        		if(DOWNLINK_MARKER.equals(subPacket.getMetadata())) {
+        			this.dowlinkListener.messageReceived(payload.getApplicationId(),payload.getDeviceId(), subPacket.getValue());
+        			subPackets.remove(i);
+        			continue;
+        		}
+        		i++;
+        	}       	
+            TtnUplinkPacket packet = new TtnUplinkPacket(device, subPackets);
             try {
                 endpoint.process(packet);
             } catch (InvalidPacketException e) {

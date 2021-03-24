@@ -83,9 +83,7 @@ public class MqttBroker {
     public void publish(String topic, String message){
         try {
             LOG.info("Publishing message {} on the topic {}", message,topic);
-            MqttMessage mqMessage = new MqttMessage(message.getBytes());
-            mqMessage.setQos(0);
-            client.publish(topic, mqMessage);
+            client.publish(topic, message.getBytes(), 1, false);
         } catch (Exception e) {
             LOG.error("Unable to publishing message {} on the topic {}", message,topic);
         }
