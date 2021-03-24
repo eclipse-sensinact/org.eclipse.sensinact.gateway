@@ -215,14 +215,14 @@ public final class AttributeBuilder implements Nameable, Cloneable {
 	 */
 	private AttributeBuilder(String name, Requirement[] requirementsArray, Deque<Requirement> requirementsList,
 			boolean hidden, Modifiable modifiable, Class<?> type, Object value) throws InvalidAttributeException {
-		if (name == null) {
+		
+		if (name == null) 
 			throw new InvalidAttributeException("attribute name required");
-		}
 		this.requirementsArray = new Requirement[requirementsArray == null ? 0 : requirementsArray.length];
 
-		if (this.requirementsArray.length > 0) {
+		if (this.requirementsArray.length > 0) 
 			System.arraycopy(requirementsArray, 0, this.requirementsArray, 0, this.requirementsArray.length);
-		}
+		
 		this.requirementsList = new LinkedList<Requirement>(requirementsList);
 		this.constraintsList = new LinkedList<Constraint>();
 		this.metadataBuilders = new ArrayList<MetadataBuilder>();
@@ -349,9 +349,9 @@ public final class AttributeBuilder implements Nameable, Cloneable {
 	 */
 	public Attribute getAttribute(Mediator mediator, ResourceImpl resource, TypeConfig resourceTypeConfig)
 			throws InvalidAttributeException {
-		if (resource == null) {
+		if (resource == null) 
 			return null;
-		}
+		
 		String constantPrefix = new StringBuilder().append(this.name.toUpperCase()).append(SEP).toString();
 
 		// retrieve fixed values
@@ -365,8 +365,8 @@ public final class AttributeBuilder implements Nameable, Cloneable {
 		}
 		while (this.requirementsList.size() > 0) {
 			Requirement requirement = this.requirementsList.removeFirst();
-			String constantName = new StringBuilder().append(PROPERTY_DEFAULT_PREFIX).append(constantPrefix)
-					.append(requirement.name()).toString();
+			String constantName = new StringBuilder().append(PROPERTY_DEFAULT_PREFIX).append(constantPrefix
+				).append(requirement.name()).toString();
 			this.setRequirementValue(mediator, requirement, resourceTypeConfig, constantName, false);
 		}
 		if (this.isComplete()) {
@@ -374,15 +374,14 @@ public final class AttributeBuilder implements Nameable, Cloneable {
 				Attribute attribute = new Attribute(mediator, resource, this.name, this.type, this.value,
 						this.modifiable, this.hidden);
 
-				if (!this.constraintsList.isEmpty()) {
+				if (!this.constraintsList.isEmpty()) 
 					attribute.addMetadata(new Metadata(mediator, Metadata.CONSTRAINTS, Constraint[].class,
 							this.constraintsList.toArray(new Constraint[0]), Modifiable.FIXED));
-				}
+				
 				if (!this.metadataBuilders.isEmpty()) {
 					Iterator<MetadataBuilder> iterator = this.metadataBuilders.iterator();
-					while (iterator.hasNext()) {
+					while (iterator.hasNext()) 
 						attribute.addMetadata(iterator.next().getMetadata());
-					}
 				}
 				return attribute;
 
@@ -413,7 +412,6 @@ public final class AttributeBuilder implements Nameable, Cloneable {
 		if (constant != null) {
 			try {
 				AttributeBuilder.class.getDeclaredField(requirement.name().toLowerCase()).set(this, constant);
-
 				this.updateRequirements(requirement);
 
 			} catch (Exception e) {

@@ -46,6 +46,7 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.log.LogService;
 
 /**
@@ -104,6 +105,8 @@ public class TestContext<R extends ModelInstance> {
 
 	private final ServiceReference filteringReference = Mockito.mock(ServiceReference.class);
 	private final ServiceRegistration registrationFiltering = Mockito.mock(ServiceRegistration.class);
+	
+	private final ComponentContext componentContext= Mockito.mock(ComponentContext.class);
 
 	private MyModelInstance instance;
 	private SnaAgent agent;
@@ -350,14 +353,17 @@ public class TestContext<R extends ModelInstance> {
 		Mockito.when(bundle.getBundleId()).thenReturn(MOCK_BUNDLE_ID);
 		Mockito.when(bundle.getState()).thenReturn(Bundle.ACTIVE);
 
-		mediator = new Mediator(context);
+		Mockito.when(componentContext.getBundleContext()).thenReturn(context);
 
-		sensinact = new SensiNact(mediator);
+		sensinact = new SensiNact();
+		sensinact.activate(componentContext);
+		this.mediator = sensinact.mediator;
 		
 		instance = (MyModelInstance) new ModelInstanceBuilder(mediator
 			).build("serviceProvider", null, new ModelConfigurationBuilder(
 				mediator,ModelConfiguration.class, MyModelInstance.class
 				).withStartAtInitializationTime(true).build());
+		
 		initialized = true;
 
 		callbackCount = 0;

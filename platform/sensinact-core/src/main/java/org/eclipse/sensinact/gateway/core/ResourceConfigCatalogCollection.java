@@ -51,9 +51,8 @@ public class ResourceConfigCatalogCollection {
 	 *            the {@link ResourceConfigCatalog} to delete
 	 */
 	public void delete(ResourceConfigCatalog catalog) {
-		if (catalog == null) {
+		if (catalog == null) 
 			return;
-		}
 		synchronized (this.catalogs) {
 			this.catalogs.remove(catalog);
 		}
@@ -76,34 +75,18 @@ public class ResourceConfigCatalogCollection {
 		return new Iterator<ResourceConfigCatalog>() {
 			int position = 0;
 
-			/**
-			 * @inheritDoc
-			 *
-			 * @see java.util.Iterator#hasNext()
-			 */
 			@Override
 			public boolean hasNext() {
 				return position < catalogsArray.length;
 			}
 
-			/**
-			 * @inheritDoc
-			 *
-			 * @see java.util.Iterator#next()
-			 */
 			@Override
 			public ResourceConfigCatalog next() {
-				if (hasNext()) {
-					return catalogsArray[position++];
-				}
+				if (hasNext()) 
+					return catalogsArray[position++];				
 				return null;
 			}
 
-			/**
-			 * @inheritDoc
-			 *
-			 * @see java.util.Iterator#remove()
-			 */
 			@Override
 			public void remove() {
 			}
@@ -125,15 +108,12 @@ public class ResourceConfigCatalogCollection {
 	 */
 	public ResourceConfig getResourceConfig(ResourceDescriptor descriptor) {
 		Iterator<ResourceConfigCatalog> iterator = this.iterator();
-
 		ResourceConfig resourceConfig = null;
-
 		while (iterator.hasNext()) {
 			try {
 				ResourceConfigCatalog catalog = iterator.next();
-				if ((resourceConfig = catalog.getResourceConfig(descriptor)) != null) {
+				if ((resourceConfig = catalog.getResourceConfig(descriptor)) != null)
 					break;
-				}
 			} catch (ClassCastException e) {
 				continue;
 			}

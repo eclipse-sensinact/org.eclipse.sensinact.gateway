@@ -28,11 +28,6 @@ public class ServiceProviderProxy extends ModelElementProxy {
 		super(mediator, ServiceProvider.class, UriUtils.getUri(new String[] { name }));
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelElementProxy# getAccessMethod(AccessMethod.Type)
-	 */
 	@Override
 	public AccessMethod getAccessMethod(String name) {
 		return null;

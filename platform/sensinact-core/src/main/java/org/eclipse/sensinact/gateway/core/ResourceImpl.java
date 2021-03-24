@@ -206,8 +206,7 @@ public class ResourceImpl extends
 	 * @param service
 	 */
 	protected ResourceImpl(ModelInstance<?> modelInstance, ResourceConfig resourceConfig, ServiceImpl service) {
-		super(modelInstance, service, UriUtils.getUri(
-				new String[] { service.getPath(), resourceConfig.getName(service.getName()) }));
+		super(modelInstance, service, UriUtils.getUri(new String[] { service.getPath(), resourceConfig.buildName(service.getName())}));
 		this.methods = new HashMap<AccessMethod.Type, AccessMethod>();
 		this.links = new ArrayList<String>();
 		this.resourceType = resourceConfig.getTypeConfig().getResourceImplementedInterface();
@@ -215,13 +214,6 @@ public class ResourceImpl extends
 		buildAttributes(resourceConfig);
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.ModelElementOld#
-	 *      proces(org.eclipse.sensinact.gateway.core.ProcessableData)
-	 */
-	@SuppressWarnings("rawtypes")
 	@Override
 	public void process(ResourceProcessableContainer data) {
 		if (data == null) {
@@ -389,13 +381,7 @@ public class ResourceImpl extends
 			}
 		};
 	}
-	
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.PrimitiveCollection#
-	 *      set(java.lang.String, java.lang.Object)
-	 */
+
 	public AttributeDescription set(String name, Object value) throws InvalidValueException {
 		AttributeDescription description = null;
 		if (name == null) {
@@ -443,8 +429,7 @@ public class ResourceImpl extends
 	/**
 	 * Removes the {@link Attribute} whose name is passed as parameter
 	 * 
-	 * @param primitive
-	 *            the name of the {@link Attribute} to remove
+	 * @param primitive the name of the {@link Attribute} to remove
 	 */
 	public boolean removeAttribute(String attributeName) {
 		if (attributeName == null || Resource.NAME.intern() == attributeName.intern()
@@ -635,9 +620,8 @@ public class ResourceImpl extends
 	 * Returns the {@link AccessMethod} of this resource whose
 	 * {@link AccessMethod.Type} is passed as parameter
 	 * 
-	 * @param act
-	 *            the {@link AccessMethod.Type} of the {@link AccessMethod} to
-	 *            return
+	 * @param act the {@link AccessMethod.Type} of the {@link AccessMethod} to return
+	 * 
 	 * @return the {@link AccessMethod} of this resource of the specified type
 	 */
 	public AccessMethod getAccessMethod(AccessMethod.Type method) {

@@ -184,12 +184,6 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 		}
 	}
 	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#
-	 *      open(org.eclipse.sensinact.gateway.core.RemoteCore)
-	 */
 	@Override
 	public void open(RemoteCore remoteCore) {
 		if (this.getConnected()) {
@@ -216,11 +210,6 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 		this.remoteCore.connect(this.namespace());
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.RemoteEndpoint#close()
-	 */
 	@Override
 	public void close() {
 		if(this.connectionThread != null) {
@@ -242,13 +231,6 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 		this.remoteCore.disconnect();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see fr.cea.sna.gateway.core.RemoteEndpoint# jsonSubscribe(java.lang.String,
-	 *      java.lang.String, java.lang.String,
-	 *      fr.cea.sna.gateway.core.model.message.Recipient, org.json.JSONArray)
-	 */
 	@Override
 	public JSONObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
 			Recipient recipient, JSONArray conditions) {
@@ -278,12 +260,6 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 		return this.remoteCore.namespace();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Sessions.SessionObserver#
-	 *      disappearing(java.lang.String)
-	 */
 	@Override
 	public void disappearing(String publicKey) {
 		if (!this.getConnected()) {

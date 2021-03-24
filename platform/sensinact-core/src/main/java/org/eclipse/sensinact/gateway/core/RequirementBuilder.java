@@ -20,26 +20,33 @@ import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 
 /**
- * Data structure gathering needed to complete an
- * {@link AttributeBuilder.Requirement}
+ * Data structure gathering needed to complete an {@link AttributeBuilder.Requirement}
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class RequirementBuilder implements Nameable, Iterable<Map.Entry<String, Object>> {
-	private final AttributeBuilder.Requirement requirement;
-	private final String attributeName;
-	private final Map<String, Object> values;
+	
+	protected final AttributeBuilder.Requirement requirement;
+	protected final String attributeName;
+	protected final Map<String, Object> values;
 
 	/**
 	 * Constructor
 	 * 
-	 * @param requirement
-	 * @param attributeName
+	 * @param requirement {@link AttributeBuilder.Requirement} to be built 
+	 * @param attributeName the String name of the {@link Attribute} for which the Requirement is built
 	 */
 	public RequirementBuilder(AttributeBuilder.Requirement requirement, String attributeName) {
 		this.requirement = requirement;
 		this.attributeName = attributeName;
-		values = new HashMap<String, Object>();
+		this.values = new HashMap<String, Object>();
+	}
+	
+	/**
+	 * @param value
+	 */
+	public void put(Object value) {
+		this.put(ResourceConfig.ALL_TARGETS, value);
 	}
 
 	/**
@@ -47,25 +54,11 @@ public class RequirementBuilder implements Nameable, Iterable<Map.Entry<String, 
 	 * @param value
 	 */
 	public void put(String service, Object value) {
-		this.put(service,value,false);
-	}
-	
-	/**
-	 * @param service
-	 * @param value
-	 */
-	public void put(String service, Object value, boolean multiple) {
+		Object val = (value!=null && value.getClass()==String.class)?new StringPatternValue((String)value):value;
 		if (service == null || service.length() == 0) 
-			this.values.put(ResourceConfig.ALL_TARGETS, value);
+			this.values.put(ResourceConfig.ALL_TARGETS, val);
 		else 
-			this.values.put(service, value);
-	}
-
-	/**
-	 * @param value
-	 */
-	public void put(Object value) {
-		this.put(ResourceConfig.ALL_TARGETS, value,false);
+			this.values.put(service, val);
 	}
 
 	/**
@@ -74,33 +67,23 @@ public class RequirementBuilder implements Nameable, Iterable<Map.Entry<String, 
 	 */
 	public Object get(String service) {
 		Object value = this.values.get(service);
-		if (value == null && service.intern() != ResourceConfig.ALL_TARGETS.intern()) {
+		if (value == null && service.intern() != ResourceConfig.ALL_TARGETS.intern())
 			value = this.values.get(ResourceConfig.ALL_TARGETS);
-		}
 		return value;
 	}
-
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see java.lang.Iterable#iterator()
-	 */
-	public Iterator<Map.Entry<String, Object>> iterator() {
-		return this.values.entrySet().iterator();
-	}
-
+	
 	/**
 	 * Applies this RequirementBuilder on the set of {AttributeBuilder}s passed as
 	 * parameter, meaning sets the value of the one targeting the same attribute and
 	 * the same requirement
 	 * 
+	 * @param service
 	 * @param builders
 	 */
 	public void apply(String service, List<AttributeBuilder> builders) {
 		int index = builders.indexOf(new Name<AttributeBuilder>(this.attributeName));
-		if (index == -1) {
-			return;
-		}
+		if (index == -1) 
+			return;		
 		this.apply(service, builders.get(index));
 	}
 
@@ -109,60 +92,54 @@ public class RequirementBuilder implements Nameable, Iterable<Map.Entry<String, 
 	 * parameter, meaning sets the value of the one targeting the same attribute and
 	 * the same requirement
 	 * 
+	 * @param service
 	 * @param builders
 	 */
 	public void apply(String service, AttributeBuilder builder) {
 		Object value = this.get(service);
-		if (value == null || !this.attributeName.equals(builder.getName())) {
+		if (value == null || !this.attributeName.equals(builder.getName())) 
 			return;
-		}
+		if(value instanceof StringPatternValue)
+			value = this.attributeName.equals(Resource.NAME)?((StringPatternValue)value).getLast()
+					:((StringPatternValue)value).build();
 		switch (this.requirement) {
-		case HIDDEN:
-			builder.hidden((Boolean) value);
-			break;
-		case MODIFIABLE:
-			builder.modifiable((Modifiable) value);
-			break;
-		case TYPE:
-			builder.type((Class) value);
-			break;
-		case VALUE:
-			builder.value(value);
-			break;
-		default:
-			break;
+			case HIDDEN:
+				builder.hidden((Boolean) value);
+				break;
+			case MODIFIABLE:
+				builder.modifiable((Modifiable) value);
+				break;
+			case TYPE:
+				builder.type((Class) value);
+				break;
+			case VALUE:
+				builder.value(value);
+				break;
+			default:
+				break;
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
+	@Override
+	public Iterator<Map.Entry<String, Object>> iterator() {
+		return this.values.entrySet().iterator();
+	}
+	
+	@Override
 	public boolean equals(Object object) {
-		if (object == null) {
+		if (object == null) 
 			return false;
-		}
 		Class objectClass = object.getClass();
 		if (RequirementBuilder.class.isAssignableFrom(objectClass)) {
 			RequirementBuilder builder = (RequirementBuilder) object;
-
 			return this.equals(builder.attributeName) && this.equals(builder.requirement);
-
-		} else if (String.class == objectClass) {
+		} else if (String.class == objectClass) 
 			return object.equals(this.attributeName);
-
-		} else if (AttributeBuilder.Requirement.class.isAssignableFrom(objectClass)) {
+		else if (AttributeBuilder.Requirement.class.isAssignableFrom(objectClass))
 			return object.equals(this.requirement);
-		}
 		return false;
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see Nameable#getName()
-	 */
 	@Override
 	public String getName() {
 		return this.attributeName;

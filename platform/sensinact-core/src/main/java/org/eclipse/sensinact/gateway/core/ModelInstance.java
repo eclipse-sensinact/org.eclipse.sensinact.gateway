@@ -163,12 +163,6 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 		});
 	}
 
-
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see SensiNactResourceModel#configuration()
-	 */
 	@Override
 	public C configuration() {
 		return this.configuration;
@@ -260,10 +254,8 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 */
 	public ResourceBuilder createResourceBuilder(ResourceDescriptor descriptor) {
 		ResourceConfig resourceConfig = this.configuration().createResourceConfig(descriptor);
-
-		if (resourceConfig == null) {
+		if (resourceConfig == null) 
 			return null;
-		}
 		return configureResourceBuilder(resourceConfig, descriptor);
 	}
 
@@ -332,35 +324,31 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	}
 
 	/**
-	 * Registers this sensiNact resource model instance in the OSGi host
-	 * environment.
+	 * Registers this sensiNact resource model instance in the OSGi host environment.
 	 * 
-	 * @throws ModelAlreadyRegisteredException
-	 *             if this sensiNact resource model instance is already registered
+	 * @throws ModelAlreadyRegisteredException if this sensiNact resource model instance is already registered
 	 */
 	protected final void register() throws ModelAlreadyRegisteredException {
-		if (this.registered) {
-			throw new ModelAlreadyRegisteredException(this.registration.getName());
-		}
+		if (this.registered) 
+			throw new ModelAlreadyRegisteredException(this.registration.getName());		
 		final String name = this.getName();
-
 		boolean exists = AccessController.<Boolean>doPrivileged(new PrivilegedAction<Boolean>() {
 			@Override
 			public Boolean run() {
 				Collection<ServiceReference<SensiNactResourceModel>> references = null;
 				try {
 					references = ModelInstance.this.mediator.getContext().getServiceReferences(
-							SensiNactResourceModel.class,
-							new StringBuilder().append("(name=").append(name).append(")").toString());
+					    SensiNactResourceModel.class, new StringBuilder().append("(name=").append(name).append(")"
+					    		).toString());
 				} catch (InvalidSyntaxException e) {
 					ModelInstance.this.mediator.error(e);
 				}
 				return (references != null && references.size() > 0);
 			}
 		});
-		if (exists) {
+		if (exists) 
 			throw new ModelAlreadyRegisteredException(name);
-		}
+		
 		final String uri = UriUtils.getUri(new String[] { name });
 
 		final Dictionary<String, Object> props = new Hashtable<String, Object>();

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 Kentyou.
+* Copyright (c) 2020-2021 Kentyou.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,41 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.constraint.Constraint;
-import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
-import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractor;
-import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractorType;
-import org.eclipse.sensinact.gateway.core.message.*;
-import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
-import org.eclipse.sensinact.gateway.core.method.RemoteAccessMethodExecutable;
-import org.eclipse.sensinact.gateway.core.method.legacy.*;
-import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod.DescribeType;
-import org.eclipse.sensinact.gateway.core.remote.SensinactCoreBaseIFaceManager;
-import org.eclipse.sensinact.gateway.core.remote.SensinactCoreBaseIFaceManagerFactory;
-import org.eclipse.sensinact.gateway.core.remote.SensinactCoreBaseIface;
-import org.eclipse.sensinact.gateway.core.security.*;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
-import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
-
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttTopic;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.listener.MqttTopicMessage;
-import org.eclipse.sensinact.gateway.util.CryptoUtils;
-import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.osgi.framework.*;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 import java.security.AccessController;
 import java.security.InvalidKeyException;
 import java.security.PrivilegedAction;
@@ -62,16 +27,90 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.constraint.Constraint;
+import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
+import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractor;
+import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractorType;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.LocalAgent;
+import org.eclipse.sensinact.gateway.core.message.LocalAgentImpl;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
+import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.message.ResourceIntent;
+import org.eclipse.sensinact.gateway.core.message.SnaAgent;
+import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
+import org.eclipse.sensinact.gateway.core.method.RemoteAccessMethodExecutable;
+import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod.DescribeType;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponseBuilder;
+import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
+import org.eclipse.sensinact.gateway.core.remote.RemoteCore;
+import org.eclipse.sensinact.gateway.core.remote.SensinactCoreBaseIFaceManager;
+import org.eclipse.sensinact.gateway.core.remote.SensinactCoreBaseIFaceManagerFactory;
+import org.eclipse.sensinact.gateway.core.remote.SensinactCoreBaseIface;
+import org.eclipse.sensinact.gateway.core.security.AccessNode;
+import org.eclipse.sensinact.gateway.core.security.AccessTree;
+import org.eclipse.sensinact.gateway.core.security.AccountConnector;
+import org.eclipse.sensinact.gateway.core.security.Authentication;
+import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
+import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
+import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
+import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
+import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
+import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
+import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
+import org.eclipse.sensinact.gateway.core.security.SecurityDataStoreServiceFactory;
+import org.eclipse.sensinact.gateway.core.security.User;
+import org.eclipse.sensinact.gateway.core.security.UserKey;
+import org.eclipse.sensinact.gateway.core.security.UserManager;
+import org.eclipse.sensinact.gateway.core.security.UserManagerFactory;
+import org.eclipse.sensinact.gateway.core.security.UserUpdater;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
+import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
+import org.eclipse.sensinact.gateway.util.CryptoUtils;
+import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * {@link Core} service implementation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
-@SuppressWarnings({"unchecked","rawtypes","unused"})
+@Component(immediate=true)
 public class SensiNact implements Core {
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
@@ -91,9 +130,6 @@ public class SensiNact implements Core {
 			super(identifier);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.Session#serviceProviders(java.lang.String)
-		 */
 		@Override
 		public Set<ServiceProvider> serviceProviders(final String filter) {
 			return AccessController.doPrivileged(new PrivilegedAction<Set<ServiceProvider>>() {
@@ -104,9 +140,6 @@ public class SensiNact implements Core {
 			});
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.Session#serviceProvider(java.lang.String)
-		 */
 		@Override
 		public ServiceProvider serviceProvider(final String serviceProviderName) {
 			ServiceProvider provider = AccessController.doPrivileged(new PrivilegedAction<ServiceProvider>() {
@@ -118,9 +151,6 @@ public class SensiNact implements Core {
 			return provider;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.Session#registerSessionAgent(java.lang.String, org.eclipse.sensinact.gateway.core.message.MidAgentCallback, org.eclipse.sensinact.gateway.core.message.SnaFilter)
-		 */
 		@Override
 		public SubscribeResponse registerSessionAgent(String requestId, 
 				final MidAgentCallback callback, final SnaFilter filter) {
@@ -151,9 +181,6 @@ public class SensiNact implements Core {
 			return tatooRequestId(requestId, response);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.Session#unregisterSessionAgent(java.lang.String, java.lang.String)
-		 */
 		@Override
 		public UnsubscribeResponse unregisterSessionAgent(String requestId, final String agentId) {
 			final SessionKey sessionKey;
@@ -181,9 +208,6 @@ public class SensiNact implements Core {
 			return tatooRequestId(requestId, response);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.Session#registerSessionIntent(java.lang.String, org.eclipse.sensinact.gateway.common.execution.Executable, java.lang.String[])
-		 */
 		@Override
 		public SubscribeResponse registerSessionIntent(String requestId, Executable<Boolean, Void> callback,
 				String... resourcePath) {
@@ -338,12 +362,6 @@ public class SensiNact implements Core {
 			return tatooRequestId(requestId, response);
 		}
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.core.Session# act(java.lang.String,
-		 *      java.lang.String, java.lang.String, java.lang.Object[])
-		 */
 		@Override
 		public ActResponse act(String requestId, final String serviceProviderId, final String serviceId,
 				final String resourceId, final Object[] parameters) {
@@ -392,15 +410,6 @@ public class SensiNact implements Core {
 			return tatooRequestId(requestId, response);
 		}
 
-
-		/**
-		 * @inheritDoc
-		 * 
-		 * @see org.eclipse.sensinact.gateway.core.Session# subscribe(java.lang.String,
-		 *      java.lang.String, java.lang.String,
-		 *      org.eclipse.sensinact.gateway.core.message.Recipient,
-		 *      org.json.JSONArray)
-		 */
 		@Override
 		public SubscribeResponse subscribe(final String requestId, final String serviceProviderId, final String serviceId,
 				final String resourceId, final Recipient recipient, final JSONArray conditions, final String policy) {
@@ -447,7 +456,7 @@ public class SensiNact implements Core {
 			}			
 			final String uriRemote=String.format("/%s/%s/%s",serviceProviderId,serviceId,resourceId);
 			response=new SubscribeResponse(mediator,uriRemote,Status.SUCCESS);
-			response.setResponse(new JSONObject().put("subscriptionId",recipient.toString()));				
+			response.setResponse(new JSONObject().put("subscriptionId",recipient.toString()));	
 			MidAgentCallback cb = new AbstractMidAgentCallback(true,true,recipient.toString()){					
 				@Override
 				public void doHandle(SnaUpdateMessageImpl message) throws MidCallbackException {
@@ -477,13 +486,6 @@ public class SensiNact implements Core {
 			return tatooRequestId(requestId, response);
 		}
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.core.Session#
-		 *      unsubscribe(java.lang.String, java.lang.String, java.lang.String,
-		 *      java.lang.String)
-		 */
 		@Override
 		public UnsubscribeResponse unsubscribe(String requestId, final String serviceProviderId, final String serviceId,
 				final String resourceId, final String subscriptionId) {
@@ -537,12 +539,6 @@ public class SensiNact implements Core {
 
 		}
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.core.Session# getAll(java.lang.String,
-		 *      org.eclipse.sensinact.gateway.core.FilteringDefinition)
-		 */
 		@Override
 		public DescribeResponse<String> getAll(String requestId, String filter, FilteringCollection filterCollection) {
 			final SessionKey sessionKey;
@@ -595,13 +591,6 @@ public class SensiNact implements Core {
 			return tatooRequestId(requestId, response);
 		}
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.core.Session#
-		 *      getProviders(java.lang.String,
-		 *      org.eclipse.sensinact.gateway.core.FilteringCollection)
-		 */
 		@Override
 		public DescribeResponse<String> getProviders(String requestId, FilteringCollection filterCollection) {
 			SessionKey sessionKey = SensiNact.this.sessions.get(new KeyExtractor<KeyExtractorType>(
@@ -650,12 +639,6 @@ public class SensiNact implements Core {
 			return tatooRequestId(requestId, response);
 		}
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.core.Session#
-		 *      getProvider(java.lang.String, java.lang.String)
-		 */
 		@Override
 		public DescribeResponse<JSONObject> getProvider(String requestId, final String serviceProviderId) {
 			SessionKey sessionKey = SensiNact.this.sessions.get(new KeyExtractor<KeyExtractorType>(
@@ -694,13 +677,6 @@ public class SensiNact implements Core {
 			return tatooRequestId(requestId, response);
 		}
 
-		/**
-		 * @inheritDoc
-		 * 
-		 * @see org.eclipse.sensinact.gateway.core.Session#
-		 *      getServices(java.lang.String, java.lang.String,
-		 *      org.eclipse.sensinact.gateway.core.FilteringCollection)
-		 */
 		@Override
 		public DescribeResponse<String> getServices(String requestId, final String serviceProviderId,
 				FilteringCollection filterCollection) {
@@ -758,12 +734,6 @@ public class SensiNact implements Core {
 			return tatooRequestId(requestId, response);
 		}
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.core.Endpoint#
-		 *      jsonService(java.lang.String, java.lang.String)
-		 */
 		@Override
 		public DescribeResponse<JSONObject> getService(String requestId, final String serviceProviderId,
 				final String serviceId) {
@@ -801,13 +771,6 @@ public class SensiNact implements Core {
 			return tatooRequestId(requestId, describeFromJSONObject(mediator, builder, DescribeType.SERVICE, object));
 		}
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.core.Session#
-		 *      getResources(java.lang.String, java.lang.String,
-		 *      org.eclipse.sensinact.gateway.core.FilteringDefinition)
-		 */
 		@Override
 		public DescribeResponse<String> getResources(String requestId, final String serviceProviderId,
 				final String serviceId, FilteringCollection filterCollection) {
@@ -871,12 +834,6 @@ public class SensiNact implements Core {
 			return tatooRequestId(requestId, response);
 		}
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.core.Session#
-		 *      getResource(java.lang.String, java.lang.String, java.lang.String)
-		 */
 		@Override
 		public DescribeResponse<JSONObject> getResource(final String requestId, final String serviceProviderId,
 				final String serviceId, final String resourceId) {
@@ -975,11 +932,6 @@ public class SensiNact implements Core {
 			super(identifier);
 		}
 		
-		/**
-		 * @inheritDoc
-		 * 
-		 * @see org.eclipse.sensinact.gateway.core.AnonymousSession#registerUser(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-		 */
 		@Override
 		public final void registerUser(final String login, final String password, final String account, final String accountType) 
 			throws SecuredAccessException {
@@ -1025,11 +977,6 @@ public class SensiNact implements Core {
 			}
 		}
 
-		/**
-		 * @inheritDoc
-		 * 
-		 * @see org.eclipse.sensinact.gateway.core.AnonymousSession#renewPassword(java.lang.String)
-		 */
 		@Override
 		public final void renewPassword(final String account) throws SecuredAccessException {
 			SecuredAccessException exception = SensiNact.this.mediator.callService(
@@ -1090,11 +1037,6 @@ public class SensiNact implements Core {
 			super(identifier);
 		}
 
-		/**
-		 * @inheritDoc
-		 * 
-		 * @see org.eclipse.sensinact.gateway.core.AuthenticatedSession#changePassword(java.lang.String, java.lang.String)
-		 */
 		@Override
 		public final void changePassword(final String oldPassword, final String newPassword) throws SecuredAccessException {
 			final SessionKey sessionKey;
@@ -1167,14 +1109,13 @@ public class SensiNact implements Core {
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
 
-	private final AccessTree<? extends AccessNode> anonymousTree;
 	private final Sessions sessions;
+	private AccessTree<? extends AccessNode> anonymousTree;
 
 	public Mediator mediator;
 	private RegistryEndpoint registry;
 
 	private volatile AtomicInteger count = new AtomicInteger(LOCAL_ID + 1);
-	public final String defaultLocation;
 
 	private final <R, P> R doPrivilegedService(final Class<P> p, final String f, final Executable<P, R> e) {
 		R r = AccessController.<R>doPrivileged(new PrivilegedAction<R>() {
@@ -1223,19 +1164,64 @@ public class SensiNact implements Core {
 		}
 		return tree;
 	}
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY, bind="bindConditionalPermissionAdmin", unbind="unbindConditionalPermissionAdmin")
+	private ConditionalPermissionAdmin cpa;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param mediator
-	 *            the extended {@link Mediator} allowing the {@link Core} to be
-	 *            instantiated to interact with the OSGi host environment
-	 * 
-	 * @throws SecuredAccessException
-	 * @throws BundleException
-	 */
-	public SensiNact(final Mediator mediator) throws SecuredAccessException, BundleException, DataStoreException {
+	public void bindConditionalPermissionAdmin(ConditionalPermissionAdmin cpa){
+		this.cpa = cpa;
+	}
+
+	public void unbindConditionalPermissionAdmin(){
+		this.cpa = null;
+	}	
+	
+	public SensiNact() {
+		this.sessions = new Sessions();
+	}
+	
+	@Activate
+	public void activate(ComponentContext context) throws SecuredAccessException, 
+	BundleException, DataStoreException  {
 		
+		Mediator mediator = new Mediator(context.getBundleContext());
+//		List<String> types = ReflectUtils.getAllStringTypes(mediator.getContext().getBundle());
+//
+//		StringBuilder builder = new StringBuilder();
+//
+//		for (int index = 0; index < types.size(); index++) {
+//			if (index > 0)
+//				builder.append("\\,");
+//			builder.append(types.get(index));
+//		}
+//
+//		ConditionalPermissionUpdate cpu = cpa.newConditionalPermissionUpdate();
+//		List piList = cpu.getConditionalPermissionInfos();
+//		
+//		ConditionalPermissionInfo cpiDeny = cpa.newConditionalPermissionInfo(
+//		String.format("DENY { [org.eclipse.sensinact.gateway.core.security.perm.StrictCodeBaseCondition \"%s\" \"!\"]"
+//			+ " (org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.Core\" \"register\")"
+//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModel\" \"register,get\")"
+//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement\" \"register,get\")"
+//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.LocalAgent\" \"register,get\")"
+//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.RemoteAgent\" \"register,get\")"
+//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.remote.RemoteCore\" \"register,get\")"
+//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecuredAccess\" \"register,get\")"
+//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.UserManager\" \"register,get\")"
+//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService\" \"register,get\")"
+//			+ "} null", builder.toString()));
+//		piList.add(cpiDeny);
+		
+//		ConditionalPermissionInfo cpiAllow = null;"
+//
+//		cpiAllow = cpa.newConditionalPermissionInfo(
+//			"ALLOW {[org.eclipse.sensinact.gateway.core.security.perm.CodeBaseCondition \"*\"](java.security.AllPermission \"\" \"\")} null");
+//		
+//		piList.add(cpiAllow);
+//
+//		if (!cpu.commit()) 
+//			throw new ConcurrentModificationException("Permissions changed during update");
+//		
 		SecuredAccess securedAccess = null;
 		ServiceLoader<SecurityDataStoreServiceFactory> dataStoreServiceFactoryLoader = 
 			ServiceLoader.load(SecurityDataStoreServiceFactory.class, mediator.getClassLoader());
@@ -1245,9 +1231,8 @@ public class SensiNact implements Core {
 
 		if (dataStoreServiceFactoryIterator.hasNext()) {
 			SecurityDataStoreServiceFactory<?> factory = dataStoreServiceFactoryIterator.next();
-			if (factory != null) {
+			if (factory != null) 
 				factory.newInstance(mediator);
-			}
 		}
 		ServiceLoader<UserManagerFactory> userManagerFactoryLoader = ServiceLoader.load(
 			UserManagerFactory.class, mediator.getClassLoader());
@@ -1273,9 +1258,9 @@ public class SensiNact implements Core {
 				break;
 			}
 		}
-		if (securedAccess == null) {
+		if (securedAccess == null) 
 			throw new BundleException("A SecuredAccess service was excepted");
-		}
+		
 		securedAccess.createAuthorizationService();
 		final SecuredAccess sa = securedAccess;
 
@@ -1286,16 +1271,14 @@ public class SensiNact implements Core {
 				return null;
 			}
 		});
-		this.defaultLocation = ModelInstance.defaultLocation(mediator);
-		this.sessions = new Sessions();
-
 		this.anonymousTree = mediator.callService(SecuredAccess.class,
 			new Executable<SecuredAccess, AccessTree<? extends AccessNode>>() {
 				@Override
 				public AccessTree<? extends AccessNode> execute(SecuredAccess securedAccess) throws Exception {
 					return securedAccess.getUserAccessTree(UserManager.ANONYMOUS_PKEY);
 				}
-			});
+			}
+		);
 		this.mediator = mediator;
 		this.registry = new RegistryEndpoint(mediator);
 		
@@ -1313,6 +1296,103 @@ public class SensiNact implements Core {
 			}
 		}
 	}
+	
+	@Deactivate
+	public void deactivate() {
+		this.close();
+	}
+//	
+//	
+//	
+//	/**
+//	 * Constructor
+//	 * 
+//	 * @param mediator
+//	 *            the extended {@link Mediator} allowing the {@link Core} to be
+//	 *            instantiated to interact with the OSGi host environment
+//	 * 
+//	 * @throws SecuredAccessException
+//	 * @throws BundleException
+//	 */
+//	public SensiNact(final Mediator mediator) throws SecuredAccessException, BundleException, DataStoreException {
+//		
+//		SecuredAccess securedAccess = null;
+//		ServiceLoader<SecurityDataStoreServiceFactory> dataStoreServiceFactoryLoader = 
+//			ServiceLoader.load(SecurityDataStoreServiceFactory.class, mediator.getClassLoader());
+//
+//		Iterator<SecurityDataStoreServiceFactory> dataStoreServiceFactoryIterator = 
+//			dataStoreServiceFactoryLoader.iterator();
+//
+//		if (dataStoreServiceFactoryIterator.hasNext()) {
+//			SecurityDataStoreServiceFactory<?> factory = dataStoreServiceFactoryIterator.next();
+//			if (factory != null) {
+//				factory.newInstance(mediator);
+//			}
+//		}
+//		ServiceLoader<UserManagerFactory> userManagerFactoryLoader = ServiceLoader.load(
+//			UserManagerFactory.class, mediator.getClassLoader());
+//
+//		Iterator<UserManagerFactory> userManagerFactoryIterator = userManagerFactoryLoader.iterator();
+//
+//		while (userManagerFactoryIterator.hasNext()) {
+//			UserManagerFactory factory = userManagerFactoryIterator.next();
+//			if (factory != null) {
+//				factory.newInstance(mediator);
+//				break;
+//			}
+//		}
+//		ServiceLoader<SecuredAccessFactory> securedAccessFactoryLoader = ServiceLoader.load(
+//				SecuredAccessFactory.class, mediator.getClassLoader());
+//
+//		Iterator<SecuredAccessFactory> securedAccessFactoryIterator = securedAccessFactoryLoader.iterator();
+//
+//		while (securedAccessFactoryIterator.hasNext()) {
+//			SecuredAccessFactory factory = securedAccessFactoryIterator.next();
+//			if (factory != null) {
+//				securedAccess = factory.newInstance(mediator);
+//				break;
+//			}
+//		}
+//		if (securedAccess == null) {
+//			throw new BundleException("A SecuredAccess service was excepted");
+//		}
+//		securedAccess.createAuthorizationService();
+//		final SecuredAccess sa = securedAccess;
+//
+//		AccessController.doPrivileged(new PrivilegedAction<Void>() {
+//			@Override
+//			public Void run() {
+//				mediator.register(sa, SecuredAccess.class, null);
+//				return null;
+//			}
+//		});
+//		this.defaultLocation = ModelInstance.defaultLocation(mediator);
+//		this.sessions = new Sessions();
+//
+//		this.anonymousTree = mediator.callService(SecuredAccess.class,
+//			new Executable<SecuredAccess, AccessTree<? extends AccessNode>>() {
+//				@Override
+//				public AccessTree<? extends AccessNode> execute(SecuredAccess securedAccess) throws Exception {
+//					return securedAccess.getUserAccessTree(UserManager.ANONYMOUS_PKEY);
+//				}
+//			});
+//		this.mediator = mediator;
+//		this.registry = new RegistryEndpoint(mediator);
+//		
+//		ServiceLoader<SensinactCoreBaseIFaceManagerFactory> loader = ServiceLoader.load(
+//			SensinactCoreBaseIFaceManagerFactory.class, mediator.getClassLoader());
+//		
+//		Iterator<SensinactCoreBaseIFaceManagerFactory> it = loader.iterator();
+//		
+//		while(it.hasNext()){
+//			SensinactCoreBaseIFaceManagerFactory factory = it.next();
+//			SensinactCoreBaseIFaceManager manager = factory.instance();
+//			if(manager!=null) {
+//				manager.start(mediator);
+//				break;
+//			}
+//		}
+//	}
 	
 	@Override
 	public AuthenticatedSession getSession(final Authentication<?> authentication)
@@ -1346,9 +1426,6 @@ public class SensiNact implements Core {
 		return session;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.sensinact.gateway.core.Core#getSession(java.lang.String)
-	 */
 	@Override
 	public AuthenticatedSession getSession(final String token) {
 		AuthenticatedSession session;
@@ -1358,9 +1435,6 @@ public class SensiNact implements Core {
 		return session;
 	}	
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.sensinact.gateway.core.Core#getRemoteSession(java.lang.String)
-	 */
 	@Override
 	public Session getRemoteSession(final String publicKey) {
 		final int sessionCount;
@@ -1566,8 +1640,7 @@ public class SensiNact implements Core {
 	/**
 	 * Unregisters the {@link SnaAgent} whose identifier is passed as parameter
 	 * 
-	 * @param identifier
-	 *            the identifier of the {@link SnaAgent} to register
+	 * @param identifier the identifier of the {@link SnaAgent} to register
 	 */
 	public void unregisterAgent(final String identifier) {
 		doPrivilegedService(SnaAgent.class,
@@ -1606,14 +1679,10 @@ public class SensiNact implements Core {
 	}
 
 	/**
-	 * Returns the {@link ServiceProvider} whose String identifier is passed as
-	 * parameter
+	 * Returns the {@link ServiceProvider} whose String identifier is passed as parameter
 	 * 
-	 * @param identifier
-	 *            the String identifier of the {@link Session} requiring the service
-	 *            provider
-	 * @param serviceProviderId
-	 *            the String identifier of the service provider
+	 * @param identifier the String identifier of the {@link Session} requiring the service provider
+	 * @param serviceProviderId the String identifier of the service provider
 	 * 
 	 * @return the {@link ServiceProvider}
 	 */
@@ -1760,9 +1829,8 @@ public class SensiNact implements Core {
 		String[] serviceProviderIdElements = serviceProviderId.split(":");
 		String remoteNamespace = serviceProviderIdElements[0];
 		F f = null;
-		if (serviceProviderIdElements.length == 1 || remoteNamespace.length() == 0 || remoteNamespace.equals(this.namespace()) ) {
-			return f;
-		}
+		if (serviceProviderIdElements.length == 1 || remoteNamespace.length() == 0 || remoteNamespace.equals(this.namespace()) ) 
+			return f;		
 		f = mediator.callService(SensinactCoreBaseIface.class, String.format("(%s=%s)",
 			SensinactCoreBaseIFaceManager.REMOTE_NAMESPACE_PROPERTY, remoteNamespace), executable);
 		return f;
@@ -2008,9 +2076,8 @@ public class SensiNact implements Core {
 			for (Future<String> future : results) {
 				try {
 					String result = future.get();
-					if (index > 0) {
+					if (index > 0) 
 						builder.append(",");
-					}
 					builder.append(result);
 					index++;
 				} catch (CancellationException | ExecutionException | InterruptedException e) {
@@ -2321,11 +2388,6 @@ public class SensiNact implements Core {
 		return content.toString();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Core#close()
-	 */
 	public void close() {
 		mediator.debug("closing sensiNact core");
 		this.mediator.callService(SensinactCoreBaseIFaceManager.class, 
@@ -2360,8 +2422,6 @@ public class SensiNact implements Core {
 		});
 	}
 
-	/**
-	 */
 	String nextToken() {
 		boolean exists = false;
 		String token = null;

@@ -173,16 +173,12 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 		this.defaultResourceType = defaultResourceType;
 		this.resourceConfigCatalogs = new ResourceConfigCatalogCollection();
 
-		ServiceLoader<ResourceConfigCatalog> loader = ServiceLoader.load(ResourceConfigCatalog.class,
-				mediator.getClassLoader());
-
+		ServiceLoader<ResourceConfigCatalog> loader = ServiceLoader.load(ResourceConfigCatalog.class, mediator.getClassLoader());
 		Iterator<ResourceConfigCatalog> iterator = loader.iterator();
-
 		while (iterator.hasNext()) {
 			ResourceConfigCatalog catalog = iterator.next();
-			if (catalog != null) {
-				this.resourceConfigCatalogs.add(catalog);
-			}
+			if (catalog != null) 
+				this.resourceConfigCatalogs.add(catalog);			
 		}
 		this.resourceConfigType = ResourceConfig.class;
 		this.defaultResourceConfigBuilder = defaultResourceConfigBuilder;
@@ -210,9 +206,8 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 
 			for (; index < length; index++) {
 				List<String> tobeAdded = this.profiles.get(profiles[index]);
-				if (tobeAdded == null) {
+				if (tobeAdded == null)
 					continue;
-				}
 				services.addAll(tobeAdded);
 			}
 		}
@@ -381,9 +376,8 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 	 *            the {@link ResourceConfigCatalog} to add
 	 */
 	public ModelConfiguration addResourceConfigCatalog(ResourceConfigCatalog resourceConfigCatalog) {
-		if (resourceConfigCatalog != null) {
+		if (resourceConfigCatalog != null) 
 			this.resourceConfigCatalogs.add(resourceConfigCatalog);
-		}
 		return this;
 	}
 
@@ -476,9 +470,8 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 
 		while (iterator.hasNext()) {
 			config = iterator.next().getDefaultResourceConfig(profile, serviceName);
-			if (config != null) {
+			if (config != null)
 				break;
-			}
 		}
 		return config;
 	}

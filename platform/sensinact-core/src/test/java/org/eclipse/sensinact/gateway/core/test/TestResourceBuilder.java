@@ -76,6 +76,7 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -87,7 +88,6 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import junit.framework.Assert;
 
 /**
  * Test ResourceFactory
@@ -104,8 +104,12 @@ public class TestResourceBuilder<R extends ModelInstance> {
 	@Before
 	public void init() throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException,
 			DataStoreException, BundleException {
+		try {
 		this.testContext = new TestContext();
 		this.tree = new AccessTreeImpl(testContext.getMediator()).withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@After

@@ -72,7 +72,7 @@
 				<configuration>
 					<obrRepository>NONE</obrRepository>
 					<instructions>
-						<Bundle-Activator>org.eclipse.sensinact.gateway.core.osgi.Activator</Bundle-Activator>
+						<!--<Bundle-Activator>org.eclipse.sensinact.gateway.core.osgi.Activator</Bundle-Activator>-->
 						<DynamicImport-Package>
 							org.eclipse.sensinact.gateway.core.security.impl
 						</DynamicImport-Package>

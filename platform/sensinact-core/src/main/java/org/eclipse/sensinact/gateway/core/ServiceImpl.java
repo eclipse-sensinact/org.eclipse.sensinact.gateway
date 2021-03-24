@@ -41,8 +41,8 @@ import org.json.JSONObject;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ServiceImpl
-		extends ModelElement<ModelInstance<?>, ServiceProxy, ServiceProcessableData<?>, ResourceImpl, Resource> {
+public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, ServiceProcessableData<?>, ResourceImpl, Resource> {
+	
 	class ServiceProxyWrapper extends ModelElementProxyWrapper implements ResourceCollection {
 		protected ServiceProxyWrapper(ServiceProxy proxy, ImmutableAccessTree tree) {
 			super(proxy, tree);
@@ -198,21 +198,17 @@ public class ServiceImpl
 	/**
 	 * Constructor
 	 * 
-	 * @param modelInstance
-	 *            the {@link ModelInstance} of the service to be instantiated
-	 * @param name
-	 *            the name of the service to be instantiated
-	 * @param serviceProvider
-	 *            the {@link ServiceProviderImpl} parent of the service to be
-	 *            instantiated
+	 * @param modelInstance the {@link ModelInstance} of the service to be instantiated
+	 * @param name the name of the service to be instantiated
+	 * @param serviceProvider the {@link ServiceProviderImpl} parent of the service to be
+	 * instantiated
 	 * 
 	 * @throws InvalidServiceException
 	 *             if an error occurred while instantiating the service
 	 */
 	protected ServiceImpl(ModelInstance<?> modelInstance, String name, ServiceProviderImpl serviceProvider)
-			throws InvalidServiceException {
+			throws InvalidServiceException {		
 		super(modelInstance, serviceProvider, UriUtils.getUri(new String[] { serviceProvider.getPath(), name }));
-
 		this.subscriptionsCount = 0;
 	}
 
@@ -259,7 +255,7 @@ public class ServiceImpl
 			    			dataType = String.class;
 		    				break;
 		    		}
-		    	} else if (obj instanceof Number) {		    		
+		    	} else if (obj instanceof Number) {	    		
 		        	switch(clazz.getName()) {
 		    		case "java.lang.Byte":
 		    		case "java.lang.Short":
@@ -323,8 +319,8 @@ public class ServiceImpl
 	 *             if an error occurred while instantiating the new
 	 *             {@link DataResource}
 	 */
-	public <D extends DataResource> ResourceImpl addDataResource(Class<D> resourceClass, String name, Class<?> type,
-			Object value) throws InvalidResourceException {
+	public <D extends DataResource> ResourceImpl addDataResource(Class<D> resourceClass, String name, Class<?> type, Object value) 
+		throws InvalidResourceException {
 		ResourceDescriptor descriptor = super.getModelInstance().configuration().getResourceDescriptor()
 				.withServiceName(this.getName()).withResourceName(name).withResourceType(resourceClass)
 				.withDataType(type).withDataValue(value);
@@ -566,9 +562,9 @@ public class ServiceImpl
 				default:
 					break;
 				}
-				if (trigger.passOn()) {
-					ServiceImpl.this.passOn(AccessMethod.SET, target, new Object[] { DataResource.VALUE, result });
-				}
+				if (trigger.passOn()) 
+					ServiceImpl.this.passOn(AccessMethod.SET, variable.getPath(), new Object[] { DataResource.VALUE, result });
+				
 				attribute.setValue(result);
 				builder.push(new JSONObject(attribute.getDescription().getJSON()));
 				return null;

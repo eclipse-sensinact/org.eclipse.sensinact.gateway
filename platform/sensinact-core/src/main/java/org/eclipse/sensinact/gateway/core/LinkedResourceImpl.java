@@ -28,11 +28,10 @@ public class LinkedResourceImpl extends ResourceImpl {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
+	 * @param modelInstance
 	 * @param resourceConfig
 	 * @param targetedResource
-	 * @param serviceImpl
-	 * 
+	 * @param service
 	 * @throws InvalidResourceException
 	 */
 	public LinkedResourceImpl(ModelInstance<?> modelInstance, ResourceConfig resourceConfig,
@@ -42,11 +41,6 @@ public class LinkedResourceImpl extends ResourceImpl {
 
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see ResourceImpl# buildAttributes(ResourceConfig)
-	 */
 	@Override
 	public void buildAttributes(ResourceConfig resourceConfig) {
 		String defaultAttributeName = resourceConfig.getTypeConfig()
@@ -62,11 +56,6 @@ public class LinkedResourceImpl extends ResourceImpl {
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ResourceImpl# get(java.lang.String)
-	 */
 	@Override
 	public Attribute getAttribute(String name) {
 		Attribute attribute = null;
@@ -76,12 +65,6 @@ public class LinkedResourceImpl extends ResourceImpl {
 		return attribute;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.DescribableCollection
-	 *      #getDescription(java.lang.String)
-	 */
 	@Override
 	public AttributeDescription getDescription(String name) {
 		AttributeDescription description = null;
@@ -95,12 +78,6 @@ public class LinkedResourceImpl extends ResourceImpl {
 		return description;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.DescribableCollection
-	 *      #getAllDescriptions()
-	 */
 	@Override
 	public List<AttributeDescription> getAllDescriptions() {
 		List<AttributeDescription> descriptions = super.getAllDescriptions();
@@ -117,21 +94,11 @@ public class LinkedResourceImpl extends ResourceImpl {
 		return allDescriptions;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see Typable#getType()
-	 */
 	@Override
 	public Resource.Type getType() {
 		return this.targetedResource.getType();
 	}
 
-	/**
-	 * @InheritedDoc
-	 *
-	 * @see ResourceImpl#registerLink(java.lang.String)
-	 */
 	@Override
 	public void registerLink(String path) {
 		super.modelInstance.mediator().debug("Unable to register a link for a LinkedResourceImpl");

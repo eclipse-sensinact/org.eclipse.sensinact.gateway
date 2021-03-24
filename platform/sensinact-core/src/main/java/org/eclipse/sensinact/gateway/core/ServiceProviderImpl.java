@@ -84,12 +84,6 @@ public class ServiceProviderImpl extends
 			return location;
 		}
 
-		/**
-		 * @inheritDoc
-		 * 
-		 * @see org.eclipse.sensinact.gateway.common.primitive.Localizable#
-		 *      setLocation(java.lang.String)
-		 */
 		@Override
 		public String setLocation(String location) throws InvalidValueException {
 			String setLocation = null;
@@ -101,11 +95,6 @@ public class ServiceProviderImpl extends
 			return setLocation;
 		}
 
-		/**
-		 * @inheritDoc
-		 * 
-		 * @see org.eclipse.sensinact.gateway.common.primitive.Stateful#getStatus()
-		 */
 		@Override
 		public ServiceProvider.LifecycleStatus getStatus() {
 			ServiceProvider.LifecycleStatus status = null;
@@ -116,13 +105,7 @@ public class ServiceProviderImpl extends
 			}
 			return status;
 		}
-
-		/**
-		 * @inheritDoc
-		 * 
-		 * @see org.eclipse.sensinact.gateway.common.primitive.Stateful#
-		 *      setStatus(java.lang.Enum)
-		 */
+		
 		@Override
 		public ServiceProvider.LifecycleStatus setStatus(ServiceProvider.LifecycleStatus status)
 				throws InvalidValueException {
@@ -134,22 +117,12 @@ public class ServiceProviderImpl extends
 			}
 			return setStatus;
 		}
-
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#isAccessible()
-		 */
+		
 		@Override
 		public boolean isAccessible() {
 			return true;
 		}
 
-		/**
-		 * @inheritDoc
-		 * 
-		 * @see org.eclipse.sensinact.gateway.common.primitive.Describable#getDescription()
-		 */
 		public Description getDescription() {
 			return new Description() {
 				@Override
@@ -266,16 +239,11 @@ public class ServiceProviderImpl extends
 		this.listeners.add(super.modelInstance);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ModelElement# process(ProcessableData)
-	 */
 	@Override
 	public void process(ServiceProviderProcessableData<?> data) {
-		if (data == null) {
+		if (data == null) 
 			return;
-		}
+		
 		Iterator<ServiceProcessableData<?>> iterator = (Iterator<ServiceProcessableData<?>>) data.iterator();
 
 		while (iterator.hasNext()) {

@@ -133,11 +133,6 @@ public class RemoteSensiNact implements RemoteCore {
 		});
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteCore#onConnected(org.eclipse.sensinact.gateway.common.execution.Executable)
-	 */
 	@Override
 	public void onConnected(Collection<Executable<String, Void>> onConnectedCallbacks) {
 		if (onConnectedCallbacks == null) {
@@ -146,11 +141,6 @@ public class RemoteSensiNact implements RemoteCore {
 		this.onConnectedCallback.addAll(onConnectedCallbacks);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteCore#onDisconnected(org.eclipse.sensinact.gateway.common.execution.Executable)
-	 */
 	@Override
 	public void onDisconnected(Collection<Executable<String, Void>> onDisconnectedCallbacks) {
 		if (onDisconnectedCallbacks == null) {
@@ -161,11 +151,6 @@ public class RemoteSensiNact implements RemoteCore {
 		this.onDisconnectedCallback.addAll(onDisconnectedCallbacks);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteCore#open(org.eclipse.sensinact.gateway.core.remote.RemoteEndpoint)
-	 */
 	@Override
 	public void open(RemoteEndpoint remoteEndpoint) {
 		if (remoteEndpoint == null) {
@@ -175,11 +160,6 @@ public class RemoteSensiNact implements RemoteCore {
 		this.remoteEndpoint.open(this);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteCore#connect(java.lang.String)
-	 */
 	@Override
 	public void connect(final String namespace) {
 		synchronized(this) {
@@ -217,11 +197,6 @@ public class RemoteSensiNact implements RemoteCore {
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteCore#close()
-	 */
 	@Override
 	public void close() {
 		this.disconnect();
@@ -231,11 +206,6 @@ public class RemoteSensiNact implements RemoteCore {
 		this.remoteEndpoint.close();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteCore#disconnect()
-	 */
 	@Override
 	public void disconnect() {
 		synchronized(this) {
@@ -290,140 +260,69 @@ public class RemoteSensiNact implements RemoteCore {
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteCore#endpoint()
-	 */
 	@Override
 	public RemoteEndpoint endpoint() {
 		return this.remoteEndpoint;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getAll(java.lang.String)
-	 */
 	@Override
 	public String getAll(String publicKey) {
 		return this.getAll(publicKey, null);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getAll(java.lang.String,java.lang.String)
-	 */
 	@Override
 	public String getAll(String publicKey, String filter) {
 		return this.localEndpoint.getAll(publicKey, filter);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getProviders(java.lang.String)
-	 */
 	@Override
 	public String getProviders(String publicKey) {
 		return this.localEndpoint.getProviders(publicKey);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getProvider(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public String getProvider(String publicKey, String serviceProviderId) {
 		return this.localEndpoint.getProvider(publicKey, serviceProviderId);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getServices(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public String getServices(String publicKey, String serviceProviderId) {
 		return this.localEndpoint.getServices(publicKey, serviceProviderId);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#getService(java.lang.String, java.lang.String, java.lang.String)
-	 */
 	@Override
 	public String getService(String publicKey, String serviceProviderId, String serviceId) {
 		return this.localEndpoint.getService(publicKey, serviceProviderId, serviceId);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#
-	 * getResources(java.lang.String, java.lang.String, java.lang.String)
-	 */
 	@Override
 	public String getResources(String publicKey, String serviceProviderId, String serviceId) {
 		return this.localEndpoint.getResources(publicKey, serviceProviderId, serviceId);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#
-	 * getResource(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
-	 */
 	@Override
 	public String getResource(String publicKey, String serviceProviderId, String serviceId, String resourceId) {
 		return this.localEndpoint.getResource(publicKey, serviceProviderId, serviceId, resourceId);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#
-	 * get(java.lang.String,java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-	 */
 	@Override
 	public JSONObject get(String publicKey, String serviceProviderId, String serviceId, String resourceId,
 			String attributeId) {
 		return this.localEndpoint.get(publicKey, serviceProviderId, serviceId, resourceId, attributeId);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#
-	 * set(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.Object)
-	 */
 	@Override
 	public JSONObject set(String publicKey, String serviceProviderId, String serviceId, String resourceId,
 			String attributeId, Object parameter) {
 		return this.localEndpoint.set(publicKey, serviceProviderId, serviceId, resourceId, attributeId, parameter);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint# 
-	 * act(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.Object[])
-	 */
 	@Override
 	public JSONObject act(String publicKey, String serviceProviderId, String serviceId, String resourceId,
 			Object[] parameters) {
 		return this.localEndpoint.act(publicKey, serviceProviderId, serviceId, resourceId, parameters);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteCore#
-	 * subscribe(java.lang.String,java.lang.String,java.lang.String,java.lang.String,org.json.JSONArray)
-	 */
 	@Override
 	public JSONObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
 			JSONArray conditions) {
@@ -432,12 +331,6 @@ public class RemoteSensiNact implements RemoteCore {
 		return response;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#
-	 * subscribe(java.lang.String,java.lang.String,java.lang.String,java.lang.String,org.eclipse.sensinact.gateway.core.message.Recipient,org.json.JSONArray)
-	 */
 	@Override
 	public JSONObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
 			Recipient recipient, JSONArray conditions) {
@@ -458,12 +351,6 @@ public class RemoteSensiNact implements RemoteCore {
 		return response;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#
-	 * unsubscribe(java.lang.String, java.lang.String, java.lang.String,java.lang.String, java.lang.String)
-	 */
 	@Override
 	public JSONObject unsubscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
 			String subscriptionId) {
@@ -474,42 +361,21 @@ public class RemoteSensiNact implements RemoteCore {
 		return response;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Endpoint#isAccessible(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public boolean isAccessible(String publicKey, String path) {
 		return this.localEndpoint.isAccessible(publicKey, path);
 	}
 	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteCore#namespace()
-	 */
 	@Override
 	public String namespace() {
 		return this.localEndpoint.localNamespace();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteCore#localID()
-	 */
 	@Override
 	public int localID() {
 		return this.localEndpoint.localID();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteCore#
-	 * registerAgent(java.lang.String,org.eclipse.sensinact.gateway.core.message.SnaFilter,java.lang.String)
-	 */
 	@Override
 	public void registerAgent(final String remoteAgentId, final SnaFilter filter, final String publicKey) {		
 		if(this.localAgents.get(remoteAgentId) != null) {
@@ -528,11 +394,6 @@ public class RemoteSensiNact implements RemoteCore {
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteCore#unregisterAgent(java.lang.String)
-	 */
 	@Override
 	public void unregisterAgent(String remoteAgentId) {
 		String localAgentId = this.localAgents.remove(remoteAgentId);
@@ -542,12 +403,6 @@ public class RemoteSensiNact implements RemoteCore {
 		this.localEndpoint.unregisterAgent(localAgentId);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteCore#
-	 * dispatch(java.lang.String,org.eclipse.sensinact.gateway.core.message.SnaMessage)
-	 */
 	@Override
 	public void dispatch(String agentId, final SnaMessage<?> message) {
 		this.callAgent(agentId, true, new Executable<SnaAgent, Void>() {
@@ -561,11 +416,6 @@ public class RemoteSensiNact implements RemoteCore {
 		});
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.remote.RemoteCore#closeSession(java.lang.String)
-	 */
 	@Override
 	public void closeSession(String publicKey) {
 		this.localEndpoint.closeSession(publicKey);

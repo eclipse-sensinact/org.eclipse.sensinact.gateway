@@ -46,6 +46,19 @@ public class ResourceConfig implements Nameable {
 		this.requirementBuilders = new ArrayList<RequirementBuilder>();
 	}
 
+	/**
+	 * Returns 
+	 */
+	public String buildName(String service) {			
+		if (service == null || service.length() == 0) 
+			return null;	
+		String name = null;
+		int index = -1;
+		if ((index = this.requirementBuilders.indexOf(new Name<RequirementBuilder>(Resource.NAME))) > -1)
+			name = ((StringPatternValue) this.requirementBuilders.get(index).get(service)).build();
+		return name;
+	}
+	
 	@Override
 	public String getName() {
 		return this.getName(ResourceConfig.ALL_TARGETS);
@@ -54,15 +67,28 @@ public class ResourceConfig implements Nameable {
 	/**
 	 * Returns the registered name for the specified service
 	 */
-	public String getName(String service) {
-		if (service == null || service.length() == 0) {
-			return this.getName(ResourceConfig.ALL_TARGETS);
-		}
+	public String getName(String service) {			
+		if (service == null || service.length() == 0) 
+			return this.getName(ResourceConfig.ALL_TARGETS);		
 		String name = null;
 		int index = -1;
-		if ((index = this.requirementBuilders.indexOf(new Name<RequirementBuilder>(Resource.NAME))) > -1) {
-			name = (String) this.requirementBuilders.get(index).get(service);
-		}
+		if ((index = this.requirementBuilders.indexOf(new Name<RequirementBuilder>(Resource.NAME))) > -1)
+			name = ((StringPatternValue) this.requirementBuilders.get(index).get(service)).getLast();
+		return name;
+	}
+
+
+	public String getRawName() {
+		return this.getRawName(ResourceConfig.ALL_TARGETS);
+	}
+
+	public String getRawName(String serviceName) {	
+		if (serviceName == null || serviceName.length() == 0) 
+			return this.getRawName(ResourceConfig.ALL_TARGETS);		
+		String name = null;
+		int index = -1;
+		if ((index = this.requirementBuilders.indexOf(new Name<RequirementBuilder>(Resource.NAME))) > -1)
+			name = ((StringPatternValue) this.requirementBuilders.get(index).get(serviceName)).getRaw();
 		return name;
 	}
 
@@ -73,23 +99,12 @@ public class ResourceConfig implements Nameable {
 	 * @param name the name to be set
 	 */
 	public void configureName(String service, String name) {
-		this.configureName(service, name, false);
-	}
-
-	/**
-	 * Configures the name of the resource to build
-	 * 
-	 * @param service the String name of the service for which to define the name
-	 * @param name the name to be set
-	 */
-	public void configureName(String service, String name, boolean multiple) {
 		int index = -1;
-		if ((index = this.requirementBuilders.indexOf(new Name<RequirementBuilder>(Resource.NAME))) > -1) {
-			this.requirementBuilders.get(index).put(service, name, multiple);
-
-		} else {
+		if ((index = this.requirementBuilders.indexOf(new Name<RequirementBuilder>(Resource.NAME))) > -1) 
+			this.requirementBuilders.get(index).put(service, name);
+		else {
 			RequirementBuilder builder = new RequirementBuilder(Requirement.VALUE, Resource.NAME);
-			builder.put(service, name, multiple);
+			builder.put(service, name);
 			this.requirementBuilders.add(builder);
 		}
 	}
@@ -106,7 +121,7 @@ public class ResourceConfig implements Nameable {
 
 	/**
 	 * Defines the {@link TypeConfig} which applies on {@link ResourceImpl}
-	 * instances based on this ResourceConfig
+	 * instances based on this ResourceConfigs
 	 * 
 	 * @param policy
 	 *            the {@link TypeConfig} which applies
@@ -133,9 +148,8 @@ public class ResourceConfig implements Nameable {
 	 * @return the {@link UpdatePolicy} which applies
 	 */
 	public UpdatePolicy getUpdatePolicy() {
-		if (this.updatePolicy == null) {
+		if (this.updatePolicy == null)
 			return UpdatePolicy.NONE;
-		}
 		return this.updatePolicy;
 	}
 
@@ -144,30 +158,27 @@ public class ResourceConfig implements Nameable {
 	 * targeted by this ResourceConfig; otherwise returns false
 	 * 
 	 * @return true if the service whose identifier is passed as parameter is
-	 *         defined as targeted; <br/>
-	 *         false otherwise
+	 * defined as targeted; <br/> false otherwise
 	 */
 	public boolean isTargeted(String serviceId) {
-		if (serviceId == null || serviceId.length() == 0) {
+		if (serviceId == null || serviceId.length() == 0) 
 			return this.isTargeted(ResourceConfig.ALL_TARGETS);
-		}
-		if (this.targets == null || this.targets.size() == 0) {
+		
+		if (this.targets == null || this.targets.size() == 0) 
 			return !serviceId.equals(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
-		}
+		
 		return targets.indexOf(serviceId) > -1 || (targets.indexOf(ResourceConfig.ALL_TARGETS) > -1 
 				&& !ServiceProvider.ADMINISTRATION_SERVICE_NAME.equals(serviceId));
 	}
 
 	/**
-	 * Defines specific {@link Service} targets for this XmlResourceConfig
+	 * Defines specific {@link Service} targets for this ResourceConfig
 	 * 
-	 * @param target
-	 *            specific {@link Service} targets for this ResourceConfig
+	 * @param target specific {@link Service} targets for this ResourceConfig
 	 */
 	public void setTarget(String target) {
-		if(target==null){
+		if(target==null)
 			return;
-		}
 		this.targets = Arrays.asList(target.split(","));
 	}
 
@@ -176,29 +187,24 @@ public class ResourceConfig implements Nameable {
 	 * for which this ResourceConfig; otherwise returns false
 	 * 
 	 * @return true if the service whose identifier is passed as parameter is
-	 *         defined as targeted; <br/>
-	 *         false otherwise
+	 * defined as targeted; <br/> false otherwise
 	 */
 	public boolean isProfiled(String profileId) {
-		if (profileId == null) {
+		if (profileId == null)
 			return this.isProfiled(ResourceConfig.ALL_PROFILES);
-		}
-		if (this.profiles == null) {
+		if (this.profiles == null) 
 			return ResourceConfig.ALL_PROFILES.equals(profileId);
-		}
 		return this.profiles.indexOf(profileId) > -1 || this.profiles.indexOf(ResourceConfig.ALL_PROFILES) > -1;
 	}
 
 	/**
-	 * Defines specific profile for this XmlResourceConfig
+	 * Defines specific profile for this ResourceConfig
 	 * 
-	 * @param policy
-	 *            specific profile for this XmlResourceConfig
+	 * @param policy specific profile for this ResourceConfig
 	 */
 	public void setProfile(String profile) {
-		if(profile == null) {
+		if(profile == null)
 			return;
-		}
 		this.profiles = Arrays.asList(profile.split(","));
 	}
 
@@ -212,12 +218,10 @@ public class ResourceConfig implements Nameable {
 	 *            the {@link RequirementBuilder} to add
 	 */
 	public void addRequirementBuilder(RequirementBuilder requirementBuilder) {
-		if (requirementBuilder == null) {
+		if (requirementBuilder == null) 
 			return;
-		}
 		int index = -1;
 		RequirementBuilder builder = null;
-
 		if ((index = this.requirementBuilders.indexOf(requirementBuilder)) > -1) {
 			builder = this.requirementBuilders.get(index);
 			Iterator<Map.Entry<String, Object>> iterator = requirementBuilder.iterator();
@@ -225,10 +229,8 @@ public class ResourceConfig implements Nameable {
 				Map.Entry<String, Object> entry = iterator.next();
 				builder.put(entry.getKey(), entry.getValue());
 			}
-
-		} else {
+		} else 
 			this.requirementBuilders.add(requirementBuilder);
-		}
 	}
 
 	/**
@@ -240,12 +242,9 @@ public class ResourceConfig implements Nameable {
 	 */
 	public List<AttributeBuilder> getAttributeBuilders(String service) {
 		List<AttributeBuilder> builders = this.typeConfig.getAttributeBuilders();
-
 		Iterator<RequirementBuilder> iterator = this.requirementBuilders.iterator();
-
-		while (iterator.hasNext()) {
+		while (iterator.hasNext()) 
 			iterator.next().apply(service, builders);
-		}
 		return builders;
 	}
 	

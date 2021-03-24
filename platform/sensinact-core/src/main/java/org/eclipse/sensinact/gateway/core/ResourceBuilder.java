@@ -86,8 +86,7 @@ public class ResourceBuilder {
 	/**
 	 * Returns the name of the resource to build
 	 * 
-	 * @param name
-	 *            the name of the resource to build
+	 * @param name the name of the resource to build
 	 */
 	public String getConfiguredName() {
 		return this.resourceConfig.getName();
@@ -96,8 +95,7 @@ public class ResourceBuilder {
 	/**
 	 * Configures the type of the 'value' attribute of the resource to build
 	 * 
-	 * @param name
-	 *            the name of the resource to build
+	 * @param name the name of the resource to build
 	 */
 	public void configureType(Class<?> type) {
 		this.configureRequirement(DataResource.VALUE, AttributeBuilder.Requirement.TYPE, type);
@@ -106,8 +104,7 @@ public class ResourceBuilder {
 	/**
 	 * Configures the value of the 'value' attribute of the resource to build
 	 * 
-	 * @param name
-	 *            the name of the resource to build
+	 * @param name the name of the resource to build
 	 */
 	public void configureValue(Object value) {
 		if (value == null) {
@@ -117,16 +114,12 @@ public class ResourceBuilder {
 	}
 
 	/**
-	 * Builds a new {@link RequirementBuilder} to apply on the set of
-	 * {@link AttributeBuilder}s used to create the set of {@link Attribute}s of the
-	 * resource to create
+	 * Builds a new {@link RequirementBuilder} to apply on the set of {@link AttributeBuilder}s 
+	 * used to create the set of {@link Attribute}s of the resource to create
 	 * 
-	 * @param attributeName
-	 *            the name of the attribute on which the requirement will apply
-	 * @param requirement
-	 *            the targeted {@link AttributeBuilder.Requirement}
-	 * @param value
-	 *            the object value to set
+	 * @param attributeName the name of the attribute on which the requirement will apply
+	 * @param requirement the targeted {@link AttributeBuilder.Requirement}
+	 * @param value the object value to set
 	 */
 	public void configureRequirement(String attributeName, AttributeBuilder.Requirement requirement, Object value) {
 		RequirementBuilder builder = new RequirementBuilder(requirement, attributeName);
@@ -147,27 +140,27 @@ public class ResourceBuilder {
 	 * Builds and returns a new {@link ResourceImpl} connected to the
 	 * {@link ServiceImpl} passed as parameter
 	 * 
-	 * @param service
-	 *            the service to which the {@link ResourceImpl} to create is
-	 *            connected to
+	 * @param service the service to which the {@link ResourceImpl} to create is
+	 * connected to
+	 * 
 	 * @return a new {@link ResourceImpl}
 	 * 
 	 * @throws InvalidResourceException
 	 */
 	public ResourceImpl build(ModelInstance<?> modelInstance, ServiceImpl service) throws InvalidResourceException {
 		String name = this.getConfiguredName();
-		if (name == null) {
+		if (name == null) 
 			throw new InvalidResourceException("Resource's name is needed");
-		}
+		
 		TypeConfig typeConfig = this.getResourceConfig().getTypeConfig();
 
 		ResourceImpl resourceImpl = ReflectUtils.getInstance(typeConfig.getResourceBaseClass(),
 			typeConfig.getResourceImplementedClass(), new Object[] { modelInstance, 
 					this.getResourceConfig(), service });
 
-		if (resourceImpl == null) {
+		if (resourceImpl == null) 
 			throw new InvalidResourceException(String.format("Unable to create the resource : %s", name));
-		}
+		
 		if (!resourceImpl.isHidden()) {
 			try {
 				this.buildMethods(resourceImpl);
@@ -187,22 +180,20 @@ public class ResourceBuilder {
 	 * {@link ServiceImpl} passed as parameter and linked to the
 	 * {@link ResourceImpl} also passed as parameter
 	 * 
-	 * @param service
-	 *            the service to which the {@link LinkedResourceImpl} to create is
-	 *            connected to
-	 * @param target
-	 *            the {@link ResourceImpl} to which the {@link LinkedResourceImpl}
-	 *            to create is linked to
-	 * @param link
-	 *            the name of the {@link LinkedResourceImpl} to create
+	 * @param service the service to which the {@link LinkedResourceImpl} to create is
+	 * connected to
+	 * @param target the {@link ResourceImpl} to which the {@link LinkedResourceImpl}
+	 * to create is linked to
+	 * @param link the name of the {@link LinkedResourceImpl} to create
+	 * 
 	 * @return a new {@link LinkedResourceImpl}
 	 * 
 	 * @throws InvalidResourceException
 	 */
 	public ResourceImpl buildLinkedResource(ServiceImpl service, ResourceImpl target) throws InvalidResourceException {
-		if (target == null) {
+		if (target == null) 
 			throw new InvalidResourceException("Target resource is needed");
-		}
+		
 		LinkedResourceImpl linkedResourceImpl = new LinkedResourceImpl((ModelInstance<?>) target.getModelInstance(),
 				this.getResourceConfig(), target, service);
 
@@ -220,20 +211,16 @@ public class ResourceBuilder {
 	 * {@link ServiceImpl} passed as parameter and linked to the
 	 * {@link ResourceImpl} also passed as parameter
 	 * 
-	 * @param service
-	 *            the service to which the {@link LinkedResourceImpl} to create is
-	 *            connected to
-	 * @param target
-	 *            the {@link ResourceImpl} to which the {@link LinkedResourceImpl}
-	 *            to create is linked to
-	 * @param link
-	 *            the name of the {@link LinkedResourceImpl} to create
-	 * @param copyActMethod
-	 *            true if the {@link LinkedActMethod} of the created
-	 *            {@link LinkedResourceImpl} is a simple copy of the
-	 *            {@link ActMethod} of the targeted {@link ActionResource} ; if
-	 *            false an empty {@link LinkedActMethod} (containing no signature)
-	 *            is registered into the created {@link LinkedResourceImpl}
+	 * @param service the service to which the {@link LinkedResourceImpl} to create is
+	 * connected to
+	 * @param target the {@link ResourceImpl} to which the {@link LinkedResourceImpl}
+	 * to create is linked to
+	 * @param link the name of the {@link LinkedResourceImpl} to create
+	 * @param copyActMethod true if the {@link LinkedActMethod} of the created
+	 * {@link LinkedResourceImpl} is a simple copy of the {@link ActMethod} of 
+	 * the targeted {@link ActionResource} ; if false an empty {@link LinkedActMethod} 
+	 * (containing no signature) is registered into the created {@link LinkedResourceImpl}
+	 * 
 	 * @return a new {@link LinkedResourceImpl}
 	 * 
 	 * @throws InvalidResourceException
@@ -476,11 +463,6 @@ public class ResourceBuilder {
 	 */
 	final private AccessMethodExecutor getExecutor(final ResourceImpl resource) {
 		return new AccessMethodExecutor() {
-			/**
-			 * @inheritDoc
-			 *
-			 * @see AccessMethodExecutor# execute(java.lang.Object[])
-			 */
 			@Override
 			public Void execute(AccessMethodResponseBuilder snaResult) throws Exception {
 				JSONObject result = null;
@@ -501,11 +483,6 @@ public class ResourceBuilder {
 	 */
 	final private AccessMethodExecutor setExecutor(final ResourceImpl resource) {
 		return new AccessMethodExecutor() {
-			/**
-			 * @inheritDoc
-			 *
-			 * @see AccessMethodExecutor# execute(java.lang.Object[])
-			 */
 			@Override
 			public Void execute(AccessMethodResponseBuilder snaResult) throws Exception {
 				AttributeDescription desc = resource.set((String) snaResult.getParameter(0),snaResult.getParameter(1));
@@ -522,11 +499,6 @@ public class ResourceBuilder {
 	 */
 	final private AccessMethodExecutor subscribeExecutor(final ResourceImpl resource) {
 		return new AccessMethodExecutor() {
-			/**
-			 * @inheritDoc
-			 *
-			 * @see AccessMethodExecutor# execute(java.lang.Object[])
-			 */
 			@Override
 			public Void execute(AccessMethodResponseBuilder snaResult) throws Exception {
 				String attributeName = (String) snaResult.getParameter(0);
