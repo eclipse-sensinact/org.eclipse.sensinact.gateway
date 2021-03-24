@@ -8,10 +8,11 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.nthbnd.rest.osgi;
+package org.eclipse.sensinact.gateway.nthbnd.rest.component;
 
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -23,7 +24,7 @@ import javax.servlet.ServletResponse;
 
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
-import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
+import org.eclipse.sensinact.gateway.common.interpolator.Interpolator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.http.CorsFilter;
@@ -35,15 +36,21 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /**
- * @see AbstractActivator
+ * 
  */
-public class Activator extends AbstractActivator<NorthboundMediator> {
+@Component(immediate=true)
+public class RestAccessConfigurator {
     	
 	private CorsFilter corsFilter = null;
     private boolean corsHeader = false;
+	private NorthboundMediator mediator;
     
     private static ClassLoader loader = null;
     
@@ -62,21 +69,29 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
     		}
     	}
     }
+
+    protected void injectPropertyFields() throws Exception {
+        this.mediator.debug("Starting introspection in bundle %s", mediator.getContext().getBundle().getSymbolicName());
+        Interpolator interpolator = new Interpolator(this.mediator);
+        interpolator.getInstance(this);
+        for(Map.Entry<String,String> entry:interpolator.getPropertiesInjected().entrySet()){
+            if(!this.mediator.getProperties().containsKey(entry.getKey()))
+                mediator.setProperty(entry.getKey(),entry.getValue());
+        }
+    }
     
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#
-     * doStart()
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-	public void doStart() throws Exception {
+    @Activate
+	public void activate(ComponentContext componentContext) throws Exception {
     	
-    	findJettyClassLoader(super.mediator.getContext());
+    	this.mediator = new NorthboundMediator(componentContext.getBundleContext());
+
+        injectPropertyFields();
+    	findJettyClassLoader(this.mediator.getContext());
     	        
-    	this.corsHeader = Boolean.valueOf((String) super.mediator.getProperty(RestAccessConstants.CORS_HEADER));
+    	this.corsHeader = Boolean.valueOf((String) this.mediator.getProperty(RestAccessConstants.CORS_HEADER));
         if (this.corsHeader) {
             this.corsFilter = new CorsFilter(mediator);                    
-            mediator.register(Activator.this.corsFilter, Filter.class, new Hashtable() {{
+            mediator.register(RestAccessConfigurator.this.corsFilter, Filter.class, new Hashtable() {{
             	this.put(Constants.SERVICE_RANKING, 1);
                 this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
                 this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
@@ -84,13 +99,13 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
             });
         }
         
-        super.mediator.register(
+        this.mediator.register(
         	new Hashtable() {{
         		this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.WS_ROOT);
         		this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");}}, 
         	new WebSocketServlet() { 			
 				private static final long serialVersionUID = 1L;			
-				private WebSocketConnectionFactory sessionPool = new WebSocketConnectionFactory(Activator.super.mediator);
+				private WebSocketConnectionFactory sessionPool = new WebSocketConnectionFactory(RestAccessConfigurator.this.mediator);
 				
 		        private final AtomicBoolean firstCall = new AtomicBoolean(true); 
 		    
@@ -138,37 +153,32 @@ public class Activator extends AbstractActivator<NorthboundMediator> {
                 };
             }, 
         	new Class[]{ Servlet.class, WebSocketServlet.class });
-        super.mediator.info(String.format("%s servlet registered", RestAccessConstants.WS_ROOT));
+        this.mediator.info(String.format("%s servlet registered", RestAccessConstants.WS_ROOT));
         
-        super.mediator.register(new HttpLoginEndpoint(mediator), Servlet.class, new Hashtable() {{
+        this.mediator.register(new HttpLoginEndpoint(mediator), Servlet.class, new Hashtable() {{
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.LOGIN_ENDPOINT);
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
         	}
         });
-        super.mediator.info(String.format("%s servlet registered", RestAccessConstants.LOGIN_ENDPOINT));
+        this.mediator.info(String.format("%s servlet registered", RestAccessConstants.LOGIN_ENDPOINT));
         
         mediator.register(new HttpRegisteringEndpoint(mediator), Servlet.class, new Hashtable() {{
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.REGISTERING_ENDPOINT);
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
         	}
         });
-        super.mediator.info(String.format("%s servlet registered", RestAccessConstants.REGISTERING_ENDPOINT));
+        this.mediator.info(String.format("%s servlet registered", RestAccessConstants.REGISTERING_ENDPOINT));
         
         mediator.register(new HttpEndpoint(mediator), Servlet.class, new Hashtable() {{
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.HTTP_ROOT);
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
         	}
         });      
-        super.mediator.info(String.format("%s servlet registered", RestAccessConstants.HTTP_ROOT));
+        this.mediator.info(String.format("%s servlet registered", RestAccessConstants.HTTP_ROOT));
     }
 
-    @Override
-    public void doStop() throws Exception {
+    @Deactivate
+    public void deactivate() throws Exception {
     }
 
-    @Override
-    public NorthboundMediator doInstantiate(BundleContext context) {
-        NorthboundMediator mediator = new NorthboundMediator(context);
-        return mediator;
-    }
 }

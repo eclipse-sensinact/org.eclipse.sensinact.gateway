@@ -109,7 +109,8 @@ public class TestContext {
 
     private final ServiceRegistration registrationFiltering = Mockito.mock(ServiceRegistration.class);
 
-	private final ComponentContext cpctx = Mockito.mock(ComponentContext.class);
+	private final ComponentContext componentContext= Mockito.mock(ComponentContext.class);
+
 	
     private MyModelInstance instance;
     private SnaAgent agent;
@@ -382,20 +383,23 @@ public class TestContext {
         Mockito.when(bundle.getBundleId()).thenReturn(MOCK_BUNDLE_ID);
         Mockito.when(bundle.getState()).thenReturn(Bundle.ACTIVE);
 
-		mediator = new NorthboundMediator(context);        
-		sensinact = new SensiNact(mediator);		
-		
-        instance = (MyModelInstance) new ModelInstanceBuilder(mediator).build(
-        	"serviceProvider", null, new ModelConfigurationBuilder(mediator,
-        	  ModelConfiguration.class,MyModelInstance.class
-        	   ).withStartAtInitializationTime(true).build());
-        
-        initialized = true;
+		Mockito.when(componentContext.getBundleContext()).thenReturn(context);
 
-        callbackCount = 0;
-        linkCallbackCount = 0;
-        extraCallbackCount = 0;
-        agentCallbackCount = 0;
+		mediator = new NorthboundMediator(context);
+		sensinact = new SensiNact();
+		sensinact.activate(componentContext);;
+		
+		instance = (MyModelInstance) new ModelInstanceBuilder(mediator
+			).build("serviceProvider", null, new ModelConfigurationBuilder(
+				mediator,ModelConfiguration.class, MyModelInstance.class
+				).withStartAtInitializationTime(true).build());
+		
+		initialized = true;
+
+		callbackCount = 0;
+		linkCallbackCount = 0;
+		extraCallbackCount = 0;
+		agentCallbackCount = 0;
     }
 
     public final SnaAgent getAgent() {

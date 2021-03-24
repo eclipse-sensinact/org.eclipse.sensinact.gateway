@@ -130,11 +130,30 @@ public class InfluxDBStorageConnection extends StorageConnection {
 		}
 		this.extractLocation(fs, obj.opt("location"));
 		Object o = obj.opt(DataResource.VALUE);
-		if(o!=null && o.getClass()==String.class)
+		if(o == null)
+			return;
+		Object value = null;
+		
+		if(o.getClass().isPrimitive()) {
+			value = String.valueOf(o);
+			if(o.getClass() != char.class && o.getClass() != boolean.class ) 
+				value = Double.parseDouble((String) value);			
+		} else if(o instanceof Number) 
+			value = ((Number)o).doubleValue();
+		else 
+			value = String.valueOf(o);
+
+		if(value.getClass()==String.class)
 			measurement=this.measurement.concat("_str");
 		else
-			measurement=this.measurement.concat("_num");		
-		this.database.add(measurement, ts, fs, o);	
+			measurement=this.measurement.concat("_num");
+		long tm  = obj.optLong("timestamp");
+		long timestamp = 0;
+		if(tm>0)
+			timestamp = tm;
+		else
+			timestamp = System.currentTimeMillis();
+		this.database.add(measurement, ts, fs, value,timestamp);	
 	}
 
 	private void extractLocation(Dictionary<String,Object> fields, Object location)  {		

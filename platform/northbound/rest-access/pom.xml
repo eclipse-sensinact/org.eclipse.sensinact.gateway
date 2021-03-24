@@ -97,8 +97,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-Activator>org.eclipse.sensinact.gateway.nthbnd.rest.osgi.Activator</Bundle-Activator>
-						<Export-Package>org.eclipse.sensinact.gateway.nthbnd.rest.osgi</Export-Package>
+						<Export-Package>org.eclipse.sensinact.gateway.nthbnd.rest.component</Export-Package>
 						<Include-Resource>
 							about.html
 						</Include-Resource>
