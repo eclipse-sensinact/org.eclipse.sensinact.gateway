@@ -19,12 +19,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.sensinact.gateway.util.LocationUtils;
+import org.eclipse.sensinact.gateway.util.location.Segment;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Point.Builder;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.influxdb.impl.InfluxDBResultMapper;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,6 +159,7 @@ public class InfluxDbDatabase {
     	}
         addField(builder,"value",value);
         point = builder.build();
+        
         influxDB.write(point);
         influxDB.flush();
     }
@@ -198,30 +202,30 @@ public class InfluxDbDatabase {
              builder.addField(key, (String) value);
         } else if (value instanceof Number) {
         	switch(value.getClass().getName()) {
-    		case "java.lang.Byte":
-    			builder.addField(key, (Byte) value);
-				break;
-    		case "java.lang.Short":
-    			builder.addField(key, (Short) value);
-				break;
-    		case "java.lang.Integer":
-    			builder.addField(key, (Integer) value);
-				break;
-    		case "java.lang.Long":
-    			builder.addField(key, (Long) value);
-				break;
-    		case "java.lang.Float":
-    			builder.addField(key, (Float) value);
-    			break;
-    		case "java.lang.Double":
-    			builder.addField(key, (Double) value);
-				break;
-    		case "java.lang.Character":
-    			builder.addField(key, new String(new char[] {((Character)value).charValue()}));
-				break;
-    		case "java.lang.Boolean":
-    			builder.addField(key, new String(new char[] {(char)value}));
-				break;
+	    		case "java.lang.Byte":
+	    			builder.addField(key, (Byte) value);
+					break;
+	    		case "java.lang.Short":
+	    			builder.addField(key, (Short) value);
+					break;
+	    		case "java.lang.Integer":
+	    			builder.addField(key, (Integer) value);
+					break;
+	    		case "java.lang.Long":
+	    			builder.addField(key, (Long) value);
+					break;
+	    		case "java.lang.Float":
+	    			builder.addField(key, (Float) value);
+	    			break;
+	    		case "java.lang.Double":
+	    			builder.addField(key, (Double) value);
+					break;
+	    		case "java.lang.Character":
+	    			builder.addField(key, new String(new char[] {((Character)value).charValue()}));
+					break;
+	    		case "java.lang.Boolean":
+	    			builder.addField(key, new String(new char[] {(char)value}));
+					break;
         	}			
 		} else if(value instanceof Enum){
 			builder.addField(key, ((Enum)value).name());
@@ -232,7 +236,6 @@ public class InfluxDbDatabase {
 
     /*
      * (non-javadoc)
-     * 
      */
     private String getTimeWindow(long timeWindow) {
     	if(timeWindow <= MILLISECOND)
@@ -755,5 +758,5 @@ public class InfluxDbDatabase {
     	QueryResult result = this.influxDB.query(query);
     	InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
     	return resultMapper.toPOJO(result, resultType);
-    }	
+    }
 }

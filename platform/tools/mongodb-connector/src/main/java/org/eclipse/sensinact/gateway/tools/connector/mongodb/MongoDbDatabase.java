@@ -15,11 +15,13 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
 
+import org.bson.BsonDocument;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -45,7 +47,7 @@ public class MongoDbDatabase {
 	}
 
 	//build a BasicDBObject to be used to query the MongoDB database
-	private BasicDBObject createBasisDBObject(String key, String value) {
+	private BasicDBObject createBasisDBObject(String key, Object value) {
 		BasicDBObject obj = new BasicDBObject();
 		obj.put(key, value);
 		return obj;
@@ -71,7 +73,7 @@ public class MongoDbDatabase {
 		return obj;
 	}
 
-	//Returns the List of Documents compliant with the specified tag value
+	//Returns the List of Documents compliant with the specified tagged value
 	private List<Document> getAll(MongoCollection<Document> collection, String identifierName, String identifier){
 		List<Document> list = new ArrayList<>();
 		BasicDBObject searchQuery = createBasisDBObject(identifierName,identifier);
@@ -85,7 +87,7 @@ public class MongoDbDatabase {
 		return list;
 	}
 
-	//Returns the List of Documents compliant with the specified tag values
+	//Returns the List of Documents compliant with the specified tagged values
 	private List<Document> getAll(MongoCollection<Document> collection, Dictionary<String,Object> identifiers){
 		List<Document> list = new ArrayList<>();
 		BasicDBObject searchQuery = createBasisDBObject(identifiers);
@@ -99,11 +101,12 @@ public class MongoDbDatabase {
 		return list;
 	}
 
-	//Returns the Document that complies to the specified tag value
+	//Returns the Document that complies to the specified tagged value
 	private Document get(MongoCollection<Document> collection, String identifierName, String identifier) {
 		Document result = null;
 		BasicDBObject searchQuery = createBasisDBObject(identifierName,identifier);
 		FindIterable<Document> iterable = collection.find(searchQuery);
+		System.out.println("SEARCH QUERY :" + searchQuery.toJson());
 		MongoCursor<Document> cursor = iterable.cursor();
 		try {
 			while(cursor.hasNext()) {
@@ -116,7 +119,7 @@ public class MongoDbDatabase {
 		return result;
 	}                                                                     
 
-	//Returns the Document that complies to the specified tag values
+	//Returns the Document that complies to the specified tagged values
 	private Document get(MongoCollection<Document> collection, Dictionary<String,Object> identifiers) {
 		Document result = null;
 		BasicDBObject searchQuery = createBasisDBObject(identifiers);
@@ -132,7 +135,8 @@ public class MongoDbDatabase {
 		}
 		return result;
 	}             
-	
+
+	//Returns the <T> typed Object value that complies to the specified tagged value
 	private <T> T get(MongoCollection<Document> collection, String identifierName, String identifier, Class<T> resultType) {
 		T result = null;
 		BasicDBObject searchQuery = createBasisDBObject(identifierName,identifier);
@@ -148,7 +152,8 @@ public class MongoDbDatabase {
 		}
 		return result;
 	}
-	
+
+	//Returns the <T> typed Object value that complies to the specified tagged values
 	private <T> T get(MongoCollection<Document> collection, Dictionary<String,Object> identifiers, Class<T> resultType) {
 		T result = null;
 		BasicDBObject searchQuery = createBasisDBObject(identifiers);
@@ -164,7 +169,8 @@ public class MongoDbDatabase {
 		}
 		return result;
 	}
-	
+
+	//Returns the List <T> typed Object values that complies to the specified tagged value
 	private <T> List<T> getAll(MongoCollection<Document> collection, String identifierName, String identifier, Class<T> resultType){
 		List<T> list = new ArrayList<>();
 		BasicDBObject searchQuery = createBasisDBObject(identifierName,identifier);
@@ -177,7 +183,8 @@ public class MongoDbDatabase {
 		}
 		return list;
 	}
-	
+
+	//Returns the List <T> typed Object values that complies to the specified tagged values
 	private <T> List<T> getAll(MongoCollection<Document> collection, Dictionary<String,Object> identifiers, Class<T> resultType){
 		List<T> list = new ArrayList<>();
 		BasicDBObject searchQuery = createBasisDBObject(identifiers);
@@ -191,19 +198,63 @@ public class MongoDbDatabase {
 		return list;
 	}
 	
+	/**
+	 * Operates the aggregation command String passed as parameter on the {@link MongoCollection} 
+	 * whose name is also passed as parameter
+	 * 
+	 * @param collection the {@link MongoCollection} name
+	 * @param aggregation the String aggregation command
+	 * 
+	 * @return the {@link Iterable} of {@link Document}s resulting from the aggregation command
+	 */
+	public Iterable<Document> aggregate(String collection, String...aggregations){
+		return aggregate(this.base.getCollection(collection), aggregations);
+	}
+	
+	//
+	private Iterable<Document> aggregate(MongoCollection<Document> collection, String...aggregations){
+		List<Document> pipeline = new ArrayList<>();
+		for(String aggregation : aggregations) {
+			Document doc = Document.parse(aggregation);
+			pipeline.add(doc);
+		}
+		AggregateIterable<Document> iterable = collection.aggregate(pipeline);
+		return iterable;
+	}
+	
+	/**
+	 * Returns the names List of existing Collections in the current database
+	 * 
+	 * @return the List of names of existing Collections 
+	 */
+	public List<String> getCollectionNames() {
+		List<String> collectionNames = new ArrayList<>();
+		for(MongoCursor<String> cursor = this.base.listCollectionNames().iterator();cursor.hasNext();) 
+			collectionNames.add(cursor.next());
+		return collectionNames;
+	}
 	
 	/**
 	 * Adds a collection whose name is the one passed as parameter if it does not already exist
 	 *   
 	 * @param collectionName the name of the collection
+	 * 
+	 * @return true if the collection with the specified name is created ; false if it already exists
 	 */
-	public void addCollection(String collectionName) {
-		MongoCollection<Document> collection = this.base.getCollection(collectionName);
-		if(collection == null)
-			this.base.createCollection(collectionName);
+	public boolean addCollection(String collectionName) {
+		boolean found = false;
+		for(MongoCursor<String> cursor = this.base.listCollectionNames().iterator();cursor.hasNext();) {
+			if(cursor.next().equals(collectionName)) {
+				found = true;
+				break;
+			}
+		}
+		if(found)
+			return false;
+		this.base.createCollection(collectionName);
+		return true;
 	}
-	
-	
+		
 	public List<Document> getAll(String collectionName, String identifierName, String identifier) {
 		MongoCollection<Document> collection = this.base.getCollection(collectionName);
 		return getAll(collection, identifierName, identifier);
@@ -212,9 +263,7 @@ public class MongoDbDatabase {
 	public List<Document> getAll(String collectionName,  Dictionary<String,Object> identifiers) {
 		MongoCollection<Document> collection = this.base.getCollection(collectionName);
 		return getAll(collection, identifiers);
-	}
-	
-                                                        
+	}                                                
 	
 	public Document get(String collectionName, String identifierName, String identifier) {
 		MongoCollection<Document> collection = this.base.getCollection(collectionName);		
@@ -438,5 +487,39 @@ public class MongoDbDatabase {
 		} catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+
+	public String createIndex(String collectionName, String index) {
+		MongoCollection<Document> collection = this.base.getCollection(collectionName);
+		String json = String.format("{\"%s\":1}", index);
+		BsonDocument bson = BsonDocument.parse(json);
+		return collection.createIndex(bson);
+	}
+
+	public String createIndexes(String collectionName, List<String> indexes) {
+		try {
+			List<String> names = new ArrayList<>();
+			for(String index : indexes)
+				names.add(createIndex(collectionName, index));
+			System.out.println("NAMES : "+ names);
+			return names.toString();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public String createCompoundIndex(String collectionName, List<String> indexes) {
+		MongoCollection<Document> collection = this.base.getCollection(collectionName);
+		StringBuilder builder = new StringBuilder();
+		for(String index : indexes) {
+			builder.append(String.format("\"%s\":1", index));
+			builder.append(",");
+		}
+		builder.deleteCharAt(builder.length()-1);
+		builder.insert(0, '{');
+		builder.append('}');
+		BsonDocument bson = BsonDocument.parse(builder.toString());
+		return collection.createIndex(bson);
 	}
 }
