@@ -23,7 +23,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
 public @interface KeyValuePair {
+	
     String key();
 
     String value();
+    
+    String operator() default "=";
 }

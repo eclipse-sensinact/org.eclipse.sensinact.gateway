@@ -42,18 +42,12 @@ public abstract class AbstractMutableSnaDAO<E extends SnaEntity> extends Abstrac
 	 * @param entityType
 	 * @throws DAOException
 	 */
-	AbstractMutableSnaDAO(Mediator mediator, Class<E> entityType, DataStoreService dataStoreService)
-			throws DAOException {
+	AbstractMutableSnaDAO(Mediator mediator, Class<E> entityType, DataStoreService dataStoreService) throws DAOException {
 		super(mediator, entityType, dataStoreService);
 		if (this.entityType.getAnnotation(Immutable.class) != null)
 			throw new DAOException("Mutable type expected");
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AbstractSnaDAO# created(SnaEntity, java.lang.Long)
-	 */
 	@Override
 	void created(E entity, long identifier) {
 		if (entity == null || identifier < 0) {
@@ -68,21 +62,11 @@ public abstract class AbstractMutableSnaDAO<E extends SnaEntity> extends Abstrac
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AbstractSnaDAO# updated(java.lang.Integer)
-	 */
 	@Override
 	void updated(int records) {
 		super.mediator.debug("%s %s record(s) updated in the datastore", records, entityType.getSimpleName());
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AbstractSnaDAO# deleted(java.lang.Integer)
-	 */
 	@Override
 	void deleted(int records) {
 		super.mediator.debug("%s %s record(s) deleted in the datastore", records, entityType.getSimpleName());

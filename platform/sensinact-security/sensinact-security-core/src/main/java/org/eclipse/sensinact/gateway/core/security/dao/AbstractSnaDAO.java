@@ -324,12 +324,6 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 		return entitiesList;
 	}
 
-	/**
-	 * @throws DataStoreException
-	 * @inheritDoc
-	 *
-	 * @see SnaDAO#select(java.util.Map)
-	 */
 	@Override
 	public E select(List<SnaEntity.Key> keyMap) throws DAOException, DataStoreException {
 		KeyDirective keyDirective = KeyDirective.createKeyDirective(mediator, entityType);
@@ -435,24 +429,12 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 		return entitiesList;
 	}
 
-	/**
-	 * @throws DataStoreException
-	 * @inheritDoc
-	 *
-	 * @see SnaDAO#select()
-	 */
 	@Override
 	public List<E> select() throws DAOException, DataStoreException {
 		List<E> entities = this.getEntities(this.entityType);
 		return entities;
 	}
 
-	/**
-	 * @throws DataStoreException
-	 * @inheritDoc
-	 *
-	 * @see SnaDAO# create(SnaEntity)
-	 */
 	@Override
 	public void create(E entity) throws DAOException, DataStoreException {
 		CreateDirective createDirective = CreateDirective.getCreateDirective(this.mediator, entity);
@@ -460,24 +442,12 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 		this.created(entity, this.create(createDirective.toString()));
 	}
 
-	/**
-	 * @throws DataStoreException
-	 * @inheritDoc
-	 *
-	 * @see SnaDAO# update(SnaEntity)
-	 */
 	@Override
 	public void update(E entity) throws DAOException, DataStoreException {
 		UpdateDirective updateDirective = UpdateDirective.getUpdateDirective(this.mediator, entity);
 		this.updated(this.update(updateDirective.toString()));
 	}
 
-	/**
-	 * @throws DataStoreException
-	 * @inheritDoc
-	 *
-	 * @see SnaDAO# delete(SnaEntity)
-	 */
 	@Override
 	public void delete(E entity) throws DAOException, DataStoreException {
 		DeleteDirective deleteDirective = DeleteDirective.getDeleteDirective(this.mediator, entity);

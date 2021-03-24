@@ -10,6 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 
+import java.io.IOException;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
@@ -24,23 +36,11 @@ import org.eclipse.sensinact.gateway.sthbnd.http.annotation.RecurrentHttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.SimpleHttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTasks;
-import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpDiscoveryTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTaskImpl;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -178,11 +178,7 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
         this.recurrences.add(executor);
     }
 
-    /**
-     * @inheritDoc
-     * @see ProtocolStackEndpoint#
-     * connect(ExtModelConfiguration)
-     */
+    @Override
     public void connect(ExtModelConfiguration manager) throws InvalidProtocolStackException {
         super.connect(manager);
 
@@ -264,18 +260,14 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
         }
         HttpTask<?, ?> task = super.wrap(HttpTask.class, ReflectUtils.getInstance(this.getTaskType(command), new Object[]{mediator, command, this, SimpleHttpRequest.class, path, profileId, resourceConfig, parameters}));
         try {
-            if (task.getPacketType() == null) {
-                task.setPacketType(packetType);
-            }
-            if (ChainedHttpTaskConfigurator.class.isAssignableFrom(configuration.getClass())) {
+            if (task.getPacketType() == null) 
+                task.setPacketType(packetType);            
+            if (ChainedHttpTaskConfigurator.class.isAssignableFrom(configuration.getClass()))
                 configuration.configure(task);
-
-            } else {
+            else {
                 HttpTaskProcessingContext context = SimpleHttpProtocolStackEndpoint.this.createContext(configuration, task);
-
-                if (context != null) {
+                if (context != null)
                     ((HttpMediator) mediator).registerProcessingContext(task, context);
-                }
             }
             return task;
         } catch (Exception e) {
@@ -293,9 +285,8 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
      */
     protected HttpTaskProcessingContext createContext(HttpTaskConfigurator httpTaskConfigurator, HttpTask<?, ?> task) {
         HttpTaskProcessingContextFactory factory = null;
-        if ((factory = ((HttpMediator) mediator).getTaskProcessingContextFactory()) != null) {
+        if ((factory = ((HttpMediator) mediator).getTaskProcessingContextFactory()) != null)
             return factory.newInstance(httpTaskConfigurator, this.endpointId, task);
-        }
         return null;
     }
 

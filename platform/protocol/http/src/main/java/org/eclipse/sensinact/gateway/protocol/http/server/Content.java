@@ -16,6 +16,7 @@ import org.eclipse.sensinact.gateway.protocol.http.Headers;
  *
  */
 public interface Content extends Headers {
+	
     byte[] getContent();
 
     void setContent(byte[] content);

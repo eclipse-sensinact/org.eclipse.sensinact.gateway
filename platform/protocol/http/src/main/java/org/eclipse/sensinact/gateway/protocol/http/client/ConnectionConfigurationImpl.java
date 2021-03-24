@@ -87,10 +87,6 @@ public class ConnectionConfigurationImpl<RESPONSE extends Response, REQUEST exte
         }
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#queryParameter(java.lang.String, java.lang.String)
-     */
     @Override
     public ConnectionConfigurationImpl<RESPONSE, REQUEST> queryParameter(String key, String value) {
         if (key != null && key.length() > 0 && value != null) {
@@ -99,20 +95,12 @@ public class ConnectionConfigurationImpl<RESPONSE extends Response, REQUEST exte
         return this;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#setUri(java.lang.String)
-     */
     @Override
     public ConnectionConfigurationImpl<RESPONSE, REQUEST> setUri(String uri) {
         this.uri = uri;
         return this;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#getUri()
-     */
     @Override
     public String getUri() {
         if (!this.parameters.isEmpty()) {
@@ -134,77 +122,45 @@ public class ConnectionConfigurationImpl<RESPONSE extends Response, REQUEST exte
         return this.uri;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#setContent(java.lang.Object)
-     */
     @Override
     public ConnectionConfigurationImpl<RESPONSE, REQUEST> setContent(Object content) {
         this.content = content;
         return this;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#getContent()
-     */
     @Override
     public Object getContent() {
         return this.content;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#setAccept(java.lang.String)
-     */
     @Override
     public ConnectionConfigurationImpl<RESPONSE, REQUEST> setAccept(String acceptType) {
         this.acceptType = acceptType;
         return this;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#getAccept()
-     */
     @Override
     public String getAccept() {
         return this.acceptType;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#setContentType(java.lang.String)
-     */
     @Override
     public ConnectionConfigurationImpl<RESPONSE, REQUEST> setContentType(String contentType) {
         this.contentType = contentType;
         return this;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#getContentType()
-     */
     @Override
     public String getContentType() {
         return this.contentType;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#setHttpMethod(java.lang.String)
-     */
     @Override
     public ConnectionConfigurationImpl<RESPONSE, REQUEST> setHttpMethod(String httpMethod) {
         this.httpMethod = httpMethod;
         return this;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#getHttpMethod()
-     */
     @Override
     public String getHttpMethod() {
         if (this.httpMethod == null) {
@@ -213,20 +169,12 @@ public class ConnectionConfigurationImpl<RESPONSE extends Response, REQUEST exte
         return this.httpMethod;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#setConnectTimeout(int)
-     */
     @Override
     public ConnectionConfigurationImpl<RESPONSE, REQUEST> setConnectTimeout(int connectTimeout) {
         this.connectTimeout = connectTimeout;
         return this;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#getConnectTimeout()
-     */
     @Override
     public int getConnectTimeout() {
         if (this.connectTimeout <= 0) {
@@ -235,20 +183,12 @@ public class ConnectionConfigurationImpl<RESPONSE extends Response, REQUEST exte
         return this.connectTimeout;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#setReadTimeout(int)
-     */
     @Override
     public ConnectionConfigurationImpl<RESPONSE, REQUEST> setReadTimeout(int readTimeout) {
         this.readTimeout = readTimeout;
         return this;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#getReadTimeout()
-     */
     @Override
     public int getReadTimeout() {
         if (this.readTimeout <= 0) {
@@ -257,20 +197,12 @@ public class ConnectionConfigurationImpl<RESPONSE extends Response, REQUEST exte
         return this.readTimeout;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#setProxyHost(java.lang.String)
-     */
     @Override
     public ConnectionConfigurationImpl<RESPONSE, REQUEST> setProxyHost(String proxyHost) {
         this.proxyConfiguration.setProxyHost(proxyHost);
         return this;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#setProxyPort(int)
-     */
     @Override
     public ConnectionConfigurationImpl<RESPONSE, REQUEST> setProxyPort(int proxyPort) {
         this.proxyConfiguration.setProxyPort(proxyPort);
@@ -297,32 +229,16 @@ public class ConnectionConfigurationImpl<RESPONSE extends Response, REQUEST exte
 		return this.clientCertificate;
 	}
 
-
-    /**
-     * Returns a new {@link Proxy} instance using
-     * the retrieved proxy's host and port
-     * configuration
-     *
-     * @return a new {@link Proxy} instance
-     */
     @Override
     public Proxy getProxy() {
         return this.proxyConfiguration.getProxy();
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectionConfiguration#connect()
-     */
     @Override
     public HttpURLConnection connect() throws IOException {
         return ConnectionConfiguration.HttpURLConnectionBuilder.build(this);
     }
 
-    /**
-     * @inheritDoc
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

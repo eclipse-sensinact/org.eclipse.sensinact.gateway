@@ -32,6 +32,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -71,6 +72,7 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
     final static Map<String,TrustManager[]> TRUST_MANAGERS = new HashMap<>();
     final static Map<String, KeyManager[]> KEY_MANAGERS = new HashMap<>();  
     
+    
     abstract class BooleanProvider {
         abstract boolean init();
     }
@@ -84,15 +86,17 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
          * @return an appropriate {@link HttpURLConnection} according
          * to the specified  {@link URL}'s protocol
          */
-        public static <RESPONSE extends Response, REQUEST extends Request<RESPONSE>> HttpURLConnection build(ConnectionConfiguration<RESPONSE, REQUEST> config) throws IOException {
+        public static <RESPONSE extends Response, REQUEST extends Request<RESPONSE>> HttpURLConnection build(ConnectionConfiguration<RESPONSE, REQUEST> config) 
+        	throws IOException {
             HttpURLConnection connection = null;            
             String uri = config.getUri();
-            if (uri == null || uri.length() == 0) {
+            if (uri == null || uri.length() == 0) 
                 return null;
-            }
+            
             URL url = new URL(uri);
             Proxy proxy = config.getProxy();
-
+            SSLContext sc = null;
+            
             if (url.getProtocol().toLowerCase().equals("https")) {
                 connection = (HttpsURLConnection) url.openConnection(proxy);
                 String host = url.getHost();
@@ -126,7 +130,8 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
 	            			trusteds = null;
 	            		}
 	                	if(trusteds == null && TRUST_ALL.equals(serverCertificateStr)) {
-	                       trusteds = new TrustManager[]{new X509TrustManager() {
+	                       trusteds = new TrustManager[]{
+	                        new X509TrustManager() {
 	                            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
 	                                return null;
 	                            }
@@ -149,13 +154,13 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
             		}                    
                 	if(clientCertificate != null) {
                 		try {
-                		 InputStream is = clientCertificate.openStream();                		 
-                		 KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                		 KeyStore ks = KeyStore.getInstance("PKCS12");
-                		 ks.load(is,new char[] {});              		 
-                		 kmf.init(ks, new char[] {});
-                		 keys = kmf.getKeyManagers();
-                		 KEY_MANAGERS.put(host,keys);
+	                		 InputStream is = clientCertificate.openStream();                		 
+	                		 KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+	                		 KeyStore ks = KeyStore.getInstance("PKCS12");
+	                		 ks.load(is,new char[] {});              		 
+	                		 kmf.init(ks, new char[] {});
+	                		 keys = kmf.getKeyManagers();
+	                		 KEY_MANAGERS.put(host,keys);
                 		} catch(NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException | UnrecoverableKeyException e) {
                 			LOG.log(Level.SEVERE,e.getMessage(), e);
                         	keys = null;
@@ -163,16 +168,16 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
                 	}
                 }                
                 try {
-                    SSLContext sc = SSLContext.getInstance("TLS"); // "TLS" "SSL"
+                    sc = SSLContext.getInstance("TLS"); // "TLS" "TLSv1.2" "SSL"
                     sc.init(keys, trusteds, null);
                     ((HttpsURLConnection)connection).setSSLSocketFactory(sc.getSocketFactory());
                 } catch (Exception e) {
                 	LOG.log(Level.SEVERE,e.getMessage(), e);
                     return null;
                 }                
-            } else {
+            } else 
             	connection = (HttpURLConnection) url.openConnection(proxy);
-            }
+            
             connection.setConnectTimeout(config.getConnectTimeout());
             connection.setReadTimeout(config.getReadTimeout());
             connection.setDoInput(true);
@@ -183,13 +188,13 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
             connection.setRequestMethod(config.getHttpMethod());
 
             String contentType = null;
-            if ((contentType = config.getContentType()) != null) {
+            if ((contentType = config.getContentType()) != null) 
                 connection.setRequestProperty("Content-type", contentType);
-            }
+            
             String acceptType = null;
-            if ((acceptType = config.getAccept()) != null) {
+            if ((acceptType = config.getAccept()) != null) 
                 connection.setRequestProperty("Accept", acceptType);
-            }
+            
             String data = doOutput ? String.valueOf(content) : null;
             Iterator<String> iterator = config.iterator();
 
@@ -198,10 +203,9 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
                 connection.setRequestProperty(header, config.getHeaderAsString(header));
             }
             connection.connect();
-
-            if (data != null) {
-                IOUtils.write(data.getBytes(), connection.getOutputStream());
-            }
+            
+            if (data != null) 
+                IOUtils.write(data.getBytes(), connection.getOutputStream());            
             return connection;
         }
     }
