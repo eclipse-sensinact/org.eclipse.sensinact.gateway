@@ -47,6 +47,8 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class TestGenericImplementation extends MidOSGiTest {
 
+	Method getJSON=null;
+	Method getProviders=null;
     Method getDescription = null;
     Method getMethod = null;
     Method setMethod = null;
@@ -54,7 +56,9 @@ public class TestGenericImplementation extends MidOSGiTest {
 
     public TestGenericImplementation() throws Exception {
         super();
-        getDescription = Describable.class.getDeclaredMethod("getDescription");
+        getProviders = Session.class.getDeclaredMethod("getProviders");  
+        getJSON = DescribeResponse.class.getDeclaredMethod("getJSON");  
+        getDescription = Describable.class.getDeclaredMethod("getDescription");        
         getMethod = Resource.class.getDeclaredMethod("get", new Class<?>[]{String.class});
         setMethod = Resource.class.getDeclaredMethod("set", new Class<?>[]{String.class, Object.class});
         actMethod = ActionResource.class.getDeclaredMethod("act", new Class<?>[]{Object[].class});
@@ -236,10 +240,18 @@ public class TestGenericImplementation extends MidOSGiTest {
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
         Core core = mid.buildProxy();
         Session session = core.getAnonymousSession();
-
+        
+        MidProxy midSession = (MidProxy) Proxy.getInvocationHandler(session);
+        Object providers = midSession.toOSGi(getProviders,null);
+        
+        MidProxy midDesc = (MidProxy) Proxy.getInvocationHandler(providers);
+        String resp = (String)midDesc.toOSGi(getJSON,null);
+        System.out.println(resp);
+        
         Resource resource = session.resource("providerTest", "measureTest", "condition");
         MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(resource);
         Description description = (Description) midResource.toOSGi(getDescription, null);
+        System.out.println(description.getJSON());
         core.close();
     }
 
