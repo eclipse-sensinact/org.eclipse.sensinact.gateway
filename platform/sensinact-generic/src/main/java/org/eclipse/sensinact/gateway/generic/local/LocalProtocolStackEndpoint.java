@@ -189,7 +189,6 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
                 }
             }
         }
-        System.out.println(this.executors);
         Collections.sort(this.executors, new Comparator<AnnotationExecutor>() {
             @Override
             public int compare(AnnotationExecutor basis1, AnnotationExecutor basis2) { 
@@ -237,7 +236,6 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
                 return basis1AllProfile?1:-1;         	   
             }
         });
-        System.out.println(this.executors);
     }
 
     /**
