@@ -49,6 +49,8 @@ public class TestGenericImplementation extends MidOSGiTest {
 
 	Method getJSON=null;
 	Method getProviders=null;
+	Method getServices=null;
+	Method getResources=null;
     Method getDescription = null;
     Method resource = null;
     Method getMethod = null;
@@ -58,7 +60,9 @@ public class TestGenericImplementation extends MidOSGiTest {
     public TestGenericImplementation() throws Exception {
         super();
         resource = Session.class.getDeclaredMethod("resource", new Class<?>[] {String.class,String.class,String.class});  
-        getProviders = Session.class.getDeclaredMethod("getProviders");  
+        getProviders = Session.class.getDeclaredMethod("getProviders");   
+        getServices = Session.class.getDeclaredMethod("getServices", new Class<?>[] {String.class});   
+        getResources = Session.class.getDeclaredMethod("getResources", new Class<?>[] {String.class, String.class});  
         getJSON = DescribeResponse.class.getDeclaredMethod("getJSON");  
         getDescription = Describable.class.getDeclaredMethod("getDescription");        
         getMethod = Resource.class.getDeclaredMethod("get", new Class<?>[]{String.class});
@@ -244,13 +248,26 @@ public class TestGenericImplementation extends MidOSGiTest {
         Session session = core.getAnonymousSession();
         
         MidProxy midSession = (MidProxy) Proxy.getInvocationHandler(session);
-        Object providers = midSession.toOSGi(getProviders,null);
-        
+        Object providers = midSession.toOSGi(getProviders,null);        
         MidProxy midDesc = (MidProxy) Proxy.getInvocationHandler(providers);
         String resp = (String)midDesc.toOSGi(getJSON,null);
         System.out.println(resp);
         
-
+        Object services = midSession.toOSGi(getServices, new Object[] {"providerTest"});
+        midDesc = (MidProxy) Proxy.getInvocationHandler(services);
+        resp = (String)midDesc.toOSGi(getJSON,null);
+        System.out.println(resp);
+        
+        Object resources = midSession.toOSGi(getResources, new Object[] {"providerTest","measureTest"});
+        midDesc = (MidProxy) Proxy.getInvocationHandler(resources);
+        resp = (String)midDesc.toOSGi(getJSON,null);
+        System.out.println(resp);
+        
+        resources = midSession.toOSGi(getResources, new Object[] {"providerTest","serviceTest"});
+        midDesc = (MidProxy) Proxy.getInvocationHandler(resources);
+        resp = (String)midDesc.toOSGi(getJSON,null);
+        System.out.println(resp);
+        
         Object res = midSession.toOSGi(resource, new Object[]{"providerTest", "measureTest", "condition"});        
         MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(res);
         Description description = (Description) midResource.toOSGi(getDescription, null);
