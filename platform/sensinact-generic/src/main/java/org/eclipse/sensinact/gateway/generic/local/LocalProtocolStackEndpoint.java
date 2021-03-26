@@ -189,38 +189,55 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
                 }
             }
         }
+        System.out.println(this.executors);
         Collections.sort(this.executors, new Comparator<AnnotationExecutor>() {
             @Override
-            public int compare(AnnotationExecutor basis1, AnnotationExecutor basis2) {            	
-            	int basis1WildcardIndex = basis1.getName().indexOf('*');
-            	int basis2WildcardIndex = basis2.getName().indexOf('*');
-                
-                if(basis1WildcardIndex>-1 && basis2WildcardIndex==-1)
-                	return 1;
-                if(basis1WildcardIndex==-1 && basis2WildcardIndex>-1)
-                	return -1;
-            	if(basis1WildcardIndex>-1 && basis2WildcardIndex>-1) {            	
-            		String[] thisPathElements = UriUtils.getUriElements(basis1.getName());
-            		String[] thatPathElements = UriUtils.getUriElements(basis2.getName());
-            		int i=0;
-            		for(;i<thisPathElements.length && !"*".equals(thisPathElements[i]);i++);
-            		int j=0;
-            		for(;j<thatPathElements.length && !"*".equals(thatPathElements[j]);j++);
-            		if(i==j) {
-            			int k=i+1;
-                		for(;k<thisPathElements.length && !"*".equals(thisPathElements[k]);k++);
-                		k=k==thisPathElements.length?0:k;
-                		int l=j+1;
-                		for(;l<thatPathElements.length && !"*".equals(thatPathElements[l]);l++);
-                		l=l==thatPathElements.length?0:l;
-                		i=k;
-                		j=l;
-            		}
-            		return i<j?-1:1;            			
-            	}
-                return basis1.length() < basis2.length()?-1:1;
+            public int compare(AnnotationExecutor basis1, AnnotationExecutor basis2) { 
+               boolean basis1AllProfile = basis1.isProfile(ResourceConfig.ALL_PROFILES);
+               boolean basis2AllProfile = basis2.isProfile(ResourceConfig.ALL_PROFILES);
+
+               boolean basis1AllTargets = basis1.isAllTargets();
+               boolean basis2AllTargets = basis2.isAllTargets();
+               
+               if (basis1AllProfile == basis2AllProfile) {
+            	   
+            	   if(basis1AllTargets && !basis2AllTargets)
+            		   return 1;
+            	   if(!basis1AllTargets && basis2AllTargets)
+            		   return -1;
+            	   
+            	   int basis1WildcardIndex = basis1.getName().indexOf('*');
+               	   int basis2WildcardIndex = basis2.getName().indexOf('*');
+                   
+                   if(basis1WildcardIndex>-1 && basis2WildcardIndex==-1)
+                   	    return 1;
+                   if(basis1WildcardIndex==-1 && basis2WildcardIndex>-1)
+                   	    return -1;
+               	   if(basis1WildcardIndex>-1 && basis2WildcardIndex>-1) {            	
+	               		String[] thisPathElements = UriUtils.getUriElements(basis1.getName());
+	               		String[] thatPathElements = UriUtils.getUriElements(basis2.getName());
+	               		int i=0;
+	               		for(;i<thisPathElements.length && !"*".equals(thisPathElements[i]);i++);
+	               		int j=0;
+	               		for(;j<thatPathElements.length && !"*".equals(thatPathElements[j]);j++);
+	               		if(i==j) {
+	               			int k=i+1;
+	                   		for(;k<thisPathElements.length && !"*".equals(thisPathElements[k]);k++);
+	                   		k=k==thisPathElements.length?0:k;
+	                   		int l=j+1;
+	                   		for(;l<thatPathElements.length && !"*".equals(thatPathElements[l]);l++);
+	                   		l=l==thatPathElements.length?0:l;
+	                   		i=k;
+	                   		j=l;
+	               		}
+	               		return i<j?-1:1;            			
+               		}
+                    return basis1.length() < basis2.length()?1:-1;
+                }
+                return basis1AllProfile?1:-1;         	   
             }
         });
+        System.out.println(this.executors);
     }
 
     /**

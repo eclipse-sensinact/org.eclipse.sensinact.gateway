@@ -104,6 +104,17 @@ public abstract class AnnotationExecutor implements Executable<Task, Object>, Na
 
         return index < length;
     }
+    
+    public boolean isAllTargets() {
+    	switch(getName()) {
+	    	case "/":
+	    	case "*":
+	    	case "/*":
+	    	case ResourceConfig.ALL_TARGETS:
+	    		return true;
+    	}
+    	return false;
+    }
 
     @Override
     public String getName() {
