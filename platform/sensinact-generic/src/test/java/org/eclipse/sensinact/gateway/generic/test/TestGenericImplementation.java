@@ -50,12 +50,14 @@ public class TestGenericImplementation extends MidOSGiTest {
 	Method getJSON=null;
 	Method getProviders=null;
     Method getDescription = null;
+    Method resource = null;
     Method getMethod = null;
     Method setMethod = null;
     Method actMethod = null;
 
     public TestGenericImplementation() throws Exception {
         super();
+        resource = Session.class.getDeclaredMethod("resource", new Class<?>[] {String.class,String.class,String.class});  
         getProviders = Session.class.getDeclaredMethod("getProviders");  
         getJSON = DescribeResponse.class.getDeclaredMethod("getJSON");  
         getDescription = Describable.class.getDeclaredMethod("getDescription");        
@@ -248,8 +250,9 @@ public class TestGenericImplementation extends MidOSGiTest {
         String resp = (String)midDesc.toOSGi(getJSON,null);
         System.out.println(resp);
         
-        Resource resource = session.resource("providerTest", "measureTest", "condition");
-        MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(resource);
+
+        Object res = midSession.toOSGi(resource, new Object[]{"providerTest", "measureTest", "condition"});        
+        MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(res);
         Description description = (Description) midResource.toOSGi(getDescription, null);
         System.out.println(description.getJSON());
         core.close();
