@@ -1998,7 +1998,7 @@ public class SensiNact implements Core {
 		    return object;
 		}
 		List<Future<String>> results = new ArrayList<Future<String>>();		
-		ExecutorService executor = Executors.newFixedThreadPool(10);
+		ExecutorService executor = Executors.newFixedThreadPool(20);
 		
 		if (sessionKey.localID() == 0) {
 			Collection<ServiceReference<SensinactCoreBaseIface>> references = null;

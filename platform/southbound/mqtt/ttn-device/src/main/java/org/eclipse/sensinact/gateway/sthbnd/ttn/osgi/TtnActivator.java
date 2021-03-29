@@ -49,11 +49,11 @@ public class TtnActivator extends BasisActivator<MqttPacket> {
     @Property(name = "the.things.network.broker.protocol",defaultValue = "SSL")
     public String brokerProtocol;
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.generic.BasisActivator#configure()
-     */
+   
     @Override
-    public void configure() {    	
+    public void configure() {  
+    	if(appId == null || appKey == null)
+    		return;
         MqttAuthentication authentication = new MqttAuthentication.Builder()
                 .username(appId)
                 .password(appKey)
