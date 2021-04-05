@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2020 Kentyou.
+* Copyright (c) 2020-2021 Kentyou.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,12 +21,9 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
 import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
-import org.eclipse.sensinact.gateway.generic.SubscribeTaskWrapper;
 import org.eclipse.sensinact.gateway.generic.Task;
-import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.Task.RequestType;
 import org.eclipse.sensinact.gateway.generic.TaskTranslator;
-import org.eclipse.sensinact.gateway.generic.UnsubscribeTaskWrapper;
 import org.eclipse.sensinact.gateway.protocol.http.Headers;
 import org.eclipse.sensinact.gateway.protocol.http.HeadersCollection;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
@@ -41,10 +38,6 @@ import org.xml.sax.SAXException;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<HttpPacket> {
-//	/**
-//	 * HttpPackets stack
-//	 */
-//	private final HttpPacketStack stack;
 	
     /**
      * permanent header fields added to each request
