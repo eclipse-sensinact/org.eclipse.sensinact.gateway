@@ -45,9 +45,6 @@ public class HttpRequestWrapper extends HttpServletRequestWrapper implements Req
         super(request);
     }
     
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.http.tools.internal.RequestWrapper#getQueryMap()
-     */
     @Override
     public Map<String, List<String>> getQueryMap() {
         if (this.queryMap == null) {
@@ -60,9 +57,6 @@ public class HttpRequestWrapper extends HttpServletRequestWrapper implements Req
         return queryMap;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.http.tools.internal.RequestWrapper#getContent()
-     */
     @Override
     public String getContent() {
         if (this.content == null) {
@@ -77,9 +71,6 @@ public class HttpRequestWrapper extends HttpServletRequestWrapper implements Req
         return this.content;
     }
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.sensinact.gateway.nthbnd.http.tools.internal.RequestWrapper#getProperties()
-	 */
 	@Override
 	public Map<String, List<String>> getAttributes() {
         Map<String, List<String>> map = new HashMap<String, List<String>>();
