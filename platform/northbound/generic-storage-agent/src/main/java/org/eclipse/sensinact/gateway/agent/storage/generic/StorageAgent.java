@@ -248,10 +248,17 @@ public abstract class StorageAgent extends AbstractAgentRelay {
 				});
 			}
 		}
-        Long timestamp = (Long) content.opt("timestamp");
-        if (timestamp == null) 
+		Long timestamp;
+        Object timestampProp = content.opt("timestamp");
+        if (timestampProp == null) 
             timestamp = System.currentTimeMillis();
-        
+        else {
+        	try {
+        		timestamp = Long.valueOf(String.valueOf(timestampProp));
+        	} catch(NumberFormatException e) {
+                timestamp = System.currentTimeMillis();
+        	}
+        }
         String timestampStr = FORMAT.format(new Date(timestamp));
 		
         JSONObject jsonObject = new JSONObject();
