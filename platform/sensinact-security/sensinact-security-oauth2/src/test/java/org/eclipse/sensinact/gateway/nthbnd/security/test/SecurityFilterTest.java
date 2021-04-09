@@ -32,7 +32,7 @@ public class SecurityFilterTest extends MidOSGiTest {
 		KeycloakServer server = null;		
 		KServer() throws Throwable {	
 		    server = KeycloakServer.bootstrapKeycloakServer(
-		    	new String[] {"-b","localhost","-p","8080"});		
+		    	new String[] {"-b","localhost","-p","8895"});		
 			assertNotNull(server);		
 			RealmRepresentation representation = KeycloakServer.loadJson(
 			    new FileInputStream("src/test/resources/testRealm.json"), 
