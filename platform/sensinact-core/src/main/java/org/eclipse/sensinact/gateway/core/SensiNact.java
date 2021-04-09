@@ -1165,17 +1165,9 @@ public class SensiNact implements Core {
 		return tree;
 	}
 	
-	@Reference(cardinality=ReferenceCardinality.MANDATORY, bind="bindConditionalPermissionAdmin", unbind="unbindConditionalPermissionAdmin")
-	private ConditionalPermissionAdmin cpa;
+//	@Reference
+//	private ConditionalPermissionAdmin cpa;
 
-	public void bindConditionalPermissionAdmin(ConditionalPermissionAdmin cpa){
-		this.cpa = cpa;
-	}
-
-	public void unbindConditionalPermissionAdmin(){
-		this.cpa = null;
-	}	
-	
 	public SensiNact() {
 		this.sessions = new Sessions();
 	}
