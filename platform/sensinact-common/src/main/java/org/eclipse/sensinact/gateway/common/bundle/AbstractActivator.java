@@ -1,12 +1,12 @@
 /*
-* Copyright (c) 2020 Kentyou.
+ * Copyright (c) 2020 - 2021 Kentyou.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
-*    Kentyou - initial API and implementation
+ *    Kentyou - initial API and implementation
  */
 package org.eclipse.sensinact.gateway.common.bundle;
 
@@ -44,21 +44,6 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
      */
     protected M mediator;
 
-    /**
-     * @inheritDoc
-     * @see org.osgi.framework.BundleActivator#
-     * start(org.osgi.framework.BundleContext)
-     */
-    public void start(final BundleContext context) throws Exception {
-        try {
-             AbstractActivator.this.mediator = AbstractActivator.this.initMediator(context);
-             injectPropertyFields();
-             AbstractActivator.this.doStart();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     protected void injectPropertyFields() throws Exception {
         this.mediator.debug("Starting introspection in bundle %s", mediator.getContext().getBundle().getSymbolicName());
         //This line creates an interpolator and inject the properties into the activator
@@ -72,11 +57,18 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
         }
     }
 
-    /**
-     * @inheritDoc
-     * @see org.osgi.framework.BundleActivator#
-     * stop(org.osgi.framework.BundleContext)
-     */
+    @Override
+    public void start(final BundleContext context) throws Exception {        
+    	this.mediator = AbstractActivator.this.initMediator(context);
+        try {
+             injectPropertyFields();
+        } catch (Exception e) {
+            mediator.error(e);
+        }
+        AbstractActivator.this.doStart();
+    }
+
+    @Override
     public void stop(BundleContext context) throws Exception {
         try{
             doStop();
@@ -95,9 +87,7 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
      * current {@link Bundle}
      *
      * @param context The current {@link BundleContext}
-     * @return the {@link Mediator}
-     * @throws IOException
-     * @
+     * @return the newly created {@link Mediator}
      */
     protected M initMediator(BundleContext context) {
         M mediator = doInstantiate(context);

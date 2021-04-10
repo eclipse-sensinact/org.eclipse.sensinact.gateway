@@ -22,32 +22,25 @@ public class Changed extends ConstraintOnComparable<Boolean> {
     public static final String OPERATOR = "changed";
 
     /**
-     * @param complement
+     * @param classloader
      */
     public Changed(ClassLoader classloader) {
         this(classloader, false);
     }
 
     /**
+     * @param classloader
      * @param complement
      */
     public Changed(ClassLoader classloader, boolean complement) {
         super(classloader, OPERATOR, new Boolean(true), complement);
     }
 
-    /**
-     * @inheritDoc
-     * @see ConstraintOnComparable#doComplies(java.lang.Object)
-     */
     @Override
     protected boolean doComplies(Boolean castedValue) {
         return castedValue.booleanValue() || isComplement();
     }
 
-    /**
-     * @inheritDoc
-     * @see Constraint#getComplement()
-     */
     @Override
     public Constraint getComplement() {
         Changed complement = new Changed(super.classloader, !this.complement);
