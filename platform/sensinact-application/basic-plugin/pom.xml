@@ -36,7 +36,6 @@
 				<configuration>
 					<instructions>
 						<Import-Package>*</Import-Package>
-						<Bundle-Activator>org.eclipse.sensinact.gateway.app.basic.osgi.Activator</Bundle-Activator>
 						<Include-Resource>
 							about.html,
 							src/main/resources/

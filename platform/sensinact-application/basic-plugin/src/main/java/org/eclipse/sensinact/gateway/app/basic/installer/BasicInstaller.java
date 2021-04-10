@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.app.basic.installer;
 
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.api.plugin.AbstractPlugin;
+import org.eclipse.sensinact.gateway.app.api.plugin.PluginInstaller;
 import org.eclipse.sensinact.gateway.app.basic.logic.BetweenFunction;
 import org.eclipse.sensinact.gateway.app.basic.logic.DoubleConditionFunction;
 import org.eclipse.sensinact.gateway.app.basic.logic.SimpleConditionFunction;
@@ -33,16 +34,21 @@ import org.eclipse.sensinact.gateway.app.basic.time.TimeFunction;
 import org.eclipse.sensinact.gateway.app.manager.json.AppFunction;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.json.JSONObject;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
 
 /**
- * @author Remi Druilhe
  * @see PluginInstaller
  */
+@Component(immediate = true, service = PluginInstaller.class, property = {"plugin.name=BasicPlugin"})
 public class BasicInstaller extends AbstractPlugin {
+	
     protected Mediator mediator;
 
-    public BasicInstaller(Mediator mediator) {
-        this.mediator = mediator;
+    @Activate
+    public void activate(ComponentContext context) {
+    	this.mediator = new Mediator(context.getBundleContext()); 
     }
 
     /**
