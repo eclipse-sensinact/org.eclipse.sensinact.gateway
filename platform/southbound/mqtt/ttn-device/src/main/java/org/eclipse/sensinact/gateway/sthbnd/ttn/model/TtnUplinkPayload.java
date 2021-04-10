@@ -12,6 +12,7 @@
 package org.eclipse.sensinact.gateway.sthbnd.ttn.model;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.sthbnd.ttn.listener.TtnUplinkListener;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.packet.PayloadDecoder;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONException;
@@ -99,19 +100,11 @@ public class TtnUplinkPayload extends TtnPacketPayload {
 
     public TtnMetadata getMetadata() {
         return metadata;
-    }
+    }    
     
-
     @Override
     public List<TtnSubPacket> getSubPackets() {
         List<TtnSubPacket> subPackets = new ArrayList<>();
-
-        subPackets.add(new TtnSubPacket<>("system", "frequency", null,null,metadata.getFrequency()));
-        subPackets.add(new TtnSubPacket<>("system", "modulation", null,null,metadata.getModulation()));
-        subPackets.add(new TtnSubPacket<>("system", "data_rate", null,null,metadata.getDataRate()));
-        subPackets.add(new TtnSubPacket<>("system", "coding_rate", null,null,metadata.getCodingRate()));
-        subPackets.add(new TtnSubPacket<>("system", "data", null, null, payloadRaw));
-
         if (payloadRaw != null) {
             try {
                 ServiceReference[] serviceReferences = this.mediator.getContext().getServiceReferences((String) null, PAYLOAD_DECODER);
@@ -122,9 +115,14 @@ public class TtnUplinkPayload extends TtnPacketPayload {
 
                         if(!decodedPayload.isEmpty()) {
                             for(Map.Entry<String, Object> payloadMap : decodedPayload.entrySet()) {
-                                if(payloadMap.getKey().equals("position")){
+                                if(payloadMap.getKey().equals("position")) {
                                     subPackets.add(new TtnSubPacket<>("admin", "location", null,null,String.valueOf(payloadMap.getValue())));
+                                    continue;
                                 }
+                                if(TtnUplinkListener.DOWNLINK_MARKER.equals(payloadMap.getKey())){
+                                    subPackets.add(new TtnSubPacket<>(null, null, null, TtnUplinkListener.DOWNLINK_MARKER, payloadMap.getValue()));
+                                    continue;
+                                }                                
                                 String key = payloadMap.getKey();
                                 String[] keyElements = UriUtils.getUriElements(key);
                                 subPackets.add(new TtnSubPacket<>("content", keyElements[0],keyElements.length>1?keyElements[1]:null,
@@ -137,6 +135,15 @@ public class TtnUplinkPayload extends TtnPacketPayload {
             } catch (InvalidSyntaxException e) {
                 e.printStackTrace();
             }
+        }
+        if(!subPackets.isEmpty() && (subPackets.size() > 1 || !TtnUplinkListener.DOWNLINK_MARKER.equals(subPackets.get(0).getMetadata()))) {
+        	Double frequency = metadata.getFrequency();
+            if(frequency != null)
+             	subPackets.add(new TtnSubPacket<>("system", "frequency", null,null, frequency.doubleValue()));
+            subPackets.add(new TtnSubPacket<>("system", "modulation", null,null,metadata.getModulation()));
+            subPackets.add(new TtnSubPacket<>("system", "data_rate", null,null,metadata.getDataRate()));
+            subPackets.add(new TtnSubPacket<>("system", "coding_rate", null,null,metadata.getCodingRate()));
+            subPackets.add(new TtnSubPacket<>("system", "data", null, null, payloadRaw));
         }
         return subPackets;
     }
