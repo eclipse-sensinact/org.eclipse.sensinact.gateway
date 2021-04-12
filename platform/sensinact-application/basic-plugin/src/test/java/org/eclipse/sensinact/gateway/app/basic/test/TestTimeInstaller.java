@@ -16,12 +16,15 @@ import org.eclipse.sensinact.gateway.app.basic.installer.BasicInstaller;
 import org.eclipse.sensinact.gateway.app.basic.time.SleepFunction;
 import org.eclipse.sensinact.gateway.app.manager.json.AppFunction;
 import org.eclipse.sensinact.gateway.app.manager.json.AppJsonConstant;
-import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
@@ -29,12 +32,18 @@ import java.nio.charset.Charset;
 
 @RunWith(PowerMockRunner.class)
 public class TestTimeInstaller extends TestCase {
-    @Mock
-    private AppServiceMediator mediator;
+
+    private ComponentContext context;
+    private BundleContext bundleContext;
+    private Bundle bundle;
 
     @Before
     public void init() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        context = Mockito.mock(ComponentContext.class);
+        bundle = Mockito.mock(Bundle.class);
+        bundleContext = Mockito.mock(BundleContext.class);
+        Mockito.when(bundleContext.getBundle()).thenReturn(bundle);
+        Mockito.when(context.getBundleContext()).thenReturn(bundleContext);
     }
 
     public void testSleepCreation() {
@@ -46,7 +55,8 @@ public class TestTimeInstaller extends TestCase {
         }
         if (content != null) {
             JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE).getJSONArray("application").getJSONObject(0);
-            BasicInstaller installer = new BasicInstaller(mediator);
+            BasicInstaller installer = new BasicInstaller();
+            installer.activate(context);
             AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
             AbstractFunction function = installer.getFunction(appFunction);
             assertTrue(function instanceof SleepFunction);
