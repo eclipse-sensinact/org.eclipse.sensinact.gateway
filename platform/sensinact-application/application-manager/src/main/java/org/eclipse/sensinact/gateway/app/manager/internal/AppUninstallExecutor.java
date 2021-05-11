@@ -50,7 +50,7 @@ public class AppUninstallExecutor extends ApplicationAvailabilityListenerAbstrac
         String name = (String) jsonObjects.getParameter(0);
         try {
             uninstall(name);
-            jsonObjects.push(new JSONObject().put("message", "The application " + name + " has been uninstalled"));
+            jsonObjects.setAccessMethodObjectResult(new JSONObject().put("message", "The application " + name + " has been uninstalled"));
         } catch (Exception e) {
             jsonObjects.setAccessMethodObjectResult(new JSONObject().put("message", "The application " + name + " has failed to be uninstalled"));
         }

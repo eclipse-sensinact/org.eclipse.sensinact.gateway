@@ -96,7 +96,6 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
             httpJSONObject.put("parameters", parametersArray);
             persistenceService.persist(new org.eclipse.sensinact.gateway.app.api.persistence.dao.Application(name, httpJSONObject));
         }
-        jsonObjects.push(new JSONObject().put("message", "Application " + name + " successfully installed."));
         jsonObjects.setAccessMethodObjectResult(new JSONObject().put("message", "Application " + name + " successfully installed."));
         return null;
     }
