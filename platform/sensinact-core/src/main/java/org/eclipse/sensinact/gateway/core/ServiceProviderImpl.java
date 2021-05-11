@@ -382,8 +382,12 @@ public class ServiceProviderImpl extends
 		byte buildPolicy = (byte) (SensiNactResourceModelConfiguration.BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy()
 				| SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED.getPolicy());
 
+		String profile = super.modelInstance.getProfile();
+		if(profile ==null) 
+			profile =  ResourceConfig.ALL_PROFILES;
+		
 		List<ResourceConfig> resourceConfigs = super.getModelInstance().configuration()
-				.getResourceConfigs(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
+				.getResourceConfigs(profile, ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 
 		int index = -1;
 
