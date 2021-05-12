@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
@@ -386,18 +387,23 @@ public class ServiceProviderImpl extends
 		if(profile ==null) 
 			profile =  ResourceConfig.ALL_PROFILES;
 		
-		List<ResourceConfig> resourceConfigs = super.getModelInstance().configuration()
-				.getResourceConfigs(profile, ServiceProvider.ADMINISTRATION_SERVICE_NAME);
+		List<ResourceConfig> resourceConfigs = super.getModelInstance().configuration(
+				).getResourceConfigs(profile, ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 
 		int index = -1;
 
 		if (admin.getResource(ServiceProvider.LIFECYCLE_STATUS) == null) {
-			ResourceBuilder statusResourceBuilder = super.getModelInstance()
-					.getResourceBuilder(super.getModelInstance().configuration().getResourceDescriptor()
-							.withResourceType(PropertyResource.class).withResourceName(ServiceProvider.LIFECYCLE_STATUS)
-							.withDataType(ServiceProvider.LifecycleStatus.class)
-							.withDataValue(ServiceProvider.LifecycleStatus.INACTIVE).withHidden(true)
-							.withUpdatePolicy(UpdatePolicy.AUTO).withModifiable(Modifiable.UPDATABLE), buildPolicy);
+			ResourceBuilder statusResourceBuilder = super.getModelInstance().getResourceBuilder(
+					super.getModelInstance().configuration().getResourceDescriptor(
+							).withResourceType(PropertyResource.class
+							).withResourceName(ServiceProvider.LIFECYCLE_STATUS
+							).withDataType(ServiceProvider.LifecycleStatus.class
+							).withDataValue(ServiceProvider.LifecycleStatus.INACTIVE
+							).withHidden(true
+							).withUpdatePolicy(UpdatePolicy.AUTO
+							).withModifiable(Modifiable.UPDATABLE
+							).withProfile(profile), buildPolicy);
+			statusResourceBuilder.configureName(ServiceProvider.LIFECYCLE_STATUS);
 			admin.addResource(statusResourceBuilder);
 		}
 		if (admin.getResource(ServiceProvider.FRIENDLY_NAME) == null) {
@@ -407,29 +413,39 @@ public class ServiceProviderImpl extends
 				rc = resourceConfigs.get(index);
 				friendlyNameResourceBuilder = super.getModelInstance().getResourceBuilder(rc);
 				index = -1;
-
 			} else {
-				friendlyNameResourceBuilder = super.getModelInstance().getResourceBuilder(super.getModelInstance()
-						.configuration().getResourceDescriptor().withResourceType(PropertyResource.class)
-						.withResourceName(ServiceProvider.FRIENDLY_NAME).withDataType(String.class).withHidden(false)
-						.withUpdatePolicy(UpdatePolicy.AUTO).withModifiable(Modifiable.MODIFIABLE), buildPolicy);
+				friendlyNameResourceBuilder = super.getModelInstance().getResourceBuilder(
+						super.getModelInstance().configuration().getResourceDescriptor(
+							).withResourceType(PropertyResource.class
+							).withResourceName(ServiceProvider.FRIENDLY_NAME
+							).withDataType(String.class
+							).withHidden(false
+							).withUpdatePolicy(UpdatePolicy.AUTO
+							).withModifiable(Modifiable.MODIFIABLE
+							).withProfile(profile), buildPolicy);
 			}
 			friendlyNameResourceBuilder.configureName(ServiceProvider.FRIENDLY_NAME);
 			admin.addResource(friendlyNameResourceBuilder);
 		}
 		if (admin.getResource(LocationResource.LOCATION) == null) {
+			String defaultLocation=ModelInstance.defaultLocation(super.modelInstance.mediator());			
 			ResourceBuilder locationResourceBuilder = null;
 			ResourceConfig rc = null;
 			if ((index = resourceConfigs.indexOf(new Name<ResourceConfig>(LocationResource.LOCATION, true))) > -1) {
 				rc = resourceConfigs.get(index);
 				locationResourceBuilder = super.getModelInstance().getResourceBuilder(rc);
 				index = -1;
-			} else {
-				locationResourceBuilder = super.getModelInstance().getResourceBuilder(super.getModelInstance()
-						.configuration().getResourceDescriptor().withResourceType(LocationResource.class)
-						.withResourceName(LocationResource.LOCATION).withDataType(String.class)
-						.withDataValue(ModelInstance.defaultLocation(super.modelInstance.mediator())).withHidden(false)
-						.withModifiable(Modifiable.MODIFIABLE), buildPolicy);
+			}  else {
+				locationResourceBuilder = super.getModelInstance().getResourceBuilder(
+					super.getModelInstance().configuration().getResourceDescriptor(
+							).withResourceType(LocationResource.class
+							).withResourceName(LocationResource.LOCATION
+							).withDataType(String.class
+							).withDataValue(defaultLocation
+							).withHidden(false
+							).withModifiable(Modifiable.MODIFIABLE
+							).withProfile(profile), 
+					buildPolicy);
 			}
 			locationResourceBuilder.configureName(LocationResource.LOCATION);
 			admin.addResource(locationResourceBuilder);
@@ -437,19 +453,18 @@ public class ServiceProviderImpl extends
 		if (admin.getResource(ServiceProvider.BRIDGE) == null) {
 			ResourceBuilder bridgeResourceBuilder = null;
 			try {
-				bridgeResourceBuilder = super.getModelInstance()
-						.getResourceBuilder(
-								super.getModelInstance().configuration().getResourceDescriptor()
-										.withResourceType(PropertyResource.class)
-										.withResourceName(ServiceProvider.BRIDGE).withDataType(String.class)
-										.withDataValue(super.modelInstance.mediator().getContext().getBundle()
-												.getSymbolicName())
-										.withHidden(false).withUpdatePolicy(UpdatePolicy.AUTO)
-										.withModifiable(Modifiable.FIXED),
-								buildPolicy);
-
+				bridgeResourceBuilder = super.getModelInstance().getResourceBuilder(
+						super.getModelInstance().configuration().getResourceDescriptor(
+						    ).withResourceType(PropertyResource.class
+							).withResourceName(ServiceProvider.BRIDGE
+							).withDataType(String.class
+							).withDataValue(super.modelInstance.mediator().getContext().getBundle().getSymbolicName()
+							).withHidden(false
+							).withUpdatePolicy(UpdatePolicy.AUTO
+							).withModifiable(Modifiable.FIXED
+							).withProfile(profile),buildPolicy);
+				bridgeResourceBuilder.configureName(ServiceProvider.BRIDGE);
 				admin.addResource(bridgeResourceBuilder);
-
 			} catch (Exception e) {
 				super.modelInstance.mediator().debug("Unable to create the 'bridge' resource");
 				bridgeResourceBuilder = null;
@@ -463,10 +478,15 @@ public class ServiceProviderImpl extends
 				iconResourceBuilder = super.getModelInstance().getResourceBuilder(rc);
 				index = -1;
 			} else {
-				iconResourceBuilder = super.getModelInstance().getResourceBuilder(super.getModelInstance()
-						.configuration().getResourceDescriptor().withResourceType(PropertyResource.class)
-						.withResourceName(ServiceProvider.ICON).withDataType(String.class).withHidden(false)
-						.withUpdatePolicy(UpdatePolicy.AUTO).withModifiable(Modifiable.MODIFIABLE), buildPolicy);
+				iconResourceBuilder = super.getModelInstance().getResourceBuilder(
+						super.getModelInstance().configuration().getResourceDescriptor(
+							).withResourceType(PropertyResource.class
+							).withResourceName(ServiceProvider.ICON
+							).withDataType(String.class
+						    ).withHidden(false
+						    ).withUpdatePolicy(UpdatePolicy.AUTO
+						    ).withModifiable(Modifiable.MODIFIABLE
+						    ).withProfile(profile), buildPolicy);
 			}
 			iconResourceBuilder.configureName(ServiceProvider.ICON);
 			admin.addResource(iconResourceBuilder);
@@ -587,20 +607,10 @@ public class ServiceProviderImpl extends
 		return false;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ModelElement#getProxyType()
-	 */
 	protected Class<? extends ElementsProxy<Service>> getProxyType() {
 		return ServiceProvider.class;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ModelElement#start()
-	 */
 	@Override
 	public void start() {
 		if (!super.getModelInstance().isRegistered()) {
@@ -667,57 +677,27 @@ public class ServiceProviderImpl extends
 		// to be overwritten
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ModelElement#getRegisteredEvent()
-	 */
 	@Override
 	protected SnaLifecycleMessage.Lifecycle getRegisteredEvent() {
 		return SnaLifecycleMessage.Lifecycle.PROVIDER_APPEARING;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ModelElement#getUnregisteredEvent()
-	 */
 	@Override
 	protected SnaLifecycleMessage.Lifecycle getUnregisteredEvent() {
 		return SnaLifecycleMessage.Lifecycle.PROVIDER_DISAPPEARING;
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement#
-	 *      getProxy(java.util.List)
-	 */
 	@Override
 	public ServiceProviderProxy getProxy(List<MethodAccessibility> methodAccessibilities) {
 		return new ServiceProviderProxy(super.modelInstance.mediator(), super.getName());
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.ModelElement#
-	 *      getElementProxy(org.eclipse.sensinact.gateway.core.security.AccessTree,
-	 *      org.eclipse.sensinact.gateway.common.primitive.Nameable)
-	 */
 	@Override
 	protected Service getElementProxy(AccessTree<?> tree, ServiceImpl element) throws ModelElementProxyBuildException {
 		Service service = element.getProxy(tree);
 		return service;
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.ModelElement#
-	 *      getWrapper(org.eclipse.sensinact.gateway.core.ModelElementProxy,
-	 *      org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree)
-	 */
 	@Override
 	protected ModelElementProxyWrapper getWrapper(ServiceProviderProxy proxy, ImmutableAccessTree tree) {
 		return new ServiceProviderProxyWrapper(proxy, tree);
