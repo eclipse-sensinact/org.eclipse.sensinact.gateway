@@ -93,7 +93,7 @@ public class ResourceInfoDefinition extends XmlModelParsingContext  {
                 if ("ANY_TARGET".equals(targets[index])) {
                     this.target[index] = ResourceConfig.ALL_TARGETS;
                 } else {
-                    this.target[index] = targets[index];
+                    this.target[index] = targets[index].trim();
                 }
             }
         }
@@ -148,7 +148,7 @@ public class ResourceInfoDefinition extends XmlModelParsingContext  {
                 if ("ANY_PROFILE".equals(profiles[index])) {
                     this.profile[index] = ResourceConfig.ALL_PROFILES;
                 } else {
-                    this.profile[index] = profiles[index];
+                    this.profile[index] = profiles[index].trim();
                 }
             }
         }

@@ -13,19 +13,19 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
-import org.eclipse.sensinact.gateway.common.primitive.Name;
-import org.eclipse.sensinact.gateway.core.ActionResource;
-import org.eclipse.sensinact.gateway.core.ResourceConfig;
-import org.eclipse.sensinact.gateway.core.ResourceConfigCatalog;
-import org.eclipse.sensinact.gateway.core.ResourceDescriptor;
-import org.eclipse.sensinact.gateway.generic.parser.XmlResourceConfigHandler;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.ActionResource;
+import org.eclipse.sensinact.gateway.core.ResourceConfig;
+import org.eclipse.sensinact.gateway.core.ResourceConfigCatalog;
+import org.eclipse.sensinact.gateway.core.ResourceDescriptor;
+import org.eclipse.sensinact.gateway.generic.parser.XmlResourceConfigHandler;
 
 /**
  *
@@ -97,6 +97,8 @@ public class ExtResourceConfigCatalog implements ResourceConfigCatalog {
         String resourceName = resourceConfigDescriptor.resourceName();
         byte[] identifier = null;
 
+        String profile = resourceConfigDescriptor.profile();
+        
         if (ExtResourceDescriptor.class.isAssignableFrom(resourceConfigDescriptor.getClass())) 
             identifier = ((ExtResourceDescriptor) resourceConfigDescriptor).identifier();        
         int index = -1;
@@ -105,7 +107,7 @@ public class ExtResourceConfigCatalog implements ResourceConfigCatalog {
             while (iterator.hasNext()) {
                 resourceConfig = iterator.next();
                 String rawName = serviceName!=null?resourceConfig.getRawName(serviceName):resourceConfig.getRawName();
-                if (resourceName.equalsIgnoreCase(rawName))
+                if (resourceName.equalsIgnoreCase(rawName) && resourceConfig.isProfiled(profile))
                     break;
                 resourceConfig = null;
             }
