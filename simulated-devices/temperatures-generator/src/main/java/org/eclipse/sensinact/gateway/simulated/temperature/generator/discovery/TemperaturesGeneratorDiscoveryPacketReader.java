@@ -10,17 +10,22 @@
  */
 package org.eclipse.sensinact.gateway.simulated.temperature.generator.discovery;
 
+import java.util.Random;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacket;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacketReader;
 
 public class TemperaturesGeneratorDiscoveryPacketReader extends TemperaturesGeneratorAbstractPacketReader {
-    /**
+    
+	Random random;
+	/**
      * @param mediator the mediator
      */
     public TemperaturesGeneratorDiscoveryPacketReader(Mediator mediator) {
         super(mediator);
+        this.random = new Random();
     }
 
     @Override
@@ -37,6 +42,12 @@ public class TemperaturesGeneratorDiscoveryPacketReader extends TemperaturesGene
         super.setServiceId("sensor");
         super.setResourceId("temperature");
         super.setData(((TemperaturesGeneratorDiscoveryPacket) packet).getValue());
+        super.configure(); 
+        super.setServiceProviderId(((TemperaturesGeneratorDiscoveryPacket) packet).getServiceProvider());
+        super.setServiceId("sensor");
+        super.setResourceId("temperature");
+        super.setAttributeId("category");
+        super.setData(random.nextInt(3)+1);
         super.configure(); 
     }
 }

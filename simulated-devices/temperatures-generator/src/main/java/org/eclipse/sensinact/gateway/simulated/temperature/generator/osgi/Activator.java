@@ -18,11 +18,16 @@ import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.parser.DataParser;
+import org.eclipse.sensinact.gateway.simulated.temperature.generator.parser.DeviceInfo;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.reader.TemperaturesGeneratorPacket;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.thread.TemperaturesGeneratorThreadManager;
 import org.osgi.framework.BundleContext;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 public class Activator extends AbstractActivator<Mediator> {
     @Property(name = "org.eclipse.sensinact.simulated.generator.amount", defaultValue = "100")
@@ -38,16 +43,18 @@ public class Activator extends AbstractActivator<Mediator> {
         	).withServiceBuildPolicy((byte) (BuildPolicy.BUILD_NON_DESCRIBED.getPolicy() | BuildPolicy.BUILD_ON_DESCRIPTION.getPolicy())
         	).withStartAtInitializationTime(true
         	).build("temperature-resource.xml", Collections.<String, String>emptyMap());
-            manager.setObserved(Collections.singletonList("/sensor/temperature/floor"));
-        }
-        
-        if (connector == null) {
+            manager.setObserved(Collections.singletonList("/sensor/temperature/category"));
+        }        
+        if (connector == null) 
             connector = new LocalProtocolStackEndpoint<TemperaturesGeneratorPacket>(super.mediator);
-        }
+        
         connector.connect(manager);
         DataParser dataParser = new DataParser(mediator);
-        this.threadManager = new TemperaturesGeneratorThreadManager(connector, dataParser.createDeviceInfosSet(DEVICES_NUMBER));
+        
+        Set<DeviceInfo> deviceInfoSet = dataParser.createDeviceInfosSet(DEVICES_NUMBER);
+        this.threadManager = new TemperaturesGeneratorThreadManager(connector, deviceInfoSet);
         this.threadManager.startThreads();
+        
     }
 
     public void doStop() throws Exception {

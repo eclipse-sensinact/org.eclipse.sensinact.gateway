@@ -22,7 +22,7 @@
   <resourceInfo xsi:type="resourceInfoProperty" name="LOCATION"  target="admin">
     <identifier xsi:type="stringContent">LOCATION</identifier>
     <attributes>
-    	<attribute name="value" type="String" modifiable="UPDATABLE">
+    	<attribute name="value" type="String" modifiable="MODIFIABLE">
     	</attribute>
     </attributes>
   </resourceInfo>
@@ -30,7 +30,7 @@
     <identifier xsi:type="stringContent">TEMPERATURE</identifier>
     <attributes>
     	<attribute name="value" type="double"></attribute>
-    	<attribute name="floor" type="int" modifiable="MODIFIABLE"></attribute>
+    	<attribute name="category" type="int" modifiable="MODIFIABLE"></attribute>
     </attributes>
   </resourceInfo>
 </resourceInfos>

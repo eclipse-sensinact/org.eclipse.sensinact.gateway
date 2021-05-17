@@ -83,7 +83,7 @@ public class DataParser {
             for (int i = 0; i < 12; i++) {
                 temperatures[i] = Double.parseDouble(splittedLine[i + 2]);
             }
-            DeviceInfo deviceInfo = new DeviceInfo(String.valueOf(nb), splittedLine[1] + "," + splittedLine[2], temperatures, sleepTimeRandom);
+            DeviceInfo deviceInfo = new DeviceInfo(String.valueOf(nb), splittedLine[1] + ":" + splittedLine[2], temperatures, sleepTimeRandom);
             result = deviceInfo;
             break;
         }

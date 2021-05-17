@@ -53,6 +53,9 @@
 							about.html,
 							src/main/resources/
 						</Include-Resource>
+						<Export-Package>
+							org.eclipse.sensinact.gateway.simulated.temperature.generator
+						</Export-Package>
 					</instructions>
 				</configuration>
 			</plugin>
