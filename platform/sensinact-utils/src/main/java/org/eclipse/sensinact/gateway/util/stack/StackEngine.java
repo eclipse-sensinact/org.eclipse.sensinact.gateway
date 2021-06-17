@@ -12,8 +12,11 @@ package org.eclipse.sensinact.gateway.util.stack;
 
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -23,59 +26,62 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class StackEngine<E, H extends StackEngineHandler<E>> implements Runnable {
+public class StackEngine<E, H extends StackEngineHandler<E>> {
     private final int UNLIMITED_SIZE = -1;
     private final Object lock = new Object();
     private int maxStackSize;
 
     private final Deque<E> elements;
     private final H handler;
+    private final AtomicBoolean locked;
+
+    private final Semaphore semaphore;
+    private final CountDownLatch completionLatch;
     private final AtomicBoolean running;
     private final AtomicBoolean closing;
-    private final AtomicBoolean locked;
-    private TimerTask timer;
-
-
+    
+    private final ScheduledExecutorService worker;
+    
+    private ScheduledFuture<?> unlockTask;
+    
     /**
      * Constructor
      */
-    public StackEngine(H handler) {
+    StackEngine(H handler, ScheduledExecutorService worker) {
         this.handler = handler;
         this.elements = new LinkedList<E>();
-        this.running = new AtomicBoolean(false);
+        this.semaphore = new Semaphore(1);
+        this.completionLatch = new CountDownLatch(1);
+        this.running = new AtomicBoolean(true);
         this.closing = new AtomicBoolean(false);
         this.locked = new AtomicBoolean(false);
+        this.worker = worker;
         this.maxStackSize = UNLIMITED_SIZE;
+        requestProcessingIfNeeded();
+    }
+    
+    void requestProcessingIfNeeded() {
+        if(running.get() && semaphore.tryAcquire()) {
+            worker.execute(this::dequeue);
+        }
     }
 
     /**
-     * @inheritDoc
-     * @see java.lang.Runnable#run()
+     * Dequeue and handle up to 5 items before releasing the
+     * thread so other StackEngine instances may do their work
+     * too
      */
-    @Override
-    public void run() {
-        synchronized (lock) {
-            this.running.set(true);
-        }
-        while (running()) {
+    void dequeue() {
+        for(int i = 0; i < 5; i++) {
             E element = pop();
             try {
                 if (element != null) {
                     handler.doHandle(element);
-
                 } else {
                     if (closing.get()) {
                         stop();
-                        break;
                     }
-                    try {
-                        Thread.sleep(150);
-
-                    } catch (InterruptedException e) {
-                        Thread.interrupted();
-                        stop();
-                        break;
-                    }
+                    break;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -83,8 +89,20 @@ public class StackEngine<E, H extends StackEngineHandler<E>> implements Runnable
                 break;
             }
         }
+        
+        boolean runAgain;
         synchronized (lock) {
-            this.elements.clear();
+            runAgain = !elements.isEmpty();
+        }
+        
+        if(runAgain) {
+            worker.execute(this::dequeue);
+        } else {
+            semaphore.release();
+        }
+        
+        if(!running()) {
+            completionLatch.countDown();
         }
     }
 
@@ -109,6 +127,7 @@ public class StackEngine<E, H extends StackEngineHandler<E>> implements Runnable
         synchronized (lock) {
             this.elements.addLast(element);
         }
+        requestProcessingIfNeeded();
     }
 
     /**
@@ -132,6 +151,7 @@ public class StackEngine<E, H extends StackEngineHandler<E>> implements Runnable
         synchronized (lock) {
             this.elements.addFirst(element);
         }
+        requestProcessingIfNeeded();
     }
 
     /**
@@ -191,9 +211,7 @@ public class StackEngine<E, H extends StackEngineHandler<E>> implements Runnable
             return element;
         }
         synchronized (lock) {
-            if (!this.elements.isEmpty()) {
-                element = this.elements.removeFirst();
-            }
+            element = this.elements.pollFirst();
         }
         return element;
     }
@@ -201,9 +219,13 @@ public class StackEngine<E, H extends StackEngineHandler<E>> implements Runnable
     /**
      * Stops this StackEngine
      */
-    public void stop() {
+    void stop() {
         synchronized (lock) {
             this.running.set(false);
+            elements.clear();
+        }
+        if(semaphore.tryAcquire()) {
+            completionLatch.countDown();
         }
     }
 
@@ -214,7 +236,7 @@ public class StackEngine<E, H extends StackEngineHandler<E>> implements Runnable
      * @return the running state of this
      * StackEngine
      */
-    public boolean running() {
+    boolean running() {
         boolean running = false;
         synchronized (lock) {
             running = this.running.get();
@@ -244,13 +266,17 @@ public class StackEngine<E, H extends StackEngineHandler<E>> implements Runnable
      * @param locked the lock state of this
      *               StackEngine
      */
-    protected void locked(boolean locked) {
+    void unlock() {
         synchronized (lock) {
-            if (timer != null) {
-                timer.cancel();
-                timer = null;
+            if(Thread.interrupted()) {
+                return;
             }
-            this.locked.set(locked);
+            
+            if (unlockTask != null) {
+                unlockTask.cancel(false);
+                unlockTask = null;
+            }
+            locked.set(false);
         }
     }
 
@@ -258,25 +284,15 @@ public class StackEngine<E, H extends StackEngineHandler<E>> implements Runnable
      * Defines this StackEngine's lock state as
      * true for the delay specified as parameter
      *
-     * @param delay
-     * 		the lock delay of this StackEngine
-     */
-    /**
-     * @param delay
+     * @param delay the lock delay of this StackEngine
      */
     public void locked(long delay) {
         synchronized (lock) {
-            if (timer != null) {
-                timer.cancel();
-                timer = null;
+            if (unlockTask != null) {
+                unlockTask.cancel(true);
+                unlockTask = null;
             }
-            timer = new TimerTask() {
-                @Override
-                public void run() {
-                    StackEngine.this.locked(false);
-                }
-            };
-            new Timer().schedule(timer, delay);
+            unlockTask = worker.schedule(this::unlock, delay, TimeUnit.MILLISECONDS);
             this.locked.set(true);
         }
     }
@@ -285,7 +301,24 @@ public class StackEngine<E, H extends StackEngineHandler<E>> implements Runnable
      * Waits until the stack is empty for closing
      * it
      */
-    public void closeWhenEmpty() {
+    void closeWhenEmpty() {
         this.closing.set(true);
+        synchronized (lock) {
+            if(elements.isEmpty()) {
+                this.running.set(false);
+            }
+        }
+        
+        if(semaphore.tryAcquire()) {
+            completionLatch.countDown();
+        }
+    }
+    
+    void awaitTermination() throws InterruptedException {
+        completionLatch.await(100, TimeUnit.MILLISECONDS);
+    }
+
+    void awaitTermination(long time, TimeUnit unit) throws InterruptedException {
+        completionLatch.await(time, unit);
     }
 }
