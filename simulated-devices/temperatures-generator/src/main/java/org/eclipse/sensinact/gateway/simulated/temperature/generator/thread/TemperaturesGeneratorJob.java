@@ -10,19 +10,26 @@
  */
 package org.eclipse.sensinact.gateway.simulated.temperature.generator.thread;
 
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.discovery.TemperaturesGeneratorDiscoveryPacket;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.parser.DeviceInfo;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.reader.TemperaturesGeneratorPacket;
 
-public class TemperaturesGeneratorThread extends Thread implements Runnable {
-    private LocalProtocolStackEndpoint<TemperaturesGeneratorPacket> connector;
-    private DeviceInfo deviceInfo;
+public class TemperaturesGeneratorJob implements Runnable {
+    private final LocalProtocolStackEndpoint<TemperaturesGeneratorPacket> connector;
+    private final DeviceInfo deviceInfo;
+	private final ScheduledExecutorService worker;
+	
+	volatile int index = 1;
 
-    public TemperaturesGeneratorThread(LocalProtocolStackEndpoint<TemperaturesGeneratorPacket> connector, DeviceInfo deviceInfo) {
+    public TemperaturesGeneratorJob(LocalProtocolStackEndpoint<TemperaturesGeneratorPacket> connector, DeviceInfo deviceInfo, ScheduledExecutorService worker) {
         this.connector = connector;
         this.deviceInfo = deviceInfo;
+		this.worker = worker;
         try {
             this.connector.process(new TemperaturesGeneratorDiscoveryPacket(deviceInfo.getServiceProviderId(), deviceInfo.getLocation(), deviceInfo.getTemperatures()[0]));
         } catch (InvalidPacketException e) {
@@ -32,20 +39,13 @@ public class TemperaturesGeneratorThread extends Thread implements Runnable {
 
     @Override
     public void run() {
-        int index = 1;
-        while (true) {
-            try {
-                this.connector.process(new TemperaturesGeneratorPacket(deviceInfo.getServiceProviderId(), deviceInfo.getTemperatures()[index]));
-                index = (index + 1) % 12;
-            } catch (InvalidPacketException e) {
-                e.printStackTrace();
-            }
-            try {
-                Thread.sleep(deviceInfo.getSleepTime());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
+        int index = this.index;
+        try {
+        	this.connector.process(new TemperaturesGeneratorPacket(deviceInfo.getServiceProviderId(), deviceInfo.getTemperatures()[index]));
+        	this.index = (index + 1) % 12;
+        } catch (InvalidPacketException e) {
+        	e.printStackTrace();
         }
+        worker.schedule(this, deviceInfo.getSleepTime(), TimeUnit.MILLISECONDS);
     }
 }
