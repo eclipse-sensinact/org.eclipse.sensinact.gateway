@@ -20,11 +20,11 @@ import org.eclipse.sensinact.gateway.core.AttributeDescription;
 import org.eclipse.sensinact.gateway.core.ModelElementProxy;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.UnsubscribeResponse;
 
 import java.util.Enumeration;
 import java.util.Set;
@@ -45,34 +45,34 @@ class DisplayActionResource implements ActionResource {
     }
 
     @Override
-    public GetResponse get(String s) {
+    public GetResponse get(String s, Object...args) {
         return null;
     }
 
     @Override
-    public SetResponse set(String s, Object o) {
+    public SetResponse set(String s, Object o, Object...args) {
         return null;
     }
 
     @Override
-    public SubscribeResponse subscribe(String s, Recipient recipient) {
+    public SubscribeResponse subscribe(String s, Recipient recipient, Object...args) {
         return null;
     }
 
     @Override
-    public SubscribeResponse subscribe(String s, Recipient recipient, Set<Constraint> set) {
+    public SubscribeResponse subscribe(String s, Recipient recipient, Set<Constraint> set, Object...args) {
         return null;
     }
 
     
 	@Override
 	public SubscribeResponse subscribe(String attributeName, Recipient recipient, Set<Constraint> conditions,
-			String policy) {
+			String policy, Object...args) {
 		return null;
 	}
 	
     @Override
-    public UnsubscribeResponse unsubscribe(String s, String s1) {
+    public UnsubscribeResponse unsubscribe(String s, String s1, Object...args) {
         return null;
     }
 

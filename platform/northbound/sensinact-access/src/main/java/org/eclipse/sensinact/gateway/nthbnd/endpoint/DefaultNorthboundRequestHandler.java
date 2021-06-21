@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
-import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Filtering;
 import org.eclipse.sensinact.gateway.core.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
@@ -41,7 +40,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 /**
- *
+ * Default {@link NorthboundRequestHandler} implementation
  */
 public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler {
 	
@@ -109,9 +108,6 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
         return this.buildError;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestHandler#processRequestURI()
-     */
     @Override
     public boolean processRequestURI() {
         String path = null;
@@ -147,9 +143,8 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
                 this.isElementsList = true;	
                 break;
 	        case "sensinact":
-	        	if(this.method==null) {
-	        		this.method = "ALL";
-	        	}
+	        	if(this.method==null) 
+	        		this.method = "ALL";	        	
 	        	this.multi = true;
                 break;
             default:
@@ -186,11 +181,6 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
         return true;
     }
 
-    /**
-     * @return
-     * @throws IOException
-     * @throws JSONException
-     */
     private List<Parameter> processParameters() throws IOException, JSONException {
         String content = this.request.getContent();
         JSONArray parameters = null;
@@ -204,7 +194,6 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
             } catch (JSONException e) {
                 try {
                     parameters = new JSONArray(content);
-
                 } catch (JSONException je) {
                     mediator.debug("No JSON formated content in %s", content);
                 }
@@ -247,23 +236,11 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
         return parametersList;
     }
 
-    /**
-     * @param builder
-     */
     private void processAttribute(NorthboundRequestBuilder builder) {
-        if (this.attribute != null)// {
+        if (this.attribute != null)
             builder.withAttribute(this.attribute);
-        //} else {
-        //    builder.withAttribute(DataResource.VALUE);
-        //}
     }
 
-    /**
-     * @param builder
-     * @param parameters
-     * @return
-     * @throws IOException
-     */
     private void processFilters(NorthboundRequestBuilder builder, List<Parameter> parameters) throws IOException {
         List<FilteringDefinition> defs = new ArrayList<>();
         String filter = null;
@@ -296,33 +273,27 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
     				filter = CastUtils.castPrimitive(String.class, parameter.getValue());
     				int i=0;
     				for(;i<defs.size();i++){
-    					if(rank > defs.get(i).rank) {
+    					if(rank > defs.get(i).rank)
     						continue;
-    					}
 						defs.add(i,new FilteringDefinition(name, filter,rank));
 						break;
     				}
-    				if(i == defs.size()) {
+    				if(i == defs.size()) 
     					defs.add(new FilteringDefinition(name, filter,rank));
-    				}
     				it.remove();
     			}
     		} catch (InvalidSyntaxException e) {
     			continue;
     		}
         }
-        if(defs.size()==0) {
+        if(defs.size()==0) 
         	return;
-        }
         builder.withFilter(defs.size());
         final AtomicInteger n = new AtomicInteger(-1);
         defs.stream().forEach(d -> {builder.withFilter(d, n.incrementAndGet());});
         builder.withHiddenFilter(hidden);
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestHandler#handle()
-     */
     public NorthboundRequestBuilder handle() throws IOException {
         List<Parameter> parameters = null;
         try {
@@ -350,9 +321,9 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
         	).withService(this.service
         	).withResource(this.resource);
 
-        if (!this.multi && !this.method.equals(AccessMethod.ACT) && !this.method.equals(AccessMethod.DESCRIBE)) {
+        if (!this.multi && !this.method.equals(AccessMethod.ACT) && !this.method.equals(AccessMethod.DESCRIBE))
             this.processAttribute(builder);
-        }    
+            
         this.rid = request.getRequestId();
         if(this.rid == null) {
 	        String requestIdName = request.getRequestIdProperty();
@@ -373,42 +344,44 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
                 builder.isElementsList(isElementsList);
                 break;
             case "ACT":
-                int index = 0;
-                int length = parameters == null ? 0 : parameters.size();
-
-                Object[] arguments = length == 0 ? null : new Object[length];
-                for (; index < length; index++) {
-                    arguments[index] = parameters.get(index).getValue();
-                }
-                builder.withArgument(arguments);
+            case "GET":
+            	int index = 0;
+            	int length = parameters.size();
+                for (; index < length; index++) 
+                    builder.withArgument(new Argument(parameters.get(index).getType(), parameters.get(index).getValue()));
                 break;
             case "UNSUBSCRIBE":
-                if (parameters == null || parameters.size() != 1 || parameters.get(0) == null) {
+                if (parameters == null || parameters.isEmpty()) {
                     this.buildError = new NorthboundResponseBuildError(400, "A Parameter was expected");
                     return null;
                 }
-                if (parameters.get(0).getType() != String.class) {
+                if (parameters.get(0) == null || parameters.get(0).getType() != String.class) {
                     this.buildError = new NorthboundResponseBuildError(400, "Invalid parameter format");
                     return null;
                 }
-                builder.withArgument(parameters.get(0).getValue());
+                builder.withArgument(new Argument(String.class, parameters.get(0).getValue()));
+                index = 1;
+                length = parameters.size();
+                for (; index < length; index++) 
+                    builder.withArgument(new Argument(parameters.get(index).getType(), parameters.get(index).getValue()));
                 break;
             case "SET":
-                if (parameters == null || parameters.size() != 1 || parameters.get(0) == null) {
+                if (parameters == null || parameters.get(0) == null) {
                     this.buildError = new NorthboundResponseBuildError(400, "A Parameter was expected");
                     return null;
                 }
-                builder.withArgument(parameters.get(0).getValue());
+                builder.withArgument(new Argument(Object.class, parameters.get(0).getValue()));
+                index = 1;
+                length = parameters.size();
+                for (; index < length; index++) 
+                    builder.withArgument(new Argument(parameters.get(index).getType(), parameters.get(index).getValue()));  
                 break;
             case "SUBSCRIBE":
                 NorthboundRecipient recipient = this.request.createRecipient(parameters);
                 if (recipient == null) {
                     this.buildError = new NorthboundResponseBuildError(400, "Unable to create the appropriate recipient");
                     return null;
-                }
-                index = 0;
-                length = parameters == null ? 0 : parameters.size();
-
+                }                
                 String sender = null;
                 boolean isPattern = false;
                 boolean isComplement = false;
@@ -416,52 +389,71 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
                 SnaMessage.Type[] types = null;
                 JSONArray conditions = null;
 
-                for (; index < length; index++) {
-                    Parameter parameter = parameters.get(index);
+                List<Parameter> extraParameters = new ArrayList<>();
+                
+                length = parameters == null ? 0 : parameters.size();                
+                for (; length > 0;) {
+                	boolean found = false;
+                    Parameter parameter = parameters.remove(0);
                     String name = parameter.getName();
                     switch (name) {
-                        case "conditions":
-                            conditions = CastUtils.cast(mediator.getClassLoader(), JSONArray.class, parameter.getValue());
-                            break;
+	                    case "callback":
+	                    	found = true;
+	                        break;
+	                    case "conditions":
+	                        conditions = CastUtils.cast(mediator.getClassLoader(), JSONArray.class, parameter.getValue());
+	                    	found = true;
+	                        break;
                         case "sender":
                             sender = CastUtils.cast(mediator.getClassLoader(), String.class, parameter.getValue());
+	                    	found = true;
                             break;
                         case "pattern":
                             isPattern = CastUtils.cast(mediator.getClassLoader(), boolean.class, parameter.getValue());
+	                    	found = true;
                             break;
                         case "complement":
                             isComplement = CastUtils.cast(mediator.getClassLoader(), boolean.class, parameter.getValue());
+	                    	found = true;
                             break;
                         case "types":
                             types = CastUtils.castArray(mediator.getClassLoader(), SnaMessage.Type[].class, parameter.getValue());
+	                    	found = true;
                         case "policy":
                             policy = CastUtils.cast(mediator.getClassLoader(), String.class, parameter.getValue());
+	                    	found = true;
                             break;
                         default:
-                            break;
+                        	break;
                     }
+                    if(!found)
+                    	extraParameters.add(parameter);
+                    length = parameters.size();
                 }
+
                 if (sender == null) {
                     sender = "(/[^/]+)+";
                     isPattern = true;
                 }
-                if (types == null) {
+                if (types == null) 
                     types = SnaMessage.Type.values();
-                }
-                if (conditions == null) {
+                
+                if (conditions == null) 
                     conditions = new JSONArray();
-                }
-                Object argument = null;
-
+                
+                builder.withArgument(new Argument(NorthboundRecipient.class, recipient));
                 if (this.resource == null) {
                     SnaFilter snaFilter = new SnaFilter(mediator, sender, isPattern, isComplement, conditions);
-                    snaFilter.addHandledType(types);
-                    argument = snaFilter;                    
-                    builder.withArgument(new Object[]{recipient, argument});
+                    snaFilter.addHandledType(types);       
+                    builder.withArgument(new Argument(SnaFilter.class, snaFilter));
                 } else {
-                    argument = conditions;
-                    builder.withArgument(new Object[]{recipient, argument, policy});
-                }
+                    builder.withArgument(new Argument(JSONArray.class, conditions));
+                    builder.withArgument(new Argument(String.class, policy));
+                }                
+                index = 0;
+                length = extraParameters == null ? 0 : extraParameters.size();
+                for (; index < length; index++) 
+                    builder.withArgument(new Argument(extraParameters.get(index).getType(), extraParameters.get(index).getValue()));
                 break;
             default:
                 break;

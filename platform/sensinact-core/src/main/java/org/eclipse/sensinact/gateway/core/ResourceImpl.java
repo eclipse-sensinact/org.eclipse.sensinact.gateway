@@ -382,21 +382,17 @@ public class ResourceImpl extends
 		};
 	}
 
-	public AttributeDescription set(String name, Object value) throws InvalidValueException {
+	public AttributeDescription set(String attributeName, Object value) throws InvalidValueException {
 		AttributeDescription description = null;
-		if (name == null) {
+		if (attributeName == null) 
 			return description;
-		}
-		Attribute attribute = this.getAttribute(name);
+		
+		Attribute attribute = this.getAttribute(attributeName);
 		if (attribute != null) {
-			if (!Modifiable.MODIFIABLE.equals(attribute.getModifiable())) {
-				throw new InvalidValueException(
-						new StringBuilder().append(name).append(" attribute is not modifiable").toString());
-			}
-			if (attribute.getLocked()) {
-				throw new InvalidValueException(new StringBuilder().append(name)
-						.append(" attribute has been locked by an action trigger").toString());
-			}
+			if (!Modifiable.MODIFIABLE.equals(attribute.getModifiable())) 
+				throw new InvalidValueException(new StringBuilder().append(attributeName).append(" attribute is not modifiable").toString());
+			if (attribute.getLocked()) 
+				throw new InvalidValueException(new StringBuilder().append(attributeName).append(" attribute has been locked by an action trigger").toString());
 			attribute.setValue(value);
 			description = (AttributeDescription) attribute.getDescription();
 		}
@@ -632,27 +628,23 @@ public class ResourceImpl extends
 	 * Registers a {@link Signature} to create and to associate with the specified
 	 * {@link AccessMethodExecutor}
 	 * 
-	 * @param type
-	 *            the type of the {@link AccessMethod} associated to the signature
-	 *            to create
-	 * @param parameterNames
-	 *            the array of parameter names of the signature to create
-	 * @param parameterTypes
-	 *            the array of parameter types of the signature to create
-	 * @param executor
-	 *            the {@link AccessMethodExecutor} to associate to the signature to
-	 *            create
-	 * @param policy
-	 *            the execution policy of the {@link AccessMethodExecutor}
+	 * @param type the type of the {@link AccessMethod} associated to the signature
+	 * to create
+	 * @param parameterNames the array of parameter names of the signature to create
+	 * @param parameterTypes the array of parameter types of the signature to create
+	 * @param executor the {@link AccessMethodExecutor} to associate to the signature 
+	 * to create
+	 * @param policy the execution policy of the {@link AccessMethodExecutor}
 	 * @throws InvalidValueException
 	 * @throws InvalidConstraintDefinitionException
 	 */
-	public AccessMethod registerExecutor(AccessMethod.Type type, Class<?>[] parameterTypes, String[] parameterNames,
-			AccessMethodExecutor executor, AccessMethodExecutor.ExecutionPolicy policy) throws InvalidValueException {
+	@SuppressWarnings("unchecked")
+	public AccessMethod registerExecutor(AccessMethod.Type type, Class<?>[] parameterTypes, String[] parameterNames, 
+		AccessMethodExecutor executor, AccessMethodExecutor.ExecutionPolicy policy) 
+		throws InvalidValueException {
 		AccessMethod method = this.getAccessMethod(type);
-		if (method != null) {
+		if (method != null)
 			((AbstractAccessMethod) method).addSignature(parameterTypes, parameterNames, executor, policy);
-		}
 		return method;
 	}
 
@@ -689,11 +681,6 @@ public class ResourceImpl extends
 		return super.elements();
 	}
 
-	/**
-	 * @param attribute
-	 * @param value
-	 * @param hasChanged
-	 */
 	@SuppressWarnings("rawtypes")
 	protected void updated(Attribute attribute, Object value, boolean hasChanged) {
 		if (!super.started.get() || attribute.isHidden()) {
@@ -729,6 +716,16 @@ public class ResourceImpl extends
 		}
 	}
 
+	protected void updated(Attribute attribute, MetadataDescription metadata) {
+		if (!super.started.get() || attribute==null || metadata == null) 
+			return;
+		SnaUpdateMessage message = SnaNotificationMessageImpl.Builder.<SnaUpdateMessage>notification(
+			super.modelInstance.mediator(), SnaUpdateMessage.Update.METADATA_VALUE_UPDATED, 
+				UriUtils.getUri(new String[] {getPath(), attribute.getName(), metadata.getName()}));
+		message.setNotification(metadata.getJSONObjectDescription());
+		super.modelInstance.postMessage(message);
+	}
+	
 	/**
 	 * Registers the path of a {@link LinkedResourceImpl} linked to this ResouceImpl
 	 * instance
@@ -743,10 +740,9 @@ public class ResourceImpl extends
 
 	@Override
 	public void start() {
-		if (!super.getModelInstance().isRegistered() || this.isHidden()) {
-			// already registered or hidden resource
+		// already registered or hidden resource
+		if (!super.getModelInstance().isRegistered() || this.isHidden()) 
 			return;
-		}
 		if (super.started.get()) {
 			this.modelInstance.mediator().debug("%s already started", this.getName());
 			return;
@@ -763,31 +759,33 @@ public class ResourceImpl extends
 
 		notificationObject.put(SnaConstants.ADDED_OR_REMOVED, SnaLifecycleMessage.Lifecycle.RESOURCE_APPEARING.name());
 		notificationObject.put(Resource.TYPE, this.getType());
-
 		notification.setNotification(notificationObject);
 
-		Attribute attribute = null;
+		for(Attribute attribute : this.elements) {
 
-		if (this.defaultAttribute != null && (attribute = this.getAttribute(this.defaultAttribute)) != null) {
-			JSONObject jsonAttribute = new JSONObject(attribute.getDescription().getJSON());
-
-			MetadataDescription[] metadataDescriptions = attribute.getAllDescriptions();
-
-			int index = 0;
-			int length = metadataDescriptions.length;
-
-			for (; index < length; index++) {
-				MetadataDescription metadataDescription = metadataDescriptions[index];
-				String metadataName = metadataDescription.getName().intern();
-
-				if (Modifiable.FIXED.equals(metadataDescription.getModifiable())
-						&& Metadata.LOCKED.intern() != metadataName && Metadata.MODIFIABLE.intern() != metadataName
-						&& Metadata.HIDDEN.intern() != metadataName && Attribute.NICKNAME.intern() != metadataName) {
-					jsonAttribute.put(metadataDescription.getName(),
-							PrimitiveDescription.toJson(metadataDescription.getType(), metadataDescription.getValue()));
+			if (this.defaultAttribute != null && attribute.getName().equals(this.defaultAttribute)) {
+				JSONObject jsonAttribute = new JSONObject(attribute.getDescription().getJSON());	
+				MetadataDescription[] metadataDescriptions = attribute.getAllDescriptions();	
+				int index = 0;
+				int length = metadataDescriptions.length;	
+				for (; index < length; index++) {
+					MetadataDescription metadataDescription = metadataDescriptions[index];
+					String metadataName = metadataDescription.getName().intern();	
+					if (Modifiable.FIXED.equals(metadataDescription.getModifiable())
+							&& Metadata.LOCKED.intern() != metadataName && Metadata.MODIFIABLE.intern() != metadataName
+							&& Metadata.HIDDEN.intern() != metadataName && Attribute.NICKNAME.intern() != metadataName) {
+						jsonAttribute.put(metadataDescription.getName(),
+								PrimitiveDescription.toJson(metadataDescription.getType(), metadataDescription.getValue()));
+					}
 				}
+				((SnaLifecycleMessageImpl) notification).put("initial", jsonAttribute);
 			}
-			((SnaLifecycleMessageImpl) notification).put("initial", jsonAttribute);
+			if(attribute.isHidden()) 
+				continue;
+			for(Metadata m : attribute.metadata) {
+				if(!m.getName().equals(Metadata.HIDDEN) &&  m.getModifiable().equals(Modifiable.FIXED) && m.getValue()!=null )
+						this.updated(attribute, m.getDescription());
+			}
 		}
 		super.modelInstance.postMessage(notification);
 	}

@@ -25,45 +25,29 @@ public class ResourcesRequest extends ServiceRequest {
         super(mediator, requestIdentifier, serviceProvider, service, filteringCollection);
     }
 
-    /**
-     * @inheritDoc
-     * @see ServiceRequest#getName()
-     */
+    @Override
     public String getName() {
         return null;
     }
 
-    /**
-     * @inheritDoc
-     * @see ServiceRequest#getPath()
-     */
     @Override
     public String getPath() {
         return new StringBuilder().append(super.getPath()).append(UriUtils.PATH_SEPARATOR).append("resources").toString();
     }
 
-    /**
-     * @inheritDoc
-     * @see ServiceRequest#getMethod()
-     */
     @Override
     protected String getMethod() {
         return "resourcesList";
     }
 
-    /**
-     * @inheritDoc
-     * @see NorthboundRequest#getExecutionArguments()
-     */
     @Override
     protected Argument[] getExecutionArguments() {
         if (this.getClass() == ResourcesRequest.class && super.filteringCollection != null) {
             Argument[] superArguments = super.getExecutionArguments();
             int length = superArguments == null ? 0 : superArguments.length;
             Argument[] arguments = new Argument[length + 1];
-            if (length > 0) {
-                System.arraycopy(superArguments, 0, arguments, 0, length);
-            }
+            if (length > 0) 
+                System.arraycopy(superArguments, 0, arguments, 0, length);            
             arguments[length] = new Argument(FilteringCollection.class, super.filteringCollection);
             return arguments;
         }

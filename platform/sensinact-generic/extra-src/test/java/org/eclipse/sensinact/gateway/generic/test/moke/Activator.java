@@ -59,7 +59,6 @@ public class Activator extends AbstractActivator<Mediator> {
     		).withStartAtInitializationTime(startAtInitializationTime
     		).build("resources.xml", defaults);
 
-    	
         this.endpoint = new MokeStack(mediator);
         this.endpoint.connect(this.manager);
 

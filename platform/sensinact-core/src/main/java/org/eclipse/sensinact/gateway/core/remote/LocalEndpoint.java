@@ -123,37 +123,27 @@ public abstract class LocalEndpoint implements Endpoint {
 	}
 
 	@Override
-	public JSONObject get(String publicKey, String serviceProviderId, String serviceId, String resourceId,
-			String attributeId) {
-		return new JSONObject(
-				this.getSession(publicKey).get(serviceProviderId, serviceId, resourceId, attributeId).getJSON());
+	public JSONObject get(String publicKey, String serviceProviderId, String serviceId, String resourceId,String attributeId) {
+		return new JSONObject(this.getSession(publicKey).get(serviceProviderId, serviceId, resourceId, attributeId).getJSON());
 	}
 
 	@Override
-	public JSONObject set(String publicKey, String serviceProviderId, String serviceId, String resourceId,
-			String attributeId, Object parameter) {
-		return new JSONObject(this.getSession(publicKey)
-				.set(serviceProviderId, serviceId, resourceId, attributeId, parameter).getJSON());
+	public JSONObject set(String publicKey, String serviceProviderId, String serviceId, String resourceId,String attributeId, Object parameter) {
+		return new JSONObject(this.getSession(publicKey).set(serviceProviderId, serviceId, resourceId, attributeId, parameter).getJSON());
 	}
 
 	@Override
-	public JSONObject act(String publicKey, String serviceProviderId, String serviceId, String resourceId,
-			Object[] parameters) {
-		return new JSONObject(
-				this.getSession(publicKey).act(serviceProviderId, serviceId, resourceId, parameters).getJSON());
+	public JSONObject act(String publicKey, String serviceProviderId, String serviceId, String resourceId,Object[] parameters) {
+		return new JSONObject(this.getSession(publicKey).act(serviceProviderId, serviceId, resourceId, parameters).getJSON());
 	}
 
 	@Override
-	public JSONObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
-			Recipient recipient, JSONArray conditions) {
-		return new JSONObject(this.getSession(publicKey)
-				.subscribe(serviceProviderId, serviceId, resourceId, recipient, conditions).getJSON());
+	public JSONObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,Recipient recipient, JSONArray conditions) {
+		return new JSONObject(this.getSession(publicKey).subscribe(serviceProviderId, serviceId, resourceId, recipient, conditions).getJSON());
 	}
 
 	@Override
-	public JSONObject unsubscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
-			String subscriptionId) {
-		return new JSONObject(this.getSession(publicKey)
-				.unsubscribe(serviceProviderId, serviceId, resourceId, subscriptionId).getJSON());
+	public JSONObject unsubscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,String subscriptionId) {
+		return new JSONObject(this.getSession(publicKey).unsubscribe(serviceProviderId, serviceId, resourceId, subscriptionId).getJSON());
 	}
 }

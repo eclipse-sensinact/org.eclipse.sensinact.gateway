@@ -14,15 +14,15 @@ import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.UnsubscribeResponse;
 
 /**
  * Extended {@link Resource} holding a 'value' attribute
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public interface DataResource extends Resource {
 	// Value attribute name
@@ -47,9 +47,11 @@ public interface DataResource extends Resource {
 	 * {@link GetResponse}. The read attribute is the one defined as being
 	 * the default attribute of this DataResource (the "value" attribute by default).
 	 * 
+	 * @param args optional variable Objects array parameterizing the call
+	 * 
 	 * @return the {@link GetResponse} of the executed get access method
 	 */
-	GetResponse get();
+	GetResponse get(Object...args);
 
 	/**
 	 * Executes an set access method on this DataResource and returns its 
@@ -57,10 +59,11 @@ public interface DataResource extends Resource {
 	 * the default attribute of this DataResource (the "value" attribute by default).
 	 * 
 	 * @param value the Object to set as value of the default attribute
+	 * @param args optional variable Objects array parameterizing the call
 	 * 
 	 * @return the {@link SetResponse} of the executed set access method
 	 */
-	SetResponse set(Object value);
+	SetResponse set(Object value, Object...args);
 
 	/**
 	 * Executes an subscribe access method on this DataResource and returns its 
@@ -73,10 +76,11 @@ public interface DataResource extends Resource {
 	 *  subscription closing and to the thrown exception logging
 	 * 
 	 * @param recipient the {@link Recipient} to which the messages will be sent
+	 * @param args optional variable Objects array parameterizing the call
 	 * 
 	 * @return the {@link SubscribeResponse} of the executed subscribe access method
 	 */
-	SubscribeResponse subscribe(Recipient recipient);
+	SubscribeResponse subscribe(Recipient recipient, Object...args);
 
 	/**
 	 * Executes an subscribe access method on this DataResource and returns its 
@@ -89,10 +93,11 @@ public interface DataResource extends Resource {
 	 * @param recipient the {@link Recipient} to which the messages will be sent
 	 * @param conditions the {@link Set} of {@link Constraint}s that will help at
 	 * discriminating the messages to be transmitted to the recipient
+	 * @param args optional variable Objects array parameterizing the call
 	 * 
 	 * @return the {@link SubscribeResponse} of the executed subscribe access method
 	 */
-	SubscribeResponse subscribe(Recipient recipient, Set<Constraint> conditions);
+	SubscribeResponse subscribe(Recipient recipient, Set<Constraint> conditions, Object...args);
 
 	/**
 	 * Executes an subscribe access method on this DataResource and returns its 
@@ -105,10 +110,11 @@ public interface DataResource extends Resource {
 	 * @param policy the String representation of the policy that will apply on the 
 	 * {@link org.eclipse.sensinact.gateway.common.execution.ErrorHandler} of the 
 	 * subscription to be created.
+	 * @param args optional variable Objects array parameterizing the call
 	 * 
 	 * @return the {@link SubscribeResponse} of the executed subscribe access method
 	 */
-	SubscribeResponse subscribe(Recipient recipient, Set<Constraint> conditions, String policy);
+	SubscribeResponse subscribe(Recipient recipient, Set<Constraint> conditions, String policy, Object...args);
 
 	/**
 	 * Executes an unsubscribe access method on this DataResource and returns its 
@@ -116,8 +122,9 @@ public interface DataResource extends Resource {
 	 * is passed as parameter.
 	 * 
 	 * @param subscriptionId the String identifier of the subscription to close
+	 * @param args optional variable Objects array parameterizing the call
 	 * 
 	 * @return the {@link UnsubscribeResponse} of the executed unsubscribe access method
 	 */
-	UnsubscribeResponse unsubscribe(String subscriptionId);
+	UnsubscribeResponse unsubscribe(String subscriptionId, Object...args);
 }

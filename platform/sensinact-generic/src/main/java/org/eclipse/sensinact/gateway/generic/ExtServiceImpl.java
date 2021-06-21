@@ -99,7 +99,7 @@ public class ExtServiceImpl extends ServiceImpl {
             return;
         }
         int index = 0;
-        int length = references == null ? 0 : references.size();
+        int length = references == null ?0:references.size();
         AccessMethodTriggerFactory.Loader loader = AccessMethodTriggerFactory.LOADER.get();
         try {
             for (; index < length; index++) {

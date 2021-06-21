@@ -23,9 +23,6 @@ import org.osgi.service.cm.ManagedServiceFactory;
  */
 public class Activator extends AbstractActivator<Mediator> {
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#doStart()
-     */
     @Override
     public void doStart() throws Exception {
     	mediator.info("Starting MQTT Agents factory");

@@ -25,9 +25,11 @@ import org.eclipse.sensinact.gateway.core.method.builder.DynamicParameterValueFa
 import org.json.JSONObject;
 import org.xml.sax.Attributes;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -102,7 +104,7 @@ public class ParameterDefinition extends ResolvedNameTypeValueDefinition impleme
             }
             Object fixedValue = null;
             Iterator<ConstraintDefinition> iterator = this.constraintDefinitions.iterator();
-            Set<Constraint> constraints = new HashSet<Constraint>();
+            List<Constraint> constraints = new ArrayList<Constraint>();
 
             while (iterator.hasNext()) {
                 try {
@@ -120,10 +122,10 @@ public class ParameterDefinition extends ResolvedNameTypeValueDefinition impleme
                 }
             }
             if (fixedValue == null) {
-                parameter = new Parameter(super.mediator, super.getName(), super.getType(), (Set<Constraint>) constraints);
+                parameter = new Parameter(super.mediator, super.getName(), super.getType(), constraints);
             } else {
                 parameter = new Parameter(super.mediator, super.getName(), super.getType(), fixedValue);
-            }
+            }            
         } catch (Exception e) {
             e.printStackTrace();
         }

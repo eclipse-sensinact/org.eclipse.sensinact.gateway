@@ -79,7 +79,7 @@ public class ServiceProviderImpl extends
 			String location = null;
 			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 			if (admin != null) {
-				JSONObject response = admin.get(LocationResource.LOCATION).getResponse();
+				JSONObject response = admin.get(LocationResource.LOCATION, DataResource.VALUE).getResponse();
 				location = String.valueOf(response.opt(DataResource.VALUE));
 			}
 			return location;
@@ -90,7 +90,7 @@ public class ServiceProviderImpl extends
 			String setLocation = null;
 			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 			if (admin != null) {
-				JSONObject response = admin.set(LocationResource.LOCATION, location).getResponse();
+				JSONObject response = admin.set(LocationResource.LOCATION, DataResource.VALUE, location).getResponse();
 				setLocation = String.valueOf(response.opt(DataResource.VALUE));
 			}
 			return setLocation;
@@ -101,7 +101,7 @@ public class ServiceProviderImpl extends
 			ServiceProvider.LifecycleStatus status = null;
 			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 			if (admin != null) {
-				JSONObject response = admin.get(ServiceProvider.LIFECYCLE_STATUS).getResponse();
+				JSONObject response = admin.get(ServiceProvider.LIFECYCLE_STATUS, DataResource.VALUE).getResponse();
 				status = ServiceProvider.LifecycleStatus.valueOf(String.valueOf(response.opt(DataResource.VALUE)));
 			}
 			return status;
@@ -113,7 +113,7 @@ public class ServiceProviderImpl extends
 			ServiceProvider.LifecycleStatus setStatus = null;
 			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 			if (admin != null) {
-				JSONObject response = admin.set(ServiceProvider.LIFECYCLE_STATUS, status).getResponse();
+				JSONObject response = admin.set(ServiceProvider.LIFECYCLE_STATUS, DataResource.VALUE, status).getResponse();
 				setStatus = ServiceProvider.LifecycleStatus.valueOf(String.valueOf(response.opt(DataResource.VALUE)));
 			}
 			return setStatus;

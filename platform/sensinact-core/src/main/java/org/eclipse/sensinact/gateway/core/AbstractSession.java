@@ -24,15 +24,15 @@ import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
+import org.eclipse.sensinact.gateway.core.method.DescribeResponseBuilder;
+import org.eclipse.sensinact.gateway.core.method.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.UnsubscribeResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
-import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.DescribeMethod.DescribeType;
-import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponseBuilder;
-import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.DescribeMethod.DescribeType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -42,21 +42,6 @@ import org.json.JSONObject;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class AbstractSession implements Session {
-	// ********************************************************************//
-	// NESTED DECLARATIONS //
-	// ********************************************************************//
-
-	// ********************************************************************//
-	// ABSTRACT DECLARATIONS //
-	// ********************************************************************//
-
-	// ********************************************************************//
-	// STATIC DECLARATIONS //
-	// ********************************************************************//
-
-	// ********************************************************************//
-	// INSTANCE DECLARATIONS //
-	// ********************************************************************//
 
 	protected final String identifier;
 
@@ -85,40 +70,45 @@ public abstract class AbstractSession implements Session {
 		return response;
 	}
 
+	@SuppressWarnings("unchecked")
 	protected <A extends AccessMethodResponse<JSONObject>> A responseFromJSONObject(Mediator mediator, String uri,
 			String method, JSONObject object) throws Exception {
-		A response = null;
-		if (object == null) {
-			response = AccessMethodResponse.<JSONObject, A>error(mediator, uri, AccessMethod.Type.valueOf(method),
-					SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Not found", null);
+		if (object == null) 
+			return AccessMethodResponse.<JSONObject, A>error(mediator, uri, AccessMethod.Type.valueOf(method),
+				SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Not found", null);
+		else {			
+			switch (method) {
+			case "ACT":
+				return (A) this.<ActResponse>responseFromJSONObject(ActResponse.class, mediator, uri, method, object);
+			case "GET":
+				return (A) this.<GetResponse>responseFromJSONObject(GetResponse.class, mediator, uri, method, object);
+			case "SET":
+				return (A) this.<SetResponse>responseFromJSONObject(SetResponse.class, mediator, uri, method, object);
+			case "SUBSCRIBE":
+				return (A) this.<SubscribeResponse>responseFromJSONObject(SubscribeResponse.class, mediator, uri, 
+						method, object);
+			case "UNSUBSCRIBE":
+				return (A) this.<UnsubscribeResponse>responseFromJSONObject(UnsubscribeResponse.class, mediator, uri, 
+						method, object);
+			default:
+			    break;
+			}
+		}
+		return (A) null;
+	}
 
-		} else {
+	protected <A extends AccessMethodResponse<JSONObject>> A responseFromJSONObject(Class<A> responseType, Mediator mediator, 
+		String uri, String method, JSONObject object) throws Exception {
+		A response = null;
+		if (object == null) 
+			response = AccessMethodResponse.<JSONObject, A>error(mediator, uri, AccessMethod.Type.valueOf(method),
+				SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Not found", null);
+		else {
 			object.remove("type");
 			object.remove("uri");
 			Integer statusCode = (Integer) object.remove("statusCode");
-
-			Class<A> clazz = null;
-			switch (method) {
-			case "ACT":
-				clazz = (Class<A>) ActResponse.class;
-				break;
-			case "GET":
-				clazz = (Class<A>) GetResponse.class;
-				break;
-			case "SET":
-				clazz = (Class<A>) SetResponse.class;
-				break;
-			case "SUBSCRIBE":
-				clazz = (Class<A>) SubscribeResponse.class;
-				break;
-			case "UNSUBSCRIBE":
-				clazz = (Class<A>) UnsubscribeResponse.class;
-				break;
-			default:
-				break;
-			}
-			if (clazz != null) {
-				response = clazz.getConstructor(new Class<?>[] { Mediator.class, String.class, 
+			if (responseType != null) {
+				response = responseType.getConstructor(new Class<?>[] { Mediator.class, String.class, 
 					Status.class, int.class }).newInstance(mediator, uri, statusCode.intValue() == 200 
 					? Status.SUCCESS : Status.ERROR, statusCode.intValue());
 
@@ -137,8 +127,8 @@ public abstract class AbstractSession implements Session {
 		return response;
 	}
 
-	protected DescribeResponse<JSONObject> describeFromJSONObject(Mediator mediator,
-			DescribeResponseBuilder<JSONObject> builder, DescribeType describeType, JSONObject object) {
+	protected DescribeResponse<JSONObject> describeFromJSONObject(Mediator mediator, DescribeResponseBuilder<JSONObject> builder, 
+		DescribeType describeType, JSONObject object) {
 		DescribeResponse<JSONObject> response = null;
 		if (object == null) {
 			String element = describeType.name().toLowerCase();
@@ -190,22 +180,11 @@ public abstract class AbstractSession implements Session {
 		return this.identifier;
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.Session#getServiceProviders()
-	 */
 	@Override
 	public Set<ServiceProvider> serviceProviders() {
 		return this.serviceProviders(null);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session# getService(java.lang.String,
-	 *      java.lang.String)
-	 */
 	@Override
 	public Service service(String serviceProviderName, String serviceName) {
 		Service service = null;
@@ -216,12 +195,6 @@ public abstract class AbstractSession implements Session {
 		return service;
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.Session#
-	 *      getResource(java.lang.String, java.lang.String, java.lang.String)
-	 */
 	@Override
 	public Resource resource(String serviceProviderName, String serviceName, String resourceName) {
 		Resource resource = null;
@@ -232,265 +205,123 @@ public abstract class AbstractSession implements Session {
 		return resource;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session#
-	 * registerSessionIntent(org.eclipse.sensinact.gateway.common.execution.Executable, java.lang.String[])
-	 */
 	@Override
 	public SubscribeResponse registerSessionIntent(Executable<Boolean,Void> callback, String... resourcePath) {
 		return registerSessionIntent(null, callback, resourcePath);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session#unregisterSessionIntent(java.lang.String)
-	 */
 	@Override
 	public UnsubscribeResponse unregisterSessionIntent(String intentId) {
 		return unregisterSessionIntent(null, intentId);
 	}
 	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session#registerSessionAgent(org.eclipse.sensinact.gateway.core.message.MidAgentCallback, 
-	 * org.eclipse.sensinact.gateway.core.message.SnaFilter)
-	 */
 	@Override
 	public SubscribeResponse registerSessionAgent(MidAgentCallback callback, SnaFilter filter) {
 		return registerSessionAgent(null, callback, filter);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session#
-	 *      unregisterSessionAgent(java.lang.String)
-	 */
 	@Override
 	public UnsubscribeResponse unregisterSessionAgent(String agentId) {
 		return unregisterSessionAgent(null, agentId);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session# get(java.lang.String,
-	 *      java.lang.String, java.lang.String, java.lang.String)
-	 */
 	@Override
-	public GetResponse get(String serviceProviderId, String serviceId, String resourceId, String attributeId) {
-		return get(null, serviceProviderId, serviceId, resourceId, attributeId);
+	public GetResponse get(String serviceProviderId, String serviceId, String resourceId, String attributeId, Object...args) {
+		return get(null, serviceProviderId, serviceId, resourceId, attributeId, args);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session# set(java.lang.String,
-	 *      java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
-	 */
 	@Override
 	public SetResponse set(final String serviceProviderId, final String serviceId, final String resourceId,
-			final String attributeId, final Object parameter) {
-		return set(null, serviceProviderId, serviceId, resourceId, attributeId, parameter);
+			final String attributeId, final Object parameter, Object... args) {
+		return set(null, serviceProviderId, serviceId, resourceId, attributeId, parameter, args);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session# act(java.lang.String,
-	 *      java.lang.String, java.lang.String, java.lang.Object[])
-	 */
-	public ActResponse act(String serviceProviderId, String serviceId, String resourceId, 
-			Object[] parameters) {
+	@Override
+	public ActResponse act(String serviceProviderId, String serviceId, String resourceId, Object[] parameters) {
 		return act(null, serviceProviderId, serviceId, resourceId, parameters);
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.Session# subscribe(java.lang.String,
-	 *      java.lang.String, java.lang.String,org.eclipse.sensinact.gateway.core.message.Recipient,
-	 *      org.json.JSONArray)
-	 */
 	@Override
 	public SubscribeResponse subscribe(String serviceProviderId, String serviceId, 
-		    String resourceId, Recipient recipient, JSONArray conditions) {
-		return subscribe(null, serviceProviderId, serviceId, resourceId, recipient, conditions);
+		    String resourceId, Recipient recipient, JSONArray conditions, Object...args) {
+		return subscribe(null, serviceProviderId, serviceId, resourceId, recipient, conditions, args);
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.Session#subscribe(java.lang.String, java.lang.String, 
-	 * java.lang.String, org.eclipse.sensinact.gateway.core.message.Recipient, org.json.JSONArray, 
-	 * java.lang.String)
-	 */
 	@Override
 	public SubscribeResponse subscribe(String serviceProviderId, String serviceId, 
-		    String resourceId, Recipient recipient, JSONArray conditions, String policy) {
-		return subscribe(null, serviceProviderId, serviceId, resourceId, recipient, conditions, policy);
+		    String resourceId, Recipient recipient, JSONArray conditions, String policy, Object...args) {
+		return subscribe(null, serviceProviderId, serviceId, resourceId, recipient, conditions, policy, args);
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.Session#subscribe(java.lang.String, java.lang.String, 
-	 * java.lang.String, java.lang.String, org.eclipse.sensinact.gateway.core.message.Recipient, 
-	 * org.json.JSONArray)
-	 */
 	@Override
 	public SubscribeResponse subscribe(String requestId, String serviceProviderId, String serviceId, 
-		    String resourceId, Recipient recipient, JSONArray conditions) {
+		    String resourceId, Recipient recipient, JSONArray conditions, Object...args) {
 		return subscribe(requestId, serviceProviderId, serviceId, resourceId, recipient, 
-				conditions, String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY));
+				conditions, String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY), args);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session#
-	 *      unsubscribe(java.lang.String, java.lang.String, java.lang.String,
-	 *      java.lang.String)
-	 */
 	@Override
 	public UnsubscribeResponse unsubscribe(String serviceProviderId, String serviceId, 
-			final String resourceId, String subscriptionId) {
-		return unsubscribe(null, serviceProviderId, serviceId, resourceId, subscriptionId);
+			final String resourceId, String subscriptionId, Object...args) {
+		return unsubscribe(null, serviceProviderId, serviceId, resourceId, subscriptionId, args);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session# getAll(java.lang.String,
-	 *      org.eclipse.sensinact.gateway.core.FilteringDefinition)
-	 */
 	@Override
 	public DescribeResponse<String> getAll() {
 		return getAll(null, null, null);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session# getAll(java.lang.String,
-	 *      org.eclipse.sensinact.gateway.core.FilteringDefinition)
-	 */
 	@Override
 	public DescribeResponse<String> getAll(FilteringCollection filterCollection) {
 		return getAll(null, null, filterCollection);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session# getAll(java.lang.String,
-	 *      org.eclipse.sensinact.gateway.core.FilteringDefinition)
-	 */
 	@Override
 	public DescribeResponse<String> getAll(String filter, FilteringCollection filterCollection) {
 		return getAll(null, filter, filterCollection);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session#getProviders()
-	 */
 	@Override
 	public DescribeResponse<String> getProviders() {
 		return getProviders(null, null);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session#
-	 *      getProviders(org.eclipse.sensinact.gateway.core.FilteringCollection)
-	 */
 	@Override
 	public DescribeResponse<String> getProviders(FilteringCollection filterCollection) {
 		return getProviders(null, filterCollection);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session#
-	 *      getProvider(java.lang.String)
-	 */
 	@Override
 	public DescribeResponse<JSONObject> getProvider(String serviceProviderId) {
 		return getProvider(null, serviceProviderId);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session#
-	 *      getServices(java.lang.String)
-	 */
 	@Override
 	public DescribeResponse<String> getServices(String serviceProviderId) {
 		return getServices(null, serviceProviderId, null);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session#
-	 *      getServices(java.lang.String,
-	 *      org.eclipse.sensinact.gateway.core.FilteringCollection)
-	 */
 	@Override
 	public DescribeResponse<String> getServices(final String serviceProviderId, FilteringCollection filterCollection) {
 		return getServices(null, serviceProviderId, filterCollection);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session# getService(java.lang.String,
-	 *      java.lang.String)
-	 */
 	@Override
 	public DescribeResponse<JSONObject> getService(final String serviceProviderId, final String serviceId) {
 		return getService(null, serviceProviderId, serviceId);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session#
-	 *      getResources(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public DescribeResponse<String> getResources(final String serviceProviderId, final String serviceId) {
 		return getResources(null, serviceProviderId, serviceId, null);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session#
-	 *      getResources(java.lang.String, java.lang.String,
-	 *      org.eclipse.sensinact.gateway.core.FilteringDefinition)
-	 */
 	@Override
 	public DescribeResponse<String> getResources(final String serviceProviderId, final String serviceId,
 			FilteringCollection filterCollection) {
 		return getResources(null, serviceProviderId, serviceId, filterCollection);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Session#
-	 *      getResource(java.lang.String, java.lang.String, java.lang.String)
-	 */
 	@Override
 	public DescribeResponse<JSONObject> getResource(final String serviceProviderId, final String serviceId,
 			final String resourceId) {

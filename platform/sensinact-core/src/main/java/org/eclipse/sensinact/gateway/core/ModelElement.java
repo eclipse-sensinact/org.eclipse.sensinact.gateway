@@ -43,10 +43,10 @@ import org.json.JSONObject;
  * Abstract sensiNact resource model element (service provider, service &
  * resource) implementation
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelElementProxy, P extends ProcessableData, E extends Nameable, R extends Nameable>
-		extends Elements<E> implements SensiNactResourceModelElement<M> {
+	extends Elements<E> implements SensiNactResourceModelElement<M> {
 	abstract class ModelElementProxyWrapper extends ElementsProxyWrapper<M, R> {
 		private final ImmutableAccessTree tree;
 
@@ -58,11 +58,6 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 			this.tree = tree;
 		}
 
-		/**
-		 * @inheritDoc
-		 * 
-		 * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#element(java.lang.String)
-		 */
 		@Override
 		public R element(String name) {
 			E e = ModelElement.this.element(name);
@@ -80,11 +75,6 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 			return null;
 		}
 
-		/**
-		 * @inheritDoc
-		 * 
-		 * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#elements()
-		 */
 		@Override
 		public Enumeration<R> elements() {
 			final Object[] es;
@@ -126,9 +116,6 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 			};
 		}
 
-		/**
-		 * @return
-		 */
 		protected List<R> list() {
 			List<R> list = new ArrayList<R>();
 			Enumeration<R> elements = elements();
@@ -263,13 +250,11 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 	 * @throws ModelElementProxyBuildException
 	 */
 	public <S extends ElementsProxy<R>> S getProxy(SessionKey key) throws ModelElementProxyBuildException {
-		if (!this.started.get()) {
+		if (!this.started.get()) 
 			throw new ModelElementProxyBuildException("this model element must be started first");
-		}
 		AccessTree<? extends AccessNode> accessTree = key.getAccessTree();
-		if (accessTree == null || accessTree.getRoot() == null) {
+		if (accessTree == null || accessTree.getRoot() == null) 
 			throw new ModelElementProxyBuildException("A valid access tree was expected");
-		}
 		return this.getProxy(accessTree);
 	}
 
@@ -294,12 +279,12 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 
 		// AccessLevelOption will be the same for all methods, just check
 		// what is the one associated with the DESCRIBE one
-		AccessLevelOption accessLevelOption = node
-				.getAccessLevelOption(AccessMethod.Type.valueOf(AccessMethod.DESCRIBE));
+		AccessLevelOption accessLevelOption = node.getAccessLevelOption(
+				AccessMethod.Type.valueOf(AccessMethod.DESCRIBE));
 
-		if (accessLevelOption == null) {
+		if (accessLevelOption == null) 
 			throw new ModelElementProxyBuildException("Access level option expected");
-		}
+		
 		Class<S> proxied = (Class<S>) this.getProxyType();
 		M proxy = this.proxies.get(accessLevelOption);
 		if (proxy == null) {
@@ -358,11 +343,6 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 		return null;
 	}
 
-	/**
-	 * @InheritedDoc
-	 *
-	 * @see Elements# addElement(Nameable)
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean addElement(final E element) {
@@ -375,11 +355,6 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 		return true;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see Elements# removeElement(java.lang.String)
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public E removeElement(String name) {
@@ -394,10 +369,7 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 	}
 
 	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.ModelElementOld#
-	 *      registered(org.eclipse.sensinact.gateway.core.model.message.SnaMessageHandler)
+	 * Starts this ModelElement
 	 */
 	protected void start() {
 		try {
@@ -437,7 +409,7 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 	}
 
 	/**
-	 * Stops this extended {@link ModelElementOld}
+	 * Stops this ModelElement
 	 */
 	protected void stop() {
 		if (!this.started.get()) {

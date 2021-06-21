@@ -24,41 +24,22 @@ public class ResourceRequest extends ResourcesRequest {
     public ResourceRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, String resource) {
         super(mediator, requestIdentifier, serviceProvider, service, null);
         this.resource = resource;
-//      if (this.resource == null) {
-//      throw new NullPointerException("Resource missing");
-//  }
     }
 
-    /**
-     * @inheritDoc
-     * @see ResourcesRequest#getName()
-     */
     public String getName() {
         return resource;
     }
 
-    /**
-     * @inheritDoc
-     * @see ResourcesRequest#getPath()
-     */
     @Override
     public String getPath() {
         return new StringBuilder().append(super.getPath()).append(UriUtils.PATH_SEPARATOR).append(this.getName()).toString();
     }
 
-    /**
-     * @inheritDoc
-     * @see ResourcesRequest#getMethod()
-     */
     @Override
     protected String getMethod() {
         return "resourceDescription";
     }
 
-    /**
-     * @inheritDoc
-     * @see NorthboundRequest#getExecutionArguments()
-     */
     @Override
     protected Argument[] getExecutionArguments() {
         Argument[] superArguments = super.getExecutionArguments();

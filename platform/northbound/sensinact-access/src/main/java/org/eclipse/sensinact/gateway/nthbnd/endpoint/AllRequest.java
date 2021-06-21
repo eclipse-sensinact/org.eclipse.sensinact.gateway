@@ -22,27 +22,16 @@ public class AllRequest extends NorthboundRequest {
         super(mediator, requestIdentifier, filteringCollection);
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.common.primitive.Nameable#getName()
-     */
+    @Override
     public String getName() {
         return "all";
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest#getMethod()
-     */
     @Override
     protected String getMethod() {
         return this.getName();
     }
 
-    /**
-     * @inheritDoc
-     * @see NorthboundRequest#getExecutionArguments()
-     */
     @Override
     protected Argument[] getExecutionArguments() {
         Argument[] superArguments = super.getExecutionArguments();

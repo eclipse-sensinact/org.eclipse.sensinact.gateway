@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.core.method;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
@@ -17,8 +19,10 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Fixed;
@@ -130,8 +134,9 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 	 * @param parameterTypes
 	 *            the array of types of the {@link Signature} to create
 	 * @return a new {@link Signature} instance
+	 * @throws InvalidValueException 
 	 */
-	private Signature createSignature(Class<?>[] parameterTypes) {
+	private Signature createSignature(Class<?>[] parameterTypes) throws InvalidValueException {
 		Class<?>[] types = parameterTypes == null ? new Class<?>[0] : parameterTypes;
 
 		String[] names = new String[types.length];
@@ -157,24 +162,21 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 	 *            the array of parameter string names of the {@link Signature} to
 	 *            create
 	 * @return a new {@link Signature} instance
+	 * 
+	 * @throws InvalidValueException 
 	 */
-	private Signature createSignature(Class<?>[] parameterTypes, String[] parameterNames) {
+	private Signature createSignature(Class<?>[] parameterTypes, String[] parameterNames) throws InvalidValueException {
 		Signature signature = null;
 		Class<?>[] types = parameterTypes == null ? new Class<?>[0] : parameterTypes;
-
 		String[] names = parameterNames == null ? new String[0] : parameterNames;
-
-		if (types.length > names.length) {
+		if (types.length > names.length) 
 			return signature;
-		}
 		Parameter[] parameters = new Parameter[types.length];
-
 		int index = 0;
 		int length = types.length;
 		for (; index < length; index++) {
 			try {
 				parameters[index] = new Parameter(this.mediator, names[index], types[index]);
-
 			} catch (InvalidValueException e) {
 				// cannot happen
 				e.printStackTrace();
@@ -183,7 +185,7 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 		signature = new Signature(this.mediator, type.name(), parameters);
 		return signature;
 	}
-
+	
 	/**
 	 * Creates a {@link Signature} using the parameter types array argument and maps
 	 * it to the {@link AccessMethodExecutor} passed as parameter
@@ -196,9 +198,10 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 	 * @param policy
 	 *            the {@link AccessMethodExecutor.Execu tionPolicy} of the specified
 	 *            {@link AccessMethodExecutor}
+	 * @throws InvalidValueException 
 	 */
-	public void addSignature(Class<?>[] parameterTypes, AccessMethodExecutor executor,
-			AccessMethodExecutor.ExecutionPolicy policy) {
+	public void addSignature(Class<?>[] parameterTypes, AccessMethodExecutor executor, AccessMethodExecutor.ExecutionPolicy policy) 
+		throws InvalidValueException {
 		Signature signature = this.getSignature(parameterTypes);
 		if (signature != null) {
 			this.addSignature(signature, executor, policy);
@@ -222,10 +225,11 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 	 * @param policy
 	 *            the {@link AccessMethodExecutor.ExecutionPolicy} of the specified
 	 *            {@link AccessMethodExecutor}
+	 * @throws InvalidValueException 
 	 * @throws InvalidConstraintDefinitionException
 	 */
 	public void addSignature(Class<?>[] parameterTypes, String[] parameterNames, AccessMethodExecutor executor,
-			AccessMethodExecutor.ExecutionPolicy policy) {
+			AccessMethodExecutor.ExecutionPolicy policy) throws InvalidValueException {	
 		Signature signature = this.getSignature(parameterTypes);
 		if (signature != null) {
 			this.addSignature(signature, executor, policy);
@@ -326,64 +330,51 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 	 *            {@link Shortcut}
 	 */
 	public void addShortcut(Shortcut shortcut, Signature signature) {
-		if (shortcut == null || signature == null
-				|| (this.map.get(signature) == null && this.shortcuts.get(signature) == null)) {
-			return;
-		}
+		if (shortcut == null || signature == null || (this.map.get(signature) == null && this.shortcuts.get(signature) == null)) 
+			return;		
 		this.shortcuts.put(shortcut, signature);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see Describable# getDescription()
-	 */
 	@Override
 	public AccessMethodDescription getDescription() {
 		return new AccessMethodDescription(this);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see Nameable#getName()
-	 */
 	@Override
 	public String getName() {
 		return this.type.name();
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see PathElement#getPath()
-	 */
+	@Override
 	public String getPath() {
 		return this.uri;
 	}
 
-	/**
-	 * @return
-	 */
+	@Override
 	public int size() {
 		return this.map.size() + this.shortcuts.size();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.method.AccessMethod#invoke(java.lang.Object[])
-	 */
 	@Override
 	public R invoke(Object[] parameters) {
-		Iterator<Signature> iterator = this.getSignatures().iterator();
+		List<Signature> signatures = new ArrayList<>();
+		
+		signatures.addAll(this.shortcuts.keySet().stream().sorted(
+			(s1,s2)->{return s1.length()<s2.length()?-1:(s1.length()>s2.length()?1:0);}
+			).collect(Collectors.toList()));
+		
+		signatures.addAll(this.map.keySet().stream().sorted(
+			(s1,s2)->{return s1.length()<s2.length()?-1:(s1.length()>s2.length()?1:0);}
+			).collect(Collectors.toList()));
+		
+		Iterator<Signature> iterator = signatures.iterator();
 
 		while (iterator.hasNext()) {
 			Signature signature = iterator.next();
-			if (signature.validParameters(parameters)) {
+			if (signature.validParameters(parameters)) 
 				return this.invoke(signature);
-			}
 		}
+		
 		return this.error(AccessMethodResponse.NOT_FOUND_ERROR_CODE, "Unknown signature");
 	}
 
@@ -391,16 +382,13 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 	 * Invokes this method using the specified {@link Signature}'s parameter values
 	 * to parameterize the call
 	 * 
-	 * @param signature
-	 *            the {@link Signature} of this method parameterizing the invocation
-	 * @param accessLevel
-	 *            the integer access level of the call
-	 * @return the invocation resulting {@link SnaMessage}
+	 * @param signature  the {@link Signature} of this method parameterizing the invocation
+
+	 * @return the resulting {@link SnaMessage}
 	 */
 	public synchronized <A extends AccessMethodResponseBuilder<T, R>> R invoke(Signature signature) {
-		if (signature == null) {
+		if (signature == null) 
 			return this.error(SnaErrorfulMessage.BAD_REQUEST_ERROR_CODE, "Null signature");
-		}
 		Deque<AccessMethodExecutor> executors = null;
 		Signature current = signature;
 		Signature previous = null;
@@ -417,26 +405,25 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 				break;
 			}
 			((Shortcut) signature).push((Shortcut) current);
-		}
-		if (executors == null) {
+		};
+		if (executors == null) 
 			return this.error(SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Unknown signature");
-		}
+		
 		Object[] parameters = signature.values();
 		A result = this.createAccessMethodResponseBuilder(parameters);
-
-		if (preProcessingExecutor != null) {
-			executors.addFirst(preProcessingExecutor);
-		}
-		if (postProcessingExecutor != null) {
+		
+		if (preProcessingExecutor != null) 
+			executors.addFirst(preProcessingExecutor);		
+		
+		if (postProcessingExecutor != null) 
 			executors.addLast(postProcessingExecutor);
-		}
+		
 		Iterator<AccessMethodExecutor> iterator = executors.iterator();
 
 		while (iterator.hasNext()) {
 			AccessMethodExecutor executor = iterator.next();
-			if (executor == null) {
-				continue;
-			}
+			if (executor == null) 
+				continue;			
 			try {
 				executor.execute(result);
 
@@ -447,12 +434,12 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 				}
 			}
 		}
-		if (preProcessingExecutor != null) {
+		if (preProcessingExecutor != null) 
 			executors.removeFirst();
-		}
-		if (postProcessingExecutor != null) {
+		
+		if (postProcessingExecutor != null) 
 			executors.removeLast();
-		}
+		
 		return result.createAccessMethodResponse();
 	}
 
@@ -460,11 +447,6 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 		return AccessMethodResponse.<T, R>error(mediator, this.getPath(), this.getType(), errorCode, message, null);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AccessMethod#getSignatures()
-	 */
 	@Override
 	public Set<Signature> getSignatures() {
 		Set<Signature> signatures = new HashSet<Signature>(this.map.keySet());
@@ -472,11 +454,6 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 		return Collections.unmodifiableSet(signatures);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AccessMethod# getType()
-	 */
 	@Override
 	public AccessMethod.Type getType() {
 		return this.type;
@@ -490,11 +467,6 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 		this.shortcuts.clear();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.method.SnaObjectMethod#getErrorHandler()
-	 */
 	@Override
 	public ErrorHandler getErrorHandler() {
 		return this.errorHandler;

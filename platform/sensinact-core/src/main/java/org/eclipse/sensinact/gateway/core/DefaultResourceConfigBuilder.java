@@ -17,7 +17,7 @@ import org.eclipse.sensinact.gateway.core.AttributeBuilder.Requirement;
  * The default {@link ResourceConfigBuilder} is in charge of create the
  * previously non-described {@link ResourceConfig}s
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class DefaultResourceConfigBuilder implements ResourceConfigBuilder {
 	private Class<? extends Resource> defaultResourceType;
@@ -25,11 +25,6 @@ public class DefaultResourceConfigBuilder implements ResourceConfigBuilder {
 	private Modifiable defaultModifiable;
 	private Resource.UpdatePolicy defaultUpdatePolicy;
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.ResourceConfigBuilder#getResourceConfig(org.eclipse.sensinact.gateway.core.ResourceDescriptor)
-	 */
 	@Override
 	public ResourceConfig getResourceConfig(ResourceDescriptor resourceDescriptor) {
 		Class<? extends Resource> resourceType = (resourceDescriptor.resourceType() == null)
@@ -90,11 +85,7 @@ public class DefaultResourceConfigBuilder implements ResourceConfigBuilder {
 		return defaultResourceType;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ResourceConfigBuilder# setDefaultResourceType(java.lang.Class)
-	 */
+	@Override
 	public void setDefaultResourceType(Class<? extends Resource> defaultResourceType) {
 		this.defaultResourceType = defaultResourceType;
 	}
@@ -111,11 +102,7 @@ public class DefaultResourceConfigBuilder implements ResourceConfigBuilder {
 		return defaultDataType;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ResourceConfigBuilder# setDefaultDataType(java.lang.Class)
-	 */
+	@Override
 	public void setDefaultDataType(Class<?> defaultDataType) {
 		this.defaultDataType = defaultDataType;
 	}
@@ -133,11 +120,7 @@ public class DefaultResourceConfigBuilder implements ResourceConfigBuilder {
 		return defaultModifiable;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ResourceConfigBuilder#setDefaultModifiable(Modifiable)
-	 */
+	@Override
 	public void setDefaultModifiable(Modifiable defaultModifiable) {
 		this.defaultModifiable = defaultModifiable;
 	}
@@ -149,17 +132,12 @@ public class DefaultResourceConfigBuilder implements ResourceConfigBuilder {
 	 * @return this ResourceConfigBuilder's default {@link Resource.UpdatePolicy}
 	 */
 	private Resource.UpdatePolicy getDefaultUpdatePolicy() {
-		if (this.defaultUpdatePolicy == null) {
+		if (this.defaultUpdatePolicy == null)
 			return UPDATE_POLICY;
-		}
 		return defaultUpdatePolicy;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ResourceConfigBuilder# setDefaultUpdatePolicy(Resource.UpdatePolicy)
-	 */
+	@Override
 	public void setDefaultUpdatePolicy(Resource.UpdatePolicy defaultUpdatePolicy) {
 		this.defaultUpdatePolicy = defaultUpdatePolicy;
 	}

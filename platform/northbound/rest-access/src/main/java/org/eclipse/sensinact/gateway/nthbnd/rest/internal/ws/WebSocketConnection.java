@@ -111,6 +111,7 @@ public class WebSocketConnection {
 	            this.mediator.error(e1);
 			}
         } catch (Exception e) {
+        	e.printStackTrace();
             this.mediator.error(e);
             try {
 				this.send(new JSONObject().put("statusCode", 500).put("message", "Exception - Internal server error").toString());

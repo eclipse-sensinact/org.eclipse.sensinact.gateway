@@ -16,12 +16,12 @@ import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
+import org.eclipse.sensinact.gateway.core.method.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.UnsubscribeResponse;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
@@ -29,6 +29,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * A NorthboundEndpoint is a connection point to a sensiNact instance
@@ -55,9 +58,8 @@ public class NorthboundEndpoint {
     public NorthboundEndpoint(NorthboundMediator mediator, Authentication<?> authentication) throws InvalidCredentialException {
         this.mediator = mediator;
         this.session = this.mediator.getSession(authentication);
-        if (this.session == null) {
+        if (this.session == null) 
             throw new NullPointerException("null sensiNact session");
-        }
     }
 
     /**
@@ -84,13 +86,38 @@ public class NorthboundEndpoint {
      */
     public AccessMethodResponse<?> execute(NorthboundRequest request) {
         AccessMethodResponse<?> result = null;
-
         Argument[] arguments = request.getExecutionArguments();
-        Class<?>[] parameterTypes = Argument.getParameterTypes(arguments);
+        final String meth =  request.getMethod();
+        final Class<?>[] parameterTypes = Argument.getParameterTypes(arguments);
+    	Predicate<Method> predicate = m -> {
+			if(!m.getName().equals(meth))
+				return false;
+			Class<?>[] types = m.getParameterTypes();
+			if(types.length > (parameterTypes.length +1) || types.length < parameterTypes.length)
+				return false;
+			if(types.length == (parameterTypes.length +1) && !m.isVarArgs())
+				return false;
+			for(int i=0;i<parameterTypes.length;i++) {
+				if(!types[i].isAssignableFrom(parameterTypes[i]))
+					return false;
+			}
+			return true;
+	    };
         try {
-            Method method = getClass().getDeclaredMethod(request.getMethod(), parameterTypes);
-            result = (AccessMethodResponse<?>) method.invoke(this, Argument.getParameters(arguments));
+        	Method[] methods = getClass().getDeclaredMethods();
+        	Optional<Method> opt = Arrays.stream(methods).filter(predicate).findFirst();        	
+            Method method = opt.isPresent()?opt.get():null;
+            Object[] args = Argument.getParameters(arguments);
+            
+            if(method.isVarArgs() && method.getParameterTypes().length == parameterTypes.length+1) {
+            	Object[] _args = new Object[parameterTypes.length+1];
+            	System.arraycopy(args, 0, _args, 0, parameterTypes.length);
+            	_args[parameterTypes.length] = (Object[])null;
+            	args = _args;
+            }
+            result = (AccessMethodResponse<?>) method.invoke(this, args);
         } catch (Exception e) {
+        	e.printStackTrace();
             this.mediator.error(e);
         }
         return result;
@@ -104,9 +131,8 @@ public class NorthboundEndpoint {
      * @throws SecuredAccessException
      */
     public void registerUser(String login, String password, String account, String accountType) throws SecuredAccessException {
-    	if(!(session instanceof AnonymousSession)) {
+    	if(!(session instanceof AnonymousSession)) 
     		throw new SecuredAccessException("Invalid Session");
-    	}
 		((AnonymousSession)session).registerUser(login, password, account, accountType);
     }
 
@@ -115,9 +141,8 @@ public class NorthboundEndpoint {
      * @throws SecuredAccessException
      */
     public void renewUserPassword(String account) throws SecuredAccessException {    	
-    	if(!(session instanceof AnonymousSession)) {
+    	if(!(session instanceof AnonymousSession))
     		throw new SecuredAccessException("Invalid Session");
-    	}
 		((AnonymousSession)session).renewPassword(account);
     }
     
@@ -343,8 +368,9 @@ public class NorthboundEndpoint {
      * @param attributeId       the String identifier of the attribute
      * @return
      */
-    public GetResponse get(String requestIdentifier, String serviceProviderId, String serviceId, String resourceId, String attributeId) {
-        return session.get(requestIdentifier, serviceProviderId, serviceId, resourceId, attributeId);
+    public GetResponse get(String requestIdentifier, String serviceProviderId, String serviceId, String resourceId, 
+    		String attributeId, Object...args) {
+        return session.get(requestIdentifier, serviceProviderId, serviceId, resourceId, attributeId, args);
     }
 
     /**
@@ -359,8 +385,9 @@ public class NorthboundEndpoint {
      * @param value
      * @return
      */
-    public SetResponse set(String requestIdentifier, String serviceProviderId, String serviceId, String resourceId, String attributeId, Object value) {
-        return session.set(requestIdentifier, serviceProviderId, serviceId, resourceId, attributeId, value);
+    public SetResponse set(String requestIdentifier, String serviceProviderId, String serviceId, String resourceId, 
+    	String attributeId, Object value, Object...args) {
+        return session.set(requestIdentifier, serviceProviderId, serviceId, resourceId, attributeId, value, args);
     }
 
     /**
@@ -392,8 +419,8 @@ public class NorthboundEndpoint {
      * @return
      */
     public SubscribeResponse subscribe(String requestIdentifier, String serviceProviderId, String serviceId, String resourceId, String attributeId, 
-    		NorthboundRecipient recipient, JSONArray conditions, String policy) {
-        return session.subscribe(requestIdentifier, serviceProviderId, serviceId, resourceId, recipient, conditions, policy);
+    		NorthboundRecipient recipient, JSONArray conditions, String policy, Object...args) {
+        return session.subscribe(requestIdentifier, serviceProviderId, serviceId, resourceId, recipient, conditions, policy, args);
     }
 
     /**
@@ -408,7 +435,8 @@ public class NorthboundEndpoint {
      * @param subscriptionId
      * @return
      */
-    public UnsubscribeResponse unsubscribe(String requestIdentifier, String serviceProviderId, String serviceId, String resourceId, String attributeId, String subscriptionId) {
-        return session.unsubscribe(requestIdentifier, serviceProviderId, serviceId, resourceId, subscriptionId);
+    public UnsubscribeResponse unsubscribe(String requestIdentifier, String serviceProviderId, String serviceId, String resourceId, String attributeId,
+    		String subscriptionId, Object...args) {
+        return session.unsubscribe(requestIdentifier, serviceProviderId, serviceId, resourceId, subscriptionId, args);
     }
 }

@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -30,15 +31,15 @@ import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
+import org.eclipse.sensinact.gateway.core.method.ActMethod;
+import org.eclipse.sensinact.gateway.core.method.GetMethod;
 import org.eclipse.sensinact.gateway.core.method.LinkedActMethod;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
+import org.eclipse.sensinact.gateway.core.method.SetMethod;
 import org.eclipse.sensinact.gateway.core.method.Shortcut;
 import org.eclipse.sensinact.gateway.core.method.Signature;
-import org.eclipse.sensinact.gateway.core.method.legacy.ActMethod;
-import org.eclipse.sensinact.gateway.core.method.legacy.GetMethod;
-import org.eclipse.sensinact.gateway.core.method.legacy.SetMethod;
-import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeMethod;
-import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeMethod;
+import org.eclipse.sensinact.gateway.core.method.SubscribeMethod;
+import org.eclipse.sensinact.gateway.core.method.UnsubscribeMethod;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 
 /**
@@ -47,12 +48,12 @@ import org.eclipse.sensinact.gateway.util.ReflectUtils;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ResourceBuilder {
-	private final AccessMethod.Type GET = AccessMethod.Type.valueOf(AccessMethod.GET);
-	private final AccessMethod.Type SET = AccessMethod.Type.valueOf(AccessMethod.SET);
-	private final AccessMethod.Type ACT = AccessMethod.Type.valueOf(AccessMethod.ACT);
-	private final AccessMethod.Type SUBSCRIBE = AccessMethod.Type.valueOf(AccessMethod.SUBSCRIBE);
-	private final AccessMethod.Type UNSUBSCRIBE = AccessMethod.Type.valueOf(AccessMethod.UNSUBSCRIBE);
-	private final AccessMethod.Type DESCRIBE = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
+	private static final AccessMethod.Type GET = AccessMethod.Type.valueOf(AccessMethod.GET);
+	private static final AccessMethod.Type SET = AccessMethod.Type.valueOf(AccessMethod.SET);
+	private static final AccessMethod.Type ACT = AccessMethod.Type.valueOf(AccessMethod.ACT);
+	private static final AccessMethod.Type SUBSCRIBE = AccessMethod.Type.valueOf(AccessMethod.SUBSCRIBE);
+	private static final AccessMethod.Type UNSUBSCRIBE = AccessMethod.Type.valueOf(AccessMethod.UNSUBSCRIBE);
+	private static final AccessMethod.Type DESCRIBE = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
 
 	protected final Mediator mediator;
 	protected final ResourceConfig resourceConfig;
@@ -107,9 +108,8 @@ public class ResourceBuilder {
 	 * @param name the name of the resource to build
 	 */
 	public void configureValue(Object value) {
-		if (value == null) {
-			return;
-		}
+		if (value == null) 
+			return;		
 		this.configureRequirement(DataResource.VALUE, AttributeBuilder.Requirement.VALUE, value);
 	}
 
@@ -166,9 +166,8 @@ public class ResourceBuilder {
 				this.buildMethods(resourceImpl);
 
 			} catch (InvalidValueException e) {
-				if (this.mediator.isErrorLoggable()) {
-					this.mediator.error(e, e.getMessage());
-				}
+				if (this.mediator.isErrorLoggable()) 
+					this.mediator.error(e);				
 				throw new InvalidResourceException("Error while creating methods", e);
 			}
 		}
@@ -238,12 +237,6 @@ public class ResourceBuilder {
 		return linkedResourceImpl;
 	}
 
-	/**
-	 * Builds the set of access methods of this resource
-	 * 
-	 * @throws InvalidResourceException
-	 * @throws InvalidValueException
-	 */
 	protected final void buildMethods(final ResourceImpl resource)
 			throws InvalidResourceException, InvalidValueException {
 		if (resource == null) {
@@ -274,7 +267,7 @@ public class ResourceBuilder {
 
 		setMethod = new SetMethod(this.mediator, resource.getPath(),
 				this.getPreProcessingExecutor(resource, AccessMethod.SET));
-
+		
 		setSignature = new Signature(this.mediator, SET, new Class<?>[] { String.class, Object.class },
 				new String[] { "attributeName", "value" });
 
@@ -282,14 +275,15 @@ public class ResourceBuilder {
 				this.getPreProcessingExecutor(resource, AccessMethod.SUBSCRIBE));
 
 		subscribeSignature = new Signature(this.mediator, SUBSCRIBE,
-				new Class<?>[] { String.class, Recipient.class, Set.class, String.class },
-				new String[] { "attributeName", "listener", "conditions", "policy" });
+			new Class<?>[] { String.class, Recipient.class, Set.class, String.class },
+			new String[] { "attributeName", "listener", "conditions", "policy" });
 
 		unsubscribeMethod = new UnsubscribeMethod(this.mediator, resource.getPath(),
 				this.getPreProcessingExecutor(resource, AccessMethod.UNSUBSCRIBE));
-
+		
 		unsubscribeSignature = new Signature(this.mediator, UNSUBSCRIBE, new Class<?>[] { String.class, String.class },
 				new String[] { "attributeName", "subscriptionId" });
+		
 		// Get method
 		getMethod.addSignature(getSignature, getExecutor(resource), AccessMethodExecutor.ExecutionPolicy.BEFORE);
 
@@ -301,11 +295,10 @@ public class ResourceBuilder {
 			if (Modifiable.MODIFIABLE.equals(attrs.nextElement().getModifiable())) {
 				// Set method
 				setMethod.addSignature(setSignature, setExecutor(resource),
-						AccessMethodExecutor.ExecutionPolicy.BEFORE);
+						AccessMethodExecutor.ExecutionPolicy.BEFORE );
 				break;
 			}
 		}
-
 		// Subscribe method
 		subscribeMethod.addSignature(subscribeSignature, subscribeExecutor(resource),
 				AccessMethodExecutor.ExecutionPolicy.BEFORE);
@@ -325,7 +318,7 @@ public class ResourceBuilder {
 
 		fixedPolicyParameters = new HashMap<Integer, Parameter>();
 		fixedPolicyParameters.put(3, policyParameter);
-
+		
 		Shortcut subscribePolicyShortcut = new Shortcut(this.mediator, SUBSCRIBE,
 			new Class<?>[] { String.class, Recipient.class, Set.class }, 
 			new String[] { "attributeName", "listener", "conditions" },
@@ -340,33 +333,38 @@ public class ResourceBuilder {
 				new Class<?>[] { String.class, Recipient.class }, 
 				new String[] { "attributeName", "listener" },
 				fixedConditionsParameters);
-
+		
 		subscribeMethod.addShortcut(subscribeConditionsAndPolicyShortcut, subscribePolicyShortcut);
-
-		if (resource.getDefault() != null) {
+		String resourceDefaultAttribute = resource.getDefault();
+		
+		if (resourceDefaultAttribute != null) {
 			Parameter nameParameter = new Parameter(this.mediator, "attributeName", String.class);
-			nameParameter.setValue(resource.getDefault());
+			nameParameter.setValue(resourceDefaultAttribute);
 
 			Map<Integer, Parameter> fixedNameParameter = new HashMap<Integer, Parameter>();
 
 			fixedNameParameter.put(0, nameParameter);
 
 			// Get method - name parameter shortcut
-			Shortcut getAttributeShortcut = new Shortcut(this.mediator, GET, new Class<?>[0], new String[0],
-					fixedNameParameter);
+			//Shortcut getAttributeShortcut = new Shortcut(this.mediator, GET, new Class<?>[0], new String[0], fixedNameParameter, true);
 
+			// Get method - name parameter shortcut
+			Shortcut getAttributeShortcut = new Shortcut(this.mediator, GET, new Class<?>[0], new String[0], fixedNameParameter);
+			
 			getMethod.addShortcut(getAttributeShortcut, getSignature);
 
 			// Set method - name parameter shortcut
 			// if the default attribute is modifiable
-			Attribute defaultAttribute = resource.getAttribute(resource.getDefault());
+			Attribute defaultAttribute = resource.getAttribute(resourceDefaultAttribute);
 
 			if (defaultAttribute != null && Modifiable.MODIFIABLE.equals(defaultAttribute.getModifiable())) {
+				
 				Shortcut setAttributeShortcut = new Shortcut(this.mediator, SET, new Class<?>[] { Object.class },
-						new String[] { "value" }, fixedNameParameter);
+						new String[] { DataResource.VALUE }, fixedNameParameter);
 
 				setMethod.addShortcut(setAttributeShortcut, setSignature);
 			}
+
 			Shortcut subscribeNameConditionsAndPolicyShortcut = new Shortcut(this.mediator, SUBSCRIBE,
 					new Class<?>[] { Recipient.class }, 
 					new String[] { "listener" }, fixedNameParameter);
@@ -380,7 +378,7 @@ public class ResourceBuilder {
 					new Class<?>[] { Recipient.class, Set.class, String.class }, 
 					new String[] { "listener", "conditions", "policy" },
 					fixedNameParameter);
-
+			
 			subscribeMethod.addShortcut(subscribeNameConditionsAndPolicyShortcut, subscribeConditionsAndPolicyShortcut);
 			subscribeMethod.addShortcut(subscribeNameAndPolicyShortcut, subscribePolicyShortcut);
 			subscribeMethod.addShortcut(subscribeNameShortcut, subscribeSignature);
@@ -404,12 +402,6 @@ public class ResourceBuilder {
 		resource.registerMethod(UNSUBSCRIBE, unsubscribeMethod);
 	}
 
-	/**
-	 * Creates and returns the pre-processing {@link AccessMethodExecutor} to
-	 * register into the {@link AccessMethod} whose type is passed as parameter
-	 * 
-	 * @return the pre-processing executor associated to the specified method type
-	 */
 	private AccessMethodExecutor getPreProcessingExecutor(final ResourceImpl resource, final String type) {
 		return new AccessMethodExecutor() {
 			@Override
@@ -430,20 +422,12 @@ public class ResourceBuilder {
 		};
 	}
 
-	/**
-	 * Creates and returns the specific post-processing {@link AccessMethodExecutor}
-	 * to register into the {@link ActMethod} of the {@link ResourceImpl} passed as
-	 * parameter
-	 * 
-	 * @return the post-processing executor associated to the act method of the
-	 *         specified resource
-	 */
 	private AccessMethodExecutor getActPostProcessingExecutor(final ResourceImpl resource) {
 		return new AccessMethodExecutor() {
 			@Override
 			public Void execute(AccessMethodResponseBuilder parameter) throws Exception {
-				SnaUpdateMessage message = SnaNotificationMessageImpl.Builder.<SnaUpdateMessage>notification(mediator,
-						SnaUpdateMessage.Update.ACTUATED, resource.getPath());
+				SnaUpdateMessage message = SnaNotificationMessageImpl.Builder.<SnaUpdateMessage>notification(
+					mediator, SnaUpdateMessage.Update.ACTUATED, resource.getPath());
 
 				JSONObject notification = new JSONObject();
 				notification.put(Metadata.TIMESTAMP, System.currentTimeMillis());
@@ -457,10 +441,6 @@ public class ResourceBuilder {
 		};
 	}
 
-	/**
-	 * @param resource
-	 * @return
-	 */
 	final private AccessMethodExecutor getExecutor(final ResourceImpl resource) {
 		return new AccessMethodExecutor() {
 			@Override
@@ -477,15 +457,13 @@ public class ResourceBuilder {
 		};
 	}
 
-	/**
-	 * @param resource
-	 * @return
-	 */
 	final private AccessMethodExecutor setExecutor(final ResourceImpl resource) {
 		return new AccessMethodExecutor() {
 			@Override
 			public Void execute(AccessMethodResponseBuilder snaResult) throws Exception {
-				AttributeDescription desc = resource.set((String) snaResult.getParameter(0),snaResult.getParameter(1));
+				Object[] parameters = snaResult.getParameters();
+				int length = parameters == null?0:parameters.length;	
+				AttributeDescription desc = resource.set((String) parameters[0], (Object)parameters[1]);
 				JSONObject result = new JSONObject(desc.getJSON());
 				snaResult.setAccessMethodObjectResult(result);
 				return null;
@@ -493,10 +471,6 @@ public class ResourceBuilder {
 		};
 	}
 
-	/**
-	 * @param resource
-	 * @return
-	 */
 	final private AccessMethodExecutor subscribeExecutor(final ResourceImpl resource) {
 		return new AccessMethodExecutor() {
 			@Override
@@ -551,9 +525,8 @@ public class ResourceBuilder {
 									}								
 								}
 							}
-						} else {
-							policy = ((Integer) parameters[3]).intValue();
-						}				
+						} else 
+						policy = ((Integer) parameters[3]).intValue();		
 					case 3:
 						conditions = (Set) parameters[2];
 					case 2:
@@ -576,10 +549,6 @@ public class ResourceBuilder {
 		};
 	}
 
-	/**
-	 * @param resource
-	 * @return
-	 */
 	final private AccessMethodExecutor unsubscribeExecutor(final ResourceImpl resource) {
 		return new AccessMethodExecutor() {
 			@Override

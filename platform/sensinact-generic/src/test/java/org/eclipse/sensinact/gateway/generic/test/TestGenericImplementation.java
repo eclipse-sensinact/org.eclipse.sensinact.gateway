@@ -20,7 +20,7 @@ import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
+import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
 import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.eclipse.sensinact.gateway.test.MidProxy;
 import org.eclipse.sensinact.gateway.test.ProcessorService;
@@ -65,8 +65,8 @@ public class TestGenericImplementation extends MidOSGiTest {
         getResources = Session.class.getDeclaredMethod("getResources", new Class<?>[] {String.class, String.class});  
         getJSON = DescribeResponse.class.getDeclaredMethod("getJSON");  
         getDescription = Describable.class.getDeclaredMethod("getDescription");        
-        getMethod = Resource.class.getDeclaredMethod("get", new Class<?>[]{String.class});
-        setMethod = Resource.class.getDeclaredMethod("set", new Class<?>[]{String.class, Object.class});
+        getMethod = Resource.class.getDeclaredMethod("get", new Class<?>[]{String.class, Object[].class});
+        setMethod = Resource.class.getDeclaredMethod("set", new Class<?>[]{String.class, Object.class, Object[].class});
         actMethod = ActionResource.class.getDeclaredMethod("act", new Class<?>[]{Object[].class});
     }
 
@@ -102,7 +102,7 @@ public class TestGenericImplementation extends MidOSGiTest {
         MidProxy midVariable = (MidProxy) Proxy.getInvocationHandler(variable);
         MidProxy midVariation = (MidProxy) Proxy.getInvocationHandler(variation);
 
-        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         JSONObject jsonObject = new JSONObject(response.getJSON());
 
         assertEquals(1, (int) jsonObject.getJSONObject("response").getInt("value"));
@@ -114,7 +114,7 @@ public class TestGenericImplementation extends MidOSGiTest {
 
         ActionResource action = actionProxy.buildProxy(midAction.getInstance());
         actionProxy.toOSGi(actMethod, new Object[]{new Object[0]});
-        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         assertEquals(1, (int) jsonObject.getJSONObject("response").getInt("value"));
 
         resource = service.getResource("turnoff");
@@ -123,11 +123,11 @@ public class TestGenericImplementation extends MidOSGiTest {
 
         action = actionProxy.buildProxy(midAction.getInstance());
         actionProxy.toOSGi(actMethod, new Object[]{new Object[0]});
-        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         jsonObject = new JSONObject(response.getJSON());
 
         assertEquals(0, (int) jsonObject.getJSONObject("response").getInt("value"));
-        response = (SnaMessage) midVariation.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        response = (SnaMessage) midVariation.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
 
         jsonObject = new JSONObject(response.getJSON());
 
@@ -153,14 +153,14 @@ public class TestGenericImplementation extends MidOSGiTest {
         Resource temperature = service.getResource("temperature");
         JSONObject jsonObject;
         MidProxy midTemperature = (MidProxy) Proxy.getInvocationHandler(temperature);
-        SnaMessage response = (SnaMessage) midTemperature.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        SnaMessage response = (SnaMessage) midTemperature.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(5.0f, (float) jsonObject.getJSONObject("response").getDouble("value"), 0.0f);
 
-        response = (SnaMessage) midTemperature.toOSGi(setMethod, new Object[]{DataResource.VALUE, -24.5f});
+        response = (SnaMessage) midTemperature.toOSGi(setMethod, new Object[]{DataResource.VALUE, -24.5f, null});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(-24.5f, (float) jsonObject.getJSONObject("response").getDouble("value"), 0.0f);
-        response = (SnaMessage) midTemperature.toOSGi(setMethod, new Object[]{DataResource.VALUE, 45.1f});
+        response = (SnaMessage) midTemperature.toOSGi(setMethod, new Object[]{DataResource.VALUE, 45.1f, null});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(520, (int) jsonObject.getInt("statusCode"));
         core.close();
@@ -305,7 +305,7 @@ public class TestGenericImplementation extends MidOSGiTest {
         MidProxy midAdmin = (MidProxy) Proxy.getInvocationHandler(service);
         Description response = (Description) midAdmin.toOSGi(getDescription, null);
         MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(resource);
-        SnaMessage message = (SnaMessage) midResource.toOSGi(setMethod, new Object[]{"value", "45.5667:5.9333"});
+        SnaMessage message = (SnaMessage) midResource.toOSGi(setMethod, new Object[]{"value", "45.5667:5.9333", null});
         JSONObject jsonObject = new JSONObject(message.getJSON());
 
         jsonObject.getJSONObject("response").remove("timestamp");
@@ -315,7 +315,7 @@ public class TestGenericImplementation extends MidOSGiTest {
         ProcessorService processorService = processor.buildProxy();
 
         processorService.process("weather_7,null,admin,location,45.900002:6.11667");
-        message = (SnaMessage) midResource.toOSGi(getMethod, new Object[]{"value"});
+        message = (SnaMessage) midResource.toOSGi(getMethod, new Object[]{"value", null});
 
         jsonObject = new JSONObject(message.getJSON());
         jsonObject.getJSONObject("response").remove("timestamp");

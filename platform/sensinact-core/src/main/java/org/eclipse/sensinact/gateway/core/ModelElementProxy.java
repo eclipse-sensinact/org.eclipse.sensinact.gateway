@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import java.util.Arrays;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
@@ -21,7 +23,7 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 /**
  * Abstract {@link SensiNactResourceModelElementProxy} implementation
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public abstract class ModelElementProxy implements Nameable, PathElement {
 	/**
@@ -73,21 +75,13 @@ public abstract class ModelElementProxy implements Nameable, PathElement {
 		this.mediator = mediator;
 		this.proxied = proxied;
 	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.common.primitive.PathElement#getPath()
-	 */
+	
+	@Override
 	public String getPath() {
 		return this.path;
 	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.common.primitive.Nameable#getName()
-	 */
+	
+	@Override
 	public String getName() {
 		return this.name;
 	}

@@ -214,7 +214,7 @@ public final class AttributeBuilder implements Nameable, Cloneable {
 	 * @throws InvalidAttributeException
 	 */
 	private AttributeBuilder(String name, Requirement[] requirementsArray, Deque<Requirement> requirementsList,
-			boolean hidden, Modifiable modifiable, Class<?> type, Object value) throws InvalidAttributeException {
+		boolean hidden, Modifiable modifiable, Class<?> type, Object value) throws InvalidAttributeException {
 		
 		if (name == null) 
 			throw new InvalidAttributeException("attribute name required");
@@ -241,11 +241,6 @@ public final class AttributeBuilder implements Nameable, Cloneable {
 		this.metadataBuilders.addAll(metadataBuilder);
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see java.lang.Object#clone()
-	 */
 	public Object clone() {
 		AttributeBuilder clone = new AttributeBuilder(this.name, this.requirementsArray, this.requirementsList,
 				this.hidden, this.modifiable, this.type, this.value);

@@ -48,11 +48,6 @@ public class ServiceProxy extends ModelElementProxy {
 		this.methods = new HashMap<String, AccessMethod>();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelElementProxy# getAccessMethod(AccessMethod.Type)
-	 */
 	@Override
 	public AccessMethod getAccessMethod(String method) {
 		return this.methods.get(method);
@@ -103,26 +98,21 @@ public class ServiceProxy extends ModelElementProxy {
 			}
 			switch (methodAccessibility.getMethod().name()) {
 			case "ACT":
-				actMethod = new ServiceAccessMethod(mediator, getPath(), AccessMethod.Type.valueOf(AccessMethod.ACT),
-						handler);
+				actMethod = new ServiceAccessMethod(mediator, getPath(), AccessMethod.Type.valueOf(AccessMethod.ACT),handler);
 				break;
 			case "DESCRIBE":
 				break;
 			case "GET":
-				getMethod = new ServiceAccessMethod(mediator, getPath(), AccessMethod.Type.valueOf(AccessMethod.GET),
-						handler);
+				getMethod = new ServiceAccessMethod(mediator, getPath(), AccessMethod.Type.valueOf(AccessMethod.GET),handler);
 				break;
 			case "SET":
-				setMethod = new ServiceAccessMethod(mediator, getPath(), AccessMethod.Type.valueOf(AccessMethod.SET),
-						handler);
+				setMethod = new ServiceAccessMethod(mediator, getPath(), AccessMethod.Type.valueOf(AccessMethod.SET),handler);
 				break;
 			case "SUBSCRIBE":
-				subscribeMethod = new ServiceAccessMethod(mediator, getPath(),
-						AccessMethod.Type.valueOf(AccessMethod.SUBSCRIBE), handler);
+				subscribeMethod = new ServiceAccessMethod(mediator, getPath(),AccessMethod.Type.valueOf(AccessMethod.SUBSCRIBE), handler);
 				break;
 			case "UNSUBSCRIBE":
-				unsubscribeMethod = new ServiceAccessMethod(mediator, getPath(),
-						AccessMethod.Type.valueOf(AccessMethod.UNSUBSCRIBE), handler);
+				unsubscribeMethod = new ServiceAccessMethod(mediator, getPath(),AccessMethod.Type.valueOf(AccessMethod.UNSUBSCRIBE), handler);
 				break;
 			default:
 				break;
@@ -138,16 +128,17 @@ public class ServiceProxy extends ModelElementProxy {
 		Signature getSignature = new Signature(mediator, GET, new Class<?>[] { String.class, String.class },
 				new String[] { "resourceName", "attributeName" });
 
+
 		Signature setSignature = new Signature(mediator, SET,
 				new Class<?>[] { String.class, String.class, Object.class },
 				new String[] { "resourceName", "attributeName", "value" });
 
 		Signature actSignature = new Signature(mediator, ACT, new Class<?>[] { String.class, Object[].class },
 				new String[] { "resourceName", "arguments" });
-
+		
 		Signature subscribeSignature = new Signature(mediator, SUBSCRIBE,
-				new Class<?>[] { String.class, String.class, Recipient.class, Set.class },
-				new String[] { "resourceName", "attributeName", "listener", "conditions" });
+				new Class<?>[] { String.class, String.class, Recipient.class, Set.class, String.class },
+				new String[] { "resourceName", "attributeName", "listener", "conditions", "policy" });
 
 		Signature unsubscribeSignature = new Signature(mediator, UNSUBSCRIBE,
 				new Class<?>[] { String.class, String.class, String.class },
@@ -156,10 +147,6 @@ public class ServiceProxy extends ModelElementProxy {
 		// Get method
 		if (getMethod != null) {
 			getMethod.addSignature(getSignature);
-			Signature getAttributeShortcut = new Signature(mediator, GET, new Class<?>[] { String.class },
-					new String[] { "resourceName" });
-
-			getMethod.addSignature(getAttributeShortcut);
 			registerMethod(AccessMethod.GET, getMethod);
 
 		} else {
@@ -169,10 +156,7 @@ public class ServiceProxy extends ModelElementProxy {
 		}
 		// Set method
 		if (setMethod != null) {
-			setMethod.addSignature(setSignature);
-			Signature setAttributeShortcut = new Signature(mediator, SET, new Class<?>[] { String.class, Object.class },
-					new String[] { "resourceName", "value" });
-			setMethod.addSignature(setAttributeShortcut);
+			setMethod.addSignature(setSignature);			
 			registerMethod(AccessMethod.SET, setMethod);
 
 		} else {
@@ -194,21 +178,16 @@ public class ServiceProxy extends ModelElementProxy {
 		if (subscribeMethod != null) {
 			subscribeMethod.addSignature(subscribeSignature);
 
-			Signature subscribeConditionsShortcut = new Signature(mediator, SUBSCRIBE,
-					new Class<?>[] { String.class, String.class, Recipient.class },
-					new String[] { "resourceName", "attributeName", "listener" });
-
-			subscribeMethod.addSignature(subscribeConditionsShortcut);
-
-			Signature subscribeNameConditionsShortcut = new Signature(mediator, SUBSCRIBE,
-					new Class<?>[] { String.class, Recipient.class }, new String[] { "resourceName", "listener" });
-
-			Signature subscribeNameShortcut = new Signature(mediator, SUBSCRIBE,
-					new Class<?>[] { String.class, Recipient.class, Set.class },
-					new String[] { "resourceName", "listener", "conditions" });
-
-			subscribeMethod.addSignature(subscribeNameConditionsShortcut);
-			subscribeMethod.addSignature(subscribeNameShortcut);
+			Signature subscribePolicyShortcut = new Signature(mediator, SUBSCRIBE,
+				new Class<?>[] { String.class, String.class, Recipient.class, Set.class },
+				new String[] { "resourceName", "attributeName", "listener", "conditions" });
+					
+			Signature subscribeConditionsPolicyShortcut = new Signature(mediator, SUBSCRIBE,
+				new Class<?>[] { String.class, String.class, Recipient.class },
+				new String[] { "resourceName", "attributeName", "listener" });
+			
+			subscribeMethod.addSignature(subscribePolicyShortcut);
+			subscribeMethod.addSignature(subscribeConditionsPolicyShortcut);
 			registerMethod(AccessMethod.SUBSCRIBE, subscribeMethod);
 
 		} else {
@@ -219,8 +198,10 @@ public class ServiceProxy extends ModelElementProxy {
 		// Unsubscribe method
 		if (unsubscribeMethod != null) {
 			unsubscribeMethod.addSignature(unsubscribeSignature);
+			
 			Signature unsubscribeNameShortcut = new Signature(mediator, UNSUBSCRIBE,
-					new Class<?>[] { String.class, String.class }, new String[] { "resourceName", "subscriptionId" });
+				new Class<?>[] { String.class, String.class, String.class }, 
+				new String[] { "resourceName", "attributeName", "subscriptionId" });
 			unsubscribeMethod.addSignature(unsubscribeNameShortcut);
 			registerMethod(AccessMethod.UNSUBSCRIBE, unsubscribeMethod);
 

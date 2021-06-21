@@ -52,9 +52,8 @@ public interface AccessMethod<T, R extends AccessMethodResponse<T>> extends Name
 		 * 
 		 */
 		private static final void initialize() {
-			if (initialized) {
+			if (initialized) 
 				return;
-			}
 			initialized = true;
 			new Type(AccessMethod.GET, AccessMethodResponse.Response.GET_RESPONSE);
 			new Type(AccessMethod.SET, AccessMethodResponse.Response.SET_RESPONSE);
@@ -69,12 +68,10 @@ public interface AccessMethod<T, R extends AccessMethodResponse<T>> extends Name
 		 * @return
 		 */
 		public static final Type valueOf(String name) {
-			if (!initialized) {
+			if (!initialized) 
 				initialize();
-			}
-			if (name == null) {
+			if (name == null) 
 				return null;
-			}
 			return METHODS.get(name);
 		}
 
@@ -83,12 +80,10 @@ public interface AccessMethod<T, R extends AccessMethodResponse<T>> extends Name
 		 * @return
 		 */
 		public static final Type valueOf(AccessMethodResponse.Response response) {
-			if (!initialized) {
+			if (!initialized)
 				initialize();
-			}
-			if (response == null) {
+			if (response == null) 
 				return null;
-			}
 			Collection<Type> methods = METHODS.values();
 			Iterator<Type> it = methods.iterator();
 			Type m = null;
@@ -96,9 +91,8 @@ public interface AccessMethod<T, R extends AccessMethodResponse<T>> extends Name
 				if (!it.hasNext())
 					break;
 				m = it.next();
-				if (response.equals(m.response)) {
+				if (response.equals(m.response))
 					return m;
-				}
 			}
 			return null;
 		}
@@ -107,9 +101,8 @@ public interface AccessMethod<T, R extends AccessMethodResponse<T>> extends Name
 		 * @return
 		 */
 		public static final Type[] values() {
-			if (!initialized) {
+			if (!initialized)
 				initialize();
-			}
 			Collection<Type> collection = METHODS.values();
 			Type[] types = new Type[collection.size()];
 			Iterator<Type> iterator = collection.iterator();
@@ -159,20 +152,12 @@ public interface AccessMethod<T, R extends AccessMethodResponse<T>> extends Name
 			return this.response;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Object#hashCode()
-		 */
+		@Override	
 		public int hashCode() {
 			return this.ordinal();
 		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Object#equals(java.lang.Object)
-		 */
+		
+		@Override	
 		public boolean equals(Object o) {
 			if (AccessMethod.Type.class.isAssignableFrom(o.getClass())) {
 				return ((AccessMethod.Type) o).ordinal() == this.ordinal();

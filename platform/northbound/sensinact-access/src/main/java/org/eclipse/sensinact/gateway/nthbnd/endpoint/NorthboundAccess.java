@@ -103,9 +103,8 @@ public abstract class NorthboundAccess<W extends NorthboundRequestWrapper> {
         dnrh.init(request);
         if (dnrh.processRequestURI()) {
             builder = dnrh.handle();
-            if (builder == null) {
-                buildError = dnrh.getBuildError();
-            }
+            if (builder == null) 
+                buildError = dnrh.getBuildError();            
         } else {
             Collection<ServiceReference<NorthboundRequestHandler>> references;
             try {
@@ -126,25 +125,22 @@ public abstract class NorthboundAccess<W extends NorthboundRequestWrapper> {
                             }
                         } catch (IOException e) {
                             mediator.error(e);
-
                         } finally {
                             mediator.getContext().ungetService(reference);
                         }
                     }
-                    if (builder != null) {
+                    if (builder != null)
                         break;
-                    }
                 }
             } catch (InvalidSyntaxException e) {
                 mediator.error(e);
             }
         }
         if (builder == null) {
-            if (buildError == null) {
+            if (buildError == null) 
                 this.sendError(400, "Invalid request");
-            } else {
+            else
                 this.sendError(buildError.status, buildError.message);
-            }
             return;
         }
         this.respond(mediator, builder);

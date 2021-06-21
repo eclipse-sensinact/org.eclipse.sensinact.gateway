@@ -26,25 +26,18 @@ public class MetadataDescription extends PrimitiveDescription {
 	/**
 	 * Constructor
 	 * 
-	 * @param metadata
-	 *            the {@link Metadata} for which to instantiate the
-	 *            MetadataDescription
+	 * @param metadata the {@link Metadata} for which to instantiate the
+	 * MetadataDescription
 	 */
 	public MetadataDescription(Metadata metadata) {
 		super(metadata);
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see Description #getJSONDescription()
-	 */
 	@Override
 	public String getJSONDescription() {
 		JSONObject description = this.getJSONObjectDescription();
-		if (description == null) {
-			return EMPTY;
-		}
+		if (description == null) 
+			return EMPTY;		
 		return description.toString();
 	}
 

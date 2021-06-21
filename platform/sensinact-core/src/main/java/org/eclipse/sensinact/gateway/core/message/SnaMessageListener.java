@@ -177,43 +177,43 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 		String messageMethod = null;
 
 		switch (((SnaMessageSubType) message.getType()).getSnaMessageType()) {
-		case RESPONSE:
-			switch ((AccessMethodResponse.Response) message.getType()) {
-			case ACT_RESPONSE:
-				messageMethod = AccessMethod.ACT;
+			case RESPONSE:
+				switch ((AccessMethodResponse.Response) message.getType()) {
+				case ACT_RESPONSE:
+					messageMethod = AccessMethod.ACT;
+					break;
+				case DESCRIBE_RESPONSE:
+					messageMethod = AccessMethod.DESCRIBE;
+					break;
+				case GET_RESPONSE:
+					messageMethod = AccessMethod.GET;
+					break;
+				case SET_RESPONSE:
+					messageMethod = AccessMethod.SET;
+					break;
+				case SUBSCRIBE_RESPONSE:
+					messageMethod = AccessMethod.SUBSCRIBE;
+					break;
+				case UNSUBSCRIBE_RESPONSE:
+					messageMethod = AccessMethod.UNSUBSCRIBE;
+					break;
+				default:
+					break;
+				}
 				break;
-			case DESCRIBE_RESPONSE:
+			case ERROR:
+			case LIFECYCLE:
 				messageMethod = AccessMethod.DESCRIBE;
 				break;
-			case GET_RESPONSE:
+			case UPDATE:
 				messageMethod = AccessMethod.GET;
-				break;
-			case SET_RESPONSE:
-				messageMethod = AccessMethod.SET;
-				break;
-			case SUBSCRIBE_RESPONSE:
-				messageMethod = AccessMethod.SUBSCRIBE;
-				break;
-			case UNSUBSCRIBE_RESPONSE:
-				messageMethod = AccessMethod.UNSUBSCRIBE;
 				break;
 			default:
 				break;
-			}
-			break;
-		case ERROR:
-		case LIFECYCLE:
-			messageMethod = AccessMethod.DESCRIBE;
-			break;
-		case UPDATE:
-			messageMethod = AccessMethod.GET;
-			break;
-		default:
-			break;
 		}
-		if (messageMethod != null) {
+		if (messageMethod != null)
 			doHandleAgents(message, messageMethod);
-		}
+		
 		doHandleSubscribers(message);
 	}
 

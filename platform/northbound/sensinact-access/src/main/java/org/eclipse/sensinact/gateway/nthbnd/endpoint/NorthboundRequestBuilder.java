@@ -10,6 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.core.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.FilteringDefinition;
@@ -43,7 +46,7 @@ public class NorthboundRequestBuilder {
     protected String requestIdentifier;
     protected String method;
     protected boolean listElements;
-    private Object argument;
+    private List<Argument> arguments;
     private FilteringDefinition[] filterDefinitions;
     private boolean hiddenFilter;
 
@@ -56,6 +59,7 @@ public class NorthboundRequestBuilder {
      */
     public NorthboundRequestBuilder(NorthboundMediator mediator) {
         this.mediator = mediator;
+        this.arguments = new ArrayList<>();
         if (this.mediator == null) {
             throw new NullPointerException("Mediator needed");
         }
@@ -138,15 +142,14 @@ public class NorthboundRequestBuilder {
     }
 
     /**
-     * Define the argument that will be used to parameterize
-     * the call to the method the request to be built is
-     * targeting
+     * Define an argument that will be used to parameterize the associated method call
      *
-     * @param argument
+     * @param argument {@link Argument} wrapping the parameter 
+     * 
      * @return this NorthboundRequestBuilder
      */
-    public NorthboundRequestBuilder withArgument(Object argument) {
-        this.argument = argument;
+    public NorthboundRequestBuilder withArgument(Argument argument) {
+        this.arguments.add(argument);
         return this;
     }
 
@@ -205,80 +208,76 @@ public class NorthboundRequestBuilder {
      */
     public NorthboundRequest build() {
         NorthboundRequest request = null;
-        if (this.method == null) {
+        if (this.method == null) 
             return request;
-        }
         switch (this.method) {
             case "ALL":
                 FilteringCollection collection = null;
-                if (this.filterDefinitions != null) {
+                if (this.filterDefinitions != null) 
                     collection = new FilteringCollection(mediator, this.hiddenFilter, this.filterDefinitions);
-                }
                 request = new AllRequest(mediator, getRequestIdentifier(), collection);
                 break;
             case "ACT":
-                if (this.resource != null) {
-                    Object[] arguments = null;
-                    if (this.argument != null) {
-                        if (this.argument.getClass().isArray()) {
-                            arguments = (Object[]) this.argument;
-
-                        } else {
-                            arguments = new Object[]{this.argument};
-                        }
-                    }
-                    request = new ResourceActRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, arguments);
-                }
+                if (this.resource != null) 
+                    request = new ResourceActRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, 
+                       this.arguments.stream().<List<Object>>collect(ArrayList::new,(l,a)->{l.add(a.value);},List::addAll).toArray());
                 break;
             case "DESCRIBE":
-                if (this.resource != null) {
+                if (this.resource != null) 
                     request = new ResourceRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource);
-
-                } else if (service != null) {
-                    if (this.listElements) {
-                        request = new ResourcesRequest(mediator, getRequestIdentifier(), serviceProvider, service, this.filterDefinitions == null ? null : new FilteringCollection(mediator, this.hiddenFilter, this.filterDefinitions));
-
-                    } else {
-                        request = new ServiceRequest(mediator, getRequestIdentifier(), serviceProvider, service, null);
-                    }
+                else if (service != null) {
+                    if (this.listElements) 
+                        request = new ResourcesRequest(mediator, getRequestIdentifier(), serviceProvider, service, 
+                        	this.filterDefinitions == null ? null : new FilteringCollection(mediator, this.hiddenFilter, this.filterDefinitions));
+                    else 
+                        request = new ServiceRequest(mediator, getRequestIdentifier(), serviceProvider, service, null);                    
                 } else if (serviceProvider != null) {
-                    if (this.listElements) {
-                        request = new ServicesRequest(mediator, getRequestIdentifier(), serviceProvider, this.filterDefinitions == null ? null : new FilteringCollection(mediator, this.hiddenFilter, this.filterDefinitions));
-
-                    } else {
+                    if (this.listElements) 
+                        request = new ServicesRequest(mediator, getRequestIdentifier(), serviceProvider, 
+                        	this.filterDefinitions == null ? null : new FilteringCollection(mediator, this.hiddenFilter, this.filterDefinitions));
+                    else 
                         request = new ServiceProviderRequest(mediator, getRequestIdentifier(), serviceProvider, null);
-                    }
-                } else {
-                    request = new ServiceProvidersRequest(mediator, getRequestIdentifier(), this.filterDefinitions == null ? null : new FilteringCollection(mediator, this.hiddenFilter, this.filterDefinitions));
-                }
+                    
+                } else 
+                    request = new ServiceProvidersRequest(mediator, getRequestIdentifier(), 
+                    	this.filterDefinitions == null ? null : new FilteringCollection(mediator, this.hiddenFilter, this.filterDefinitions));                
                 break;
             case "GET":
-                request = new AttributeGetRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, attribute);
+                request = new AttributeGetRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, 
+                	attribute, this.arguments==null || this.arguments.size()==0 ?null:this.arguments.toArray(new Argument[0]));
                 break;
             case "SET":
-                request = new AttributeSetRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, attribute, argument);
+            	List<Argument> extraArguments = this.arguments.size()>1?this.arguments.subList(1, this.arguments.size()-1):null;
+                request = new AttributeSetRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, 
+                	attribute, this.arguments.get(0).value, extraArguments==null|| extraArguments.size()==0?null:extraArguments.toArray(new Argument[0]));
                 break;
             case "SUBSCRIBE":
-                Object[] arguments = this.argument != null ? (this.argument.getClass().isArray() ? (Object[]) this.argument : new Object[]{this.argument}) : null;
-
-                if (arguments == null || arguments.length == 0 || !NorthboundRecipient.class.isAssignableFrom(arguments[0].getClass())) {
+                if (this.arguments == null || this.arguments.size() == 0) 
                     break;
+                NorthboundRecipient northboundRecipient = null;
+                try{
+                	northboundRecipient = (NorthboundRecipient)this.arguments.get(0).value;
+                } catch(ClassCastException e){
+                	break;
                 }
-                if (this.resource != null) {
-                    request = new AttributeSubscribeRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, attribute, (NorthboundRecipient) arguments[0],
-                    	(arguments.length > 1 ? ((JSONArray) arguments[1]) : new JSONArray()),(arguments.length > 2 ? ((String) arguments[2]) : String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY)));
-                } else {
-                    request = new RegisterAgentRequest(mediator, getRequestIdentifier(), serviceProvider, service, (NorthboundRecipient) arguments[0], 
-                    	(SnaFilter) (arguments.length > 1 ? arguments[1] : null),(arguments.length > 2 ? ((String) arguments[2]) : String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY)));
-                }
+                String policy =  this.arguments.size() > 2?((String) this.arguments.get(2).value):String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY);
+            	extraArguments = this.arguments.size() > 3?this.arguments.subList(3, this.arguments.size()-1):null;
+                if (this.resource != null) 
+                    request = new AttributeSubscribeRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, attribute, 
+                    	northboundRecipient, (JSONArray)(this.arguments.size() > 1?this.arguments.get(1).value:new JSONArray()), 
+                    	policy, extraArguments==null|| extraArguments.size()==0?null:extraArguments.toArray(new Argument[0]));
+                else 
+                    request = new RegisterAgentRequest(mediator, getRequestIdentifier(), serviceProvider, service, northboundRecipient, 
+                    	(SnaFilter) (this.arguments.size() > 1 ?this.arguments.get(1).value:null), policy);               
                 break;
             case "UNSUBSCRIBE":
-                String arg = CastUtils.cast(mediator.getClassLoader(), String.class, this.argument);
-                if (this.resource != null) {
-                    request = new AttributeUnsubscribeRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, attribute, arg);
-                } else {
-                    request = new UnregisterAgentRequest(mediator, getRequestIdentifier(), arg);
-                }
+            	extraArguments = this.arguments.size()>1?this.arguments.subList(1, this.arguments.size()-1):null;
+            	String subcriptionId = CastUtils.cast(mediator.getClassLoader(), String.class, this.arguments.get(0).value);
+                if (this.resource != null)
+                    request = new AttributeUnsubscribeRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, 
+                    	attribute, subcriptionId, extraArguments==null|| extraArguments.size()==0?null:extraArguments.toArray(new Argument[0]));
+                else 
+                    request = new UnregisterAgentRequest(mediator, getRequestIdentifier(), subcriptionId);                
                 break;
             default:
                 break;

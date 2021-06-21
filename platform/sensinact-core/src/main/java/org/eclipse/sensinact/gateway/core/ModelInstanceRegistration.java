@@ -129,10 +129,6 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 		}
 	}
 
-	/**
-	 * @param uri
-	 * @param location
-	 */
 	void update(final Dictionary<String, Object> properties) {
 		if (!registered || properties == null || properties.size() == 0 || this.instanceRegistration == null) {
 			return;
@@ -165,9 +161,6 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 		}
 	}
 
-	/**
-	 * @return
-	 */
 	private Dictionary<String, Object> properties() {
 		final Hashtable<String, Object> properties = new Hashtable<String, Object>();
 
@@ -301,9 +294,9 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 				Object value = null;
 				String attribute = it.next();
 
-				if (attribute.equals(name) || (attribute.equals(DataResource.VALUE) && resource.equals(name))) {
+				if (attribute.equals(name) || (attribute.equals(DataResource.VALUE) && resource.equals(name))) 
 					value = initial.opt(DataResource.VALUE);
-				}
+				
 				if (LOCATION_PROPERTY.equals(resourceKey)) {
 					double latitude = 0d;
 					double longitude = 0d;
@@ -353,9 +346,9 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 		String resourceKey = new StringBuilder().append(service).append(".").append(resource).toString();
 
 		List<String> resources = (List<String>) properties.get(serviceKey);
-		if (resources != null) {
+		if (resources != null) 
 			resources.remove(resource);
-		}
+		
 		properties.remove(resourceKey.concat(".type"));
 		int index = 0;
 		for (; index < typesLength; index++) {
@@ -403,12 +396,6 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 		properties.put("services", services);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidCallback#
-	 *      doCallback(org.eclipse.sensinact.gateway.core.message.SnaMessage)
-	 */
 	@Override
 	public void doCallback(SnaMessage<?> message) {
 
@@ -416,18 +403,26 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 		String[] uriElements = UriUtils.getUriElements(uri);
 		switch (((SnaMessageSubType) message.getType()).getSnaMessageType()) {
 		case UPDATE:
-			if (!Update.ATTRIBUTE_VALUE_UPDATED.equals((SnaMessageSubType) message.getType())) {
-				break;
-			}
 			SnaUpdateMessage m = (SnaUpdateMessage) message;
 			JSONObject notification = m.getNotification();
 			String key = new StringBuilder().append(uriElements[1]).append(".").append(uriElements[2]).toString();
-			List<String> obs = this.observed.get(key);
-			if (obs != null && !obs.isEmpty() && obs.contains(uriElements[3])) {
-				Object value = notification.opt(DataResource.VALUE);
-				this.updateObserved(new StringBuilder().append(key).append("."
-					).append(uriElements[3]).toString(), value);
-			}
+			switch(m.getType()) {
+				case ATTRIBUTE_VALUE_UPDATED:					
+					List<String> obs = this.observed.get(key);
+					if (obs != null && !obs.isEmpty() && obs.contains(uriElements[3])) {
+						Object value = notification.opt(DataResource.VALUE);
+						this.updateObserved(new StringBuilder().append(key).append("."
+							).append(uriElements[3]).toString(), value);
+					}
+					break;
+				case METADATA_VALUE_UPDATED:
+					Object value = notification.opt(DataResource.VALUE);
+					this.updateObserved(new StringBuilder().append(key).append("."
+						).append(uriElements[3]).append(".").append(uriElements[4]).toString(), value);					
+					break;
+				case ACTUATED: 
+					break;
+				}
 			break;
 		case LIFECYCLE:
 			SnaLifecycleMessage l = (SnaLifecycleMessage) message;

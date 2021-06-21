@@ -10,7 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class AttributeSetRequest extends AttributeRequest {
+
+    private Argument[] extraArguments;
     private Object argument;
 
     /**
@@ -21,9 +27,11 @@ public class AttributeSetRequest extends AttributeRequest {
      * @param attribute
      * @param argument
      */
-    public AttributeSetRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, String resource, String attribute, Object argument) {
+    public AttributeSetRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, String resource, 
+    		String attribute, Object argument, Argument[] extraArguments) {
         super(mediator, requestIdentifier, serviceProvider, service, resource, attribute);
         this.argument = argument;
+        this.extraArguments = extraArguments;
     }
 
     /**
@@ -32,13 +40,15 @@ public class AttributeSetRequest extends AttributeRequest {
      */
     @Override
     protected Argument[] getExecutionArguments() {
+    	int offset = this.extraArguments == null?0:this.extraArguments.length;
         Argument[] superArguments = super.getExecutionArguments();
         int length = superArguments == null ? 0 : superArguments.length;
-        Argument[] arguments = new Argument[length + 1];
-        if (length > 0) {
+        Argument[] arguments = new Argument[length + offset + 1];
+        if (length > 0) 
             System.arraycopy(superArguments, 0, arguments, 0, length);
-        }
         arguments[length] = new Argument(Object.class, this.argument);
+        if (offset > 0)
+            System.arraycopy(this.extraArguments, 0, arguments, length+1, offset);
         return arguments;
     }
 

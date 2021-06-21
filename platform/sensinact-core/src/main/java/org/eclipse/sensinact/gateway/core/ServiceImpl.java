@@ -48,33 +48,16 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 			super(proxy, tree);
 		}
 
-		/**
-		 * @inheritDoc
-		 * 
-		 * @see org.eclipse.sensinact.gateway.core.ResourceCollection#getResources()
-		 */
 		@Override
 		public List<Resource> getResources() {
 			return super.list();
 		}
 
-		/**
-		 * @inheritDoc
-		 * 
-		 * @see org.eclipse.sensinact.gateway.core.ResourceCollection#
-		 *      getResource(java.lang.String)
-		 */
 		@Override
 		public <R extends Resource> R getResource(String resource) {
 			return (R) super.element(resource);
 		}
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see java.lang.reflect.InvocationHandler# invoke(java.lang.Object,
-		 *      java.lang.reflect.Method, java.lang.Object[])
-		 */
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] parameters) throws Throwable {
 			Object result = null;
@@ -83,39 +66,27 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 				if (method.isVarArgs() && parameters != null && parameters.length == 1
 						&& parameters[0].getClass().isArray()) {
 					calledParameters = (Object[]) parameters[0];
-
-				} else {
+				} else 
 					calledParameters = parameters;
-				}
+				
 				if (calledParameters.length > 0) {
 					String resourceName = (String) calledParameters[0];
 					calledParameters[0] = getResource(resourceName);
 				}
 				result = this.proxy.invoke(method.getName().toUpperCase(), calledParameters);
-			} else {
+			} else
 				result = method.invoke(this, parameters);
-			}
-			if (result == this.proxy || result == this) {
+			
+			if (result == this.proxy || result == this) 
 				return proxy;
-			}
 			return result;
 		}
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#isAccessible()
-		 */
 		@Override
 		public boolean isAccessible() {
 			return true;
 		}
 
-		/**
-		 * @inheritDoc
-		 * 
-		 * @see org.eclipse.sensinact.gateway.common.primitive.Describable#getDescription()
-		 */
 		@Override
 		public Description getDescription() {
 			return new Description() {
@@ -659,42 +630,21 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 		return this.subscriptionsCount;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ModelElement#getRegisteredEvent()
-	 */
 	@Override
 	protected Lifecycle getRegisteredEvent() {
 		return Lifecycle.SERVICE_APPEARING;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see ModelElement#getUnregisteredEvent()
-	 */
 	@Override
 	protected Lifecycle getUnregisteredEvent() {
 		return Lifecycle.SERVICE_DISAPPEARING;
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.ModelElement#getProxyType()
-	 */
 	@Override
 	protected Class<? extends ElementsProxy<Resource>> getProxyType() {
 		return Service.class;
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement#
-	 *      getProxy(java.util.List)
-	 */
 	@Override
 	public ServiceProxy getProxy(List<MethodAccessibility> methodAccessibilities) {
 		try {
@@ -708,13 +658,6 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 		return null;
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.ModelElement#
-	 *      getElementProxy(org.eclipse.sensinact.gateway.core.security.AccessTree,
-	 *      org.eclipse.sensinact.gateway.common.primitive.Nameable)
-	 */
 	@Override
 	protected Resource getElementProxy(AccessTree<?> tree, ResourceImpl element)
 			throws ModelElementProxyBuildException {
@@ -724,13 +667,6 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 		return element.getProxy(tree);
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.ModelElement#
-	 *      getWrapper(org.eclipse.sensinact.gateway.core.ModelElementProxy,
-	 *      org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree)
-	 */
 	@Override
 	protected ModelElementProxyWrapper getWrapper(ServiceProxy proxy, ImmutableAccessTree tree) {
 		ServiceProxyWrapper wrapper = new ServiceProxyWrapper(proxy, tree);

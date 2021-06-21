@@ -100,6 +100,7 @@ public class HttpEndpoint extends HttpServlet {
             response.sendError(403, e.getMessage());
 
         } catch (Exception e) {
+        	e.printStackTrace();
             mediator.error(e);
             response.sendError(520, "Internal server error");
 

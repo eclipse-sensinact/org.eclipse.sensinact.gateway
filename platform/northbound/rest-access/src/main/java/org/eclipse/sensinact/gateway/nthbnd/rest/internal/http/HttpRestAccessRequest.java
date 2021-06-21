@@ -51,17 +51,11 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
         this.mediator = mediator;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getMediator()
-     */
     @Override
     public NorthboundMediator getMediator() {
         return this.mediator;
     }
     
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getQueryMap()
-     */
     @Override
     public Map<String, List<String>> getQueryMap() {
         if (this.queryMap == null) {
@@ -75,9 +69,6 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
         return queryMap;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getContent()
-     */
     @Override
     public String getContent() {
         if (this.content == null) {
@@ -104,9 +95,6 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
         this.authentication = authentication;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getAuthentication()
-     */
     @Override
     public Authentication<?> getAuthentication() {
         if (this.authentication == null) {
@@ -123,25 +111,16 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
         return this.authentication;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getRequestID()
-     */
     @Override
     public String getRequestIdProperty() {
        return "rid";
     }
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getRequestID()
-	 */
 	@Override
 	public String getRequestId() {
 		return super.getHeader(getRequestIdProperty());
 	}
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#createRecipient(org.eclipse.sensinact.gateway.core.api.method.Parameter[])
-     */
     @Override
     public NorthboundRecipient createRecipient(List<Parameter> parameters) {
         NorthboundRecipient recipient = null;
@@ -158,9 +137,8 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
                 break;
             }
         }
-        if (callback != null) {
+        if (callback != null) 
             recipient = new HttpRecipient(mediator, callback);
-        }
         return recipient;
     }
 

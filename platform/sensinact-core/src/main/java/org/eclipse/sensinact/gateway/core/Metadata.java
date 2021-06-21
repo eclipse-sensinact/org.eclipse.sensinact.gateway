@@ -74,38 +74,21 @@ public class Metadata extends DescribablePrimitive {
 		super(mediator, metadata);
 		try {
 			this.modifiable = Modifiable.valueOf(metadata.optString(Metadata.MODIFIABLE));
-
 		} catch (Exception e) {
 			this.modifiable = Modifiable.FIXED;
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see Primitive#isModifiable()
-	 */
 	@Override
 	public Modifiable getModifiable() {
 		return this.modifiable;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see Primitive#getDefaultDescription()
-	 */
 	@Override
 	protected MetadataDescription createDescription() {
 		return new MetadataDescription(this);
 	}
 
-	/**
-	 * Validates the type of this Metadata
-	 * 
-	 * @param type
-	 *            the type to validate
-	 */
 	@Override
 	protected void checkType(Class<?> type) throws InvalidValueTypeException {
 		if ((!type.isArray() || !Constraint.class.isAssignableFrom(type.getComponentType()))) {

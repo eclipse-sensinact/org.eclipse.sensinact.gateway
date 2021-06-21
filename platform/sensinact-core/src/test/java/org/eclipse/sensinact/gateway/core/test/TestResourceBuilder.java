@@ -21,12 +21,14 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.sensinact.gateway.common.constraint.Changed;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.MaxLength;
 import org.eclipse.sensinact.gateway.common.constraint.MinLength;
+import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
@@ -60,13 +62,13 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
+import org.eclipse.sensinact.gateway.core.method.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.LinkedActMethod;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
+import org.eclipse.sensinact.gateway.core.method.SetResponse;
 import org.eclipse.sensinact.gateway.core.method.Shortcut;
 import org.eclipse.sensinact.gateway.core.method.Signature;
-import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
 import org.eclipse.sensinact.gateway.core.method.trigger.Constant;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
@@ -189,10 +191,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 					@Override
 					public Void execute(AccessMethodResponseBuilder result) throws Exception {
 						JSONObject jsonObject = (JSONObject) result.getAccessMethodObjectResult();
-
-						jsonObject.put("value",
-								new StringBuilder().append(jsonObject.get("value")).append("_suffix").toString());
-
+						jsonObject.put("value",new StringBuilder().append(jsonObject.get("value")).append("_suffix").toString());
 						result.setAccessMethodObjectResult(jsonObject);
 						return null;
 					}
@@ -236,19 +235,11 @@ public class TestResourceBuilder<R extends ModelInstance> {
 			}
 		}, null);
 
-		JSONObject set1 = session.set("serviceProvider", "testService", "TestProperty2", null, "property3")
-				.getResponse();
-
+		JSONObject set1 = session.set("serviceProvider", "testService", "TestProperty2", null, "property3").getResponse();
 		Thread.sleep(250);
-
-		JSONObject set2 = session
-				.set("serviceProvider", "testService", "TestProperty2", DataResource.VALUE, "property3").getResponse();
-
+		JSONObject set2 = session.set("serviceProvider", "testService", "TestProperty2", DataResource.VALUE, "property3").getResponse();
 		Assert.assertEquals(set1.get(DataResource.VALUE), set2.get(DataResource.VALUE));
-
-		JSONObject set3 = session
-				.set("serviceProvider", "testService", "TestProperty", DataResource.VALUE, "TEST LINKED SUBSCRIPTION")
-				.getResponse();
+		JSONObject set3 = session.set("serviceProvider", "testService", "TestProperty", DataResource.VALUE, "TEST LINKED SUBSCRIPTION").getResponse();
 
 		Thread.sleep(250);
 
@@ -273,7 +264,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 				((MyModelInstance) this.testContext.getModelInstance()).getHandler().count(filter));
 
 		Service proxy = service.<Service>getProxy(this.tree);
-		SetResponse error = proxy.set("location", "unknown");
+		SetResponse error = proxy.set("location", DataResource.VALUE, "unknown");
 		assertTrue(error.getStatusCode() == 403);
 		assertEquals(1, this.testContext.getLinkCallbackCount());
 	}
@@ -290,31 +281,25 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		Assert.assertEquals("TestProperty", r1.getName());
 		Assert.assertEquals(Resource.Type.PROPERTY, r1.getType());
 
-		String get1 = r1.get(DataResource.VALUE).getJSON();
+		String get1 = r1.get(DataResource.VALUE).getJSON();		
 		String get2 = r1.get().getJSON();
-
+		
 		JSONAssert.assertEquals(get1, get2, false);
 		SubscribeResponse res = r1.subscribe(new Recipient() {
 			@Override
 			public void callback(String callbackId, SnaMessage[] messages) throws Exception {
 				boolean hasChanged = ((TypedProperties<?>) messages[0]).<Boolean>get("hasChanged");
-
 				if (!hasChanged)
-					;
-				{
 					TestResourceBuilder.this.testContext.extraCallbackInc();
-				}
 			}
-
+			
 			@Override
 			public String getJSON() {
 				return null;
 			}
-		}, new HashSet<Constraint>() {
-			{
+		}, new HashSet<Constraint>() {{
 				this.add(new Changed(Thread.currentThread().getContextClassLoader(), true));
-			}
-		});
+		}});
 
 		r1.set("hello");
 		Thread.sleep(500);
@@ -328,7 +313,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		ResourceImpl r3impl = service.addLinkedResource("LinkedProperty", r1impl);
 		PropertyResource r3 = r3impl.<PropertyResource>getProxy(this.tree);
 
-		service.addLinkedResource(LocationResource.LOCATION, this.testContext.getModelInstance().getRootElement()
+		ResourceImpl r4impl = service.addLinkedResource(LocationResource.LOCATION, this.testContext.getModelInstance().getRootElement()
 				.getAdminService().getResource(LocationResource.LOCATION));
 
 		// test linked resource
@@ -338,21 +323,16 @@ public class TestResourceBuilder<R extends ModelInstance> {
 
 		JSONAssert.assertEquals(((GetResponse) r1.get()).getResponse(), ((GetResponse) r3.get()).getResponse(), false);
 
-		ResourceImpl r4impl = service.getResource("location");
-
 		r4impl.registerExecutor(AccessMethod.Type.valueOf(AccessMethod.GET), new Class<?>[0], new String[0],
-				new AccessMethodExecutor() {
-					@Override
-					public Void execute(AccessMethodResponseBuilder result) throws Exception {
-						JSONObject jsonObject = (JSONObject) result.getAccessMethodObjectResult();
-
-						jsonObject.put("value",
-								new StringBuilder().append(jsonObject.get("value")).append("_suffix").toString());
-
-						result.setAccessMethodObjectResult(jsonObject);
-						return null;
-					}
-				}, AccessMethodExecutor.ExecutionPolicy.AFTER);
+			new AccessMethodExecutor() {
+				@Override
+				public Void execute(AccessMethodResponseBuilder result) throws Exception {
+					JSONObject jsonObject = (JSONObject) result.getAccessMethodObjectResult();
+					jsonObject.put("value", new StringBuilder().append(jsonObject.get("value")).append("_suffix").toString());
+					result.setAccessMethodObjectResult(jsonObject);
+					return null;
+				}
+			}, AccessMethodExecutor.ExecutionPolicy.AFTER);
 
 		String attributeValue = (String) r4impl.getAttribute("value").getValue();
 		LocationResource r4 = r4impl.<LocationResource>getProxy(this.tree);
@@ -421,21 +401,19 @@ public class TestResourceBuilder<R extends ModelInstance> {
 				((MyModelInstance) this.testContext.getModelInstance()).getHandler().count(filter));
 
 		Service proxy = service.<Service>getProxy(this.tree);
-		SetResponse error = proxy.set("location", "unknown");
+		SetResponse error = proxy.set("location", DataResource.VALUE, (Object)"unknown");
 		assertTrue(error.getStatusCode() == 403);
 		assertEquals(1, this.testContext.getLinkCallbackCount());
 	}
 
 	@Test
 	public void testAgent() throws Exception {
+		
 		ServiceImpl service1 = this.testContext.getModelInstance().getRootElement().addService("testService");
-
 		ResourceImpl r1impl = service1.addDataResource(PropertyResource.class, "TestProperty", String.class, "hello");
-
 		ServiceImpl service2 = this.testContext.getModelInstance().getRootElement().addService("tostService");
-
 		ResourceImpl r2impl = service2.addDataResource(PropertyResource.class, "TestProperty", String.class, "hello");
-
+		
 		// wait for the previously generated events to be consumed
 		Thread.sleep(1000);
 		SnaFilter filter = new SnaFilter(this.testContext.getMediator(), "/serviceProvider/(test).*", true, false);
@@ -453,12 +431,12 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		PropertyResource r2 = r2impl.<PropertyResource>getProxy(this.tree);
 
 		assertEquals(0, TestResourceBuilder.this.testContext.getAgentCallbackCount());
-		r2.set("goodbye");
+		System.out.println(r2.set("goodbye").getJSON());
 
 		Thread.sleep(250);
 		assertEquals(0, TestResourceBuilder.this.testContext.getAgentCallbackCount());
 
-		r1.set("goodbye");
+		System.out.println(r1.set("goodbye").getJSON());
 
 		Thread.sleep(250);
 		assertEquals(1, TestResourceBuilder.this.testContext.getAgentCallbackCount());

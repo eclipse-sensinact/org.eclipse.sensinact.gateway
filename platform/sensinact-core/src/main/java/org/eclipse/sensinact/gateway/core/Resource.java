@@ -17,16 +17,16 @@ import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.Typable;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.UnsubscribeResponse;
 
 /**
  * A Resource owns {@link Attribute}s and {@link AccessMethod}s whose call allow
  * to manipulate those {@link Attribute}s
  * 
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public interface Resource extends ElementsProxy<AttributeDescription>, Typable<Resource.Type> {
 	// Type attribute property key
@@ -81,54 +81,68 @@ public interface Resource extends ElementsProxy<AttributeDescription>, Typable<R
 	/**
 	 * Asks for this Resource's associated get execution
 	 * 
-	 * @param parameters
-	 *            objects array parameterizing the invocation
-	 * @return the invocation {@link SnaMessage} result
+	 * @param atributeName the String name of the targeted attribute
+	 * @param args optional variable Objects array parameterizing the call
+	 * 
+	 * @return the resulting {@link GetResponse}
 	 */
-	GetResponse get(String attributeName);
+	GetResponse get(String attributeName, Object...args);
 
 	/**
 	 * Asks for this Resource's associated set execution
 	 * 
-	 * @param parameters
-	 *            objects array parameterizing the invocation
-	 * @return the invocation {@link SnaMessage} result
+	 * @param atributeName the String name of the targeted attribute
+	 * @param value the value Object to be set
+	 * @param args optional variable Objects array parameterizing the call
+	 * 
+	 * @return the resulting {@link SetResponse}
 	 */
-	SetResponse set(String atributeName, Object value);
+	SetResponse set(String atributeName, Object value, Object...args);
 
 	/**
-	 * Asks for this Resource's associated set execution
+	 * Asks for this Resource's associated subscription execution
 	 * 
-	 * @param parameters
-	 *            array of {@link Parameter}s parameterizing the invocation
-	 * @return the {@link SnaMessage} resulting of the invocation
+	 * @param atributeName the String name of the targeted attribute
+	 * @param recipient the {@link Recipient} of the subscription to be created
+	 * @param args optional variable Objects array parameterizing the call
+	 *
+	 * @return the resulting {@link SubscribeResponse}
 	 */
-	SubscribeResponse subscribe(String attributeName, Recipient recipient);
+	SubscribeResponse subscribe(String attributeName, Recipient recipient, Object...args);
 
 	/**
-	 * Asks for this Resource's associated set execution
+	 * Asks for this Resource's associated subscription execution
 	 * 
-	 * @param parameters
-	 *            array of {@link Parameter}s parameterizing the invocation
-	 * @return the {@link SnaMessage} resulting of the invocation
+	 * @param atributeName the String name of the targeted attribute
+	 * @param recipient the {@link Recipient} of the subscription to be created
+	 * @param conditions Set of {@link Constraint}s applying on the subscription to be created
+	 * @param args optional variable Objects array parameterizing the call
+	 * 
+	 * @return the resulting {@link SubscribeResponse}
 	 */
-	SubscribeResponse subscribe(String attributeName, Recipient recipient, Set<Constraint> conditions);
+	SubscribeResponse subscribe(String attributeName, Recipient recipient, Set<Constraint> conditions, Object...args);
 
 	/**
-	 * Asks for this Resource's associated set execution
+	 * Asks for this Resource's associated subscription execution
 	 * 
-	 * @param parameters
-	 *            array of {@link Parameter}s parameterizing the invocation
-	 * @return the {@link SnaMessage} resulting of the invocation
+	 * @param atributeName the String name of the targeted attribute
+	 * @param recipient the {@link Recipient} of the subscription to be created
+	 * @param conditions Set of {@link Constraint}s applying on the subscription to be created
+	 * @param policy the String definition of the error policy applying on the subscription to be created
+	 * @param args optional variable Objects array parameterizing the call
+	 * 
+	 * @return the resulting {@link SubscribeResponse}
 	 */
-	SubscribeResponse subscribe(String attributeName, Recipient recipient, Set<Constraint> conditions, String policy);
+	SubscribeResponse subscribe(String attributeName, Recipient recipient, Set<Constraint> conditions, String policy, Object...args);
 
 	/**
-	 * Asks for this Resource's associated set execution
+	 * Asks for this Resource's associated unsubscription execution
 	 * 
-	 * @param parameters
-	 *            array of {@link Parameter}s parameterizing the invocation
-	 * @return the {@link SnaMessage} resulting of the invocation
+	 * @param atributeName the String name of the targeted attribute
+	 * @param subscriptionId the String identifier of the subscription to be deleted
+	 * @param args optional variable Objects array parameterizing the call
+	 * 
+	 * @return the resulting {@link UnsubscribeResponse}
 	 */
-	UnsubscribeResponse unsubscribe(String attributeName, String subscriptionId);
+	UnsubscribeResponse unsubscribe(String attributeName, String subscriptionId, Object...args);
 }

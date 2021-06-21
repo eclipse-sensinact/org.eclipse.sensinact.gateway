@@ -14,15 +14,7 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
  * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class Argument {
-    //********************************************************************//
-    //						NESTED DECLARATIONS			  			      //
-    //********************************************************************//
-    //********************************************************************//
-    //						ABSTRACT DECLARATIONS						  //
-    //********************************************************************//
-    //********************************************************************//
-    //						STATIC DECLARATIONS							  //
-    //********************************************************************//
+
     public static Object[] getParameters(Argument[] arguments) {
         int index = 0;
         int length = arguments == null ? 0 : arguments.length;
@@ -42,7 +34,7 @@ public class Argument {
         int length = arguments == null ? 0 : arguments.length;
 
         if (length == 0) {
-            return null;
+            return null; 
         }
         Class<?>[] parameterTypes = new Class<?>[length];
         for (; index < length; index++) {
@@ -51,15 +43,16 @@ public class Argument {
         return parameterTypes;
     }
 
-    //********************************************************************//
-    //						INSTANCE DECLARATIONS						  //
-    //********************************************************************//
-
     public final Class<?> clazz;
     public final Object value;
 
     Argument(Class<?> clazz, Object value) {
         this.clazz = clazz;
         this.value = value;
+    }
+    
+    @Override
+    public String toString() {
+    	return String.format("{\"type\":\"%s\",\"value\":\"%s\"}", this.clazz.getName(), String.valueOf(value));
     }
 }

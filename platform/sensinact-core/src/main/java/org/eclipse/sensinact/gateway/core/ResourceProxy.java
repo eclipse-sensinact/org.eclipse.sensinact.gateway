@@ -54,11 +54,9 @@ public class ResourceProxy extends ModelElementProxy {
 			}
 			int accessIndex = -1;
 
-			if ((accessIndex = methodAccessibilities
-					.indexOf(new Name<MethodAccessibility>(existingTypes[index].name()))) == -1
+			if ((accessIndex = methodAccessibilities.indexOf(new Name<MethodAccessibility>(existingTypes[index].name()))) == -1
 					|| !methodAccessibilities.get(accessIndex).isAccessible()) {
-				methods.put(existingTypes[index].name(),
-						new UnaccessibleAccessMethod(mediator, super.getPath(), existingTypes[index]));
+				methods.put(existingTypes[index].name(),new UnaccessibleAccessMethod(mediator, super.getPath(), existingTypes[index]));
 			} else {
 				methods.put(existingTypes[index].name(), method);
 			}
@@ -66,11 +64,6 @@ public class ResourceProxy extends ModelElementProxy {
 		this.methods = Collections.<String, AccessMethod>unmodifiableMap(methods);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelElementProxy# getAccessMethod(String)
-	 */
 	@Override
 	public AccessMethod getAccessMethod(String type) {
 		return this.methods.get(type);

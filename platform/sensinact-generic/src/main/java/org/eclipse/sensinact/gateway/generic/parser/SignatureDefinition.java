@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.generic.parser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -85,6 +86,7 @@ public class SignatureDefinition implements Comparable<SignatureDefinition> {
      * @throws InvalidValueException
      */
     public Signature getSignature(Mediator mediator, ResourceImpl resource, ServiceImpl service) throws InvalidValueException {
+
         Map<Integer, Parameter> fixedParameters = new HashMap<Integer, Parameter>();
         List<Parameter> parameters = new ArrayList<Parameter>();
 
@@ -97,11 +99,11 @@ public class SignatureDefinition implements Comparable<SignatureDefinition> {
         while (parameterIterator.hasNext()) {
             ParameterDefinition parameterDefinition = parameterIterator.next();
             Parameter parameter = parameterDefinition.getParameter(resource, service);
-            if (Modifiable.FIXED.equals(parameter.getModifiable())) {
+
+            if (Modifiable.FIXED.equals(parameter.getModifiable()))
                 fixedParameters.put(position, parameter);
-            } else {
+            else
                 parameters.add(parameter);
-            }
             position++;
         }
         Parameter[] parametersArray = parameters.toArray(new Parameter[parameters.size()]);
@@ -131,11 +133,7 @@ public class SignatureDefinition implements Comparable<SignatureDefinition> {
         }
         return count;
     }
-
-    /**
-     * @inheritDoc
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
+    
     @Override
     public int compareTo(SignatureDefinition definition) {
         int compare = new Integer(this.size()).compareTo(definition.size());

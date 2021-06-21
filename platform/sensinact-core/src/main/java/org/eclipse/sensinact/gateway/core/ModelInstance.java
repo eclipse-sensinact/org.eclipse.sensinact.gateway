@@ -316,9 +316,8 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 *            the {@link SnaMessage} to post
 	 */
 	public void postMessage(SnaMessage<?> message) {
-		if (this.messageRouter == null) {
+		if (this.messageRouter == null) 
 			return;
-		}
 		((AbstractSnaMessage<?>)message).put("namespace", this.namespace, true);
 		this.messageRouter.handle(message);
 	}
@@ -366,9 +365,9 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 		AccessNode root = this.configuration.getAccessTree().getRoot();
 		AccessMethod.Type[] accessMethodTypes = AccessMethod.Type.values();
 		int typesLength = accessMethodTypes == null ? 0 : accessMethodTypes.length;
-		if ((node = (AccessNodeImpl<?>) root.get(uri)) == null) {
+		if ((node = (AccessNodeImpl<?>) root.get(uri)) == null)
 			node = root;
-		}
+		
 		int index = 0;
 		for (; index < typesLength; index++) {
 			AccessLevelOption accessLevelOption = node.getAccessLevelOption(accessMethodTypes[index]);
@@ -430,9 +429,8 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 			filter.addHandledType(SnaMessage.Type.LIFECYCLE);
 			this.messageRouter.addCallback(filter, registration);
 
-			if (this.configuration().getStartAtInitializationTime()) {
+			if (this.configuration().getStartAtInitializationTime())
 				this.provider.start();
-			}
 		}
 	}
 
@@ -585,9 +583,9 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 */
 	public <I extends ModelInstance<?>, M extends ModelElementProxy, P extends ProcessableData, E extends Nameable, R extends Nameable> List<MethodAccessibility> getAuthorizations(
 			ModelElement<I, M, P, E, R> modelElement, AccessLevelOption accessLevelOption) {
-		if (modelElement.getModelInstance() != this) {
+		if (modelElement.getModelInstance() != this)
 			throw new RuntimeException("the model element argument must belong to this model instance");
-		}
+		
 		final String path = modelElement.getPath();
 		return this.configuration().getAccessibleMethods(path, accessLevelOption);
 	}

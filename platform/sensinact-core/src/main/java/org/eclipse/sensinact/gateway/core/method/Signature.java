@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core.method;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import org.json.JSONArray;
@@ -56,14 +57,15 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 	 *            the type of the associated {@link SnaObjectMethod}
 	 * @param parameters
 	 *            this Signature {@link Parameter}s array
+	 * @throws InvalidValueException 
 	 */
-	public Signature(Mediator mediator, String methodType, Parameter[] parameters) {
+	public Signature(Mediator mediator, String methodType, Parameter[] parameters) throws InvalidValueException {
 		this.mediator = mediator;
 		int length = parameters == null ? 0 : parameters.length;
 		this.parameters = new Parameter[length];
 		int index = 0;
 		for (; index < length; index++) {
-			this.parameters[index] = parameters[index];
+			this.parameters[index] = (Parameter) parameters[index].clone();
 		}
 		this.name = methodType;
 		this.returnedType = AccessMethod.Type.valueOf(this.name).getReturnedType();
@@ -82,7 +84,7 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 	 * @throws InvalidValueException
 	 */
 	public Signature(Mediator mediator, AccessMethod.Type type, Class<?>[] parameterTypes, String[] parameterNames)
-			throws InvalidValueException {
+	throws InvalidValueException {
 		this.mediator = mediator;
 		String name = null;
 		int index = 0;
@@ -93,26 +95,28 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 		String[] names = parameterNames == null ? new String[0] : parameterNames;
 
 		for (; index < length; index++) {
-			if (index < names.length) {
-				name = names[index];
-			}
-			if (name == null) {
-				name = new StringBuilder().append("arg").append(index).toString();
-			}
+			if (index < names.length) 
+				name = names[index];			
+			if (name == null) 
+				name = new StringBuilder().append("arg").append(index).toString();			
 			this.parameters[index] = new Parameter(this.mediator, name, parameterTypes[index]);
-
 			name = null;
 		}
+		
 		this.name = type.name();
 		this.returnedType = AccessMethod.Type.valueOf(this.name).getReturnedType();
 	}
 
 	protected Signature(Mediator mediator, String name, AccessMethodResponse.Response returnedType,
-			Parameter[] parameters) {
+			Parameter[] parameters) throws InvalidValueException {
 		this.mediator = mediator;
 		this.name = name;
 		this.returnedType = returnedType;
-		this.parameters = parameters.clone();
+		this.parameters = new Parameter[parameters.length];
+		int index = 0;
+		for (; index < parameters.length; index++) {
+			this.parameters[index] = (Parameter) parameters[index].clone();
+		}
 	}
 
 	/**
@@ -142,7 +146,6 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 	 */
 	public Class<?>[] getParameterTypes() {
 		int index = 0;
-
 		Class<?>[] parameterTypes = new Class<?>[this.length()];
 		for (; index < this.length(); index++) {
 			parameterTypes[index] = this.parameters[index].getType();
@@ -315,18 +318,21 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 	 *         {@link Set}; false otherwise
 	 */
 	public boolean validParameters(Object[] methodParameters) {
-		int length = methodParameters == null ? 0 : methodParameters.length;
-
-		if (this.parameters.length != length) {
-			return false;
-		}
-		int index = 0;
-		for (; index < length; index++) {
-			this.parameters[index].reset();
-
-			if (!this.parameters[index].validParameter(methodParameters[index])) {
+		try {
+			int length = methodParameters == null ? 0 : methodParameters.length;
+	
+			if (this.parameters.length != length)
 				return false;
+			
+			int index = 0;
+			for (; index < length; index++) {
+				this.parameters[index].reset();			
+				if (!this.parameters[index].validParameter(methodParameters[index]))
+					return false;
 			}
+		}catch(Exception | Error e) {
+			e.printStackTrace();
+			return false;
 		}
 		return true;
 	}
@@ -369,11 +375,6 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 		return this.parameters.length;
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see JSONable#getJSON()
-	 */
 	@Override
 	public String getJSON() {
 		return getJSONObjectDescription().toString();
@@ -399,23 +400,18 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 		return jsonObject;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see java.lang.Iterable#iterator()
-	 */
 	@Override
 	public Iterator<Parameter> iterator() {
 		return new ParameterIterator();
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see java.lang.Object#clone()
-	 */
 	public Object clone() {
-		return new Signature(this.mediator, this.name, this.returnedType, this.parameters);
+		try {
+			return new Signature(this.mediator, this.name, this.returnedType, this.parameters);
+		} catch (InvalidValueException e) {
+			mediator.error(e);
+		}
+		return null;
 	}
 
 	private final class ParameterIterator implements Iterator<Parameter> {
@@ -429,21 +425,11 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 			findNext();
 		}
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see java.util.Iterator#hasNext()
-		 */
 		@Override
 		public boolean hasNext() {
 			return next != null;
 		}
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see java.util.Iterator#next()
-		 */
 		@Override
 		public Parameter next() {
 			Parameter parameter = next;
@@ -451,19 +437,11 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 			return parameter;
 		}
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see java.util.Iterator#remove()
-		 */
 		@Override
 		public void remove() {
 			// not implemented
 		}
 
-		/**
-		 * 
-		 */
 		private final void findNext() {
 			position += 1;
 			next = null;

@@ -15,10 +15,10 @@ import java.util.Set;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.UnsubscribeResponse;
 
 /**
  * This interface represents devices (called smart object services) and higher
@@ -44,38 +44,20 @@ public interface Service extends ElementsProxy<Resource>, ResourceCollection {
 	/**
 	 * Asks for this Resource's associated get execution
 	 * 
-	 * @param parameters
-	 *            objects array parameterizing the invocation
-	 * @return the invocation {@link SnaMessage} result
-	 */
-	GetResponse get(String resourceName, String attributeName);
-
-	/**
-	 * Asks for this Resource's associated get execution
+	 * @param parameters objects array parameterizing the invocation
 	 * 
-	 * @param parameters
-	 *            objects array parameterizing the invocation
-	 * @return the invocation {@link SnaMessage} result
+	 * @return the resulting {@link GetResponse} 
 	 */
-	GetResponse get(String resourceName);
+	GetResponse get(String resourceName, String attributeName, Object...args);
 
 	/**
 	 * Asks for this Resource's associated set execution
 	 * 
-	 * @param parameters
-	 *            objects array parameterizing the invocation
-	 * @return the invocation {@link SnaMessage} result
-	 */
-	SetResponse set(String resourceName, String atributeName, Object value);
-
-	/**
-	 * Asks for this Resource's associated set execution
+	 * @param parameters objects array parameterizing the invocation
 	 * 
-	 * @param parameters
-	 *            objects array parameterizing the invocation
-	 * @return the invocation {@link SnaMessage} result
+	 * @return the resulting {@link SetResponse} 
 	 */
-	SetResponse set(String resourceName, Object value);
+	SetResponse set(String resourceName, String atributeName, Object value, Object...args);
 
 	/**
 	 * Asks for this Resource's associated set execution
@@ -84,7 +66,7 @@ public interface Service extends ElementsProxy<Resource>, ResourceCollection {
 	 *            array of {@link Parameter}s parameterizing the invocation
 	 * @return the {@link SnaMessage} resulting of the invocation
 	 */
-	SubscribeResponse subscribe(String resourceName, String attributeName, Recipient recipient);
+	SubscribeResponse subscribe(String resourceName, String attributeName, Recipient recipient, Object...args);
 
 	/**
 	 * Asks for this Resource's associated set execution
@@ -93,8 +75,8 @@ public interface Service extends ElementsProxy<Resource>, ResourceCollection {
 	 *            array of {@link Parameter}s parameterizing the invocation
 	 * @return the {@link SnaMessage} resulting of the invocation
 	 */
-	SubscribeResponse subscribe(String resourceName, Recipient recipient);
-
+	SubscribeResponse subscribe(String resourceName, String attributeName, Recipient recipient, Set<Constraint> conditions, Object...args);
+	
 	/**
 	 * Asks for this Resource's associated set execution
 	 * 
@@ -102,42 +84,15 @@ public interface Service extends ElementsProxy<Resource>, ResourceCollection {
 	 *            array of {@link Parameter}s parameterizing the invocation
 	 * @return the {@link SnaMessage} resulting of the invocation
 	 */
-	SubscribeResponse subscribe(String resourceName, String attributeName, Recipient recipient,
-			Set<Constraint> conditions);
+	SubscribeResponse subscribe(String resourceName, String attributeName, Recipient recipient, Set<Constraint> conditions, String policy, Object...args);
 
 	/**
 	 * Asks for this Resource's associated set execution
 	 * 
-	 * @param parameters
-	 *            array of {@link Parameter}s parameterizing the invocation
-	 * @return the {@link SnaMessage} resulting of the invocation
-	 */
-	SubscribeResponse subscribe(String resourceName, Recipient recipient, Set<Constraint> conditions);
-
-	/**
-	 * Asks for this Resource's associated set execution
+	 * @param parameters array of {@link Parameter}s parameterizing the invocation
 	 * 
-	 * @param parameters
-	 *            array of {@link Parameter}s parameterizing the invocation
-	 * @return the {@link SnaMessage} resulting of the invocation
+	 * @return the resulting {@link UnsubscribeResponse} 
 	 */
-	SubscribeResponse subscribe(String resourceName, Recipient recipient, Set<Constraint> conditions, long lifetime);
+	UnsubscribeResponse unsubscribe(String resourceName, String attributeName, String subscriptionId, Object...args);
 
-	/**
-	 * Asks for this Resource's associated set execution
-	 * 
-	 * @param parameters
-	 *            array of {@link Parameter}s parameterizing the invocation
-	 * @return the {@link SnaMessage} resulting of the invocation
-	 */
-	UnsubscribeResponse unsubscribe(String resourceName, String attributeName, String subscriptionId);
-
-	/**
-	 * Asks for this Resource's associated set execution
-	 * 
-	 * @param parameters
-	 *            array of {@link Parameter}s parameterizing the invocation
-	 * @return the {@link SnaMessage} resulting of the invocation
-	 */
-	UnsubscribeResponse unsubscribe(String resourceName, String subscriptionId);
 }

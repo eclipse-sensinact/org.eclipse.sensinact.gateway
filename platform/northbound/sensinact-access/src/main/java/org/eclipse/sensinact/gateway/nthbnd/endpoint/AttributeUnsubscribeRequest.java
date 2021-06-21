@@ -10,8 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class AttributeUnsubscribeRequest extends AttributeRequest {
+	
     private String subscriptionId;
+	private Argument[] extraArguments;
 
     /**
      * @param mediator
@@ -20,35 +26,31 @@ public class AttributeUnsubscribeRequest extends AttributeRequest {
      * @param service
      * @param resource
      */
-    public AttributeUnsubscribeRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, String resource, String attribute, String subscriptionId) {
+    public AttributeUnsubscribeRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, String resource, 
+    		String attribute, String subscriptionId, Argument[] extraArguments) {
         super(mediator, requestIdentifier, serviceProvider, service, resource, attribute);
 
         this.subscriptionId = subscriptionId;
-        if (this.subscriptionId == null) {
+        this.extraArguments = extraArguments;
+        if (this.subscriptionId == null) 
             throw new NullPointerException("Subscription identifier mising");
-        }
+        
     }
 
-    /**
-     * @inheritDoc
-     * @see ServiceProvidersRequest#getExecutionArguments()
-     */
     @Override
     protected Argument[] getExecutionArguments() {
+    	int offset = this.extraArguments == null?0:this.extraArguments.length;
         Argument[] superArguments = super.getExecutionArguments();
         int length = superArguments == null ? 0 : superArguments.length;
-        Argument[] arguments = new Argument[length + 1];
-        if (length > 0) {
+        Argument[] arguments = new Argument[length + offset + 1];
+        if (length > 0) 
             System.arraycopy(superArguments, 0, arguments, 0, length);
-        }
         arguments[length] = new Argument(String.class, this.subscriptionId);
+        if (offset > 0)
+            System.arraycopy(this.extraArguments, 0, arguments, length+1, offset);
         return arguments;
     }
 
-    /**
-     * @inheritDoc
-     * @see ResourceRequest#getMethod()
-     */
     @Override
     protected String getMethod() {
         return "unsubscribe";

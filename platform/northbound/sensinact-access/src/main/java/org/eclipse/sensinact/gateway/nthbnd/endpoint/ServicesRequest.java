@@ -54,9 +54,8 @@ public class ServicesRequest extends ServiceProviderRequest {
             Argument[] superArguments = super.getExecutionArguments();
             int length = superArguments == null ? 0 : superArguments.length;
             Argument[] arguments = new Argument[length + 1];
-            if (length > 0) {
+            if (length > 0) 
                 System.arraycopy(superArguments, 0, arguments, 0, length);
-            }
             arguments[length] = new Argument(FilteringCollection.class, super.filteringCollection);
             return arguments;
         }

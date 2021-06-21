@@ -139,19 +139,11 @@ public abstract class NorthboundRequest implements PathElement, Nameable {
         this.filteringCollection = filteringCollection;
     }
 
-    /**
-     * @inheritedDoc
-     * @see org.eclipse.sensinact.gateway.util.common.primitive.PathElement#getPath()
-     */
     @Override
     public String getPath() {
         return ROOT;
     }
 
-    /**
-     * @inheritDoc
-     * @see NorthboundRequest#getExecutionArguments()
-     */
     protected Argument[] getExecutionArguments() {
         Argument[] arguments = new Argument[1];
         arguments[0] = new Argument(String.class, this.requestIdentifier);

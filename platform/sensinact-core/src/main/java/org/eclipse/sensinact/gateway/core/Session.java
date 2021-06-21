@@ -16,12 +16,12 @@ import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
-import org.eclipse.sensinact.gateway.core.method.legacy.ActResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.DescribeResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SetResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.SubscribeResponse;
-import org.eclipse.sensinact.gateway.core.method.legacy.UnsubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
+import org.eclipse.sensinact.gateway.core.method.GetResponse;
+import org.eclipse.sensinact.gateway.core.method.SetResponse;
+import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
+import org.eclipse.sensinact.gateway.core.method.UnsubscribeResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -130,11 +130,13 @@ public interface Session {
 	 * @param attributeId
 	 *            the String identifier of the resource's attribute targeted by the
 	 *            access method call
+	 * @param args optional extra arguments Object array parameterizing the call
 	 * 
 	 * @return the JSON formated response of the GET access method invocation,
 	 *         wrapped into a {@link GetResponse}
 	 */
-	GetResponse get(String serviceProviderId, String serviceId, String resourceId, String attributeId);
+	GetResponse get(String serviceProviderId, String serviceId, String resourceId, String attributeId, 
+			Object...args);
 
 	/**
 	 * Invokes the GET access method on the resource whose String identifier is
@@ -155,13 +157,14 @@ public interface Session {
 	 * @param attributeId
 	 *            the String identifier of the resource's attribute targeted by the
 	 *            access method call
+	 * @param args optional extra arguments Object array parameterizing the call
 	 * 
 	 * @return the JSON formated response of the GET access method invocation,
 	 *         tagged by the specified request identifier, and wrapped into a
 	 *         {@link GetResponse}
 	 */
 	GetResponse get(String requestId, String serviceProviderId, String serviceId, String resourceId,
-			String attributeId);
+			String attributeId, Object...args);
 
 	/**
 	 * Invokes the SET access method on the resource whose String identifier is
@@ -181,12 +184,13 @@ public interface Session {
 	 *            access method call
 	 * @param parameter
 	 *            the value object to be set
+	 * @param args optional extra arguments Object array parameterizing the call
 	 * 
 	 * @return the JSON formated response of the SET access method invocation,
 	 *         wrapped into a {@link SetResponse}
 	 */
 	SetResponse set(String serviceProviderId, String serviceId, String resourceId, String attributeId,
-			Object parameter);
+			Object parameter, Object...args);
 
 	/**
 	 * Invokes the SET access method on the resource whose String identifier is
@@ -209,13 +213,14 @@ public interface Session {
 	 *            access method call
 	 * @param parameter
 	 *            the value object to be set
+	 * @param args optional extra arguments Object array parameterizing the call
 	 * 
 	 * @return the JSON formated response of the SET access method invocation,
 	 *         tagged by the specified request identifier and , wrapped into a
 	 *         {@link SetResponse}
 	 */
 	SetResponse set(String requestId, String serviceProviderId, String serviceId, String resourceId,
-			String attributeId, Object parameter);
+			String attributeId, Object parameter, Object...args);
 
 	/**
 	 * Invokes the ACT access method on the resource whose String identifier is
@@ -283,12 +288,13 @@ public interface Session {
 	 * @param conditions
 	 *            the JSON formated set of constraints applying on the subscription
 	 *            to be created
+	 * @param args optional extra arguments Object array parameterizing the call
 	 * 
 	 * @return the JSON formated response of the SUBSCRIBE access method invocation,
 	 *         wrapped into a {@link SubscribeResponse}
 	 */
 	SubscribeResponse subscribe(String serviceProviderId, String serviceId, String resourceId, 
-			Recipient recipient, JSONArray conditions);
+			Recipient recipient, JSONArray conditions, Object...args);
 
 	/**
 	 * Invokes the SUBSCRIBE access method on the resource whose String identifier
@@ -312,12 +318,13 @@ public interface Session {
 	 * @param policy
 	 *            the policy applying on the ErrorHandler of the callback of the 
 	 *            subscription to be created
+	 * @param args optional extra arguments Object array parameterizing the call
 	 * 
 	 * @return the JSON formated response of the SUBSCRIBE access method invocation,
 	 *         wrapped into a {@link SubscribeResponse}
 	 */
 	SubscribeResponse subscribe(String serviceProviderId, String serviceId, String resourceId, 
-		Recipient recipient, JSONArray conditions, String policy);
+		Recipient recipient, JSONArray conditions, String policy, Object...args);
 
 	/**
 	 * Invokes the SUBSCRIBE access method on the resource whose String identifier
@@ -341,13 +348,14 @@ public interface Session {
 	 * @param conditions
 	 *            the JSON formated set of constraints applying on the subscription
 	 *            to be created
+	 * @param args optional extra arguments Object array parameterizing the call
 	 * 
 	 * @return the JSON formated response of the SUBSCRIBE access method invocation,
 	 *         tagged by the specified request identifier, and wrapped into a
 	 *         {@link SubscribeResponse}
 	 */
 	SubscribeResponse subscribe(String requestId, String serviceProviderId, String serviceId, 
-		String resourceId, Recipient recipient, JSONArray conditions);
+		String resourceId, Recipient recipient, JSONArray conditions, Object...args);
 
 	/**
 	 * Invokes the SUBSCRIBE access method on the resource whose String identifier
@@ -374,13 +382,14 @@ public interface Session {
 	 * @param policy
 	 *            the policy applying on the ErrorHandler of the callback of the subscription
 	 *            to be created
+	 * @param args optional extra arguments Object array parameterizing the call
 	 * 
 	 * @return the JSON formated response of the SUBSCRIBE access method invocation,
 	 *         tagged by the specified request identifier, and wrapped into a
 	 *         {@link SubscribeResponse}
 	 */
 	SubscribeResponse subscribe(String requestId, String serviceProviderId, String serviceId, String resourceId,
-			Recipient recipient, JSONArray conditions, String policy);
+			Recipient recipient, JSONArray conditions, String policy, Object...args);
 
 	/**
 	 * Invokes the UNSUBSCRIBE access method on the resource whose String identifier
@@ -397,12 +406,13 @@ public interface Session {
 	 *            method call
 	 * @param subscriptionId
 	 *            the String identifier of the subscription to be deleted
+	 * @param args optional extra arguments Object array parameterizing the call
 	 * 
 	 * @return the JSON formated response of the UNSUBSCRIBE access method
 	 *         invocation, wrapped into a {@link UnsubscribeResponse}
 	 */
 	UnsubscribeResponse unsubscribe(String serviceProviderId, String serviceId, String resourceId,
-			String subscriptionId);
+			String subscriptionId, Object...args);
 
 	/**
 	 * Invokes the UNSUBSCRIBE access method on the resource whose String identifier
@@ -422,13 +432,14 @@ public interface Session {
 	 *            method call
 	 * @param subscriptionId
 	 *            the String identifier of the subscription to be deleted
+	 * @param args optional extra arguments Object array parameterizing the call
 	 * 
 	 * @return the JSON formated response of the UNSUBSCRIBE access method
 	 *         invocation, tagged by the specified request identifier, and wrapped
 	 *         into a {@link UnsubscribeResponse}
 	 */
-	UnsubscribeResponse unsubscribe(String requestId, String serviceProviderId, String serviceId, String resourceId,
-			String subscriptionId);
+	UnsubscribeResponse unsubscribe(String requestId, String serviceProviderId, String serviceId, 
+		String resourceId, String subscriptionId, Object...args);
 
 	/**
 	 * Creates and registers an {@link SnaAgent} attached to this Session and that

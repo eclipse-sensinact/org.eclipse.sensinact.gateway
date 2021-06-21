@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.method.legacy.ActMethod;
+import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 
 /**
  * Extended {@link AccessMethod} dedicated to an Actuation
@@ -120,12 +120,11 @@ public class LinkedActMethod extends ActMethod {
 	 * Links the registered executors for the specified {@link Signature} of the
 	 * {@link ActMethod} passed as parameters, to this LinkedActMethod
 	 * 
-	 * @param linked
-	 *            the {@link ActMethod} to link with
-	 * @param Signature
-	 *            the {@Signature} of the {@link ActMethod} to link with
+	 * @param linked the {@link ActMethod} to link with
+	 * @param Signature the {@Signature} of the {@link ActMethod} to link with
+	 * @throws InvalidValueException 
 	 */
-	public final void createShortcut(Signature signature, Shortcut shortcut) {
+	public final void createShortcut(Signature signature, Shortcut shortcut) throws InvalidValueException {
 		Signature thatSignature = null;
 
 		if (linked == null || signature == null || signature.getName().intern() != super.getName().intern()
@@ -133,7 +132,6 @@ public class LinkedActMethod extends ActMethod {
 			return;
 		}
 		Deque<AccessMethodExecutor> executors = linked.map.get(thatSignature);
-
 		Map<Integer, Parameter> fixedParameters = new HashMap<Integer, Parameter>();
 
 		fixedParameters.putAll(shortcut.getFixedParameters());
@@ -155,9 +153,7 @@ public class LinkedActMethod extends ActMethod {
 		while (iterator.hasNext()) {
 			parameters.add(iterator.next());
 		}
-		super.map.put(
-				new Shortcut(super.mediator, signature.getName(), signature.getResponseType(),
-						parameters.toArray(new Parameter[parameters.size()]), fixedParameters),
-				new LinkedList<AccessMethodExecutor>(executors));
+		super.map.put(new Shortcut(super.mediator, signature.getName(), parameters.toArray(new Parameter[parameters.size()]), 
+			fixedParameters),  new LinkedList<AccessMethodExecutor>(executors));
 	}
 }

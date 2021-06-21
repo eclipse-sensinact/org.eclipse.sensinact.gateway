@@ -181,11 +181,11 @@ public class Attribute extends DescribablePrimitive {
 	 */
 	public MetadataDescription setMetadataValue(String name, Object value) throws InvalidValueException {
 		Metadata metadata = null;
-		if (name == null || (metadata = this.get(name)) == null) {
+		if (name == null || (metadata = this.get(name)) == null) 
 			return null;
-		}
 		metadata.setValue(value);
-		return (MetadataDescription) metadata.getDescription();
+		MetadataDescription description = (MetadataDescription) metadata.getDescription();
+		return description;
 	}
 
 	/**
@@ -201,16 +201,15 @@ public class Attribute extends DescribablePrimitive {
 		synchronized (this.metadata) {
 			if (meta == null) {
 				this.metadata.add(metadata);
-				super.weakDescription = null;
-
+				super.weakDescription = null;				
+				if(!metadata.getName().equals(Metadata.HIDDEN) && metadata.getModifiable().equals(Modifiable.FIXED))
+					this.resource.updated(this, metadata.getDescription());
 			} else {
 				try {
 					this.setMetadataValue(metadata.getName(), metadata.getValue());
-
 				} catch (InvalidValueException e) {
-					if (super.mediator.isErrorLoggable()) {
-						super.mediator.error(e, e.getMessage());
-					}
+					if (super.mediator.isErrorLoggable()) 
+						super.mediator.error(e);
 				}
 				return;
 			}

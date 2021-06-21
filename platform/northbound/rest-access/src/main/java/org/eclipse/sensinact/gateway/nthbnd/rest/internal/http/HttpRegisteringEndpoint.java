@@ -43,11 +43,6 @@ public class HttpRegisteringEndpoint extends HttpServlet {
         this.mediator = mediator;
     }
 
-    /**
-     * @inheritDoc
-     * @see javax.servlet.http.HttpServlet#
-     * doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         this.doExecute(request, response);

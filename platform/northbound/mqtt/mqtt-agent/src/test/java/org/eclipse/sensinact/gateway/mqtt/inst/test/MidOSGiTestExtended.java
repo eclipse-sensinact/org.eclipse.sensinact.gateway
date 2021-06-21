@@ -265,7 +265,9 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         }
         MidProxy<Session> mids = (MidProxy<Session>) Proxy.getInvocationHandler(s);
         try {
-            Object o = mids.toOSGi(Session.class.getDeclaredMethod("get", new Class<?>[]{String.class, String.class, String.class, String.class}), new Object[]{provider, service, resource, DataResource.VALUE});
+            Object o = mids.toOSGi(Session.class.getDeclaredMethod("get", 
+            	new Class<?>[]{String.class, String.class, String.class, String.class, Object[].class}), 
+            	new Object[]{provider, service, resource, DataResource.VALUE, (Object[])null});
             Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
             System.out.println(j);
             return (String) j;
@@ -284,7 +286,9 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         }
         MidProxy<Session> mids = (MidProxy<Session>) Proxy.getInvocationHandler(s);
         try {
-            Object o = mids.toOSGi(Session.class.getDeclaredMethod("set", new Class<?>[]{String.class, String.class, String.class, String.class, Object.class}), new Object[]{provider, service, resource, DataResource.VALUE, value});
+            Object o = mids.toOSGi(Session.class.getDeclaredMethod("set", 
+            	new Class<?>[]{String.class, String.class, String.class, String.class, Object.class,
+            	Object[].class}), new Object[]{provider, service, resource, DataResource.VALUE, value, (Object[])null});
             Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
             System.out.println(j);
             return (String) j;
@@ -303,7 +307,9 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         }
         MidProxy<Session> mids = (MidProxy<Session>) Proxy.getInvocationHandler(s);
         try {
-            Object o = mids.toOSGi(Session.class.getDeclaredMethod("act", new Class<?>[]{String.class, String.class, String.class, Object[].class}), new Object[]{provider, service, resource, args});
+            Object o = mids.toOSGi(Session.class.getDeclaredMethod("act", 
+            	new Class<?>[]{String.class, String.class, String.class, Object[].class}),
+            	new Object[]{provider, service, resource, args});
             Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
             System.out.println(j);
             return (String) j;
@@ -322,7 +328,9 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         }
         MidProxy<Session> mids = (MidProxy<Session>) Proxy.getInvocationHandler(s);
         try {
-            Object o = mids.toOSGi(Session.class.getDeclaredMethod("subscribe", new Class<?>[]{String.class, String.class, String.class, Recipient.class, JSONArray.class}), new Object[]{provider, service, resource, recipient, null});
+            Object o = mids.toOSGi(Session.class.getDeclaredMethod("subscribe", 
+            	new Class<?>[]{String.class, String.class, String.class, Recipient.class, JSONArray.class, Object[].class}), 
+            	new Object[]{provider, service, resource, recipient, null, (Object[])null});
             Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
             System.out.println(j);
             return (String) j;
@@ -333,7 +341,8 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         return null;
     }
 
-    public String unsubscribe(String provider, String service, String resource, String subscriptionId) throws ClassNotFoundException, IOException, InvalidSyntaxException {
+    public String unsubscribe(String provider, String service, String resource, String subscriptionId) 
+    		throws ClassNotFoundException, IOException, InvalidSyntaxException {
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
         Core core = mid.buildProxy();
         if(s == null) {
@@ -341,7 +350,9 @@ public class MidOSGiTestExtended extends MidOSGiTest {
         }
         MidProxy<Session> mids = (MidProxy<Session>) Proxy.getInvocationHandler(s);
         try {
-            Object o = mids.toOSGi(Session.class.getDeclaredMethod("unsubscribe", new Class<?>[]{String.class, String.class, String.class, String.class}), new Object[]{provider, service, resource, subscriptionId});
+            Object o = mids.toOSGi(Session.class.getDeclaredMethod("unsubscribe", 
+            	new Class<?>[]{String.class, String.class, String.class, String.class, Object[].class}), 
+            	new Object[]{provider, service, resource, subscriptionId, (Object[])null});
             Object j = o.getClass().getDeclaredMethod("getJSON").invoke(o);
             System.out.println(j);
             return (String) j;

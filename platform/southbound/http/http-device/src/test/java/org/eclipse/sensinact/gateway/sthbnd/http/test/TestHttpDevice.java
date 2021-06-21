@@ -135,8 +135,8 @@ public class TestHttpDevice extends MidOSGiTest {
     public TestHttpDevice() throws Exception {
         super();
         getDescription = Describable.class.getDeclaredMethod("getDescription");
-        getMethod = Resource.class.getDeclaredMethod("get", new Class<?>[]{String.class});
-        setMethod = Resource.class.getDeclaredMethod("set", new Class<?>[]{String.class, Object.class});
+        getMethod = Resource.class.getDeclaredMethod("get", new Class<?>[]{String.class, Object[].class});
+        setMethod = Resource.class.getDeclaredMethod("set", new Class<?>[]{String.class, Object.class, Object[].class});
         actMethod = ActionResource.class.getDeclaredMethod("act", new Class<?>[]{Object[].class});
     }
 
@@ -167,16 +167,16 @@ public class TestHttpDevice extends MidOSGiTest {
         Resource variable = service.getResource("temperature");
         MidProxy midVariable = (MidProxy) Proxy.getInvocationHandler(variable);
 
-        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
 
         JSONObject jsonObject = new JSONObject(response.getJSON());
         assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
 
-        response = (SnaMessage) midVariable.toOSGi(setMethod, new Object[]{DataResource.VALUE, 25});
+        response = (SnaMessage) midVariable.toOSGi(setMethod, new Object[]{DataResource.VALUE, 25, null});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
 
-        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
 
@@ -199,15 +199,15 @@ public class TestHttpDevice extends MidOSGiTest {
         Resource variable = service.getResource("temperature");
         MidProxy midVariable = (MidProxy) Proxy.getInvocationHandler(variable);
 
-        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         JSONObject jsonObject = new JSONObject(response.getJSON());
         assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
 
-        response = (SnaMessage) midVariable.toOSGi(setMethod, new Object[]{DataResource.VALUE, 25});
+        response = (SnaMessage) midVariable.toOSGi(setMethod, new Object[]{DataResource.VALUE, 25, null});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
 
-        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
 
@@ -230,15 +230,15 @@ public class TestHttpDevice extends MidOSGiTest {
         Resource variable = service.getResource("temperature");
         MidProxy midVariable = (MidProxy) Proxy.getInvocationHandler(variable);
 
-        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         JSONObject jsonObject = new JSONObject(response.getJSON());
         assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
 
-        response = (SnaMessage) midVariable.toOSGi(setMethod, new Object[]{DataResource.VALUE, 25});
+        response = (SnaMessage) midVariable.toOSGi(setMethod, new Object[]{DataResource.VALUE, 25, null});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
 
-        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
 
@@ -260,7 +260,7 @@ public class TestHttpDevice extends MidOSGiTest {
         Resource variable = service.getResource("temperature");
         MidProxy midVariable = (MidProxy) Proxy.getInvocationHandler(variable);
 
-        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         JSONObject jsonObject = new JSONObject(response.getJSON());
         assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
 
@@ -280,27 +280,27 @@ public class TestHttpDevice extends MidOSGiTest {
         Service service = provider.getService("service1");
         Resource variable = service.getResource("temperature");
         MidProxy midVariable = (MidProxy) Proxy.getInvocationHandler(variable);
-        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         JSONObject jsonObject = new JSONObject(response.getJSON());
         assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
 
         callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway2").put("serviceId", "service1").put("resourceId", "temperature").put("data", 25));
 
         Thread.sleep(2000);
-        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         jsonObject = new JSONObject(response.getJSON());
         System.out.println(jsonObject);
         assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
         callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway2").put("serviceId", "service1").put("resourceId", "temperature").put("data", 32));
         Thread.sleep(2000);
-        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(32, (int) jsonObject.getJSONObject("response").getInt("value"));
         Thread.sleep(16 * 1000);
 
         callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway2").put("serviceId", "service1").put("resourceId", "temperature").put("data", 45));
         Thread.sleep(2000);
-        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE});
+        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(32, (int) jsonObject.getJSONObject("response").getInt("value"));
         

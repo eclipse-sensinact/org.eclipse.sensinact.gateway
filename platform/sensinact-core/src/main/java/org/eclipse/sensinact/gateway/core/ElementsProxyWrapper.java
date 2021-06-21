@@ -10,20 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
-import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 
 /**
- * Abstract extended {@link ElementsProxyWrapper} implementation
+ * Abstract extended {@link ElementsProxy} implementation
  *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public abstract class ElementsProxyWrapper<M extends ModelElementProxy, P extends Nameable>
-		implements ElementsProxy<P>, InvocationHandler, Nameable, PathElement {
+		implements ElementsProxy<P>, InvocationHandler {
 	/**
 	 * the proxied class
 	 */
@@ -32,89 +32,70 @@ public abstract class ElementsProxyWrapper<M extends ModelElementProxy, P extend
 	/**
 	 * Constructor
 	 * 
-	 * @param proxy
-	 *            the extended {@link ModelElementProxy} to be wrapped by the
-	 *            ProxyWrapper to be instantiated
+	 * @param proxy the extended {@link ModelElementProxy} to be wrapped by the
+	 * ElementsProxyWrapper to be instantiated
 	 */
 	protected ElementsProxyWrapper(M proxy) {
 		this.proxy = proxy;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see java.lang.reflect.InvocationHandler# invoke(java.lang.Object,
-	 *      java.lang.reflect.Method, java.lang.Object[])
-	 */
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] parameters) throws Throwable {
 		Object result = null;
 		if (this.proxy.getProxied().isAssignableFrom(method.getDeclaringClass())) {
 			Object[] calledParameters = null;
-
-			if (method.isVarArgs() && parameters != null && parameters.length == 1
-					&& parameters[0].getClass().isArray()) {
-				calledParameters = (Object[]) parameters[0];
-
-			} else {
-				calledParameters = parameters;
-			}
+			if(method.isVarArgs()) {
+				if(parameters[parameters.length-1]==null || Array.getLength(parameters[parameters.length-1]) == 0
+					|| (Array.getLength(parameters[parameters.length-1]) == 1 && Array.get(parameters[parameters.length-1], 0)==null)) {
+					int length = method.getParameterCount() -1 ;
+					calledParameters = new Object[length];
+					if(length > 0)
+						System.arraycopy(parameters, 0, calledParameters, 0, length);
+				} else if(parameters.length == 1) 
+					calledParameters = (Object[]) parameters[0];
+				else {
+					int length = Array.getLength(parameters[parameters.length-1]);
+					length+=(parameters.length-1);
+					calledParameters = new Object[length];
+					System.arraycopy(parameters, 0, calledParameters, 0, parameters.length-1);
+					System.arraycopy(parameters[parameters.length-1],0,calledParameters, parameters.length-1,Array.getLength(parameters[parameters.length-1]));
+				}
+			} else 
+				calledParameters = parameters;			
 			result = this.proxy.invoke(method.getName().toUpperCase(), calledParameters);
-		} else {
+		} else 
 			result = method.invoke(this, parameters);
-		}
-		if (result == this.proxy || result == this) {
+		
+		if (result == this.proxy || result == this) 
 			return proxy;
-		}
+		
 		return result;
 	}
 
 	/**
-	 * Returns the {@link ModelElementProxy} wrapped by this ProxyWrapper
+	 * Returns the {@link ModelElementProxy} wrapped by this ElementsProxyWrapper
 	 * 
-	 * @return this ProxyWrapper's {@link ModelElementProxy}
+	 * @return this ElementsProxyWrapper's {@link ModelElementProxy}
 	 */
 	public M getProxy() {
 		return this.proxy;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxyWrapper#
-	 *      getName()
-	 */
+	@Override
 	public String getName() {
 		return this.proxy.getName();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxyWrapper#
-	 *      getPath()
-	 */
+	@Override
 	public String getPath() {
 		return this.proxy.getPath();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#
-	 *      addElement(org.eclipse.sensinact.gateway.common.primitive.Nameable)
-	 */
 	@Override
 	public boolean addElement(P element) {
 		return false;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.common.primitive.ElementsProxy#
-	 *      removeElement(java.lang.String)
-	 */
 	@Override
 	public P removeElement(String element) {
 		return null;
