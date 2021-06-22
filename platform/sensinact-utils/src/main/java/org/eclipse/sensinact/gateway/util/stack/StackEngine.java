@@ -61,6 +61,10 @@ public class StackEngine<E, H extends StackEngineHandler<E>> {
     }
     
     void requestProcessingIfNeeded() {
+        worker.schedule(this::_requestProcessingIfNeeded, 100, TimeUnit.MILLISECONDS);
+    }
+    
+    void _requestProcessingIfNeeded() {
         if(running.get() && semaphore.tryAcquire()) {
             worker.execute(this::dequeue);
         }
