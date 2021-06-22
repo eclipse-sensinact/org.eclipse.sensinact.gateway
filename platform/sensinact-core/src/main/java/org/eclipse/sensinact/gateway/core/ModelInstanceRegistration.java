@@ -29,7 +29,6 @@ import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaMessageSubType;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage.Update;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
@@ -185,11 +184,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 		return properties;
 	}
 
-	/**
-	 * @param uri
-	 * @param location
-	 */
-	public void updateLifecycle(LifecycleStatus status) {
+	protected void updateLifecycle(LifecycleStatus status) {
 		if (!registered) {
 			return;
 		}
@@ -397,7 +392,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 	}
 
 	@Override
-	public void doCallback(SnaMessage<?> message) {
+	public synchronized void doCallback(SnaMessage<?> message) {
 
 		String uri = message.getPath();
 		String[] uriElements = UriUtils.getUriElements(uri);

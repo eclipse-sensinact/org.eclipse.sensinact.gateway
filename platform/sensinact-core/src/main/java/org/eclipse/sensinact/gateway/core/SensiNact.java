@@ -125,17 +125,7 @@ public class SensiNact implements Core {
 		 */
 		public SensiNactSession(String identifier) {
 			super(identifier);
-		}
-		
-		protected final SessionKey getSessionKeyFromToken() {
-			SessionKey sessionKey;
-			synchronized(SensiNact.this.sessions) {
-				sessionKey = SensiNact.this.sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, getSessionId()));
-			}	
-			if(sessionKey == null)
-				throw new IllegalArgumentException("Invalid session token");
-			return sessionKey;
-		}
+		}		
 
 		@Override
 		public Set<ServiceProvider> serviceProviders(final String filter) {
@@ -161,7 +151,7 @@ public class SensiNact implements Core {
 		@Override
 		public SubscribeResponse registerSessionAgent(String requestId, final MidAgentCallback callback, final SnaFilter filter) {
 
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 			
 			boolean registered = AccessController.<Boolean>doPrivileged(new PrivilegedAction<Boolean>() {
 				@Override public Boolean run() {return sessionKey.registerAgent(callback, filter);}});
@@ -187,7 +177,7 @@ public class SensiNact implements Core {
 		@Override
 		public UnsubscribeResponse unregisterSessionAgent(String requestId, final String agentId) {
 
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 			
 			boolean unregistered = AccessController.<Boolean>doPrivileged(new PrivilegedAction<Boolean>() {
 				@Override
@@ -213,7 +203,7 @@ public class SensiNact implements Core {
 		@Override
 		public SubscribeResponse registerSessionIntent(String requestId, Executable<Boolean, Void> callback, String... resourcePath) {
 
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 			final ResourceIntent intent = new ResourceIntent(mediator, sessionKey.getPublicKey(), callback, resourcePath) {
 				@Override
 				public boolean isAccessible(String path) {	
@@ -245,7 +235,7 @@ public class SensiNact implements Core {
 		@Override
 		public UnsubscribeResponse unregisterSessionIntent(String requestId, final String intentId) {
 
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 			
 			boolean unregistered = AccessController.<Boolean>doPrivileged(new PrivilegedAction<Boolean>() {
 				@Override
@@ -272,7 +262,7 @@ public class SensiNact implements Core {
 		public GetResponse get(String requestId, final String serviceProviderId, final String serviceId,
 				final String resourceId, final String attributeId, Object... args) {
 
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 			
 			String uri = getUri((sessionKey.localID() != 0), SensiNact.this.namespace(), serviceProviderId, serviceId, resourceId);
 
@@ -316,7 +306,7 @@ public class SensiNact implements Core {
 		public SetResponse set(String requestId, final String serviceProviderId, final String serviceId,
 				final String resourceId, final String attributeId, final Object parameter, Object... args) {
 
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 			
 			String uri = getUri((sessionKey.localID() != 0), SensiNact.this.namespace(), serviceProviderId, serviceId,
 					resourceId);
@@ -362,7 +352,7 @@ public class SensiNact implements Core {
 		public ActResponse act(String requestId, final String serviceProviderId, final String serviceId,
 				final String resourceId, final Object[] parameters) {
 
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 			
 			ActResponse response = null;
 			String uri = getUri((sessionKey.localID() != 0), SensiNact.this.namespace(), serviceProviderId, serviceId,
@@ -410,7 +400,7 @@ public class SensiNact implements Core {
 				final String resourceId, final Recipient recipient, final JSONArray conditions, final String policy,
 				Object... args) {
 
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 			
 			SubscribeResponse response = null;	
 			String uri = getUri((sessionKey.localID() != 0), SensiNact.this.namespace(), serviceProviderId, 
@@ -485,7 +475,7 @@ public class SensiNact implements Core {
 		public UnsubscribeResponse unsubscribe(String requestId, final String serviceProviderId, final String serviceId,
 				final String resourceId, final String subscriptionId, Object... args) {
 
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 			
 			UnsubscribeResponse response = null;	
 			String uri = getUri((sessionKey.localID() != 0), SensiNact.this.namespace(), serviceProviderId, serviceId,
@@ -535,7 +525,7 @@ public class SensiNact implements Core {
 		@Override
 		public DescribeResponse<String> getAll(String requestId, String filter, FilteringCollection filterCollection) {
 
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 			
 			DescribeResponse<String> response = null;
 			DescribeMethod<String> method = new DescribeMethod<String>(mediator, UriUtils.PATH_SEPARATOR, null,
@@ -585,7 +575,7 @@ public class SensiNact implements Core {
 		@Override
 		public DescribeResponse<String> getProviders(String requestId, FilteringCollection filterCollection) {
 
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 			
 			DescribeResponse<String> response = null;
 			DescribeMethod<String> method = new DescribeMethod<String>(mediator, UriUtils.PATH_SEPARATOR, null,
@@ -633,7 +623,7 @@ public class SensiNact implements Core {
 		@Override
 		public DescribeResponse<JSONObject> getProvider(String requestId, final String serviceProviderId) {
 
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 
 			String uri = getUri((sessionKey.localID() != 0), SensiNact.this.namespace(), serviceProviderId);
 
@@ -672,7 +662,7 @@ public class SensiNact implements Core {
 		public DescribeResponse<String> getServices(String requestId, final String serviceProviderId,
 				FilteringCollection filterCollection) {
 
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 
 			String uri = getUri((sessionKey.localID() != 0), SensiNact.this.namespace(), serviceProviderId);
 			DescribeResponse<String> response = null;
@@ -728,8 +718,7 @@ public class SensiNact implements Core {
 		@Override
 		public DescribeResponse<JSONObject> getService(String requestId, final String serviceProviderId,
 				final String serviceId) {
-
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 			
 			String uri = getUri((sessionKey.localID() != 0), SensiNact.this.namespace(), serviceProviderId, serviceId);
 
@@ -765,8 +754,7 @@ public class SensiNact implements Core {
 		@Override
 		public DescribeResponse<String> getResources(String requestId, final String serviceProviderId,
 				final String serviceId, FilteringCollection filterCollection) {
-
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 
 			String uri = getUri((sessionKey.localID() != 0), SensiNact.this.namespace(), serviceProviderId, serviceId);
 
@@ -828,8 +816,7 @@ public class SensiNact implements Core {
 		@Override
 		public DescribeResponse<JSONObject> getResource(final String requestId, final String serviceProviderId,
 				final String serviceId, final String resourceId) {
-
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 			
 			String uri = getUri((sessionKey.localID() != 0), SensiNact.this.namespace(), serviceProviderId, serviceId,
 					resourceId);
@@ -880,8 +867,7 @@ public class SensiNact implements Core {
 		 * </ul>
 		 */
 		private final boolean isAccessible(final String path) {
-
-			final SessionKey sessionKey=getSessionKeyFromToken();
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 			
 			Boolean accessible = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
 				@Override
@@ -1032,7 +1018,7 @@ public class SensiNact implements Core {
 		@Override
 		public final void changePassword(final String oldPassword, final String newPassword) throws SecuredAccessException {
 
-			final SessionKey sessionKey=getSessionKeyFromToken();	
+			final SessionKey sessionKey= SensiNact.this.getSessionKeyFromToken(this.getSessionId());
 			final String publicKey = sessionKey.getPublicKey();
 			
 			SecuredAccessException exception = SensiNact.this.mediator.callService(
@@ -1650,10 +1636,7 @@ public class SensiNact implements Core {
 	 *         specified filter and for the specified {@link Session}
 	 */
 	protected Set<ServiceProvider> serviceProviders(String identifier, String filter) {
-		SessionKey sessionKey;
-		synchronized(this.sessions) {
-			sessionKey = this.sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN,identifier));
-		}	
+		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
 		Set<ServiceProvider> set = new HashSet<ServiceProvider>();
 		set.addAll(this.registry.serviceProviders(sessionKey, filter));
 		return set;
@@ -1668,10 +1651,7 @@ public class SensiNact implements Core {
 	 * @return the {@link ServiceProvider}
 	 */
 	protected ServiceProvider serviceProvider(String identifier, String serviceProviderId) {
-		SessionKey sessionKey;
-		synchronized(this.sessions) {
-			sessionKey = this.sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN,identifier));
-		}	
+		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
 		return this.registry.serviceProvider(sessionKey, serviceProviderId);
 	}
 
@@ -1689,10 +1669,7 @@ public class SensiNact implements Core {
 	 * @return the {@link Service}
 	 */
 	protected Service service(String identifier, String serviceProviderId, String serviceId) {
-		SessionKey sessionKey;
-		synchronized(this.sessions) {
-			sessionKey = this.sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN,identifier));
-		}	
+		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
 		return this.registry.service(sessionKey, serviceProviderId, serviceId);
 	}
 
@@ -1840,10 +1817,7 @@ public class SensiNact implements Core {
 	 */
 	private JSONObject act(String identifier, final String serviceProviderId, final String serviceId,
 			final String resourceId, final Object[] parameters) {
-		final SessionKey sessionKey;
-		synchronized(this.sessions){
-			sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
-		}
+		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
 		String response = remoteCoreInvocation(serviceProviderId, new RemoteAccessMethodExecutable(
 			mediator,
 			AccessMethod.Type.valueOf(AccessMethod.ACT), sessionKey.getPublicKey(
@@ -1881,10 +1855,7 @@ public class SensiNact implements Core {
 	 */
 	private JSONObject set(String identifier, final String serviceProviderId, final String serviceId,
 			final String resourceId, final String attributeId, final Object parameter, Object...args) {
-		final SessionKey sessionKey;
-		synchronized(this.sessions){
-			sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
-		}
+		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
 		String response = remoteCoreInvocation(serviceProviderId, 
 			new RemoteAccessMethodExecutable(mediator, AccessMethod.Type.valueOf(AccessMethod.SET
 				), sessionKey.getPublicKey()
@@ -1961,10 +1932,7 @@ public class SensiNact implements Core {
 	 */
 	private JSONObject get(String identifier, final String serviceProviderId, final String serviceId,
 	final String resourceId, final String attributeId, Object...args) {
-		final SessionKey sessionKey;
-		synchronized(this.sessions){
-			sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
-		}		
+		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
 		if(serviceProviderId.indexOf('(') < 0) {			
 			String response = remoteCoreInvocation(serviceProviderId, 
 				new RemoteAccessMethodExecutable(mediator, AccessMethod.Type.valueOf(AccessMethod.GET
@@ -2095,10 +2063,7 @@ public class SensiNact implements Core {
 	 * @return the JSON formated description of the specified resource
 	 */
 	private JSONObject getResource(String identifier, final String serviceProviderId, final String serviceId, final String resourceId) {
-		final SessionKey sessionKey;
-		synchronized(this.sessions){
-			sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
-		}
+		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
 		final String localNamespace = this.namespace();
 		JSONObject object = remoteCoreInvocation(serviceProviderId, new Executable<SensinactCoreBaseIface, JSONObject>() {
 			@Override
@@ -2130,10 +2095,7 @@ public class SensiNact implements Core {
 	 *         service and service provider
 	 */
 	private String getResources(String identifier, final String serviceProviderId, final String serviceId) {
-		final SessionKey sessionKey;
-		synchronized(this.sessions){
-			sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
-		}
+		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
 		final String localNamespace = this.namespace();
 		String object = remoteCoreInvocation(serviceProviderId, new Executable<SensinactCoreBaseIface, String>() {
 			@Override
@@ -2163,10 +2125,7 @@ public class SensiNact implements Core {
 	 * @return the JSON formated description of the specified service
 	 */
 	private JSONObject getService(String identifier, final String serviceProviderId, final String serviceId) {
-		final SessionKey sessionKey;
-		synchronized(this.sessions){
-			sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
-		}
+		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
 		final String localNamespace = this.namespace();
 		JSONObject object = remoteCoreInvocation(serviceProviderId, new Executable<SensinactCoreBaseIface, JSONObject>() {
 			@Override
@@ -2195,10 +2154,7 @@ public class SensiNact implements Core {
 	 *         service provider
 	 */
 	private String getServices(String identifier, final String serviceProviderId) {
-		final SessionKey sessionKey;
-		synchronized(this.sessions){
-			sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
-		}
+		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
 		final String localNamespace = this.namespace();
 		String object = remoteCoreInvocation(serviceProviderId, new Executable<SensinactCoreBaseIface, String>() {
 			@Override
@@ -2227,10 +2183,7 @@ public class SensiNact implements Core {
 	 * @return the JSON formated description of the specified service provider
 	 */
 	private JSONObject getProvider(String identifier, final String serviceProviderId) {
-		final SessionKey sessionKey;
-		synchronized(this.sessions){
-			sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
-		}
+		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
 		final String localNamespace = this.namespace();
 		JSONObject object = remoteCoreInvocation(serviceProviderId, new Executable<SensinactCoreBaseIface, JSONObject>() {
 			@Override
@@ -2258,10 +2211,8 @@ public class SensiNact implements Core {
 	 * @return the JSON formated list of available service providers
 	 */
 	private String getProviders(String identifier, final String filter) {
-		final SessionKey sessionKey;
-		synchronized(this.sessions){
-			sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
-		}
+
+		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
 		String effectiveFilter = null;
 		if (filter != null && filter.length() > 0) {
 			try {
@@ -2320,10 +2271,9 @@ public class SensiNact implements Core {
 	 *         specified {@link Session} and compliant to the specified filter.
 	 */
 	protected String getAll(String identifier, final String filter) {
-		final SessionKey sessionKey;
-		synchronized(this.sessions){
-			sessionKey = sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, identifier));
-		}
+		
+		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
+		
 		String effectiveFilter = null;
 		if (filter != null && filter.length() > 0) {
 			try {
@@ -2404,6 +2354,16 @@ public class SensiNact implements Core {
 		});
 	}
 
+	final SessionKey getSessionKeyFromToken(String sessionId) {
+		SessionKey sessionKey;
+		synchronized(this.sessions) {
+			sessionKey = this.sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, sessionId));
+		}	
+		if(sessionKey == null)
+			throw new IllegalArgumentException("Invalid session token");
+		return sessionKey;
+	}
+	
 	String nextToken() {
 		boolean exists = false;
 		String token = null;

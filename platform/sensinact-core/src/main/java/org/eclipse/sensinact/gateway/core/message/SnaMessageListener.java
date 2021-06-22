@@ -74,13 +74,6 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 		this.agentsAccessibility = new HashMap<String, List<MethodAccessibility>>();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.MessageRouter#
-	 *      addCallback(org.eclipse.sensinact.gateway.core.message.SnaFilter,
-	 *      org.eclipse.sensinact.gateway.core.message.MidCallback)
-	 */
 	@Override
 	public void addCallback(SnaFilter filter, MidCallback callback) {
 		if (filter == null || callback == null ||!callback.isActive()) {
@@ -96,12 +89,6 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.MessageRouter#
-	 *      deleteCallback(java.lang.String)
-	 */
 	@Override
 	public void deleteCallback(String callback) {
 		synchronized (this.callbacks) {
@@ -155,23 +142,11 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.message.MessageRouter#
-	 *      handle(org.eclipse.sensinact.gateway.core.message.SnaMessage)
-	 */
 	@Override
 	public void handle(SnaMessage message) {
 		super.eventEngine.push(message);
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.util.stack.StackEngineHandler#
-	 *      doHandle(java.lang.Object)
-	 */
 	@Override
 	public void doHandle(SnaMessage<?> message) {
 		String messageMethod = null;
@@ -261,43 +236,38 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 	 */
 	private void doHandleAgents(final SnaMessage<?> message, final String method) {
 		final String path = message.getPath();
-		
-		AccessController.doPrivileged(new PrivilegedAction<Void>() {
-			@Override
-			public Void run() {
-				mediator.callServices(SnaAgent.class, new Executable<SnaAgent, Void>() {
-					@Override
-					public Void execute(SnaAgent agent) throws Exception {	
-						String agentKey = agent.getPublicKey();						
-						List<MethodAccessibility> methodAccessibilities = SnaMessageListener.this.agentsAccessibility.get(agentKey);
-						int index = -1;
-						if (methodAccessibilities == null) {
-							AccessLevelOption option = SnaMessageListener.this.configuration.getAuthenticatedAccessLevelOption(path, agentKey);
-							if (option == null) {
-								option = AccessLevelOption.ANONYMOUS;
+		synchronized(this) {
+		    AccessController.doPrivileged(new PrivilegedAction<Void>() {
+				@Override
+				public Void run() {
+					mediator.callServices(SnaAgent.class, new Executable<SnaAgent, Void>() {
+						@Override
+						public Void execute(SnaAgent agent) throws Exception {	
+							String agentKey = agent.getPublicKey();						
+							List<MethodAccessibility> methodAccessibilities = SnaMessageListener.this.agentsAccessibility.get(agentKey);
+							int index = -1;
+							if (methodAccessibilities == null) {
+								AccessLevelOption option = SnaMessageListener.this.configuration.getAuthenticatedAccessLevelOption(path, agentKey);
+								if (option == null) {
+									option = AccessLevelOption.ANONYMOUS;
+								}
+								methodAccessibilities = SnaMessageListener.this.configuration.getAccessibleMethods(path, option);
+								SnaMessageListener.this.agentsAccessibility.put(agentKey, methodAccessibilities);
+							}						
+							if ((index = methodAccessibilities.indexOf(new Name<MethodAccessibility>(method))) > -1
+									&& methodAccessibilities.get(index).isAccessible()) {
+								agent.register(message);
 							}
-							methodAccessibilities = SnaMessageListener.this.configuration.getAccessibleMethods(path, option);
-							SnaMessageListener.this.agentsAccessibility.put(agentKey, methodAccessibilities);
-						}						
-						if ((index = methodAccessibilities.indexOf(new Name<MethodAccessibility>(method))) > -1
-								&& methodAccessibilities.get(index).isAccessible()) {
-							agent.register(message);
+							return null;
 						}
-						return null;
+					});
+					return null;
 					}
-				});
-				return null;
 				}
-			});
-		
-		
+		    );
+		}
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see MessageRouter#close(boolean)
-	 */
 	@Override
 	public void close(boolean wait) {
 		if (wait) {

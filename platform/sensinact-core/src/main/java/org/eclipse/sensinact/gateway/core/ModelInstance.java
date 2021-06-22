@@ -479,34 +479,16 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 		return this.registered;
 	}
 
-	/**
-	 * Returns the root {@link ServiceProviderImpl} of this instance of the
-	 * sensiNact resource model
-	 * 
-	 * @return this resource model instance's root {@link ServiceProviderImpl}
-	 * 
-	 * @see SensiNactResourceModel#getRootElement()
-	 */
 	@Override
 	public ServiceProviderImpl getRootElement() {
 		return this.provider;
 	}
 
-	/**
-	 * @inheritedDoc
-	 *
-	 * @see Nameable#getName()
-	 */
 	@Override
 	public String getName() {
 		return this.getRootElement().getName();
 	}
 
-	/**
-	 * @inheritedDoc
-	 *
-	 * @see SensiNactResourceModel#getIdentifier()
-	 */
 	@Override
 	public String getIdentifier() {
 		return this.identifier;
@@ -544,21 +526,11 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 		return this.profileId;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see LifecycleStatusListener# update(ServiceProvider.LifecycleStatus)
-	 */
 	@Override
 	public void update(LifecycleStatus status) {
 		this.registration.updateLifecycle(status);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModel#getProperties()
-	 */
 	@Override
 	public Dictionary<String, String> getProperties() {
 		Dictionary<String, String> props = new Hashtable<String, String>();
