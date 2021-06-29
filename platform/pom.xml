@@ -92,6 +92,8 @@
 		<module>../simulated-devices</module>
 		<module>northbound/mqtt/mqtt-agent</module>
 		<module>sensinact-datastore</module>
+		<module>sensinact-historic-api</module>
+		<module>sensinact-historic-manager</module>
 		<module>northbound</module>
 		<module>sensinact-security/sensinact-mail-connector</module>
 		<module>sensinact-security/sensinact-security-core</module>
