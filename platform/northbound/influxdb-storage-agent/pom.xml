@@ -50,6 +50,11 @@
 			<artifactId>sensinact-core</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-historic-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
     </dependencies>
 
     <build>

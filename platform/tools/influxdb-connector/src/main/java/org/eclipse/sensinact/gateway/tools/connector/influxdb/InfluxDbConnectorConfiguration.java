@@ -1,12 +1,9 @@
-/*
- * Copyright (c) 2020 Kentyou.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Kentyou - initial API and implementation
+/* 
+ * Copyright 2021 Kentyou 
+ * Proprietary and confidential
+ * 
+ * All Rights Reserved. 
+ * Unauthorized copying of this file is strictly prohibited
  */
 package org.eclipse.sensinact.gateway.tools.connector.influxdb;
 
@@ -241,7 +238,7 @@ public class InfluxDbConnectorConfiguration {
      */
     public String getUri() {
     	String port = null;
-    	if(this.port == 0)
+    	if(this.port <= 0)
     		port="";
     	else 
     		port=":".concat(String.valueOf(this.port));

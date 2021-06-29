@@ -1,33 +1,29 @@
-/*
- * Copyright (c) 2020 Kentyou.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Kentyou - initial API and implementation
+/* 
+ * Copyright 2021 Kentyou 
+ * Proprietary and confidential
+ * 
+ * All Rights Reserved. 
+ * Unauthorized copying of this file is strictly prohibited
  */
 package org.eclipse.sensinact.gateway.tools.connector.influxdb;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.sensinact.gateway.util.LocationUtils;
-import org.eclipse.sensinact.gateway.util.location.Segment;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Point.Builder;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
-import org.influxdb.impl.InfluxDBResultMapper;
-import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,40 +65,35 @@ public class InfluxDbDatabase {
 			};
 		}
 	};
-	
-	private static final Logger LOG = LoggerFactory.getLogger(InfluxDbDatabase.class);
 
     private InfluxDB influxDB;
 	private String database;
+	private final ZoneOffset offset;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param influxDB the {@link InfluxDB} wrapped by the InfluxDbDatabase to be instantiated
+	 * @param database the String database name
 	 */
 	public InfluxDbDatabase(InfluxDB influxDB, String database) {
-		this.influxDB = influxDB;
-		this.database = database;
-
-        influxDB.setDatabase(database);
-        influxDB.setRetentionPolicy("autogen");
+		this(influxDB,database,"autogen");
 	}
 	
-	private boolean isValidDate(String datetime) {
-		SimpleDateFormatProvider formatProvider = THREAD_LOCAL_FORMATS.get();
-		boolean valid = false;
-		for(Iterator<SimpleDateFormat> it = formatProvider.iterator();it.hasNext();) {
-			SimpleDateFormat format = it.next();
-			try {			
-				format.parse(datetime);
-				valid = true;
-				break;
-			}catch(ParseException e) {
-				LOG.error(e.getMessage(),e);
-			};			
-		}
-		THREAD_LOCAL_FORMATS.remove();
-		return valid;
+	/**
+	 * Constructor
+	 * 
+	 * @param influxDB the {@link InfluxDB} wrapped by the InfluxDbDatabase to be instantiated
+	 * @param database the String database name
+	 * @param retention the String retention policy applying
+	 */
+	public InfluxDbDatabase(InfluxDB influxDB, String database, String retention) {
+		this.influxDB = influxDB;
+		this.database = database;
+		this.offset = ZoneOffset.systemDefault().getRules().getOffset(Instant.now());
+
+        influxDB.setDatabase(database);
+        influxDB.setRetentionPolicy(retention);
 	}
 
     /**
@@ -233,7 +224,7 @@ public class InfluxDbDatabase {
 			builder.addField(key, String.valueOf(value));			
 		}
     }
-
+    
     /*
      * (non-javadoc)
      */
@@ -271,19 +262,16 @@ public class InfluxDbDatabase {
     	}    	
     }
     
-    /*
-     * (non-javadoc)
-     * 
-     */
     private String getSelectFunction(String column, String function) {
     	String select = null;
-    	if(column==null)
+    	if(column ==null || column.trim().length()==0)
     		return null;
-    	if(function == null)
-    		return column;
+    	if(function == null) 
+    		return column;   	
     	
 		switch(function) {
-    		case "avg":
+		   case "avg":
+		   case "mean":
     			select = String.format("MEAN(%s)",column);
     			break;
     		case "count":
@@ -304,6 +292,7 @@ public class InfluxDbDatabase {
     		case "min":
     			select = String.format("MIN(%s)",column);
     			break;
+    		case "sum_square":
     		case "sqsum":
     			select = String.format("SQRT(SUM(%s))",column,column);
     			break;
@@ -312,22 +301,33 @@ public class InfluxDbDatabase {
     			break;
     		default:
     			select = column;   
-    	}
+    	}		
 		return select;
     }
-
-    /**
-     * Returns the String formated values for the columns List passed as parameter, of the records from 
-     * the InfluxDB measurement whose name is also passed as parameter, and compliant with tags dictionary 
-     * argument.
-     * 
-     * @param measurement the name of the InfluxDB measurement in which searching the points
-     * @param columns the Strings List defining the fields to be provided
-     * @param tags the dictionary of tags allowing to parameterize the research
-     * 
-     * @return the JSON formated String result of the research
-     */
-    public String get(String measurement, List<String> columns, Dictionary<String,String> tags) {
+    
+    private String buildWhereClause(List<InfluxDBTagDTO> tags) {
+    	String where=null;
+    	if(tags == null || tags.isEmpty()) {
+    		where="";
+    		return where;
+    	}
+    	StringBuilder builder = new StringBuilder();
+   		builder.append(" WHERE ");
+   		for(int i=0;i<tags.size();i++) {  
+   			InfluxDBTagDTO t = tags.get(i); 
+			if(i > 0)
+				builder.append(" AND ");
+		    builder.append(t.name);
+		    builder.append(t.pattern?"=~":"=");
+		    builder.append(t.pattern?" ":"'");
+		    builder.append(t.value);
+			builder.append(t.pattern?" ":"'");
+   		}
+		where = builder.toString();
+		return where;
+    }
+   
+    public QueryResult getResult(String measurement, List<InfluxDBTagDTO> tags,  List<String> columns) {
     	String select = null;
     	if(columns==null || columns.isEmpty())
     		select = "* ";
@@ -338,85 +338,29 @@ public class InfluxDbDatabase {
     		}, (h,t)->h.append(t.toString())).toString();
     	select =select.substring(0,select.length()-1);
 
-    	String from = String.format(" FROM %s " , measurement);
-    	
-    	String where = null;
-    	if(tags != null && !tags.isEmpty()) {
-	   		StringBuilder builder = new StringBuilder();
-	   		builder.append(" WHERE ");
-			for(Iterator<String> it = Collections.list(tags.keys()).iterator();it.hasNext();) {
-				String key = it.next();
-				builder.append(key);
-				builder.append("='");
-				builder.append(tags.get(key));
-				builder.append("'");
-				if(it.hasNext())
-					builder.append(" AND ");
-			}
-			where = builder.toString();
-    	} else 
-    		where="";
+    	String from = String.format(" FROM %s " , measurement);    	
+    	String where = buildWhereClause(tags);
     	Query query = new Query(String.format("SELECT %s%s%s", select, from, where),database);
     	QueryResult result = this.influxDB.query(query);
-    	return result.toString();
+    	return result;
     }
 
-    /**
-     * Returns the String formated values for the columns List passed as parameter, of the records from 
-     * the InfluxDB measurement whose name is also passed as parameter, and compliant with tags dictionary 
-     * argument.
-     * 
-     * @param measurement the name of the InfluxDB measurement in which searching the points
-     * @param tags the dictionary of tags allowing to parameterize the research
-     * @param column the String name of the column on which  the specified aggregation function applies
-     * @param function the String name of the aggregation function applying
-     * @param timeWindow the time window of the specified aggregation function
-     * 
-     * @return the JSON formated String result of the research
-     */
-    public String get(String measurement, Dictionary<String,String> tags, String column, String function, long timeWindow) {
+    public QueryResult getResult(String measurement, List<InfluxDBTagDTO> tags, String column, String function, long timeWindow) {
     	String select = getSelectFunction(column, function);
     	if(select == null)
     		return null;
     	String from = String.format(" FROM %s " , measurement);
     	
-    	String where = null;
-    	if(tags != null && !tags.isEmpty()) {
-	   		StringBuilder builder = new StringBuilder();
-	   		builder.append(" WHERE ");
-			for(Iterator<String> it = Collections.list(tags.keys()).iterator();it.hasNext();) {
-				String key = it.next();
-				builder.append(key);
-				builder.append("='");
-				builder.append(tags.get(key));
-				builder.append("'");
-				if(it.hasNext())
-					builder.append(" AND ");
-			}
-			where = builder.toString();
-    	} else 
-    		where="";
+    	String where = buildWhereClause(tags);
     	String window = getTimeWindow(timeWindow);
     	Query query = new Query(String.format("SELECT %s%s%s%s", select, from, where, window),database);
     	QueryResult result = this.influxDB.query(query);
-    	return result.toString();
+    	return result;
     }
 
-    /**
-     * Returns the String formated values for the columns List passed as parameter, of the records from 
-     * the InfluxDB measurement whose name is also passed as parameter, compliant with tags dictionary 
-     * argument and starting from the specified String formated start datetime. 
-     * 
-     * @param measurement the name of the InfluxDB measurement in which searching the points
-     * @param columns the Strings List defining the fields to be provided
-     * @param tags the dictionary of tags allowing to parameterize the research
-     * @param start the String formated date defining the chronological beginning of records in which to search 
-     * 
-     * @return the JSON formated String result of the research
-     */
-    public String get(String measurement, List<String> columns, Dictionary<String,String> tags, String start) {
-    	if(start == null || !isValidDate(start))
-    		return get(measurement, columns, tags);
+    public QueryResult getResult(String measurement, List<InfluxDBTagDTO> tags, List<String> columns, LocalDateTime start) {
+    	if(start == null)
+    		return getResult(measurement, tags, columns);
     	String select = null;
     	if(columns==null || columns.isEmpty())
     		select = "* ";
@@ -429,90 +373,59 @@ public class InfluxDbDatabase {
 
     	String from = String.format(" FROM %s " , measurement);
     	
-    	String where = null;
-    	if(tags != null && !tags.isEmpty()) {    		
-	   		StringBuilder builder = new StringBuilder();
-	   		builder.append(" WHERE ");
-			for(Iterator<String> it = Collections.list(tags.keys()).iterator();it.hasNext();) {
-				String key = it.next();
-				builder.append(key);
-				builder.append("='");
-				builder.append(tags.get(key));
-				builder.append("'");
-				if(it.hasNext())
-					builder.append(" AND ");
-			}
-			builder.append(String.format(" AND time > '%s'", start));
-			where = builder.toString();
-    	} else 
-			where = String.format(" WHERE time > '%s'", start);
+    	String where =  buildWhereClause(tags);
+
+    	SimpleDateFormatProvider formatProvider = THREAD_LOCAL_FORMATS.get();
     	
+    	SimpleDateFormat df = formatProvider.iterator().next();
+    	
+    	String startDate = df.format(new Date(start.toInstant(offset).toEpochMilli()));
+    	
+    	THREAD_LOCAL_FORMATS.remove();
+    	if(where.length() == 0)
+    		where = String.format(" WHERE time > '%s'", startDate);
+    	else {
+    		StringBuilder builder = new StringBuilder();
+    		builder.append(where);
+    		builder.append(String.format(" AND time > '%s'", startDate));
+    		where = builder.toString();
+    	}
     	Query query = new Query(String.format("SELECT %s%s%s", select, from, where),database);
     	QueryResult result = this.influxDB.query(query);
-    	return result.toString();
+    	return result;
     }	
 
-    /**
-     * Returns the String formated values for the columns List passed as parameter, of the records from 
-     * the InfluxDB measurement whose name is also passed as parameter, and compliant with tags dictionary 
-     * argument.
-     * 
-     * @param measurement the name of the InfluxDB measurement in which searching the points
-     * @param tags the dictionary of tags allowing to parameterize the research
-     * @param column the String name of the column on which  the specified aggregation function applies
-     * @param function the String name of the aggregation function applying
-     * @param timeWindow the time window of the specified aggregation function
-     * @param start the String formated date defining the chronological beginning of records in which to search 
-     * 
-     * @return the JSON formated String result of the research
-     */
-    public String get(String measurement, Dictionary<String,String> tags, String column, String function, long timeWindow, String start) {
-    	if(start == null || !isValidDate(start))
-    		return get(measurement, tags, column, function, timeWindow);
+    public QueryResult getResult(String measurement,  List<InfluxDBTagDTO> tags, String column, String function, long timeWindow, LocalDateTime start) {
+    	if(start == null)
+    		return getResult(measurement, tags, column, function, timeWindow);
     	String select = getSelectFunction(column, function);
     	if(select == null)
     		return null;
     	String from = String.format(" FROM %s " , measurement);
-
-    	String where = null;
-    	if(tags != null && !tags.isEmpty()) {    		
-	   		StringBuilder builder = new StringBuilder();
-	   		builder.append(" WHERE ");
-			for(Iterator<String> it = Collections.list(tags.keys()).iterator();it.hasNext();) {
-				String key = it.next();
-				builder.append(key);
-				builder.append("='");
-				builder.append(tags.get(key));
-				builder.append("'");
-				if(it.hasNext())
-					builder.append(" AND ");
-			}
-			builder.append(String.format(" AND time > '%s'", start));
-			where = builder.toString();
-    	} else 
-			where = String.format(" WHERE time > '%s'", start);
+    	String where =  buildWhereClause(tags);
+    	SimpleDateFormatProvider formatProvider = THREAD_LOCAL_FORMATS.get();
+    	
+    	SimpleDateFormat df = formatProvider.iterator().next();    	
+    	String startDate = df.format(new Date(start.toInstant(offset).toEpochMilli()));
+    	
+    	THREAD_LOCAL_FORMATS.remove();
+    	if(where.length() == 0)
+    		where = String.format(" WHERE time > '%s'", startDate);
+    	else {
+    		StringBuilder builder = new StringBuilder();
+    		builder.append(where);
+    		builder.append(String.format(" AND time > '%s'", startDate));
+    		where = builder.toString();
+    	} 
     	String window = getTimeWindow(timeWindow);
     	Query query = new Query(String.format("SELECT %s%s%s%s", select, from, where, window),database);
     	QueryResult result = this.influxDB.query(query);
-    	return result.toString();
+    	return result;
     }
-    
-    /**
-     * Returns the String formated values for the columns List passed as parameter, of the records from 
-     * the InfluxDB measurement whose name is also passed as parameter, compliant with tags dictionary 
-     * argument, between both String formated start and end datetimes. 
-     * 
-     * @param measurement the name of the InfluxDB measurement in which searching the points
-     * @param columns the Strings List defining the fields to be provided
-     * @param tags the dictionary of tags allowing to parameterize the research
-     * @param start the String formated date defining the chronological beginning of records in which to search 
-     * @param end the String formated date defining the chronological ending of records in which to search 
-     * 
-     * @return the JSON formated String result of the research
-     */
-    public String get(String measurement, List<String> columns, Dictionary<String,String> tags, String start, String end) {
-    	if(end == null || !isValidDate(end))
-    		return get(measurement, columns, tags, start);
+
+    public QueryResult getResult(String measurement, List<InfluxDBTagDTO> tags, List<String> columns,  LocalDateTime start, LocalDateTime end) {    	
+    	if(end == null)
+    		return this.getResult(measurement, tags,  columns, start);
     	String select = null;
     	if(columns==null || columns.isEmpty())
     		select = "* ";
@@ -522,241 +435,61 @@ public class InfluxDbDatabase {
     			b.append(",");
     		}, (h,t)->h.append(t.toString())).toString();
     	select =select.substring(0,select.length()-1);
-
+    	    	
+    	SimpleDateFormatProvider formatProvider = THREAD_LOCAL_FORMATS.get();
+    	SimpleDateFormat df = formatProvider.iterator().next();
+    	
+    	String startDate=null;
+    	String endDate=null;
+    	
+    	startDate = df.format(new Date(start.toInstant(offset).toEpochMilli()));
+    	endDate = df.format(new Date(end.toInstant(offset).toEpochMilli()));
+    	
+    	THREAD_LOCAL_FORMATS.remove();
+    	
     	String from = String.format(" FROM %s " , measurement);
-    	if(start == null || !isValidDate(start))   
-			start = "1970-01-01T00:00:00.001Z";
-		
-    	String where = null;
-    	if(tags != null && !tags.isEmpty()) {
-	   		StringBuilder builder = new StringBuilder();
-	   		builder.append(" WHERE ");
-			for(Iterator<String> it = Collections.list(tags.keys()).iterator();it.hasNext();) {
-				String key = it.next();
-				builder.append(key);
-				builder.append("='");
-				builder.append(tags.get(key));
-				builder.append("'");
-				if(it.hasNext())
-					builder.append(" AND ");
-			}
-		    builder.append(String.format(" AND time > '%s' AND time < '%s'", start, end));
-			where = builder.toString();
-    	} else 
-			where = String.format(" WHERE time > '%s' AND time < '%s'", start, end);
+    	String where =  buildWhereClause(tags);
+    	if(where.length() == 0)
+    		where = String.format(" WHERE time > '%s' AND time < '%s'", startDate, endDate);
+    	else {
+    		StringBuilder builder = new StringBuilder();
+    		builder.append(where);
+    		builder.append(String.format(" AND time > '%s' AND time < '%s'", startDate, endDate));
+    		where = builder.toString();
+    	}
     	Query query = new Query(String.format("SELECT %s%s%s", select, from, where),database);
-    	QueryResult result = this.influxDB.query(query);
-    	return result.toString();
+	    QueryResult result = this.influxDB.query(query);
+    	return result;
     }	
 	
+    public QueryResult getResult(String measurement,  List<InfluxDBTagDTO> tags, String column, String function, long timeWindow, LocalDateTime start, LocalDateTime end) {
+    	if(end == null)
+    		return getResult(measurement,  tags, column, function, timeWindow, start);
 
-    /**
-     * Returns the String formated values for the columns List passed as parameter, of the records from 
-     * the InfluxDB measurement whose name is also passed as parameter, and compliant with tags dictionary 
-     * argument.
-     * 
-     * @param measurement the name of the InfluxDB measurement in which searching the points
-     * @param tags the dictionary of tags allowing to parameterize the research
-     * @param column the String name of the column on which  the specified aggregation function applies
-     * @param function the String name of the aggregation function applying
-     * @param timeWindow the time window of the specified aggregation function
-     * @param start the String formated date defining the chronological beginning of records in which to search 
-     * @param end the String formated date defining the chronological ending of records in which to search 
-     * 
-     * @return the JSON formated String result of the research
-     */
-    public String get(String measurement, Dictionary<String,String> tags, String column, String function, long timeWindow, String start, String end) {
-    	if(end == null || !isValidDate(end))
-    		return get(measurement, tags, column, function, timeWindow, start);
     	String select = getSelectFunction(column, function);
     	if(select == null)
     		return null;
     	String from = String.format(" FROM %s " , measurement);
 
-    	if(start == null || !isValidDate(start))   
-			start = "1970-01-01T00:00:00.001Z";
-		
-    	String where = null;
-    	if(tags != null && !tags.isEmpty()) {
-	   		StringBuilder builder = new StringBuilder();
-	   		builder.append(" WHERE ");
-			for(Iterator<String> it = Collections.list(tags.keys()).iterator();it.hasNext();) {
-				String key = it.next();
-				builder.append(key);
-				builder.append("='");
-				builder.append(tags.get(key));
-				builder.append("'");
-				if(it.hasNext())
-					builder.append(" AND ");
-			}
-		    builder.append(String.format(" AND time > '%s' AND time < '%s'", start, end));
-			where = builder.toString();
-    	} else 
-			where = String.format(" WHERE time > '%s' AND time < '%s'", start, end);
+    	SimpleDateFormatProvider formatProvider = THREAD_LOCAL_FORMATS.get();    	
+    	SimpleDateFormat df = formatProvider.iterator().next();
+    	
+    	String startDate = df.format(new Date(start.toInstant(offset).toEpochMilli()));
+    	String endDate = df.format(new Date(end.toInstant(offset).toEpochMilli()));
+    	
+    	THREAD_LOCAL_FORMATS.remove();
+    	String where =  buildWhereClause(tags);
+    	if(where.length() == 0)
+    		where = String.format(" WHERE time > '%s' AND time < '%s'", startDate, endDate);
+    	else {
+    		StringBuilder builder = new StringBuilder();
+    		builder.append(where);
+    		builder.append(String.format(" AND time > '%s' AND time < '%s'", startDate, endDate));
+    		where = builder.toString();
+    	} 
     	String window = getTimeWindow(timeWindow);
     	Query query = new Query(String.format("SELECT %s%s%s%s", select, from, where, window),database);
     	QueryResult result = this.influxDB.query(query);
-    	return result.toString();
-    }
-    
-
-    /**
-     * Returns the List of records from the InfluxDB measurement whose name is passed as parameter, 
-     * mapped to the specified result type, and compliant with tags dictionary also passed as parameter
-     * 
-     * @param <T> result unit type  
-     * 
-     * @param resultType the type to which found points (records) are mapped 
-     * @param measurement the name of the InfluxDB measurement in which searching the points
-     * @param columns the Strings List defining the fields to be provided
-     * @param tags the dictionary of tags allowing to parameterize the research 
-     * 
-     * @return the List of resultType typed instances resulting of the search
-     */
-    public <T> List<T> get(Class<T> resultType, String measurement, List<String> columns, Dictionary<String,String> tags) {
-    	String select = null;
-    	if(columns.isEmpty())
-    		select = "* ";
-    	else
-    		select = columns.stream().collect(StringBuilder::new,(b,s)-> { 
-    			b.append(s); 
-    			b.append(",");
-    		}, (h,t)->h.append(t.toString())).toString();
-    	select =select.substring(0,select.length()-1);
-    	
-    	String from = String.format(" FROM %s " , measurement);
-    	
-    	String where = null;
-    	if(tags != null && !tags.isEmpty()) {
-	   		StringBuilder builder = new StringBuilder();
-	   		builder.append(" WHERE ");
-			for(Iterator<String> it = Collections.list(tags.keys()).iterator();it.hasNext();) {
-				String key = it.next();
-				builder.append(key);
-				builder.append("='");
-				builder.append(tags.get(key));
-				builder.append("'");
-				if(it.hasNext())
-					builder.append(" AND ");
-			}
-			where = builder.toString();
-    	} else 
-    		where="";
-    	
-    	Query query = new Query(String.format("SELECT %s%s%s", select, from, where),database);
-    	QueryResult result = this.influxDB.query(query);
-    	InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
-    	return resultMapper.toPOJO(result, resultType);
-    }	
-    
-    /**
-     * Returns the List of records from the InfluxDB measurement whose name is passed as parameter, 
-     * mapped to the specified result type, compliant with tags dictionary also passed as parameter, 
-     * and starting from the specified String formated start datetime.. 
-     * 
-     * @param <T> result unit type  
-     * 
-     * @param resultType the type to which found points (records) are mapped 
-     * @param measurement the name of the InfluxDB measurement in which searching the points
-     * @param columns the Strings List defining the fields to be provided
-     * @param tags the dictionary of tags allowing to parameterize the research
-     * @param start the String formated date defining the chronological beginning of records in which to search
-     * 
-     * @return the List of resultType typed instances resulting of the search
-     */
-    public <T> List<T> get(Class<T> resultType, String measurement, List<String> columns, Dictionary<String,String> tags, String start) {
-    	if(start == null || !isValidDate(start))
-    		return get(resultType, measurement, columns, tags);
-    	String select = null;
-    	if(columns.isEmpty())
-    		select = "* ";
-    	else
-    		select = columns.stream().collect(StringBuilder::new,(b,s)-> { 
-    			b.append(s); 
-    			b.append(",");
-    		}, (h,t)->h.append(t.toString())).toString();
-    	select =select.substring(0,select.length()-1);
-    	
-    	String from = String.format(" FROM %s " , measurement);
-		
-    	String where = null;
-    	if(tags != null && !tags.isEmpty()) {
-	   		StringBuilder builder = new StringBuilder();
-	   		builder.append(" WHERE ");
-			for(Iterator<String> it = Collections.list(tags.keys()).iterator();it.hasNext();) {
-				String key = it.next();
-				builder.append(key);
-				builder.append("='");
-				builder.append(tags.get(key));
-				builder.append("'");
-				if(it.hasNext())
-					builder.append(" AND ");
-			}
-			builder.append(String.format(" AND time > '%s'", start));
-			where = builder.toString();
-    	} else
-    		where = String.format(" WHERE time > '%s'", start);
-    	Query query = new Query(String.format("SELECT %s%s%s", select, from, where),database);
-    	QueryResult result = this.influxDB.query(query);
-    	InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
-    	return resultMapper.toPOJO(result, resultType);
-    }	
-	
-
-    /**
-     * Returns the List of records from the InfluxDB measurement whose name is passed as parameter, 
-     * mapped to the specified result type, compliant with tags dictionary also passed as parameter, 
-     * and between both String formated start and end datetimes. 
-     * 
-     * @param <T> result unit type  
-     * 
-     * @param resultType the type to which found points (records) are mapped 
-     * @param measurement the name of the InfluxDB measurement in which searching the points
-     * @param columns the Strings List defining the fields to be provided
-     * @param tags the dictionary of tags allowing to parameterize the research
-     * @param start the String formated date defining the chronological beginning of records in which to search 
-     * @param end the String formated date defining the chronological ending of records in which to search 
-     * 
-     * @return the List of resultType typed instances resulting of the search
-     */
-    public <T> List<T> get(Class<T> resultType, String measurement, List<String> columns, Dictionary<String,String> tags, String start, String end) {
-    	if(end == null || !isValidDate(end))
-    		return get(resultType, measurement, columns, tags, start);
-    	String select = null;
-    	if(columns.isEmpty())
-    		select = "* ";
-    	else
-    		select = columns.stream().collect(StringBuilder::new,(b,s)-> { 
-    			b.append(s); 
-    			b.append(",");
-    		}, (h,t)->h.append(t.toString())).toString();
-    	select =select.substring(0,select.length()-1);
-    	
-    	String from = String.format(" FROM %s " , measurement);
-    	if(start == null || !isValidDate(start))   
-			start = "1970-01-01T00:00:00.001Z";
-		
-    	String where = null;
-    	if(tags != null && !tags.isEmpty()) {
-	   		StringBuilder builder = new StringBuilder();
-	   		builder.append(" WHERE ");
-			for(Iterator<String> it = Collections.list(tags.keys()).iterator();it.hasNext();) {
-				String key = it.next();
-				builder.append(key);
-				builder.append("='");
-				builder.append(tags.get(key));
-				builder.append("'");
-				if(it.hasNext())
-					builder.append(" AND ");
-			}
-			builder.append(String.format(" AND time > '%s' AND time < '%s'", start, end));
-			where = builder.toString();
-    	} else
-    		where = String.format(" WHERE time > '%s' AND time < '%s'", start, end);
-    	
-    	Query query = new Query(String.format("SELECT %s%s%s", select, from, where),database);
-    	QueryResult result = this.influxDB.query(query);
-    	InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
-    	return resultMapper.toPOJO(result, resultType);
-    }
+    	return result;
+    }  
 }

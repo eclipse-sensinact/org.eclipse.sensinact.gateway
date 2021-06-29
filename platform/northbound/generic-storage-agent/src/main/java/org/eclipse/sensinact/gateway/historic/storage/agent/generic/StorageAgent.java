@@ -8,7 +8,7 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.agent.storage.generic;
+package org.eclipse.sensinact.gateway.historic.storage.agent.generic;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;

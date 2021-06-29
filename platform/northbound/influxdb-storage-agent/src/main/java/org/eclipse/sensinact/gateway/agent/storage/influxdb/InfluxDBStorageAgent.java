@@ -1,11 +1,22 @@
+/*
+ * Copyright (c) 2021 Kentyou.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Kentyou - initial API and implementation
+ */
 package org.eclipse.sensinact.gateway.agent.storage.influxdb;
 
-import java.io.IOException;
+import java.util.Hashtable;
 
-import org.eclipse.sensinact.gateway.agent.storage.generic.StorageAgent;
-import org.eclipse.sensinact.gateway.agent.storage.influxdb.internal.InfluxDBStorageConnection;
+import org.eclipse.sensinact.gateway.agent.storage.influxdb.write.InfluxDBStorageConnection;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.AgentRelay;
+import org.eclipse.sensinact.gateway.historic.storage.agent.generic.StorageAgent;
+import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricProvider;
 import org.eclipse.sensinact.gateway.tools.connector.influxdb.InfluxDbConnector;
 import org.eclipse.sensinact.gateway.tools.connector.influxdb.InfluxDbConnectorConfiguration;
 import org.eclipse.sensinact.gateway.tools.connector.influxdb.InfluxDbDatabase;
@@ -89,7 +100,10 @@ public class InfluxDBStorageAgent extends StorageAgent {
 			this.measurement = INFLUX_AGENT_DEFAULT_MEASUREMENT;
 		
 		this.database = this.connector.createIfNotExists(db);
-
+		
+		InfluxDBHistoricProvider provider = new InfluxDBHistoricProvider(connector, db, this.measurement);
+		this.mediator.register(new Hashtable(), provider,new Class[] { HistoricProvider.class});
+		
 		super.setStorageKeys((String) mediator.getProperty(STORAGE_AGENT_KEYS_PROPS));
 		super.setStorageConnection(new InfluxDBStorageConnection(mediator, database, this.measurement));
 		

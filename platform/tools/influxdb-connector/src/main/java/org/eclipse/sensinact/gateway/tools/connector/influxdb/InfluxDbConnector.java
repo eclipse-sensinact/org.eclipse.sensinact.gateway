@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Kentyou.
+ * Copyright (c) 2021 Kentyou.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,10 +16,11 @@ import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Pong;
 
+
 /**
- * InfluxDB database connector
+ * Historic provider implementation connected to InfluxDB database
  */
-public class InfluxDbConnector  {
+public class InfluxDbConnector {
 
     private InfluxDB influxDB;
     
@@ -48,26 +49,13 @@ public class InfluxDbConnector  {
     	else
     		connected = this.connect(configuration.getUri());
     	if(connected) {
-            influxDB.setLogLevel(InfluxDB.LogLevel.BASIC);
+            influxDB.setLogLevel(InfluxDB.LogLevel.NONE);
             influxDB.enableBatch();
     	}
     	else
     		throw new IOException("Unable to connect");
     }
 
-    
-    /**
-     * Creates a connection and returns true if it has been done properly.
-     * Returns false otherwise 
-     *  
-     * @param uri
-     * @param database
-     * 
-     * @return <ul>
-     * 			<li>true if the connection has been properly done</li>
-     * 			<li>false otherwise</li>
-     * 		   </ul>
-     */
     private boolean connect(String uri) {
         influxDB = InfluxDBFactory.connect(uri);
         if(!checkVersion())
@@ -75,21 +63,6 @@ public class InfluxDbConnector  {
         return true;
     }
     
-
-    /**
-     * Creates a connection and returns true if it has been done properly.
-     * Returns false otherwise  
-     *  
-     * @param uri
-     * @param username
-     * @param password
-     * @param database
-     * 
-     * @return <ul>
-     * 			<li>true if the connection has been properly done</li>
-     * 			<li>false otherwise</li>
-     * 		   </ul>
-     */
     private boolean connect(String uri, String username, String password) {
         influxDB = InfluxDBFactory.connect(uri, username, password);
         if(!checkVersion())
@@ -99,7 +72,7 @@ public class InfluxDbConnector  {
     
     private boolean checkVersion() {
     	Pong response = this.influxDB.ping();
-        if (response.getVersion().equalsIgnoreCase("unknown")) {
+        if (!response.isGood()) {
             System.out.println("Error pinging server.");
             influxDB.close();
             influxDB = null;
@@ -125,7 +98,8 @@ public class InfluxDbConnector  {
 	public boolean exists(String databaseName) {    	
     	return this.influxDB.databaseExists(databaseName);
     }    
-    
+
+
     /**
      * Returns the database with the name passed as parameter if it exists, otherwise 
      * it is created and returned
@@ -161,11 +135,22 @@ public class InfluxDbConnector  {
     }
     
     /**
-     * Close the connection this InfluxDbConnector initiated
-     * with an InfluxDB instance
+     * Returns the database with the name passed as parameter if it exists, otherwise 
+     * returns null
+     *  
+     * @param databaseName the name of the database
+     * @param retentionPolicy the String retention policy applying on the database
+     * 
+     * @return
+     * 	<ul>
+     * 		<li>the database with the specified name if it exists</li>
+     * 		<li>null otherwise</li>
+     * </ul>
      */
-    public void close() {
-    	this.influxDB.close();
+    public InfluxDbDatabase getIfExists(String databaseName, String retentionPolicy) {
+    	if(!exists(databaseName))
+    		return null;
+    	return new InfluxDbDatabase(this.influxDB,databaseName,retentionPolicy);
     }
-    
+
 }

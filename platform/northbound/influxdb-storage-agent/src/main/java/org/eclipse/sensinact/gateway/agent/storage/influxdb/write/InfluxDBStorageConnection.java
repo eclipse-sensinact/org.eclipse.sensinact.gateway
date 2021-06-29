@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Kentyou.
+ * Copyright (c) 2021 Kentyou.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.agent.storage.influxdb.internal;
+package org.eclipse.sensinact.gateway.agent.storage.influxdb.write;
 
 import java.io.IOException;
 import java.util.Dictionary;
@@ -17,9 +17,9 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.agent.storage.generic.StorageConnection;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.DataResource;
+import org.eclipse.sensinact.gateway.historic.storage.agent.generic.StorageConnection;
 import org.eclipse.sensinact.gateway.tools.connector.influxdb.InfluxDbDatabase;
 import org.eclipse.sensinact.gateway.util.json.JSONObjectStatement;
 import org.eclipse.sensinact.gateway.util.json.JSONTokenerStatement;
@@ -119,7 +119,7 @@ public class InfluxDBStorageConnection extends StorageConnection {
 		String measurement = null;
 		final Dictionary<String,Object> fs = new Hashtable<>();		
 		final Dictionary<String,String> ts = new Hashtable<>();		
-		for(Iterator<String> it = obj.keys();it.hasNext();) {
+		for(Iterator<String> it = obj.keys(); it.hasNext();) {
 			String key = it.next();
 			if(this.fields.contains(key)) {
 				fs.put(key,obj.get(key));
