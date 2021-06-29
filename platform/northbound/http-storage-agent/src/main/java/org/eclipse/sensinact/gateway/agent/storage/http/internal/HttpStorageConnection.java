@@ -10,8 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.agent.storage.http.internal;
 
-import org.eclipse.sensinact.gateway.agent.storage.generic.StorageConnection;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.historic.storage.agent.generic.StorageConnection;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfiguration;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
