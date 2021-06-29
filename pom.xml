@@ -1000,6 +1000,16 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.sensinact.gateway</groupId>
+				<artifactId>sensinact-historic-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.sensinact.gateway</groupId>
+				<artifactId>sensinact-historic-manager</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.sensinact.gateway</groupId>
 				<artifactId>application-manager</artifactId>
 				<version>${project.version}</version>
 			</dependency>
