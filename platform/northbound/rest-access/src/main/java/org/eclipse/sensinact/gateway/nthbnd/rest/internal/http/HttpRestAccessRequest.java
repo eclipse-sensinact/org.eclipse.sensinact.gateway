@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class HttpRestAccessRequest extends HttpServletRequestWrapper implements NorthboundRequestWrapper {
     private NorthboundMediator mediator;
-    private Map<String, List<String>> queryMap;
+    private Map<QueryKey, List<String>> queryMap;
     private Authentication<?> authentication;
     private String content;
 
@@ -57,13 +57,13 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
     }
     
     @Override
-    public Map<String, List<String>> getQueryMap() {
+    public Map<QueryKey, List<String>> getQueryMap() {
         if (this.queryMap == null) {
             try {
                 this.queryMap = NorthboundRequest.processRequestQuery(super.getQueryString());
             } catch (UnsupportedEncodingException e) {
                 mediator.error(e.getMessage(), e);
-                this.queryMap = Collections.<String, List<String>>emptyMap();
+                this.queryMap = Collections.<QueryKey, List<String>>emptyMap();
             }
         }
         return queryMap;

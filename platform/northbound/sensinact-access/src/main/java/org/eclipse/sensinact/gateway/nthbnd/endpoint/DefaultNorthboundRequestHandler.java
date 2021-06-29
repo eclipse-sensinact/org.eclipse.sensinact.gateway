@@ -31,6 +31,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper.QueryKey;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
@@ -74,7 +75,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
     protected String rid;
     protected String method = null;
 
-    private Map<String, List<String>> query;
+    private Map<NorthboundRequestWrapper.QueryKey, List<String>> query;
     private NorthboundRequestWrapper request;
     private NorthboundResponseBuildError buildError;
     private Set<String> methods;
@@ -217,13 +218,17 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
             }
             parametersList.add(parameter);
         }
-        Iterator<Map.Entry<String, List<String>>> iterator = this.query.entrySet().iterator();
+        Iterator<Map.Entry<QueryKey, List<String>>> iterator = this.query.entrySet().iterator();
 
         while (iterator.hasNext()) {
-            Map.Entry<String, List<String>> entry = iterator.next();
+            Map.Entry<QueryKey, List<String>> entry = iterator.next();
             Parameter parameter = null;
             try {
-                parameter = new Parameter(mediator, entry.getKey(), entry.getValue().size() > 1 ? JSONArray.class : String.class, entry.getValue().size() == 0 ? "true" : (entry.getValue().size() == 1 ? entry.getValue().get(0) : new JSONArray(entry.getValue())));
+                parameter = new Parameter(mediator, 
+                	entry.getKey().name, 
+                	entry.getValue().size() > 1 ? JSONArray.class : String.class, 
+                	entry.getValue().size() == 0 ? "true" : (entry.getValue().size() == 1 ? entry.getValue().get(0) : new JSONArray(entry.getValue()))
+                );
             } catch (InvalidValueException e) {
                 throw new JSONException(e);
             }

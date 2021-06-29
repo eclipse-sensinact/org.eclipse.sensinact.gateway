@@ -35,34 +35,22 @@ public class WsRestAccessRequest implements NorthboundRequestWrapper {
         this.mediator = mediator;
         this.wsConnection = wsConnection;
     }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getMediator()
-     */
+    
     @Override
     public NorthboundMediator getMediator() {
         return this.mediator;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getRequestID()
-     */
     @Override
     public String getRequestIdProperty() {
        return "rid";
     }
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getRequestID()
-	 */
 	@Override
 	public String getRequestId() {
 		return (String) this.request.opt(getRequestIdProperty());
 	}
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getRequestURI()
-     */
     @Override
     public String getRequestURI() {
         String uri = request.optString("uri");
@@ -70,11 +58,8 @@ public class WsRestAccessRequest implements NorthboundRequestWrapper {
         return uriElements[0];
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getQueryMap()
-     */
     @Override
-    public Map<String, List<String>> getQueryMap() {
+    public Map<QueryKey, List<String>> getQueryMap() {
         String uri = request.optString("uri");
         String[] uriElements = uri.split("\\?");
         if (uriElements.length == 2) {
@@ -84,12 +69,9 @@ public class WsRestAccessRequest implements NorthboundRequestWrapper {
                 this.mediator.error(e);
             }
         }
-        return Collections.<String, List<String>>emptyMap();
+        return Collections.<QueryKey, List<String>>emptyMap();
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getContent()
-     */
     @Override
     public String getContent() {
         if (this.content == null) {
@@ -102,17 +84,11 @@ public class WsRestAccessRequest implements NorthboundRequestWrapper {
         return this.content;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getAuthentication()
-     */
     @Override
     public Authentication<?> getAuthentication() {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#createRecipient(org.eclipse.sensinact.gateway.core.api.method.Parameter[])
-     */
     @Override
     public NorthboundRecipient createRecipient(List<Parameter> parameters) {
         return new WebSocketRecipient(mediator, wsConnection);

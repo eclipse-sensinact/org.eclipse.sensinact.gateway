@@ -18,14 +18,11 @@ public class Argument {
     public static Object[] getParameters(Argument[] arguments) {
         int index = 0;
         int length = arguments == null ? 0 : arguments.length;
-
-        if (length == 0) {
+        if (length == 0) 
             return null;
-        }
-        Object[] parameters = new Object[length];
-        for (; index < length; index++) {
+        Object[] parameters = new Object[length];        
+        for (; index < length; index++) 
             parameters[index] = arguments[index].value;
-        }
         return parameters;
     }
 

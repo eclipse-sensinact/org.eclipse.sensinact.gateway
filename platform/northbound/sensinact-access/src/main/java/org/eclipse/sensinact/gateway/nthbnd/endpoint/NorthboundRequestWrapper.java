@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper.QueryKey;
 
 /**
  * Northbound request wrapper service.
@@ -23,7 +24,17 @@ import org.eclipse.sensinact.gateway.core.security.Authentication;
  * characteristics of the request, allowing to treat it
  */
 public interface NorthboundRequestWrapper {
-    /**
+	
+    class QueryKey {
+		public int index;
+		public String name;
+		
+		public int hashCode() {
+			return index;
+		}
+	}
+
+	/**
      * Returns the {@link NorthboundMediator} of this
      * NorthboundAccessWrapper, allowing to interact with
      * the OSGi host environment
@@ -65,7 +76,7 @@ public interface NorthboundRequestWrapper {
      * @return the query String of the wrapped request as a
      * map
      */
-    Map<String, List<String>> getQueryMap();
+    Map<NorthboundRequestWrapper.QueryKey, List<String>> getQueryMap();
 
     /**
      * Returns the String content the wrapped request

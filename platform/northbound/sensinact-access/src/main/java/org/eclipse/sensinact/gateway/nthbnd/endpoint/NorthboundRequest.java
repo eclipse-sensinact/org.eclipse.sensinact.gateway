@@ -23,7 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class NorthboundRequest implements PathElement, Nameable {
-    public static final String ROOT = "/sensinact";
+    
+	public static final String ROOT = "/sensinact";
 
     /**
      * Builds a map of parameters according to the query String
@@ -34,14 +35,15 @@ public abstract class NorthboundRequest implements PathElement, Nameable {
      *                    into a map of parameters
      * @throws UnsupportedEncodingException
      */
-    public static Map<String, List<String>> processRequestQuery(String queryString) throws UnsupportedEncodingException {
-        if (queryString == null) {
-            return Collections.<String, List<String>>emptyMap();
-        }
-        Map<String, List<String>> queryMap = new HashMap<String, List<String>>();
+    public static Map<NorthboundRequestWrapper.QueryKey, List<String>> processRequestQuery(String queryString) throws UnsupportedEncodingException {
+        if (queryString == null) 
+            return Collections.<NorthboundRequestWrapper.QueryKey, List<String>>emptyMap();
+        
+        Map<NorthboundRequestWrapper.QueryKey, List<String>> queryMap = new HashMap<NorthboundRequestWrapper.QueryKey, List<String>>();
 
         char[] characters = queryString.toCharArray();
         int index = 0;
+        int pos = 0;
         int length = characters.length;
 
         boolean escape = false;
@@ -71,7 +73,7 @@ public abstract class NorthboundRequest implements PathElement, Nameable {
                     break;
                 case '&':
                     value = element.toString();
-                    addQueryParameter(queryMap, name, value);
+                    addQueryParameter(queryMap, pos++, name, value);
                     name = null;
                     value = null;
                     element = new StringBuilder();
@@ -82,11 +84,11 @@ public abstract class NorthboundRequest implements PathElement, Nameable {
         }
         if(name == null && element.length()>0) {
         	name = element.toString();
-            addQueryParameter(queryMap, name, Boolean.TRUE.toString());
+            addQueryParameter(queryMap, pos++, name, Boolean.TRUE.toString());
             return queryMap;
         }
         value = element.toString();
-        addQueryParameter(queryMap, name, value);
+        addQueryParameter(queryMap, pos++, name, value);
         return queryMap;
     }
 
@@ -103,17 +105,18 @@ public abstract class NorthboundRequest implements PathElement, Nameable {
      *                 added to the map argument
      * @throws UnsupportedEncodingException
      */
-    private static void addQueryParameter(Map<String, List<String>> queryMap, String name, String value) throws UnsupportedEncodingException {
-        if (name == null || name.length() == 0) {
+    private static void addQueryParameter(Map<NorthboundRequestWrapper.QueryKey, List<String>> queryMap, int pos, String name, String value) throws UnsupportedEncodingException {
+        if (name == null || name.length() == 0) 
             name = DefaultNorthboundRequestHandler.RAW_QUERY_PARAMETER;
-
-        } else {
+        else 
             name = URLDecoder.decode(name, "UTF-8");
-        }
-        List<String> values = queryMap.get(name);
+        NorthboundRequestWrapper.QueryKey key = new NorthboundRequestWrapper.QueryKey();
+        key.index = pos;
+        key.name = name;
+        List<String> values = queryMap.get(key);
         if (values == null) {
             values = new ArrayList<String>();
-            queryMap.put(name, values);
+            queryMap.put(key, values);
         }
         values.add(URLDecoder.decode(value, "UTF-8"));
     }

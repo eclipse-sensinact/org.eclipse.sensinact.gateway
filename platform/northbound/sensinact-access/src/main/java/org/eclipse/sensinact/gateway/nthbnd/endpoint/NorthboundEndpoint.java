@@ -93,11 +93,15 @@ public class NorthboundEndpoint {
 			if(!m.getName().equals(meth))
 				return false;
 			Class<?>[] types = m.getParameterTypes();
-			if(types.length > (parameterTypes.length +1) || types.length < parameterTypes.length)
+			if(types.length < parameterTypes.length && !m.isVarArgs())
 				return false;
 			if(types.length == (parameterTypes.length +1) && !m.isVarArgs())
 				return false;
-			for(int i=0;i<parameterTypes.length;i++) {
+			if(types.length > (parameterTypes.length +1))
+				return false;
+			for(int i=0;i<types.length;i++) {
+				if(i == (types.length-1) && (types.length == (parameterTypes.length +1)||types.length < parameterTypes.length))
+					continue;
 				if(!types[i].isAssignableFrom(parameterTypes[i]))
 					return false;
 			}
@@ -107,15 +111,29 @@ public class NorthboundEndpoint {
         	Method[] methods = getClass().getDeclaredMethods();
         	Optional<Method> opt = Arrays.stream(methods).filter(predicate).findFirst();        	
             Method method = opt.isPresent()?opt.get():null;
-            Object[] args = Argument.getParameters(arguments);
             
-            if(method.isVarArgs() && method.getParameterTypes().length == parameterTypes.length+1) {
-            	Object[] _args = new Object[parameterTypes.length+1];
-            	System.arraycopy(args, 0, _args, 0, parameterTypes.length);
-            	_args[parameterTypes.length] = (Object[])null;
-            	args = _args;
+            if(method != null) {       
+            	Object[] args = Argument.getParameters(arguments);                
+	            if(method.isVarArgs()) {
+	            	if(method.getParameterTypes().length == parameterTypes.length+1) {	            
+		            	Object[] _args = new Object[parameterTypes.length+1];
+		            	System.arraycopy(args, 0, _args, 0, parameterTypes.length);
+		            	_args[parameterTypes.length] = (Object[])null;
+		            	args = _args;
+	            	} else if(method.getParameterTypes().length < parameterTypes.length) {
+	            		Object[] _args = new Object[method.getParameterTypes().length];
+	            		Object[] _var = new Object[(parameterTypes.length - method.getParameterTypes().length) + 1];
+	            		if(method.getParameterTypes().length>1)
+	            			System.arraycopy(args, 0, _args, 0, method.getParameterTypes().length-1);
+	            		int n=0;
+	            		for(int i=method.getParameterTypes().length - 1; i < parameterTypes.length; i++)
+	            			_var[n++]=args[i];
+	            		_args[method.getParameterTypes().length-1] = _var;
+	            		args = _args;
+	            	}	            	
+	            }
+	            result = (AccessMethodResponse<?>) method.invoke(this, args);
             }
-            result = (AccessMethodResponse<?>) method.invoke(this, args);
         } catch (Exception e) {
         	e.printStackTrace();
             this.mediator.error(e);

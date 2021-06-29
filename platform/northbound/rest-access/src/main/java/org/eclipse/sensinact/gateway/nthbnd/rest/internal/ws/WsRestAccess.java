@@ -17,11 +17,14 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper.QueryKey;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Extended {@link NorthboundAccess} dedicated to websocket connections
@@ -64,15 +67,24 @@ public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest> {
             return false;
         }
         String result = null;
-        List<String> rawList = super.request.getQueryMap().get("rawDescribe");
-
+        List<String> rawList = null;
+        List<String> acceptEncoding = null;
+        
+        Map<QueryKey, List<String>> queryMap = super.request.getQueryMap();
+        Iterator<QueryKey> iterator = queryMap.keySet().iterator();
+        while(iterator.hasNext()) {
+        	QueryKey queryKey = iterator.next();
+        	if("rawDescribe".equals(queryKey.name)) 
+        		rawList = queryMap.get(queryKey);        	
+        	if("Accept-Encoding".equals(queryKey.name)) 
+        		acceptEncoding= queryMap.get(queryKey);        	
+        }
         if (rawList != null && (rawList.contains("true") || rawList.contains("True") || rawList.contains("yes") || rawList.contains("Yes")) && DescribeResponse.class.isAssignableFrom(cap.getClass())) {
             result = ((DescribeResponse<?>) cap).getJSON(true);
         } else {
             result = cap.getJSON();
         }
         byte[] resultBytes;
-        List<String> acceptEncoding = super.request.getQueryMap().get("Accept-Encoding");
         try {
 	        if (acceptEncoding != null && acceptEncoding.contains("gzip")) {
 	            resultBytes = NorthboundAccess.compress(result);

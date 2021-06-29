@@ -193,10 +193,16 @@ public class NorthboundRequestHandlerTest {
             }
 
             @Override
-            public Map<String, List<String>> getQueryMap() {
-                return new HashMap<String, List<String>>() {{
-                    put("yfilter."+ranky, yfilter);
-                    put("xfilter."+rankx, xfilter);
+            public Map<QueryKey, List<String>> getQueryMap() {
+                return new HashMap<QueryKey, List<String>>() {{
+                	QueryKey k0 = new QueryKey();
+                	k0.index = 0;
+                	k0.name = "yfilter."+ranky;
+                    put(k0 , yfilter);
+                	QueryKey k1 = new QueryKey();
+                	k1.index = 1;
+                	k1.name = "xfilter."+rankx;
+                    put(k1, xfilter);
                     /*put("hideFilter",Arrays.asList("true"));	*/
                 }};
             }

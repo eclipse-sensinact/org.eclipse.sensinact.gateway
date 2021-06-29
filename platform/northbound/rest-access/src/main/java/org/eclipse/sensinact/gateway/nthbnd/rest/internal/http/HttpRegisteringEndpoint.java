@@ -11,8 +11,10 @@
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.WebServlet;
@@ -22,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper.QueryKey;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.RegisteringResponse;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 import org.eclipse.sensinact.gateway.util.IOUtils;
@@ -62,17 +65,31 @@ public class HttpRegisteringEndpoint extends HttpServlet {
             if(queryString == null) {
             	response.sendError(400, "'create' or 'renew' request parameter expected");
             }
-            Map<String,List<String>> map = NorthboundRequest.processRequestQuery(queryString);
             String query = null;
-            List<String> list = map.get("request");
-            if(list!= null){
-            	query = list.get(list.size()-1);
-            }else {
-            	query = map.get("create")!=null?"create":(map.get("renew")!=null?"renew":null);
+            Map<QueryKey,List<String>> map = NorthboundRequest.processRequestQuery(queryString);
+            Set<QueryKey> queryKeys = map.keySet();
+            Iterator<QueryKey> iterator = queryKeys.iterator();
+            while(iterator.hasNext()) {
+            	QueryKey queryKey = iterator.next();
+            	switch(queryKey.name) {
+            	  case "request":
+            		List<String> list = map.get(queryKey);
+	                if(list != null)
+	                	query = list.get(list.size()-1);
+	                break;
+            	  case "create":
+            	  case "renew":
+            		  query = queryKey.name;
+            		  break;
+            	  default:
+            		  break;
+            	}
+            	if(query!=null)
+            		break;
             }
-            if(query == null) {
+            if(query == null) 
             	response.sendError(400, "'create' or 'renew' request parameter expected");
-            }                    
+                              
             byte[] content = IOUtils.read(request.getInputStream(),false);
             JSONObject jcontent = new JSONObject(new String(content));          
 

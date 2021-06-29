@@ -20,12 +20,15 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper.QueryKey;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
@@ -90,8 +93,16 @@ public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest> {
             return false;
         }
         String result = null;
-        List<String> rawList = super.request.getQueryMap().get("rawDescribe");
-
+        List<String> rawList = null;
+        Map<QueryKey, List<String>> queryMap = super.request.getQueryMap();
+        Iterator<QueryKey> iterator = queryMap.keySet().iterator();
+        while(iterator.hasNext()) {
+        	QueryKey queryKey = iterator.next();
+        	if("rawDescribe".equals(queryKey.name)) {
+        		rawList = queryMap.get(queryKey);
+        		break;
+        	}
+        }
         if (rawList != null && (rawList.contains("true") || rawList.contains("True") || rawList.contains("yes") || rawList.contains("Yes")) && DescribeResponse.class.isAssignableFrom(cap.getClass()))
             result = ((DescribeResponse<?>) cap).getJSON(true);
         else
