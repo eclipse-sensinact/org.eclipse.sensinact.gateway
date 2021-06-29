@@ -70,7 +70,7 @@ public class ShellAccessRequest implements NorthboundRequestWrapper {
      * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper#getQueryMap()
      */
     @Override
-    public Map<String, List<String>> getQueryMap() {
+    public Map<QueryKey, List<String>> getQueryMap() {
         String uri = request.optString("uri");
         String[] uriElements = uri.split("\\?");
         if (uriElements.length == 2) {
@@ -80,7 +80,7 @@ public class ShellAccessRequest implements NorthboundRequestWrapper {
                 this.mediator.error(e);
             }
         }
-        return Collections.<String, List<String>>emptyMap();
+        return Collections.<QueryKey, List<String>>emptyMap();
     }
 
     /**
