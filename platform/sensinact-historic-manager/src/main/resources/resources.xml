@@ -1,0 +1,104 @@
+<resourceInfos
+	xmlns="http://org.eclipse.sensinact/resource"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../sensinact-generic/src/main/resources/sensinact-resource.xsd"
+	empty_profile="true">
+	<resourceInfo xsi:type="resourceInfoProperty" name="REQUESTER" target="history">
+		<policy name="PROPERTY" update="NONE" />
+		<identifier xsi:type="stringContent">requester</identifier>
+		<attributes>
+			<attribute name="value" type="string" modifiable="UPDATABLE" />
+		</attributes>
+		<methods>
+			<method type="GET">
+				<parameter name="attributeName" type="string">
+					<constraints>
+						<fixed value="value"/>
+					</constraints>
+				</parameter>
+				<parameter name="provider" type="string"/>
+				<parameter name="service" type="string"/>
+				<parameter name="resource" type="string"/>
+				<parameter name="from" type="string"/>
+				<parameter name="to" type="string"/>
+				<parameter name="function" type="string"/>
+				<parameter name="window" type="string"/>
+				<parameter name="region" type="string"/>
+			</method>					
+			<method type="GET">
+				<parameter name="attributeName" type="string">
+					<constraints>
+						<fixed value="value"/>
+					</constraints>
+				</parameter>
+				<parameter name="provider" type="string"/>
+				<parameter name="service" type="string"/>
+				<parameter name="resource" type="string"/>
+				<parameter name="from" type="string"/>
+				<parameter name="to" type="string"/>
+				<parameter name="function" type="string"/>
+				<parameter name="window" type="string"/>
+				<parameter name="region" type="string">					
+					<constraints>
+						<fixed value="#NONE#"/>
+					</constraints>
+				</parameter>
+			</method>					
+			<method type="GET">
+				<parameter name="attributeName" type="string">
+					<constraints>
+						<fixed value="value"/>
+					</constraints>
+				</parameter>
+				<parameter name="provider" type="string"/>
+				<parameter name="service" type="string"/>
+				<parameter name="resource" type="string"/>
+				<parameter name="from" type="string"/>
+				<parameter name="to" type="string"/>
+				<parameter name="function" type="string">					
+					<constraints>
+						<fixed value="#NONE#"/>
+					</constraints>
+				</parameter>
+				<parameter name="window" type="string">					
+					<constraints>
+						<fixed value="-1"/>
+					</constraints>
+				</parameter>
+				<parameter name="region" type="string"/>
+			</method>					
+			<method type="GET">
+				<parameter name="attributeName" type="string">
+					<constraints>
+						<fixed value="value"/>
+					</constraints>
+				</parameter>
+				<parameter name="provider" type="string"/>
+				<parameter name="service" type="string"/>
+				<parameter name="resource" type="string"/>
+				<parameter name="from" type="string"/>
+				<parameter name="to" type="string"/>
+				<parameter name="function" type="string">					
+					<constraints>
+						<fixed value="#NONE#"/>
+					</constraints>
+				</parameter>
+				<parameter name="window" type="string">					
+					<constraints>
+						<fixed value="-1"/>
+					</constraints>
+				</parameter>
+				<parameter name="region" type="string">					
+					<constraints>
+						<fixed value="#NONE#"/>
+					</constraints>
+				</parameter>
+			</method>		
+		</methods>
+	</resourceInfo>
+	<devices>
+		<device identifier="historicManager">
+			<service name="history"/>
+		</device>
+	</devices>
+</resourceInfos>
