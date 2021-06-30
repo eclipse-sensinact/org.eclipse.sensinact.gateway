@@ -21,27 +21,19 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>influxdb-storage-agent</artifactId>
+    <artifactId>historic</artifactId>
     <packaging>pom</packaging>
 
     <name>sensiNact IoT Gateway - sensiNact Runtime (${project.artifactId} bridge dependencies)</name>
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-            <artifactId>generic-storage-agent</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
-            <artifactId>influxdb-storage-agent</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.sensinact.gateway.tools</groupId>
-            <artifactId>influxdb-connector</artifactId>
+            <groupId>org.eclipse.sensinact.gateway</groupId>
+            <artifactId>sensinact-historic-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway</groupId>
-            <artifactId>sensinact-historic-api</artifactId>
+            <artifactId>sensinact-historic-manager</artifactId>
         </dependency>
     </dependencies>
 

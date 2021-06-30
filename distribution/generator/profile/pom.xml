@@ -96,6 +96,7 @@
 		<module>simulation-profile</module>
 		<module>http-storage-agent-profile</module>
 		<module>influxdb-storage-agent-profile</module>
+		<module>historic-profile</module>
 		<module>swagger-profile</module>
 		<module>sensinact-remote</module>
 		<module>sensinact-datastore</module>
