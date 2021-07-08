@@ -99,6 +99,35 @@ public class ResourceImpl extends
 					buffer.append(JSONUtils.QUOTE);
 					buffer.append(ResourceProxyWrapper.this.getType().name());
 					buffer.append(JSONUtils.QUOTE);
+					
+					switch(ResourceProxyWrapper.this.getType()) {
+						case ACTION:
+							break;
+						case PROPERTY:
+						case SENSOR:
+						case STATE_VARIABLE:
+							buffer.append(JSONUtils.COMMA);
+							buffer.append(JSONUtils.QUOTE);
+							buffer.append("rws");
+							buffer.append(JSONUtils.QUOTE);
+							buffer.append(JSONUtils.COLON);
+							buffer.append(JSONUtils.QUOTE);
+							switch(ResourceProxyWrapper.this.element(DataResource.VALUE).getModifiable()) {								
+								case MODIFIABLE:
+									buffer.append("RW");
+									break;
+								case FIXED:
+								case UPDATABLE:
+									buffer.append("RO");
+									break;	
+								default:
+									break;						
+							}
+							buffer.append(JSONUtils.QUOTE);
+							break;
+						default:
+							break;					
+					}
 					buffer.append(JSONUtils.CLOSE_BRACE);
 					return buffer.toString();
 				}
@@ -496,10 +525,9 @@ public class ResourceImpl extends
 	/**
 	 * Defines the name of the default {@link Attribute} of this ResourceImpl
 	 * 
-	 * @param defaultAttribute
-	 *            the name of the default {@link Attribute}
+	 * @param defaultAttribute the name of the default {@link Attribute}
 	 */
-	public void setDefault(String defaultAttribute) {
+	void setDefault(String defaultAttribute) {
 		this.defaultAttribute = defaultAttribute;
 	}
 
@@ -770,20 +798,29 @@ public class ResourceImpl extends
 				int length = metadataDescriptions.length;	
 				for (; index < length; index++) {
 					MetadataDescription metadataDescription = metadataDescriptions[index];
-					String metadataName = metadataDescription.getName().intern();	
+					String metadataName = metadataDescription.getName().intern();
+					
+//					if (Modifiable.FIXED.equals(metadataDescription.getModifiable())
+//							&& Metadata.LOCKED.intern() != metadataName && Metadata.MODIFIABLE.intern() != metadataName
+//							&& Metadata.HIDDEN.intern() != metadataName && Attribute.NICKNAME.intern() != metadataName)
+//						jsonAttribute.put(metadataDescription.getName(), PrimitiveDescription.toJson(metadataDescription.getType(), 
+//								metadataDescription.getValue()));
+					
 					if (Modifiable.FIXED.equals(metadataDescription.getModifiable())
-							&& Metadata.LOCKED.intern() != metadataName && Metadata.MODIFIABLE.intern() != metadataName
-							&& Metadata.HIDDEN.intern() != metadataName && Attribute.NICKNAME.intern() != metadataName) {
-						jsonAttribute.put(metadataDescription.getName(),
-								PrimitiveDescription.toJson(metadataDescription.getType(), metadataDescription.getValue()));
-					}
+							&& Metadata.LOCKED.intern() != metadataName && Metadata.HIDDEN.intern() != metadataName 
+							&& Attribute.NICKNAME.intern() != metadataName)
+						jsonAttribute.put(metadataDescription.getName(), PrimitiveDescription.toJson(metadataDescription.getType(), 
+								metadataDescription.getValue()));
+					
 				}
 				((SnaLifecycleMessageImpl) notification).put("initial", jsonAttribute);
 			}
 			if(attribute.isHidden()) 
 				continue;
 			for(Metadata m : attribute.metadata) {
-				if(!m.getName().equals(Metadata.HIDDEN) &&  m.getModifiable().equals(Modifiable.FIXED) && m.getValue()!=null )
+				if(!m.getName().equals(Metadata.HIDDEN) 
+					&& m.getModifiable().equals(Modifiable.FIXED) 
+					&& m.getValue()!=null )
 						this.updated(attribute, m.getDescription());
 			}
 		}

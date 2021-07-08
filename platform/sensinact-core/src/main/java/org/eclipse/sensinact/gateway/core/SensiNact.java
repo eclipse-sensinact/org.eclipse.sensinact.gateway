@@ -565,10 +565,9 @@ public class SensiNact implements Core {
 			builder.setAccessMethodObjectResult(result);
 			response = builder.createAccessMethodResponse(Status.SUCCESS);
 
-			if (filterCollection != null) {
+			if (filterCollection != null)
 				response.put("filters", new JSONArray(filterCollection.filterJsonDefinition()),
 						filterCollection.hideFilter());
-			}
 			return tatooRequestId(requestId, response);
 		}
 
@@ -596,7 +595,7 @@ public class SensiNact implements Core {
 			});
 			if (providers == null) {
 				response = SensiNact.<String, DescribeResponse<String>>createErrorResponse(mediator,
-						DescribeType.PROVIDERS_LIST, UriUtils.PATH_SEPARATOR, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
+					DescribeType.PROVIDERS_LIST, UriUtils.PATH_SEPARATOR, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
 						"Internal server error", null);
 
 				return tatooRequestId(requestId, response);
@@ -1669,7 +1668,7 @@ public class SensiNact implements Core {
 	 * @return the {@link Service}
 	 */
 	protected Service service(String identifier, String serviceProviderId, String serviceId) {
-		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
+		SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
 		return this.registry.service(sessionKey, serviceProviderId, serviceId);
 	}
 
@@ -1691,10 +1690,7 @@ public class SensiNact implements Core {
 	 * @return the {@link Resource}
 	 */
 	protected Resource resource(String identifier, String serviceProviderId, String serviceId, String resourceId) {
-		SessionKey sessionKey;
-		synchronized(this.sessions) {
-			sessionKey = this.sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN,identifier));
-		}	
+		SessionKey sessionKey = this.getSessionKeyFromToken(identifier);	
 		return this.registry.resource(sessionKey, serviceProviderId, serviceId, resourceId);
 	}
 	
@@ -1868,46 +1864,6 @@ public class SensiNact implements Core {
 		return object;
 	}
 
-	private boolean match(String expected, String found) {
-		if(expected == null)
-			return true;
-		if(found == null)
-			return false;
-		if(found.equals(expected))
-			return true;
-		if(!expected.startsWith("(") || !expected.endsWith(")"))
-			return false;		
-		String pattern = expected.substring(1,expected.length()-1);
-		boolean match = true;
-		if(pattern.startsWith("*")) {
-			int pos = found.length()-1;
-			for(int i=pattern.length()-1;i>0;i--) {
-				if(pattern.charAt(i)!=found.charAt(pos)) {					
-					match=false;
-					break;
-				}
-				pos--;
-			}
-	    } else if(pattern.endsWith("*")){
-			int pos = 0;
-			for(int i=0;i<pattern.length()-1;i++) {
-				if(pattern.charAt(i)!=found.charAt(pos)) {					
-					match=false;
-					break;
-				}
-				pos++;
-			}
-		} else {
-			try {
-				Pattern _pattern = Pattern.compile(pattern); 
-				match = _pattern.matcher(found).matches();
-			} catch(Exception e) {
-				match = false;
-			}
-		}
-		return match;
-	}
-	
 	/**
 	 * Invokes the GET access method on the resource whose String identifier is
 	 * passed as parameter, held by the specified service provider and service
@@ -2354,7 +2310,7 @@ public class SensiNact implements Core {
 		});
 	}
 
-	final SessionKey getSessionKeyFromToken(String sessionId) {
+	private final SessionKey getSessionKeyFromToken(String sessionId) {
 		SessionKey sessionKey;
 		synchronized(this.sessions) {
 			sessionKey = this.sessions.get(new KeyExtractor<KeyExtractorType>(KeyExtractorType.TOKEN, sessionId));
@@ -2364,7 +2320,47 @@ public class SensiNact implements Core {
 		return sessionKey;
 	}
 	
-	String nextToken() {
+	private boolean match(String expected, String found) {
+		if(expected == null)
+			return true;
+		if(found == null)
+			return false;
+		if(found.equals(expected))
+			return true;
+		if(!expected.startsWith("(") || !expected.endsWith(")"))
+			return false;		
+		String pattern = expected.substring(1,expected.length()-1);
+		boolean match = true;
+		if(pattern.startsWith("*")) {
+			int pos = found.length()-1;
+			for(int i=pattern.length()-1;i>0;i--) {
+				if(pattern.charAt(i)!=found.charAt(pos)) {					
+					match=false;
+					break;
+				}
+				pos--;
+			}
+	    } else if(pattern.endsWith("*")){
+			int pos = 0;
+			for(int i=0;i<pattern.length()-1;i++) {
+				if(pattern.charAt(i)!=found.charAt(pos)) {					
+					match=false;
+					break;
+				}
+				pos++;
+			}
+		} else {
+			try {
+				Pattern _pattern = Pattern.compile(pattern); 
+				match = _pattern.matcher(found).matches();
+			} catch(Exception e) {
+				match = false;
+			}
+		}
+		return match;
+	}
+
+	private String nextToken() {
 		boolean exists = false;
 		String token = null;
 		do {
@@ -2378,4 +2374,5 @@ public class SensiNact implements Core {
 		} while (exists);
 		return token;
 	}
+
 }

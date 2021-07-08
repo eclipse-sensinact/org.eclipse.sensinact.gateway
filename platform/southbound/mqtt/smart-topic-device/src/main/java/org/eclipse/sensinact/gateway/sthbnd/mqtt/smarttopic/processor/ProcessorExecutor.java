@@ -43,9 +43,9 @@ public class ProcessorExecutor {
         String incompleteProcessedInData = inData;
         for (SelectorIface selector : selectors) {
             try {
-                LOG.info("Selector {} IN Data {}  Expression {}", selector.getName(), incompleteProcessedInData, selector.getExpression());
+                //LOG.info("Selector {} IN Data {}  Expression {}", selector.getName(), incompleteProcessedInData, selector.getExpression());
                 incompleteProcessedInData = processors.get(selector.getName()).process(incompleteProcessedInData, selector);
-                LOG.info("Selector {} OUT {}", selector.getName(), incompleteProcessedInData);
+                //LOG.info("Selector {} OUT {}", selector.getName(), incompleteProcessedInData);
             } catch (Exception e) {
                 throw new ProcessorException("Failed to execute processor " + selector.getName(), e);
             }

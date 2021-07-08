@@ -46,7 +46,7 @@ public class LinkedResourceImpl extends ResourceImpl {
 		String defaultAttributeName = resourceConfig.getTypeConfig()
 				.<String>getConstantValue(Resource.ATTRIBUTE_DEFAULT_PROPERTY, false);
 
-		this.setDefault(defaultAttributeName);
+		super.setDefault(defaultAttributeName);
 		try {
 			super.elements.add(new Attribute(super.modelInstance.mediator(), this, Resource.NAME, String.class,
 					UriUtils.getLeaf(super.uri), Modifiable.FIXED, true));

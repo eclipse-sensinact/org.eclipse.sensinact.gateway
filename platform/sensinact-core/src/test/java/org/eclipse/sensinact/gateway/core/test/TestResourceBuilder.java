@@ -731,7 +731,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 				"untriggered");
 
 		Session s = testContext.getSensiNact().getAnonymousSession();
-		Thread.sleep(1000);
+		Thread.sleep(1000);		
 		String obj = s.getAll(
 				new FilteringCollection(this.testContext.getMediator(), false, new FilteringDefinition("xfilter", "a")))
 				.getJSON();

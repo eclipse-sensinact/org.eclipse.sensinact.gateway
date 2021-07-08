@@ -124,23 +124,18 @@ public abstract class Primitive implements Nameable {
     /**
      * Constructor
      *
-     * @param jsonObject the JSONObject describing the Primitive
-     *                   to instantiate
+     * @param jsonObject the JSONObject describing the Primitive to instantiate
      */
     protected Primitive(Mediator mediator, JSONObject jsonObject) throws InvalidValueException {
-        this(mediator, jsonObject == null ? null : jsonObject.optString(PrimitiveDescription.NAME_KEY), jsonObject == null ? null : jsonObject.optString(PrimitiveDescription.TYPE_KEY));
-
+        this(mediator, jsonObject == null ? null : jsonObject.optString(PrimitiveDescription.NAME_KEY), 
+        		jsonObject == null ? null : jsonObject.optString(PrimitiveDescription.TYPE_KEY));
         // set the value if defined in the JSONObject
         Object ovalue = jsonObject.opt(PrimitiveDescription.VALUE_KEY);
-        if (ovalue != null) {
+        if (ovalue != null)
             this.setValue(CastUtils.getObjectFromJSON(this.mediator.getClassLoader(), this.getType(), ovalue));
-        }
     }
-
-    /**
-     * @inheritDoc
-     * @see Nameable#getName()
-     */
+    
+    @Override
     public String getName() {
         return this.name;
     }
@@ -175,23 +170,23 @@ public abstract class Primitive implements Nameable {
      * Sets this Primitive's value
      *
      * @param value the value to set
+     * 
      * @throws InvalidValueException if the value cannot be set
      */
     public Object setValue(Object value) throws InvalidValueException {
-        if (Modifiable.FIXED.equals(this.getModifiable())) {
+        if (Modifiable.FIXED.equals(this.getModifiable())) 
             throw new InvalidValueException("the value cannot be modified");
-        }
+        
         Object valueObject = cast(value);
         Object copy = CastUtils.copy(this.type, valueObject);
 
         synchronized (lock) {
-            boolean hasChanged = ((valueObject == null && this.value != null) || (valueObject != null && !valueObject.equals(this.value)));
-
+            boolean hasChanged = ((valueObject == null && this.value != null) 
+            		|| (valueObject != null && !valueObject.equals(this.value)));
             this.beforeChange(copy);
             this.value = valueObject;
-            if (hasChanged) {
+            if (hasChanged) 
                 this.afterChange(copy);
-            }
         }
         return copy;
     }
@@ -202,7 +197,11 @@ public abstract class Primitive implements Nameable {
      * @param type the type to validate
      */
     protected void checkType(Class<?> type) throws InvalidValueTypeException {
-        if (!CastUtils.isPrimitive(type) && !JSONObject.class.isAssignableFrom(type) && !JSONArray.class.isAssignableFrom(type) && !type.isEnum() && (!type.isArray() || !CastUtils.isPrimitive(type.getComponentType()))) {
+        if (!CastUtils.isPrimitive(type) 
+        		&& !JSONObject.class.isAssignableFrom(type) 
+        		&& !JSONArray.class.isAssignableFrom(type) 
+        		&& !type.isEnum() 
+        		&& (!type.isArray() || !CastUtils.isPrimitive(type.getComponentType()))) {
             throw new InvalidValueTypeException("Invalid type : " + type.getCanonicalName());
         }
     }
@@ -213,10 +212,13 @@ public abstract class Primitive implements Nameable {
      *
      * @param value the value object to cast
      * @return the casted object value
-     * @throws InvalidValueException if the value object cannot be cast into the type
-     *                               of this Primitive
+     * 
+     * @throws InvalidValueException if the value object cannot be cast 
+     * into the type of this Primitive
      */
     protected Object cast(Object value) throws InvalidValueException {
+    	if(value == null)
+    		return value;
         Object valueObject = null;
         try {
             valueObject = CastUtils.cast(this.mediator.getClassLoader(), this.getType(), value);

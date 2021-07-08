@@ -194,9 +194,8 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 	}
 
 	private final void updateObserved(String observed, Object value) {
-		if (!registered || observed == null) {
+		if (!registered || observed == null) 
 			return;
-		}
 		Dictionary<String, Object> properties = properties();
 		properties.remove(observed);
 
@@ -222,9 +221,8 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 				}
 			}
 		}
-		if (value == null) {
-			return;
-		}
+		if (value == null)
+			return;		
 		properties.put(observed, value);
 		this.update(properties);
 	}
@@ -411,7 +409,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 					}
 					break;
 				case METADATA_VALUE_UPDATED:
-					Object value = notification.opt(DataResource.VALUE);
+					Object value = notification.opt(DataResource.VALUE);				
 					this.updateObserved(new StringBuilder().append(key).append("."
 						).append(uriElements[3]).append(".").append(uriElements[4]).toString(), value);					
 					break;
@@ -425,7 +423,9 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 			JSONObject initial = null;
 			switch (l.getType()) {
 				case RESOURCE_APPEARING:
+					key = new StringBuilder().append(uriElements[1]).append(".").append(uriElements[2]).toString();
 					initial = (JSONObject) ((SnaLifecycleMessageImpl) l).get("initial");
+									
 					type = ((SnaLifecycleMessageImpl) l).getNotification().optString("type");
 					ResourceConfig config = configuration.getResourceConfig(new ResourceDescriptor(
 							).withResourceName(uriElements[2]
@@ -462,7 +462,12 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 							if (!list.contains(attr)) 
 								list.add(attr);
 						}
-					}				
+					}		
+					String modifiable = initial==null?null:String.valueOf(initial.opt(Metadata.MODIFIABLE));
+					if(modifiable!=null) 
+					    this.updateObserved(new StringBuilder().append(key).append("."
+							).append(DataResource.VALUE).append(".").append(Metadata.MODIFIABLE).toString(),
+					    		modifiable);			
 				case SERVICE_APPEARING:
 				case PROVIDER_DISAPPEARING:
 				case RESOURCE_DISAPPEARING:

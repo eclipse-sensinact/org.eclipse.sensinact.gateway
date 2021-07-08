@@ -39,7 +39,7 @@ public class LocationUtils {
    	 }
    	 return m;
     }
-    
+
     public static double getDistance(double lat1, double lng1, double lat2, double lng2) {
         double a = Constants.EARTH_SPHERICAL_MODEL_RADIUS * 1000D;
         double dlong = ((lng2 - lng1) * Constants.DEGREES_TO_RADIUS_COEF) / 2;
@@ -75,7 +75,44 @@ public class LocationUtils {
         backBrg = backBrg * Constants.RADIUS_TO_DEGREES_COEF;
         return new Segment(lat, lng, lat2, lng2, finalBrg, backBrg , distance);
     }  
+    
+    public static double fromReverseClockedRadiusAngleToNorthOrientedBearing(double angle) {
+    	return fromReverseClockedDegreesAngleToNorthOrientedBearing(Constants.RADIUS_TO_DEGREES_COEF * angle);
+    }
+    
+    public static double fromReverseClockedDegreesAngleToNorthOrientedBearing(double angle) {
+    	double bearing=angle;
+    	if(angle < 90)
+    		bearing = 90-angle;
+    	else if(angle <180)
+    		bearing = 270+(180-angle);
+    	else if(angle < 270)
+    		bearing = 180+(270-angle);
+    	else
+    		bearing = 90+(360-angle);		
+    	 return Constants.DEGREES_TO_RADIUS_COEF * bearing;    
+    }
+    
+    public static Point getDiffLatLng(Point origin, double dx, double dy) {    	
+    	if(dx==0.0d && dy==0.0d)
+    		return  origin;
 
+       double agl = 0.0d;
+       
+    	if(dy == 0)
+    		agl = dx >= 0?0:180;
+    	else if(dx == 0)
+    		agl = dy >= 0?90:270;
+    	else 	{
+    		agl = Constants.RADIUS_TO_DEGREES_COEF * Math.atan((dy/dx));
+    		agl = agl + (dy<0 && dx<0?180:0);
+    	}
+    	double distance = Math.sqrt((Math.pow(Math.abs(dx),2)+ Math.pow(Math.abs(dy),2)));
+    	Segment segment = getElipsoidEarthModelCoordinates(origin.latitude, origin.longitude, 
+    			fromReverseClockedDegreesAngleToNorthOrientedBearing(agl) ,distance);
+    	return new Point(segment.getLat2(),segment.getLng2());
+    }     
+    
     public static Segment getElipsoidEarthModelDistance(double latdep, double lngdep, double latarr, double lngarr) {
 //   	The WGS 84 datum surface is an oblate spheroid (ellipsoid)
 //   	with major (equatorial) radius a = 6378137 m at the equator 

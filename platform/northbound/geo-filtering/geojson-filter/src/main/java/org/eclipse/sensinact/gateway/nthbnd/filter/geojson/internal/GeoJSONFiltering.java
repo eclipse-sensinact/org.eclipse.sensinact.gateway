@@ -73,20 +73,11 @@ public class GeoJSONFiltering implements Filtering {
         this.mediator = mediator;
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Filtering#handle(java.lang.String)
-     */
     @Override
     public boolean handle(String type) {
         return "geojson".equals(type);
     }
 
-
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Filtering#apply(java.lang.String, java.lang.Object)
-     */
     @Override
     public String apply(String definition, Object result) {
         JSONObject obj = new JSONObject(definition);
@@ -149,16 +140,26 @@ public class GeoJSONFiltering implements Filtering {
 
     boolean writeLocation(String name, String location, int index, StringBuilder builder) {
         try {
-            String[] locationElements = location.split(":");
-
+        	char[] seps = new char[] {':',',',' '};
+        	int pos = 0;
+        	for(;pos < seps.length; pos++) {
+        		int sep = location.indexOf(':');
+        		if(sep >= 0)
+        			break;
+        	}
+        	if(pos == seps.length)
+        		return false;
+        	
+        	char sep = seps[pos];        	
+            String[] locationElements = location.split(new String(new char[] {sep}));
             double latitude = Double.parseDouble(locationElements[0]);
             double longitude = Double.parseDouble(locationElements[1]);
             STATEMENT.apply("latitude", latitude);
             STATEMENT.apply("longitude", longitude);
             STATEMENT.apply("name", name);
-            if (index > 0) {
+            if (index > 0) 
                 builder.append(",");
-            }
+            
             builder.append(STATEMENT.toString());
             return true;
 
@@ -171,10 +172,6 @@ public class GeoJSONFiltering implements Filtering {
         return false;
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Filtering#getLDAPComponent()
-     */
     @Override
     public String getLDAPComponent(String definition) {
         String ldapFilter = null;
@@ -186,20 +183,23 @@ public class GeoJSONFiltering implements Filtering {
 
             Segment rad0 = null;
             Segment rad90 = null;
-
+            int bearing0 =  Double.valueOf(LocationUtils.fromReverseClockedDegreesAngleToNorthOrientedBearing(0)).intValue();
+            int bearing90 =  Double.valueOf(LocationUtils.fromReverseClockedDegreesAngleToNorthOrientedBearing(90)).intValue();
             if (distance < 200) {
-                rad0 = LocationUtils.getSphericalEarthModelCoordinates(lat, lng, 0, distance);
-                rad90 = LocationUtils.getSphericalEarthModelCoordinates(lat, lng, 90, distance);
-
+                rad0 = LocationUtils.getSphericalEarthModelCoordinates(lat, lng, bearing0	, distance);
+                rad90 = LocationUtils.getSphericalEarthModelCoordinates(lat, lng, bearing90, distance);
             } else {
-                rad0 = LocationUtils.getElipsoidEarthModelCoordinates(lat, lng, 0, distance);
-                rad90 = LocationUtils.getElipsoidEarthModelCoordinates(lat, lng, 90, distance);
+                rad0 = LocationUtils.getElipsoidEarthModelCoordinates(lat, lng, bearing0,distance);
+                rad90 = LocationUtils.getElipsoidEarthModelCoordinates(lat, lng, bearing90, distance);
             }
             double diffLat = Math.abs((rad0.getLat1() - rad0.getLat2()));
             double diffLng = Math.abs((rad90.getLng1() - rad90.getLng2()));
 
-            ldapFilter = String.format("(&(latitude <= %s)(latitude >= %s)(longitude <= %s)(longitude >= %s))", (lat + diffLat), (lat - diffLat), (lng + diffLng), (lng - diffLng));
-        } catch (JSONException e) {
+            ldapFilter = String.format("(&(latitude <= %s)(latitude >= %s)(longitude <= %s)(longitude >= %s))",
+            		(lat + diffLat), (lat - diffLat), (lng + diffLng), (lng - diffLng));
+            
+        } catch (Exception e) {
+        	e.printStackTrace();
             return null;
         }
         return ldapFilter;

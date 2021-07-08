@@ -112,11 +112,9 @@ public class Attribute extends DescribablePrimitive {
 	 * Constructs an attribute from the given {@link JSONObject} for the
 	 * ResourceImpl passed as parameter
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing the Attribute to be instantiated to
-	 *            interact with the OSGi host environment
-	 * @param attribute
-	 *            the {@link JSONObject} describing the attribute to instantiate
+	 * @param mediator the {@link Mediator} allowing the Attribute to be instantiated to
+	 * interact with the OSGi host environment
+	 * @param attribute the {@link JSONObject} describing the attribute to instantiate
 	 */
 	protected Attribute(Mediator mediator, ResourceImpl resource, JSONObject attribute) throws InvalidValueException {
 		super(mediator, attribute == null ? null : attribute.optString(PrimitiveDescription.NAME_KEY),
@@ -170,12 +168,10 @@ public class Attribute extends DescribablePrimitive {
 	 * Defines the value of the {@link Metadata} whose whose name is passed as
 	 * parameter
 	 * 
-	 * @param name
-	 *            the name of the {@link Metadata} to set the value of
-	 * @param value
-	 *            the value to set
+	 * @param name the name of the {@link Metadata} to set the value of
+	 * @param value the value to set
 	 * @return the extended {@link Description} describing the modified Metadata
-	 *         {@link Metadata}
+	 * {@link Metadata}
 	 * 
 	 * @throws InvalidValueException
 	 */
@@ -193,17 +189,16 @@ public class Attribute extends DescribablePrimitive {
 	 * this Attribute if it does not already exist or replaces the existing one with
 	 * the same name if it is defined as modifiable
 	 * 
-	 * @param metadata
-	 *            the {@link Metadata} to add or update
+	 * @param metadata the {@link Metadata} to add or update
 	 */
 	public void addMetadata(Metadata metadata) {
 		Metadata meta = this.get(metadata.getName());
 		synchronized (this.metadata) {
-			if (meta == null) {
+			if (meta == null) { 
 				this.metadata.add(metadata);
-				super.weakDescription = null;				
+				super.weakDescription = null;
 				if(!metadata.getName().equals(Metadata.HIDDEN) && metadata.getModifiable().equals(Modifiable.FIXED))
-					this.resource.updated(this, metadata.getDescription());
+					this.resource.updated(this, metadata.getDescription());					
 			} else {
 				try {
 					this.setMetadataValue(metadata.getName(), metadata.getValue());

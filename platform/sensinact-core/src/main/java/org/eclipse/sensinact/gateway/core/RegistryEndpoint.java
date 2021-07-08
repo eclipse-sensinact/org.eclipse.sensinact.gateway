@@ -98,15 +98,14 @@ public final class RegistryEndpoint {
                             SensiNactResourceModel model = mediator.getContext().getService(ref);
                             ServiceProvider provider = null;
                             try {
-                                provider = (ServiceProvider) model.getRootElement()
-                                        .getProxy(sessionKey.getAccessTree());
+                                provider = (ServiceProvider) model.getRootElement().getProxy(
+                                		sessionKey.getAccessTree());
 
                             } catch (ModelElementProxyBuildException e) {
                                 mediator.error(e);
                             }
-                            if (provider != null && provider.isAccessible()) {
+                            if (provider != null && provider.isAccessible())
                                 providers.add(provider);
-                            }
                         }
                         return providers;
                     }
@@ -140,9 +139,8 @@ public final class RegistryEndpoint {
                               String resourceName) {
         Service service = this.service(sessionKey, serviceProviderName, serviceName);
         Resource resource = null;
-        if (service != null) {
+        if (service != null) 
             resource = service.getResource(resourceName);
-        }
         return resource;
     }
 
@@ -305,22 +303,52 @@ public final class RegistryEndpoint {
                 int rlength = resourceList == null ? 0 : resourceList.size();
                 for (; rindex < rlength; rindex++) {
                     String resource = resourceList.get(rindex);
-                    String resolvedResource = new StringBuilder().append(service).append(".").append(resource)
-                            .toString();
+                    String resolvedResource = new StringBuilder().append(service).append(".").append(resource).toString();
                     String resourceUri = UriUtils.getUri(new String[] { name, service, resource });
                     Integer resourceLevel = (Integer) reference.getProperty(resolvedResource.concat(".DESCRIBE"));
-                    if (resourceLevel == null) {
+                    
+                    if (resourceLevel == null)
                         resourceLevel = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
-                    }
+                   
                     node = sessionKey.getAccessTree().getRoot().get(resourceUri);
-                    if (node == null) {
+                    if (node == null) 
                         node = tree.getRoot();
-                    }
-                    if (node.getAccessLevelOption(describe).getAccessLevel().getLevel() < resourceLevel
-                            .intValue()) {
+                    
+                    if (node.getAccessLevelOption(describe).getAccessLevel().getLevel() < resourceLevel.intValue()) 
                         continue;
-                    }
+                    
                     String type = (String) reference.getProperty(resolvedResource.concat(".type"));
+                    String rws = null;
+                    
+                    switch(type) {
+	                    case "PROPERTY":
+	                    case "STATE_VARIABLE":
+	                    case "SENSOR":
+	                    	StringBuilder sbuilder = new StringBuilder();
+	                    	sbuilder.append(resolvedResource);
+	                    	sbuilder.append(".");
+	                    	sbuilder.append(DataResource.VALUE);
+	                    	sbuilder.append(".");
+	                    	sbuilder.append(Metadata.MODIFIABLE);
+	                    	String st = (String) reference.getProperty(sbuilder.toString());
+	                    	if(st!=null) {
+		                    	switch(st) {
+			                    	case "MODIFIABLE":
+			                    		rws = "RW";
+			                    		break;
+			                    	case "FIXED":
+			                    	case "UPDATABLE":
+			                    		rws = "RO";
+			                    		break;
+			                    	default:
+			                    		break;
+		                    	}
+                    		}
+	                    	break;
+	                    case "ACTION":
+	                    default:
+	                    	break;
+                    }                    
                     builder.append(rindex > 0 ? ',' : "");
                     builder.append('{');
                     builder.append("\"name\":");
@@ -331,6 +359,12 @@ public final class RegistryEndpoint {
                     builder.append('"');
                     builder.append(type);
                     builder.append('"');
+                    if(rws != null) {
+                        builder.append(",\"rws\":");
+                        builder.append('"');
+                        builder.append(rws);
+                        builder.append('"');
+                    }
                     builder.append('}');
                 }
                 builder.append(']');
@@ -373,11 +407,6 @@ public final class RegistryEndpoint {
         }
     }
     
-    /**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.Core#namespace()
-	 */
 	protected String namespace() {
 		String namespace = this.mediator.callService(SensinactCoreBaseIFaceManager.class, 
 			new Executable<SensinactCoreBaseIFaceManager,String>() {

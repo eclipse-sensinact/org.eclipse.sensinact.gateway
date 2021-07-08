@@ -65,8 +65,7 @@ public class Metadata extends DescribablePrimitive {
 	/**
 	 * Constructs a Metadata using the given {@link JSONObject}
 	 * 
-	 * @param metadata
-	 *            the {@link JSONObject} describing the Metadata to instantiate
+	 * @param metadata the {@link JSONObject} describing the Metadata to instantiate
 	 * 
 	 * @throws InvalidConstraintDefinitionException
 	 */
