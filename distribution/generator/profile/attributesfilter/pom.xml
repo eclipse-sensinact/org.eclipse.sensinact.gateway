@@ -22,7 +22,7 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>attributes-filter-profile</artifactId>
+	<artifactId>attributesfilter</artifactId>
 	<packaging>pom</packaging>
 
 	<name>sensiNact IoT Gateway - sensiNact Runtime (${project.artifactId} bridge dependencies)</name>

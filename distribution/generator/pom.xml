@@ -292,6 +292,10 @@
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.shell.remote</artifactId>
 								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+									<artifactId>attributes-filter</artifactId>
+								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${project.build.directory}/dependencies/bundle/4</outputDirectory>
 						</configuration>

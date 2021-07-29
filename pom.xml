@@ -1196,6 +1196,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+				<artifactId>attributes-filter</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 				<artifactId>jsonpath-filter</artifactId>
 				<version>${project.version}</version>
 			</dependency>
