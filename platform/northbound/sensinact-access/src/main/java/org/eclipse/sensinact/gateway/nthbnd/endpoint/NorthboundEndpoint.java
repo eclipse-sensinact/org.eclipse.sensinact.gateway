@@ -11,8 +11,8 @@
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import org.eclipse.sensinact.gateway.core.AnonymousSession;
-import org.eclipse.sensinact.gateway.core.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.Session;
+import org.eclipse.sensinact.gateway.core.filtering.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;

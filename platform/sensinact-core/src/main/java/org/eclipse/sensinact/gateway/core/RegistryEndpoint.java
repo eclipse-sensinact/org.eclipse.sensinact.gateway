@@ -155,9 +155,9 @@ public final class RegistryEndpoint {
 
         Collection<ServiceReference<SensiNactResourceModel>> references =
                 this.getReferences(tree, filter);
-        if(references.size()!=1) {
+        if(references.size()!=1) 
             return false;
-        }
+        
         ServiceReference<SensiNactResourceModel> reference = references.iterator().next();
 
         AccessMethod.Type describe = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
@@ -219,14 +219,22 @@ public final class RegistryEndpoint {
     public String getAll(SessionKey sessionKey, boolean resolveNamespace, String filter) {
         StringBuilder builder = new StringBuilder();
         int index = -1;
-
+        
         Collection<ServiceReference<SensiNactResourceModel>> references = 
         		RegistryEndpoint.this.getReferences(sessionKey, filter);
+        
         Iterator<ServiceReference<SensiNactResourceModel>> iterator = 
         		references.iterator();
 
         AccessTree<? extends AccessNode> tree = sessionKey.getAccessTree();
+        AccessNode root = sessionKey.getAccessTree().getRoot();
+        
         AccessMethod.Type describe = AccessMethod.Type.valueOf(AccessMethod.DESCRIBE);
+        AccessMethod.Type get = AccessMethod.Type.valueOf(AccessMethod.GET);
+
+        boolean addBridge = filter == null ?false:filter.indexOf("admin.bridge.value=*") > -1;
+        boolean addIcon = filter == null ?false:filter.indexOf("admin.icon.value=*") > -1;
+        boolean addFriendlyName = filter == null ?false:filter.indexOf("admin.friendlyName.value=*") > -1;
         
         String namespace = namespace();
         String prefix = "";
@@ -235,15 +243,76 @@ public final class RegistryEndpoint {
             index++;
             ServiceReference<SensiNactResourceModel> reference = iterator.next();
             String name = (String) reference.getProperty("name");
-
             String provider = new StringBuilder().append(prefix).append(name).toString();
-            
+
             String location = null;
             Object obj = reference.getProperty(ModelInstanceRegistration.LOCATION_PROPERTY.concat(".value"));
-            if (obj != null) {
-                location = String.valueOf(obj).replace('"', '\'');
-            }
-            location = (location == null || location.length() == 0) ? defaultLocation : location;
+            if (obj == null || "null".equals(String.valueOf(obj)))           
+            	location = defaultLocation;
+            else	
+                location = String.valueOf(obj).replace('"', '\'');  
+
+            Integer locationGetLevel = (Integer) reference.getProperty(ModelInstanceRegistration.LOCATION_PROPERTY.concat(".GET"));
+            if (locationGetLevel == null)
+            	locationGetLevel = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
+
+            String resourceUri = UriUtils.getUri(new String[] { name, ServiceProvider.ADMINISTRATION_SERVICE_NAME, LocationResource.LOCATION });
+            AccessNode node = root.get(resourceUri);
+            if (node == null) 
+                node = tree.getRoot();            
+            int locationAccessLevel = node.getAccessLevelOption(get).getAccessLevel().getLevel();
+            
+            String friendlyName = null;
+            obj = reference.getProperty(ModelInstanceRegistration.FRIENDLY_NAME_PROPERTY.concat(".value"));
+            if (obj == null || "null".equals(String.valueOf(obj))) 
+            	friendlyName = name;
+            else
+            	friendlyName = String.valueOf(obj).replace('"', '\'');
+
+            Integer friendlyNameGetLevel = (Integer) reference.getProperty(ModelInstanceRegistration.FRIENDLY_NAME_PROPERTY.concat(".GET"));
+            if (friendlyNameGetLevel == null)
+            	friendlyNameGetLevel = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
+
+           resourceUri = UriUtils.getUri(new String[] { name, ServiceProvider.ADMINISTRATION_SERVICE_NAME, ServiceProvider.FRIENDLY_NAME});
+           node = root.get(resourceUri);
+           if (node == null) 
+                node = tree.getRoot();            
+            int friendlyNameAccessLevel = node.getAccessLevelOption(get).getAccessLevel().getLevel();
+            
+            String bridge;
+            obj = reference.getProperty(ModelInstanceRegistration.BRIDGE_PROPERTY.concat(".value"));
+            if (obj == null || "null".equals(String.valueOf(obj)))  
+            	bridge = null;
+            else
+            	bridge = String.valueOf(obj).replace('"', '\'');
+
+            Integer bridgeGetLevel = (Integer) reference.getProperty(ModelInstanceRegistration.BRIDGE_PROPERTY.concat(".GET"));
+            if (bridgeGetLevel == null)
+            	bridgeGetLevel = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
+
+            resourceUri = UriUtils.getUri(new String[] { name, ServiceProvider.ADMINISTRATION_SERVICE_NAME, ServiceProvider.BRIDGE});
+            node = root.get(resourceUri);
+            if (node == null) 
+                 node = tree.getRoot();            
+             int bridgeAccessLevel = node.getAccessLevelOption(get).getAccessLevel().getLevel();
+            
+            String icon;
+            obj = reference.getProperty(ModelInstanceRegistration.ICON_PROPERTY.concat(".value"));
+            if (obj == null || "null".equals(String.valueOf(obj)))  
+            	icon = null;
+            else
+            	icon = String.valueOf(obj).replace('"', '\'');
+
+            Integer iconGetLevel = (Integer) reference.getProperty(ModelInstanceRegistration.ICON_PROPERTY.concat(".GET"));
+            if (iconGetLevel == null)
+            	iconGetLevel = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());            
+
+            resourceUri = UriUtils.getUri(new String[] { name, ServiceProvider.ADMINISTRATION_SERVICE_NAME, ServiceProvider.ICON});
+            node = root.get(resourceUri);
+            if (node == null) 
+                 node = tree.getRoot();            
+             int iconAccessLevel = node.getAccessLevelOption(get).getAccessLevel().getLevel();
+            
             List<String> serviceList = (List<String>) reference.getProperty("services");
 
             builder.append(index > 0 ? ',' : "");
@@ -262,10 +331,38 @@ public final class RegistryEndpoint {
 	            builder.append(namespace);
 	            builder.append('"');
             }
-            builder.append(",\"location\":");
-            builder.append('"');
-            builder.append(location);
-            builder.append('"');
+            if (locationAccessLevel >= locationGetLevel.intValue()) {
+	            builder.append(",\"location\":");
+	            if(location!=null)
+	            	builder.append('"');
+	            builder.append(location);
+	            if(location!=null)
+	            	builder.append('"');
+            }
+            if (addBridge && bridgeAccessLevel >= bridgeGetLevel.intValue()) {
+	            builder.append(",\"bridge\":");
+	            if(bridge!=null)
+	            	builder.append('"');
+	            builder.append(bridge);
+	            if(bridge!=null)
+	            	builder.append('"');
+            }
+            if (addIcon && iconAccessLevel >= iconGetLevel.intValue()) {
+	            builder.append(",\"icon\":");
+	            if(icon!=null)
+	            	builder.append('"');
+	            builder.append(icon);
+	            if(icon!=null)
+	            	builder.append('"');
+            }
+            if (addFriendlyName && friendlyNameAccessLevel >= friendlyNameGetLevel.intValue()) {
+	            builder.append(",\"friendlyName\":");
+	            if(friendlyName!=null)
+	            	builder.append('"');
+	            builder.append(friendlyName);
+	            if(friendlyName!=null)
+	            	builder.append('"');
+            }
             builder.append(",\"services\":");
             builder.append('[');
 
@@ -275,19 +372,17 @@ public final class RegistryEndpoint {
                 String service = serviceList.get(sindex);
                 String serviceUri = UriUtils.getUri(new String[] { name, service });
                 Integer serviceLevel = (Integer) reference.getProperty(service.concat(".DESCRIBE"));
-                if (serviceLevel == null) {
+                if (serviceLevel == null) 
                     serviceLevel = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
-                }
-                AccessNode node = sessionKey.getAccessTree().getRoot().get(serviceUri);
-                if (node == null) {
+                
+                node = root.get(serviceUri);
+                if (node == null) 
                     node = tree.getRoot();
-                }
+                
                 int describeAccessLevel = node.getAccessLevelOption(describe).getAccessLevel().getLevel();
-                int serviceLevelLevel = serviceLevel.intValue();
-
-                if (node.getAccessLevelOption(describe).getAccessLevel().getLevel() < serviceLevel.intValue()) {
+                if (describeAccessLevel < serviceLevel.intValue()) 
                     continue;
-                }
+                
                 List<String> resourceList = (List<String>) reference.getProperty(service.concat(".resources"));
 
                 builder.append(sindex > 0 ? ',' : "");
@@ -304,17 +399,18 @@ public final class RegistryEndpoint {
                 for (; rindex < rlength; rindex++) {
                     String resource = resourceList.get(rindex);
                     String resolvedResource = new StringBuilder().append(service).append(".").append(resource).toString();
-                    String resourceUri = UriUtils.getUri(new String[] { name, service, resource });
-                    Integer resourceLevel = (Integer) reference.getProperty(resolvedResource.concat(".DESCRIBE"));
+                    resourceUri = UriUtils.getUri(new String[] { name, service, resource });
                     
+                    Integer resourceLevel = (Integer) reference.getProperty(resolvedResource.concat(".DESCRIBE"));
                     if (resourceLevel == null)
                         resourceLevel = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
-                   
-                    node = sessionKey.getAccessTree().getRoot().get(resourceUri);
+
+                    node = root.get(resourceUri);
                     if (node == null) 
                         node = tree.getRoot();
-                    
-                    if (node.getAccessLevelOption(describe).getAccessLevel().getLevel() < resourceLevel.intValue()) 
+
+                    describeAccessLevel = node.getAccessLevelOption(describe).getAccessLevel().getLevel();
+                    if (describeAccessLevel < resourceLevel.intValue()) 
                         continue;
                     
                     String type = (String) reference.getProperty(resolvedResource.concat(".type"));
@@ -391,9 +487,9 @@ public final class RegistryEndpoint {
                 ServiceReference<SensiNactResourceModel> reference = iterator.next();
                 String name = (String) reference.getProperty("name");
                 String provider = new StringBuilder().append(prefix).append(name).toString();
-                if (index > 0) {
+                if (index > 0) 
                     builder.append(",");
-                }
+                
                 builder.append('"');
                 builder.append(provider);
                 builder.append('"');

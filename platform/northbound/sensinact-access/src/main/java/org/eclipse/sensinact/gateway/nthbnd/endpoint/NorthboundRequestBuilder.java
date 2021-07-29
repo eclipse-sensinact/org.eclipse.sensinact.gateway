@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
-import org.eclipse.sensinact.gateway.core.FilteringCollection;
-import org.eclipse.sensinact.gateway.core.FilteringDefinition;
+import org.eclipse.sensinact.gateway.core.filtering.FilteringCollection;
+import org.eclipse.sensinact.gateway.core.filtering.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONArray;

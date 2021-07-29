@@ -8,7 +8,7 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core;
+package org.eclipse.sensinact.gateway.core.filtering;
 
 import java.util.ArrayList;
 import java.util.Iterator;

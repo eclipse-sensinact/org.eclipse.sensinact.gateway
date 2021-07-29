@@ -37,6 +37,7 @@ import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefiniti
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractor;
 import org.eclipse.sensinact.gateway.core.Sessions.KeyExtractorType;
+import org.eclipse.sensinact.gateway.core.filtering.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.LocalAgent;
 import org.eclipse.sensinact.gateway.core.message.LocalAgentImpl;
@@ -534,12 +535,11 @@ public class SensiNact implements Core {
 			DescribeResponseBuilder<String> builder = method.createAccessMethodResponseBuilder(null);
 
 			final String ldapFilter;
-			if (filterCollection != null) {
+			if (filterCollection != null) 
 				ldapFilter = filterCollection.composeLDAPFormatedFilter(filter);
-
-			} else {
+			else 
 				ldapFilter = filter;
-			}
+			
 			String all = AccessController.doPrivileged(new PrivilegedAction<String>() {
 				@Override
 				public String run() {
@@ -559,9 +559,9 @@ public class SensiNact implements Core {
 			}
 			String result = new StringBuilder().append("[").append(all).append("]").toString();
 
-			if (filterCollection != null) {
+			if (filterCollection != null) 
 				result = filterCollection.apply(result);
-			}
+			
 			builder.setAccessMethodObjectResult(result);
 			response = builder.createAccessMethodResponse(Status.SUCCESS);
 
@@ -2185,9 +2185,9 @@ public class SensiNact implements Core {
 			return local;
 		}
 		final StringBuilder content = new StringBuilder();
-		if (local != null && local.length() > 0) {
+		if (local != null && local.length() > 0) 
 			content.append(local);
-		}
+		
 		final String localNamespace = this.namespace();
 		AccessController.doPrivileged(new PrivilegedAction<Void>() {
 			@Override

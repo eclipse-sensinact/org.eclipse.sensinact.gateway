@@ -1,6 +1,6 @@
 package org.eclipse.sensinact.gateway.core.test;
 
-import org.eclipse.sensinact.gateway.core.Filtering;
+import org.eclipse.sensinact.gateway.core.filtering.Filtering;
 
 /**
  *
@@ -32,7 +32,7 @@ public class XFilter implements Filtering {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Filtering#handle(java.lang.String)
+	 * @see org.eclipse.sensinact.gateway.core.filtering.Filtering#handle(java.lang.String)
 	 */
 	@Override
 	public boolean handle(String type) {
@@ -42,7 +42,7 @@ public class XFilter implements Filtering {
 	/**
 	 * @inheritDoc
 	 *
-	 * @see org.eclipse.sensinact.gateway.core.Filtering#apply(java.lang.String,
+	 * @see org.eclipse.sensinact.gateway.core.filtering.Filtering#apply(java.lang.String,
 	 *      java.lang.Object)
 	 */
 	@Override
@@ -55,7 +55,7 @@ public class XFilter implements Filtering {
 	/**
 	 * @inheritDoc
 	 * 
-	 * @see org.eclipse.sensinact.gateway.core.Filtering#getLDAPComponent()
+	 * @see org.eclipse.sensinact.gateway.core.filtering.Filtering#getLDAPComponent()
 	 */
 	@Override
 	public String getLDAPComponent(String definition) {

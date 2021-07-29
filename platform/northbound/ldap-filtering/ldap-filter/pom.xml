@@ -108,7 +108,6 @@
 						<_nouses>true</_nouses>
 						<_failok>true</_failok>
 						<_noee>true</_noee>
-						<Bundle-Activator>org.eclipse.sensinact.gateway.nthbnd.filter.ldap.osgi.Activator</Bundle-Activator>
 					</instructions>
 				</configuration>
 				<executions>

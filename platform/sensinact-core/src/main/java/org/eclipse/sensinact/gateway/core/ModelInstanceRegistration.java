@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.core;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -39,13 +40,15 @@ import org.osgi.framework.ServiceRegistration;
 
 /**
  * Wraps the {@link ServiceRegistration} of a {@link SensiNactResourceModel}
- * instance and updates the properties of its associated
- * {@link ServiceReference}.
+ * instance and updates the properties of its associated {@link ServiceReference}.
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ModelInstanceRegistration extends AbstractMidCallback {
 	public static final String LOCATION_PROPERTY = "admin.".concat(LocationResource.LOCATION);
+	public static final String ICON_PROPERTY = "admin.".concat(ServiceProvider.ICON);
+	public static final String BRIDGE_PROPERTY = "admin.".concat(ServiceProvider.BRIDGE);
+	public static final String FRIENDLY_NAME_PROPERTY = "admin.".concat(ServiceProvider.FRIENDLY_NAME);
 
 	private boolean registered;
 	private ServiceRegistration<?> instanceRegistration;
@@ -99,19 +102,23 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 					list = new ArrayList<String>();
 					this.observed.put(key, list);
 				}
-				if (!list.contains(attribute)) {
+				if (!list.contains(attribute)) 
 					list.add(attribute);
-				}
 			}
 		}
-		List<String> list = this.observed.get(LOCATION_PROPERTY);
-		if (list == null) {
-			list = new ArrayList<String>();
-			this.observed.put(LOCATION_PROPERTY, list);
-		}
-		if (!list.contains(DataResource.VALUE)) {
-			list.add(DataResource.VALUE);
-		}
+		
+		Arrays.asList(LOCATION_PROPERTY, ICON_PROPERTY, FRIENDLY_NAME_PROPERTY, BRIDGE_PROPERTY).stream().forEach(
+				p -> {
+						List<String> list = ModelInstanceRegistration.this.observed.get(p);
+						if (list == null) {
+							list = new ArrayList<String>();
+							ModelInstanceRegistration.this.observed.put(p, list);
+						}
+						if (!list.contains(DataResource.VALUE)) 
+							list.add(DataResource.VALUE);
+				}
+		);
+
 		this.instanceRegistration = registration;
 		this.configuration = configuration;
 		this.registered = true;
@@ -145,12 +152,13 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 						String message = e.getMessage();
 						String duplicateMessage = "Duplicate service property: ";
 						String duplicateProperty = null;
-						if (message.startsWith(duplicateMessage)) {
+						
+						if (message.startsWith(duplicateMessage)) 
 							duplicateProperty = message.substring(duplicateMessage.length());
-						}
-						if (duplicateProperty != null && properties.remove(duplicateProperty) != null) {
+						
+						if (duplicateProperty != null && properties.remove(duplicateProperty) != null) 
 							update(properties);
-						}
+						
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

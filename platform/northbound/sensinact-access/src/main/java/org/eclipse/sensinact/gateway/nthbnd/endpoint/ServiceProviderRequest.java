@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import org.eclipse.sensinact.gateway.core.FilteringCollection;
+import org.eclipse.sensinact.gateway.core.filtering.FilteringCollection;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
 public class ServiceProviderRequest extends ServiceProvidersRequest {

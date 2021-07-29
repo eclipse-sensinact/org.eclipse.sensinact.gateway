@@ -10,25 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.test;
 
-import org.eclipse.sensinact.gateway.util.IOUtils;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
-
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.test.MidOSGiTest;
-import org.json.JSONObject;
-import org.junit.Test;
-
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.test.MidOSGiTest;
+import org.json.JSONObject;
+import org.junit.Test;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -123,17 +118,6 @@ public class TestLdapFiltering extends MidOSGiTest {
         configuration.put("org.osgi.service.http.port", "8899");
         configuration.put("org.apache.felix.http.jettyEnabled", true);
         configuration.put("org.apache.felix.http.whiteboardEnabled", true);
-
-        try {
-        	String fileName = "sensinact.config";
-            File testFile = new File(new File("src/test/resources"), fileName);
-            URL testFileURL = testFile.toURI().toURL();
-            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
-            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
-            IOUtils.write(testCng, output);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Test

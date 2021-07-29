@@ -8,7 +8,7 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core;
+package org.eclipse.sensinact.gateway.core.filtering;
 
 /**
  * Gather the type and the String representation of an {@link Filtering} service

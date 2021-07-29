@@ -12,7 +12,7 @@ package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
-import org.eclipse.sensinact.gateway.core.FilteringCollection;
+import org.eclipse.sensinact.gateway.core.filtering.FilteringCollection;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;

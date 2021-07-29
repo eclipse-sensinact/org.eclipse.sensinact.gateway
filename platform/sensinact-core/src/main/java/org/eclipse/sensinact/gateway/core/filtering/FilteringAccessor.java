@@ -8,7 +8,7 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core;
+package org.eclipse.sensinact.gateway.core.filtering;
 
 import java.util.Collection;
 import java.util.NoSuchElementException;
@@ -30,12 +30,10 @@ public class FilteringAccessor extends FilteringDefinition {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing the FilteringAccessor to be
-	 *            instantiated to interact with the OSGi host environment
-	 * @param filterDefinition
-	 *            the {@link FilteringDefinition} parameterizing the instantiation
-	 *            of the FilteringAccessor to be created
+	 * @param mediator the {@link Mediator} allowing the FilteringAccessor to be
+	 *  instantiated to interact with the OSGi host environment
+	 * @param filterDefinition the {@link FilteringDefinition} parameterizing the 
+	 * instantiation of the FilteringAccessor to be created
 	 */
 	public FilteringAccessor(Mediator mediator, FilteringDefinition filteringDefinition) {
 		super(filteringDefinition.type, filteringDefinition.filter);
@@ -60,14 +58,12 @@ public class FilteringAccessor extends FilteringDefinition {
 	 * FilteringAccessor is able to handle the String type of filter passed as
 	 * parameter; returns false otherwise
 	 * 
-	 * @param type
-	 *            the String type of filter
+	 * @param type the String type of filter
 	 * 
 	 * @return
 	 *         <ul>
-	 *         <li>true if the specified type of filter is handled by the wrapped
-	 *         {@link Filtering} service</li>
-	 *         <li>false otherwise</li>
+	 *             <li>true if the specified type of filter is handled by the wrapped {@link Filtering} service</li>
+	 *             <li>false otherwise</li>
 	 *         </ul>
 	 */
 	public boolean handle(String type) {
@@ -91,8 +87,7 @@ public class FilteringAccessor extends FilteringDefinition {
 	 * discriminate the elements on which the wrapped {@link Filtering} service will
 	 * be applied on
 	 * 
-	 * @return the String formated LDAP component part of the wrapped Filtering
-	 *         service
+	 * @return the String formated LDAP component part of the wrapped Filtering service
 	 */
 	public String getLDAPComponent() {
 		Filtering filtering = this.mediator.getContext().getService(reference);
@@ -109,8 +104,7 @@ public class FilteringAccessor extends FilteringDefinition {
 	 * Applies the {@link Filtering} service wrapped by this FilteringAccessor on
 	 * the specified object argument and returns the String result
 	 * 
-	 * @param obj
-	 *            the Object value to be filtered
+	 * @param obj the Object value to be filtered
 	 * 
 	 * @return the String result of the filtering process
 	 */

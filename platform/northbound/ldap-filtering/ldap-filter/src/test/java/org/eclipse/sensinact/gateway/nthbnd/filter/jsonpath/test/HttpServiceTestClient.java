@@ -25,24 +25,19 @@ public class HttpServiceTestClient {
         ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> builder = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
         builder.setUri(url);
         builder.setAccept("application/json");
-        /*builder.addHeader("Authorization",
-        		"Basic " + Base64.encodeBytes(
-                	"cea:sensiNact_team".getBytes()));*/
-        try {
-            if (method.equals("GET")) {
-                builder.setHttpMethod("GET");
 
-            } else if (method.equals("POST")) {
+        try {
+            if (method.equals("GET")) 
+                builder.setHttpMethod("GET");
+            else if (method.equals("POST")) {
                 builder.setContentType("application/json");
                 builder.setHttpMethod("POST");
                 if (content != null && content.length() > 0) {
-                    if (new JSONValidator(content).valid()) {
-                        builder.setContent(content);
-                    }
+                    if (new JSONValidator(content).valid()) 
+                        builder.setContent(content);                    
                 }
-            } else {
+            } else 
                 return null;
-            }
             SimpleRequest request = new SimpleRequest(builder);
             response = request.send();
             byte[] responseContent = response.getContent();

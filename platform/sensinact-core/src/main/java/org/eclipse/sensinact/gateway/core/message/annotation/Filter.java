@@ -31,6 +31,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 @Retention(RUNTIME)
 @Target(TYPE)
 public @interface Filter {	
+	
 	/**
 	 * Returns the path defining accepted source(s) of messages - A message
 	 * coming from a different source will not be propagated
@@ -38,6 +39,7 @@ public @interface Filter {
 	 * @return the accepted source(s) path
 	 */
 	String sender() default "(/[^/]+)+";
+	
 	/**
 	 * Returns true if the sender attribute is an regular expression - 
 	 * returns false otherwise
@@ -49,6 +51,7 @@ public @interface Filter {
 	 * </ul>
 	 */
 	boolean isPattern() default true;
+	
 	/**
 	 * Returns true if the filtering process refers to the logical complement
 	 * of both sender and conditions arguments for message validation - returns
@@ -61,6 +64,7 @@ public @interface Filter {
 	 * </ul> 
 	 */
 	boolean isComplement() default false;	
+	
 	/**
 	 * Returns the array of filtered message types - A message of a different type
 	 * will not be propagated
@@ -68,6 +72,7 @@ public @interface Filter {
 	 * @return the array of filtered message types
 	 */
 	SnaMessage.Type[] handled() default {};
+	
 	/**
 	 * Returns the array of the JSON formated string representations of 
 	 * the constraints applying on the filtered messages - A message that does

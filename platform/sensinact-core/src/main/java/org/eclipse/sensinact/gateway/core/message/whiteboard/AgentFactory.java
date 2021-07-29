@@ -54,41 +54,26 @@ public class AgentFactory {
 	
 	private final class EmptyFilterDefinition implements MessageFilterDefinition {
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.FilterDefinition#handledTypes()
-		 */
 		@Override
 		public SnaMessage.Type[] handledTypes() {
 			return null;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.FilterDefinition#conditions()
-		 */
 		@Override
 		public List<Constraint> conditions() {
 			return null;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.FilterDefinition#sender()
-		 */
 		@Override
 		public String sender() {
 			return null;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.FilterDefinition#isPattern()
-		 */
 		@Override
 		public boolean isPattern() {
 			return false;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.FilterDefinition#isComplement()
-		 */
 		@Override
 		public boolean isComplement() {
 			return false;
@@ -103,9 +88,6 @@ public class AgentFactory {
 			this.filter = filter;
 		}
 		
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.FilterDefinition#handledTypes()
-		 */
 		@Override
 		public SnaMessage.Type[] handledTypes() {
 			SnaMessage.Type[] arr = filter.handled();
@@ -115,9 +97,6 @@ public class AgentFactory {
 			return arr;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.FilterDefinition#conditions()
-		 */
 		@Override
 		public List<Constraint> conditions() {
 			String[] cds = filter.conditions();
@@ -141,25 +120,16 @@ public class AgentFactory {
 			return null;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.FilterDefinition#sender()
-		 */
 		@Override
 		public String sender() {
 			return filter.sender();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.FilterDefinition#isPattern()
-		 */
 		@Override
 		public boolean isPattern() {
 			return filter.isPattern();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.FilterDefinition#isComplement()
-		 */
 		@Override
 		public boolean isComplement() {
 			return filter.isComplement();
@@ -191,106 +161,67 @@ public class AgentFactory {
 				}
 			}
 		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback#propagate()
-		 */
+
 		@Override
 		public boolean propagate() {
 			return agentRelay.propagate();
 		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback#doHandle(org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl)
-		 */
+
 		@Override
 		public void doHandle(SnaLifecycleMessageImpl message) throws MidCallbackException {
 			agentRelay.doHandle(message);
 		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback#doHandle(org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl)
-		 */
+
 		@Override
 		public void doHandle(SnaUpdateMessageImpl message) throws MidCallbackException {
 			agentRelay.doHandle(message);
 		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback#doHandle(org.eclipse.sensinact.gateway.core.message.SnaRemoteMessageImpl)
-		 */
+
 		@Override
 		public void doHandle(SnaRemoteMessageImpl message) throws MidCallbackException {
 			agentRelay.doHandle(message);	
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback#doHandle(org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl)
-		 */
 		@Override
 		public void doHandle(SnaErrorMessageImpl message) throws MidCallbackException {
 			agentRelay.doHandle(message);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback#doHandle(org.eclipse.sensinact.gateway.core.message.SnaResponseMessage)
-		 */
 		@Override
 		public void doHandle(SnaResponseMessage<?, ?> message) throws MidCallbackException {
 			agentRelay.doHandle(message);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.message.AgentRelay#getRelayIdentifier()
-		 */
 		@Override
 		public String getRelayIdentifier() {
 			return agentRelay.getRelayIdentifier();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.AgentRelay#lifetime()
-		 */
 		@Override
 		public long lifetime() {
 			return agentRelay.lifetime();
 		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.FilterDefinition#handledTypes()
-		 */
+
 		@Override
 		public SnaMessage.Type[] handledTypes() {
 			return this.filterDefinition.handledTypes();
 		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.FilterDefinition#conditions()
-		 */
+
 		@Override
 		public List<Constraint> conditions() {
 			return this.filterDefinition.conditions();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.FilterDefinition#sender()
-		 */
 		@Override
 		public String sender() {
 			return this.filterDefinition.sender();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.FilterDefinition#isPattern()
-		 */
 		@Override
 		public boolean isPattern() {
 			return this.filterDefinition.isPattern();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.api.message.FilterDefinition#isComplement()
-		 */
 		@Override
 		public boolean isComplement() {
 			return this.filterDefinition.isComplement();
@@ -312,58 +243,37 @@ public class AgentFactory {
 			super(true,true,ID_GENERATOR(agentRelay));
 			this.agentRelay = agentRelay;
 		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback#propagate()
-		 */
+
 		@Override
 		public boolean propagate() {
 			return agentRelay.propagate();
 		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback#doHandle(org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl)
-		 */
+
 		@Override
 		public void doHandle(SnaLifecycleMessageImpl message) throws MidCallbackException {
 			agentRelay.doHandle(message);
 		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback#doHandle(org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl)
-		 */
+
 		@Override
 		public void doHandle(SnaUpdateMessageImpl message) throws MidCallbackException {
 			agentRelay.doHandle(message);
 		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback#doHandle(org.eclipse.sensinact.gateway.core.message.SnaRemoteMessageImpl)
-		 */
+
 		@Override
 		public void doHandle(SnaRemoteMessageImpl message) throws MidCallbackException {
 			agentRelay.doHandle(message);	
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback#doHandle(org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl)
-		 */
 		@Override
 		public void doHandle(SnaErrorMessageImpl message) throws MidCallbackException {
 			agentRelay.doHandle(message);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback#doHandle(org.eclipse.sensinact.gateway.core.message.SnaResponseMessage)
-		 */
 		@Override
 		public void doHandle(SnaResponseMessage<?, ?> message) throws MidCallbackException {
 			agentRelay.doHandle(message);
 		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.sensinact.gateway.core.message.AbstractMidCallback#setTimeout(long)
-		 */
+
 		@Override
 		protected void setTimeout(long timeout) {
 			super.setTimeout(timeout);

@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import org.eclipse.sensinact.gateway.core.FilteringCollection;
+import org.eclipse.sensinact.gateway.core.filtering.FilteringCollection;
 
 public class AllRequest extends NorthboundRequest {
     /**

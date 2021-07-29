@@ -12,7 +12,7 @@ package org.eclipse.sensinact.gateway.nthbnd.filter.geojson.osgi;
 
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.Filtering;
+import org.eclipse.sensinact.gateway.core.filtering.Filtering;
 import org.eclipse.sensinact.gateway.nthbnd.filter.geojson.internal.GeoJSONFiltering;
 import org.osgi.framework.BundleContext;
 

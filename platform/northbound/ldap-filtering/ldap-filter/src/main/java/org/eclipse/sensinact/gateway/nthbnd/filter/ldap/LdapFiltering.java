@@ -8,16 +8,17 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.nthbnd.filter.ldap.internal;
+package org.eclipse.sensinact.gateway.nthbnd.filter.ldap;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.Filtering;
+import org.eclipse.sensinact.gateway.core.filtering.Filtering;
+import org.osgi.service.component.annotations.Component;
 
 /**
  * {@link Filtering} implementation allowing to apply an LDAP filter
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
+@Component(immediate=true, service=Filtering.class, property="type=ldap")
 public class LdapFiltering implements Filtering {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
@@ -33,44 +34,17 @@ public class LdapFiltering implements Filtering {
     //********************************************************************//
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
-    private Mediator mediator;
-
-    /**
-     * Constructor
-     *
-     * @param mediator the {@link Mediator} allowing the
-     *                 LdapFiltering to be instantiated to interact with
-     *                 the OSGi host environment
-     */
-    public LdapFiltering(Mediator mediator) {
-        this.mediator = mediator;
-    }
-
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Filtering#
-     * handle(java.lang.String)
-     */
+    
     @Override
     public boolean handle(String type) {
         return "ldap".equals(type);
     }
 
-
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Filtering#
-     * apply(java.lang.String, java.lang.Object)
-     */
     @Override
     public String apply(String definition, Object result) {
         return String.valueOf(result);
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.Filtering#getLDAPComponent()
-     */
     @Override
     public String getLDAPComponent(String definition) {
         String ldapFilter = definition;

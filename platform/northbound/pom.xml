@@ -30,6 +30,7 @@
 		<!--<module>jsonpath-filtering</module>-->
 		<module>geo-filtering</module>
 		<module>ldap-filtering</module>
+		<module>attributes-filtering</module>
 		<module>mqtt</module>
 		<module>generic-storage-agent</module>
 		<module>http-storage-agent</module>
