@@ -246,13 +246,13 @@ public final class RegistryEndpoint {
             String provider = new StringBuilder().append(prefix).append(name).toString();
 
             String location = null;
-            Object obj = reference.getProperty(ModelInstanceRegistration.LOCATION_PROPERTY.concat(".value"));
+            Object obj = reference.getProperty(ModelInstance.LOCATION_PROPERTY.concat(".value"));
             if (obj == null || "null".equals(String.valueOf(obj)))           
             	location = defaultLocation;
             else	
                 location = String.valueOf(obj).replace('"', '\'');  
 
-            Integer locationGetLevel = (Integer) reference.getProperty(ModelInstanceRegistration.LOCATION_PROPERTY.concat(".GET"));
+            Integer locationGetLevel = (Integer) reference.getProperty(ModelInstance.LOCATION_PROPERTY.concat(".GET"));
             if (locationGetLevel == null)
             	locationGetLevel = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
 
@@ -262,14 +262,14 @@ public final class RegistryEndpoint {
                 node = tree.getRoot();            
             int locationAccessLevel = node.getAccessLevelOption(get).getAccessLevel().getLevel();
             
-            String friendlyName = null;
-            obj = reference.getProperty(ModelInstanceRegistration.FRIENDLY_NAME_PROPERTY.concat(".value"));
+            String friendlyName;
+            obj = reference.getProperty(ModelInstance.FRIENDLY_NAME_PROPERTY.concat(".value"));
             if (obj == null || "null".equals(String.valueOf(obj))) 
-            	friendlyName = name;
+            	friendlyName = null;
             else
             	friendlyName = String.valueOf(obj).replace('"', '\'');
 
-            Integer friendlyNameGetLevel = (Integer) reference.getProperty(ModelInstanceRegistration.FRIENDLY_NAME_PROPERTY.concat(".GET"));
+            Integer friendlyNameGetLevel = (Integer) reference.getProperty(ModelInstance.FRIENDLY_NAME_PROPERTY.concat(".GET"));
             if (friendlyNameGetLevel == null)
             	friendlyNameGetLevel = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
 
@@ -280,13 +280,13 @@ public final class RegistryEndpoint {
             int friendlyNameAccessLevel = node.getAccessLevelOption(get).getAccessLevel().getLevel();
             
             String bridge;
-            obj = reference.getProperty(ModelInstanceRegistration.BRIDGE_PROPERTY.concat(".value"));
+            obj = reference.getProperty(ModelInstance.BRIDGE_PROPERTY.concat(".value"));
             if (obj == null || "null".equals(String.valueOf(obj)))  
             	bridge = null;
             else
             	bridge = String.valueOf(obj).replace('"', '\'');
 
-            Integer bridgeGetLevel = (Integer) reference.getProperty(ModelInstanceRegistration.BRIDGE_PROPERTY.concat(".GET"));
+            Integer bridgeGetLevel = (Integer) reference.getProperty(ModelInstance.BRIDGE_PROPERTY.concat(".GET"));
             if (bridgeGetLevel == null)
             	bridgeGetLevel = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());
 
@@ -297,13 +297,13 @@ public final class RegistryEndpoint {
              int bridgeAccessLevel = node.getAccessLevelOption(get).getAccessLevel().getLevel();
             
             String icon;
-            obj = reference.getProperty(ModelInstanceRegistration.ICON_PROPERTY.concat(".value"));
+            obj = reference.getProperty(ModelInstance.ICON_PROPERTY.concat(".value"));
             if (obj == null || "null".equals(String.valueOf(obj)))  
             	icon = null;
             else
             	icon = String.valueOf(obj).replace('"', '\'');
 
-            Integer iconGetLevel = (Integer) reference.getProperty(ModelInstanceRegistration.ICON_PROPERTY.concat(".GET"));
+            Integer iconGetLevel = (Integer) reference.getProperty(ModelInstance.ICON_PROPERTY.concat(".GET"));
             if (iconGetLevel == null)
             	iconGetLevel = Integer.valueOf(AccessLevelOption.OWNER.getAccessLevel().getLevel());            
 

@@ -10,11 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.filter.attributes.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -123,9 +118,30 @@ public class TestAttributesFiltering extends MidOSGiTest {
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
         + ",\"location\":\"45.2:5.7\""
-        + ",\"friendlyName\":\"slider\"}]}");
+        + ",\"friendlyName\":null}]}");
         JSONAssert.assertEquals(expected, new JSONObject(response), false);
+        
+        HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/slider/admin/friendlyName/SET",
+        "[{\"name\":\"attributeName\",\"type\":\"string\",\"value\":\"value\"},{\"name\":\"value\",\"type\":\"string\",\"value\":\"mySlider\"}]", "POST");
 
+        Thread.sleep(2000);
+        response = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?attrs=[friendlyName]", null, "GET");
+        
+        result = new JSONObject(response);
+        expected = new JSONObject(
+        "{\"filters\":[{\"definition\":\"[friendlyName]\",\"type\":\"attrs\"}]," 
+        + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
+        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," 
+        + "{\"name\":\"cursor\",\"resources\":" 
+        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
+        + "}]" 
+        + ",\"location\":\"45.2:5.7\""
+        + ",\"friendlyName\":\"mySlider\"}]}");
+        JSONAssert.assertEquals(expected, new JSONObject(response), false);
+        
         response = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?attrs={friendlyName,icon}", null, "GET");
         result = new JSONObject(response);
         expected = new JSONObject(
@@ -140,7 +156,7 @@ public class TestAttributesFiltering extends MidOSGiTest {
         + "}]" 
         + ",\"location\":\"45.2:5.7\""
         + ",\"icon\":null"
-        + ",\"friendlyName\":\"slider\"}]}");
+        + ",\"friendlyName\":\"mySlider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
 
         response = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?attrs=friendlyName,icon,bridge", null, "GET");
@@ -156,7 +172,7 @@ public class TestAttributesFiltering extends MidOSGiTest {
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
         + ",\"location\":\"45.2:5.7\""
-        + ",\"friendlyName\":\"slider\""
+        + ",\"friendlyName\":\"mySlider\""
         + ",\"icon\":null"
         + ",\"bridge\":\"slider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
@@ -180,7 +196,27 @@ public class TestAttributesFiltering extends MidOSGiTest {
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
         + ",\"location\":\"45.2:5.7\""
-        + ",\"friendlyName\":\"slider\"}]}");
+        + ",\"friendlyName\":null}]}");
+        JSONAssert.assertEquals(expected, result, false);
+
+        this.synchronizedRequest(client, "/sensinact/slider/admin/friendlyName/SET", "[{\"name\":\"attributeName\",\"type\":\"string\",\"value\":\"value\"},{\"name\":\"value\",\"type\":\"string\",\"value\":\"mySlider\"}]");
+
+        Thread.sleep(2000);
+
+        response = this.synchronizedRequest(client, "/sensinact", "[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"[friendlyName]\"}]");
+        result = new JSONObject(response);
+        expected = new JSONObject(
+        "{\"filters\":[{\"definition\":\"[friendlyName]\",\"type\":\"attrs\"}]," 
+        + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
+        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," 
+        + "{\"name\":\"cursor\",\"resources\":" 
+        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
+        + "}]" 
+        + ",\"location\":\"45.2:5.7\""
+        + ",\"friendlyName\":\"mySlider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
 
         response = this.synchronizedRequest(client, "/sensinact", "[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"{friendlyName,icon}\"}]");
@@ -197,7 +233,7 @@ public class TestAttributesFiltering extends MidOSGiTest {
         + "}]" 
         + ",\"location\":\"45.2:5.7\""
         + ",\"icon\":null"
-        + ",\"friendlyName\":\"slider\"}]}");
+        + ",\"friendlyName\":\"mySlider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
 
         response = this.synchronizedRequest(client, "/sensinact", "[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"friendlyName,icon,bridge\"}]");
@@ -213,7 +249,7 @@ public class TestAttributesFiltering extends MidOSGiTest {
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
         + ",\"location\":\"45.2:5.7\""
-        + ",\"friendlyName\":\"slider\""
+        + ",\"friendlyName\":\"mySlider\""
         + ",\"icon\":null"
         + ",\"bridge\":\"slider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
