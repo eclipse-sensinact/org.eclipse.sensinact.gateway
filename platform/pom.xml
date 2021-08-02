@@ -83,6 +83,7 @@
 		<module>tools</module>
 		<module>sensinact-datastore/sensinact-datastore-api</module>
 		<module>sensinact-security/sensinact-signature-validator</module>
+		<module>sensinact-security/sensinact-framework-extension</module>
 		<module>sensinact-core</module>
 		<module>sensinact-remote-osgi</module>
 		<module>sensinact-security</module>
