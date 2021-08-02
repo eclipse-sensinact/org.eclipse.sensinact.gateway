@@ -31,6 +31,7 @@ import java.util.Stack;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 
 public abstract class MidOSGiTest implements BundleContextProvider {
     /**
@@ -163,15 +164,18 @@ public abstract class MidOSGiTest implements BundleContextProvider {
                 File file = enumerator.nextElement();
                 if (file.isFile()) {
                     String entryName = null;
-                    if (sourceDirectory.isDirectory()) {
+                    if (sourceDirectory.isDirectory()) 
                         entryName = file.getAbsolutePath().substring(sourceDirectory.getAbsolutePath().length() + 1);
-
-                    } else {
+                    else 
                         entryName = file.getName();
-                    }
+                    
                     entryName = entryName.replace(File.separatorChar, '/');
-                    jarOut.putNextEntry(new ZipEntry(entryName));
-
+                    try {
+                    	jarOut.putNextEntry(new ZipEntry(entryName));
+                    }catch(ZipException e) {
+                    	if(!e.getMessage().startsWith("duplicate entry: ")) 
+                    		throw e;
+                    }
                     reader = new FileInputStream(file);
                     int len;
                     while ((len = reader.read(buf)) > 0) {
@@ -207,18 +211,11 @@ public abstract class MidOSGiTest implements BundleContextProvider {
         return null;
     }
 
-    /**
-     * @inheritDoc
-     * @see BundleContextProvider#getBundleContext()
-     */
     @Override
     public BundleContext getBundleContext() {
         return this.context;
     }
 
-    /**
-     * @throws Exception
-     */
     @After
     public void tearDown() throws Exception {
         long start = System.currentTimeMillis();
@@ -255,9 +252,6 @@ public abstract class MidOSGiTest implements BundleContextProvider {
         Thread.sleep(5000);
     }
 
-    /**
-     * @throws Exception
-     */
     @SuppressWarnings({"unchecked", "rawtypes", "serial"})
     @Before
     public void init() throws Exception {
@@ -268,7 +262,30 @@ public abstract class MidOSGiTest implements BundleContextProvider {
         configuration.put("felix.cache.rootdir", felixDir.getPath());
         configuration.put("org.osgi.framework.storage", "felix-cache");
         configuration.put("org.osgi.framework.bootdelegation", "*");
-        configuration.put("org.osgi.framework.system.packages.extra", "org.eclipse.sensinact.gateway.test,org.slf4j," + "com.sun.net.httpserver," + "javax.activation," + "javax.net.ssl," + "javax.xml.parsers," + "javax.imageio," + "javax.management," + "javax.naming," + "javax.sql," + "javax.swing," + "javax.swing.border," + "javax.swing.event," + "javax.management.modelmbean," + "javax.management.remote," + "javax.security.auth," + "javax.security.cert," + "org.w3c.dom," + "org.xml.sax," + "org.xml.sax.helpers," + "sun.misc," + "javax.mail," + "javax.mail.internet," + "sun.security.action");
+        configuration.put("org.osgi.framework.system.packages.extra", 
+        	"org.eclipse.sensinact.gateway.test,org.slf4j," + 
+            "com.sun.net.httpserver," + 
+            "javax.activation," + 
+            "javax.net.ssl," + 
+            "javax.xml.parsers," + 
+            "javax.imageio," + 
+            "javax.management," + 
+            "javax.naming," + 
+            "javax.sql," + 
+            "javax.swing," + 
+            "javax.swing.border," + 
+            "javax.swing.event," + 
+            "javax.management.modelmbean," + 
+            "javax.management.remote," + 
+            "javax.security.auth," + 
+            "javax.security.cert," + 
+            "org.w3c.dom," + 
+            "org.xml.sax," + 
+            "org.xml.sax.helpers," + 
+            "sun.misc," + 
+            "javax.mail," + 
+            "javax.mail.internet," + 
+            "sun.security.action");
         configuration.put("org.osgi.framework.storage.clean", "onFirstInit");
         configuration.put("felix.auto.deploy.action", "install");
         configuration.put("felix.log.level", "4");
@@ -325,7 +342,8 @@ public abstract class MidOSGiTest implements BundleContextProvider {
         String m2 = this.getMavenRepository();
         String path = "file:".concat(m2.concat("/*"));
         path = path.concat(",http://felix.extensions:9/");
-
+        path = path.concat(",jar:System Bundle");
+        
         String testPath = new File("target/test-classes").getAbsolutePath();
         path = path.concat(String.format(",file:%s%s", testPath.startsWith("/") ? "" : "/", testPath));
         path = path.concat("/*");
@@ -339,7 +357,7 @@ public abstract class MidOSGiTest implements BundleContextProvider {
         String m2 = System.getenv().get("M2_REPO");
         if (m2 == null) {
             m2 = System.getProperty("user.home");
-            m2 = m2.concat(".m2/repository");
+            m2 = m2.concat("/.m2/repository");
         }
         if (!m2.startsWith("/")) {
             m2 = "/".concat(m2);

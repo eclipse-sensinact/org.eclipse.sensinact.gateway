@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core.test;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,6 +48,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
+import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
 import org.osgi.service.log.LogService;
 
 /**
@@ -54,8 +57,8 @@ import org.osgi.service.log.LogService;
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class TestContext<R extends ModelInstance> {
-	private static final String LOG_FILTER = "(" + Constants.OBJECTCLASS + "=" + LogService.class.getCanonicalName()
-			+ ")";
+	private static final String LOG_FILTER = "(" + Constants.OBJECTCLASS + "=" 
+			+ LogService.class.getCanonicalName()	+ ")";
 
 	private static final String DATA_STORE_FILTER = "(" + Constants.OBJECTCLASS + "="
 			+ DataStoreService.class.getCanonicalName() + ")";
@@ -69,8 +72,8 @@ public class TestContext<R extends ModelInstance> {
 	private static final String VALIDATION_FILTER = "(" + Constants.OBJECTCLASS + "="
 			+ BundleValidation.class.getCanonicalName() + ")";
 
-	private static final String AGENT_FILTER = "(" + Constants.OBJECTCLASS + "=" + SnaAgent.class.getCanonicalName()
-			+ ")";
+	private static final String AGENT_FILTER = "(" + Constants.OBJECTCLASS + "=" 
+			+ SnaAgent.class.getCanonicalName() 	+ ")";
 
 	private static final String AUTHORIZATION_FILTER = "(" + Constants.OBJECTCLASS + "="
 			+ AuthorizationService.class.getCanonicalName() + ")";
@@ -343,6 +346,13 @@ public class TestContext<R extends ModelInstance> {
 				return l.toArray(new String[0]);
 			}
 		});
+		
+		ConditionalPermissionAdmin cpa = Mockito.mock(ConditionalPermissionAdmin.class);
+		ConditionalPermissionUpdate cpu = Mockito.mock(ConditionalPermissionUpdate.class);
+		
+		Mockito.when(cpu.commit()).thenReturn(true);
+		Mockito.when(cpa.newConditionalPermissionUpdate()).thenReturn(cpu);
+		
 		Mockito.when(registration.getReference()).thenReturn(referenceProvider);
 		
 		Mockito.when(registrationAgent.getReference()).thenReturn(referenceAgent);
@@ -356,6 +366,13 @@ public class TestContext<R extends ModelInstance> {
 		Mockito.when(componentContext.getBundleContext()).thenReturn(context);
 
 		sensinact = new SensiNact();
+		try {
+			Field cpaField = sensinact.getClass().getDeclaredField("cpa");
+			cpaField.setAccessible(true);
+			cpaField.set(sensinact, cpa);
+		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+			e.printStackTrace();
+		}
 		sensinact.activate(componentContext);
 		this.mediator = sensinact.mediator;
 		

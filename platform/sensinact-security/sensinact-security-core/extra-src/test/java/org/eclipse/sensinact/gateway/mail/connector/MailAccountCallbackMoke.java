@@ -18,19 +18,12 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackContext;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
 
-/**
- * @author christophe
- *
- */
 public class MailAccountCallbackMoke implements CallbackService{
 
 	private String pattern;
 	private Executable<CallbackContext, Void> processor;
 	private Dictionary properties;
 
-	/**
-	 * 
-	 */
 	public MailAccountCallbackMoke(String pattern, Dictionary properties, Executable<CallbackContext, Void> processor) {
 		this.pattern = pattern;
 		if(properties != null) {

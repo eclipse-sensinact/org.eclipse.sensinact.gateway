@@ -28,27 +28,23 @@ import java.util.List;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class Activator implements BundleActivator {
-    /**
-     * @throws BundleException
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.common.bundle.AbstractActivator#
-     * doStart()
-     */
+
     public void start(BundleContext context) throws Exception {
         String codeBase = context.getProperty("org.eclipse.sensinact.gateway.test.codeBase");
 
-        if (codeBase == null || codeBase.length() == 0) {
+        if (codeBase == null || codeBase.length() == 0) 
             return;
-        }
+        
         String[] codeBases = codeBase.split(",");
 
-        ServiceReference<ConditionalPermissionAdmin> sRef = context.getServiceReference(ConditionalPermissionAdmin.class);
+        ServiceReference<ConditionalPermissionAdmin> sRef = context.getServiceReference(
+        		ConditionalPermissionAdmin.class);
 
         ConditionalPermissionAdmin cpa = null;
 
-        if (sRef == null) {
+        if (sRef == null) 
             throw new BundleException("ConditionalPermissionAdmin services needed");
-        }
+        
         cpa = context.getService(sRef);
 
         ConditionalPermissionUpdate cpu = cpa.newConditionalPermissionUpdate();
@@ -57,17 +53,16 @@ public class Activator implements BundleActivator {
         int index = 0;
         int length = codeBases.length;
         for (; index < length; index++) {
-            piList.add(cpa.newConditionalPermissionInfo(String.format("ALLOW {[org.eclipse.sensinact.gateway.core.security.perm.CodeBaseCondition \"%s\"]" + "(java.security.AllPermission \"\" \"\")" + "} null", codeBases[index])));
+            piList.add(cpa.newConditionalPermissionInfo(
+            		String.format("ALLOW {[org.eclipse.sensinact.gateway.core.security.perm.CodeBaseCondition \"%s\"]" 
+            				+ "(java.security.AllPermission \"\" \"\")" 
+            				+ "} null", codeBases[index])));
         }
-        if (!cpu.commit()) {
+        if (!cpu.commit()) 
             throw new ConcurrentModificationException("Permissions changed during update");
-        }
+        
     }
 
-    /**
-     * @inheritDoc
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
     @Override
     public void stop(BundleContext context) throws Exception {
         //nothing to do here

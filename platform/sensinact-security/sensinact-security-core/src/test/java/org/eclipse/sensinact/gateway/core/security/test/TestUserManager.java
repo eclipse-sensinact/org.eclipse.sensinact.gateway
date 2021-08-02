@@ -10,12 +10,17 @@
  */
 package org.eclipse.sensinact.gateway.core.security.test;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import java.io.File;
+import java.lang.reflect.Method;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Describable;
-import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.AnonymousSession;
 import org.eclipse.sensinact.gateway.core.Core;
-import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.security.dao.UserDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.UserEntity;
@@ -32,24 +37,8 @@ import org.eclipse.sensinact.gateway.util.CryptoUtils;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.Ignore;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class TestUserManager extends MidOSGiTest {
@@ -104,8 +93,6 @@ public class TestUserManager extends MidOSGiTest {
 
     Method getDescription = null;
     Method getMethod = null;
-    Method setMethod = null;
-    Method actMethod = null;
 
     private Mediator mediator;
     private DataStoreService dataStoreService;
@@ -113,9 +100,7 @@ public class TestUserManager extends MidOSGiTest {
     public TestUserManager() throws Exception {
         super();
         getDescription = Describable.class.getDeclaredMethod("getDescription");
-        getMethod = Resource.class.getDeclaredMethod("get", new Class<?>[]{String.class});
-        setMethod = Resource.class.getDeclaredMethod("set", new Class<?>[]{String.class, Object.class});
-        actMethod = ActionResource.class.getDeclaredMethod("act", new Class<?>[]{Object[].class});
+        getMethod = Resource.class.getDeclaredMethod("get", new Class<?>[]{String.class, Object[].class});
     }
 
 	@Before
@@ -124,94 +109,88 @@ public class TestUserManager extends MidOSGiTest {
 		mediator.setProperty("org.eclipse.sensinact.gateway.security.database", "src/test/resources/sensinact.sqlite");
 		dataStoreService = new SQLiteDataStoreService(mediator);
 	}
-	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see MidOSGiTest#isExcluded(java.lang.String)
-	 */
+
 	public boolean isExcluded(String fileName) {
-		if ("org.apache.felix.framework.security.jar".equals(fileName)) {
-			return true;
-		}
+		if ("org.apache.felix.framework.security.jar".equals(fileName)) 
+			return true;		
 		return false;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see MidOSGiTest#doInit(java.util.Map)
-	 */
 	@Override
 	protected void doInit(Map configuration) {
+
 		configuration.put("org.osgi.framework.system.packages.extra",
-		"org.eclipse.sensinact.gateway.test," 
-		+ "com.sun.net.httpserver," 
-		+ "javax.net.ssl,"
-		+ "javax.xml.parsers," 
-		+ "javax.imageio," 
-		+ "javax.management," 
-		+ "javax.naming," 
-		+ "javax.sql,"
-		+ "javax.swing," 
-		+ "javax.swing.border," 
-		+ "javax.swing.event," 
-		+ "javax.mail,"
-		+ "javax.mail.internet," 
-		+ "javax.management.modelmbean," 
-		+ "javax.management.remote,"
-		+ "javax.xml.parsers," 
-		+ "javax.security.auth," 
-		+ "javax.security.cert," 
-		+ "junit.framework,"
-		+ "junit.textui," 
-		+ "org.w3c.dom," 
-		+ "org.xml.sax," 
-		+ "org.xml.sax.helpers," 
-		+ "sun.misc,"
-		+ "sun.security.action");
+		    "org.eclipse.sensinact.gateway.test," + 
+			"com.sun.net.httpserver," + 
+			"javax.mail," + 
+			"javax.mail.internet," + 
+			"javax.microedition.io," +
+			"javax.management.modelmbean," + 
+			"javax.management.remote,"	+
+			"javax.persistence," +
+			"junit.framework," + 
+			"junit.textui," + 
+			"org.w3c.dom," + 
+			"org.xml.sax," + 
+			"org.xml.sax.helpers," + 
+			"sun.misc,"+ 
+			"sun.security.action");
 
 		configuration.put("org.eclipse.sensinact.simulated.gui.enabled", "false");
 
 		configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
 		configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
 
-		configuration.put("org.eclipse.sensinact.gateway.security.database",
-				new File("src/test/resources/sensinact.sqlite").getAbsolutePath());
+		configuration.put("org.eclipse.sensinact.gateway.security.database", new File("src/test/resources/sensinact.sqlite").getAbsolutePath());
 
-		configuration.put("felix.auto.start.1",
-				"file:target/felix/bundle/org.osgi.compendium.jar "
-			  + "file:target/felix/bundle/org.apache.felix.framework.security.jar "
-			  + "file:target/felix/bundle/org.apache.felix.configadmin.jar "
-			  + "file:target/felix/bundle/org.apache.felix.fileinstall.jar");
+    	configuration.put("felix.auto.start.1",  
+           "file:target/felix/bundle/org.osgi.service.component.jar "+ 
+           "file:target/felix/bundle/org.osgi.service.cm.jar "+  
+           "file:target/felix/bundle/org.osgi.service.metatype.jar "+  
+           "file:target/felix/bundle/org.osgi.namespace.extender.jar "+  
+           "file:target/felix/bundle/org.osgi.util.promise.jar "+  
+           "file:target/felix/bundle/org.osgi.util.function.jar "+  
+           "file:target/felix/bundle/org.osgi.util.pushstream.jar "+
+           "file:target/felix/bundle/org.osgi.service.log.jar "  +
+           "file:target/felix/bundle/org.apache.felix.log.jar " + 
+           "file:target/felix/bundle/org.apache.felix.scr.jar " +
+           "file:target/felix/bundle/org.apache.felix.fileinstall.jar " +
+           "file:target/felix/bundle/org.apache.felix.configadmin.jar " + 
+           "file:target/felix/bundle/org.apache.felix.framework.security.jar ");
 
 		configuration.put("felix.auto.install.2",
-				"file:target/felix/bundle/sensinact-utils.jar "
-			  + "file:target/felix/bundle/sensinact-datastore-api.jar "
-			  + "file:target/felix/bundle/sensinact-sqlite-connector.jar "
-			  + "file:target/felix/bundle/sensinact-common.jar "
-			  + "file:target/felix/bundle/http.jar "  
-			  + "file:target/felix/bundle/sensinact-framework-extension.jar "
-		      + "file:target/felix/bundle/dynamicBundle.jar");
+	        "file:target/felix/bundle/slf4j-api.jar "+
+	    	"file:target/felix/bundle/sensinact-utils.jar "+ 
+	    	"file:target/felix/bundle/sensinact-datastore-api.jar "+
+	    	"file:target/felix/bundle/sensinact-sqlite-connector.jar "+
+	    	"file:target/felix/bundle/sensinact-common.jar "+
+			"file:target/felix/bundle/http.jar "  +
+	    	"file:target/felix/bundle/sensinact-framework-extension.jar "+
+	    	"file:target/felix/bundle/dynamicBundle.jar");
 
-		configuration.put("felix.auto.start.2", 
-				"file:target/felix/bundle/sensinact-test-configuration.jar "
-			  + "file:target/felix/bundle/sensinact-signature-validator.jar "
-			  + "file:target/felix/bundle/javax.servlet-api.jar "
-			  + "file:target/felix/bundle/org.apache.felix.http.api.jar "
-			  + "file:target/felix/bundle/org.apache.felix.http.jetty.jar "
-			  + "file:target/felix/bundle/http-tools.jar " );
+	    configuration.put("felix.auto.start.2", 
+	        "file:target/felix/bundle/slf4j-simple.jar "+
+	    	"file:target/felix/bundle/sensinact-test-configuration.jar "+
+	    	"file:target/felix/bundle/sensinact-signature-validator.jar " +
+	    	"file:target/felix/bundle/org.apache.felix.http.servlet-api.jar " +
+	    	"file:target/felix/bundle/org.apache.felix.http.api.jar " +
+	    	"file:target/felix/bundle/org.apache.felix.http.jetty.jar " +
+	    	"file:target/felix/bundle/org.apache.aries.javax.jax.rs-api.jar "+
+			"file:target/felix/bundle/http-tools.jar " );
 
 		configuration.put("felix.auto.start.3",
 				"file:target/felix/bundle/sensinact-core.jar " + 
 				"file:target/felix/bundle/sensinact-generic.jar " +
-				"file:target/felix/bundle/sensinact-northbound-access.jar ");
+				"file:target/felix/bundle/sensinact-northbound-access.jar "+
+				"file:target/felix/bundle/rest-access.jar ");
 
 		configuration.put("felix.auto.start.4", 
-				"file:target/felix/bundle/rest-access.jar " +
 				"file:target/felix/bundle/slider.jar " + 
 				"file:target/felix/bundle/fan.jar " + 
 				"file:target/felix/bundle/button.jar " );
+		
+        configuration.put("org.eclipse.sensinact.gateway.location.latitude", "45.2d");
+        configuration.put("org.eclipse.sensinact.gateway.location.longitude", "5.7d");
 		
 		configuration.put("mail.account.connector.host","smtp.server.fr");
 		configuration.put("mail.account.connector.port","465");
@@ -224,7 +203,6 @@ public class TestUserManager extends MidOSGiTest {
 		configuration.put("org.apache.felix.http.enable","true");
 	}
 
-	@Ignore
 	@Test
 	public void testUserManager() throws Exception {
 		this.initializeMoke(
@@ -246,7 +224,7 @@ public class TestUserManager extends MidOSGiTest {
 		
 		ServiceReference<?>[] references = super.getBundleContext().getServiceReferences("org.eclipse.sensinact.gateway.mail.connector.MailAccountConnectorMailReplacement",null);
 		Object mailAccountConnectorMailReplacement  = super.getBundleContext().getService(references[0]);		
-		Method method = mailAccountConnectorMailReplacement.getClass().getMethod("getMailDetails");
+		Method method = mailAccountConnectorMailReplacement.getClass().getMethod("getMailDetails",null);
 		method.setAccessible(true);
 		String message = (String) method.invoke(mailAccountConnectorMailReplacement);
 		
@@ -269,8 +247,10 @@ public class TestUserManager extends MidOSGiTest {
 	
     private void initializeMoke(File manifestFile, File... sourceDirectories) throws Exception {
         File tmpDirectory = new File("./target/felix/tmp");
-        new File(tmpDirectory, "dynamicBundle.jar").delete();
-
+        if(tmpDirectory.exists())
+        	new File(tmpDirectory, "dynamicBundle.jar").delete();
+        else 
+        	tmpDirectory.mkdir();
         int length = (sourceDirectories == null ? 0 : sourceDirectories.length);
         File[] sources = new File[length];
         int index = 0;

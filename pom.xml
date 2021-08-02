@@ -138,7 +138,7 @@
 		<keycloak.version>9.0.0-SNAPSHOT-stage-20191219-003332</keycloak.version>
 		<io.moquette.version>0.9</io.moquette.version>
 		<io.netty.version>4.1.45.Final</io.netty.version>
-		<org.bouncycastle.version>1.64</org.bouncycastle.version>
+		<org.bouncycastle.version>1.66</org.bouncycastle.version>
 
 		<!-- BUILD: org.apache.maven.plugins -->
 		<maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>

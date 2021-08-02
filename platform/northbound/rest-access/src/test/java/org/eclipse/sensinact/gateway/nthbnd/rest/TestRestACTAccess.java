@@ -130,9 +130,9 @@ public class TestRestACTAccess extends TestRestAccess {
 
         new Thread(client).start();
 
-
         simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null);
-        //System.out.println(simulated);
+        System.out.println(simulated); 
+
         response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/light/switch/brightness"));

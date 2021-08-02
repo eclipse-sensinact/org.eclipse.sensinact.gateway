@@ -60,82 +60,87 @@ public class TestSecurityPattern extends MidOSGiTest {
 	// ********************************************************************//
 
 	Method getDescription = null;
-	Method getMethod = null;
-	Method setMethod = null;
-	Method actMethod = null;
-
 	public TestSecurityPattern() throws Exception {
 		super();
 		getDescription = Describable.class.getDeclaredMethod("getDescription");
-		getMethod = Resource.class.getDeclaredMethod("get", new Class<?>[] { String.class });
-		setMethod = Resource.class.getDeclaredMethod("set", new Class<?>[] { String.class, Object.class });
-		actMethod = ActionResource.class.getDeclaredMethod("act", new Class<?>[] { Object[].class });
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see MidOSGiTest#isExcluded(java.lang.String)
-	 */
 	public boolean isExcluded(String fileName) {
-		if ("org.apache.felix.framework.security.jar".equals(fileName)) {
-			return true;
-		}
+		if ("org.apache.felix.framework.security.jar".equals(fileName)) 
+			return true;		
 		return false;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see MidOSGiTest#doInit(java.util.Map)
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void doInit(Map configuration) {
 		configuration.put("org.osgi.framework.system.packages.extra",
-				"org.eclipse.sensinact.gateway.test," + "com.sun.net.httpserver," + "javax.net.ssl,"
-						+ "javax.xml.parsers," + "javax.imageio," + "javax.management," + "javax.naming," + "javax.sql,"
-						+ "javax.swing," + "javax.swing.border," + "javax.swing.event," + "javax.mail,"
-						+ "javax.mail.internet," + "javax.management.modelmbean," + "javax.management.remote,"
-						+ "javax.xml.parsers," + "javax.security.auth," + "javax.security.cert," + "junit.framework,"
-						+ "junit.textui," + "org.w3c.dom," + "org.xml.sax," + "org.xml.sax.helpers," + "sun.misc,"
-						+ "sun.security.action");
+			"org.eclipse.sensinact.gateway.test," + 
+			"com.sun.net.httpserver," + 
+			"javax.mail," + 
+			"javax.mail.internet," + 
+			"javax.microedition.io," +
+			"javax.management.modelmbean," + 
+			"javax.management.remote,"	+
+			"javax.persistence," +
+			"junit.framework," + 
+			"junit.textui," + 
+			"org.w3c.dom," + 
+			"org.xml.sax," + 
+			"org.xml.sax.helpers," + 
+			"sun.misc,"+ 
+			"sun.security.action");
 
-		configuration.put(GUI_ENABLED, "false");
-		configuration.put(SLIDERS_PROP, SLIDERS_DEFAULT);
+		configuration.put("org.eclipse.sensinact.simulated.gui.enabled", "false");
 
 		configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
 		configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
 
-		configuration.put("org.eclipse.sensinact.gateway.security.database",
-				new File("src/test/resources/sensinact.sqlite").getAbsolutePath());
+		configuration.put("org.eclipse.sensinact.gateway.security.database", new File("src/test/resources/sensinact.sqlite").getAbsolutePath());
 
-		configuration.put("felix.auto.start.1",
-				"file:target/felix/bundle/org.osgi.compendium.jar "
-						+ "file:target/felix/bundle/org.apache.felix.framework.security.jar "
-						+ "file:target/felix/bundle/org.apache.felix.configadmin.jar "
-						+ "file:target/felix/bundle/org.apache.felix.fileinstall.jar");
+    	configuration.put("felix.auto.start.1",  
+           "file:target/felix/bundle/org.osgi.service.component.jar "+ 
+           "file:target/felix/bundle/org.osgi.service.cm.jar "+  
+           "file:target/felix/bundle/org.osgi.service.metatype.jar "+  
+           "file:target/felix/bundle/org.osgi.namespace.extender.jar "+  
+           "file:target/felix/bundle/org.osgi.util.promise.jar "+  
+           "file:target/felix/bundle/org.osgi.util.function.jar "+  
+           "file:target/felix/bundle/org.osgi.util.pushstream.jar "+
+           "file:target/felix/bundle/org.osgi.service.log.jar "  +
+           "file:target/felix/bundle/org.apache.felix.log.jar " + 
+           "file:target/felix/bundle/org.apache.felix.scr.jar " +
+           "file:target/felix/bundle/org.apache.felix.fileinstall.jar " +
+           "file:target/felix/bundle/org.apache.felix.configadmin.jar " + 
+           "file:target/felix/bundle/org.apache.felix.framework.security.jar ");
+    	
+        configuration.put("felix.auto.install.2",  
+    	    "file:target/felix/bundle/slf4j-api.jar "+
+			"file:target/felix/bundle/sensinact-utils.jar "+ 
+			"file:target/felix/bundle/sensinact-datastore-api.jar "+
+			"file:target/felix/bundle/sensinact-sqlite-connector.jar "+
+			"file:target/felix/bundle/sensinact-common.jar "+
+			"file:target/felix/bundle/sensinact-framework-extension.jar "+
+			"file:target/felix/bundle/dynamicBundle.jar");
 
-		configuration.put("felix.auto.install.2",
-				"file:target/felix/bundle/sensinact-utils.jar "
-						+ "file:target/felix/bundle/sensinact-datastore-api.jar "
-						+ "file:target/felix/bundle/sensinact-sqlite-connector.jar "
-						+ "file:target/felix/bundle/sensinact-common.jar "
-						+ "file:target/felix/bundle/sensinact-framework-extension.jar "
-						+ "file:target/felix/bundle/dynamicBundle.jar");
-
-		configuration.put("felix.auto.start.2", "file:target/felix/bundle/sensinact-test-configuration.jar "
-				+ "file:target/felix/bundle/sensinact-signature-validator.jar ");
+		configuration.put("felix.auto.start.2", 
+		    "file:target/felix/bundle/slf4j-simple.jar "+
+			"file:target/felix/bundle/sensinact-test-configuration.jar "+
+			"file:target/felix/bundle/sensinact-signature-validator.jar " +
+			"file:target/felix/bundle/org.apache.felix.http.servlet-api.jar " +
+			"file:target/felix/bundle/org.apache.felix.http.api.jar " +
+			"file:target/felix/bundle/org.apache.felix.http.jetty.jar " +
+			"file:target/felix/bundle/org.apache.aries.javax.jax.rs-api.jar");
 
 		configuration.put("felix.auto.start.3",
-				"file:target/felix/bundle/sensinact-core.jar " + "file:target/felix/bundle/sensinact-generic.jar ");
+			"file:target/felix/bundle/sensinact-core.jar " + 
+		    "file:target/felix/bundle/sensinact-generic.jar ");
 
-		configuration.put("felix.auto.start.4", "file:target/felix/bundle/slider.jar ");
+		configuration.put("felix.auto.start.4", "file:target/felix/bundle/slider.jar ");       
+		configuration.put(SLIDERS_PROP, SLIDERS_DEFAULT);
 
 		configuration.put("felix.log.level", "4");
 	}
 
-	@Ignore
 	@Test
 	public void testSecurityAccessWithPattern() throws Throwable {
 		// slider[0-9]{2} - authenticated access level

@@ -16,6 +16,7 @@ import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -88,6 +89,7 @@ import org.eclipse.sensinact.gateway.core.security.UserUpdater;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
+import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -102,6 +104,8 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
+import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
+import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1139,8 +1143,8 @@ public class SensiNact implements Core {
 		return tree;
 	}
 	
-//	@Reference
-//	private ConditionalPermissionAdmin cpa;
+	@Reference
+	private ConditionalPermissionAdmin cpa;
 
 	public SensiNact() {
 		this.sessions = new Sessions();
@@ -1151,43 +1155,43 @@ public class SensiNact implements Core {
 	BundleException, DataStoreException  {
 		
 		Mediator mediator = new Mediator(context.getBundleContext());
-//		List<String> types = ReflectUtils.getAllStringTypes(mediator.getContext().getBundle());
-//
-//		StringBuilder builder = new StringBuilder();
-//
-//		for (int index = 0; index < types.size(); index++) {
-//			if (index > 0)
-//				builder.append("\\,");
-//			builder.append(types.get(index));
-//		}
-//
-//		ConditionalPermissionUpdate cpu = cpa.newConditionalPermissionUpdate();
-//		List piList = cpu.getConditionalPermissionInfos();
-//		
-//		ConditionalPermissionInfo cpiDeny = cpa.newConditionalPermissionInfo(
-//		String.format("DENY { [org.eclipse.sensinact.gateway.core.security.perm.StrictCodeBaseCondition \"%s\" \"!\"]"
-//			+ " (org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.Core\" \"register\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModel\" \"register,get\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement\" \"register,get\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.LocalAgent\" \"register,get\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.RemoteAgent\" \"register,get\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.remote.RemoteCore\" \"register,get\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecuredAccess\" \"register,get\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.UserManager\" \"register,get\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService\" \"register,get\")"
-//			+ "} null", builder.toString()));
-//		piList.add(cpiDeny);
+		List<String> types = ReflectUtils.getAllStringTypes(mediator.getContext().getBundle());
+
+		StringBuilder builder = new StringBuilder();
+
+		for (int index = 0; index < types.size(); index++) {
+			if (index > 0)
+				builder.append("\\,");
+			builder.append(types.get(index));
+		}
+
+		ConditionalPermissionUpdate cpu = cpa.newConditionalPermissionUpdate();
+		List piList = cpu.getConditionalPermissionInfos();
 		
-//		ConditionalPermissionInfo cpiAllow = null;"
-//
-//		cpiAllow = cpa.newConditionalPermissionInfo(
-//			"ALLOW {[org.eclipse.sensinact.gateway.core.security.perm.CodeBaseCondition \"*\"](java.security.AllPermission \"\" \"\")} null");
-//		
-//		piList.add(cpiAllow);
-//
-//		if (!cpu.commit()) 
-//			throw new ConcurrentModificationException("Permissions changed during update");
-//		
+		ConditionalPermissionInfo cpiDeny = cpa.newConditionalPermissionInfo(
+		String.format("DENY { [org.eclipse.sensinact.gateway.core.security.perm.StrictCodeBaseCondition \"%s\" \"!\"]"
+			+ " (org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.Core\" \"register\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModel\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.LocalAgent\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.RemoteAgent\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.remote.RemoteCore\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecuredAccess\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.UserManager\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService\" \"register,get\")"
+			+ "} null", builder.toString()));
+		piList.add(cpiDeny);
+		
+		ConditionalPermissionInfo cpiAllow = null;
+
+		cpiAllow = cpa.newConditionalPermissionInfo(
+			"ALLOW {[org.eclipse.sensinact.gateway.core.security.perm.CodeBaseCondition \"*\"](java.security.AllPermission \"\" \"\")} null");
+		
+		piList.add(cpiAllow);
+
+		if (!cpu.commit()) 
+			throw new ConcurrentModificationException("Permissions changed during update");
+		
 		SecuredAccess securedAccess = null;
 		ServiceLoader<SecurityDataStoreServiceFactory> dataStoreServiceFactoryLoader = 
 			ServiceLoader.load(SecurityDataStoreServiceFactory.class, mediator.getClassLoader());
@@ -1364,10 +1368,9 @@ public class SensiNact implements Core {
 	public AuthenticatedSession getSession(final Authentication<?> authentication)
 			throws InvalidKeyException, InvalidCredentialException {
 		AuthenticatedSession session = null;
-		if (authentication == null) {
+		if (authentication == null) 
 			return null;
-
-		} else if (Credentials.class.isAssignableFrom(authentication.getClass())) {
+		else if (Credentials.class.isAssignableFrom(authentication.getClass())) {
 			UserKey userKey = this.doPrivilegedService(AuthenticationService.class, null,
 				new Executable<AuthenticationService, UserKey>() {
 					@Override
@@ -1386,9 +1389,8 @@ public class SensiNact implements Core {
 			synchronized(this.sessions) {
 				sessions.put(sessionKey, session);
 			}
-		} else if (AuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
+		} else if (AuthenticationToken.class.isAssignableFrom(authentication.getClass())) 
 			session = this.getSession(((AuthenticationToken) authentication).getAuthenticationMaterial());
-		}
 		return session;
 	}
 

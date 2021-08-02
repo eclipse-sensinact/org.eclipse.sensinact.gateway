@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.mail.connector;
 
+import java.util.Hashtable;
 import java.util.Properties;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -40,12 +41,7 @@ public class MailAccountConnectorMoke implements AccountConnector {
 	public MailAccountConnectorMoke(Mediator mediator){
 		this.mediator = mediator;
 	}
-	
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.AccountConnector#connect(org.eclipse.sensinact.gateway.core.security.UserUpdater)
-	 */
+
 	@Override
 	public void connect(final String token, final UserUpdater userUpdater){
 	  // Recipient's email ID needs to be mentioned.
@@ -85,7 +81,7 @@ public class MailAccountConnectorMoke implements AccountConnector {
          final String link =  new StringBuilder().append(scheme).append("://").append(linkHost).append(":"
         	).append(linkPort).append(path).toString();
           
-         MailAccountCallbackMoke callback = new MailAccountCallbackMoke(path, null, 
+         MailAccountCallbackMoke callback = new MailAccountCallbackMoke(path, new Hashtable(), 
     		new Executable<CallbackContext, Void>() {
 				@Override
 				public Void execute(CallbackContext context) throws Exception {
@@ -97,15 +93,17 @@ public class MailAccountConnectorMoke implements AccountConnector {
 				}
 			}
          );
+
          this.mediator.register(new MailAccountConnectorMailReplacement(){
 			@Override
 			public String getMailDetails() {
 				return new StringBuilder().append(userUpdater.getMessage()
 		        		 ).append(":\n").append(link).toString();
-			}}, MailAccountConnectorMailReplacement.class, null);
+			}}, MailAccountConnectorMailReplacement.class, null);         
          
          ServiceRegistration<?> registration = this.mediator.getContext().registerService(
-        		 CallbackService.class, callback, null);
+        	 new String[] {CallbackService.class.getCanonicalName()},	 callback, new Hashtable() {{}});
+
          userUpdater.setRegistration(registration);
 
       } catch (Exception mex) {

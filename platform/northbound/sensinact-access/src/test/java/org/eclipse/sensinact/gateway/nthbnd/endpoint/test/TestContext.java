@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint.test;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -49,6 +50,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
+import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
 import org.osgi.service.log.LogService;
 
 /**
@@ -374,6 +377,7 @@ public class TestContext {
             }
 
         }).when(registration).setProperties(Mockito.any(Dictionary.class));
+        
         Mockito.when(registration.getReference()).thenReturn(referenceProvider);
         Mockito.when(registrationAgent.getReference()).thenReturn(referenceAgent);
         Mockito.when(registrationValidation.getReference()).thenReturn(referenceValidation);
@@ -385,8 +389,23 @@ public class TestContext {
 
 		Mockito.when(componentContext.getBundleContext()).thenReturn(context);
 
+		ConditionalPermissionAdmin cpa = Mockito.mock(ConditionalPermissionAdmin.class);
+		ConditionalPermissionUpdate cpu = Mockito.mock(ConditionalPermissionUpdate.class);
+		
+		Mockito.when(cpu.commit()).thenReturn(true);
+		Mockito.when(cpa.newConditionalPermissionUpdate()).thenReturn(cpu);
+		
 		mediator = new NorthboundMediator(context);
 		sensinact = new SensiNact();
+
+		try {
+			Field cpaField = sensinact.getClass().getDeclaredField("cpa");
+			cpaField.setAccessible(true);
+			cpaField.set(sensinact, cpa);
+		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+			e.printStackTrace();
+		}
+		
 		sensinact.activate(componentContext);;
 		
 		instance = (MyModelInstance) new ModelInstanceBuilder(mediator

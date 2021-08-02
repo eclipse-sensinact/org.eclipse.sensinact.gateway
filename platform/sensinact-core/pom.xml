@@ -48,6 +48,16 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-framework-extension</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.framework.security</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.skyscreamer</groupId>
 			<artifactId>jsonassert</artifactId>
 			<scope>test</scope>
@@ -57,10 +67,12 @@
 			<artifactId>slf4j-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
 			<artifactId>mqtt-utils</artifactId>
 		</dependency>
+		-->
 	</dependencies>
 
 	<!-- Build -->

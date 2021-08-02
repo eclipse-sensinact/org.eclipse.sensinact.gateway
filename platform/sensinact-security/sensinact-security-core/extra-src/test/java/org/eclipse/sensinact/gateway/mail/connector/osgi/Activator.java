@@ -24,11 +24,6 @@ import java.util.Hashtable;
  */
 public class Activator extends AbstractActivator<Mediator> {
 	
-    /**
-     * @inheritDoc
-     * 
-     * @see AbstractActivator#doStart()
-     */
 	@Override
     public void doStart() throws Exception {
         Dictionary<String, Object> props = new Hashtable<String, Object>();
@@ -36,20 +31,10 @@ public class Activator extends AbstractActivator<Mediator> {
         mediator.getContext().registerService(AccountConnector.class.getName(), new MailAccountConnectorMoke(mediator), props);
     }
 
-    /**
-     * @inheritDoc
-     * 
-     * @see AbstractActivator#doStop()
-     */
 	@Override
     public void doStop() throws Exception {
     }
 
-    /**
-     * @inheritDoc
-     * 
-     * @see AbstractActivator#doInstantiate(BundleContext)
-     */
 	@Override
     public Mediator doInstantiate(BundleContext context) {
         return new Mediator(context);
