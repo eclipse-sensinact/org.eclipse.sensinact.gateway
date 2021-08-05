@@ -139,23 +139,23 @@ public class TestRestGETAccess extends TestRestAccess {
 
     @Test
     public void testWsAccessMethodGET() throws Exception {
-        JSONObject response;
-        String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
 
         new Thread(client).start();
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers", null);
-
+        String simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers", null);
         System.out.println(simulated);
 
-        response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"]," + "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
+        JSONObject response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"]," + "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
         JSONAssert.assertEquals(response, new JSONObject(simulated), false);
+        simulated = null;
         simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/slider/services", null);
 
         response = new JSONObject(simulated);
         JSONArray array = response.getJSONArray("services");
         assertTrue(array.length() == 2);
         JSONAssert.assertEquals(new JSONArray("[\"admin\",\"cursor\"]"), array, false);
+        
+        simulated = null;
         simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/slider/services/cursor/resources", null);
         response = new JSONObject(simulated);
         array = response.getJSONArray("resources");
@@ -165,6 +165,8 @@ public class TestRestGETAccess extends TestRestAccess {
         SliderSetterItf slider = sliderProxy.buildProxy();
         slider.move(1);
         Thread.sleep(1000);
+        
+        simulated = null;        
         simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/slider/services/cursor/resources/position/GET", null);
         response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
