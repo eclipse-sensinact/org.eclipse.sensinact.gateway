@@ -72,7 +72,10 @@ public class TestRestACTAccess extends TestRestAccess {
     @Test
     public void testHttpACTWithParameters() throws Exception {
         Mediator mediator = new Mediator(context);
-        String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null, "GET");
+        String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers", null, "GET");
+        System.out.println(simulated);
+        
+        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null, "GET");
 
         JSONObject response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
