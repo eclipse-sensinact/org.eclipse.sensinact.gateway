@@ -49,7 +49,7 @@
 		<org.osgi.util.function.version>1.1.0</org.osgi.util.function.version>
 		<org.osgi.util.promise.version>1.1.1</org.osgi.util.promise.version>
 		<org.osgi.util.pushstream.version>1.0.1</org.osgi.util.pushstream.version>
-
+		
 		<!-- Apache Felix Version -->
 		<org.apache.felix.version>6.0.3</org.apache.felix.version>
 
@@ -102,6 +102,7 @@
 		<powermock-module-junit4.version>1.7.4</powermock-module-junit4.version>
 
 		<!-- Apache Aries -->
+		<org.apache.aries.jax.rs.version>1.0.3</org.apache.aries.jax.rs.version>
 		<org.fusesource.hawtbuf.version>1.11</org.fusesource.hawtbuf.version>
 		<org.fusesource.hawtdispatch.version>1.22</org.fusesource.hawtdispatch.version>
 		<org.apache.aries.rsa.version>1.14.0</org.apache.aries.rsa.version>
@@ -448,7 +449,12 @@
 				<artifactId>org.osgi.util.pushstream</artifactId>
 				<version>${org.osgi.util.pushstream.version}</version>
 			</dependency>
-
+			<!-- Apache Aries -->
+			<dependency>
+				<groupId>org.apache.aries.spec</groupId>
+    			<artifactId>org.apache.aries.javax.jax.rs-api</artifactId>
+    			<version>${org.apache.aries.jax.rs.version}</version>			
+			</dependency>
 			<!-- Apache Felix Version -->
 
 			<dependency>
@@ -1060,6 +1066,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.sensinact.gateway</groupId>
+				<artifactId>sensinact-security-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.sensinact.gateway</groupId>
 				<artifactId>sensinact-security-oauth2</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -1343,7 +1354,12 @@
 				<type>pom</type>
 				<version>${project.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
+				<artifactId>sensinact-distribution-template-with-security</artifactId>
+				<type>pom</type>
+				<version>${project.version}</version>
+			</dependency>
 
 			<!-- org.eclipse.sensinact.gateway.simulated.devices -->
 
@@ -1542,7 +1558,7 @@
 					<configuration>
 						<excludePackageNames>*.internal:*.internal.*</excludePackageNames>
 						<links>
-							<link>https://docs.oracle.com/javase/7/docs/api/</link>
+							<link>https://docs.oracle.com/javase/8/docs/api/</link>
 						</links>
 						<version>true</version>
 						<show>protected</show>
