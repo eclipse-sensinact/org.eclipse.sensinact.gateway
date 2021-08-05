@@ -2131,12 +2131,10 @@ public class SensiNact implements Core {
 	 * Returns the JSON formated description of the service provider whose String
 	 * identifier is passed as parameter
 	 * 
-	 * @param identifier
-	 *            the String identifier of the {@link Session} requiring the service
-	 *            provider description
-	 * @param serviceProviderId
-	 *            the String identifier of the service provider to return the
-	 *            description of
+	 * @param identifier the String identifier of the {@link Session} requiring the 
+	 * service provider description
+	 * @param serviceProviderId the String identifier of the service provider to return 
+	 * the description of
 	 * 
 	 * @return the JSON formated description of the specified service provider
 	 */
@@ -2183,9 +2181,9 @@ public class SensiNact implements Core {
 		}
 		String local = this.registry.getProviders(sessionKey, sessionKey.localID() != 0, effectiveFilter);
 
-		if (sessionKey.localID() != 0) {
+		if (sessionKey.localID() != 0) 
 			return local;
-		}
+		
 		final StringBuilder content = new StringBuilder();
 		if (local != null && local.length() > 0) 
 			content.append(local);
@@ -2215,6 +2213,33 @@ public class SensiNact implements Core {
 				return null;
 			}});
 		return content.toString();
+	}
+
+	/**
+	 * Returns the JSON formated description of the service provider whose identifier
+	 * is passed as parameter for the {@link Session} whose String identifier is also 
+	 * passed as parameter
+	 * 
+	 * @param identifier the String identifier of the {@link Session} requiring the list 
+	 * of available service providers
+	 * @param filter the (extra) LDAP String filter applying
+	 * 
+	 * @return the JSON String formated description of the specified service provider
+	 */
+	private String getProvider(String identifier, String providerId, String filter) {
+
+		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
+		String effectiveFilter = null;
+		if (filter != null && filter.length() > 0) {
+			try {
+				mediator.getContext().createFilter(filter);
+				effectiveFilter = filter;
+			} catch (InvalidSyntaxException e) {
+				effectiveFilter = null;
+			}
+		}
+		String provider = this.registry.getProvider(sessionKey, sessionKey.localID() != 0, providerId, effectiveFilter);
+		return provider;
 	}
 
 	/**

@@ -28,8 +28,7 @@ import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.UserKey;
 
 /**
- *
- * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
+ * 
  */
 public class SessionKey {
 	private Mediator mediator;
@@ -188,11 +187,6 @@ public class SessionKey {
 		this.agents.clear();
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see java.lang.Object#finalize()
-	 */
 	@Override
 	public void finalize() throws Throwable {
 		this.unregisterAgents();
