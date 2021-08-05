@@ -176,16 +176,17 @@ public class TestRestGETAccess extends TestRestAccess {
     @Test
     public void testSimplifiedWsAccessMethodGET() throws Exception {
         JSONObject response;
-        String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
 
         new Thread(client).start();
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/slider", null);
+        String simulated = this.synchronizedRequest(client, WS_ROOTURL + "/slider", null);
 
         response = new JSONObject(simulated).getJSONObject("response");
         JSONArray array = response.getJSONArray("services");
         assertTrue(array.length() == 2);
         JSONAssert.assertEquals(new JSONArray("[\"admin\",\"cursor\"]"), array, false);
+        
+        simulated = null;
         simulated = this.synchronizedRequest(client, WS_ROOTURL + "/slider/cursor", null);
         response = new JSONObject(simulated).getJSONObject("response");
         array = response.getJSONArray("resources");
@@ -194,6 +195,8 @@ public class TestRestGETAccess extends TestRestAccess {
         SliderSetterItf slider = sliderProxy.buildProxy();
         slider.move(1);
         Thread.sleep(1000);
+        
+        simulated = null;
         simulated = this.synchronizedRequest(client, WS_ROOTURL + "/slider/cursor/position/GET", null);
         response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));

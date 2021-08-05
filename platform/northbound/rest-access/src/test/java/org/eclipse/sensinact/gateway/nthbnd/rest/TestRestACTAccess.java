@@ -51,7 +51,6 @@ public class TestRestACTAccess extends TestRestAccess {
         Mediator mediator = new Mediator(context);
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/light/switch/status/GET", null, "GET");
 
-        //System.out.println(simulated);
         JSONObject response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/light/switch/status"));
