@@ -101,22 +101,25 @@ public class TestRestACTAccess extends TestRestAccess {
     @Test
     public void testWsACTWithoutParameters() throws Exception {
         JSONObject response;
-        String simulated;
-        WsServiceTestClient client = new WsServiceTestClient();
 
+        WsServiceTestClient client = new WsServiceTestClient();
+        
         new Thread(client).start();
 
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/status/GET", null);
+        String simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/status/GET", null);
 
         response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/light/switch/status"));
         assertTrue(response.getJSONObject("response").get("value").equals("OFF"));
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/turn_on/ACT", null);
 
+        simulated = null;
+        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/turn_on/ACT", null);
+        
         response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
 
+        simulated = null;
         simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/status/GET", null);
         response = new JSONObject(simulated);
 
@@ -128,24 +131,27 @@ public class TestRestACTAccess extends TestRestAccess {
     @Test
     public void testWsACTWithParameters() throws Exception {
         JSONObject response;
-        String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
-
         new Thread(client).start();
 
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null);
+        String simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null);
+        System.out.println("***********************************************"); 
         System.out.println(simulated); 
-
+        System.out.println("***********************************************"); 
+        
         response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
-        assertTrue(response.getString("uri").equals("/light/switch/brightness"));
+        assertTrue(response.getString("uri").equals("/light/switch/brightness")); 
         assertTrue(response.getJSONObject("response").get("value").equals(10));
+        simulated = null;
         simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/dim/ACT", "[{\"name\": \"brightness\",\"value\": 5,\"type\": \"int\"}]");
-
+        System.out.println(simulated);
+        
         response = new JSONObject(simulated);
 
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/light/switch/dim"));
+        simulated = null;
         simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null);
         response = new JSONObject(simulated);
 
