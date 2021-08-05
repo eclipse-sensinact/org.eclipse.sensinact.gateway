@@ -126,12 +126,9 @@ public class TestRestGETAccess extends TestRestAccess {
 
     @Test
     public void testWsAccessMethodRawDescription() throws Exception {
-        String simulated;
         WsServiceTestClient client = new WsServiceTestClient();
-
         new Thread(client).start();
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers?rawDescribe=true", null);
-        
+        String simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers?rawDescribe=true", null);        
         System.out.println(simulated);
         JSONArray response = new JSONArray("[\"slider\",\"light\"]");
         JSONAssert.assertEquals(response, new JSONArray(simulated), false);
