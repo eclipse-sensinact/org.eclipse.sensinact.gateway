@@ -161,7 +161,7 @@
 		<module>geojsonfilter</module>
 		<module>attributesfilter</module>
 		<module>http-client</module>
-		<module>oauth2-profile</module>
+		<!--<module>oauth2-profile</module>-->
 		<module>ttn-profile</module>
 	</modules>
 </project>

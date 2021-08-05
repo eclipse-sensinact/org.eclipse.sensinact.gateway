@@ -98,7 +98,7 @@
 		<module>northbound</module>
 		<module>sensinact-security/sensinact-mail-connector</module>
 		<module>sensinact-security/sensinact-security-core</module>
-		<module>sensinact-security/sensinact-security-oauth2</module>
+		<!--<module>sensinact-security/sensinact-security-oauth2</module>-->
 		<module>southbound</module>
 		<module>sensinact-system</module>
 		<module>sensinact-shell</module>
