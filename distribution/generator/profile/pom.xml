@@ -50,6 +50,11 @@
 			<artifactId>sensinact-distribution-template</artifactId>
 			<type>pom</type>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
+			<artifactId>sensinact-distribution-template-with-security</artifactId>
+			<type>pom</type>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -74,8 +79,60 @@
 							</resources>
 						</configuration>
 					</execution>
+					<execution>
+						<id>copy-resources-this-build-with-security</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/../../../target/sensinact-with-security</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}/sensinact/</directory>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
 				</executions>
-			</plugin>
+			</plugin>			
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/sensinact/load/${project.artifactId}</outputDirectory>
+                            <excludeArtifactIds>${excludeArtifactId}</excludeArtifactIds>
+                            <excludeGroupIds>${excludeGroupId}</excludeGroupIds>
+                            <excludeTransitive>${excludeTransitive}</excludeTransitive>
+                            <excludeTypes>pom</excludeTypes>
+                        </configuration>
+                        <inherited>false</inherited>
+                    </execution>                    
+                    <execution>
+                        <id>copy-dependencies-with-security</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/sensinact-with-security/load/${project.artifactId}</outputDirectory>
+                            <excludeArtifactIds>${excludeArtifactId}</excludeArtifactIds>
+                            <excludeGroupIds>${excludeGroupId}</excludeGroupIds>
+                            <excludeTransitive>${excludeTransitive}</excludeTransitive>
+                            <excludeTypes>pom</excludeTypes>
+                        </configuration>
+                        <inherited>false</inherited>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 

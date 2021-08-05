@@ -30,6 +30,7 @@
     <modules>
         <module>generator</module>
         <module>template</module>
+        <module>template-with-security</module>
         <module>archetypes</module>
     </modules>
 </project>

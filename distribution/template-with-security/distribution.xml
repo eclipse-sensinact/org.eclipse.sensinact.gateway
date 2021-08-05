@@ -21,8 +21,8 @@
 
     <fileSets>
         <fileSet>
-            <directory>${project.basedir}</directory>
-            <outputDirectory>/</outputDirectory>
+            <directory>${project.basedir}/../template</directory>
+            <outputDirectory>.</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <excludes>
                 <exclude>**/distribution.xml</exclude>
@@ -34,6 +34,31 @@
                 <exclude>**/pom.xml</exclude>
                 <exclude>**/${project.build.directory}/**</exclude>
                 <exclude>**/about.html</exclude>
+                <exclude>**/conf/**</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}</directory>
+            <outputDirectory>.</outputDirectory>
+            <useDefaultExcludes>true</useDefaultExcludes>
+            <excludes>
+                <exclude>**/distribution.xml</exclude>
+                <exclude>**/.settings</exclude>
+                <exclude>**/.project</exclude>
+                <exclude>**/*.log</exclude>
+                <exclude>**/*.iml</exclude>
+                <exclude>**/.gitignore</exclude>
+                <exclude>**/pom.xml</exclude>
+                <exclude>**/${project.build.directory}/**</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${sensinact.rootdir}/platform/sensinact-security/sensinact-security-core/src/test/resources/</directory>
+            <outputDirectory>datastore/storage</outputDirectory>
+            <useDefaultExcludes>true</useDefaultExcludes>
+            <excludes>
+                <exclude>**/MANIFEST.MF</exclude>
+                <exclude>**/all.policy</exclude>
             </excludes>
         </fileSet>
     </fileSets>
