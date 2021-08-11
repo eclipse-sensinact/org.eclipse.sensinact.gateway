@@ -62,11 +62,6 @@ abstract class AbstractUserUpdater implements UserUpdater{
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.UserUpdater#setRegistration(org.osgi.framework.ServiceRegistration)
-	 */
 	@Override
 	public void setRegistration(ServiceRegistration<?> registration) {
 		this.registration = registration;
@@ -88,13 +83,7 @@ abstract class AbstractUserUpdater implements UserUpdater{
 			}
 		}, 1000*60*60);		
 	}
-	
-	/** 
-	 * @throws SecuredAccessException 
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.UserUpdater#validate(java.lang.String)
-	 */
+
 	@Override
 	public String validate(String token) throws SecuredAccessException {
 		if(this.timer != null) {
@@ -125,11 +114,6 @@ abstract class AbstractUserUpdater implements UserUpdater{
 		return builder.toString();
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.UserUpdater#getMessage()
-	 */
 	@Override
 	public String getMessage() {
 		StringBuilder builder = new StringBuilder();
@@ -140,11 +124,6 @@ abstract class AbstractUserUpdater implements UserUpdater{
 		return builder.toString();
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.UserUpdater#getUpdateType()
-	 */
 	@Override
 	public String getUpdateType() {
 		return this.updateType;

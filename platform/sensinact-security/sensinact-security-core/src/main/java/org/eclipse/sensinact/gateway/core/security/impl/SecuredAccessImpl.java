@@ -127,11 +127,6 @@ public class SecuredAccessImpl implements SecuredAccess {
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SecuredAccess#buildAccessNodesHierarchy(String, String, AccessTree)
-	 */
 	@Override
 	public void buildAccessNodesHierarchy(String signature, String name,
 			MutableAccessTree<? extends MutableAccessNode> tree) throws SecuredAccessException {
@@ -157,12 +152,6 @@ public class SecuredAccessImpl implements SecuredAccess {
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.security.SecuredAccess#
-	 *      getAccessTree(java.lang.String)
-	 */
 	@Override
 	public MutableAccessTree<? extends MutableAccessNode> getAccessTree(String signature)
 			throws SecuredAccessException {
@@ -184,11 +173,6 @@ public class SecuredAccessImpl implements SecuredAccess {
 		return tree;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SecuredAccess#getRootNode(java.lang.String)
-	 */
 	@Override
 	public AccessTree<? extends AccessNode> getUserAccessTree(String publicKey) throws SecuredAccessException {
 		AccessTreeImpl<? extends AccessNodeImpl<?>> tree = null;
@@ -227,11 +211,6 @@ public class SecuredAccessImpl implements SecuredAccess {
 		}
 	}
 
-	/**
-	 * @param tree
-	 * @param object
-	 * @throws Exception
-	 */
 	private void buildTree(MutableAccessTree<? extends MutableAccessNode> tree, String publicKey)// User user)
 			throws SecuredAccessException {
 		// if (user == null || user.getPublicKey() == null ||user.isAnonymous())
@@ -325,12 +304,6 @@ public class SecuredAccessImpl implements SecuredAccess {
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.security.SecuredAccess#
-	 *      getApplicationAccessTree(java.lang.String)
-	 */
 	@Override
 	public AccessTree<? extends AccessNode> getApplicationAccessTree(String publicKey) throws SecuredAccessException {
 		AccessTreeImpl<? extends AccessNodeImpl<?>> tree = null;
@@ -445,12 +418,6 @@ public class SecuredAccessImpl implements SecuredAccess {
 	// }
 	// }
 
-	/**
-	 * @param signature
-	 * @param name
-	 * @return
-	 * @throws SecuredAccessException
-	 */
 	private boolean checkIdentifier(String signature, String name) throws SecuredAccessException {
 		try {
 			if (name == null) {
@@ -478,11 +445,6 @@ public class SecuredAccessImpl implements SecuredAccess {
 		}
 	}
 
-	/**
-	 * @param tree
-	 * @param list
-	 * @throws Exception
-	 */
 	private void buildNodes(MutableAccessTree<? extends MutableAccessNode> tree, List<ObjectEntity> objectEntities)
 			throws SecuredAccessException {
 
@@ -508,13 +470,6 @@ public class SecuredAccessImpl implements SecuredAccess {
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SecuredAccess#createAuthorizationService()
-	 * 
-	 * @throws SecuredAccessException
-	 */
 	@Override
 	public void createAuthorizationService() throws SecuredAccessException {
 		try {
@@ -525,13 +480,6 @@ public class SecuredAccessImpl implements SecuredAccess {
 		}
 	}
 
-	/**
-	 * @throws DataStoreException
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.security.SecuredAccess#
-	 *      getAgentPublicKey(java.lang.String)
-	 */
 	@Override
 	public String getAgentPublicKey(String signature) throws SecuredAccessException, DataStoreException {
 		try {
@@ -546,12 +494,6 @@ public class SecuredAccessImpl implements SecuredAccess {
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.security.SecuredAccess#
-	 *      getApplicationPublicKey(java.lang.String)
-	 */
 	@Override
 	public String getApplicationPublicKey(String privateKey) throws SecuredAccessException {
 		try {
@@ -565,12 +507,8 @@ public class SecuredAccessImpl implements SecuredAccess {
 			throw new SecuredAccessException(e);
 		}
 	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SecuredAccess#close()
-	 */
+	
+	@Override
 	public void close() {
 		if (mediator.isDebugLoggable()) {
 			mediator.debug("closing sensiNact secured access");

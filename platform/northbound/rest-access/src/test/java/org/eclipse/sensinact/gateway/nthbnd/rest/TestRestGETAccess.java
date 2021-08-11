@@ -50,8 +50,8 @@ public class TestRestGETAccess extends TestRestAccess {
 
     @Test
     public void testHttpAccessMethodGET() throws Exception {
+    	
         Mediator mediator = new Mediator(context);
-
         String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers", null, "GET");
 
         System.out.println(simulated);

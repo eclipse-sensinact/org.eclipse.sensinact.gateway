@@ -53,13 +53,13 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.eclipse.sensinact.gateway.core.method.ActResponse;
 import org.eclipse.sensinact.gateway.core.method.DescribeMethod;
+import org.eclipse.sensinact.gateway.core.method.DescribeMethod.DescribeType;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponseBuilder;
 import org.eclipse.sensinact.gateway.core.method.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
-import org.eclipse.sensinact.gateway.core.method.DescribeMethod.DescribeType;
 import org.eclipse.sensinact.gateway.core.method.RemoteAccessMethodExecutable;
 import org.eclipse.sensinact.gateway.core.method.SetResponse;
 import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
@@ -74,7 +74,6 @@ import org.eclipse.sensinact.gateway.core.security.AccountConnector;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
-import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
@@ -102,7 +101,6 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
@@ -1271,9 +1269,7 @@ public class SensiNact implements Core {
 	public void deactivate() {
 		this.close();
 	}
-//	
-//	
-//	
+
 //	/**
 //	 * Constructor
 //	 * 
@@ -1363,24 +1359,28 @@ public class SensiNact implements Core {
 //			}
 //		}
 //	}
-	
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public AuthenticatedSession getSession(final Authentication<?> authentication)
 			throws InvalidKeyException, InvalidCredentialException {
 		AuthenticatedSession session = null;
 		if (authentication == null) 
 			return null;
-		else if (Credentials.class.isAssignableFrom(authentication.getClass())) {
-			UserKey userKey = this.doPrivilegedService(AuthenticationService.class, null,
+		else if(AuthenticationToken.class.isAssignableFrom(authentication.getClass())) 
+			session = this.getSession(((AuthenticationToken) authentication).getAuthenticationMaterial());
+		else{
+			UserKey userKey = this.doPrivilegedService(AuthenticationService.class, 
+				String.format("(identityMaterial=%s)",authentication.getClass().getCanonicalName()),
 				new Executable<AuthenticationService, UserKey>() {
 					@Override
 					public UserKey execute(AuthenticationService service) throws Exception {
-						return service.buildKey((Credentials) authentication);
+						return service.buildKey(authentication);
 					}
 				});
-			if (userKey == null) {
+			if (userKey == null) 
 				throw new InvalidCredentialException("Invalid credentials");
-			}
+			
 			String pkey = userKey.getPublicKey();
 			AccessTree<? extends AccessNode> tree = this.getUserAccessTree(pkey);
 			SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, SensiNact.this.nextToken(), tree, null);
@@ -1389,8 +1389,7 @@ public class SensiNact implements Core {
 			synchronized(this.sessions) {
 				sessions.put(sessionKey, session);
 			}
-		} else if (AuthenticationToken.class.isAssignableFrom(authentication.getClass())) 
-			session = this.getSession(((AuthenticationToken) authentication).getAuthenticationMaterial());
+		}
 		return session;
 	}
 

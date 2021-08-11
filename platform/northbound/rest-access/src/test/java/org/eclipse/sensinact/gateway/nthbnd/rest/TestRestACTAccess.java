@@ -129,16 +129,11 @@ public class TestRestACTAccess extends TestRestAccess {
 
     @Test
     public void testWsACTWithParameters() throws Exception {
-        JSONObject response;
         WsServiceTestClient client = new WsServiceTestClient();
         new Thread(client).start();
 
-        String simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null);
-        System.out.println("***********************************************"); 
-        System.out.println(simulated); 
-        System.out.println("***********************************************"); 
-        
-        response = new JSONObject(simulated);
+        String simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null);        
+        JSONObject response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/light/switch/brightness")); 
         assertTrue(response.getJSONObject("response").get("value").equals(10));

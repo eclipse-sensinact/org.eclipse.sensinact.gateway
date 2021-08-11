@@ -59,11 +59,7 @@ public class TestRestAccess extends MidOSGiTest {
         }
         return false;
     }
-
-    /**
-     * @inheritDoc
-     * @see MidOSGiTest#doInit(java.util.Map)
-     */
+    
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void doInit(Map configuration) {

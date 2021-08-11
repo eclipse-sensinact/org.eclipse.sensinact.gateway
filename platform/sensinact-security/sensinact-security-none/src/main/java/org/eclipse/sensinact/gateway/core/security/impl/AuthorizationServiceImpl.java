@@ -16,24 +16,12 @@ import org.eclipse.sensinact.gateway.core.security.AuthorizationServiceException
 
 class AuthorizationServiceImpl implements AuthorizationService {
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AuthorizationService#
-	 *      getAuthenticatedAccessLevelOption(java.lang.String, long)
-	 */
 	@Override
 	public AccessLevelOption getAuthenticatedAccessLevelOption(String path, long uid)
 			throws AuthorizationServiceException {
 		return AccessLevelOption.ANONYMOUS;
 	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see AuthorizationService#
-	 *      getAuthenticatedAccessLevelOption(java.lang.String, java.lang.String)
-	 */
+	
 	@Override
 	public AccessLevelOption getAuthenticatedAccessLevelOption(String path, String publicKey)
 			throws AuthorizationServiceException {

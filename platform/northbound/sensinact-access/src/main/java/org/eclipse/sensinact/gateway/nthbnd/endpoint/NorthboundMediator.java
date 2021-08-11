@@ -19,8 +19,7 @@ import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.osgi.framework.BundleContext;
 
 /**
- * Extended {@link Mediator} type allowing to easily instantiate a
- * {@link Session}
+ * Extended {@link Mediator} type allowing to easily instantiate a {@link Session}
  *
  * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
@@ -35,20 +34,14 @@ public class NorthboundMediator extends Mediator {
             this.authentication = authentication;
         }
 
-        /**
-         * @inheritDoc
-         * @see Executable#execute(java.lang.Object)
-         */
         @Override
         public Session execute(Core core) throws Exception {
             Session session = null;
             try {
-                if (this.authentication != null) {
-                    session = core.getSession(authentication);
-                }
-                if (session == null) {
-                    session = core.getAnonymousSession();
-                }
+                if (this.authentication != null) 
+                    session = core.getSession(authentication);                
+                if (session == null) 
+                    session = core.getAnonymousSession();                
             } catch (InvalidCredentialException e) {
                 throw e;
             }

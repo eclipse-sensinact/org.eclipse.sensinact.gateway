@@ -332,7 +332,7 @@ public abstract class MidOSGiTest implements BundleContextProvider {
         Assert.assertTrue(bundleClass == Bundle.class);
         Assert.assertTrue(((Integer) bundleClass.getDeclaredMethod(BUNDLE_STATE).invoke(felix)) == Bundle.ACTIVE);
         //let the environment initialize
-        Thread.sleep(5000);
+        Thread.sleep(8000);
     }
 
     /**

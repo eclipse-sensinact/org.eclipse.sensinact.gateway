@@ -30,6 +30,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 	 * 
 	 * @param mediator
 	 * @param authenticatedAccessLevelDAO
+	 * 
 	 * @throws DAOException
 	 */
 	public AuthorizationServiceImpl(Mediator mediator, AuthenticatedAccessLevelDAO authenticatedAccessLevelDAO)
@@ -37,13 +38,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 		this.authenticatedAccessLevelDAO = authenticatedAccessLevelDAO;
 	}
 
-	/**
-	 * @throws DataStoreException
-	 * @throws DAOException
-	 * @inheritDoc
-	 * 
-	 * @see AuthorizationService# getAccessLevel(java.lang.String, long)
-	 */
 	@Override
 	public AccessLevelOption getAuthenticatedAccessLevelOption(String path, long uid)
 			throws AuthorizationServiceException {
@@ -59,11 +53,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see AuthorizationService# getAccessLevel(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public AccessLevelOption getAuthenticatedAccessLevelOption(String path, String publicKey)
 			throws AuthorizationServiceException {

@@ -35,27 +35,27 @@ import org.osgi.framework.ServiceReference;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class UserManagerImpl implements UserManager, AuthenticationService {
+public class UserManagerImpl implements UserManager, AuthenticationService<Credentials,Credentials> {
 	
 	private Mediator mediator;
 	private UserDAO userDAO;
 	private UserEntity anonymous;
 
 	/**
+	 * Constructor
 	 * 
-	 * @param mediator
-	 * @throws DataStoreException
-	 * @throws DAOException
+	 * @param mediator the {@link Mediator} allowing the {@link UserManager} service
+	 * to be instantiated to interact with the OSGi host environment
 	 * 
+	 * @throws SecuredAccessException if an error occurred while instantiating the 
+	 * {@link UserManager} and {@link AuthenticationService} service
 	 */
 	public UserManagerImpl(Mediator mediator) throws SecuredAccessException {
 		this.mediator = mediator;
 		try {
-			ServiceReference<SecurityDataStoreService> reference = this.mediator.getContext()
-					.getServiceReference(SecurityDataStoreService.class);
-
+			ServiceReference<SecurityDataStoreService> reference = this.mediator.getContext(
+				).getServiceReference(SecurityDataStoreService.class);
 			this.userDAO = new UserDAO(mediator, this.mediator.getContext().getService(reference));
-
 			anonymous = userDAO.find(ANONYMOUS_ID);
 		} catch (DataStoreException | NullPointerException | IllegalArgumentException e) {
 			mediator.error(e);
@@ -63,30 +63,18 @@ public class UserManagerImpl implements UserManager, AuthenticationService {
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see java.lang.Object#finalize()
-	 */
+	@Override
 	public void finalize() {
 		this.userDAO = null;
-
 		try {
-			ServiceReference<SecurityDataStoreService> reference = this.mediator.getContext()
-					.getServiceReference(SecurityDataStoreService.class);
-
+			ServiceReference<SecurityDataStoreService> reference = this.mediator.getContext(
+				).getServiceReference(SecurityDataStoreService.class);
 			this.mediator.getContext().ungetService(reference);
 		} catch (NullPointerException | IllegalArgumentException e) {
 			mediator.error(e);
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.UserManager#
-	 *      loginExists(java.lang.String)
-	 */
 	@Override
 	public boolean loginExists(final String login) throws SecuredAccessException, DataStoreException {
 		return this.userDAO.select(new HashMap<String, Object>() {
@@ -96,34 +84,16 @@ public class UserManagerImpl implements UserManager, AuthenticationService {
 		}).size()>0;
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.UserManager#
-	 *      accountExists(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public boolean accountExists(String account) throws SecuredAccessException, DataStoreException {
 		return this.userDAO.findFromAccount(account) != null;
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.UserManager#
-	 *      getUser(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public User getUser(String login, String password) throws SecuredAccessException, DataStoreException {
 		return userDAO.find(login, password);
 	}
 	
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.UserManager#
-	 *      getUserFromPublicKey(java.lang.String)
-	 */
 	@Override
 	public User getUserFromPublicKey(String publicKey) throws SecuredAccessException, DataStoreException {
 		if (publicKey == null) {
@@ -132,12 +102,6 @@ public class UserManagerImpl implements UserManager, AuthenticationService {
 		return userDAO.find(publicKey);
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.UserManager#
-	 *      getUserFromAccount(java.lang.String)
-	 */
 	@Override
 	public User getUserFromAccount(String account) throws SecuredAccessException, DataStoreException {
 		if (account == null) {
@@ -146,30 +110,18 @@ public class UserManagerImpl implements UserManager, AuthenticationService {
 		return userDAO.findFromAccount(account);
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see AuthenticationService#buildKey(Credentials)
-	 */
 	@Override
 	public UserKey buildKey(Credentials credentials) throws InvalidKeyException, DAOException, InvalidCredentialException, DataStoreException {
-		if(Credentials.ANONYMOUS_LOGIN.equals(credentials.login) && Credentials.ANONYMOUS_PASSWORD.equals(credentials.password)) {
-			return null;
-		}
+		if(Credentials.ANONYMOUS_LOGIN.equals(credentials.login) && Credentials.ANONYMOUS_PASSWORD.equals(credentials.password))
+			return null;		
 		String md5 = CryptoUtils.cryptWithMD5(credentials.password);
 		UserEntity userEntity = this.userDAO.find(credentials.login, md5);
-		if (userEntity == null) {
+		if (userEntity == null) 
 			return null;
-		} else {
+		else
 			return new UserKey(userEntity.getPublicKey());
-		}
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.UserManager#createUser(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-	 */
 	@Override
 	public UserUpdater createUser(String token, final String login, final String password, final String account, final String accountType) throws SecuredAccessException {
 		return new AbstractUserUpdater(mediator, token, "create") {
@@ -200,11 +152,6 @@ public class UserManagerImpl implements UserManager, AuthenticationService {
 		};
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.UserManager#renewUserPassword(java.lang.String, java.lang.String, java.lang.String)
-	 */
 	@Override
 	public UserUpdater renewUserPassword(String token, final String account, final String accountType) throws SecuredAccessException {
 		return new AbstractUserUpdater(mediator, token, "renew") {
@@ -252,11 +199,6 @@ public class UserManagerImpl implements UserManager, AuthenticationService {
 		};
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.UserManager#updateField(java.lang.String, java.lang.String, java.lang.String)
-	 */
 	@Override
 	public void updateField(User user, String fieldName, Object oldValue, Object newValue) throws SecuredAccessException {
 		try {
@@ -268,9 +210,9 @@ public class UserManagerImpl implements UserManager, AuthenticationService {
 			Method getMethod = clazz.getMethod(new StringBuilder().append(getPrefix).append(suffix
 				).toString());
 			Object current = getMethod.invoke(user);
-			if((current==null && oldValue!=null)||(current!=null && !current.equals(oldValue))){
+			if((current==null && oldValue!=null)||(current!=null && !current.equals(oldValue)))
 				throw new SecuredAccessException("Invalid current value");
-			}
+			
 			Method setMethod = clazz.getMethod(new StringBuilder().append(setPrefix).append(suffix
 				).toString(), newValue.getClass());
 			setMethod.invoke(user, newValue);			

@@ -40,14 +40,6 @@ public class SecuredAccessFactoryImpl implements SecuredAccessFactory {
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
 
-	/**
-	 * @throws SecuredAccessException
-	 * @throws DataStoreException
-	 * @inheritedDoc
-	 *
-	 * @see SecuredAccessFactory#
-	 *      newInstance(org.eclipse.sensinact.gateway.common.bundle.Mediator)
-	 */
 	@Override
 	public SecuredAccess newInstance(Mediator mediator) throws SecuredAccessException {
 		return new SecuredAccessImpl(mediator);

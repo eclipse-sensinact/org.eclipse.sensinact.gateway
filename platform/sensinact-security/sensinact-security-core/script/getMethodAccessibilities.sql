@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 --                                 FUNCTIONS                             --
---				       method accessibility from object path			 --
---						      and user public key                        --
+--				       method accessibilities for object path			 --
+--						      by user access level                       --
 ---------------------------------------------------------------------------
 WITH RECURSIVE path_element (ITERATION, PATH, LAST, POSITION, ELEMENT, PARENT, OID, PATTERN) AS
 (

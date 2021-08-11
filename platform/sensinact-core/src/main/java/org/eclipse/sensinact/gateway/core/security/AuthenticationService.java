@@ -15,17 +15,16 @@ package org.eclipse.sensinact.gateway.core.security;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface AuthenticationService {
+public interface AuthenticationService<C,A extends Authentication<C>> {
 	/**
 	 * Build a {@link UserKey} for the user whose the {@link Credentials} are passed
 	 * as parameter
 	 * 
-	 * @param credentials
-	 *            the {@link Credentials} from which to build a {@link UserKey}
+	 * @param authentication the {@link Authentication} from which to build a {@link UserKey}
 	 * 
 	 * @return a {@link UserKey} for the specified {@link Credentials}
 	 * 
-	 * @throws Exception
+	 * @throws Exception if the {@link UserKey} build process is in error 
 	 */
-	UserKey buildKey(Credentials credentials) throws Exception;
+	UserKey buildKey(A authentication) throws Exception;
 }
