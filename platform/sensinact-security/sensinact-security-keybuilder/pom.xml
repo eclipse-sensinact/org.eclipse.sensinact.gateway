@@ -17,76 +17,52 @@
 
 	<parent>
 		<groupId>org.eclipse.sensinact.gateway</groupId>
-		<artifactId>parent</artifactId>
+		<artifactId>sensinact-security</artifactId>
 		<version>2.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>sensinact-core</artifactId>
+	<artifactId>sensinact-security-keybuilder</artifactId>
 	<packaging>bundle</packaging>
 
-	<name>sensiNact IoT Gateway - Core</name>
+	<name>sensiNact IoT Gateway - Security Core User Key Builder</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
-			<artifactId>sensinact-signature-validator</artifactId>
+			<artifactId>sensinact-core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-utils</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-common</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.sensinact.gateway</groupId>
-			<artifactId>sensinact-utils</artifactId>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-datastore-api</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.sensinact.gateway</groupId>
-			<artifactId>sensinact-framework-extension</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.framework.security</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.skyscreamer</groupId>
-			<artifactId>jsonassert</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
-	<!-- Build -->
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 				<configuration>
-					<obrRepository>NONE</obrRepository>
 					<instructions>
-						<Require-Capability>
-							org.eclipse.sensinact.security,
-							org.eclipse.sensinact.data.store,
-							org.eclipse.sensinact.signature.validator,
-							org.eclipse.sensinact.user.manager;resolution:=optional
-							org.eclipse.sensinact.user.keybuilder;resolution:=optional
-						</Require-Capability>
+						<Fragment-Host>sensinact-core</Fragment-Host>
+						<Provide-Capability>
+							org.eclipse.sensinact.user.keybuilder
+						</Provide-Capability>
 						<Include-Resource>
-							about.html
+							about.html,
+							src/main/resources/
 						</Include-Resource>
 					</instructions>
 				</configuration>

@@ -95,7 +95,8 @@ public interface UserManager {
 
 	/**
 	 * Asks for the update of the password of the user whose account endpoint is
-	 * passed as parameter and returns the {@link UserUpdater} holding the update.
+	 * passed as parameter and returns the {@link@Override
+	 UserUpdater} holding the update.
 	 * The validation of the {@link UserUpdater} by the appropriate String token
 	 * and a new password will result in the effective password renewing
 	 * 
@@ -133,4 +134,5 @@ public interface UserManager {
 	 * @throws SecuredAccessException
 	 */
 	void updateField(User user, String fieldName, Object oldValue, Object newValue) throws SecuredAccessException;
+
 }

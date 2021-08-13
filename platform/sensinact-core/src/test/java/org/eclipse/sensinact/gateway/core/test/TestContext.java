@@ -28,7 +28,7 @@ import org.eclipse.sensinact.gateway.core.SensiNact;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
 import org.eclipse.sensinact.gateway.core.filtering.Filtering;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
+import org.eclipse.sensinact.gateway.core.security.UserKeyBuilder;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
@@ -64,7 +64,7 @@ public class TestContext<R extends ModelInstance> {
 			+ DataStoreService.class.getCanonicalName() + ")";
 
 	private static final String AUTHENTICATION_FILTER = "(" + Constants.OBJECTCLASS + "="
-			+ AuthenticationService.class.getCanonicalName() + ")";
+			+ UserKeyBuilder.class.getCanonicalName() + ")";
 
 	private static final String ACCESS_FILTER = "(" + Constants.OBJECTCLASS + "="
 			+ SecuredAccess.class.getCanonicalName() + ")";

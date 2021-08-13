@@ -8,7 +8,7 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.security.impl;
+package org.eclipse.sensinact.gateway.core.security.access.impl;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;

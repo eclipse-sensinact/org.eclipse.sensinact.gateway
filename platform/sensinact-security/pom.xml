@@ -36,8 +36,10 @@
 		<!--<module>sensinact-mail-connector</module> -->
 		<!--<module>sensinact-signature-validator</module> -->
 		<!--<module>sensinact-security-core</module> -->
+		<!--<module>sensinact-security-keybuilder</module> -->
 		<module>mock-signature-validator</module>
 		<!--<module>sensinact-security-oauth2</module> -->
+		<!--<module>sensinact-security-test</module> -->
 	</modules>
 
 </project>

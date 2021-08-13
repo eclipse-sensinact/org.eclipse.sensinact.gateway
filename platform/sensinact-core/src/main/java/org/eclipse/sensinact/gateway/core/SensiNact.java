@@ -72,7 +72,8 @@ import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.AccountConnector;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
+import org.eclipse.sensinact.gateway.core.security.UserKeyBuilder;
+import org.eclipse.sensinact.gateway.core.security.UserKeyBuilderFactory;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
@@ -1176,6 +1177,7 @@ public class SensiNact implements Core {
 			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.remote.RemoteCore\" \"register,get\")"
 			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecuredAccess\" \"register,get\")"
 			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.UserManager\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.UserKeyBuilder\" \"register,get\")"
 			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService\" \"register,get\")"
 			+ "} null", builder.toString()));
 		piList.add(cpiDeny);
@@ -1214,6 +1216,19 @@ public class SensiNact implements Core {
 				break;
 			}
 		}
+		ServiceLoader<UserKeyBuilderFactory> userKeyBuilderFactoryLoader = ServiceLoader.load(UserKeyBuilderFactory.class,
+			mediator.getClassLoader());
+		
+		Iterator<UserKeyBuilderFactory> iterator = userKeyBuilderFactoryLoader.iterator();
+		
+		while(iterator.hasNext()) {
+			UserKeyBuilderFactory<?, ?, ?> factory = iterator.next();
+			if(factory!=null) {
+				factory.newInstance(mediator);
+				break;
+			}
+		}
+		
 		ServiceLoader<SecuredAccessFactory> securedAccessFactoryLoader = ServiceLoader.load(
 				SecuredAccessFactory.class, mediator.getClassLoader());
 
@@ -1370,11 +1385,11 @@ public class SensiNact implements Core {
 		else if(AuthenticationToken.class.isAssignableFrom(authentication.getClass())) 
 			session = this.getSession(((AuthenticationToken) authentication).getAuthenticationMaterial());
 		else{
-			UserKey userKey = this.doPrivilegedService(AuthenticationService.class, 
+			UserKey userKey = this.doPrivilegedService(UserKeyBuilder.class, 
 				String.format("(identityMaterial=%s)",authentication.getClass().getCanonicalName()),
-				new Executable<AuthenticationService, UserKey>() {
+				new Executable<UserKeyBuilder, UserKey>() {
 					@Override
-					public UserKey execute(AuthenticationService service) throws Exception {
+					public UserKey execute(UserKeyBuilder service) throws Exception {
 						return service.buildKey(authentication);
 					}
 				});

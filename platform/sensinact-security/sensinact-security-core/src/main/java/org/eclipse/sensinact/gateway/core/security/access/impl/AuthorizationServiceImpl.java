@@ -8,7 +8,7 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.security.impl;
+package org.eclipse.sensinact.gateway.core.security.access.impl;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
@@ -41,12 +41,10 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 	@Override
 	public AccessLevelOption getAuthenticatedAccessLevelOption(String path, long uid)
 			throws AuthorizationServiceException {
-		if (uid <= 0) {
+		if (uid <= 0) 
 			return AccessLevelOption.ANONYMOUS;
-		}
 		try {
 			AuthenticatedAccessLevelEntity userAccessLevelEntity = this.authenticatedAccessLevelDAO.find(path, uid);
-
 			return AccessLevelOption.valueOf(userAccessLevelEntity);
 		} catch (DAOException | DataStoreException e) {
 			throw new AuthorizationServiceException(e);
@@ -56,13 +54,11 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 	@Override
 	public AccessLevelOption getAuthenticatedAccessLevelOption(String path, String publicKey)
 			throws AuthorizationServiceException {
-		if (publicKey == null || publicKey.startsWith("anonymous")) {
+		if (publicKey == null || publicKey.startsWith("anonymous")) 
 			return AccessLevelOption.ANONYMOUS;
-		}
 		try {
 			AuthenticatedAccessLevelEntity userAccessLevelEntity = this.authenticatedAccessLevelDAO.find(path,
 					publicKey);
-
 			return AccessLevelOption.valueOf(userAccessLevelEntity);
 		} catch (Exception e) {
 			throw new AuthorizationServiceException(e);

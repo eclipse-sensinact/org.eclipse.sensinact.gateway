@@ -14,7 +14,7 @@ import java.util.Dictionary;
 
 import org.eclipse.sensinact.gateway.core.ModelElement;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
+import org.eclipse.sensinact.gateway.core.security.UserKeyBuilder;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.junit.Before;
 import org.mockito.Mockito;
@@ -63,7 +63,7 @@ public class TestSecuredAccess {
 			+ DataStoreService.class.getCanonicalName() + ")";
 
 	private static final String AUTHENTICATION_FILTER = "(" + Constants.OBJECTCLASS + "="
-			+ AuthenticationService.class.getCanonicalName() + ")";
+			+ UserKeyBuilder.class.getCanonicalName() + ")";
 
 	private static final String AGENT_FILTER = "(" + Constants.OBJECTCLASS + "=" + SnaAgent.class.getCanonicalName()
 			+ ")";

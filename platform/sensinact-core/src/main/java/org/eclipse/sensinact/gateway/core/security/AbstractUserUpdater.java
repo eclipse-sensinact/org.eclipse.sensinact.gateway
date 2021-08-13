@@ -8,14 +8,12 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.security.impl;
+package org.eclipse.sensinact.gateway.core.security;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
-import org.eclipse.sensinact.gateway.core.security.UserUpdater;
 import org.osgi.framework.ServiceRegistration;
 
 /**
@@ -23,7 +21,7 @@ import org.osgi.framework.ServiceRegistration;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-abstract class AbstractUserUpdater implements UserUpdater{
+public abstract class AbstractUserUpdater implements UserUpdater{
 
 	/**
 	 * @return

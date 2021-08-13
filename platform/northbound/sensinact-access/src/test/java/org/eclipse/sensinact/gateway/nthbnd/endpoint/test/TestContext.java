@@ -29,7 +29,7 @@ import org.eclipse.sensinact.gateway.core.SensiNact;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
 import org.eclipse.sensinact.gateway.core.filtering.Filtering;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
+import org.eclipse.sensinact.gateway.core.security.UserKeyBuilder;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
@@ -62,7 +62,7 @@ public class TestContext {
     private static final String CORE_FILTER = "(" + Constants.OBJECTCLASS + "=" + Core.class.getCanonicalName() + ")";
     private static final String LOG_FILTER = "(" + Constants.OBJECTCLASS + "=" + LogService.class.getCanonicalName() + ")";
     private static final String DATA_STORE_FILTER = "(" + Constants.OBJECTCLASS + "=" + DataStoreService.class.getCanonicalName() + ")";
-    private static final String AUTHENTICATION_FILTER = "(" + Constants.OBJECTCLASS + "=" + AuthenticationService.class.getCanonicalName() + ")";
+    private static final String AUTHENTICATION_FILTER = "(" + Constants.OBJECTCLASS + "=" + UserKeyBuilder.class.getCanonicalName() + ")";
     private static final String ACCESS_FILTER = "(" + Constants.OBJECTCLASS + "=" + SecuredAccess.class.getCanonicalName() + ")";
     private static final String VALIDATION_FILTER = "(" + Constants.OBJECTCLASS + "=" + BundleValidation.class.getCanonicalName() + ")";
 

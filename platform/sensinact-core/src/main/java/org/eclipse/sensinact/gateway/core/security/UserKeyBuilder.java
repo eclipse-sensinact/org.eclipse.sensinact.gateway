@@ -15,7 +15,7 @@ package org.eclipse.sensinact.gateway.core.security;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface AuthenticationService<C,A extends Authentication<C>> {
+public interface UserKeyBuilder<C,A extends Authentication<C>> {
 	/**
 	 * Build a {@link UserKey} for the user whose the {@link Credentials} are passed
 	 * as parameter

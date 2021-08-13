@@ -8,19 +8,15 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.security.impl;
-
-import java.util.Hashtable;
+package org.eclipse.sensinact.gateway.core.security.access.impl;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
-import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.UserManager;
 import org.eclipse.sensinact.gateway.core.security.UserManagerFactory;
 
 /**
- *
+ * {@link UserManagerFactory} service implementation
  */
 public class UserManagerFactoryImpl implements UserManagerFactory<UserManagerImpl> {
 	
@@ -32,7 +28,6 @@ public class UserManagerFactoryImpl implements UserManagerFactory<UserManagerImp
 	@Override
 	public void newInstance(Mediator mediator) throws SecuredAccessException {
 		UserManager manager = new UserManagerImpl(mediator);
-		mediator.register(new Hashtable(){{this.put("identityMaterial",Credentials.class.getCanonicalName());}}, 
-			manager, new Class<?>[] { UserManager.class, AuthenticationService.class });
+		mediator.register(null, manager, new Class<?>[] { UserManager.class });
 	}
 }

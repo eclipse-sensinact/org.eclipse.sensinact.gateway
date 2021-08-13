@@ -106,13 +106,18 @@ public class TestUserManager extends MidOSGiTest {
 	@Before
 	public void before() throws UnableToFindDataStoreException, UnableToConnectToDataStoreException {
 		mediator = new Mediator(context);
-		mediator.setProperty("org.eclipse.sensinact.gateway.security.database", "src/test/resources/sensinact.sqlite");
+		mediator.setProperty("org.eclipse.sensinact.gateway.security.database", 
+				"../sensinact-security-core/src/test/resources/sensinact.sqlite");
 		dataStoreService = new SQLiteDataStoreService(mediator);
 	}
 
 	public boolean isExcluded(String fileName) {
-		if ("org.apache.felix.framework.security.jar".equals(fileName)) 
-			return true;		
+		switch(fileName) {
+		case "org.apache.felix.framework.security.jar":
+			return true;
+		default:
+			break;
+		}
 		return false;
 	}
 
@@ -141,7 +146,7 @@ public class TestUserManager extends MidOSGiTest {
 		configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
 		configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
 
-		configuration.put("org.eclipse.sensinact.gateway.security.database", new File("src/test/resources/sensinact.sqlite").getAbsolutePath());
+		configuration.put("org.eclipse.sensinact.gateway.security.database", new File("../sensinact-security-core/src/test/resources/sensinact.sqlite").getAbsolutePath());
 
     	configuration.put("felix.auto.start.1",  
            "file:target/felix/bundle/org.osgi.service.component.jar "+ 
@@ -164,12 +169,13 @@ public class TestUserManager extends MidOSGiTest {
 	    	"file:target/felix/bundle/sensinact-datastore-api.jar "+
 	    	"file:target/felix/bundle/sensinact-sqlite-connector.jar "+
 	    	"file:target/felix/bundle/sensinact-common.jar "+
+	    	"file:target/felix/bundle/sensinact-security-keybuilder.jar "+
+	    	"file:target/felix/bundle/sensinact-security-core.jar "+
 			"file:target/felix/bundle/http.jar "  +
 	    	"file:target/felix/bundle/sensinact-framework-extension.jar "+
-	    	"file:target/felix/bundle/dynamicBundle.jar");
+	    	"file:target/felix/bundle/slf4j-simple.jar");
 
 	    configuration.put("felix.auto.start.2", 
-	        "file:target/felix/bundle/slf4j-simple.jar "+
 	    	"file:target/felix/bundle/sensinact-test-configuration.jar "+
 	    	"file:target/felix/bundle/sensinact-signature-validator.jar " +
 	    	"file:target/felix/bundle/org.apache.felix.http.servlet-api.jar " +

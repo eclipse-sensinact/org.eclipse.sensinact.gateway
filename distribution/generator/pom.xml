@@ -507,6 +507,10 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
+									<artifactId>sensinact-security-keybuilder</artifactId>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-core</artifactId>
 								</artifactItem>
 								<artifactItem>

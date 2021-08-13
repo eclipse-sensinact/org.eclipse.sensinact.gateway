@@ -8,7 +8,7 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.security.impl;
+package org.eclipse.sensinact.gateway.core.security.access.impl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -102,8 +102,8 @@ public class SecuredAccessImpl implements SecuredAccess {
 	public SecuredAccessImpl(Mediator mediator) throws SecuredAccessException {
 		this.mediator = mediator;
 		try {
-			ServiceReference<SecurityDataStoreService> reference = this.mediator.getContext()
-					.getServiceReference(SecurityDataStoreService.class);
+			ServiceReference<SecurityDataStoreService> reference = this.mediator.getContext(
+					).getServiceReference(SecurityDataStoreService.class);
 
 			SecurityDataStoreService dataStoreService = this.mediator.getContext().getService(reference);
 
@@ -114,12 +114,8 @@ public class SecuredAccessImpl implements SecuredAccess {
 			this.objectProfileAccessDAO = new ObjectProfileAccessDAO(mediator, dataStoreService);
 			this.authenticatedAccessLevelDAO = new AuthenticatedAccessLevelDAO(mediator, dataStoreService);
 
-			root = this.objectDAO.select(new HashMap<String, Object>() {
-				{
-					this.put("OID", 0l);
-
-				}
-			}).get(0);
+			root = this.objectDAO.select(new HashMap<String, Object>() {{
+					this.put("OID", 0l);}}).get(0);
 
 			rootObjectProfileOption = this.objectProfileAccessDAO.getAccessProfileOption(root.getObjectProfileEntity());
 		} catch (DAOException | DataStoreException e) {
@@ -206,7 +202,6 @@ public class SecuredAccessImpl implements SecuredAccess {
 					ImmutableAccessNode.class);
 
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new SecuredAccessException(e);
 		}
 	}
@@ -474,7 +469,7 @@ public class SecuredAccessImpl implements SecuredAccess {
 	public void createAuthorizationService() throws SecuredAccessException {
 		try {
 			this.authorizationRegistration = this.mediator.getContext().registerService(AuthorizationService.class,
-					new AuthorizationServiceImpl(mediator, this.authenticatedAccessLevelDAO), null);
+				new AuthorizationServiceImpl(mediator, this.authenticatedAccessLevelDAO), null);
 		} catch (DAOException e) {
 			throw new SecuredAccessException(e);
 		}

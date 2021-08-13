@@ -1,1 +1,1 @@
-org.eclipse.sensinact.gateway.core.security.impl.UserManagerFactoryImpl
+org.eclipse.sensinact.gateway.core.security.access.impl.UserManagerFactoryImpl
