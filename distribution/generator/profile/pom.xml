@@ -55,6 +55,11 @@
 			<artifactId>sensinact-distribution-template-with-security</artifactId>
 			<type>pom</type>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
+			<artifactId>sensinact-distribution-template-with-openid-security</artifactId>
+			<type>pom</type>
+		</dependency>
 	</dependencies>
 
 	<build>

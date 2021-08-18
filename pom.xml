@@ -120,7 +120,8 @@
 		<org.apache.httpcomponents.httpclient-osgi.version>4.5.11</org.apache.httpcomponents.httpclient-osgi.version>
 		<org.apache.httpcomponents.httpcore-osgi.version>4.4.13</org.apache.httpcomponents.httpcore-osgi.version>
 		<org.apache.httpcomponents.httpmime.version>4.5.11</org.apache.httpcomponents.httpmime.version>
-
+		<!-- Jackson -->
+		<com.fasterxml.jackson.core.version>2.10.0</com.fasterxml.jackson.core.version>
 		<!-- Misc -->
 		<bnd.version>2.4.0</bnd.version>
 		<com.hazelcast.version>3.12.5</com.hazelcast.version>
@@ -177,7 +178,7 @@
 		<org.apache.maven.surefire.junit48.version>2.22.2</org.apache.maven.surefire.junit48.version>
 		<org.jacoco.maven-plugin.version>0.8.5</org.jacoco.maven-plugin.version>
 		<sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
-
+	
 		<!-- Properties -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.build.timestamp.format>yyyyMMd</maven.build.timestamp.format>
@@ -449,14 +450,15 @@
 				<artifactId>org.osgi.util.pushstream</artifactId>
 				<version>${org.osgi.util.pushstream.version}</version>
 			</dependency>
+			
 			<!-- Apache Aries -->
 			<dependency>
 				<groupId>org.apache.aries.spec</groupId>
     			<artifactId>org.apache.aries.javax.jax.rs-api</artifactId>
     			<version>${org.apache.aries.jax.rs.version}</version>			
 			</dependency>
+			
 			<!-- Apache Felix Version -->
-
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.framework</artifactId>
@@ -788,7 +790,6 @@
 
 
 			<!-- HTTP -->
-
 			<dependency>
 				<groupId>com.sun.jersey</groupId>
 				<artifactId>jersey-client</artifactId>
@@ -828,9 +829,23 @@
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpmime</artifactId>
 				<version>${org.apache.httpcomponents.httpmime.version}</version>
+			</dependency>			
+			<!-- Jackson -->			
+			<dependency>	
+ 				<groupId>com.fasterxml.jackson.core</groupId>
+ 				<artifactId>jackson-databind</artifactId>
+ 				<version>${com.fasterxml.jackson.core.version}</version>
 			</dependency>
-
-
+			<dependency>	
+ 				<groupId>com.fasterxml.jackson.core</groupId>
+ 				<artifactId>jackson-annotations</artifactId>
+ 				<version>${com.fasterxml.jackson.core.version}</version>
+			</dependency>
+			<dependency>	
+ 				<groupId>com.fasterxml.jackson.core</groupId>
+ 				<artifactId>jackson-core</artifactId>
+ 				<version>${com.fasterxml.jackson.core.version}</version>
+			</dependency>
 			<!-- Misc -->
 
 			<dependency>
@@ -1072,6 +1087,11 @@
 			<dependency>
 				<groupId>org.eclipse.sensinact.gateway</groupId>
 				<artifactId>sensinact-security-keybuilder</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.sensinact.gateway</groupId>
+				<artifactId>sensinact-security-openid-keybuilder</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -1362,6 +1382,12 @@
 			<dependency>
 				<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
 				<artifactId>sensinact-distribution-template-with-security</artifactId>
+				<type>pom</type>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
+				<artifactId>sensinact-distribution-template-with-openid-security</artifactId>
 				<type>pom</type>
 				<version>${project.version}</version>
 			</dependency>

@@ -74,6 +74,20 @@
 							<finalName>sensiNact-gateway-with-security-${project.version}-${maven.build.timestamp}</finalName>
 						</configuration>
 					</execution>
+					<execution>
+						<id>make-assembly-with-openid-security</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>						
+						<configuration>
+							<appendAssemblyId>false</appendAssemblyId>
+							<descriptors>
+								<descriptor>distribution-with-openid-security.xml</descriptor>
+							</descriptors>
+							<finalName>sensiNact-gateway-with-openid-security-${project.version}-${maven.build.timestamp}</finalName>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>

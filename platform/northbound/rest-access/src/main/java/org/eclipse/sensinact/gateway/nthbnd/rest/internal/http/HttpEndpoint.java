@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
+import org.eclipse.sensinact.gateway.core.security.SessionToken;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
@@ -86,8 +86,8 @@ public class HttpEndpoint extends HttpServlet {
                 client = /*new StringBuilder().append(*/clientAddress/*).append(":").append(clientPort).toString()*/;
                 String sid = HttpEndpoint.this.anonymous.get(client);
                 if (sid != null) {
-                    authentication = new AuthenticationToken(sid);
-                    if (HttpEndpoint.this.mediator.getNorthboundEndpoints().getEndpoint(new AuthenticationToken(sid)) != null) {
+                    authentication = new SessionToken(sid);
+                    if (HttpEndpoint.this.mediator.getNorthboundEndpoints().getEndpoint(new SessionToken(sid)) != null) {
                         rar.setAuthentication(authentication);
                     }
                 }

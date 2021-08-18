@@ -169,7 +169,7 @@ public class TestUserManager extends MidOSGiTest {
 	    	"file:target/felix/bundle/sensinact-datastore-api.jar "+
 	    	"file:target/felix/bundle/sensinact-sqlite-connector.jar "+
 	    	"file:target/felix/bundle/sensinact-common.jar "+
-	    	"file:target/felix/bundle/sensinact-security-keybuilder.jar "+
+	    	"file:target/felix/bundle/sensinact-security-keybuilder.jar "+	
 	    	"file:target/felix/bundle/sensinact-security-core.jar "+
 			"file:target/felix/bundle/http.jar "  +
 	    	"file:target/felix/bundle/sensinact-framework-extension.jar "+

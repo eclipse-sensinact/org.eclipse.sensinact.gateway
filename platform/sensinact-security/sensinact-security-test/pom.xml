@@ -51,6 +51,17 @@
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-datastore-api</artifactId>
 			<scope>provided</scope>
+		</dependency>		
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>2.10.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.http.jetty</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
@@ -91,13 +102,6 @@
 
 	<build>
 		<plugins>	
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -267,6 +271,12 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway</groupId>
+									<artifactId>sensinact-security-openid-keybuilder</artifactId>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>sensinact-security-openid-keybuilder.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.eclipse.sensinact.gateway</groupId>
 									<artifactId>sensinact-generic</artifactId>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>sensinact-generic.jar</destFileName>
@@ -304,9 +314,26 @@
 								<artifactItem>
 									<groupId>org.apache.aries.spec</groupId>
 									<artifactId>org.apache.aries.javax.jax.rs-api</artifactId>
-									<version>1.0.3</version>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.aries.javax.jax.rs-api.jar</destFileName>
+								</artifactItem>
+								<artifactItem>	
+		    						<groupId>com.fasterxml.jackson.core</groupId>
+		    						<artifactId>jackson-databind</artifactId>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>jackson-databind.jar</destFileName>
+								</artifactItem>
+								<artifactItem>	
+		    						<groupId>com.fasterxml.jackson.core</groupId>
+		    						<artifactId>jackson-annotations</artifactId>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>jackson-annotations.jar</destFileName>
+								</artifactItem>
+								<artifactItem>	
+		    						<groupId>com.fasterxml.jackson.core</groupId>
+		    						<artifactId>jackson-core</artifactId>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>jackson-core.jar</destFileName>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
@@ -401,8 +428,58 @@
 							<goal>run</goal>
 						</goals>
 					</execution>
+					<execution>
+			          	 <id>containers-test-configuration</id>
+			          	 <phase>validate</phase>
+			          	 <configuration>
+			          	 	<target>          	 		
+			          	 		<mkdir dir="${project.build.directory}/compose"/> 
+			          	 		<copy todir="${project.build.directory}/compose">
+			          	 			<fileset dir="${project.basedir}/src/test/resources/compose"/>
+			          	 		</copy>          	 		
+				                <exec dir="${project.build.directory}/compose" executable="docker-compose">
+				                  <arg line="up -d"/>
+				                </exec>
+				                <waitfor  maxwait="1" maxwaitunit="minute" checkevery="1000">
+				                  <http url="http://localhost:24680/auth/realms/test/.well-known/openid-configuration"/>
+				                </waitfor>
+			              </target>
+			            </configuration>
+			            <goals>
+			              <goal>run</goal>
+			            </goals>
+			          </execution>	             
+			          <execution>
+			            <id>stop-containers</id>
+			            <phase>package</phase>
+			            <configuration>
+			              <target>
+			                <exec dir="${project.build.directory}/compose" executable="docker-compose">
+			                  <arg value="down" />
+			                </exec>
+			              </target>
+			            </configuration>
+			            <goals>
+			              <goal>run</goal>
+			            </goals>
+			          </execution>
 				</executions>
 			</plugin>
+		    <plugin>
+		        <artifactId>maven-jar-plugin</artifactId>
+		        <executions>
+			          <execution>
+				            <id>default-jar</id>
+				            <phase>package</phase>
+				            <goals>
+				              	<goal>jar</goal>
+				            </goals>
+				            <configuration>
+				              	<skip>true</skip>
+				            </configuration>
+			          </execution>
+		        </executions>
+		    </plugin>
 		</plugins>
 	</build>
 

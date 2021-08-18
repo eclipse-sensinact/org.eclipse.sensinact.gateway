@@ -12,7 +12,7 @@ package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
+import org.eclipse.sensinact.gateway.core.security.SessionToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
@@ -102,7 +102,7 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
             String authorizationHeader = super.getHeader("Authorization");
 
             if (tokenHeader != null) {
-                this.authentication = new AuthenticationToken(tokenHeader);
+                this.authentication = new SessionToken(tokenHeader);
 
             } else if (authorizationHeader != null && super.getAttribute("token")==null) {
                 this.authentication = new Credentials(authorizationHeader);

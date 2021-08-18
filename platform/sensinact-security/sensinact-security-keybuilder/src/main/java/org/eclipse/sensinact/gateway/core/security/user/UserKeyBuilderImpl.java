@@ -8,7 +8,7 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.security.user.impl;
+package org.eclipse.sensinact.gateway.core.security.user;
 
 import java.security.InvalidKeyException;
 

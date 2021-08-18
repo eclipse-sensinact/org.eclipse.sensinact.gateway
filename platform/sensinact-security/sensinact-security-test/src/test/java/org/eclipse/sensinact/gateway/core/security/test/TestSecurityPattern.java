@@ -122,7 +122,7 @@ public class TestSecurityPattern extends MidOSGiTest {
 			"file:target/felix/bundle/sensinact-sqlite-connector.jar "+
 			"file:target/felix/bundle/sensinact-common.jar "+
 			"file:target/felix/bundle/sensinact-framework-extension.jar "+
-	    	"file:target/felix/bundle/sensinact-security-keybuilder.jar "+
+	    	"file:target/felix/bundle/sensinact-security-keybuilder.jar "+	
 			"file:target/felix/bundle/sensinact-security-core.jar "+
 	    	"file:target/felix/bundle/slf4j-simple.jar");
 

@@ -10,7 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
+import org.eclipse.sensinact.gateway.core.security.SessionToken;
+import org.eclipse.sensinact.gateway.core.security.AccessToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.LoginResponse.TokenMode;
@@ -68,22 +69,46 @@ public class AccessingEndpoint {
         }
         return response;
     }
+    
+    /**
+     * Returns a newly created {@link NorthboundEndpoint} attached to
+     * a {@link Session} built using the specified {@link AccessToken}
+     *
+     * @param accesToken the {@link AccessToken}  that will allow
+     * this LoginEndpoint to create a valid {@link NorthboundEndpoint}
+     * 
+     * @return {@link NorthboundEndpoint} for the specified {@link accessToken}
+     */
+    public LoginResponse createNorthboundEndpoint(AccessToken accessToken) throws InvalidCredentialException {
+        LoginResponse response = new LoginResponse(mediator, TokenMode.TOKEN_CREATION);
+        if (accessToken != null) {
+            NorthboundEndpoints endpoints = this.mediator.getNorthboundEndpoints();
+            NorthboundEndpoint endpoint = endpoints.add(new NorthboundEndpoint(this.mediator, accessToken));
+
+            long lifetime = endpoints.getLifetime();
+            long timeout = endpoints.getTimeout(endpoint.getSessionToken());
+
+            response.setTimeout(timeout);
+            response.setGenerated(timeout - lifetime);
+            response.setToken(endpoint.getSessionToken());
+        } else
+            throw new InvalidCredentialException("Null access token");
+        return response;
+    }
 
     /**
      * Reactivates the {@link NorthboundEndpoint} attached to {@link
      * Session} whose String identifier is wrapped by the {@link
-     * AuthenticationToken} passed as parameter
+     * SessionToken} passed as parameter
      *
      * @param token the String identifier of the {@link Session} attached
      *              to the {@link NorthboundEndpoint} to be reactivated
      * @return true if the appropriate the {@link NorthboundEndpoint} has
      * been reactivated; false otherwise
      */
-    public LoginResponse reactivateEndpoint(AuthenticationToken token) {
+    public LoginResponse reactivateEndpoint(SessionToken token) {
         LoginResponse response = new LoginResponse(mediator, TokenMode.TOKEN_RENEW);
-
         String authenticationMaterial = token == null ? null : token.getAuthenticationMaterial();
-
         if (token != null) {
             NorthboundEndpoints endpoints = this.mediator.getNorthboundEndpoints();
             try {

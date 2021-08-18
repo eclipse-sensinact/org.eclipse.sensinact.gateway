@@ -8,7 +8,7 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.core.security.user.impl;
+package org.eclipse.sensinact.gateway.core.security.user;
 
 import java.util.Hashtable;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;

@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
+import org.eclipse.sensinact.gateway.core.security.SessionToken;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
@@ -50,11 +50,10 @@ public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest> {
         if (authentication == null) {
             this.endpoint = request.getMediator().getNorthboundEndpoints().getEndpoint();
             response.setHeader("X-Auth-Token", this.endpoint.getSessionToken());
-        } else if (AuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
-            this.endpoint = request.getMediator().getNorthboundEndpoints().getEndpoint((AuthenticationToken) authentication);
-        } else {
+        } else if (SessionToken.class.isAssignableFrom(authentication.getClass()))
+            this.endpoint = request.getMediator().getNorthboundEndpoints().getEndpoint((SessionToken) authentication);
+        else 
             throw new InvalidCredentialException("Authentication token was expected");
-        }
     }
 
     @Override
@@ -103,7 +102,11 @@ public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest> {
         		break;
         	}
         }
-        if (rawList != null && (rawList.contains("true") || rawList.contains("True") || rawList.contains("yes") || rawList.contains("Yes")) && DescribeResponse.class.isAssignableFrom(cap.getClass()))
+        if (rawList != null && (rawList.contains("true") 
+        	|| rawList.contains("True") 
+        	|| rawList.contains("yes") 
+        	|| rawList.contains("Yes")) 
+        	&& DescribeResponse.class.isAssignableFrom(cap.getClass()))
             result = ((DescribeResponse<?>) cap).getJSON(true);
         else
             result = cap.getJSON();
@@ -112,12 +115,10 @@ public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest> {
         if (acceptEncoding != null && acceptEncoding.contains("gzip")) {
             resultBytes = NorthboundAccess.compress(result);
             response.setHeader("Content-Encoding", "gzip");
-
-        } else {
+        } else
             resultBytes = result.getBytes("UTF-8");
-        }
         int length = -1;
-        if ((length = resultBytes == null ? 0 : resultBytes.length) > 0) {
+        if ((length = (resultBytes == null)?0:resultBytes.length) > 0) {
             response.setContentType(RestAccessConstants.JSON_CONTENT_TYPE);
             response.setContentLength(resultBytes.length);
             response.setBufferSize(resultBytes.length);
@@ -130,11 +131,6 @@ public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest> {
 
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundAccess#
-     * sendError(int, java.lang.String)
-     */
     @Override
     protected void sendError(int statusCode, String message) throws IOException {
         this.response.sendError(statusCode, message);

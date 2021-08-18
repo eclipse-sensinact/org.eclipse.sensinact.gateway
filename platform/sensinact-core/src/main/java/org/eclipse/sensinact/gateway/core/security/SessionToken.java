@@ -11,18 +11,25 @@
 package org.eclipse.sensinact.gateway.core.security;
 
 /**
+ * {@link Authentication} implementation holding an existing sensiNact's {@link Session} authentication material
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class IdentityToken implements Authentication<String> {
-	private String token;
+public class SessionToken implements Authentication<String> {
+	private String sessionToken;
 
-	public IdentityToken(String token) {
-		this.token = token;
+	/**
+	 * Constructor
+	 * 
+	 * @param sessionToken the String {@link Session}'s authentication material held
+	 * by the SessionToken to be instantiated
+	 */
+	public SessionToken(String sessionToken) {
+		this.sessionToken = sessionToken;
 	}
 
 	@Override
 	public String getAuthenticationMaterial() {
-		return this.token;
+		return this.sessionToken;
 	}
 }

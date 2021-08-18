@@ -74,7 +74,7 @@ import org.eclipse.sensinact.gateway.core.security.AccountConnector;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.UserKeyBuilder;
 import org.eclipse.sensinact.gateway.core.security.UserKeyBuilderFactory;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
+import org.eclipse.sensinact.gateway.core.security.SessionToken;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
@@ -1217,16 +1217,14 @@ public class SensiNact implements Core {
 			}
 		}
 		ServiceLoader<UserKeyBuilderFactory> userKeyBuilderFactoryLoader = ServiceLoader.load(UserKeyBuilderFactory.class,
-			mediator.getClassLoader());
-		
+			mediator.getClassLoader());	
+				
 		Iterator<UserKeyBuilderFactory> iterator = userKeyBuilderFactoryLoader.iterator();
-		
+
 		while(iterator.hasNext()) {
 			UserKeyBuilderFactory<?, ?, ?> factory = iterator.next();
-			if(factory!=null) {
+			if(factory!=null) 
 				factory.newInstance(mediator);
-				break;
-			}
 		}
 		
 		ServiceLoader<SecuredAccessFactory> securedAccessFactoryLoader = ServiceLoader.load(
@@ -1382,8 +1380,8 @@ public class SensiNact implements Core {
 		AuthenticatedSession session = null;
 		if (authentication == null) 
 			return null;
-		else if(AuthenticationToken.class.isAssignableFrom(authentication.getClass())) 
-			session = this.getSession(((AuthenticationToken) authentication).getAuthenticationMaterial());
+		else if(SessionToken.class.isAssignableFrom(authentication.getClass())) 
+			session = this.getSession(((SessionToken) authentication).getAuthenticationMaterial());
 		else{
 			UserKey userKey = this.doPrivilegedService(UserKeyBuilder.class, 
 				String.format("(identityMaterial=%s)",authentication.getClass().getCanonicalName()),

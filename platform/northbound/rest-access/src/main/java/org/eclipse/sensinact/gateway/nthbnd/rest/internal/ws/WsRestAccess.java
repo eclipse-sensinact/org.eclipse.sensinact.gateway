@@ -39,9 +39,12 @@ public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest> {
 
     /**
      * Constructor
-     *
-     * @param wsConnection the {@link WebSocketConnection} held by
-     *                     the WsRestAccess to be instantiated
+     * 
+     * @param request 
+     * 
+     * @param wsConnection the {@link WebSocketConnection} held by the 
+     * WsRestAccess to be instantiated
+     * 
      * @throws IOException
      * @throws InvalidCredentialException
      */
@@ -50,10 +53,6 @@ public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest> {
         this.wsConnection = wsConnection;
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.AbstractNorthboundRequestHandler#respond(org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder)
-     */
     @Override
     protected boolean respond(NorthboundMediator mediator, NorthboundRequestBuilder builder) throws IOException {
         NorthboundRequest nthbndRequest = builder.build();
@@ -79,17 +78,21 @@ public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest> {
         	if("Accept-Encoding".equals(queryKey.name)) 
         		acceptEncoding= queryMap.get(queryKey);        	
         }
-        if (rawList != null && (rawList.contains("true") || rawList.contains("True") || rawList.contains("yes") || rawList.contains("Yes")) && DescribeResponse.class.isAssignableFrom(cap.getClass())) {
+        if (rawList != null && (rawList.contains("true") 
+        		|| rawList.contains("True") 
+        		|| rawList.contains("yes") 
+        		|| rawList.contains("Yes")) 
+        	&& DescribeResponse.class.isAssignableFrom(cap.getClass()))
             result = ((DescribeResponse<?>) cap).getJSON(true);
-        } else {
+        else
             result = cap.getJSON();
-        }
+        
         byte[] resultBytes;
+        
         try {
 	        if (acceptEncoding != null && acceptEncoding.contains("gzip")) {
 	            resultBytes = NorthboundAccess.compress(result);
 	            this.wsConnection.send(resultBytes);
-	
 	        } else {
 	            resultBytes = result.getBytes("UTF-8");
 	            this.wsConnection.send(new String(resultBytes));
@@ -100,10 +103,6 @@ public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest> {
         return true;
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.nthbnd.endpoint.AbstractNorthboundRequestHandler#sendError(int, java.lang.String)
-     */
     @Override
     protected void sendError(int i, String message) throws IOException {
         JSONObject jsonObject = new JSONObject();

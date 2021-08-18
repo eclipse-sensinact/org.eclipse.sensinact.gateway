@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
+import org.eclipse.sensinact.gateway.core.security.SessionToken;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 
@@ -223,20 +223,20 @@ public final class NorthboundEndpoints {
     /**
      * Returns the already existing {@link NorthboundEndpoint}
      * associated to the {@link Session} whose String identifier
-     * is  wrapped by the {@link AuthenticationToken} instance
+     * is  wrapped by the {@link SessionToken} instance
      * passed as parameter. The lifetime of the {@link
      * NorthboundEndpoint} is 'reactivated' before it is returned.
-     * if the {@link AuthenticationToken} argument is null or the
+     * if the {@link SessionToken} argument is null or the
      * {@link NorthboundEnpoint} does not already exist the method
      * returns null.
      *
-     * @param token the {@link AuthenticationToken} wrapping the
+     * @param token the {@link SessionToken} wrapping the
      *              String identifier of the {@link Session}
      * @return the {@link NorthboundEndpoint} for the specified
      * authentication material
      * @throws InvalidCredentialException
      */
-    public NorthboundEndpoint getEndpoint(AuthenticationToken token) throws InvalidCredentialException {
+    public NorthboundEndpoint getEndpoint(SessionToken token) throws InvalidCredentialException {
         if (token == null) {
             return null;
         }

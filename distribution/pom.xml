@@ -28,9 +28,10 @@
     <name>sensiNact IoT Gateway - Distribution</name>
 
     <modules>
-        <module>generator</module>
         <module>template</module>
         <module>template-with-security</module>
+        <module>template-with-openid-security</module>
+        <module>generator</module>
         <module>archetypes</module>
     </modules>
 </project>
