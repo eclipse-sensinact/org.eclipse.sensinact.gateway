@@ -428,6 +428,7 @@
 							<goal>run</goal>
 						</goals>
 					</execution>
+					<!-- 
 					<execution>
 			          	 <id>containers-test-configuration</id>
 			          	 <phase>validate</phase>
@@ -463,6 +464,7 @@
 			              <goal>run</goal>
 			            </goals>
 			          </execution>
+			          -->
 				</executions>
 			</plugin>
 		    <plugin>
