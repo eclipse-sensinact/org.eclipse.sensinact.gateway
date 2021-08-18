@@ -1,0 +1,153 @@
+[
+  { 
+	"realm": "test",   
+	"enabled": true,   
+	"sslRequired": "none",   
+	"registrationAllowed": true,   
+	"requiredCredentials": [ "password" ],   
+	"users": 
+	[   
+		{   
+			"username": "fake",   
+			"enabled": true,   
+			"credentials": 
+			[   
+				{   
+					"type": "password",   
+					"value": "fake"   
+				}   
+			],
+            "groups": [
+                "/Maintainers"
+            ],
+            "attributes": {
+                "snaKey": "f92fe92b61e018be14a88ab84f2859c35d832316"
+            }
+		},  
+		{   
+			"username": "fake2",   
+			"enabled": true,   
+			"credentials": 
+			[   
+				{   
+					"type": "password",   
+					"value": "fake2"   
+				}   
+			],
+            "groups": [
+                "/Maintainers"
+            ],
+            "attributes": {
+                "snaKey": "31e63e9c4a319bf313b8a6d454798e09b3e7344a"
+            }
+		},
+		{   
+			"username": "cea",   
+			"enabled": true,   
+			"credentials": 
+			[   
+				{   
+					"type": "password",   
+					"value": "sensiNact_team"   
+				}   
+			],
+            "groups": [
+                "/Admins"
+            ],
+            "attributes": {
+                "snaKey": "73c5f1a1e7b4a75c2b5fabafca2cf51e6b0e7426"
+            }
+		}   
+	],
+	"roles" : 
+	{   
+		"realm" : 
+		[   
+			{   
+				"name": "maintainer",   
+				"description": "Have maintainer privileges"   
+			},   
+			{   
+				"name": "administrator",   
+				"description": "Have administrator privileges"   
+			}
+		]   
+	},
+    "groups" : [
+        {
+            "name": "Maintainers",
+            "attributes": {
+                "topAttribute": ["true"]
+            },
+            "clientRoles": {
+                "testClient": [ "maintainer" ]
+            }
+        }, 
+        {
+            "name": "Admins",
+            "attributes": {
+                "topAttribute": ["true"]
+            },
+            "clientRoles": {
+                "testClient": [ "administrator", "maintainer" ]
+            }
+        }
+    ],
+	"clients": 
+	[   
+		{       
+			"clientId": "testClient",    
+			"secret": "testClient", 
+			"enabled": true,   
+			"fullScopeAllowed": true,   
+			"baseUrl": "http://localhost:8899",
+		    "bearerOnly": false,
+		    "consentRequired": false,
+		    "standardFlowEnabled": true,
+		    "directAccessGrantsEnabled": true,
+		    "publicClient": false,
+		    "frontchannelLogout": false,
+		    "protocol": "openid-connect",
+		    "nodeReRegistrationTimeout": -1,		      
+			"redirectUris": 
+			[   
+				"http://localhost:8899/sensinact.auth",
+				"http://localhost:8899/sensinact",
+				"http://localhost:8899/sensinact/*"   
+			],   
+			"protocolMappers": [
+			{
+		         "name": "UserClientRoleMapper",
+		         "protocol": "openid-connect",
+		         "protocolMapper": "oidc-usermodel-client-role-mapper",
+		         "consentRequired": false,
+		         "config": {
+		              "multivalued": "true",
+		              "userinfo.token.claim": "true",
+		              "id.token.claim": "true",
+		              "access.token.claim": "true",
+		              "claim.name": "roles",
+		              "jsonType.label": "String",
+		              "usermodel.clientRoleMapping.clientId": "testClient"
+		            }
+		    },
+		    {
+		         "name": "UserSnaKeyMapper",
+		         "protocol": "openid-connect",
+		         "protocolMapper": "oidc-usermodel-attribute-mapper",
+		         "consentRequired": false,
+		         "config": {
+		              "userinfo.token.claim": "true",
+		              "id.token.claim": "false",
+		              "access.token.claim": "false",
+		              "claim.name": "snaKey",
+		              "jsonType.label": "String",
+		              "user.attribute": "snaKey"
+		            }
+		    
+		    }
+		    ]  
+		}
+	 ]   
+   }
+]
