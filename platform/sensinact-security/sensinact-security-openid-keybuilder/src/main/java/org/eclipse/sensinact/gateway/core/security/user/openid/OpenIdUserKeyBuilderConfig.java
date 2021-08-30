@@ -57,13 +57,16 @@ public class OpenIdUserKeyBuilderConfig {
 				throw new RuntimeException("Error while loading configuration", e);
 			}
 		} else {
-			discoveryURL = mediator.getProperty("discoveryURL").toString();
-			certsURL = mediator.getProperty("certsURL").toString();
 			
+			discoveryURL = mediator.getProperty("discoveryURL").toString();
+			certsURL = mediator.getProperty("certsURL").toString();			
 			clientId = mediator.getProperty("client_id").toString();
 			clientSecret = mediator.getProperty("client_secret").toString();
 		}
-		loadEndpoints();
+		if(discoveryURL != null)
+			loadEndpoints();
+		else
+			mediator.error("Unable to load connected OpenID server endpoints");
 	}
 	
 	private void loadEndpoints() {
