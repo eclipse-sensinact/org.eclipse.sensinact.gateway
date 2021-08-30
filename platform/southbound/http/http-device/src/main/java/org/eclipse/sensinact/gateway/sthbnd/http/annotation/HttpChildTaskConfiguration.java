@@ -52,6 +52,8 @@ public @interface HttpChildTaskConfiguration {
     
     String clientSSLCertificate() default HttpTaskConfiguration.DEFAULT_CLIENT_SSL_CERTIFICATE;
 
+    String clientSSLCertificatePassword() default HttpTaskConfiguration. DEFAULT_CLIENT_SSL_CERTIFICATE_PASSWORD ;
+
     String serverSSLCertificate() default HttpTaskConfiguration.DEFAULT_SERVER_SSL_CERTIFICATE;
 
     KeyValuePair[] query() default {};

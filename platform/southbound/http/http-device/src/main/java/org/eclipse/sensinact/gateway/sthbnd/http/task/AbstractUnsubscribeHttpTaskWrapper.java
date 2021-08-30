@@ -81,6 +81,16 @@ extends AbstractUnsubscribeTaskWrapper implements HttpTask<RESPONSE,REQUEST>, Un
 	}
 
 	@Override
+	public String getClientSSLCertificatePassword() {
+		return ((HttpTask<?,?>)task).getClientSSLCertificatePassword();
+	}
+
+	@Override
+	public void setClientSSLCertificatePassword(String clientCertificatePassword) {
+		((HttpTask<?,?>)task).setClientSSLCertificatePassword(clientCertificatePassword);
+	}
+
+	@Override
 	public HttpTask<RESPONSE, REQUEST> setUri(String uri) {
 		((HttpTask<?,?>)task).setUri(uri);
 		return this;
