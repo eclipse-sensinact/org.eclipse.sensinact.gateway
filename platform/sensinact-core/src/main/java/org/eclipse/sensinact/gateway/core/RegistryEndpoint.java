@@ -1,5 +1,14 @@
 package org.eclipse.sensinact.gateway.core;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
@@ -10,12 +19,6 @@ import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.*;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 @SuppressWarnings({"rawtypes","unchecked"}) 
 public final class RegistryEndpoint {
@@ -211,6 +214,7 @@ public final class RegistryEndpoint {
             builder.append(",\"services\":");
             builder.append('[');
 
+            int pos = 0;
             int sindex = 0;
             int slength = serviceList == null ? 0 : serviceList.size();
             for (; sindex < slength; sindex++) {
@@ -230,7 +234,7 @@ public final class RegistryEndpoint {
                 
                 List<String> resourceList = (List<String>) reference.getProperty(service.concat(".resources"));
 
-                builder.append(sindex > 0 ? ',' : "");
+                builder.append(pos > 0 ? ',' : "");
                 builder.append('{');
                 builder.append("\"name\":");
                 builder.append('"');
@@ -238,7 +242,8 @@ public final class RegistryEndpoint {
                 builder.append('"');
                 builder.append(",\"resources\":");
                 builder.append('[');
-
+                
+                int rpos = 0;
                 int rindex = 0;
                 int rlength = resourceList == null ? 0 : resourceList.size();
                 for (; rindex < rlength; rindex++) {
@@ -290,7 +295,7 @@ public final class RegistryEndpoint {
 	                    default:
 	                    	break;
                     }                    
-                    builder.append(rindex > 0 ? ',' : "");
+                    builder.append(rpos > 0 ? ',' : "");
                     builder.append('{');
                     builder.append("\"name\":");
                     builder.append('"');
@@ -307,9 +312,11 @@ public final class RegistryEndpoint {
                         builder.append('"');
                     }
                     builder.append('}');
+                    rpos+=1;
                 }
                 builder.append(']');
                 builder.append('}');
+                pos+=1;
             }
             builder.append(']');
             builder.append('}');
