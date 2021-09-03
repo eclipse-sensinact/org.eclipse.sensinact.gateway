@@ -36,8 +36,6 @@ import org.eclipse.sensinact.gateway.core.security.AccessToken;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.http.test.HttpServiceTestClient;
-import org.eclipse.sensinact.gateway.core.security.test.TestSecurityPatternWithNorthbound.ProvidersList;
-import org.eclipse.sensinact.gateway.core.security.test.TestSecurityPatternWithNorthbound.ServicesList;
 import org.eclipse.sensinact.gateway.core.security.ws.test.WsServiceTestClient;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
@@ -540,10 +538,9 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
         configuration.put("org.apache.felix.http.jettyEnabled", true);
         configuration.put("org.apache.felix.http.whiteboardEnabled", true);
         
-		configuration.put("discoveryURL","http://localhost:24680/auth/realms/test/.well-known/openid-configuration");
-		configuration.put("certsURL","http://localhost:24680/auth/realms/test/protocol/openid-connect/certs");
-		configuration.put("client_id","testClient");
-		configuration.put("client_secret","testClient");
+		configuration.put("org.eclipse.sensinact.security.keybuilder.openid.discoveryURL","http://localhost:24680/auth/realms/test/.well-known/openid-configuration");
+		configuration.put("org.eclipse.sensinact.security.keybuilder.openid.client_id","testClient");
+		configuration.put("org.eclipse.sensinact.security.keybuilder.openid.client_secret","testClient");
 		
 		configuration.put("felix.log.level", "4");
 	}
@@ -564,6 +561,11 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		// slider1[0-9] - authenticated access level
 		// slider1[0-9]/cursor - authenticated access level
 		// fake2 user is authenticated on slider1[0-9]
+
+		while(!keycloakAvailable()) {
+			Thread.sleep(1000);
+		}
+		Thread.sleep(20000);
 
 		MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
 
@@ -662,6 +664,124 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 			System.out.println(serviceProvider.getDescription().getJSON());
 		}
 	}
+	
+	@SuppressWarnings("rawtypes")
+	@Ignore
+	@Test
+	public void testThirdPartyIdentityProviderWithCredentials() throws Throwable {
+		
+		// slider[0-9]{2} - authenticated access level
+		// slider[0-9]{2}/admin - admin authenticated access level
+		// cea user is admin on slider[0-9]{2}
+
+		// slider0[0-9] - authenticated access level
+		// slider0[0-9]/cursor - authenticated access level
+		// fake user is authenticated on slider0[0-9]
+
+		// slider1[0-9] - authenticated access level
+		// slider1[0-9]/cursor - authenticated access level
+		// fake2 user is authenticated on slider1[0-9]
+
+		while(!keycloakAvailable()) {
+			Thread.sleep(1000);
+		}
+		Thread.sleep(20000);
+
+		MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
+
+		Core core = mid.buildProxy();
+		Session session = core.getAnonymousSession();
+		assertNotNull(session);
+
+		Set providers = session.serviceProviders();
+		System.out.println(providers);
+		assertTrue(providers.isEmpty());
+
+		// ******************************************************
+		// admin
+		// the admin user is suppose to see every thing
+		// service providers and services
+		
+		MidProxy<Authentication> midCredentials = new MidProxy<Authentication>(classloader, this, Authentication.class);
+		midCredentials.buildProxy(Credentials.class.getCanonicalName(), new Class<?>[] { String.class, String.class },
+				new Object[] { "cea", "sensiNact_team" });
+
+		Method method = mid.getContextualizedType().getDeclaredMethod("getSession",
+				new Class<?>[] { midCredentials.getContextualizedType() });
+		session = (Session) mid.toOSGi(method, new Object[] { midCredentials.getInstance() });
+		assertNotNull(session);
+
+		providers = session.serviceProviders();
+		assertEquals(3, providers.size());
+		Iterator<ServiceProvider> iterator = providers.iterator();
+
+		while (iterator.hasNext()) {
+			MidProxy<ServiceProvider> provider = new MidProxy<ServiceProvider>(classloader, this,
+					ServiceProvider.class);
+
+			ServiceProvider serviceProvider = provider.buildProxy(iterator.next());
+			assertEquals(2, serviceProvider.getServices().size());
+			System.out.println(serviceProvider.getDescription().getJSON());
+		}
+
+		// *************************************
+		// fake
+		// the fake user is suppose to see only two service providers
+		// and only the cursor service for each one
+
+		midCredentials = new MidProxy<Authentication>(classloader, this, Authentication.class);
+		midCredentials.buildProxy(Credentials.class.getCanonicalName(), new Class<?>[] { String.class, String.class },
+				new Object[] { "fake", "fake" });
+
+		method = mid.getContextualizedType().getDeclaredMethod("getSession",
+				new Class<?>[] { midCredentials.getContextualizedType() });
+
+		session = (Session) mid.toOSGi(method, new Object[] { midCredentials.getInstance() });
+
+		assertNotNull(session);
+
+		providers = session.serviceProviders();
+
+		assertEquals(2, providers.size());
+		iterator = providers.iterator();
+
+		while (iterator.hasNext()) {
+			MidProxy<ServiceProvider> provider = new MidProxy<ServiceProvider>(classloader, this,
+					ServiceProvider.class);
+
+			ServiceProvider serviceProvider = provider.buildProxy(iterator.next());
+			assertEquals(1, serviceProvider.getServices().size());
+			System.out.println(serviceProvider.getDescription().getJSON());
+		}
+
+		// ***************************************
+		// fake2
+		// the fake2 user is suppose to see only one service provider
+		// and only its cursor service
+		midCredentials = new MidProxy<Authentication>(classloader, this, Authentication.class);
+		midCredentials.buildProxy(Credentials.class.getCanonicalName(), new Class<?>[] { String.class, String.class },
+				new Object[] { "fake2", "fake2" });
+
+		method = mid.getContextualizedType().getDeclaredMethod("getSession",
+				new Class<?>[] { midCredentials.getContextualizedType() });
+
+		session = (Session) mid.toOSGi(method, new Object[] { midCredentials.getInstance() });
+
+		assertNotNull(session);
+
+		providers = session.serviceProviders();
+		assertEquals(1, providers.size());
+		iterator = providers.iterator();
+
+		while (iterator.hasNext()) {
+			MidProxy<ServiceProvider> provider = new MidProxy<ServiceProvider>(classloader, this,
+					ServiceProvider.class);
+
+			ServiceProvider serviceProvider = provider.buildProxy(iterator.next());
+			assertEquals(1, serviceProvider.getServices().size());
+			System.out.println(serviceProvider.getDescription().getJSON());
+		}
+	}
 
 
 	@Ignore
@@ -679,6 +799,11 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		// slider1[0-9]/cursor - authenticated access level
 		// fake2 user is authenticated on slider1[0-9]
 
+		while(!keycloakAvailable()) {
+			Thread.sleep(1000);
+		}
+		Thread.sleep(20000);
+		
     	Mediator mediator = new Mediator(context);
 		String response = HttpServiceTestClient.newRequest(mediator, "http://localhost:8899/sensinact/providers", 
 				null, "GET", null);
@@ -777,7 +902,7 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 			assertEquals(1,services.getServices().size());
 		}		
 		System.out.println("====================================>>>>>");
-	}	
+	}
 
 	@Ignore
 	@Test
@@ -794,6 +919,11 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		// slider1[0-9]/cursor - authenticated access level
 		// fake2 user is authenticated on slider1[0-9]
 
+		while(!keycloakAvailable()) {
+			Thread.sleep(1000);
+		}
+		Thread.sleep(20000);
+		
     	Mediator mediator = new Mediator(context);
 
     	WsServiceTestClient client = new WsServiceTestClient(null);
@@ -910,6 +1040,20 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
         }
         return simulated;
     }
+
+    private boolean keycloakAvailable()  {
+    	try {
+			ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> connection = 
+				new ConnectionConfigurationImpl<SimpleResponse,SimpleRequest>();			
+			connection.setUri("http://localhost:24680/auth/realms/test/.well-known/openid-configuration");
+			connection.setHttpMethod("GET");			
+			SimpleRequest req = new SimpleRequest(connection);
+			SimpleResponse resp = req.send();
+			return resp.getStatusCode()==200;
+    	} catch(Exception e) {
+    		return false;
+    	}
+    }
     
     private String openIdAuthenticate(String username, String password) throws IOException {
     	//Retrieve access token from third party identity provider
@@ -919,8 +1063,7 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		
 		StringBuilder urlParameters = new StringBuilder();
 		
-		urlParameters.append("redirect_uri=http://localhost:8899/sensinact.auth");
-		urlParameters.append("&client_id=testClient");
+		urlParameters.append("client_id=testClient");
 		urlParameters.append("&username=");
 		urlParameters.append(username);
 		urlParameters.append("&password=");
@@ -940,7 +1083,7 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		
 		SimpleRequest req = new SimpleRequest(connection);
 		SimpleResponse resp = req.send();
-		
+
 		String response = new String(resp.getContent());
 		
 		ObjectMapper mapper = new ObjectMapper();

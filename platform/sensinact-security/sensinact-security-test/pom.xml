@@ -428,7 +428,7 @@
 							<goal>run</goal>
 						</goals>
 					</execution>
-					<!-- 
+					<!--
 					<execution>
 			          	 <id>containers-test-configuration</id>
 			          	 <phase>validate</phase>
@@ -441,9 +441,6 @@
 				                <exec dir="${project.build.directory}/compose" executable="docker-compose">
 				                  <arg line="up -d"/>
 				                </exec>
-				                <waitfor  maxwait="1" maxwaitunit="minute" checkevery="1000">
-				                  <http url="http://localhost:24680/auth/realms/test/.well-known/openid-configuration"/>
-				                </waitfor>
 			              </target>
 			            </configuration>
 			            <goals>
