@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core.security.user.openid;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AccessToken;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.core.security.UserKey;
@@ -22,26 +21,27 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *  {@link UserKeyBuilder} implementation in charge of building {@link UserKey}
  * 
  * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
-public class OpenIdUserKeyBuilder implements UserKeyBuilder<String,AccessToken> {
+public class OpenIdAccessTokenUserKeyBuilder implements UserKeyBuilder<String,AccessToken> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(OpenIdAccessTokenUserKeyBuilder.class);
 	
-	private Mediator mediator;
 	private OpenIdUserKeyBuilderConfig config;
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator the {@link Mediator} allowing the {@link UserKeyBuilder}	to be instantiated to
-	 * interat with the OSGi host environement 
+	 * @param config the {@link OpenIdUserKeyBuilderConfig} of the {@link UserKeyBuilder} to be instantiated
 	 */
-	public OpenIdUserKeyBuilder(Mediator mediator)  {
-		this.mediator = mediator;
-		this.config = new OpenIdUserKeyBuilderConfig(mediator);
+	public OpenIdAccessTokenUserKeyBuilder(OpenIdUserKeyBuilderConfig config)  {
+		this.config = config;
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class OpenIdUserKeyBuilder implements UserKeyBuilder<String,AccessToken> 
 		try {
 			user = getUserInfo(token.getAuthenticationMaterial());
 		} catch (IOException e) {
-			mediator.error(e);
+			LOG.error(e.getMessage(),e);
 		}
 		if (user == null) 
 			return null;
@@ -59,7 +59,9 @@ public class OpenIdUserKeyBuilder implements UserKeyBuilder<String,AccessToken> 
 	}
 	
 	private OpenIdUser getUserInfo(String bearer) throws IOException {
-
+		if(!this.config.isConfigured())
+			return null;
+		
 		JsonWebToken jwt = new JsonWebToken(bearer, config.getPublicKeys());
 		if(!jwt.isValid()) 
 			return null;

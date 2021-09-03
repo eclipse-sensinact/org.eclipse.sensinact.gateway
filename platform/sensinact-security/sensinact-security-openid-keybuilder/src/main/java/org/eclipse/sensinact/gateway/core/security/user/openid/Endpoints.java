@@ -33,6 +33,9 @@ public class Endpoints {
 
 	@JsonProperty(value="issuer")
 	private String issuer;
+	
+	@JsonProperty(value="jwks_uri")
+	private String certsEP;
 
 	/**
 	 * Constructor
@@ -46,12 +49,14 @@ public class Endpoints {
 	 * @param tokenEP the token endpoint address for the Endpoints to be instantiated
 	 * @param userinfoEP the user information endpoint address for the Endpoints to be instantiated
 	 * @param issuer the issuer endpoint address for the Endpoints to be instantiated
+	 * @param certsEP the certificats endpoint address for the Endpoints to be instantiated
 	 */
-	public Endpoints(String authEP, String tokenEP, String userinfoEP, String issuer){
+	public Endpoints(String authEP, String tokenEP, String userinfoEP, String issuer, String certsEP){
 		this.authEP = authEP;
 		this.tokenEP = tokenEP;
 	    this.userinfoEP = userinfoEP;
 		this.issuer = issuer;
+		this.certsEP = certsEP;
 	}
 
 	/**
@@ -144,4 +149,21 @@ public class Endpoints {
 		this.issuer = issuer;
 	}
 
+	/**
+	 * Returns the certifiats endpoint address for this Endpoints
+	 * 
+	 * @return the certificats endpoint address for this Endpoints
+	 */
+	public String getCertsEP() {
+		return certsEP;
+	}
+
+	/**
+	 * Defines the certifiats endpoint address for this Endpoints
+	 * 
+	 * @param certsEP the certificats endpoint address for this Endpoints
+	 */
+	public void setCertsEP(String certsEP) {
+		this.certsEP = certsEP;
+	}
 }

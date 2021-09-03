@@ -15,24 +15,33 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.UserKeyBuilder;
 import org.eclipse.sensinact.gateway.core.security.UserKeyBuilderFactory;
 import org.eclipse.sensinact.gateway.core.security.AccessToken;
+import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 
 /**
  * {@link UserKeyBuilderFactory} service implementation
  */
-public class OpenIdUserKeyBuilderFactory implements UserKeyBuilderFactory<String,AccessToken,OpenIdUserKeyBuilder> {
+public class OpenIdUserKeyBuilderFactory implements UserKeyBuilderFactory<String,AccessToken,OpenIdAccessTokenUserKeyBuilder> {
 	
 	@Override
-	public Class<OpenIdUserKeyBuilder> getType() {
-		return OpenIdUserKeyBuilder.class;
+	public Class<OpenIdAccessTokenUserKeyBuilder> getType() {
+		return OpenIdAccessTokenUserKeyBuilder.class;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes", "serial" })
 	@Override
 	public void newInstance(Mediator mediator) throws SecuredAccessException {
-		UserKeyBuilder<String,AccessToken> builder = new OpenIdUserKeyBuilder(mediator);
+
+		OpenIdUserKeyBuilderConfig config = new OpenIdUserKeyBuilderConfig(mediator);
+		
+		UserKeyBuilder<String,AccessToken> accessTokenUserKeyBuilder = new OpenIdAccessTokenUserKeyBuilder(config);
 		mediator.register(new Hashtable() {	{
-			this.put("identityMaterial",AccessToken.class.getCanonicalName());
-		}}, builder, new Class<?>[] { UserKeyBuilder.class });
+			this.put("identityMaterial", AccessToken.class.getCanonicalName());
+		}}, accessTokenUserKeyBuilder, new Class<?>[] { UserKeyBuilder.class });
+		
+		UserKeyBuilder<Credentials,Credentials> credentialsUserKeyBuilder = new OpenIdCredentialsUserKeyBuilder(config);
+		mediator.register(new Hashtable() {	{
+			this.put("identityMaterial", Credentials.class.getCanonicalName());
+		}}, credentialsUserKeyBuilder, new Class<?>[] { UserKeyBuilder.class });
 	}
 }
