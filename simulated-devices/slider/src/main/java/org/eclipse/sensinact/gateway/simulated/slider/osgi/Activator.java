@@ -66,7 +66,7 @@ public class Activator extends AbstractActivator<Mediator> {
             final String id = slidersArray.getString(i);
             SliderSetterItf sliderPanel = null;
 
-            if (mediator.getContext().getProperty(GUI_ENABLED).equals("true")) {
+            if ("true".equals(mediator.getProperty(GUI_ENABLED))) {
                 sliderPanel = new SliderGUI(new SliderAdapter(id, connector));
                 this.sliderPanels.add(sliderPanel);
             } else {

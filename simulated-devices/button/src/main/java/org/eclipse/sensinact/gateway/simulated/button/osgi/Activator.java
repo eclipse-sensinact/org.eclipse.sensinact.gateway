@@ -47,7 +47,7 @@ public class Activator extends AbstractActivator<Mediator> {
         }
         connector.connect(manager);
 
-        if (mediator.getContext().getProperty(GUI_ENABLED).equals("true")) {
+        if ("true".equals(mediator.getProperty(GUI_ENABLED))) {
             buttonPanel = new ButtonGUI(mediator, new ButtonAdapter(connector));
             jFrame = new JFrame();
             javax.swing.SwingUtilities.invokeLater(new Runnable() {

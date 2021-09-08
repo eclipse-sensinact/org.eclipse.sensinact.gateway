@@ -39,7 +39,7 @@ public class Activator extends AbstractActivator<Mediator> {
         connector.addInjectableInstance(LightConfig.class, config);
         connector.connect(manager);
 
-        if (mediator.getContext().getProperty(GUI_ENABLED).equals("true")) {
+        if ("true".equals(mediator.getProperty(GUI_ENABLED))) {
             lightPanel = new LightPanel();
             config.addListener(lightPanel);
         }
