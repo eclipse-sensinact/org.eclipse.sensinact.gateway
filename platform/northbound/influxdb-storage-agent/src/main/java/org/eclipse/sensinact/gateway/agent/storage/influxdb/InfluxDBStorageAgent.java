@@ -29,6 +29,7 @@ import org.osgi.service.component.annotations.Deactivate;
 @Component(immediate=true, service = {AgentRelay.class})
 public class InfluxDBStorageAgent extends StorageAgent {
 		
+	private static final String INFLUX_AGENT_URI_PROPS           = "org.eclipse.sensinact.gateway.history.influx.uri";
 	private static final String INFLUX_AGENT_SCHEME_PROPS        = "org.eclipse.sensinact.gateway.history.influx.scheme";
 	private static final String INFLUX_AGENT_HOST_PROPS          = "org.eclipse.sensinact.gateway.history.influx.host";
 	private static final String INFLUX_AGENT_PORT_PROPS          = "org.eclipse.sensinact.gateway.history.influx.port";
@@ -55,40 +56,52 @@ public class InfluxDBStorageAgent extends StorageAgent {
 		BundleContext bc = context.getBundleContext();
 		this.mediator = new Mediator(bc);
 		
-		String scheme =  (String) mediator.getProperty(INFLUX_AGENT_SCHEME_PROPS);
-		if(scheme == null)
-			scheme = InfluxDbConnectorConfiguration.DEFAULT_SCHEME;
-		
-		String host = (String) mediator.getProperty(INFLUX_AGENT_HOST_PROPS);
-		if(host == null)
-			host = InfluxDbConnectorConfiguration.DEFAULT_HOST;
-		
-		int port = -1;
-		String portStr =  (String) mediator.getProperty(INFLUX_AGENT_PORT_PROPS);
-		if(portStr == null)
-			port = InfluxDbConnectorConfiguration.DEFAULT_PORT;
-		else 
-			port = Integer.parseInt(portStr);
-		
-		String path = (String) mediator.getProperty(INFLUX_AGENT_PATH_PROPS);
-		if(path == null)
-			path = InfluxDbConnectorConfiguration.DEFAULT_PATH;
-
 		String db = (String) mediator.getProperty(INFLUX_AGENT_DB_PROPS);
 		if(db == null)
 			db = DEFAULT_DATABASE;
 		
 		String username = (String) mediator.getProperty(INFLUX_AGENT_LOGIN_PROPS);
 		String password = (String) mediator.getProperty(INFLUX_AGENT_PASSWORD_PROPS);
+
+		InfluxDbConnectorConfiguration configuration;
 		
-		InfluxDbConnectorConfiguration configuration = new InfluxDbConnectorConfiguration.Builder(
-			).withScheme(scheme
+		InfluxDbConnectorConfiguration.Builder builder = new InfluxDbConnectorConfiguration.Builder();
+		
+		String uri = (String) mediator.getProperty(INFLUX_AGENT_URI_PROPS);
+		
+		if(uri == null) {
+			String scheme =  (String) mediator.getProperty(INFLUX_AGENT_SCHEME_PROPS);
+			if(scheme == null)
+				scheme = InfluxDbConnectorConfiguration.DEFAULT_SCHEME;
+			
+			String host = (String) mediator.getProperty(INFLUX_AGENT_HOST_PROPS);
+			if(host == null)
+				host = InfluxDbConnectorConfiguration.DEFAULT_HOST;
+			
+			int port = -1;
+			String portStr =  (String) mediator.getProperty(INFLUX_AGENT_PORT_PROPS);
+			if(portStr == null)
+				port = InfluxDbConnectorConfiguration.DEFAULT_PORT;
+			else 
+				port = Integer.parseInt(portStr);
+			
+			String path = (String) mediator.getProperty(INFLUX_AGENT_PATH_PROPS);
+			if(path == null)
+				path = InfluxDbConnectorConfiguration.DEFAULT_PATH;
+
+			configuration = builder.withScheme(scheme
 			).withHost(host
 			).withPort(port
 			).withPath(path
 			).withUsername(username
 			).withPassword(password
 			).build();
+		} else {
+			configuration = builder.withUri(uri
+            ).withUsername(username
+            ).withPassword(password
+            ).build();
+		}
 		try {
 			this.connector = new InfluxDbConnector(configuration);
 		} catch (Exception e) {
@@ -102,7 +115,7 @@ public class InfluxDBStorageAgent extends StorageAgent {
 		this.database = this.connector.createIfNotExists(db);
 		
 		InfluxDBHistoricProvider provider = new InfluxDBHistoricProvider(connector, db, this.measurement);
-		this.mediator.register(new Hashtable(), provider,new Class[] { HistoricProvider.class});
+		this.mediator.register(new Hashtable<String, Object>(), provider,new Class[] { HistoricProvider.class});
 		
 		super.setStorageKeys((String) mediator.getProperty(STORAGE_AGENT_KEYS_PROPS));
 		super.setStorageConnection(new InfluxDBStorageConnection(mediator, database, this.measurement));
