@@ -19,6 +19,7 @@
 		<groupId>org.eclipse.sensinact.gateway</groupId>
 		<artifactId>parent</artifactId>
 		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>sensinact-datastore</artifactId>
@@ -31,7 +32,7 @@
 	</properties>
 
 	<modules>
-		<!--<module>sensinact-datastore-api</module> -->
+		<module>sensinact-datastore-api</module>
 		<module>sensinact-sqlite-connector</module>
 	</modules>
 

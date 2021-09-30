@@ -31,10 +31,12 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
 			<artifactId>kodi-device</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
 			<artifactId>ssdp</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 

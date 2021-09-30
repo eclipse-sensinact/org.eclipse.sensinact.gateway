@@ -11,25 +11,28 @@
 package org.eclipse.sensinact.gateway.nthbnd.filter.geojson.test;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.filter.geojson.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.filter.geojson.ws.test.WsServiceTestClient;
-import org.eclipse.sensinact.gateway.test.MidOSGiTest;
-import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.framework.BundleContext;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.service.ServiceExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class TestGeoJsonFiltering extends MidOSGiTest {
+@ExtendWith(BundleContextExtension.class)
+@ExtendWith(ServiceExtension.class)
+public class TestGeoJsonFiltering{
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
@@ -47,30 +50,11 @@ public class TestGeoJsonFiltering extends MidOSGiTest {
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
 
-    /**
-     * @throws MalformedURLException
-     * @throws IOException
-     */
-    public TestGeoJsonFiltering() throws Exception {
-        super();
-    }
-
-    /**
-     * @inheritDoc
-     * @see MidOSGiTest#isExcluded(java.lang.String)
-     */
-    public boolean isExcluded(String fileName) {
-        if ("org.apache.felix.framework.security.jar".equals(fileName)) {
-            return true;
-        }
-        return false;
-    }
 
     /**
      * @inheritDoc
      * @see MidOSGiTest#doInit(java.util.Map)
      */
-    @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void doInit(Map configuration) {
         configuration.put("felix.auto.start.1",  
@@ -124,16 +108,25 @@ public class TestGeoJsonFiltering extends MidOSGiTest {
         	String fileName = "sensinact.config";
             File testFile = new File(new File("src/test/resources"), fileName);
             URL testFileURL = testFile.toURI().toURL();
-            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
-            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
-            IOUtils.write(testCng, output);
+//            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
+//            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
+//            IOUtils.write(testCng, output);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    
+    @AfterEach
+    public void afterEach(@InjectBundleContext BundleContext context) throws InterruptedException {
+    	Mediator mediator = new Mediator(context);
+    	String response = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/slider/admin/location/SET", "[{\"name\":\"value\",\"type\":\"string\",\"value\":\"45.2:5.7\"}]", "POST");
+    	Thread.sleep(1000);
+    }
 
     @Test
-    public void testHttpFiltered() throws Exception {
+    public void testHttpFiltered(
+    		@InjectBundleContext BundleContext context
+    		) throws Exception {
         Mediator mediator = new Mediator(context);
         //(&(latitude <= 45.20899800276024)(latitude >= 45.191001997239766)(longitude <= 5.712727172127145)(longitude >= 5.687272827872856))
 

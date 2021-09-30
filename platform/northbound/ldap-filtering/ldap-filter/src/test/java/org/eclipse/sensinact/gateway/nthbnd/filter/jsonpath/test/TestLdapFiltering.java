@@ -10,8 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,14 +21,26 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.InjectInstalledBundle;
+import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.context.InstalledBundleExtension;
+import org.osgi.test.junit5.service.ServiceExtension;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class TestLdapFiltering extends MidOSGiTest {
+@ExtendWith(InstalledBundleExtension.class)
+@ExtendWith(ServiceExtension.class)
+@ExtendWith(BundleContextExtension.class)
+@Disabled
+public class TestLdapFiltering {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
@@ -69,7 +81,6 @@ public class TestLdapFiltering extends MidOSGiTest {
      * @inheritDoc
      * @see MidOSGiTest#doInit(java.util.Map)
      */
-    @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void doInit(Map configuration) {
         configuration.put("felix.auto.start.1",  
@@ -121,16 +132,19 @@ public class TestLdapFiltering extends MidOSGiTest {
     }
 
     @Test
-    public void testLdapFilter() throws Exception {
-        File tmpDirectory = new File("./target/felix/tmp");
-
-        new File(tmpDirectory, "props.xml").delete();
-        new File(tmpDirectory, "resources.xml").delete();
-        new File(tmpDirectory, "dynamicBundle.jar").delete();
-
-        super.createDynamicBundle(new File("./extra-src/test/resources/MANIFEST.MF"), tmpDirectory, new File("./extra-src/test/resources/meta"), new File("./src/test/resources/resources.xml"), new File("./target/extra-test-classes"));
-
-        super.installDynamicBundle(new File(tmpDirectory, "dynamicBundle.jar").toURI().toURL()).start();
+    public void testLdapFilter(
+    			@InjectInstalledBundle(value = "extra.jar", start = true) Bundle bundle,
+    			@InjectBundleContext BundleContext context
+    		) throws Exception {
+//        File tmpDirectory = new File("./target/felix/tmp");
+//
+//        new File(tmpDirectory, "props.xml").delete();
+//        new File(tmpDirectory, "resources.xml").delete();
+//        new File(tmpDirectory, "dynamicBundle.jar").delete();
+//
+//        super.createDynamicBundle(new File("./extra-src/test/resources/MANIFEST.MF"), tmpDirectory, new File("./extra-src/test/resources/meta"), new File("./src/test/resources/resources.xml"), new File("./target/extra-test-classes"));
+//
+//        super.installDynamicBundle(new File(tmpDirectory, "dynamicBundle.jar").toURI().toURL()).start();
         Thread.sleep(5000);
 
         Mediator mediator = new Mediator(context);

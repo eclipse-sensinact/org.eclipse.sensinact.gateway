@@ -35,6 +35,7 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.sthbnd</groupId>
 			<artifactId>sensinact-openhab</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 

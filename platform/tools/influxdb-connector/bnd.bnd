@@ -1,0 +1,34 @@
+-include: ${sensinact.root.dir}/bnd/default.bnd.bnd
+Import-Package: \
+	javax.annotation,\
+	javax.annotation.meta,\
+	javax.crypto,\
+	javax.crypto.spec,\
+	javax.net,\
+	javax.net.ssl,\
+	javax.security.auth.x500,\
+	org.slf4j;version="[1.7,2)",\
+	sun.misc
+	
+Export-Package:\
+	org.influxdb,\
+	org.influxdb.annotation,\
+	org.influxdb.dto,\
+	okhttp3,\
+	okio,\
+	org.eclipse.sensinact.gateway.tools.connector.influxdb                    		
+
+-privatepackage: \
+	org.influxdb.impl,\
+	org.influxdb.msgpack,\
+	org.influxdb.querybuilder,\
+	org.influxdb.querybuilder.clauses,\
+	com.squareup.moshi,\
+	okhttp3.*,\
+	org.json,\
+	org.msgpack.core,\
+	org.msgpack.value,\
+	org.msgpack.value.*,\
+	retrofit2,\
+	retrofit2.*,\
+	org.msgpack.core.buffer

@@ -57,6 +57,7 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 			<artifactId>attributes-filter</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>

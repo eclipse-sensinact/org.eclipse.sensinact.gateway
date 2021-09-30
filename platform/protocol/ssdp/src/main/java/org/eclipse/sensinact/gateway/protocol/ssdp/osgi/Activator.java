@@ -10,18 +10,21 @@
  */
 package org.eclipse.sensinact.gateway.protocol.ssdp.osgi;
 
-import org.eclipse.sensinact.gateway.protocol.ssdp.discovery.SSDPAbstractListenerThread;
-import org.eclipse.sensinact.gateway.protocol.ssdp.discovery.SSDPDiscoveryListenerThread;
-import org.eclipse.sensinact.gateway.protocol.ssdp.discovery.SSDPMulticastListenerThread;
-import org.eclipse.sensinact.gateway.protocol.ssdp.listener.SSDPDiscoveryNotifier;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-
 import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.protocol.ssdp.discovery.SSDPAbstractListenerThread;
+import org.eclipse.sensinact.gateway.protocol.ssdp.discovery.SSDPDiscoveryListenerThread;
+import org.eclipse.sensinact.gateway.protocol.ssdp.discovery.SSDPMulticastListenerThread;
+import org.eclipse.sensinact.gateway.protocol.ssdp.listener.SSDPDiscoveryNotifier;
+import org.osgi.annotation.bundle.Header;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator implements BundleActivator {
     private List<SSDPAbstractListenerThread> discoveryThreads;
     private SSDPDiscoveryNotifier notifier;

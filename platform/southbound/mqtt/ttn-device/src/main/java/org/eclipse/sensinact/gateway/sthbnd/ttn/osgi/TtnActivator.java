@@ -25,6 +25,8 @@ import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttTopic;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.listener.TtnActivationListener;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.listener.TtnDownlinkListener;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.listener.TtnUplinkListener;
+import org.osgi.annotation.bundle.Header;
+import org.osgi.framework.Constants;
 
 @SensiNactBridgeConfiguration(
 	startAtInitializationTime = true,
@@ -32,6 +34,7 @@ import org.eclipse.sensinact.gateway.sthbnd.ttn.listener.TtnUplinkListener;
 	endpointType = MqttProtocolStackEndpoint.class,
 	resourceBuildPolicy = { BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION, BuildPolicy.BUILD_NON_DESCRIBED},
 	serviceBuildPolicy = { BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION, BuildPolicy.BUILD_NON_DESCRIBED})
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class TtnActivator extends BasisActivator<MqttPacket> {
 
     @Property(name = "the.things.network.application.id")

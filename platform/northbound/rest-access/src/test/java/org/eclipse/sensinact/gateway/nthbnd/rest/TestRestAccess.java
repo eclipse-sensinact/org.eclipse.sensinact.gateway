@@ -10,8 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.rest;
 
-import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.eclipse.sensinact.gateway.util.IOUtils;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.service.ServiceExtension;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,7 +25,7 @@ import java.util.Map;
 /**
  * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
-public class TestRestAccess extends MidOSGiTest {
+public class TestRestAccess {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
@@ -64,7 +66,6 @@ public class TestRestAccess extends MidOSGiTest {
      * @inheritDoc
      * @see MidOSGiTest#doInit(java.util.Map)
      */
-    @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void doInit(Map configuration) {
     	configuration.put("felix.auto.start.1",  
@@ -117,9 +118,9 @@ public class TestRestAccess extends MidOSGiTest {
         	String fileName = "sensinact.config";
             File testFile = new File(new File("src/test/resources"), fileName);
             URL testFileURL = testFile.toURI().toURL();
-            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
-            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
-            IOUtils.write(testCng, output);
+//            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
+//            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
+//            IOUtils.write(testCng, output);
         } catch (Exception e) {
             e.printStackTrace();
         }

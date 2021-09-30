@@ -10,7 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.generic.test;
 
-import org.eclipse.sensinact.gateway.common.primitive.Describable;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.File;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.Core;
@@ -21,76 +27,39 @@ import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
-import org.eclipse.sensinact.gateway.test.MidOSGiTest;
-import org.eclipse.sensinact.gateway.test.MidProxy;
 import org.eclipse.sensinact.gateway.test.ProcessorService;
 import org.eclipse.sensinact.gateway.test.StarterService;
-import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
+import org.osgi.test.common.annotation.InjectInstalledBundle;
+import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.service.ServiceAware;
+import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.context.InstalledBundleExtension;
+import org.osgi.test.junit5.service.ServiceExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+@ExtendWith(InstalledBundleExtension.class)
+@ExtendWith(BundleContextExtension.class)
+@ExtendWith(ServiceExtension.class)
+public class TestGenericImplementation {
 
-import static org.junit.Assert.assertEquals;
-
-@SuppressWarnings({"unchecked", "rawtypes"})
-public class TestGenericImplementation extends MidOSGiTest {
-
-	Method getJSON=null;
-	Method getProviders=null;
-	Method getServices=null;
-	Method getResources=null;
-    Method getDescription = null;
-    Method resource = null;
-    Method getMethod = null;
-    Method setMethod = null;
-    Method actMethod = null;
-
-    public TestGenericImplementation() throws Exception {
-        super();
-        resource = Session.class.getDeclaredMethod("resource", new Class<?>[] {String.class,String.class,String.class});  
-        getProviders = Session.class.getDeclaredMethod("getProviders");   
-        getServices = Session.class.getDeclaredMethod("getServices", new Class<?>[] {String.class});   
-        getResources = Session.class.getDeclaredMethod("getResources", new Class<?>[] {String.class, String.class});  
-        getJSON = DescribeResponse.class.getDeclaredMethod("getJSON");  
-        getDescription = Describable.class.getDeclaredMethod("getDescription");        
-        getMethod = Resource.class.getDeclaredMethod("get", new Class<?>[]{String.class, Object[].class});
-        setMethod = Resource.class.getDeclaredMethod("set", new Class<?>[]{String.class, Object.class, Object[].class});
-        actMethod = ActionResource.class.getDeclaredMethod("act", new Class<?>[]{Object[].class});
-    }
-
-    /**
-     * @inheritDoc
-     * @see MidOSGiTest#isExcluded(java.lang.String)
-     */
-    public boolean isExcluded(String fileName) {
-        if ("org.apache.felix.framework.security.jar".equals(fileName)) {
-            return true;
-        }
-        return false;
-    }
 
     @Test
-    public void testActionResourceModel() throws Throwable {
-        this.initializeMoke(new File("src/test/resources/st-resource.xml").toURI().toURL(), null, false);
-        ServiceReference reference = super.getBundleContext().getServiceReference(StarterService.class);
+    public void testActionResourceModel(
+    		@InjectService(cardinality = 0) ServiceAware<StarterService> starterServiceAware, 
+    		@InjectService(timeout = 500) Core core,
+    		@InjectInstalledBundle(start = true, value = "st-resource.jar") Bundle bundle
+    		) throws Throwable {
 
-        StarterService starter = (StarterService) super.getBundleContext().getService(reference);
-        starter.start("SmartPlug");
+    	StarterService starterService = starterServiceAware.waitForService(500);
+    	
+        starterService.start("SmartPlug");
         Thread.sleep(2000);
-        MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
-        Core core = mid.buildProxy();
 
         Session session = core.getAnonymousSession();
 
@@ -99,36 +68,30 @@ public class TestGenericImplementation extends MidOSGiTest {
         Resource variable = service.getResource("status");
         Resource variation = service.getResource("variation");
         //System.out.println(service.getDescription().getDescription());
-        MidProxy midVariable = (MidProxy) Proxy.getInvocationHandler(variable);
-        MidProxy midVariation = (MidProxy) Proxy.getInvocationHandler(variation);
 
-        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
+        SnaMessage response = variable.get(DataResource.VALUE, (Object[]) null);
         JSONObject jsonObject = new JSONObject(response.getJSON());
 
         assertEquals(1, (int) jsonObject.getJSONObject("response").getInt("value"));
 
         Resource resource = service.getResource("turnon");
-        MidProxy midAction = (MidProxy) Proxy.getInvocationHandler(resource);
-
-        MidProxy<ActionResource> actionProxy = new MidProxy<ActionResource>(classloader, this, ActionResource.class);
-
-        ActionResource action = actionProxy.buildProxy(midAction.getInstance());
-        actionProxy.toOSGi(actMethod, new Object[]{new Object[0]});
-        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
+        
+        ActionResource action = (ActionResource) resource;
+        action.act(new Object[0]);
+        
+        response = variable.get(DataResource.VALUE, (Object[]) null);
         assertEquals(1, (int) jsonObject.getJSONObject("response").getInt("value"));
 
         resource = service.getResource("turnoff");
-        midAction = (MidProxy) Proxy.getInvocationHandler(resource);
-        actionProxy = new MidProxy<ActionResource>(classloader, this, ActionResource.class);
-
-        action = actionProxy.buildProxy(midAction.getInstance());
-        actionProxy.toOSGi(actMethod, new Object[]{new Object[0]});
-        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
+        
+        action = (ActionResource) resource;
+        action.act(new Object[0]);
+        
+        response = variable.get(DataResource.VALUE, (Object[]) null);
         jsonObject = new JSONObject(response.getJSON());
 
         assertEquals(0, (int) jsonObject.getJSONObject("response").getInt("value"));
-        response = (SnaMessage) midVariation.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
-
+        response = variation.get(DataResource.VALUE, (Object[]) null);
         jsonObject = new JSONObject(response.getJSON());
 
         assertEquals(0.2f, (float) jsonObject.getJSONObject("response").getDouble("value"), 0.0f);
@@ -136,48 +99,50 @@ public class TestGenericImplementation extends MidOSGiTest {
     }
 
     @Test
-    public void testConstrainedResourceModel() throws Throwable {
-        this.initializeMoke(new File("src/test/resources/temperature-resource.xml").toURI().toURL(), null, false);
-        ServiceReference reference = super.getBundleContext().getServiceReference(StarterService.class);
+    public void testConstrainedResourceModel(
+    		@InjectService(cardinality = 0) ServiceAware<StarterService> starterServiceAware, 
+    		@InjectService(timeout = 500) Core core,
+    		@InjectInstalledBundle(start = true, value = "temperature-resource.jar") Bundle bundle
+    		) throws Throwable {
 
-        StarterService starter = (StarterService) super.getBundleContext().getService(reference);
-        starter.start("TestForSensiNactGateway");
-
+    	StarterService starterService = starterServiceAware.waitForService(500);
+    	
+    	starterService.start("TestForSensiNactGateway");
         Thread.sleep(2000);
-        MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
-        Core core = mid.buildProxy();
+        
         Session session = core.getAnonymousSession();
 
         ServiceProvider provider = session.serviceProvider("TestForSensiNactGateway");
         Service service = provider.getService("sensor");
         Resource temperature = service.getResource("temperature");
         JSONObject jsonObject;
-        MidProxy midTemperature = (MidProxy) Proxy.getInvocationHandler(temperature);
-        SnaMessage response = (SnaMessage) midTemperature.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
+//        MidProxy midTemperature = (MidProxy) Proxy.getInvocationHandler(temperature);
+//        SnaMessage response = (SnaMessage) midTemperature.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
+        SnaMessage response = temperature.get(DataResource.VALUE, (Object[]) null);
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(5.0f, (float) jsonObject.getJSONObject("response").getDouble("value"), 0.0f);
 
-        response = (SnaMessage) midTemperature.toOSGi(setMethod, new Object[]{DataResource.VALUE, -24.5f, null});
+        response = temperature.set(DataResource.VALUE, -24.5f, (Object[]) null);
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(-24.5f, (float) jsonObject.getJSONObject("response").getDouble("value"), 0.0f);
-        response = (SnaMessage) midTemperature.toOSGi(setMethod, new Object[]{DataResource.VALUE, 45.1f, null});
+        response = temperature.set(DataResource.VALUE, 45.1f, (Object[]) null);
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(520, (int) jsonObject.getInt("statusCode"));
         core.close();
     }
 
     @Test
-    public void testResourceModel() throws Throwable {
-        this.initializeMoke(new File("src/test/resources/genova-resource.xml").toURI().toURL(), null, false);
-        Thread.sleep(5000);
+    public void testResourceModel(
+    		@InjectService(cardinality = 0) ServiceAware<StarterService> starterServiceAware, 
+    		@InjectService(timeout = 500) Core core,
+    		@InjectInstalledBundle(start = true, value = "genova-resource.jar") Bundle bundle
+    		) throws Throwable {
         
-        ServiceReference reference = super.getBundleContext().getServiceReference(StarterService.class);
-        StarterService starter = (StarterService) super.getBundleContext().getService(reference);
-        starter.start("weather_5");        
+    	StarterService starterService = starterServiceAware.waitForService(500);
+    	
+        starterService.start("weather_5");        
         Thread.sleep(2000);
         
-        MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
-        Core core = mid.buildProxy();
         Session session = core.getAnonymousSession();
         ServiceProvider provider = session.serviceProvider("weather_5");
         Service service = provider.getService("admin");
@@ -185,30 +150,27 @@ public class TestGenericImplementation extends MidOSGiTest {
         JSONObject jsonObject = new JSONObject(description.getJSON());
         core.close();
     }
-
+    
     @Test
-    public void testFactory() throws Throwable {
-        this.initializeMoke(new File("src/test/resources/test-resource.xml").toURI().toURL(), new HashMap<String, String>() {{
-            this.put("pir", "VALUE");
-            this.put("ldr", "VALUE");
-            this.put("gpr", "VALUE");
-
-        }}, true);
-        Thread.sleep(5000);
+    public void testFactory(
+    		@InjectService(cardinality = 0) ServiceAware<ProcessorService> processorAware, 
+    		@InjectService(timeout = 500) Core core,
+    		@InjectInstalledBundle(start = true, value = "test-resource.jar") Bundle bundle
+    		) throws Throwable {
         
-        ServiceReference reference = super.getBundleContext().getServiceReference(ProcessorService.class);
-        ProcessorService processor = (ProcessorService) super.getBundleContext().getService(reference);
+    	ProcessorService processor = processorAware.waitForService(500);
+    	
         processor.process("device1");
-        
         Thread.sleep(2000);
         
-        MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
-        Core core = mid.buildProxy();
         Session session = core.getAnonymousSession();
 
         ServiceProvider provider = session.serviceProvider("device1");
         Service ldrService = provider.getService("ldr");
+        System.err.println("Resources");
+        ldrService.getResources().stream().forEach(r -> System.err.println(r.getName()));
         Resource ldrResource = ldrService.getResource("value");
+        
         Description response = ldrResource.getDescription();
         JSONObject responseDescription = new JSONObject(response.getJSONDescription());
 
@@ -227,95 +189,91 @@ public class TestGenericImplementation extends MidOSGiTest {
         }
         JSONAssert.assertEquals(new JSONObject("{\"name\":\"value\",\"type\":\"float\",\"metadata\":" + "[{\"name\":\"modifiable\",\"value\":" + "\"UPDATABLE\",\"type\":\"org.eclipse.sensinact.gateway.common.primitive.Modifiable\"}," + "{\"name\":\"nickname\",\"value\":\"value\",\"type\":\"string\"}," + "{\"name\":\"Description\",\"value\":" + "\"Detected light/darkness\",\"type\":\"string\"}," + "{\"name\":\"Unit\"," + "\"value\":\"LUX\",\"type\":\"string\"}]}"), valueDescription, false);
         core.close();
+        
     }
 
     @Test
-    public void testAnnotationResolver() throws Throwable {
-        File tmpDirectory = new File("./target/felix/tmp");
-        File confDirectory = new File("./target/felix/conf");
-        new File(confDirectory, "props.xml").delete();
-        if(!tmpDirectory.exists()) {
-        	tmpDirectory.mkdir();
-        } else {
-        	new File(tmpDirectory, "resources.xml").delete();
-        	new File(tmpDirectory, "dynamicBundle.jar").delete();
-        }
-        super.createDynamicBundle(new File("./extra-src2/test/resources/MANIFEST.MF"), tmpDirectory, new File("./extra-src2/test/resources/meta"), new File("./extra-src2/test/resources/test-resource.xml"), new File("./target/extra-test-classes2"));
-        super.installDynamicBundle(new File(tmpDirectory, "dynamicBundle.jar").toURI().toURL()).start();
-        Thread.sleep(5000);
-        MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
-        Core core = mid.buildProxy();
+    public void testAnnotationResolver(
+    		@InjectService(timeout = 500) Core core,
+    		@InjectInstalledBundle(start = true, value = "extra-2.jar") Bundle bundle
+    		) throws Throwable {
         Session session = core.getAnonymousSession();
-        
-        MidProxy midSession = (MidProxy) Proxy.getInvocationHandler(session);
-        Object providers = midSession.toOSGi(getProviders,null);        
-        MidProxy midDesc = (MidProxy) Proxy.getInvocationHandler(providers);
-        String resp = (String)midDesc.toOSGi(getJSON,null);
+
+//        MidProxy midSession = (MidProxy) Proxy.getInvocationHandler(session);
+//        Object providers = midSession.toOSGi(getProviders,null);        
+//        MidProxy midDesc = (MidProxy) Proxy.getInvocationHandler(providers);
+//        String resp = (String)midDesc.toOSGi(getJSON,null);
+        DescribeResponse<String> providers = session.getProviders();
+        String resp = providers.getJSON();
         System.out.println(resp);
         
-        Object services = midSession.toOSGi(getServices, new Object[] {"providerTest"});
-        midDesc = (MidProxy) Proxy.getInvocationHandler(services);
-        resp = (String)midDesc.toOSGi(getJSON,null);
+        
+//        Object services = midSession.toOSGi(getServices, new Object[] {"providerTest"});
+//        midDesc = (MidProxy) Proxy.getInvocationHandler(services);
+//        resp = (String)midDesc.toOSGi(getJSON,null);
+        DescribeResponse<String> services = session.getServices("providerTest");
+        resp = services.getJSON();
         System.out.println(resp);
         
-        Object resources = midSession.toOSGi(getResources, new Object[] {"providerTest","measureTest"});
-        midDesc = (MidProxy) Proxy.getInvocationHandler(resources);
-        resp = (String)midDesc.toOSGi(getJSON,null);
+//        Object resources = midSession.toOSGi(getResources, new Object[] {"providerTest","measureTest"});
+//        midDesc = (MidProxy) Proxy.getInvocationHandler(resources);
+//        resp = (String)midDesc.toOSGi(getJSON,null);
+        DescribeResponse<String> resources = session.getResources("providerTest","measureTest");
+        resp = resources.getJSON();
         System.out.println(resp);
         
-        resources = midSession.toOSGi(getResources, new Object[] {"providerTest","serviceTest"});
-        midDesc = (MidProxy) Proxy.getInvocationHandler(resources);
-        resp = (String)midDesc.toOSGi(getJSON,null);
+//        resources = midSession.toOSGi(getResources, new Object[] {"providerTest","serviceTest"});
+//        midDesc = (MidProxy) Proxy.getInvocationHandler(resources);
+//        resp = (String)midDesc.toOSGi(getJSON,null);
+        resources = session.getResources("providerTest","serviceTest");
+        resp = resources.getJSON();
         System.out.println(resp);
         
-        Object res = midSession.toOSGi(resource, new Object[]{"providerTest", "measureTest", "condition"});        
-        MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(res);
-        Description description = (Description) midResource.toOSGi(getDescription, null);
+//        Object res = midSession.toOSGi(resource, new Object[]{"providerTest", "measureTest", "condition"});        
+//        MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(res);
+//        Description description = (Description) midResource.toOSGi(getDescription, null);
+        Resource resource = session.resource("providerTest", "measureTest", "condition");
+        Description description = resource.getDescription();
         System.out.println(description.getJSON());
         core.close();
     }
 
     @Test
-    public void testAnnotatedPacket() throws Throwable {
-        File tmpDirectory = new File("./target/felix/tmp");
-        File confDirectory = new File("./target/felix/conf");
-        new File(confDirectory, "props.xml").delete();
-        if(!tmpDirectory.exists()) {
-        	tmpDirectory.mkdir();
-        } else {
-        	new File(tmpDirectory, "resources.xml").delete();
-        	new File(tmpDirectory, "dynamicBundle.jar").delete();
-        }
-        super.createDynamicBundle(new File("./extra-src3/test/resources/MANIFEST.MF"), tmpDirectory, new File("./extra-src3/test/resources/meta"), new File("./src/test/resources/genova-resource.xml"), new File("./target/extra-test-classes3"));
+    public void testAnnotatedPacket(
+    		@InjectService(cardinality = 0) ServiceAware<StarterService> starterServiceAware, 
+    		@InjectService(cardinality = 0) ServiceAware<ProcessorService> processorServiceAware, 
+    		@InjectService(timeout = 500) Core core,
+    		@InjectInstalledBundle(start = true, value = "extra-3.jar") Bundle bundle
+    		) throws Throwable {
 
-        super.installDynamicBundle(new File(tmpDirectory, "dynamicBundle.jar").toURI().toURL()).start();
-        Thread.sleep(5000);
-
-        MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
-        Core core = mid.buildProxy();
-        Session session = core.getAnonymousSession();
-        MidProxy<StarterService> starter = new MidProxy<StarterService>(classloader, this, StarterService.class);
-        StarterService starterService = starter.buildProxy();
+    	StarterService starterService = starterServiceAware.waitForService(500);
+    	
+    	Session session = core.getAnonymousSession();
         starterService.start("weather_7");
         Thread.sleep(2000);
         ServiceProvider provider = session.serviceProvider("weather_7");
         Service service = provider.getService("admin");
         Resource resource = service.getResource("location");
 
-        MidProxy midAdmin = (MidProxy) Proxy.getInvocationHandler(service);
-        Description response = (Description) midAdmin.toOSGi(getDescription, null);
-        MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(resource);
-        SnaMessage message = (SnaMessage) midResource.toOSGi(setMethod, new Object[]{"value", "45.5667:5.9333", null});
+//        Description response = (Description) midAdmin.toOSGi(getDescription, null);
+        Description response = service.getDescription();
+//        MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(resource);
+//        SnaMessage message = (SnaMessage) midResource.toOSGi(setMethod, new Object[]{"value", "45.5667:5.9333", null});
+        SnaMessage message = resource.set("value", "45.5667:5.9333", null);
         JSONObject jsonObject = new JSONObject(message.getJSON());
 
         jsonObject.getJSONObject("response").remove("timestamp");
         JSONAssert.assertEquals(new JSONObject("{\"statusCode\":200,\"response\":{\"name\":\"location\",\"value\":\"45.5667:5.9333\"," + "\"type\":\"string\"},\"type\":\"SET_RESPONSE\",\"uri\":\"/weather_7/admin/location\"}"), jsonObject, false);
-        MidProxy<ProcessorService> processor = new MidProxy<ProcessorService>(classloader, this, ProcessorService.class);
+//        MidProxy<ProcessorService> processor = new MidProxy<ProcessorService>(classloader, this, ProcessorService.class);
+//
+//        ProcessorService processorService = processor.buildProxy();
 
-        ProcessorService processorService = processor.buildProxy();
-
+        ProcessorService processorService = processorServiceAware.waitForService(500);
+        
         processorService.process("weather_7,null,admin,location,45.900002:6.11667");
-        message = (SnaMessage) midResource.toOSGi(getMethod, new Object[]{"value", null});
+        
+//        message = (SnaMessage) midResource.toOSGi(getMethod, new Object[]{"value", null});
+        message = resource.get("value", (Object[]) null);
 
         jsonObject = new JSONObject(message.getJSON());
         jsonObject.getJSONObject("response").remove("timestamp");
@@ -325,7 +283,13 @@ public class TestGenericImplementation extends MidOSGiTest {
     }
 
     @Test
-    public void testExtraCatalogs() throws Throwable {
+    @Disabled
+    public void testExtraCatalogs(
+    		@InjectInstalledBundle(start = true, value = "extra-4.jar") Bundle bundle4,
+    		@InjectInstalledBundle( value = "extra-5.jar") Bundle bundle5,// do not start its a fragment
+    		@InjectInstalledBundle( value = "extra-6.jar") Bundle bundle6,// do not start its a fragment
+    		@InjectService(timeout = 500) Core core
+    		) throws Throwable {
     	String all = "{"+
     			   "\"providers\": ["+
     			     "{"+
@@ -581,71 +545,22 @@ public class TestGenericImplementation extends MidOSGiTest {
     			   "\"statusCode\": 200"+
     			 "}";
     	
-        File tmpDirectory = new File("target/felix/tmp");
-        File tmpDirectory1 = new File("target/felix/tmp1");
-        File tmpDirectory2 = new File("target/felix/tmp2");
-        
-        File confDirectory = new File("target/felix/conf");
-        new File(confDirectory, "props.xml").delete();
-        
-        if(!tmpDirectory1.exists()) {
-        	tmpDirectory1.mkdir();
-        }
-        if(!tmpDirectory2.exists()) {
-        	tmpDirectory2.mkdir();
-        }
-        if(!tmpDirectory.exists()) {
-        	tmpDirectory.mkdir();
-        } else {
-        	new File(tmpDirectory, "resources.xml").delete();
-        	new File(tmpDirectory, "dynamicBundle.jar").delete();
-        }
-        super.createDynamicBundle(
-        	new File("./extra-src6/test/resources/MANIFEST.MF"), 
-        	tmpDirectory2, 
-        	new File("./extra-src6/test/resources/meta"),  
-        	new File("./target/extra-test-classes6"));
-        
-        super.installDynamicBundle(new File(tmpDirectory2, 
-        		"dynamicBundle.jar").toURI().toURL());
-        
-        Thread.sleep(2000);
-
-        super.createDynamicBundle(
-        	new File("./extra-src5/test/resources/MANIFEST.MF"), 
-        	tmpDirectory1, 
-        	new File("./extra-src5/test/resources/meta"),  
-        	new File("./target/extra-test-classes5"));
-        
-        super.installDynamicBundle(new File(tmpDirectory1, 
-        		"dynamicBundle.jar").toURI().toURL());
-        
-        Thread.sleep(2000);
-        
-        super.createDynamicBundle(
-        	new File("./extra-src4/test/resources/MANIFEST.MF"), 
-        	tmpDirectory, 
-        	new File("./extra-src4/test/resources/meta"), 
-        	new File("./src/test/resources/genova-resource_0.xml"), 
-        	new File("./target/extra-test-classes4"));
-
-        super.installDynamicBundle(new File(tmpDirectory, 
-        		"dynamicBundle.jar").toURI().toURL()).start();
-        
-        Thread.sleep(5000);
-
-        MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
-        Core core = mid.buildProxy();
+    	
+    	Arrays.asList(bundle4.getBundleContext().getBundles())
+    		.stream().forEach(b -> {
+    			
+    			System.err.println(b.getSymbolicName() + " - " + b.getState());
+    		});
+    	
         Session session = core.getAnonymousSession();
-
-        MidProxy midSession = (MidProxy) Proxy.getInvocationHandler(session);
-        SnaMessage response = (SnaMessage) midSession.toOSGi(Session.class.getDeclaredMethod("getAll"), null);
+        DescribeResponse<String> response = session.getAll();
+        
+        System.err.println(response.getJSON());
         
         JSONAssert.assertEquals(all, response.getJSON(), false);
         core.close();
     }
 
-    @Override
     protected void doInit(Map configuration) {
 
         configuration.put("felix.auto.start.1",  
@@ -690,66 +605,66 @@ public class TestGenericImplementation extends MidOSGiTest {
         	String fileName = "sensinact.config";
             File testFile = new File(new File("src/test/resources"), fileName);
             URL testFileURL = testFile.toURI().toURL();
-            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
-            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
-            IOUtils.write(testCng, output);
+//            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
+//            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
+//            IOUtils.write(testCng, output);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void initializeMoke(URL resource, Map defaults, boolean startAtInitializationTime) throws Exception {
-        StringBuilder builder = new StringBuilder();
-        builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
-        builder.append("<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">");
-        builder.append("<properties>");
-        builder.append("<entry key=\"startAtInitializationTime\">");
-        builder.append(startAtInitializationTime);
-        builder.append("</entry>");
-
-        if (defaults != null && !defaults.isEmpty()) {
-            Iterator<Map.Entry> iterator = defaults.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry entry = iterator.next();
-                builder.append("<entry key=\"");
-                builder.append(entry.getKey());
-                builder.append("\">)");
-                builder.append(entry.getValue());
-                builder.append("</entry>");
-            }
-        }
-        builder.append("</properties>");
-
-        File tmpDirectory = new File("./target/felix/tmp");
-        if(!tmpDirectory.exists()) {
-        	tmpDirectory.mkdir();
-        } else {
-        	new File(tmpDirectory, "resources.xml").delete();
-        	new File(tmpDirectory, "dynamicBundle.jar").delete();
-        }
-        File confDirectory = new File("./target/felix/conf");
-        new File(confDirectory, "props.xml").delete();
-
-        FileOutputStream output = new FileOutputStream(new File(confDirectory, "props.xml"));
-        IOUtils.write(builder.toString().getBytes(), output);
-        
-        byte[] resourcesBytes = IOUtils.read(resource.openStream());        
-        output = new FileOutputStream(new File(tmpDirectory, "resources.xml"));
-        IOUtils.write(resourcesBytes, output);
-
-        super.createDynamicBundle(new File("./extra-src/test/resources/MANIFEST.MF"), tmpDirectory, new File("./extra-src/test/resources/meta"), new File(confDirectory, "props.xml"), new File(tmpDirectory, "resources.xml"), new File("./target/extra-test-classes"));
-
-        Bundle bundle = super.installDynamicBundle(new File(tmpDirectory, "dynamicBundle.jar").toURI().toURL());
-
-        ClassLoader current = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(classloader);
-        try {
-            bundle.start();
-        } catch(Exception e){
-        	e.printStackTrace();
-        }finally {
-            Thread.currentThread().setContextClassLoader(current);
-        }
-        Thread.sleep(5000);
+//        StringBuilder builder = new StringBuilder();
+//        builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
+//        builder.append("<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">");
+//        builder.append("<properties>");
+//        builder.append("<entry key=\"startAtInitializationTime\">");
+//        builder.append(startAtInitializationTime);
+//        builder.append("</entry>");
+//
+//        if (defaults != null && !defaults.isEmpty()) {
+//            Iterator<Map.Entry> iterator = defaults.entrySet().iterator();
+//            while (iterator.hasNext()) {
+//                Map.Entry entry = iterator.next();
+//                builder.append("<entry key=\"");
+//                builder.append(entry.getKey());
+//                builder.append("\">)");
+//                builder.append(entry.getValue());
+//                builder.append("</entry>");
+//            }
+//        }
+//        builder.append("</properties>");
+//
+//        File tmpDirectory = new File("./target/felix/tmp");
+//        if(!tmpDirectory.exists()) {
+//        	tmpDirectory.mkdir();
+//        } else {
+//        	new File(tmpDirectory, "resources.xml").delete();
+//        	new File(tmpDirectory, "dynamicBundle.jar").delete();
+//        }
+//        File confDirectory = new File("./target/felix/conf");
+//        new File(confDirectory, "props.xml").delete();
+//
+//        FileOutputStream output = new FileOutputStream(new File(confDirectory, "props.xml"));
+//        IOUtils.write(builder.toString().getBytes(), output);
+//        
+//        byte[] resourcesBytes = IOUtils.read(resource.openStream());        
+//        output = new FileOutputStream(new File(tmpDirectory, "resources.xml"));
+//        IOUtils.write(resourcesBytes, output);
+//
+//        super.createDynamicBundle(new File("./extra-src/test/resources/MANIFEST.MF"), tmpDirectory, new File("./extra-src/test/resources/meta"), new File(confDirectory, "props.xml"), new File(tmpDirectory, "resources.xml"), new File("./target/extra-test-classes"));
+//
+//        Bundle bundle = super.installDynamicBundle(new File(tmpDirectory, "dynamicBundle.jar").toURI().toURL());
+//
+//        ClassLoader current = Thread.currentThread().getContextClassLoader();
+//        Thread.currentThread().setContextClassLoader(classloader);
+//        try {
+//            bundle.start();
+//        } catch(Exception e){
+//        	e.printStackTrace();
+//        }finally {
+//            Thread.currentThread().setContextClassLoader(current);
+//        }
+//        Thread.sleep(5000);
     }
 }

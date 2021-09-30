@@ -10,25 +10,26 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.filter.attributes.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.filter.attributes.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.filter.attributes.ws.test.WsServiceTestClient;
-import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.framework.BundleContext;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.service.ServiceExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class TestAttributesFiltering extends MidOSGiTest {
+@ExtendWith(BundleContextExtension.class)
+@ExtendWith(ServiceExtension.class)
+public class TestAttributesFiltering {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
@@ -57,7 +58,6 @@ public class TestAttributesFiltering extends MidOSGiTest {
         return false;
     }
 
-    @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void doInit(Map configuration) {
         configuration.put("felix.auto.start.1",  
@@ -108,7 +108,9 @@ public class TestAttributesFiltering extends MidOSGiTest {
     }
 
     @Test
-    public void testHttpFiltered() throws Exception {
+    public void testHttpFiltered(
+    		@InjectBundleContext BundleContext context
+    		) throws Exception {
         Mediator mediator = new Mediator(context);
         String response = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?attrs=[friendlyName]", null, "GET");
         JSONObject result = new JSONObject(response);
@@ -158,7 +160,7 @@ public class TestAttributesFiltering extends MidOSGiTest {
         + ",\"location\":\"45.2:5.7\""
         + ",\"friendlyName\":\"slider\""
         + ",\"icon\":null"
-        + ",\"bridge\":\"slider\"}]}");
+        + ",\"bridge\":\"org.eclipse.sensinact.gateway.simulated.devices.slider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
     }
 
@@ -201,6 +203,7 @@ public class TestAttributesFiltering extends MidOSGiTest {
         JSONAssert.assertEquals(expected, result, false);
 
         response = this.synchronizedRequest(client, "/sensinact", "[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"friendlyName,icon,bridge\"}]");
+        System.err.println(response);
         result = new JSONObject(response);
         expected = new JSONObject(
         "{\"filters\":[{\"definition\":\"friendlyName,icon,bridge\",\"type\":\"attrs\"}]," 
@@ -215,7 +218,7 @@ public class TestAttributesFiltering extends MidOSGiTest {
         + ",\"location\":\"45.2:5.7\""
         + ",\"friendlyName\":\"slider\""
         + ",\"icon\":null"
-        + ",\"bridge\":\"slider\"}]}");
+        + ",\"bridge\":\"org.eclipse.sensinact.gateway.simulated.devices.slider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
         client.close();
     }

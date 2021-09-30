@@ -55,12 +55,14 @@
     <dependencies>
         <!-- This is an example of the dependency to provide to generate the profile -->
         <dependency>
-		<groupId>org.eclipse.sensinact.gateway</groupId>
-		<artifactId>sensinact-datastore-api</artifactId>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-datastore-api</artifactId>
+			<version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway</groupId>
             <artifactId>sensinact-sqlite-connector</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

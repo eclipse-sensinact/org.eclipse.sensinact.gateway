@@ -1,0 +1,3 @@
+-privatepackage: org.eclipse.sensinact.gateway.generic.test.tb.bundle
+-includeresource: ${.}/extra-2
+

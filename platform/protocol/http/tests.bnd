@@ -1,0 +1,2 @@
+-include: ${sensinact.root.dir}/bnd/default.tests.bnd
+Private-Package: org.skyscreamer*

@@ -10,49 +10,54 @@
  */
 package org.eclipse.sensinact.gateway.core.security.test;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.FileAttribute;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.primitive.Describable;
-import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.AnonymousSession;
 import org.eclipse.sensinact.gateway.core.Core;
-import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
-import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.security.dao.UserDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.UserEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService;
+import org.eclipse.sensinact.gateway.mail.connector.api.MailAccountConnectorMailReplacement;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.eclipse.sensinact.gateway.test.MidOSGiTest;
-import org.eclipse.sensinact.gateway.test.MidProxy;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
+import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.Ignore;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.BundleContext;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.InjectInstalledBundle;
+import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.service.ServiceAware;
+import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.context.InstalledBundleExtension;
+import org.osgi.test.junit5.service.ServiceExtension;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
-@SuppressWarnings({"unchecked", "rawtypes"})
-public class TestUserManager extends MidOSGiTest {
+@ExtendWith(BundleContextExtension.class)
+@ExtendWith(ServiceExtension.class)
+@ExtendWith(InstalledBundleExtension.class)
+@Disabled
+public class TestUserManager {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
@@ -102,27 +107,32 @@ public class TestUserManager extends MidOSGiTest {
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
 
-    Method getDescription = null;
-    Method getMethod = null;
-    Method setMethod = null;
-    Method actMethod = null;
-
     private Mediator mediator;
     private DataStoreService dataStoreService;
     
-    public TestUserManager() throws Exception {
-        super();
-        getDescription = Describable.class.getDeclaredMethod("getDescription");
-        getMethod = Resource.class.getDeclaredMethod("get", new Class<?>[]{String.class});
-        setMethod = Resource.class.getDeclaredMethod("set", new Class<?>[]{String.class, Object.class});
-        actMethod = ActionResource.class.getDeclaredMethod("act", new Class<?>[]{Object[].class});
-    }
 
-	@Before
-	public void before() throws UnableToFindDataStoreException, UnableToConnectToDataStoreException {
+    private File tempDB;
+    
+	@BeforeEach
+	public void before(@InjectBundleContext BundleContext context) throws UnableToFindDataStoreException, UnableToConnectToDataStoreException, IOException {
+
+		tempDB = File.createTempFile("test", ".sqlite");
+		tempDB.deleteOnExit();
+		
+		Path copied = tempDB.toPath();
+	    Path originalPath = Paths.get(context.getProperty("sqlitedb"));
+	    Files.copy(originalPath, copied, StandardCopyOption.REPLACE_EXISTING);
+		
 		mediator = new Mediator(context);
-		mediator.setProperty("org.eclipse.sensinact.gateway.security.database", "src/test/resources/sensinact.sqlite");
+		mediator.setProperty("org.eclipse.sensinact.gateway.security.database", tempDB.getAbsolutePath());
 		dataStoreService = new SQLiteDataStoreService(mediator);
+	}
+	
+	@AfterEach
+	public void after() {
+		if(tempDB != null) {
+			tempDB.delete();
+		}
 	}
 	
 	/**
@@ -142,7 +152,6 @@ public class TestUserManager extends MidOSGiTest {
 	 *
 	 * @see MidOSGiTest#doInit(java.util.Map)
 	 */
-	@Override
 	protected void doInit(Map configuration) {
 		configuration.put("org.osgi.framework.system.packages.extra",
 		"org.eclipse.sensinact.gateway.test," 
@@ -224,31 +233,33 @@ public class TestUserManager extends MidOSGiTest {
 		configuration.put("org.apache.felix.http.enable","true");
 	}
 
-	@Ignore
 	@Test
-	public void testUserManager() throws Exception {
-		this.initializeMoke(
-				new File("./src/test/resources/MANIFEST.MF"), 
-				new File("./extra-src/test/java"), 
-				new File("./target/extra-test-classes"));
+	public void testUserManager(
+			@InjectService Core core,
+			@InjectInstalledBundle(value = "tb.jar", start = true) Bundle bundle,
+			@InjectService(cardinality = 0) ServiceAware<MailAccountConnectorMailReplacement> mailReplacerAware
+			) throws Exception {
 		
 		UserDAO dao = new UserDAO(mediator, dataStoreService);
 		String encryptedPassword = CryptoUtils.cryptWithMD5("mytestpassword");
 		UserEntity entity = dao.find("mytester", encryptedPassword);
 		assertNull(entity);
-		
-		MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
-		Core core = mid.buildProxy();		
+//		
+//		MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
+//		Core core = mid.buildProxy();		
 		AnonymousSession as = core.getAnonymousSession();
 		assertNotNull(as);
 		as.registerUser("mytester", encryptedPassword, "fake@test.fr", "MAIL");
 		Thread.sleep(2000);
-		
-		ServiceReference<?>[] references = super.getBundleContext().getServiceReferences("org.eclipse.sensinact.gateway.mail.connector.MailAccountConnectorMailReplacement",null);
-		Object mailAccountConnectorMailReplacement  = super.getBundleContext().getService(references[0]);		
-		Method method = mailAccountConnectorMailReplacement.getClass().getMethod("getMailDetails");
-		method.setAccessible(true);
-		String message = (String) method.invoke(mailAccountConnectorMailReplacement);
+//		
+//		ServiceReference<?>[] references = super.getBundleContext().getServiceReferences("org.eclipse.sensinact.gateway.mail.connector.MailAccountConnectorMailReplacement",null);
+//		Object mailAccountConnectorMailReplacement  = super.getBundleContext().getService(references[0]);		
+//		Method method = mailAccountConnectorMailReplacement.getClass().getMethod("getMailDetails");
+//		method.setAccessible(true);
+//		String message = (String) method.invoke(mailAccountConnectorMailReplacement);
+//		
+		MailAccountConnectorMailReplacement replacer = mailReplacerAware.waitForService(500);
+		String message = replacer.getMailDetails();
 		
 		String link = new StringBuilder().append("http").append(message.split("http")[1]).toString();
 		String validation = newRequest(link,null,"GET");
@@ -266,30 +277,4 @@ public class TestUserManager extends MidOSGiTest {
 		entity = dao.find("mytester", encryptedPassword);
 		assertNull(entity);
 	}
-	
-    private void initializeMoke(File manifestFile, File... sourceDirectories) throws Exception {
-        File tmpDirectory = new File("./target/felix/tmp");
-        new File(tmpDirectory, "dynamicBundle.jar").delete();
-
-        int length = (sourceDirectories == null ? 0 : sourceDirectories.length);
-        File[] sources = new File[length];
-        int index = 0;
-        if (length > 0) {
-            for (; index < length; index++) {
-                sources[index] = sourceDirectories[index];
-            }
-        }
-        super.createDynamicBundle(manifestFile, tmpDirectory, sources);
-        Bundle bundle = super.installDynamicBundle(new File(tmpDirectory, "dynamicBundle.jar").toURI().toURL());
-
-        ClassLoader current = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(super.classloader);
-        try {
-            bundle.start();
-
-        } finally {
-            Thread.currentThread().setContextClassLoader(current);
-        }
-        Thread.sleep(10 * 1000);
-    }
 }

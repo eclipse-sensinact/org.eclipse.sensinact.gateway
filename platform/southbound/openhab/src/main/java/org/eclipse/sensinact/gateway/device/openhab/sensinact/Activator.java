@@ -10,6 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.device.openhab.sensinact;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.jmdns.ServiceEvent;
+import javax.jmdns.ServiceInfo;
+import javax.jmdns.ServiceListener;
+
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.device.openhab.common.Broker;
 import org.eclipse.sensinact.gateway.device.openhab.common.ServerLocation;
@@ -25,19 +34,11 @@ import org.eclipse.sensinact.gateway.sthbnd.http.annotation.SimpleHttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpMediator;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.SimpleHttpProtocolStackEndpoint;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.jmdns.ServiceEvent;
-import javax.jmdns.ServiceInfo;
-import javax.jmdns.ServiceListener;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
 
 @HttpTasks(
     recurrences = {
@@ -101,6 +102,7 @@ import java.util.ArrayList;
         )
     }
 )
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends HttpActivator implements ServiceListener {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Activator.class);

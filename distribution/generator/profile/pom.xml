@@ -32,6 +32,7 @@
 			slf4j-api,
 			org.osgi.core,
 			osgi.cmpn,
+			osgi.annotation,
 			sensinact-generic,
 			sensinact-core,
 			sensinact-utils,
@@ -48,6 +49,7 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
 			<artifactId>sensinact-distribution-template</artifactId>
+			<version>${project.version}</version>
 			<type>pom</type>
 		</dependency>
 	</dependencies>

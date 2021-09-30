@@ -10,16 +10,23 @@
  */
 package org.eclipse.sensinact.gateway.system.osgi;
 
+import java.io.IOException;
+import java.util.Collections;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.xml.sax.SAXException;
 
-import java.util.Collections;
-
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends AbstractActivator<Mediator> {
     private ExtModelConfiguration<Packet> manager = null;
     private LocalProtocolStackEndpoint<Packet> connector = null;

@@ -6,11 +6,10 @@
 		<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 		<artifactId>parent</artifactId>
 		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
     <artifactId>influxdb-storage-agent</artifactId>
-    <packaging>bundle</packaging>
-
 
 	<name>sensiNact IoT Gateway - Influxdb Historical Storage Agent</name>
 	
@@ -28,31 +27,37 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 			<artifactId>generic-storage-agent</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.tools</groupId>
 			<artifactId>influxdb-connector</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-common</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-utils</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-core</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-historic-api</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
     </dependencies>
@@ -60,10 +65,9 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-            </plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-maven-plugin</artifactId>
+			</plugin>
         </plugins>
     </build>
     

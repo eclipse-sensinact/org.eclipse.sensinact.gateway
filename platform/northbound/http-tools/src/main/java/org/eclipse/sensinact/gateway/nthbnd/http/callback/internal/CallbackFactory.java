@@ -34,6 +34,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.http.whiteboard.annotations.RequireHttpWhiteboard;
 
 /**
  * A CallbackFactory is in charge of creating the {@link CallbackServlet}s attached
@@ -42,6 +43,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  *
  * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
+@RequireHttpWhiteboard
 public class CallbackFactory {
 
     private static ClassLoader loader = null;
@@ -66,7 +68,7 @@ public class CallbackFactory {
     private String appearingKey;
     private String disappearingKey;
 
-    private Map<String, ServiceRegistration> registrations;
+    private Map<String, ServiceRegistration<?>> registrations;
 
     private final AtomicBoolean running;
 
@@ -81,7 +83,7 @@ public class CallbackFactory {
     		findJettyClassLoader(mediator.getContext());
     	}
         this.mediator = mediator;
-        this.registrations = Collections.synchronizedMap(new HashMap<String, ServiceRegistration>());
+        this.registrations = Collections.synchronizedMap(new HashMap<String, ServiceRegistration<?>>());
         this.running = new AtomicBoolean(false);
     }
 
@@ -274,7 +276,7 @@ public class CallbackFactory {
         if (!endpoint.startsWith("/")) {
             endpoint = "/".concat(endpoint);
         }
-        ServiceRegistration registration = this.registrations.get(endpoint);
+        ServiceRegistration<?> registration = this.registrations.remove(endpoint);
     	if(registration != null) {
     		try {
     			registration.unregister();
@@ -285,7 +287,7 @@ public class CallbackFactory {
     		registration = null;
     	}
     	if(!endpoint.startsWith("/ws/")) {
-	    	registration = this.registrations.get("/ws".concat(endpoint));
+	    	registration = this.registrations.remove("/ws".concat(endpoint));
 	    	if(registration != null) {
 	    		try {
 	    			registration.unregister();

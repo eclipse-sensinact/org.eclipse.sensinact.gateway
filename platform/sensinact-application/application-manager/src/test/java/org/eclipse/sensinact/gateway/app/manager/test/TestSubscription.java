@@ -10,7 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.test;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.app.api.exception.ApplicationFactoryException;
 import org.eclipse.sensinact.gateway.app.api.plugin.PluginHook;
 import org.eclipse.sensinact.gateway.app.api.plugin.PluginInstaller;
@@ -44,19 +53,16 @@ import org.eclipse.sensinact.gateway.core.TypeConfig;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.method.DescribeJSONResponse;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
+import org.eclipse.sensinact.gateway.core.method.DescribeMethod.DescribeType;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
 import org.eclipse.sensinact.gateway.core.method.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
-import org.eclipse.sensinact.gateway.core.method.DescribeMethod.DescribeType;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -64,32 +70,24 @@ import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Map;
+public class TestSubscription   implements TestResult {
+    
+    private AppModelInstance modelInstance=mock(AppModelInstance.class);
 
-@RunWith(PowerMockRunner.class)
-public class TestSubscription extends TestCase implements TestResult {
-    @Mock
-    private AppModelInstance modelInstance;
+    
+    private ModelConfiguration modelConfiguration=mock(ModelConfiguration.class);
+    
+    private ServiceProviderImpl device=mock(ServiceProviderImpl.class);
 
-    @Mock
-    private ModelConfiguration modelConfiguration;
-    @Mock
-    private ServiceProviderImpl device;
-
-    @Mock
-    private ServiceImpl service;
-    @Mock
-    private AppServiceMediator mediator;
-    @Mock
-    private Resource resource;
-    @Mock
-    private Core core;
+    
+    private ServiceImpl service=mock(ServiceImpl.class);
+    
+    private AppServiceMediator mediator=mock(AppServiceMediator.class);
+    
+    private Resource resource=mock(Resource.class);
+    
+    private Core core=mock(Core.class);
 
     private SnaMessage message;
     private int result;
@@ -100,7 +98,7 @@ public class TestSubscription extends TestCase implements TestResult {
     /**
      * @throws Exception
      */
-    @Before
+    @BeforeEach
     public void init() throws Exception {
         MockitoAnnotations.initMocks(this);
         mockedRegistry = new HashMap<String, DataProviderItf>();

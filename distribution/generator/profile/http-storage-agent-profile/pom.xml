@@ -19,7 +19,7 @@
         <artifactId>profile</artifactId>
         <version>2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
-    </parent>
+	</parent>
 
     <artifactId>storage-agent</artifactId>
     <packaging>pom</packaging>
@@ -30,14 +30,17 @@
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.protocol</groupId>
             <artifactId>http</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
             <artifactId>generic-storage-agent</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
             <artifactId>http-storage-agent</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

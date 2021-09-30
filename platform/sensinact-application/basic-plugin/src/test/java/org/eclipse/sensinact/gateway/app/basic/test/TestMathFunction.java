@@ -10,7 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.test;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.app.api.function.DataItf;
 import org.eclipse.sensinact.gateway.app.api.function.FunctionUpdateListener;
 import org.eclipse.sensinact.gateway.app.basic.math.AdditionFunction;
@@ -21,25 +25,18 @@ import org.eclipse.sensinact.gateway.app.basic.math.MultiplicationFunction;
 import org.eclipse.sensinact.gateway.app.basic.math.SubtractionFunction;
 import org.eclipse.sensinact.gateway.app.manager.component.data.ConstantData;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.ArrayList;
-import java.util.List;
+public class TestMathFunction  {
 
-@RunWith(PowerMockRunner.class)
-public class TestMathFunction extends TestCase {
+    
+    private Mediator mediator=Mockito.mock(Mediator.class);
+    
+    private FunctionUpdateListener listener=Mockito.mock(FunctionUpdateListener.class);
 
-    @Mock
-    private Mediator mediator;
-    @Mock
-    private FunctionUpdateListener listener;
-
-    @Before
+    @BeforeEach
     public void init() throws Exception {
         MockitoAnnotations.initMocks(this);
         Mockito.when(mediator.isDebugLoggable()).thenReturn(false);

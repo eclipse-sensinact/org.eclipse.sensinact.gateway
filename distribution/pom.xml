@@ -18,7 +18,7 @@
         <groupId>org.eclipse.sensinact</groupId>
         <artifactId>gateway</artifactId>
         <version>2.0-SNAPSHOT</version>
-    </parent>
+    <relativePath>../pom.xml</relativePath></parent>
 
     <groupId>org.eclipse.sensinact.gateway.distribution</groupId>
     <artifactId>parent</artifactId>
@@ -28,6 +28,7 @@
     <name>sensiNact IoT Gateway - Distribution</name>
 
     <modules>
+        <module>exports</module>
         <module>generator</module>
         <module>template</module>
         <module>archetypes</module>

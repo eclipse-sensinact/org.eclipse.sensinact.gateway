@@ -14,6 +14,7 @@ import java.util.Hashtable;
 
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ManagedServiceFactory;
@@ -21,6 +22,7 @@ import org.osgi.service.cm.ManagedServiceFactory;
 /**
  * Extended {@link AbstractActivator}
  */
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends AbstractActivator<Mediator> {
 
     @Override

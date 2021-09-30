@@ -10,20 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.protocol.http.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.IOException;
+import java.net.URL;
+
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
-
-import java.io.IOException;
-import java.net.URL;
-
-import static org.junit.Assert.assertEquals;
 
 public class TestHttpProtocol {
     //********************************************************************//
@@ -96,7 +96,7 @@ public class TestHttpProtocol {
 
     private static HttpTestServer server = null;
 
-    @BeforeClass
+    @BeforeAll
     public static void init() throws Exception {
         if (server != null) {
             if (server.isStarted()) {
@@ -111,7 +111,7 @@ public class TestHttpProtocol {
         server.registerCallback(new HttpServerTestCallback());
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws Exception {
         server.stop();
     }

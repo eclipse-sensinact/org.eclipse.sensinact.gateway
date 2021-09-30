@@ -35,10 +35,12 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 			<artifactId>mqtt-generic-agent</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 			<artifactId>mqtt-onem2m-agent</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 

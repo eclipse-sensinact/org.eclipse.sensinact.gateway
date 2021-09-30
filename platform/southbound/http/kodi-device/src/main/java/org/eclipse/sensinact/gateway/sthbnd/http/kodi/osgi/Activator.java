@@ -32,13 +32,16 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskProcessingContext;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskProcessingContextFactory;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 
 import java.util.Hashtable;
 
 @HttpTasks(tasks = {@SimpleHttpTask(commands = {CommandType.GET, CommandType.ACT}, configuration = @HttpTaskConfiguration(host = "@context[kodi.ip]", path = "/jsonrpc", contentType = "application/json", httpMethod = "POST", content = KodiTaskConfigurator.class), profile = "")})
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends HttpActivator {
     private static final String KODI_ENDPOINT = "/kodi/remote-control";
 

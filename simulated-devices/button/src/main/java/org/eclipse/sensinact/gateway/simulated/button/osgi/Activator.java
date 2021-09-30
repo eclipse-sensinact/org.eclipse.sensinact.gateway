@@ -20,7 +20,9 @@ import org.eclipse.sensinact.gateway.simulated.button.internal.ButtonAdapter;
 import org.eclipse.sensinact.gateway.simulated.button.internal.ButtonGUI;
 import org.eclipse.sensinact.gateway.simulated.button.internal.ButtonPacket;
 import org.eclipse.sensinact.gateway.simulated.button.internal.ButtonSetter;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 
 import javax.swing.JFrame;
@@ -28,6 +30,7 @@ import javax.swing.JLabel;
 import java.awt.BorderLayout;
 import java.util.Collections;
 
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends AbstractActivator<Mediator> {
     private static final String GUI_ENABLED = "org.eclipse.sensinact.simulated.gui.enabled";
     private LocalProtocolStackEndpoint<ButtonPacket> connector;

@@ -21,32 +21,35 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 		<groupId>org.eclipse.sensinact.gateway</groupId>
 		<artifactId>sensinact-datastore</artifactId>
 		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>sensinact-sqlite-connector</artifactId>
 	<name>sensiNact IoT Gateway - SQLite DataBase Connector</name>
 
-	<packaging>bundle</packaging>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-utils</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-common</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-core</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-datastore-api</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -59,29 +62,33 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<configuration>
-					<instructions>
-						<Fragment-Host>
-							sensinact-core
-						</Fragment-Host>
-						<Embed-Dependency>*;scope=compile</Embed-Dependency>
-						<Embed-Transitive>false</Embed-Transitive>
-						<_nouses>true</_nouses>
-						<Export-Package>
-							org.eclipse.sensinact.gateway.datastore.sqlite
-						</Export-Package>
-						<Include-Resource>
-							about.html,
-							src/main/resources/
-						</Include-Resource>
-						<Provide-Capability>
-							org.eclipse.sensinact.data.store
-						</Provide-Capability>
-					</instructions>
-				</configuration>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-maven-plugin</artifactId>
 			</plugin>
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.apache.felix</groupId> -->
+<!-- 				<artifactId>maven-bundle-plugin</artifactId> -->
+<!-- 				<configuration> -->
+<!-- 					<instructions> -->
+<!-- 						<Fragment-Host> -->
+<!-- 							sensinact-core -->
+<!-- 						</Fragment-Host> -->
+<!-- 						<Embed-Dependency>*;scope=compile</Embed-Dependency> -->
+<!-- 						<Embed-Transitive>false</Embed-Transitive> -->
+<!-- 						<_nouses>true</_nouses> -->
+<!-- 						<Export-Package> -->
+<!-- 							org.eclipse.sensinact.gateway.datastore.sqlite -->
+<!-- 						</Export-Package> -->
+<!-- 						<Include-Resource> -->
+<!-- 							about.html, -->
+<!-- 							src/main/resources/ -->
+<!-- 						</Include-Resource> -->
+<!-- 						<Provide-Capability> -->
+<!-- 							org.eclipse.sensinact.data.store -->
+<!-- 						</Provide-Capability> -->
+<!-- 					</instructions> -->
+<!-- 				</configuration> -->
+<!-- 			</plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>

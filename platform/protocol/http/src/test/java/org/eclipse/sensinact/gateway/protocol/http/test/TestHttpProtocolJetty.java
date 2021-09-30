@@ -10,6 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.protocol.http.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfiguration;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
@@ -19,16 +25,10 @@ import org.eclipse.sensinact.gateway.protocol.http.client.mid.MidClientListener;
 import org.eclipse.sensinact.gateway.protocol.http.client.mid.Reusable;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.junit.Assert.assertEquals;
 
 public class TestHttpProtocolJetty {
     //********************************************************************//
@@ -162,7 +162,7 @@ public class TestHttpProtocolJetty {
 
     private static JettyTestServer server = null;
 
-    @BeforeClass
+    @BeforeAll
     public static void init() throws Exception {
         System.out.println("Starting Jetty server ...");
         server = new JettyTestServer(HTTP_PORT);
@@ -172,7 +172,7 @@ public class TestHttpProtocolJetty {
         server.registerCallback(new JettyServerTestCallback());
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws Exception {
         System.out.println("Stopping Jetty server ...");
         server.stop();

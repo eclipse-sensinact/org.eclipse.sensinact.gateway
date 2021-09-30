@@ -10,14 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.core.test;
 
-import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory;
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
 import org.eclipse.sensinact.gateway.core.method.builder.DynamicParameterValueFactory;
+import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory;
+import org.json.JSONObject;
 
 /**
  * 

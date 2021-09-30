@@ -10,26 +10,36 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.forward.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.test.MidOSGiTest;
-import org.eclipse.sensinact.gateway.util.IOUtils;
+import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
+import org.eclipse.sensinact.gateway.nthbnd.http.callback.test.bundle1.CallbackServiceImpl;
+import org.eclipse.sensinact.gateway.nthbnd.http.forward.ForwardingService;
+import org.eclipse.sensinact.gateway.nthbnd.http.forward.test.bundle1.ForwardingServiceImpl;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.InjectBundleInstaller;
+import org.osgi.test.common.annotation.InjectInstalledBundle;
+import org.osgi.test.common.install.BundleInstaller;
+import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.context.InstalledBundleExtension;
+import org.osgi.test.junit5.service.ServiceExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class TestForwardingService extends MidOSGiTest {
+@ExtendWith(BundleContextExtension.class)
+@ExtendWith(InstalledBundleExtension.class)
+@ExtendWith(ServiceExtension.class)
+public class TestForwardingService {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
@@ -47,13 +57,6 @@ public class TestForwardingService extends MidOSGiTest {
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
 
-    /**
-     * @throws MalformedURLException
-     * @throws IOException
-     */
-    public TestForwardingService() throws Exception {
-        super();
-    }
 
     /**
      * @inheritDoc
@@ -70,7 +73,6 @@ public class TestForwardingService extends MidOSGiTest {
      * @inheritDoc
      * @see MidOSGiTest#doInit(java.util.Map)
      */
-    @Override
     protected void doInit(Map configuration) {
 
         configuration.put("felix.auto.start.1",  
@@ -123,22 +125,25 @@ public class TestForwardingService extends MidOSGiTest {
         try {
         	String fileName = "sensinact.config";
             File testFile = new File(new File("src/test/resources"), fileName);
-            URL testFileURL = testFile.toURI().toURL();
-            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
-            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
-            IOUtils.write(testCng, output);
+//            URL testFileURL = testFile.toURI().toURL();
+//            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
+//            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
+//            IOUtils.write(testCng, output);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     @Test
-    public void testForwarding() throws Exception {
+    public void testForwarding(
+    			@InjectBundleContext BundleContext context
+    		) throws Exception {
+    	context.registerService(ForwardingService.class, new ForwardingServiceImpl(), null);
         Mediator mediator = new Mediator(context);
-        this.initializeMoke(new File("./extra-src/test/resources/MANIFEST.MF"), new File("./extra-src/test/resources/meta"), new File("./target/extra-test-classes"));
+//        this.initializeMoke(new File("./extra-src/test/resources/MANIFEST.MF"), new File("./extra-src/test/resources/meta"), new File("./target/extra-test-classes"));
         
         String simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/providers", null, "GET");
-        System.out.println(simulated1);
+        System.out.println("1- " +  simulated1);
 
         String simulated2 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/forwardingTest1/0", null, "GET");
         System.out.println(simulated2);
@@ -155,9 +160,12 @@ public class TestForwardingService extends MidOSGiTest {
     }
 
     @Test
-    public void testCallback() throws Exception {
+    public void testCallback(
+    		@InjectBundleContext BundleContext context
+    		) throws Exception {
+    	context.registerService(CallbackService.class, new CallbackServiceImpl(), null);
         Mediator mediator = new Mediator(context);
-        this.initializeMoke(new File("./extra-src2/test/resources/MANIFEST.MF"), new File("./extra-src2/test/resources/meta"), new File("./target/extra-test-classes2"));
+//        this.initializeMoke(new File("./extra-src2/test/resources/MANIFEST.MF"), new File("./extra-src2/test/resources/meta"), new File("./target/extra-test-classes2"));
         try {
             String simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/callbackTest1", null, "GET");
 
@@ -174,9 +182,13 @@ public class TestForwardingService extends MidOSGiTest {
     
 
     @Test
-    public void testCallbackHttpAndWebSocket() throws Exception {
-        Mediator mediator = new Mediator(context);
-        this.initializeMoke(new File("./extra-src3/test/resources/MANIFEST.MF"), new File("./extra-src3/test/resources/meta"), new File("./target/extra-test-classes3"));
+    public void testCallbackHttpAndWebSocket(
+    		@InjectBundleContext BundleContext context
+    		) throws Exception {
+    	context.registerService(CallbackService.class, new org.eclipse.sensinact.gateway.nthbnd.http.callback.test.CallbackServiceImpl(), null);
+    	
+    	Mediator mediator = new Mediator(context);
+//        this.initializeMoke(new File("./extra-src3/test/resources/MANIFEST.MF"), new File("./extra-src3/test/resources/meta"), new File("./target/extra-test-classes3"));
         String simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/callbackTest1", null, "GET");
         System.out.println(simulated1);
         
@@ -220,38 +232,4 @@ public class TestForwardingService extends MidOSGiTest {
         }
         return simulated;
     }
-
-    private void initializeMoke(File manifestFile, File... sourceDirectories) throws Exception {
-        File tmpDirectory = new File("./target/felix/tmp");
-        if(!tmpDirectory.exists()) {
-        	tmpDirectory.mkdir();
-        } else {
-        	new File(tmpDirectory, "dynamicBundle.jar").delete();
-        }
-        int length = (sourceDirectories == null ? 0 : sourceDirectories.length);
-        File[] sources = new File[length + 1];
-        int index = 0;
-        if (length > 0) {
-            for (; index < length; index++) {
-                sources[index] = sourceDirectories[index];
-            }
-        }
-        sources[index] = new File(tmpDirectory, "resources.xml");
-        super.createDynamicBundle(manifestFile, tmpDirectory, sources);
-
-        Bundle bundle = super.installDynamicBundle(new File(tmpDirectory, "dynamicBundle.jar").toURI().toURL());
-
-        ClassLoader current = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(super.classloader);
-        Thread.sleep(5000);
-        try {
-            bundle.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            Thread.currentThread().setContextClassLoader(current);
-        }
-        Thread.sleep(10 * 1000);
-    }
-
 }

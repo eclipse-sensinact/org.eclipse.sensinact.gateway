@@ -30,18 +30,22 @@
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
             <artifactId>generic-storage-agent</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
             <artifactId>influxdb-storage-agent</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway.tools</groupId>
             <artifactId>influxdb-connector</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway</groupId>
             <artifactId>sensinact-historic-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

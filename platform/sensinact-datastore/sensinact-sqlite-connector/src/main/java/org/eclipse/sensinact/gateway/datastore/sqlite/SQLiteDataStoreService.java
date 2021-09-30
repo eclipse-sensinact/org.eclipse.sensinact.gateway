@@ -57,10 +57,14 @@ implements SecurityDataStoreService{
 	public SQLiteDataStoreService(Mediator mediator)
 			throws UnableToFindDataStoreException, UnableToConnectToDataStoreException {
 		super(mediator);
+		start();
+	}
+
+	public void start() throws UnableToConnectToDataStoreException, UnableToFindDataStoreException {
 		String dbName = (String) mediator.getProperty("org.eclipse.sensinact.gateway.security.database");
 		this.provider = new SQLiteConnectionProvider(mediator, dbName);
 	}
-
+	
 	/**
 	 * @inheritDoc
 	 *

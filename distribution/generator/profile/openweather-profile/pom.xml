@@ -31,6 +31,7 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
 			<artifactId>openweather-device</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 

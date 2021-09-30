@@ -10,15 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.test;
 
+import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 //import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -28,6 +31,7 @@ class JettyServerTestCallback {
     }
 
     private JSONObject remoteEntity;
+	private Optional<CountDownLatch> latch = Optional.empty();
 
     @doPost
     public void callbackPost(HttpServletRequest request, HttpServletResponse response) throws IOException, JSONException {
@@ -59,6 +63,8 @@ class JettyServerTestCallback {
                         response.getOutputStream().write(this.remoteEntity.toString().getBytes());
                     }
                     response.setStatus(200);
+                    System.err.println("Returning for get: " + this.remoteEntity.toString());
+                    latch.ifPresent(CountDownLatch::countDown);
                     break;
                 case services:
                     JSONObject object = new JSONObject();
@@ -78,7 +84,6 @@ class JettyServerTestCallback {
                     } catch (IOException e) {
                         response.setStatus(520);
                     }
-
                     break;
                 case json1:
                     response.setContentType("application/json");
@@ -119,8 +124,13 @@ class JettyServerTestCallback {
             response.setStatus(520);
         }
     }
+    
+    public void setCountDownLatch(CountDownLatch latch) {
+		this.latch = Optional.ofNullable(latch);
+    }
 
     public void setRemoteEntity(JSONObject remoteEntity) {
+    	System.err.println("Setting entity for: " + remoteEntity.getString("serviceProviderId"));
         this.remoteEntity = remoteEntity;
     }
 }

@@ -19,11 +19,10 @@
 		<groupId>org.eclipse.sensinact.gateway.tools</groupId>
 		<artifactId>platform.tools</artifactId>
 		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>mqtt-server</artifactId>
-
-	<packaging>bundle</packaging>
 
 	<name>sensiNact IoT Gateway - MQTT Server</name>
 
@@ -36,12 +35,14 @@
 		<dependency>
 			<groupId>io.moquette</groupId>
 			<artifactId>moquette-broker</artifactId>
+			<version>0.9</version>
 			<scope>system</scope>
 			<systemPath>${project.basedir}/lib/moquette-broker-0.9.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>io.moquette</groupId>
 			<artifactId>moquette-netty-parser</artifactId>
+			<version>0.9</version>
 			<scope>system</scope>
 			<systemPath>${project.basedir}/lib/moquette-netty-parser-0.9.jar</systemPath>
 		</dependency>
@@ -56,6 +57,7 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-common</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<!-- Removing this dependency causes an error while reading XML files -->
@@ -68,34 +70,38 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Embed-Dependency>*;inline=true;scope=compile|system;artifactId=!(osgi*|slf4j*)</Embed-Dependency>
-						<Embed-Transitive>false</Embed-Transitive>
-						<Bundle-Activator>org.sensinact.mqtt.server.osgi.Activator</Bundle-Activator>
-						<Export-Package>
-						org.sensinact.mqtt.server,
-						org.sensinact.mqtt.server.osgi
-						</Export-Package>
-						<Import-Package>
-						org.osgi.service.cm,
-						sun.misc,
-						org.eclipse.sensinact.*,
-						org.osgi.util.tracker,
-						org.osgi.framework.wiring,
-						javax.net.ssl,
-						javax.net,
-						org.osgi.framework;version="1.9",
-						org.slf4j,
-						javax.security.cert
-						</Import-Package>
-						<_nouses>false</_nouses>
-					</instructions>
-				</configuration>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-maven-plugin</artifactId>
 			</plugin>
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.apache.felix</groupId> -->
+<!-- 				<artifactId>maven-bundle-plugin</artifactId> -->
+<!-- 				<extensions>true</extensions> -->
+<!-- 				<configuration> -->
+<!-- 					<instructions> -->
+<!-- 						<Embed-Dependency>*;inline=true;scope=compile|system;artifactId=!(osgi*|slf4j*)</Embed-Dependency> -->
+<!-- 						<Embed-Transitive>false</Embed-Transitive> -->
+<!-- 						<Bundle-Activator>org.sensinact.mqtt.server.osgi.Activator</Bundle-Activator> -->
+<!-- 						<Export-Package> -->
+<!-- 						org.sensinact.mqtt.server, -->
+<!-- 						org.sensinact.mqtt.server.osgi -->
+<!-- 						</Export-Package> -->
+<!-- 						<Import-Package> -->
+<!-- 						org.osgi.service.cm, -->
+<!-- 						sun.misc, -->
+<!-- 						org.eclipse.sensinact.*, -->
+<!-- 						org.osgi.util.tracker, -->
+<!-- 						org.osgi.framework.wiring, -->
+<!-- 						javax.net.ssl, -->
+<!-- 						javax.net, -->
+<!-- 						org.osgi.framework;version="1.9", -->
+<!-- 						org.slf4j, -->
+<!-- 						javax.security.cert -->
+<!-- 						</Import-Package> -->
+<!-- 						<_nouses>false</_nouses> -->
+<!-- 					</instructions> -->
+<!-- 				</configuration> -->
+<!-- 			</plugin> -->
 		</plugins>
 	</build>
 </project>

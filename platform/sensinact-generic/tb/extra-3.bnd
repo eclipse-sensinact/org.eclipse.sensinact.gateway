@@ -1,0 +1,2 @@
+-privatepackage: org.eclipse.sensinact.gateway.generic.test.tb.moke3
+-includeresource: ${.}/extra-3

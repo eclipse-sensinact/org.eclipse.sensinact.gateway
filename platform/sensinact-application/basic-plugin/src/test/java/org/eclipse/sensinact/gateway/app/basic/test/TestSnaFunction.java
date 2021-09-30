@@ -10,7 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.test;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.app.api.function.DataItf;
 import org.eclipse.sensinact.gateway.app.api.function.FunctionUpdateListener;
 import org.eclipse.sensinact.gateway.app.api.plugin.PluginHook;
@@ -37,11 +44,11 @@ import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.TypeConfig;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.eclipse.sensinact.gateway.core.method.ActResponse;
+import org.eclipse.sensinact.gateway.core.method.DescribeMethod.DescribeType;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
 import org.eclipse.sensinact.gateway.core.method.SetResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
-import org.eclipse.sensinact.gateway.core.method.DescribeMethod.DescribeType;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
@@ -50,9 +57,7 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.security.signature.exception.BundleValidationException;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -61,29 +66,23 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.List;
 
-@RunWith(PowerMockRunner.class)
-public class TestSnaFunction extends TestCase {
+public class TestSnaFunction{
+	
+
     private String lightState;
     private String displayText;
     private Integer displayTimeout;
-    @Mock
-    private AppServiceMediator mediator;
+    
+    private AppServiceMediator mediator=Mockito.mock(AppServiceMediator.class);
     private ModelInstance modelInstance;
 
-    @Mock
-    private Session session;
+    private Session session=Mockito.mock(Session.class);
     private PropertyResource dimResource;
 
     @SuppressWarnings("unchecked")
-    @Before
+    @BeforeEach
     public void init() throws Exception {
         AuthorizationService authorization = Mockito.mock(AuthorizationService.class);
         SecuredAccess securedAccess = Mockito.mock(SecuredAccess.class);

@@ -14,12 +14,15 @@ import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.filtering.Filtering;
 import org.eclipse.sensinact.gateway.nthbnd.filter.geojson.internal.GeoJSONFiltering;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 
 import java.util.Hashtable;
 
 /**
  */
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends AbstractActivator<Mediator> {
     private static final String TYPE = "geojson";
 

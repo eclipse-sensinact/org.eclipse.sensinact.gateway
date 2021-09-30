@@ -20,6 +20,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.security.oauth2.OpenIDServer;
 import org.eclipse.sensinact.gateway.security.oauth2.filter.SecurityFilter;
 import org.eclipse.sensinact.gateway.security.oauth2.servlet.SecurityServlet;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
@@ -28,6 +29,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 /**
  * @see AbstractActivator
  */
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends AbstractActivator<Mediator> {
 
 	public static final String AUTH_SECURITY_CONFIG = "org.eclipse.sensinact.security.oauth2.config";

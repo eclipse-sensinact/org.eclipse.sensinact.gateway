@@ -12,8 +12,8 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
-   <groupId>${groupId}</groupId>
-   <artifactId>${artifactId}</artifactId>
+   <groupId>${project.groupId}</groupId>
+   <artifactId>${project.artifactId}</artifactId>
    <version>${version}</version>
   
    <packaging>bundle</packaging>
@@ -34,7 +34,7 @@
 	          <configuration>
 	            <unpackBundle>false</unpackBundle>
 	            <instructions>
-	              <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
+	              <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
 	              <Bundle-Name>${project.name}</Bundle-Name>
 	              <Bundle-Description>${project.name}</Bundle-Description>
 	              <_nouses>true</_nouses>

@@ -14,7 +14,9 @@ import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AccountConnector;
 import org.eclipse.sensinact.gateway.mail.connector.MailAccountConnectorMoke;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -22,6 +24,7 @@ import java.util.Hashtable;
 /**
  * @see AbstractActivator
  */
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends AbstractActivator<Mediator> {
 	
     /**

@@ -13,13 +13,18 @@ package org.eclipse.sensinact.gateway.core.security.impl;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
+import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
 import org.eclipse.sensinact.gateway.core.security.UserManager;
 import org.eclipse.sensinact.gateway.core.security.UserManagerFactory;
+
+import aQute.bnd.annotation.Resolution;
+import aQute.bnd.annotation.spi.ServiceProvider;
 
 /**
  * @author christophe
  *
  */
+@ServiceProvider(value = UserManagerFactory.class, resolution = Resolution.OPTIONAL)
 public class UserManagerFactoryImpl implements UserManagerFactory<UserManagerImpl> {
 	/**
 	 * @inheritDoc

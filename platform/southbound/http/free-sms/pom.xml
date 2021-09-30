@@ -19,10 +19,10 @@
 		<groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
 		<artifactId>parent</artifactId>
 		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>free-sms-service</artifactId>
-	<packaging>bundle</packaging>
 
 	<name>sensiNact IoT Gateway - Free Mobile SMS service</name>
 
@@ -30,22 +30,20 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.sthbnd.http</groupId>
 			<artifactId>http-device</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
 			<artifactId>http</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-common</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.main</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.skyscreamer</groupId>
@@ -61,21 +59,25 @@
 				<artifactId>xml-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Bundle-Activator>
-							org.eclipse.sensinact.gateway.sthbnd.http.free.osgi.Activator
-						</Bundle-Activator>
-						<Include-Resource>
-							about.html,
-							src/main/resources/
-						</Include-Resource>
-					</instructions>
-				</configuration>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-maven-plugin</artifactId>
 			</plugin>
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.apache.felix</groupId> -->
+<!-- 				<artifactId>maven-bundle-plugin</artifactId> -->
+<!-- 				<extensions>true</extensions> -->
+<!-- 				<configuration> -->
+<!-- 					<instructions> -->
+<!-- 						<Bundle-Activator> -->
+<!-- 							org.eclipse.sensinact.gateway.sthbnd.http.free.osgi.Activator -->
+<!-- 						</Bundle-Activator> -->
+<!-- 						<Include-Resource> -->
+<!-- 							about.html, -->
+<!-- 							src/main/resources/ -->
+<!-- 						</Include-Resource> -->
+<!-- 					</instructions> -->
+<!-- 				</configuration> -->
+<!-- 			</plugin> -->
 		</plugins>
 	</build>
 

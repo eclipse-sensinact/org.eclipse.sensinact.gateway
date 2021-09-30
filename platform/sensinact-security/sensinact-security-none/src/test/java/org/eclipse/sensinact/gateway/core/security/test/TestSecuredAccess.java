@@ -16,7 +16,6 @@ import org.eclipse.sensinact.gateway.core.ModelElement;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
 import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
-import org.junit.Before;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -34,6 +33,7 @@ import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.MessageRouter;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
+import org.junit.jupiter.api.BeforeEach;
 
 /**
  *
@@ -105,7 +105,7 @@ public class TestSecuredAccess {
 	private int linkCallbackCount;
 	private int agentCallbackCount;
 
-	@Before
+	@BeforeEach
 	public void init() throws InvalidServiceProviderException, InvalidSyntaxException {
 		Filter filter = Mockito.mock(Filter.class);
 		Mockito.when(filter.toString()).thenReturn(LOG_FILTER);

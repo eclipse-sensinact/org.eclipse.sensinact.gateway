@@ -17,19 +17,17 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.ws.test.WsServiceTestClient;
-import org.eclipse.sensinact.gateway.test.MidOSGiTest;
 import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class TestJsonPathFiltering extends MidOSGiTest {
+public class TestJsonPathFiltering {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
@@ -70,7 +68,6 @@ public class TestJsonPathFiltering extends MidOSGiTest {
      * @inheritDoc
      * @see MidOSGiTest#doInit(java.util.Map)
      */
-    @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void doInit(Map configuration) {
         configuration.put("felix.auto.start.1",  
@@ -126,9 +123,9 @@ public class TestJsonPathFiltering extends MidOSGiTest {
         	String fileName = "sensinact.config";
             File testFile = new File(new File("src/test/resources"), fileName);
             URL testFileURL = testFile.toURI().toURL();
-            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
-            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
-            IOUtils.write(testCng, output);
+//            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
+//            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
+//            IOUtils.write(testCng, output);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -136,16 +133,16 @@ public class TestJsonPathFiltering extends MidOSGiTest {
 
     @Test
     public void testHttpFiltered() throws Exception {
-        Mediator mediator = new Mediator(context);
-        String simulated3 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?jsonpath=$.[?(@.name=='slider')]", null, "GET");
+
+        String simulated3 = HttpServiceTestClient.newRequest( HTTP_ROOTURL + "/sensinact?jsonpath=$.[?(@.name=='slider')]", null, "GET");
         JSONObject response = new JSONObject("{\"filters\":[{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"}]," + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," + "{\"name\":\"cursor\",\"resources\":" + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" + "}]" + ",\"location\":\"45.2:5.7\"}]}");
         JSONAssert.assertEquals(response, new JSONObject(simulated3), false);
 
-        String simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/providers", null, "GET");
+        String simulated1 = HttpServiceTestClient.newRequest( HTTP_ROOTURL + "/sensinact/providers", null, "GET");
         response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"]," + "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
         JSONAssert.assertEquals(response, new JSONObject(simulated1), false);
 
-        String simulated2 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/providers?jsonpath=$.[:1]", null, "GET");
+        String simulated2 = HttpServiceTestClient.newRequest( HTTP_ROOTURL + "/sensinact/providers?jsonpath=$.[:1]", null, "GET");
         response = new JSONObject("{\"statusCode\":200,\"providers\":[\"" + new JSONObject(simulated1).getJSONArray("providers").getString(0) + "\"]," + "\"filters\":[{\"type\":\"jsonpath\", \"definition\":\"$.[:1]\"}], " + "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
         JSONAssert.assertEquals(response, new JSONObject(simulated2), false);
     }
