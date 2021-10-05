@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint.test;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,7 +29,7 @@ import org.eclipse.sensinact.gateway.core.SensiNact;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
 import org.eclipse.sensinact.gateway.core.filtering.Filtering;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
+import org.eclipse.sensinact.gateway.core.security.UserKeyBuilder;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
@@ -49,6 +50,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
+import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
 import org.osgi.service.log.LogService;
 
 /**
@@ -59,7 +62,7 @@ public class TestContext {
     private static final String CORE_FILTER = "(" + Constants.OBJECTCLASS + "=" + Core.class.getCanonicalName() + ")";
     private static final String LOG_FILTER = "(" + Constants.OBJECTCLASS + "=" + LogService.class.getCanonicalName() + ")";
     private static final String DATA_STORE_FILTER = "(" + Constants.OBJECTCLASS + "=" + DataStoreService.class.getCanonicalName() + ")";
-    private static final String AUTHENTICATION_FILTER = "(" + Constants.OBJECTCLASS + "=" + AuthenticationService.class.getCanonicalName() + ")";
+    private static final String AUTHENTICATION_FILTER = "(" + Constants.OBJECTCLASS + "=" + UserKeyBuilder.class.getCanonicalName() + ")";
     private static final String ACCESS_FILTER = "(" + Constants.OBJECTCLASS + "=" + SecuredAccess.class.getCanonicalName() + ")";
     private static final String VALIDATION_FILTER = "(" + Constants.OBJECTCLASS + "=" + BundleValidation.class.getCanonicalName() + ")";
 
@@ -374,6 +377,7 @@ public class TestContext {
             }
 
         }).when(registration).setProperties(Mockito.any(Dictionary.class));
+        
         Mockito.when(registration.getReference()).thenReturn(referenceProvider);
         Mockito.when(registrationAgent.getReference()).thenReturn(referenceAgent);
         Mockito.when(registrationValidation.getReference()).thenReturn(referenceValidation);
@@ -385,8 +389,23 @@ public class TestContext {
 
 		Mockito.when(componentContext.getBundleContext()).thenReturn(context);
 
+		ConditionalPermissionAdmin cpa = Mockito.mock(ConditionalPermissionAdmin.class);
+		ConditionalPermissionUpdate cpu = Mockito.mock(ConditionalPermissionUpdate.class);
+		
+		Mockito.when(cpu.commit()).thenReturn(true);
+		Mockito.when(cpa.newConditionalPermissionUpdate()).thenReturn(cpu);
+		
 		mediator = new NorthboundMediator(context);
 		sensinact = new SensiNact();
+
+		try {
+			Field cpaField = sensinact.getClass().getDeclaredField("cpa");
+			cpaField.setAccessible(true);
+			cpaField.set(sensinact, cpa);
+		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+			e.printStackTrace();
+		}
+		
 		sensinact.activate(componentContext);;
 		
 		instance = (MyModelInstance) new ModelInstanceBuilder(mediator

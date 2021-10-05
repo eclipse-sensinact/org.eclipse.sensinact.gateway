@@ -51,9 +51,8 @@ public class UserEntity extends SnaEntity implements User {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
+	 * @param mediator the {@link Mediator} allowing to interact with the OSGi 
+	 * host environment
 	 */
 	public UserEntity(Mediator mediator) {
 		super(mediator);
@@ -62,9 +61,8 @@ public class UserEntity extends SnaEntity implements User {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
+	 * @param mediator the {@link Mediator} allowing to interact with the OSGi 
+	 * host environment
 	 * @param row
 	 * 
 	 */
@@ -75,9 +73,8 @@ public class UserEntity extends SnaEntity implements User {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
+	 * @param mediator the {@link Mediator} allowing to interact with the OSGi 
+	 * host environment
 	 * @param login
 	 * @param password
 	 * @param mail
@@ -89,9 +86,8 @@ public class UserEntity extends SnaEntity implements User {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
+	 * @param mediator the {@link Mediator} allowing to interact with the OSGi 
+	 * host environment
 	 * @param login
 	 * @param password
 	 * @param account
@@ -104,9 +100,8 @@ public class UserEntity extends SnaEntity implements User {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
+	 * @param mediator the {@link Mediator} allowing to interact with the OSGi 
+	 * host environment
 	 * @param login
 	 * @param password
 	 * @param account
@@ -123,18 +118,12 @@ public class UserEntity extends SnaEntity implements User {
 		this.setPublicKey(publicKey);
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SnaEntity#getIdentifier()
-	 */
 	public long getIdentifier() {
 		return identifier;
 	}
 
 	/**
-	 * @param identifier
-	 *            the identifier to set
+	 * @param identifier the identifier to set
 	 */
 	public void setIdentifier(long identifier) {
 		this.identifier = identifier;
@@ -148,8 +137,7 @@ public class UserEntity extends SnaEntity implements User {
 	}
 
 	/**
-	 * @param login
-	 *            the login to set
+	 * @param login the login to set
 	 */
 	public void setLogin(String login) {
 		this.login = login;
@@ -163,8 +151,7 @@ public class UserEntity extends SnaEntity implements User {
 	}
 
 	/**
-	 * @param password
-	 *            the password to set
+	 * @param password the password to set
 	 */
 	public void setPassword(String password) {
 		this.password = password;
@@ -178,8 +165,7 @@ public class UserEntity extends SnaEntity implements User {
 	}
 
 	/**
-	 * @param account
-	 *            the account to be set
+	 * @param account the account to be set
 	 */
 	public void setAccount(String account) {
 		this.account = account;
@@ -196,8 +182,7 @@ public class UserEntity extends SnaEntity implements User {
 	}
 
 	/**
-	 * @param accounttype
-	 *            the accounttype to be set
+	 * @param accounttype the accounttype to be set
 	 */
 	public void setAccounttype(String accounttype) {
 		this.accounttype = accounttype;
@@ -221,28 +206,17 @@ public class UserEntity extends SnaEntity implements User {
 	}
 
 	/**
-	 * @param publicKey
-	 *            the public key to set
+	 * @param publicKey the public key to set
 	 */
 	public void setPublicKey(String publicKey) {
 		this.publicKey = publicKey;
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.User#getAccountType()
-	 */
 	@Override
 	public String getAccountType() {
 		return this.getAccounttype();
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see org.eclipse.sensinact.gateway.core.security.User#isAnonymous()
-	 */
 	@Override
 	public boolean isAnonymous() {
 		return this.getPublicKey().startsWith(UserManager.ANONYMOUS_PKEY);

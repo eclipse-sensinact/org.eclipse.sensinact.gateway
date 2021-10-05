@@ -1,0 +1,20 @@
+version: '3.7'
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:12.0.4
+    volumes:
+      - ./keycloak/cfg:/opt/keycloak/imports:rw
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - keycloak.profile.feature.upload_scripts=enabled
+      - KEYCLOAK_LOGLEVEL=DEBUG
+    command:
+      - "-Djboss.socket.binding.port-offset=4"
+      - "-Dkeycloak.migration.action=import"
+      - "-Dkeycloak.migration.provider=singleFile"
+      - "-Dkeycloak.migration.file=/opt/keycloak/imports/realms.json"
+      - "-Dkeycloak.migration.strategy=IGNORE_EXISTING"
+    ports:
+      - 24680:8084
+    container_name: keycloak

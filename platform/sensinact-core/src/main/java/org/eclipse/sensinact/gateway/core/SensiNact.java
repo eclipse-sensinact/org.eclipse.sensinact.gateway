@@ -16,6 +16,7 @@ import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -52,13 +53,13 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.eclipse.sensinact.gateway.core.method.ActResponse;
 import org.eclipse.sensinact.gateway.core.method.DescribeMethod;
+import org.eclipse.sensinact.gateway.core.method.DescribeMethod.DescribeType;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponseBuilder;
 import org.eclipse.sensinact.gateway.core.method.GetResponse;
-import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
-import org.eclipse.sensinact.gateway.core.method.DescribeMethod.DescribeType;
 import org.eclipse.sensinact.gateway.core.method.RemoteAccessMethodExecutable;
 import org.eclipse.sensinact.gateway.core.method.SetResponse;
 import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
@@ -71,9 +72,9 @@ import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.AccountConnector;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationService;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
-import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.core.security.UserKeyBuilder;
+import org.eclipse.sensinact.gateway.core.security.UserKeyBuilderFactory;
+import org.eclipse.sensinact.gateway.core.security.SessionToken;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
@@ -88,6 +89,7 @@ import org.eclipse.sensinact.gateway.core.security.UserUpdater;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
+import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -100,8 +102,9 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
+import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
+import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1139,8 +1142,8 @@ public class SensiNact implements Core {
 		return tree;
 	}
 	
-//	@Reference
-//	private ConditionalPermissionAdmin cpa;
+	@Reference
+	private ConditionalPermissionAdmin cpa;
 
 	public SensiNact() {
 		this.sessions = new Sessions();
@@ -1151,43 +1154,44 @@ public class SensiNact implements Core {
 	BundleException, DataStoreException  {
 		
 		Mediator mediator = new Mediator(context.getBundleContext());
-//		List<String> types = ReflectUtils.getAllStringTypes(mediator.getContext().getBundle());
-//
-//		StringBuilder builder = new StringBuilder();
-//
-//		for (int index = 0; index < types.size(); index++) {
-//			if (index > 0)
-//				builder.append("\\,");
-//			builder.append(types.get(index));
-//		}
-//
-//		ConditionalPermissionUpdate cpu = cpa.newConditionalPermissionUpdate();
-//		List piList = cpu.getConditionalPermissionInfos();
-//		
-//		ConditionalPermissionInfo cpiDeny = cpa.newConditionalPermissionInfo(
-//		String.format("DENY { [org.eclipse.sensinact.gateway.core.security.perm.StrictCodeBaseCondition \"%s\" \"!\"]"
-//			+ " (org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.Core\" \"register\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModel\" \"register,get\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement\" \"register,get\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.LocalAgent\" \"register,get\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.RemoteAgent\" \"register,get\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.remote.RemoteCore\" \"register,get\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecuredAccess\" \"register,get\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.UserManager\" \"register,get\")"
-//			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService\" \"register,get\")"
-//			+ "} null", builder.toString()));
-//		piList.add(cpiDeny);
+		List<String> types = ReflectUtils.getAllStringTypes(mediator.getContext().getBundle());
+
+		StringBuilder builder = new StringBuilder();
+
+		for (int index = 0; index < types.size(); index++) {
+			if (index > 0)
+				builder.append("\\,");
+			builder.append(types.get(index));
+		}
+
+		ConditionalPermissionUpdate cpu = cpa.newConditionalPermissionUpdate();
+		List piList = cpu.getConditionalPermissionInfos();
 		
-//		ConditionalPermissionInfo cpiAllow = null;"
-//
-//		cpiAllow = cpa.newConditionalPermissionInfo(
-//			"ALLOW {[org.eclipse.sensinact.gateway.core.security.perm.CodeBaseCondition \"*\"](java.security.AllPermission \"\" \"\")} null");
-//		
-//		piList.add(cpiAllow);
-//
-//		if (!cpu.commit()) 
-//			throw new ConcurrentModificationException("Permissions changed during update");
-//		
+		ConditionalPermissionInfo cpiDeny = cpa.newConditionalPermissionInfo(
+		String.format("DENY { [org.eclipse.sensinact.gateway.core.security.perm.StrictCodeBaseCondition \"%s\" \"!\"]"
+			+ " (org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.Core\" \"register\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModel\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.SensiNactResourceModelElement\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.LocalAgent\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.message.RemoteAgent\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.remote.RemoteCore\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecuredAccess\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.UserManager\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.UserKeyBuilder\" \"register,get\")"
+			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService\" \"register,get\")"
+			+ "} null", builder.toString()));
+		piList.add(cpiDeny);
+		
+		ConditionalPermissionInfo cpiAllow = null;
+
+		cpiAllow = cpa.newConditionalPermissionInfo(
+			"ALLOW {[org.eclipse.sensinact.gateway.core.security.perm.CodeBaseCondition \"*\"](java.security.AllPermission \"\" \"\")} null");
+		
+		piList.add(cpiAllow);
+
+		if (!cpu.commit()) 
+			throw new ConcurrentModificationException("Permissions changed during update");
+		
 		SecuredAccess securedAccess = null;
 		ServiceLoader<SecurityDataStoreServiceFactory> dataStoreServiceFactoryLoader = 
 			ServiceLoader.load(SecurityDataStoreServiceFactory.class, mediator.getClassLoader());
@@ -1212,6 +1216,17 @@ public class SensiNact implements Core {
 				break;
 			}
 		}
+		ServiceLoader<UserKeyBuilderFactory> userKeyBuilderFactoryLoader = ServiceLoader.load(UserKeyBuilderFactory.class,
+			mediator.getClassLoader());	
+				
+		Iterator<UserKeyBuilderFactory> iterator = userKeyBuilderFactoryLoader.iterator();
+
+		while(iterator.hasNext()) {
+			UserKeyBuilderFactory<?, ?, ?> factory = iterator.next();
+			if(factory!=null) 
+				factory.newInstance(mediator);
+		}
+		
 		ServiceLoader<SecuredAccessFactory> securedAccessFactoryLoader = ServiceLoader.load(
 				SecuredAccessFactory.class, mediator.getClassLoader());
 
@@ -1267,9 +1282,7 @@ public class SensiNact implements Core {
 	public void deactivate() {
 		this.close();
 	}
-//	
-//	
-//	
+
 //	/**
 //	 * Constructor
 //	 * 
@@ -1359,25 +1372,28 @@ public class SensiNact implements Core {
 //			}
 //		}
 //	}
-	
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public AuthenticatedSession getSession(final Authentication<?> authentication)
 			throws InvalidKeyException, InvalidCredentialException {
 		AuthenticatedSession session = null;
-		if (authentication == null) {
+		if (authentication == null) 
 			return null;
-
-		} else if (Credentials.class.isAssignableFrom(authentication.getClass())) {
-			UserKey userKey = this.doPrivilegedService(AuthenticationService.class, null,
-				new Executable<AuthenticationService, UserKey>() {
+		else if(SessionToken.class.isAssignableFrom(authentication.getClass())) 
+			session = this.getSession(((SessionToken) authentication).getAuthenticationMaterial());
+		else{
+			UserKey userKey = this.doPrivilegedService(UserKeyBuilder.class, 
+				String.format("(identityMaterial=%s)",authentication.getClass().getCanonicalName()),
+				new Executable<UserKeyBuilder, UserKey>() {
 					@Override
-					public UserKey execute(AuthenticationService service) throws Exception {
-						return service.buildKey((Credentials) authentication);
+					public UserKey execute(UserKeyBuilder service) throws Exception {
+						return service.buildKey(authentication);
 					}
 				});
-			if (userKey == null) {
+			if (userKey == null) 
 				throw new InvalidCredentialException("Invalid credentials");
-			}
+			
 			String pkey = userKey.getPublicKey();
 			AccessTree<? extends AccessNode> tree = this.getUserAccessTree(pkey);
 			SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, SensiNact.this.nextToken(), tree, null);
@@ -1386,8 +1402,6 @@ public class SensiNact implements Core {
 			synchronized(this.sessions) {
 				sessions.put(sessionKey, session);
 			}
-		} else if (AuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
-			session = this.getSession(((AuthenticationToken) authentication).getAuthenticationMaterial());
 		}
 		return session;
 	}
@@ -2129,12 +2143,10 @@ public class SensiNact implements Core {
 	 * Returns the JSON formated description of the service provider whose String
 	 * identifier is passed as parameter
 	 * 
-	 * @param identifier
-	 *            the String identifier of the {@link Session} requiring the service
-	 *            provider description
-	 * @param serviceProviderId
-	 *            the String identifier of the service provider to return the
-	 *            description of
+	 * @param identifier the String identifier of the {@link Session} requiring the 
+	 * service provider description
+	 * @param serviceProviderId the String identifier of the service provider to return 
+	 * the description of
 	 * 
 	 * @return the JSON formated description of the specified service provider
 	 */
@@ -2181,9 +2193,9 @@ public class SensiNact implements Core {
 		}
 		String local = this.registry.getProviders(sessionKey, sessionKey.localID() != 0, effectiveFilter);
 
-		if (sessionKey.localID() != 0) {
+		if (sessionKey.localID() != 0) 
 			return local;
-		}
+		
 		final StringBuilder content = new StringBuilder();
 		if (local != null && local.length() > 0) 
 			content.append(local);
@@ -2213,6 +2225,33 @@ public class SensiNact implements Core {
 				return null;
 			}});
 		return content.toString();
+	}
+
+	/**
+	 * Returns the JSON formated description of the service provider whose identifier
+	 * is passed as parameter for the {@link Session} whose String identifier is also 
+	 * passed as parameter
+	 * 
+	 * @param identifier the String identifier of the {@link Session} requiring the list 
+	 * of available service providers
+	 * @param filter the (extra) LDAP String filter applying
+	 * 
+	 * @return the JSON String formated description of the specified service provider
+	 */
+	private String getProvider(String identifier, String providerId, String filter) {
+
+		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
+		String effectiveFilter = null;
+		if (filter != null && filter.length() > 0) {
+			try {
+				mediator.getContext().createFilter(filter);
+				effectiveFilter = filter;
+			} catch (InvalidSyntaxException e) {
+				effectiveFilter = null;
+			}
+		}
+		String provider = this.registry.getProvider(sessionKey, sessionKey.localID() != 0, providerId, effectiveFilter);
+		return provider;
 	}
 
 	/**

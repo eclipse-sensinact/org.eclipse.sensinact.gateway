@@ -32,7 +32,7 @@
 	</properties>
 
 	<modules>
-		<module>sensinact-framework-extension</module>
+			<module>sensinact-framework-extension</module>
 		<module>sensinact-security-none</module>
 		<module>sensinact-mail-connector</module>
 		<module>sensinact-security-core</module>
@@ -40,6 +40,9 @@
 		<module>sensinact-signature-validator-api</module>
 		<module>sensinact-signature-validator-mock</module>
 		<module>sensinact-signature-validator-secure</module>
+		<module>sensinact-security-keybuilder</module>
+		<module>sensinact-security-test</module>
+		<module>sensinact-security-openid-keybuilder</module>
 	</modules>
 
 </project>

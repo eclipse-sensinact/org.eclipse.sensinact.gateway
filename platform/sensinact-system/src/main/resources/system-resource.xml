@@ -11,6 +11,15 @@
 <resourceInfos xmlns="http://org.eclipse.sensinact/resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../sensinact-generic/src/main/resources/sensinact-resource.xsd">
 
+    <resourceInfo xsi:type="resourceInfoProperty" name="VERSION" target="system">
+        <policy name="PROPERTY" update="AUTO"/>
+        <identifier xsi:type="stringContent">version</identifier>
+	    <attributes>
+	     	<attribute name="value" type="double" modifiable="FIXED">
+	     		<value>2.0</value>
+	     	</attribute>
+	    </attributes>
+    </resourceInfo>
     <resourceInfo xsi:type="resourceInfoProperty" name="NAME" target="system">
         <policy name="PROPERTY" update="INIT"/>
         <identifier xsi:type="stringContent">name</identifier>
@@ -18,14 +27,12 @@ xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../sensinact-
 	     	<attribute name="value" type="string" modifiable="MODIFIABLE"/>
 	    </attributes>
     </resourceInfo>
-
     <resourceInfo xsi:type="resourceInfoProperty" name="DATETIME"  target="system">
         <identifier xsi:type="stringContent">datetime</identifier>
 	    <attributes>
 	     	<attribute name="value" type="long" modifiable="UPDATABLE"/>
 	    </attributes>
     </resourceInfo>
-
     <resourceInfo xsi:type="resourceInfoProperty" name="ADDRESS"  target="system">
         <policy name="PROPERTY" update="INIT"/>
         <identifier xsi:type="stringContent">address</identifier>
@@ -33,7 +40,6 @@ xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../../../sensinact-
 	     	<attribute name="value" type="array" modifiable="UPDATABLE"/>
 	    </attributes>
     </resourceInfo>
-
     <devices>
         <device identifier="sensiNact">
             <service name="system"/>

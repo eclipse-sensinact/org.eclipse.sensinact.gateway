@@ -35,10 +35,11 @@ public class ConnectionConfigurationImpl<RESPONSE extends Response, REQUEST exte
     protected String acceptType;
     protected String uri;
     protected String httpMethod;
-    protected ProxyConfiguration proxyConfiguration;
-    protected Map<String, String> parameters;
 	private String serverCertificate;
 	private String clientCertificate;
+	private String clientCertificatePassword;
+    protected ProxyConfiguration proxyConfiguration;
+    protected Map<String, String> parameters;
 
     /**
      * Constructor
@@ -229,6 +230,16 @@ public class ConnectionConfigurationImpl<RESPONSE extends Response, REQUEST exte
 		return this.clientCertificate;
 	}
 
+	@Override
+	public String getClientSSLCertificatePassword() {
+		return this.clientCertificatePassword;
+	}
+
+	@Override
+	public void setClientSSLCertificatePassword(String clientCertificatePassword) {
+		this.clientCertificatePassword = clientCertificatePassword;
+		
+	}
     @Override
     public Proxy getProxy() {
         return this.proxyConfiguration.getProxy();
@@ -258,4 +269,5 @@ public class ConnectionConfigurationImpl<RESPONSE extends Response, REQUEST exte
         builder.append(super.toString());
         return builder.toString();
     }
+
 }

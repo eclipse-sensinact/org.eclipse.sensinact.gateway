@@ -46,19 +46,11 @@ public class LoginResponse extends AbstractSnaErrorfulMessage<LoginResponse.Toke
             keys = Collections.unmodifiableSet(tmpKeys);
         }
 
-        /**
-         * @inheritDoc
-         * @see KeysCollection#keys()
-         */
         @Override
         public Set<TypedKey<?>> keys() {
             return this.keys;
         }
 
-        /**
-         * @inheritDoc
-         * @see KeysCollection#key(java.lang.String)
-         */
         @Override
         public TypedKey<?> key(String key) {
             TypedKey<?> typedKey = null;
@@ -133,11 +125,8 @@ public class LoginResponse extends AbstractSnaErrorfulMessage<LoginResponse.Toke
     protected void setTimeout(long timeout) {
         super.put(SnaConstants.TIMEOUT_KEY, timeout);
     }
-
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.common.props.TypedProperties#getJSON()
-     */
+    
+    @Override
     public String getJSON() {
         StringBuilder builder = new StringBuilder();
         Iterator<Map.Entry<TypedKey<?>, Object>> iterator = super.properties.entrySet().iterator();

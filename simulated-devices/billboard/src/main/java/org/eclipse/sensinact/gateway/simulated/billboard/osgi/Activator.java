@@ -50,7 +50,7 @@ public class Activator extends AbstractActivator<Mediator> {
         }
         connector.connect(manager);
 
-        if (mediator.getContext().getProperty(GUI_ENABLED).equals("true")) {
+        if ("true".equals(mediator.getProperty(GUI_ENABLED))) {
             billboardPanel = new BillboardPanel();
             config.addListener(billboardPanel);
         }

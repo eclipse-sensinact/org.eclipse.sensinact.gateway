@@ -26,6 +26,8 @@
             <useDefaultExcludes>true</useDefaultExcludes>
             <excludes>
                 <exclude>**/distribution.xml</exclude>
+                <exclude>**/.settings</exclude>
+                <exclude>**/.project</exclude>
                 <exclude>**/*.log</exclude>
                 <exclude>**/*.iml</exclude>
                 <exclude>**/.gitignore</exclude>

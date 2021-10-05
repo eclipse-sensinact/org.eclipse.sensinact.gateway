@@ -9,9 +9,7 @@
  *    Christophe Munilla - initial API and implementation
  */
 ---------------------------------------------------------------------------
---                                 FUNCTIONS                             --
---				       method accessibility from object path			 --
---						      and user public key                        --
+--         FUNCTIONS method accessibilities for object path	          --
 ---------------------------------------------------------------------------
 WITH RECURSIVE path_element (ITERATION, PATH, LAST, POSITION, ELEMENT, PARENT, OID, PATTERN) AS
 (

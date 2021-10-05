@@ -14,21 +14,19 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 
 /**
- *
+ * Simplest {@link AbstractRequest} concrete implementation
  */
 public class SimpleRequest extends AbstractRequest<SimpleResponse> {
     /**
-     * @param configuration
+     * Constructor
+     * 
+     * @param configuration the {@link ConnectionConfiguration} used be the SimpleRequest to be 
+     * instantiated
      */
     public SimpleRequest(ConnectionConfiguration<SimpleResponse, SimpleRequest> configuration) {
         super(configuration);
     }
 
-    /**
-     * @throws IOException
-     * @inheritDoc
-     * @see AbstractRequest#createResponse(java.net.HttpURLConnection)
-     */
     @Override
     public SimpleResponse createResponse(HttpURLConnection connection) throws IOException {
         if (connection == null) {

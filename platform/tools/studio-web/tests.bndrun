@@ -1,5 +1,48 @@
--tester: biz.aQute.tester.junit-platform
+-tester: biz.aQute.tester.junit-platform-tester: biz.aQute.tester.junit-platform
 
+-augment.security:\
+	org.apache.felix.framework.security;capability:='osgi.service;objectClass:List<String>=org.osgi.service.condpermadmin.ConditionalPermissionAdmin'
+
+-runsystempackages.default: \
+	com.sun.net.httpserver,\
+	javax.net.ssl,\
+	javax.xml.parsers,\
+	javax.imageio,\
+	javax.management,\
+	javax.naming,\
+	javax.sql,\
+	javax.swing,\
+	javax.swing.border,\
+	javax.swing.event,\
+	javax.mail,\
+	javax.mail.internet,\
+	javax.management.modelmbean,\
+	javax.management.remote,\
+	javax.xml.parsers,\
+	javax.security.auth,\
+	javax.security.cert,\
+	junit.framework,\
+	junit.textui,\
+	org.w3c.dom,\
+	org.xml.sax,\
+	org.xml.sax.helpers,\
+	sun.misc,\
+	sun.security.action,\
+	sun.reflect
+	
+-runee: JavaSE-1.8
+-runvm.default: ${def;argLine}
+
+-runfw: org.apache.felix.framework
+-resolve.effective: active
+
+-runproperties.default: \
+    org.eclipse.sensinact.gateway.location.latitude=45.2d,\
+    org.eclipse.sensinact.gateway.location.longitude=5.7d,\
+    org.eclipse.sensinact.http.corsheader=false,\
+    org.apache.felix.http.jettyEnabled=true,\
+    org.apache.felix.http.whiteboardEnabled=true,\
+    org.eclipse.sensinact.simulated.gui.enabled=false
 -runsystempackages: com.sun.net.httpserver
 
 -runee: JavaSE-1.8

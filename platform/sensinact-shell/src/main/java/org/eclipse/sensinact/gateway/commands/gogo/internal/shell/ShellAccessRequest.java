@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.commands.gogo.internal.shell;
 import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
+import org.eclipse.sensinact.gateway.core.security.SessionToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
@@ -111,7 +111,7 @@ public class ShellAccessRequest implements NorthboundRequestWrapper {
             String password = (String) request.opt("password");
 
             if (tokenHeader != null) {
-                this.authentication = new AuthenticationToken(tokenHeader);
+                this.authentication = new SessionToken(tokenHeader);
 
             } else if (login != null && password != null) {
                 this.authentication = new Credentials(login, password);

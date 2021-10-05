@@ -60,6 +60,7 @@ public class TestSecurity {
 	// ********************************************************************//
 
 	@Test
+	@Disabled
 	public void testSecurityAccessInitialization(@InjectService Core core) throws Throwable {
 		Session session = core.getAnonymousSession();
 		assertNotNull(session);

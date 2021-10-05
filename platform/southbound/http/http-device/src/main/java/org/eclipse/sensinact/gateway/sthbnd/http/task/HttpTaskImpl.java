@@ -48,6 +48,7 @@ extends TaskImpl implements HttpTask<RESPONSE, REQUEST> {
     protected String httpMethod;
 	protected String serverCertificate;
 	protected String clientCertificate;
+	protected String clientCertificatePassword;
     protected ProxyConfiguration proxyConfiguration;
     protected Map<String, String> queries;
     protected HeadersCollection headers;
@@ -240,6 +241,17 @@ extends TaskImpl implements HttpTask<RESPONSE, REQUEST> {
 		return this.clientCertificate;
 	}
 
+	@Override
+	public String getClientSSLCertificatePassword() {
+		return this.clientCertificatePassword;
+	}
+
+	@Override
+	public void setClientSSLCertificatePassword(String clientCertificatePassword) {
+		this.clientCertificatePassword = clientCertificatePassword;
+		
+	}
+	
     @Override
     public HttpURLConnection connect() throws IOException {
         return ConnectionConfiguration.HttpURLConnectionBuilder.build(this);

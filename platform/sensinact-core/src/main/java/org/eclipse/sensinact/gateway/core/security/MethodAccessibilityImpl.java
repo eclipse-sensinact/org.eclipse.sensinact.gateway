@@ -94,51 +94,26 @@ public class MethodAccessibilityImpl implements MethodAccessibility {
 		this.accessible = accessible;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see Nameable#getName()
-	 */
 	@Override
 	public String getName() {
 		return this.method.name();
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see MethodAccessibility#getMethod()
-	 */
 	@Override
 	public Type getMethod() {
 		return this.method;
 	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see MethodAccessibility#getAccessLevelOption()
-	 */
+	
 	@Override
 	public AccessLevelOption getAccessLevelOption() {
 		return this.option;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see MethodAccessibility#isAccessible()
-	 */
 	@Override
 	public boolean isAccessible() {
 		return this.accessible;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(Object object) {
 		if (object == null) {
@@ -163,11 +138,6 @@ public class MethodAccessibilityImpl implements MethodAccessibility {
 		return false;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		String m = method == null ? "NO_METHOD" : method.name();

@@ -68,6 +68,7 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
     private String path = null;
     private String profile = null;
     private String clientCertificate = null;
+    private String clientCertificatePassword = null;
     private String serverCertificate = null;
     private boolean direct = false;
     private CommandType command = null;
@@ -104,8 +105,12 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
 
         this.valuePattern = Pattern.compile(VALUE_PATTERN);
         this.contextPattern = Pattern.compile(CONTEXT_PATTERN);
-        this.acceptType = annotation != null && !HttpChildTaskConfiguration.DEFAULT_ACCEPT_TYPE.equals(annotation.acceptType()) ? annotation.acceptType() : parent.acceptType();
-        this.contentType = annotation != null && !HttpChildTaskConfiguration.DEFAULT_CONTENT_TYPE.equals(annotation.contentType()) ? annotation.contentType() : parent.contentType();
+        
+        this.acceptType = annotation != null && !HttpChildTaskConfiguration.DEFAULT_ACCEPT_TYPE.equals(
+        		annotation.acceptType()) ? annotation.acceptType() : parent.acceptType();
+        
+        this.contentType = annotation != null && !HttpChildTaskConfiguration.DEFAULT_CONTENT_TYPE.equals(
+        		annotation.contentType()) ? annotation.contentType() : parent.contentType();
 
         this.httpMethod = annotation != null && !HttpChildTaskConfiguration.DEFAULT_HTTP_METHOD.equals(annotation.httpMethod()) ? annotation.httpMethod() : parent.httpMethod();
         this.scheme = annotation != null && !HttpChildTaskConfiguration.DEFAULT_SCHEME.equals(annotation.scheme()) ? annotation.scheme() : parent.scheme();
@@ -115,9 +120,14 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
 
         this.path = annotation != null && !HttpChildTaskConfiguration.DEFAULT_PATH.equals(annotation.path()) ? annotation.path() : parent.path();
         
-        this.clientCertificate =  annotation != null && !HttpTaskConfiguration.DEFAULT_CLIENT_SSL_CERTIFICATE.equals(annotation.clientSSLCertificate()) ?annotation.clientSSLCertificate():parent.clientSSLCertificate();
+        this.clientCertificate =  annotation != null && !HttpTaskConfiguration.DEFAULT_CLIENT_SSL_CERTIFICATE.equals(
+        		annotation.clientSSLCertificate()) ?annotation.clientSSLCertificate():parent.clientSSLCertificate();
+
+        this.clientCertificatePassword =  annotation != null && !HttpTaskConfiguration.DEFAULT_CLIENT_SSL_CERTIFICATE_PASSWORD.equals(
+        		annotation.clientSSLCertificatePassword()) ?annotation.clientSSLCertificatePassword():parent.clientSSLCertificatePassword();
         
-        this.serverCertificate =  annotation != null && !HttpTaskConfiguration.DEFAULT_SERVER_SSL_CERTIFICATE.equals(annotation.serverSSLCertificate()) ?annotation.serverSSLCertificate():parent.serverSSLCertificate();
+        this.serverCertificate =  annotation != null && !HttpTaskConfiguration.DEFAULT_SERVER_SSL_CERTIFICATE.equals(
+        		annotation.serverSSLCertificate()) ?annotation.serverSSLCertificate():parent.serverSSLCertificate();
         
         this.profile = profile;
         this.urlBuilder = urlBuilder;
@@ -169,11 +179,7 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
         }
     }
 
-    /**
-     * @param key
-     * @param value
-     * @return
-     */
+    
     private String resolve(HttpTask<?, ?> key, String value) {
         String argument = value;
         String resolved = null;
@@ -201,11 +207,7 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
         return resolved;
     }
 
-    /**
-     * @inheritDoc
-     * @see Executable#
-     * execute(java.lang.Object)
-     */
+    @Override
     public <T extends HttpTask<?, ?>> void configure(T task) throws Exception {
         String portStr = this.resolve(task, this.port);
         int port;
@@ -250,6 +252,8 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
             this.urlBuilder.configure(task);
         }
         task.setClientSSLCertificate(HttpTaskConfiguration.NO_CERTIFICATE.equals(clientCertificate)?null:clientCertificate);
+        task.setClientSSLCertificatePassword(HttpTaskConfiguration.NO_CERTIFICATE.equals(clientCertificatePassword)?null:clientCertificatePassword);
+        
         task.setServerSSLCertificate(HttpTaskConfiguration.NO_CERTIFICATE.equals(serverCertificate)?ConnectionConfiguration.TRUST_ALL:serverCertificate);
         task.setDirect(direct);
         iterator = headers.entrySet().iterator();

@@ -47,7 +47,7 @@
 		<org.osgi.util.function.version>1.1.0</org.osgi.util.function.version>
 		<org.osgi.util.promise.version>1.1.1</org.osgi.util.promise.version>
 		<org.osgi.util.pushstream.version>1.0.1</org.osgi.util.pushstream.version>
-
+		
 		<!-- Apache Felix Version -->
 		<org.apache.felix.version>6.0.3</org.apache.felix.version>
 
@@ -55,7 +55,7 @@
 		<org.apache.felix.bundlerepository.version>2.0.10</org.apache.felix.bundlerepository.version>
 		<org.apache.felix.configadmin.version>1.9.16</org.apache.felix.configadmin.version>
 		<org.apache.felix.fileinstall.version>3.6.4</org.apache.felix.fileinstall.version>
-		<org.apache.felix.framework.security.version>2.6.1</org.apache.felix.framework.security.version>
+		<org.apache.felix.framework.security.version>2.8.1</org.apache.felix.framework.security.version>
 		<org.apache.felix.gogo.command.version>1.1.2</org.apache.felix.gogo.command.version>
 		<org.apache.felix.gogo.shell.version>1.1.4</org.apache.felix.gogo.shell.version>
 		<org.apache.felix.gogo.jline.version>1.1.8</org.apache.felix.gogo.jline.version>
@@ -91,10 +91,15 @@
 		<osgi.test.version>1.0.1</osgi.test.version>
 
 		<!-- Apache Aries -->
+		<org.apache.aries.jax.rs.version>1.0.3</org.apache.aries.jax.rs.version>
 		<org.fusesource.hawtbuf.version>1.11</org.fusesource.hawtbuf.version>
 		<org.fusesource.hawtdispatch.version>1.22</org.fusesource.hawtdispatch.version>
 		<org.apache.aries.rsa.version>1.14.0</org.apache.aries.rsa.version>
 		<org.apache.zookeeper.version>3.5.6</org.apache.zookeeper.version>
+
+		<!-- Eclipse Aether -->
+		<org.eclipse.aether.version>1.1.0</org.eclipse.aether.version>
+		<maven-aether-provider.version>3.3.9</maven-aether-provider.version>
 
 		<!-- HTTP -->
 		<com.sun.jersey.version>1.19.4</com.sun.jersey.version>
@@ -104,7 +109,8 @@
 		<org.apache.httpcomponents.httpclient-osgi.version>4.5.11</org.apache.httpcomponents.httpclient-osgi.version>
 		<org.apache.httpcomponents.httpcore-osgi.version>4.4.13</org.apache.httpcomponents.httpcore-osgi.version>
 		<org.apache.httpcomponents.httpmime.version>4.5.11</org.apache.httpcomponents.httpmime.version>
-
+		<!-- Jackson -->
+		<com.fasterxml.jackson.core.version>2.10.0</com.fasterxml.jackson.core.version>
 		<!-- Misc -->
 		<bnd.lib.version>5.3.0</bnd.lib.version>
 		<com.hazelcast.version>3.12.5</com.hazelcast.version>
@@ -122,7 +128,7 @@
 		<keycloak.version>9.0.0-SNAPSHOT-stage-20191219-003332</keycloak.version>
 		<io.moquette.version>0.9</io.moquette.version>
 		<io.netty.version>4.1.45.Final</io.netty.version>
-		<org.bouncycastle.version>1.64</org.bouncycastle.version>
+		<org.bouncycastle.version>1.66</org.bouncycastle.version>
 		<biz.aQute.gogo.commands.provider.verion>1.7.0</biz.aQute.gogo.commands.provider.verion>
 
 		<!-- BUILD: org.apache.maven.plugins -->
@@ -164,7 +170,7 @@
 		<!-- <org.apache.maven.surefire.junit48.version>2.22.2</org.apache.maven.surefire.junit48.version> -->
 		<org.jacoco.maven-plugin.version>0.8.5</org.jacoco.maven-plugin.version>
 		<sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
-
+	
 		<!-- Properties -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.build.timestamp.format>yyyyMMd</maven.build.timestamp.format>
@@ -465,9 +471,15 @@
 				<artifactId>org.osgi.util.pushstream</artifactId>
 				<version>${org.osgi.util.pushstream.version}</version>
 			</dependency>
-
+			
+			<!-- Apache Aries -->
+			<dependency>
+				<groupId>org.apache.aries.spec</groupId>
+    			<artifactId>org.apache.aries.javax.jax.rs-api</artifactId>
+    			<version>${org.apache.aries.jax.rs.version}</version>			
+			</dependency>
+			
 			<!-- Apache Felix Version -->
-
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.framework</artifactId>
@@ -769,8 +781,52 @@
 				<version>${org.apache.zookeeper.version}</version>
 			</dependency>
 
-			<!-- HTTP -->
+			<!-- Eclipse Aether -->
 
+			<dependency>
+				<groupId>org.eclipse.aether</groupId>
+				<artifactId>aether-api</artifactId>
+				<version>${org.eclipse.aether.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.aether</groupId>
+				<artifactId>aether-impl</artifactId>
+				<version>${org.eclipse.aether.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.aether</groupId>
+				<artifactId>aether-util</artifactId>
+				<version>${org.eclipse.aether.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.aether</groupId>
+				<artifactId>aether-transport-http</artifactId>
+				<version>${org.eclipse.aether.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.aether</groupId>
+				<artifactId>aether-transport-file</artifactId>
+				<version>${org.eclipse.aether.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.aether</groupId>
+				<artifactId>aether-spi</artifactId>
+				<version>${org.eclipse.aether.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.aether</groupId>
+				<artifactId>aether-connector-basic</artifactId>
+				<version>${org.eclipse.aether.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-aether-provider</artifactId>
+				<version>${maven-aether-provider.version}</version>
+			</dependency>
+
+
+
+			<!-- HTTP -->
 			<dependency>
 				<groupId>com.sun.jersey</groupId>
 				<artifactId>jersey-client</artifactId>
@@ -810,9 +866,23 @@
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpmime</artifactId>
 				<version>${org.apache.httpcomponents.httpmime.version}</version>
+			</dependency>			
+			<!-- Jackson -->			
+			<dependency>	
+ 				<groupId>com.fasterxml.jackson.core</groupId>
+ 				<artifactId>jackson-databind</artifactId>
+ 				<version>${com.fasterxml.jackson.core.version}</version>
 			</dependency>
-
-
+			<dependency>	
+ 				<groupId>com.fasterxml.jackson.core</groupId>
+ 				<artifactId>jackson-annotations</artifactId>
+ 				<version>${com.fasterxml.jackson.core.version}</version>
+			</dependency>
+			<dependency>	
+ 				<groupId>com.fasterxml.jackson.core</groupId>
+ 				<artifactId>jackson-core</artifactId>
+ 				<version>${com.fasterxml.jackson.core.version}</version>
+			</dependency>
 			<!-- Misc -->
 
 			<dependency>
@@ -1220,7 +1290,7 @@
 					<configuration>
 						<excludePackageNames>*.internal:*.internal.*</excludePackageNames>
 						<links>
-							<link>https://docs.oracle.com/javase/7/docs/api/</link>
+							<link>https://docs.oracle.com/javase/8/docs/api/</link>
 						</links>
 						<version>true</version>
 						<show>protected</show>
@@ -1343,32 +1413,32 @@
 				</plugin>
 				
                 <plugin>
-                        <groupId>biz.aQute.bnd</groupId>
-                        <artifactId>bnd-maven-plugin</artifactId>
-                        <version>${bnd-maven-plugin.version}</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>bnd-process</goal>
-                                </goals>
-                                <configuration>
-									<bndfile>bnd.bnd</bndfile>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>bnd-process-tests</id>
-                                <phase>process-test-classes</phase>
-                                <goals>
-                                    <goal>bnd-process-tests</goal>
-                                </goals>
-                                <configuration>
-                                	<bndfile>tests.bnd</bndfile>
-                                	<artifactFragment>true</artifactFragment>
-                                    <testCases>junit5</testCases>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
+                     <groupId>biz.aQute.bnd</groupId>
+                     <artifactId>bnd-maven-plugin</artifactId>
+                     <version>${bnd-maven-plugin.version}</version>
+                     <executions>
+                         <execution>
+                             <goals>
+                                 <goal>bnd-process</goal>
+                             </goals>
+                             <configuration>
+						<bndfile>bnd.bnd</bndfile>
+                             </configuration>
+                         </execution>
+                         <execution>
+                             <id>bnd-process-tests</id>
+                             <phase>process-test-classes</phase>
+                             <goals>
+                                 <goal>bnd-process-tests</goal>
+                             </goals>
+                             <configuration>
+                             	<bndfile>tests.bnd</bndfile>
+                             	<artifactFragment>true</artifactFragment>
+                                <testCases>junit5</testCases>
+                             </configuration>
+                         </execution>
+                     </executions>
+                 </plugin>
 
 <!-- 					<plugin> -->
 <!-- 						<groupId>org.apache.maven.plugins</groupId> -->

@@ -301,11 +301,6 @@ public class KeyDirective extends Directive {
 		return builder.toString();
 	}
 
-	/**
-	 * @inheritDoc
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();

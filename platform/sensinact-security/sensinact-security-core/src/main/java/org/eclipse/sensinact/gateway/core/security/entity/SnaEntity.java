@@ -258,10 +258,8 @@ public abstract class SnaEntity {
 			// {
 			// try
 			// {
-			// Object entity = entry.getKey().getType(
-			// ).getConstructor(Mediator.class,
-			// JSONObject.class).newInstance(
-			// mediator, row);
+			// Object entity = entry.getKey().getType().getConstructor(Mediator.class,JSONObject.class
+			//).newInstance(mediator, row);
 			// setFieldValue(entry.getKey(), entity);
 			//
 			// } catch(Exception e)

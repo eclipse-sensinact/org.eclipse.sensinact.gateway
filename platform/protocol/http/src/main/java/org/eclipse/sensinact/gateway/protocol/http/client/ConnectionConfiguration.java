@@ -147,8 +147,10 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
                 }
                 if(keys == null) {
                     URL clientCertificate = null;
+                    String password = null;
             		try {
             			clientCertificate = new URL(config.getClientSSLCertificate());
+            			password = config.getClientSSLCertificatePassword();
             		} catch(NullPointerException|IOException e) {
             			LOG.log(Level.CONFIG, e.getMessage());
             		}                    
@@ -157,8 +159,8 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
 	                		 InputStream is = clientCertificate.openStream();                		 
 	                		 KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 	                		 KeyStore ks = KeyStore.getInstance("PKCS12");
-	                		 ks.load(is,new char[] {});              		 
-	                		 kmf.init(ks, new char[] {});
+	                		 ks.load(is, password!=null?password.toCharArray():new char[] {});              		 
+	                		 kmf.init(ks, password!=null?password.toCharArray():new char[] {});
 	                		 keys = kmf.getKeyManagers();
 	                		 KEY_MANAGERS.put(host,keys);
                 		} catch(NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException | UnrecoverableKeyException e) {
@@ -219,7 +221,7 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
      */
     ConnectionConfiguration<RESPONSE, REQUEST> queryParameter(String key, String value);
 
-    /**
+	/**
      * Returns the String path to the server certificate to be used for TLS configuration.
      * A TRUST_ALL constant return means that all server certificates will be considered as 
      * valid
@@ -253,6 +255,22 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
      */
     void setClientSSLCertificate(String clientCertificate);
 
+    /**
+     * Returns the String password for the client certificate to be used for TLS configuration 
+     * 
+     * @return the String password for the client certificate
+     */
+    String getClientSSLCertificatePassword();
+
+    /**
+     * Defines the String password for the client certificate to be used for TLS configuration 
+     * 
+     * @param clientCertificatPassword the String password for the client certificate.
+     */
+    void setClientSSLCertificatePassword(String clientCertificatPassword);
+    
+    
+    
 	/**
      * Defines the string uri targeted by requests build from {@link
      * HttpDiscoveryTask}s configured by this HttpTaskConfiguration

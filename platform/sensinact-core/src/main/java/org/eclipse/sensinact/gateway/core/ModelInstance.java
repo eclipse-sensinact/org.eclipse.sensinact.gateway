@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.core;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -43,6 +45,11 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class ModelInstance<C extends ModelConfiguration> implements SensiNactResourceModel<C>, LifecycleStatusListener {
 
+	public static final String LOCATION_PROPERTY = "admin.".concat(LocationResource.LOCATION);
+	public static final String ICON_PROPERTY = "admin.".concat(ServiceProvider.ICON);
+	public static final String BRIDGE_PROPERTY = "admin.".concat(ServiceProvider.BRIDGE);
+	public static final String FRIENDLY_NAME_PROPERTY = "admin.".concat(ServiceProvider.FRIENDLY_NAME);
+	
 	/**
 	 * Returns the initial location of the sensiNact gateway and so of the service
 	 * providers for which it is not specified. This method should be called once at
@@ -123,13 +130,10 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
-	 * @param configuration
-	 *            the extended {@link ModelConfiguration} gathering the
-	 *            configuration properties applying on the ModelInstance to be
-	 *            created
+	 * @param mediator the {@link Mediator} allowing to interact with the OSGi 
+	 * host  environment
+	 * @param configuration the extended {@link ModelConfiguration} gathering 
+	 * the configuration properties applying on the ModelInstance to be created
 	 * 
 	 * @throws InvalidServiceProviderException
 	 */
@@ -390,11 +394,24 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 			this.registration = new ModelInstanceRegistration(uri, observed, instanceRegistration, this.configuration);
 			this.messageRouter = new SnaMessageListener(mediator, this.configuration());
 			
-			boolean pattern = false;
-
-			StringBuilder observedBuilder = new StringBuilder().append(uri);
+			StringBuilder observedBuilder  = Arrays.asList(
+				LOCATION_PROPERTY, ICON_PROPERTY, FRIENDLY_NAME_PROPERTY, BRIDGE_PROPERTY
+			    ).stream().<StringBuilder>collect(
+						() -> {return new StringBuilder();},
+						(sb,p) -> {							    
+							    if(sb.length()==0) {
+							    	sb.append(uri.replace("/","\\/"));
+							    	sb.append("(");
+							    }else
+									sb.append("|");
+						    	sb.append("(");
+								sb.append("\\/");
+								sb.append(p.concat("(.value)?").replace(".","\\/"));
+						    	sb.append(")");
+					},
+					(sb1,sb2)->{sb1.append(sb2.toString());});
+			
 			if (observed != null && !observed.isEmpty()) {
-				observedBuilder.append("(/admin/location/value");
 				Iterator<String> it = observed.iterator();
 				while (it.hasNext()) {
 					String obs = null;
@@ -404,28 +421,26 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 					case 1:
 						continue;
 					case 2:
-						obs = UriUtils.getUri(uriElements).concat("/value");
+						obs = UriUtils.getUri(uriElements).concat("(/value)?");
 						break;
 					case 3:
-						obs = UriUtils.getUri(uriElements);
+						obs = UriUtils.getUri(uriElements).replace("/value","(/value)?");
 						break;
 					default:
 						continue;
 					}
-					observedBuilder.append("|");
-					observedBuilder.append(obs);
+					observedBuilder.append("|(");
+					observedBuilder.append(obs.replace("/","\\/"));
+					observedBuilder.append(")");
 				}
-				observedBuilder.append(")");
-				pattern = true;
-			} else {
-				observedBuilder.append("/admin/location/value");
 			}
-			SnaFilter filter = new SnaFilter(mediator, observedBuilder.toString(), pattern, false);
+			observedBuilder.append(")");
 
+			SnaFilter filter = new SnaFilter(mediator, observedBuilder.toString(), true, false);
 			filter.addHandledType(SnaMessage.Type.UPDATE);
 			this.messageRouter.addCallback(filter, registration);
-
-			filter = new SnaFilter(mediator, "(/[^/]+)+", true, false);
+			
+			filter = new SnaFilter(mediator, uri.replace("/","\\/").concat("(\\/[^\\/]+)*"), true, false);
 			filter.addHandledType(SnaMessage.Type.LIFECYCLE);
 			this.messageRouter.addCallback(filter, registration);
 
@@ -544,14 +559,12 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 * {@link AccessMethod.Type}s for the {@link AccessLevelOption} passed as
 	 * parameter and
 	 * 
-	 * @param modelElement
-	 *            the {@link ModelElement} for which to retrieve the set of
-	 *            accessible {@link AccessMethod.Type}s
-	 * @param accessLevelOption
-	 *            the requirer {@link AccessLevelOption}
+	 * @param modelElement  the {@link ModelElement} for which to retrieve the 
+	 * set of accessible {@link AccessMethod.Type}s
+	 * @param accessLevelOption the requirer {@link AccessLevelOption}
 	 * 
 	 * @return the set of accessible {@link AccessMethod.Type} of the specified
-	 *         {@link ModelElement} for the specified {@link AccessLevelOption}
+	 *  {@link ModelElement} for the specified {@link AccessLevelOption}
 	 */
 	public <I extends ModelInstance<?>, M extends ModelElementProxy, P extends ProcessableData, E extends Nameable, R extends Nameable> List<MethodAccessibility> getAuthorizations(
 			ModelElement<I, M, P, E, R> modelElement, AccessLevelOption accessLevelOption) {

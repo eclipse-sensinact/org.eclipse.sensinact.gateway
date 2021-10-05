@@ -1,0 +1,11 @@
+grant codeBase "file:bin/felix.jar" {
+  permission java.security.AllPermission;
+};
+
+grant codeBase "http://felix.extensions:9/" {
+  permission java.security.AllPermission;
+};
+
+grant codeBase "file:bundle/" {
+  permission java.security.AllPermission;
+};

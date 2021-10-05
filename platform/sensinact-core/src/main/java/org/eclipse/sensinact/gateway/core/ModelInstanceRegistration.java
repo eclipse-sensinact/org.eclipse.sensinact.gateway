@@ -45,10 +45,6 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ModelInstanceRegistration extends AbstractMidCallback {
-	public static final String LOCATION_PROPERTY = "admin.".concat(LocationResource.LOCATION);
-	public static final String ICON_PROPERTY = "admin.".concat(ServiceProvider.ICON);
-	public static final String BRIDGE_PROPERTY = "admin.".concat(ServiceProvider.BRIDGE);
-	public static final String FRIENDLY_NAME_PROPERTY = "admin.".concat(ServiceProvider.FRIENDLY_NAME);
 
 	private boolean registered;
 	private ServiceRegistration<?> instanceRegistration;
@@ -63,8 +59,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 	 * @param observed
 	 *            the list of observed String paths
 	 * @param registration
-	 *            the {@link ServiceRegistration} of the
-	 *            {@link SensiNactResourceModel}
+	 *            the {@link ServiceRegistration} of the {@link SensiNactResourceModel}
 	 * @param configuration
 	 *            the {@link ModelConfiguration} of the {@link ModelInstance} whose
 	 *            registration will be wrapped by the ModelInstanceRegistration to
@@ -105,9 +100,12 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 				if (!list.contains(attribute)) 
 					list.add(attribute);
 			}
-		}
-		
-		Arrays.asList(LOCATION_PROPERTY, ICON_PROPERTY, FRIENDLY_NAME_PROPERTY, BRIDGE_PROPERTY).stream().forEach(
+		}		
+		Arrays.asList(ModelInstance.LOCATION_PROPERTY, 
+				ModelInstance.ICON_PROPERTY, 
+				ModelInstance.FRIENDLY_NAME_PROPERTY, 
+				ModelInstance.BRIDGE_PROPERTY
+				).stream().forEach(
 				p -> {
 						List<String> list = ModelInstanceRegistration.this.observed.get(p);
 						if (list == null) {
@@ -118,7 +116,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 							list.add(DataResource.VALUE);
 				}
 		);
-
+		
 		this.instanceRegistration = registration;
 		this.configuration = configuration;
 		this.registered = true;
@@ -136,9 +134,8 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 	}
 
 	void update(final Dictionary<String, Object> properties) {
-		if (!registered || properties == null || properties.size() == 0 || this.instanceRegistration == null) {
+		if (!registered || properties == null || properties.size() == 0 || this.instanceRegistration == null) 
 			return;
-		}
 		synchronized (this.instanceRegistration) {
 			AccessController.<Void>doPrivileged(new PrivilegedAction<Void>() {
 				@Override
@@ -207,7 +204,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 		Dictionary<String, Object> properties = properties();
 		properties.remove(observed);
 
-		if (observed.startsWith(LOCATION_PROPERTY)) {
+		if (observed.startsWith(ModelInstance.LOCATION_PROPERTY)) {
 			properties.remove("latitude");
 			properties.remove("longitude");
 
@@ -247,11 +244,11 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 		if (service == null) {
 			return;
 		}
-		MutableAccessNode node = null;
 		MutableAccessNode root = this.configuration.getAccessTree().getRoot();
-		if ((node = (MutableAccessNode) root.get(uri)) == null) {
+		MutableAccessNode node = (MutableAccessNode) root.get(uri);
+		if (node == null) 
 			node = root;
-		}
+		
 		String resource = (length > 2) ? uriElements[2] : null;
 		boolean added = !lifecycle.equals(Lifecycle.RESOURCE_DISAPPEARING)
 				&& !lifecycle.equals(Lifecycle.SERVICE_DISAPPEARING);
@@ -298,7 +295,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 				if (attribute.equals(name) || (attribute.equals(DataResource.VALUE) && resource.equals(name))) 
 					value = initial.opt(DataResource.VALUE);
 				
-				if (LOCATION_PROPERTY.equals(resourceKey)) {
+				if (ModelInstance.LOCATION_PROPERTY.equals(resourceKey)) {
 					double latitude = 0d;
 					double longitude = 0d;
 
@@ -399,7 +396,6 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 
 	@Override
 	public synchronized void doCallback(SnaMessage<?> message) {
-
 		String uri = message.getPath();
 		String[] uriElements = UriUtils.getUriElements(uri);
 		switch (((SnaMessageSubType) message.getType()).getSnaMessageType()) {
@@ -408,7 +404,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 			JSONObject notification = m.getNotification();
 			String key = new StringBuilder().append(uriElements[1]).append(".").append(uriElements[2]).toString();
 			switch(m.getType()) {
-				case ATTRIBUTE_VALUE_UPDATED:					
+				case ATTRIBUTE_VALUE_UPDATED:
 					List<String> obs = this.observed.get(key);
 					if (obs != null && !obs.isEmpty() && obs.contains(uriElements[3])) {
 						Object value = notification.opt(DataResource.VALUE);

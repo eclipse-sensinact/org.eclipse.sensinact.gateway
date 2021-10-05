@@ -26,6 +26,7 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskConfigurator;
 public @interface HttpTaskConfiguration {
 	public static final String NO_CERTIFICATE = "#NO_CERTIFICATE#";
     public static final String DEFAULT_CLIENT_SSL_CERTIFICATE = NO_CERTIFICATE;
+    public static final String DEFAULT_CLIENT_SSL_CERTIFICATE_PASSWORD = NO_CERTIFICATE;
     public static final String DEFAULT_SERVER_SSL_CERTIFICATE = NO_CERTIFICATE;
     public static final String DEFAULT_ACCEPT_TYPE = "text/plain";
     public static final String DEFAULT_CONTENT_TYPE = "text/plain";
@@ -47,8 +48,10 @@ public @interface HttpTaskConfiguration {
     String port() default DEFAULT_PORT;
 
     String path() default DEFAULT_PATH;
-    
+
     String clientSSLCertificate() default DEFAULT_CLIENT_SSL_CERTIFICATE;
+    
+    String clientSSLCertificatePassword() default DEFAULT_CLIENT_SSL_CERTIFICATE_PASSWORD;
 
     String serverSSLCertificate() default DEFAULT_SERVER_SSL_CERTIFICATE;
 

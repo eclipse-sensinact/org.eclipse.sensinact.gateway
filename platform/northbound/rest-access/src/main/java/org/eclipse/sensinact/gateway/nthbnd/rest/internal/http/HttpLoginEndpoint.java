@@ -18,7 +18,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.sensinact.gateway.core.security.AuthenticationToken;
+import org.eclipse.sensinact.gateway.core.security.SessionToken;
+import org.eclipse.sensinact.gateway.core.security.AccessToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.LoginResponse;
@@ -75,11 +76,15 @@ public class HttpLoginEndpoint extends HttpServlet {
             String tokenHeader = request.getHeader("X-Auth-Token");
             String authorizationHeader = request.getHeader("Authorization");
 
-            if (tokenHeader != null) {
-                loginResponse = mediator.getAccessingEndpoint().reactivateEndpoint(new AuthenticationToken(tokenHeader));
-
-            } else if (authorizationHeader != null) {
-                loginResponse = mediator.getAccessingEndpoint().createNorthboundEndpoint(new Credentials(authorizationHeader));
+            if (tokenHeader != null)
+                loginResponse = mediator.getAccessingEndpoint().reactivateEndpoint(new SessionToken(tokenHeader));
+            else if (authorizationHeader != null) {
+            	if(authorizationHeader.startsWith("Basic"))            
+            		loginResponse = mediator.getAccessingEndpoint().createNorthboundEndpoint(
+            				new Credentials(authorizationHeader.substring(6)));
+            	else if(authorizationHeader.startsWith("Bearer"))           
+                	loginResponse = mediator.getAccessingEndpoint().createNorthboundEndpoint(
+                			new AccessToken(authorizationHeader.substring(7)));
             }
             byte[] resultBytes = loginResponse.getJSON().getBytes();
             response.setContentType(RestAccessConstants.JSON_CONTENT_TYPE);

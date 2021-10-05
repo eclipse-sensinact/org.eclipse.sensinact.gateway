@@ -7,6 +7,8 @@
  */
 package org.eclipse.sensinact.gateway.tools.connector.influxdb;
 
+import java.net.URI;
+
 /**
  * InfluxDbConnectorConfiguration helps at configuring a InfluxDb client 
  * to be instantiated
@@ -61,6 +63,23 @@ public class InfluxDbConnectorConfiguration {
     		return this;
     	}
 
+    	/**
+    	 * Defines the String uri of the InfluxDB instance to connect to
+    	 *  
+    	 * @param host the String uri of the InfluxDB instance
+    	 * @return this Builder
+    	 */
+    	public Builder withUri(String uri) {
+    		if(uri!=null) {
+    			URI u = URI.create(uri);
+    			this.scheme = u.getScheme();
+    			this.host = u.getHost();
+    			this.port = u.getPort();
+    			this.path = u.getPath();
+    		}
+    		return this;
+    	}
+    	
     	/**
     	 * Defines the String host of the InfluxDB instance to connect to
     	 *  

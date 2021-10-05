@@ -15,6 +15,10 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
 
+import aQute.bnd.annotation.Resolution;
+import aQute.bnd.annotation.spi.ServiceProvider;
+
+@ServiceProvider(value = SecuredAccessFactory.class, resolution = Resolution.OPTIONAL)
 public class SecuredAccesFactoryImpl implements SecuredAccessFactory {
 	@Override
 	public SecuredAccess newInstance(Mediator mediator) throws SecuredAccessException {

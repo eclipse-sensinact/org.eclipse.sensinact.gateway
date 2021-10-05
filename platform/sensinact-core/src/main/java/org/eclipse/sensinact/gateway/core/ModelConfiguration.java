@@ -244,23 +244,15 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 		return this.accessTree;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration#setDefaultResourceType(java.lang.Class)
-	 */
+	@Override
 	public ModelConfiguration setDefaultResourceType(Class<? extends Resource> defaultResourceType) {
 		if (this.defaultResourceConfigBuilder != null) {
 			this.defaultResourceConfigBuilder.setDefaultResourceType(defaultResourceType);
 		}
 		return this;
 	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration# setDefaultDataType(java.lang.Class)
-	 */
+	
+	@Override
 	public ModelConfiguration setDefaultDataType(Class<?> defaultDataType) {
 		if (this.defaultResourceConfigBuilder != null) {
 			this.defaultResourceConfigBuilder.setDefaultDataType(defaultDataType);
@@ -268,11 +260,7 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 		return this;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration# setDefaultModifiable(Modifiable)
-	 */
+	@Override
 	public ModelConfiguration setDefaultModifiable(Modifiable defaultModifiable) {
 		if (this.defaultResourceConfigBuilder != null) {
 			this.defaultResourceConfigBuilder.setDefaultModifiable(defaultModifiable);
@@ -280,12 +268,7 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 		return this;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration#
-	 *      setDefaultUpdatePolicy(Resource.UpdatePolicy)
-	 */
+	@Override
 	public ModelConfiguration setDefaultUpdatePolicy(Resource.UpdatePolicy defaultUpdatePolicy) {
 		if (this.defaultResourceConfigBuilder != null) {
 			this.defaultResourceConfigBuilder.setDefaultUpdatePolicy(defaultUpdatePolicy);
@@ -293,23 +276,12 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 		return this;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration#
-	 *      setProviderImplementationType(java.lang.Class)
-	 */
 	@Override
 	public ModelConfiguration setProviderImplementationType(Class<? extends ServiceProviderImpl> serviceProviderType) {
 		this.serviceProviderType = serviceProviderType;
 		return this;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration# getProviderImplementationType()
-	 */
 	@Override
 	public Class<? extends ServiceProviderImpl> getProviderImplementationType() {
 		if (this.serviceProviderType == null) {
@@ -318,23 +290,12 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 		return this.serviceProviderType;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration#
-	 *      setServiceImplmentationType(java.lang.Class)
-	 */
 	@Override
 	public ModelConfiguration setServiceImplmentationType(Class<? extends ServiceImpl> serviceType) {
 		this.serviceType = serviceType;
 		return this;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration# getServiceImplementationType()
-	 */
 	@Override
 	public Class<? extends ServiceImpl> getServiceImplementationType() {
 		if (this.serviceType == null) {
@@ -343,23 +304,12 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 		return this.serviceType;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration#
-	 *      setResourceImplementationType(java.lang.Class)
-	 */
 	@Override
 	public ModelConfiguration setResourceImplementationType(Class<? extends ResourceImpl> resourceType) {
 		this.resourceType = resourceType;
 		return this;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration# getResourceImplementationType()
-	 */
 	@Override
 	public Class<? extends ResourceImpl> getResourceImplementationType() {
 		if (this.resourceType == null) {
@@ -557,55 +507,28 @@ public class ModelConfiguration implements SensiNactResourceModelConfiguration {
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration#
-	 *      setResourceBuildPolicy(SensiNactResourceModelConfiguration.BuildPolicy)
-	 */
 	@Override
 	public ModelConfiguration setResourceBuildPolicy(byte buildPolicy) {
 		this.resourceBuildPolicy = buildPolicy;
 		return this;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration# getResourceBuildPolicy()
-	 */
 	@Override
 	public byte getResourceBuildPolicy() {
 		return this.resourceBuildPolicy;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration#
-	 *      setServiceBuildPolicy(SensiNactResourceModelConfiguration.BuildPolicy)
-	 */
 	@Override
 	public ModelConfiguration setServiceBuildPolicy(byte buildPolicy) {
 		this.serviceBuildPolicy = buildPolicy;
 		return this;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration# getServiceBuildPolicy()
-	 */
 	@Override
 	public byte getServiceBuildPolicy() {
 		return this.serviceBuildPolicy;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SensiNactResourceModelConfiguration# getStartAtInitializationTime()
-	 */
 	@Override
 	public boolean getStartAtInitializationTime() {
 		return this.startAtInitializationTime;

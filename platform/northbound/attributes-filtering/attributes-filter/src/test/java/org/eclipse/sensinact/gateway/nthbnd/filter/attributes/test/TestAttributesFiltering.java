@@ -16,6 +16,9 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.filter.attributes.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.filter.attributes.ws.test.WsServiceTestClient;
 import org.json.JSONObject;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
@@ -106,6 +109,15 @@ public class TestAttributesFiltering {
         configuration.put("org.apache.felix.http.jettyEnabled", true);
         configuration.put("org.apache.felix.http.whiteboardEnabled", true);
     }
+    
+    @BeforeEach
+    public void beforeEach(@InjectBundleContext BundleContext context
+    		) throws Exception {
+        Mediator mediator = new Mediator(context);
+    	HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/slider/admin/friendlyName/SET",
+    	        "[{\"name\":\"attributeName\",\"type\":\"string\",\"value\":\"value\"},{\"name\":\"value\",\"type\":\"string\",\"value\":\"startName\"}]", "POST");
+    	Thread.sleep(2000);
+    }
 
     @Test
     public void testHttpFiltered(
@@ -125,9 +137,36 @@ public class TestAttributesFiltering {
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
         + ",\"location\":\"45.2:5.7\""
-        + ",\"friendlyName\":\"slider\"}]}");
+        + ",\"friendlyName\":\"startName\"}]}");
+        
+        System.out.println("==============================================");
+        System.out.println("result: ");
+        System.out.println(response);
+        System.out.println("==============================================");
+        
         JSONAssert.assertEquals(expected, new JSONObject(response), false);
+        
+        HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/slider/admin/friendlyName/SET",
+        "[{\"name\":\"attributeName\",\"type\":\"string\",\"value\":\"value\"},{\"name\":\"value\",\"type\":\"string\",\"value\":\"mySlider\"}]", "POST");
 
+        Thread.sleep(2000);
+        response = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?attrs=[friendlyName]", null, "GET");
+        
+        result = new JSONObject(response);
+        expected = new JSONObject(
+        "{\"filters\":[{\"definition\":\"[friendlyName]\",\"type\":\"attrs\"}]," 
+        + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
+        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," 
+        + "{\"name\":\"cursor\",\"resources\":" 
+        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
+        + "}]" 
+        + ",\"location\":\"45.2:5.7\""
+        + ",\"friendlyName\":\"mySlider\"}]}");
+        JSONAssert.assertEquals(expected, new JSONObject(response), false);
+        
         response = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?attrs={friendlyName,icon}", null, "GET");
         result = new JSONObject(response);
         expected = new JSONObject(
@@ -142,7 +181,7 @@ public class TestAttributesFiltering {
         + "}]" 
         + ",\"location\":\"45.2:5.7\""
         + ",\"icon\":null"
-        + ",\"friendlyName\":\"slider\"}]}");
+        + ",\"friendlyName\":\"mySlider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
 
         response = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?attrs=friendlyName,icon,bridge", null, "GET");
@@ -158,7 +197,7 @@ public class TestAttributesFiltering {
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
         + ",\"location\":\"45.2:5.7\""
-        + ",\"friendlyName\":\"slider\""
+        + ",\"friendlyName\":\"mySlider\""
         + ",\"icon\":null"
         + ",\"bridge\":\"org.eclipse.sensinact.gateway.simulated.devices.slider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
@@ -182,7 +221,27 @@ public class TestAttributesFiltering {
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
         + ",\"location\":\"45.2:5.7\""
-        + ",\"friendlyName\":\"slider\"}]}");
+        + ",\"friendlyName\":\"startName\"}]}");
+        JSONAssert.assertEquals(expected, result, false);
+
+        this.synchronizedRequest(client, "/sensinact/slider/admin/friendlyName/SET", "[{\"name\":\"attributeName\",\"type\":\"string\",\"value\":\"value\"},{\"name\":\"value\",\"type\":\"string\",\"value\":\"mySlider\"}]");
+
+        Thread.sleep(2000);
+
+        response = this.synchronizedRequest(client, "/sensinact", "[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"[friendlyName]\"}]");
+        result = new JSONObject(response);
+        expected = new JSONObject(
+        "{\"filters\":[{\"definition\":\"[friendlyName]\",\"type\":\"attrs\"}]," 
+        + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
+        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," 
+        + "{\"name\":\"cursor\",\"resources\":" 
+        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
+        + "}]" 
+        + ",\"location\":\"45.2:5.7\""
+        + ",\"friendlyName\":\"mySlider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
 
         response = this.synchronizedRequest(client, "/sensinact", "[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"{friendlyName,icon}\"}]");
@@ -199,7 +258,7 @@ public class TestAttributesFiltering {
         + "}]" 
         + ",\"location\":\"45.2:5.7\""
         + ",\"icon\":null"
-        + ",\"friendlyName\":\"slider\"}]}");
+        + ",\"friendlyName\":\"mySlider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
 
         response = this.synchronizedRequest(client, "/sensinact", "[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"friendlyName,icon,bridge\"}]");
@@ -216,7 +275,7 @@ public class TestAttributesFiltering {
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
         + ",\"location\":\"45.2:5.7\""
-        + ",\"friendlyName\":\"slider\""
+        + ",\"friendlyName\":\"mySlider\""
         + ",\"icon\":null"
         + ",\"bridge\":\"org.eclipse.sensinact.gateway.simulated.devices.slider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
