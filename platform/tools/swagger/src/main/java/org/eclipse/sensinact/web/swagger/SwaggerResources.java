@@ -17,8 +17,7 @@ import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardContextSelec
 import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardResource;
 @ServiceRanking(3)
 @HttpWhiteboardContextSelect("("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"="+SwaggerServletContextHelper.NAME+")")
-//will fix the prefix
-@HttpWhiteboardResource(pattern =  "/*", prefix = "/swagger-api/swagger-ui-3.51.2/dist")
+@HttpWhiteboardResource(pattern =  "/*", prefix = "/swagger-api")
 @Component(service = SwaggerResources.class,immediate = true)
 public class SwaggerResources {
 	

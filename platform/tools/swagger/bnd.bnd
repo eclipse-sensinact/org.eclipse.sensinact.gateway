@@ -1,6 +1,6 @@
 -include: ${sensinact.root.dir}/bnd/default.bnd.bnd
 -includeresource.swagger: \
-	swagger-api=@https://github.com/swagger-api/swagger-ui/archive/refs/tags/v3.51.2.zip!/swagger-ui-3.51.2/dist/*,\
-	/swagger-api/swagger-ui-3.51.2/dist/=${project.basedir}/src/client\
+	swagger-api=@https://github.com/swagger-api/swagger-ui/archive/refs/tags/v3.52.3.zip!/swagger-ui-3.52.3/dist/(*);rename:=$1,\
+	/swagger-api=${project.basedir}/src/client
 	
-#	swagger-api/=@https://github.com/swagger-api/swagger-ui/archive/refs/tags/v3.51.2.zip!/swagger-ui-3.51.2/dist/*,\
+#	copys files from dist folder of unrolled swagger zip file. copys on thop the local sna ui components from /src/client\ 

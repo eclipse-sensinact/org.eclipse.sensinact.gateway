@@ -17,14 +17,12 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-//@ExtendWith(BundleContextExtension.class)
-//@ExtendWith(ServiceExtension.class)
 public class SwaggerTest {
 
 	@ParameterizedTest
-	@ValueSource(strings =  {"/swagger-api","/swagger-api/"})
+	@ValueSource(strings = { "/swagger-api", "/swagger-api/" })
 	public void testRedirect(String path) throws Exception {
-		URL url = new URL("http://localhost:8080"+path);
+		URL url = new URL("http://localhost:8080" + path);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setInstanceFollowRedirects(false);
 		connection.setRequestMethod("GET");
@@ -36,17 +34,15 @@ public class SwaggerTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings =  {"/swagger-api/index.html","/swagger-api/rest-api-swagger.yaml","/swagger-api/schemas/act_request.json"})
+	@ValueSource(strings = { "/swagger-api/index.html", "/swagger-api/rest-api-swagger.yaml",
+			"/swagger-api/schemas/act_request.json" })
 	public void testIndex(String text) throws Exception {
-		URL url = new URL("http://localhost:8080"+text);
+		URL url = new URL("http://localhost:8080" + text);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("GET");
 		connection.connect();
 		Assertions.assertThat(connection.getResponseCode()).isEqualTo(200);
 
 	}
-
-
-
 
 }
