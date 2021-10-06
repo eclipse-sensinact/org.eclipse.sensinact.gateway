@@ -13,12 +13,8 @@ package org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.json.JSONObject;
@@ -57,79 +53,6 @@ public class TestLdapFiltering {
     //********************************************************************//
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
-
-    /**
-     * @throws MalformedURLException
-     * @throws IOException
-     */
-    public TestLdapFiltering() throws Exception {
-        super();
-    }
-
-    /**
-     * @inheritDoc
-     * @see MidOSGiTest#isExcluded(java.lang.String)
-     */
-    public boolean isExcluded(String fileName) {
-        if ("org.apache.felix.framework.security.jar".equals(fileName)) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * @inheritDoc
-     * @see MidOSGiTest#doInit(java.util.Map)
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    protected void doInit(Map configuration) {
-        configuration.put("felix.auto.start.1",  
-                "file:target/felix/bundle/org.osgi.service.component.jar "+  
-                "file:target/felix/bundle/org.osgi.service.cm.jar "+  
-                "file:target/felix/bundle/org.osgi.service.metatype.jar "+  
-                "file:target/felix/bundle/org.osgi.namespace.extender.jar "+  
-                "file:target/felix/bundle/org.osgi.util.promise.jar "+  
-                "file:target/felix/bundle/org.osgi.util.function.jar "+ 
-                "file:target/felix/bundle/org.osgi.util.pushstream.jar "+ 
-                "file:target/felix/bundle/org.osgi.service.log.jar "  +
-                "file:target/felix/bundle/org.apache.felix.log.jar " + 
-                "file:target/felix/bundle/org.apache.felix.scr.jar " +
-        		"file:target/felix/bundle/org.apache.felix.fileinstall.jar " +
-        		"file:target/felix/bundle/org.apache.felix.configadmin.jar " + 
-        		"file:target/felix/bundle/org.apache.felix.framework.security.jar ");
-        configuration.put("felix.auto.install.2",  
-        	    "file:target/felix/bundle/org.eclipse.paho.client.mqttv3.jar " + 
-                "file:target/felix/bundle/mqtt-utils.jar " + 
-        	    "file:target/felix/bundle/sensinact-utils.jar " + 
-                "file:target/felix/bundle/sensinact-common.jar " + 
-        	    "file:target/felix/bundle/sensinact-datastore-api.jar " + 
-                "file:target/felix/bundle/sensinact-security-none.jar " + 
-                "file:target/felix/bundle/sensinact-generic.jar " + 
-                "file:target/felix/bundle/slf4j-api.jar " + 
-                "file:target/felix/bundle/slf4j-simple.jar");
-        configuration.put("felix.auto.start.2", 
-        		"file:target/felix/bundle/sensinact-signature-validator.jar " + 
-        		"file:target/felix/bundle/sensinact-core.jar ");
-        configuration.put("felix.auto.start.3", 
-        		"file:target/felix/bundle/org.apache.felix.http.servlet-api.jar " + 
-                "file:target/felix/bundle/org.apache.felix.http.jetty.jar " + 
-        		"file:target/felix/bundle/http.jar " +
-        		"file:target/felix/bundle/sensinact-northbound-access.jar " + 
-                "file:target/felix/bundle/rest-access.jar");
-        configuration.put("felix.auto.start.4", 
-        		"file:target/felix/bundle/dynamicBundle.jar " + 
-                "file:target/felix/bundle/slider.jar " + 
-        		"file:target/felix/bundle/light.jar ");
-        configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
-        configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
-
-        configuration.put("org.eclipse.sensinact.gateway.location.latitude", "45.2d");
-        configuration.put("org.eclipse.sensinact.gateway.location.longitude", "5.7d");
-
-        configuration.put("org.osgi.service.http.port", "8899");
-        configuration.put("org.apache.felix.http.jettyEnabled", true);
-        configuration.put("org.apache.felix.http.whiteboardEnabled", true);
-    }
 
     @Test
     public void testLdapFilter(

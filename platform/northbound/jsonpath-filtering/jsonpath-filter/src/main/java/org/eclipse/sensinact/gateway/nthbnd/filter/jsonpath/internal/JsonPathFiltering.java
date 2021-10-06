@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.internal;
 import java.util.logging.Logger;
 
 import org.eclipse.sensinact.gateway.core.filtering.Filtering;
+import org.eclipse.sensinact.gateway.core.filtering.FilteringType;
 import org.osgi.service.component.annotations.Component;
 
 import com.jayway.jsonpath.DocumentContext;
@@ -24,7 +25,8 @@ import com.jayway.jsonpath.JsonPath;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@Component(immediate=true, service = Filtering.class, property = "type="+JsonPathFiltering.jsonpath)
+@FilteringType(JsonPathFiltering.JSONPATH)
+@Component(immediate=true, service = Filtering.class)
 public class JsonPathFiltering implements Filtering {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
@@ -38,18 +40,11 @@ public class JsonPathFiltering implements Filtering {
 	
 	protected static final Logger LOG = Logger.getLogger(JsonPathFiltering.class.getName());
 
-	public static final String jsonpath="jsonpath";
+	public static final String JSONPATH="jsonpath";
     //********************************************************************//
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
 
-
-    /**
-     * @param mediator
-     */
-    public JsonPathFiltering() {
-    
-    }
 
     /**
      * @inheritDoc
@@ -57,7 +52,7 @@ public class JsonPathFiltering implements Filtering {
      */
     @Override
     public boolean handle(String type) {
-        return jsonpath.equals(type);
+        return JSONPATH.equals(type);
     }
 
     /**

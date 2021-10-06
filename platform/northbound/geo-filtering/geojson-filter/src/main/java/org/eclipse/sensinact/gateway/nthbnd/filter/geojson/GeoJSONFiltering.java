@@ -8,25 +8,27 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.nthbnd.filter.geojson.internal;
+package org.eclipse.sensinact.gateway.nthbnd.filter.geojson;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.eclipse.sensinact.gateway.core.LocationResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.filtering.Filtering;
+import org.eclipse.sensinact.gateway.core.filtering.FilteringType;
 import org.eclipse.sensinact.gateway.util.LocationUtils;
 import org.eclipse.sensinact.gateway.util.json.JSONObjectStatement;
 import org.eclipse.sensinact.gateway.util.json.JSONTokenerStatement;
 import org.eclipse.sensinact.gateway.util.json.JSONValidator;
 import org.eclipse.sensinact.gateway.util.json.JSONValidator.JSONToken;
 import org.eclipse.sensinact.gateway.util.location.Segment;
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link Filtering} implementation allowing to apply a location discrimination
@@ -34,8 +36,12 @@ import java.util.Set;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
+@FilteringType(GeoJSONFiltering.GEOJSON)
+@Component(immediate=true, service = Filtering.class)
 public class GeoJSONFiltering implements Filtering {
-    //********************************************************************//
+    public static final String GEOJSON = "geojson";
+
+	//********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
     //********************************************************************//
@@ -44,6 +50,9 @@ public class GeoJSONFiltering implements Filtering {
     //********************************************************************//
     //						STATIC DECLARATIONS							  //
     //********************************************************************//
+    
+    private static Logger LOG = LoggerFactory.getLogger(GeoJSONFiltering.class.getCanonicalName());
+
     private static final JSONObjectStatement STATEMENT = 
     		new JSONObjectStatement(new JSONTokenerStatement(
 			    "{" + 
@@ -60,22 +69,10 @@ public class GeoJSONFiltering implements Filtering {
     //********************************************************************//
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
-    private Mediator mediator;
-
-    /**
-     * Constructor
-     *
-     * @param mediator the {@link Mediator} allowing the
-     *                 GeoJSONFiltering to be instantiated to interact with
-     *                 the OSGi host environment
-     */
-    public GeoJSONFiltering(Mediator mediator) {
-        this.mediator = mediator;
-    }
 
     @Override
     public boolean handle(String type) {
-        return "geojson".equals(type);
+        return GEOJSON.equals(type);
     }
 
     @Override
@@ -106,13 +103,13 @@ public class GeoJSONFiltering implements Filtering {
                 count++;
             }
             if (token.ordinal() == JSONToken.JSON_OBJECT_CLOSING.ordinal()) {
-                Integer ind = new Integer(count);
+                Integer ind = Integer.valueOf(count);
                 nameMap.remove(ind);
                 locationMap.remove(ind);
                 count--;
             }
             if (token.ordinal() == JSONToken.JSON_OBJECT_ITEM.ordinal() && token.getContext().key.equals(Resource.NAME)) {
-                Integer ind = new Integer(count);
+                Integer ind = Integer.valueOf(count);
                 String name = (String) token.getContext().value;
                 if (name != null) {
                     nameMap.put(ind, name);
@@ -123,7 +120,7 @@ public class GeoJSONFiltering implements Filtering {
                 }
             }
             if (token.ordinal() == JSONToken.JSON_OBJECT_ITEM.ordinal() && token.getContext().key.equals(LocationResource.LOCATION)) {
-                Integer ind = new Integer(count);
+                Integer ind = Integer.valueOf(count);
                 String location = (String) token.getContext().value;
                 if (location != null) {
                     locationMap.put(ind, location);
@@ -164,7 +161,7 @@ public class GeoJSONFiltering implements Filtering {
             return true;
 
         } catch (Exception e) {
-            mediator.error(e);
+        	LOG.error("could not write location",e);
 
         } finally {
             STATEMENT.reset();

@@ -272,7 +272,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
             }
             try {
     			Collection<ServiceReference<Filtering>> references = mediator.getContext(
-    				).getServiceReferences(Filtering.class, String.format("(type=%s)", name));
+    				).getServiceReferences(Filtering.class, String.format("(%s=%s)",Filtering.TYPE, name));
     			
     			if (references != null && references.size() == 1) {
     				filter = CastUtils.castPrimitive(String.class, parameter.getValue());

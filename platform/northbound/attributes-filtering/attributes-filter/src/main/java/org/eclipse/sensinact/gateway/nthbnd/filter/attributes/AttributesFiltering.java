@@ -12,8 +12,8 @@ package org.eclipse.sensinact.gateway.nthbnd.filter.attributes;
 
 import java.util.Arrays;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.filtering.Filtering;
+import org.eclipse.sensinact.gateway.core.filtering.FilteringType;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -21,11 +21,14 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@Component(immediate=true, service = Filtering.class, property = "type=attrs")
+@FilteringType(AttributesFiltering.ATTRS)
+@Component(immediate=true, service = Filtering.class)
 public class AttributesFiltering implements Filtering {
-    @Override
+    public static final String ATTRS = "attrs";
+
+	@Override
     public boolean handle(String type) {
-        return "attrs".equals(type);
+        return ATTRS.equals(type);
     }
 
     @Override
