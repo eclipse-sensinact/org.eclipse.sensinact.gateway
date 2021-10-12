@@ -26,16 +26,16 @@ public class MailAccountCallback implements CallbackService{
 
 	private String pattern;
 	private Executable<CallbackContext, Void> processor;
-	private Dictionary properties;
+	private Dictionary<Object,Object> properties;
 
 	/**
 	 * 
 	 */
-	public MailAccountCallback(String pattern, Dictionary properties, Executable<CallbackContext, Void> processor) {
+	public MailAccountCallback(String pattern, Dictionary<Object,Object> properties, Executable<CallbackContext, Void> processor) {
 		this.pattern = pattern;
 		if(properties != null) {
-			this.properties = new Hashtable();
-			Enumeration enumeration = properties.keys();
+			this.properties = new Hashtable<Object, Object>();
+			Enumeration<?> enumeration = properties.keys();
 			while(enumeration.hasMoreElements()) {
 				Object key = enumeration.nextElement();
 				this.properties.put(key, properties.get(key));
@@ -50,7 +50,7 @@ public class MailAccountCallback implements CallbackService{
 	}
 
 	@Override
-	public Dictionary getProperties() {
+	public Dictionary<Object,Object> getProperties() {
 		return this.properties;
 	}
 
