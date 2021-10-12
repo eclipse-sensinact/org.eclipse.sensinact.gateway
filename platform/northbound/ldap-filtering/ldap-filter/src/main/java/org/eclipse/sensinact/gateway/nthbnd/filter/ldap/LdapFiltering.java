@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.nthbnd.filter.ldap;
 
 import org.eclipse.sensinact.gateway.core.filtering.Filtering;
+import org.eclipse.sensinact.gateway.core.filtering.FilteringType;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -18,9 +19,11 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-@Component(immediate=true, service=Filtering.class, property="type=ldap")
+@FilteringType(LdapFiltering.LDAP)
+@Component(immediate=true, service=Filtering.class)
 public class LdapFiltering implements Filtering {
-    //********************************************************************//
+
+	//********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
 
@@ -30,6 +33,7 @@ public class LdapFiltering implements Filtering {
     //********************************************************************//
     //						STATIC DECLARATIONS							  //
     //********************************************************************//
+	public static final String LDAP = "ldap";
 
     //********************************************************************//
     //						INSTANCE DECLARATIONS						  //
@@ -37,7 +41,7 @@ public class LdapFiltering implements Filtering {
     
     @Override
     public boolean handle(String type) {
-        return "ldap".equals(type);
+        return LDAP.equals(type);
     }
 
     @Override

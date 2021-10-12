@@ -10,19 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.filter.attributes.test;
 
-import java.util.Map;
-
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.filter.attributes.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.filter.attributes.ws.test.WsServiceTestClient;
 import org.json.JSONObject;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.osgi.framework.BundleContext;
-import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -49,82 +42,17 @@ public class TestAttributesFiltering {
     //********************************************************************//
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
-
-    public TestAttributesFiltering() throws Exception {
-        super();
-    }
-
-    public boolean isExcluded(String fileName) {
-        if ("org.apache.felix.framework.security.jar".equals(fileName)) {
-            return true;
-        }
-        return false;
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    protected void doInit(Map configuration) {
-        configuration.put("felix.auto.start.1",  
-                "file:target/felix/bundle/org.osgi.service.component.jar "+  
-                "file:target/felix/bundle/org.osgi.service.cm.jar "+  
-                "file:target/felix/bundle/org.osgi.service.metatype.jar "+  
-                "file:target/felix/bundle/org.osgi.namespace.extender.jar "+  
-                "file:target/felix/bundle/org.osgi.util.promise.jar "+  
-                "file:target/felix/bundle/org.osgi.util.function.jar "+  
-                "file:target/felix/bundle/org.osgi.util.pushstream.jar "+
-                "file:target/felix/bundle/org.osgi.service.log.jar "  +
-                "file:target/felix/bundle/org.apache.felix.log.jar " + 
-                "file:target/felix/bundle/org.apache.felix.scr.jar " +
-        		"file:target/felix/bundle/org.apache.felix.fileinstall.jar " +
-        		"file:target/felix/bundle/org.apache.felix.configadmin.jar " + 
-        		"file:target/felix/bundle/org.apache.felix.framework.security.jar ");
-        configuration.put("felix.auto.install.2",  
-        	    "file:target/felix/bundle/org.eclipse.paho.client.mqttv3.jar " + 
-                "file:target/felix/bundle/mqtt-utils.jar " + 
-        	    "file:target/felix/bundle/sensinact-utils.jar " + 
-                "file:target/felix/bundle/sensinact-common.jar " + 
-        	    "file:target/felix/bundle/sensinact-datastore-api.jar " + 
-                "file:target/felix/bundle/sensinact-security-none.jar " + 
-                "file:target/felix/bundle/sensinact-generic.jar " + 
-                "file:target/felix/bundle/slf4j-api.jar " + 
-                "file:target/felix/bundle/slf4j-simple.jar");
-        configuration.put("felix.auto.start.2", 
-        		"file:target/felix/bundle/sensinact-signature-validator.jar " + 
-        		"file:target/felix/bundle/sensinact-core.jar ");
-        configuration.put("felix.auto.start.3", 
-        		"file:target/felix/bundle/org.apache.felix.http.servlet-api.jar " + 
-                "file:target/felix/bundle/org.apache.felix.http.jetty.jar " + 
-        		"file:target/felix/bundle/http.jar " +
-        		"file:target/felix/bundle/sensinact-northbound-access.jar " + 
-                "file:target/felix/bundle/rest-access.jar");
-        configuration.put("felix.auto.start.4",
-                "file:target/felix/bundle/slider.jar " + 
-        		"file:target/felix/bundle/dynamicBundle.jar ");
-        configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
-        configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
-
-        configuration.put("org.eclipse.sensinact.gateway.location.latitude", "45.2d");
-        configuration.put("org.eclipse.sensinact.gateway.location.longitude", "5.7d");
-
-        configuration.put("org.osgi.service.http.port", "8899");
-        configuration.put("org.apache.felix.http.jettyEnabled", true);
-        configuration.put("org.apache.felix.http.whiteboardEnabled", true);
-    }
     
     @BeforeEach
-    public void beforeEach(@InjectBundleContext BundleContext context
-    		) throws Exception {
-        Mediator mediator = new Mediator(context);
-    	HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/slider/admin/friendlyName/SET",
+    public void beforeEach() throws Exception {
+    	HttpServiceTestClient.newRequest(HTTP_ROOTURL + "/sensinact/slider/admin/friendlyName/SET",
     	        "[{\"name\":\"attributeName\",\"type\":\"string\",\"value\":\"value\"},{\"name\":\"value\",\"type\":\"string\",\"value\":\"startName\"}]", "POST");
     	Thread.sleep(2000);
     }
 
     @Test
-    public void testHttpFiltered(
-    		@InjectBundleContext BundleContext context
-    		) throws Exception {
-        Mediator mediator = new Mediator(context);
-        String response = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?attrs=[friendlyName]", null, "GET");
+    public void testHttpFiltered() throws Exception {
+        String response = HttpServiceTestClient.newRequest(HTTP_ROOTURL + "/sensinact?attrs=[friendlyName]", null, "GET");
         JSONObject result = new JSONObject(response);
         JSONObject expected = new JSONObject(
         "{\"filters\":[{\"definition\":\"[friendlyName]\",\"type\":\"attrs\"}]," 
@@ -142,15 +70,16 @@ public class TestAttributesFiltering {
         System.out.println("==============================================");
         System.out.println("result: ");
         System.out.println(response);
+        System.out.println(expected);
         System.out.println("==============================================");
         
         JSONAssert.assertEquals(expected, new JSONObject(response), false);
         
-        HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/slider/admin/friendlyName/SET",
+        HttpServiceTestClient.newRequest(HTTP_ROOTURL + "/sensinact/slider/admin/friendlyName/SET",
         "[{\"name\":\"attributeName\",\"type\":\"string\",\"value\":\"value\"},{\"name\":\"value\",\"type\":\"string\",\"value\":\"mySlider\"}]", "POST");
 
         Thread.sleep(2000);
-        response = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?attrs=[friendlyName]", null, "GET");
+        response = HttpServiceTestClient.newRequest(HTTP_ROOTURL + "/sensinact?attrs=[friendlyName]", null, "GET");
         
         result = new JSONObject(response);
         expected = new JSONObject(
@@ -167,7 +96,7 @@ public class TestAttributesFiltering {
         + ",\"friendlyName\":\"mySlider\"}]}");
         JSONAssert.assertEquals(expected, new JSONObject(response), false);
         
-        response = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?attrs={friendlyName,icon}", null, "GET");
+        response = HttpServiceTestClient.newRequest(HTTP_ROOTURL + "/sensinact?attrs={friendlyName,icon}", null, "GET");
         result = new JSONObject(response);
         expected = new JSONObject(
         "{\"filters\":[{\"definition\":\"{friendlyName,icon}\",\"type\":\"attrs\"}]," 
@@ -184,7 +113,7 @@ public class TestAttributesFiltering {
         + ",\"friendlyName\":\"mySlider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
 
-        response = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?attrs=friendlyName,icon,bridge", null, "GET");
+        response = HttpServiceTestClient.newRequest(HTTP_ROOTURL + "/sensinact?attrs=friendlyName,icon,bridge", null, "GET");
         result = new JSONObject(response);
         expected = new JSONObject(
         "{\"filters\":[{\"definition\":\"friendlyName,icon,bridge\",\"type\":\"attrs\"}]," 
@@ -282,22 +211,14 @@ public class TestAttributesFiltering {
         client.close();
     }
 
-    private String synchronizedRequest(WsServiceTestClient client, String url, String content) {
-        String simulated = null;
-        long wait = 1000;
+	private String synchronizedRequest(WsServiceTestClient client, String url, String content) {
 
-        client.newRequest(url, content);
+		client.newRequest(url, content);
 
-        while (!client.isAvailable() && wait > 0) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.interrupted();
-            }
-        }
-        if (client.isAvailable()) {
-            simulated = client.getResponseMessage();
-        }
-        return simulated;
-    }
+		while (!client.isAvailable()) {
+			Thread.yield();
+		}
+
+		return client.getResponseMessage();
+	}
 }

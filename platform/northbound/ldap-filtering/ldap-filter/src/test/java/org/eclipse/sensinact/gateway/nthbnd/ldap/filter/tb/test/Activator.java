@@ -10,9 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.ldap.filter.tb.test;
 
-import java.util.ArrayList;
 import java.util.Collections;
 
+import org.assertj.core.util.Lists;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
@@ -30,10 +30,8 @@ public class Activator extends AbstractActivator<Mediator> {
     public void doStart() throws Exception {
         ExtModelConfiguration<Packet> manager = ExtModelConfigurationBuilder.instance(super.mediator
         	).withStartAtInitializationTime(true
-        	).withObserved(new ArrayList<String>() {{
-        		this.add("/service1/humidity/accessible");
-        		this.add("/service1/temperature");
-        	}}).build("resources.xml", Collections.<String, String>emptyMap());
+        	).withObserved(Lists.list("/service1/humidity/accessible","/service1/temperature"))
+        	.build("resources.xml", Collections.<String, String>emptyMap());
 
         connector = new LocalProtocolStackEndpoint<Packet>(super.mediator);
         connector.connect(manager);
