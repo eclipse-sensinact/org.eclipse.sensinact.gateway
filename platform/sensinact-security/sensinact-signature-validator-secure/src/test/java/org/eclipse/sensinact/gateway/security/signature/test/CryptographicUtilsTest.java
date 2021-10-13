@@ -20,7 +20,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
 import org.eclipse.sensinact.gateway.security.signature.internal.CryptographicUtils;
-import org.eclipse.sensinact.gateway.util.crypto.Base64;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -71,7 +70,7 @@ public class CryptographicUtilsTest {
     String getTrueHashValue(byte[] data, String algo) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance(algo);
         digest.update(data);
-        return Base64.encodeBytes(digest.digest());
+        return java.util.Base64.getEncoder().encodeToString(digest.digest());
     }
 
     /**

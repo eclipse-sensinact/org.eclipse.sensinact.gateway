@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.core.security.user.openid;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
+import java.util.Base64;
 
 import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
@@ -22,7 +23,6 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.eclipse.sensinact.gateway.util.crypto.Base64;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +73,7 @@ public class OpenIdCredentialsUserKeyBuilder implements UserKeyBuilder<Credentia
 			
 			conf.setUri(this.config.getTokenEP().toURL().toExternalForm());
 			String clientCredentials = new String(this.config.getClientId() + ":" + this.config.getClientSecret());
-			String basic = Base64.encodeBytes(clientCredentials.getBytes(StandardCharsets.UTF_8));
+			String basic = Base64.getEncoder().encodeToString(clientCredentials.getBytes(StandardCharsets.UTF_8));
 			conf.addHeader("Authorization", "Basic " + basic);
 			
 			StringBuilder urlParameters = new StringBuilder();

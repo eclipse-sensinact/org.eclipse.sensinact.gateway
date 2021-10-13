@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core.security;
 
-import org.eclipse.sensinact.gateway.util.crypto.Base64;
+import java.util.Base64;
 
 public class Credentials implements Authentication<Credentials> {
 	public static final String HEADER_SEP = " ";
@@ -33,8 +33,8 @@ public class Credentials implements Authentication<Credentials> {
 		try {
 			String[] encodedElements = encoded.split(HEADER_SEP);
 			int index = encodedElements.length == 1 ? 0 : 1;
-
-			String[] credentials = new String(Base64.decode(encodedElements[index])).split(":");
+			byte[] credBytes = Base64.getDecoder().decode(encodedElements[index]);
+			String[] credentials = new String(credBytes).split(":");
 
 			localLogin = credentials[0];
 			localPassword = credentials[1];

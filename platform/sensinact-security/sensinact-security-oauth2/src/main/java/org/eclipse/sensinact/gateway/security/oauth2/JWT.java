@@ -20,13 +20,13 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.eclipse.sensinact.gateway.util.crypto.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,7 +47,7 @@ public class JWT extends JSONObject {
 		}
 		header = header.replace("-", "+");
 		header = header.replace("_", "/");	
-		header = new String(Base64.decode(header));
+		header = new String(Base64.getDecoder().decode(header));
 		
 		this.header = new JSONObject(header);
 		alg = this.header.getString("alg");
@@ -57,7 +57,7 @@ public class JWT extends JSONObject {
 		}
 		payload = payload.replace("-", "+");
 		payload = payload.replace("_", "/");
-		payload = new String(Base64.decode(payload));
+		payload = new String(Base64.getDecoder().decode(payload.getBytes()));
 
 		boolean result = false;
 		try {
@@ -67,14 +67,14 @@ public class JWT extends JSONObject {
 			}
 			signature = signature.replace("-", "+");
 			signature = signature.replace("_", "/");
-			byte[] signatureBytes = Base64.decode(signature);
+			byte[] signatureBytes = Base64.getDecoder().decode(signature);
 					
-			String b64header = Base64.encodeBytes(header.getBytes("UTF-8"));
+			String b64header = Base64.getEncoder().encodeToString(header.getBytes("UTF-8"));
 			b64header = b64header.split("=")[0]; // Remove any trailing '='s
 			b64header = b64header.replace('+', '-'); // 62nd char of encoding
 			b64header = b64header.replace('/', '_'); // 63rd char of encoding
 			
-			String b64payload = Base64.encodeBytes(payload.getBytes("UTF-8"));
+			String b64payload = Base64.getEncoder().encodeToString(payload.getBytes("UTF-8"));
 			b64payload = b64payload.split("=")[0]; // Remove any trailing '='s
 			b64payload = b64payload.replace('+', '-'); // 62nd char of encoding
 			b64payload = b64payload.replace('/', '_'); // 63rd char of encoding
@@ -93,7 +93,7 @@ public class JWT extends JSONObject {
 					}
 					modulusBase64 = modulusBase64.replace("-", "+");
 					modulusBase64 = modulusBase64.replace("_", "/");
-					byte[] modulusBase64Bytes = Base64.decode(modulusBase64);
+					byte[] modulusBase64Bytes = Base64.getDecoder().decode(modulusBase64);
 					
 			        String exponentBase64 = key.substring(index+1);
 					while(((4 - exponentBase64.length() % 4) % 4)!=0) {
@@ -101,7 +101,7 @@ public class JWT extends JSONObject {
 					}
 					exponentBase64 = exponentBase64.replace("-", "+");
 					exponentBase64 = exponentBase64.replace("_", "/");
-					byte[] exponentBase64Bytes = Base64.decode(exponentBase64);
+					byte[] exponentBase64Bytes = Base64.getDecoder().decode(exponentBase64);
 			         		        
 			        BigInteger modulus = new BigInteger(1, modulusBase64Bytes);
 			        BigInteger publicExponent = new BigInteger(1, exponentBase64Bytes);
@@ -116,7 +116,7 @@ public class JWT extends JSONObject {
 					SecretKeySpec secret_key = new SecretKeySpec(keyBytes, "HmacSHA256");
 					sha256_HMAC.init(secret_key);
 					byte compsign[] = sha256_HMAC.doFinal(testdata.getBytes());
-					String newsignature = Base64.encodeBytes(compsign);
+					String newsignature = Base64.getEncoder().encodeToString(compsign);
 					newsignature = newsignature.split("=")[0]; // Remove any trailing '='s
 					newsignature = newsignature.replace('+', '-'); // 62nd char of encoding
 					newsignature = newsignature.replace('/', '_'); // 63rd char of encoding				
@@ -175,9 +175,9 @@ public class JWT extends JSONObject {
 		String token = null;
 		if (header != null) {
 			token = "";
-			token += Base64.encodeBytes(header.toString().getBytes(StandardCharsets.UTF_8));
+			token += Base64.getEncoder().encode(header.toString().getBytes(StandardCharsets.UTF_8));
 			token += ".";
-			token += Base64.encodeBytes(this.toString().getBytes(StandardCharsets.UTF_8));
+			token += Base64.getEncoder().encode(this.toString().getBytes(StandardCharsets.UTF_8));
 			String signature = null;
 			if (alg.equals("HS256")) {
 			}

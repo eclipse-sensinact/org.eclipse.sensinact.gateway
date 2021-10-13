@@ -18,10 +18,10 @@ import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Base64;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.sensinact.gateway.security.signature.internal.CryptographicUtils;
-import org.eclipse.sensinact.gateway.util.crypto.Base64;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -72,7 +72,7 @@ public class CryptographicUtilsTest {
     String getTrueHashValue(byte[] data, String algo) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance(algo);
         digest.update(data);
-        return Base64.encodeBytes(digest.digest());
+        return Base64.getEncoder().encodeToString(digest.digest());
     }
 
     /**
