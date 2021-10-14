@@ -1,1 +1,3 @@
 -include: ${sensinact.root.dir}/bnd/default.bnd.bnd
+
+Export-Package: org.json.*
