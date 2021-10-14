@@ -2,3 +2,5 @@
 
 Provide-Capability: \
 	org.eclipse.sensinact.user.keybuilder
+	
+Fragment-Host: org.eclipse.sensinact.gateway.sensinact-core
