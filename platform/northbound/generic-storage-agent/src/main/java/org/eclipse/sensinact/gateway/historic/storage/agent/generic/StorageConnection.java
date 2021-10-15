@@ -24,7 +24,6 @@ public abstract class StorageConnection {
 
     private static final Logger LOG = LoggerFactory.getLogger(StorageConnection.class);
 
-    protected Mediator mediator;
     protected Stack stack;
     
     private boolean running = false;
@@ -42,8 +41,7 @@ public abstract class StorageConnection {
      * @param mediator the {@link Mediator} allowing the StorageConnection to be 
      * instantiated to interact with the OSGi host environment 
      */
-    public StorageConnection(Mediator mediator) {
-        this.mediator = mediator;
+    public StorageConnection() {
         this.stack = new Stack();
         this.running = true;
 
