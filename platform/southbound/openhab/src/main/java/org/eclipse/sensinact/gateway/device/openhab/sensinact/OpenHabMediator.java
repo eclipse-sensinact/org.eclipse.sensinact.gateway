@@ -10,9 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.device.openhab.sensinact;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,12 +50,11 @@ public class OpenHabMediator extends HttpMediator {
         return brokerById.remove(endpointId).getDevices();
     }
 
-    public Set<String> updateBroker(String endpointId, Set<String> devices) {
+    public List<String> updateBroker(String endpointId, Set<String> devices) {
         Broker broker = brokerById.get(endpointId);
-        if (broker == null) {
-            return Collections.<String>emptySet();
-        }
-        HashSet<String> toBeRemoved = new HashSet<String>(broker.getDevices());
+        if (broker == null)
+            return Collections.<String>emptyList();
+        List<String> toBeRemoved = new ArrayList<String>(broker.getDevices());
         toBeRemoved.removeAll(devices);
         return toBeRemoved;
     }

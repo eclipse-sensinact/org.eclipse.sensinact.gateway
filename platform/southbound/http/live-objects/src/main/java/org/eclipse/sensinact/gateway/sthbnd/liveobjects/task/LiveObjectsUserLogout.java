@@ -24,8 +24,10 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  * @author Rémi Druilhe
  */
 public class LiveObjectsUserLogout extends HttpTaskImpl<SimpleHttpResponse, SimpleHttpRequest> {
-    public LiveObjectsUserLogout(Mediator mediator, TaskTranslator transmitter) {
-        super(mediator, null, transmitter, SimpleHttpRequest.class, UriUtils.ROOT, null, null, null);
+    
+	public LiveObjectsUserLogout(Mediator mediator, TaskTranslator transmitter) {
+        super(mediator, null, transmitter, SimpleHttpRequest.class, UriUtils.ROOT, 
+        		null, null, null);
     }
 
     @Override

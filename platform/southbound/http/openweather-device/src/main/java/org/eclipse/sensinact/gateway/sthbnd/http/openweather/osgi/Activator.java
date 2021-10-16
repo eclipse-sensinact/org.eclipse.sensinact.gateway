@@ -66,10 +66,6 @@ import java.util.List;
 public class Activator extends HttpActivator {
     List<SimpleHttpProtocolStackEndpoint> endpoints;
 
-    /**
-     * @inheritDoc
-     * @see AbstractActivator#doStart()
-     */
     @Override
     public void doStart() throws Exception {
         super.mediator.setTaskProcessingContextHandler(this.getProcessingContextHandler());
@@ -78,7 +74,8 @@ public class Activator extends HttpActivator {
 
         this.mediator.setChainedTaskProcessingContextFactory(this.getChainedTaskProcessingContextFactory());
 
-        ExtModelConfiguration<? extends HttpPacket> configuration = ExtModelConfigurationBuilder.instance(mediator, getPacketType()
+        ExtModelConfiguration<? extends HttpPacket> configuration = 
+        	ExtModelConfigurationBuilder.instance(mediator, getPacketType()
         ).withStartAtInitializationTime(isStartingAtInitializationTime()
         ).withServiceBuildPolicy(getServiceBuildPolicy()
         ).withResourceBuildPolicy(getResourceBuildPolicy()
@@ -102,10 +99,6 @@ public class Activator extends HttpActivator {
         }
     }
 
-    /**
-     * @inheritDoc
-     * @see AbstractActivator#doStop()
-     */
     @Override
     public void doStop() throws Exception {
         while (!endpoints.isEmpty()) {
@@ -113,26 +106,15 @@ public class Activator extends HttpActivator {
         }
     }
 
-    /**
-     * @inheritDoc
-     * @see HttpActivator#getPacketType()
-     */
+    @Override
     public Class<? extends HttpPacket> getPacketType() {
         return HttpPacket.class;
     }
 
-    /**
-     * @inheritDoc
-     * @see HttpActivator#
-     * getChainedTaskProcessingContextFactory()
-     */
+    @Override
     public HttpChainedTaskProcessingContextFactory getChainedTaskProcessingContextFactory() {
         return new DefaultHttpChainedTaskProcessingContextFactory(mediator) {
-            /**
-             * @inheritDoc
-             *
-             * @see HttpChainedTaskProcessingContextFactory#newInstance(HttpChainedTasks, HttpChainedTask)
-             */
+           
             @Override
             public <CHAINED extends HttpChainedTask<?>> HttpTaskProcessingContext newInstance(HttpTaskConfigurator httpTaskConfigurator, String endpointId, HttpChainedTasks<?, CHAINED> tasks, CHAINED task) {
                 return new OpenWeatherTaskProcessingContext(Activator.this.mediator, httpTaskConfigurator, endpointId, tasks, task);
@@ -148,10 +130,7 @@ public class Activator extends HttpActivator {
      * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
      */
     private class OpenWeatherTaskProcessingContext extends DefaultHttpChainedTaskProcessingContext {
-        /**
-         * @param mediator
-         * @param task
-         */
+        
         public <CHAINED extends HttpChainedTask<?>> OpenWeatherTaskProcessingContext(Mediator mediator, HttpTaskConfigurator httpTaskConfigurator, final String endpointId, final HttpChainedTasks<?, CHAINED> tasks, final CHAINED task) {
             super(mediator, httpTaskConfigurator, endpointId, tasks, task);
             super.properties.put("weather.icon", new Executable<Void, String>() {
@@ -170,10 +149,7 @@ public class Activator extends HttpActivator {
 
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator#connect(org.eclipse.sensinact.gateway.generic.ExtModelConfiguration)
-     */
+    @Override
     protected void connect(ExtModelConfiguration configuration) throws InvalidProtocolStackException {
     }
 

@@ -16,7 +16,9 @@ import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacket;
 
 public class TemperaturesGeneratorPacketReader extends SimplePacketReader<TemperaturesGeneratorAbstractPacket> {
-    /**
+    private TemperaturesGeneratorPacket packet;
+
+	/**
      * @param mediator the mediator
      */
     public TemperaturesGeneratorPacketReader(Mediator mediator) {
@@ -24,11 +26,21 @@ public class TemperaturesGeneratorPacketReader extends SimplePacketReader<Temper
     }
 
     @Override
-    public void parse(TemperaturesGeneratorAbstractPacket packet) throws InvalidPacketException {
-        super.setServiceProviderId(((TemperaturesGeneratorPacket) packet).getServiceProvider());
+    public void load(TemperaturesGeneratorAbstractPacket packet) throws InvalidPacketException {
+       this.packet = (TemperaturesGeneratorPacket) packet;
+    }
+
+    @Override
+    public void parse() throws InvalidPacketException {
+        if(this.packet == null) {
+        	super.configureEOF();
+        	return;
+    	}
+    	super.setServiceProviderId(packet.getServiceProvider());
         super.setServiceId("sensor");
         super.setResourceId("temperature");
-        super.setData(((TemperaturesGeneratorPacket) packet).getValue());
+        super.setData(packet.getValue());
+        this.packet = null;
         super.configure();
     }
 }

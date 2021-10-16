@@ -10,6 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.openweather.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.LocationResource;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
@@ -26,47 +29,81 @@ import org.json.JSONObject;
  *
  */
 public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
-    /**
+    
+	class WeatherSubPacket {
+		String serviceProvider;
+		String service;
+		String resource;
+		Object data;
+		long timestamp;
+	}
+	
+	private List<WeatherSubPacket> subPackets;
+	private HttpPacket packet = null;
+    
+	/**
      * @param mediator
      */
     public OpenWeatherPacketReader(Mediator mediator) {
         super(mediator);
     }
 
-    /**
-     * @InheritedDoc
-     * @see PacketReader#
-     * parse(Packet)
-     */
     @Override
-    public void parse(HttpPacket packet) throws InvalidPacketException {
-        try {
+    public void load(HttpPacket packet) throws InvalidPacketException {
+        this.packet = packet;
+        this.subPackets = new ArrayList<>();
+    }
+
+    @Override
+    public void parse() throws InvalidPacketException {
+    	if(this.packet == null) {
+    		super.configureEOF();
+    		return;
+    	}
+    	if(this.subPackets.isEmpty()) {
             String content = new String(packet.getBytes());
-            String serviceProvider = null;
             JSONArray jsonArray = new JSONArray(content);
-            JSONObject jsonObject = jsonArray.optJSONObject(0);
-
-            JSONObject weatherObject = jsonObject.optJSONObject("weather");
-
-            if (!JSONObject.NULL.equals(weatherObject) && weatherObject.length() != 0) {
-                serviceProvider = weatherObject.getString("name");
-                this.parseWeather(serviceProvider, weatherObject);
-            }
-            jsonObject = jsonArray.optJSONObject(1);
-
-            String iconObject = jsonObject.optString("icon");
-
-            if (iconObject != null && iconObject.length() != 0) {
-                super.setServiceProviderId(serviceProvider);
-                super.setServiceId("weather");
-                super.setResourceId("image");
-                super.setData(Base64.encodeBytes(iconObject.getBytes()));
-                super.configure();
-            }
-        } catch (Exception e) {
-            mediator.error(e);
-            throw new InvalidPacketException(e);
-        }
+	    	String serviceProvider = null;
+	        try {
+	            JSONObject jsonObject = jsonArray.optJSONObject(0);	
+	            JSONObject weatherObject = jsonObject.optJSONObject("weather");
+	
+	            if (!JSONObject.NULL.equals(weatherObject) && weatherObject.length() != 0) {
+	                serviceProvider = weatherObject.getString("name");
+	                this.parseWeather(serviceProvider, weatherObject);
+	            }
+	            jsonObject = jsonArray.optJSONObject(1);	
+	            String iconObject = jsonObject.optString("icon");
+	
+	            if (iconObject != null && iconObject.length() != 0) {
+	            	WeatherSubPacket sp = new WeatherSubPacket();
+	                sp.serviceProvider = serviceProvider;
+	                sp.service= "weather";
+	                sp.resource = "image";
+	                sp.data = Base64.encodeBytes(iconObject.getBytes());
+	            	this.subPackets.add(sp); 
+	            }
+	        } catch (Exception e) {
+	            mediator.error(e);
+	            super.configureEOF();
+	            throw new InvalidPacketException(e);
+	        }
+	        if(!this.subPackets.isEmpty())
+	        	parse();
+    	} else {
+    		WeatherSubPacket sub = this.subPackets.remove(0);
+    		super.setServiceProviderId(sub.serviceProvider);
+    		super.setServiceId(sub.service);
+    		super.setResourceId(sub.resource);
+    		super.setTimestamp(sub.timestamp == 0
+    			?System.currentTimeMillis():sub.timestamp);
+    		super.setData(sub.data);
+    		if(this.subPackets.isEmpty())
+    			this.packet = null;
+    		super.configure();
+    		return;
+    	}
+    	super.configureEOF();
     }
 
     /**
@@ -77,74 +114,76 @@ public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
         long timestamp = object.optLong("dt") * 1000L;
         JSONObject coord = object.optJSONObject("coord");
         if (coord != null) {
-            super.setServiceProviderId(station);
-            super.setServiceId(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
-            super.setResourceId(LocationResource.LOCATION);
-            super.setData(new StringBuilder().append(coord.optDouble("lat")).append(JSONUtils.COLON).append(coord.optDouble("lon")).toString());
-            super.setCommand(CommandType.GET);
-            super.configure();
+        	WeatherSubPacket sp = new WeatherSubPacket();
+            sp.serviceProvider = station;
+            sp.service= ServiceProvider.ADMINISTRATION_SERVICE_NAME;
+            sp.resource = LocationResource.LOCATION;
+            sp.data = new StringBuilder().append(coord.optDouble("lat")).append(JSONUtils.COLON).append(coord.optDouble("lon")).toString();
+            this.subPackets.add(sp);
         }
         JSONArray weather = object.optJSONArray("weather");
         JSONObject content = null;
         if (weather != null && (content = weather.optJSONObject(0)) != null) {
-            super.setServiceProviderId(station);
-            super.setServiceId("weather");
-            super.setResourceId("state");
-            super.setData(content.opt("main"));
-            super.setTimestamp(timestamp);
-            super.setCommand(CommandType.GET);
-            super.configure();
-
-            super.setServiceProviderId(station);
-            super.setServiceId("weather");
-            super.setResourceId("description");
-            super.setData(content.opt("description"));
-            super.setTimestamp(timestamp);
-            super.setCommand(CommandType.GET);
-            super.configure();
+        	WeatherSubPacket sp = new WeatherSubPacket();
+            sp.serviceProvider = station;
+            sp.service= "weather";
+            sp.resource = "state";
+            sp.data = content.opt("main");
+            sp.timestamp = timestamp;
+            this.subPackets.add(sp);
+            
+            sp = new WeatherSubPacket();
+            sp.serviceProvider = station;
+            sp.service= "weather";
+            sp.resource = "description";
+            sp.data = content.opt("description");
+            sp.timestamp = timestamp;
+            this.subPackets.add(sp);
         }
         JSONObject wind = object.optJSONObject("wind");
         if (wind != null) {
-            super.setServiceProviderId(station);
-            super.setServiceId("weather");
-            super.setResourceId("wind");
-            super.setData(wind.opt("speed"));
-            super.setTimestamp(timestamp);
-            super.setCommand(CommandType.GET);
-            super.configure();
+        	WeatherSubPacket sp = new WeatherSubPacket();
+            sp.serviceProvider = station;
+            sp.service= "weather";
+            sp.resource = "wind";
+            sp.data = wind.opt("speed");
+            sp.timestamp = timestamp;
+            this.subPackets.add(sp);
 
-            super.setServiceProviderId(station);
-            super.setServiceId("weather");
-            super.setResourceId("orientation");
-            super.setData(wind.opt("deg"));
-            super.setTimestamp(timestamp);
-            super.setCommand(CommandType.GET);
-            super.configure();
+        	sp = new WeatherSubPacket();
+            sp.serviceProvider = station;
+            sp.service= "weather";
+            sp.resource = "orientation";
+            sp.data = wind.opt("deg");
+            sp.timestamp = timestamp;
+            this.subPackets.add(sp);
         }
         JSONObject main = object.optJSONObject("main");
-        if (main != null) {
-            super.setServiceProviderId(station);
-            super.setServiceId("weather");
-            super.setResourceId("temperature");
-            super.setData(main.opt("temp"));
-            super.setTimestamp(timestamp);
-            super.setCommand(CommandType.GET);
-            super.configure();
-            super.setServiceProviderId(station);
-            super.setServiceId("weather");
-            super.setResourceId("humidity");
-            super.setData(main.opt("humidity"));
-            super.setTimestamp(timestamp);
-            super.setCommand(CommandType.GET);
-            super.configure();
+        if (main != null) {       	
 
-            super.setServiceProviderId(station);
-            super.setServiceId("weather");
-            super.setResourceId("pressure");
-            super.setData(main.opt("pressure"));
-            super.setTimestamp(timestamp);
-            super.setCommand(CommandType.GET);
-            super.configure();
+        	WeatherSubPacket sp = new WeatherSubPacket();
+            sp.serviceProvider = station;
+            sp.service= "weather";
+            sp.resource = "temperature";
+            sp.data = main.opt("temp");
+            sp.timestamp = timestamp;
+            this.subPackets.add(sp);
+            
+            sp = new WeatherSubPacket();
+            sp.serviceProvider = station;
+            sp.service= "weather";
+            sp.resource = "humidity";
+            sp.data = main.opt("humidity");
+            sp.timestamp = timestamp;
+            this.subPackets.add(sp);
+
+            sp = new WeatherSubPacket();
+            sp.serviceProvider = station;
+            sp.service= "weather";
+            sp.resource = "pressure";
+            sp.data = main.opt("pressure");
+            sp.timestamp = timestamp;
+            this.subPackets.add(sp);
         }
     }
 }

@@ -19,7 +19,32 @@ import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.Te
 
 public class TemperaturesGeneratorDiscoveryPacketReader extends TemperaturesGeneratorAbstractPacketReader {
     
+	class Generated {
+		boolean isHello;
+		boolean isGoodbye;		
+		String serviceProviderId;
+        String serviceId;
+        String resourceId;
+        String attributeId;
+        Object data;
+        Generated(boolean isHello, boolean isGoodbye,		
+		String serviceProviderId, String serviceId, String resourceId,
+        String attributeId, Object data){
+        	this.isHello = isHello;
+        	this.isGoodbye = isGoodbye;
+        	this.serviceProviderId = serviceProviderId;
+        	this.serviceId = serviceId;
+        	this.resourceId = resourceId;
+        	this.attributeId = attributeId;
+        	this.data = data;
+        }
+	}
+	
+	Generated[] generateds;
+	TemperaturesGeneratorDiscoveryPacket packet;
 	Random random;
+	int pos=0;
+	
 	/**
      * @param mediator the mediator
      */
@@ -27,27 +52,35 @@ public class TemperaturesGeneratorDiscoveryPacketReader extends TemperaturesGene
         super(mediator);
         this.random = new Random();
     }
-
+    
     @Override
-    public void parse(TemperaturesGeneratorAbstractPacket packet) throws InvalidPacketException {
-        super.setServiceProviderId(((TemperaturesGeneratorDiscoveryPacket) packet).getServiceProvider());
-        super.isHelloMessage(true);
+    public void load(TemperaturesGeneratorAbstractPacket packet) throws InvalidPacketException {
+        this.packet = (TemperaturesGeneratorDiscoveryPacket) packet;
+        this.generateds = new Generated[] {
+            new Generated(true,false,this.packet.getServiceProvider(),null,null,null,null),	
+        	new Generated(false,false,this.packet.getServiceProvider(),"admin","location",null,this.packet.getLocation()),
+        	new Generated(false,false,this.packet.getServiceProvider(),"sensor","temperature",null,this.packet.getValue()),
+        	new Generated(false,false,this.packet.getServiceProvider(),"sensor","temperature","category",random.nextInt(3)+1)
+        };
+    }
+    
+    @Override
+    public void parse() throws InvalidPacketException {
+    	if(this.packet == null)
+    		return;
+    	if(pos==this.generateds.length) {
+    		this.packet = null;
+    		super.configureEOF();
+    		return;
+    	}
+        super.isHelloMessage(generateds[pos].isHello);
+        super.isGoodbyeMessage(generateds[pos].isGoodbye);
+        super.setServiceProviderId(generateds[pos].serviceProviderId);
+        super.setServiceId(generateds[pos].serviceId);
+        super.setResourceId(generateds[pos].resourceId);
+        super.setAttributeId(generateds[pos].attributeId);
+        super.setData(generateds[pos].data);
+        pos+=1;
         super.configure();
-        super.setServiceProviderId(((TemperaturesGeneratorDiscoveryPacket) packet).getServiceProvider());
-        super.setServiceId("admin");
-        super.setResourceId("location");
-        super.setData(((TemperaturesGeneratorDiscoveryPacket) packet).getLocation());
-        super.configure();  
-        super.setServiceProviderId(((TemperaturesGeneratorDiscoveryPacket) packet).getServiceProvider());
-        super.setServiceId("sensor");
-        super.setResourceId("temperature");
-        super.setData(((TemperaturesGeneratorDiscoveryPacket) packet).getValue());
-        super.configure(); 
-        super.setServiceProviderId(((TemperaturesGeneratorDiscoveryPacket) packet).getServiceProvider());
-        super.setServiceId("sensor");
-        super.setResourceId("temperature");
-        super.setAttributeId("category");
-        super.setData(random.nextInt(3)+1);
-        super.configure(); 
     }
 }

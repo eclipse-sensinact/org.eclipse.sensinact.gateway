@@ -68,9 +68,7 @@ import java.util.ArrayList;
     }, 
     tasks = {
         @SimpleHttpTask(
-            commands = {
-                Task.CommandType.ACT
-            }, 
+            commands = Task.CommandType.ACT, 
             configuration = @HttpTaskConfiguration(
                 scheme = "@context[openhab.scheme]", 
                 host = "@context[openhab.host]", 
@@ -84,9 +82,7 @@ import java.util.ArrayList;
             )
         ),
         @SimpleHttpTask(
-            commands = {
-                Task.CommandType.SET
-            }, 
+            commands = Task.CommandType.SET, 
             configuration = @HttpTaskConfiguration(
                 scheme = "@context[openhab.scheme]", 
                 host = "@context[openhab.host]", 

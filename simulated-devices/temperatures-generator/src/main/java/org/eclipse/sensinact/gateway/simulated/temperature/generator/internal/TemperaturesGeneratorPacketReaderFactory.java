@@ -40,12 +40,12 @@ public class TemperaturesGeneratorPacketReaderFactory implements PacketReaderFac
 
         if (packet instanceof TemperaturesGeneratorDiscoveryPacket) {
             PacketReader<TemperaturesGeneratorAbstractPacket> reader = new TemperaturesGeneratorDiscoveryPacketReader(mediator);
-            reader.parse(tpacket);
+            reader.load(tpacket);
             return (PacketReader<P>) reader;
 
         } else {
             PacketReader<TemperaturesGeneratorAbstractPacket> reader = new TemperaturesGeneratorPacketReader(mediator);
-            reader.parse(tpacket);
+            reader.load(tpacket);
             return (PacketReader<P>) reader;
         }
     }

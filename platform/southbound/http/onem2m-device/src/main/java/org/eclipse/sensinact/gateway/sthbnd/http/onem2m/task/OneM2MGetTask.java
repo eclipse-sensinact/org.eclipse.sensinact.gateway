@@ -17,13 +17,16 @@ import org.eclipse.sensinact.gateway.generic.TaskTranslator;
 import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpRequest;
 import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpResponse;
 import org.eclipse.sensinact.gateway.sthbnd.http.onem2m.internal.OneM2MHttpPacketReader;
-import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTaskImpl;
 import org.json.JSONObject;
 
 public class OneM2MGetTask extends HttpTaskImpl<SimpleHttpResponse, SimpleHttpRequest> {
-    public OneM2MGetTask(Mediator mediator, CommandType command, TaskTranslator transmitter, Class<SimpleHttpRequest> requestType, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        super(mediator, command, transmitter, requestType, path, profileId, resourceConfig, parameters);
+    
+	public OneM2MGetTask(Mediator mediator, CommandType command, TaskTranslator transmitter, 
+		Class<SimpleHttpRequest> requestType, String path, String profileId, 
+		ResourceConfig resourceConfig, Object[] parameters) {
+        super(mediator, command, transmitter, requestType, path, profileId, 
+        		resourceConfig, parameters);
     }
 
     @Override
@@ -44,10 +47,9 @@ public class OneM2MGetTask extends HttpTaskImpl<SimpleHttpResponse, SimpleHttpRe
     @Override
     public void setResult(Object result) {
         JSONObject content = new JSONObject(new String((byte[]) result));
-        if (content.has("m2m:cin")) {
+        if (content.has("m2m:cin"))
             super.setResult(content.getJSONObject("m2m:cin").getString("con"));
-        } else {
+        else
             super.setResult(AccessMethod.EMPTY);
-        }
     }
 }

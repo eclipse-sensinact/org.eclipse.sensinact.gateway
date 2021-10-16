@@ -54,9 +54,9 @@ public class KodiResponsePacket extends HttpResponsePacket {
     @Data
     public Object getData() {
         try {
+        	byte[] c = super.getBytes();
             KodiApi api = KodiApi.fromName(resource);
-            return api.getData(new JSONObject(new String(super.content)).get("result"));
-
+            return api.getData(new JSONObject(new String(c)).get("result"));
         } catch (Exception e) {
             return null;
         }

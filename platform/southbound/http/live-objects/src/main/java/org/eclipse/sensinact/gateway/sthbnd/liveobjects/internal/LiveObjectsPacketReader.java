@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.liveobjects.internal;
 
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
@@ -25,67 +27,100 @@ import org.json.JSONTokener;
  * @author Rémi Druilhe
  */
 public class LiveObjectsPacketReader extends SimplePacketReader<HttpPacket> {
-    /**
+	
+	class LiveObjectsSubPacket {
+		String serviceProvider;
+		String service;
+		String resource;
+		Object data;
+	}
+	
+	private HttpPacket packet;
+	private List<LiveObjectsSubPacket> subPackets;
+	
+	/**
      * Constructor
      *
-     * @param mediator the {@link Mediator} allowing to interact
+     * @param mediator the {@link Mediato r} allowing to interact
      *                 with the OSGi host environment
      */
     public LiveObjectsPacketReader(Mediator mediator) {
         super(mediator);
     }
 
-    /**
-     * @inheritDoc
-     * @see SimplePacketReader#parse(Packet)
-     */
     @Override
-    public void parse(HttpPacket packet) throws InvalidPacketException {
-        String content = new String(packet.getBytes());
-        Object json = new JSONTokener(content).nextValue();
-        if (json instanceof JSONObject) {
-            JSONObject jsonObject = (JSONObject) json;
-            if (jsonObject.has("data")) {
-                JSONArray devices = jsonObject.optJSONArray("data");
-                int length = devices == null ? 0 : devices.length();
+    public void load(HttpPacket packet) throws InvalidPacketException {
+    	this.packet = packet;
+    }
 
-                for (int i = 0; i < length; i++) {
-                    try {
-                        JSONObject jo = devices.optJSONObject(i);
-                        if (JSONObject.NULL.equals(jo)) {
-                            continue;
-                        }
-                        String serviceProviderId = jo.getString("namespace") + ":" + jo.getString("id").replace(" ", "");
-                        super.setServiceProviderId(serviceProviderId);
-                        super.setServiceId("admin");
-                        super.setResourceId("connected");
-                        super.setData(jo.getBoolean("connected"));
-                        super.configure();
-
-                    } catch (JSONException e) {
-                        throw new InvalidPacketException(e);
-                    }
-                }
+    @Override
+    public void parse() throws InvalidPacketException {
+    	if(this.packet == null) {
+    		super.configureEOF();
+    		return;
+    	}
+    	if(this.subPackets.isEmpty()) {
+            try {
+		        String content = new String(packet.getBytes());
+		        Object json = new JSONTokener(content).nextValue();
+		        if (json instanceof JSONObject) {
+		            JSONObject jsonObject = (JSONObject) json;
+		            if (jsonObject.has("data")) {
+		                JSONArray devices = jsonObject.optJSONArray("data");
+		                int length = devices == null ? 0 : devices.length();
+		
+		                for (int i = 0; i < length; i++) {
+	                        JSONObject jo = devices.optJSONObject(i);
+	                        if (JSONObject.NULL.equals(jo)) {
+	                            continue;
+	                        }
+	                        String serviceProviderId = jo.getString("namespace") + ":" + jo.getString("id").replace(" ", "");
+	                        LiveObjectsSubPacket sub = new LiveObjectsSubPacket();
+	                        sub.serviceProvider = serviceProviderId;
+	                        sub.service = "admin";
+	                        sub.resource = "connected";
+	                        sub.data = jo.getBoolean("connected");
+	                        this.subPackets.add(sub);	
+		                }
+		            }
+		        } else if (json instanceof JSONArray) {
+		            JSONArray jsonArray = (JSONArray) json;
+		            JSONObject jsonObject = jsonArray.getJSONObject(0);
+		            if (jsonArray.getJSONObject(0).has("streamId")) {	                
+		            	String serviceProvider = jsonObject.getString("streamId").replace(LiveObjectsConstant.URN, "");
+		            	LiveObjectsSubPacket sub = new LiveObjectsSubPacket();
+	                    sub.serviceProvider = serviceProvider;
+	                    sub.service = "test";
+	                    sub.resource = "temp";
+	                    sub.data = jsonObject.getJSONObject("value").getDouble("temp");
+	                    this.subPackets.add(sub);
+		                
+		                String location = jsonObject.getJSONObject("location").getInt("lat") + ":" + jsonObject.getJSONObject("location").getInt("lon");
+		                sub = new LiveObjectsSubPacket();
+	                    sub.serviceProvider = serviceProvider;
+	                    sub.service = "admin";
+	                    sub.resource = "location";
+	                    sub.data = location;
+	                    this.subPackets.add(sub);
+		            }
+		        }
+            } catch (JSONException e) {
+            	super.configureEOF();
+                throw new InvalidPacketException(e);
             }
-        } else if (json instanceof JSONArray) {
-            JSONArray jsonArray = (JSONArray) json;
-            JSONObject jsonObject = jsonArray.getJSONObject(0);
-            if (jsonArray.getJSONObject(0).has("streamId")) {
-                String serviceProvider = jsonObject.getString("streamId").replace(LiveObjectsConstant.URN, "");
-                super.setServiceProviderId(serviceProvider);
-                super.setServiceId("test");
-                super.setResourceId("temp");
-                super.setData(jsonObject.getJSONObject("value").getDouble("temp"));
-                super.setCommand(CommandType.GET);
-                super.configure();
-                String location = jsonObject.getJSONObject("location").getInt("lat") + ":" + jsonObject.getJSONObject("location").getInt("lon");
-                super.setServiceProviderId(serviceProvider);
-                super.setServiceId("admin");
-                super.setResourceId("location");
-                super.setData(location);
-                super.setCommand(CommandType.GET);
-                super.configure();
-            }
-        }
+		    if(!this.subPackets.isEmpty())
+		        parse();
+    	} else {
+    		LiveObjectsSubPacket sub =this.subPackets.remove(0);
+    		super.setServiceProviderId(sub.serviceProvider);
+            super.setServiceId(sub.service);
+            super.setResourceId(sub.resource);
+            super.setData(sub.data);
+            if(this.subPackets.isEmpty())
+            	this.packet = null;
+            super.configure();
+            return;
+    	}
+    	super.configureEOF();
     }
 }

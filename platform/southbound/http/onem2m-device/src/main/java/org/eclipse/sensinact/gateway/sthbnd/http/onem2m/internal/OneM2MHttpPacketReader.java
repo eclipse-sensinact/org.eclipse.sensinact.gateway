@@ -10,6 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.onem2m.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
@@ -18,7 +21,16 @@ import org.json.JSONObject;
 
 public class OneM2MHttpPacketReader extends SimplePacketReader<HttpPacket> {
     public static final String DEFAULT_SERVICE_NAME = "container";
-
+    
+    class OneM2MHttpSubPacket {
+		String serviceProvider;
+		String service;
+		String resource;
+		Object data;
+	}
+    
+    private List<OneM2MHttpSubPacket> subPackets;
+    private HttpPacket packet;
     /**
      * @param mediator the mediator of the bundle
      */
@@ -26,39 +38,62 @@ public class OneM2MHttpPacketReader extends SimplePacketReader<HttpPacket> {
         super(mediator);
     }
 
-    /**
-     * @inheritDoc
-     * @see PacketReader#parse(Packet)
-     */
     @Override
-    public void parse(HttpPacket packet) throws InvalidPacketException {
-        try {
-            JSONObject content = new JSONObject(new String(packet.getBytes()));
-            if (mediator.isDebugLoggable()) {
-                mediator.debug(content.toString());
-            }
-            if (content.has("m2m:uril")) {
-                String[] uris = content.getString("m2m:uril").split(" ");
-                for (String uri : uris) {
-                    String[] elements = uri.split("/");
-                    if (elements.length >= 3) {
-                        if (elements.length >= 5 && elements.length < 6) {
-                            super.setResourceId(elements[4]);
-                            super.setServiceId(elements[3]);
-                        } else if ("admin".equalsIgnoreCase(elements[3])) {
-                            super.setServiceId(elements[3]);
-                        } else {
-                            super.setResourceId(elements[3]);
-                            super.setServiceId(DEFAULT_SERVICE_NAME);
-                        }
-                        super.setServiceProviderId(elements[2]);
-                        super.configure();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            mediator.error(e);
-            throw new InvalidPacketException(e);
-        }
+    public void load(HttpPacket packet) throws InvalidPacketException {
+    	this.packet = packet;
+    	this.subPackets = new ArrayList<OneM2MHttpSubPacket>();
+    }
+
+    @Override
+    public void parse() throws InvalidPacketException {
+    	if(this.packet == null) {
+    		super.configureEOF();
+    		return;
+    	}
+    	if(this.subPackets.isEmpty()) {
+	        try {
+	            JSONObject content = new JSONObject(new String(packet.getBytes()));
+	            if (mediator.isDebugLoggable()) {
+	                mediator.debug(content.toString());
+	            }
+	            if (content.has("m2m:uril")) {
+	                String[] uris = content.getString("m2m:uril").split(" ");
+	                for (String uri : uris) {
+	                    String[] elements = uri.split("/");
+	                    if (elements.length >= 3) {
+	                    	OneM2MHttpSubPacket sub = new OneM2MHttpSubPacket();
+;	                        if (elements.length >= 5 && elements.length < 6) {
+	                            sub.resource = elements[4];
+	                            sub.service = elements[3];
+	                        } else if ("admin".equalsIgnoreCase(elements[3])) {
+	                        	sub.service = elements[3];
+	                        } else {
+	                        	sub.resource = elements[3];
+	                            sub.service = DEFAULT_SERVICE_NAME;
+	                        }
+							sub.serviceProvider = elements[2];
+	                        this.subPackets.add(sub);
+	                    }
+	                }
+	            }
+	        } catch (Exception e) {
+                mediator.error(e);
+        		super.configureEOF();
+                throw new InvalidPacketException(e);
+	        }
+	        if(!this.subPackets.isEmpty())
+	        	parse();
+	     } else {
+        	OneM2MHttpSubPacket sub = this.subPackets.remove(0);
+        	super.setServiceProviderId(sub.serviceProvider);
+            super.setServiceId(sub.service);
+            super.setResourceId(sub.resource);
+            super.setData(sub.data);
+            if(this.subPackets.isEmpty())
+            	this.packet = null;
+            super.configure();
+            return;
+	    } 
+    	super.configureEOF();
     }
 }
