@@ -124,11 +124,6 @@ class MediatorManagedConfiguration implements ManagedService {
         }
     }
 
-    /**
-     * @inheritDoc
-     * @see org.osgi.service.cm.ManagedService#
-     * updated(java.util.Dictionary)
-     */
     @Override
     public void updated(Dictionary<String, ?> properties) throws ConfigurationException {
         if (registration == null) {

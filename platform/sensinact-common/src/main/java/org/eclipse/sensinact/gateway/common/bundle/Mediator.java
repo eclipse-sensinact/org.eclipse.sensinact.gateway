@@ -38,11 +38,7 @@ public class Mediator {
 	 * environment by calling and registering services
 	 */
 	public final ThreadLocal<ServiceCaller> CALLERS = new ThreadLocal<ServiceCaller>() {
-		/**
-		 * @inheritedDoc
-		 * 
-		 * @see java.lang.ThreadLocal#initialValue()
-		 */
+		@Override
 		public ServiceCaller initialValue() {
 			return new ServiceCaller(Mediator.this.getContext());
 		}
