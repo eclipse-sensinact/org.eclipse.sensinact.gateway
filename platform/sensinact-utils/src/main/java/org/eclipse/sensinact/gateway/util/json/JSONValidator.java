@@ -28,6 +28,7 @@ import java.util.Stack;
 //TODO: to be extended to be able to provide the last parsed 
 //item's [key and] value, when relevant
 public class JSONValidator {
+	
     public static class TokenContext {
         public final String path;
         public final String key;
@@ -41,12 +42,16 @@ public class JSONValidator {
     }
 
     public static enum JSONToken {
-        JSON_OBJECT_OPENING, JSON_OBJECT_CLOSING, JSON_OBJECT_ITEM, JSON_ARRAY_OPENING, JSON_ARRAY_CLOSING, JSON_ARRAY_ITEM;
+        JSON_OBJECT_OPENING,
+        JSON_OBJECT_CLOSING, 
+        JSON_OBJECT_ITEM,
+        JSON_ARRAY_OPENING,
+        JSON_ARRAY_CLOSING,
+        JSON_ARRAY_ITEM;
 
         private TokenContext context;
 
-        JSONToken() {
-        }
+        JSONToken() {}
 
         public void clear() {
             this.context = null;
@@ -74,7 +79,7 @@ public class JSONValidator {
      *               to validate by the JSONValidator to be instantiated
      */
     public JSONValidator(Reader reader) {
-        this.reader = reader.markSupported() ? reader : new BufferedReader(reader);
+        this.reader = reader; //reader.markSupported() ? reader : new BufferedReader(reader);
         this.useLastChar = false;
         this.index = 0;
     }
@@ -140,20 +145,19 @@ public class JSONValidator {
         char c = nextClean();
         if (this.tokens.isEmpty()) {
             JSONToken co = checkOpening(c, null);
-            if (co != null) {
+            if (co != null) 
                 return co;
-            }
             return null;
         }
         JSONToken cc = checkClosing(c);
-        if (cc != null) {
+        if (cc != null) 
             return cc;
-        }
         JSONToken lastToken = tokens.pop();
 
-        if (lastToken != null && (lastToken.equals(JSONToken.JSON_ARRAY_OPENING) || lastToken.equals(JSONToken.JSON_OBJECT_OPENING))) {
+        if (lastToken != null && (lastToken.equals(JSONToken.JSON_ARRAY_OPENING) 
+        		|| lastToken.equals(JSONToken.JSON_OBJECT_OPENING))) 
             tokens.push(lastToken);
-        }
+        
         switch (lastToken) {
             case JSON_OBJECT_OPENING:
                 String key = null;
@@ -168,12 +172,11 @@ public class JSONValidator {
                 }
                 c = nextClean();
                 if (c == '=') {
-                    if (next() != '>') {
-                        back();
-                    }
-                } else if (c != ':') {
+                    if (next() != '>') 
+                        back();                    
+                } else if (c != ':') 
                     throw syntaxError("Expected a ':' after a key");
-                }
+                
                 c = nextClean();
                 switch (c) {
                     case '"':
@@ -184,9 +187,8 @@ public class JSONValidator {
                 }
                 if (value == null) {
                     JSONToken co = checkOpening(c, key);
-                    if (co != null) {
-                        return co;
-                    }
+                    if (co != null) 
+                        return co;                    
                     StringBuffer sb = new StringBuffer();
                     while (c >= ' ' && ",:]}/\\\"[{;=#".indexOf(c) < 0) {
                         sb.append(c);
@@ -194,9 +196,8 @@ public class JSONValidator {
                     }
                     back();
                     String s = sb.toString().trim();
-                    if (s.equals("")) {
-                        throw syntaxError("Missing value");
-                    }
+                    if (s.equals("")) 
+                        throw syntaxError("Missing value");                    
                     value = JSONObject.stringToValue(s);
                 }
                 c = nextClean();
@@ -224,9 +225,8 @@ public class JSONValidator {
                         break;
                 }
                 cc = checkClosing(c);
-                if (cc != null) {
-                    return cc;
-                }
+                if (cc != null) 
+                    return cc;                
                 switch (c) {
                     case '"':
                     case '\'':
@@ -235,10 +235,9 @@ public class JSONValidator {
                         break;
                 }
                 if (value == null) {
-                    JSONToken co = checkOpening(c, "array");
-                    if (co != null) {
-                        return co;
-                    }
+                    JSONToken co = checkOpening(c, null);
+                    if (co != null) 
+                        return co;                    
                     StringBuffer sb = new StringBuffer();
                     while (c >= ' ' && ",:]}/\\\"[{;=#".indexOf(c) < 0) {
                         sb.append(c);
@@ -246,9 +245,8 @@ public class JSONValidator {
                     }
                     back();
                     String s = sb.toString().trim();
-                    if (s.equals("")) {
-                        throw syntaxError("Missing value");
-                    }
+                    if (s.equals("")) 
+                        throw syntaxError("Missing value");                    
                     value = JSONObject.stringToValue(s);
                 }
                 c = nextClean();
@@ -326,10 +324,12 @@ public class JSONValidator {
         switch (c) {
             case '{':
                 o = JSONToken.JSON_OBJECT_OPENING;
+                o.setContext(new TokenContext(null, key, null));
                 this.tokens.push(o);
                 break;
             case '[':
                 o = JSONToken.JSON_ARRAY_OPENING;
+                o.setContext(new TokenContext(null, key, null));
                 this.tokens.push(o);
                 break;
             default:

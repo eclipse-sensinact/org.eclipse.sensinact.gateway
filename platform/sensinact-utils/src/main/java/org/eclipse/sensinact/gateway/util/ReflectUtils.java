@@ -554,7 +554,8 @@ public abstract class ReflectUtils {
      * @return a new instance of the implementation class
      */
     public static <E, F> F getInstance(Class<E> baseClass, Class<F> implementationClass, Object... parameters) {
-        if (baseClass == implementationClass) {
+
+    	if (baseClass == implementationClass) {
             return ReflectUtils.<F>getInstance(implementationClass, parameters);
         }
         F instance = null;
