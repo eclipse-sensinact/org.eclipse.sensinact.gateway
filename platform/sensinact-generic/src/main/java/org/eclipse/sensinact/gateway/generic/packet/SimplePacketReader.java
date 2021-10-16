@@ -159,53 +159,54 @@ public abstract class SimplePacketReader<P extends Packet> extends AbstractPacke
     public long setTimestamp(long timestamp) {
         return this.timestamp = timestamp;
     }
+    
+    /**
+     * Specifies that the packet reader reached the end of the
+     * packet
+     */
+    protected void configureEOF() {
+    	reset();
+    	super.setSubPacket(PayloadFragment.EOF_FRAGMENT);
+    }
 
     /**
-     * Creates the SubPacket, PayloadFragment
-     * and PayloadAttributeFragment
+     * Creates the SubPacket, PayloadFragment and PayloadAttributeFragment
      */
     protected void configure() {
-        boolean isNewSubPacket = false;
         boolean isNewPayloadFragment = false;
-
         PayloadFragmentImpl subPacket = null;
+        
         if (this.serviceProviderId == null) {
+        	this.configureEOF();
             return;
         }
-        int index = -1;
-        if ((index = super.subPackets.indexOf(new Name<PayloadFragment>(this.serviceProviderId))) != -1) {
-            subPacket = (PayloadFragmentImpl) super.subPackets.get(index);
-
-        } else {
-            subPacket = newSubPacket();
-            subPacket.setProfileId(this.profileId);
-            subPacket.setServiceProviderIdentifier(this.serviceProviderId);
-            subPacket.isGoodbyeMessage(this.isGoodbyeMessage);
-            subPacket.isHelloMessage(this.isHelloMessage);
-            isNewSubPacket = true;
-        }
+        subPacket = newSubPacket();
+        subPacket.setProfileId(this.profileId);
+        subPacket.setServiceProviderIdentifier(this.serviceProviderId);
+        subPacket.isGoodbyeMessage(this.isGoodbyeMessage);
+        subPacket.isHelloMessage(this.isHelloMessage);
+        
         PayloadServiceFragmentImpl payloadFragment = null;
         StringBuilder builder = new StringBuilder();
         if (this.command != null) {
             builder.append(this.command.name());
-            if (this.serviceId != null) {
+            if (this.serviceId != null) 
                 builder.append(TaskManager.IDENTIFIER_SEP_CHAR);
-            }
         }
         if (this.serviceId != null) {
             builder.append(this.serviceId);
-            if (this.resourceId != null) {
+            if (this.resourceId != null)
                 builder.append(TaskManager.IDENTIFIER_SEP_CHAR);
-            }
         }
-        if (this.resourceId != null) {
+        if (this.resourceId != null) 
             builder.append(this.resourceId);
-        }
+        int index = -1;
         String name = builder.toString();
+        
         if (name.length() > 0) {
-            if ((index = subPacket.payloadFragments.indexOf(new Name<PayloadServiceFragment>(name))) != -1) {
+            if ((index = subPacket.payloadFragments.indexOf(new Name<PayloadServiceFragment>(name))) != -1)
                 payloadFragment = (PayloadServiceFragmentImpl) subPacket.payloadFragments.get(index);
-            } else {
+            else {
                 payloadFragment = newPayloadFragment();
                 payloadFragment.setCommand(this.command);
                 payloadFragment.setServiceId(this.serviceId);
@@ -216,44 +217,20 @@ public abstract class SimplePacketReader<P extends Packet> extends AbstractPacke
         if (payloadFragment != null) {
             if (this.attributeId != null || this.data != null) {
                 PayloadResourceFragmentImpl payloadAttributeFragment = newPayloadAttributeFragment(this.attributeId, this.metadataId, this.data);
-
                 payloadAttributeFragment.setTimestamp(this.timestamp);
                 payloadFragment.addPayloadAttributeFragment(payloadAttributeFragment);
             }
-            if (isNewPayloadFragment) {
+            if (isNewPayloadFragment) 
                 subPacket.addPayloadFragment(payloadFragment);
-            }
         }
-        if (isNewSubPacket) {
-            super.addSubPacket(subPacket);
-        }
-        resetFields();
+        reset();
+        super.setSubPacket(subPacket);
     }
 
-    /**
-     * @inheritDoc
-     * @see PacketReader#
-     * treated(java.lang.String)
-     */
     @Override
-    public void treated(String taskIdentifier) {
-        int index = 0;
-        int length = super.subPackets == null ? 0 : super.subPackets.size();
-
-        for (; index < length && !super.subPackets.get(index).treated(taskIdentifier); index++) ;
-
-        if (index < length && super.subPackets.get(index).size() == 0) {
-            super.subPackets.remove(index);
-        }
-    }
-
-    /**
-     * @inheritDoc
-     * @see PacketReader#reset()
-     */
     public void reset() {
         resetFields();
-        super.subPackets.clear();
+        super.subPacket = null;
     }
 
     /**

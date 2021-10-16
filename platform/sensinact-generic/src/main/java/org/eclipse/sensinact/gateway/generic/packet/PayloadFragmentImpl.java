@@ -76,19 +76,11 @@ public class PayloadFragmentImpl implements PayloadFragment {
         }
     }
 
-    /**
-     * @inheritDoc
-     * @see java.lang.Iterable#iterator()
-     */
     @Override
     public Iterator<PayloadServiceFragment> iterator() {
         return this.payloadFragments.iterator();
     }
 
-    /**
-     * @inheritDoc
-     * @see PayloadFragment#getProfileId()
-     */
     @Override
     public String getProfileId() {
         return this.profileId;
@@ -104,10 +96,6 @@ public class PayloadFragmentImpl implements PayloadFragment {
         this.profileId = profileId;
     }
 
-    /**
-     * @inheritDoc
-     * @see PayloadFragment#getServiceProviderIdentifier()
-     */
     @Override
     public String getServiceProviderIdentifier() {
         return this.serviceProviderIdentifier;
@@ -123,10 +111,6 @@ public class PayloadFragmentImpl implements PayloadFragment {
         this.serviceProviderIdentifier = serviceProviderIdentifier;
     }
 
-    /**
-     * @inheritDoc
-     * @see PayloadFragment#isHelloMessage()
-     */
     @Override
     public boolean isHelloMessage() {
         return this.isHelloMessage;
@@ -169,10 +153,6 @@ public class PayloadFragmentImpl implements PayloadFragment {
         this.isGoodbyeMessage = isGoodbyeMessage;
     }
 
-    /**
-     * @inheritDoc
-     * @see PayloadFragment#getTaskIdValuePairs()
-     */
     @Override
     public List<TaskIdValuePair> getTaskIdValuePairs() {
         List<TaskIdValuePair> list = new ArrayList<TaskIdValuePair>();
@@ -190,10 +170,6 @@ public class PayloadFragmentImpl implements PayloadFragment {
         return list;
     }
 
-    /**
-     * @inheritDoc
-     * @see PayloadFragment#treated(java.lang.String)
-     */
     @Override
     public boolean treated(String taskIdentifier) {
         boolean treated = false;
@@ -211,35 +187,37 @@ public class PayloadFragmentImpl implements PayloadFragment {
         return treated;
     }
 
-    /**
-     * @inheritDoc
-     * @see PayloadFragment#size()
-     */
     @Override
     public int size() {
         return this.payloadFragments.size();
     }
 
-    /**
-     * @inheritDoc
-     * @see Nameable#getName()
-     */
     @Override
     public String getName() {
         return this.getServiceProviderIdentifier();
     }
 
     /**
-     * @param name
-     * @return
+     * Returns the index of the {@link PayloadServiceFragment} of
+     * this PayloadFragment, whose name is passed as parameter  
+     * 
+     * @param name the name of the {@link PayloadServiceFragment}
+     * 
+     * @return the index of the {@link PayloadServiceFragment} with
+     * the specified name
      */
     public int indexOf(Name<PayloadServiceFragment> name) {
         return this.payloadFragments.indexOf(name);
     }
 
     /**
-     * @param index
-     * @return
+     * Returns the {@link PayloadServiceFragment} of this {@link PayloadFragment}
+     * at the index passed as parameter  
+     * 
+     * @param index the index of the {@link PayloadServiceFragment}
+     * 
+     * @return the {@link PayloadServiceFragment} with
+     * the specified index
      */
     public PayloadServiceFragmentImpl get(int index) {
         return (PayloadServiceFragmentImpl) this.payloadFragments.get(index);

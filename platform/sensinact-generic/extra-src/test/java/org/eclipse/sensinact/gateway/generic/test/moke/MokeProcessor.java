@@ -27,16 +27,11 @@ public class MokeProcessor implements ProcessorService {
         this.connector = connector;
     }
 
-    /**
-     * @throws org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException
-     * @inheritDoc
-     * @see ProcessorService#process(java.lang.String)
-     */
     @Override
     public void process(String packet) {
         try {
             this.connector.process(new MokePacket(mediator, packet, null, null, null, null));
-        } catch (InvalidPacketException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -10,10 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.generic.packet;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract implementation of a {@link PacketReader}
@@ -21,37 +24,71 @@ import java.util.List;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class AbstractPacketReader<P extends Packet> implements PacketReader<P> {
-    protected List<PayloadFragment> subPackets;
+    
+	protected static final Logger LOG = LoggerFactory.getLogger(PacketReader.class);
+	
+	protected CountDownLatch countDown;
+	protected ExecutorService worker;
     protected PayloadFragment subPacket;
 
     /**
      * Constructor
      */
     protected AbstractPacketReader() {
-        this.subPackets = new ArrayList<PayloadFragment>();
+    	this.countDown = new CountDownLatch(1);
+    	this.worker = Executors.newSingleThreadExecutor();
     }
 
-    /**
-     * @inheritDoc
-     * @see java.lang.Iterable#iterator()
-     */
+    @Override
     public Iterator<PayloadFragment> iterator() {
-        return Collections.<PayloadFragment>unmodifiableList(this.subPackets).iterator();
-    }
+    	return new Iterator<PayloadFragment>() {
+    		
+    		private void parse (){
+    			AbstractPacketReader.this.worker.submit(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							AbstractPacketReader.this.parse();
+						} catch (InvalidPacketException e) {
+							LOG.error(e.getMessage(),e);
+						}
+					}
+    				
+    			});
+    		}
+    		
+    		private void await()  {
+				try {
+					AbstractPacketReader.this.countDown.await();
+					AbstractPacketReader.this.countDown = new CountDownLatch(1);
+				} catch (InterruptedException e) {
+					Thread.interrupted();
+					AbstractPacketReader.this.setSubPacket(PayloadFragment.EOF_FRAGMENT);
+				}
+    		}
+    		
+			@Override
+			public boolean hasNext() {
+				if(AbstractPacketReader.this.subPacket == null) {	
+					parse();
+					await();
+				}
+				return PayloadFragment.EOF_FRAGMENT != AbstractPacketReader.this.subPacket;
+			}
 
-    /**
-     * @inheritDoc
-     * @see PacketReader#getTaskIdValuePairs()
-     */
-    public Iterator<TaskIdValuePair> getTaskIdValuePairs() {
-        List<TaskIdValuePair> taskResults = new ArrayList<TaskIdValuePair>();
-
-        int index = 0;
-        int length = this.subPackets == null ? 0 : this.subPackets.size();
-        for (; index < length; index++) {
-            taskResults.addAll(this.subPackets.get(index).getTaskIdValuePairs());
-        }
-        return taskResults.iterator();
+			@Override
+			public PayloadFragment next() {
+				if(AbstractPacketReader.this.subPacket == null) {
+					parse();
+					await();
+				}
+				if(PayloadFragment.EOF_FRAGMENT == AbstractPacketReader.this.subPacket)
+					return null;
+				PayloadFragment fragment = AbstractPacketReader.this.subPacket;
+				AbstractPacketReader.this.subPacket = null;
+				return fragment;
+			}
+    	};
     }
 
     /**
@@ -60,10 +97,10 @@ public abstract class AbstractPacketReader<P extends Packet> implements PacketRe
      *
      * @param packet the {@link PayloadFragment} to add
      */
-    protected void addSubPacket(PayloadFragment subPacket) {
-        if (subPacket == null) {
+    protected void setSubPacket(PayloadFragment subPacket) {
+        if (subPacket == null) 
             return;
-        }
-        this.subPackets.add(subPacket);
+        this.subPacket = subPacket;
+        this.countDown.countDown();
     }
 }

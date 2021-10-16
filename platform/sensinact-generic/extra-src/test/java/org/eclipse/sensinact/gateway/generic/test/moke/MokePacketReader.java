@@ -19,7 +19,9 @@ import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
  * Extended {@link PayloadServiceFragment} for tests
  */
 public class MokePacketReader extends SimplePacketReader<MokePacket> {
-    /**
+	
+	private MokePacket packet;
+	/**
      * Constructor
      *
      * @param mediator the mediator
@@ -29,13 +31,22 @@ public class MokePacketReader extends SimplePacketReader<MokePacket> {
     }
 
     @Override
-    public void parse(MokePacket packet) throws InvalidPacketException {
-        super.setServiceProviderId(packet.getServiceProviderIdentifier());
-        String serviceId = packet.getServiceId();
-        super.setServiceId(serviceId);
-        super.setResourceId(packet.getResourceId());
-        super.setData(packet.getData());
-        super.setCommand(packet.getCommand());
-        super.configure();
+    public void load(MokePacket packet) throws InvalidPacketException {
+    	this.packet = packet;
+    }
+    
+    @Override
+    public void parse() throws InvalidPacketException {
+    	if(this.packet == null )
+    		super.configureEOF();
+    	else {
+	        super.setServiceProviderId(packet.getServiceProviderIdentifier());
+	        super.setServiceId(packet.getServiceId());
+	        super.setResourceId(packet.getResourceId());
+	        super.setData(packet.getData());
+	        super.setCommand(packet.getCommand());
+	        this.packet = null;
+	        super.configure();
+    	}
     }
 }

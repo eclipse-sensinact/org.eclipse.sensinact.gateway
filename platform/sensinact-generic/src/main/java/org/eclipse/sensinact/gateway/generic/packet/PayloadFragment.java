@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.generic.packet;
 
 import org.eclipse.sensinact.gateway.core.ServiceProviderProcessableData;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -21,6 +23,55 @@ import java.util.List;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface PayloadFragment extends ServiceProviderProcessableData<PayloadServiceFragment> {
+	
+	public static final PayloadFragment EOF_FRAGMENT = new PayloadFragment() {
+
+		@Override
+		public String getServiceProviderIdentifier() {
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return null;
+		}
+
+		@Override
+		public Iterator<PayloadServiceFragment> iterator() {
+			return Collections.emptyListIterator();
+		}
+
+		@Override
+		public String getProfileId() {
+			return null;
+		}
+
+		@Override
+		public boolean isHelloMessage() {
+			return false;
+		}
+
+		@Override
+		public boolean isGoodByeMessage() {
+			return false;
+		}
+
+		@Override
+		public List<TaskIdValuePair> getTaskIdValuePairs() {
+			return null;
+		}
+
+		@Override
+		public boolean treated(String taskIdentifier) {
+			return true;
+		}
+
+		@Override
+		public int size() {
+			return 0;
+		}
+	};
+	
     /**
      * Returns the string identifier of the profile of the
      * {@link ServiceProvider} targeted by this {@link PayloadFragment}

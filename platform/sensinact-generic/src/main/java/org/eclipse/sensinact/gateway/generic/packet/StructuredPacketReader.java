@@ -36,6 +36,7 @@ import java.util.List;
  * @param <P>
  */
 public class StructuredPacketReader<P extends Packet> extends SimplePacketReader<P> {
+	
     private static final List<String> ANNOTATIONS = Arrays.asList(
     		AttributeID.class.getCanonicalName(), 
     		CommandID.class.getCanonicalName(), 
@@ -50,7 +51,8 @@ public class StructuredPacketReader<P extends Packet> extends SimplePacketReader
     		HelloMessage.class.getCanonicalName(), 
     		GoodbyeMessage.class.getCanonicalName());
 
-    private PojoPacketWrapper<P> wrapper;
+    private PojoPacketWrapper<P> wrapper = null;
+    private Iterator<SubPacket> iterator = null;
 
     /**
      * @param mediator the {@link Mediator} allowing to
@@ -90,8 +92,12 @@ public class StructuredPacketReader<P extends Packet> extends SimplePacketReader
         int length = elements == null ? 0 : elements.length;
         PojoPacketWrapper<P> wrapper = new PojoPacketWrapper<P>(mediator);
         for (; index < length; index++) {
-            Annotation[] annotations = elements[index].getAnnotations();
-
+        	Annotation[] annotations = null;
+        	try {
+        		annotations = elements[index].getAnnotations();
+        	} catch(Exception e) {
+        		e.printStackTrace();
+        	}        	
             int annotationIndex = 0;
             int annotationLength = annotations == null ? 0 : annotations.length;
 
@@ -124,37 +130,43 @@ public class StructuredPacketReader<P extends Packet> extends SimplePacketReader
     }
 
     @Override
-    public void parse(P packet) throws InvalidPacketException {
+    public void load(P packet) throws InvalidPacketException {
         super.reset();
-        StructuredPacket structuredPacket = null;
-
-        if (StructuredPacket.class.isAssignableFrom(packet.getClass())) {
+    	StructuredPacket structuredPacket = null;
+        if (StructuredPacket.class.isAssignableFrom(packet.getClass()))
             structuredPacket = (StructuredPacket) packet;
-
-        } else if (this.wrapper != null) {
+        else if (this.wrapper != null) {
             wrapper.wrap(packet);
             structuredPacket = wrapper;
         }
-        if (structuredPacket == null) {
+        if (structuredPacket == null)
             return;
+        this.iterator = structuredPacket.iterator();
+    }
+    
+	@Override
+	public void parse() throws InvalidPacketException {
+        if (iterator == null)
+            return;
+        if(!iterator.hasNext()) {
+        	this.iterator = null;
+        	super.configureEOF();
+        	return;
         }
-        Iterator<SubPacket> iterator = structuredPacket.iterator();
-        while (iterator.hasNext()) {
-            SubPacket subPacket = iterator.next();
-
-            super.isGoodbyeMessage(subPacket.isGoodbyeMessage());
-            super.isHelloMessage(subPacket.isHelloMessage());
-            super.setCommand(subPacket.getCommand());
-            super.setProfileId(subPacket.getProfileId());
-            super.setServiceProviderId(subPacket.getServiceProviderId());
-            super.setServiceId(subPacket.getServiceId());
-            super.setResourceId(subPacket.getResourceId());
-            super.setAttributeId(subPacket.getAttributeId());
-            super.setMetadataId(subPacket.getMetadataId());
-            super.setTimestamp(subPacket.getTimestamp());
-            super.setData(subPacket.getData());
-
-            super.configure();
-        }
+        super.reset();
+        
+        SubPacket subPacket = iterator.next();
+        super.isGoodbyeMessage(subPacket.isGoodbyeMessage());
+        super.isHelloMessage(subPacket.isHelloMessage());
+        super.setCommand(subPacket.getCommand());
+        super.setProfileId(subPacket.getProfileId());
+        super.setServiceProviderId(subPacket.getServiceProviderId());
+        super.setServiceId(subPacket.getServiceId());
+        super.setResourceId(subPacket.getResourceId());
+        super.setAttributeId(subPacket.getAttributeId());
+        super.setMetadataId(subPacket.getMetadataId());
+        super.setTimestamp(subPacket.getTimestamp());
+        super.setData(subPacket.getData());
+        super.configure();
     }
 }

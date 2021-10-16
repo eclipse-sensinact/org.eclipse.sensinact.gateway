@@ -28,58 +28,29 @@ public class EmptyPacketReader<P extends Packet> implements PacketReader<P> {
         this.mediator = mediator;
     }
 
-    /**
-     * @inheritDoc
-     * @see PacketReader#
-     * parse(Packet)
-     */
     @Override
-    public void parse(P packet) throws InvalidPacketException {
+    public void load(P packet) throws InvalidPacketException {
         if (this.mediator.isDebugLoggable()) {
             this.mediator.debug("not implemented");
         }
     }
 
-    /**
-     * @inheritDoc
-     * @see PacketReader#getTaskIdValuePairs()
-     */
-    @Override
-    public Iterator<TaskIdValuePair> getTaskIdValuePairs() {
-        if (this.mediator.isDebugLoggable()) {
-            this.mediator.debug("not implemented");
-        }
-        return Collections.<TaskIdValuePair>emptyList().iterator();
-    }
-
-    /**
-     * @inheritDoc
-     * @see PacketReader#treated(java.lang.String)
-     */
-    @Override
-    public void treated(String taskIdentifier) {
-        if (this.mediator.isDebugLoggable()) {
-            this.mediator.debug("not implemented");
-        }
-    }
-
-    /**
-     * @inheritDoc
-     * @see java.lang.Iterable#iterator()
-     */
     @Override
     public Iterator<PayloadFragment> iterator() {
         return Collections.<PayloadFragment>emptyList().iterator();
     }
 
-    /**
-     * @inheritDoc
-     * @see PacketReader#reset()
-     */
     @Override
     public void reset() {
         if (this.mediator.isDebugLoggable()) {
             this.mediator.debug("not implemented");
         }
     }
+
+	@Override
+	public void parse() throws InvalidPacketException {
+        if (this.mediator.isDebugLoggable()) {
+            this.mediator.debug("not implemented");
+        }
+	}
 }

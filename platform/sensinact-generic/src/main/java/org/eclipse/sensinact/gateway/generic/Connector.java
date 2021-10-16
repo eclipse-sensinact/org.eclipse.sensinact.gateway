@@ -102,20 +102,23 @@ public class Connector<P extends Packet> extends TaskManager {
      */
     protected void configureCustomizer() {
         try {
-            if (this.customizer == null) {
+            if (this.customizer == null)
                 this.customizer = new DefaultConnectorCustomizer<P>(mediator, this.extModelConfiguration);
-            }
         } catch (Exception e) {
             mediator.error(e);
         }
     }
-
+    
     /**
-     * @throws InvalidServiceProviderException
-     * @inheritDoc
-     * @see PacketReader#process(Packet)
+     * Read the {@link Packet} and extract the data allowing to create
+     * of to feed sensiNact's data model
+     * 
+     * @param packet the extended {@link Packet} wrapping the data to be loaded
+     * 
+     * @throws InvalidPacketException if the specified {@link Packet} cannot be read 
      */
     public void process(P packet) throws InvalidPacketException {
+
         if (!this.customizer.preProcessing(packet)) {
             if (super.mediator.isDebugLoggable()) {
                 super.mediator.debug("Do not process the received packet : exiting");
@@ -123,74 +126,74 @@ public class Connector<P extends Packet> extends TaskManager {
             return;
         }
         PacketReader<P> reader = this.customizer.newPacketReader(packet);
-
-        if (reader == null) {
+        if (reader == null) 
             throw new InvalidPacketException("Unable to create an appropriate reader");
-        }
-        Iterator<TaskIdValuePair> iterator = reader.getTaskIdValuePairs();
-
-        while (iterator.hasNext()) {
-            TaskIdValuePair taskIdValuePair = iterator.next();
-            String taskIdentifier = taskIdValuePair.taskIdentifier;
-            // No need to process if the protocol allows
-            // to identify the response according to the
-            // initial Task object
-            List<Task> tasks = super.remove(taskIdentifier);
-            Iterator<Task> taskIterator = tasks.iterator();
-
-            boolean treated = false;
-
-            while (taskIterator.hasNext()) {
-                Task task = taskIterator.next();
-                if (task != null && !task.isResultAvailable()) {
-                    task.setResult(taskIdValuePair.getValue(), taskIdValuePair.getTimestamp());
-                    treated = true;
-                }
-            }
-            if (treated) {
-                reader.treated(taskIdentifier);
-            }
-        }
+        
         Iterator<PayloadFragment> subPacketIterator = reader.iterator();
-        while (subPacketIterator.hasNext()) {
+        while (subPacketIterator.hasNext()) {        	
             PayloadFragment subPacket = subPacketIterator.next();
+            
+            List<TaskIdValuePair> taskIdValuePairs = subPacket.getTaskIdValuePairs();
+            Iterator<TaskIdValuePair> iterator = 
+            	(taskIdValuePairs==null||taskIdValuePairs.isEmpty())
+            	?null:taskIdValuePairs.iterator();
+            
+            if(iterator != null) {
+	            while (iterator.hasNext()) {
+	                TaskIdValuePair taskIdValuePair = iterator.next();
+	                String taskIdentifier = taskIdValuePair.taskIdentifier;
+	                // No need to process if the protocol allows
+	                // to identify the response according to the
+	                // initial Task object
+	                List<Task> tasks = super.remove(taskIdentifier);
+	                Iterator<Task> taskIterator = tasks.iterator();
+	
+	                boolean treated = false;
+	
+	                while (taskIterator.hasNext()) {
+	                    Task task = taskIterator.next();
+	                    if (task != null && !task.isResultAvailable()) {
+	                        task.setResult(taskIdValuePair.getValue(), taskIdValuePair.getTimestamp());
+	                        treated = true;
+	                    }
+	                }
+	                if (treated) 
+	                	subPacket.treated(taskIdentifier);
+	            }
+            }
             String serviceProviderName = subPacket.getServiceProviderIdentifier();
-
+            
             if (serviceProviderName == null) {
-                if (this.mediator.isDebugLoggable()) {
+                if (this.mediator.isDebugLoggable())
                     this.mediator.debug("Unable to identify the targeted service provider");
-                }
                 continue;
             }
             int index = -1;
             ExtModelInstance<?> instance = null;
             ExtServiceProviderImpl serviceProvider = null;
 
-            if ((index = this.instances.indexOf(new Name<ExtModelInstance<?>>(serviceProviderName))) > -1) {
+            if ((index = this.instances.indexOf(new Name<ExtModelInstance<?>>(serviceProviderName))) > -1)
                 instance = this.instances.get(index);
-            }
+            
             if (subPacket.isGoodByeMessage()) {
                 this.processGoodbye(instance);
-                if (index > -1) {
+                if (index > -1)
                     this.instances.remove(index);
-                }
                 continue;
             }
             if (instance == null) {
                 try {
                     instance = this.addModelInstance(subPacket.getProfileId(), serviceProviderName);
-                    if (instance == null) {
+                    if (instance == null)
                         continue;
-                    }
                     super.mediator.debug("Service provider discovered : %s", serviceProviderName);
                 } catch (InvalidServiceProviderException e) {
                     throw new InvalidPacketException(e);
                 }
             }
             serviceProvider = instance.getRootElement();
-            if (subPacket.isHelloMessage()) {
+            if (subPacket.isHelloMessage())
                 this.processHello(serviceProvider);
-            }
             serviceProvider.process(subPacket);
             this.customizer.postProcessing(serviceProvider, reader);
         }
@@ -247,6 +250,7 @@ public class Connector<P extends Packet> extends TaskManager {
     @SuppressWarnings({ "unchecked", "rawtypes", "unused" })
 	protected synchronized ExtModelInstance<?> addModelInstance(String profileId, 
     	final String serviceProviderName) throws InvalidServiceProviderException {
+
     	ExtModelInstance<?> instance = this.extModelInstanceBuilder.<ExtModelConfiguration, 
     		ExtModelInstance>build(serviceProviderName, profileId,this.extModelConfiguration);
         if (instance != null) {

@@ -53,8 +53,6 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
         }
     }
 
-    ;
-
     private P packet;
     private Mediator mediator;
     protected AnnotatedElement attributeIDAnnotated = null;
@@ -158,19 +156,11 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
         this.packet = packet;
     }
 
-    /**
-     * @inheritDoc
-     * @see Packet#getBytes()
-     */
     @Override
     public byte[] getBytes() {
         return this.packet.getBytes();
     }
 
-    /**
-     * @inheritDoc
-     * @see StructuredPacket#iterator()
-     */
     @Override
     public Iterator<SubPacket> iterator() {
         return new Iterator<SubPacket>() {
@@ -185,7 +175,6 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
             public SubPacket next() {
                 try {
                     last = iteration.execute(packet);
-
                 } catch (Exception e) {
                     last = true;
                 }
@@ -195,171 +184,143 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
             @Override
             public void remove() {
             }
-
         };
     }
 
-    /**
-     * @inheritDoc
-     * @see SubPacket#getCommand()
-     */
     @Override
     public Task.CommandType getCommand() {
         try {
             return this.commandExtractor.execute(packet);
 
         } catch (Exception e) {
-            mediator.error(e);
+        	if(mediator.isDebugLoggable())
+        		mediator.debug(e.getMessage());
         }
         return null;
     }
 
-    /**
-     * @inheritDoc
-     * @see SubPacket#isHelloMessage()
-     */
     @Override
     public boolean isHelloMessage() {
         try {
-            return this.isHelloMessageExtractor.execute(packet);
-
+           Boolean hello = this.isHelloMessageExtractor.execute(packet);
+           if(hello == null)
+        	   return false;
+           return hello.booleanValue();
         } catch (Exception e) {
-            mediator.debug(e.getMessage());
+        	if(mediator.isDebugLoggable())
+        		mediator.debug(e.getMessage());
         }
         return false;
     }
 
-    /**
-     * @inheritDoc
-     * @see SubPacket#isGoodbyeMessage()
-     */
     @Override
     public boolean isGoodbyeMessage() {
         try {
-            return this.isGoodByeMessageExtractor.execute(packet);
-
+            Boolean goodbye = this.isGoodByeMessageExtractor.execute(packet);
+            if(goodbye == null)
+            	return false;
+            return goodbye.booleanValue();
         } catch (Exception e) {
-            mediator.debug(e.getMessage());
+        	if(mediator.isDebugLoggable())
+        		mediator.debug(e.getMessage());
         }
         return false;
     }
 
-    /**
-     * @inheritDoc
-     * @see SubPacket#getProfileId()
-     */
     @Override
     public String getProfileId() {
         try {
             return this.profileIdExtractor.execute(packet);
 
         } catch (Exception e) {
-            mediator.error(e);
+        	if(mediator.isDebugLoggable())
+        		mediator.debug(e.getMessage());
         }
         return null;
     }
 
-    /**
-     * @inheritDoc
-     * @see SubPacket#getServiceProviderId()
-     */
     @Override
     public String getServiceProviderId() {
         try {
             return this.serviceProviderIdExtractor.execute(packet);
 
         } catch (Exception e) {
-            mediator.error(e);
+        	if(mediator.isDebugLoggable())
+        		mediator.debug(e.getMessage());
         }
         return null;
     }
 
-    /**
-     * @inheritDoc
-     * @see SubPacket#getServiceId()
-     */
     @Override
     public String getServiceId() {
         try {
             return this.serviceIdExtractor.execute(packet);
 
         } catch (Exception e) {
-            mediator.error(e);
+        	if(mediator.isDebugLoggable())
+        		mediator.debug(e.getMessage());
         }
         return null;
     }
 
-    /**
-     * @inheritDoc
-     * @see SubPacket#getResourceId()
-     */
     @Override
     public String getResourceId() {
         try {
             return this.resourceIdExtractor.execute(packet);
 
         } catch (Exception e) {
-            mediator.error(e);
+        	if(mediator.isDebugLoggable())
+        		mediator.debug(e.getMessage());
         }
         return null;
     }
 
-    /**
-     * @inheritDoc
-     * @see SubPacket#getAttributeId()
-     */
     @Override
     public String getAttributeId() {
         try {
             return this.attributeIdExtractor.execute(packet);
 
         } catch (Exception e) {
-            mediator.error(e);
+        	if(mediator.isDebugLoggable())
+        		mediator.debug(e.getMessage());
         }
         return null;
     }
 
-    /**
-     * @inheritDoc
-     * @see SubPacket#getMetadataId()
-     */
     @Override
     public String getMetadataId() {
         try {
             return this.metadataIdExtractor.execute(packet);
 
         } catch (Exception e) {
-            mediator.error(e);
+        	if(mediator.isDebugLoggable())
+        		mediator.debug(e.getMessage());
         }
         return null;
     }
 
-    /**
-     * @inheritDoc
-     * @see SubPacket#getData()
-     */
     @Override
     public Object getData() {
         try {
             return this.dataExtractor.execute(packet);
 
         } catch (Exception e) {
-            mediator.error(e);
+        	if(mediator.isDebugLoggable())
+        		mediator.debug(e.getMessage());
         }
         return null;
     }
 
-    /**
-     * @inheritDoc
-     * @see SubPacket#getTimestamp()
-     */
     @Override
     public long getTimestamp() {
         try {
-            return this.timestampExtractor.execute(packet);
-
+            Long l = this.timestampExtractor.execute(packet);
+            if(l == null)
+            	return -1;
+            return l.longValue();
         } catch (Exception e) {
-            mediator.debug(e.getMessage());
+        	if(mediator.isDebugLoggable())
+        		mediator.debug(e.getMessage());
         }
         return -1;
     }

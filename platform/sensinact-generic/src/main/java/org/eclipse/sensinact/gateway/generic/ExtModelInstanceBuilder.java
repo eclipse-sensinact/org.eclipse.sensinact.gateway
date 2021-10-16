@@ -60,6 +60,7 @@ extends ModelInstanceBuilder<C,I> {
         if (modelConfiguration != null) {
             super.buildAccessNode(modelConfiguration.getAccessTree(), name);
             Class<I> ci = modelConfiguration.<C,I>getModelInstanceType();
+
             if(ci != null) {
             	instance = ReflectUtils.<ExtModelInstance,I>getInstance(
             		ExtModelInstance.class, ci,  this.mediator, modelConfiguration, 

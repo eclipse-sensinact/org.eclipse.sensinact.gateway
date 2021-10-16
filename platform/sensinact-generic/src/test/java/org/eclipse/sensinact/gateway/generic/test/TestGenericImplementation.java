@@ -188,16 +188,18 @@ public class TestGenericImplementation extends MidOSGiTest {
 
     @Test
     public void testFactory() throws Throwable {
-        this.initializeMoke(new File("src/test/resources/test-resource.xml").toURI().toURL(), new HashMap<String, String>() {{
-            this.put("pir", "VALUE");
-            this.put("ldr", "VALUE");
-            this.put("gpr", "VALUE");
-
+        this.initializeMoke(new File("src/test/resources/test-resource.xml").toURI().toURL(), 
+        	new HashMap<String, String>() {{
+	            this.put("pir", "VALUE");
+	            this.put("ldr", "VALUE");
+	            this.put("gpr", "VALUE");
         }}, true);
         Thread.sleep(5000);
         
-        ServiceReference reference = super.getBundleContext().getServiceReference(ProcessorService.class);
-        ProcessorService processor = (ProcessorService) super.getBundleContext().getService(reference);
+        ServiceReference reference = super.getBundleContext().getServiceReference(
+        		ProcessorService.class);
+        ProcessorService processor = (ProcessorService) super.getBundleContext(
+        		).getService(reference);
         processor.process("device1");
         
         Thread.sleep(2000);
@@ -737,7 +739,12 @@ public class TestGenericImplementation extends MidOSGiTest {
         output = new FileOutputStream(new File(tmpDirectory, "resources.xml"));
         IOUtils.write(resourcesBytes, output);
 
-        super.createDynamicBundle(new File("./extra-src/test/resources/MANIFEST.MF"), tmpDirectory, new File("./extra-src/test/resources/meta"), new File(confDirectory, "props.xml"), new File(tmpDirectory, "resources.xml"), new File("./target/extra-test-classes"));
+        super.createDynamicBundle(new File("./extra-src/test/resources/MANIFEST.MF"), 
+        		tmpDirectory, 
+        		new File("./extra-src/test/resources/meta"),
+        		new File(confDirectory, "props.xml"), 
+        		new File(tmpDirectory, "resources.xml"), 
+        		new File("./target/extra-test-classes"));
 
         Bundle bundle = super.installDynamicBundle(new File(tmpDirectory, "dynamicBundle.jar").toURI().toURL());
 

@@ -61,20 +61,13 @@ public class DefaultConnectorCustomizer<P extends Packet> implements ConnectorCu
         Iterator<PacketReaderFactory> iterator = loader.iterator();
         while (iterator.hasNext()) {
             PacketReaderFactory factory = iterator.next();
-            if (ExtModelConfiguration.getPacketType() == null || factory.handle(ExtModelConfiguration.getPacketType())) {
+            if (ExtModelConfiguration.getPacketType() == null || factory.handle(ExtModelConfiguration.getPacketType()))
                 factories.add(factory);
-            }
         }
-        if (this.factories.isEmpty()) {
+        if (this.factories.isEmpty())
             this.factories.add(new DefaultPacketReaderFactory(mediator, ExtModelConfiguration));
-        }
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectorCustomizer#
-     * preProcessing(Packet)
-     */
     @Override
     public boolean preProcessing(P packet) {
         if (this.mediator.isDebugLoggable()) {
@@ -83,12 +76,6 @@ public class DefaultConnectorCustomizer<P extends Packet> implements ConnectorCu
         return true;
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectorCustomizer#
-     * postProcessing(ExtServiceProviderImpl,
-     * PacketReader)
-     */
     @Override
     public void postProcessing(ExtServiceProviderImpl processor, PacketReader<P> packet) {
         if (this.mediator.isDebugLoggable()) {
@@ -96,15 +83,9 @@ public class DefaultConnectorCustomizer<P extends Packet> implements ConnectorCu
         }
     }
 
-    /**
-     * @inheritDoc
-     * @see ConnectorCustomizer#
-     * newPacketReader(Packet)
-     */
     @Override
     public PacketReader<P> newPacketReader(P packet) throws InvalidPacketException {
         PacketReader<P> reader = null;
-
         Iterator<PacketReaderFactory> iterator = this.factories.iterator();
 
         while (iterator.hasNext()) {

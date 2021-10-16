@@ -43,22 +43,11 @@ public class DefaultPacketReaderFactory implements PacketReaderFactory {
         }
     }
 
-    /**
-     * @param packetType
-     * @return
-     */
     @Override
     public boolean handle(Class<? extends Packet> packetType) {
         return this.packetType.isAssignableFrom(packetType);
     }
 
-    /**
-     * @param mediator
-     * @param manager
-     * @param packet
-     * @return
-     * @throws InvalidPacketException
-     */
     @Override
     public <P extends Packet> PacketReader<P> newInstance(Mediator mediator, ExtModelConfiguration manager, P packet) throws InvalidPacketException {
         int index = 0;
@@ -67,17 +56,14 @@ public class DefaultPacketReaderFactory implements PacketReaderFactory {
         for (; index < length; index++) {
             try {
                 Class<? extends PacketReader<P>> packetReaderType = (Class<? extends PacketReader<P>>) packetReaders.get(index);
-
-                if (StructuredPacketReader.class.isAssignableFrom(packetReaderType)) {
+                if (StructuredPacketReader.class.isAssignableFrom(packetReaderType)) 
                     packetReader = new StructuredPacketReader<P>(mediator, (Class<P>) packet.getClass());
-                } else {
+                else
                     packetReader = ReflectUtils.getTheBestInstance(packetReaderType, new Object[]{mediator, manager});
-                }
-                packetReader.parse(packet);
+                packetReader.load(packet);
                 break;
 
             } catch (Exception e) {
-                e.printStackTrace();
                 continue;
             }
         }

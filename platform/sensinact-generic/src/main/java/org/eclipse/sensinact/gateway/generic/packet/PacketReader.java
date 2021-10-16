@@ -24,43 +24,24 @@ import java.util.Iterator;
  */
 public interface PacketReader<P extends Packet> extends ServiceProviderProcessableContainer<PayloadFragment> {
     /**
-     * Parses the {@link Packet} passed as parameter
+     * Loads the {@link Packet} passed as parameter
      *
-     * @param packet the {@link Packet} to parse
-     * @throws InvalidPacketException
+     * @param packet the {@link Packet} to be loaded
+     * 
+     * @throws InvalidPacketException if an error occurs while loading the 
+     * specified {@link Packet}
      */
-    void parse(P packet) throws InvalidPacketException;
-
+    void load(P packet) throws InvalidPacketException;
+    
     /**
-     * Returns an {@link Iterator} over identified {@link
-     * TaskIdValuePair}s in the entire parsed {@link Packet}
-     *
-     * @return an {@link Iterator} over {@link TaskIdValuePair}s
-     * of the entire parsed {@link Packet}
+     * Parses a previously loaded {@link Packet} if any to define
+     * fields relative to sensiNact's model instance hierarchies
+     * 
+     * @throws InvalidPacketException if an error occurs while parsing 
+     * a previously loaded {@link Packet}
      */
-    Iterator<TaskIdValuePair> getTaskIdValuePairs();
-
-    /**
-     * This {@link PacketReader} is informed that the {@link Task}
-     * whose identifier is passed as parameter has been treated. The
-     * associated {@link PayloadResourceFragment} is removed from its
-     * {@link PayloadServiceFragment} holder, which belongs to a {@link PayloadFragment}
-     * of the parsed {@link Packet}, to avoid a redundant treatment
-     *
-     * @param taskIdentifier the String identifier of the treated {@link Task}
-     * @return <ul>
-     * <li>
-     * true if the associated {@link PayloadResourceFragment}
-     * has been deleted
-     * </li>
-     * <li>
-     * false if no associated {@link PayloadResourceFragment}
-     * can be found
-     * </li>
-     * </ul>
-     */
-    void treated(String taskIdentifier);
-
+    void parse() throws InvalidPacketException;
+    
     /**
      * Clears all previously defined field
      */
