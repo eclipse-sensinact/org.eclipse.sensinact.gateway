@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
@@ -29,7 +30,6 @@ import javax.servlet.http.HttpSession;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.eclipse.sensinact.gateway.util.crypto.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osgi.framework.Bundle;
@@ -179,7 +179,7 @@ public class OpenIDServer extends IdentityServerWrapper implements oAuthServer {
 		try {
 			conf.setUri(tokenEP.toURL().toExternalForm());
 			String credentials = new String(client_id + ":" + client_secret);
-			String basic = Base64.encodeBytes(credentials.getBytes(StandardCharsets.UTF_8));
+			String basic = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 			conf.addHeader("Authorization", "Basic " + basic);
 			
 			StringBuilder urlParameters = new StringBuilder();
@@ -276,7 +276,7 @@ public class OpenIDServer extends IdentityServerWrapper implements oAuthServer {
 			
 			conf.setUri(tokenEP.toURL().toExternalForm());
 			String credentials = new String(client_id + ":" + client_secret);
-			String basic = Base64.encodeBytes(credentials.getBytes(StandardCharsets.UTF_8));
+			String basic = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 			conf.addHeader("Authorization", "Basic " + basic);
 			
 			StringBuilder urlParameters = new StringBuilder();
@@ -287,7 +287,7 @@ public class OpenIDServer extends IdentityServerWrapper implements oAuthServer {
 					).append("://").append(req.getServerName()).append(":"
 					).append(req.getServerPort()).append(localAuth);		
 			}		
-			String credentialsStr = new String(Base64.decode(authorization.substring(6)));
+			String credentialsStr = new String(Base64.getDecoder().decode(authorization.substring(6)));
 			String credentialsArr[] = credentialsStr.split(":");
 			String username = credentialsArr[0];
 			String password = credentialsArr[1];

@@ -10,6 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.security.signature.internal;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.Security;
+import java.security.cert.CertStore;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.X509CertSelector;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.ess.ESSCertID;
@@ -29,21 +43,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
 import org.eclipse.sensinact.gateway.util.IOUtils;
-import org.eclipse.sensinact.gateway.util.crypto.Base64;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.Security;
-import java.security.cert.CertStore;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.X509CertSelector;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * Implementation class of the CryptographicUtils service, using Bouncy Castle
@@ -155,7 +154,7 @@ public class CryptographicUtils {
      * @return String, the hash value of the file
      */
     public String getHashValue(byte[] data, String algo) throws NoSuchAlgorithmException {
-        return Base64.encodeBytes(digest(data, algo));
+        return java.util.Base64.getEncoder().encodeToString(digest(data, algo));
     }
 
     /**

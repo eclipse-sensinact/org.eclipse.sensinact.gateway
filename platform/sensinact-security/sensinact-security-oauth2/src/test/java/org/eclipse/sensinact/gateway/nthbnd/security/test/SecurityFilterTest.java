@@ -2,16 +2,14 @@ package org.eclipse.sensinact.gateway.nthbnd.security.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.eclipse.sensinact.gateway.util.crypto.Base64;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -165,7 +163,7 @@ public class SecurityFilterTest {
 
 		
 		String credentials = new String("anonymousTester:anonymousTester");
-		String basic = Base64.encodeBytes(credentials.getBytes(StandardCharsets.UTF_8));
+		String basic = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 		
 		ConnectionConfigurationImpl conf = new ConnectionConfigurationImpl();
 		conf.setHttpMethod("GET");
@@ -177,7 +175,7 @@ public class SecurityFilterTest {
 		assertEquals(401, response.getStatusCode());
 		
 		credentials = new String("adminTester:adminTester");
-		basic = Base64.encodeBytes(credentials.getBytes(StandardCharsets.UTF_8));
+		basic = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 		
 		conf = new ConnectionConfigurationImpl();
 		conf.setHttpMethod("GET");
@@ -189,7 +187,7 @@ public class SecurityFilterTest {
 		assertEquals(200, response.getStatusCode());	
 
 		credentials = new String("unknown:unknown");
-		basic = Base64.encodeBytes(credentials.getBytes(StandardCharsets.UTF_8));
+		basic = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 		
 		conf = new ConnectionConfigurationImpl();
 		conf.setHttpMethod("GET");

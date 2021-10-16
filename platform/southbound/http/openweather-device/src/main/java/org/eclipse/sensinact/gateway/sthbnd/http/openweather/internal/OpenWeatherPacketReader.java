@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.openweather.internal;
 
+import java.util.Base64;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.LocationResource;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
@@ -18,7 +20,6 @@ import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
-import org.eclipse.sensinact.gateway.util.crypto.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -60,7 +61,7 @@ public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
                 super.setServiceProviderId(serviceProvider);
                 super.setServiceId("weather");
                 super.setResourceId("image");
-                super.setData(Base64.encodeBytes(iconObject.getBytes()));
+                super.setData(Base64.getEncoder().encode(iconObject.getBytes()));
                 super.configure();
             }
         } catch (Exception e) {

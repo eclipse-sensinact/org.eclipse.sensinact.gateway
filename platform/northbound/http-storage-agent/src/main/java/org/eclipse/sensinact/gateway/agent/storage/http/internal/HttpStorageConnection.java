@@ -10,6 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.agent.storage.http.internal;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.historic.storage.agent.generic.StorageConnection;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfiguration;
@@ -18,16 +25,9 @@ import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.protocol.http.client.Response;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.eclipse.sensinact.gateway.util.crypto.Base64;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * HTTP Agent dedicated to storage service
@@ -57,7 +57,7 @@ public class HttpStorageConnection extends StorageConnection {
 		this.login = login;
 		this.password = password;
 		this.broker = uri;
-		this.authorization = Base64.encodeBytes((this.login + ":" + this.password).getBytes());
+		this.authorization = Base64.getEncoder().encodeToString((this.login + ":" + this.password).getBytes());
 	}
 
 	/**
