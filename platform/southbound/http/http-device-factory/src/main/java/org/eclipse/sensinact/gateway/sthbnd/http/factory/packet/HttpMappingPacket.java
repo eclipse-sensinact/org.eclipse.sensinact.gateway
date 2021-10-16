@@ -87,8 +87,8 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 		this.jsonMapping = new HashMap<>();
 		
 		doSetMapping(mappings);
-		System.out.println(modelMapping);
-		System.out.println(jsonMapping);
+		//System.out.println(modelMapping);
+		//System.out.println(jsonMapping);
 		initParsing();
 	}
 
