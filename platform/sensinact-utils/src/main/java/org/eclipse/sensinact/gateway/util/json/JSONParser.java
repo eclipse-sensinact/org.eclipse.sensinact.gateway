@@ -368,10 +368,14 @@ public class JSONParser {
 			Stack<Integer> indexes) {
 
 		int index = -1;
-		String key = null;
-				
-		JSONToken token = validator.nextToken();
+		String key = null;		
+		JSONToken token = null;
 		
+		try {
+			token = validator.nextToken();
+		} catch(Exception e) {
+			LOG.error(e.getMessage(),e);
+		}		
 		if(token == null)
 			return null;
 		
