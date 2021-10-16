@@ -31,10 +31,12 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-security-oauth2</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.protocol</groupId>
 			<artifactId>http</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -51,23 +53,6 @@
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<inherited>false</inherited>
-				<executions>
-					<execution>
-						<id>copy-dependencies</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/sensinact/load/${project.artifactId}</outputDirectory>
-							<excludeArtifactIds>${excludeArtifactId}</excludeArtifactIds>
-							<excludeGroupIds>${excludeGroupId}</excludeGroupIds>
-							<excludeTransitive>${excludeTransitive}</excludeTransitive>
-							<excludeTypes>pom</excludeTypes>
-						</configuration>
-						<inherited>false</inherited>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

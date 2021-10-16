@@ -53,7 +53,7 @@
             </excludes>
         </fileSet>
         <fileSet>
-            <directory>${sensinact.rootdir}/platform/sensinact-security/sensinact-security-core/src/test/resources/</directory>
+            <directory>${project.basedir}/../../platform/sensinact-security/sensinact-security-core/src/test/resources/</directory>
             <outputDirectory>datastore/storage</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <excludes>

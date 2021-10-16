@@ -18,11 +18,14 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 
 /**
  * Extended {@link AbstractActivator}
  */
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends AbstractActivator<Mediator> {
 
 

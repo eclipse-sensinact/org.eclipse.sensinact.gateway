@@ -10,18 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.datastore.sqlite.test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
-import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
-import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteConnectionProvider;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 
 import java.sql.Connection;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
+import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
+import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteConnectionProvider;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -46,7 +46,7 @@ public class TestSqliteConnectionProvider {
 	private SQLiteConnectionProvider sqliteProvider;
 	private Mediator mediator;
 
-	@Before
+	@BeforeEach
 	public void init() throws UnableToConnectToDataStoreException, InvalidSyntaxException {
 		Filter filter = Mockito.mock(Filter.class);
 		Mockito.when(filter.toString()).thenReturn(LOG_FILTER);
@@ -72,9 +72,11 @@ public class TestSqliteConnectionProvider {
 		sqliteProvider.closeConnection();
 	}
 
-	@Test(expected = UnableToFindDataStoreException.class)
+	@Test
 	public void testOpenConnectionFail() throws UnableToFindDataStoreException, UnableToConnectToDataStoreException {
+	Assertions.assertThrows(UnableToFindDataStoreException.class, ()->{
+		
 		sqliteProvider = new SQLiteConnectionProvider(mediator, FAKE_DATABASE_PATH);
-		fail("No Exception has been thrown");
+	});
 	}
 }

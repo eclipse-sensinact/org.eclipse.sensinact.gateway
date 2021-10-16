@@ -10,10 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.internal;
 
+import java.util.logging.Logger;
+
+import org.eclipse.sensinact.gateway.core.filtering.Filtering;
+import org.eclipse.sensinact.gateway.core.filtering.FilteringType;
+import org.osgi.service.component.annotations.Component;
+
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.Filtering;
 
 /**
  * {@link Filtering} implementation allowing to apply a JsonPath expression to
@@ -21,6 +25,8 @@ import org.eclipse.sensinact.gateway.core.Filtering;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
+@FilteringType(JsonPathFiltering.JSONPATH)
+@Component(immediate=true, service = Filtering.class)
 public class JsonPathFiltering implements Filtering {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
@@ -31,17 +37,14 @@ public class JsonPathFiltering implements Filtering {
     //********************************************************************//
     //						STATIC DECLARATIONS							  //
     //********************************************************************//
+	
+	protected static final Logger LOG = Logger.getLogger(JsonPathFiltering.class.getName());
+
+	public static final String JSONPATH="jsonpath";
     //********************************************************************//
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
-    private Mediator mediator;
 
-    /**
-     * @param mediator
-     */
-    public JsonPathFiltering(Mediator mediator) {
-        this.mediator = mediator;
-    }
 
     /**
      * @inheritDoc
@@ -49,7 +52,7 @@ public class JsonPathFiltering implements Filtering {
      */
     @Override
     public boolean handle(String type) {
-        return "jsonpath".equals(type);
+        return JSONPATH.equals(type);
     }
 
     /**
@@ -70,7 +73,7 @@ public class JsonPathFiltering implements Filtering {
                 return String.valueOf(object);
             }
         } catch (Exception e) {
-            mediator.error("Failed to process JsonPath", e);
+        	LOG.warning("Failed to process JsonPath");
             throw e;
         }
     }

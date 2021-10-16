@@ -11,9 +11,10 @@
 
 package org.eclipse.sensinact.gateway.core.security.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,10 +41,15 @@ import org.eclipse.sensinact.gateway.core.security.ws.test.WsServiceTestClient;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.eclipse.sensinact.gateway.test.MidOSGiTest;
-import org.eclipse.sensinact.gateway.test.MidProxy;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.framework.BundleContext;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.context.InstalledBundleExtension;
+import org.osgi.test.junit5.service.ServiceExtension;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -53,7 +59,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class TestThirdPartyAccessToken extends MidOSGiTest {
+@ExtendWith(BundleContextExtension.class)
+@ExtendWith(InstalledBundleExtension.class)
+@ExtendWith(ServiceExtension.class)
+public class TestThirdPartyAccessToken{
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
 	// ********************************************************************//
@@ -460,7 +469,6 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Override
 	protected void doInit(Map configuration) {
 		configuration.put("org.osgi.framework.system.packages.extra",
 			"org.eclipse.sensinact.gateway.test," + 
@@ -546,9 +554,9 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 	}
 
 	@SuppressWarnings("rawtypes")
-	@Ignore
+	@Disabled
 	@Test
-	public void testThirdPartyIdentityProvider() throws Throwable {
+	public void testThirdPartyIdentityProvider(@InjectService Core core) throws Throwable {
 		
 		// slider[0-9]{2} - authenticated access level
 		// slider[0-9]{2}/admin - admin authenticated access level
@@ -567,9 +575,6 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		}
 		Thread.sleep(20000);
 
-		MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
-
-		Core core = mid.buildProxy();
 		Session session = core.getAnonymousSession();
 		assertNotNull(session);
 
@@ -583,13 +588,10 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		// service providers and services
 		String token =  this.openIdAuthenticate("cea", "sensiNact_team");
 		
-		MidProxy<Authentication> midCredentials = new MidProxy<Authentication>(classloader, this, Authentication.class);
-		midCredentials.buildProxy(AccessToken.class.getCanonicalName(), new Class<?>[] { String.class },
-				new Object[] { token });
+		Authentication<String> credentials = new AccessToken(token);
 
-		Method method = mid.getContextualizedType().getDeclaredMethod("getSession",
-				new Class<?>[] { midCredentials.getContextualizedType() });
-		session = (Session) mid.toOSGi(method, new Object[] { midCredentials.getInstance() });
+		session = core.getSession(credentials);
+
 		assertNotNull(session);
 
 		providers = session.serviceProviders();
@@ -597,10 +599,7 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		Iterator<ServiceProvider> iterator = providers.iterator();
 
 		while (iterator.hasNext()) {
-			MidProxy<ServiceProvider> provider = new MidProxy<ServiceProvider>(classloader, this,
-					ServiceProvider.class);
-
-			ServiceProvider serviceProvider = provider.buildProxy(iterator.next());
+			ServiceProvider serviceProvider = iterator.next();
 			assertEquals(2, serviceProvider.getServices().size());
 			System.out.println(serviceProvider.getDescription().getJSON());
 		}
@@ -610,14 +609,9 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		// the fake user is suppose to see only two service providers
 		// and only the cursor service for each one
 		token = this.openIdAuthenticate("fake", "fake");
-		midCredentials = new MidProxy<Authentication>(classloader, this, Authentication.class);
-		midCredentials.buildProxy(AccessToken.class.getCanonicalName(), new Class<?>[] { String.class },
-				new Object[] { token });
+		credentials = new AccessToken(token);
 
-		method = mid.getContextualizedType().getDeclaredMethod("getSession",
-				new Class<?>[] { midCredentials.getContextualizedType() });
-
-		session = (Session) mid.toOSGi(method, new Object[] { midCredentials.getInstance() });
+		session = core.getSession(credentials);
 
 		assertNotNull(session);
 
@@ -627,10 +621,7 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		iterator = providers.iterator();
 
 		while (iterator.hasNext()) {
-			MidProxy<ServiceProvider> provider = new MidProxy<ServiceProvider>(classloader, this,
-					ServiceProvider.class);
-
-			ServiceProvider serviceProvider = provider.buildProxy(iterator.next());
+			ServiceProvider serviceProvider = iterator.next();
 			assertEquals(1, serviceProvider.getServices().size());
 			System.out.println(serviceProvider.getDescription().getJSON());
 		}
@@ -640,14 +631,9 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		// the fake2 user is suppose to see only one service provider
 		// and only its cursor service
 		token = this.openIdAuthenticate("fake2", "fake2");
-		midCredentials = new MidProxy<Authentication>(classloader, this, Authentication.class);
-		midCredentials.buildProxy(AccessToken.class.getCanonicalName(), new Class<?>[] { String.class },
-				new Object[] { token });
+		credentials = new AccessToken(token);
 
-		method = mid.getContextualizedType().getDeclaredMethod("getSession",
-				new Class<?>[] { midCredentials.getContextualizedType() });
-
-		session = (Session) mid.toOSGi(method, new Object[] { midCredentials.getInstance() });
+		session = core.getSession(credentials);
 
 		assertNotNull(session);
 
@@ -656,19 +642,16 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		iterator = providers.iterator();
 
 		while (iterator.hasNext()) {
-			MidProxy<ServiceProvider> provider = new MidProxy<ServiceProvider>(classloader, this,
-					ServiceProvider.class);
-
-			ServiceProvider serviceProvider = provider.buildProxy(iterator.next());
+			ServiceProvider serviceProvider = iterator.next();
 			assertEquals(1, serviceProvider.getServices().size());
 			System.out.println(serviceProvider.getDescription().getJSON());
 		}
 	}
 	
 	@SuppressWarnings("rawtypes")
-	@Ignore
+	@Disabled
 	@Test
-	public void testThirdPartyIdentityProviderWithCredentials() throws Throwable {
+	public void testThirdPartyIdentityProviderWithCredentials(@InjectService Core core) throws Throwable {
 		
 		// slider[0-9]{2} - authenticated access level
 		// slider[0-9]{2}/admin - admin authenticated access level
@@ -687,13 +670,10 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		}
 		Thread.sleep(20000);
 
-		MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
-
-		Core core = mid.buildProxy();
 		Session session = core.getAnonymousSession();
 		assertNotNull(session);
 
-		Set providers = session.serviceProviders();
+		Set<ServiceProvider> providers = session.serviceProviders();
 		System.out.println(providers);
 		assertTrue(providers.isEmpty());
 
@@ -702,13 +682,10 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		// the admin user is suppose to see every thing
 		// service providers and services
 		
-		MidProxy<Authentication> midCredentials = new MidProxy<Authentication>(classloader, this, Authentication.class);
-		midCredentials.buildProxy(Credentials.class.getCanonicalName(), new Class<?>[] { String.class, String.class },
-				new Object[] { "cea", "sensiNact_team" });
+		Authentication<Credentials> credentials = new Credentials("cea", "sensiNact_team");
 
-		Method method = mid.getContextualizedType().getDeclaredMethod("getSession",
-				new Class<?>[] { midCredentials.getContextualizedType() });
-		session = (Session) mid.toOSGi(method, new Object[] { midCredentials.getInstance() });
+		session = core.getSession(credentials);
+
 		assertNotNull(session);
 
 		providers = session.serviceProviders();
@@ -716,10 +693,7 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		Iterator<ServiceProvider> iterator = providers.iterator();
 
 		while (iterator.hasNext()) {
-			MidProxy<ServiceProvider> provider = new MidProxy<ServiceProvider>(classloader, this,
-					ServiceProvider.class);
-
-			ServiceProvider serviceProvider = provider.buildProxy(iterator.next());
+			ServiceProvider serviceProvider = iterator.next();
 			assertEquals(2, serviceProvider.getServices().size());
 			System.out.println(serviceProvider.getDescription().getJSON());
 		}
@@ -729,14 +703,9 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		// the fake user is suppose to see only two service providers
 		// and only the cursor service for each one
 
-		midCredentials = new MidProxy<Authentication>(classloader, this, Authentication.class);
-		midCredentials.buildProxy(Credentials.class.getCanonicalName(), new Class<?>[] { String.class, String.class },
-				new Object[] { "fake", "fake" });
+		credentials = new Credentials("fake", "fake");
 
-		method = mid.getContextualizedType().getDeclaredMethod("getSession",
-				new Class<?>[] { midCredentials.getContextualizedType() });
-
-		session = (Session) mid.toOSGi(method, new Object[] { midCredentials.getInstance() });
+		session = core.getSession(credentials);
 
 		assertNotNull(session);
 
@@ -746,10 +715,7 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		iterator = providers.iterator();
 
 		while (iterator.hasNext()) {
-			MidProxy<ServiceProvider> provider = new MidProxy<ServiceProvider>(classloader, this,
-					ServiceProvider.class);
-
-			ServiceProvider serviceProvider = provider.buildProxy(iterator.next());
+			ServiceProvider serviceProvider = iterator.next();
 			assertEquals(1, serviceProvider.getServices().size());
 			System.out.println(serviceProvider.getDescription().getJSON());
 		}
@@ -758,14 +724,9 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		// fake2
 		// the fake2 user is suppose to see only one service provider
 		// and only its cursor service
-		midCredentials = new MidProxy<Authentication>(classloader, this, Authentication.class);
-		midCredentials.buildProxy(Credentials.class.getCanonicalName(), new Class<?>[] { String.class, String.class },
-				new Object[] { "fake2", "fake2" });
+		credentials = new Credentials("fake2", "fake2");
 
-		method = mid.getContextualizedType().getDeclaredMethod("getSession",
-				new Class<?>[] { midCredentials.getContextualizedType() });
-
-		session = (Session) mid.toOSGi(method, new Object[] { midCredentials.getInstance() });
+		session = core.getSession(credentials);
 
 		assertNotNull(session);
 
@@ -774,19 +735,16 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		iterator = providers.iterator();
 
 		while (iterator.hasNext()) {
-			MidProxy<ServiceProvider> provider = new MidProxy<ServiceProvider>(classloader, this,
-					ServiceProvider.class);
-
-			ServiceProvider serviceProvider = provider.buildProxy(iterator.next());
+			ServiceProvider serviceProvider = iterator.next();
 			assertEquals(1, serviceProvider.getServices().size());
 			System.out.println(serviceProvider.getDescription().getJSON());
 		}
 	}
 
 
-	@Ignore
+	@Disabled
 	@Test
-	public void testSecurityPatternWithHttpNorthbound() throws Throwable {
+	public void testSecurityPatternWithHttpNorthbound(@InjectBundleContext BundleContext context) throws Throwable {
 		// slider[0-9]{2} - authenticated access level
 		// slider[0-9]{2}/admin - admin authenticated access level
 		// cea user is admin on slider[0-9]{2}
@@ -904,9 +862,9 @@ public class TestThirdPartyAccessToken extends MidOSGiTest {
 		System.out.println("====================================>>>>>");
 	}
 
-	@Ignore
+	@Disabled
 	@Test
-	public void testSecurityPatternWithWsNorthbound() throws Throwable {
+	public void testSecurityPatternWithWsNorthbound(@InjectBundleContext BundleContext context) throws Throwable {
 		// slider[0-9]{2} - authenticated access level
 		// slider[0-9]{2}/admin - admin authenticated access level
 		// cea user is admin on slider[0-9]{2}

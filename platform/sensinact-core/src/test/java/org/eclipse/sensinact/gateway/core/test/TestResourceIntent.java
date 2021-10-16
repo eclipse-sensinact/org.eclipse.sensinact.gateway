@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Dictionary;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,9 +26,10 @@ import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -47,13 +48,14 @@ public class TestResourceIntent<R extends ModelInstance> {
 	private final BundleContext context = Mockito.mock(BundleContext.class);
 	private final Bundle bundle = Mockito.mock(Bundle.class);
 
-	@Before
-	public void init() throws Exception {
+	@BeforeEach
+	public void init() throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException,
+			DataStoreException, BundleException {
 		this.testContext = new TestContext();
 		this.tree = new AccessTreeImpl(testContext.getMediator()).withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		this.testContext.stop();
 	}

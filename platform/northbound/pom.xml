@@ -17,7 +17,7 @@
 		<groupId>org.eclipse.sensinact.gateway</groupId>
 		<artifactId>parent</artifactId>
 		<version>2.0-SNAPSHOT</version>
-	</parent>
+	<relativePath>../pom.xml</relativePath></parent>
 
 	<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 	<artifactId>parent</artifactId>
@@ -26,8 +26,8 @@
 	<name>sensiNact IoT Gateway - Northbound parent module</name>
 
 	<modules>
-	<module>rest-access</module>
-		<!--<module>jsonpath-filtering</module>-->
+		<module>rest-access</module>
+		<module>jsonpath-filtering</module>
 		<module>geo-filtering</module>
 		<module>ldap-filtering</module>
 		<module>attributes-filtering</module>
@@ -37,6 +37,7 @@
 		<module>influxdb-storage-agent</module>
 		<module>http-onem2m-agent</module>
 		<module>http-tools</module>
+		<module>sensinact-access</module>
 	</modules>
 </project>
 

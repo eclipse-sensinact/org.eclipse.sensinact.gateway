@@ -1,0 +1,6 @@
+Bundle-Name: Test Bundle
+Bundle-Vendor: Eclipse
+Bundle-SymbolicName: test-bundle
+-privatepackage: \
+	org.eclipse.sensinact.gateway.mail.connector.tb.osgi,\
+	org.eclipse.sensinact.gateway.mail.connector.tb

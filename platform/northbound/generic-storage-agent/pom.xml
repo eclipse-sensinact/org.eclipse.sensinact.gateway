@@ -6,10 +6,10 @@
 		<groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
 		<artifactId>parent</artifactId>
 		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
     <artifactId>generic-storage-agent</artifactId>
-    <packaging>bundle</packaging>
 
     <name>sensiNact IoT Gateway - Generic Historical Storage Agent</name>
 
@@ -17,19 +17,21 @@
         <dependency>
             <groupId>org.eclipse.sensinact.gateway</groupId>
             <artifactId>sensinact-common</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.sensinact.gateway</groupId>
             <artifactId>sensinact-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-            </plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-maven-plugin</artifactId>
+			</plugin>
         </plugins>
     </build>
 

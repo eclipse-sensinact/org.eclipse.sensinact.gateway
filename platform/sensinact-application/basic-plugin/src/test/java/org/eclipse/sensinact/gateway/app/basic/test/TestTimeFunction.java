@@ -10,33 +10,24 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.test;
 
-import junit.framework.TestCase;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.app.api.function.DataItf;
 import org.eclipse.sensinact.gateway.app.api.function.FunctionUpdateListener;
 import org.eclipse.sensinact.gateway.app.basic.time.SleepFunction;
 import org.eclipse.sensinact.gateway.app.manager.component.data.ConstantData;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.junit.Before;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.ArrayList;
-import java.util.List;
+public class TestTimeFunction {
+    
+    private Mediator mediator=Mockito.mock(Mediator.class);
+    
+    private FunctionUpdateListener listener=Mockito.mock(FunctionUpdateListener.class);
 
-@RunWith(PowerMockRunner.class)
-public class TestTimeFunction extends TestCase {
-    @Mock
-    private Mediator mediator;
-    @Mock
-    private FunctionUpdateListener listener;
 
-    @Before
-    public void init() throws Exception {
-        MockitoAnnotations.initMocks(this);
-    }
 
     public void testSleep() {
         SleepFunction function = new SleepFunction(mediator);

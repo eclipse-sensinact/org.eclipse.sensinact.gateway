@@ -25,6 +25,7 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.nthbnd.http.forward.ForwardingService;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.http.whiteboard.annotations.RequireHttpWhiteboard;
 
 /**
  * A ForwardingFactory is in charge of creating the {@link ForwardingFilter}s attached
@@ -33,6 +34,7 @@ import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
  *
  * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
+@RequireHttpWhiteboard
 public class ForwardingFactory {
     private Mediator mediator;
     private String appearingKey;

@@ -14,6 +14,10 @@ import java.util.Hashtable;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.UserKeyBuilder;
 import org.eclipse.sensinact.gateway.core.security.UserKeyBuilderFactory;
+
+import aQute.bnd.annotation.Resolution;
+import aQute.bnd.annotation.spi.ServiceProvider;
+
 import org.eclipse.sensinact.gateway.core.security.AccessToken;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
@@ -21,6 +25,7 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 /**
  * {@link UserKeyBuilderFactory} service implementation
  */
+@ServiceProvider(value = UserKeyBuilderFactory.class, resolution = Resolution.OPTIONAL)
 public class OpenIdUserKeyBuilderFactory implements UserKeyBuilderFactory<String,AccessToken,OpenIdAccessTokenUserKeyBuilder> {
 	
 	@Override

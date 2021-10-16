@@ -10,6 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.commands.gogo.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import org.eclipse.sensinact.gateway.commands.gogo.internal.AccessMethodCommands;
 import org.eclipse.sensinact.gateway.commands.gogo.internal.DescribeCommands;
 import org.eclipse.sensinact.gateway.commands.gogo.internal.DeviceCommands;
@@ -18,14 +21,14 @@ import org.eclipse.sensinact.gateway.commands.gogo.internal.ServiceCommands;
 import org.eclipse.sensinact.gateway.commands.gogo.internal.UserCommands;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
-
-import java.util.Dictionary;
-import java.util.Hashtable;
+import org.osgi.framework.Constants;
 
 /**
  * @see AbstractActivator
  */
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends AbstractActivator<CommandServiceMediator> {
     /**
      * @inheritDoc

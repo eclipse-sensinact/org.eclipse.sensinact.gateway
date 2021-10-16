@@ -19,6 +19,7 @@
 		<groupId>org.eclipse.sensinact</groupId>
 		<artifactId>gateway</artifactId>
 		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.eclipse.sensinact.gateway</groupId>
@@ -56,55 +57,109 @@
 					</execution>
 				</executions>
 			</plugin>
+                     <!-- This dynamically calculates all the things we need to run our code. -->
+                    <plugin>
+						<groupId>biz.aQute.bnd</groupId>
+						<artifactId>bnd-testing-maven-plugin</artifactId>
+						<version>${bnd-maven-plugin.version}</version>
+						<executions>
+							<!-- OSGi integration tests execution -->
+							<execution>
+								<id>testing</id>
+								<goals>
+									<goal>testing</goal>
+								</goals>
+								<configuration>
+									<bndruns>
+										<include>*.bndrun</include>
+									</bndruns>
+									<bundles>
+										<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
+									</bundles>
+									<failOnChanges>false</failOnChanges>
+									<includeDependencyManagement>true</includeDependencyManagement>
+									<useMavenDependencies>true</useMavenDependencies>
+									<resolve>true</resolve>
+									<scopes>
+										<scope>compile</scope>
+										<scope>runtime</scope>
+										<scope>test</scope>
+										<scope>provided</scope>
+									</scopes>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					 <!-- This dynamically calculates all the things we need to run our code. -->
+                    <plugin>
+                        <groupId>biz.aQute.bnd</groupId>
+                        <artifactId>bnd-resolver-maven-plugin</artifactId>
+                        <version>${bnd-maven-plugin.version}</version>
+                        <executions>
+						<!-- Integration Test Configuration -->
+			            <execution>
+			                <goals>
+			                    <goal>resolve</goal>
+			                </goals>
+			            </execution>
+						<execution>
+							<id>resolve-test</id>
+							<phase>pre-integration-test</phase>
+							<goals>
+								<goal>resolve</goal>
+							</goals>
+							<configuration>
+								<bndruns>
+										<include>*.bndrun</include>
+								</bndruns>
+								<bundles>
+									<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
+								</bundles>
+								<failOnChanges>false</failOnChanges>
+								<includeDependencyManagement>true</includeDependencyManagement>
+								<useMavenDependencies>true</useMavenDependencies>
+								<reportOptional>false</reportOptional>
+								
+								<scopes>
+									<scope>compile</scope>
+									<scope>runtime</scope>
+									<scope>test</scope>
+									<scope>provided</scope>
+								</scopes>
+							</configuration>
+						</execution>
+					</executions>
+                    </plugin>
+
 		</plugins>
+		<pluginManagement>
+		<plugins>
+		
+		</plugins>
+		</pluginManagement>
 	</build>
 
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-junit4</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito</artifactId>
-			<scope>test</scope>
-		</dependency>
+
 	</dependencies>
 
 	<modules>
 		<module>sensinact-utils</module>
 		<module>sensinact-common</module>
-		<module>tools</module>
-		<module>sensinact-datastore/sensinact-datastore-api</module>
-		<module>sensinact-security/sensinact-signature-validator</module>
-		<module>sensinact-security/sensinact-framework-extension</module>
-		<module>sensinact-core</module>
-		<module>sensinact-remote-osgi</module>
 		<module>sensinact-security</module>
-		<module>protocol</module>
-		<module>northbound/sensinact-access</module>
-		<module>sensinact-generic</module>
-		<module>../simulated-devices</module>
-		<module>northbound/mqtt/mqtt-agent</module>
 		<module>sensinact-datastore</module>
-		<module>sensinact-historic-api</module>
+		<module>sensinact-core</module>
 		<module>sensinact-historic-manager</module>
-		<module>northbound</module>
-		<module>sensinact-security/sensinact-mail-connector</module>
-		<module>sensinact-security/sensinact-security-core</module>
-		<module>sensinact-security/sensinact-security-keybuilder</module>
-		<module>sensinact-security/sensinact-security-openid-keybuilder</module>
-		<module>sensinact-security/sensinact-security-test</module>
-		<!--<module>sensinact-security/sensinact-security-oauth2</module>-->
-		<module>southbound</module>
+		<module>sensinact-remote-osgi</module>
+		<module>protocol</module>
+		<module>sensinact-generic</module>
+		<module>sensinact-historic-api</module>
 		<module>sensinact-system</module>
 		<module>sensinact-shell</module>
 		<module>sensinact-application</module>
+		<module>southbound</module>
+		<module>northbound</module>
+		<module>tools</module>
+		<module>../simulated-devices</module>
 	</modules>
 </project>

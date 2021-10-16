@@ -19,6 +19,7 @@
 		<groupId>org.eclipse.sensinact.gateway</groupId>
 		<artifactId>parent</artifactId>
 		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.eclipse.sensinact.gateway.tools</groupId>
@@ -36,5 +37,6 @@
 		<module>influxdb-connector</module>
 		<module>mongodb-connector</module>
 		<module>mixed-osgi-over-slf4j</module>
+<!-- 		<module>studio-web</module> -->
 	</modules>
 </project>

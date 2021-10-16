@@ -19,10 +19,10 @@
 		<groupId>org.eclipse.sensinact.gateway</groupId>
 		<artifactId>parent</artifactId>
 		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>sensinact-common</artifactId>
-	<packaging>bundle</packaging>
 
 	<name>sensiNact IoT Gateway - Common Data Structures</name>
 	<description>SensiNact - Common</description>
@@ -31,6 +31,7 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-utils</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -47,21 +48,25 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<_nouses>true</_nouses>
-						<_exportcontents>*</_exportcontents>
-						<Import-Package>org.osgi.framework;version="1.9",*</Import-Package>
-						<Include-Resource>
-							about.html,
-							src/main/resources/
-						</Include-Resource>
-					</instructions>
-				</configuration>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-maven-plugin</artifactId>
 			</plugin>
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.apache.felix</groupId> -->
+<!-- 				<artifactId>maven-bundle-plugin</artifactId> -->
+<!-- 				<extensions>true</extensions> -->
+<!-- 				<configuration> -->
+<!-- 					<instructions> -->
+<!-- 						<_nouses>true</_nouses> -->
+<!-- 						<_exportcontents>*</_exportcontents> -->
+<!-- 						<Import-Package>org.osgi.framework;version="1.9",*</Import-Package> -->
+<!-- 						<Include-Resource> -->
+<!-- 							about.html, -->
+<!-- 							src/main/resources/ -->
+<!-- 						</Include-Resource> -->
+<!-- 					</instructions> -->
+<!-- 				</configuration> -->
+<!-- 			</plugin> -->
 		</plugins>
 	</build>
 </project>

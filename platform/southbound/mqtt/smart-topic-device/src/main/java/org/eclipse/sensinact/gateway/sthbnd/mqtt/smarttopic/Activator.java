@@ -13,8 +13,11 @@ package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ManagedBasisActivator;
 import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpointConfigurator;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends ManagedBasisActivator<Mediator> {
 	
     public static final String MQTT_PREFIX = "smarttopic";

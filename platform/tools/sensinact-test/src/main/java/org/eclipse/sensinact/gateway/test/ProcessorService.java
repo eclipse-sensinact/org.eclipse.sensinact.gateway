@@ -1,3 +1,4 @@
+package org.eclipse.sensinact.gateway.test;
 /*
 * Copyright (c) 2020 Kentyou.
  * All rights reserved. This program and the accompanying materials
@@ -8,7 +9,7 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.test;
+
 
 public interface ProcessorService {
     void process(String packet);

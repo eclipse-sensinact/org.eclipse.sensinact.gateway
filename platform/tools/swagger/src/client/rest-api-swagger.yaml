@@ -1,4 +1,4 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
   version: 2.0-SNAPSHOT
   title: sensiNact REST API
@@ -47,7 +47,7 @@ paths:
         '200':
           description: Successful response
           schema:
-            $ref: '/schemas/providers_response.json'
+            $ref: './schemas/providers_response.json'
   '/providers/{providerId}':
     get:
       description: |
@@ -75,7 +75,7 @@ paths:
         '200':
           description: Successful response
           schema:
-            $ref: '/schemas/provider_response.json'
+            $ref: './schemas/provider_response.json'
   '/providers/{providerId}/services':
     get:
       description: |
@@ -103,7 +103,7 @@ paths:
         '200':
           description: Successful response
           schema:
-            $ref: '/schemas/services_response.json'
+            $ref: './schemas/services_response.json'
   '/providers/{providerId}/services/{serviceId}':
     get:
       description: |
@@ -136,7 +136,7 @@ paths:
         '200':
           description: Successful response
           schema:
-            $ref: '/schemas/service_response.json'
+            $ref: './schemas/service_response.json'
   '/providers/{providerId}/services/{serviceId}/resources':
     get:
       description: |
@@ -169,7 +169,7 @@ paths:
         '200':
           description: Successful response
           schema:
-            $ref: '/schemas/resources_response.json'
+            $ref: './schemas/resources_response.json'
   '/providers/{providerId}/services/{serviceId}/resources/{resourceId}':
     get:
       description: |
@@ -207,7 +207,7 @@ paths:
         '200':
           description: Successful response
           schema:
-            $ref: '/schemas/resource_response.json'
+            $ref: './schemas/resource_response.json'
   '/providers/{providerId}/services/{serviceId}/resources/{resourceId}/GET':
     get:
       description: |
@@ -245,7 +245,7 @@ paths:
         '200':
           description: Successful response
           schema:
-            $ref: '/schemas/get_response.json'
+            $ref: './schemas/get_response.json'
   '/providers/{providerId}/services/{serviceId}/resources/{resourceId}/SET':
     post:
       description: |
@@ -284,12 +284,12 @@ paths:
           description: the sNa parameter object containing the value to set
           required: true
           schema:
-            $ref: '/schemas/set_request.json'
+            $ref: './schemas/set_request.json'
       responses:
         '200':
           description: Successful response
           schema:
-            $ref: '/schemas/set_response.json'
+            $ref: './schemas/set_response.json'
   '/providers/{providerId}/services/{serviceId}/resources/{resourceId}/ACT':
     post:
       description: |
@@ -328,12 +328,12 @@ paths:
           description: the sNa parameter objects for the action
           required: false
           schema:
-            $ref: '/schemas/act_request.json'
+            $ref: './schemas/act_request.json'
       responses:
         '200':
           description: Successful response
           schema:
-            $ref: '/schemas/act_response.json'
+            $ref: './schemas/act_response.json'
   '/providers/{providerId}/services/{serviceId}/resources/{resourceId}/SUBSCRIBE':
     get:
       description: |
@@ -371,8 +371,7 @@ paths:
         '200':
           description: Successful response
           schema:
-            $ref: '/schemas/get_response.json'
-  '/providers/{providerId}/services/{serviceId}/resources/{resourceId}/SUBSCRIBE':
+            $ref: './schemas/get_response.json'
     post:
       description: |
         Perform a sNa SUBSCRIBE on a `resource`.
@@ -410,12 +409,12 @@ paths:
           description: the sNa parameters object for the subscription (e.g., contraints)
           required: true
           schema:
-            $ref: '/schemas/subscribe_request.json'
+            $ref: './schemas/subscribe_request.json'
       responses:
         '200':
           description: Successful response
           schema:
-            $ref: '/schemas/subscribe_response.json'
+            $ref: './schemas/subscribe_response.json'
   '/providers/{providerId}/services/{serviceId}/resources/{resourceId}/UNSUBSCRIBE':
     post:
       description: |
@@ -454,9 +453,9 @@ paths:
           description: the subscription Id
           required: true
           schema:
-            $ref: '/schemas/unsubscribe_request.json'
+            $ref: './schemas/unsubscribe_request.json'
       responses:
         '200':
           description: Successful response
           schema:
-            $ref: '/schemas/unsubscribe_response.json'
+            $ref: './schemas/unsubscribe_response.json'

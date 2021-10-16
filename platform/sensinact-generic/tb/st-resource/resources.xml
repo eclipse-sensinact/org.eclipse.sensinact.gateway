@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+  ~ Copyright (c) 2020 Kentyou.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+*    Kentyou - initial API and implementation
+  -->
+
+<resourceInfos empty_profile="true"
+xmlns="http://org.eclipse.sensinact/resource"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../main/resources/sensinact-resource.xsd">
+  <resourceInfo xsi:type="resourceInfoSensor" name="POWER" policy="SENSOR">
+    <identifier xsi:type="stringContent">0400</identifier>
+    <attributes>
+    	<attribute name="value" type="int">
+    		<value>0</value>    		
+		    <metadata>
+			    <meta name="Description" type="string">
+			    	<value>Instantaneous power of the plugged device</value>
+			    </meta>
+			    <meta name="Unit" type="string">
+			    	<value>W</value>
+			    </meta>
+		    </metadata>
+    	</attribute>
+    </attributes>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoSensor" name="POWER" profile="OTHER_PROFILE" policy="SENSOR">
+    <identifier xsi:type="stringContent">04001</identifier>    
+    <attributes>
+    	<attribute name="value" type="int">
+    		<value>0</value>    		
+		    <metadata>
+			    <meta name="Description" type="string">
+			    	<value>Instantaneous power of the plugged device</value>
+			    </meta>
+			    <meta name="Unit" type="string">
+			    	<value>W</value>
+			    </meta>
+		    </metadata>
+    	</attribute>
+    </attributes>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoSensor" name="ENERGY" policy="SENSOR">
+    <identifier xsi:type="stringContent">0000</identifier>      
+    <attributes>
+    	<attribute name="value" type="int">
+    		<value>0</value>    		
+		    <metadata>
+			    <meta name="Description" type="string">
+			    	<value>Power spent for one hour of the plugged device</value>
+			    </meta>
+			    <meta name="Unit" type="string">
+			    	<value>Wh</value>
+			    </meta>
+		    </metadata>
+    	</attribute>
+    </attributes>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoVariable" name="STATUS" policy="STATE_VARIABLE">
+    <identifier xsi:type="stringContent">STATUS</identifier>    
+    <attributes>
+    	<attribute name="value" type="int">
+    		<value>1</value>    		
+		    <metadata>
+			    <meta name="Description" type="string">
+			    	<value>State of the plugged device (ON=1, OFF=0)</value>
+			    </meta>
+		    </metadata>
+    	</attribute>
+    </attributes>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoVariable" name="VARIATION" policy="STATE_VARIABLE">
+    <identifier xsi:type="stringContent">VARIATION</identifier>  
+    <attributes>
+    	<attribute name="value" type="float">
+    		<value>0</value>
+    	</attribute>
+    </attributes>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoProperty" name="VOLTAGE" policy="PROPERTY">
+    <identifier xsi:type="stringContent">VOLTAGE</identifier>  
+    <attributes>
+    	<attribute name="value" type="int">
+    		<value>220</value> 
+    	</attribute>
+    </attributes>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoProperty" name="VERSION" target="admin"  policy="PROPERTY">
+    <identifier xsi:type="stringContent">VERSION</identifier>  
+    <attributes>
+    	<attribute name="value" type="string">
+    		<value>2.4</value>  
+    	</attribute>
+    </attributes>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoProperty" name="VENDOR" target="admin" policy="PROPERTY">
+    <identifier xsi:type="stringContent">VENDOR</identifier>
+    <attributes>
+    	<attribute name="value" type="string">
+    		<value>STM</value>  
+    	</attribute>
+    </attributes>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoAction" name="TURNON" policy="ACTION" target="PowerService" profile="power" > 
+    <identifier xsi:type="stringContent">on</identifier>
+    <methods>
+	    <method type="ACT">
+		    <references>
+		    	<reference xsi:type="constantReference" reference="STATUS" passOn="false">
+		    		<builder type="EMPTY">
+						<argument type="int">
+							<value>1</value>
+						</argument>
+					</builder>
+		    	</reference>
+		    </references>
+	    </method>
+    </methods>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoAction" name="TURNOFF" policy="ACTION" target="PowerService" profile="power"> 
+    <identifier xsi:type="stringContent">off</identifier>
+    <methods>
+	    <method type="ACT">
+			<references>
+		    	<reference xsi:type="constantReference" reference="STATUS" passOn="false">
+		    		<builder type="EMPTY">
+						<argument type="int">
+							<value>0</value>
+						</argument>
+					</builder>
+		    	</reference>
+		    	<reference xsi:type="calculatedReference" calculated="VARIATIONTEST_TRIGGER" reference="VARIATION" passOn="false">
+		    		<builder type="PARAMETER">
+						<argument type="int">
+							<value>0</value>
+						</argument>
+					</builder>
+				</reference>
+		    </references> 
+	    </method>
+    </methods>
+  </resourceInfo>
+  <devices>
+  	<device identifier="SmartPlug" profile="power">
+  		<!--<service name="PowerService"/>-->
+  	</device>
+  </devices>
+</resourceInfos>
+ 

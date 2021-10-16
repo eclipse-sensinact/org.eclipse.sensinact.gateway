@@ -1,5 +1,15 @@
 package org.eclipse.sensinact.gateway.nthbnd.endpoint.test;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
@@ -24,25 +34,15 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestHandler;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.skyscreamer.jsonassert.JSONAssert;
-
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -56,14 +56,14 @@ public class NorthboundRequestHandlerTest {
     private final BundleContext context = Mockito.mock(BundleContext.class);
     private final Bundle bundle = Mockito.mock(Bundle.class);
 
-    @Before
+    @BeforeEach
     public void init() throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException, BundleException, DataStoreException {
         this.testContext = new TestContext();
         this.tree = new AccessTreeImpl(testContext.getMediator()).withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
     }
 
 
-    @After
+    @AfterEach
     public void tearDown() {
         this.testContext.stop();
     }

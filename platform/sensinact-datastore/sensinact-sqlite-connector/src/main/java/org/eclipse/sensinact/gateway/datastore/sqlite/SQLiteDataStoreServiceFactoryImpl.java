@@ -20,9 +20,13 @@ import org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService;
 import org.eclipse.sensinact.gateway.core.security.SecurityDataStoreServiceFactory;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 
+import aQute.bnd.annotation.Resolution;
+import aQute.bnd.annotation.spi.ServiceProvider;
+
 /**
  * Factory of {@link DataStoreService}
  */
+@ServiceProvider(value = SecurityDataStoreServiceFactory.class, resolution = Resolution.OPTIONAL)
 public class SQLiteDataStoreServiceFactoryImpl implements SecurityDataStoreServiceFactory<SQLiteDataStoreService> {
 	/**
 	 * @inheritDoc

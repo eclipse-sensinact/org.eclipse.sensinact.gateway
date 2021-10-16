@@ -13,7 +13,8 @@ package org.eclipse.sensinact.gateway.util.tree.test;
 import org.eclipse.sensinact.gateway.util.tree.PathNode;
 import org.eclipse.sensinact.gateway.util.tree.PathNodeFactory;
 import org.eclipse.sensinact.gateway.util.tree.PathTree;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>

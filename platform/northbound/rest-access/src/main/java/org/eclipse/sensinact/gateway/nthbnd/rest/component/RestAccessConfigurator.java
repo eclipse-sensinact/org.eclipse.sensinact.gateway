@@ -41,11 +41,13 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
+import org.osgi.service.http.whiteboard.annotations.RequireHttpWhiteboard;
 
 /**
  * 
  */
 @Component(immediate=true)
+@RequireHttpWhiteboard
 public class RestAccessConfigurator {
     	
 	private CorsFilter corsFilter = null;

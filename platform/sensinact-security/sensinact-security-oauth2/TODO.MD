@@ -1,0 +1,1 @@
+The whole test is deactivated because we had to remove the keycloak server from the dependency list. They pulled in half the world including the kitchen sink. This made bndtools hard to use, as it tends to reindex all the dependencies available when changes appear.

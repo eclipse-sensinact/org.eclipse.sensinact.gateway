@@ -13,8 +13,10 @@ package org.sensinact.mqtt.server.osgi;
 import java.io.IOException;
 import java.util.Hashtable;
 
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -26,6 +28,7 @@ import org.sensinact.mqtt.server.impl.MQTTServerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator implements BundleActivator,SynchronousConfigurationListener {
 	
     private final static String CONFIGURATION_PID="mqtt.server";

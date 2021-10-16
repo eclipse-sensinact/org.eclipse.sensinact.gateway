@@ -14,30 +14,44 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.rest.ws.test.WsServiceTestClient;
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.framework.BundleContext;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.service.ServiceExtension;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestRestSETAccess extends TestRestAccess {
-    public TestRestSETAccess() throws Exception {
-        super();
-    }
+@ExtendWith(BundleContextExtension.class)
+@ExtendWith(ServiceExtension.class)
+public class TestRestSETAccess{
 
+	@BeforeEach
+	public void before(@InjectBundleContext BundleContext context) {
+		Mediator mediator = new Mediator(context);
+		String simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/SET", "{\"parameters\":[{\"name\": \"location\",\"value\": \"45.2:5.7\",\"type\": \"string\"}]}", "POST");
+        JSONObject response = new JSONObject(simulated);
+        assertEquals(200, response.get("statusCode"));
+	}
+	
     @Test
-    public void testHttpAccessMethodSET() throws Exception {
+    public void testHttpAccessMethodSET(@InjectBundleContext BundleContext context) throws Exception {
         Mediator mediator = new Mediator(context);
-        String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/GET", null, "GET");
+        String simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/GET", null, "GET");
 
         JSONObject response = new JSONObject(simulated);
 
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/admin/location"));
-        assertTrue(response.getJSONObject("response").get("value").equals("45.2:5.7"));
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/SET", "{\"parameters\":[{\"name\": \"location\",\"value\": \"0.0,0.0\",\"type\": \"string\"}]}", "POST");
+        assertEquals(response.getJSONObject("response").get("value"),"45.2:5.7");
+        simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/SET", "{\"parameters\":[{\"name\": \"location\",\"value\": \"0.0,0.0\",\"type\": \"string\"}]}", "POST");
 
         response = new JSONObject(simulated);
 
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/GET", null, "GET");
+        simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/GET", null, "GET");
 
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/admin/location"));
@@ -52,18 +66,18 @@ public class TestRestSETAccess extends TestRestAccess {
 
         new Thread(client).start();
 
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/slider/services/admin/resources/location/GET", null);
+        simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers/slider/services/admin/resources/location/GET", null);
 
         response = new JSONObject(simulated);
 
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/admin/location"));
-        assertTrue(response.getJSONObject("response").get("value").equals("45.2:5.7"));
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/slider/services/admin/resources/location/SET", "[{\"name\": \"location\",\"value\": \"0.0,0.0\",\"type\": \"string\"}]");
+        assertEquals(response.getJSONObject("response").get("value"),"45.2:5.7");
+        simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers/slider/services/admin/resources/location/SET", "[{\"name\": \"location\",\"value\": \"0.0,0.0\",\"type\": \"string\"}]");
 
         response = new JSONObject(simulated);
 
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/slider/services/admin/resources/location/GET", null);
+        simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers/slider/services/admin/resources/location/GET", null);
 
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/slider/admin/location"));

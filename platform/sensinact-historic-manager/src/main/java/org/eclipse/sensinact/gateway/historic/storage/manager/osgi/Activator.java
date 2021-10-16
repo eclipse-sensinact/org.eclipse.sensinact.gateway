@@ -13,9 +13,12 @@ package org.eclipse.sensinact.gateway.historic.storage.manager.osgi;
 import org.eclipse.sensinact.gateway.generic.BasisActivator;
 import org.eclipse.sensinact.gateway.generic.annotation.SensiNactBridgeConfiguration;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
+import org.osgi.annotation.bundle.Header;
+import org.osgi.framework.Constants;
 
 /**
  * Handle the bundle activation/deactivation
  */
 @SensiNactBridgeConfiguration(outputOnly = true)
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends BasisActivator<Packet> {}

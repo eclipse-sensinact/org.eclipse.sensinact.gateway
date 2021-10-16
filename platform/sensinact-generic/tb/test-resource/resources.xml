@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+  ~ Copyright (c) 2020 Kentyou.
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  ~
+  ~ Contributors:
+*    Kentyou - initial API and implementation
+  -->
+
+<resourceInfos xmlns="http://org.eclipse.sensinact/resource"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://org.eclipse.sensinact/resource ../../main/resources/sensinact-resource.xsd">
+  <commands> 
+  	  <command type="GET"> 
+     	<identifier xsi:type="binaryHexContent">52</identifier>  
+  	 </command> 
+  	  <command type="SET"> 
+     	<identifier xsi:type="stringContent">50</identifier>  
+  	 </command> 
+  	  <command type="ACT"> 
+     	<identifier xsi:type="stringContent">54</identifier>  
+  	 </command> 
+  	  <command type="SUBSCRIBE"> 
+     	<identifier xsi:type="binaryHexContent">56</identifier>  
+  	 </command> 
+  	  <command type="UNSUBSCRIBE"> 
+     	<identifier xsi:type="stringContent">58</identifier>  
+  	 </command> 
+  	  <command type="SERVICES_ENUMERATION"> 
+     	<identifier xsi:type="binaryHexContent">35</identifier>  
+  	 </command> 
+  	  <command type="HELLO"> 
+     	<identifier xsi:type="stringContent">Hello</identifier>  
+  	 </command> 
+  	  <command type="GOODBYE"> 
+     	<identifier xsi:type="stringContent">Goodbye</identifier>  
+  	 </command> 
+  </commands>  
+  <resourceInfo xsi:type="resourceInfoSensor" name="VALUE" policy="SENSOR" 
+  	target="tmp,bat,pir,hum,co,co2,bend,for,hall,ldr">
+    <identifier xsi:type="binaryHexContent">31</identifier>
+    <attributes>
+    	<attribute name="value" type="float" target="tmp">
+		    <metadata>    	
+			    <meta name="Unit" type="string">
+			    	<value>CELSIUS</value>
+			    </meta>
+			    <meta name="Description" type="string">
+			    	<value>Sensed temperature</value>
+			    </meta>
+		    </metadata>
+    	</attribute>
+    	<attribute name="value" type="float" target="bat">
+		    <metadata>    	
+			    <meta name="Unit" type="string">
+			    	<value>AH</value>
+			    </meta>
+			    <meta name="Description" type="string">
+			    	<value>Capacity of the battery</value>
+			    </meta>
+		    </metadata>
+    	</attribute>
+    	<attribute name="value" type="int" target="pir">
+		    <metadata>    	
+			    <meta name="Unit" type="string">
+			    	<value>INT</value>
+			    </meta>
+			    <meta name="Description" type="string">
+			    	<value>Detected presence : Detected = 1, Undetected = 0</value>
+			    </meta>
+		    </metadata>
+    	</attribute>
+    	<attribute name="value" type="float" target="co">
+		    <metadata>    	
+			    <meta name="Unit" type="string">
+			    	<value>PPM</value>
+			    </meta>
+			    <meta name="Description" type="string">
+			    	<value>Concentration of carbon monoxyde (30 ~ 1000ppm)</value>
+			    </meta>
+		    </metadata>
+    	</attribute>
+    	<attribute name="value" type="float" target="co2">
+		    <metadata>    	
+			    <meta name="Unit" type="string">
+			    	<value>PPM</value>
+			    </meta>
+			    <meta name="Description" type="string">
+			    	<value>Concentration of carbon dioxyde (350 ~ 10000ppm)</value>
+			    </meta>
+		    </metadata>
+    	</attribute>
+    	<attribute name="value" type="float" target="bend">
+		    <metadata>    	
+			    <meta name="Unit" type="string">
+			    	<value>KILOOHMS</value>
+			    </meta>
+			    <meta name="Description" type="string">
+			    	<value>Bending resistance</value>
+			    </meta>
+		    </metadata>
+    	</attribute>
+    	<attribute name="value" type="float" target="for">
+		    <metadata>    	
+			    <meta name="Unit" type="string">
+			    	<value>KILOOHMS</value>
+			    </meta>
+			    <meta name="Description" type="string">
+			    	<value>Pressure resistance</value>
+			    </meta>
+		    </metadata>
+    	</attribute>
+    	<attribute name="value" type="float" target="hall"> 
+		    <metadata>    	
+			    <meta name="Unit" type="string">
+			    	<value>INT</value>
+			    </meta>
+			    <meta name="Description" type="string">
+			    	<value>Hall effect (doors and windows) : Open = 1, Closed = 0</value>
+			    </meta>
+		    </metadata>
+    	</attribute>
+    	<attribute name="value" type="float" target="hum">
+		    <metadata>    	
+			    <meta name="Unit" type="string">
+			    	<value>PERCENTAGE</value>
+			    </meta>
+			    <meta name="Description" type="string">
+			    	<value>Relative humidity percentage (0 - 100)</value>
+			    </meta>
+		    </metadata>
+    	</attribute>
+    	<attribute name="value" type="float" target="ldr">
+		    <metadata>    	
+			    <meta name="Unit" type="string">
+			    	<value>LUX</value>
+			    </meta>
+			    <meta name="Description" type="string">
+			    	<value>Detected light/darkness</value>
+			    </meta>
+		    </metadata>
+    	</attribute>
+    </attributes> 
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoVariable" name="CONDITION" policy="STATE_VARIABLE"  > 
+    <identifier xsi:type="binaryHexContent">33</identifier>
+    <attributes>
+	   	<attribute name="value" type="string" modifiable="UPDATABLE">
+	   		<value>O</value>
+	   	</attribute>
+    </attributes>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoProperty" name="THRESHOLD" policy="PROPERTY" > 
+    <identifier xsi:type="binaryHexContent">34</identifier> 
+    <attributes>
+	    <attribute name="value" type="float" modifiable="MODIFIABLE">
+	    	<value>0.0</value>
+	    </attribute> 
+	    <attribute name="value" type="float" target="gpr" modifiable="MODIFIABLE">
+	    	<value>1.5</value>
+	    </attribute> 
+	    <attribute name="gpr_reboot" type="string" target="gpr" modifiable="MODIFIABLE">
+	    	<value>gpr_reboot targeted property</value>
+	    </attribute> 
+    </attributes>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoVariable" name="LOCATION" policy="STATE_VARIABLE" target="admin"> 
+    <identifier xsi:type="binaryHexContent">36</identifier>     
+    <attributes>
+	    <attribute name="value" type="string" modifiable="MODIFIABLE">
+	    	<value>unknown</value>
+	    </attribute> 
+    </attributes>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoProperty" name="MODEL" policy="PROPERTY" target="admin"> 
+  	<policy name="PROPERTY" update="AUTO"/>
+    <identifier xsi:type="binaryHexContent">37</identifier>    
+    <attributes>
+	    <attribute name="value" type="string"/> 
+    </attributes>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoProperty" name="MANUFACTURER" policy="PROPERTY" target="admin"> 
+    <identifier xsi:type="binaryHexContent">38</identifier>   
+    <attributes>
+	    <attribute name="value" type="string"/> 
+    </attributes>   
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoProperty" name="OWNER" policy="PROPERTY" target="admin"> 
+    <identifier xsi:type="binaryHexContent">39</identifier>     
+    <attributes>
+	    <attribute name="value" type="string">
+	    </attribute> 
+    </attributes>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoProperty" name="RATE" policy="PROPERTY" target="admin"> 
+    <identifier xsi:type="binaryHexContent">3130</identifier>     
+    <attributes>
+	    <attribute name="value" type="float"/> 
+    </attributes>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoProperty" name="UPTIME" policy="PROPERTY" target="admin"> 
+    <identifier xsi:type="binaryHexContent">3131</identifier>     
+    <attributes>
+	    <attribute name="value" type="long"/> 
+    </attributes>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoProperty" name="RSSI" policy="PROPERTY" target="admin"> 
+    <identifier xsi:type="binaryHexContent">3132</identifier> 
+    <attributes>
+	    <attribute name="value" type="float"/> 
+    </attributes>
+  </resourceInfo> 
+  <resourceInfo xsi:type="resourceInfoProperty" name="VERSION" policy="PROPERTY" target="admin"> 
+    <identifier xsi:type="binaryHexContent">3134</identifier>   
+    <attributes>
+	    <attribute name="value" type="string"/> 
+    </attributes> 
+  </resourceInfo>  
+  <resourceInfo xsi:type="resourceInfoAction" name="SLEEP" policy="ACTION" target="admin"> 
+    <identifier xsi:type="binaryHexContent">3133</identifier> 
+    <methods>
+    	<method type="ACT">
+	    	<parameter name="delay" type="long" />
+    	</method>
+    </methods>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoAction" name="BLINK" policy="ACTION" target="admin"> 
+    <identifier xsi:type="binaryHexContent">3136</identifier>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoAction" name="REBOOT" policy="ACTION" target="admin">
+    <policy name="ACTION" update="NONE">
+        <classname>org.eclipse.sensinact.gateway.generic.test.moke.MokeAction</classname>
+    </policy>
+    <identifier xsi:type="binaryHexContent">3137</identifier> 
+    <methods>
+    	<method type="ACT"/>
+    </methods>
+  </resourceInfo>
+  <resourceInfo xsi:type="resourceInfoAction" name="SMS" target="gpr" policy="ACTION"> 
+    <policy name="ACTION" update="NONE">
+        <classname>org.eclipse.sensinact.gateway.generic.test.moke.MokeAction</classname>
+    </policy>
+    <identifier xsi:type="binaryHexContent">3138</identifier> 
+    <methods>
+	    <method type="ACT">  
+	    	<parameter name="number" type="string"/>
+	    	<parameter name="message" type="string"/>
+	    </method>
+    </methods>
+  </resourceInfo>
+</resourceInfos>

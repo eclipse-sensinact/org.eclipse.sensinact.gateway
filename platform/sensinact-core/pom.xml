@@ -19,43 +19,50 @@
 		<groupId>org.eclipse.sensinact.gateway</groupId>
 		<artifactId>parent</artifactId>
 		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>sensinact-core</artifactId>
-	<packaging>bundle</packaging>
 
 	<name>sensiNact IoT Gateway - Core</name>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.eclipse.sensinact.gateway</groupId>
-			<artifactId>sensinact-signature-validator</artifactId>
-			<scope>provided</scope>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.eclipse.sensinact.gateway</groupId>
-			<artifactId>sensinact-common</artifactId>
-			<scope>compile</scope>
-		</dependency>
+
+
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-utils</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-common</artifactId>
+			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-datastore-api</artifactId>
+			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
-			<artifactId>sensinact-framework-extension</artifactId>
+			<artifactId>sensinact-signature-validator-api</artifactId>
+			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.framework.security</artifactId>
-			<scope>compile</scope>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-signature-validator-mock</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.skyscreamer</groupId>
@@ -65,32 +72,60 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<scope>provided</scope>
+			<scope>compile</scope>
 		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId> -->
+<!-- 			<artifactId>mqtt-utils</artifactId> -->
+<!-- 			<version>${project.version}</version> -->
+<!-- 		</dependency> -->
 	</dependencies>
 
 	<!-- Build -->
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-testing-maven-plugin</artifactId>
 				<configuration>
-					<obrRepository>NONE</obrRepository>
-					<instructions>
-						<Require-Capability>
-							org.eclipse.sensinact.security,
-							org.eclipse.sensinact.data.store,
-							org.eclipse.sensinact.signature.validator,
-							org.eclipse.sensinact.user.manager;resolution:=optional
-							org.eclipse.sensinact.user.keybuilder;resolution:=optional
-						</Require-Capability>
-						<Include-Resource>
-							about.html
-						</Include-Resource>
-					</instructions>
+					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven-surefire-plugin.version}</version>
+				<!-- We let bnd-testing-maven-plugin do all the testing -->
+				<configuration>
+					<skipTests>false</skipTests>
+					
+				</configuration>
+			</plugin>
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.apache.felix</groupId> -->
+<!-- 				<artifactId>maven-bundle-plugin</artifactId> -->
+<!-- 				<configuration> -->
+<!-- 					<obrRepository>NONE</obrRepository> -->
+<!-- 					<instructions> -->
+<!-- 						<Bundle-Activator>org.eclipse.sensinact.gateway.core.osgi.Activator</Bundle-Activator> -->
+<!-- 						<DynamicImport-Package> -->
+<!-- 							org.eclipse.sensinact.gateway.core.security.impl -->
+<!-- 						</DynamicImport-Package> -->
+<!-- 						<Require-Capability> -->
+<!-- 							org.eclipse.sensinact.security, -->
+<!-- 							org.eclipse.sensinact.data.store, -->
+<!-- 							org.eclipse.sensinact.signature.validator -->
+<!-- 						</Require-Capability> -->
+<!-- 						<Include-Resource> -->
+<!-- 							about.html -->
+<!-- 						</Include-Resource> -->
+<!-- 					</instructions> -->
+<!-- 				</configuration> -->
+<!-- 			</plugin> -->
 		</plugins>
 	</build>
 

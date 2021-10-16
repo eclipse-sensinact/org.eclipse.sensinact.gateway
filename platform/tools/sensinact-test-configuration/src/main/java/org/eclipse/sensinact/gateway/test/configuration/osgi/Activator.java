@@ -10,16 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.test.configuration.osgi;
 
+import java.util.ConcurrentModificationException;
+import java.util.List;
+
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
-
-import java.util.ConcurrentModificationException;
-import java.util.List;
 
 
 /**
@@ -27,6 +29,7 @@ import java.util.List;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator implements BundleActivator {
 
     public void start(BundleContext context) throws Exception {

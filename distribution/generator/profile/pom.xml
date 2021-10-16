@@ -32,13 +32,15 @@
 			slf4j-api,
 			org.osgi.core,
 			osgi.cmpn,
+			osgi.annotation,
 			sensinact-generic,
 			sensinact-core,
 			sensinact-utils,
 			sensinact-condperm,
 			sensinact-datastore-api,
 			json,
-			asm-all
+			asm-all,
+			biz.aQute.bnd.annotation
 		</excludeArtifactId>
 		<excludeGroupId></excludeGroupId> <!-- org.apache.felix, -->
 		<excludeTransitive>true</excludeTransitive>
@@ -48,21 +50,48 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
 			<artifactId>sensinact-distribution-template</artifactId>
+			<version>${project.version}</version>
 			<type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
 			<artifactId>sensinact-distribution-template-with-security</artifactId>
+			<version>${project.version}</version>
 			<type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
 			<artifactId>sensinact-distribution-template-with-openid-security</artifactId>
+			<version>${project.version}</version>
 			<type>pom</type>
 		</dependency>
 	</dependencies>
 
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+	                <artifactId>maven-dependency-plugin</artifactId>
+	                <executions>
+	                    <execution>
+	                        <id>copy-dependencies</id>
+	                        <phase>prepare-package</phase>
+	                        <goals>
+	                            <goal>copy-dependencies</goal>
+	                        </goals>
+	                        <configuration>
+	                            <outputDirectory>${project.build.directory}/sensinact/load/${project.artifactId}</outputDirectory>
+	                            <excludeArtifactIds>${excludeArtifactId}</excludeArtifactIds>
+	                            <excludeGroupIds>${excludeGroupId}</excludeGroupIds>
+	                            <excludeTransitive>${excludeTransitive}</excludeTransitive>
+	                            <excludeTypes>pom</excludeTypes>
+	                            <includeScope>runtime</includeScope>
+	                        </configuration>
+	                    </execution>     
+	                </executions>
+	            </plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -121,23 +150,6 @@
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <inherited>false</inherited>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/sensinact/load/${project.artifactId}</outputDirectory>
-                            <excludeArtifactIds>${excludeArtifactId}</excludeArtifactIds>
-                            <excludeGroupIds>${excludeGroupId}</excludeGroupIds>
-                            <excludeTransitive>${excludeTransitive}</excludeTransitive>
-                            <excludeTypes>pom</excludeTypes>
-                        </configuration>
-                        <inherited>false</inherited>
-                    </execution>     
-                </executions>
             </plugin>
 		</plugins>
 	</build>

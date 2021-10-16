@@ -10,7 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.test;
 
-import junit.framework.TestCase;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.app.api.function.DataItf;
 import org.eclipse.sensinact.gateway.app.api.function.FunctionUpdateListener;
 import org.eclipse.sensinact.gateway.app.basic.logic.BetweenFunction;
@@ -18,24 +20,17 @@ import org.eclipse.sensinact.gateway.app.basic.logic.DoubleConditionFunction;
 import org.eclipse.sensinact.gateway.app.basic.logic.SimpleConditionFunction;
 import org.eclipse.sensinact.gateway.app.manager.component.data.ConstantData;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.ArrayList;
-import java.util.List;
+public class TestLogicFunction {
+    
+    private Mediator mediator=Mockito.mock(Mediator.class);
+    
+    private FunctionUpdateListener listener=Mockito.mock(FunctionUpdateListener.class);
 
-@RunWith(PowerMockRunner.class)
-public class TestLogicFunction extends TestCase {
-    @Mock
-    private Mediator mediator;
-    @Mock
-    private FunctionUpdateListener listener;
-
-    @Before
+    @BeforeEach
     public void init() throws Exception {
         MockitoAnnotations.initMocks(this);
     }

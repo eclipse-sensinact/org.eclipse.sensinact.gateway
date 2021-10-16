@@ -16,6 +16,12 @@ package org.eclipse.sensinact.gateway.core.filtering;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public interface Filtering {
+	
+	/*
+	 * Name of the Component-property that is used to set the filter type(s)
+	 */
+	public static String TYPE= 	"sensinact.filtering.type";
+
 	/**
 	 * Returns true if this Filtering service is able to handle the String type of
 	 * filter passed as parameter; returns false otherwise

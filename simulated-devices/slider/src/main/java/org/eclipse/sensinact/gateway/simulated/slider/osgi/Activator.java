@@ -10,6 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.simulated.slider.osgi;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
@@ -21,15 +27,12 @@ import org.eclipse.sensinact.gateway.simulated.slider.internal.SliderGUI;
 import org.eclipse.sensinact.gateway.simulated.slider.internal.SliderPacket;
 import org.eclipse.sensinact.gateway.simulated.slider.internal.SliderSetter;
 import org.json.JSONArray;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.List;
-
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends AbstractActivator<Mediator> {
 
     private static final String SLIDERS_DEFAULT = "[\"slider\"]";

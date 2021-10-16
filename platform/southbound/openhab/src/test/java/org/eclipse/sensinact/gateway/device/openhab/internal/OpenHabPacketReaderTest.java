@@ -10,11 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.device.openhab.internal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+
 
 /**
  *
@@ -55,16 +57,16 @@ public class OpenHabPacketReaderTest {
         String[] parseOpenhabPath = null;
         try {
             parseOpenhabPath = OpenHabPacketReader.parseOpenhabPath(openhabDeviceId);
-            assertNotNull("unexpected null path", parseOpenhabPath);
-            assertEquals("unexpected path length", 4, parseOpenhabPath.length);
+            assertNotNull( parseOpenhabPath,"unexpected null path");
+            assertEquals( 4, parseOpenhabPath.length,"unexpected path length");
             for (int i = 0; i < 4; i ++) {
-                assertNotNull("unexpected null element", parseOpenhabPath[i]);
+                assertNotNull( parseOpenhabPath[i],"unexpected null element");
             }
             System.out.println("Provider=" + OpenHabPacketReader.OPENHAB_ZWAVE_PROVIDER_ID_FORMAT.format(parseOpenhabPath));
             System.out.println("Service =" + parseOpenhabPath[2]);
             System.out.println("Resource=" + parseOpenhabPath[3]);
             if (expectedResourceId != null) {
-                assertEquals("unexpected resource id", expectedResourceId, parseOpenhabPath[3]);
+                assertEquals( expectedResourceId, parseOpenhabPath[3],"unexpected resource id");
             }
         } catch (Exception ex) {
             fail("unexpected error:" + ex.getMessage());
@@ -74,6 +76,6 @@ public class OpenHabPacketReaderTest {
     
     private void testCreateProvider(final String openhabDeviceId) {
         String[] parsedOpenhabPath = testParseOpenhabPath(openhabDeviceId);
-        assertNotNull("unexpected null path", parsedOpenhabPath);
+        assertNotNull( parsedOpenhabPath,"unexpected null path");
     }
 }

@@ -19,6 +19,7 @@
 		<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
 		<artifactId>parent</artifactId>
 		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>sensinact-distribution-template-with-security</artifactId>

@@ -11,14 +11,20 @@
 
 package org.eclipse.sensinact.gateway.datastore.sqlite.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
+import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
+import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
+import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -26,12 +32,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
-import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
-import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
-import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService;
 
 public class TestDataBaseService {
 	private static final String FAKE_DATABASE_PATH = "target/test-resources/fake.db";
@@ -47,7 +47,7 @@ public class TestDataBaseService {
 	private SQLiteDataStoreService dataService;
 	private Mediator mediator;
 
-	@Before
+	@BeforeEach
 	public void init() throws Exception {
 		context = Mockito.mock(BundleContext.class);
 		bundle = Mockito.mock(Bundle.class);
@@ -69,13 +69,17 @@ public class TestDataBaseService {
 
 	}
 
-	@Test(expected = UnableToFindDataStoreException.class)
+	@Test
 	public void testOpenConnectionFail()
 			throws DataStoreException, UnableToConnectToDataStoreException, UnableToFindDataStoreException {
 		Mockito.when(mediator.getProperty(Mockito.eq("org.eclipse.sensinact.gateway.security.database")))
 				.thenReturn(FAKE_DATABASE_PATH);
+	
+		Assertions.assertThrows(UnableToFindDataStoreException.class,()->{
+			
 		dataService = new SQLiteDataStoreService(mediator);
-		fail("No Exception has been thrown");
+		});
+	
 	}
 
 	@Test

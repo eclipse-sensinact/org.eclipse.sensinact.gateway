@@ -42,6 +42,7 @@ public class HttpServiceTestClient {
             response = request.send();
             byte[] responseContent = response.getContent();
             String contentStr = (responseContent == null ? null : new String(responseContent));
+            System.out.println("response from URL " + url + " was " + contentStr);
             return contentStr;
         } catch (JSONException e) {
             e.printStackTrace();

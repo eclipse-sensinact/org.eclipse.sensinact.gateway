@@ -40,7 +40,7 @@ public class FilteringAccessor extends FilteringDefinition {
 		this.mediator = mediator;
 		try {
 			Collection<ServiceReference<Filtering>> references = mediator.getContext()
-					.getServiceReferences(Filtering.class, String.format("(type=%s)", super.type));
+					.getServiceReferences(Filtering.class, String.format("(%s=%s)", Filtering.TYPE,super.type));
 
 			if (references == null || references.size() != 1) {
 				throw new RuntimeException("Unable to retrieve the appropriate Filtering service reference");

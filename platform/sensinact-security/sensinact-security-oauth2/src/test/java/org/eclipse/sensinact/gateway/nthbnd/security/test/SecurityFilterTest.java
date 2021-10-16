@@ -1,102 +1,88 @@
 package org.eclipse.sensinact.gateway.nthbnd.security.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.Test;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.representations.idm.RealmRepresentation;
-import org.keycloak.services.managers.RealmManager;
-import org.keycloak.testsuite.KeycloakServer;
-import org.junit.Ignore;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+//import org.keycloak.models.KeycloakSession;
+//import org.keycloak.models.RealmModel;
+//import org.keycloak.representations.idm.RealmRepresentation;
+//import org.keycloak.services.managers.RealmManager;
+//import org.keycloak.testsuite.KeycloakServer;
 
-import org.eclipse.sensinact.gateway.test.MidOSGiTest;
-import org.eclipse.sensinact.gateway.util.crypto.Base64;
-
-public class SecurityFilterTest extends MidOSGiTest {
+@Disabled
+public class SecurityFilterTest {
 	
 	class KServer {
 		
-		KeycloakServer server = null;		
-		KServer() throws Throwable {	
-		    server = KeycloakServer.bootstrapKeycloakServer(
-		    	new String[] {"-b","localhost","-p","8895"});		
-			assertNotNull(server);		
-			RealmRepresentation representation = KeycloakServer.loadJson(
-			    new FileInputStream("src/test/resources/testRealm.json"), 
-				    RealmRepresentation.class);
-			KeycloakSession session = server.getSessionFactory().create();
-	        session.getTransactionManager().begin();
-	        try {
-	        	
-	            RealmManager manager = new RealmManager(session);
-	            assertNull(manager.getRealmByName("test"));
-	            //manager.setContextPath(representation.getClients().get(0).getBaseUrl());
-	            RealmModel realm = manager.importRealm(representation);
-	            System.out.println("Imported realm " + realm.getName());
-	            session.getTransactionManager().commit();
-	        } finally {
-	            session.close();
-	        }
-	        
-//			Keycloak kc = Keycloak.getInstance("http://localhost:8080/sensinact.auth", 
-//			    "test", "testRealmAdmin", "testRealmAdminPassword", "testClient", "testClient");
-//			CredentialRepresentation credential = new CredentialRepresentation();
-//			credential.setType(CredentialRepresentation.PASSWORD);
-//			credential.setValue("test123");
-//			UserRepresentation user = new UserRepresentation();
-//			user.setUsername("testuser");
-//			user.setFirstName("Test");
-//			user.setLastName("User");
-//			user.setCredentials(Arrays.asList(credential));
-//			kc.realm("test").users().create(user);
-//			user.setEnabled(true);		
-		}
-		
-		
-		public void stop() {
-			server.stop();
-		}
+//		KeycloakServer server = null;		
+//		KServer() throws Throwable {	
+//		    server = KeycloakServer.bootstrapKeycloakServer(
+//		    	new String[] {"-b","localhost","-p","8895"});		
+//			assertNotNull(server);		
+//			RealmRepresentation representation = KeycloakServer.loadJson(
+//			    new FileInputStream("src/test/resources/testRealm.json"), 
+//				    RealmRepresentation.class);
+//			KeycloakSession session = server.getSessionFactory().create();
+//	        session.getTransactionManager().begin();
+//	        try {
+//	        	
+//	            RealmManager manager = new RealmManager(session);
+//	            assertNull(manager.getRealmByName("test"));
+//	            //manager.setContextPath(representation.getClients().get(0).getBaseUrl());
+//	            RealmModel realm = manager.importRealm(representation);
+//	            System.out.println("Imported realm " + realm.getName());
+//	            session.getTransactionManager().commit();
+//	        } finally {
+//	            session.close();
+//	        }
+//	        
+////			Keycloak kc = Keycloak.getInstance("http://localhost:8080/sensinact.auth", 
+////			    "test", "testRealmAdmin", "testRealmAdminPassword", "testClient", "testClient");
+////			CredentialRepresentation credential = new CredentialRepresentation();
+////			credential.setType(CredentialRepresentation.PASSWORD);
+////			credential.setValue("test123");
+////			UserRepresentation user = new UserRepresentation();
+////			user.setUsername("testuser");
+////			user.setFirstName("Test");
+////			user.setLastName("User");
+////			user.setCredentials(Arrays.asList(credential));
+////			kc.realm("test").users().create(user);
+////			user.setEnabled(true);		
+//		}
+//		
+//		
+//		public void stop() {
+//			server.stop();
+//		}
 	}
 	
     KServer s;
     
-    /**
-     * @throws MalformedURLException
-     * @throws IOException
-     */
-    public SecurityFilterTest() throws Exception {
-        super();
+    @BeforeEach
+    public void before() throws Throwable {
+    	s = new KServer();
     }
 
-    /**
-     * @inheritDoc
-     * @see MidOSGiTest#isExcluded(java.lang.String)
-     */
-    public boolean isExcluded(String fileName) {
-        if ("org.apache.felix.framework.security.jar".equals(fileName)) {
-            return true;
-        }
-        return false;
+    @AfterEach
+    public void after() throws Throwable {
+//    	s.stop();
     }
-
+    
     /**
      * @inheritDoc
      * @see MidOSGiTest#doInit(java.util.Map)
      */
-    @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void doInit(Map configuration) {
     	    	
@@ -160,14 +146,14 @@ public class SecurityFilterTest extends MidOSGiTest {
         configuration.put("org.apache.felix.http.whiteboardEnabled", true);
     }
 
-    @Ignore
+    @Disabled
 	@Test
 	public void testKeycloakServer() throws Throwable {//		
 //		Manually call http://localhost:8899/sensinact/slider with both adminTester 
 //		and anonymousTester users to test oAuth2 security handling	 
 //		wait 10mns 	   
 		Thread.sleep(600000);
-		s.stop();
+//		s.stop();
 		Thread.sleep(2000);
 	}
 
@@ -175,10 +161,9 @@ public class SecurityFilterTest extends MidOSGiTest {
 	@Test
 	public void testAccess() throws Throwable {	
 
-		Thread.sleep(2000);
 		
 		String credentials = new String("anonymousTester:anonymousTester");
-		String basic = Base64.encodeBytes(credentials.getBytes(StandardCharsets.UTF_8));
+		String basic = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 		
 		ConnectionConfigurationImpl conf = new ConnectionConfigurationImpl();
 		conf.setHttpMethod("GET");
@@ -190,7 +175,7 @@ public class SecurityFilterTest extends MidOSGiTest {
 		assertEquals(401, response.getStatusCode());
 		
 		credentials = new String("adminTester:adminTester");
-		basic = Base64.encodeBytes(credentials.getBytes(StandardCharsets.UTF_8));
+		basic = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 		
 		conf = new ConnectionConfigurationImpl();
 		conf.setHttpMethod("GET");
@@ -202,7 +187,7 @@ public class SecurityFilterTest extends MidOSGiTest {
 		assertEquals(200, response.getStatusCode());	
 
 		credentials = new String("unknown:unknown");
-		basic = Base64.encodeBytes(credentials.getBytes(StandardCharsets.UTF_8));
+		basic = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 		
 		conf = new ConnectionConfigurationImpl();
 		conf.setHttpMethod("GET");
@@ -213,8 +198,7 @@ public class SecurityFilterTest extends MidOSGiTest {
 		response = new SimpleRequest(conf).send();
 		assertEquals(401, response.getStatusCode());
 
-		Thread.sleep(5000);
-		s.stop();
+		
 	}
     
 }

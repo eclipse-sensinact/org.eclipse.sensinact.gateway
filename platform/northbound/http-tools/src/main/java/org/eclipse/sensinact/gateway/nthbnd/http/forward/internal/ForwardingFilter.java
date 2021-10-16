@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -171,6 +172,11 @@ public class ForwardingFilter implements Filter {
 		@Override
 		public void removeAttribute(String name) {
 			setAttribute(name, null);
+		}
+
+		@Override
+		public Set<String> getAttributeNameSet() {
+			return _attr.getAttributeNameSet();
 		}
 	}
 

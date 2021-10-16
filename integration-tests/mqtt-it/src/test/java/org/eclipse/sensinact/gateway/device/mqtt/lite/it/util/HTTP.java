@@ -9,15 +9,21 @@
 *    Kentyou - initial API and implementation
  */
 package org.eclipse.sensinact.gateway.device.mqtt.lite.it.util;
-import org.eclipse.sensinact.gateway.util.crypto.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * Helper class to perform HTTP request
  */
@@ -67,7 +73,7 @@ public class HTTP {
     }
     private void configAuthenticationHeaders() throws Exception {
         if(authenticationMethod==AuthenticationMethod.BASIC){
-            final String usernamePasswordBase64=Base64.encodeBytes(
+            final String usernamePasswordBase64=Base64.getEncoder().encodeToString(
             	String.format("%s:%s",getUsername(),
             			getPassword()).getBytes());
             String encoded=" Basic "+usernamePasswordBase64;

@@ -10,17 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.http.test;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import java.io.IOException;
+
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
 import org.eclipse.sensinact.gateway.util.json.JSONValidator;
 import org.json.JSONException;
 
-import java.io.IOException;
-
 public class HttpServiceTestClient {
-    public static String newRequest(Mediator mediator, String url, String content, String method) {
+    public static String newRequest( String url, String content, String method) {
         SimpleResponse response;
         ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> builder = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
         builder.setUri(url);

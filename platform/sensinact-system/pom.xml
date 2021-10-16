@@ -18,10 +18,10 @@
 		<groupId>org.eclipse.sensinact.gateway</groupId>
 		<artifactId>parent</artifactId>
 		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>sensinact-system</artifactId>
-	<packaging>bundle</packaging>
 
 	<name>sensiNact IoT Gateway - System</name>
 
@@ -48,41 +48,45 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<unpackBundle>true</unpackBundle>
-					<instructions>
-						<Import-Package>
-							org.eclipse.sensinact.gateway.core,
-							org.eclipse.sensinact.gateway.core.message,
-							org.eclipse.sensinact.gateway.core.method,
-							org.eclipse.sensinact.gateway.core.security,
-							org.eclipse.sensinact.gateway.generic,
-							org.eclipse.sensinact.gateway.generic.annotation,
-							org.eclipse.sensinact.gateway.generic.local,
-							org.eclipse.sensinact.gateway.generic.packet,
-							org.eclipse.sensinact.gateway.generic.packet.annotation,
-							org.eclipse.sensinact.gateway.generic.parser,
-							org.eclipse.sensinact.gateway.generic.stream,
-							org.eclipse.sensinact.gateway.generic.uri,
-							org.eclipse.sensinact.gateway.common.bundle,
-							org.eclipse.sensinact.gateway.common.execution,
-							org.eclipse.sensinact.gateway.util,
-							javax.xml.parsers,
-							org.json,
-							org.osgi.framework;version="[1.6,2)",
-							org.xml.sax
-						</Import-Package>
-						<Bundle-Activator>org.eclipse.sensinact.gateway.system.osgi.Activator</Bundle-Activator>
-						<Include-Resource>
-							about.html,
-							src/main/resources/
-						</Include-Resource>
-					</instructions>
-				</configuration>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-maven-plugin</artifactId>
 			</plugin>
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.apache.felix</groupId> -->
+<!-- 				<artifactId>maven-bundle-plugin</artifactId> -->
+<!-- 				<extensions>true</extensions> -->
+<!-- 				<configuration> -->
+<!-- 					<unpackBundle>true</unpackBundle> -->
+<!-- 					<instructions> -->
+<!-- 						<Import-Package> -->
+<!-- 							org.eclipse.sensinact.gateway.core, -->
+<!-- 							org.eclipse.sensinact.gateway.core.message, -->
+<!-- 							org.eclipse.sensinact.gateway.core.method, -->
+<!-- 							org.eclipse.sensinact.gateway.core.security, -->
+<!-- 							org.eclipse.sensinact.gateway.generic, -->
+<!-- 							org.eclipse.sensinact.gateway.generic.annotation, -->
+<!-- 							org.eclipse.sensinact.gateway.generic.local, -->
+<!-- 							org.eclipse.sensinact.gateway.generic.packet, -->
+<!-- 							org.eclipse.sensinact.gateway.generic.packet.annotation, -->
+<!-- 							org.eclipse.sensinact.gateway.generic.parser, -->
+<!-- 							org.eclipse.sensinact.gateway.generic.stream, -->
+<!-- 							org.eclipse.sensinact.gateway.generic.uri, -->
+<!-- 							org.eclipse.sensinact.gateway.common.bundle, -->
+<!-- 							org.eclipse.sensinact.gateway.common.execution, -->
+<!-- 							org.eclipse.sensinact.gateway.util, -->
+<!-- 							javax.xml.parsers, -->
+<!-- 							org.json, -->
+<!-- 							org.osgi.framework;version="[1.6,2)", -->
+<!-- 							org.xml.sax -->
+<!-- 						</Import-Package> -->
+<!-- 						<Bundle-Activator>org.eclipse.sensinact.gateway.system.osgi.Activator</Bundle-Activator> -->
+<!-- 						<Include-Resource> -->
+<!-- 							about.html, -->
+<!-- 							src/main/resources/ -->
+<!-- 						</Include-Resource> -->
+<!-- 					</instructions> -->
+<!-- 				</configuration> -->
+<!-- 			</plugin> -->
 		</plugins>
 	</build>
 
@@ -90,16 +94,19 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-core</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-common</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-generic</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

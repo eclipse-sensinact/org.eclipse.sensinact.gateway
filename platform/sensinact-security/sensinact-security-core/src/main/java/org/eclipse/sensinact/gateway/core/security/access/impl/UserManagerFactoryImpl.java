@@ -15,9 +15,13 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.UserManager;
 import org.eclipse.sensinact.gateway.core.security.UserManagerFactory;
 
+import aQute.bnd.annotation.Resolution;
+import aQute.bnd.annotation.spi.ServiceProvider;
+
 /**
  * {@link UserManagerFactory} service implementation
  */
+@ServiceProvider(value = UserManagerFactory.class, resolution = Resolution.OPTIONAL)
 public class UserManagerFactoryImpl implements UserManagerFactory<UserManagerImpl> {
 	
 	@Override

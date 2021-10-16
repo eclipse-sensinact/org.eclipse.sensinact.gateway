@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.onem2m.osgi;
 
+import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
@@ -24,8 +25,11 @@ import org.eclipse.sensinact.gateway.sthbnd.http.onem2m.internal.OneM2MHttpGetCo
 import org.eclipse.sensinact.gateway.sthbnd.http.onem2m.task.OneM2MDiscoveryTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.onem2m.task.OneM2MGetTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator;
+import org.osgi.annotation.bundle.Header;
+import org.osgi.framework.Constants;
 
 @HttpTasks(tasks = {@SimpleHttpTask(commands = {Task.CommandType.GET}, configuration = @HttpTaskConfiguration(host = "$(http.onem2m.host)", port = "$(http.onem2m.port)", path = "/$(http.onem2m.cse.base)", acceptType = "application/json", contentType = "application/json", headers = {@KeyValuePair(key = "X-M2M-Origin", value = "SOrigin")}, content = OneM2MHttpGetConfigurator.class, direct = true))})
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends HttpActivator {
     /**
      * @inheritDoc

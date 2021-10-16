@@ -1,0 +1,83 @@
+-tester: biz.aQute.tester.junit-platform-tester: biz.aQute.tester.junit-platform
+
+-augment.security:\
+	org.apache.felix.framework.security;capability:='osgi.service;objectClass:List<String>=org.osgi.service.condpermadmin.ConditionalPermissionAdmin'
+
+-runsystempackages.default: \
+	com.sun.net.httpserver,\
+	javax.net.ssl,\
+	javax.xml.parsers,\
+	javax.imageio,\
+	javax.management,\
+	javax.naming,\
+	javax.sql,\
+	javax.swing,\
+	javax.swing.border,\
+	javax.swing.event,\
+	javax.mail,\
+	javax.mail.internet,\
+	javax.management.modelmbean,\
+	javax.management.remote,\
+	javax.xml.parsers,\
+	javax.security.auth,\
+	javax.security.cert,\
+	junit.framework,\
+	junit.textui,\
+	org.w3c.dom,\
+	org.xml.sax,\
+	org.xml.sax.helpers,\
+	sun.misc,\
+	sun.security.action,\
+	sun.reflect
+	
+-runee: JavaSE-1.8
+-runvm.default: ${def;argLine}
+
+-runfw: org.apache.felix.framework
+-resolve.effective: active
+
+-runproperties.default: \
+    org.eclipse.sensinact.gateway.location.latitude=45.2d,\
+    org.eclipse.sensinact.gateway.location.longitude=5.7d,\
+    org.eclipse.sensinact.http.corsheader=false,\
+    org.apache.felix.http.jettyEnabled=true,\
+    org.apache.felix.http.whiteboardEnabled=true,\
+    org.eclipse.sensinact.simulated.gui.enabled=false
+-runsystempackages: com.sun.net.httpserver
+
+-runee: JavaSE-1.8
+-runvm: ${def;argLine}
+
+-runfw: org.apache.felix.framework
+-resolve.effective: active
+
+-runrequires: \
+	bnd.identity;id='${project.groupId}.${project.artifactId}-tests',\
+	bnd.identity;id=junit-jupiter-engine,\
+	bnd.identity;id=junit-platform-launcher,\
+	bnd.identity;id='biz.aQute.gogo.commands.provider'
+-runbundles: \
+	junit-jupiter-api;version='[5.7.2,5.7.3)',\
+	junit-jupiter-engine;version='[5.7.2,5.7.3)',\
+	junit-platform-commons;version='[1.7.2,1.7.3)',\
+	junit-platform-engine;version='[1.7.2,1.7.3)',\
+	junit-platform-launcher;version='[1.7.2,1.7.3)',\
+	org.apache.felix.http.jetty;version='[4.1.10,4.1.11)',\
+	org.apache.felix.http.servlet-api;version='[1.1.4,1.1.5)',\
+	org.apache.felix.scr;version='[2.1.16,2.1.17)',\
+	org.opentest4j;version='[1.2.0,1.2.1)',\
+	org.osgi.service.http.whiteboard;version='[1.1.0,1.1.1)',\
+	org.osgi.util.function;version='[1.1.0,1.1.1)',\
+	org.osgi.util.promise;version='[1.1.1,1.1.2)',\
+	studio-web;version='[2.0.0,2.0.1)',\
+	studio-web-tests;version='[2.0.0,2.0.1)',\
+	assertj-core;version='[3.20.2,3.20.3)',\
+	biz.aQute.gogo.commands.provider;version='[1.7.0,1.7.1)',\
+	ch.qos.logback.classic;version='[1.2.3,1.2.4)',\
+	ch.qos.logback.core;version='[1.2.3,1.2.4)',\
+	log4j;version='[1.2.17,1.2.18)',\
+	org.apache.felix.gogo.command;version='[1.1.2,1.1.3)',\
+	org.apache.felix.gogo.jline;version='[1.1.8,1.1.9)',\
+	org.apache.felix.gogo.runtime;version='[1.1.4,1.1.5)',\
+	org.jline;version='[3.13.2,3.13.3)',\
+	slf4j.api;version='[1.7.30,1.7.31)'

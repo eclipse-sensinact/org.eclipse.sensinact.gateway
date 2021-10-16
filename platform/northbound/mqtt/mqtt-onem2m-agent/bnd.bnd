@@ -1,0 +1,4 @@
+-include: ${sensinact.root.dir}/bnd/default.bnd.bnd
+Import-Package: \
+	org.json,\
+	*

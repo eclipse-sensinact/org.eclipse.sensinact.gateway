@@ -10,8 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.util;
 
-import org.eclipse.sensinact.gateway.util.crypto.Base64;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -24,6 +22,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -124,7 +123,7 @@ public final class SignatureUtil {
                     if (line == null) {
                         throw new IOException(endMarker + " not found");
                     }
-                    content = Base64.decode(buf.toString());
+                    content = Base64.getDecoder().decode(buf.toString());
                 }
                 return keyFactory.generatePublic(new X509EncodedKeySpec(content));
             }
@@ -152,7 +151,7 @@ public final class SignatureUtil {
 
         sig.initVerify(publicKey);
         sig.update(message.getBytes(SignatureUtil.CHARSET));
-        byte[] bytes = Base64.decode(URLDecoder.decode(sign, SignatureUtil.CHARSET));
+        byte[] bytes = java.util.Base64.getDecoder().decode(URLDecoder.decode(sign, SignatureUtil.CHARSET));
         return sig.verify(bytes);
     }
 }

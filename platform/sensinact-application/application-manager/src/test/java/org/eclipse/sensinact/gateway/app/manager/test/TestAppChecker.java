@@ -10,7 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.test;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.assertj.core.api.Assertions;
 import org.eclipse.sensinact.gateway.app.api.exception.InvalidApplicationException;
 import org.eclipse.sensinact.gateway.app.api.exception.ValidationException;
 import org.eclipse.sensinact.gateway.app.manager.checker.ArchitectureChecker;
@@ -20,11 +28,9 @@ import org.eclipse.sensinact.gateway.app.manager.json.AppJsonConstant;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -32,20 +38,13 @@ import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
 
-@RunWith(PowerMockRunner.class)
-public class TestAppChecker extends TestCase {
-    @Mock
-    private AppServiceMediator mediator;
+public class TestAppChecker {
+    
+    private AppServiceMediator mediator=Mockito.mock(AppServiceMediator.class);
 
-    @Before
+    @BeforeEach
     public void init() throws Exception {
         MockitoAnnotations.initMocks(this);
         ServiceReference serviceReference = Mockito.mock(ServiceReference.class);
@@ -71,7 +70,7 @@ public class TestAppChecker extends TestCase {
         Mockito.when(mediator.getContext()).thenReturn(context);
     }
 
-    @Test(expected = InvalidApplicationException.class)
+    @Test
     public void testUniqueOutput() throws Exception {
         String content = null;
         try {
@@ -87,10 +86,13 @@ public class TestAppChecker extends TestCase {
         for (int i = 0; i < componentArray.length(); i++) {
             components.add(new AppComponent(mediator, componentArray.getJSONObject(i)));
         }
+        Assertions.assertThatThrownBy(()->{
+        	
         ArchitectureChecker.checkApplication(applicationName, components);
+        }).isInstanceOf(InvalidApplicationException.class);
     }
 
-    @Test(expected = InvalidApplicationException.class)
+    @Test
     public void testVariableExist() throws Exception {
         String content = null;
         try {
@@ -106,11 +108,14 @@ public class TestAppChecker extends TestCase {
         for (int i = 0; i < componentArray.length(); i++) {
             components.add(new AppComponent(mediator, componentArray.getJSONObject(i)));
         }
+        Assertions.assertThatThrownBy(()->{
         ArchitectureChecker.checkApplication(applicationName, components);
+        }).isInstanceOf(InvalidApplicationException.class);
+        
     }
 
-    @Test(expected = ValidationException.class)
-    @Ignore
+    @Test
+    @Disabled
     public void testInvalidJSONApplication() throws Exception {
         String content = null;
         try {
@@ -120,11 +125,15 @@ public class TestAppChecker extends TestCase {
         }
         assertNotNull(content);
         JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
+        Assertions.assertThatThrownBy(()->{
+
         JsonValidator.validateApplication(mediator, json);
-    }
+        }).isInstanceOf(ValidationException.class);
+
+        }
 
     @Test
-    @Ignore
+    @Disabled
     public void testValidJSONComponents() throws Exception {
         String content = null;
         try {

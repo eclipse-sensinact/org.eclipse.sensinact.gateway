@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0" name="org.eclipse.sensinact.gateway.nthbnd.http.callback.test.CallbackServiceImpl" immediate="true">
-  <implementation class="org.eclipse.sensinact.gateway.nthbnd.http.callback.test.CallbackServiceImpl"/>
-  <service>
-    <provide interface="org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService" />
-  </service>
-</scr:component>

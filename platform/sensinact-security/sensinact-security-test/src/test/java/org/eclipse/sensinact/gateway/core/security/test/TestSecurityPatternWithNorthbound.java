@@ -11,8 +11,9 @@
 
 package org.eclipse.sensinact.gateway.core.security.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,13 +27,21 @@ import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Describable;
+import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.security.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.core.security.ws.test.WsServiceTestClient;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.eclipse.sensinact.gateway.test.MidOSGiTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.framework.BundleContext;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.context.InstalledBundleExtension;
+import org.osgi.test.junit5.service.ServiceExtension;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,7 +51,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class TestSecurityPatternWithNorthbound extends MidOSGiTest {
+@ExtendWith(BundleContextExtension.class)
+@ExtendWith(InstalledBundleExtension.class)
+@ExtendWith(ServiceExtension.class)
+@Disabled
+public class TestSecurityPatternWithNorthbound{
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
 	// ********************************************************************//
@@ -338,7 +351,6 @@ public class TestSecurityPatternWithNorthbound extends MidOSGiTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Override
 	protected void doInit(Map configuration) {
 		configuration.put("org.osgi.framework.system.packages.extra",
 			"org.eclipse.sensinact.gateway.test," + 
@@ -417,7 +429,7 @@ public class TestSecurityPatternWithNorthbound extends MidOSGiTest {
 	}
 
 	@Test
-	public void testSecurityPatternWithHttpNorthbound() throws Throwable {
+	public void testSecurityPatternWithHttpNorthbound(@InjectBundleContext BundleContext context) throws Throwable {
 		// slider[0-9]{2} - authenticated access level
 		// slider[0-9]{2}/admin - admin authenticated access level
 		// cea user is admin on slider[0-9]{2}
@@ -531,7 +543,7 @@ public class TestSecurityPatternWithNorthbound extends MidOSGiTest {
 	}	
 
 	@Test
-	public void testSecurityPatternWithWsNorthbound() throws Throwable {
+	public void testSecurityPatternWithWsNorthbound(@InjectBundleContext BundleContext context) throws Throwable {
 		// slider[0-9]{2} - authenticated access level
 		// slider[0-9]{2}/admin - admin authenticated access level
 		// cea user is admin on slider[0-9]{2}

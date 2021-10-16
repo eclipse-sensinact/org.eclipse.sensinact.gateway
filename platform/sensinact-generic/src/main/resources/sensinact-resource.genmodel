@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/sensinact-generic/src" modelPluginID="sensinact-generic"
+    modelName="Sensinact-resource" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    importerID="org.eclipse.xsd.ecore.importer" complianceLevel="8.0" copyrightFields="false"
+    operationReflection="true" importOrganizing="true">
+  <foreignModel>sensinact-resource.xsd</foreignModel>
+  <genPackages prefix="Resource" basePackage="sensinact.eclipse.org" resource="XML"
+      disposableProviderFactory="true" ecorePackage="resource.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="resource.ecore#//ExtendedMethodEnum">
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//ExtendedMethodEnum/GET"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//ExtendedMethodEnum/SET"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//ExtendedMethodEnum/ACT"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//ExtendedMethodEnum/SUBSCRIBE"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//ExtendedMethodEnum/UNSUBSCRIBE"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="resource.ecore#//MethodEnum">
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//MethodEnum/GET"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//MethodEnum/SET"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//MethodEnum/SUBSCRIBE"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//MethodEnum/UNSUBSCRIBE"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="resource.ecore#//ModifiableEnum">
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//ModifiableEnum/MODIFIABLE"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//ModifiableEnum/UPDATABLE"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//ModifiableEnum/FIXED"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="resource.ecore#//PolicyEnum">
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//PolicyEnum/STATEVARIABLE"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//PolicyEnum/SENSOR"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//PolicyEnum/PROPERTY"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//PolicyEnum/ACTION"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="resource.ecore#//ReferenceParameterEnum">
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//ReferenceParameterEnum/EMPTY"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//ReferenceParameterEnum/PARAMETER"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//ReferenceParameterEnum/INTERMEDIATE"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//ReferenceParameterEnum/RESPONSE"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//ReferenceParameterEnum/MODEL"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="resource.ecore#//SubscribeEnum">
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//SubscribeEnum/ONCHANGE"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//SubscribeEnum/SCHEDULED"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//SubscribeEnum/CONDITIONAL"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//SubscribeEnum/BUFFERIZED"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//SubscribeEnum/TIMEDOUT"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="resource.ecore#//TypeEnum">
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//TypeEnum/GET"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//TypeEnum/SET"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//TypeEnum/ACT"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//TypeEnum/SUBSCRIBE"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//TypeEnum/UNSUBSCRIBE"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//TypeEnum/HELLO"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//TypeEnum/GOODBYE"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//TypeEnum/SERVICESENUMERATION"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="resource.ecore#//UpdateEnum">
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//UpdateEnum/INIT"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//UpdateEnum/AUTO"/>
+      <genEnumLiterals ecoreEnumLiteral="resource.ecore#//UpdateEnum/NONE"/>
+    </genEnums>
+    <genDataTypes ecoreDataType="resource.ecore#//ExtendedMethodEnumObject"/>
+    <genDataTypes ecoreDataType="resource.ecore#//MethodEnumObject"/>
+    <genDataTypes ecoreDataType="resource.ecore#//ModifiableEnumObject"/>
+    <genDataTypes ecoreDataType="resource.ecore#//ModifiableHiddenKeyWordsExcludedString"/>
+    <genDataTypes ecoreDataType="resource.ecore#//NameTypeKeyWordsExcludedString"/>
+    <genDataTypes ecoreDataType="resource.ecore#//NameTypeValueKeyWordsExcludedString"/>
+    <genDataTypes ecoreDataType="resource.ecore#//PolicyEnumObject"/>
+    <genDataTypes ecoreDataType="resource.ecore#//ReferenceParameterEnumObject"/>
+    <genDataTypes ecoreDataType="resource.ecore#//SubscribeEnumObject"/>
+    <genDataTypes ecoreDataType="resource.ecore#//Targets"/>
+    <genDataTypes ecoreDataType="resource.ecore#//TypeEnumObject"/>
+    <genDataTypes ecoreDataType="resource.ecore#//UpdateEnumObject"/>
+    <genClasses image="false" ecoreClass="resource.ecore#//AbstractConstraintOnReference"/>
+    <genClasses ecoreClass="resource.ecore#//ActionResourceAttribute">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ActionResourceAttribute/value"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ActionResourceAttribute/metadata"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ActionResourceAttribute/constraints"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ActionResourceAttribute/hidden"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ActionResourceAttribute/modifiable"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ActionResourceAttribute/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ActionResourceAttribute/observed"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ActionResourceAttribute/target"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ActionResourceAttribute/type"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//ActionResourceAttributes">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ActionResourceAttributes/attribute"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//ActionResourceMethod">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ActionResourceMethod/type"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//ActionResourceMethods">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ActionResourceMethods/method"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//Argument">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Argument/name"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//ArgumentBuilder">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ArgumentBuilder/argument"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ArgumentBuilder/type"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//BinaryHexContent"/>
+    <genClasses image="false" ecoreClass="resource.ecore#//Builder">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Builder/policy"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Builder/profile"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Builder/reference"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//CalculatedBuilder">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//CalculatedBuilder/constant"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//CalculatedBuilder/calculated"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//CalculatedReference">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//CalculatedReference/constant"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//CalculatedReference/calculated"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//Command">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//Command/identifier"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Command/type"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//Commands">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//Commands/command"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//ConditionalBuilder">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ConditionalBuilder/constant"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//ConditionalConstant">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ConditionalConstant/value"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ConditionalConstant/constraints"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ConditionalConstant/type"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//ConditionalConstantFixed"/>
+    <genClasses ecoreClass="resource.ecore#//ConditionalReference">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ConditionalReference/constant"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//ConstantReference"/>
+    <genClasses ecoreClass="resource.ecore#//Constraint">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Constraint/value"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//ConstraintOnNumeric"/>
+    <genClasses ecoreClass="resource.ecore#//ConstraintOnReference">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ConstraintOnReference/reference"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//ConstraintOnString"/>
+    <genClasses ecoreClass="resource.ecore#//Constraints">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EAttribute resource.ecore#//Constraints/group"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference resource.ecore#//Constraints/minExclusive"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference resource.ecore#//Constraints/minInclusive"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference resource.ecore#//Constraints/maxExclusive"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference resource.ecore#//Constraints/maxInclusive"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference resource.ecore#//Constraints/length"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference resource.ecore#//Constraints/minLength"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference resource.ecore#//Constraints/maxLength"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference resource.ecore#//Constraints/enumeration"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference resource.ecore#//Constraints/fixed"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference resource.ecore#//Constraints/pattern"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference resource.ecore#//Constraints/delta"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference resource.ecore#//Constraints/absolute"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//CopyBuilder"/>
+    <genClasses ecoreClass="resource.ecore#//CopyReference"/>
+    <genClasses ecoreClass="resource.ecore#//DataResourceAttribute">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//DataResourceAttribute/value"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//DataResourceAttribute/metadata"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//DataResourceAttribute/constraints"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//DataResourceAttribute/hidden"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//DataResourceAttribute/modifiable"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//DataResourceAttribute/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//DataResourceAttribute/observed"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//DataResourceAttribute/target"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//DataResourceAttribute/type"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//DataResourceAttributes">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//DataResourceAttributes/attribute"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//DataResourceMethod">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//DataResourceMethod/type"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//DataResourceMethods">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//DataResourceMethods/method"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//Device">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//Device/service"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Device/identifier"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Device/profile"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EAttribute resource.ecore#//Device/anyAttribute"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//Devices">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//Devices/device"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//DocumentRoot">
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//DocumentRoot/mixed"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference resource.ecore#//DocumentRoot/xMLNSPrefixMap"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference resource.ecore#//DocumentRoot/xSISchemaLocation"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//DocumentRoot/resourceInfos"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//Meta">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//Meta/value"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Meta/modifiable"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Meta/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Meta/type"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//Metadata">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//Metadata/meta"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="resource.ecore#//Method">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//Method/parameter"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//Method/references"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="resource.ecore#//NameTypeValue"/>
+    <genClasses ecoreClass="resource.ecore#//Parameter">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//Parameter/constraints"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//Parameter/builder"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Parameter/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Parameter/type"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//Policies">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//Policies/policy"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//Policy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Policy/classname"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Policy/interfacename"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Policy/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Policy/update"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="resource.ecore#//Reference">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//Reference/builder"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Reference/passOn"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Reference/policy"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Reference/profile"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Reference/reference"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//References">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//References/reference"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="resource.ecore#//ResourceInfo"/>
+    <genClasses ecoreClass="resource.ecore#//ResourceInfoAction">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ResourceInfoAction/policy"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ResourceInfoAction/subscriptionModes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ResourceInfoAction/identifier"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ResourceInfoAction/attributes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ResourceInfoAction/methods"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ResourceInfoAction/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ResourceInfoAction/policy1"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ResourceInfoAction/profile"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ResourceInfoAction/target"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="resource.ecore#//ResourceInfoData">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ResourceInfoData/policy"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ResourceInfoData/subscriptionModes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ResourceInfoData/identifier"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ResourceInfoData/attributes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ResourceInfoData/methods"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ResourceInfoData/hidden"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ResourceInfoData/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ResourceInfoData/profile"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ResourceInfoData/target"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//ResourceInfoProperty">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ResourceInfoProperty/policy1"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//ResourceInfos">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ResourceInfos/policies"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ResourceInfos/commands"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ResourceInfos/subscriptionModes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ResourceInfos/resourceInfo"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference resource.ecore#//ResourceInfos/devices"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ResourceInfos/emptyProfile"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//ResourceInfoSensor">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ResourceInfoSensor/policy1"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//ResourceInfoVariable">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//ResourceInfoVariable/policy1"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//RestrictedValueType"/>
+    <genClasses ecoreClass="resource.ecore#//Service">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//Service/name"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//SimpleContent">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//SimpleContent/value"/>
+    </genClasses>
+    <genClasses ecoreClass="resource.ecore#//StringContent"/>
+    <genClasses ecoreClass="resource.ecore#//SubscriptionModes">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute resource.ecore#//SubscriptionModes/subscriptionMode"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

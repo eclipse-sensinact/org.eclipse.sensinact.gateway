@@ -10,14 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.common.constraint.test;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.assertj.core.api.Assertions;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -51,7 +55,7 @@ public class ConstraintTest {
     private final Bundle bundle = Mockito.mock(Bundle.class);
     private Mediator mediator;
 
-    @Before
+    @BeforeEach
     public void init() throws InvalidSyntaxException {
         Filter filter = Mockito.mock(Filter.class);
         Mockito.when(filter.toString()).thenReturn(LOG_FILTER);
@@ -92,30 +96,30 @@ public class ConstraintTest {
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 
         Constraint constraint = ConstraintFactory.Loader.load(classloader, new JSONArray(ConstraintTest.EXPRESSION));
-        Assert.assertTrue(constraint.complies("0033921976095"));
-        Assert.assertFalse(constraint.complies("0033aa9976095"));
-        Assert.assertFalse(constraint.complies("003368997609544"));
+        assertTrue(constraint.complies("0033921976095"));
+        assertFalse(constraint.complies("0033aa9976095"));
+        assertFalse(constraint.complies("003368997609544"));
         JSONAssert.assertEquals(ConstraintTest.EXPRESSION, constraint.getJSON(), false);
         constraint = ConstraintFactory.Loader.load(classloader, new JSONObject(ConstraintTest.COLLECTION));
-        Assert.assertTrue(constraint.complies("3"));
-        Assert.assertTrue(constraint.complies("a"));
-        Assert.assertFalse(constraint.complies("d"));
+        assertTrue(constraint.complies("3"));
+        assertTrue(constraint.complies("a"));
+        assertFalse(constraint.complies("d"));
 
         JSONAssert.assertEquals(ConstraintTest.RETURNED_COLLECTION, constraint.getJSON(), false);
 
         constraint = constraint.getComplement();
-        Assert.assertFalse(constraint.complies("3"));
-        Assert.assertFalse(constraint.complies("a"));
-        Assert.assertTrue(constraint.complies("d"));
+        assertFalse(constraint.complies("3"));
+        assertFalse(constraint.complies("a"));
+        assertTrue(constraint.complies("d"));
 
         constraint = ConstraintFactory.Loader.load(classloader, new JSONObject(ConstraintTest.ABSOLUTE));
-        Assert.assertTrue(constraint.complies(23));
-        Assert.assertTrue(constraint.complies(25));
-        Assert.assertTrue(constraint.complies(13));
-        Assert.assertTrue(constraint.complies(10));
-        Assert.assertFalse(constraint.complies(17));
-        Assert.assertFalse(constraint.complies(18));
-        Assert.assertFalse(constraint.complies(16));
+        assertTrue(constraint.complies(23));
+        assertTrue(constraint.complies(25));
+        assertTrue(constraint.complies(13));
+        assertTrue(constraint.complies(10));
+        assertFalse(constraint.complies(17));
+        assertFalse(constraint.complies(18));
+        assertFalse(constraint.complies(16));
 
         JSONAssert.assertEquals(ConstraintTest.RETURNED_ABSOLUTE, constraint.getJSON(), false);
     }

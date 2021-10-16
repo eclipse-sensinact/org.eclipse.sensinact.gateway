@@ -15,6 +15,9 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
 
+import aQute.bnd.annotation.Resolution;
+import aQute.bnd.annotation.spi.ServiceProvider;
+
 /**
  * Implementation of a {@link SecuredAccessFactory}
  * 
@@ -22,6 +25,7 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
+@ServiceProvider(value = SecuredAccessFactory.class, resolution = Resolution.OPTIONAL)
 public class SecuredAccessFactoryImpl implements SecuredAccessFactory {
 
 	// ********************************************************************//

@@ -10,6 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.simulated.temperature.generator.osgi;
 
+import java.util.Collections;
+import java.util.Set;
+
 import org.eclipse.sensinact.gateway.common.annotation.Property;
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -21,14 +24,11 @@ import org.eclipse.sensinact.gateway.simulated.temperature.generator.parser.Data
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.parser.DeviceInfo;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.reader.TemperaturesGeneratorPacket;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.thread.TemperaturesGeneratorThreadManager;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends AbstractActivator<Mediator> {
     @Property(name = "org.eclipse.sensinact.simulated.generator.amount", defaultValue = "100")
     Integer DEVICES_NUMBER;

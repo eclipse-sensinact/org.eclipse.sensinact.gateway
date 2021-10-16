@@ -10,35 +10,50 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.rest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.rest.ws.test.WsServiceTestClient;
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.framework.BundleContext;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.junit5.context.BundleContextExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+@ExtendWith(BundleContextExtension.class)
+public class TestRestACTAccess {
 
-public class TestRestACTAccess extends TestRestAccess {
-    public TestRestACTAccess() throws Exception {
-        super();
-    }
-
+	@BeforeEach
+	public void before(@InjectBundleContext BundleContext context) {
+		Mediator mediator = new Mediator(context);
+		String simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/light/services/switch/resources/turn_off/ACT", null, "POST");
+		JSONObject response = new JSONObject(simulated);
+		assertTrue(response.get("statusCode").equals(200));
+		
+		simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/light/services/switch/resources/dim/ACT", "{\"parameters\":[{\"name\": \"brightness\",\"value\": 10,\"type\": \"int\"}]}", "POST");
+        response = new JSONObject(simulated);
+        assertEquals(200, response.get("statusCode"));
+	}
+	
     @Test
-    public void testHttpACTWithoutParameters() throws Exception {
+    public void testHttpACTWithoutParameters(@InjectBundleContext BundleContext context) throws Exception {
         Mediator mediator = new Mediator(context);
-        String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/light/services/switch/resources/status/GET", null, "GET");
+        String simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/light/services/switch/resources/status/GET", null, "GET");
         //System.out.println(simulated);
         JSONObject response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/light/switch/status"));
         assertTrue(response.getJSONObject("response").get("value").equals("OFF"));
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/light/services/switch/resources/turn_on/ACT", null, "POST");
+        simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/light/services/switch/resources/turn_on/ACT", null, "POST");
 
         response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
 
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/light/services/switch/resources/status/GET", null, "GET");
+        simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/light/services/switch/resources/status/GET", null, "GET");
         response = new JSONObject(simulated);
 
         assertTrue(response.get("statusCode").equals(200));
@@ -47,20 +62,20 @@ public class TestRestACTAccess extends TestRestAccess {
     }
 
     @Test
-    public void testSimplifiedHttpACTWithoutParameters() throws Exception {
+    public void testSimplifiedHttpACTWithoutParameters(@InjectBundleContext BundleContext context) throws Exception {
         Mediator mediator = new Mediator(context);
-        String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/light/switch/status/GET", null, "GET");
+        String simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/light/switch/status/GET", null, "GET");
 
         JSONObject response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/light/switch/status"));
-        assertTrue(response.getJSONObject("response").get("value").equals("OFF"));
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/light/switch/turn_on/ACT", null, "POST");
+        assertEquals(response.getJSONObject("response").get("value"),"OFF");
+        simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/light/switch/turn_on/ACT", null, "POST");
         System.out.println(simulated);
         response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
 
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/light/switch/status/GET", null, "GET");
+        simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/light/switch/status/GET", null, "GET");
         response = new JSONObject(simulated);
 
         assertTrue(response.get("statusCode").equals(200));
@@ -69,18 +84,19 @@ public class TestRestACTAccess extends TestRestAccess {
     }
 
     @Test
-    public void testHttpACTWithParameters() throws Exception {
+    public void testHttpACTWithParameters(@InjectBundleContext BundleContext context) throws Exception {
         Mediator mediator = new Mediator(context);
-        String simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers", null, "GET");
+
+        String simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers", null, "GET");
         System.out.println(simulated);
         
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null, "GET");
+        simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null, "GET");
 
         JSONObject response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/light/switch/brightness"));
-        assertTrue(response.getJSONObject("response").get("value").equals(10));
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/light/services/switch/resources/dim/ACT", "{\"parameters\":[{\"name\": \"brightness\",\"value\": 5,\"type\": \"int\"}]}", "POST");
+        assertEquals(10, response.getJSONObject("response").get("value"));
+        simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/light/services/switch/resources/dim/ACT", "{\"parameters\":[{\"name\": \"brightness\",\"value\": 5,\"type\": \"int\"}]}", "POST");
         System.out.println(simulated);
         
         response = new JSONObject(simulated);
@@ -88,7 +104,7 @@ public class TestRestACTAccess extends TestRestAccess {
 
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/light/switch/dim"));
-        simulated = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null, "GET");
+        simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null, "GET");
         response = new JSONObject(simulated);
 
         assertTrue(response.get("statusCode").equals(200));
@@ -98,14 +114,14 @@ public class TestRestACTAccess extends TestRestAccess {
     }
 
     @Test
-    public void testWsACTWithoutParameters() throws Exception {
+    public void testWsACTWithoutParameters(@InjectBundleContext BundleContext context) throws Exception {
         JSONObject response;
 
         WsServiceTestClient client = new WsServiceTestClient();
         
         new Thread(client).start();
 
-        String simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/status/GET", null);
+        String simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers/light/services/switch/resources/status/GET", null);
 
         response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
@@ -113,13 +129,13 @@ public class TestRestACTAccess extends TestRestAccess {
         assertTrue(response.getJSONObject("response").get("value").equals("OFF"));
 
         simulated = null;
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/turn_on/ACT", null);
+        simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers/light/services/switch/resources/turn_on/ACT", null);
         
         response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
 
         simulated = null;
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/status/GET", null);
+        simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers/light/services/switch/resources/status/GET", null);
         response = new JSONObject(simulated);
 
         assertTrue(response.get("statusCode").equals(200));
@@ -132,13 +148,13 @@ public class TestRestACTAccess extends TestRestAccess {
         WsServiceTestClient client = new WsServiceTestClient();
         new Thread(client).start();
 
-        String simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null);        
+        String simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null);        
         JSONObject response = new JSONObject(simulated);
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/light/switch/brightness")); 
         assertTrue(response.getJSONObject("response").get("value").equals(10));
         simulated = null;
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/dim/ACT", "[{\"name\": \"brightness\",\"value\": 5,\"type\": \"int\"}]");
+        simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers/light/services/switch/resources/dim/ACT", "[{\"name\": \"brightness\",\"value\": 5,\"type\": \"int\"}]");
         System.out.println(simulated);
         
         response = new JSONObject(simulated);
@@ -146,7 +162,7 @@ public class TestRestACTAccess extends TestRestAccess {
         assertTrue(response.get("statusCode").equals(200));
         assertTrue(response.getString("uri").equals("/light/switch/dim"));
         simulated = null;
-        simulated = this.synchronizedRequest(client, WS_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null);
+        simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers/light/services/switch/resources/brightness/GET", null);
         response = new JSONObject(simulated);
 
         assertTrue(response.get("statusCode").equals(200));

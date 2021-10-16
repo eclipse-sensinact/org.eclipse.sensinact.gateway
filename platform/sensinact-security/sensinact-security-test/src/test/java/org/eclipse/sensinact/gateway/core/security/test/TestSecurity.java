@@ -11,7 +11,7 @@
 
 package org.eclipse.sensinact.gateway.core.security.test;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -25,15 +25,22 @@ import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.Credentials;
-import org.eclipse.sensinact.gateway.test.MidOSGiTest;
-import org.eclipse.sensinact.gateway.test.MidProxy;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.context.InstalledBundleExtension;
+import org.osgi.test.junit5.service.ServiceExtension;
 
 /**
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class TestSecurity extends MidOSGiTest {
+@ExtendWith(BundleContextExtension.class)
+@ExtendWith(InstalledBundleExtension.class)
+@ExtendWith(ServiceExtension.class)
+public class TestSecurity {
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
 	// ********************************************************************//
@@ -68,7 +75,6 @@ public class TestSecurity extends MidOSGiTest {
 	}
 	
 	@SuppressWarnings("unchecked")
-	@Override
 	protected void doInit(Map configuration) {
 		
 		configuration.put("org.osgi.framework.system.capabilities",
@@ -146,35 +152,25 @@ public class TestSecurity extends MidOSGiTest {
 	}
 
 	@Test
-	public void testSecurityAccessInitialization() throws Throwable {
-		MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
-
-		Core core = mid.buildProxy();
+	@Disabled
+	public void testSecurityAccessInitialization(@InjectService Core core) throws Throwable {
 		Session session = core.getAnonymousSession();
 		assertNotNull(session);
 
-		Set providers = session.serviceProviders();
-		Iterator iterator = providers.iterator();
+		Set<ServiceProvider> providers = session.serviceProviders();
+		Iterator<ServiceProvider> iterator = providers.iterator();
 
 		while (iterator.hasNext()) {
-			MidProxy<ServiceProvider> provider = new MidProxy<ServiceProvider>(classloader, this,
-					ServiceProvider.class);
-
-			ServiceProvider serviceProvider = provider.buildProxy(iterator.next());
+			ServiceProvider serviceProvider = iterator.next();
 
 			System.out.println(serviceProvider.getDescription().getJSON());
 		}
 		System.out.println("============================================");
 
-		MidProxy<Authentication> midCredentials = new MidProxy<Authentication>(classloader, this, Authentication.class);
 
-		midCredentials.buildProxy(Credentials.class.getCanonicalName(), new Class<?>[] { String.class, String.class },
-				new Object[] { "cea", "sensiNact_team" });
+		Authentication<Credentials> credentials = new Credentials("cea", "sensiNact_team");
 
-		Method method = mid.getContextualizedType().getDeclaredMethod("getSession",
-				new Class<?>[] { midCredentials.getContextualizedType() });
-
-		session = (Session) mid.toOSGi(method, new Object[] { midCredentials.getInstance() });
+		session = core.getSession(credentials);
 
 		assertNotNull(session);
 
@@ -182,10 +178,9 @@ public class TestSecurity extends MidOSGiTest {
 		iterator = providers.iterator();
 
 		while (iterator.hasNext()) {
-			MidProxy<ServiceProvider> provider = new MidProxy<ServiceProvider>(classloader, this,
-					ServiceProvider.class);
+			ServiceProvider serviceProvider = iterator.next();
 
-			ServiceProvider serviceProvider = provider.buildProxy(iterator.next());
+			System.out.println(serviceProvider.getDescription().getJSON());
 
 			System.out.println(serviceProvider.getDescription().getJSON());
 		}

@@ -10,6 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.openweather.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
@@ -31,9 +35,8 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.SimpleHttpProtocolStackEnd
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTasks;
 import org.json.JSONArray;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.osgi.annotation.bundle.Header;
+import org.osgi.framework.Constants;
 
 @ChainedHttpTasks(recurrences = {
 	@RecurrentChainedHttpTask(
@@ -63,6 +66,7 @@ import java.util.List;
 		}
 	)
 })
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends HttpActivator {
     List<SimpleHttpProtocolStackEndpoint> endpoints;
 

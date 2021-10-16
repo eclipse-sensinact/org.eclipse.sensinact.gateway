@@ -31,6 +31,7 @@
 		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.distribution</groupId>
 			<artifactId>profile</artifactId>
+			<version>${project.version}</version>
 			<type>pom</type>
 		</dependency>
 	</dependencies>

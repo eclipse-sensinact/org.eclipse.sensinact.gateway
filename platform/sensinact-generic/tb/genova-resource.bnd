@@ -1,0 +1,2 @@
+-privatepackage: org.eclipse.sensinact.gateway.generic.test.tb.moke
+-includeresource: ${.}/genova-resource

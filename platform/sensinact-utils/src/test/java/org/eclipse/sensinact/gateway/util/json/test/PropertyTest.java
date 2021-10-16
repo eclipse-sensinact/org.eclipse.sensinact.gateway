@@ -10,9 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.util.json.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.eclipse.sensinact.gateway.util.PropertyUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -22,8 +24,6 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.log.LogService;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * test Constraint
@@ -43,7 +43,7 @@ public class PropertyTest {
     private final BundleContext context = Mockito.mock(BundleContext.class);
     private final Bundle bundle = Mockito.mock(Bundle.class);
 
-    @Before
+    @BeforeEach
     public void init() throws InvalidSyntaxException {
         Filter filter = Mockito.mock(Filter.class);
         Mockito.when(filter.toString()).thenReturn(LOG_FILTER);
