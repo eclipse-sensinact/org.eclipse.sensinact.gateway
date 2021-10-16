@@ -26,21 +26,11 @@ public class DefaultHttpTaskProcessingContextHandler implements HttpTaskProcessi
         this.contexts = new WeakHashMap<Task, HttpTaskProcessingContext>();
     }
 
-    /**
-     * @inheritDoc
-     * @see HttpTaskProcessingContextHandler#
-     * unregisterProcessingContext(java.lang.Object)
-     */
     @Override
     public void unregisterProcessingContext(HttpTask<?, ?> key) {
         this.contexts.remove(key);
     }
 
-    /**
-     * @inheritDoc
-     * @see HttpTaskProcessingContextHandler#
-     * configure(HttpTask)
-     */
     @Override
     public void configure(HttpTask<?, ?> task) throws Exception {
         HttpTaskProcessingContext context = this.contexts.get(task);
@@ -49,12 +39,7 @@ public class DefaultHttpTaskProcessingContextHandler implements HttpTaskProcessi
             configurator.configure(task);
         }
     }
-
-    /**
-     * @inheritDoc
-     * @see HttpTaskProcessingContextHandler#
-     * resolve(java.lang.Object, java.lang.String)
-     */
+    
     @Override
     public String resolve(HttpTask<?, ?> key, String property) {
         HttpTaskProcessingContext context = this.contexts.get(key);
@@ -64,11 +49,6 @@ public class DefaultHttpTaskProcessingContextHandler implements HttpTaskProcessi
         return context.resolve(property);
     }
 
-    /**
-     * @inheritDoc
-     * @see HttpTaskProcessingContextHandler#
-     * registerProcessingContext(java.lang.Object, HttpTaskProcessingContext)
-     */
     @Override
     public void registerProcessingContext(HttpTask<?, ?> key, HttpTaskProcessingContext context) {
         this.contexts.put((Task) key, context);

@@ -24,10 +24,6 @@ public class DefaultHttpChainedTaskProcessingContextFactory implements HttpChain
         this.mediator = mediator;
     }
 
-    /**
-     * @inheritDoc
-     * @see HttpChainedTaskProcessingContextFactory#newInstance(HttpChainedTasks, HttpChainedTask)
-     */
     @Override
     public <CHAINED extends HttpChainedTask<?>> HttpTaskProcessingContext newInstance(HttpTaskConfigurator httpTaskConfigurator, String endpointId, HttpChainedTasks<?, CHAINED> tasks, CHAINED task) {
         return new DefaultHttpChainedTaskProcessingContext(this.mediator, httpTaskConfigurator, endpointId, tasks, task);

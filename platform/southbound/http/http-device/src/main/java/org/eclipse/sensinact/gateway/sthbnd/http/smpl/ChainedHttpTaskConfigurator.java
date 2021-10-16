@@ -17,10 +17,13 @@ import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTaskConfiguratio
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTasks;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.HttpChildTaskConfigurationDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.HttpTaskConfigurationDescription;
 
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -64,22 +67,20 @@ class ChainedHttpTaskConfigurator extends SimpleTaskConfigurator {
      * @param chain      the chain of {@link HttpChildTaskConfiguration} applying on
      *                   {@link HttpChainedTask}s to be configured
      */
-    public ChainedHttpTaskConfigurator(SimpleHttpProtocolStackEndpoint endpoint, String profile, CommandType command, HttpTaskUrlConfigurator urlBuilder, HttpTaskConfiguration annotation, HttpChildTaskConfiguration[] chain) {
+    public ChainedHttpTaskConfigurator(SimpleHttpProtocolStackEndpoint endpoint, String profile, 
+    	CommandType command, HttpTaskUrlConfigurator urlBuilder, HttpTaskConfigurationDescription annotation, 
+    	List<HttpChildTaskConfigurationDescription> chain) {
         super(endpoint, null, command, urlBuilder, annotation);
         this.chain = new LinkedList<Link>();
         int index = 0;
-        int length = chain == null ? 0 : chain.length;
+        int length = chain == null ? 0 : chain.size();
         for (; index < length; index++) {
-            SimpleTaskConfigurator executable = new SimpleTaskConfigurator(endpoint, profile, command, urlBuilder, annotation, chain[index]);
-            this.chain.addLast(new Link(chain[index].identifier(), executable));
+            SimpleTaskConfigurator executable = new SimpleTaskConfigurator(endpoint, 
+            	profile, command, urlBuilder, annotation, chain.get(index));
+            this.chain.addLast(new Link(chain.get(index).getIdentifier(), executable));
         }
     }
 
-    /**
-     * @inheritDoc
-     * @see SimpleTaskConfigurator#
-     * configure(HttpTask, java.lang.Object[])
-     */
     @Override
     public <T extends HttpTask<?, ?>> void configure(T task) throws Exception {
         if (!HttpChainedTasks.class.isAssignableFrom(task.getClass())) {
@@ -88,19 +89,17 @@ class ChainedHttpTaskConfigurator extends SimpleTaskConfigurator {
         }
         try {
             HttpChainedTasks chained = (HttpChainedTasks) task;
-
             Iterator<Link> iterator = this.chain.iterator();
 
             while (iterator.hasNext()) {
                 Link link = iterator.next();
                 @SuppressWarnings("rawtypes")
 				HttpChainedTask subTask = chained.addChainedTask(link.identifier);
-
-                HttpTaskProcessingContext context = super.endpoint.createChainedContext(link.configurator, chained, subTask);
-
-                if (context != null) {
-                    super.endpoint.getMediator().registerProcessingContext(subTask, context);
-                }
+                HttpTaskProcessingContext context = super.endpoint.createChainedContext(
+                	link.configurator, chained, subTask);
+                if (context != null)
+                    super.endpoint.getMediator().registerProcessingContext(subTask, 
+                    	context);
             }
         } catch (Exception e) {
             e.printStackTrace();

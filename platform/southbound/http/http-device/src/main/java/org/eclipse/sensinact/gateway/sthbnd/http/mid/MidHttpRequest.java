@@ -33,10 +33,6 @@ public abstract class MidHttpRequest<RESPONSE extends HttpResponse> extends Abst
         this.mediator = mediator;
     }
 
-    /**
-     * @inheritDoc
-     * @see HttpTask#send()
-     */
     @Override
     @SuppressWarnings("unchecked")
     public RESPONSE send() throws IOException {

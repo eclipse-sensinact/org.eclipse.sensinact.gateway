@@ -10,10 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
-import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpChildTaskConfiguration;
-import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTaskConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.HttpChildTaskConfigurationDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.HttpTaskConfigurationDescription;
 
 class RecurrentChainedTaskConfigurator extends ChainedHttpTaskConfigurator implements RecurrentHttpTaskConfigurator {
     private long period = 1000 * 60;
@@ -21,12 +23,15 @@ class RecurrentChainedTaskConfigurator extends ChainedHttpTaskConfigurator imple
     private long timeout = -1;
     private Class<? extends HttpTask> taskType;
 
-    public RecurrentChainedTaskConfigurator(SimpleHttpProtocolStackEndpoint endpoint, CommandType command, HttpTaskUrlConfigurator urlBuilder, Class<? extends HttpTask> taskType, long period, long delay, long timeout, HttpTaskConfiguration parent, HttpChildTaskConfiguration[] annotation) {
-        super(endpoint, null, command, urlBuilder, parent, annotation);
-        this.setTaskType(taskType);
-        this.setPeriod(period);
-        this.setDelay(delay);
-        this.setTimeout(timeout);
+    public RecurrentChainedTaskConfigurator(SimpleHttpProtocolStackEndpoint endpoint, 
+    	CommandType command, HttpTaskUrlConfigurator urlBuilder, Class<? extends HttpTask> taskType, 
+    	long period, long delay, long timeout, HttpTaskConfigurationDescription parent, 
+    	List<HttpChildTaskConfigurationDescription> chain) {
+        super(endpoint, null, command, urlBuilder, parent, chain);
+        this.taskType = taskType;
+        this.period = period;
+        this.delay = delay;
+        this.timeout = timeout;
     }
 
     /**

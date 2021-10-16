@@ -11,6 +11,8 @@
 
 package org.eclipse.sensinact.gateway.sthbnd.http.test.bundle1;
 
+import java.util.Arrays;
+
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.*;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
@@ -18,22 +20,17 @@ import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponsePacket;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class HttpTestPacket extends HttpResponsePacket
-{
+public class HttpTestPacket extends HttpResponsePacket {
 	private String serviceProviderId;
 	private String serviceId;
 	private String resourceId;
 	private Object data;
 
-
-	public HttpTestPacket(HttpResponse response)
-			throws JSONException
-    {
-    	super(response);
-    	if(super.content != null &&  super.content.length>0)
-    	{
-    		String str = new String(super.content);
-    		
+	public HttpTestPacket(HttpResponse response) throws JSONException {
+    	super(response);    	
+    	byte[] c = super.content;
+    	if(c != null &&  c.length>0) {
+    		String str = new String(c);    		
 			JSONObject json = new JSONObject(str);
 			this.serviceProviderId = json.getString("serviceProviderId");
 			this.serviceId = json.getString("serviceId");
@@ -43,32 +40,27 @@ public class HttpTestPacket extends HttpResponsePacket
 	}
 	
 	@ServiceProviderID
-	public String getServiceProviderId()
-	{
+	public String getServiceProviderId() {
 		return this.serviceProviderId;
 	}
 
 	@ServiceID
-	public String getServiceId()
-	{
+	public String getServiceId() {
 		return this.serviceId;
 	}
 
 	@ResourceID
-	public String getResourceId()
-	{
+	public String getResourceId() {
 		return this.resourceId;
 	}
 	
 	@Data
-	public Object getData()
-	{
+	public Object getData() {
 		return this.data;
 	}
 
 	@CommandID
-	public Task.CommandType getCommand()
-	{
+	public Task.CommandType getCommand() {
 		return super.command;
 	}
 }

@@ -290,9 +290,45 @@
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.apache.felix</groupId>
+									<artifactId>org.apache.felix.http.jetty</artifactId>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.apache.felix.http.jetty.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.felix</groupId>
+									<artifactId>org.apache.felix.http.api</artifactId>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.apache.felix.http.api.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.http.servlet-api</artifactId>
 									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
 									<destFileName>org.apache.felix.http.servlet-api.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.aries.spec</groupId>
+									<artifactId>org.apache.aries.javax.jax.rs-api</artifactId>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>org.apache.aries.javax.jax.rs-api.jar</destFileName>
+								</artifactItem>
+								<artifactItem>	
+		    						<groupId>com.fasterxml.jackson.core</groupId>
+		    						<artifactId>jackson-databind</artifactId>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>jackson-databind.jar</destFileName>
+								</artifactItem>
+								<artifactItem>	
+		    						<groupId>com.fasterxml.jackson.core</groupId>
+		    						<artifactId>jackson-annotations</artifactId>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>jackson-annotations.jar</destFileName>
+								</artifactItem>
+								<artifactItem>	
+		    						<groupId>com.fasterxml.jackson.core</groupId>
+		    						<artifactId>jackson-core</artifactId>
+									<outputDirectory>${project.build.directory}/felix/bundle</outputDirectory>
+									<destFileName>jackson-core.jar</destFileName>
 								</artifactItem>
 							</artifactItems>
 						</configuration>
@@ -319,6 +355,11 @@
 					<artifactId>javax.servlet-api</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>

@@ -89,11 +89,6 @@ public class DefaultHttpTaskProcessingContext implements HttpTaskProcessingConte
         });
     }
 
-    /**
-     * @inheritDoc
-     * @see HttpTaskProcessingContext#
-     * resolve(java.lang.String)
-     */
     @Override
     public String resolve(String property) {
         Executable<Void, String> executable = this.properties.get(property);
@@ -108,10 +103,6 @@ public class DefaultHttpTaskProcessingContext implements HttpTaskProcessingConte
         return null;
     }
 
-    /**
-     * @inheritDoc
-     * @see HttpTaskProcessingContext#getHttpTaskConfigurator()
-     */
     @Override
     public HttpTaskConfigurator getHttpTaskConfigurator() {
         return this.httpTaskConfigurator;

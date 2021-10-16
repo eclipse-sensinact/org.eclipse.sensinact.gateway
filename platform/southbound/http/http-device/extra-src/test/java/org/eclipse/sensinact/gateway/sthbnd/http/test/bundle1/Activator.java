@@ -17,6 +17,7 @@ import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTaskConfiguratio
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTasks;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.SimpleHttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator;
+import org.eclipse.sensinact.gateway.sthbnd.http.smpl.SimpleHttpProtocolStackEndpoint;
 
 @HttpTasks( tasks =
 {
@@ -25,8 +26,7 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator;
 		configuration = @HttpTaskConfiguration(
 			host = "127.0.0.1", 
 			port="8899", 
-			path = "/get")
-			),
+			path = "/get")),
 	@SimpleHttpTask(
 		commands = Task.CommandType.SET,
 		configuration = @HttpTaskConfiguration(
@@ -37,16 +37,9 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator;
 			content=ContentBuilderImpl.class)
 			)
 })
-public class Activator extends HttpActivator
-{
-	/**
-	 * @inheritDoc
-	 *
-	 * @see HttpActivator#getPacketType()
-	 */
+public class Activator extends HttpActivator{
 	@Override
-	protected Class<? extends HttpPacket> getPacketType()
-	{
-		return HttpTestPacket.class;
-	}
+    protected Class<? extends HttpPacket> getPacketType() {
+        return HttpTestPacket.class;
+    }
 }

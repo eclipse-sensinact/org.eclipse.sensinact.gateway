@@ -10,6 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
@@ -22,11 +25,12 @@ import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTasks;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.RecurrentChainedHttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.RecurrentHttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.SimpleHttpTask;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.ChainedHttpTaskDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.RecurrentChainedHttpTaskDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.RecurrentHttpTaskDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.SimpleHttpTaskDescription;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.osgi.framework.BundleContext;
-
-import java.util.Collections;
-import java.util.Map;
 
 /**
  * Extended {@link AbstractActivator} dedicated to the automatic
@@ -39,20 +43,16 @@ import java.util.Map;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class HttpActivator extends AbstractActivator<HttpMediator> {
-    /**
-     *
-     */
-    protected SimpleHttpProtocolStackEndpoint endpoint;
+	 /**
+    *
+    */
+   protected SimpleHttpProtocolStackEndpoint endpoint;
 
-    /**
-     * @inheritDoc
-     * @see AbstractActivator#doStart()
-     */
     @Override
     public void doStart() throws Exception {
         super.mediator.setTaskProcessingContextHandler(this.getProcessingContextHandler());
-        this.mediator.setTaskProcessingContextFactory(this.getTaskProcessingContextFactory());
-        this.mediator.setChainedTaskProcessingContextFactory(this.getChainedTaskProcessingContextFactory());
+        super.mediator.setTaskProcessingContextFactory(this.getTaskProcessingContextFactory());
+        super.mediator.setChainedTaskProcessingContextFactory(this.getChainedTaskProcessingContextFactory());
 
         ExtModelConfiguration<? extends HttpPacket> configuration = 
         	ExtModelConfigurationBuilder.instance(
@@ -74,10 +74,7 @@ public abstract class HttpActivator extends AbstractActivator<HttpMediator> {
         this.endpoint.connect(configuration);
     }
 
-    /**
-     * @inheritDoc
-     * @see AbstractActivator#doStop()
-     */
+
     @Override
     public void doStop() throws Exception {
         this.endpoint.stop();
@@ -187,33 +184,34 @@ public abstract class HttpActivator extends AbstractActivator<HttpMediator> {
      * @returns a newly created {@link SimpleHttpProtocolStackEndpoint}
      */
     public SimpleHttpProtocolStackEndpoint configureProtocolStackEndpoint() throws Exception {
-        SimpleHttpProtocolStackEndpoint endpoint = ReflectUtils.getInstance(getEndpointType(), new Object[]{mediator});
+        SimpleHttpProtocolStackEndpoint endpoint = ReflectUtils.getInstance(getEndpointType(), 
+        		new Object[]{mediator});
 
         HttpTasks taskArray = this.getClass().getAnnotation(HttpTasks.class);
         SimpleHttpTask[] tasks = taskArray == null ? null : taskArray.tasks();
         int index = 0;
         int length = tasks == null ? 0 : tasks.length;
         for (; index < length; index++) {
-            endpoint.registerAdapter(tasks[index]);
+            endpoint.registerAdapter(SimpleHttpTaskDescription.toDescription(tasks[index]));
         }
         RecurrentHttpTask[] recurrences = taskArray == null ? null : taskArray.recurrences();
         index = 0;
         length = recurrences == null ? 0 : recurrences.length;
         for (; index < length; index++) {
-            endpoint.registerAdapter(recurrences[index]);
+            endpoint.registerAdapter(RecurrentHttpTaskDescription.toDescription(recurrences[index]));
         }
         ChainedHttpTasks chainedTaskArray = this.getClass().getAnnotation(ChainedHttpTasks.class);
         ChainedHttpTask[] chainedTasks = chainedTaskArray == null ? null : chainedTaskArray.tasks();
         index = 0;
         length = chainedTasks == null ? 0 : chainedTasks.length;
         for (; index < length; index++) {
-            endpoint.registerAdapter(chainedTasks[index]);
+            endpoint.registerAdapter(ChainedHttpTaskDescription.toDescription(chainedTasks[index]));
         }
         RecurrentChainedHttpTask[] recurrentChainedTasks = chainedTaskArray == null ? null : chainedTaskArray.recurrences();
         index = 0;
         length = recurrentChainedTasks == null ? 0 : recurrentChainedTasks.length;
         for (; index < length; index++) {
-            endpoint.registerAdapter(recurrentChainedTasks[index]);
+            endpoint.registerAdapter(RecurrentChainedHttpTaskDescription.toDescription(recurrentChainedTasks[index]));
         }
         return endpoint;
     }

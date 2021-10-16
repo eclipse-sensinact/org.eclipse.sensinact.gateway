@@ -112,22 +112,14 @@ public class JettyTestServer implements Runnable {
 
     @SuppressWarnings("serial")
     public class JettyTestServerCallbackServlet extends HttpServlet {
-        /**
-         * @throws IOException
-         * @inheritDoc
-         * @see javax.servlet.http.HttpServlet#
-         * service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-         */
+       
         public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
             if (!response.isCommitted()) {
                 final AsyncContext context = request.startAsync(request, response);
                 response.getOutputStream().setWriteListener(new WriteListener() {
                     @Override
                     public void onWritePossible() throws IOException {
-                        //long start = System.currentTimeMillis();
                         doHandle(context, JettyTestServer.this.callbacks.get(doGet.class));
-                        //long delay = System.currentTimeMillis() - start;
-                        //System.out.println("GET DELAY " + delay);
                     }
 
                     @Override
@@ -138,12 +130,6 @@ public class JettyTestServer implements Runnable {
             }
         }
 
-        /**
-         * @throws IOException
-         * @inheritDoc
-         * @see javax.servlet.http.HttpServlet#
-         * service(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-         */
         public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
             if (!response.isCommitted()) {
                 final AsyncContext context = request.startAsync(request, response);
@@ -151,10 +137,7 @@ public class JettyTestServer implements Runnable {
                 response.getOutputStream().setWriteListener(new WriteListener() {
                     @Override
                     public void onWritePossible() throws IOException {
-                        //long start = System.currentTimeMillis();
                         doHandle(context, JettyTestServer.this.callbacks.get(doPost.class));
-                        //long delay = System.currentTimeMillis() - start;
-                        //System.out.println("POST DELAY " + delay);
                     }
 
                     @Override
@@ -203,15 +186,13 @@ public class JettyTestServer implements Runnable {
                         parameters[parametersIndex] = super.getServletConfig();
                         continue;
                     }
-                    parameters[parametersIndex] = super.getServletContext().getAttribute(parameterClass.getCanonicalName());
+                    parameters[parametersIndex] = super.getServletContext().getAttribute(
+                    		parameterClass.getCanonicalName());
                 }
                 try {
                     callback.invoke(parameters);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-
-                } catch (Error e) {
+                } catch (Exception | Error e) {
                     e.printStackTrace();
                 }
             }

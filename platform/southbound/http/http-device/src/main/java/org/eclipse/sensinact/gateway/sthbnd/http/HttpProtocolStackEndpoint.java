@@ -23,7 +23,6 @@ import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
 import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.Task.RequestType;
-import org.eclipse.sensinact.gateway.generic.TaskTranslator;
 import org.eclipse.sensinact.gateway.protocol.http.Headers;
 import org.eclipse.sensinact.gateway.protocol.http.HeadersCollection;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
@@ -73,15 +72,14 @@ public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<Ht
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public HttpProtocolStackEndpoint(Mediator mediator) throws ParserConfigurationException, SAXException, IOException {
+    public HttpProtocolStackEndpoint(Mediator mediator) 
+    	throws ParserConfigurationException, SAXException, IOException {
         super(mediator);
         this.stopping = false;
 
         this.permanentHeaders = new HeadersCollection();
         this.discovery = new LinkedList<HttpDiscoveryTask<?, ?>>();
         this.disconnexion = new LinkedList<HttpTask<?, ?>>();
-//		this.stack = new HttpPacketStack();
-//		new Thread(this.stack).start();
     }
 
     @Override
@@ -139,32 +137,6 @@ public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<Ht
         }
     }
 
-//	/**
-//	 * Stacks the {@link HttpPacket} passed as parameter
-//	 * for a future processing
-//	 * 
-//	 * @param packet
-//	 * 		the {@link HttpPacket} to stack
-//	 */
-//	@Override
-//	public void process(HttpPacket packet) 
-//    		throws InvalidPacketException
-//    {
-//		this.stack.addPacket(packet);
-//    }
-//	
-//	/**
-//	 * Processes the {@link HttpPacket} passed as parameter
-//	 * 
-//	 * @param packet
-//	 * 		the {@link HttpPacket} to process
-//	 */
-//	protected final void doProcess(HttpPacket packet)
-//			throws InvalidPacketException
-//	{
-//    	super.process(packet);
-//	}
-
     /**
      * Registers a permanent header field value that will be added to
      * each request build by this HttpProtocolStackEndpoint
@@ -204,10 +176,6 @@ public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<Ht
         }
     }
 
-    /**
-     * @inheritDoc
-     * @see TaskTranslator#getRequestType()
-     */
     @Override
     public RequestType getRequestType() {
         return RequestType.URI;
@@ -243,121 +211,4 @@ public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<Ht
             super.connector.stop();
         }
     }
-
-//	/**
-//	 * Stack of {@link HttpPacket} waiting to be processed
-//	 */
-//	private final class HttpPacketStack implements Runnable 
-//	{
-//		private final AtomicBoolean running;
-//		private LinkedList<HttpPacket> packets;
-//
-//		/**
-//		 * Constructor
-//		 */
-//		HttpPacketStack()
-//		{
-//			this.running = new AtomicBoolean(false);
-//			this.packets = new LinkedList<HttpPacket>();
-//		}
-//
-//		/**
-//		 * Adds the {@link HttpPacket} passed as parameter 
-//		 * on the top of the managed list
-//		 * 
-//		 * @param packet
-//		 *     the {@link HttpPacket} to add
-//		 */
-//		public void addPacket(HttpPacket request) 
-//		{
-//			synchronized (this)
-//			{
-//				this.packets.offer(request);
-//			}
-//		}
-//
-//		/**
-//		 * Removes and  returns the {@link HttPacket} 
-//		 * from the head of the list
-//		 * 
-//		 * @return 
-//		 *     list head {@link HttPacket}
-//		 */
-//		private HttpPacket getPacket()
-//		{
-//			HttpPacket packet = null;
-//			synchronized (this) 
-//			{
-//				packet = this.packets.pollFirst();
-//			}
-//			return packet;
-//		}
-//
-//		/**
-//		 * @InheritDoc
-//		 *
-//		 * @see java.lang.Runnable#run()
-//		 */
-//		@Override
-//		public void run()
-//		{
-//			running(true);
-//			
-//			while (running()) 
-//			{
-//				HttpPacket packet = getPacket();
-//				if (packet == null)
-//				{
-//					try 
-//					{
-//						Thread.sleep(100);
-//
-//					} catch (InterruptedException e)
-//					{
-//						Thread.interrupted();
-//						HttpProtocolStackEndpoint.this.mediator.error(e);
-//						this.running(false);
-//					}
-//					continue;
-//				}
-//				try 
-//				{
-//					HttpProtocolStackEndpoint.this.doProcess(packet);
-//
-//				} catch (InvalidPacketException e)
-//				{
-//					HttpProtocolStackEndpoint.this.mediator.error(e);
-//				}
-//			}
-//		}
-//
-//		/**
-//		 * Defines the running state
-//		 * 
-//		 * @param running
-//		 *            the running state
-//		 */
-//		void running(boolean running) 
-//		{
-//			synchronized (this)
-//			{
-//				this.running.set(running);
-//			}
-//		}
-//
-//		/**
-//		 * Returns the running state
-//		 * 
-//		 * @return the running state
-//		 */
-//		boolean running()
-//		{
-//			boolean running = false;
-//			synchronized (this)
-//			{
-//				running = this.running.get();
-//			}
-//			return running;
-//		}
-//	}
 }

@@ -45,10 +45,7 @@ public abstract class MidHttpProtocolStackEndpoint<RESPONSE extends HttpResponse
         this.client = new MidClient<RESPONSE, REQUEST>(this);
     }
 
-    /**
-     * @inheritDoc
-     * @see TaskTranslator#send(Task)
-     */
+    @Override
     public void send(Task task) {
         if (MidHttpTask.class.isAssignableFrom(task.getClass())) {
             MidHttpTask<RESPONSE, REQUEST> httpMidtask = (MidHttpTask<RESPONSE, REQUEST>) task;
@@ -63,11 +60,6 @@ public abstract class MidHttpProtocolStackEndpoint<RESPONSE extends HttpResponse
 
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.util.client.MidClientListener#
-     * respond(java.lang.Object)
-     */
     @Override
     public void respond(RESPONSE response) {
         if (!response.isDirect()) {

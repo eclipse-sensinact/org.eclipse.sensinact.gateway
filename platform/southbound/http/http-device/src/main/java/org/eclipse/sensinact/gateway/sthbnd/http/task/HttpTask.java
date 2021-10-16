@@ -15,6 +15,8 @@ import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpConnectionConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.MappingDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.NestedMappingDescription;
 
 /**
  * Extended {@link URITask} dedicated to HTTP communication
@@ -25,9 +27,14 @@ public interface HttpTask<RESPONSE extends HttpResponse, REQUEST extends Request
 HttpConnectionConfiguration<RESPONSE, REQUEST>, URITask {
 
     HttpTask<RESPONSE, REQUEST> setPacketType(Class<? extends HttpPacket> packetType);
-
     
     HttpTask<RESPONSE, REQUEST> setDirect(boolean direct);
 
+    HttpTask<RESPONSE, REQUEST> setMapping(MappingDescription[] mapping);
+    
+    MappingDescription[] getMapping();
+    		
     REQUEST build();    
+    
+    
 }

@@ -41,7 +41,9 @@ public abstract class HttpResponse extends SimpleResponse implements PathElement
      * @param configuration
      * @throws IOException
      */
-    public HttpResponse(Mediator mediator, HttpURLConnection connection, HttpConnectionConfiguration<? extends HttpResponse, ? extends Request<? extends HttpResponse>> configuration) throws IOException {
+    public HttpResponse(Mediator mediator, HttpURLConnection connection, 
+    		HttpConnectionConfiguration<? extends HttpResponse, ? extends Request<? extends HttpResponse>> configuration) 
+    				throws IOException {
         super(connection);
         this.mediator = mediator;
         this.path = configuration.getPath();
@@ -49,24 +51,15 @@ public abstract class HttpResponse extends SimpleResponse implements PathElement
         this.isDirect = configuration.isDirect();
     }
 
-    /**
-     * @inheritDoc
-     * @see PathElement#getPath()
-     */
+    @Override
     public String getPath() {
         return this.path;
     }
 
-    /**
-     * @return
-     */
     public CommandType getCommand() {
         return this.command;
     }
 
-    /**
-     * @return
-     */
     public boolean isDirect() {
         return this.isDirect;
     }

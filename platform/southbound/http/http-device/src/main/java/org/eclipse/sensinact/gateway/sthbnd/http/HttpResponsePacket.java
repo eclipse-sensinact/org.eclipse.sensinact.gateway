@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http;
 
+import java.io.InputStream;
+
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 
 /**
@@ -18,22 +20,44 @@ import org.eclipse.sensinact.gateway.generic.Task.CommandType;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class HttpResponsePacket extends HttpPacket {
+	
+    protected CommandType command;
     protected int statusCode = -1;
     protected String path;
-    protected CommandType command;
+    protected String savedContent;
+	protected boolean consume;
+	
+	private HttpResponse response;
 
     /**
-     * @param topic
-     * @param mqttMessage
+     * Constructor
+     * 
+     * @param response
      */
     public HttpResponsePacket(HttpResponse response) {
-        super(response != null ? response.getContent() : new byte[0]);
+    	this(response, false, true);
+    	this.savedContent = null;
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param response
+     * @param save
+     */
+    public HttpResponsePacket(HttpResponse response, boolean save, boolean consume) {
+        super((response != null && !save && consume)?response.getContent():new byte[0]);
+        if(save)
+        	this.savedContent = response.save();  
+        if(!consume)
+        	this.response = response;
+        this.consume = consume;
         this.setStatusCode(statusCode);
         this.path = response.getPath();
         this.command = response.getCommand();
         super.addHeaders(response.getHeaders());
     }
-
+    
     /**
      * @return
      */
@@ -46,6 +70,17 @@ public class HttpResponsePacket extends HttpPacket {
      */
     public String getPath() {
         return this.path;
+    }
+    
+    /**
+     * Returns the wrapped {@link HttpResponse}'s {@link InputStream} if any
+     * 
+     * @return the wrapped {@link HttpResponse}'s {@link InputStream}
+     */
+    public InputStream getInputStream() {
+    	if(!consume && this.response!=null)
+    		return this.response.inputStream();
+    	return null;
     }
 
     /**
@@ -66,5 +101,13 @@ public class HttpResponsePacket extends HttpPacket {
      */
     public int getStatusCode() {
         return this.statusCode;
+    }
+    
+    @Override
+    public void finalize() {
+    	if(this.response != null)
+    		this.response.disconnect();
+    	this.response = null;
+    	
     }
 }

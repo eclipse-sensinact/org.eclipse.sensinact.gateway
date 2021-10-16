@@ -26,6 +26,8 @@ import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfiguratio
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.MappingDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.NestedMappingDescription;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 
 /**
@@ -232,6 +234,17 @@ extends AbstractUnsubscribeTaskWrapper implements HttpTask<RESPONSE,REQUEST>, Un
 	@Override
 	public Class<? extends HttpPacket> getPacketType() {
 		return ((HttpTask<?,?>)task).getPacketType();
+	}
+
+	@Override
+	public HttpTask<RESPONSE, REQUEST> setMapping(MappingDescription[] mappings) {
+		((HttpTask<?,?>)task).setMapping(mappings);
+		return this;
+	}
+	
+	@Override
+	public MappingDescription[] getMapping() {
+		return ((HttpTask<?,?>)task).getMapping();
 	}
 
 	@Override

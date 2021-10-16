@@ -36,10 +36,7 @@ extends HttpDiscoveryTask<RESPONSE, REQUEST> {
         super(mediator, transmitter, requestType);
     }
 
-    /**
-     * @inheritDoc
-     * @see HttpTask#isDirect()
-     */
+    @Override
     public boolean isDirect() {
         return false;
     }

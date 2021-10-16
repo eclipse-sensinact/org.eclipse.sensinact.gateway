@@ -53,10 +53,6 @@ public class HttpPacket extends HeadersCollection implements Packet {
         this(null, content);
     }
 
-    /**
-     * @inheritDoc
-     * @see org.eclipse.sensinact.gateway.core.model.data.api.com.Packet#getBytes()
-     */
     @Override
     public byte[] getBytes() {
         int length = this.content == null ? 0 : this.content.length;

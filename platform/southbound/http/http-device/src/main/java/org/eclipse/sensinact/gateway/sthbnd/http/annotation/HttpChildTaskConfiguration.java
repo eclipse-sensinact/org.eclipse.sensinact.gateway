@@ -31,6 +31,8 @@ public @interface HttpChildTaskConfiguration {
     public static final String DEFAULT_PORT = "#EMPTY#";
     public static final String DEFAULT_PATH = "#EMPTY#";
     public static final String DEFAULT_HOST = "#EMPTY#";
+    public static final int DEFAULT_CONNECTION_TIMEOUT = -1;
+    public static final int DEFAULT_READ_TIMEOUT = -1;
 
     String acceptType() default DEFAULT_ACCEPT_TYPE;
 
@@ -63,4 +65,8 @@ public @interface HttpChildTaskConfiguration {
     Class<? extends HttpTaskConfigurator> content() default HttpTaskConfigurator.class;
     
     Class<? extends HttpPacket> packet() default HttpPacket.class;
+
+    int connectTimeout() default DEFAULT_CONNECTION_TIMEOUT;
+
+    int readTimeout() default DEFAULT_READ_TIMEOUT;
 }

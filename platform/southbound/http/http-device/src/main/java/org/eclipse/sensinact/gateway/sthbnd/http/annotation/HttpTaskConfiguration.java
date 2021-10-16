@@ -34,6 +34,8 @@ public @interface HttpTaskConfiguration {
     public static final String DEFAULT_HTTP_METHOD = "GET";
     public static final String DEFAULT_PORT = "80";
     public static final String DEFAULT_PATH = "/";
+    public static final int DEFAULT_CONNECTION_TIMEOUT = 300000;
+    public static final int DEFAULT_READ_TIMEOUT = 300000;
 
     String acceptType() default DEFAULT_ACCEPT_TYPE;
 
@@ -64,4 +66,8 @@ public @interface HttpTaskConfiguration {
     Class<? extends HttpTaskConfigurator> content() default HttpTaskConfigurator.class;
     
     Class<? extends HttpPacket> packet() default HttpPacket.class;
+
+    int connectTimeout() default DEFAULT_CONNECTION_TIMEOUT;
+
+    int readTimeout() default DEFAULT_READ_TIMEOUT;
 }

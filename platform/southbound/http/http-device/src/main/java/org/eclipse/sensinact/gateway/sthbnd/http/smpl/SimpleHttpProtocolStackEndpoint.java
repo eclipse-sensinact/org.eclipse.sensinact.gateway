@@ -13,12 +13,19 @@ package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 import java.io.IOException;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -30,14 +37,17 @@ import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpRequest;
-import org.eclipse.sensinact.gateway.sthbnd.http.annotation.ChainedHttpTask;
-import org.eclipse.sensinact.gateway.sthbnd.http.annotation.RecurrentChainedHttpTask;
-import org.eclipse.sensinact.gateway.sthbnd.http.annotation.RecurrentHttpTask;
-import org.eclipse.sensinact.gateway.sthbnd.http.annotation.SimpleHttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTasks;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTaskImpl;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.ChainedHttpTaskDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.ChainedHttpTasksDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.HttpProtocolStackEndpointTasksDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.HttpTasksDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.RecurrentChainedHttpTaskDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.RecurrentHttpTaskDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.SimpleHttpTaskDescription;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.xml.sax.SAXException;
@@ -77,6 +87,8 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
     protected Deque<RecurrentHttpTaskConfigurator> recurrences;
     protected Map<CommandType, HttpTaskBuilder> adapters;
     protected Map<CommandType, HttpTaskUrlConfigurator> builders;
+    protected Set<String> recurrenceTasks;
+    protected ScheduledExecutorService worker;
 
     /**
      * @param mediator
@@ -86,10 +98,12 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
      */
     public SimpleHttpProtocolStackEndpoint(HttpMediator mediator) throws ParserConfigurationException, SAXException, IOException {
         super(mediator);
-        this.recurrences = new LinkedList<RecurrentHttpTaskConfigurator>();
-        this.adapters = new HashMap<CommandType, HttpTaskBuilder>();
-        this.builders = new HashMap<CommandType, HttpTaskUrlConfigurator>();
-
+        this.recurrences = new LinkedList<>();
+        this.adapters = new HashMap<>();
+        this.builders = new HashMap<>();
+        this.recurrenceTasks = new HashSet<>();
+        this.worker = Executors.newScheduledThreadPool(3);
+        
         //Mediator classloader because we don't need to retrieve
         //all declared factories in the OSGi environment, but only
         //the one specified in the bundle instantiating this
@@ -109,49 +123,83 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
             }
         }
     }
+    
+    public void registerAdapters(HttpProtocolStackEndpointTasksDescription config) {
+	    HttpTasksDescription taskArray = config.getStandalone();
+	    List<SimpleHttpTaskDescription> tasks = taskArray == null ? null : taskArray.getTasks();
+	    int index = 0;
+	    int length = tasks == null ? 0 : tasks.size();
+	    for (; index < length; index++) {
+	        this.registerAdapter(tasks.get(index));
+	    }
+	    List<RecurrentHttpTaskDescription> recurrences = taskArray == null ? null : taskArray.getRecurrences();
+	    index = 0;
+	    length = recurrences == null ? 0 : recurrences.size();
+	    for (; index < length; index++) {
+	       this.registerAdapter(recurrences.get(index));
+	    }
+	    ChainedHttpTasksDescription chainedTaskArray = config.getChained();
+	    List<ChainedHttpTaskDescription> chainedTasks = chainedTaskArray == null ? null : chainedTaskArray.getTasks();
+	    index = 0;
+	    length = chainedTasks == null ? 0 : chainedTasks.size();
+	    for (; index < length; index++) {
+	        this.registerAdapter(chainedTasks.get(index));
+	    }
+	    List<RecurrentChainedHttpTaskDescription> recurrentChainedTasks = chainedTaskArray == null ? null : chainedTaskArray.getRecurrences();
+	    index = 0;
+	    length = recurrentChainedTasks == null ? 0 : recurrentChainedTasks.size();
+	    for (; index < length; index++) {
+	        this.registerAdapter(recurrentChainedTasks.get(index));
+	    }
+    }
 
     /**
      * @param chainedHttpTask
      */
-    public void registerAdapter(ChainedHttpTask chainedHttpTask) {
-        CommandType[] commands = chainedHttpTask.commands();
-        int length = commands == null ? 0 : commands.length;
+    public void registerAdapter(ChainedHttpTaskDescription chainedHttpTask) {
+        List<CommandType> commands = chainedHttpTask.getCommands();
+        int length = commands == null ? 0 : commands.size();
         int index = 0;
 
         for (; index < length; index++) {
-            ChainedHttpTaskConfigurator executor = new ChainedHttpTaskConfigurator(this, chainedHttpTask.profile(), commands[index], this.builders.get(commands[index]), chainedHttpTask.configuration(), chainedHttpTask.chain());
+            ChainedHttpTaskConfigurator executor = new ChainedHttpTaskConfigurator(this, 
+            	chainedHttpTask.getProfile(), commands.get(index), this.builders.get(commands.get(index)), 
+            	chainedHttpTask.getConfiguration(), chainedHttpTask.getChain());
 
-            switch (commands[index]) {
+            switch (commands.get(index)) {
                 case ACT:
-                    this.setActTaskType(chainedHttpTask.chaining());
+                    this.setActTaskType(chainedHttpTask.getChaining());
                     break;
                 case GET:
-                    this.setGetTaskType(chainedHttpTask.chaining());
+                    this.setGetTaskType(chainedHttpTask.getChaining());
                     break;
                 case SERVICES_ENUMERATION:
-                    this.setServicesEnumerationTaskType(chainedHttpTask.chaining());
+                    this.setServicesEnumerationTaskType(chainedHttpTask.getChaining());
                     break;
                 case SET:
-                    this.setSetTaskType(chainedHttpTask.chaining());
+                    this.setSetTaskType(chainedHttpTask.getChaining());
                     break;
                 case SUBSCRIBE:
-                    this.setSubscribeTaskType(chainedHttpTask.chaining());
+                    this.setSubscribeTaskType(chainedHttpTask.getChaining());
                     break;
                 case UNSUBSCRIBE:
-                    this.setUnsubscribeTaskType(chainedHttpTask.chaining());
+                    this.setUnsubscribeTaskType(chainedHttpTask.getChaining());
                     break;
                 default:
                     break;
             }
-            this.adapters.put(commands[index], executor);
+            this.adapters.put(commands.get(index), executor);
         }
     }
 
     /**
      * @param chainedHttpTask
      */
-    public void registerAdapter(RecurrentChainedHttpTask chainedHttpTask) {
-        RecurrentHttpTaskConfigurator executor = new RecurrentChainedTaskConfigurator(this, chainedHttpTask.command(), this.builders.get(chainedHttpTask.command()), chainedHttpTask.chaining(), chainedHttpTask.period(), chainedHttpTask.delay(), chainedHttpTask.timeout(), chainedHttpTask.configuration(), chainedHttpTask.chain());
+    public void registerAdapter(RecurrentChainedHttpTaskDescription chainedHttpTask) {
+        RecurrentHttpTaskConfigurator executor = new RecurrentChainedTaskConfigurator(this, 
+        	chainedHttpTask.getCommand(), this.builders.get(chainedHttpTask.getCommand()), 
+        	chainedHttpTask.getChaining(), chainedHttpTask.getPeriod(), chainedHttpTask.getDelay(), 
+        	chainedHttpTask.getTimeout(), chainedHttpTask.getConfiguration(), chainedHttpTask.getChain());
         this.recurrences.add(executor);
     }
 
@@ -159,22 +207,28 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
      * @param command
      * @param executor
      */
-    public void registerAdapter(SimpleHttpTask httpTaskAnnotation) {
-        CommandType[] commands = httpTaskAnnotation.commands();
-        int length = commands == null ? 0 : commands.length;
+    public void registerAdapter(SimpleHttpTaskDescription httpTaskAnnotation) {
+        List<CommandType> commands = httpTaskAnnotation.getCommands();
+        int length = commands == null ? 0 : commands.size();
         int index = 0;
 
         for (; index < length; index++) {
-            SimpleTaskConfigurator executor = new SimpleTaskConfigurator(this, httpTaskAnnotation.profile(), commands[index], this.builders.get(commands[index]), httpTaskAnnotation.configuration());
-            this.adapters.put(commands[index], executor);
+            SimpleTaskConfigurator executor = new SimpleTaskConfigurator(this, 
+            	httpTaskAnnotation.getProfile(), commands.get(index), this.builders.get(commands.get(index)), 
+            	httpTaskAnnotation.getConfiguration());
+            this.adapters.put(commands.get(index), executor);
         }
     }
 
     /**
-     * @param httpTaskAnnotation
+     * @param reccurent
      */
-    public void registerAdapter(RecurrentHttpTask httpTaskAnnotation) {
-        RecurrentTaskConfigurator executor = new RecurrentTaskConfigurator(this, httpTaskAnnotation.command(), this.builders.get(httpTaskAnnotation.command()), this.getTaskType(httpTaskAnnotation.command()), httpTaskAnnotation.period(), httpTaskAnnotation.delay(), httpTaskAnnotation.timeout(), httpTaskAnnotation.recurrence());
+    public void registerAdapter(RecurrentHttpTaskDescription reccurent) {
+        RecurrentTaskConfigurator executor = new RecurrentTaskConfigurator(this, 
+        	reccurent.getCommand(), this.builders.get(reccurent.getCommand()),
+        	this.getTaskType(reccurent.getCommand()), reccurent.getPeriod(), 
+        	reccurent.getDelay(), reccurent.getTimeout(), 
+        	reccurent.getConfiguration());
         this.recurrences.add(executor);
     }
 
@@ -189,37 +243,51 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
         }
         while (iterator.hasNext()) {
             final RecurrentHttpTaskConfigurator executable = iterator.next();
-            TimerTask timerTask = new TimerTask() {
+            final AtomicReference<ScheduledFuture<?>>  ref = new AtomicReference<>();
+            ScheduledFuture<?> future = worker.scheduleWithFixedDelay( new Runnable() {
                 private long timeout = 0;
-
+                private String taskId;
+                
                 @Override
-                public void run() {
-                    if (timeout == 0) {
+                public void run() {                	
+                	if(this.taskId == null)
+                		this.taskId = String.format("task_%s",this.hashCode());
+                	
+                	if(SimpleHttpProtocolStackEndpoint.this.recurrenceTasks.contains(this.taskId))
+                		return; 
+                	
+                	SimpleHttpProtocolStackEndpoint.this.recurrenceTasks.add(this.taskId);         
+                	
+                    if (timeout == 0) 
                         timeout = executable.getTimeout() == -1 ? -1 : (System.currentTimeMillis() + executable.getTimeout());
-                    }
+                    
                     if (timeout > -1 && System.currentTimeMillis() > timeout) {
-                        this.cancel();
+                    	SimpleHttpProtocolStackEndpoint.this.recurrenceTasks.remove(this.taskId);
+                    	ScheduledFuture<?> future = ref.get();
+                    	if(future != null)
+                    		future.cancel(true);
                         return;
                     }
-                    HttpTask<?, ?> task = ReflectUtils.getInstance(executable.getTaskType(), new Object[]{mediator, executable.handled(), SimpleHttpProtocolStackEndpoint.this, SimpleHttpRequest.class, UriUtils.ROOT, null, null, null});
+                    HttpTask<?, ?> task = ReflectUtils.getInstance(executable.getTaskType(), new Object[]{mediator, 
+                    	executable.handled(), SimpleHttpProtocolStackEndpoint.this, SimpleHttpRequest.class, UriUtils.ROOT, 
+                    		null, null, null});
                     try {
-                        if (ChainedHttpTaskConfigurator.class.isAssignableFrom(executable.getClass())) {
+                        if (ChainedHttpTaskConfigurator.class.isAssignableFrom(executable.getClass()))
                             executable.configure(task);
-
-                        } else {
+                       else {
                             HttpTaskProcessingContext context = SimpleHttpProtocolStackEndpoint.this.createContext(executable, task);
-
-                            if (context != null) {
-                                ((HttpMediator) mediator).registerProcessingContext(task, context);
-                            }
+                            if (context != null) 
+                                ((HttpMediator) mediator).registerProcessingContext(task, context);                            
                         }
                         task.execute();
                     } catch (Exception e) {
                         mediator.error(e);
+                    }finally {
+                    	SimpleHttpProtocolStackEndpoint.this.recurrenceTasks.remove(this.taskId);
                     }
                 }
-            };
-            this.timer.schedule(timerTask, executable.getDelay(), executable.getPeriod());
+            }, executable.getDelay(), executable.getPeriod(), TimeUnit.MILLISECONDS);
+            ref.set(future);
         }
     }
 
@@ -258,7 +326,9 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
         if (configuration == null) {
             return null;
         }
-        HttpTask<?, ?> task = super.wrap(HttpTask.class, ReflectUtils.getInstance(this.getTaskType(command), new Object[]{mediator, command, this, SimpleHttpRequest.class, path, profileId, resourceConfig, parameters}));
+        HttpTask<?, ?> task = super.wrap(HttpTask.class, ReflectUtils.getInstance(this.getTaskType(command), 
+        	new Object[]{mediator, command, this, SimpleHttpRequest.class, path, profileId, 
+        		resourceConfig, parameters}));
         try {
             if (task.getPacketType() == null) 
                 task.setPacketType(packetType);            
@@ -467,11 +537,8 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
         }
         return HttpTask.class;
     }
-
-    /**
-     * @inheritedDoc
-     * @see HttpProtocolStackEndpoint#stop()
-     */
+    
+    @Override
     public void stop() {
         if (this.timer != null) {
             this.timer.cancel();

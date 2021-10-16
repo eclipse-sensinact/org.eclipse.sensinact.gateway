@@ -19,28 +19,7 @@ import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ContentBuilderImpl implements HttpTaskConfigurator
-{
-	//********************************************************************//
-	//						NESTED DECLARATIONS			  			      //
-	//********************************************************************//
-
-	//********************************************************************//
-	//						ABSTRACT DECLARATIONS						  //
-	//********************************************************************//
-
-	//********************************************************************//
-	//						STATIC DECLARATIONS							  //
-	//********************************************************************//
-
-	//********************************************************************//
-	//						INSTANCE DECLARATIONS						  //
-	//********************************************************************//
-	
-	public ContentBuilderImpl()
-	{}
-	
-
+public class ContentBuilderImpl implements HttpTaskConfigurator{
 	@Override
 	public <T extends HttpTask<?,?>> void configure(T task){
 		if(Task.CommandType.SET.equals(task.getCommand()))

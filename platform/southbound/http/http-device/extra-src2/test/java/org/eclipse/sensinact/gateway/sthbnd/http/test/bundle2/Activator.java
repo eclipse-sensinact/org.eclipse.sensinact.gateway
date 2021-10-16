@@ -28,13 +28,8 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator;
 			path = "/get")
 		)
 })
-public class Activator extends HttpActivator
-{
-	/**
-	 * @inheritDoc
-	 *
-	 * @see HttpActivator#getPacketType()
-	 */
+public class Activator extends HttpActivator{
+	
 	@Override
 	protected Class<? extends HttpPacket> getPacketType(){
 		return HttpTestPacket.class;

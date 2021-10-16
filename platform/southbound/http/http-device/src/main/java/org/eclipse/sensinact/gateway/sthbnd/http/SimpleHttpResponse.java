@@ -29,15 +29,13 @@ public class SimpleHttpResponse extends HttpResponse {
      * @param configuration
      * @throws IOException
      */
-    public SimpleHttpResponse(Mediator mediator, HttpURLConnection connection, HttpConnectionConfiguration<? extends HttpResponse, ? extends Request<? extends HttpResponse>> configuration) throws IOException {
+    public SimpleHttpResponse(Mediator mediator, HttpURLConnection connection, 
+    		HttpConnectionConfiguration<? extends HttpResponse, ? extends Request<? extends HttpResponse>> configuration) 
+    				throws IOException {
         super(mediator, connection, configuration);
         this.packetType = configuration.getPacketType();
     }
 
-    /**
-     * @InheritedDoc
-     * @see HttpResponse#createPacket()
-     */
     @Override
     public HttpPacket createPacket() {
         if (this.packetType == null) {
@@ -45,12 +43,13 @@ public class SimpleHttpResponse extends HttpResponse {
         }
         try {
             if (HttpResponsePacket.class.isAssignableFrom(packetType)) 
-                return packetType.getConstructor(HttpResponse.class).newInstance(this);
+                return packetType.getConstructor(HttpResponse.class
+                		).newInstance(this);
             else 
-                return this.packetType.getConstructor(Map.class, byte[].class).newInstance(this.getHeaders(), this.content);
+                return this.packetType.getConstructor(Map.class, byte[].class
+                		).newInstance(super.getHeaders(), super.getContent());
         } catch (Exception e) {
-        	e.printStackTrace();
-            return new HttpPacket(this.getHeaders(), this.content);
+            return new HttpPacket(this.getHeaders(), super.getContent());
         }
     }
 }

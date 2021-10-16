@@ -21,6 +21,9 @@ import org.eclipse.sensinact.gateway.protocol.http.client.ProxyConfiguration;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.MappingDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.NestedMappingDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.RootMappingDescription;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 
 import java.io.IOException;
@@ -54,6 +57,7 @@ extends TaskImpl implements HttpTask<RESPONSE, REQUEST> {
     protected HeadersCollection headers;
     protected Class<? extends HttpPacket> packetType;
     protected Class<REQUEST> requestType;
+	protected MappingDescription[] mappings;
     protected boolean direct;
 
     /**
@@ -74,8 +78,12 @@ extends TaskImpl implements HttpTask<RESPONSE, REQUEST> {
      *                       which created the task to be instantiated if it applies
      * @param parameters     the objects array parameterizing the task execution
      */
-    public HttpTaskImpl(Mediator mediator, CommandType command, TaskTranslator transmitter, Class<REQUEST> requestType, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        super(mediator, command, transmitter, path, profileId, resourceConfig, parameters);
+    public HttpTaskImpl(Mediator mediator, CommandType command, TaskTranslator transmitter, 
+    	Class<REQUEST> requestType, String path, String profileId, ResourceConfig resourceConfig, 
+    	Object[] parameters) {
+    	
+        super(mediator, command, transmitter, path, profileId, resourceConfig, 
+        		parameters);
 
         this.requestType = requestType;
         this.queries = new HashMap<String, String>();
@@ -102,6 +110,17 @@ extends TaskImpl implements HttpTask<RESPONSE, REQUEST> {
         return this.packetType;
     }
 
+	@Override
+	public HttpTask<RESPONSE, REQUEST> setMapping(MappingDescription[] mappings) {
+		this.mappings = mappings;
+		return this;
+	}
+
+	@Override
+	public MappingDescription[] getMapping() {
+		return this.mappings;
+	}
+	
     @Override
     public HttpTaskImpl<RESPONSE, REQUEST> setUri(String uri) {
         this.uri = uri;
@@ -315,7 +334,7 @@ extends TaskImpl implements HttpTask<RESPONSE, REQUEST> {
 
     @Override
     public REQUEST build() {
-        return ReflectUtils.getInstance(Request.class, this.requestType, new Object[]{super.mediator, this});
-    }
-    
+        return ReflectUtils.getInstance(Request.class, this.requestType, 
+        		new Object[]{super.mediator, this});
+    }    
 }

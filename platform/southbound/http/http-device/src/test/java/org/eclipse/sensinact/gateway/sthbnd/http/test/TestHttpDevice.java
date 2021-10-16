@@ -58,7 +58,6 @@ public class TestHttpDevice extends MidOSGiTest {
 
     public static String newRequest(String configuration) throws IOException {
         SimpleResponse response;
-
         ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> builder = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>(configuration);
         SimpleRequest request = new SimpleRequest(builder);
         response = request.send();
@@ -72,19 +71,17 @@ public class TestHttpDevice extends MidOSGiTest {
         ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> builder = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
         builder.setUri(url);
         try {
-            if (method.equals("GET")) {
+            if (method.equals("GET")) 
                 builder.setHttpMethod("GET");
-
-            } else if (method.equals("POST")) {
+            else if (method.equals("POST")) {
                 builder.setContentType("application/json");
                 builder.setHttpMethod("POST");
                 if (content != null && content.length() > 0) {
                     JSONObject jsonData = new JSONObject(content);
                     builder.setContent(jsonData.toString());
                 }
-            } else {
+            } else 
                 return null;
-            }
             builder.setAccept("application/json");
             SimpleRequest request = new SimpleRequest(builder);
             response = request.send();
@@ -140,10 +137,6 @@ public class TestHttpDevice extends MidOSGiTest {
         actMethod = ActionResource.class.getDeclaredMethod("act", new Class<?>[]{Object[].class});
     }
 
-    /**
-     * @inheritDoc
-     * @see MidOSGiTest#isExcluded(java.lang.String)
-     */
     public boolean isExcluded(String fileName) {
         if ("org.apache.felix.framework.security.jar".equals(fileName)) {
             return true;
@@ -153,9 +146,17 @@ public class TestHttpDevice extends MidOSGiTest {
 
     @Test
     public void testHttpTask() throws Throwable {
-        callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
+        callback.setRemoteEntity(new JSONObject(
+        	).put("serviceProviderId", "TestForSensiNactGateway"
+        	).put("serviceId", "service1"
+        	).put("resourceId", "temperature"
+        	).put("data", 24));
 
-        this.initializeMoke(new File("src/test/resources/resources.xml").toURI().toURL(), new File("./extra-src/test/resources/MANIFEST.MF"), new File("./extra-src/test/resources/meta"), new File("./target/extra-test-classes"));
+        this.initializeMoke(
+        	new File("src/test/resources/resources.xml").toURI().toURL(), 
+        	new File("./extra-src/test/resources/MANIFEST.MF"), 
+        	new File("./extra-src/test/resources/meta"), 
+        	new File("./target/extra-test-classes"));
 
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
         Core core = mid.buildProxy();
@@ -179,15 +180,22 @@ public class TestHttpDevice extends MidOSGiTest {
         response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
-
         core.close();
     }
 
     @Test
     public void testHttpTaskWithProcessingContext() throws Throwable {
-        callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway5").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
+        callback.setRemoteEntity(new JSONObject(
+        	).put("serviceProviderId", "TestForSensiNactGateway5"
+        	).put("serviceId", "service1"
+        	).put("resourceId", "temperature"
+        	).put("data", 24));
 
-        this.initializeMoke(new File("src/test/resources/resources5.xml").toURI().toURL(), new File("./extra-src5/test/resources/MANIFEST.MF"), new File("./extra-src5/test/resources/meta"), new File("./target/extra-test-classes5"));
+        this.initializeMoke(
+        	new File("src/test/resources/resources5.xml").toURI().toURL(), 
+        	new File("./extra-src5/test/resources/MANIFEST.MF"), 
+        	new File("./extra-src5/test/resources/meta"), 
+        	new File("./target/extra-test-classes5"));
 
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
         Core core = mid.buildProxy();
@@ -218,7 +226,12 @@ public class TestHttpDevice extends MidOSGiTest {
     public void testHttpTaskWithServicesEnumeration() throws Throwable {
         callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway4").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
 
-        this.initializeMoke(new File("src/test/resources/resources4.xml").toURI().toURL(), new File("./extra-src4/test/resources/MANIFEST.MF"), new File("./extra-src4/test/resources/meta"), new File("./target/extra-test-classes4"));
+        this.initializeMoke(
+        	new File("src/test/resources/resources4.xml").toURI().toURL(), 
+        	new File("./extra-src4/test/resources/MANIFEST.MF"), 
+        	new File("./extra-src4/test/resources/meta"), 
+        	new File("./target/extra-test-classes4"));
+        
         Thread.sleep(1000);
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
         Core core = mid.buildProxy();
@@ -249,7 +262,11 @@ public class TestHttpDevice extends MidOSGiTest {
     public void testChainedHttpTask() throws Throwable {
         callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway3").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
 
-        this.initializeMoke(new File("src/test/resources/resources3.xml").toURI().toURL(), new File("./extra-src3/test/resources/MANIFEST.MF"), new File("./extra-src3/test/resources/meta"), new File("./target/extra-test-classes3"));
+        this.initializeMoke(
+        	new File("src/test/resources/resources3.xml").toURI().toURL(), 
+        	new File("./extra-src3/test/resources/MANIFEST.MF"), 
+        	new File("./extra-src3/test/resources/meta"), 
+        	new File("./target/extra-test-classes3"));
 
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
         Core core = mid.buildProxy();
@@ -269,9 +286,18 @@ public class TestHttpDevice extends MidOSGiTest {
 
     @Test
     public void testHttpDeviceReccurrent() throws Throwable {
-        callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway2").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
+    	
+        callback.setRemoteEntity(new JSONObject().put(
+        		"serviceProviderId", "TestForSensiNactGateway2"
+        		).put("serviceId", "service1"
+        		).put("resourceId", "temperature"
+        		).put("data", 24));
+        
+        this.initializeMoke(
+        		new File("src/test/resources/resources2.xml").toURI().toURL(), 
+        		new File("./extra-src2/test/resources/MANIFEST.MF"),
+        		new File("./target/extra-test-classes2"));
 
-        this.initializeMoke(new File("src/test/resources/resources2.xml").toURI().toURL(), new File("./extra-src2/test/resources/MANIFEST.MF"), new File("./extra-src2/test/resources/meta"), new File("./target/extra-test-classes2"));
         MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
         Core core = mid.buildProxy();
 
@@ -279,26 +305,41 @@ public class TestHttpDevice extends MidOSGiTest {
         ServiceProvider provider = session.serviceProvider("TestForSensiNactGateway2");
         Service service = provider.getService("service1");
         Resource variable = service.getResource("temperature");
+
         MidProxy midVariable = (MidProxy) Proxy.getInvocationHandler(variable);
         SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         JSONObject jsonObject = new JSONObject(response.getJSON());
         assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
 
-        callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway2").put("serviceId", "service1").put("resourceId", "temperature").put("data", 25));
+        callback.setRemoteEntity(new JSONObject(
+        		).put("serviceProviderId", "TestForSensiNactGateway2"
+        		).put("serviceId", "service1"
+        		).put("resourceId", "temperature"
+        		).put("data", 25));
 
         Thread.sleep(2000);
         response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         jsonObject = new JSONObject(response.getJSON());
-        System.out.println(jsonObject);
         assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
-        callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway2").put("serviceId", "service1").put("resourceId", "temperature").put("data", 32));
+        
+        callback.setRemoteEntity(new JSONObject(
+        		).put("serviceProviderId", "TestForSensiNactGateway2"
+        		).put("serviceId", "service1"
+        		).put("resourceId", "temperature"
+        		).put("data", 32));
+        
         Thread.sleep(2000);
         response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(32, (int) jsonObject.getJSONObject("response").getInt("value"));
         Thread.sleep(16 * 1000);
 
-        callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway2").put("serviceId", "service1").put("resourceId", "temperature").put("data", 45));
+        callback.setRemoteEntity(new JSONObject(
+        		).put("serviceProviderId", "TestForSensiNactGateway2"
+        		).put("serviceId", "service1"
+        		).put("resourceId", "temperature"
+        		).put("data", 45));
+        
         Thread.sleep(2000);
         response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
         jsonObject = new JSONObject(response.getJSON());
@@ -307,10 +348,6 @@ public class TestHttpDevice extends MidOSGiTest {
         core.close();
     }
 
-    /**
-     * @inheritDoc
-     * @see MidOSGiTest#doInit(java.util.Map)
-     */
     @Override
     protected void doInit(Map configuration) {
        
@@ -328,17 +365,23 @@ public class TestHttpDevice extends MidOSGiTest {
         		"file:target/felix/bundle/org.apache.felix.fileinstall.jar " +
         		"file:target/felix/bundle/org.apache.felix.configadmin.jar " + 
         		"file:target/felix/bundle/org.apache.felix.framework.security.jar ");
-        configuration.put("felix.auto.install.2",  
-        	    "file:target/felix/bundle/org.eclipse.paho.client.mqttv3.jar " + 
-                "file:target/felix/bundle/mqtt-utils.jar " + 
-        	    "file:target/felix/bundle/sensinact-utils.jar " + 
-                "file:target/felix/bundle/sensinact-common.jar " + 
-        	    "file:target/felix/bundle/sensinact-datastore-api.jar " + 
-                "file:target/felix/bundle/sensinact-security-none.jar " + 
-                "file:target/felix/bundle/sensinact-generic.jar " + 
-                "file:target/felix/bundle/slf4j-api.jar " + 
-                "file:target/felix/bundle/slf4j-simple.jar");
+        configuration.put("felix.auto.install.2",          
+            	"file:target/felix/bundle/http.jar "+
+            	"file:target/felix/bundle/jackson-databind.jar " +
+            	"file:target/felix/bundle/jackson-annotations.jar " +
+            	"file:target/felix/bundle/jackson-core.jar " +
+    			"file:target/felix/bundle/sensinact-generic.jar "+ 
+    			"file:target/felix/bundle/sensinact-utils.jar "+ 
+    			"file:target/felix/bundle/sensinact-datastore-api.jar "+
+    			"file:target/felix/bundle/sensinact-common.jar "+	
+    			"file:target/felix/bundle/sensinact-security-none.jar "+ 
+    			"file:target/felix/bundle/org.apache.felix.http.servlet-api.jar " +
+    			"file:target/felix/bundle/org.apache.felix.http.api.jar " +
+    			"file:target/felix/bundle/org.apache.aries.javax.jax.rs-api.jar "+
+            	"file:target/felix/bundle/slf4j-api.jar "+
+    	    	"file:target/felix/bundle/slf4j-simple.jar");        
         configuration.put("felix.auto.start.2", 
+        		"file:target/felix/bundle/org.apache.felix.http.jetty.jar " +
         		"file:target/felix/bundle/sensinact-signature-validator.jar " + 
         		"file:target/felix/bundle/sensinact-core.jar ");
         configuration.put("felix.auto.start.3", 
@@ -399,7 +442,8 @@ public class TestHttpDevice extends MidOSGiTest {
         Thread.currentThread().setContextClassLoader(super.classloader);
         try {
             bundle.start();
-
+        } catch(Exception e) {
+        	e.printStackTrace();
         } finally {
             Thread.currentThread().setContextClassLoader(current);
         }

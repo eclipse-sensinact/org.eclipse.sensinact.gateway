@@ -13,10 +13,12 @@ package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
-import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpChildTaskConfiguration;
-import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTaskConfiguration;
-import org.eclipse.sensinact.gateway.sthbnd.http.annotation.KeyValuePair;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.HttpChildTaskConfigurationDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.HttpTaskConfigurationDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.KeyValuePairDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.NestedMappingDescription;
+import org.eclipse.sensinact.gateway.sthbnd.http.task.config.RootMappingDescription;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 
 import java.net.URL;
@@ -32,24 +34,12 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
     public static final String VALUE_PATTERN = "\\$\\(([^\\)\\@]+)\\)";
     public static final String CONTEXT_PATTERN = "\\@context\\[([^\\]\\$]+)\\]";
 
-    private static KeyValuePair[] join(KeyValuePair[] pa, KeyValuePair[] pb) {
-        int paLength = pa == null ? 0 : pa.length;
-        int pbLength = pb == null ? 0 : pb.length;
-        int length = paLength + pbLength;
-
-        KeyValuePair[] joined = new KeyValuePair[length];
-        int index = 0;
-
-        if (paLength > 0) {
-            for (; index < paLength; index++) {
-                joined[index] = pa[index];
-            }
-        }
-        if (pbLength > 0) {
-            for (; index < length; index++) {
-                joined[index] = pb[index - paLength];
-            }
-        }
+    private static List<KeyValuePairDescription> join(List<KeyValuePairDescription> pa, List<KeyValuePairDescription> pb) {       
+        List<KeyValuePairDescription> joined = new ArrayList<>();
+        if(pa!=null && !pa.isEmpty())
+        	joined.addAll(pa);
+        if(pb!=null && !pb.isEmpty())
+        	joined.addAll(pb);
         return joined;
     }
 
@@ -71,6 +61,8 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
     private String clientCertificatePassword = null;
     private String serverCertificate = null;
     private boolean direct = false;
+    private int readTimeout = -1;
+    private int connectTimeout = -1;
     private CommandType command = null;
 
     private Map<String, List<String>> query = null;
@@ -80,6 +72,8 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
     
     private HttpTaskConfigurator contentBuilder = null;
     private HttpTaskConfigurator urlBuilder = null;
+	private NestedMappingDescription[] nestedMapping = null;
+	private RootMappingDescription[] rootMapping = null;
 
     /**
      * @param mediator
@@ -88,7 +82,8 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
      * @param urlBuilder
      * @param annotation
      */
-    public SimpleTaskConfigurator(SimpleHttpProtocolStackEndpoint endpoint, String profile, CommandType command, HttpTaskConfigurator urlBuilder, HttpTaskConfiguration annotation) {
+    public SimpleTaskConfigurator(SimpleHttpProtocolStackEndpoint endpoint, String profile, 
+    	CommandType command, HttpTaskConfigurator urlBuilder, HttpTaskConfigurationDescription annotation) {
         this(endpoint, profile, command, urlBuilder, annotation, null);
     }
 
@@ -98,77 +93,97 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
      * @param command
      * @param urlBuilder
      * @param parent
-     * @param annotation
+     * @param child
      */
-    public SimpleTaskConfigurator(SimpleHttpProtocolStackEndpoint endpoint, String profile, CommandType command, HttpTaskConfigurator urlBuilder, HttpTaskConfiguration parent, HttpChildTaskConfiguration annotation) {
+    public SimpleTaskConfigurator(SimpleHttpProtocolStackEndpoint endpoint, String profile, 
+    	CommandType command, HttpTaskConfigurator urlBuilder, HttpTaskConfigurationDescription parent, 
+    	HttpChildTaskConfigurationDescription child) {
         this.endpoint = endpoint;
 
         this.valuePattern = Pattern.compile(VALUE_PATTERN);
         this.contextPattern = Pattern.compile(CONTEXT_PATTERN);
         
-        this.acceptType = annotation != null && !HttpChildTaskConfiguration.DEFAULT_ACCEPT_TYPE.equals(
-        		annotation.acceptType()) ? annotation.acceptType() : parent.acceptType();
+        this.acceptType = child != null && !HttpChildTaskConfigurationDescription.DEFAULT_ACCEPT_TYPE.equals(
+        	child.getAcceptType()) ? child.getAcceptType() : parent.getAcceptType();
         
-        this.contentType = annotation != null && !HttpChildTaskConfiguration.DEFAULT_CONTENT_TYPE.equals(
-        		annotation.contentType()) ? annotation.contentType() : parent.contentType();
+        this.contentType = child != null && !HttpChildTaskConfigurationDescription.DEFAULT_CONTENT_TYPE.equals(
+        	child.getContentType()) ? child.getContentType() : parent.getContentType();
 
-        this.httpMethod = annotation != null && !HttpChildTaskConfiguration.DEFAULT_HTTP_METHOD.equals(annotation.httpMethod()) ? annotation.httpMethod() : parent.httpMethod();
-        this.scheme = annotation != null && !HttpChildTaskConfiguration.DEFAULT_SCHEME.equals(annotation.scheme()) ? annotation.scheme() : parent.scheme();
-        this.host = annotation != null && !HttpChildTaskConfiguration.DEFAULT_HOST.equals(annotation.host()) ? annotation.host() : parent.host();
-
-        this.port = annotation != null && !HttpChildTaskConfiguration.DEFAULT_PORT.equals(annotation.port()) ? annotation.port() : parent.port();
-
-        this.path = annotation != null && !HttpChildTaskConfiguration.DEFAULT_PATH.equals(annotation.path()) ? annotation.path() : parent.path();
+        this.httpMethod = child != null && !HttpChildTaskConfigurationDescription.DEFAULT_HTTP_METHOD.equals(
+        	child.getHttpMethod()) ? child.getHttpMethod() : parent.getHttpMethod();
         
-        this.clientCertificate =  annotation != null && !HttpTaskConfiguration.DEFAULT_CLIENT_SSL_CERTIFICATE.equals(
-        		annotation.clientSSLCertificate()) ?annotation.clientSSLCertificate():parent.clientSSLCertificate();
+        this.scheme = child != null && !HttpChildTaskConfigurationDescription.DEFAULT_SCHEME.equals(
+        	child.getScheme()) ? child.getScheme() : parent.getScheme();
+        
+        this.host = child != null && !HttpChildTaskConfigurationDescription.DEFAULT_HOST.equals(
+        	child.getHost()) ? child.getHost() : parent.getHost();
 
-        this.clientCertificatePassword =  annotation != null && !HttpTaskConfiguration.DEFAULT_CLIENT_SSL_CERTIFICATE_PASSWORD.equals(
-        		annotation.clientSSLCertificatePassword()) ?annotation.clientSSLCertificatePassword():parent.clientSSLCertificatePassword();
+        this.port = child != null && !HttpChildTaskConfigurationDescription.DEFAULT_PORT.equals(
+        	child.getPort()) ? child.getPort() : parent.getPort();
+
+        this.path = child != null && !HttpChildTaskConfigurationDescription.DEFAULT_PATH.equals(
+        	child.getPath()) ? child.getPath() : parent.getPath();
         
-        this.serverCertificate =  annotation != null && !HttpTaskConfiguration.DEFAULT_SERVER_SSL_CERTIFICATE.equals(
-        		annotation.serverSSLCertificate()) ?annotation.serverSSLCertificate():parent.serverSSLCertificate();
+        this.clientCertificate =  child != null && !HttpTaskConfigurationDescription.DEFAULT_CLIENT_SSL_CERTIFICATE.equals(
+        	child.getClientSSLCertificate()) ?child.getClientSSLCertificate():parent.getClientSSLCertificate();
+
+        this.clientCertificatePassword =  child != null && !HttpTaskConfigurationDescription.DEFAULT_CLIENT_SSL_CERTIFICATE_PASSWORD.equals(
+        	child.getClientSSLCertificatePassword()) ?child.getClientSSLCertificatePassword():parent.getClientSSLCertificatePassword();
         
-        this.profile = profile;
+        this.serverCertificate =  child != null && !HttpTaskConfigurationDescription.DEFAULT_SERVER_SSL_CERTIFICATE.equals(
+        	child.getClientSSLCertificate()) ?child.getClientSSLCertificate():parent.getClientSSLCertificate();
+
+        this.readTimeout =  (child != null && HttpChildTaskConfigurationDescription.DEFAULT_READ_TIMEOUT != child.getReadTimeout()) ?
+        		child.getReadTimeout():parent.getReadTimeout();
+        
+        this.connectTimeout =  (child != null && HttpChildTaskConfigurationDescription.DEFAULT_CONNECTION_TIMEOUT != child.getConnectTimeout()) ?
+        		child.getConnectTimeout():parent.getConnectTimeout();
+
+        this.nestedMapping =  (child != null && HttpChildTaskConfigurationDescription.DEFAULT_NESTED_MAPPING != child.getNestedMapping()) ?
+        		child.getNestedMapping():parent.getNestedMapping();
+        
+        this.rootMapping =  (child != null && HttpChildTaskConfigurationDescription.DEFAULT_ROOT_MAPPING != child.getRootMapping()) ?
+        		child.getRootMapping():parent.getRootMapping();
+        
+        this.setProfile(profile);
         this.urlBuilder = urlBuilder;
         this.command = command;
-        this.direct = annotation != null ? annotation.direct() : parent.direct();
-        this.packetType = annotation != null && HttpPacket.class != annotation.packet() ? annotation.packet() : parent.packet();
-
-        this.query = new HashMap<String, List<String>>();
+        this.direct = child != null ? child.isDirect() : parent.isDirect();
+        this.packetType = child != null && HttpPacket.class != child.getPacket() ? child.getPacket() : parent.getPacket();
         
-        KeyValuePair[] queryParameters = join(annotation == null ? null : annotation.query(), parent.query());
+        List<KeyValuePairDescription> queryParameters = join(child == null ? null : child.getQuery(), parent.getQuery());
 
         int index = 0;
-        int length = queryParameters == null ? 0 : queryParameters.length;
+        int length = queryParameters == null ? 0 : queryParameters.size();
 
+        this.query = new HashMap<String, List<String>>();
         for (; index < length; index++) {
-            String key = queryParameters[index].key();
-            String value = queryParameters[index].value();
+            String key = queryParameters.get(index).getKey();
+            String value = queryParameters.get(index).getValue();
             List<String> values = query.get(key);
             if (values == null) {
                 values = new ArrayList<String>();
                 query.put(key, values);
             }
             values.add(value);
-        }
+        }        
         this.headers = new HashMap<String, List<String>>();
-        KeyValuePair[] headersParameters = join(annotation == null ? null : annotation.headers(), parent.headers());
+        List<KeyValuePairDescription> headersParameters = join(child == null ? null : child.getHeaders(), parent.getHeaders());
         index = 0;
-        length = headersParameters == null ? 0 : headersParameters.length;
+        length = headersParameters == null ? 0 : headersParameters.size();
 
         for (; index < length; index++) {
-            String key = headersParameters[index].key();
-            String value = headersParameters[index].value();
+            String key = headersParameters.get(index).getKey();
+            String value = headersParameters.get(index).getValue();
             List<String> values = headers.get(key);
             if (values == null) {
                 values = new ArrayList<String>();
                 headers.put(key, values);
             }
             values.add(value);
-        }
-        Class<? extends HttpTaskConfigurator> taskContentConfigurationType = annotation != null && HttpTaskConfigurator.class != annotation.content() 
-        		? annotation.content() : parent.content();
+        }        
+        Class<? extends HttpTaskConfigurator> taskContentConfigurationType = child != null && HttpTaskConfigurator.class != child.getContent() 
+        		? child.getContent() : parent.getContent();
 
         if (taskContentConfigurationType != null && taskContentConfigurationType != HttpTaskConfigurator.class) {
              try {
@@ -209,6 +224,7 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
 
     @Override
     public <T extends HttpTask<?, ?>> void configure(T task) throws Exception {
+    	try {
         String portStr = this.resolve(task, this.port);
         int port;
         try {
@@ -251,10 +267,10 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
         if (this.urlBuilder != null) {
             this.urlBuilder.configure(task);
         }
-        task.setClientSSLCertificate(HttpTaskConfiguration.NO_CERTIFICATE.equals(clientCertificate)?null:clientCertificate);
-        task.setClientSSLCertificatePassword(HttpTaskConfiguration.NO_CERTIFICATE.equals(clientCertificatePassword)?null:clientCertificatePassword);
+        task.setClientSSLCertificate(HttpTaskConfigurationDescription.NO_CERTIFICATE.equals(clientCertificate)?null:clientCertificate);
+        task.setClientSSLCertificatePassword(HttpTaskConfigurationDescription.NO_CERTIFICATE.equals(clientCertificatePassword)?null:clientCertificatePassword);        
+        task.setServerSSLCertificate(HttpTaskConfigurationDescription.NO_CERTIFICATE.equals(serverCertificate)?ConnectionConfiguration.TRUST_ALL:serverCertificate);
         
-        task.setServerSSLCertificate(HttpTaskConfiguration.NO_CERTIFICATE.equals(serverCertificate)?ConnectionConfiguration.TRUST_ALL:serverCertificate);
         task.setDirect(direct);
         iterator = headers.entrySet().iterator();
         entry = null;
@@ -279,9 +295,17 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
         task.setAccept(this.resolve(task, acceptType));
         task.setContentType(this.resolve(task, contentType));
         task.setHttpMethod(this.resolve(task, httpMethod));
-
-        if (contentBuilder != null) {
+        task.setReadTimeout(this.readTimeout);
+        task.setConnectTimeout(this.connectTimeout);
+        if(this.nestedMapping!=null && this.nestedMapping.length > 0)
+        	task.setMapping(this.nestedMapping);
+        else if(this.rootMapping!=null && this.rootMapping.length > 0)
+        	task.setMapping(this.rootMapping);
+        
+        if (contentBuilder != null) 
             contentBuilder.configure(task);
+    	}catch(Exception e) {
+        	e.printStackTrace();
         }
     }
 
@@ -295,4 +319,18 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
     public CommandType handled() {
         return this.command;
     }
+
+	/**
+	 * @return the profile
+	 */
+	public String getProfile() {
+		return profile;
+	}
+
+	/**
+	 * @param profile the profile to set
+	 */
+	public void setProfile(String profile) {
+		this.profile = profile;
+	}
 }

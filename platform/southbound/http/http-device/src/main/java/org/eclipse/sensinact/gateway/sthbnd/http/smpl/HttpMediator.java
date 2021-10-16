@@ -84,11 +84,6 @@ public class HttpMediator extends Mediator implements HttpTaskProcessingContextH
         return this.chainedTaskProcessingContextFactory;
     }
 
-    /**
-     * @inheritDoc
-     * @see HttpTaskProcessingContextHandler#
-     * registerProcessingContext(java.lang.Object, HttpTaskProcessingContext)
-     */
     @Override
     public void registerProcessingContext(HttpTask<?, ?> key, HttpTaskProcessingContext context) {
         if (this.taskProcessingContextHandler == null || key == null || context == null) {
@@ -97,11 +92,6 @@ public class HttpMediator extends Mediator implements HttpTaskProcessingContextH
         this.taskProcessingContextHandler.registerProcessingContext(key, context);
     }
 
-    /**
-     * @inheritDoc
-     * @see HttpTaskProcessingContextHandler#
-     * unregisterProcessingContext(java.lang.Object)
-     */
     @Override
     public void unregisterProcessingContext(HttpTask<?, ?> key) {
         if (this.taskProcessingContextHandler == null || key == null) {
@@ -110,11 +100,6 @@ public class HttpMediator extends Mediator implements HttpTaskProcessingContextH
         this.taskProcessingContextHandler.unregisterProcessingContext(key);
     }
 
-    /**
-     * @inheritDoc
-     * @see HttpTaskProcessingContextHandler#
-     * resolve(java.lang.Object, java.lang.String)
-     */
     @Override
     public String resolve(HttpTask<?, ?> task, String property) {
         if (this.taskProcessingContextHandler == null || task == null || property == null) {
@@ -123,11 +108,6 @@ public class HttpMediator extends Mediator implements HttpTaskProcessingContextH
         return this.taskProcessingContextHandler.resolve(task, property);
     }
 
-    /**
-     * @inheritDoc
-     * @see HttpTaskProcessingContextHandler#
-     * configure(HttpTask)
-     */
     @Override
     public void configure(HttpTask<?, ?> task) throws Exception {
         if (this.taskProcessingContextHandler != null && task != null) {

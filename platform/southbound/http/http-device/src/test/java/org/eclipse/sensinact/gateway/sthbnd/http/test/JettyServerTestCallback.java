@@ -36,7 +36,6 @@ class JettyServerTestCallback {
             JSONObject message = new JSONObject(new String(content));
             this.remoteEntity.put("data", message.get("value"));
             response.setStatus(200);
-
         } catch (IOException e) {
             response.setStatus(520);
         }
@@ -45,9 +44,7 @@ class JettyServerTestCallback {
     @doGet
     public void callbackGet(HttpServletRequest request, HttpServletResponse response) throws IOException, JSONException {
         String uri = request.getRequestURI();
-
         String[] uriElements = UriUtils.getUriElements(uri);
-
         try {
             PATH path = PATH.valueOf(uriElements[uriElements.length - 1]);
             switch (path) {
@@ -70,15 +67,12 @@ class JettyServerTestCallback {
                     try {
                         response.setContentType("application/json");
                         response.setContentLength(object.toString().length());
-
-                        if (response.getOutputStream().isReady()) {
+                        if (response.getOutputStream().isReady()) 
                             response.getOutputStream().write(object.toString().getBytes());
-                        }
                         response.setStatus(200);
                     } catch (IOException e) {
                         response.setStatus(520);
                     }
-
                     break;
                 case json1:
                     response.setContentType("application/json");

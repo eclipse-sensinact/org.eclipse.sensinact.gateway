@@ -34,10 +34,11 @@ public class SimpleHttpRequest extends AbstractRequest<SimpleHttpResponse> {
 
     @Override
     public SimpleHttpResponse createResponse(HttpURLConnection connection) throws IOException {
-        if (connection == null) {
-            return null;
-        }
-        SimpleHttpResponse response = new SimpleHttpResponse(mediator, connection, (HttpConnectionConfiguration<? extends HttpResponse, ? extends Request<? extends HttpResponse>>) super.configuration);
+        if (connection == null) 
+            return null;        
+        SimpleHttpResponse response = new SimpleHttpResponse(mediator, connection, 
+        		(HttpConnectionConfiguration<? extends HttpResponse, ? extends Request<? extends HttpResponse>>) 
+        		super.configuration);
         return response;
     }
 }
