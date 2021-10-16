@@ -32,7 +32,6 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -357,9 +356,9 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
      * be established, a java.net.SocketTimeoutException is raised.A timeout
      * of zero is interpreted as an infinite timeout
      *
-     * @param connectTimeout the connection timeout value to set
+     * @param readTimeout the connection timeout value to set
      */
-    ConnectionConfiguration<RESPONSE, REQUEST> setConnectTimeout(int connectTimeout);
+    ConnectionConfiguration<RESPONSE, REQUEST> setConnectTimeout(int readTimeout);
 
     /**
      * Returns a timeout value, in milliseconds, to be used when opening a

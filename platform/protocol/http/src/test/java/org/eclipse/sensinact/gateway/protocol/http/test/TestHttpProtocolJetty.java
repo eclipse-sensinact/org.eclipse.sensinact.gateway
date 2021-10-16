@@ -45,10 +45,6 @@ public class TestHttpProtocolJetty {
             this.reusable = reusable;
         }
 
-        /**
-         * @inheritDoc
-         * @see Reusable#isReusable()
-         */
         @Override
         public boolean isReusable() {
             return this.reusable;
@@ -67,18 +63,15 @@ public class TestHttpProtocolJetty {
             available = new AtomicBoolean(false);
         }
 
-        /**
-         * @inheritDoc
-         * @see MidClientListener#respond(java.lang.Object)
-         */
         @Override
         public void respond(SimpleResponse response) {
-            if (response != null) {
-                this.message = new String(response.getContent());
-
-            } else {
+            if (response != null) 
+            	if(response.getContent() == null)
+                    this.message = "NO RESPONSE";
+            	else
+                    this.message = new String(response.getContent());
+            else
                 this.message = "NO RESPONSE";
-            }
             this.setAvailable(true);
         }
 
@@ -167,7 +160,6 @@ public class TestHttpProtocolJetty {
         System.out.println("Starting Jetty server ...");
         server = new JettyTestServer(HTTP_PORT);
         new Thread(server).start();
-
         server.join();
         server.registerCallback(new JettyServerTestCallback());
     }
@@ -179,9 +171,9 @@ public class TestHttpProtocolJetty {
         server.join();
     }
 
-    //********************************************************************//
-    //						INSTANCE DECLARATIONS						  //
-    //********************************************************************//
+    //***************************************************************//
+    //						INSTANCE DECLARATIONS						         //
+    //***************************************************************//
 
     @Test
     public void testHttpProtocolGet() throws Exception {
@@ -193,12 +185,9 @@ public class TestHttpProtocolJetty {
         JSONObject configuration = new JSONObject();
         configuration.put("uri", HTTP_ROOTURL + "/providers");
         configuration.put("httpMethod", "GET");
-        //configuration.put("content", null);
         configuration.put("acceptType", "application/json");
-        //configuration.put("contentType", "application/json");
         configuration.put("connectTimeout", 2000);
         configuration.put("readTimeout", 2000);
-        //configuration.put("parameters", new JSONArray());
         simulated = TestHttpProtocolJetty.newRequest(configuration.toString());
         JSONAssert.assertEquals(expected, new JSONObject(simulated), false);
 
@@ -240,7 +229,6 @@ public class TestHttpProtocolJetty {
     @Test
     public void testHttpMidClient() throws Exception {
         ClientListener listener = new ClientListener();
-
         MidClient<SimpleResponse, MidRequest> client = new MidClient<SimpleResponse, MidRequest>(listener);
 
         client.setInitialDelay(200);
@@ -248,38 +236,41 @@ public class TestHttpProtocolJetty {
         JSONObject configuration = new JSONObject();
         configuration.put("uri", HTTP_ROOTURL + "/error");
         configuration.put("httpMethod", "GET");
-        //configuration.put("content", null);
         configuration.put("acceptType", "*/*");
-        //configuration.put("contentType", "application/json");
         configuration.put("connectTimeout", 2000);
         configuration.put("readTimeout", 2000);
-        //configuration.put("parameters", new JSONArray());
 
-        ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> builder = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>(configuration.toString());
-        assertEquals(-1, client.getCurrentDelay());
-
+        ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> builder = 
+        		new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>(configuration.toString());
         MidRequest request = new MidRequest(builder, true);
+        
+        assertEquals(-1, client.getCurrentDelay());
         client.addRequest(request);
+        
         listener.setAvailable(false);
         waitForAvailableMessage(listener, 5000);
+    	
         assertEquals(200, client.getCurrentDelay());
         listener.setAvailable(false);
         waitForAvailableMessage(listener, 5000);
+    	
         assertEquals(400, client.getCurrentDelay());
         listener.setAvailable(false);
         waitForAvailableMessage(listener, 5000);
+    	
         assertEquals(800, client.getCurrentDelay());
         listener.setAvailable(false);
         waitForAvailableMessage(listener, 5000);
+    	
         assertEquals(1000, client.getCurrentDelay());
         listener.setAvailable(false);
         waitForAvailableMessage(listener, 5000);
+    	
         assertEquals(1000, client.getCurrentDelay());
-
         listener.setAvailable(false);
         waitForAvailableMessage(listener, 5000);
+    	
         assertEquals(1000, client.getCurrentDelay());
-
         client.close();
     }
 

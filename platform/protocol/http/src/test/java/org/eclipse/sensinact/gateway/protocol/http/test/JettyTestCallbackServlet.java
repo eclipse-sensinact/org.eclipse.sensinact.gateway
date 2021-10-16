@@ -32,11 +32,7 @@ public class JettyTestCallbackServlet extends HttpServlet {
         this.callbackCollection = callbackCollection;
     }
 
-    /**
-     * @inheritDoc
-     * @see javax.servlet.http.HttpServlet#
-     * doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
+    @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (request.getRequestURI().equals("/error")) {
             response.setStatus(520);
@@ -45,11 +41,7 @@ public class JettyTestCallbackServlet extends HttpServlet {
         this.doHandle(request, response, this.callbackCollection.getdoGetCallbacks());
     }
 
-    /**
-     * @inheritDoc
-     * @see javax.servlet.http.HttpServlet#
-     * doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
+    @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (request.getRequestURI().equals("/error")) {
             response.setStatus(520);
@@ -64,7 +56,8 @@ public class JettyTestCallbackServlet extends HttpServlet {
      * @param callbackList
      * @throws IOException
      */
-    private void doHandle(HttpServletRequest request, HttpServletResponse response, List<Callback> callbackList) throws IOException {
+    private void doHandle(HttpServletRequest request, HttpServletResponse response, List<Callback> callbackList) 
+    	throws IOException {
         int index = 0;
         int length = callbackList == null ? 0 : callbackList.size();
 

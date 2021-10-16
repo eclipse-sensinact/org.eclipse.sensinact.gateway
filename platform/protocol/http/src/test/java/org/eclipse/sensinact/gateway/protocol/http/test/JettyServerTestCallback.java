@@ -17,25 +17,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-//import java.util.concurrent.atomic.AtomicBoolean;
-
 class JettyServerTestCallback {
-    //private AtomicBoolean available;
 
-    //	JettyTestServerCallback()
-//	{
-//		//this.available = new AtomicBoolean(false);
-//	}
     @doPost
     public void callbackPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         JSONObject requestDescription = new JSONObject();
         requestDescription.put("method", "POST");
-        if (request.getQueryString() != null) {
+        
+        if (request.getQueryString() != null) 
             requestDescription.put("url", request.getRequestURI() + "?" + request.getQueryString());
-
-        } else {
+        else 
             requestDescription.put("url", request.getRequestURI());
-        }
+
         requestDescription.put("content-type", request.getContentType());
         requestDescription.put("content-length", request.getContentLength());
 
@@ -52,22 +45,16 @@ class JettyServerTestCallback {
             response.getWriter().println(e.getMessage());
             response.setStatus(520);
         }
-//		finally
-//		{
-//			this.setAvailable(true);
-//		}
     }
 
     @doGet
     public void callbackGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         JSONObject requestDescription = new JSONObject();
         requestDescription.put("method", "GET");
-        if (request.getQueryString() != null) {
+        if (request.getQueryString() != null) 
             requestDescription.put("url", request.getRequestURI() + "?" + request.getQueryString());
-
-        } else {
+        else 
             requestDescription.put("url", request.getRequestURI());
-        }
         response.setContentType("application/json");
         try {
             response.getWriter().println(requestDescription.toString());
@@ -76,21 +63,6 @@ class JettyServerTestCallback {
         } catch (IOException e) {
             response.getWriter().println(e.getMessage());
             response.setStatus(520);
-
         }
-//		finally
-//		{
-//			this.setAvailable(true);
-//		}
-
     }
-//	private void setAvailable(boolean available) 
-//	{
-//		this.available.set(available);
-//	}
-//
-//	public boolean isAvailable() 
-//	{
-//		return this.available.get();
-//	}
 }

@@ -17,25 +17,18 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
-//import java.util.concurrent.atomic.AtomicBoolean;
-
 class HttpServerTestCallback {
-    //private AtomicBoolean available;
 
-    //	JettyTestServerCallback()
-//	{
-//		//this.available = new AtomicBoolean(false);
-//	}
     @doPost
     public Content callbackPost(RequestContent request) throws IOException {
         JSONObject requestDescription = new JSONObject();
         requestDescription.put("method", "POST");
-        if (request.getQueryString() != null) {
+        
+        if (request.getQueryString() != null) 
             requestDescription.put("url", request.getRequestURI() + "?" + request.getQueryString());
-
-        } else {
+        else 
             requestDescription.put("url", request.getRequestURI());
-        }
+        
         requestDescription.put("content-type", request.getHeaderAsString("Content-type"));
         requestDescription.put("content-length", Integer.parseInt(request.getHeaderAsString("Content-length")));
 
@@ -53,29 +46,15 @@ class HttpServerTestCallback {
     public Content callbackGet(RequestContent request) throws IOException {
         JSONObject requestDescription = new JSONObject();
         requestDescription.put("method", "GET");
-        if (request.getQueryString() != null) {
+        
+        if (request.getQueryString() != null) 
             requestDescription.put("url", request.getRequestURI() + "?" + request.getQueryString());
-
-        } else {
+        else 
             requestDescription.put("url", request.getRequestURI());
-        }
+        
         HttpResponseContent response = new HttpResponseContent();
         response.addHeader("Content-Type", "application/json");
         response.setContent(requestDescription.toString().getBytes());
         return response;
-//		finally
-//		{
-//			this.setAvailable(true);
-//		}
-
     }
-//	private void setAvailable(boolean available) 
-//	{
-//		this.available.set(available);
-//	}
-//
-//	public boolean isAvailable() 
-//	{
-//		return this.available.get();
-//	}
 }

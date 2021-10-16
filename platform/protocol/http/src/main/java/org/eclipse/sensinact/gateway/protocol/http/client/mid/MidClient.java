@@ -23,8 +23,10 @@ import java.util.logging.Logger;
  * that use and the resulting behavior is difficult to predict. For a recurrent request, the
  * execution is scheduled according to the defined initial delay.
  */
-public class MidClient<RESPONSE extends Response, REQUEST extends Request<RESPONSE> & Reusable> extends AbstractStackEngineHandler<REQUEST> {
-    private static Logger LOG = Logger.getLogger(MidClient.class.getName());
+public class MidClient<RESPONSE extends Response, REQUEST extends Request<RESPONSE> & Reusable> 
+extends AbstractStackEngineHandler<REQUEST> {
+	
+    protected static Logger LOG = Logger.getLogger(MidClient.class.getName());
 
     public static final int DEFAULT_MAX_STACK_SIZE = 50;
     //initial wait of one minute
@@ -61,9 +63,7 @@ public class MidClient<RESPONSE extends Response, REQUEST extends Request<RESPON
     public MidClient(MidClientListener<RESPONSE> listener, int maxStackSize) {
         super();
         super.eventEngine.setMaxStackSize(maxStackSize <= 0 ? DEFAULT_MAX_STACK_SIZE : maxStackSize);
-
         this.listener = listener;
-
         this.currentDelay = -1;
         this.initialDelay = -1;
         this.maxDelay = -1;
@@ -71,12 +71,11 @@ public class MidClient<RESPONSE extends Response, REQUEST extends Request<RESPON
     }
 
     /**
-     * Defines the first {@link Reusable} to be
-     * executed by IntermediateClient after a previous execution
-     * error.
+     * Defines the first {@link Reusable} to be executed by 
+     * IntermediateClient after a previous execution error.
      *
      * @param reactivation the first {@link Reusable} to be
-     *                     executed by IntermediateClient after an error.
+     * executed by IntermediateClient after an error.
      */
     public void setReactivationRequest(REQUEST reactivation) {
         this.reactivation = reactivation;
@@ -154,10 +153,9 @@ public class MidClient<RESPONSE extends Response, REQUEST extends Request<RESPON
      * Reusable} execution
      */
     public void updateDelay() {
-        if (this.currentDelay < 0) {
+        if (this.currentDelay < 0) 
             this.currentDelay = this.getInitialDelay();
-
-        } else if (currentDelay < this.getMaxDelay()) {
+        else if (currentDelay < this.getMaxDelay()) {
             int tmpDelay = this.currentDelay * 2;
             this.currentDelay = tmpDelay > this.getMaxDelay() ? this.getMaxDelay() : tmpDelay;
         }
@@ -189,10 +187,6 @@ public class MidClient<RESPONSE extends Response, REQUEST extends Request<RESPON
         super.eventEngine.push(request);
     }
 
-    /**
-     * @inheritDoc
-     * @see StackEngineHandler#doHandle(java.lang.Object)
-     */
     @Override
     public void doHandle(REQUEST element) {
         RESPONSE response = null;
@@ -203,21 +197,18 @@ public class MidClient<RESPONSE extends Response, REQUEST extends Request<RESPON
                 this.listener.respond(response);
             }
             response = element.send();
-            if (response.getStatusCode() >= 400) {
+            if (response.getStatusCode() >= 400) 
                 throw new HttpResponseException(response.getStatusCode(), response.getContent(), response.getHeaders());
-            }
             this.resetDelay();
         } catch (HttpResponseException e) {
-            if (handleHttpError(e)) {
+            if (handleHttpError(e)) 
                 handleError(e, element);
-
-            } else {
+            else {
                 this.resetDelay();
                 this.listener.respond(response);
             }
         } catch (Exception e) {
             handleError(e, element);
-
         } finally {
             this.listener.respond(response);
         }
@@ -238,8 +229,7 @@ public class MidClient<RESPONSE extends Response, REQUEST extends Request<RESPON
         this.updateDelay();
         this.reactivate = true;
         super.eventEngine.locked(this.getCurrentDelay());
-        if (element.isReusable()) {
+        if (element.isReusable()) 
             super.eventEngine.push((REQUEST) element.copy());
-        }
     }
 }

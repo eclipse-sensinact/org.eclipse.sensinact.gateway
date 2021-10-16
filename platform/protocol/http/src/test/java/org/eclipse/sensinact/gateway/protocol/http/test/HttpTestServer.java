@@ -80,10 +80,6 @@ public class HttpTestServer implements Runnable, CallbackCollection {
 
     private boolean running = false;
 
-    /**
-     * @inheritDoc
-     * @see java.lang.Runnable#run()
-     */
     @Override
     public void run() {
         running = true;

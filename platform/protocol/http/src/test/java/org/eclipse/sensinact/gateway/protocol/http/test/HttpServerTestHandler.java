@@ -41,19 +41,14 @@ public class HttpServerTestHandler implements RequestHandler {
         this.callbacks = callbacks;
     }
 
-    /**
-     * @inheritDoc
-     * @see RequestHandler#handle(RequestContent)
-     */
     @Override
     public ResponseContent handle(RequestContent request) {
         List<Callback> callbackList = null;
 
-        if (request.getHttpMethod().equals("GET")) {
+        if (request.getHttpMethod().equals("GET"))
             callbackList = this.callbacks.getdoGetCallbacks();
-        } else if (request.getHttpMethod().equals("POST")) {
+        else if (request.getHttpMethod().equals("POST"))
             callbackList = this.callbacks.getdoPostCallbacks();
-        }
 
         int index = 0;
         int length = callbackList == null ? 0 : callbackList.size();
@@ -62,12 +57,10 @@ public class HttpServerTestHandler implements RequestHandler {
             Callback callback = callbackList.get(index);
             try {
                 return (ResponseContent) callback.invoke(new Object[]{request});
-
             } catch (Exception e) {
                 e.printStackTrace();
                 continue;
             }
-
         }
         return null;
     }
