@@ -321,198 +321,6 @@
 									<artifactId>org.osgi.service.remoteserviceadmin</artifactId>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.http.servlet-api</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.paho</groupId>
-									<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-								</artifactItem>
-							</artifactItems>
-							<outputDirectory>${project.build.directory}/dependencies/bundle/2</outputDirectory>
-						</configuration>
-					</execution>
-					<execution>
-						<id>copy-dependencies-with-security-bundle2</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
-									<artifactId>mqtt-utils</artifactId>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway.tools</groupId>
-									<artifactId>mixed-osgi-over-slf4j</artifactId>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.fileinstall</artifactId>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.configadmin</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.component</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.cm</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.metatype</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.namespace.extender</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.util.promise</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.util.function</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.util.pushstream</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.log</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.log</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.bundlerepository</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.scr</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.component</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.remoteserviceadmin</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.paho</groupId>
-									<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.http.servlet-api</artifactId>
-								</artifactItem>
-								<artifactItem>									
-									<groupId>org.apache.aries.spec</groupId>
-					    			<artifactId>org.apache.aries.javax.jax.rs-api</artifactId>
-								</artifactItem>
-							</artifactItems>
-							<outputDirectory>${project.build.directory}/dependencies-with-security/bundle/2</outputDirectory>
-						</configuration>
-					</execution>					
-					<execution>						
-						<id>copy-dependencies-with-openid-security-bundle2</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway.sthbnd.mqtt</groupId>
-									<artifactId>mqtt-utils</artifactId>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway.tools</groupId>
-									<artifactId>mixed-osgi-over-slf4j</artifactId>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.fileinstall</artifactId>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.configadmin</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.component</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.cm</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.metatype</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.namespace.extender</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.util.promise</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.util.function</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.util.pushstream</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.log</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.log</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.bundlerepository</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.apache.felix</groupId>
-									<artifactId>org.apache.felix.scr</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.component</artifactId>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.osgi</groupId>
-									<artifactId>org.osgi.service.remoteserviceadmin</artifactId>
-								</artifactItem>
-								<artifactItem>
 									<groupId>org.eclipse.paho</groupId>
 									<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
 								</artifactItem>
@@ -537,9 +345,9 @@
 		    						<artifactId>jackson-core</artifactId>
 								</artifactItem>
 							</artifactItems>
-							<outputDirectory>${project.build.directory}/dependencies-with-openid-security/bundle/2</outputDirectory>
+							<outputDirectory>${project.build.directory}/dependencies/bundle/2</outputDirectory>
 						</configuration>
-					</execution>					
+					</execution>				
 					<execution>
 						<id>ext-copy-dependencies-bundle3</id>
 						<phase>package</phase>
@@ -948,6 +756,22 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>copy-resources-dep-with-security-bundle2</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/sensinact-with-security/bundle/2/</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}/dependencies/bundle/2/</directory>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
 						<id>copy-resources-dep-with-security-bundle4</id>
 						<phase>package</phase>
 						<goals>
@@ -989,7 +813,7 @@
 							<outputDirectory>${project.build.directory}/sensinact-with-openid-security/bundle/2/</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${project.build.directory}/dependencies-with-openid-security/bundle/2/</directory>
+									<directory>${project.build.directory}/dependencies/bundle/2/</directory>
 									<filtering>false</filtering>
 								</resource>
 							</resources>
