@@ -289,8 +289,7 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 		M proxy = this.proxies.get(accessLevelOption);
 		if (proxy == null) {
 			int index = -1;
-			List<MethodAccessibility> methodAccessibilities = this.modelInstance.getAuthorizations(this,
-					accessLevelOption);
+			List<MethodAccessibility> methodAccessibilities = this.modelInstance.getAuthorizations(this, accessLevelOption);
 
 			// if the describe method does not exists it means
 			// that the user is not allowed to access this ModelElement
@@ -299,22 +298,18 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 				return (S) Proxy.newProxyInstance(ModelElement.class.getClassLoader(), new Class<?>[] { proxied },
 						new UnaccessibleModelElementProxyWrapper(new UnaccessibleModelElementProxy(
 								this.modelInstance.mediator(), proxied, this.getPath())));
-
-			} else {
+			} else
 				proxy = this.getProxy(methodAccessibilities);
-			}
 		}
 		if (proxy == null) {
 			return null;
 		}
 		this.proxies.put(accessLevelOption, proxy);
 		ImmutableAccessTree accessTree = null;
-		if (tree.isMutable()) {
+		if (tree.isMutable()) 
 			accessTree = ((MutableAccessTree<?>) tree).immutable();
-
-		} else {
+		else
 			accessTree = (ImmutableAccessTree) tree;
-		}
 		ModelElementProxyWrapper wrapper = getWrapper(proxy, accessTree);
 
 		// creates the java proxy based on the created ModelElementProxy and returns it

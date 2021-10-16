@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.core;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -61,7 +62,7 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] parameters) throws Throwable {
 			Object result = null;
-			if (this.proxy.getProxied().isAssignableFrom(method.getDeclaringClass())) {
+			if (super.proxy.getProxied().isAssignableFrom(method.getDeclaringClass())) {
 				Object[] calledParameters = null;
 				if (method.isVarArgs() && parameters != null && parameters.length == 1
 						&& parameters[0].getClass().isArray()) {
@@ -74,7 +75,7 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 					calledParameters[0] = getResource(resourceName);
 				}
 				result = this.proxy.invoke(method.getName().toUpperCase(), calledParameters);
-			} else
+			} else 
 				result = method.invoke(this, parameters);
 			
 			if (result == this.proxy || result == this) 
@@ -345,18 +346,17 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 			super.modelInstance.mediator().debug("Unable to create the linked resource : %s", link);
 			return null;
 		}
-		if (targetedResource.getType() == Resource.Type.ACTION) {
+		if (targetedResource.getType() == Resource.Type.ACTION) 
 			return addLinkedActionResource(link, targetedResource, true);
-		}
+		
 		ResourceBuilder builder = super.getModelInstance()
 				.createResourceBuilder(super.getModelInstance().configuration().getResourceDescriptor()
 						.withResourceName(link).withResourceType(targetedResource.getResourceType()));
 
 		ResourceImpl linkedResource = builder.buildLinkedResource(this, targetedResource);
-
-		if (this.addResource(linkedResource)) {
+		if (this.addResource(linkedResource)) 
 			targetedResource.registerLink(linkedResource.getPath());
-		}
+		
 		return linkedResource;
 	}
 

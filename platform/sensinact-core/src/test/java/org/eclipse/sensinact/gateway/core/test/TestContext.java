@@ -370,10 +370,10 @@ public class TestContext<R extends ModelInstance> {
 			Field cpaField = sensinact.getClass().getDeclaredField("cpa");
 			cpaField.setAccessible(true);
 			cpaField.set(sensinact, cpa);
-		} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+			sensinact.activate(componentContext);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		sensinact.activate(componentContext);
 		this.mediator = sensinact.mediator;
 		
 		instance = (MyModelInstance) new ModelInstanceBuilder(mediator

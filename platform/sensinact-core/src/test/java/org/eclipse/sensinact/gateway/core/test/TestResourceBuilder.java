@@ -43,6 +43,7 @@ import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.core.PropertyResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
+import org.eclipse.sensinact.gateway.core.SensiNact;
 import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
@@ -394,15 +395,16 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		assertEquals(2, this.testContext.getCallbackCount());
 
 		String filter = "/serviceProvider/testService/TestProperty2/value";
-		org.junit.Assert.assertEquals(1,
-				((MyModelInstance) this.testContext.getModelInstance()).getHandler().count(filter));
+		org.junit.Assert.assertEquals(1,((MyModelInstance) this.testContext.getModelInstance()
+				).getHandler().count(filter));
 		r2.unsubscribe(subId);
-		org.junit.Assert.assertEquals(0,
-				((MyModelInstance) this.testContext.getModelInstance()).getHandler().count(filter));
+		org.junit.Assert.assertEquals(0, ((MyModelInstance) this.testContext.getModelInstance()
+				).getHandler().count(filter));
 
 		Service proxy = service.<Service>getProxy(this.tree);
+
 		SetResponse error = proxy.set("location", DataResource.VALUE, (Object)"unknown");
-		assertTrue(error.getStatusCode() == 403);
+		assertEquals(403, error.getStatusCode());
 		assertEquals(1, this.testContext.getLinkCallbackCount());
 	}
 
@@ -729,8 +731,9 @@ public class TestResourceBuilder<R extends ModelInstance> {
 
 		ResourceImpl r2impl = service.addDataResource(StateVariableResource.class, "TestVariable", String.class,
 				"untriggered");
+		SensiNact sensinact = testContext.getSensiNact();
+		Session s = sensinact.getAnonymousSession();
 
-		Session s = testContext.getSensiNact().getAnonymousSession();
 		Thread.sleep(1000);		
 		String obj = s.getAll(
 				new FilteringCollection(this.testContext.getMediator(), false, new FilteringDefinition("xfilter", "a")))

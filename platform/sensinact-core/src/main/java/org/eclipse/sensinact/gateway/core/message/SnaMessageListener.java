@@ -108,11 +108,6 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see MessageRouter#count(java.lang.String)
-	 */
 	@Override
 	public int count(String uri) {
 		int count = 0;
@@ -186,10 +181,13 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 			default:
 				break;
 		}
-		if (messageMethod != null)
-			doHandleAgents(message, messageMethod);
-		
-		doHandleSubscribers(message);
+		try {
+			if (messageMethod != null)
+				doHandleAgents(message, messageMethod);			
+			doHandleSubscribers(message);
+		}catch(Exception e) {
+			mediator.error(e);
+		}
 	}
 
 	/**

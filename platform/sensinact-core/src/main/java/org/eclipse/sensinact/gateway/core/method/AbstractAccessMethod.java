@@ -367,8 +367,7 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 			(s1,s2)->{return s1.length()<s2.length()?-1:(s1.length()>s2.length()?1:0);}
 			).collect(Collectors.toList()));
 		
-		Iterator<Signature> iterator = signatures.iterator();
-
+		Iterator<Signature> iterator = signatures.iterator();		
 		while (iterator.hasNext()) {
 			Signature signature = iterator.next();
 			if (signature.validParameters(parameters)) 

@@ -31,11 +31,6 @@ public abstract class AbstractMidCallback implements MidCallback {
 			super();
 		}
 
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.util.stack.StackEngineHandler#doHandle(java.lang.Object)
-		 */
 		@Override
 		public void doHandle(SnaMessage<?> message) {
 			try {
@@ -54,24 +49,15 @@ public abstract class AbstractMidCallback implements MidCallback {
 				}
 			}
 		}
-
-		/**
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.core.message.MessageRegisterer#register(org.eclipse.sensinact.gateway.core.message.SnaMessage)
-		 */
+		
+		@Override
 		public void register(SnaMessage<?> message) {
 			super.eventEngine.push(message);
 		}
 	}
 
 	class MessageRegistererDirectDelegate implements MessageRegisterer {
-		/**
-		 * @throws MidCallbackException 
-		 * @inheritDoc
-		 *
-		 * @see org.eclipse.sensinact.gateway.core.message.MessageRegisterer#register(org.eclipse.sensinact.gateway.core.message.SnaMessage)
-		 */
+		@Override
 		public void register(SnaMessage<?> message) {
 			try {
 				AbstractMidCallback.this.doCallback(message);
@@ -177,21 +163,12 @@ public abstract class AbstractMidCallback implements MidCallback {
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.common.primitive.Nameable#getName()
-	 */
+	@Override
 	public String getName() {
 		return this.identifier;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.MidCallback#
-	 *      getCallbackErrorHandler()
-	 */
+	@Override
 	public ErrorHandler getCallbackErrorHandler() {
 		if (this.errorHandler == null) {
 			this.errorHandler = new DefaultErrorHandler();
@@ -209,11 +186,7 @@ public abstract class AbstractMidCallback implements MidCallback {
 		this.errorHandler = errorHandler;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.MidCallback#getTimeout()
-	 */
+	@Override
 	public long getTimeout() {
 		return this.timeout;
 	}
@@ -228,21 +201,11 @@ public abstract class AbstractMidCallback implements MidCallback {
 		this.timeout = timeout;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.MidCallback#
-	 *      getMessageRegisterer()
-	 */
+	@Override
 	public MessageRegisterer getMessageRegisterer() {
 		return this.registerer;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see org.eclipse.sensinact.gateway.core.message.MidCallback#isActive()
-	 */
 	@Override
 	public boolean isActive(){
 		synchronized(this.isActive) {

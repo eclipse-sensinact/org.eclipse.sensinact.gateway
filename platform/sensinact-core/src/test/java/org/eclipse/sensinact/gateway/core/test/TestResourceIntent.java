@@ -48,8 +48,7 @@ public class TestResourceIntent<R extends ModelInstance> {
 	private final Bundle bundle = Mockito.mock(Bundle.class);
 
 	@Before
-	public void init() throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException,
-			DataStoreException, BundleException {
+	public void init() throws Exception {
 		this.testContext = new TestContext();
 		this.tree = new AccessTreeImpl(testContext.getMediator()).withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
 	}
