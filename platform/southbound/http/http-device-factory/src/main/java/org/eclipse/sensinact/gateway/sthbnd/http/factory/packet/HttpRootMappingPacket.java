@@ -95,14 +95,20 @@ public class HttpRootMappingPacket extends HttpMappingPacket<RootMappingDescript
 			} catch (Exception e) {
 				LOG.error(e.getMessage(),e);
 				return null;
+			}			
+			List<Evaluation> evaluations = null;
+			try {
+				evaluations = parser.parse(list);
+				this.resultMapping = evaluations.stream().<Map<String,String>>collect(
+					HashMap::new,
+					(m,e)-> {m.put(e.path,e.result);},
+					Map::putAll);
+			}catch(Exception e) {
+				LOG.error(e.getMessage(),e);
+			} finally {
+				parser.close();
+				parser = null;
 			}
-			List<Evaluation> extractions = parser.parse(list);
-			this.resultMapping = extractions.stream().<Map<String,String>>collect(
-				HashMap::new,
-				(m,e)-> {m.put(e.path,e.result);},
-				Map::putAll);
-			parser.close();
-			parser = null;
 		}
 		pos++;
 		this.serviceProviderMapping = null;

@@ -27,21 +27,18 @@ class JSONParserListener extends JSONParser.JSONParserCallback{
 	
 	private final Object lock = new Object(); 
 	private CountDownLatch countDown = null ;
-	//private Deque<Extraction> extractions = null;
-	private Evaluation extraction = null;
+	private Evaluation evaluation = null;
 	private boolean endOfParsing;
 	
 	public JSONParserListener() {
 		this.countDown = new CountDownLatch(1) ;
-		//this.extractions = new LinkedList<Extraction>();
 		this.endOfParsing = false;
 	}
 
 	@Override
-	public void handle(Evaluation extraction) {
+	public void handle(Evaluation evaluation) {
 		synchronized(lock) {
-			//this.extractions.addFirst(extraction);
-			this.extraction = extraction;
+			this.evaluation = evaluation;
 		}	
 		try {
 			this.countDown.await();
@@ -59,25 +56,25 @@ class JSONParserListener extends JSONParser.JSONParserCallback{
 	}
 	
 	public Map<String,String> getEvent(Map<String,List<String>> jsonMapping) {
-		Evaluation ex = null;
+		Evaluation eval = null;
 		synchronized(lock) {
-			//ex = this.extractions.pollLast();
-			ex = this.extraction;
+			eval = this.evaluation;
 		}
-		if(ex != null) {
-			if(ex == JSONParser.END_OF_PARSING) 
+		if(eval != null) {
+			if(eval == JSONParser.END_OF_PARSING) 
 				setEndOfParsing();
-			else if(ex.result!=null && ex.result.length()>0) {
+			else if(eval.result!=null && eval.result.length()>0) {
 				JSONParser parser = null;
 				try {
-					parser = new JSONParser(new StringReader(ex.result));
-					List<Evaluation> extractions = parser.parse(jsonMapping.get(ex.path));
-					return extractions.stream().<Map<String,String>>collect(
+					parser = new JSONParser(new StringReader(eval.result));
+					List<Evaluation> evaluations = parser.parse(jsonMapping.get(eval.path));
+					return evaluations.stream().<Map<String,String>>collect(
 						HashMap::new,
 						(m,e)-> {m.put(e.path,e.result);},
 						Map::putAll);
 				} catch(Exception e) {
 					HttpMappingPacket.LOG.error(e.getMessage(),e);
+					setEndOfParsing();
 				} finally {
 					if(parser!=null)
 						parser.close();
@@ -96,7 +93,6 @@ class JSONParserListener extends JSONParser.JSONParserCallback{
 			this.countDown.await();
 		} catch (InterruptedException e) {
 			Thread.interrupted();
-			return;
 		}
 		this.countDown  = new CountDownLatch(1) ;
 	}

@@ -86,7 +86,12 @@ public class HttpNestedMappingPacket  extends HttpMappingPacket<NestedMappingDes
 		this.worker.submit(new Runnable() {
 			@Override
 			public void run() {
-				parser.parse(paths, HttpNestedMappingPacket.this.listener);
+				try {
+					parser.parse(paths, HttpNestedMappingPacket.this.listener);
+				} catch(Exception e) {					
+					LOG.error(e.getMessage(), e);
+					HttpNestedMappingPacket.this.listener.handle(JSONParser.END_OF_PARSING);					
+				}
 			}			
 		});
 		this.resultMapping = getEvent();
