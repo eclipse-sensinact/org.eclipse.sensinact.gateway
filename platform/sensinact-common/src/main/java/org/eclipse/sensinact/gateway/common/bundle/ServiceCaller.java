@@ -78,10 +78,9 @@ final class ServiceCaller {
 
         if (referenceList == null || referenceList.isEmpty()) {
             Collection<ServiceReference<S>> referenceCollection = this.context.getServiceReferences(clazz, filter);
-
-            referenceList = referenceCollection == null ? Collections.<ServiceReference<?>>emptyList() : Collections.<ServiceReference<?>>unmodifiableList(new ArrayList<ServiceReference<S>>(referenceCollection));
-
-            this.references.put(classname, referenceList);
+            referenceList = referenceCollection == null?Collections.<ServiceReference<?>>emptyList() 
+            	:Collections.<ServiceReference<?>>unmodifiableList(new ArrayList<ServiceReference<S>>(referenceCollection));
+            this.references.put(completeFilter, referenceList);
         }
         return referenceList;
     }
