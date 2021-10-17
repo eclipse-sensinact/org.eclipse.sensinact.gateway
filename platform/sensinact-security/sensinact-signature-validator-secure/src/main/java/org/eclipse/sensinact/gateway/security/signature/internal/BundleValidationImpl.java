@@ -16,9 +16,11 @@ import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
@@ -51,6 +53,16 @@ public class BundleValidationImpl implements BundleValidation {
         }
     }
 
+    private final class UnknownBundleKey {
+        public final int hashcode;
+        public final String name;
+
+        public UnknownBundleKey(int hashcode, String name) {
+            this.hashcode = hashcode;
+            this.name = name;
+        }
+    }
+
     // ********************************************************************//
     // 						ABSTRACT DECLARATIONS 						   //
     // ********************************************************************//
@@ -63,6 +75,7 @@ public class BundleValidationImpl implements BundleValidation {
     // 						INSTANCE DECLARATIONS 							//
     // ********************************************************************//
     private final Map<String, ValidBundleKey> validated;
+    private final Map<String, UnknownBundleKey> unknown;
     private final CryptographicUtils cryptoUtils;
     private final KeyStoreManager ksm;
     private Mediator mediator;
@@ -70,7 +83,8 @@ public class BundleValidationImpl implements BundleValidation {
     @Activate
     public BundleValidationImpl(BundleContext ctx) throws KeyStoreManagerException, NoSuchAlgorithmException {
         this.mediator = new Mediator(ctx);
-        this.validated = new HashMap<String, ValidBundleKey>();
+        this.validated = new HashMap<>();
+        this.unknown = new HashMap<>();
 
         this.cryptoUtils = new CryptographicUtils(mediator);
         this.ksm = new KeyStoreManager(this.getKeyStoreFileName(), this.getKeyStorePassword());
@@ -88,11 +102,7 @@ public class BundleValidationImpl implements BundleValidation {
         return (String) this.mediator.getProperty("org.eclipse.sensinact.gateway.security.signer.password");
     }
 
-    /**
-     * @inheritDoc
-     * @see BundleValidation#
-     * check(org.osgi.framework.Bundle)
-     */
+    @Override
     public String check(Bundle bundle) throws BundleValidationException {
         if (bundle == null) {
             this.mediator.debug("null bundle");
@@ -102,12 +112,15 @@ public class BundleValidationImpl implements BundleValidation {
 
         int hashcode = bundle.hashCode();
         String bundleName = bundle.getSymbolicName();
-
         ValidBundleKey validBundleKey = this.validated.get(bundleName);
 
-        if (validBundleKey != null && validBundleKey.hashcode == hashcode) {
+        if (validBundleKey != null && validBundleKey.hashcode == hashcode) 
             return validBundleKey.key;
-        }
+        
+        UnknownBundleKey unknownBundleKey = this.unknown.get(bundleName);
+        if(unknownBundleKey != null && unknownBundleKey.hashcode == hashcode)
+        	return null;
+        
         boolean isSigned = false;
 
         final Enumeration<URL> entries = bundle.findEntries("/META-INF", "*", true);
@@ -129,17 +142,12 @@ public class BundleValidationImpl implements BundleValidation {
                 sjar.setKeyStoreManager(ksm);
 
                 Map<String, Certificate> validCertificates = sjar.getValidCertificates(this.getSignerPassword());
-
                 Iterator signers = validCertificates.entrySet().iterator();
-
-                if (this.mediator.isDebugLoggable()) {
-                    this.mediator.debug("signers: " + signers);
-                }
-                Map.Entry entry = null;
 
                 final List<Certificate> certs4validSig = new ArrayList<Certificate>();
                 Certificate currentCert = null;
                 String signer = "";
+                Map.Entry entry = null;
 
                 while (signers.hasNext()) {
                     entry = (Map.Entry) signers.next();
@@ -159,22 +167,21 @@ public class BundleValidationImpl implements BundleValidation {
                         }
                     }
                     if (certs4validSig.size() == 0) {
-                        System.out.println("checkCoherence returned false");
+                        this.unknown.put(bundleName, new UnknownBundleKey(hashcode, bundleName));
                         sha1 = null;
-                        this.mediator.debug("no valid certificate found");
                     } else {
                         sha1 = signatureFile.getManifestHash();
-                        this.mediator.debug("%s certificate(s) found", certs4validSig.size());
                     }
                 }
             } catch (Exception e) {
+                this.unknown.put(bundleName, new UnknownBundleKey(hashcode, bundleName));
                 throw new BundleValidationException(e);
             }
-        } else {
-            this.mediator.debug("%s %s is not signed", FILE, bundle.getLocation());
         }
-        this.mediator.debug("%s %s is valid? %s", FILE, bundle.getLocation(), sha1 != null);
-        this.validated.put(bundleName, new ValidBundleKey(hashcode, bundleName, sha1));
+        if(sha1!=null)
+        	this.validated.put(bundleName, new ValidBundleKey(hashcode, bundleName, sha1));
+        else 
+            this.unknown.put(bundleName, new UnknownBundleKey(hashcode, bundleName));
         return sha1;
     }
 }
