@@ -104,8 +104,8 @@ FOREIGN KEY (OPID) REFERENCES OBJECT_PROFILE(OPID));
 
 CREATE UNIQUE INDEX 'BUNDLE_PK_INDEX' ON 'BUNDLE' ('BID' ASC);
 
-INSERT INTO BUNDLE VALUES (0, 0, 4, "sensinact-system", "sensinact-system");
-INSERT INTO BUNDLE VALUES (1, 0, 4, "application-manager", "application-manager");
+INSERT INTO BUNDLE VALUES (0, 0, 4, "org.eclipse.sensinact.gateway.sensinact-system", "sensinact-system");
+INSERT INTO BUNDLE VALUES (1, 0, 4, "org.eclipse.sensinact.gateway.application-manager", "application-manager");
 
 DROP TABLE IF EXISTS OBJECT ; 
 CREATE TABLE OBJECT (
@@ -406,12 +406,12 @@ INSERT INTO SNAUSER VALUES (NULL, "fake", "144c9defac04969c7bfad8efaa8ea194",
 INSERT INTO SNAUSER VALUES (NULL, "fake2","503f7fada600da935e2851a1c7326084",
 "fake2@cea.fr", "MAIL", "31e63e9c4a319bf313b8a6d454798e09b3e7344a"); 
 
-INSERT INTO BUNDLE VALUES (2, 0, 1, "fan", "fan");
-INSERT INTO BUNDLE VALUES (3, 0, 1, "slider", "slider");
-INSERT INTO BUNDLE VALUES (4, 0, 1, "light", "light");
-INSERT INTO BUNDLE VALUES (5, 0, 1, "billboard", "bilboard");
-INSERT INTO BUNDLE VALUES (6, 1, 1, "button", "button");
-INSERT INTO BUNDLE VALUES (7, 1, 1, "temperatures-generator", "temperatures-generator");
+INSERT INTO BUNDLE VALUES (2, 0, 1, "org.eclipse.sensinact.gateway.simulated.devices.fan", "fan");
+INSERT INTO BUNDLE VALUES (3, 0, 1, "org.eclipse.sensinact.gateway.simulated.devices.slider", "slider");
+INSERT INTO BUNDLE VALUES (4, 0, 1, "org.eclipse.sensinact.gateway.simulated.devices.light", "light");
+INSERT INTO BUNDLE VALUES (5, 0, 1, "org.eclipse.sensinact.gateway.simulated.devices.billboard", "bilboard");
+INSERT INTO BUNDLE VALUES (6, 1, 1, "org.eclipse.sensinact.gateway.simulated.devices.button", "button");
+INSERT INTO BUNDLE VALUES (7, 1, 1, "org.eclipse.sensinact.gateway.simulated.devices.temperatures-generator", "temperatures-generator");
 
 INSERT INTO OBJECT(OID, BID, SAUTH, OPID, NAME, PATTERN, PARENT) 
 VALUES (2, 3, 0, 1, "slider", 0, 0);   -- Anonymous / DEFAULT
