@@ -17,12 +17,8 @@ import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTaskConfiguratio
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.HttpTasks;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.SimpleHttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpActivator;
-<<<<<<< HEAD:platform/southbound/http/http-device/extra-src/test/java/org/eclipse/sensinact/gateway/sthbnd/http/test/bundle1/Activator.java
-import org.eclipse.sensinact.gateway.sthbnd.http.smpl.SimpleHttpProtocolStackEndpoint;
-=======
 import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.Constants;
->>>>>>> origin/master:platform/southbound/http/http-device/src/test/java/org/eclipse/sensinact/gateway/sthbnd/http/test/bundle1/Activator.java
 
 @HttpTasks( tasks =
 {

@@ -11,11 +11,11 @@
 package org.eclipse.sensinact.gateway.sthbnd.http.factory.packet;
 
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.gateway.generic.packet.annotation.AttributeID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.Data;
@@ -67,7 +67,13 @@ public class HttpRootMappingPacket extends HttpMappingPacket<RootMappingDescript
 			RootMappingDescription rmd = mappings[i];;
 			Map<String,String> tmp = rmd.getMapping();
 			this.modelMapping.putAll(tmp);
-			this.jsonMapping.put(String.format("root_%s",i), tmp.keySet().stream().collect(Collectors.toList()));
+			super.jsonMapping.put(String.format("root_%s",i), tmp.keySet().stream().collect(
+					ArrayList::new,
+					(l,s)->{
+						if(!s.startsWith("$concat("))
+							l.add(s);
+					}, 
+					List::addAll));
 		}
 	}	
 	
@@ -113,7 +119,7 @@ public class HttpRootMappingPacket extends HttpMappingPacket<RootMappingDescript
 		pos++;
 		this.serviceProviderMapping = null;
 		if(this.resultMapping != null) 	
-			this.serviceProviderMapping = reverseModelMapping(PROVIDER_PATTERN);
+			this.serviceProviderMapping = reverseModelMapping(PROVIDER_IDENTIFIER);
 		return this.resultMapping;		
 	}
 

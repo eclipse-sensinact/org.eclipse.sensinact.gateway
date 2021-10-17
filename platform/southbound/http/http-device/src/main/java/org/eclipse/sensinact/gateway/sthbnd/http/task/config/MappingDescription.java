@@ -21,7 +21,13 @@ public abstract class MappingDescription {
 	public static final int NESTED = 2;
 	
 	/**
-	 * @return
+	 * Return the type of the described mapping : 
+	 * <ul>
+	 * 		<li>ROOT or</li>
+	 * 		<li>NESTED</li>
+	 * </ul>
+	 * 
+	 * @return the type of mapping described by this MappingDescription
 	 */
 	public abstract int getMappingType();
 	

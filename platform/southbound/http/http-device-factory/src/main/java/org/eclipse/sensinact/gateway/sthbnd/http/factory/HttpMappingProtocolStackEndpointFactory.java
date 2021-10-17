@@ -136,6 +136,8 @@ public class HttpMappingProtocolStackEndpointFactory implements ManagedServiceFa
 		}		
 		if(tasksDescription != null) 
 			endpoint.registerAdapters(tasksDescription);		
+		
+		endpoint.setServiceProviderIdPattern(endpointDescription.getServiceProviderIdPattern()); 
 		try {
 			endpoint.connect(configuration);
 			this.endpoints.put(pid,endpoint);

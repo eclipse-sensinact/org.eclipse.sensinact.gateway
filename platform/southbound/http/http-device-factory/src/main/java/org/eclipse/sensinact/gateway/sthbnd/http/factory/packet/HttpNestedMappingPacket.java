@@ -10,13 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.factory.packet;
 
-import java.io.InputStreamReader;
+import java.io.File;
+import java.io.FileReader;
+//import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.gateway.generic.packet.annotation.AttributeID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.Data;
@@ -39,6 +40,8 @@ import org.slf4j.LoggerFactory;
  */
 public class HttpNestedMappingPacket  extends HttpMappingPacket<NestedMappingDescription> {
 	
+	private static final boolean SAVE_CONTENT_INTO_TEMPORARY_FILE = true;
+	
 	static final Logger LOG = LoggerFactory.getLogger(HttpNestedMappingPacket.class);
 			
 	protected JSONParser parser = null;	
@@ -52,7 +55,7 @@ public class HttpNestedMappingPacket  extends HttpMappingPacket<NestedMappingDes
 	 * by the HttpMappingPacket to be initialized
 	 */
 	public HttpNestedMappingPacket(HttpResponse response) {
-		super(response, false, false);
+		super(response, SAVE_CONTENT_INTO_TEMPORARY_FILE, false);
 		this.worker = Executors.newSingleThreadExecutor(r -> new Thread(r, "Http Mapping Packet Worker Thread"));
 	}	
 	
@@ -66,13 +69,20 @@ public class HttpNestedMappingPacket  extends HttpMappingPacket<NestedMappingDes
 			NestedMappingDescription nmd = mappings[i];	
 			Map<String,String> tmp = nmd.getMapping();
 			super.modelMapping.putAll(tmp);
-			super.jsonMapping.put(nmd.getPath(), tmp.keySet().stream().collect(Collectors.toList()));
+			super.jsonMapping.put(nmd.getPath(), tmp.keySet().stream().collect(
+					ArrayList::new,
+					(l,s)->{
+						if(!s.startsWith("$concat("))
+							l.add(s);
+					}, 
+					List::addAll));
 		}
 	}	
 
 	protected void initParsing() {
 		try {
-			InputStreamReader reader = new InputStreamReader(super.getInputStream());
+			FileReader reader = new FileReader(new File(super.savedContent));
+			//InputStreamReader reader = new InputStreamReader(super.getInputStream());
 			this.parser = new JSONParser(reader);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(),e);
@@ -94,30 +104,35 @@ public class HttpNestedMappingPacket  extends HttpMappingPacket<NestedMappingDes
 				}
 			}			
 		});
-		this.resultMapping = getEvent();
+		super.resultMapping = getEvent();
+		this.listener.countDown();
+		if(super.resultMapping != null) 	
+			super.serviceProviderMapping = buildProviderId();
 	}
 
 	protected Map<String,String> getEvent () {
-		this.serviceProviderMapping = null;
-		Map<String,String> event = this.listener.getEvent(this.jsonMapping);
+		super.serviceProviderMapping = null;
+		Map<String,String> event = this.listener.getEvent(super.jsonMapping);
 		while(event == null && !this.listener.isEndOfParsing()) {
 			try {
 				Thread.sleep(5);
 			} catch (InterruptedException e) {
 				Thread.interrupted();
 			}
-			event = this.listener.getEvent(this.jsonMapping);
+			event = this.listener.getEvent(super.jsonMapping);
 		}
 		if(this.listener.isEndOfParsing()) {
 			this.worker.shutdownNow();
 			this.worker = null;
 			this.parser.close();
 			this.parser = null;
+			if(super.savedContent!=null)
+				new File(super.savedContent).delete();
 		}
-		this.resultMapping = event;
+		super.resultMapping = event;
 		this.listener.countDown();
-		if(this.resultMapping != null) 	
-			this.serviceProviderMapping = reverseModelMapping(PROVIDER_PATTERN);
+		if(super.resultMapping != null) 	
+			super.serviceProviderMapping = buildProviderId();
 		return event;
 	}
 

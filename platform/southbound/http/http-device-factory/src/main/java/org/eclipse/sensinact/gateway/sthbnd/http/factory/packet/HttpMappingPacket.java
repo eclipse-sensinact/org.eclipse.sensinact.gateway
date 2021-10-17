@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponsePacket;
@@ -31,8 +33,13 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 	
 	static final Logger LOG = LoggerFactory.getLogger(HttpMappingPacket.class);
 
-	static final String PROVIDER_PATTERN = "::provider::";
-	static final String PROVIDER_NESTED_PATTERN = "\\$\\((provider)\\)";
+	static final String PROVIDER_IDENTIFIER = "::provider::";
+	static final String PROVIDER_IDENTIFIER_REGEX = "::(provider)::\\[([0-9])\\]";
+	static final String PROVIDER_IDENTIFIER_JOIN = ":";
+	static final String CONCATENATION_FUNCTION_REGEX = "\\$(concat)\\(([^,]+(,[^,]+)+)\\)";
+	
+	static final Pattern PROVIDER_IDENTIFIER_PATTERN = Pattern.compile(PROVIDER_IDENTIFIER_REGEX);
+	static final Pattern CONCATENATION_FUNCTION_PATTERN = Pattern.compile(CONCATENATION_FUNCTION_REGEX);
 	
 	protected int index;
 
@@ -87,8 +94,6 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 		this.jsonMapping = new HashMap<>();
 		
 		doSetMapping(mappings);
-		//System.out.println(modelMapping);
-		//System.out.println(jsonMapping);
 		initParsing();
 	}
 
@@ -115,6 +120,49 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 		).stream().filter(e -> {return mapping.equals(e.getValue());}
 			).findFirst();
 	    return entry.isPresent()?entry.get().getKey():null;
+	}	
+
+	protected String substitute(String expression) {
+		String variable = expression;
+    	int startVariable = variable.indexOf("${");
+    	int endVariable = variable.indexOf("}");
+    	
+    	if(startVariable > -1 && endVariable > -1 && endVariable > startVariable) {
+			try {
+				String pathVariable = variable.substring(startVariable + 2, endVariable);
+				String pathResult = resultMapping.get(reverseModelMapping(String.format("__%s", pathVariable)));
+				variable = String.format("%s%s%s", expression.substring(0,startVariable), pathResult, expression.substring(endVariable+1));
+			} catch (Exception e) {
+				LOG.error(e.getMessage(),e);
+			}
+    	}
+    	return variable;
+	}
+	
+	protected String buildProviderId() {
+	    String identifier = null;
+	    try {
+		    identifier = this.modelMapping.entrySet(
+			).stream().filter(e -> {return e.getValue().startsWith(PROVIDER_IDENTIFIER);}
+				).sorted((e1,e2)->{
+					Matcher m1 = PROVIDER_IDENTIFIER_PATTERN.matcher(e1.getValue());
+					Matcher m2 = PROVIDER_IDENTIFIER_PATTERN.matcher(e2.getValue());
+					if(m1.matches() && m2.matches()) {
+						String v1 = m1.group(2);
+						String v2 = m2.group(2);
+						return Integer.valueOf(v1).compareTo(Integer.valueOf(v2));
+					} else 
+						return 0;}
+				).<StringBuilder>collect( StringBuilder::new,
+						(s,e)->{
+							if(s.length() > 0)
+								s.append(PROVIDER_IDENTIFIER_JOIN);
+							s.append(resultMapping.get(e.getKey()));},
+						(sb1,sb2)->{sb1.append(sb2.toString());}).toString();
+	    }catch(Exception e) {
+	    	LOG.error(e.getMessage(),e);
+	    }
+	    return identifier;
 	}
 	
 	private void iterate() {
@@ -137,30 +185,19 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 	
 	protected boolean wasLast() {	
 		iterate();
-		String path = this.modelMapping.get(current.getKey());		
+		String path = current.getValue();		
     	while(true) { 
-    		if(path!=null && !PROVIDER_PATTERN.equals(path) && !path.startsWith("__"))
+    		if(path!=null && !path.startsWith(PROVIDER_IDENTIFIER) && !path.startsWith("__"))
     			break;
     		iterate();
-    		path = this.modelMapping.get(current.getKey()); 
+    		path = current.getValue(); 
 		}
-    	int startVariable = path.indexOf("${");
-    	int endVariable = path.indexOf("}");
     	
-    	if(startVariable > -1 && endVariable > -1 && endVariable > startVariable) {
-			try {
-				String pathVariable = path.substring(startVariable + 2, endVariable);
-				String pathResult = resultMapping.get(reverseModelMapping(String.format("__%s", pathVariable)));
-				path = String.format("%s%s%s", path.substring(0,startVariable),pathResult,
-						path.substring(endVariable+1));
-			} catch (Exception e) {
-				LOG.error(e.getMessage(),e);
-			}
-    	}
+    	path = substitute(path);
     	if(this.serviceProviderMapping == null) 
     		providerId = this.serviceProviderId;
     	else
-    		providerId = this.resultMapping.get(this.serviceProviderMapping);
+    		providerId = this.serviceProviderMapping;
 
 		if(path.startsWith("/"))
 			path = path.substring(1);		
@@ -221,7 +258,24 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 	protected Object getData() {
 		if(resultMapping == null || this.current ==null)
 			return null;
+		Matcher matcher =CONCATENATION_FUNCTION_PATTERN.matcher(this.current.getKey());
+		if(matcher.matches()) {
+			String argument = matcher.group(2);
+			String[] arguments = argument.split(",");
+			StringBuilder builder = new StringBuilder();
+			for(int i =0;i<arguments.length;i++) {
+					String s = substitute(arguments[i]).trim();
+					if(s.startsWith("\"") && s.endsWith("\""))
+						s = s.replace('"', ' ').trim();
+					if(s.startsWith("'") && s.endsWith("'"))
+						s = s.replace('\'', ' ').trim();
+					builder.append(s);
+			}
+			return builder.toString();
+ 		}
 		String value = resultMapping.get(this.current.getKey());
+		if(value == null)
+			return null;
 		if(value.startsWith("\"") && value.endsWith("\""))
 			return value.replace('"', ' ').trim();
 	    else if("TRUE".equals(value.toUpperCase()) || "FALSE".equals(value.toUpperCase()))

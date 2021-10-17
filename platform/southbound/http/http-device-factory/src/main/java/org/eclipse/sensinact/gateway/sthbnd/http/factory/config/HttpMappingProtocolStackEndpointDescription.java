@@ -45,6 +45,9 @@ public class HttpMappingProtocolStackEndpointDescription {
 
 	@JsonProperty(value="serviceBuildPolicy")
 	private String[] serviceBuildPolicy;
+
+	@JsonProperty(value="serviceProviderIdPattern")
+	private String serviceProviderIdPattern;
 	
 	public HttpMappingProtocolStackEndpointDescription() {}
 	
@@ -55,7 +58,8 @@ public class HttpMappingProtocolStackEndpointDescription {
 			String modifiable,
 			Map<String,String> defaults,
 			String[] resourceBuildPolicy, 
-			String[] serviceBuildPolicy) {
+			String[] serviceBuildPolicy,
+			String serviceProviderIdPattern) {
 		this.startAtInitializationTime = startAtInitializationTime;
 		this.startAtInitializationTimeSet = true;
 		this.packetTypeName = packetTypeName;
@@ -64,6 +68,7 @@ public class HttpMappingProtocolStackEndpointDescription {
 		this.defaults = defaults;
 		this.resourceBuildPolicy = resourceBuildPolicy;
 		this.serviceBuildPolicy = serviceBuildPolicy;
+		this.serviceProviderIdPattern = serviceProviderIdPattern;
 	}
 
 	/**
@@ -178,5 +183,19 @@ public class HttpMappingProtocolStackEndpointDescription {
 	 */
 	public void setServiceBuildPolicy(String[] serviceBuildPolicy) {
 		this.serviceBuildPolicy = serviceBuildPolicy;
+	}
+
+	/**
+	 * @return the serviceProviderIdPattern
+	 */
+	public String getServiceProviderIdPattern() {
+		return serviceProviderIdPattern;
+	}
+
+	/**
+	 * @param serviceProviderIdPattern the serviceProviderIdPattern to set
+	 */
+	public void setServiceProviderIdPattern(String serviceProviderIdPattern) {
+		this.serviceProviderIdPattern = serviceProviderIdPattern;
 	}
 }
