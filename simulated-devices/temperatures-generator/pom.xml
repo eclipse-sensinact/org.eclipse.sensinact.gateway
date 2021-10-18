@@ -32,37 +32,14 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>xml-maven-plugin</artifactId>
 			</plugin>
-<!-- 			<plugin> -->
-<!-- 				<groupId>org.codehaus.gmaven</groupId> -->
-<!-- 				<artifactId>groovy-maven-plugin</artifactId> -->
-<!-- 			</plugin> -->
-<!-- 			<plugin> -->
-<!-- 				<groupId>org.codehaus.mojo</groupId> -->
-<!-- 				<artifactId>sql-maven-plugin</artifactId> -->
-<!-- 			</plugin> -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>sql-maven-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<groupId>biz.aQute.bnd</groupId>
 				<artifactId>bnd-maven-plugin</artifactId>
 			</plugin>
-<!-- 			<plugin> -->
-<!-- 				<groupId>org.apache.felix</groupId> -->
-<!-- 				<artifactId>maven-bundle-plugin</artifactId> -->
-<!-- 				<extensions>true</extensions> -->
-<!-- 				<configuration> -->
-<!-- 					<instructions> -->
-<!-- 						<Bundle-Activator> -->
-<!-- 							org.eclipse.sensinact.gateway.simulated.temperature.generator.osgi.Activator -->
-<!-- 						</Bundle-Activator> -->
-<!-- 						<Include-Resource> -->
-<!-- 							about.html, -->
-<!-- 							src/main/resources/ -->
-<!-- 						</Include-Resource> -->
-<!-- 						<Export-Package> -->
-<!-- 							org.eclipse.sensinact.gateway.simulated.temperature.generator -->
-<!-- 						</Export-Package> -->
-<!-- 					</instructions> -->
-<!-- 				</configuration> -->
-<!-- 			</plugin> -->
 		</plugins>
 	</build>
 

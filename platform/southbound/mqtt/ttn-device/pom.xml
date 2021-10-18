@@ -73,27 +73,11 @@
         	<plugin>
 				<groupId>biz.aQute.bnd</groupId>
 				<artifactId>bnd-maven-plugin</artifactId>
+			</plugin>	
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>sql-maven-plugin</artifactId>
 			</plugin>
-<!--             <plugin> -->
-<!--                 <groupId>org.apache.felix</groupId> -->
-<!--                 <artifactId>maven-bundle-plugin</artifactId> -->
-<!--                 <extensions>true</extensions> -->
-<!--                 <configuration> -->
-<!--                     <instructions> -->
-<!--                         <Bundle-Activator>org.eclipse.sensinact.gateway.sthbnd.ttn.osgi.TtnActivator</Bundle-Activator> -->
-<!--                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName> -->
-<!--                         <Bundle-Name>${project.name}</Bundle-Name> -->
-<!--                         <Bundle-Vendor>Kentyou</Bundle-Vendor> -->
-<!--                         <Build-By>Kentyou</Build-By> -->
-<!--                         <Bundle-Description>${project.name}</Bundle-Description> -->
-<!--                         <_nouses>true</_nouses> -->
-<!--                         <_plugin>aQute.bnd.signing.JartoolSigner;alias="selfsigned";path="${signer.path}";keystore="${sensinact.root.dir}/platform/sensinact-security/cert/keystore.jks";storepass="sensiNact_team"</_plugin> -->
-<!--                         <_sign>selfsigned</_sign> -->
-<!--                         <_failok>true</_failok> -->
-<!--                         <Service-Components>OSGI-INF/*.xml</Service-Components>  -->
-<!--                     </instructions> -->
-<!--                 </configuration>  -->
-<!--             </plugin> -->
         </plugins>
     </build>
     

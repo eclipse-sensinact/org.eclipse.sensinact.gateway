@@ -27,37 +27,19 @@
 	<name>sensiNact IoT Gateway - Simulated Billboard</name>
 
 	<build>
-		<plugins>
+		<plugins>		
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>xml-maven-plugin</artifactId>
 			</plugin>
-<!-- 			<plugin> -->
-<!-- 				<groupId>org.codehaus.gmaven</groupId> -->
-<!-- 				<artifactId>groovy-maven-plugin</artifactId> -->
-<!-- 			</plugin> -->
-<!-- 			<plugin> -->
-<!-- 				<groupId>org.codehaus.mojo</groupId> -->
-<!-- 				<artifactId>sql-maven-plugin</artifactId> -->
-<!-- 			</plugin> -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>sql-maven-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<groupId>biz.aQute.bnd</groupId>
 				<artifactId>bnd-maven-plugin</artifactId>
 			</plugin>
-<!-- 			<plugin> -->
-<!-- 				<groupId>org.apache.felix</groupId> -->
-<!-- 				<artifactId>maven-bundle-plugin</artifactId> -->
-<!-- 				<extensions>true</extensions> -->
-<!-- 				<configuration> -->
-<!-- 					<instructions> -->
-<!-- 						<Bundle-Activator>org.eclipse.sensinact.gateway.simulated.billboard.osgi.Activator</Bundle-Activator> -->
-<!-- 						<Include-Resource> -->
-<!-- 							about.html, -->
-<!-- 							src/main/resources/ -->
-<!-- 						</Include-Resource> -->
-<!-- 					</instructions> -->
-<!-- 				</configuration> -->
-<!-- 			</plugin> -->
 		</plugins>
 	</build>
 

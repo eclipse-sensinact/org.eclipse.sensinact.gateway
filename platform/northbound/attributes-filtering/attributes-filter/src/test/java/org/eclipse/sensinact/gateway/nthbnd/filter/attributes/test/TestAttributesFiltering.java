@@ -213,12 +213,21 @@ public class TestAttributesFiltering {
 
 	private String synchronizedRequest(WsServiceTestClient client, String url, String content) {
 
-		client.newRequest(url, content);
+		String response = null;
+        long wait = 2000;
 
-		while (!client.isAvailable()) {
-			Thread.yield();
-		}
+        client.newRequest(url, content);
 
-		return client.getResponseMessage();
+        while (!client.isAvailable() && wait > 0) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.interrupted();
+            }
+        }
+        if (client.isAvailable()) {
+        	response = client.getResponseMessage();
+        }
+        return response;
 	}
 }

@@ -29,6 +29,26 @@
 	<name>sensiNact IoT Gateway - Platform</name>
 
 	<build>
+		<pluginManagement>
+			<plugins>				
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>sql-maven-plugin</artifactId>
+					<executions>
+						<execution>
+							<id>insert-bundle-signature</id>
+							<phase>install</phase>
+							<goals>
+								<goal>execute</goal>
+							</goals>
+							<configuration>
+								<sqlCommand>UPDATE BUNDLE SET BSHA = '${sha}' WHERE BNAME = '${project.groupId}.${project.artifactId}'</sqlCommand>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -57,86 +77,79 @@
 					</execution>
 				</executions>
 			</plugin>
-                     <!-- This dynamically calculates all the things we need to run our code. -->
-                    <plugin>
-						<groupId>biz.aQute.bnd</groupId>
-						<artifactId>bnd-testing-maven-plugin</artifactId>
-						<version>${bnd-maven-plugin.version}</version>
-						<executions>
-							<!-- OSGi integration tests execution -->
-							<execution>
-								<id>testing</id>
-								<goals>
-									<goal>testing</goal>
-								</goals>
-								<configuration>
-									<bndruns>
-										<include>*.bndrun</include>
-									</bndruns>
-									<bundles>
-										<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
-									</bundles>
-									<failOnChanges>false</failOnChanges>
-									<includeDependencyManagement>true</includeDependencyManagement>
-									<useMavenDependencies>true</useMavenDependencies>
-									<resolve>true</resolve>
-									<scopes>
-										<scope>compile</scope>
-										<scope>runtime</scope>
-										<scope>test</scope>
-										<scope>provided</scope>
-									</scopes>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					 <!-- This dynamically calculates all the things we need to run our code. -->
-                    <plugin>
-                        <groupId>biz.aQute.bnd</groupId>
-                        <artifactId>bnd-resolver-maven-plugin</artifactId>
-                        <version>${bnd-maven-plugin.version}</version>
-                        <executions>
-						<!-- Integration Test Configuration -->
-			            <execution>
-			                <goals>
-			                    <goal>resolve</goal>
-			                </goals>
-			            </execution>
-						<execution>
-							<id>resolve-test</id>
-							<phase>pre-integration-test</phase>
-							<goals>
-								<goal>resolve</goal>
-							</goals>
-							<configuration>
-								<bndruns>
-										<include>*.bndrun</include>
-								</bndruns>
-								<bundles>
-									<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
-								</bundles>
-								<failOnChanges>false</failOnChanges>
-								<includeDependencyManagement>true</includeDependencyManagement>
-								<useMavenDependencies>true</useMavenDependencies>
-								<reportOptional>false</reportOptional>
-								
-								<scopes>
-									<scope>compile</scope>
-									<scope>runtime</scope>
-									<scope>test</scope>
-									<scope>provided</scope>
-								</scopes>
-							</configuration>
-						</execution>
-					</executions>
-                    </plugin>
-
+            <!-- This dynamically calculates all the things we need to run our code. -->
+            <plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-testing-maven-plugin</artifactId>
+				<version>${bnd-maven-plugin.version}</version>
+				<executions>
+					<!-- OSGi integration tests execution -->
+					<execution>
+						<id>testing</id>
+						<goals>
+							<goal>testing</goal>
+						</goals>
+						<configuration>
+							<bndruns>
+								<include>*.bndrun</include>
+							</bndruns>
+							<bundles>
+								<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
+							</bundles>
+							<failOnChanges>false</failOnChanges>
+							<includeDependencyManagement>true</includeDependencyManagement>
+							<useMavenDependencies>true</useMavenDependencies>
+							<resolve>true</resolve>
+							<scopes>
+								<scope>compile</scope>
+								<scope>runtime</scope>
+								<scope>test</scope>
+								<scope>provided</scope>
+							</scopes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- This dynamically calculates all the things we need to run our code. -->
+            <plugin>
+                 <groupId>biz.aQute.bnd</groupId>
+                 <artifactId>bnd-resolver-maven-plugin</artifactId>
+                 <version>${bnd-maven-plugin.version}</version>
+                 <executions>
+					<!-- Integration Test Configuration -->
+		            <execution>
+		                <goals>
+		                    <goal>resolve</goal>
+		                </goals>
+		            </execution>
+					<execution>
+						<id>resolve-test</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>resolve</goal>
+						</goals>
+						<configuration>
+							<bndruns>
+									<include>*.bndrun</include>
+							</bndruns>
+							<bundles>
+								<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
+							</bundles>
+							<failOnChanges>false</failOnChanges>
+							<includeDependencyManagement>true</includeDependencyManagement>
+							<useMavenDependencies>true</useMavenDependencies>
+							<reportOptional>false</reportOptional>							
+							<scopes>
+								<scope>compile</scope>
+								<scope>runtime</scope>
+								<scope>test</scope>
+								<scope>provided</scope>
+							</scopes>
+						</configuration>
+					</execution>
+			</executions>
+           </plugin>
 		</plugins>
-		<pluginManagement>
-		<plugins>
-		
-		</plugins>
-		</pluginManagement>
 	</build>
 
 	<dependencies>

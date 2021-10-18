@@ -1485,36 +1485,46 @@
 							</execution>
 						</executions>
                     </plugin>
-<!-- 				<plugin> -->
-<!-- 					<groupId>org.apache.felix</groupId> -->
-<!-- 					<artifactId>maven-bundle-plugin</artifactId> -->
-<!-- 					<version>${maven-bundle-plugin.version}</version> -->
-<!-- 					<extensions>true</extensions> -->
-<!-- 					<configuration> -->
-<!-- 						<unpackBundle>true</unpackBundle> -->
-<!-- 						<instructions> -->
-<!-- 							<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName> -->
-<!-- 							<Bundle-Name>${project.name}</Bundle-Name> -->
-<!-- 							<Bundle-Vendor>Eclipse</Bundle-Vendor> -->
-<!-- 							<Build-By>Eclipse</Build-By> -->
-<!-- 							<Bundle-Description>${project.name}</Bundle-Description> -->
-<!-- 							<_nouses>true</_nouses> -->
-<!-- 							<_include>-bnd.bnd</_include> -->
-<!-- 							<_snapshot>${maven.build.timestamp}</_snapshot> -->
-<!-- 							<_plugin>aQute.bnd.signing.JartoolSigner;alias="selfsigned";path="${signer.path}";keystore="${sensinact.root.dir}/platform/sensinact-security/cert/keystore.jks";storepass="sensiNact_team"</_plugin> -->
-<!-- 							<_sign>selfsigned</_sign> -->
-<!-- 							<_failok>true</_failok> -->
-<!-- 							<_exportcontents> *, !*.internal, !*.internal.*, !${private.package} -->  
-<!--								</_exportcontents> -->
-<!-- 						</instructions> -->
-<!-- 					</configuration> -->
-<!-- 				</plugin> -->
 				<plugin>
 					<groupId>org.sonarsource.scanner.maven</groupId>
 					<artifactId>sonar-maven-plugin</artifactId>
 					<version>${sonar-maven-plugin.version}</version>
 				</plugin>
+				<plugin>
+					<groupId>org.codehaus.gmaven</groupId>
+					<artifactId>groovy-maven-plugin</artifactId>
+					<version>${groovy-maven-plugin.version}</version>
+					<executions>
+						<execution>
+							<id>search-sha</id>
+							<phase>package</phase>
+							<goals>
+								<goal>execute</goal>
+							</goals>
+							<configuration>
+								<defaults>
+									<name>extract-sha</name>
+								</defaults>
+								<source>
+									File basedir = new File(project.basedir.absolutePath.replace('\\','/'));
+									File signature = new File(basedir, "/target/classes/META-INF/SELFSIGN.SF")
+
+									if(signature.exists())
+									{
+									    String fileContents = signature.getText('UTF-8')
+									    matcher = (fileContents =~ /(?s)SHA(1|-256)-Digest-Manifest\s*:\s*([^\s]+)\s*$?/)
+
+									    String sha = matcher.getAt(0).getAt(2)
+									    log.info('SHA: {}', sha)
+									    project.properties.setProperty('sha',sha)
+									}
+								</source>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
 			</plugins>
+			
 		</pluginManagement>
 
 		<plugins>
@@ -1526,10 +1536,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
 			</plugin>
-			<!-- <plugin> -->
-			<!-- <groupId>org.codehaus.gmaven</groupId> -->
-			<!-- <artifactId>groovy-maven-plugin</artifactId> -->
-			<!-- </plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
@@ -1541,8 +1547,11 @@
 			<plugin>
 				<groupId>biz.aQute.bnd</groupId>
 				<artifactId>bnd-maven-plugin</artifactId>
-			</plugin>
-
+			</plugin>			
+			<plugin>
+				<groupId>org.codehaus.gmaven</groupId>
+				<artifactId>groovy-maven-plugin</artifactId>
+			</plugin>			
 		</plugins>
 	</build>
 
