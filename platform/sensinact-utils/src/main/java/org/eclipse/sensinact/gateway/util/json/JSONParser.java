@@ -112,11 +112,10 @@ public class JSONParser {
 			else
 				value = context.value;
 			
-			String formatedPath = context.path;
-			
-			if(path.startsWith("/"))
+			String formatedPath = context.path;			
+			if(context.path.startsWith("/"))
 				formatedPath = formatedPath.substring(1);
-			if(path.endsWith("/"))
+			if(context.path.endsWith("/"))
 				formatedPath = formatedPath.substring(0,formatedPath.length()-1);
 			
 			String[] _pathElements = formatedPath.split("/");
@@ -469,6 +468,6 @@ public class JSONParser {
 				System.out.println("--------------------------------------------------------");
 			}
 		};
-		new JSONParser(s).parse(Arrays.asList("/key3/key30/[3]/key301/*", "/key3/key30/*", "/key3/key30/[0]/*", "/key3/*"), callback);	
+		new JSONParser(s).parse(Arrays.asList("key3/key30/[3]/key301/*", "/key3/key30/*", "/key3/key30/[0]/*", "/key3/*"), callback);	
 	}
 }
