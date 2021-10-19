@@ -131,6 +131,10 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 			try {
 				String pathVariable = variable.substring(startVariable + 2, endVariable);
 				String pathResult = resultMapping.get(reverseModelMapping(String.format("__%s", pathVariable)));
+				if(pathResult.startsWith("\"") && pathResult.endsWith("\""))
+					pathResult = pathResult.replace('"', ' ').trim();
+				if(pathResult.startsWith("'") && pathResult.endsWith("'"))
+					pathResult = pathResult.replace('\'', ' ').trim();
 				variable = String.format("%s%s%s", expression.substring(0,startVariable), pathResult, expression.substring(endVariable+1));
 			} catch (Exception e) {
 				LOG.error(e.getMessage(),e);
