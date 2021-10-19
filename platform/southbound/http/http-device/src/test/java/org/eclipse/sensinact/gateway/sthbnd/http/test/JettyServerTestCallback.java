@@ -53,6 +53,7 @@ class JettyServerTestCallback {
             PATH path = PATH.valueOf(uriElements[uriElements.length - 1]);
             switch (path) {
                 case get:
+                	System.out.println("Call get");
                     response.setContentType("application/json");
                     response.setContentLength(this.remoteEntity.toString().length());
 
@@ -64,6 +65,7 @@ class JettyServerTestCallback {
                     latch.ifPresent(CountDownLatch::countDown);
                     break;
                 case services:
+                	System.out.println("Call services");
                     JSONObject object = new JSONObject();
                     object.put("serviceProviderId", uriElements[1]);
 
@@ -81,6 +83,7 @@ class JettyServerTestCallback {
                     }
                     break;
                 case json1:
+                	System.out.println("Call json1");
                     response.setContentType("application/json");
                     object = new JSONObject();
                     object.put("serviceProviderId", this.remoteEntity.getString("serviceProviderId"));
@@ -92,6 +95,7 @@ class JettyServerTestCallback {
                     response.setStatus(200);
                     break;
                 case json2:
+                	System.out.println("Call json2");
                     response.setContentType("text/plain");
                     response.setContentLength(this.remoteEntity.getString("serviceId").length());
 
@@ -101,6 +105,7 @@ class JettyServerTestCallback {
                     response.setStatus(200);
                     break;
                 case json3:
+                	System.out.println("Call json3");
                     response.setContentType("application/json");
                     JSONArray array = new JSONArray();
                     array.put(this.remoteEntity.getString("resourceId"));

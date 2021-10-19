@@ -277,15 +277,23 @@ public class TestHttpDevice {
     }
 
     @Test
-    public void testHttpDeviceReccurrent(@InjectService(timeout = 500) Core core, @InjectInstalledBundle(value = "resources2.jar") Bundle bundle) throws Throwable {
+    public void testHttpDeviceReccurrent(
+    		@InjectService(timeout = 500) Core core,
+    		@InjectInstalledBundle(value = "resources2.jar") Bundle bundle) throws Throwable {
+    	
     	CountDownLatch latch = new CountDownLatch(1);
+    	
     	callback.setCountDownLatch(latch);
-    	callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway2").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
+    	callback.setRemoteEntity(new JSONObject(
+    			).put("serviceProviderId", "TestForSensiNactGateway2"
+    			).put("serviceId", "service1"
+    			).put("resourceId", "temperature"
+    			).put("data", 24));
         
         bundle.start();
-        
+
         assertTrue(latch.await(5, TimeUnit.SECONDS), "GET was never called");
-        
+
 //        this.initializeMoke(new File("src/test/resources/resources2.xml").toURI().toURL(), new File("./extra-src2/test/resources/MANIFEST.MF"), new File("./extra-src2/test/resources/meta"), new File("./target/extra-test-classes2"));
 //        MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
 //        Core core = mid.buildProxy();
@@ -344,10 +352,6 @@ public class TestHttpDevice {
         core.close();
     }
 
-    /**
-     * @inheritDoc
-     * @see MidOSGiTest#doInit(java.util.Map)
-     */
     protected void doInit(Map configuration) {
        
         configuration.put("felix.auto.start.4", 
