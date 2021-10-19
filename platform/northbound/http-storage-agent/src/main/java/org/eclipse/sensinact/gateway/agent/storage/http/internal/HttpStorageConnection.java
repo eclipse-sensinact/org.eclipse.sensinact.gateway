@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
 public class HttpStorageConnection extends StorageConnection {
 	private static final Logger LOG = LoggerFactory.getLogger(HttpStorageConnection.class);
 
-    protected String broker;
-    protected String authorization;
+	protected String broker;
+	protected String authorization;
 
 	private String login;
 	private String password;
@@ -52,8 +52,8 @@ public class HttpStorageConnection extends StorageConnection {
 	 * @param password the user password
 	 * @throws IOException Exception on connection problem
 	 */
-	public HttpStorageConnection(Mediator mediator, String uri, String login, String password) throws IOException {
-		super(mediator);
+	public HttpStorageConnection( String uri, String login, String password) throws IOException {
+		super();
 		this.login = login;
 		this.password = password;
 		this.broker = uri;
@@ -74,10 +74,11 @@ public class HttpStorageConnection extends StorageConnection {
 			configuration.setHttpMethod("POST");
 			configuration.addHeader("Authorization", "Basic " + authorization);
 			configuration.addHeader("User-Agent", "java/sensiNact-storage");
-			Request request = new SimpleRequest(configuration);
+			Request<SimpleResponse> request = new SimpleRequest(configuration);
 			Response response = request.send();
-			if (mediator.isDebugLoggable()) {
-				this.mediator.debug(" >> response status code: " + response.getStatusCode());
+
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(" >> response status code: %s", response.getStatusCode());
 			}
 			Iterator<Map.Entry<String, List<String>>> iterator = response.getHeaders().entrySet().iterator();
 			if (!iterator.hasNext()) {
@@ -85,13 +86,12 @@ public class HttpStorageConnection extends StorageConnection {
 			}
 			Map.Entry<String, List<String>> entry = iterator.next();
 			for (; iterator.hasNext(); entry = iterator.next()) {
-				this.mediator.debug(entry.getKey() + " :: " + (entry.getValue() == null ? "null"
+				LOG.debug(entry.getKey() + " :: " + (entry.getValue() == null ? "null"
 						: Arrays.toString(entry.getValue().toArray(new String[0]))));
 			}
 		} catch (Exception e) {
-			LOG.error("Can't send request", e);
-			if (this.mediator.isErrorLoggable()) {
-				this.mediator.error(e.getMessage(), e);
+			if (LOG.isErrorEnabled()) {
+				LOG.error(e.getMessage(), e);
 			}
 		}
 	}

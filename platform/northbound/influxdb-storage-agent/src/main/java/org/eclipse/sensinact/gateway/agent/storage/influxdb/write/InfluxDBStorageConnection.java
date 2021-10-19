@@ -24,12 +24,15 @@ import org.eclipse.sensinact.gateway.tools.connector.influxdb.InfluxDbDatabase;
 import org.eclipse.sensinact.gateway.util.json.JSONObjectStatement;
 import org.eclipse.sensinact.gateway.util.json.JSONTokenerStatement;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Extended {@link SorageConnection} dedicated to InfluxDB data store
  */
 public class InfluxDBStorageConnection extends StorageConnection {
 	
+	Logger LOGGER=LoggerFactory.getLogger(InfluxDBStorageConnection.class);
 	private static final String STORAGE_AGENT_INFLUXDB_FIELDS         = "org.eclipse.sensinact.gateway.history.influxdb.fields";
 	private static final String STORAGE_AGENT_INFLUXDB_TAGS           = "org.eclipse.sensinact.gateway.history.influxdb.tags";
 	private static final String STORAGE_AGENT_INFLUXDB_ENABLE_DEFAULT = "org.eclipse.sensinact.gateway.history.influxdb.default";
@@ -65,7 +68,7 @@ public class InfluxDBStorageConnection extends StorageConnection {
 	 * @throws IOException 
 	 */
 	public InfluxDBStorageConnection(Mediator mediator, InfluxDbDatabase database, String measurement){
-		super(mediator);
+		super();
 		this.database = database;
 		this.measurement = measurement;		
 		this.enableDefault = true;
@@ -189,7 +192,7 @@ public class InfluxDBStorageConnection extends StorageConnection {
 			    geolocation = STATEMENT.toString();
 			    
 			} catch(IllegalArgumentException e) {
-				mediator.error(e);
+				LOGGER.error(e.getMessage(),e);
 			}
 		} else
 			geolocation = lc;

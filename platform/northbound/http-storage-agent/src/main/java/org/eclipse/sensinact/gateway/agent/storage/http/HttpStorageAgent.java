@@ -12,10 +12,16 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.log.Logger;
+import org.osgi.service.log.LoggerFactory;
 
 @Component(immediate=true, service = {AgentRelay.class})
 public class HttpStorageAgent extends StorageAgent {
 	
+	@Reference(service = LoggerFactory.class)
+	private Logger logger;
+
 	private static final Pattern PATTERN = Pattern.compile("^http[s]*://.*/write/measure$");
 
     private String login;
@@ -39,9 +45,9 @@ public class HttpStorageAgent extends StorageAgent {
 		}
 		
 		try {
-			super.setStorageConnection(new HttpStorageConnection(this.mediator, broker, login, password));
+			super.setStorageConnection(new HttpStorageConnection(broker, login, password));
 		} catch (IOException e) {
-			mediator.error(e);
+			logger.error(l -> l.error("Could not create HttpStorageConnection", e));
 			context.getComponentInstance().dispose();
 		}
 	}
