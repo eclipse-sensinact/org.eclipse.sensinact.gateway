@@ -213,10 +213,14 @@ public class JSONParser {
 					default:
 						break;
 				}
-				if(this.pathElements.length == _pathElements.length){
+				if(this.pathElements.length == _pathElements.length){					
 					if(!WILDCARD.equals(this.pathElements[this.lastIndex])
 						|| (!context.token.equals(JSONToken.JSON_ARRAY_OPENING) 
-							&& !context.token.equals(JSONToken.JSON_OBJECT_OPENING)))
+							&& !context.token.equals(JSONToken.JSON_OBJECT_OPENING)
+							&& (!context.token.equals(JSONToken.JSON_OBJECT_CLOSING) 
+									|| this.indexes.size()>0)
+							&& (!context.token.equals(JSONToken.JSON_ARRAY_CLOSING) 
+									|| this.indexes.size()>0)))
 					    this.complete = true;
 					else
 						this.builder = new StringBuilder();
@@ -453,7 +457,7 @@ public class JSONParser {
 			+ "\"key3\":{\"key30\":[{\"key300\":\"bidule\",\"key301\":[8,2,1]},[18,\"intermediate\"],\"standalone\",{\"key300\":\"chose\",\"key301\":[10,20,11]}]}}";
 		
 		List<Evaluation> extractions = new JSONParser(s).parse(
-			Arrays.asList("/key3/key30/[3]/key301","/key3/key30/[0]","/key3","/key3/key30/[2]","/key2/key20","/key2/key25","/key3/key30/[3]/key301/*"));
+			Arrays.asList("*","/key3/key30/[3]/key301","/key3/key30/[0]","/key3","/key3/key30/[2]","/key2/key20","/key2/key25","/key3/key30/[3]/key301/*"));
 		
 		extractions.stream().forEach(e->{System.out.println( e.path+ " : " + e.result);});		
 		
@@ -469,5 +473,21 @@ public class JSONParser {
 			}
 		};
 		new JSONParser(s).parse(Arrays.asList("key3/key30/[3]/key301/*", "/key3/key30/*", "/key3/key30/[0]/*", "/key3/*"), callback);	
+	
+		s = "[null,[\"machin\",\"chose\",2],{\"key20\":\"truc\",\"key21\":45},"
+		+ "{\"key30\":[{\"key300\":\"bidule\",\"key301\":[8,2,1]},[18,\"intermediate\"],\"standalone\",{\"key300\":\"chose\",\"key301\":[10,20,11]}]}]";
+		
+		callback = new JSONParserCallback() {
+			@Override
+			public void handle(Evaluation e) {
+				System.out.println("--------------------------------------------------------");
+				if(e == END_OF_PARSING)
+					System.out.println( "end of parsing");
+				else
+					System.out.println( e.path+ " : " + e.result);
+				System.out.println("--------------------------------------------------------");
+			}
+		};
+		new JSONParser(s).parse(Arrays.asList("*"), callback);		
 	}
 }
