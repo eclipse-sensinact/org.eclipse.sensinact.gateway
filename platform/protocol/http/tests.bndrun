@@ -56,7 +56,6 @@
 
 	
 -runbundles: \
-	json;version='[20190722.0.0,20190722.0.1)',\
 	junit-jupiter-api;version='[5.7.2,5.7.3)',\
 	junit-jupiter-engine;version='[5.7.2,5.7.3)',\
 	junit-platform-commons;version='[1.7.2,1.7.3)',\
@@ -79,4 +78,8 @@
 	org.osgi.util.pushstream;version='[1.0.1,1.0.2)',\
 	org.eclipse.jetty.security;version='[9.4.42,9.4.43)',\
 	org.eclipse.jetty.servlet;version='[9.4.42,9.4.43)',\
-	org.eclipse.jetty.util;version='[9.4.42,9.4.43)'
+	org.eclipse.jetty.util;version='[9.4.42,9.4.43)',\
+	ch.qos.logback.core;version='[1.2.3,1.2.4)',\
+	log4j;version='[1.2.17,1.2.18)',\
+	slf4j.api;version='[1.7.30,1.7.31)',\
+	slf4j.log4j12;version='[1.7.25,1.7.26)'

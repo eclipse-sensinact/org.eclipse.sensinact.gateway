@@ -70,7 +70,6 @@
 	
 -runbundles: \
 	ch.qos.logback.core;version='[1.2.3,1.2.4)',\
-	json;version='[20190722.0.0,20190722.0.1)',\
 	junit-jupiter-api;version='[5.7.2,5.7.3)',\
 	junit-jupiter-engine;version='[5.7.2,5.7.3)',\
 	junit-jupiter-params;version='[5.7.2,5.7.3)',\
@@ -84,7 +83,6 @@
 	org.mockito.mockito-core;version='[3.11.2,3.11.3)',\
 	org.objenesis;version='[3.2.0,3.2.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
-	org.osgi.service.cm;version='[1.6.0,1.6.1)',\
 	org.osgi.service.component;version='[1.4.0,1.4.1)',\
 	org.osgi.service.log;version='[1.4.0,1.4.1)',\
 	org.osgi.test.common;version='[1.0.1,1.0.2)',\
@@ -107,4 +105,6 @@
 	org.eclipse.sensinact.gateway.simulated.devices.button;version='[2.0.0,2.0.1)',\
 	org.eclipse.sensinact.gateway.simulated.devices.fan;version='[2.0.0,2.0.1)',\
 	org.eclipse.sensinact.gateway.simulated.devices.slider;version='[2.0.0,2.0.1)',\
-	org.apache.felix.framework.security;version='[2.8.1,2.8.2)'
+	org.apache.felix.framework.security;version='[2.8.1,2.8.2)',\
+	org.apache.felix.configadmin;version='[1.9.16,1.9.17)',\
+	org.apache.felix.log;version='[1.2.2,1.2.3)'

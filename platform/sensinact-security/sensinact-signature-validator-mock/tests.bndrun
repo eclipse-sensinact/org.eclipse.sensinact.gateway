@@ -65,12 +65,15 @@
 	org.apache.felix.scr;version='[2.1.16,2.1.17)',\
 	org.osgi.test.common;version='[1.0.1,1.0.2)',\
 	org.osgi.test.junit5;version='[1.0.1,1.0.2)',\
-	json;version='[20190722.0.0,20190722.0.1)',\
 	org.eclipse.sensinact.gateway.sensinact-common;version='[2.0.0,2.0.1)',\
 	org.eclipse.sensinact.gateway.sensinact-signature-validator-api;version='[2.0.0,2.0.1)',\
 	org.eclipse.sensinact.gateway.sensinact-signature-validator-mock;version='[2.0.0,2.0.1)',\
 	org.eclipse.sensinact.gateway.sensinact-signature-validator-mock-tests;version='[2.0.0,2.0.1)',\
-	org.eclipse.sensinact.gateway.sensinact-utils;version='[2.0.0,2.0.1)'
+	org.eclipse.sensinact.gateway.sensinact-utils;version='[2.0.0,2.0.1)',\
+	ch.qos.logback.core;version='[1.2.3,1.2.4)',\
+	log4j;version='[1.2.17,1.2.18)',\
+	slf4j.api;version='[1.7.30,1.7.31)',\
+	slf4j.log4j12;version='[1.7.25,1.7.26)'
 	
 -runvm.test: \
 	-Dorg.eclipse.sensinact.gateway.security.jks.filename=${sensinact.root.dir}/platform/sensinact-security/cert/keystore.jks, \

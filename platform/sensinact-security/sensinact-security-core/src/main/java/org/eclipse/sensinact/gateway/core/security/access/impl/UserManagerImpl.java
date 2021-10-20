@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.core.security.access.impl;
 
 import java.lang.reflect.Method;
 import java.security.InvalidKeyException;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -28,18 +29,30 @@ import org.eclipse.sensinact.gateway.core.security.dao.UserDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.UserEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.log.Logger;
+import org.osgi.service.log.LoggerFactory;
 
 /**
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
+@Component
 public class UserManagerImpl implements UserManager {
 	
 	private Mediator mediator;
 	private UserDAO userDAO;
 	private UserEntity anonymous;
 
+	@Reference
+	private SecurityDataStoreService dataStoreService;
+	
+	@Reference(service = LoggerFactory.class)
+	private Logger logger;
+	
 	/**
 	 * 
 	 * @param mediator
@@ -47,34 +60,22 @@ public class UserManagerImpl implements UserManager {
 	 * @throws DAOException
 	 * 
 	 */
-	public UserManagerImpl(Mediator mediator) throws SecuredAccessException {
-		this.mediator = mediator;
+	@Activate
+	public UserManagerImpl(BundleContext context) throws SecuredAccessException {
+		this.mediator = new Mediator(context);
+		this.userDAO = new UserDAO(mediator, dataStoreService);
+
 		try {
-			ServiceReference<SecurityDataStoreService> reference = this.mediator.getContext(
-					).getServiceReference(SecurityDataStoreService.class);
-			this.userDAO = new UserDAO(mediator, this.mediator.getContext().getService(reference));
 			anonymous = userDAO.find(ANONYMOUS_ID);
 		} catch (DataStoreException | NullPointerException | IllegalArgumentException e) {
-			mediator.error(e);
+			logger.error("Could not load anonymous user for %s", ANONYMOUS_ID, e);
 			throw new SecuredAccessException(e);
-		}
-	}
-
-	public void finalize() {
-		this.userDAO = null;
-		try {
-			ServiceReference<SecurityDataStoreService> reference = this.mediator.getContext(
-				).getServiceReference(SecurityDataStoreService.class);
-			this.mediator.getContext().ungetService(reference);
-		} catch (NullPointerException | IllegalArgumentException e) {
-			mediator.error(e);
 		}
 	}
 
 	@Override
 	public boolean loginExists(final String login) throws SecuredAccessException, DataStoreException {
-		return this.userDAO.select(new HashMap<String, Object>() {{
-				this.put("SULOGIN", login);}}).size()>0;
+		return this.userDAO.select(Collections.singletonMap("SULOGIN", login)).size()>0;
 	}
 
 	@Override
