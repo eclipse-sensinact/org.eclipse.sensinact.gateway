@@ -62,7 +62,6 @@
 	mail.account.connector.from=sensinact@bigclout.eu,\
 	mail.account.connector.login=cmunilla@server.fr,\
 	mail.account.connector.password=478569LM,\
-	org.eclipse.sensinact.gateway.security.database=${.}/../sensinact-security-core/src/test/resources/sensinact.sqlite,\
 	sqlitedb=${.}/src/test/resources/sensinact.sqlite
 	
 -runbundles: \
@@ -108,4 +107,8 @@
 	org.eclipse.jetty.websocket.client;version='[9.4.42,9.4.43)',\
 	org.eclipse.sensinact.gateway.sensinact-security-test-tests;version='[2.0.0,2.0.1)',\
 	org.apache.felix.configadmin;version='[1.9.16,1.9.17)',\
-	org.apache.felix.log;version='[1.2.2,1.2.3)'
+	org.apache.felix.log;version='[1.2.2,1.2.3)',\
+	net.bytebuddy.byte-buddy;version='[1.11.3,1.11.4)',\
+	net.bytebuddy.byte-buddy-agent;version='[1.11.3,1.11.4)',\
+	org.mockito.mockito-core;version='[3.11.2,3.11.3)',\
+	org.objenesis;version='[3.2.0,3.2.1)'

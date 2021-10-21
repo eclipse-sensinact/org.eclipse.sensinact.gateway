@@ -77,7 +77,6 @@ import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
-import org.eclipse.sensinact.gateway.core.security.SecurityDataStoreServiceFactory;
 import org.eclipse.sensinact.gateway.core.security.SessionToken;
 import org.eclipse.sensinact.gateway.core.security.User;
 import org.eclipse.sensinact.gateway.core.security.UserKey;
@@ -1192,18 +1191,6 @@ public class SensiNact implements Core {
 			throw new ConcurrentModificationException("Permissions changed during update");
 		
 		SecuredAccess securedAccess = null;
-		ServiceLoader<SecurityDataStoreServiceFactory> dataStoreServiceFactoryLoader = 
-			ServiceLoader.load(SecurityDataStoreServiceFactory.class, mediator.getClassLoader());
-
-		Iterator<SecurityDataStoreServiceFactory> dataStoreServiceFactoryIterator = 
-			dataStoreServiceFactoryLoader.iterator();
-
-		if (dataStoreServiceFactoryIterator.hasNext()) {
-			SecurityDataStoreServiceFactory<?> factory = dataStoreServiceFactoryIterator.next();
-			if (factory != null) 
-				factory.newInstance(mediator);
-		}
-		
 		ServiceLoader<UserKeyBuilderFactory> userKeyBuilderFactoryLoader = ServiceLoader.load(UserKeyBuilderFactory.class,
 			mediator.getClassLoader());	
 				

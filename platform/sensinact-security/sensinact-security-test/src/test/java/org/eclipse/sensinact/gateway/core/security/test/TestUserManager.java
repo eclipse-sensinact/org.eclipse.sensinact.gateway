@@ -33,6 +33,7 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService;
+import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService.SQLLiteConfig;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
@@ -42,6 +43,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectBundleContext;
@@ -118,8 +120,9 @@ public class TestUserManager {
 	    Files.copy(originalPath, copied, StandardCopyOption.REPLACE_EXISTING);
 		
 		mediator = new Mediator(context);
-		mediator.setProperty("org.eclipse.sensinact.gateway.security.database", tempDB.getAbsolutePath());
-		dataStoreService = new SQLiteDataStoreService(mediator);
+		SQLLiteConfig sqlLiteConfig = Mockito.mock(SQLiteDataStoreService.SQLLiteConfig.class);
+		Mockito.when(sqlLiteConfig.database()).thenReturn(tempDB.getAbsolutePath());
+		dataStoreService = new SQLiteDataStoreService(context, sqlLiteConfig);
 	}
 	
 	@AfterEach

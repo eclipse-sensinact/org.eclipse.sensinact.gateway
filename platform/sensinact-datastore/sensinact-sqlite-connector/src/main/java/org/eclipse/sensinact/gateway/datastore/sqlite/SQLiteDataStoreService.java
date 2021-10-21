@@ -21,11 +21,19 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreConnectionProvider;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.jdbc.JdbcDataStoreService;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 /**
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
+@Component(name = SQLiteDataStoreService.COMPONENT_NAME, property = {"org.eclipse.sensinact.data.store.provider=jdbc", "org.eclipse.sensinact.data.store.sgbd=sqlite"}, configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Designate(ocd = SQLiteDataStoreService.SQLLiteConfig.class)
 public class SQLiteDataStoreService extends JdbcDataStoreService 
 implements SecurityDataStoreService{
 	
@@ -41,28 +49,38 @@ implements SecurityDataStoreService{
 	// STATIC DECLARATIONS //
 	// ********************************************************************//
 
+	public static final String COMPONENT_NAME = "SQLiteDataStoreService"; 
+	
+	@ObjectClassDefinition
+	public static @interface SQLLiteConfig{
+		
+		String PREFIX_ = "org.eclipse.sensinact.gateway.security";
+		
+		String database();
+	}
+	
 	// ********************************************************************//
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
 
 	private SQLiteConnectionProvider provider;
-	private long lastInsertedId = -1;
 
+	
 	/**
 	 * @param mediator
 	 * @param dbName
 	 * @throws UnableToFindDataStoreException
 	 * @throws UnableToConnectToDataStoreException
 	 */
-	public SQLiteDataStoreService(Mediator mediator)
+	@Activate
+	public SQLiteDataStoreService(BundleContext context, SQLLiteConfig config)
 			throws UnableToFindDataStoreException, UnableToConnectToDataStoreException {
-		super(mediator);
-		start();
+		super(new Mediator(context));
+		start(config);
 	}
 
-	public void start() throws UnableToConnectToDataStoreException, UnableToFindDataStoreException {
-		String dbName = (String) mediator.getProperty("org.eclipse.sensinact.gateway.security.database");
-		this.provider = new SQLiteConnectionProvider(mediator, dbName);
+	public void start(SQLLiteConfig config) throws UnableToConnectToDataStoreException, UnableToFindDataStoreException {
+		this.provider = new SQLiteConnectionProvider(mediator, config.database());
 	}
 	
 	/**
