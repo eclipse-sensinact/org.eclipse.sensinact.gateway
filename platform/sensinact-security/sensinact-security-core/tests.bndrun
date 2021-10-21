@@ -63,7 +63,6 @@
 	mail.account.connector.from=sensinact@bigclout.eu,\
 	mail.account.connector.login=cmunilla@server.fr,\
 	mail.account.connector.password=478569LM,\
-	org.eclipse.sensinact.gateway.security.database=${.}/src/test/resources/sensinact.sqlite,\
 	sqlitedb=${.}/src/test/resources/sensinact.sqlite
 	
 	

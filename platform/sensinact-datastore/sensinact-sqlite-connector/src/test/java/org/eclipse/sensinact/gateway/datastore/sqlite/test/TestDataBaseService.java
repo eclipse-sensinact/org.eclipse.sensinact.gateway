@@ -20,6 +20,7 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService;
+import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService.SQLLiteConfig;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
@@ -46,12 +47,14 @@ public class TestDataBaseService {
 
 	private SQLiteDataStoreService dataService;
 	private Mediator mediator;
+	private SQLLiteConfig config;
 
 	@BeforeEach
 	public void init() throws Exception {
 		context = Mockito.mock(BundleContext.class);
 		bundle = Mockito.mock(Bundle.class);
 		reference = Mockito.mock(ServiceReference.class);
+		config = Mockito.mock(SQLiteDataStoreService.SQLLiteConfig.class);
 
 		Mockito.when(bundle.getSymbolicName()).thenReturn(MOCK_BUNDLE_NAME);
 		Mockito.when(bundle.getBundleId()).thenReturn(MOCK_BUNDLE_ID);
@@ -62,9 +65,9 @@ public class TestDataBaseService {
 		mediator = createMediator();
 
 		Mockito.when(mediator.getContext()).thenReturn(context);
-		Mockito.when(mediator.getProperty(Mockito.eq("org.eclipse.sensinact.gateway.security.database")))
+		Mockito.when(config.database())
 				.thenReturn(TEST_DATABASE_PATH);
-		dataService = new SQLiteDataStoreService(mediator);
+		dataService = new SQLiteDataStoreService(context, config);
 		assertNotNull(dataService);
 
 	}
@@ -72,12 +75,12 @@ public class TestDataBaseService {
 	@Test
 	public void testOpenConnectionFail()
 			throws DataStoreException, UnableToConnectToDataStoreException, UnableToFindDataStoreException {
-		Mockito.when(mediator.getProperty(Mockito.eq("org.eclipse.sensinact.gateway.security.database")))
+		Mockito.when(config.database())
 				.thenReturn(FAKE_DATABASE_PATH);
 	
 		Assertions.assertThrows(UnableToFindDataStoreException.class,()->{
 			
-		dataService = new SQLiteDataStoreService(mediator);
+		dataService = new SQLiteDataStoreService(context, config);
 		});
 	
 	}

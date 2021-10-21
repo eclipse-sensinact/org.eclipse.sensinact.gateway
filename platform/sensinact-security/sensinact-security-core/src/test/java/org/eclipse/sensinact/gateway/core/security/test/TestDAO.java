@@ -47,6 +47,7 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService;
+import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService.SQLLiteConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -193,8 +194,9 @@ public class TestDAO {
 	    Path originalPath = Paths.get(dbPath);
 	    System.err.println("orignal - " + originalPath.toFile().getAbsolutePath());
 	    Files.copy(originalPath, copied, StandardCopyOption.REPLACE_EXISTING);
-		mediator.setProperty("org.eclipse.sensinact.gateway.security.database", tempDB.getAbsolutePath());
-		dataStoreService = new SQLiteDataStoreService(mediator);
+	    SQLLiteConfig sqlLiteConfig = Mockito.mock(SQLiteDataStoreService.SQLLiteConfig.class);
+		Mockito.when(sqlLiteConfig.database()).thenReturn(tempDB.getAbsolutePath());
+		dataStoreService = new SQLiteDataStoreService(context, sqlLiteConfig);
 	}
 	
 
