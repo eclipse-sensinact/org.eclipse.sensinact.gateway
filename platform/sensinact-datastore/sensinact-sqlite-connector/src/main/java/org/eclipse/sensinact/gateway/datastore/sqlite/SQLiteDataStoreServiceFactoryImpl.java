@@ -19,6 +19,9 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService;
 import org.eclipse.sensinact.gateway.core.security.SecurityDataStoreServiceFactory;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
+import org.osgi.annotation.bundle.Capability;
+import org.osgi.namespace.service.ServiceNamespace;
 
 import aQute.bnd.annotation.Resolution;
 import aQute.bnd.annotation.spi.ServiceProvider;
@@ -27,6 +30,7 @@ import aQute.bnd.annotation.spi.ServiceProvider;
  * Factory of {@link DataStoreService}
  */
 @ServiceProvider(value = SecurityDataStoreServiceFactory.class, resolution = Resolution.OPTIONAL)
+@Capability(namespace = ServiceNamespace.SERVICE_NAMESPACE, attribute = "objectClass=org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService")
 public class SQLiteDataStoreServiceFactoryImpl implements SecurityDataStoreServiceFactory<SQLiteDataStoreService> {
 	/**
 	 * @inheritDoc

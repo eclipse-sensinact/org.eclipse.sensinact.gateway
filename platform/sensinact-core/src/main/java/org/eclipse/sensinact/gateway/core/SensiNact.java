@@ -72,19 +72,18 @@ import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.AccountConnector;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.core.security.UserKeyBuilder;
-import org.eclipse.sensinact.gateway.core.security.UserKeyBuilderFactory;
-import org.eclipse.sensinact.gateway.core.security.SessionToken;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
 import org.eclipse.sensinact.gateway.core.security.SecurityDataStoreServiceFactory;
+import org.eclipse.sensinact.gateway.core.security.SessionToken;
 import org.eclipse.sensinact.gateway.core.security.User;
 import org.eclipse.sensinact.gateway.core.security.UserKey;
+import org.eclipse.sensinact.gateway.core.security.UserKeyBuilder;
+import org.eclipse.sensinact.gateway.core.security.UserKeyBuilderFactory;
 import org.eclipse.sensinact.gateway.core.security.UserManager;
-import org.eclipse.sensinact.gateway.core.security.UserManagerFactory;
 import org.eclipse.sensinact.gateway.core.security.UserUpdater;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
@@ -1204,18 +1203,7 @@ public class SensiNact implements Core {
 			if (factory != null) 
 				factory.newInstance(mediator);
 		}
-		ServiceLoader<UserManagerFactory> userManagerFactoryLoader = ServiceLoader.load(
-			UserManagerFactory.class, mediator.getClassLoader());
-
-		Iterator<UserManagerFactory> userManagerFactoryIterator = userManagerFactoryLoader.iterator();
-
-		while (userManagerFactoryIterator.hasNext()) {
-			UserManagerFactory factory = userManagerFactoryIterator.next();
-			if (factory != null) {
-				factory.newInstance(mediator);
-				break;
-			}
-		}
+		
 		ServiceLoader<UserKeyBuilderFactory> userKeyBuilderFactoryLoader = ServiceLoader.load(UserKeyBuilderFactory.class,
 			mediator.getClassLoader());	
 				
