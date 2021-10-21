@@ -10,6 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.factory.packet;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +36,7 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 	
 	static final Logger LOG = LoggerFactory.getLogger(HttpMappingPacket.class);
 
+	static final String TIMESTAMP = "::timestamp::";
 	static final String PROVIDER_IDENTIFIER = "::provider::";
 	static final String PROVIDER_IDENTIFIER_REGEX = "::(provider)::\\[([0-9])\\]";
 	static final String PROVIDER_IDENTIFIER_JOIN = ":";
@@ -44,7 +48,8 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 	protected int index;
 
 	protected String serviceProviderMapping = null;
-	protected String serviceProviderIdPattern = null;	
+	protected String serviceProviderIdPattern = null;
+	protected String timestampPattern = null;	
 	protected String serviceProviderId = null;
 
 	protected Map<String,String> modelMapping;
@@ -59,6 +64,11 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 	protected String resourceId = null;
 	protected String attributeId = null;
 	protected String metadataId = null;
+
+	protected long timestampValue;
+	protected long timestamp;
+
+	private SimpleDateFormat timestampFormat;
 	
 	/**
 	 * Constructor
@@ -114,6 +124,20 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 	public void setServiceProviderIdPattern(String serviceProviderIdPattern) {
 		this.serviceProviderIdPattern = serviceProviderIdPattern;
 	}
+	
+	/**
+	 * Defines the timestamp pattern applying
+	 * 
+	 * @param timestampPattern the timestamp pattern to set
+	 */
+	public void setTimestampPattern(String timestampPattern) {
+		this.timestampPattern = timestampPattern;
+		try {
+			this.timestampFormat = new SimpleDateFormat(this.timestampPattern); 
+		} catch(Exception e) {
+			LOG.error(e.getMessage(),e);
+		}
+	}
 		
 	protected String reverseModelMapping(String mapping) {
 	    Optional<Entry<String, String>> entry = this.modelMapping.entrySet(
@@ -157,16 +181,44 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 						return Integer.valueOf(v1).compareTo(Integer.valueOf(v2));
 					} else 
 						return 0;}
-				).<StringBuilder>collect( StringBuilder::new,
-						(s,e)->{
-							if(s.length() > 0)
-								s.append(PROVIDER_IDENTIFIER_JOIN);
-							s.append(resultMapping.get(e.getKey()));},
-						(sb1,sb2)->{sb1.append(sb2.toString());}).toString();
+				).<StringBuilder>collect( 
+					StringBuilder::new,
+					(s,e)->{
+						String id = resultMapping.get(e.getKey());
+						if(id.startsWith("\"") && id.endsWith("\""))
+							id = id.replace('"', ' ').trim();
+						if(id.startsWith("'") && id.endsWith("'"))
+							id = id.replace('\'', ' ').trim();
+						if(s.length() > 0)
+							s.append(PROVIDER_IDENTIFIER_JOIN);
+						s.append(id);
+					},
+					(sb1,sb2)->{sb1.append(sb2.toString());}).toString();
 	    }catch(Exception e) {
 	    	LOG.error(e.getMessage(),e);
 	    }
 	    return identifier;
+	}
+
+	protected long findTimestamp() {
+		long l = 0;		
+		String timestampPath = this.modelMapping.get(TIMESTAMP);
+		if(timestampPath == null)
+			return l;		
+		String resultTimestamp = this.resultMapping.get(timestampPath);
+		try {
+			l = Long.parseLong(resultTimestamp);
+		} catch(IllegalArgumentException e) {
+			if(this.timestampFormat != null) {
+				try {
+					Date d = this.timestampFormat.parse(resultTimestamp);
+					l = d.getTime();
+				} catch(ParseException ex) {
+					LOG.error(ex.getMessage(),e);
+				}
+			}
+		}
+	    return l;
 	}
 	
 	private void iterate() {
@@ -191,7 +243,10 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 		iterate();
 		String path = current.getValue();		
     	while(true) { 
-    		if(path!=null && !path.startsWith(PROVIDER_IDENTIFIER) && !path.startsWith("__"))
+    		if(path!=null && 
+    			!TIMESTAMP.equals(path) && 
+    			!path.startsWith(PROVIDER_IDENTIFIER) && 
+    			!path.startsWith("__"))
     			break;
     		iterate();
     		path = current.getValue(); 
@@ -218,12 +273,20 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 			attributeId = pathElements[2];
 		if(pathElements.length > 3)
 			metadataId = pathElements[3];
-
+		
+		this.timestamp = 0;		
+		if(this.timestampValue > 0)
+			this.timestamp = this.timestampValue;
+		else {
+			this.timestampValue = this.findTimestamp();
+			this.timestamp = this.timestampValue;
+		}		
 		if(index > 0)
 			return false;
 		
 		index=1;
 		this.resultMapping = getEvent();
+		this.timestampValue = 0;
 		return this.resultMapping == null;
 	}
 
@@ -286,5 +349,11 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 	    	return Boolean.parseBoolean(value);
 	    else 
 	    	return Double.parseDouble(value);
+	}
+
+	protected long getTimestamp() {
+		if(this.timestamp == 0)
+			return System.currentTimeMillis();
+		return this.timestamp;
 	}
 }

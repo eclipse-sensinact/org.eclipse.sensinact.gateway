@@ -24,6 +24,7 @@ import org.eclipse.sensinact.gateway.generic.packet.annotation.MetadataID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.ResourceID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.Timestamp;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponsePacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.config.MappingDescription;
@@ -156,6 +157,11 @@ public class HttpRootMappingPacket extends HttpMappingPacket<RootMappingDescript
 	@Data
 	public Object getData() {
 		return super.getData();
+	}
+
+	@Timestamp
+	public long getTimestamp() {
+		return super.getTimestamp();
 	}
 		
 }

@@ -28,6 +28,7 @@ import org.xml.sax.SAXException;
 public class HttpMappingProtocolStackEndpoint extends SimpleHttpProtocolStackEndpoint {
 
 	private String serviceProviderIdPattern;
+	private String timestampPattern;
 
 	/**
 	 * Constructor
@@ -47,6 +48,10 @@ public class HttpMappingProtocolStackEndpoint extends SimpleHttpProtocolStackEnd
 
 	public void setServiceProviderIdPattern(String serviceProviderIdPattern) {
 		this.serviceProviderIdPattern = serviceProviderIdPattern;
+	}
+
+	public void setTimestampPattern(String timestampPattern) {
+		this.timestampPattern = timestampPattern;
 	}
 	
     @Override
@@ -86,6 +91,7 @@ public class HttpMappingProtocolStackEndpoint extends SimpleHttpProtocolStackEnd
                 ((HttpMappingPacket) packet).setMapping(mappings);
                 
                 ((HttpMappingPacket) packet).setServiceProviderIdPattern(serviceProviderIdPattern);
+                ((HttpMappingPacket) packet).setTimestampPattern(timestampPattern);
                 
             	if(_task.getCommand()!=null) {
             		String serviceProviderId = ((HttpMediator)super.mediator).resolve(

@@ -48,6 +48,9 @@ public class HttpMappingProtocolStackEndpointDescription {
 
 	@JsonProperty(value="serviceProviderIdPattern")
 	private String serviceProviderIdPattern;
+
+	@JsonProperty(value="timestampPattern")
+	private String timestampPattern;
 	
 	public HttpMappingProtocolStackEndpointDescription() {}
 	
@@ -59,7 +62,8 @@ public class HttpMappingProtocolStackEndpointDescription {
 			Map<String,String> defaults,
 			String[] resourceBuildPolicy, 
 			String[] serviceBuildPolicy,
-			String serviceProviderIdPattern) {
+			String serviceProviderIdPattern,
+			String timestampPattern) {
 		this.startAtInitializationTime = startAtInitializationTime;
 		this.startAtInitializationTimeSet = true;
 		this.packetTypeName = packetTypeName;
@@ -69,6 +73,7 @@ public class HttpMappingProtocolStackEndpointDescription {
 		this.resourceBuildPolicy = resourceBuildPolicy;
 		this.serviceBuildPolicy = serviceBuildPolicy;
 		this.serviceProviderIdPattern = serviceProviderIdPattern;
+		this.timestampPattern = timestampPattern;
 	}
 
 	/**
@@ -197,5 +202,19 @@ public class HttpMappingProtocolStackEndpointDescription {
 	 */
 	public void setServiceProviderIdPattern(String serviceProviderIdPattern) {
 		this.serviceProviderIdPattern = serviceProviderIdPattern;
+	}
+
+	/**
+	 * @return the timestampPattern
+	 */
+	public String getTimestampPattern() {
+		return timestampPattern;
+	}
+
+	/**
+	 * @param timestampPattern the timestampPattern to set
+	 */
+	public void setTimestampPattern(String timestampPattern) {
+		this.timestampPattern = timestampPattern;
 	}
 }
