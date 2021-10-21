@@ -131,6 +131,8 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 	 * @param timestampPattern the timestamp pattern to set
 	 */
 	public void setTimestampPattern(String timestampPattern) {
+		if(timestampPattern == null)
+			return;
 		this.timestampPattern = timestampPattern;
 		try {
 			this.timestampFormat = new SimpleDateFormat(this.timestampPattern); 
@@ -155,10 +157,7 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 			try {
 				String pathVariable = variable.substring(startVariable + 2, endVariable);
 				String pathResult = resultMapping.get(reverseModelMapping(String.format("__%s", pathVariable)));
-				if(pathResult.startsWith("\"") && pathResult.endsWith("\""))
-					pathResult = pathResult.replace('"', ' ').trim();
-				if(pathResult.startsWith("'") && pathResult.endsWith("'"))
-					pathResult = pathResult.replace('\'', ' ').trim();
+				pathResult = Formatter.removeQuotes(pathResult);
 				variable = String.format("%s%s%s", expression.substring(0,startVariable), pathResult, expression.substring(endVariable+1));
 			} catch (Exception e) {
 				LOG.error(e.getMessage(),e);
@@ -166,7 +165,24 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
     	}
     	return variable;
 	}
-	
+
+	protected String resolveValue(String key) {		
+		Matcher matcher = CONCATENATION_FUNCTION_PATTERN.matcher(key);
+		if(matcher.matches()) {
+			String argument = matcher.group(2);
+			String[] arguments = argument.split(",");
+			StringBuilder builder = new StringBuilder();
+			for(int i =0;i<arguments.length;i++) {
+				String s = substitute(arguments[i]).trim();
+				s = Formatter.removeQuotes(s);
+				builder.append(s);
+			}
+			return builder.toString();
+ 		}
+    	return resultMapping.get(key);
+	}
+
+
 	protected String buildProviderId() {
 	    String identifier = null;
 	    try {
@@ -185,10 +201,7 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 					StringBuilder::new,
 					(s,e)->{
 						String id = resultMapping.get(e.getKey());
-						if(id.startsWith("\"") && id.endsWith("\""))
-							id = id.replace('"', ' ').trim();
-						if(id.startsWith("'") && id.endsWith("'"))
-							id = id.replace('\'', ' ').trim();
+						id = Formatter.formatProviderId(id);
 						if(s.length() > 0)
 							s.append(PROVIDER_IDENTIFIER_JOIN);
 						s.append(id);
@@ -200,14 +213,29 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 	    return identifier;
 	}
 
-	protected long findTimestamp() {
+	protected long resolveTimestamp() {
 		long l = 0;		
-		String timestampPath = this.modelMapping.get(TIMESTAMP);
+		String timestampPath = this.reverseModelMapping(TIMESTAMP);
 		if(timestampPath == null)
-			return l;		
-		String resultTimestamp = this.resultMapping.get(timestampPath);
+			return l;
+		String resultTimestamp = this.resolveValue(timestampPath);
 		try {
 			l = Long.parseLong(resultTimestamp);
+			String lstr = String.valueOf(l);
+			switch(lstr.length()) {
+			case 10:
+				l = l*1000;
+			case 13:
+				break;
+			case 16:
+				l = l/1000;
+				break;
+			case 19:
+				l = l/1000000;
+				break;
+			default:
+				throw new IllegalArgumentException();
+			}			
 		} catch(IllegalArgumentException e) {
 			if(this.timestampFormat != null) {
 				try {
@@ -278,7 +306,7 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 		if(this.timestampValue > 0)
 			this.timestamp = this.timestampValue;
 		else {
-			this.timestampValue = this.findTimestamp();
+			this.timestampValue = this.resolveTimestamp();
 			this.timestamp = this.timestampValue;
 		}		
 		if(index > 0)
@@ -325,26 +353,13 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 	protected Object getData() {
 		if(resultMapping == null || this.current ==null)
 			return null;
-		Matcher matcher =CONCATENATION_FUNCTION_PATTERN.matcher(this.current.getKey());
-		if(matcher.matches()) {
-			String argument = matcher.group(2);
-			String[] arguments = argument.split(",");
-			StringBuilder builder = new StringBuilder();
-			for(int i =0;i<arguments.length;i++) {
-					String s = substitute(arguments[i]).trim();
-					if(s.startsWith("\"") && s.endsWith("\""))
-						s = s.replace('"', ' ').trim();
-					if(s.startsWith("'") && s.endsWith("'"))
-						s = s.replace('\'', ' ').trim();
-					builder.append(s);
-			}
-			return builder.toString();
- 		}
-		String value = resultMapping.get(this.current.getKey());
+		String value = resolveValue(this.current.getKey());
 		if(value == null)
 			return null;
-		if(value.startsWith("\"") && value.endsWith("\""))
-			return value.replace('"', ' ').trim();
+		if(value.startsWith("\"") && value.endsWith("\"")) {
+			value = Formatter.removeQuotes(value);
+			return value;
+		}
 	    else if("TRUE".equals(value.toUpperCase()) || "FALSE".equals(value.toUpperCase()))
 	    	return Boolean.parseBoolean(value);
 	    else 
