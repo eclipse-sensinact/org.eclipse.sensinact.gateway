@@ -12,11 +12,15 @@ package org.eclipse.sensinact.gateway.common.bundle;
 
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.osgi.service.log.LogService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 final class LogExecutor implements Executable<LogService, Void> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(LogExecutor.class);
     private int level;
     private Throwable throwable;
     private String message;

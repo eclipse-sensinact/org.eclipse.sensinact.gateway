@@ -14,6 +14,8 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -33,7 +35,8 @@ class MediatorManagedConfiguration implements ManagedService {
     //********************************************************************//
     //						STATIC DECLARATIONS							  //
     //********************************************************************//
-
+	
+	private static final Logger LOG = LoggerFactory.getLogger(MediatorManagedConfiguration.class);
     public static final String MANAGED_SENSINACT_MODULE = "org.eclipse.sensinact.gateway.managed";
     //********************************************************************//
     //						INSTANCE DECLARATIONS						  //
@@ -120,7 +123,7 @@ class MediatorManagedConfiguration implements ManagedService {
             this.registration.unregister();
 
         } catch (IllegalStateException e) {
-            this.mediator.error(e.getMessage());
+            LOG.error(e.getMessage());
         }
     }
 
