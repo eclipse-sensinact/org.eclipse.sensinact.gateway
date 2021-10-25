@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.security.signature.internal;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -30,6 +32,8 @@ import java.util.jar.Manifest;
  * @author pierre parrend
  */
 public class SignatureFile {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(SignatureFile.class);
     private Attributes mainAttributes = null;
     private Map<String, Attributes> resourcesEntries = null;
     private byte[] data;
@@ -65,7 +69,7 @@ public class SignatureFile {
 
     public final Attributes getMainAttributes() {
         if (mainAttributes == null) {
-            mediator.warn("SignatureFile main Attributes not initialized");
+            LOG.warn("SignatureFile main Attributes not initialized");
         }
         return mainAttributes;
     }
@@ -75,8 +79,8 @@ public class SignatureFile {
     }
 
     public final Map<String, Attributes> getEntries() {
-        if (resourcesEntries == null && mediator.isWarningLoggable()) {
-            mediator.warn("SignatureFile entries not initialized");
+        if (resourcesEntries == null && LOG.isWarnEnabled()) {
+            LOG.warn("SignatureFile entries not initialized");
         }
         return resourcesEntries;
     }
@@ -102,8 +106,8 @@ public class SignatureFile {
      * @return hashValue
      */
     public String getManifestHash() {
-        if (this.mediator.isDebugLoggable()) {
-            this.mediator.debug("Looking for Manifest hash header [%s]", this.hashHeader);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Looking for Manifest hash header [%s]", this.hashHeader);
         }
         return mainAttributes.getValue(this.hashHeader);
     }
@@ -143,24 +147,24 @@ public class SignatureFile {
     }
 
     public void show() {
-        if (this.mediator.isDebugLoggable()) {
-            this.mediator.debug("SignatureFile.show");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("SignatureFile.show");
         }
         Map.Entry entry;
         String value;
         // mainAttributes
         for (final Iterator iter = mainAttributes.entrySet().iterator(); iter.hasNext(); ) {
             entry = (Map.Entry) iter.next();
-            if (this.mediator.isDebugLoggable()) {
-                this.mediator.debug(entry.getKey() + ", " + entry.getValue());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(entry.getKey() + ", " + entry.getValue());
             }
         }
         // resourcesEntries
         for (final Iterator iter = resourcesEntries.entrySet().iterator(); iter.hasNext(); ) {
             entry = (Map.Entry) iter.next();
             value = (String) ((Map.Entry) ((Attributes) entry.getValue()).entrySet().iterator().next()).getValue();
-            if (this.mediator.isDebugLoggable()) {
-                this.mediator.debug(entry.getKey() + ", " + value);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(entry.getKey() + ", " + value);
             }
         }
     }

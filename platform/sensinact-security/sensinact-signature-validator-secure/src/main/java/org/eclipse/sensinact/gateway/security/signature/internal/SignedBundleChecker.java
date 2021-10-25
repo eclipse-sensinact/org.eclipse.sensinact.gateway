@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.security.signature.internal;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.security.signature.exception.BundleValidationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -27,6 +29,8 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
 public class SignedBundleChecker {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(SignedBundleChecker.class);
     private static final String METADATA_DIR = "/META-INF/";
     private static final String MF_FILE = "MANIFEST.MF";
     Mediator mediator;
@@ -59,24 +63,24 @@ public class SignedBundleChecker {
         boolean signatureFileValid = false;
         boolean signatureBlockValid = false;
         resourcesOrderValid = this.checkResourcesOrderValid(signedJar);
-        if (this.mediator.isInfoLoggable()) {
-            this.mediator.info("resourcesOrderValid " + resourcesOrderValid);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("resourcesOrderValid " + resourcesOrderValid);
         }
         signatureBlockValid = this.checkSignatureBlockValidity(signedJar, signer, cryptoUtils, algo);
-        if (this.mediator.isInfoLoggable()) {
-            this.mediator.info("signatureBlockValid " + signatureBlockValid);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("signatureBlockValid " + signatureBlockValid);
         }
         signatureFileValid = this.checkSignatureFileValidity(signedJar, signer, cryptoUtils);
-        if (this.mediator.isInfoLoggable()) {
-            this.mediator.info("signatureFileValid " + signatureFileValid);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("signatureFileValid " + signatureFileValid);
         }
         manifestValid = this.checkManifestValidity(signedJar, cryptoUtils);
-        if (this.mediator.isWarningLoggable()) {
-            this.mediator.info("manifestValid " + manifestValid);
+        if (LOG.isWarnEnabled()) {
+            LOG.info("manifestValid " + manifestValid);
         }
         coherent = resourcesOrderValid && signatureBlockValid && signatureFileValid && manifestValid;
-        if (this.mediator.isWarningLoggable()) {
-            this.mediator.info("coherent " + coherent);
+        if (LOG.isWarnEnabled()) {
+            LOG.info("coherent " + coherent);
         }
         return coherent;
     }
@@ -84,28 +88,28 @@ public class SignedBundleChecker {
     protected boolean checkSignatureBlockValidity(final SignatureFile sigFile, final SignatureBlock block, final X509Certificate cert, final CryptographicUtils cryptoUtils, String algo) throws Exception {
         boolean blockValidity = false;
         if (cert == null) {
-            if (this.mediator.isWarningLoggable()) {
-                this.mediator.info("SignedJarFile.checkSignatureBlockValidity, no cert found");
+            if (LOG.isWarnEnabled()) {
+                LOG.info("SignedJarFile.checkSignatureBlockValidity, no cert found");
             }
         } else {
-            if (this.mediator.isWarningLoggable()) {
-                this.mediator.info("SignedJarFile.checkSignatureBlockValidity, cert found");
+            if (LOG.isWarnEnabled()) {
+                LOG.info("SignedJarFile.checkSignatureBlockValidity, cert found");
             }
             // check time validity of PK Certificate
             // raises a CertificateException if not valid
             cert.checkValidity();
             // check coherence between the signatureFile and the signature Block
             final byte[] signatureFileData = sigFile.getBytes();
-            if (this.mediator.isDebugLoggable()) {
-                this.mediator.debug("signature file: " + new String(signatureFileData) + ".");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("signature file: " + new String(signatureFileData) + ".");
             }
             final byte[] signatureBlock = block.getEncoded();
             // logger.log(Level.ALL, new String(signatureBlock));
             // verify signature
             blockValidity = cryptoUtils.checkCMSDataValidity(signatureFileData, signatureBlock, algo);
         }
-        if (this.mediator.isWarningLoggable()) {
-            this.mediator.info("block validity: " + blockValidity);
+        if (LOG.isWarnEnabled()) {
+            LOG.info("block validity: " + blockValidity);
         }
         return blockValidity;
     }
@@ -124,11 +128,11 @@ public class SignedBundleChecker {
             final String hashValue = sigFile.getManifestHash();
             final String hashAlgo = sigFile.getHashAlgo();
             manifestHashValid = cryptoUtils.checkHashValue(mediator, signedJar.getEntry(METADATA_DIR + MF_FILE), hashValue, hashAlgo);
-            this.mediator.debug("manifest hash valid: %s", manifestHashValid);
+            LOG.debug("manifest hash valid: %s", manifestHashValid);
             // check the validity of the hashes for the manifest entries
             manifestEntriesValid = SignatureFileChecker.checkEntriesValidity(mediator, signedJar, sigFile, cryptoUtils);
-            if (this.mediator.isWarningLoggable()) {
-                this.mediator.debug("entries hash valid: " + manifestEntriesValid);
+            if (LOG.isWarnEnabled()) {
+                LOG.debug("entries hash valid: " + manifestEntriesValid);
             }
         }
         return manifestHashValid && manifestEntriesValid;
@@ -148,8 +152,8 @@ public class SignedBundleChecker {
         // get a HashMap with Signature Files (with signers as key)
         final SignatureFile sigFile = signedJar.getSignatureFile(signer);
         if (sigFile != null) {
-            if (this.mediator.isWarningLoggable()) {
-                this.mediator.info("Signature File found");
+            if (LOG.isWarnEnabled()) {
+                LOG.info("Signature File found");
             }
             validated = this.checkSignatureFileValidity(signedJar, sigFile, cryptoUtils);
         }
@@ -168,24 +172,24 @@ public class SignedBundleChecker {
         Manifest manifest = new Manifest();
         manifest.read(signedJar.getEntry("/META-INF/MANIFEST.MF").openStream());
         boolean manifestEntriesExist = this.checkManifestEntriesExist(signedJar, manifest);
-        if (this.mediator.isInfoLoggable()) {
-            this.mediator.info("manifestEntriesExist: " + manifestEntriesExist);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("manifestEntriesExist: " + manifestEntriesExist);
         }
         boolean resourcesKnownInManifest = this.checkResourcesKnownInManifest(signedJar, manifest);
 
-        if (this.mediator.isInfoLoggable()) {
-            this.mediator.info("resourcesKnownInManifest: " + resourcesKnownInManifest);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("resourcesKnownInManifest: " + resourcesKnownInManifest);
         }
         boolean hashValuesValid = false;
         if (manifestEntriesExist && resourcesKnownInManifest) {
             hashValuesValid = this.checkHashValuesValid(signedJar, manifest, cryptoUtils);
         }
-        if (this.mediator.isWarningLoggable()) {
-            this.mediator.info("hashValuesValid: " + hashValuesValid);
+        if (LOG.isWarnEnabled()) {
+            LOG.info("hashValuesValid: " + hashValuesValid);
         }
         final boolean validated = manifestEntriesExist && resourcesKnownInManifest && hashValuesValid;
-        if (this.mediator.isWarningLoggable()) {
-            this.mediator.info("validated: " + validated);
+        if (LOG.isWarnEnabled()) {
+            LOG.info("validated: " + validated);
         }
         return validated;
     }
@@ -249,8 +253,8 @@ public class SignedBundleChecker {
             //logManifestEntry.initTimeMeasure();
             entry = (Map.Entry) iter.next();
             file = (String) entry.getKey();
-            if (this.mediator.isDebugLoggable()) {
-                this.mediator.debug("file: " + file);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("file: " + file);
             }
             data = (Attributes) entries.get(file);
             iter2 = data.entrySet().iterator();
@@ -259,12 +263,12 @@ public class SignedBundleChecker {
                 //logHash.initTimeMeasure();
                 entry2 = (Map.Entry) iter2.next();
                 key2 = (Attributes.Name) entry2.getKey();
-                if (this.mediator.isDebugLoggable()) {
-                    this.mediator.debug("key2: " + key2);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("key2: " + key2);
                 }
                 hashValue = (String) data.get(key2);
-                if (this.mediator.isDebugLoggable()) {
-                    this.mediator.debug("hashValue: " + hashValue);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("hashValue: " + hashValue);
                 }
                 type = key2.toString();
                 checked = checked && cryptoUtils.checkHashValue(mediator, signedJar.getEntry(file), hashValue, type);
@@ -296,8 +300,8 @@ public class SignedBundleChecker {
 
             if (path.endsWith(".class") && manifest.getAttributes(path) == null) {
                 checked = false;
-                if (this.mediator.isWarningLoggable()) {
-                    this.mediator.warn(path + " not referenced in the manifest file");
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn(path + " not referenced in the manifest file");
                 }
             }
         }
