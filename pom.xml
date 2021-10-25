@@ -165,7 +165,6 @@
 		<depends-maven-plugin.version>1.4.0</depends-maven-plugin.version>
 		<download-maven-plugin>1.5.0</download-maven-plugin>
 		<gradle-maven-plugin.version>1.0.8</gradle-maven-plugin.version>
-		<groovy-maven-plugin.version>2.0</groovy-maven-plugin.version>
 		<gradle-tooling-api.version>2.13</gradle-tooling-api.version>
 		<!-- <org.apache.maven.surefire.junit48.version>2.22.2</org.apache.maven.surefire.junit48.version> -->
 		<org.jacoco.maven-plugin.version>0.8.5</org.jacoco.maven-plugin.version>
@@ -1132,21 +1131,6 @@
 								</pluginExecution>
 								<pluginExecution>
 									<pluginExecutionFilter>
-										<groupId>org.codehaus.gmaven</groupId>
-										<artifactId>groovy-maven-plugin</artifactId>
-										<versionRange>2.0</versionRange>
-										<goals>
-											<goal>execute</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<execute>
-											<runOnIncremental>true</runOnIncremental>
-										</execute>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
 										<groupId>org.apache.maven.plugins</groupId>
 										<artifactId>maven-antrun-plugin</artifactId>
 										<versionRange>1.8</versionRange>
@@ -1490,39 +1474,6 @@
 					<artifactId>sonar-maven-plugin</artifactId>
 					<version>${sonar-maven-plugin.version}</version>
 				</plugin>
-				<plugin>
-					<groupId>org.codehaus.gmaven</groupId>
-					<artifactId>groovy-maven-plugin</artifactId>
-					<version>${groovy-maven-plugin.version}</version>
-					<executions>
-						<execution>
-							<id>search-sha</id>
-							<phase>package</phase>
-							<goals>
-								<goal>execute</goal>
-							</goals>
-							<configuration>
-								<defaults>
-									<name>extract-sha</name>
-								</defaults>
-								<source>
-									File basedir = new File(project.basedir.absolutePath.replace('\\','/'));
-									File signature = new File(basedir, "/target/classes/META-INF/SELFSIGN.SF")
-
-									if(signature.exists())
-									{
-									    String fileContents = signature.getText('UTF-8')
-									    matcher = (fileContents =~ /(?s)SHA(1|-256)-Digest-Manifest\s*:\s*([^\s]+)\s*$?/)
-
-									    String sha = matcher.getAt(0).getAt(2)
-									    log.info('SHA: {}', sha)
-									    project.properties.setProperty('sha',sha)
-									}
-								</source>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
 			</plugins>
 			
 		</pluginManagement>
@@ -1547,10 +1498,6 @@
 			<plugin>
 				<groupId>biz.aQute.bnd</groupId>
 				<artifactId>bnd-maven-plugin</artifactId>
-			</plugin>			
-			<plugin>
-				<groupId>org.codehaus.gmaven</groupId>
-				<artifactId>groovy-maven-plugin</artifactId>
 			</plugin>			
 		</plugins>
 	</build>
