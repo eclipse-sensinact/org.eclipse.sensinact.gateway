@@ -52,7 +52,7 @@ public class ApplicationManagerConfigurator  {
 	private AppServiceMediator mediator;
 
     protected void injectPropertyFields() throws Exception {
-        this.mediator.debug("Starting introspection in bundle %s", mediator.getContext().getBundle().getSymbolicName());
+        LOG.debug("Starting introspection in bundle %s", mediator.getContext().getBundle().getSymbolicName());
         Interpolator interpolator = new Interpolator(this.mediator);
         interpolator.getInstance(this);
         for(Map.Entry<String,String> entry:interpolator.getPropertiesInjected().entrySet()){

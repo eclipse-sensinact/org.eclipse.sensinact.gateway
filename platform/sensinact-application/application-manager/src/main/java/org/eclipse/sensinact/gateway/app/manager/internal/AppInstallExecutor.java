@@ -112,8 +112,8 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
         /*try {
             JsonValidator.validateApplication(mediator, content);
         } catch (ValidationException exception) {
-            if(mediator.isErrorLoggable()) {
-                mediator.error("The JSON of the application is not valid", exception);
+            if(LOG.isErrorEnabled()) {
+                LOG.error("The JSON of the application is not valid", exception);
             }
             throw exception;
         }*/
@@ -121,13 +121,13 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
         /*try {
             JsonValidator.validateFunctionsParameters(mediator, content.getJSONArray(AppJsonConstant.APPLICATION));
         } catch (ValidationException exception) {
-            if(mediator.isErrorLoggable()) {
-                mediator.error("The JSON of the application is not valid", exception);
+            if(LOG.isErrorEnabled()) {
+                LOG.error("The JSON of the application is not valid", exception);
             }
             throw exception;
         } catch (FileNotFoundException exception) {
-            if(mediator.isErrorLoggable()) {
-                mediator.error("Unable to find the JSON schema", exception);
+            if(LOG.isErrorEnabled()) {
+                LOG.error("Unable to find the JSON schema", exception);
             }
             throw exception;
         }*/
@@ -139,8 +139,8 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
         if (device.getService(name) != null) {
             final ApplicationService applicationService = (ApplicationService) device.getService(name);
             if (ApplicationStatus.ACTIVE.equals(applicationService.getResource(AppConstant.STATUS).getAttribute(DataResource.VALUE).getValue())) {
-                if (mediator.isErrorLoggable()) {
-                    mediator.error("The application " + name + " is active. Unable to update the application.");
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("The application " + name + " is active. Unable to update the application.");
                 }
                 throw new InvalidApplicationException("The application " + name + " is active. " + "Unable to update the application.");
             }
@@ -210,16 +210,16 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
                 LOG.warn("Application {} did not activate SAR service", name);
             }
         } catch (ApplicationFactoryException e) {
-            if (mediator.isErrorLoggable()) {
-                mediator.error("Unable to create the application " + name + " > " + e.getMessage());
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Unable to create the application " + name + " > " + e.getMessage());
             }
             device.removeService(name);
             e.printStackTrace();
         } catch (InvalidValueException|InvalidServiceException|InvalidResourceException e) {
             e.printStackTrace();
         }
-        if (mediator.isInfoLoggable()) {
-            mediator.info("Application " + name + " successfully installed.");
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Application " + name + " successfully installed.");
         }
     }
 

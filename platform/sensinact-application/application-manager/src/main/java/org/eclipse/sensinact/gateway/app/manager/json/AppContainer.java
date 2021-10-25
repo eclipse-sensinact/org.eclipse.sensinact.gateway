@@ -15,6 +15,8 @@ import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,6 +29,8 @@ import java.util.List;
  * @author Rémi Druilhe
  */
 public class AppContainer implements JSONable {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AppContainer.class);
     private final String applicationName;
     private final AppInitialize initialize;
     private final List<AppComponent> components;
@@ -52,8 +56,8 @@ public class AppContainer implements JSONable {
             try {
                 component = new AppComponent(mediator, componentArray.getJSONObject(i));
             } catch (FunctionNotFoundException e) {
-                if (mediator.isErrorLoggable()) {
-                    mediator.error("Unable to create the component", e);
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Unable to create the component", e);
                 }
                 return;
             }
