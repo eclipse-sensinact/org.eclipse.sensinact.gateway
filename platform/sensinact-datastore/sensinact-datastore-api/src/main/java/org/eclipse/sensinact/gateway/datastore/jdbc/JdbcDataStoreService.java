@@ -19,6 +19,8 @@ import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreExceptio
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -35,6 +37,8 @@ import java.sql.Statement;
 //because retrieving the last inserted row identifier depends on the SGBD
 //in use
 public abstract class JdbcDataStoreService implements DataStoreService {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(JdbcDataStoreService.class);
 	
     /**
 	 * Retrieves and returns the long identifier of the last 
@@ -199,7 +203,7 @@ public abstract class JdbcDataStoreService implements DataStoreService {
 
         } catch (Exception e) {
         	e.printStackTrace();
-            mediator.error(e);
+            LOG.error(e.getMessage(), e);
 
         } finally {
             if (statement != null) {
@@ -207,7 +211,7 @@ public abstract class JdbcDataStoreService implements DataStoreService {
                     statement.close();
 
                 } catch (SQLException e) {
-                    mediator.error("Error while closing statement", e);
+                    LOG.error("Error while closing statement", e);
                 }
             }
             if (provider != null) {
