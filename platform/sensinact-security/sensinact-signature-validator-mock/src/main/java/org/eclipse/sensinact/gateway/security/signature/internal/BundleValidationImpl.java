@@ -25,6 +25,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An implementation of the BundleValidation service
@@ -32,6 +34,8 @@ import org.osgi.service.component.annotations.Component;
 @SignatureValidator(type = "mock")
 @Component(immediate = true)
 public class BundleValidationImpl implements BundleValidation {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(BundleValidationImpl.class);
     // ********************************************************************//
     // 						NESTED DECLARATIONS 						   //
     // ********************************************************************//
@@ -92,10 +96,10 @@ public class BundleValidationImpl implements BundleValidation {
      */
     public String check(Bundle bundle) throws BundleValidationException {
         if (bundle == null) {
-            this.mediator.debug("null bundle");
+            LOG.debug("null bundle");
             return null;
         }
-        this.mediator.debug("check bundle: %s", bundle.getLocation());
+        LOG.debug("check bundle: %s", bundle.getLocation());
 
         int hashcode = bundle.hashCode();
         String bundleName = bundle.getSymbolicName();
@@ -125,7 +129,7 @@ public class BundleValidationImpl implements BundleValidation {
 	        sjar.setKeyStoreManager(ksm);
 	        SignatureFile signatureFile = sjar.getSignatureFile();
 	        String sha1 = signatureFile.getManifestHash();
-	        this.mediator.debug("%s %s is valid? %s", FILE, bundle.getLocation(), sha1 != null);
+	        LOG.debug("%s %s is valid? %s", FILE, bundle.getLocation(), sha1 != null);
 	        this.validated.put(bundleName, new ValidBundleKey(hashcode, bundleName, sha1));
 	        return sha1;
 		} catch (IOException e) {

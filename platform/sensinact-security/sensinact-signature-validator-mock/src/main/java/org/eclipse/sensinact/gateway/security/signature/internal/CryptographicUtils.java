@@ -20,12 +20,16 @@ import java.util.Base64;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
 import org.eclipse.sensinact.gateway.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation class of the CryptographicUtils service, using Bouncy Castle
  * Cryptography provider.
  */
 public class CryptographicUtils {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(CryptographicUtils.class);
     private Mediator mediator;
 
     /**
@@ -36,18 +40,18 @@ public class CryptographicUtils {
     }
 
     private boolean checkHashValue(final String realHash, final String pretendedHash) {
-        if (this.mediator.isDebugLoggable()) {
-            this.mediator.debug("pretended hash:" + pretendedHash);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("pretended hash:" + pretendedHash);
         }
         boolean validated = false;
-        if (this.mediator.isDebugLoggable()) {
-            this.mediator.debug("real Hash Value:" + realHash);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("real Hash Value:" + realHash);
         }
         if (realHash.equals(pretendedHash)) {
             validated = true;
         }
-        if (this.mediator.isDebugLoggable()) {
-            this.mediator.debug("hash valid? " + validated);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("hash valid? " + validated);
         }
         return validated;
     }
