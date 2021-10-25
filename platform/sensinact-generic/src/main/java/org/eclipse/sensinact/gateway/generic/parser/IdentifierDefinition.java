@@ -11,6 +11,8 @@
 package org.eclipse.sensinact.gateway.generic.parser;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 
 /**
@@ -22,6 +24,8 @@ import org.xml.sax.Attributes;
 @XmlElement(tag = "identifier", field = "identifier")
 @XmlAttributes({@XmlAttribute(attribute = "xsi:type", field = "encoding")})
 final class IdentifierDefinition extends XmlModelParsingContext {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(IdentifierDefinition.class);
     private String encoding;
     private byte[] identifier;
 
@@ -66,8 +70,8 @@ final class IdentifierDefinition extends XmlModelParsingContext {
                 this.identifier[pos++] = Byte.parseByte(new String(new char[]{identifierChars[i], identifierChars[i + 1]}), 16);
             }
         } else {
-            if (super.mediator.isWarningLoggable()) {
-                super.mediator.warn("Invalid command encoding");
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Invalid command encoding");
             }
         }
     }
@@ -77,8 +81,8 @@ final class IdentifierDefinition extends XmlModelParsingContext {
      */
     protected byte[] getIdentifier() {
         if (this.identifier == null) {
-            if (super.mediator.isWarningLoggable()) {
-                super.mediator.warn("No IdentifierDefinition defined");
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("No IdentifierDefinition defined");
             }
             return null;
         }

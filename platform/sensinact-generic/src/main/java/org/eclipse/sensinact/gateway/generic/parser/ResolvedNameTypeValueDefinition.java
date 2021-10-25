@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.generic.parser;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 
 /**
@@ -22,6 +24,7 @@ import org.xml.sax.Attributes;
  */
 public class ResolvedNameTypeValueDefinition extends NameTypeValueDefinition<Class<?>> {
     
+	private static final Logger LOG = LoggerFactory.getLogger(ResolvedNameTypeValueDefinition.class);
     /**
      * Constructor
      *
@@ -52,7 +55,7 @@ public class ResolvedNameTypeValueDefinition extends NameTypeValueDefinition<Cla
         try {
             super.type = CastUtils.loadClass(super.mediator.getClassLoader(), type);
         } catch (ClassNotFoundException e) {
-            super.mediator.error(new StringBuilder().append("Invalid type : ").append(type).toString());
+            LOG.error(new StringBuilder().append("Invalid type : ").append(type).toString());
         }
     }
 

@@ -18,6 +18,8 @@ import org.eclipse.sensinact.gateway.core.AttributeBuilder;
 import org.eclipse.sensinact.gateway.core.AttributeBuilder.Requirement;
 import org.eclipse.sensinact.gateway.core.MetadataBuilder;
 import org.eclipse.sensinact.gateway.core.RequirementBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 
 import java.util.ArrayList;
@@ -38,6 +40,8 @@ import java.util.List;
 @XmlEscaped(value = {"metadata","constraints"})
 public class AttributeDefinition extends TargetedResolvedNameTypeValueDefinition 
 implements ConstrainableDefinition {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AttributeDefinition.class);
     
 	private List<ConstraintDefinition> constraintDefinitions;
     private List<MetadataBuilder> metadataDefinitions;
@@ -231,7 +235,7 @@ implements ConstrainableDefinition {
             try {
                 constraints.add(definition.getConstraint(nameTypePair.type));
             } catch (InvalidConstraintDefinitionException e) {
-                super.mediator.error(e);
+                LOG.error(e.getMessage(), e);
             }
         }
         return constraints;

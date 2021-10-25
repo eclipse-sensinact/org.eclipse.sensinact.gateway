@@ -23,6 +23,8 @@ import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.method.builder.DynamicParameterValueFactory;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 
 import java.util.ArrayList;
@@ -39,6 +41,8 @@ import java.util.Set;
  */
 @XmlEscaped(value = {"constraints"})
 public class ParameterDefinition extends ResolvedNameTypeValueDefinition implements ConstrainableDefinition {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ParameterDefinition.class);
     
 	private LinkedList<ConstraintDefinition> constraintDefinitions;
     private ParameterBuilderDefinition builder;
@@ -116,8 +120,8 @@ public class ParameterDefinition extends ResolvedNameTypeValueDefinition impleme
                     }
                     constraints.add(constraint);
                 } catch (InvalidConstraintDefinitionException e) {
-                    if (super.mediator.isErrorLoggable()) {
-                        super.mediator.error(e, e.getMessage());
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error( e.getMessage(), e);
                     }
                 }
             }

@@ -5,12 +5,15 @@ package org.eclipse.sensinact.gateway.generic;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public abstract class AbstractUnsubscribeTaskWrapper implements UnsubscribeTaskWrapper {
-
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractUnsubscribeTaskWrapper.class);
 	/**
 	 * The wrapped subscribe access method {@link Task}
 	 */
@@ -59,7 +62,7 @@ public abstract class AbstractUnsubscribeTaskWrapper implements UnsubscribeTaskW
 		try {
 			return this.targetIdExtractor().execute(this.task);
 		} catch (Exception e) {
-			mediator.error("Error when extracting the subscriber identifier", e);
+			LOG.error("Error when extracting the subscriber identifier", e);
 		}
 		return null;
 	}

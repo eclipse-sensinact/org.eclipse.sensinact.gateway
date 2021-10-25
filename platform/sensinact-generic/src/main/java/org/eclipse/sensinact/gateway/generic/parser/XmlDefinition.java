@@ -11,6 +11,8 @@
 package org.eclipse.sensinact.gateway.generic.parser;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 
 import java.lang.reflect.Method;
@@ -23,6 +25,8 @@ import java.util.List;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class XmlDefinition {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(XmlDefinition.class);
 
     protected Mediator mediator;
     protected Method tagged;
@@ -102,7 +106,7 @@ public abstract class XmlDefinition {
                 method.invoke(this, value);
 
             } catch (Exception e) {
-                this.mediator.error(e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }

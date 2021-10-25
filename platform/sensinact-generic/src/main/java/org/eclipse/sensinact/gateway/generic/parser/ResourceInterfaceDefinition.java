@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.generic.parser;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 
 /**
@@ -21,6 +23,8 @@ import org.xml.sax.Attributes;
  */
 @XmlElement(tag = "interfaceName", field = "resourceInterfaceType")
 final class ResourceInterfaceDefinition extends XmlModelParsingContext {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ResourceInterfaceDefinition.class);
     private Class<? extends Resource> resourceInterfaceType;
 
     /**
@@ -57,7 +61,7 @@ final class ResourceInterfaceDefinition extends XmlModelParsingContext {
                 this.resourceInterfaceType = null;
             }
         } catch (ClassNotFoundException e) {
-            super.mediator.error(e);
+            LOG.error(e.getMessage(), e);
         }
     }
 

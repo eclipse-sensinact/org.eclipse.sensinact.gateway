@@ -11,6 +11,8 @@
 package org.eclipse.sensinact.gateway.generic.packet;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -19,6 +21,8 @@ import java.util.Iterator;
  * @param <P>
  */
 public class EmptyPacketReader<P extends Packet> implements PacketReader<P> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(EmptyPacketReader.class);
     private Mediator mediator;
 
     /**
@@ -30,8 +34,8 @@ public class EmptyPacketReader<P extends Packet> implements PacketReader<P> {
 
     @Override
     public void load(P packet) throws InvalidPacketException {
-        if (this.mediator.isDebugLoggable()) {
-            this.mediator.debug("not implemented");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("not implemented");
         }
     }
 
@@ -42,15 +46,15 @@ public class EmptyPacketReader<P extends Packet> implements PacketReader<P> {
 
     @Override
     public void reset() {
-        if (this.mediator.isDebugLoggable()) {
-            this.mediator.debug("not implemented");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("not implemented");
         }
     }
 
 	@Override
 	public void parse() throws InvalidPacketException {
-        if (this.mediator.isDebugLoggable()) {
-            this.mediator.debug("not implemented");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("not implemented");
         }
 	}
 }

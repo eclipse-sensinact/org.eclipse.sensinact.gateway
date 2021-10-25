@@ -19,6 +19,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -29,6 +31,8 @@ import java.lang.reflect.Method;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class InjectedService implements InvocationHandler, ServiceListener {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(InjectedService.class);
     private final Class<?> type;
     private final String filter;
     private final Mediator mediator;
@@ -116,8 +120,8 @@ public class InjectedService implements InvocationHandler, ServiceListener {
             references = this.mediator.getContext().getServiceReferences(this.type.getCanonicalName(), this.filter);
 
         } catch (InvalidSyntaxException e) {
-            if (this.mediator.isDebugLoggable()) {
-                this.mediator.error(e, e.getMessage());
+            if (LOG.isDebugEnabled()) {
+                LOG.error( e.getMessage(), e);
             }
         }
         int index = 0;

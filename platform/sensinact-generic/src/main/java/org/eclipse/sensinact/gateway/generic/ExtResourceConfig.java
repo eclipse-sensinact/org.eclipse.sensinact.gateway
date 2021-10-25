@@ -20,6 +20,8 @@ import org.eclipse.sensinact.gateway.generic.parser.MethodDefinition;
 import org.eclipse.sensinact.gateway.generic.parser.XmlResourceConfigHandler;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.eclipse.sensinact.gateway.util.xml.XMLUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -38,6 +40,8 @@ import java.util.List;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ExtResourceConfig extends ResourceConfig implements Iterable<MethodDefinition> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ExtResourceConfig.class);
     /**
      * Returns the array of BasisXmlResourceConfig described in the XML file whose
      * string URL is passed as parameter
@@ -72,7 +76,7 @@ public class ExtResourceConfig extends ResourceConfig implements Iterable<Method
             return handler;
 
         } catch (Exception e) {
-            mediator.error(e, e.getMessage());
+            LOG.error( e.getMessage(), e);
         }
         return null;
     }

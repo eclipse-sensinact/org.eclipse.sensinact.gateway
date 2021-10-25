@@ -15,6 +15,8 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +33,8 @@ import java.util.Map;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class TaskManager {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(TaskManager.class);
     public static final char IDENTIFIER_SEP_CHAR = '#';
     /**
      * Locker object
@@ -108,8 +112,8 @@ public abstract class TaskManager {
                     task.abort(AccessMethod.EMPTY);
                 }
             }
-        } else if (this.mediator.isDebugLoggable()) {
-            this.mediator.debug("No task left to execute");
+        } else if (LOG.isDebugEnabled()) {
+            LOG.debug("No task left to execute");
         }
         synchronized (lock) {
             if (this.desynchronizer != null) {

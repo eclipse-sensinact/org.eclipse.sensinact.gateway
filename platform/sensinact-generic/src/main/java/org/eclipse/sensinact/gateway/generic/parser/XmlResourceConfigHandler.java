@@ -32,6 +32,8 @@ import org.eclipse.sensinact.gateway.core.TypeConfig;
 import org.eclipse.sensinact.gateway.generic.ExtResourceConfig;
 import org.eclipse.sensinact.gateway.generic.ExtResourceImpl;
 import org.eclipse.sensinact.gateway.util.xml.AbstractContentHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -43,6 +45,8 @@ import org.xml.sax.SAXException;
  */
 public class XmlResourceConfigHandler extends AbstractContentHandler<ResourceInfoDefinition> implements 
 RootXmlParsingContext{
+	
+	private static final Logger LOG = LoggerFactory.getLogger(XmlResourceConfigHandler.class);
     static final String LOCATION_KEY_WORD = "LOCATION";
 
     static final String BINARY_COMMAND_TYPE = "binaryHexContent";
@@ -252,7 +256,7 @@ RootXmlParsingContext{
         	endMethod = clazz.getDeclaredMethod(qname.concat("End"));
         	def = (ResourceInfoDefinition) endMethod.invoke(subject);
         } catch(Exception e) {
-        	this.mediator.debug(e.getMessage());
+        	LOG.debug(e.getMessage());
         }
         if(parent!= null) {  	
     		parent.setNext(null);  	
@@ -290,7 +294,7 @@ RootXmlParsingContext{
         	startMethod = clazz.getMethod(qname.concat("Start"), Attributes.class);
         	def = (ResourceInfoDefinition) startMethod.invoke(subject, atts);
         } catch(Exception e) {
-        	this.mediator.debug(e.getMessage());
+        	LOG.debug(e.getMessage());
         }
         return def;
     }

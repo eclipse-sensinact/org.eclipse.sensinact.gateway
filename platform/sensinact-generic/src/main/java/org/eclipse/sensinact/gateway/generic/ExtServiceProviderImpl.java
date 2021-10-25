@@ -16,6 +16,8 @@ import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Array;
 import java.util.Collections;
@@ -28,6 +30,8 @@ import java.util.List;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ExtServiceProviderImpl extends ServiceProviderImpl {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ExtServiceProviderImpl.class);
     /**
      * Constructor
      *
@@ -81,7 +85,7 @@ public class ExtServiceProviderImpl extends ServiceProviderImpl {
                     wait -= 150;
                 } catch (InterruptedException e) {
                     Thread.interrupted();
-                    ExtServiceProviderImpl.super.modelInstance.mediator().error(e);
+                    LOG.error(e.getMessage(), e);
                     break;
                 }
             }

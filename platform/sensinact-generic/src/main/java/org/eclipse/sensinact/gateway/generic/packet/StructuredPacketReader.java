@@ -118,7 +118,7 @@ public class StructuredPacketReader<P extends Packet> extends SimplePacketReader
                     annotationField.set(wrapper, elements[index]);
                     isAnnotated = true;
                 } catch (Exception e) {
-                    mediator.error(e);
+                    LOG.error(e.getMessage(), e);
                     throw new InvalidPacketTypeException(e);
                 }
             }
