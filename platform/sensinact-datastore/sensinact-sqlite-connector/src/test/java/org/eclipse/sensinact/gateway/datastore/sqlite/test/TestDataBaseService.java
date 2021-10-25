@@ -33,8 +33,11 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestDataBaseService {
+	
 	private static final String FAKE_DATABASE_PATH = "target/test-resources/fake.db";
 	private static final String TEST_DATABASE_PATH = "target/test-resources/sample.db";
 
