@@ -20,13 +20,16 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpMediator;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.SimpleHttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.config.MappingDescription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
  * Extended {@link HttpProtocolStackEndpoint} 
  */
 public class HttpMappingProtocolStackEndpoint extends SimpleHttpProtocolStackEndpoint {
-
+	
+	private static final Logger LOG = LoggerFactory.getLogger(HttpMappingProtocolStackEndpoint.class);
 	private String serviceProviderIdPattern;
 	private String timestampPattern;
 
@@ -83,7 +86,7 @@ public class HttpMappingProtocolStackEndpoint extends SimpleHttpProtocolStackEnd
             SimpleHttpResponse response = request.send();
             
             if (response == null) {
-                mediator.error("Unable to connect");
+                LOG.error("Unable to connect");
                 return;
             }
             if (!_task.isDirect()) {
@@ -104,7 +107,7 @@ public class HttpMappingProtocolStackEndpoint extends SimpleHttpProtocolStackEnd
             } else 
             	_task.setResult(new String(response.getContent()));            
         } catch (Exception e) {
-            super.mediator.error(e);
+            LOG.error(e.getMessage(), e);
         } finally {
             ((HttpMediator) mediator).unregisterProcessingContext(_task);
         }
