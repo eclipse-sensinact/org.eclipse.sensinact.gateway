@@ -13,6 +13,8 @@ package org.eclipse.sensinact.gateway.sthbnd.http.kodi.internal;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.sthbnd.http.kodi.osgi.KodiServiceMediator;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.SimpleHttpProtocolStackEndpoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -21,6 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class KodiRemoteControlHttpListener extends HttpServlet {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(KodiRemoteControlHttpListener.class);
     SimpleHttpProtocolStackEndpoint connector;
     KodiServiceMediator mediator;
 
@@ -31,8 +35,8 @@ public class KodiRemoteControlHttpListener extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (mediator.isDebugLoggable()) {
-            mediator.debug(resp.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(resp.toString());
         }
         String key = req.getParameter("key");
         if (key == null) {
@@ -52,7 +56,7 @@ public class KodiRemoteControlHttpListener extends HttpServlet {
             connector.process(new KodiRequestPacket(serviceProvider, "buttonpressed", "lastevent", timestamp));
 
         } catch (InvalidPacketException e) {
-            mediator.error(e);
+            LOG.error(e.getMessage(), e);
         }
     }
 }

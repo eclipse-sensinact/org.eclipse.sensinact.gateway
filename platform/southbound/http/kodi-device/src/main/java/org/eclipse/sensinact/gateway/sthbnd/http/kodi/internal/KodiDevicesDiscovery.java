@@ -19,10 +19,14 @@ import org.eclipse.sensinact.gateway.protocol.ssdp.api.SSDPDiscoveryNotifierItf;
 import org.eclipse.sensinact.gateway.protocol.ssdp.api.SSDPEvent;
 import org.eclipse.sensinact.gateway.protocol.ssdp.model.SSDPDescriptionPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.SimpleHttpProtocolStackEndpoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class KodiDevicesDiscovery implements SSDPDiscoveryListenerItf {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(KodiDevicesDiscovery.class);
     private Mediator mediator;
     private SimpleHttpProtocolStackEndpoint connector;
 
@@ -44,14 +48,14 @@ public class KodiDevicesDiscovery implements SSDPDiscoveryListenerItf {
     }
 
     public void eventSSDP(SSDPEvent ssdpEvent, SSDPDescriptionPacket packet) {
-        mediator.debug("New SSDP event (" + ssdpEvent + "): " + packet.toString());
+        LOG.debug("New SSDP event (" + ssdpEvent + "): " + packet.toString());
         String serviceProvider = packet.getFriendlyName().replace("(", "").replace(")", "");
         String url = "http://" + packet.getUrl() + "/jsonrpc";
         try {
             connector.process(new KodiRequestPacket(serviceProvider, ServiceProvider.ADMINISTRATION_SERVICE_NAME, "jsonurl", url));
 
         } catch (InvalidPacketException e) {
-            mediator.error(e);
+            LOG.error(e.getMessage(), e);
         }
     }
 }
