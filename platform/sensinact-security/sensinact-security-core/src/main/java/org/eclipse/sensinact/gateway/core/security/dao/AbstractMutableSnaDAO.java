@@ -14,6 +14,8 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.SnaEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Immutable;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,7 +34,8 @@ public abstract class AbstractMutableSnaDAO<E extends SnaEntity> extends Abstrac
 	// ********************************************************************//
 	// STATIC DECLARATIONS //
 	// ********************************************************************//
-
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractMutableSnaDAO.class);
 	// ********************************************************************//
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
@@ -54,21 +57,21 @@ public abstract class AbstractMutableSnaDAO<E extends SnaEntity> extends Abstrac
 			return;
 		}
 		if (SnaEntity.setUniqueLongPrimaryKey(mediator, entity, identifier)) {
-			mediator.debug("new %s record in the datastore", entityType.getSimpleName());
+			LOG.debug("new %s record in the datastore", entityType.getSimpleName());
 
 		} else {
-			mediator.debug("Unable to define the new entity '%s' identifier [%s]", entityType.getSimpleName(),
+			LOG.debug("Unable to define the new entity '%s' identifier [%s]", entityType.getSimpleName(),
 					identifier);
 		}
 	}
 
 	@Override
 	void updated(int records) {
-		super.mediator.debug("%s %s record(s) updated in the datastore", records, entityType.getSimpleName());
+		LOG.debug("%s %s record(s) updated in the datastore", records, entityType.getSimpleName());
 	}
 
 	@Override
 	void deleted(int records) {
-		super.mediator.debug("%s %s record(s) deleted in the datastore", records, entityType.getSimpleName());
+		LOG.debug("%s %s record(s) deleted in the datastore", records, entityType.getSimpleName());
 	}
 }

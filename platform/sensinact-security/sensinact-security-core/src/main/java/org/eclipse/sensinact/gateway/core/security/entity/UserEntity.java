@@ -11,6 +11,8 @@
 package org.eclipse.sensinact.gateway.core.security.entity;
 
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.InvalidKeyException;
 
@@ -30,6 +32,8 @@ import org.eclipse.sensinact.gateway.core.security.UserManager;
 @Table(value = "SNAUSER")
 @PrimaryKey(value = { "SUID" })
 public class UserEntity extends SnaEntity implements User {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(UserEntity.class);
 	@Column(value = "SUID")
 	private long identifier;
 
@@ -199,7 +203,7 @@ public class UserEntity extends SnaEntity implements User {
 				this.publicKey = CryptoUtils.cryptWithMD5(publicKeyStr);
 
 			} catch (InvalidKeyException e) {
-				mediator.error(e);
+				LOG.error(e.getMessage(), e);
 			}
 		}
 		return this.publicKey;

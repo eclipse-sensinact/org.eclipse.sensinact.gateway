@@ -20,6 +20,8 @@ import org.eclipse.sensinact.gateway.mail.connector.api.MailAccountConnectorMail
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackContext;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -27,6 +29,7 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class MailAccountConnectorMoke implements AccountConnector {
     
+	private static final Logger LOG = LoggerFactory.getLogger(MailAccountConnectorMoke.class);
 	public static final String ACCOUNT_TYPE = "MAIL";
 	
 	private Mediator mediator;
@@ -111,7 +114,7 @@ public class MailAccountConnectorMoke implements AccountConnector {
 
       } catch (Exception mex) {
     	  mex.printStackTrace();
-          this.mediator.error(mex);
+          LOG.error(mex.getMessage(),mex);
       }
 	}
 
