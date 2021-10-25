@@ -15,11 +15,15 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class DefaultHttpTaskProcessingContext implements HttpTaskProcessingContext {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultHttpTaskProcessingContext.class);
     protected Mediator mediator;
     protected Map<String, Executable<Void, String>> properties;
     private HttpTaskConfigurator httpTaskConfigurator;
@@ -97,7 +101,7 @@ public class DefaultHttpTaskProcessingContext implements HttpTaskProcessingConte
                 return executable.execute(null);
 
             } catch (Exception e) {
-                mediator.error(e.getMessage());
+                LOG.error(e.getMessage());
             }
         }
         return null;

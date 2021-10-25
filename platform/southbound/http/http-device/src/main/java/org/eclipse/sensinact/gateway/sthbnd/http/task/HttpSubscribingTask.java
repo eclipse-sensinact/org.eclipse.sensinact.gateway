@@ -17,6 +17,8 @@ import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Extended {@link HttpTask} dedicated to discovery process
@@ -25,7 +27,8 @@ import org.eclipse.sensinact.gateway.util.CastUtils;
  */
 public class HttpSubscribingTask<RESPONSE extends HttpResponse, REQUEST extends Request<RESPONSE>> 
 extends HttpDiscoveryTask<RESPONSE, REQUEST> {
-
+	
+	private static final Logger LOG = LoggerFactory.getLogger(HttpSubscribingTask.class);
     private Executable<Object, String> subscriptionIdExtractor;
 	private String subscriptionId;
     
@@ -87,7 +90,7 @@ extends HttpDiscoveryTask<RESPONSE, REQUEST> {
             	?CastUtils.cast(String.class, result)
             			:this.subscriptionIdExtractor.execute(result);
         } catch (Exception e) {
-            this.mediator.error(e);
+            LOG.error(e.getMessage(), e);
         }
         this.setSubscriptionIdentitifer(value);
     }
