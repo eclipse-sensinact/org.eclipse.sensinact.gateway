@@ -17,6 +17,8 @@ import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.LoginResponse.TokenMode;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.RegisteringResponse.RegisteringRequest;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Connection point to a sensiNact instance allowing to create an {@link 
@@ -27,6 +29,8 @@ import org.eclipse.sensinact.gateway.util.CryptoUtils;
  * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class AccessingEndpoint {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AccessingEndpoint.class);
     private NorthboundMediator mediator;
 
     /**
@@ -123,7 +127,7 @@ public class AccessingEndpoint {
                 response.setGenerated(timeout - lifetime);
                 response.setToken(authenticationMaterial);
             } catch (InvalidCredentialException | NullPointerException e) {
-                mediator.error(e);
+                LOG.error(e.getMessage(), e);
                 response.setErrors(e);
             }
         } else {
@@ -151,7 +155,7 @@ public class AccessingEndpoint {
 	        } catch (Exception e) {
                 response.setMessage("Error when registering");
 	            response.setErrors(e);
-	            mediator.error(e);
+	            LOG.error(e.getMessage(), e);
 			}
         } else {
             response.setMessage("Error when registering");
@@ -177,7 +181,7 @@ public class AccessingEndpoint {
 	        } catch (Exception e) {
                 response.setMessage("Error when renewing the password");  
 	            response.setErrors(e);
-	            mediator.error(e);
+	            LOG.error(e.getMessage(), e);
 			}
         } else {
             response.setErrors(new NullPointerException("account required"));

@@ -14,6 +14,8 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestHandler.NorthboundResponseBuildError;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,6 +29,8 @@ import java.util.zip.GZIPOutputStream;
  *
  */
 public abstract class NorthboundAccess<W extends NorthboundRequestWrapper> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(NorthboundAccess.class);
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
@@ -124,7 +128,7 @@ public abstract class NorthboundAccess<W extends NorthboundRequestWrapper> {
                                 }
                             }
                         } catch (IOException e) {
-                            mediator.error(e);
+                            LOG.error(e.getMessage(), e);
                         } finally {
                             mediator.getContext().ungetService(reference);
                         }
@@ -133,7 +137,7 @@ public abstract class NorthboundAccess<W extends NorthboundRequestWrapper> {
                         break;
                 }
             } catch (InvalidSyntaxException e) {
-                mediator.error(e);
+                LOG.error(e.getMessage(), e);
             }
         }
         if (builder == null) {
@@ -150,6 +154,6 @@ public abstract class NorthboundAccess<W extends NorthboundRequestWrapper> {
      *
      */
     public void destroy() {
-        mediator.debug("Destroying NorthboundAccess '%s'", request.getRequestURI());
+        LOG.debug("Destroying NorthboundAccess '%s'", request.getRequestURI());
     }
 }

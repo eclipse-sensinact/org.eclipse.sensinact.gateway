@@ -39,6 +39,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Default {@link NorthboundRequestHandler} implementation
@@ -57,6 +59,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
     //						STATIC DECLARATIONS							  //
     //********************************************************************//
 	
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultNorthboundRequestHandler.class);
     public static String RAW_QUERY_PARAMETER = "#RAW#";
 
     //********************************************************************//
@@ -116,7 +119,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
         try {
             path = UriUtils.formatUri(URLDecoder.decode(requestURI, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
-            mediator.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             return false;
         }
         this.serviceProvider = null;
@@ -196,7 +199,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
                 try {
                     parameters = new JSONArray(content);
                 } catch (JSONException je) {
-                    mediator.debug("No JSON formated content in %s", content);
+                    LOG.debug("No JSON formated content in %s", content);
                 }
             }
         }
@@ -209,7 +212,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
             try {
                 parameter = new Parameter(mediator, parameters.optJSONObject(index));
             } catch (InvalidValueException e) {
-                mediator.error(e);
+                LOG.error(e.getMessage(), e);
                 continue;
             }
             if ("attributeName".equals(parameter.getName()) && String.class == parameter.getType()) {
@@ -304,11 +307,11 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
         try {
             parameters = processParameters();
         } catch (IOException e) {
-            mediator.error(e);
+            LOG.error(e.getMessage(), e);
             this.buildError = new NorthboundResponseBuildError(500, "Error processing the request content");
             return null;
         } catch (JSONException e) {
-            mediator.error(e);
+            LOG.error(e.getMessage(), e);
             String content = this.request.getContent();
             if (content != null && !content.isEmpty()) {
                 this.buildError = new NorthboundResponseBuildError(400, "Invalid parameter(s) format");

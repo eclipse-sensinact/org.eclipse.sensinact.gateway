@@ -27,6 +27,8 @@ import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -40,6 +42,8 @@ import java.util.function.Predicate;
  * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class NorthboundEndpoint {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(NorthboundEndpoint.class);
 	
     private Session session;
     private NorthboundMediator mediator;
@@ -136,7 +140,7 @@ public class NorthboundEndpoint {
             }
         } catch (Exception e) {
         	e.printStackTrace();
-            this.mediator.error(e);
+            LOG.error(e.getMessage(), e);
         }
         return result;
     }
