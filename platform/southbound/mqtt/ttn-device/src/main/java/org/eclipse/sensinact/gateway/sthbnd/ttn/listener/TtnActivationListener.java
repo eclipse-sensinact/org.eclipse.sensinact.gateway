@@ -19,8 +19,12 @@ import org.eclipse.sensinact.gateway.sthbnd.ttn.model.TtnActivationPayload;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.packet.TtnActivationPacket;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TtnActivationListener extends MqttTopicMessage {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(TtnActivationListener.class);
 
     private final Mediator mediator;
     private final MqttProtocolStackEndpoint endpoint;
@@ -36,8 +40,8 @@ public class TtnActivationListener extends MqttTopicMessage {
     @Override
     public void messageReceived(String topic, String message) {
 
-        if(mediator.isDebugLoggable()) {
-            mediator.debug("Activation message: " + message);
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Activation message: " + message);
         }
         String device = topic.split("/")[2];
         JSONObject json = new JSONObject(message);

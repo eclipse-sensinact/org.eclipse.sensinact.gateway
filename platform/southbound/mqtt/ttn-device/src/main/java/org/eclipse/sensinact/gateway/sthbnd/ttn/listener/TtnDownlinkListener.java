@@ -14,8 +14,12 @@ import java.util.Base64;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TtnDownlinkListener {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(TtnDownlinkListener.class);
 
     private final Mediator mediator;
     private MqttBroker broker;
@@ -42,14 +46,14 @@ public class TtnDownlinkListener {
     		}
 		}
     	if(bytes == null) {
-            if(mediator.isErrorLoggable()) 
-                mediator.error("Null downlink value ");
+            if(LOG.isErrorEnabled()) 
+                LOG.error("Null downlink value ");
     		return;
     	}
     	String message = String.format("{\"port\":1,\"confirmed\":true,\"payload_raw\":\"%s\"}", 
 				Base64.getEncoder().encodeToString(bytes));
     	this.broker.publish(topic, message);
-        if(mediator.isDebugLoggable()) 
-            mediator.debug("Sent downlink message: " + message);
+        if(LOG.isDebugEnabled()) 
+            LOG.debug("Sent downlink message: " + message);
     }
 }
