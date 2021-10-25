@@ -62,8 +62,8 @@ public abstract class AbstractMqttActivator extends AbstractActivator<Mediator> 
      * @see AbstractActivator#doStop()
      */
     public void doStop() throws Exception {
-        if (super.mediator.isDebugLoggable()) {
-            super.mediator.debug("Stopping MQTT agent");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Stopping MQTT agent");
         }
         this.registration = null;
         this.handler.stop();
