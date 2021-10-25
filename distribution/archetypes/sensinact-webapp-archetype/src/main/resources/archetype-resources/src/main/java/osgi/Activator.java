@@ -15,6 +15,9 @@ import java.util.Hashtable;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 
@@ -27,11 +30,11 @@ import ${package}.app.servlet.IndexFilter;
 import ${package}.app.servlet.ResourceFilter;
 import ${package}.app.servlet.MirrorServlet;
 import ${package}.WebAppConstants;
-
 /**
  * Handle the bundle activation / deactivation
  */
 public class Activator extends AbstractActivator<Mediator> {
+	private static final Logger LOG = LoggerFactory.getLogger(TtnActivationListener.class);
 
 	@Override
     public void doStart() {
@@ -41,7 +44,7 @@ public class Activator extends AbstractActivator<Mediator> {
             }
         },new IndexFilter(), 
     	new Class<?>[] {Filter.class});
-        super.mediator.info(String.format("%s filter registered", WebAppConstants.WEBAPP_ROOT));
+        LOG.info(String.format("%s filter registered", WebAppConstants.WEBAPP_ROOT));
         
         mediator.register(new Hashtable() {{
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, WebAppConstants.WEBAPP_ALIAS);
@@ -49,7 +52,7 @@ public class Activator extends AbstractActivator<Mediator> {
             }
         }, new ResourceFilter(super.mediator), 
         new Class<?>[] {Filter.class});
-        super.mediator.info(String.format("%s filter registered",  WebAppConstants.WEBAPP_ALIAS));
+        LOG.info(String.format("%s filter registered",  WebAppConstants.WEBAPP_ALIAS));
                
 	    mediator.register(new Hashtable() {{
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, WebAppConstants.WEBAPP_ALIAS);
@@ -61,7 +64,7 @@ public class Activator extends AbstractActivator<Mediator> {
 
     @Override
     public void doStop() {
-        mediator.info("Swagger API was unregistered from %s context", WebAppConstants.WEBAPP_ALIAS);
+        LOG.info("Swagger API was unregistered from %s context", WebAppConstants.WEBAPP_ALIAS);
     }
     
 	@Override
