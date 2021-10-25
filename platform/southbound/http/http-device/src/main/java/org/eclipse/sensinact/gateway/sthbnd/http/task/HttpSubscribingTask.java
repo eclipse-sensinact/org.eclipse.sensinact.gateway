@@ -84,7 +84,7 @@ extends HttpDiscoveryTask<RESPONSE, REQUEST> {
         String value = null;
         try {
             value = this.subscriptionIdExtractor == null
-            	?CastUtils.cast(super.mediator.getClassLoader(), String.class, result)
+            	?CastUtils.cast(String.class, result)
             			:this.subscriptionIdExtractor.execute(result);
         } catch (Exception e) {
             this.mediator.error(e);

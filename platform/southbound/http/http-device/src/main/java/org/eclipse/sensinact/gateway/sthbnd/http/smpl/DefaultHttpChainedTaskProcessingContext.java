@@ -26,7 +26,7 @@ public class DefaultHttpChainedTaskProcessingContext extends DefaultHttpTaskProc
         this.properties.put("task.intermediate", new Executable<Void, String>() {
             @Override
             public String execute(Void parameter) throws Exception {
-                return CastUtils.cast(DefaultHttpChainedTaskProcessingContext.this.mediator.getClassLoader(), String.class, tasks.getIntermediateResult());
+                return CastUtils.cast(String.class, tasks.getIntermediateResult());
             }
         });
     }

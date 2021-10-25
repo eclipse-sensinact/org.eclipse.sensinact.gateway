@@ -57,9 +57,9 @@ public class MultiplicationFunction extends MathFunction<Double> {
         int length = datas == null ? 0 : datas.size();
         if (length > 0) {
             try {
-                result = CastUtils.cast(super.mediator.getClassLoader(), double.class, datas.get(0).getValue());
+                result = CastUtils.cast(double.class, datas.get(0).getValue());
                 for (int i = 1; i < length; i++) {
-                    result = result * CastUtils.cast(super.mediator.getClassLoader(), double.class, datas.get(i).getValue());
+                    result = result * CastUtils.cast(double.class, datas.get(i).getValue());
                 }
             } catch (ClassCastException e) {
                 result = Double.NaN;

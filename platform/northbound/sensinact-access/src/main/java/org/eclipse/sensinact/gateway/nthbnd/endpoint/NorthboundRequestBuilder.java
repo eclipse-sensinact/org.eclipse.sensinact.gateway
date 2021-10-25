@@ -272,7 +272,7 @@ public class NorthboundRequestBuilder {
                 break;
             case "UNSUBSCRIBE":
             	extraArguments = this.arguments.size()>1?this.arguments.subList(1, this.arguments.size()-1):null;
-            	String subcriptionId = CastUtils.cast(mediator.getClassLoader(), String.class, this.arguments.get(0).value);
+            	String subcriptionId = CastUtils.cast(String.class, this.arguments.get(0).value);
                 if (this.resource != null)
                     request = new AttributeUnsubscribeRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, 
                     	attribute, subcriptionId, extraArguments==null|| extraArguments.size()==0?null:extraArguments.toArray(new Argument[0]));

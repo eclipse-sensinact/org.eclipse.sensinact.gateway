@@ -55,7 +55,7 @@ public abstract class AccessMethodJSONResponse extends AccessMethodResponse<JSON
 	 */
 	public <T> T getResponse(Class<T> clazz, String key) {
 		Object o = this.getResponse(key);
-		return CastUtils.cast(super.mediator.getClassLoader(), clazz, o);
+		return CastUtils.cast(clazz, o);
 	}
 
 }

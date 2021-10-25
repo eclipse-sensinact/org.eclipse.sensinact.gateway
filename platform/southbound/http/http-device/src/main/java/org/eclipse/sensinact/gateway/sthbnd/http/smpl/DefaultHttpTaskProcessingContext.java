@@ -42,7 +42,7 @@ public class DefaultHttpTaskProcessingContext implements HttpTaskProcessingConte
         this.properties.put("task.result", new Executable<Void, String>() {
             @Override
             public String execute(Void parameter) throws Exception {
-                return CastUtils.cast(DefaultHttpTaskProcessingContext.this.mediator.getClassLoader(), String.class, task.getResult());
+                return CastUtils.cast(String.class, task.getResult());
             }
         });
         this.properties.put("task.path", new Executable<Void, String>() {

@@ -55,8 +55,8 @@ public class ModuloFunction extends MathFunction<Double> {
     public void process(List<DataItf> datas) {
         double result;
         try {
-            double value = CastUtils.cast(mediator.getClassLoader(), double.class, datas.get(0).getValue());
-            double modulo = CastUtils.cast(mediator.getClassLoader(), double.class, datas.get(1).getValue());
+            double value = CastUtils.cast(double.class, datas.get(0).getValue());
+            double modulo = CastUtils.cast(double.class, datas.get(1).getValue());
             result = value % modulo;
             if (mediator.isDebugLoggable()) {
                 mediator.debug(value + " % " + modulo + " = " + result);

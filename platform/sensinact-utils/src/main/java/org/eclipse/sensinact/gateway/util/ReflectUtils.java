@@ -701,7 +701,7 @@ public abstract class ReflectUtils {
      *                   to instantiate
      * @return the Java object
      */
-    public static <E extends Object, T> T instantiate(ClassLoader classloader, Class<T> clazz, JSONArray jsonObject) {
+    public static <E extends Object, T> T instantiate(Class<T> clazz, JSONArray jsonObject) {
         T instance = null;
 
         if (jsonObject == null) {
@@ -714,8 +714,8 @@ public abstract class ReflectUtils {
 
         } catch (Exception e) {
             try {
-                constructor = clazz.getConstructor(new Class[]{ClassLoader.class, JSONArray.class});
-                instance = constructor.newInstance(new Object[]{classloader, jsonObject});
+                constructor = clazz.getConstructor(new Class[]{JSONArray.class});
+                instance = constructor.newInstance(new Object[]{jsonObject});
 
             } catch (Exception ex) {
                 LOGGER.log(Level.CONFIG, e.getMessage(), e);
@@ -731,7 +731,7 @@ public abstract class ReflectUtils {
             parameters[i][0] = null;
             parameters[i][1] = jsonObject.get(i);
         }
-        return newInstance(classloader, clazz, parameters);
+        return newInstance(clazz, parameters);
     }
 
     /**
@@ -742,7 +742,7 @@ public abstract class ReflectUtils {
      * @param jsonObject the JSON object describing the java one to instantiate
      * @return the Java object
      */
-    public static <E extends Object, T> T instantiate(ClassLoader classloader, Class<T> clazz, JSONObject jsonObject) {
+    public static <E extends Object, T> T instantiate(Class<T> clazz, JSONObject jsonObject) {
         T instance = null;
         if (jsonObject == null) {
             return instance;
@@ -753,8 +753,8 @@ public abstract class ReflectUtils {
             instance = constructor.newInstance(jsonObject);
         } catch (Exception e) {
             try {
-                constructor = clazz.getConstructor(new Class[]{ClassLoader.class, JSONObject.class});
-                instance = constructor.newInstance(new Object[]{classloader, jsonObject});
+                constructor = clazz.getConstructor(new Class[]{JSONObject.class});
+                instance = constructor.newInstance(new Object[]{jsonObject});
 
             } catch (Exception ex) {
                 LOGGER.log(Level.CONFIG, e.getMessage(), e);
@@ -771,11 +771,11 @@ public abstract class ReflectUtils {
             parameters[i][0] = names[i];
             parameters[i][1] = (jsonObject).get(names[i]);
         }
-        return newInstance(classloader, clazz, parameters);
+        return newInstance(clazz, parameters);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static final <E extends Object, T> T newInstance(ClassLoader classloader, Class<T> clazz, Object[][] parameters) {
+    private static final <E extends Object, T> T newInstance(Class<T> clazz, Object[][] parameters) {
         T instance = null;
 
         //orders public constructors according to their
@@ -807,7 +807,7 @@ public abstract class ReflectUtils {
             Object[] params = new Object[parameterTypes.length];
             int typeIndex = 0;
             for (; typeIndex < parameterTypes.length; typeIndex++) {
-                Object parameter = CastUtils.getObjectFromJSON(classloader, parameterTypes[typeIndex], parameters[typeIndex][1]);
+                Object parameter = CastUtils.getObjectFromJSON(parameterTypes[typeIndex], parameters[typeIndex][1]);
 
                 if (parameter == null && !JSONObject.NULL.equals(parameters[typeIndex][1])) {
                     params = null;
@@ -837,12 +837,12 @@ public abstract class ReflectUtils {
                     }
                     field.setAccessible(true);
                     if (List.class.isAssignableFrom(field.getType())) {
-                        field.set(instance, CastUtils.toList(classloader, (Class<List<E>>) field.getType(), (Class<E>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0], (JSONArray) value));
+                        field.set(instance, CastUtils.toList((Class<List<E>>) field.getType(), (Class<E>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0], (JSONArray) value));
 
                     } else if (Map.class.isAssignableFrom(field.getType())) {
-                        field.set(instance, CastUtils.toMap(classloader, (Class<Map<String, E>>) field.getType(), (Class<E>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[1], (JSONObject) value));
+                        field.set(instance, CastUtils.toMap((Class<Map<String, E>>) field.getType(), (Class<E>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[1], (JSONObject) value));
                     } else {
-                        field.set(instance, CastUtils.getObjectFromJSON(classloader, field.getType(), value));
+                        field.set(instance, CastUtils.getObjectFromJSON(field.getType(), value));
                     }
                 } catch (Exception exception) {
                     LOGGER.log(Level.CONFIG, exception.getMessage(), exception);

@@ -127,14 +127,14 @@ public class RemoteAccessMethodExecutable implements Executable<SensinactCoreBas
 
 		switch (this.method.name()) {
 		case "ACT":
-			json = core.act(publicKey, provider, service, resource, CastUtils.cast(mediator.getClassLoader(), 
+			json = core.act(publicKey, provider, service, resource, CastUtils.cast(
 					JSONArray.class, this.<Object[]>get(ARGUMENTS_TK)).toString());
 			break;
 		case "GET":
 			json = core.get(publicKey, provider, service, resource, attribute);
 			break;
 		case "SET":
-			json = core.set(publicKey, provider, service, resource, attribute, CastUtils.cast(mediator.getClassLoader(), 
+			json = core.set(publicKey, provider, service, resource, attribute, CastUtils.cast(
 					JSONArray.class, this.<Object>get(VALUE_TK)).toString());
 			break;
 		case "SUBSCRIBE":

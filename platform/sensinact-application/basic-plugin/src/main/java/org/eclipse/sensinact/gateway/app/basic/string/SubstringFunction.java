@@ -55,10 +55,10 @@ public class SubstringFunction extends StringFunction<String> {
      */
     public void process(List<DataItf> variables) {
         if (variables.size() == 2) {
-            super.update(CastUtils.cast(mediator.getClassLoader(), String.class, variables.get(0).getValue()).substring(CastUtils.castPrimitive(int.class, variables.get(1).getValue())));
+            super.update(CastUtils.cast(String.class, variables.get(0).getValue()).substring(CastUtils.castPrimitive(int.class, variables.get(1).getValue())));
             return;
         } else if (variables.size() == 3) {
-            super.update(CastUtils.cast(mediator.getClassLoader(), String.class, variables.get(0).getValue()).substring(CastUtils.castPrimitive(int.class, variables.get(1).getValue()), CastUtils.castPrimitive(int.class, variables.get(2).getValue())));
+            super.update(CastUtils.cast(String.class, variables.get(0).getValue()).substring(CastUtils.castPrimitive(int.class, variables.get(1).getValue()), CastUtils.castPrimitive(int.class, variables.get(2).getValue())));
             return;
         }
         super.update(null);

@@ -132,7 +132,7 @@ public abstract class Primitive implements Nameable {
         // set the value if defined in the JSONObject
         Object ovalue = jsonObject.opt(PrimitiveDescription.VALUE_KEY);
         if (ovalue != null)
-            this.setValue(CastUtils.getObjectFromJSON(this.mediator.getClassLoader(), this.getType(), ovalue));
+            this.setValue(CastUtils.getObjectFromJSON(this.getType(), ovalue));
     }
     
     @Override
@@ -221,7 +221,7 @@ public abstract class Primitive implements Nameable {
     		return value;
         Object valueObject = null;
         try {
-            valueObject = CastUtils.cast(this.mediator.getClassLoader(), this.getType(), value);
+            valueObject = CastUtils.cast(this.getType(), value);
 
         } catch (ClassCastException e) {
             throw new InvalidValueException(e);

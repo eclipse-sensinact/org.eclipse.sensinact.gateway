@@ -44,8 +44,8 @@ public class Absolute implements Constraint {
         this.classloader = classloader;
         this.complement = complement;
         try {
-            this.delta = Math.abs(CastUtils.cast(classloader, double.class, delta));
-            this.referenceValue = CastUtils.cast(classloader, double.class, referenceValue);
+            this.delta = Math.abs(CastUtils.cast(double.class, delta));
+            this.referenceValue = CastUtils.cast(double.class, referenceValue);
         } catch (ClassCastException e) {
             throw new InvalidConstraintDefinitionException("Unable to cast delta and referenceValue arguments into double values");
         } catch (NullPointerException e) {
@@ -62,7 +62,7 @@ public class Absolute implements Constraint {
         boolean complies = false;
         double doubleValue = 0;
         try {
-            doubleValue = CastUtils.cast(this.classloader, double.class, value);
+            doubleValue = CastUtils.cast(double.class, value);
         } catch (Exception e) {
             return complies;
         }

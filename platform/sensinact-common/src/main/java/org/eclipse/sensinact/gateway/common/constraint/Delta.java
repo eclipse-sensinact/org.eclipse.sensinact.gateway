@@ -45,10 +45,10 @@ public class Delta implements Constraint {
         this.classloader = classloader;
         this.complement = complement;
         try {
-            double deltaValue = Math.abs(CastUtils.cast(this.classloader, double.class, delta));
+            double deltaValue = Math.abs(CastUtils.cast(double.class, delta));
             this.delta = deltaValue > 100 ? deltaValue - 100 : deltaValue;
 
-            this.referenceValue = CastUtils.cast(this.classloader, double.class, referenceValue);
+            this.referenceValue = CastUtils.cast(double.class, referenceValue);
         } catch (ClassCastException e) {
             throw new InvalidConstraintDefinitionException("Unable to cast delta and referenceValue arguments into double values");
         } catch (NullPointerException e) {
@@ -65,7 +65,7 @@ public class Delta implements Constraint {
         boolean complies = false;
         double doubleValue = 0;
         try {
-            doubleValue = CastUtils.cast(classloader, double.class, value);
+            doubleValue = CastUtils.cast(double.class, value);
         } catch (Exception e) {
             return complies;
         }

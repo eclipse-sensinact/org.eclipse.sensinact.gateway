@@ -185,7 +185,7 @@ public abstract class TypedProperties<T extends Enum<T> & KeysCollection> implem
                 return (V) object;
             }
             if (typedKey != null && !typedKey.getType().isAssignableFrom(object.getClass())) {
-                return CastUtils.cast(this.mediator.getClassLoader(), typedKey.getType(), object);
+                return CastUtils.cast(typedKey.getType(), object);
             }
         }
         return (V) object;

@@ -50,7 +50,7 @@ public class SleepFunction extends TimeFunction<Boolean> {
      * @see AbstractFunction#process(List)
      */
     public void process(List<DataItf> datas) {
-        long duration = CastUtils.cast(this.mediator.getClassLoader(), long.class, datas.get(0).getValue());
+        long duration = CastUtils.cast(long.class, datas.get(0).getValue());
         try {
             Thread.sleep(duration);
         } catch (InterruptedException e) {

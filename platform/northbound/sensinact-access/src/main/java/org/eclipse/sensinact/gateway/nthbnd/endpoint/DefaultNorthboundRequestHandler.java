@@ -406,26 +406,26 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 	                    	found = true;
 	                        break;
 	                    case "conditions":
-	                        conditions = CastUtils.cast(mediator.getClassLoader(), JSONArray.class, parameter.getValue());
+	                        conditions = CastUtils.cast(JSONArray.class, parameter.getValue());
 	                    	found = true;
 	                        break;
                         case "sender":
-                            sender = CastUtils.cast(mediator.getClassLoader(), String.class, parameter.getValue());
+                            sender = CastUtils.cast(String.class, parameter.getValue());
 	                    	found = true;
                             break;
                         case "pattern":
-                            isPattern = CastUtils.cast(mediator.getClassLoader(), boolean.class, parameter.getValue());
+                            isPattern = CastUtils.cast(boolean.class, parameter.getValue());
 	                    	found = true;
                             break;
                         case "complement":
-                            isComplement = CastUtils.cast(mediator.getClassLoader(), boolean.class, parameter.getValue());
+                            isComplement = CastUtils.cast(boolean.class, parameter.getValue());
 	                    	found = true;
                             break;
                         case "types":
-                            types = CastUtils.castArray(mediator.getClassLoader(), SnaMessage.Type[].class, parameter.getValue());
+                            types = CastUtils.castArray(SnaMessage.Type[].class, parameter.getValue());
 	                    	found = true;
                         case "policy":
-                            policy = CastUtils.cast(mediator.getClassLoader(), String.class, parameter.getValue());
+                            policy = CastUtils.cast(String.class, parameter.getValue());
 	                    	found = true;
                             break;
                         default:

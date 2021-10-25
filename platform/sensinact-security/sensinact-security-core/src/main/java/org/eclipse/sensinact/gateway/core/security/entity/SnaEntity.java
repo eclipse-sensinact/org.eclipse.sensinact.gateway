@@ -162,7 +162,7 @@ public abstract class SnaEntity {
 		if (field != null) {
 			try {
 				field.setAccessible(true);
-				return CastUtils.cast(mediator.getClassLoader(), long.class, field.get(entity));
+				return CastUtils.cast(long.class, field.get(entity));
 
 			} catch (Exception e) {
 				mediator.debug(e.getMessage());
@@ -361,11 +361,11 @@ public abstract class SnaEntity {
 		Method method = null;
 		try {
 			if ((method = this.getMethod(this.getMethodName(field.getName(), "set"), field.getType())) != null) {
-				method.invoke(this, CastUtils.cast(classLoader, field.getType(), value));
+				method.invoke(this, CastUtils.cast(field.getType(), value));
 
 			} else {
 				field.setAccessible(true);
-				field.set(this, CastUtils.cast(classLoader, field.getType(), value));
+				field.set(this, CastUtils.cast(field.getType(), value));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

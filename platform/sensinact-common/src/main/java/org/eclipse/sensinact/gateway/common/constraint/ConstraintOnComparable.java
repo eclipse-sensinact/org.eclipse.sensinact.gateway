@@ -85,7 +85,7 @@ public abstract class ConstraintOnComparable<T> implements Constraint {
         if (!Comparable.class.isAssignableFrom(comparableClass) && (comparableClass = CastUtils.primitiveToComparable(operandClass)) == null) {
             throw new InvalidConstraintDefinitionException(new StringBuilder().append(operand.getClass().getCanonicalName()).append(" cannot be casted to Comparable").toString());
         }
-        this.operand = (Comparable<T>) CastUtils.cast(this.classloader, comparableClass, operand);
+        this.operand = (Comparable<T>) CastUtils.cast(comparableClass, operand);
         this.complement = complement;
     }
 
@@ -101,7 +101,7 @@ public abstract class ConstraintOnComparable<T> implements Constraint {
         }
         T castedValue = null;
         try {
-            castedValue = (T) CastUtils.cast(this.classloader, this.operand.getClass(), value);
+            castedValue = (T) CastUtils.cast(this.operand.getClass(), value);
 
         } catch (ClassCastException e) {
             return false;

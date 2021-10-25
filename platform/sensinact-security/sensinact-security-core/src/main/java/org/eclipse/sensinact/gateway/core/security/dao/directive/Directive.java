@@ -82,7 +82,7 @@ public abstract class Directive {
 			builder.append(SnaDAO.QUOTE);
 
 		} else {
-			builder.append(CastUtils.cast(mediator.getClassLoader(), String.class, object));
+			builder.append(CastUtils.cast(String.class, object));
 		}
 		return builder.toString();
 	}

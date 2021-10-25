@@ -124,15 +124,15 @@ public class DefaultConstraintFactory implements ConstraintFactory {
                 break;
             case LENGTH:
                 referenceType = int.class;
-                instance = new Length(classloader, CastUtils.cast(classloader, int.class, reference), complement);
+                instance = new Length(classloader, CastUtils.cast(int.class, reference), complement);
                 break;
             case MAXLENGTH:
                 referenceType = int.class;
-                instance = new MaxLength(classloader, CastUtils.cast(classloader, int.class, reference), complement);
+                instance = new MaxLength(classloader, CastUtils.cast(int.class, reference), complement);
                 break;
             case MINLENGTH:
                 referenceType = int.class;
-                instance = new MinLength(classloader, CastUtils.cast(classloader, int.class, reference), complement);
+                instance = new MinLength(classloader, CastUtils.cast(int.class, reference), complement);
                 break;
             case PATTERN:
                 referenceType = String.class;

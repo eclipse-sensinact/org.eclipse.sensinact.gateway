@@ -55,8 +55,8 @@ public class DivisionFunction extends MathFunction<Double> {
     public void process(List<DataItf> datas) {
         double result;
         try {
-            double numerator = CastUtils.cast(mediator.getClassLoader(), double.class, datas.get(0).getValue());
-            double divisor = CastUtils.cast(mediator.getClassLoader(), double.class, datas.get(1).getValue());
+            double numerator = CastUtils.cast(double.class, datas.get(0).getValue());
+            double divisor = CastUtils.cast(double.class, datas.get(1).getValue());
             if (divisor != 0) {
                 result = numerator / divisor;
                 if (mediator.isDebugLoggable()) {

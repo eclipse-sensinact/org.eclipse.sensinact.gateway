@@ -84,7 +84,7 @@ public abstract class ConstraintOnCollectionSize implements Constraint {
         this.operator = operator;
         this.complement = complement;
         try {
-            this.length = CastUtils.cast(this.classloader, int.class, length);
+            this.length = CastUtils.cast(int.class, length);
         } catch (ClassCastException e) {
             throw new InvalidConstraintDefinitionException(e);
         }
@@ -123,7 +123,7 @@ public abstract class ConstraintOnCollectionSize implements Constraint {
             complies = this.doComplies(Array.getLength(value));
         } else {
             try {
-                Object[] array = CastUtils.castArray(this.classloader, Object[].class, value);
+                Object[] array = CastUtils.castArray(Object[].class, value);
 
                 complies = this.complies(array);
 

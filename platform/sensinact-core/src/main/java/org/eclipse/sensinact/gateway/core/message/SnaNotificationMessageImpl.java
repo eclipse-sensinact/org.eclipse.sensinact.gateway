@@ -118,6 +118,6 @@ public abstract class SnaNotificationMessageImpl<S extends Enum<S> & SnaMessageS
 	 *         notification {@link JSONObject}
 	 */
 	public <T> T getNotification(Class<T> type, String key) {
-		return CastUtils.cast(super.mediator.getClassLoader(), type, getNotification(key));
+		return CastUtils.cast(type, getNotification(key));
 	}
 }

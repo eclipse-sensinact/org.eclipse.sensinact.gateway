@@ -88,7 +88,7 @@ public class Pattern implements Constraint {
         }
         String sequence = null;
         try {
-            sequence = CastUtils.cast(this.classloader, String.class, value);
+            sequence = CastUtils.cast(String.class, value);
         } catch (ClassCastException e) {
             return complies;
         }

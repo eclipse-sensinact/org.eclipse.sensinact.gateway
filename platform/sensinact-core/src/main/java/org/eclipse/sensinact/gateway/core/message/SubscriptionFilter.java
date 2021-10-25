@@ -78,7 +78,7 @@ public class SubscriptionFilter extends SnaFilter {
 		} catch (ClassNotFoundException e) {
 			return false;
 		}
-		Object object = CastUtils.cast(super.mediator.getClassLoader(), clazz, jsonObject.opt(DataResource.VALUE));
+		Object object = CastUtils.cast(clazz, jsonObject.opt(DataResource.VALUE));
 
 		Iterator<Constraint> iterator = this.conditions.iterator();
 

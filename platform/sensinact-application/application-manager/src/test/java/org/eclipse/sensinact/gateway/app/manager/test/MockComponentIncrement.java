@@ -25,6 +25,6 @@ class MockComponentIncrement extends AbstractFunction<Integer> {
     }
 
     public void process(List<DataItf> variables) {
-        super.update((Integer) CastUtils.cast(mediator.getClassLoader(), variables.get(0).getType(), variables.get(0).getValue()) + 1);
+        super.update((Integer) CastUtils.cast(variables.get(0).getType(), variables.get(0).getValue()) + 1);
     }
 }

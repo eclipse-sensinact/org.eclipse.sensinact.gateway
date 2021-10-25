@@ -52,7 +52,7 @@ public class ValueDefinition<C> extends XmlModelParsingContext {
     	C type = this.typeDefinition.getType();
     	if(Class.class.isAssignableFrom(type.getClass())){
 	        try {
-	            this.value = CastUtils.cast(super.mediator.getClassLoader(), (Class<?>)type, value);
+	            this.value = CastUtils.cast((Class<?>)type, value);
 	        } catch (ClassCastException e) {
 	            super.mediator.error(e);
 	        }catch(Exception e) {

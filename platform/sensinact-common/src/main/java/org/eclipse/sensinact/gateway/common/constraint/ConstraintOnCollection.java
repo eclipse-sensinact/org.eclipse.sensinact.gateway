@@ -123,7 +123,7 @@ public abstract class ConstraintOnCollection<T> implements Constraint {
         Class<T> castedOperandClass = (Class<T>) CastUtils.primitiveToComparable(this.operandClass);
         this.operandClass = castedOperandClass != null ? castedOperandClass : this.operandClass;
         try {
-            this.operand = (T[]) CastUtils.castArray(this.classloader, ((T[]) Array.newInstance(this.operandClass, 0)).getClass(), operand);
+            this.operand = (T[]) CastUtils.castArray(((T[]) Array.newInstance(this.operandClass, 0)).getClass(), operand);
         } catch (ClassCastException e) {
             throw new InvalidConstraintDefinitionException(e);
         }

@@ -36,7 +36,7 @@ public class JSONResponseFormat implements ResponseFormat<JSONObject> {
         }
         String json = JSONUtils.toJSONFormat(object);
         try {
-            return CastUtils.cast(this.mediator.getClassLoader(), JSONObject.class, json);
+            return CastUtils.cast(JSONObject.class, json);
 
         } catch (ClassCastException e) {
             return new JSONObject().put("response", json);

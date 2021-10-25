@@ -312,13 +312,12 @@ public abstract class CastUtils {
      * Casts the specified object argument into
      * the type passed as parameter
      *
-     * @param classloader the appropriate classloader
      * @param clazz       the destination type
      * @param object      the object to cast
      * @return the typed object
      * @throws ClassCastException if the cast is not possible
      */
-    public static <T> T cast(ClassLoader classloader, Class<T> clazz, Object object) throws ClassCastException {
+    public static <T> T cast(Class<T> clazz, Object object) throws ClassCastException {
         if (object == null) {
             return null;
         }
@@ -326,13 +325,13 @@ public abstract class CastUtils {
             return (T) object;
         }
         if (JSONObject.class.isAssignableFrom(object.getClass()) || JSONArray.class.isAssignableFrom(object.getClass())) {
-            return CastUtils.<T>getObjectFromJSON(classloader, clazz, object);
+            return CastUtils.<T>getObjectFromJSON(clazz, object);
         }
         if (CastUtils.isPrimitive(clazz)) {
             return (T) CastUtils.castPrimitive(clazz, object);
         }
         if (clazz.isArray()) {
-            return (T) CastUtils.castArray(classloader, clazz, object);
+            return (T) CastUtils.castArray(clazz, object);
         }
         String message = new StringBuilder("Unable to cast ").append(object.getClass().getSimpleName()).append(" into ").append(clazz.getSimpleName()).toString();
         if (String.class.isAssignableFrom(object.getClass())) {
@@ -362,7 +361,7 @@ public abstract class CastUtils {
                         throw new ClassCastException(message);
                     }
                 }
-                return CastUtils.cast(classloader, clazz, objectJSON);
+                return CastUtils.cast(clazz, objectJSON);
             }
         }
         throw new ClassCastException(message);
@@ -372,13 +371,12 @@ public abstract class CastUtils {
      * Cast the object passed as parameter into the Array class
      * also passed as parameter
      *
-     * @param classloader the appropriate classloader
      * @param clazz       the destination Array class to cast the object argument into
      * @param object      object to cast into the Array class
      * @return the clazz argument typed array
      * @throws ClassCastException if the cast is not possible
      */
-    public static <T> T castArray(ClassLoader classloader, Class<T> clazz, Object object) throws ClassCastException {
+    public static <T> T castArray(Class<T> clazz, Object object) throws ClassCastException {
         if (!clazz.isArray()) {
             throw new ClassCastException("Destination Class is not an Array one");
         }
@@ -391,7 +389,7 @@ public abstract class CastUtils {
             Object array = Array.newInstance(componentType, length);
 
             for (int i = 0; i < length; i++) {
-                Array.set(array, i, CastUtils.cast(classloader, componentType, Array.get(object, i)));
+                Array.set(array, i, CastUtils.cast(componentType, Array.get(object, i)));
             }
             return (T) array;
         }
@@ -401,13 +399,13 @@ public abstract class CastUtils {
             Object array = Array.newInstance(componentType, length);
 
             for (int i = 0; i < length; i++) {
-                Array.set(array, i, CastUtils.cast(classloader, componentType, ((JSONArray) object).get(i)));
+                Array.set(array, i, CastUtils.cast(componentType, ((JSONArray) object).get(i)));
             }
             return (T) array;
         }
         if (String.class.isAssignableFrom(object.getClass())) {
             String objectStr = (String) object;
-            T jsonArray = CastUtils.getObjectFromJSON(classloader, clazz, objectStr);
+            T jsonArray = CastUtils.getObjectFromJSON(clazz, objectStr);
             if (jsonArray != null) {
                 return jsonArray;
             }
@@ -423,7 +421,7 @@ public abstract class CastUtils {
                 return (T) characters;
             }
             objectStr = objectStr.replace('[', ' ').replace(']', ' ').trim();
-            return (T) CastUtils.<T>castArray(classloader, clazz, objectStr, CastUtils.COMMA_DELIMITER);
+            return (T) CastUtils.<T>castArray(clazz, objectStr, CastUtils.COMMA_DELIMITER);
         }
         throw new ClassCastException("the object to cast is neither an instance of an Array class nor a String one");
     }
@@ -441,14 +439,14 @@ public abstract class CastUtils {
      * @return the clazz argument typed array
      * @throws ClassCastException if the cast is not possible
      */
-    public static <T> T castArray(ClassLoader classloader, Class<T> clazz, String objectStr, String delimiter) throws ClassCastException {
+    public static <T> T castArray(Class<T> clazz, String objectStr, String delimiter) throws ClassCastException {
         if (!clazz.isArray()) {
             throw new ClassCastException("Destination Class is not an Array one");
         }
         if (objectStr.indexOf(delimiter) == -1) {
             throw new ClassCastException("Delimiter not found");
         }
-        return (T) CastUtils.castArray(classloader, clazz, objectStr.split(delimiter));
+        return (T) CastUtils.castArray(clazz, objectStr.split(delimiter));
     }
 
     /**
@@ -702,7 +700,7 @@ public abstract class CastUtils {
      * @return the created Java object
      */
     @SuppressWarnings("unchecked")
-    public static <T> T getObjectFromJSON(ClassLoader classLoader, Class<T> clazz, Object json) {
+    public static <T> T getObjectFromJSON(Class<T> clazz, Object json) {
         if (json == null) {
             return (T) null;
         }
@@ -727,18 +725,18 @@ public abstract class CastUtils {
             return CastUtils.castPrimitive(clazz, json);
 
         } else if (JSONObject.class.isAssignableFrom(json.getClass())) {
-            return getObjectFromJSON(classLoader, clazz, (JSONObject) json);
+            return getObjectFromJSON(clazz, (JSONObject) json);
 
         } else if (JSONArray.class.isAssignableFrom(json.getClass())) {
-            return getObjectFromJSON(classLoader, clazz, (JSONArray) json);
+            return getObjectFromJSON(clazz, (JSONArray) json);
 
         } else if (json.getClass().equals(String.class)) {
             try {
-                return getObjectFromJSON(classLoader, clazz, new JSONObject((String) json));
+                return getObjectFromJSON(clazz, new JSONObject((String) json));
 
             } catch (JSONException e) {
                 try {
-                    return getObjectFromJSON(classLoader, clazz, new JSONArray((String) json));
+                    return getObjectFromJSON(clazz, new JSONArray((String) json));
 
                 } catch (JSONException je) {
                     LOGGER.log(Level.CONFIG, je.getMessage(), je);
@@ -765,7 +763,7 @@ public abstract class CastUtils {
      * @return the created Java object
      */
     @SuppressWarnings("unchecked")
-    public static <T> T getObjectFromJSON(ClassLoader classloader, Class<T> clazz, JSONObject jsonObject) {
+    public static <T> T getObjectFromJSON(Class<T> clazz, JSONObject jsonObject) {
         if (JSONObject.NULL.equals(jsonObject)) {
             return (T) null;
         }
@@ -779,11 +777,11 @@ public abstract class CastUtils {
 
             int index = 0;
             for (; index < names.length; index++) {
-                Array.set(array, index, getObjectFromJSON(classloader, componentType, jsonObject.get(names[index])));
+                Array.set(array, index, getObjectFromJSON(componentType, jsonObject.get(names[index])));
             }
             return (T) array;
         }
-        return ReflectUtils.instantiate(classloader, clazz, jsonObject);
+        return ReflectUtils.instantiate(clazz, jsonObject);
     }
 
     /**
@@ -795,7 +793,7 @@ public abstract class CastUtils {
      * @param jsonArray   the JSONArray to convert
      * @return the created Java object
      */
-    public static <T> T getObjectFromJSON(ClassLoader classloader, Class<T> clazz, JSONArray jsonArray) {
+    public static <T> T getObjectFromJSON(Class<T> clazz, JSONArray jsonArray) {
         if (JSONObject.NULL.equals(jsonArray)) {
             return (T) null;
         }
@@ -811,11 +809,11 @@ public abstract class CastUtils {
             int index = 0;
 
             for (; index < jsonArray.length(); index++) {
-                Array.set(array, index, getObjectFromJSON(classloader, componentType, jsonArray.get(index)));
+                Array.set(array, index, getObjectFromJSON(componentType, jsonArray.get(index)));
             }
             return (T) array;
         }
-        return ReflectUtils.instantiate(classloader, clazz, jsonArray);
+        return ReflectUtils.instantiate(clazz, jsonArray);
     }
 
 
@@ -829,10 +827,10 @@ public abstract class CastUtils {
      * @param jsonString  the JSON formated string to convert into a {@link Map}
      * @return the {@link Map} built from the {@link JSONObject}
      */
-    public static <S extends Object, T extends Map<String, S>> T toMap(ClassLoader classloader, Class<T> clazz, Class<S> subtype, String jsonString) {
+    public static <S extends Object, T extends Map<String, S>> T toMap(Class<T> clazz, Class<S> subtype, String jsonString) {
         if (jsonString != null && jsonString.length() > 0) {
             try {
-                return toMap(classloader, clazz, subtype, new JSONObject(jsonString));
+                return toMap(clazz, subtype, new JSONObject(jsonString));
 
             } catch (JSONException e) {
                 LOGGER.log(Level.CONFIG, e.getMessage(), e);
@@ -852,7 +850,7 @@ public abstract class CastUtils {
      * @return the {@link Map} built from the {@link JSONObject}
      */
     @SuppressWarnings("unchecked")
-    public static <S extends Object, T extends Map<String, S>> T toMap(ClassLoader classloader, Class<T> clazz, Class<S> subtype, JSONObject jsonObject) {
+    public static <S extends Object, T extends Map<String, S>> T toMap(Class<T> clazz, Class<S> subtype, JSONObject jsonObject) {
         T map = null;
         if (clazz.equals(Map.class)) {
             clazz = (Class<T>) new HashMap<String, S>().getClass();
@@ -867,7 +865,7 @@ public abstract class CastUtils {
                 int position = 0;
                 int length = names.length;
                 for (; position < length; position++) {
-                    S object = getObjectFromJSON(classloader, subtype, jsonObject.get(names[position]));
+                    S object = getObjectFromJSON(subtype, jsonObject.get(names[position]));
                     if (object == null) {
                         continue;
                     }
@@ -890,7 +888,7 @@ public abstract class CastUtils {
      * @param jsonArray   the {@link JSONArray} object to convert into a {@link List}
      * @return the {@link List} built using the {@link JSONArray}
      */
-    public static <S extends Object, T extends List<S>> T toList(ClassLoader classloader, Class<T> clazz, Class<S> subtype, JSONArray jsonArray) {
+    public static <S extends Object, T extends List<S>> T toList(Class<T> clazz, Class<S> subtype, JSONArray jsonArray) {
         T list = null;
         if (clazz.equals(List.class)) {
             clazz = (Class<T>) new ArrayList<S>().getClass();
@@ -901,7 +899,7 @@ public abstract class CastUtils {
                 int position = 0;
                 int length = jsonArray.length();
                 for (; position < length; position++) {
-                    S object = getObjectFromJSON(classloader, subtype, jsonArray.get(position));
+                    S object = getObjectFromJSON(subtype, jsonArray.get(position));
                     if (object == null) {
                         continue;
                     }

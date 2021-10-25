@@ -55,8 +55,8 @@ public class SubtractionFunction extends MathFunction<Double> {
     public void process(List<DataItf> datas) {
         double result;
         try {
-            double firstOperand = CastUtils.cast(super.mediator.getClassLoader(), double.class, datas.get(0).getValue());
-            double secondOperand = CastUtils.cast(super.mediator.getClassLoader(), double.class, datas.get(1).getValue());
+            double firstOperand = CastUtils.cast(double.class, datas.get(0).getValue());
+            double secondOperand = CastUtils.cast(double.class, datas.get(1).getValue());
             result = firstOperand - secondOperand;
             if (mediator.isDebugLoggable()) {
                 mediator.debug(firstOperand + " - " + secondOperand + " = " + result);

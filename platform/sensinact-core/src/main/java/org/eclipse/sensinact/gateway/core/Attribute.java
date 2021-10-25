@@ -127,7 +127,7 @@ public class Attribute extends DescribablePrimitive {
 		Object ovalue = attribute.opt(PrimitiveDescription.VALUE_KEY);
 
 		if (ovalue != null) {
-			this.setValue(CastUtils.getObjectFromJSON(super.mediator.getClassLoader(), this.getType(), ovalue));
+			this.setValue(CastUtils.getObjectFromJSON(this.getType(), ovalue));
 		}
 		JSONArray metadataArray = attribute.optJSONArray("metadata");
 

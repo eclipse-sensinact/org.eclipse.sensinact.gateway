@@ -105,7 +105,7 @@ public class HttpAuthenticationTask<RESPONSE extends HttpResponse, REQUEST exten
         }
         String value = null;
         try {
-            value = this.tokenExtractor == null ? CastUtils.cast(super.mediator.getClassLoader(), String.class, result) : this.tokenExtractor.execute(result);
+            value = this.tokenExtractor == null ? CastUtils.cast(String.class, result) : this.tokenExtractor.execute(result);
         } catch (Exception e) {
             this.mediator.error(e);
         }

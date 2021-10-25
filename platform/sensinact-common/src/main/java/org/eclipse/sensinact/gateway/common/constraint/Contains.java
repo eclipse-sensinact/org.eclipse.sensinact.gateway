@@ -44,7 +44,7 @@ public class Contains<T> extends ConstraintOnCollection<T> {
         boolean complies = false;
         T castedValue = null;
         try {
-            castedValue = CastUtils.cast(classloader, super.operandClass, value);
+            castedValue = CastUtils.cast(super.operandClass, value);
         } catch (ClassCastException e) {
             return complies;
         }

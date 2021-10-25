@@ -329,7 +329,7 @@ public class JSONMapper {
                     }
                     Object result = null;
                     try {
-                        if ((result = jsonObject.opt(key)) != null && result.equals(CastUtils.cast(JSONMapper.this.classloader, result.getClass(), value))) {
+                        if ((result = jsonObject.opt(key)) != null && result.equals(CastUtils.cast(result.getClass(), value))) {
                             return json;
                         }
                     } catch (ClassCastException e) {

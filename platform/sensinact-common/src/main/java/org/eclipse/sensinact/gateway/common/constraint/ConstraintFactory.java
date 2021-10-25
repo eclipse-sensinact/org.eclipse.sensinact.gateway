@@ -129,7 +129,7 @@ public interface ConstraintFactory {
                     operand = operandObject;
                 }
             }
-            boolean complement = CastUtils.getObjectFromJSON(classloader, boolean.class, constraint.opt(Constraint.COMPLEMENT_KEY));
+            boolean complement = CastUtils.getObjectFromJSON( boolean.class, constraint.opt(Constraint.COMPLEMENT_KEY));
 
             return Loader.load(classloader, operator, clazz, operand, complement);
         }

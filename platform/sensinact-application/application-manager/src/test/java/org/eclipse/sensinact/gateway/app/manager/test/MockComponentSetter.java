@@ -42,7 +42,7 @@ class MockComponentSetter extends AbstractFunction<Boolean> {
     }
 
     public void process(List<DataItf> variables) {
-        test.setValue((Integer) CastUtils.cast(mediator.getClassLoader(), variables.get(0).getType(), variables.get(0).getValue()));
+        test.setValue((Integer) CastUtils.cast(variables.get(0).getType(), variables.get(0).getValue()));
         super.update(true);
     }
 }
