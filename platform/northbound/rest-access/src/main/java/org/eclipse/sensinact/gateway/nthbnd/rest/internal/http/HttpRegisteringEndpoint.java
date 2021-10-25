@@ -29,6 +29,8 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.RegisteringResponse;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is the REST interface between each others classes
@@ -37,6 +39,8 @@ import org.json.JSONObject;
 @SuppressWarnings("serial")
 @WebServlet()
 public class HttpRegisteringEndpoint extends HttpServlet {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(HttpRegisteringEndpoint.class);
     private NorthboundMediator mediator;
 
     /**
@@ -121,11 +125,11 @@ public class HttpRegisteringEndpoint extends HttpServlet {
             response.setStatus(200);
 
         } catch (ClassCastException e) {
-            mediator.error(e);
+            LOG.error(e.getMessage(), e);
             response.sendError(400, "Invalid parameters type");
 
         } catch (Exception e) {
-            mediator.error(e);
+            LOG.error(e.getMessage(), e);
             response.sendError(520, "Internal server error");
 
         } 

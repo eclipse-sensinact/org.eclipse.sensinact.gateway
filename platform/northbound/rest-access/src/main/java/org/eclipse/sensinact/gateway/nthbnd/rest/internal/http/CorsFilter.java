@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //import javax.servlet.AsyncContext;
 import javax.servlet.Filter;
@@ -32,6 +34,8 @@ import java.io.IOException;
  */
 @WebFilter()
 public class CorsFilter implements Filter {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(CorsFilter.class);
     private NorthboundMediator mediator;
 
     /**
@@ -49,8 +53,8 @@ public class CorsFilter implements Filter {
      * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
      */
     public void init(FilterConfig config) throws ServletException {
-        if (mediator.isDebugLoggable()) {
-            mediator.info("Init with config [" + config + "]");
+        if (LOG.isDebugEnabled()) {
+            LOG.info("Init with config [" + config + "]");
         }
     }
 
@@ -85,7 +89,7 @@ public class CorsFilter implements Filter {
             try {
                 chain.doFilter(req, res);
             } catch (Exception e) {
-                mediator.error(e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }
@@ -95,8 +99,8 @@ public class CorsFilter implements Filter {
      * @see javax.servlet.Filter#destroy()
      */
     public void destroy() {
-        if (mediator.isDebugLoggable()) {
-            mediator.info("Destroyed filter");
+        if (LOG.isDebugEnabled()) {
+            LOG.info("Destroyed filter");
         }
     }
 }

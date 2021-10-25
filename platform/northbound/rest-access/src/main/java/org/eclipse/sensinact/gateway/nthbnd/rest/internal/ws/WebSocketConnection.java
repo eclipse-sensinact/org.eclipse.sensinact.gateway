@@ -29,12 +29,16 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * WebSocket connection endpoint
  */
 @WebSocket(maxIdleTime = 0, maxTextMessageSize = 64 * 1024)
 public class WebSocketConnection {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(WebSocketConnection.class);
     protected static final String LOGIN_PATH = "sensinact-login";
     protected static final String LOGIN_URI = "/" + LOGIN_PATH;
 
@@ -72,7 +76,7 @@ public class WebSocketConnection {
         	try {
         		this.session.close();
         	} catch(Exception e) {
-        		this.mediator.error(e);
+        		LOG.error(e.getMessage(), e);
         	}
         }
         this.session = null;
@@ -97,26 +101,26 @@ public class WebSocketConnection {
             WsRestAccess restAccess = new WsRestAccess(wrapper, this);
             restAccess.proceed();
         } catch (IOException | JSONException e) {
-            this.mediator.error(e);
+            LOG.error(e.getMessage(), e);
             try {
 				this.send(new JSONObject().put("statusCode", 400).put("message", "Bad request").toString());
 			} catch (Exception e1) {
-	            this.mediator.error(e1);
+	            LOG.error(e1.getMessage(),e1);
 			}
         } catch (InvalidCredentialException e) {
-            this.mediator.error(e);
+            LOG.error(e.getMessage(), e);
             try {
 				this.send(new JSONObject().put("statusCode", 403).put("message", e.getMessage()).toString());
 			} catch (Exception e1) {
-	            this.mediator.error(e1);
+	            LOG.error(e1.getMessage(),e1);
 			}
         } catch (Exception e) {
         	e.printStackTrace();
-            this.mediator.error(e);
+            LOG.error(e.getMessage(), e);
             try {
 				this.send(new JSONObject().put("statusCode", 500).put("message", "Exception - Internal server error").toString());
 			} catch (Exception e1) {
-	            this.mediator.error(e1);
+	            LOG.error(e1.getMessage(),e1);
 			}
         }
     }
@@ -132,7 +136,7 @@ public class WebSocketConnection {
 				try {
 					this.session.getRemote().sendPong(ByteBuffer.allocate(0));
 				} catch (IOException e) {
-		            this.mediator.error(e);
+		            LOG.error(e.getMessage(), e);
 				}
 				break;
 			case OpCode.PONG :
@@ -189,7 +193,7 @@ public class WebSocketConnection {
         		future.get(1, TimeUnit.SECONDS);
         	}
         } catch (Exception e) {
-            this.mediator.error(new StringBuilder(
+            LOG.error(new StringBuilder(
             	).append("Session "
             	).append(session.getLocalAddress()
             	).append("seems to be invalid, removing from the pool."
@@ -218,7 +222,7 @@ public class WebSocketConnection {
 	    		future.get(1, TimeUnit.SECONDS);
 	    	}
         } catch (Exception e) {
-            this.mediator.error(new StringBuilder(
+            LOG.error(new StringBuilder(
             		).append("Session "
             		).append(session.getLocalAddress()
             		).append("seems to be invalid, removing from the pool."

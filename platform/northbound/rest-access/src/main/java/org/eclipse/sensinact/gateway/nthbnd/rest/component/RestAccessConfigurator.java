@@ -42,6 +42,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.service.http.whiteboard.annotations.RequireHttpWhiteboard;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -49,7 +51,8 @@ import org.osgi.service.http.whiteboard.annotations.RequireHttpWhiteboard;
 @Component(immediate=true)
 @RequireHttpWhiteboard
 public class RestAccessConfigurator {
-    	
+   
+	private static final Logger LOG = LoggerFactory.getLogger(RestAccessConfigurator.class);
 	private CorsFilter corsFilter = null;
     private boolean corsHeader = false;
 	private NorthboundMediator mediator;
@@ -73,7 +76,7 @@ public class RestAccessConfigurator {
     }
 
     protected void injectPropertyFields() throws Exception {
-        this.mediator.debug("Starting introspection in bundle %s", mediator.getContext().getBundle().getSymbolicName());
+        LOG.debug("Starting introspection in bundle %s", mediator.getContext().getBundle().getSymbolicName());
         Interpolator interpolator = new Interpolator(this.mediator);
         interpolator.getInstance(this);
         for(Map.Entry<String,String> entry:interpolator.getPropertiesInjected().entrySet()){
@@ -114,7 +117,7 @@ public class RestAccessConfigurator {
 		        private final CountDownLatch initBarrier = new CountDownLatch(1); 
 				@Override
 		        public void init() throws ServletException {
-		            mediator.info("The Echo servlet has been initialized, but we delay initialization until the first request so that a Jetty Context is available");	
+		            LOG.info("The Echo servlet has been initialized, but we delay initialization until the first request so that a Jetty Context is available");	
 		        }
 			
 		        @Override
@@ -155,28 +158,28 @@ public class RestAccessConfigurator {
                 };
             }, 
         	new Class[]{ Servlet.class, WebSocketServlet.class });
-        this.mediator.info(String.format("%s servlet registered", RestAccessConstants.WS_ROOT));
+        LOG.info(String.format("%s servlet registered", RestAccessConstants.WS_ROOT));
         
         this.mediator.register(new HttpLoginEndpoint(mediator), Servlet.class, new Hashtable() {{
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.LOGIN_ENDPOINT);
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
         	}
         });
-        this.mediator.info(String.format("%s servlet registered", RestAccessConstants.LOGIN_ENDPOINT));
+        LOG.info(String.format("%s servlet registered", RestAccessConstants.LOGIN_ENDPOINT));
         
         mediator.register(new HttpRegisteringEndpoint(mediator), Servlet.class, new Hashtable() {{
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.REGISTERING_ENDPOINT);
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
         	}
         });
-        this.mediator.info(String.format("%s servlet registered", RestAccessConstants.REGISTERING_ENDPOINT));
+        LOG.info(String.format("%s servlet registered", RestAccessConstants.REGISTERING_ENDPOINT));
         
         mediator.register(new HttpEndpoint(mediator), Servlet.class, new Hashtable() {{
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.HTTP_ROOT);
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
         	}
         });      
-        this.mediator.info(String.format("%s servlet registered", RestAccessConstants.HTTP_ROOT));
+        LOG.info(String.format("%s servlet registered", RestAccessConstants.HTTP_ROOT));
     }
 
     @Deactivate

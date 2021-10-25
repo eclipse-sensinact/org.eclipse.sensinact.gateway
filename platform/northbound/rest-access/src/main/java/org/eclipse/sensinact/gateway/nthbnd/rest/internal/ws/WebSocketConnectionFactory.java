@@ -21,6 +21,8 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.LoginResponse;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -30,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 
 public class WebSocketConnectionFactory implements WebSocketCreator {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(WebSocketConnectionFactory.class);
     private NorthboundMediator mediator;
     private List<WebSocketConnection> sessions;
     private Map<String, String> anonymous;
@@ -98,7 +102,7 @@ public class WebSocketConnectionFactory implements WebSocketCreator {
                     this.anonymous.put(client, endpoint.getSessionToken());
 
                 } catch (InvalidCredentialException e) {
-                    mediator.debug(e.getMessage());
+                    LOG.debug(e.getMessage());
                 }
             }
         }
@@ -107,7 +111,7 @@ public class WebSocketConnectionFactory implements WebSocketCreator {
                 LoginResponse response = mediator.getAccessingEndpoint().createNorthboundEndpoint(credentials);
                 token = new SessionToken(response.getToken());
             } catch (InvalidCredentialException | NullPointerException e) {
-                mediator.debug(e.getMessage());
+                LOG.debug(e.getMessage());
             }
         }
         if (accessToken != null) {
@@ -115,14 +119,14 @@ public class WebSocketConnectionFactory implements WebSocketCreator {
                 LoginResponse response = mediator.getAccessingEndpoint().createNorthboundEndpoint(accessToken);
                 token = new SessionToken(response.getToken());
             } catch (InvalidCredentialException | NullPointerException e) {
-                mediator.debug(e.getMessage());
+                LOG.debug(e.getMessage());
             }
         }
         if (token != null) {
             try {
                 endpoint = mediator.getNorthboundEndpoints().getEndpoint(token);
             } catch (InvalidCredentialException e) {
-                mediator.debug(e.getMessage());
+                LOG.debug(e.getMessage());
             }
         }
         if (endpoint == null) {
@@ -132,7 +136,7 @@ public class WebSocketConnectionFactory implements WebSocketCreator {
             try {
                 resp.sendError(403, new String(jsonObject.toString().getBytes("UTF-8")));
             } catch (IOException e) {
-                mediator.error(e);
+                LOG.error(e.getMessage(), e);
             }
             return null;
         }
