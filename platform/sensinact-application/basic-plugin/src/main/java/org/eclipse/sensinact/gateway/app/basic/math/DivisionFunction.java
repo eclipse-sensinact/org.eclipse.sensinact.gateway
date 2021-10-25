@@ -16,6 +16,8 @@ import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,6 +30,8 @@ import java.util.List;
  * @see MathFunction
  */
 public class DivisionFunction extends MathFunction<Double> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(DivisionFunction.class);
     private static final String JSON_SCHEMA = "division.json";
 
     public DivisionFunction(Mediator mediator) {
@@ -59,15 +63,15 @@ public class DivisionFunction extends MathFunction<Double> {
             double divisor = CastUtils.cast(double.class, datas.get(1).getValue());
             if (divisor != 0) {
                 result = numerator / divisor;
-                if (mediator.isDebugLoggable()) {
-                    mediator.debug(numerator + " / " + divisor + " = " + result);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(numerator + " / " + divisor + " = " + result);
                 }
             } else {
                 result = Double.NaN;
             }
         } catch (ClassCastException e) {
             result = Double.NaN;
-            mediator.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
         super.update(result);
     }

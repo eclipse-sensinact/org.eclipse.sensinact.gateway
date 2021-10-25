@@ -16,6 +16,8 @@ import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,6 +30,8 @@ import java.util.List;
  * @see MathFunction
  */
 public class AdditionFunction extends MathFunction<Double> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AdditionFunction.class);
     private static final String JSON_SCHEMA = "addition.json";
 
     public AdditionFunction(Mediator mediator) {
@@ -63,7 +67,7 @@ public class AdditionFunction extends MathFunction<Double> {
                 }
             } catch (ClassCastException e) {
                 result = Double.NaN;
-                mediator.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
         }
         super.update(result);

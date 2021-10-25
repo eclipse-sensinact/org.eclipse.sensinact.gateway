@@ -66,10 +66,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class TestSnaFunction{
 	
+	private static final Logger LOG = LoggerFactory.getLogger(TestSnaFunction.class);
 
     private String lightState;
     private String displayText;
@@ -297,8 +300,8 @@ public class TestSnaFunction{
         Class<? extends Resource> resourceType = implementationInterface;
 
         if (resourceType == null) {
-            if (mediator.isErrorLoggable()) {
-                mediator.error("Unable to create a resource builder : null resource type");
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Unable to create a resource builder : null resource type");
             }
             return null;
         }
