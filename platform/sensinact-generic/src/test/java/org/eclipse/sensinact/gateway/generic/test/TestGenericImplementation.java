@@ -560,7 +560,7 @@ public class TestGenericImplementation {
         core.close();
     }
 
-    protected void doInit(Map configuration) {
+    protected void doInit(Map<String, Object> configuration) {
 
         configuration.put("felix.auto.start.1",  
                 "file:target/felix/bundle/org.osgi.service.component.jar "+  

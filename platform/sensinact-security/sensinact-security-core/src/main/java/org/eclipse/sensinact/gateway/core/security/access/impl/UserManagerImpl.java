@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core.security.access.impl;
 import java.lang.reflect.Method;
 import java.security.InvalidKeyException;
 import java.util.Collections;
-import java.util.HashMap;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;

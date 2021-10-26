@@ -90,26 +90,4 @@ class MySecuredAccess implements SecuredAccess {
 		return accessTree;
 	}
 
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SecuredAccess#createAuthorizationService()
-	 */
-	@Override
-	public void createAuthorizationService() {
-		// nothing to implement here
-		// AuthorizationService already registered in the
-		// moked BundleContext
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see SecuredAccess#close()
-	 */
-	@Override
-	public void close() {
-		System.out.println("Closing the SecuredAccess");
-	}
-
 }

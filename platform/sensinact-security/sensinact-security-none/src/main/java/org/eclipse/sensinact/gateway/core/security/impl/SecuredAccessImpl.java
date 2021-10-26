@@ -15,7 +15,6 @@ import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
-import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessNode;
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
@@ -23,17 +22,19 @@ import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.UserManager;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class SecuredAccessImpl implements SecuredAccess {
+@Component
+public class SecuredAccessImpl implements SecuredAccess {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SecuredAccessImpl.class);
 	
 	private Mediator mediator;
-
-	private ServiceRegistration<AuthorizationService> authorizationRegistration;
 
 	/**
 	 * Constructor
@@ -41,8 +42,9 @@ class SecuredAccessImpl implements SecuredAccess {
 	 * @param mediator the {@link Mediator} allowing the {@link SecuredAccess} service 
 	 * to be instantiated to interact with the OSGi host environment
 	 */
-	public SecuredAccessImpl(Mediator mediator) {
-		this.mediator = mediator;
+	@Activate
+	public SecuredAccessImpl(BundleContext ctx) {
+		this.mediator = new Mediator(ctx);
 	}
 
 	@Override
@@ -85,28 +87,10 @@ class SecuredAccessImpl implements SecuredAccess {
 		// do nothing
 	}
 
-	@Override
-	public void createAuthorizationService() {
-		// do nothing
-	}
-
-	@Override
-	public void close() {
+	@Deactivate
+	void close() {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("closing sensiNact secured access");
-		}
-		if (this.authorizationRegistration != null) {
-			try {
-				this.authorizationRegistration.unregister();
-
-			} catch (IllegalStateException e) {
-				try {
-					LOG.debug(e.getMessage());
-				} catch (IllegalStateException ise) {
-					// do nothing because it probably means
-					// that the OSGi environment is closing
-				}
-			}
 		}
 	}
 }

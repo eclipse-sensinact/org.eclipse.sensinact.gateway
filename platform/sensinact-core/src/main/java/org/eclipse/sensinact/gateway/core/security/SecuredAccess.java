@@ -104,17 +104,4 @@ public interface SecuredAccess {
 	 */
 	AccessTree<? extends AccessNode> getApplicationAccessTree(String publicKey) throws SecuredAccessException;
 
-	/**
-	 * Creates and registers an {@link AuthorizationService} that will allow to
-	 * recover the {@link AccessLevel} of a connected user
-	 * 
-	 * @throws SecuredAccessException
-	 */
-	void createAuthorizationService() throws SecuredAccessException;
-
-	/**
-	 * Closes this SecuredAccess service and frees all associated resources
-	 */
-	void close();
-
 }
