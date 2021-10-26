@@ -88,7 +88,6 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
     private Class<? extends HttpTask> subscribeTaskClass = null;
     private Class<? extends HttpTask> unsubscribeTaskClass = null;
     private Class<? extends HttpTask> servicesEnumerationTaskClass = null;
-    protected Timer timer;
     protected Deque<RecurrentHttpTaskConfigurator> recurrences;
     protected Map<CommandType, HttpTaskBuilder> adapters;
     protected Map<CommandType, HttpTaskUrlConfigurator> builders;
@@ -243,9 +242,6 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
 
         Iterator<RecurrentHttpTaskConfigurator> iterator = this.recurrences.iterator();
 
-        if (iterator.hasNext()) {
-            this.timer = new Timer();
-        }
         while (iterator.hasNext()) {
             final RecurrentHttpTaskConfigurator executable = iterator.next();
             final AtomicReference<ScheduledFuture<?>>  ref = new AtomicReference<>();
@@ -545,9 +541,13 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
     
     @Override
     public void stop() {
-        if (this.timer != null) {
-            this.timer.cancel();
-        }
+        worker.shutdown();
+        try {
+			worker.awaitTermination(1000, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+        worker.shutdownNow();
         super.stop();
     }
 }

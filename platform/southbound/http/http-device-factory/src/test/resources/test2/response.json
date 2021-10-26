@@ -1,0 +1,1567 @@
+{
+	"nhits": 51,
+	"parameters": {
+		"dataset": "test2",
+		"timezone": "UTC",
+		"rows": 51,
+		"start": 0,
+		"format": "json",
+		"facet": [
+			"date",
+			"name",
+			"type",
+			"value"
+		]
+	},
+	"records": [
+		{
+			"datasetid": "test2",
+			"recordid": "14a489fe93443d9febd13971d5b24e976f852eec",
+			"fields": {
+				"name": "Sensor O",
+				"id": "1452",
+				"type": "GOOSE",
+				"value": 0,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.849577,
+					2.350867
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.350867,
+					48.849577
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:08.889000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "69a8e6410e64b573c9b2e20a40f5987615088ca6",
+			"fields": {
+				"name": "Sensor R",
+				"id": "1851",
+				"type": "DUCK",
+				"value": 7,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.858396,
+					2.350484
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.350484,
+					48.858396
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:03.729000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "31d312d5482e37829b5ade69387e2a392d1fd6a7",
+			"fields": {
+				"name": "Sensor C",
+				"id": "1401",
+				"type": "GOOSE",
+				"value": 178,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.871505,
+					2.333759
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.333759,
+					48.871505
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:07.744000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "2f1606c45232f4760f61e831d2e68d636393d190",
+			"fields": {
+				"name": "Sensor B",
+				"id": "1753",
+				"type": "SWAN",
+				"value": 6,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.850541,
+					2.348671
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.348671,
+					48.850541
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:04.946000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "5ca0806415b4b5f28067443c89ff87e843429cb7",
+			"fields": {
+				"name": "Sensor A",
+				"id": "1151",
+				"type": "PEACOCK",
+				"value": 0,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.882697,
+					2.344013
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.344013,
+					48.882697
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:07.483000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "46cab1367a2cce65f14411174c6eeda2d73d4a77",
+			"fields": {
+				"name": "Sensor A",
+				"id": "1151",
+				"type": "GOOSE",
+				"value": 122,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.882697,
+					2.344013
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.344013,
+					48.882697
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:06.754000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "df890ea4dacb4a3c4a58aa5f25a5a9eebb079ca9",
+			"fields": {
+				"name": "Sensor D",
+				"id": "1502",
+				"type": "PEACOCK",
+				"value": 1,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.845002,
+					2.375691
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.375691,
+					48.845002
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:11.653000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "3905c057640572129f5bd07f9db8663af4e83e29",
+			"fields": {
+				"name": "Sensor N",
+				"id": "1503",
+				"type": "GOOSE",
+				"value": 52,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.884606,
+					2.321516
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.321516,
+					48.884606
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:11.924000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "fdf40bd83b446b228896712c8b714970430b6b22",
+			"fields": {
+				"name": "Sensor Q",
+				"id": "1504",
+				"type": "DUCK",
+				"value": 5,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.84622,
+					2.387776
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.387776,
+					48.84622
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:12.756000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "17db646abfd18a1827a7e041349a346ed6394854",
+			"fields": {
+				"name": "Sensor P",
+				"id": "1601",
+				"type": "GOOSE",
+				"value": 0,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.864994,
+					2.33298
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.33298,
+					48.864994
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:13.639000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "9c92f6720df079222ab068bf72f5fd5d23d027c4",
+			"fields": {
+				"name": "Sensor U",
+				"id": "1604",
+				"type": "GOOSE",
+				"value": 27,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.874147,
+					2.640764
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.640764,
+					48.874147
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:14.628000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "88b66d9a5e1f1d47ee2f951881025fc56355b775",
+			"fields": {
+				"name": "Sensor E",
+				"id": "1501",
+				"type": "GOOSE",
+				"value": 73,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.850912,
+					2.341171
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.341171,
+					48.850912
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:09.896000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "0811da70297287f39f0419c038d3d3406cb9b5b3",
+			"fields": {
+				"name": "Sensor E",
+				"id": "1501",
+				"type": "SWAN",
+				"value": 0,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.850912,
+					2.341171
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.341171,
+					48.850912
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:10.410000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "6bcece31353e8ad15096e874be2a90d6f29852bd",
+			"fields": {
+				"name": "Sensor C",
+				"id": "1401",
+				"type": "PEACOCK",
+				"value": 0,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.871505,
+					2.333759
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.333759,
+					48.871505
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:08.652000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "866c5568bcaf548be8dc4812f16e33b5f3795d12",
+			"fields": {
+				"name": "Sensor F",
+				"id": "1754",
+				"type": "SWAN",
+				"value": 2,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.798667,
+					2.451794
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.451794,
+					48.798667
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:05.719000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "50df845f441b8dcc1fee02aa60e917056bb8e976",
+			"fields": {
+				"name": "Sensor L",
+				"id": "1152",
+				"type": "DUCK",
+				"value": 17,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.827057,
+					2.341523
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.341523,
+					48.827057
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:06.504000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "845b6d82dc2792dafcdd24356ddb128552138172",
+			"fields": {
+				"name": "Sensor L",
+				"id": "1152",
+				"type": "GOOSE",
+				"value": 76,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.827057,
+					2.341523
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.341523,
+					48.827057
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:06.218000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "4b715723da9f5905d33534ca2fd1e4c94b630bab",
+			"fields": {
+				"name": "Sensor D",
+				"id": "1502",
+				"type": "SWAN",
+				"value": 15,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.845002,
+					2.375691
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.375691,
+					48.845002
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:11.381000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "d984051cad41a5ca3568c42928155135a09b0218",
+			"fields": {
+				"name": "Sensor Q",
+				"id": "1504",
+				"type": "GOOSE",
+				"value": 4,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.84622,
+					2.387776
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.387776,
+					48.84622
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:12.490000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "c143a7c3fcfc8fa9b1cb69af7a2e2912df43f5d0",
+			"fields": {
+				"name": "Sensor S",
+				"id": "1603",
+				"type": "GOOSE",
+				"value": 16,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.8759,
+					2.64306
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.64306,
+					48.8759
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:14.144000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "905345537815c8d0e5c1f2d5a17c1dd6aa755bdd",
+			"fields": {
+				"name": "Sensor G",
+				"id": "1651",
+				"type": "EAGLE",
+				"value": 0,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.82097,
+					2.324525
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.324525,
+					48.82097
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:15.659000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "f1a985efc4f3be02a42d11d7fd877a0d4c1c876e",
+			"fields": {
+				"name": "Sensor I",
+				"id": "1901",
+				"type": "GOOSE",
+				"value": 268,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.833875,
+					2.382319
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.382319,
+					48.833875
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:16.031000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "807d9f565dbc5132168704529d3f331b70ccbc8e",
+			"fields": {
+				"name": "Sensor B",
+				"id": "1753",
+				"type": "DUCK",
+				"value": 0,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.850541,
+					2.348671
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.348671,
+					48.850541
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:04.711000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "1ff928dff6ff274508a1d0f7a2282b9dc6050e4a",
+			"fields": {
+				"name": "Sensor B",
+				"id": "1753",
+				"type": "PEACOCK",
+				"value": 0,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.850541,
+					2.348671
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.348671,
+					48.850541
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:05.203000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "e1c69ebb3fbc7bb070a6801ea5ec5677daef7862",
+			"fields": {
+				"name": "Sensor F",
+				"id": "1754",
+				"type": "GOOSE",
+				"value": 293,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.798667,
+					2.451794
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.451794,
+					48.798667
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:05.463000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "dadcd8def7f6f76c78e7e59e37f454fbd5f67576",
+			"fields": {
+				"name": "Sensor F",
+				"id": "1754",
+				"type": "PEACOCK",
+				"value": 3,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.798667,
+					2.451794
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.451794,
+					48.798667
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:05.954000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "52b94b9949fe3cbe18f32a22894bd62778885d26",
+			"fields": {
+				"name": "Sensor I",
+				"id": "1901",
+				"type": "DUCK",
+				"value": 5,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.833875,
+					2.382319
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.382319,
+					48.833875
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:16.166000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "a6f60275570f0ffe7f48b57f8921b75610901478",
+			"fields": {
+				"name": "Sensor K",
+				"id": "1951",
+				"type": "GOOSE",
+				"value": 179,
+				"date": "2021-10-26T15:29:00+00:00",
+				"geo": [
+					48.873379,
+					2.369972
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.369972,
+					48.873379
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:16.566000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "9c96a6d10e6ed186b8764d6dbb410b93335242ae",
+			"fields": {
+				"name": "Sensor J",
+				"id": "1953",
+				"type": "DUCK",
+				"value": 0,
+				"date": "2021-10-26T15:29:00+00:00",
+				"geo": [
+					48.87929,
+					2.40177
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.40177,
+					48.87929
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:16.955000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "b1eba4290868a827ce74a2867b276942a81ee4c7",
+			"fields": {
+				"name": "Sensor T",
+				"id": "1805",
+				"type": "GOOSE",
+				"value": 135,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.817356,
+					2.344178
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.344178,
+					48.817356
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:04.115000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "e9aababec35f22ec090f20093bd4185a39ffd6cb",
+			"fields": {
+				"name": "Sensor H",
+				"id": "1602",
+				"type": "DUCK",
+				"value": 30,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.85378,
+					2.7689
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.7689,
+					48.85378
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:13.324000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "ead2ed69213a811287b83c630c896ae8f9892a93",
+			"fields": {
+				"name": "Sensor D",
+				"id": "1502",
+				"type": "DUCK",
+				"value": 40,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.845002,
+					2.375691
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.375691,
+					48.845002
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:11.147000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "d2a979e2eb07dec5596f01bac9f9e9750b9cbcd9",
+			"fields": {
+				"name": "Sensor D",
+				"id": "1502",
+				"type": "GOOSE",
+				"value": 304,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.845002,
+					2.375691
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.375691,
+					48.845002
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:10.900000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "461bc8befe067839865fa76891eb65e34b12a761",
+			"fields": {
+				"name": "Sensor G",
+				"id": "1651",
+				"type": "DUCK",
+				"value": 13,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.82097,
+					2.324525
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.324525,
+					48.82097
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:15.421000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "48fb41a92a563a4f611ccb627364db5eb2a33f49",
+			"fields": {
+				"name": "Sensor C",
+				"id": "1401",
+				"type": "DUCK",
+				"value": 10,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.871505,
+					2.333759
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.333759,
+					48.871505
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:08.007000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "57abf6edea03070276b1414dd6c4bf81fbb5295d",
+			"fields": {
+				"name": "Sensor B",
+				"id": "1753",
+				"type": "GOOSE",
+				"value": 79,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.850541,
+					2.348671
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.348671,
+					48.850541
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:04.468000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "d856c94864d2f88329e0881214831893b81977f6",
+			"fields": {
+				"name": "Sensor C",
+				"id": "1401",
+				"type": "SWAN",
+				"value": 5,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.871505,
+					2.333759
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.333759,
+					48.871505
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:08.252000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "ebb1395ac754ed69eaec5bdaf2d0d84c90b23bdf",
+			"fields": {
+				"name": "Sensor M",
+				"id": "1551",
+				"type": "GOOSE",
+				"value": 330,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.8566,
+					2.349481
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.349481,
+					48.8566
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:16.302000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "e587b71f00481aa829b751c5e905776f999e42c1",
+			"fields": {
+				"name": "Sensor A",
+				"id": "1151",
+				"type": "DUCK",
+				"value": 7,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.882697,
+					2.344013
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.344013,
+					48.882697
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:06.997000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "2a14c4476f6a038e7090e32a0ab83aff46769f4e",
+			"fields": {
+				"name": "Sensor K",
+				"id": "1951",
+				"type": "DUCK",
+				"value": 0,
+				"date": "2021-10-26T15:29:00+00:00",
+				"geo": [
+					48.873379,
+					2.369972
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.369972,
+					48.873379
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:16.691000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "ad775d9ac0ec846e46dbb23ad00b16d762ef0e0f",
+			"fields": {
+				"name": "Sensor O",
+				"id": "1452",
+				"type": "DUCK",
+				"value": 0,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.849577,
+					2.350867
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.350867,
+					48.849577
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:09.145000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "534bf7373d51db3c90fc7973395c02dad7f040d8",
+			"fields": {
+				"name": "Sensor R",
+				"id": "1851",
+				"type": "GOOSE",
+				"value": 114,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.858396,
+					2.350484
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.350484,
+					48.858396
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:03.443000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "97ae7ef398d347f481451b258f937e158919449b",
+			"fields": {
+				"name": "Sensor A",
+				"id": "1151",
+				"type": "SWAN",
+				"value": 4,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.882697,
+					2.344013
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.344013,
+					48.882697
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:07.236000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "124d2e6b4aa0cfb0028ee319bf81da5fb76e4537",
+			"fields": {
+				"name": "Sensor E",
+				"id": "1501",
+				"type": "DUCK",
+				"value": 3,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.850912,
+					2.341171
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.341171,
+					48.850912
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:10.154000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "cd675924e4411d4b85663831dbd55e796257cda0",
+			"fields": {
+				"name": "Sensor E",
+				"id": "1501",
+				"type": "PEACOCK",
+				"value": 0,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.850912,
+					2.341171
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.341171,
+					48.850912
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:10.663000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "e6584d10136330fd19aa9f9a5fff1a937ef0383c",
+			"fields": {
+				"name": "Sensor N",
+				"id": "1503",
+				"type": "DUCK",
+				"value": 30,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.884606,
+					2.321516
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.321516,
+					48.884606
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:12.193000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "5dd1f0838db99c2f40b9b744a3c71d04e9711788",
+			"fields": {
+				"name": "Sensor H",
+				"id": "1602",
+				"type": "GOOSE",
+				"value": 94,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.85378,
+					2.7689
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.7689,
+					48.85378
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:13.089000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "ada6ee29805086d0c5459c93839b7587167cd4c1",
+			"fields": {
+				"name": "Sensor P",
+				"id": "1601",
+				"type": "DUCK",
+				"value": 0,
+				"date": "2021-10-26T15:27:00+00:00",
+				"geo": [
+					48.864994,
+					2.33298
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.33298,
+					48.864994
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:13.895000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "8d8f3e6861f0ae2dd052699f3377a63dce2bdf3c",
+			"fields": {
+				"name": "Sensor G",
+				"id": "1651",
+				"type": "GOOSE",
+				"value": 224,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.82097,
+					2.324525
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.324525,
+					48.82097
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:15.175000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "71550dcc32a0238077e11bae8faecfb9eb2406f6",
+			"fields": {
+				"name": "Sensor M",
+				"id": "1551",
+				"type": "DUCK",
+				"value": 0,
+				"date": "2021-10-26T15:28:00+00:00",
+				"geo": [
+					48.8566,
+					2.349481
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.349481,
+					48.8566
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:16.431000+00:00"
+		},
+		{
+			"datasetid": "test2",
+			"recordid": "94e8605b060f8e6d56a81e4246a4e251b6513235",
+			"fields": {
+				"name": "Sensor J",
+				"id": "1953",
+				"type": "GOOSE",
+				"value": 92,
+				"date": "2021-10-26T15:29:00+00:00",
+				"geo": [
+					48.87929,
+					2.40177
+				]
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					2.40177,
+					48.87929
+				]
+			},
+			"record_timestamp": "2021-10-26T15:29:16.829000+00:00"
+		}
+	],
+	"facet_groups": [
+		{
+			"facets": [
+				{
+					"count": 4,
+					"path": "Sensor A",
+					"state": "displayed",
+					"name": "Sensor A"
+				},
+				{
+					"count": 4,
+					"path": "Sensor B",
+					"state": "displayed",
+					"name": "Sensor B"
+				},
+				{
+					"count": 4,
+					"path": "Sensor C",
+					"state": "displayed",
+					"name": "Sensor C"
+				},
+				{
+					"count": 4,
+					"path": "Sensor D",
+					"state": "displayed",
+					"name": "Sensor D"
+				},
+				{
+					"count": 4,
+					"path": "Sensor E",
+					"state": "displayed",
+					"name": "Sensor E"
+				},
+				{
+					"count": 3,
+					"path": "Sensor F",
+					"state": "displayed",
+					"name": "Sensor F"
+				},
+				{
+					"count": 3,
+					"path": "Sensor G",
+					"state": "displayed",
+					"name": "Sensor G"
+				},
+				{
+					"count": 2,
+					"path": "Sensor H",
+					"state": "displayed",
+					"name": "Sensor H"
+				},
+				{
+					"count": 2,
+					"path": "Sensor I",
+					"state": "displayed",
+					"name": "Sensor I"
+				},
+				{
+					"count": 2,
+					"path": "Sensor J",
+					"state": "displayed",
+					"name": "Sensor J"
+				},
+				{
+					"count": 2,
+					"path": "Sensor K",
+					"state": "displayed",
+					"name": "Sensor K"
+				},
+				{
+					"count": 2,
+					"path": "Sensor L",
+					"state": "displayed",
+					"name": "Sensor L"
+				},
+				{
+					"count": 2,
+					"path": "Sensor M",
+					"state": "displayed",
+					"name": "Sensor M"
+				},
+				{
+					"count": 2,
+					"path": "Sensor N",
+					"state": "displayed",
+					"name": "Sensor N"
+				},
+				{
+					"count": 2,
+					"path": "Sensor O",
+					"state": "displayed",
+					"name": "Sensor O"
+				},
+				{
+					"count": 2,
+					"path": "Sensor P",
+					"state": "displayed",
+					"name": "Sensor P"
+				},
+				{
+					"count": 2,
+					"path": "Sensor Q",
+					"state": "displayed",
+					"name": "Sensor Q"
+				},
+				{
+					"count": 2,
+					"path": "Sensor R",
+					"state": "displayed",
+					"name": "Sensor R"
+				},
+				{
+					"count": 1,
+					"path": "Sensor S",
+					"state": "displayed",
+					"name": "Sensor S"
+				},
+				{
+					"count": 1,
+					"path": "Sensor T",
+					"state": "displayed",
+					"name": "Sensor T"
+				},
+				{
+					"count": 1,
+					"path": "Sensor U",
+					"state": "displayed",
+					"name": "Sensor U"
+				}
+			],
+			"name": "name"
+		},
+		{
+			"facets": [
+				{
+					"count": 21,
+					"path": "GOOSE",
+					"state": "displayed",
+					"name": "GOOSE"
+				},
+				{
+					"count": 17,
+					"path": "DUCK",
+					"state": "displayed",
+					"name": "DUCK"
+				},
+				{
+					"count": 6,
+					"path": "SWAN",
+					"state": "displayed",
+					"name": "SWAN"
+				},
+				{
+					"count": 6,
+					"path": "PEACOCK",
+					"state": "displayed",
+					"name": "PEACOCK"
+				},
+				{
+					"count": 1,
+					"path": "EAGLE",
+					"state": "displayed",
+					"name": "EAGLE"
+				}
+			],
+			"name": "type"
+		},
+		{
+			"facets": [
+				{
+					"count": 14,
+					"path": "0",
+					"state": "displayed",
+					"name": "0"
+				},
+				{
+					"count": 3,
+					"path": "5",
+					"state": "displayed",
+					"name": "5"
+				},
+				{
+					"count": 2,
+					"path": "3",
+					"state": "displayed",
+					"name": "3"
+				},
+				{
+					"count": 2,
+					"path": "4",
+					"state": "displayed",
+					"name": "4"
+				},
+				{
+					"count": 2,
+					"path": "7",
+					"state": "displayed",
+					"name": "7"
+				},
+				{
+					"count": 2,
+					"path": "30",
+					"state": "displayed",
+					"name": "30"
+				},
+				{
+					"count": 1,
+					"path": "1",
+					"state": "displayed",
+					"name": "1"
+				},
+				{
+					"count": 1,
+					"path": "2",
+					"state": "displayed",
+					"name": "2"
+				},
+				{
+					"count": 1,
+					"path": "6",
+					"state": "displayed",
+					"name": "6"
+				},
+				{
+					"count": 1,
+					"path": "10",
+					"state": "displayed",
+					"name": "10"
+				},
+				{
+					"count": 1,
+					"path": "13",
+					"state": "displayed",
+					"name": "13"
+				},
+				{
+					"count": 1,
+					"path": "15",
+					"state": "displayed",
+					"name": "15"
+				},
+				{
+					"count": 1,
+					"path": "16",
+					"state": "displayed",
+					"name": "16"
+				},
+				{
+					"count": 1,
+					"path": "17",
+					"state": "displayed",
+					"name": "17"
+				},
+				{
+					"count": 1,
+					"path": "27",
+					"state": "displayed",
+					"name": "27"
+				},
+				{
+					"count": 1,
+					"path": "40",
+					"state": "displayed",
+					"name": "40"
+				},
+				{
+					"count": 1,
+					"path": "52",
+					"state": "displayed",
+					"name": "52"
+				},
+				{
+					"count": 1,
+					"path": "73",
+					"state": "displayed",
+					"name": "73"
+				},
+				{
+					"count": 1,
+					"path": "76",
+					"state": "displayed",
+					"name": "76"
+				},
+				{
+					"count": 1,
+					"path": "79",
+					"state": "displayed",
+					"name": "79"
+				},
+				{
+					"count": 1,
+					"path": "92",
+					"state": "displayed",
+					"name": "92"
+				},
+				{
+					"count": 1,
+					"path": "94",
+					"state": "displayed",
+					"name": "94"
+				},
+				{
+					"count": 1,
+					"path": "114",
+					"state": "displayed",
+					"name": "114"
+				},
+				{
+					"count": 1,
+					"path": "122",
+					"state": "displayed",
+					"name": "122"
+				},
+				{
+					"count": 1,
+					"path": "135",
+					"state": "displayed",
+					"name": "135"
+				},
+				{
+					"count": 1,
+					"path": "178",
+					"state": "displayed",
+					"name": "178"
+				},
+				{
+					"count": 1,
+					"path": "179",
+					"state": "displayed",
+					"name": "179"
+				},
+				{
+					"count": 1,
+					"path": "224",
+					"state": "displayed",
+					"name": "224"
+				},
+				{
+					"count": 1,
+					"path": "268",
+					"state": "displayed",
+					"name": "268"
+				},
+				{
+					"count": 1,
+					"path": "293",
+					"state": "displayed",
+					"name": "293"
+				},
+				{
+					"count": 1,
+					"path": "304",
+					"state": "displayed",
+					"name": "304"
+				},
+				{
+					"count": 1,
+					"path": "330",
+					"state": "displayed",
+					"name": "330"
+				}
+			],
+			"name": "value"
+		},
+		{
+			"facets": [
+				{
+					"count": 51,
+					"path": "2021",
+					"state": "displayed",
+					"name": "2021"
+				}
+			],
+			"name": "date"
+		}
+	]
+}

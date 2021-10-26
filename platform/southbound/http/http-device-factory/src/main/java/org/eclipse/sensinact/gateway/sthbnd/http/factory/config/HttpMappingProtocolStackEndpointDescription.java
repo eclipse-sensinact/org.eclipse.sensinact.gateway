@@ -10,7 +10,6 @@ import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.BuildPolicy;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpProtocolStackEndpoint;
-import org.eclipse.sensinact.gateway.sthbnd.http.factory.endpoint.HttpMappingProtocolStackEndpoint;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,9 +29,6 @@ public class HttpMappingProtocolStackEndpointDescription {
 
 	@JsonProperty(value="packetTypeName")
 	private String packetTypeName;
-
-	@JsonProperty(value="endpointTypeName")
-	private String endpointTypeName;
 
 	@JsonProperty(value="modifiable")
 	private String modifiable;
@@ -67,7 +63,6 @@ public class HttpMappingProtocolStackEndpointDescription {
 		this.startAtInitializationTime = startAtInitializationTime;
 		this.startAtInitializationTimeSet = true;
 		this.packetTypeName = packetTypeName;
-		this.endpointTypeName = endpointTypeName;
 		this.modifiable = modifiable;
 		this.defaults = defaults;
 		this.resourceBuildPolicy = resourceBuildPolicy;
@@ -107,22 +102,6 @@ public class HttpMappingProtocolStackEndpointDescription {
 	 */
 	public void setPacketTypeName(String packetTypeName) {
 		this.packetTypeName = packetTypeName;
-	}
-
-	/**
-	 * @return the endpointTypeName
-	 */
-	public String getEndpointTypeName() {
-		if(this.endpointTypeName == null)
-			return HttpMappingProtocolStackEndpoint.class.getCanonicalName();
-		return endpointTypeName;
-	}
-
-	/**
-	 * @param endpointTypeName the endpointTypeName to set
-	 */
-	public void setEndpointTypeName(String endpointTypeName) {
-		this.endpointTypeName = endpointTypeName;
 	}
 
 	/**

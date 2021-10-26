@@ -23,10 +23,9 @@ import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration.Bu
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
-import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.factory.config.HttpMappingProtocolStackEndpointDescription;
-import org.eclipse.sensinact.gateway.sthbnd.http.factory.endpoint.HttpMappingProtocolStackEndpoint;
-import org.eclipse.sensinact.gateway.sthbnd.http.factory.packet.HttpMappingPacket;
+import org.eclipse.sensinact.gateway.sthbnd.http.factory.endpoint.HttpMappingProtocolStackConnectorCustomizer;
+import org.eclipse.sensinact.gateway.sthbnd.http.factory.packet.TaskAwareHttpResponsePacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.DefaultHttpChainedTaskProcessingContextFactory;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.DefaultHttpTaskProcessingContextFactory;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.DefaultHttpTaskProcessingContextHandler;
@@ -37,7 +36,6 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskProcessingContextF
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskProcessingContextHandler;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.SimpleHttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.config.HttpProtocolStackEndpointTasksDescription;
-import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
@@ -63,11 +61,9 @@ public class HttpMappingProtocolStackEndpointFactory implements ManagedServiceFa
 	public static final String ENDPOINT_RESOURCES_CONFIGURATION_PROP = "sensinact.http.endpoint.resources.config";
 	public static final String ENDPOINT_TASKS_CONFIGURATION_PROP = "sensinact.http.endpoint.tasks.config";
 
-	public static final Class<? extends HttpMappingProtocolStackEndpoint> DEFAULT_ENDPOINT_TYPE = HttpMappingProtocolStackEndpoint.class;
-	public static final Class<? extends HttpMappingPacket> DEFAULT_PACKET_TYPE = HttpMappingPacket.class;
 	public static final Modifiable DEFAULT_MODIFIABLE = Modifiable.MODIFIABLE;
 	
-	private Map<String,HttpMappingProtocolStackEndpoint> endpoints;
+	private Map<String,SimpleHttpProtocolStackEndpoint> endpoints;
 	private BundleContext bundleContext;
 	
 	@Activate
@@ -113,11 +109,6 @@ public class HttpMappingProtocolStackEndpointFactory implements ManagedServiceFa
 			if(!resourcesConfigFile.exists())
 				resourcesConfig = null;
 		}
-		
-		ExtModelConfiguration<? extends HttpPacket> configuration = buildConfiguration(mediator, endpointDescription, resourcesConfig);
-		HttpMappingProtocolStackEndpoint endpoint = buildEndpoint(mediator, endpointDescription.getEndpointTypeName());
-		if(endpoint == null)
-			return;
 
 		HttpProtocolStackEndpointTasksDescription tasksDescription = null;
 		String taskConfig = String.valueOf(properties.get(ENDPOINT_TASKS_CONFIGURATION_PROP));
@@ -134,11 +125,21 @@ public class HttpMappingProtocolStackEndpointFactory implements ManagedServiceFa
 				}
 			}
 		}		
-		if(tasksDescription != null) 
-			endpoint.registerAdapters(tasksDescription);		
 		
-		endpoint.setServiceProviderIdPattern(endpointDescription.getServiceProviderIdPattern()); 
-		endpoint.setTimestampPattern(endpointDescription.getTimestampPattern()); 
+		ExtModelConfiguration<TaskAwareHttpResponsePacket> configuration = buildConfiguration(mediator, endpointDescription, 
+				resourcesConfig);
+		SimpleHttpProtocolStackEndpoint endpoint = null;
+		try {
+			endpoint = new SimpleHttpProtocolStackEndpoint(mediator);
+		} catch (Exception e) {
+			LOG.error("Unable to create Endpoint", e);
+		}
+		
+		if(endpoint == null)
+			return;
+
+		if(tasksDescription != null) 
+			endpoint.registerAdapters(tasksDescription);	
 		
 		try {
 			endpoint.connect(configuration);
@@ -156,21 +157,8 @@ public class HttpMappingProtocolStackEndpointFactory implements ManagedServiceFa
 		endpoint.stop();
 	}
 
-	@SuppressWarnings("unchecked")
-	private final ExtModelConfiguration<? extends HttpPacket> buildConfiguration(HttpMediator mediator, 
+	private final ExtModelConfiguration<TaskAwareHttpResponsePacket> buildConfiguration(HttpMediator mediator, 
 		HttpMappingProtocolStackEndpointDescription endpointDescription, String resourceConfig) {
-			
-		Class<? extends HttpMappingPacket> packetType = null;
-		if(resourceConfig != null) {		
-			try {
-				packetType = (Class<? extends HttpMappingPacket>) mediator.getClassLoader(
-					).loadClass(endpointDescription.getPacketTypeName());
-			} catch (ClassNotFoundException e) {
-				LOG.error(e.getMessage(),e);
-				packetType = DEFAULT_PACKET_TYPE;
-			}	
-		} else 
-			packetType = DEFAULT_PACKET_TYPE;
 			
 		byte serviceBuildPolicy  = Arrays.stream(endpointDescription.getServiceBuildPolicy()).<Byte>collect(
 				()->{return Byte.valueOf((byte)0);},
@@ -188,28 +176,21 @@ public class HttpMappingProtocolStackEndpointFactory implements ManagedServiceFa
 		} catch(Exception e) {
 			modifiable = DEFAULT_MODIFIABLE;
 		}
-        ExtModelConfiguration<? extends HttpPacket> configuration = 
+        ExtModelConfiguration<TaskAwareHttpResponsePacket> configuration = 
         	ExtModelConfigurationBuilder.instance(
-        		mediator, packetType
+        		mediator, TaskAwareHttpResponsePacket.class
         		).withStartAtInitializationTime(endpointDescription.isStartAtInitializationTime()
         		).withServiceBuildPolicy(resourceConfig==null?BuildPolicy.BUILD_NON_DESCRIBED.getPolicy():serviceBuildPolicy
         		).withResourceBuildPolicy(resourceConfig==null?BuildPolicy.BUILD_NON_DESCRIBED.getPolicy():resourceBuildPolicy
         		).withDefaultModifiable(modifiable 
         		).build(resourceConfig, endpointDescription.getDefaults());
+     
+        HttpMappingProtocolStackConnectorCustomizer customizer = new HttpMappingProtocolStackConnectorCustomizer(
+        		mediator, configuration, endpointDescription);
+        
+        configuration.setConnectorCustomizer(customizer);
+        
 		return configuration;
-	}
-	
-	@SuppressWarnings("unchecked")
-	private final HttpMappingProtocolStackEndpoint buildEndpoint(HttpMediator mediator, String endpointTypeName){
-		Class<? extends HttpMappingProtocolStackEndpoint> endpointType = null;
-		try {
-			endpointType = (Class<? extends HttpMappingProtocolStackEndpoint>) mediator.getClassLoader().loadClass(endpointTypeName);
-		} catch (ClassNotFoundException e) {
-			LOG.error(e.getMessage(),e);
-			endpointType = DEFAULT_ENDPOINT_TYPE;
-		}			
-		HttpMappingProtocolStackEndpoint endpoint = ReflectUtils.getInstance(endpointType, new Object[]{mediator});
-	    return endpoint;
 	}
 	
     /**

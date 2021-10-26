@@ -30,10 +30,8 @@ public abstract class HttpResponse extends SimpleResponse implements PathElement
      */
     public abstract HttpPacket createPacket();
 
-    protected String path = null;
-    protected boolean isDirect;
     protected Mediator mediator;
-    protected CommandType command;
+    protected HttpConnectionConfiguration<? extends HttpResponse, ? extends Request<? extends HttpResponse>> configuration;
 
     /**
      * @param mediator
@@ -46,21 +44,23 @@ public abstract class HttpResponse extends SimpleResponse implements PathElement
     				throws IOException {
         super(connection);
         this.mediator = mediator;
-        this.path = configuration.getPath();
-        this.command = configuration.getCommand();
-        this.isDirect = configuration.isDirect();
+        this.configuration = configuration;
     }
 
     @Override
     public String getPath() {
-        return this.path;
+        return configuration.getPath();
     }
 
     public CommandType getCommand() {
-        return this.command;
+        return configuration.getCommand();
     }
 
     public boolean isDirect() {
-        return this.isDirect;
+        return configuration.isDirect();
+    }
+
+    public HttpConnectionConfiguration<? extends HttpResponse, ? extends Request<? extends HttpResponse>> getConfiguration() {
+    	return configuration;
     }
 }

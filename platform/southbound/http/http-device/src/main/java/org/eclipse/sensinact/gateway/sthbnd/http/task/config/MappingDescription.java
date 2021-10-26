@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.task.config;
 
+import java.util.Map;
+
 /**
  * 
  * MappingDescription defines how path described data 
@@ -31,4 +33,6 @@ public abstract class MappingDescription {
 	 */
 	public abstract int getMappingType();
 	
+	
+	public abstract Map<String, String> getMapping();
 }

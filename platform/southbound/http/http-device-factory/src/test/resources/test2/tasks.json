@@ -1,0 +1,31 @@
+{
+  "standalone": {
+    "recurrences": [
+      {
+        "period": 2000,
+        "delay": 500,
+        "configuration": {
+          "acceptType": "application/json",
+          "scheme": "http",
+          "host": "localhost",
+          "port": 8898,
+          "path": "/http-factory-test-resources/test2/response.json",
+          "nestedMapping": [
+            {
+              "path": "records/*",
+              "mapping": {
+                "fields/id": "::provider::",
+                "fields/name": "admin/friendlyName",
+                "fields/type": "__type",
+                "fields/value": "data/${type}_value",
+                "fields/geo/[0]": "__lat",
+                "fields/geo/[1]": "__lon",
+                "$concat(${lat},':',${lon})": "admin/location"
+              }
+            }
+          ]
+        }
+      } 
+    ]
+  }
+}

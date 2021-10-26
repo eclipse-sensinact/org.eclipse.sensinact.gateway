@@ -1,0 +1,5 @@
+{
+  "modifiable": "UPDATEABLE",
+  "serviceProviderIdPattern": "test1_%s",
+  "timestampPattern": "dd.MM.yy-hh:mm"
+}
