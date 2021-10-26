@@ -177,6 +177,8 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 				s = Formatter.removeQuotes(s);
 				builder.append(s);
 			}
+			builder.insert(0, '"');
+			builder.append('"');
 			return builder.toString();
  		}
     	return resultMapping.get(key);
