@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.core.security.access.impl;
 
+import static java.util.Collections.singletonMap;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -52,8 +54,12 @@ import org.eclipse.sensinact.gateway.core.security.entity.BundleEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +68,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
+@Component
 public class SecuredAccessImpl implements SecuredAccess {
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
@@ -81,6 +88,7 @@ public class SecuredAccessImpl implements SecuredAccess {
 	// ********************************************************************//
 
 	private final Mediator mediator;
+	private final SecurityDataStoreService dataStoreService;
 
 	private BundleDAO bundleDAO;
 	private AgentDAO agentDAO;
@@ -102,14 +110,11 @@ public class SecuredAccessImpl implements SecuredAccess {
 	 *            environment
 	 * @throws DataStoreException
 	 */
-	public SecuredAccessImpl(Mediator mediator) throws SecuredAccessException {
-		this.mediator = mediator;
+	@Activate
+	public SecuredAccessImpl(BundleContext ctx, @Reference SecurityDataStoreService dataStore) throws SecuredAccessException {
+		this.mediator = new Mediator(ctx);
+		this.dataStoreService = dataStore;
 		try {
-			ServiceReference<SecurityDataStoreService> reference = this.mediator.getContext(
-					).getServiceReference(SecurityDataStoreService.class);
-
-			SecurityDataStoreService dataStoreService = this.mediator.getContext().getService(reference);
-
 			this.applicationDAO = new ApplicationDAO(mediator, dataStoreService);
 			this.agentDAO = new AgentDAO(mediator, dataStoreService);
 			this.objectDAO = new ObjectDAO(mediator, dataStoreService);
@@ -117,15 +122,24 @@ public class SecuredAccessImpl implements SecuredAccess {
 			this.objectProfileAccessDAO = new ObjectProfileAccessDAO(mediator, dataStoreService);
 			this.authenticatedAccessLevelDAO = new AuthenticatedAccessLevelDAO(mediator, dataStoreService);
 
-			root = this.objectDAO.select(new HashMap<String, Object>() {{
-					this.put("OID", 0l);}}).get(0);
+			root = this.objectDAO.select(singletonMap("OID", 0l)).get(0);
 
 			rootObjectProfileOption = this.objectProfileAccessDAO.getAccessProfileOption(root.getObjectProfileEntity());
+			
+			this.authorizationRegistration = this.mediator.getContext().registerService(AuthorizationService.class,
+					new AuthorizationServiceImpl(mediator, this.authenticatedAccessLevelDAO), null);
 		} catch (DAOException | DataStoreException e) {
 			throw new SecuredAccessException(e);
 		}
 	}
 
+	@Deactivate
+	void stop() {
+		if(authorizationRegistration != null) {
+			authorizationRegistration.unregister();
+		}
+	}
+	
 	@Override
 	public void buildAccessNodesHierarchy(String signature, String name,
 			MutableAccessTree<? extends MutableAccessNode> tree) throws SecuredAccessException {
@@ -338,84 +352,6 @@ public class SecuredAccessImpl implements SecuredAccess {
 				ImmutableAccessNode.class);
 	}
 
-	// /**
-	// * @param tree
-	// * @param application
-	// * @throws SecuredAccessException
-	// */
-	// private void buildTree( MutableAccessTree<? extends MutableAccessNode> tree,
-	// ApplicationEntity application) throws SecuredAccessException
-	// {
-	// if (application == null
-	// || application.getPublicKey() == null
-	// || application.getPublicKey().equals(
-	// UserManager.ANONYMOUS_PKEY))
-	// {
-	// return;
-	// }
-	// try
-	// {
-	// //we have to retrieve all the objects for which the user has been
-	// //attached with a specific access level.
-	// Map<String,Object> directive = new HashMap<String,Object>();
-	// directive.put("PUBLIC_KEY", application.getPublicKey());
-	//
-	// List<AuthenticatedAccessLevelEntity> entities =
-	// this.authenticatedAccessLevelDAO.select(directive);
-	//
-	// Iterator<AuthenticatedAccessLevelEntity> iterator = entities.iterator();
-	// directive.clear();
-	//
-	// AccessMethod.Type[] types = AccessMethod.Type.values();
-	// int length = types==null?0:types.length;
-	// int index;
-	//
-	// while(iterator.hasNext())
-	// {
-	// AuthenticatedAccessLevelEntity entity = iterator.next();
-	// AccessLevelOption option = entity.getAccessLevelOption();
-	// long objectId = entity.getObjectId();
-	// if(objectId == 0L)
-	// {
-	// continue;
-	// }
-	// directive.put("OID", objectId);
-	// List<ObjectEntity> objectEntities = objectDAO.select(directive);
-	// if(objectEntities==null || objectEntities.size()!=1)
-	// {
-	// continue;
-	// }
-	// Set<MethodAccess> methodAccesses = new HashSet<MethodAccess>();
-	// for(index = 0;index < length;index++)
-	// {
-	// methodAccesses.add(new MethodAccessImpl(
-	// option.getAccessLevel(), types[index]));
-	// }
-	//
-	// Stack<ObjectEntity> family = new Stack<ObjectEntity>();
-	// ObjectEntity familyMember = objectEntities.get(0);
-	// while(familyMember!=null && familyMember.getIdentifier() != 0)
-	// {
-	// family.push(familyMember);
-	// directive.clear();
-	// directive.put("OID", familyMember.getParent());
-	// objectEntities = objectDAO.select(directive);
-	// familyMember = objectEntities.isEmpty()?null:objectEntities.get(0);
-	// }
-	// MutableAccessNode node = null;
-	// while(!family.isEmpty())
-	// {
-	// familyMember = family.pop();
-	// node = tree.add(familyMember.getPath(),familyMember.isPattern());
-	// }
-	// node.withAccessProfile(new AccessProfileImpl(methodAccesses));
-	// }
-	// } catch (Exception e)
-	// {
-	// throw new SecuredAccessException(e);
-	// }
-	// }
-
 	private boolean checkIdentifier(String signature, String name) throws SecuredAccessException {
 		try {
 			if (name == null) {
@@ -469,16 +405,6 @@ public class SecuredAccessImpl implements SecuredAccess {
 	}
 
 	@Override
-	public void createAuthorizationService() throws SecuredAccessException {
-		try {
-			this.authorizationRegistration = this.mediator.getContext().registerService(AuthorizationService.class,
-				new AuthorizationServiceImpl(mediator, this.authenticatedAccessLevelDAO), null);
-		} catch (DAOException e) {
-			throw new SecuredAccessException(e);
-		}
-	}
-
-	@Override
 	public String getAgentPublicKey(String signature) throws SecuredAccessException, DataStoreException {
 		try {
 			String agentKey = null;
@@ -506,8 +432,8 @@ public class SecuredAccessImpl implements SecuredAccess {
 		}
 	}
 	
-	@Override
-	public void close() {
+	@Deactivate
+	void close() {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("closing sensiNact secured access");
 		}

@@ -76,7 +76,6 @@ import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
-import org.eclipse.sensinact.gateway.core.security.SecuredAccessFactory;
 import org.eclipse.sensinact.gateway.core.security.SessionToken;
 import org.eclipse.sensinact.gateway.core.security.User;
 import org.eclipse.sensinact.gateway.core.security.UserKey;
@@ -1084,13 +1083,16 @@ public class SensiNact implements Core {
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
 
+	private final AtomicInteger count = new AtomicInteger(LOCAL_ID + 1);
 	private final Sessions sessions;
 	private AccessTree<? extends AccessNode> anonymousTree;
 
 	public Mediator mediator;
 	private RegistryEndpoint registry;
+	
+	@Reference
+	SecuredAccess securedAccess;
 
-	private volatile AtomicInteger count = new AtomicInteger(LOCAL_ID + 1);
 
 	private final <R, P> R doPrivilegedService(final Class<P> p, final String f, final Executable<P, R> e) {
 		R r = AccessController.<R>doPrivileged(new PrivilegedAction<R>() {
@@ -1190,7 +1192,6 @@ public class SensiNact implements Core {
 		if (!cpu.commit()) 
 			throw new ConcurrentModificationException("Permissions changed during update");
 		
-		SecuredAccess securedAccess = null;
 		ServiceLoader<UserKeyBuilderFactory> userKeyBuilderFactoryLoader = ServiceLoader.load(UserKeyBuilderFactory.class,
 			mediator.getClassLoader());	
 				
@@ -1202,39 +1203,11 @@ public class SensiNact implements Core {
 				factory.newInstance(mediator);
 		}
 		
-		ServiceLoader<SecuredAccessFactory> securedAccessFactoryLoader = ServiceLoader.load(
-				SecuredAccessFactory.class, mediator.getClassLoader());
-
-		Iterator<SecuredAccessFactory> securedAccessFactoryIterator = securedAccessFactoryLoader.iterator();
-
-		while (securedAccessFactoryIterator.hasNext()) {
-			SecuredAccessFactory factory = securedAccessFactoryIterator.next();
-			if (factory != null) {
-				securedAccess = factory.newInstance(mediator);
-				break;
-			}
-		}
 		if (securedAccess == null) 
 			throw new BundleException("A SecuredAccess service was excepted");
 		
-		securedAccess.createAuthorizationService();
-		final SecuredAccess sa = securedAccess;
-
-		AccessController.doPrivileged(new PrivilegedAction<Void>() {
-			@Override
-			public Void run() {
-				mediator.register(sa, SecuredAccess.class, null);
-				return null;
-			}
-		});
-		this.anonymousTree = mediator.callService(SecuredAccess.class,
-			new Executable<SecuredAccess, AccessTree<? extends AccessNode>>() {
-				@Override
-				public AccessTree<? extends AccessNode> execute(SecuredAccess securedAccess) throws Exception {
-					return securedAccess.getUserAccessTree(UserManager.ANONYMOUS_PKEY);
-				}
-			}
-		);
+		this.anonymousTree = securedAccess.getUserAccessTree(UserManager.ANONYMOUS_PKEY);
+		
 		this.mediator = mediator;
 		this.registry = new RegistryEndpoint(mediator);
 		
@@ -1392,10 +1365,8 @@ public class SensiNact implements Core {
 	
 	@Override
 	public Session getRemoteSession(final String publicKey) {
-		final int sessionCount;
-		synchronized(this.count) {
-			sessionCount = count.incrementAndGet();
-		}		
+		final int sessionCount = count.incrementAndGet();
+
 		Session session = null;
 		String filteredKey = publicKey;
 		Class<? extends Session> sessionClass = null;
@@ -1429,13 +1400,9 @@ public class SensiNact implements Core {
 
 	@Override
 	public AnonymousSession getAnonymousSession() {
-		int sessionCount = -1;
-		String sessionToken = null;	
+		int sessionCount = count.incrementAndGet();
+		String sessionToken = this.nextToken();	
 		
-		synchronized(count) {
-			sessionCount = count.incrementAndGet();
-			sessionToken = this.nextToken();
-		}
 		String pkey = new StringBuilder().append(UserManager.ANONYMOUS_PKEY).append(
 			"_").append(sessionCount).toString();
 		SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, sessionToken, 
@@ -1452,13 +1419,9 @@ public class SensiNact implements Core {
 	@Override
 	public Session getApplicationSession(final Mediator mediator, final String privateKey) {
 
-		final int sessionCount;
-		final String sessionToken;	
+		final int sessionCount = count.incrementAndGet();
+		final String sessionToken = this.nextToken();	
 		
-		synchronized(count) {
-			sessionCount = count.incrementAndGet();
-			sessionToken = this.nextToken();
-		}
 		SessionKey skey = this.doPrivilegedService(SecuredAccess.class, null,
 		new Executable<SecuredAccess, SessionKey>() {
 			@Override
@@ -1529,14 +1492,10 @@ public class SensiNact implements Core {
 	//builds an AthenticatedSession based on the String public key passed as parameter 
 	private Session buildLocalSessionFromPublicKey(String publicKey) {
 		Session session = null;
-		Class<? extends Session> sessionClass = null;
-		String sessionToken;		
-		int sessionCount;
+
+		count.incrementAndGet();
+		String sessionToken = this.nextToken();		
 		
-		synchronized(count) {
-			sessionCount = count.incrementAndGet();
-			sessionToken = this.nextToken();
-		}
 		AccessTree<? extends AccessNode> tree = SensiNact.this.getUserAccessTree(publicKey);
 		SessionKey sessionKey = new SessionKey(mediator, LOCAL_ID, sessionToken, tree, null);	
 		sessionKey.setUserKey(new UserKey(publicKey));	
