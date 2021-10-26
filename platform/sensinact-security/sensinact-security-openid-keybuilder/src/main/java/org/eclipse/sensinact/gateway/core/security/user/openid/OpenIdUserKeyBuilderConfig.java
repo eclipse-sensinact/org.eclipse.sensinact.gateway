@@ -64,7 +64,7 @@ public class OpenIdUserKeyBuilderConfig {
 					"org.eclipse.sensinact.security.keybuilder.openid.client_secret").toString();
 				
 			} catch (Exception e) {
-				mediator.error(e.getMessage(), e);
+				LOG.error(e.getMessage(), e);
 				throw new RuntimeException("Error while loading configuration", e);
 			}
 		} else {
@@ -78,7 +78,7 @@ public class OpenIdUserKeyBuilderConfig {
 		if(discoveryURL != null)
 			this.worker.scheduleWithFixedDelay(()->loadEndpoints(),1, 20, TimeUnit.SECONDS);
 		else
-			mediator.error("Unable to load connected OpenID server endpoints");
+			LOG.error("Unable to load connected OpenID server endpoints");
 	}
 	
 	private void loadEndpoints() {
