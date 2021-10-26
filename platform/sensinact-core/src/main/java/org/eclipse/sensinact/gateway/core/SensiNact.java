@@ -336,7 +336,7 @@ public class SensiNact implements Core {
 			JSONObject object = AccessController.doPrivileged(new PrivilegedAction<JSONObject>() {
 				@Override
 				public JSONObject run() {
-					return SensiNact.this.set(sessionKey.getPublicKey(), serviceProviderId, serviceId,
+					return SensiNact.this.set(sessionKey, serviceProviderId, serviceId,
 							resourceId, attributeId, parameter, args);
 				}
 			});
@@ -1797,9 +1797,8 @@ public class SensiNact implements Core {
 	 * 
 	 * @return the JSON formated response of the SET access method invocation
 	 */
-	private JSONObject set(String identifier, final String serviceProviderId, final String serviceId,
+	private JSONObject set(SessionKey sessionKey, final String serviceProviderId, final String serviceId,
 			final String resourceId, final String attributeId, final Object parameter, Object...args) {
-		final SessionKey sessionKey = this.getSessionKeyFromToken(identifier);
 		String response = remoteCoreInvocation(serviceProviderId, 
 			new RemoteAccessMethodExecutable(mediator, AccessMethod.Type.valueOf(AccessMethod.SET
 				), sessionKey.getPublicKey()

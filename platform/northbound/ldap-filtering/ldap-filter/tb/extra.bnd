@@ -1,1 +1,3 @@
 -privatepackage: org.eclipse.sensinact.gateway.nthbnd.ldap.filter.tb.test
+
+-includeresource: src/test/resources/resources.xml
