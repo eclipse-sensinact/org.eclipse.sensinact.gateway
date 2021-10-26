@@ -38,11 +38,14 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.service.http.whiteboard.annotations.RequireHttpWhiteboard;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RequireHttpWhiteboard
 @Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends AbstractActivator<Mediator> {
 	
+	private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 	private static ClassLoader loader = null;
     
     private static void findJettyClassLoader(BundleContext context) {
@@ -76,7 +79,7 @@ public class Activator extends AbstractActivator<Mediator> {
         try {
 			connector.connect(configuration);
 		} catch (InvalidProtocolStackException e) {
-			mediator.error(e);
+			LOG.error(e.getMessage(), e);
 			return;
 		}
 
@@ -92,7 +95,7 @@ public class Activator extends AbstractActivator<Mediator> {
 					private final CountDownLatch initBarrier = new CountDownLatch(1); 
     				@Override
     		        public void init() throws ServletException {
-    		            mediator.info("The Echo servlet has been initialized, but we delay initialization until the first request so that a Jetty Context is available");	
+    		            LOG.info("The Echo servlet has been initialized, but we delay initialization until the first request so that a Jetty Context is available");	
     		        }
     			
     		        @Override
@@ -134,7 +137,7 @@ public class Activator extends AbstractActivator<Mediator> {
                 }, 
             	new Class[]{ Servlet.class, WebSocketServlet.class }
             );
-            super.mediator.info(String.format("%s servlet registered", "/androidws"));
+            LOG.info(String.format("%s servlet registered", "/androidws"));
             
             super.mediator.register(new IndexFilter("/android"), Filter.class, new Hashtable() {{
             	this.put(Constants.SERVICE_RANKING, 3);
@@ -142,7 +145,7 @@ public class Activator extends AbstractActivator<Mediator> {
                 this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");
                 }
             });
-            super.mediator.info(String.format("%s filter registered", "/android"));
+            LOG.info(String.format("%s filter registered", "/android"));
             
             super.mediator.register(new ResourceFilter(super.mediator), Filter.class, new Hashtable() {{
             	this.put(Constants.SERVICE_RANKING, 2);
@@ -150,12 +153,12 @@ public class Activator extends AbstractActivator<Mediator> {
                 this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");
                 }
             });
-            super.mediator.info(String.format("%s filter registered", "/android/*"));
+            LOG.info(String.format("%s filter registered", "/android/*"));
     }
 
     @Override
     public void doStop() {
-        mediator.info("Stopping bundle");
+        LOG.info("Stopping bundle");
     }
 
     @Override

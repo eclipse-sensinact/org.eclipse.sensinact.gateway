@@ -15,11 +15,15 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AndroidWebSocketPool implements WebSocketCreator {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AndroidWebSocketPool.class);
     private final LocalProtocolStackEndpoint<DevGenPacket> endpoint;
     private Mediator mediator;
     private List<AndroidWebSocketWrapper> sessions;
@@ -31,14 +35,14 @@ public class AndroidWebSocketPool implements WebSocketCreator {
     }
 
     public void removeSensinactSocket(AndroidWebSocketWrapper wsWrapper) {
-        this.mediator.info(String.format("Removing session for client address %s.", wsWrapper.getClientAddress()));
+        LOG.info(String.format("Removing session for client address %s.", wsWrapper.getClientAddress()));
         Boolean removedSuccessfully = true;
         synchronized (this.sessions) {
             if ((removedSuccessfully = this.sessions.remove(wsWrapper))) {
                 wsWrapper.close();
             }
         }
-        this.mediator.warn(String.format("Session removal %s executed.", removedSuccessfully ? "successfully" : "not"));
+        LOG.warn(String.format("Session removal %s executed.", removedSuccessfully ? "successfully" : "not"));
     }
 
     /**
