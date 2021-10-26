@@ -18,6 +18,8 @@ import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Deque;
 import java.util.Iterator;
@@ -29,7 +31,8 @@ import java.util.Map;
  */
 public abstract class HttpChainedTasks<REQUEST extends Request<SimpleHttpResponse>, 
 HTTP_CHAINED_TASK extends HttpChainedTask<REQUEST>> extends HttpTaskImpl<SimpleHttpResponse, REQUEST> {
-
+	
+	private static final Logger LOG = LoggerFactory.getLogger(HttpChainedTasks.class);
     /**
      * @param type
      * @param path
@@ -89,7 +92,7 @@ HTTP_CHAINED_TASK extends HttpChainedTask<REQUEST>> extends HttpTaskImpl<SimpleH
                 task.execute(this.getIntermediateResult());
             } catch (Exception e) {
                 e.printStackTrace();
-                super.mediator.error(e);
+                LOG.error(e.getMessage(), e);
             }
             task.execute();
             while (!task.isResultAvailable() && wait > 0) {
@@ -98,7 +101,7 @@ HTTP_CHAINED_TASK extends HttpChainedTask<REQUEST>> extends HttpTaskImpl<SimpleH
                     wait -= 150;
                 } catch (InterruptedException e) {
                     Thread.interrupted();
-                    this.mediator.error(e);
+                    LOG.error(e.getMessage(), e);
                     break;
                 }
             }
@@ -124,7 +127,7 @@ HTTP_CHAINED_TASK extends HttpChainedTask<REQUEST>> extends HttpTaskImpl<SimpleH
             ((HttpProtocolStackEndpoint) transmitter).process(packet);
 
         } catch (Exception e) {
-            super.mediator.error(e);
+            LOG.error(e.getMessage(), e);
         }
     }
 

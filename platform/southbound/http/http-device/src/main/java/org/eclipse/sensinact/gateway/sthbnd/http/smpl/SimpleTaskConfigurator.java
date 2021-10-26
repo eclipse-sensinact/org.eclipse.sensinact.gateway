@@ -20,6 +20,8 @@ import org.eclipse.sensinact.gateway.sthbnd.http.task.config.KeyValuePairDescrip
 import org.eclipse.sensinact.gateway.sthbnd.http.task.config.NestedMappingDescription;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.config.RootMappingDescription;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -31,6 +33,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class SimpleTaskConfigurator implements HttpTaskBuilder {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(SimpleTaskConfigurator.class);
     public static final String VALUE_PATTERN = "\\$\\(([^\\)\\@]+)\\)";
     public static final String CONTEXT_PATTERN = "\\@context\\[([^\\]\\$]+)\\]";
 
@@ -189,7 +193,7 @@ class SimpleTaskConfigurator implements HttpTaskBuilder {
              try {
 	            this.contentBuilder = ReflectUtils.getTheBestInstance(taskContentConfigurationType, new Object[] {this.endpoint.getMediator()});
 	        } catch (Exception e) {
-	            this.endpoint.getMediator().error(e);
+	            LOG.error(e.getMessage(), e);
 	        }
         }
     }

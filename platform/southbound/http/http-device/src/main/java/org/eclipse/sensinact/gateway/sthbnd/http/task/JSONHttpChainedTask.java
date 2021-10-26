@@ -20,6 +20,8 @@ import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,8 @@ import java.util.Map;
  *
  */
 public class JSONHttpChainedTask<REQUEST extends Request<SimpleHttpResponse>> extends HttpChainedTask<REQUEST> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(JSONHttpChainedTask.class);
     /**
      *
      */
@@ -115,7 +119,7 @@ public class JSONHttpChainedTask<REQUEST extends Request<SimpleHttpResponse>> ex
             object.put(chainedIdentifier, jsonAppend);
 
         } catch (JSONException e) {
-            mediator.error("Unable to build the result object");
+            LOG.error("Unable to build the result object");
         }
         this.array.put(object);
     }

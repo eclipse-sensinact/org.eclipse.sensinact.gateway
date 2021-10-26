@@ -28,6 +28,8 @@ import org.eclipse.sensinact.gateway.protocol.http.HeadersCollection;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpDiscoveryTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
@@ -37,6 +39,8 @@ import org.xml.sax.SAXException;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<HttpPacket> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(HttpProtocolStackEndpoint.class);
 	
     /**
      * permanent header fields added to each request
@@ -94,7 +98,7 @@ public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<Ht
             Request<HttpResponse> request = (Request<HttpResponse>) _task.build();
             HttpResponse response = request.send();
             if (response == null) {
-                mediator.error("Unable to connect");
+            	LOG.error("Unable to connect");
                 return;
             }
             if (!_task.isDirect()) {
@@ -104,7 +108,7 @@ public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<Ht
             	_task.setResult(new String(response.getContent()));            
         } catch (Exception e) {
         	e.printStackTrace();
-            super.mediator.error(e);
+        	LOG.error(e.getMessage(), e);
         }
     }
 
@@ -127,8 +131,8 @@ public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<Ht
                         wait -= 150;
                     } catch (InterruptedException e) {
                         Thread.interrupted();
-                        if (this.mediator.isErrorLoggable()) {
-                            this.mediator.error(e.getMessage(), e);
+                        if (LOG.isErrorEnabled()) {
+                        	LOG.error(e.getMessage(), e);
                         }
                         break;
                     }
@@ -199,8 +203,8 @@ public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<Ht
                         wait -= 150;
                     } catch (InterruptedException e) {
                         Thread.interrupted();
-                        if (this.mediator.isErrorLoggable()) {
-                            this.mediator.error(e.getMessage(), e);
+                        if (LOG.isErrorEnabled()) {
+                        	LOG.error(e.getMessage(), e);
                         }
                         break;
                     }

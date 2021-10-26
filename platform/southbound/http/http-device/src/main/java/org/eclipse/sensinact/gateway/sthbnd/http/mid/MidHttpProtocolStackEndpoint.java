@@ -17,6 +17,8 @@ import org.eclipse.sensinact.gateway.protocol.http.client.mid.MidClient;
 import org.eclipse.sensinact.gateway.protocol.http.client.mid.MidClientListener;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -29,6 +31,8 @@ import java.io.IOException;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class MidHttpProtocolStackEndpoint<RESPONSE extends HttpResponse, REQUEST extends MidHttpRequest<RESPONSE>> extends HttpProtocolStackEndpoint implements MidClientListener<RESPONSE> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(MidHttpProtocolStackEndpoint.class);
     /**
      * the intermediate client
      */
@@ -66,7 +70,7 @@ public abstract class MidHttpProtocolStackEndpoint<RESPONSE extends HttpResponse
             try {
                 super.process(response.createPacket());
             } catch (InvalidPacketException e) {
-                this.mediator.error(e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }

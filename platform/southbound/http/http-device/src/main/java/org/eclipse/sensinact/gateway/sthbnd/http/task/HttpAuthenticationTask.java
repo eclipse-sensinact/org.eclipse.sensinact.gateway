@@ -17,6 +17,8 @@ import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Extended {@link HttpTask} dedicated to discovery process
@@ -24,6 +26,8 @@ import org.eclipse.sensinact.gateway.util.CastUtils;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class HttpAuthenticationTask<RESPONSE extends HttpResponse, REQUEST extends Request<RESPONSE>> extends HttpDiscoveryTask<RESPONSE, REQUEST> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(HttpAuthenticationTask.class);
     private static final String AUTHENTICATION_HEADER_KEY = "X-Auth-Token";
 
     private String authenticationHeaderKey;
@@ -107,7 +111,7 @@ public class HttpAuthenticationTask<RESPONSE extends HttpResponse, REQUEST exten
         try {
             value = this.tokenExtractor == null ? CastUtils.cast(String.class, result) : this.tokenExtractor.execute(result);
         } catch (Exception e) {
-            this.mediator.error(e);
+            LOG.error(e.getMessage(), e);
         }
         this.registerAuthenticationHeader(value);
     }

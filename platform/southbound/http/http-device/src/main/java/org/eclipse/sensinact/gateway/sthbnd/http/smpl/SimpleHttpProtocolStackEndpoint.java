@@ -50,11 +50,14 @@ import org.eclipse.sensinact.gateway.sthbnd.http.task.config.RecurrentHttpTaskDe
 import org.eclipse.sensinact.gateway.sthbnd.http.task.config.SimpleHttpTaskDescription;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
+
 public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
@@ -65,6 +68,8 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
     //********************************************************************//
     //						STATIC DECLARATIONS							  //
     //********************************************************************//
+	
+	private static final Logger LOG= LoggerFactory.getLogger(SimpleHttpProtocolStackEndpoint.class);
     public static final Class<? extends HttpTask> GET_TASK = HttpTaskImpl.class;
     public static final Class<? extends HttpTask> SET_TASK = HttpTaskImpl.class;
     public static final Class<? extends HttpTask> ACT_TASK = HttpTaskImpl.class;
@@ -281,7 +286,7 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
                         }
                         task.execute();
                     } catch (Exception e) {
-                        mediator.error(e);
+                    	LOG.error(e.getMessage(), e);
                     }finally {
                     	SimpleHttpProtocolStackEndpoint.this.recurrenceTasks.remove(this.taskId);
                     }
@@ -314,7 +319,7 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
             ((HttpMediator) mediator).configure(_task);
             super.send(_task);
         } catch (Exception e) {
-            mediator.error(e);
+            SimpleHttpProtocolStackEndpoint.this.LOG.error(e.getMessage(), e);
         } finally {
             ((HttpMediator) mediator).unregisterProcessingContext(_task);
         }
@@ -341,7 +346,7 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
             }
             return task;
         } catch (Exception e) {
-            mediator.error(e);
+        	SimpleHttpProtocolStackEndpoint.this.LOG.error(e.getMessage(), e);
             ((HttpMediator) mediator).unregisterProcessingContext(task);
         }
         return null;
