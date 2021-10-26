@@ -30,6 +30,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An implementation of the BundleValidation service
@@ -37,6 +39,8 @@ import org.osgi.service.component.annotations.Component;
 @Component
 @SignatureValidator(type = "secure")
 public class BundleValidationImpl implements BundleValidation {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(BundleValidationImpl.class);
     // ********************************************************************//
     // 						NESTED DECLARATIONS 						   //
     // ********************************************************************//
@@ -105,10 +109,10 @@ public class BundleValidationImpl implements BundleValidation {
     @Override
     public String check(Bundle bundle) throws BundleValidationException {
         if (bundle == null) {
-            this.mediator.debug("null bundle");
+            LOG.debug("null bundle");
             return null;
         }
-        this.mediator.debug("check bundle: %s", bundle.getLocation());
+        LOG.debug("check bundle: %s", bundle.getLocation());
 
         int hashcode = bundle.hashCode();
         String bundleName = bundle.getSymbolicName();
@@ -134,8 +138,8 @@ public class BundleValidationImpl implements BundleValidation {
         }
         String sha1 = null;
         if (isSigned) {
-            if (this.mediator.isDebugLoggable()) {
-                this.mediator.debug(FILE + " " + bundle.getLocation() + " is signed");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(FILE + " " + bundle.getLocation() + " is signed");
             }
             try {
                 SignedBundle sjar = new SignedBundle(mediator, bundle, cryptoUtils);
@@ -153,7 +157,7 @@ public class BundleValidationImpl implements BundleValidation {
                     entry = (Map.Entry) signers.next();
                     signer = (String) entry.getKey();
 
-                    this.mediator.debug("signers: %s", signers);
+                    LOG.debug("signers: %s", signers);
                     currentCert = (Certificate) validCertificates.get(signer);
                     SignatureFile signatureFile = sjar.getSignatureFile(signer);
 
@@ -162,8 +166,8 @@ public class BundleValidationImpl implements BundleValidation {
                     }
                     if (sjar.checkCoherence(signer, currentCert, signatureFile.getHashAlgo())) {
                         certs4validSig.add(currentCert);
-                        if (this.mediator.isInfoLoggable()) {
-                            this.mediator.debug("certificate for " + signer + " valid");
+                        if (LOG.isInfoEnabled()) {
+                            LOG.debug("certificate for " + signer + " valid");
                         }
                     }
                     if (certs4validSig.size() == 0) {

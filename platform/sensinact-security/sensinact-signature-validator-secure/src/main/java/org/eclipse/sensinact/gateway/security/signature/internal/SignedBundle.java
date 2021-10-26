@@ -17,6 +17,8 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.osgi.framework.Bundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
@@ -49,6 +51,8 @@ import java.util.jar.Manifest;
  * @see JarFile
  */
 public class SignedBundle {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(SignedBundle.class);
     private KeyStoreManager ksm = null;
     private final CryptographicUtils cryptoUtils;
     protected static final String METADATA_DIR = "/META-INF/";
@@ -134,8 +138,8 @@ public class SignedBundle {
                 signatureFiles.put(signer, signedFile);
             }
         } else {
-            if (this.mediator.isDebugLoggable()) {
-                this.mediator.debug("Better performance, data found (signatureFiles)");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Better performance, data found (signatureFiles)");
             }
         }
         return signatureFiles;
@@ -148,19 +152,19 @@ public class SignedBundle {
      */
     public SignatureFile getSignatureFile(final String givenSigner) throws IOException {
         final String signer = SignedBundle.getSignerShortName(givenSigner);
-        if (this.mediator.isDebugLoggable()) {
-            this.mediator.debug("SignedJarFile.getSignatureFile, signer: " + signer);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("SignedJarFile.getSignatureFile, signer: " + signer);
         }
         Map<String, SignatureFile> signatures = this.getSignatureFiles();
         SignatureFile file = signatures.get(signer);
 
         if (file == null) {
-            if (this.mediator.isErrorLoggable()) {
-                this.mediator.error("SignedJarFile.getSignatureFile: " + "signature file not available.");
+            if (LOG.isErrorEnabled()) {
+                LOG.error("SignedJarFile.getSignatureFile: " + "signature file not available.");
             }
         } else {
-            if (this.mediator.isDebugLoggable()) {
-                this.mediator.debug("Better performance, data found (signatureFile)");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Better performance, data found (signatureFile)");
             }
         }
         return file;
@@ -200,8 +204,8 @@ public class SignedBundle {
                 certs.put(signer, cert);
             }
         } else {
-            if (this.mediator.isDebugLoggable()) {
-                this.mediator.debug("Better performance, data found (cert)");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Better performance, data found (cert)");
             }
         }
         return cert;
@@ -231,8 +235,8 @@ public class SignedBundle {
             block = SignatureBlock.getInstance(mediator, this, signer);
             signatureBlocks.put(signer, block);
         } else {
-            if (this.mediator.isDebugLoggable()) {
-                this.mediator.debug("Better performance, data found (block)");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Better performance, data found (block)");
             }
         }
         return block;
