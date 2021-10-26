@@ -46,7 +46,7 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService;
-import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService.SQLLiteConfig;
+import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService.SQLiteConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -100,7 +100,7 @@ public class TestDAO {
 
 	private final ServiceReference referenceDataStoreService = Mockito.mock(ServiceReference.class);
 
-	private DataStoreService dataStoreService;
+	private SQLiteDataStoreService dataStoreService;
 
 	private File tempDB;
 
@@ -190,9 +190,10 @@ public class TestDAO {
 	    Path originalPath = Paths.get(dbPath);
 	    System.err.println("orignal - " + originalPath.toFile().getAbsolutePath());
 	    Files.copy(originalPath, copied, StandardCopyOption.REPLACE_EXISTING);
-	    SQLLiteConfig sqlLiteConfig = Mockito.mock(SQLiteDataStoreService.SQLLiteConfig.class);
+	    SQLiteConfig sqlLiteConfig = Mockito.mock(SQLiteDataStoreService.SQLiteConfig.class);
 		Mockito.when(sqlLiteConfig.database()).thenReturn(tempDB.getAbsolutePath());
-		dataStoreService = new SQLiteDataStoreService(context, sqlLiteConfig);
+		dataStoreService = new SQLiteDataStoreService();
+		dataStoreService.start(sqlLiteConfig);
 	}
 	
 
