@@ -28,11 +28,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 public class NorthboundBrokerManagedServiceFactory implements ManagedServiceFactory {
 	
+	private static final Logger LOG = LoggerFactory.getLogger(NorthboundBrokerManagedServiceFactory.class);
     public static final String MANAGER_NAME = "mqtt.agent.broker";
 	private Map<String, MidAgentCallback> pids;
 
@@ -122,7 +125,7 @@ public class NorthboundBrokerManagedServiceFactory implements ManagedServiceFact
 	    	    	defined = true;
     	    	} catch(JSONException | NullPointerException e) {
     	    		handled = SnaMessage.Type.values();
-    	    		mediator.error("Unable to build the array of handled message types",e);
+    	    		LOG.error("Unable to build the array of handled message types",e);
     	    	}
     	    }
     	    String conditions = (String)dictionary.get("conditions");
@@ -132,7 +135,7 @@ public class NorthboundBrokerManagedServiceFactory implements ManagedServiceFact
     	    		defined = true;
     	    	} catch(JSONException e) {
     	    		constraints = new JSONArray();
-    	    		mediator.error("Unable to build the constraint expession",e);
+    	    		LOG.error("Unable to build the constraint expession",e);
     	    	}
     	    }
     	    SnaFilter filter = null;
@@ -144,7 +147,7 @@ public class NorthboundBrokerManagedServiceFactory implements ManagedServiceFact
     	    final String broker = String.format("%s://%s:%s",protocol,host,port);    	    
     	    
     	    final AbstractMqttHandler  handler = new SnaEventEventHandler(prefix);
-    	    mediator.debug("Starting MQTT Agent point to server %s with prefix %s and qos %s",broker,prefix,qos);
+    	    LOG.debug("Starting MQTT Agent point to server %s with prefix %s and qos %s",broker,prefix,qos);
             
     	    GenericMqttAgent agent;
             if(username!=null&&password!=null&&!username.toString().trim().equals("")&&!password.toString().trim().equals("")){
@@ -159,10 +162,10 @@ public class NorthboundBrokerManagedServiceFactory implements ManagedServiceFact
                     return core.registerAgent(mediator, handler, flt);
                 }
             });
-            mediator.info("Agent with id:[%s] registered ", registration);
+            LOG.info("Agent with id:[%s] registered ", registration);
             this.pids.put(servicePID, handler);
     	} catch (Exception e) {
-			mediator.error(e);
+			LOG.error(e.getMessage(),e);
 		}
     }
 
@@ -175,7 +178,7 @@ public class NorthboundBrokerManagedServiceFactory implements ManagedServiceFact
     		MidAgentCallback callback = this.pids.remove(servicePID);
         	callback.stop();    		
     	} catch (Exception e) {
-			mediator.error(e);
+			LOG.error(e.getMessage(),e);
 		}
     }
 	

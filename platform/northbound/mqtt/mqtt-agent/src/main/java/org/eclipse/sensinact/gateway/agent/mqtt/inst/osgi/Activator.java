@@ -18,16 +18,19 @@ import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ManagedServiceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Extended {@link AbstractActivator}
  */
 @Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends AbstractActivator<Mediator> {
-
+	
+	private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
     @Override
     public void doStart() throws Exception {
-    	mediator.info("Starting MQTT Agents factory");
+    	LOG.info("Starting MQTT Agents factory");
         super.mediator.register(new NorthboundBrokerManagedServiceFactory(super.mediator),
         	ManagedServiceFactory.class, new Hashtable() {{
         		this.put(Constants.SERVICE_PID, NorthboundBrokerManagedServiceFactory.MANAGER_NAME);
@@ -39,7 +42,7 @@ public class Activator extends AbstractActivator<Mediator> {
      */
     @Override
     public void doStop() throws Exception {
-    	mediator.info("Stopping MQTT Agents factory");
+    	LOG.info("Stopping MQTT Agents factory");
     }
 
     /* (non-Javadoc)
