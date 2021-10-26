@@ -13,12 +13,17 @@ package org.eclipse.sensinact.gateway.common.bundle;
 import org.eclipse.sensinact.gateway.common.interpolator.Interpolator;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 
 /**
  * Abstract implementation of the {@link BundleActivator} interface
  */
 public abstract class AbstractActivator<M extends Mediator> implements BundleActivator {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractActivator.class);
     /**
      * Completes the starting process
      */
@@ -45,7 +50,7 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
     protected M mediator;
 
     protected void injectPropertyFields() throws Exception {
-        this.mediator.debug("Starting introspection in bundle %s", mediator.getContext().getBundle().getSymbolicName());
+        LOG.debug("Starting introspection in bundle %s", mediator.getContext().getBundle().getSymbolicName());
         //This line creates an interpolator and inject the properties into the activator
         Interpolator interpolator = new Interpolator(this.mediator);
         interpolator.getInstance(this);
@@ -63,7 +68,7 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
         try {
              injectPropertyFields();
         } catch (Exception e) {
-            mediator.error(e);
+            LOG.error(e.getMessage(), e);
         }
         AbstractActivator.this.doStart();
     }
