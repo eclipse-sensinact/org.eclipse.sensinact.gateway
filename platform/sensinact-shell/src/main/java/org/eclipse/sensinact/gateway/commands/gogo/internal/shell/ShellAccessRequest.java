@@ -21,6 +21,8 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
@@ -34,6 +36,8 @@ import java.util.Map;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ShellAccessRequest implements NorthboundRequestWrapper {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ShellAccessRequest.class);
     private NorthboundMediator mediator;
     private JSONObject request;
     private Authentication<?> authentication;
@@ -77,7 +81,7 @@ public class ShellAccessRequest implements NorthboundRequestWrapper {
             try {
                 return NorthboundRequest.processRequestQuery(uriElements[1]);
             } catch (UnsupportedEncodingException e) {
-                this.mediator.error(e);
+                LOG.error(e.getMessage(), e);
             }
         }
         return Collections.<QueryKey, List<String>>emptyMap();

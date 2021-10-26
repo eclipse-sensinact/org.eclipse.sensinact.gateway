@@ -24,10 +24,14 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class AccessMethodCommands {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AccessMethodCommands.class);
     private CommandServiceMediator mediator;
 
     public AccessMethodCommands(CommandServiceMediator mediator) {
@@ -194,7 +198,7 @@ public class AccessMethodCommands {
             params.put(new JSONObject().put("name", "conditions").put("type", "object").put("value", new JSONObject(conditions)));
 
         } catch (JSONException e) {
-            mediator.error("Unable to parse the conditions", e);
+            LOG.error("Unable to parse the conditions", e);
 
         }
         ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, "SUBSCRIBE")).put("parameters", params));
