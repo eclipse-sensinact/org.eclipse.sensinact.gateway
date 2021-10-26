@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.security.signature.internal;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.osgi.framework.Bundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
@@ -41,6 +43,8 @@ import java.util.jar.Manifest;
  * @see JarFile
  */
 public class SignedBundle {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(SignedBundle.class);
     private KeyStoreManager ksm = null;
     private final CryptographicUtils cryptoUtils;
     protected static final String METADATA_DIR = "/META-INF/";
@@ -126,8 +130,8 @@ public class SignedBundle {
                 signatureFiles.put(signer, signedFile);
             }
         } else {
-            if (this.mediator.isDebugLoggable()) {
-                this.mediator.debug("Better performance, data found (signatureFiles)");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Better performance, data found (signatureFiles)");
             }
         }
         return signatureFiles;
@@ -142,12 +146,12 @@ public class SignedBundle {
         Map<String, SignatureFile> signatures = this.getSignatureFiles();
         SignatureFile file = signatures.values().iterator().next();
         if (file == null) {
-            if (this.mediator.isErrorLoggable()) {
-                this.mediator.error("SignedJarFile.getSignatureFile: " + "signature file not available.");
+            if (LOG.isErrorEnabled()) {
+                LOG.error("SignedJarFile.getSignatureFile: " + "signature file not available.");
             }
         } else {
-            if (this.mediator.isDebugLoggable()) {
-                this.mediator.debug("Better performance, data found (signatureFile)");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Better performance, data found (signatureFile)");
             }
         }
         return file;

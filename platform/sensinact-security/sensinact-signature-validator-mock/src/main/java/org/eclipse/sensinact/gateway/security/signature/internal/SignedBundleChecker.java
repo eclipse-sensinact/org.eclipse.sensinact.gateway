@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.security.signature.internal;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.security.signature.exception.BundleValidationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -27,6 +29,8 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
 public class SignedBundleChecker {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(SignedBundleChecker.class);
     private static final String METADATA_DIR = "/META-INF/";
     private static final String MF_FILE = "MANIFEST.MF";
     Mediator mediator;
@@ -59,24 +63,24 @@ public class SignedBundleChecker {
         boolean signatureFileValid = false;
         boolean signatureBlockValid = false;
         resourcesOrderValid = this.checkResourcesOrderValid(signedJar);
-        if (this.mediator.isInfoLoggable()) {
-            this.mediator.info("resourcesOrderValid " + resourcesOrderValid);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("resourcesOrderValid " + resourcesOrderValid);
         }
         signatureBlockValid = this.checkSignatureBlockValidity(signedJar, signer, cryptoUtils, algo);
-        if (this.mediator.isInfoLoggable()) {
-            this.mediator.info("signatureBlockValid " + signatureBlockValid);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("signatureBlockValid " + signatureBlockValid);
         }
         signatureFileValid = this.checkSignatureFileValidity(signedJar, signer, cryptoUtils);
-        if (this.mediator.isInfoLoggable()) {
-            this.mediator.info("signatureFileValid " + signatureFileValid);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("signatureFileValid " + signatureFileValid);
         }
         manifestValid = this.checkManifestValidity(signedJar, cryptoUtils);
-        if (this.mediator.isWarningLoggable()) {
-            this.mediator.info("manifestValid " + manifestValid);
+        if (LOG.isWarnEnabled()) {
+            LOG.info("manifestValid " + manifestValid);
         }
         coherent = resourcesOrderValid && signatureBlockValid && signatureFileValid && manifestValid;
-        if (this.mediator.isWarningLoggable()) {
-            this.mediator.info("coherent " + coherent);
+        if (LOG.isWarnEnabled()) {
+            LOG.info("coherent " + coherent);
         }
         return coherent;
     }
@@ -177,8 +181,8 @@ public class SignedBundleChecker {
             //logManifestEntry.initTimeMeasure();
             entry = (Map.Entry) iter.next();
             file = (String) entry.getKey();
-            if (this.mediator.isDebugLoggable()) {
-                this.mediator.debug("file: " + file);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("file: " + file);
             }
             data = (Attributes) entries.get(file);
             iter2 = data.entrySet().iterator();
@@ -187,12 +191,12 @@ public class SignedBundleChecker {
                 //logHash.initTimeMeasure();
                 entry2 = (Map.Entry) iter2.next();
                 key2 = (Attributes.Name) entry2.getKey();
-                if (this.mediator.isDebugLoggable()) {
-                    this.mediator.debug("key2: " + key2);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("key2: " + key2);
                 }
                 hashValue = (String) data.get(key2);
-                if (this.mediator.isDebugLoggable()) {
-                    this.mediator.debug("hashValue: " + hashValue);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("hashValue: " + hashValue);
                 }
                 type = key2.toString();
                 checked = checked && cryptoUtils.checkHashValue(mediator, signedJar.getEntry(file), hashValue, type);
@@ -224,8 +228,8 @@ public class SignedBundleChecker {
 
             if (path.endsWith(".class") && manifest.getAttributes(path) == null) {
                 checked = false;
-                if (this.mediator.isWarningLoggable()) {
-                    this.mediator.warn(path + " not referenced in the manifest file");
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn(path + " not referenced in the manifest file");
                 }
             }
         }
