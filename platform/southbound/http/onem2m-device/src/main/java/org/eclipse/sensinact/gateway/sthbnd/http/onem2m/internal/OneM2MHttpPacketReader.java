@@ -15,11 +15,16 @@ import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
+import org.eclipse.sensinact.gateway.generic.packet.PacketReader;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OneM2MHttpPacketReader extends SimplePacketReader<HttpPacket> {
+	private static final Logger LOG = LoggerFactory.getLogger(PacketReader.class);
+
     public static final String DEFAULT_SERVICE_NAME = "container";
     
     class OneM2MHttpSubPacket {
@@ -53,8 +58,8 @@ public class OneM2MHttpPacketReader extends SimplePacketReader<HttpPacket> {
     	if(this.subPackets.isEmpty()) {
 	        try {
 	            JSONObject content = new JSONObject(new String(packet.getBytes()));
-	            if (mediator.isDebugLoggable()) {
-	                mediator.debug(content.toString());
+	            if (LOG.isDebugEnabled()) {
+	                LOG.debug(content.toString());
 	            }
 	            if (content.has("m2m:uril")) {
 	                String[] uris = content.getString("m2m:uril").split(" ");
@@ -77,7 +82,7 @@ public class OneM2MHttpPacketReader extends SimplePacketReader<HttpPacket> {
 	                }
 	            }
 	        } catch (Exception e) {
-                mediator.error(e);
+                LOG.error(e.getMessage(), e);
         		super.configureEOF();
                 throw new InvalidPacketException(e);
 	        }
