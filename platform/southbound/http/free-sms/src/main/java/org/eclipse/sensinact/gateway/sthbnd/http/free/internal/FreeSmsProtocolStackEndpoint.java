@@ -14,6 +14,8 @@ import org.eclipse.sensinact.gateway.common.bundle.ManagedConfigurationListener;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpMediator;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.SimpleHttpProtocolStackEndpoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -30,6 +32,8 @@ import java.util.Stack;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class FreeSmsProtocolStackEndpoint extends SimpleHttpProtocolStackEndpoint implements ManagedConfigurationListener {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(FreeSmsProtocolStackEndpoint.class);
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
     //********************************************************************//
@@ -124,7 +128,7 @@ public class FreeSmsProtocolStackEndpoint extends SimpleHttpProtocolStackEndpoin
                     continue;
                 }
             }
-            super.mediator.warn(String.format("unrecognized property '%s' \n '<name>#(user|pass)' key format expected ", propertyKey));
+            LOG.warn(String.format("unrecognized property '%s' \n '<name>#(user|pass)' key format expected ", propertyKey));
         }
 
         Iterator<Map.Entry<String, FreeSmsResourceConfig>> iterator = configuredResources.entrySet().iterator();
@@ -136,7 +140,7 @@ public class FreeSmsProtocolStackEndpoint extends SimpleHttpProtocolStackEndpoin
                     super.process(new FreeSmsPacket(entry.getKey(), null, null, false));
                     iterator.remove();
                 } catch (InvalidPacketException e) {
-                    mediator.error(e);
+                    LOG.error(e.getMessage(), e);
                 }
             }
         }
@@ -148,14 +152,14 @@ public class FreeSmsProtocolStackEndpoint extends SimpleHttpProtocolStackEndpoin
             String pass = null;
 
             if (fsrc == null || (user = fsrc.getUser()) == null || (pass = fsrc.getPass()) == null) {
-                mediator.warn(String.format("%s : user and pass properties are needed", key));
+                LOG.warn(String.format("%s : user and pass properties are needed", key));
                 continue;
             }
             try {
                 configuredResources.put(key, fsrc);
                 super.process(new FreeSmsPacket(key, user, pass, true));
             } catch (InvalidPacketException e) {
-                super.mediator.error(e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }
