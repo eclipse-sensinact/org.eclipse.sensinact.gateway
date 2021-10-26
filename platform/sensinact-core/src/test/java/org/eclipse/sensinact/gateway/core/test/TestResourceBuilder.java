@@ -107,7 +107,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 			DataStoreException, BundleException {
 		try {
 		this.testContext = new TestContext();
-		this.tree = new AccessTreeImpl(testContext.getMediator()).withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
+		this.tree = new AccessTreeImpl().withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}

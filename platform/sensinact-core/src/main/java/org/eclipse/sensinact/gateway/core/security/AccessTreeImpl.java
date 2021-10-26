@@ -38,18 +38,6 @@ public class AccessTreeImpl<N extends AccessNodeImpl<N>> extends PathTree<N>
 	 * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
 	 */
 	private static class AccessNodeFactory<N extends AccessNodeImpl<N>> implements PathNodeFactory<N> {
-		private Mediator mediator;
-
-		/**
-		 * Constructor
-		 * 
-		 * @param mediator
-		 *            the {@link Mediator} allowing to interact with the OSGi host
-		 *            environment
-		 */
-		AccessNodeFactory(Mediator mediator) {
-			this.mediator = mediator;
-		}
 
 		/**
 		 * @inheritDoc
@@ -58,7 +46,7 @@ public class AccessTreeImpl<N extends AccessNodeImpl<N>> extends PathTree<N>
 		 *      createPathNode(java.lang.String)
 		 */
 		public N createPathNode(String nodeName) {
-			return (N) new AccessNodeImpl<N>(mediator, nodeName, false);
+			return (N) new AccessNodeImpl<N>(nodeName, false);
 		}
 
 		/**
@@ -68,7 +56,7 @@ public class AccessTreeImpl<N extends AccessNodeImpl<N>> extends PathTree<N>
 		 *      createPatternNode(java.lang.String)
 		 */
 		public N createPatternNode(String nodeName) {
-			return (N) new AccessNodeImpl<N>(mediator, nodeName, true);
+			return (N) new AccessNodeImpl<N>(nodeName, true);
 		}
 
 		/**
@@ -78,7 +66,7 @@ public class AccessTreeImpl<N extends AccessNodeImpl<N>> extends PathTree<N>
 		 *      createRootNode()
 		 */
 		public N createRootNode() {
-			return (N) new AccessNodeImpl<N>(mediator, UriUtils.PATH_SEPARATOR, false);
+			return (N) new AccessNodeImpl<N>(UriUtils.PATH_SEPARATOR, false);
 		}
 	}
 
@@ -102,20 +90,16 @@ public class AccessTreeImpl<N extends AccessNodeImpl<N>> extends PathTree<N>
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing the AccessTree to be instantiated to
-	 *            interact with the OSGi host environment
 	 */
-	public AccessTreeImpl(Mediator mediator) {
-		super(new AccessNodeFactory<N>(mediator));
-		this.mediator = mediator;
+	public AccessTreeImpl() {
+		super(new AccessNodeFactory<N>());
 	}
 
 	/**
 	 * 
-	 * @param option
-	 *            the {@link AccessProfileOption} wrapping the {@link AccessProfile}
-	 *            applying to the root node of this {@link AccessTree}
+	 * @param option the {@link AccessProfileOption} wrapping the
+	 *               {@link AccessProfile} applying to the root node of this
+	 *               {@link AccessTree}
 	 * 
 	 * @return this AccessTree instance
 	 */
@@ -142,8 +126,7 @@ public class AccessTreeImpl<N extends AccessNodeImpl<N>> extends PathTree<N>
 	 */
 	@Override
 	public MutableAccessTree<AccessNodeImpl<N>> clone() {
-		MutableAccessTree<AccessNodeImpl<N>> tree = new AccessTreeImpl<N>(this.mediator)
-				.withAccessProfile(getRoot().getProfile());
+		MutableAccessTree<AccessNodeImpl<N>> tree = new AccessTreeImpl<N>().withAccessProfile(getRoot().getProfile());
 
 		Iterator<N> iterator = getRoot().iterator();
 		while (iterator.hasNext()) {

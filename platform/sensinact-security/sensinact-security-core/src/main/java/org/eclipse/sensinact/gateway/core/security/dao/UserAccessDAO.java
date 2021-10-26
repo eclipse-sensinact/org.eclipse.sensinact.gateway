@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.core.security.entity.UserAccessEntity;
@@ -60,11 +60,7 @@ public class UserAccessDAO extends AbstractImmutableSnaDAO<UserAccessEntity> {
 	 * @throws DataStoreException
 	 */
 	public UserAccessEntity find(final long identifier) throws DAOException, DataStoreException {
-		List<UserAccessEntity> userAccessEntities = super.select(new HashMap<String, Object>() {
-			{
-				this.put("UAID", identifier);
-			}
-		});
+		List<UserAccessEntity> userAccessEntities = super.select(Collections.singletonMap("UAID", identifier));
 		if (userAccessEntities.size() != 1) {
 			return null;
 		}
@@ -83,11 +79,7 @@ public class UserAccessDAO extends AbstractImmutableSnaDAO<UserAccessEntity> {
 	 * @throws DataStoreException
 	 */
 	public UserAccessEntity find(final String name) throws DAOException, DataStoreException {
-		List<UserAccessEntity> userAccessEntities = super.select(new HashMap<String, Object>() {
-			{
-				this.put("UANAME", name);
-			}
-		});
+		List<UserAccessEntity> userAccessEntities = super.select(Collections.singletonMap("UANAME", name));
 		if (userAccessEntities.size() != 1) {
 			return null;
 		}
@@ -106,11 +98,7 @@ public class UserAccessDAO extends AbstractImmutableSnaDAO<UserAccessEntity> {
 	 * @throws DataStoreException
 	 */
 	public UserAccessEntity find(final int level) throws DAOException, DataStoreException {
-		List<UserAccessEntity> userAccessEntities = super.select(new HashMap<String, Object>() {
-			{
-				this.put("UALEVEL", level);
-			}
-		});
+		List<UserAccessEntity> userAccessEntities = super.select(Collections.singletonMap("UALEVEL", level));
 		if (userAccessEntities.size() != 1) {
 			return null;
 		}

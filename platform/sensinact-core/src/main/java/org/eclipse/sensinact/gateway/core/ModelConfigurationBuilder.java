@@ -335,7 +335,7 @@ public class ModelConfigurationBuilder<C extends ModelConfiguration,I extends Mo
 					});
 				AccessTree<?> tree = null;
 				if (identifier == null) {
-					tree = new AccessTreeImpl<>(mediator).withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
+					tree = new AccessTreeImpl<>().withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
 				} else {
 					tree = ModelConfigurationBuilder.this.mediator.callService(SecuredAccess.class,
 						new Executable<SecuredAccess, AccessTree<?>>() {

@@ -59,7 +59,7 @@ class MySecuredAccess implements SecuredAccess {
 	@Override
 	public MutableAccessTree<? extends MutableAccessNode> getAccessTree(String identifier)
 			throws SecuredAccessException {
-		MutableAccessTree<? extends MutableAccessNode> accessTree = new AccessTreeImpl<>(mediator)
+		MutableAccessTree<? extends MutableAccessNode> accessTree = new AccessTreeImpl<>()
 				.withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
 		return accessTree;
 	}

@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -64,11 +65,7 @@ public class ApplicationDAO extends AbstractMutableSnaDAO<ApplicationEntity> {
 	 * @throws DataStoreException
 	 */
 	public ApplicationEntity find(final long identifier) throws DAOException, DataStoreException {
-		List<ApplicationEntity> applicationEntities = super.select(new HashMap<String, Object>() {
-			{
-				this.put("APPID", identifier);
-			}
-		});
+		List<ApplicationEntity> applicationEntities = super.select(Collections.singletonMap("APPID", identifier));
 
 		if (applicationEntities.size() != 1) {
 			return null;
@@ -94,11 +91,7 @@ public class ApplicationDAO extends AbstractMutableSnaDAO<ApplicationEntity> {
 		if (publicKey == null) {
 			return null;
 		}
-		List<ApplicationEntity> applicationEntities = super.select(new HashMap<String, Object>() {
-			{
-				this.put("APP_PUBLIC_KEY", publicKey);
-			}
-		});
+		List<ApplicationEntity> applicationEntities = super.select(Collections.singletonMap("APP_PUBLIC_KEY", publicKey));
 
 		if (applicationEntities.size() != 1) {
 			return null;
@@ -124,11 +117,7 @@ public class ApplicationDAO extends AbstractMutableSnaDAO<ApplicationEntity> {
 		if (privateKey == null) {
 			return null;
 		}
-		List<ApplicationEntity> applicationEntities = super.select(new HashMap<String, Object>() {
-			{
-				this.put("APP_PRIVATE_KEY", privateKey);
-			}
-		});
+		List<ApplicationEntity> applicationEntities = super.select(Collections.singletonMap("APP_PRIVATE_KEY", privateKey));
 
 		if (applicationEntities.size() != 1) {
 			return null;

@@ -13,9 +13,8 @@ package org.eclipse.sensinact.gateway.core.security.access.impl;
 import java.lang.reflect.Method;
 import java.security.InvalidKeyException;
 import java.util.Collections;
+import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.security.AbstractUserUpdater;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService;
@@ -32,6 +31,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.log.Logger;
 import org.osgi.service.log.LoggerFactory;
 
@@ -42,7 +43,6 @@ import org.osgi.service.log.LoggerFactory;
 @Component
 public class UserManagerImpl implements UserManager {
 	
-	private Mediator mediator;
 	private UserDAO userDAO;
 	private UserEntity anonymous;
 
@@ -52,6 +52,12 @@ public class UserManagerImpl implements UserManager {
 	@Reference(service = LoggerFactory.class)
 	private Logger logger;
 	
+	@Reference(cardinality = ReferenceCardinality.MULTIPLE,policy = ReferencePolicy.DYNAMIC)
+	private volatile List<UserManagerFinalizer> userManagerFinalizers;
+	
+	@Activate
+	private BundleContext context;
+	
 	/**
 	 * 
 	 * @param mediator
@@ -60,8 +66,7 @@ public class UserManagerImpl implements UserManager {
 	 * 
 	 */
 	@Activate
-	public UserManagerImpl(BundleContext context) throws SecuredAccessException {
-		this.mediator = new Mediator(context);
+	public UserManagerImpl() throws SecuredAccessException {
 		this.userDAO = new UserDAO(dataStoreService);
 
 		try {
@@ -105,7 +110,7 @@ public class UserManagerImpl implements UserManager {
 
 	@Override
 	public UserUpdater createUser(String token, final String login, final String password, final String account, final String accountType) throws SecuredAccessException {
-		return new AbstractUserUpdater(mediator, token, "create") {
+		return new AbstractUserUpdater(token, "create") {
 			@Override
 			public String getAccount() {
 				return account;
@@ -123,13 +128,12 @@ public class UserManagerImpl implements UserManager {
 					publicKey = CryptoUtils.cryptWithMD5(publicKeyStr);
 					UserEntity user = new UserEntity(login, password, account, accountType, publicKey);
 					UserManagerImpl.this.userDAO.create(user);
-					UserManagerImpl.this.mediator.callServices(UserManagerFinalizer.class,new Executable<UserManagerFinalizer,Void>() {
-						@Override
-						public Void execute(UserManagerFinalizer finalizer) throws Exception {
-							finalizer.userCreated(login, publicKey, account, accountType);
-							return null;
-						}}
-					);
+							
+					
+					for (UserManagerFinalizer f : userManagerFinalizers) {
+						f.userCreated(login, publicKey, account, accountType);
+					}
+					
 					return new StringBuilder().append("Public Key : ").append(publicKey).toString();
 				} catch(DAOException | DataStoreException | InvalidKeyException e) {
 					throw new SecuredAccessException(e);
@@ -141,7 +145,7 @@ public class UserManagerImpl implements UserManager {
 
 	@Override
 	public UserUpdater renewUserPassword(String token, final String account, final String accountType) throws SecuredAccessException {
-		return new AbstractUserUpdater(mediator, token, "renew") {
+		return new AbstractUserUpdater(token, "renew") {
 			static final String ALPHABET = ".!0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 			@Override
 			public String getAccount() {

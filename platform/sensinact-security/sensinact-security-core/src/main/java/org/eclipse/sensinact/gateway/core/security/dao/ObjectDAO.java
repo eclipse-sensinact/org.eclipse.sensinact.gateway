@@ -12,12 +12,11 @@ package org.eclipse.sensinact.gateway.core.security.dao;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
@@ -44,8 +43,6 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity> {
 	// ********************************************************************//
 	// STATIC DECLARATIONS //
 	// ********************************************************************//
-	private static Logger LOGGER=LoggerFactory.getLogger(ObjectDAO.class);
-
 	private static final Logger LOG = LoggerFactory.getLogger(ObjectDAO.class);
 	// ********************************************************************//
 	// INSTANCE DECLARATIONS //
@@ -88,8 +85,6 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity> {
 	 * Returns the {@link ObjectEntity} from the datastore matching the given String
 	 * path, otherwise null.
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} to interact with the OSGi host environment
 	 * @param path
 	 *            The String path of the {@link ObjectEntity} to be returned.
 	 * @param exact
@@ -158,10 +153,6 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity> {
 	 * @throws DataStoreException
 	 */
 	public List<ObjectEntity> findChildren(final long identifier) throws DAOException, DataStoreException {
-		return super.select(new HashMap<String, Object>() {
-			{
-				this.put("PARENT", identifier);
-			}
-		});
+		return super.select(Collections.singletonMap("PARENT", identifier));
 	}
 }

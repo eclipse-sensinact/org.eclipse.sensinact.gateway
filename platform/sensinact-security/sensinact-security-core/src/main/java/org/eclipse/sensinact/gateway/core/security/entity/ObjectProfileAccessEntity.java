@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.security.entity;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.NotNull;
@@ -61,9 +60,6 @@ public class ObjectProfileAccessEntity extends ImmutableSnaEntity {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param methodEntity
 	 * @param objectProfileEntity
 	 * @param objectAccessEntity

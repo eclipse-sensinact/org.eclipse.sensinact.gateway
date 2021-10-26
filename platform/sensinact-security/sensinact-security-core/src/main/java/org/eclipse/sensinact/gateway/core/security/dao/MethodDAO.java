@@ -10,10 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.MethodEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
@@ -62,11 +61,7 @@ public class MethodDAO extends AbstractImmutableSnaDAO<MethodEntity> {
 	 * @throws DataStoreException
 	 */
 	public MethodEntity find(final long identifier) throws DAOException, DataStoreException {
-		List<MethodEntity> methodEntities = super.select(new HashMap<String, Object>() {
-			{
-				this.put("MID", identifier);
-			}
-		});
+		List<MethodEntity> methodEntities = super.select(Collections.singletonMap("MID", identifier));
 
 		if (methodEntities.size() != 1) {
 			return null;
@@ -78,9 +73,6 @@ public class MethodDAO extends AbstractImmutableSnaDAO<MethodEntity> {
 	 * Returns the {@link MethodEntity} from the datastore matching the given String
 	 * method name, otherwise null.
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param methodName
 	 *            the String method name of the searched {@link MethodEntity}
 	 * 
@@ -88,11 +80,7 @@ public class MethodDAO extends AbstractImmutableSnaDAO<MethodEntity> {
 	 * @throws DataStoreException
 	 */
 	public MethodEntity find(final String methodName) throws DAOException, DataStoreException {
-		List<MethodEntity> methodEntities = super.select(new HashMap<String, Object>() {
-			{
-				this.put("MNAME", methodName);
-			}
-		});
+		List<MethodEntity> methodEntities = super.select(Collections.singletonMap("MNAME", methodName));
 
 		if (methodEntities.size() != 1) {
 			return null;
