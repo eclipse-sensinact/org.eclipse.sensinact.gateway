@@ -18,6 +18,7 @@ import org.eclipse.sensinact.gateway.core.security.entity.AgentEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ApplicationEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.AuthenticatedEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
+import org.eclipse.sensinact.gateway.core.security.entity.ObjectProfileEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.UserEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
@@ -57,12 +58,12 @@ public class AuthenticatedDAO extends AbstractMutableSnaDAO<AuthenticatedEntity>
 	 *            environment
 	 * @throws DAOException
 	 */
-	public AuthenticatedDAO(Mediator mediator, DataStoreService dataStoreService) throws DAOException {
-		super(mediator, AuthenticatedEntity.class, dataStoreService);
-		this.objectDAO = new ObjectDAO(mediator, dataStoreService);
-		this.userDAO = new UserDAO(mediator, dataStoreService);
-		this.agentDAO = new AgentDAO(mediator, dataStoreService);
-		this.applicationDAO = new ApplicationDAO(mediator, dataStoreService);
+	public AuthenticatedDAO(DataStoreService dataStoreService) throws DAOException {
+		super(AuthenticatedEntity.class, dataStoreService);
+		this.objectDAO = new ObjectDAO(dataStoreService);
+		this.userDAO = new UserDAO(dataStoreService);
+		this.agentDAO = new AgentDAO(dataStoreService);
+		this.applicationDAO = new ApplicationDAO(dataStoreService);
 	}
 
 	/**

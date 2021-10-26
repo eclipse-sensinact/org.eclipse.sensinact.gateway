@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.dao.SnaDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.SnaEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
@@ -47,14 +46,14 @@ public class CreateDirective extends Directive {
 	 * 
 	 * @return
 	 */
-	public static <E extends SnaEntity> CreateDirective getCreateDirective(Mediator mediator, E entity) {
+	public static <E extends SnaEntity> CreateDirective getCreateDirective(E entity) {
 		Class<? extends SnaEntity> entityType = entity.getClass();
 
 		Table table = entityType.getAnnotation(Table.class);
 		PrimaryKey primaryKey = entityType.getAnnotation(PrimaryKey.class);
 		Map<Field, Column> fields = SnaEntity.getFields(entityType);
 
-		CreateDirective createDirective = new CreateDirective(mediator, table.value());
+		CreateDirective createDirective = new CreateDirective(table.value());
 		Iterator<Map.Entry<Field, Column>> iterator = fields.entrySet().iterator();
 
 		String[] keys = primaryKey == null ? null : primaryKey.value();
@@ -89,8 +88,8 @@ public class CreateDirective extends Directive {
 	/**
 	 * Constructor
 	 */
-	public CreateDirective(Mediator mediator, String table) {
-		super(mediator, table);
+	public CreateDirective(String table) {
+		super(table);
 		this.create = new HashMap<String, Object>();
 	}
 

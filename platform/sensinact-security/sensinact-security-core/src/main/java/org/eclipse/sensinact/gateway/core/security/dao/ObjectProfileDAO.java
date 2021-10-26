@@ -13,7 +13,7 @@ package org.eclipse.sensinact.gateway.core.security.dao;
 import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectProfileEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
@@ -45,12 +45,10 @@ public class ObjectProfileDAO extends AbstractImmutableSnaDAO<ObjectProfileEntit
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
+	 * @param dataStoreService
 	 */
-	ObjectProfileDAO(Mediator mediator, DataStoreService dataStoreService) throws DAOException {
-		super(mediator, ObjectProfileEntity.class, dataStoreService);
+	ObjectProfileDAO(DataStoreService dataStoreService) throws DAOException {
+		super(ObjectProfileEntity.class, dataStoreService);
 	}
 
 	/**

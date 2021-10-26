@@ -11,13 +11,11 @@
 package org.eclipse.sensinact.gateway.core.security.entity;
 
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
+import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.NotNull;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
 import org.json.JSONObject;
-
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 
 /**
  * Method Entity
@@ -47,41 +45,31 @@ public class BundleEntity extends SnaEntity {
 
 	/**
 	 * Constructor
-	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 */
-	public BundleEntity(Mediator mediator) {
-		super(mediator);
+	public BundleEntity() {
+		super();
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param row
 	 * 
 	 */
-	public BundleEntity(Mediator mediator, JSONObject row) {
-		super(mediator, row);
+	public BundleEntity(JSONObject row) {
+		super(row);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param parent
 	 * @param path
 	 * @param userProfileEntity
 	 * @param objectProfileEntity
 	 */
-	public BundleEntity(Mediator mediator, String name, String signature, int sauth, long objectProfileEntity) {
-		this(mediator);
+	public BundleEntity(String name, String signature, int sauth, long objectProfileEntity) {
+		this();
 		this.setName(name);
 		this.setSignature(signature);
 		this.setSauth(sauth);

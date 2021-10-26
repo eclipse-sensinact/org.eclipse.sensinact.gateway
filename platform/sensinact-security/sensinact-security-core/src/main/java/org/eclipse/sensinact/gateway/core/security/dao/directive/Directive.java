@@ -15,7 +15,6 @@ package org.eclipse.sensinact.gateway.core.security.dao.directive;
 
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.dao.SnaDAO;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 
@@ -23,15 +22,12 @@ import org.eclipse.sensinact.gateway.util.CastUtils;
  * 
  */
 public abstract class Directive {
-	protected Mediator mediator;
 	protected String table;
 
 	/**
-	 * @param mediator
 	 * @param table
 	 */
-	protected Directive(Mediator mediator, String table) {
-		this.mediator = mediator;
+	protected Directive( String table) {
 		this.table = table;
 	}
 

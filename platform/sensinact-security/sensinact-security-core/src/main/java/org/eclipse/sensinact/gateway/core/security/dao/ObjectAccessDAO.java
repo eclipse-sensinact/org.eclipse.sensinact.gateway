@@ -10,8 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectAccessEntity;
@@ -31,8 +33,8 @@ public class ObjectAccessDAO extends AbstractImmutableSnaDAO<ObjectAccessEntity>
 	 *            the {@link Mediator} allowing to interact with the OSGi host
 	 *            environment
 	 */
-	public ObjectAccessDAO(Mediator mediator, DataStoreService dataStoreService) throws DAOException {
-		super(mediator, ObjectAccessEntity.class, dataStoreService);
+	public ObjectAccessDAO(DataStoreService dataStoreService) throws DAOException {
+		super(ObjectAccessEntity.class, dataStoreService);
 	}
 
 	/**
@@ -50,12 +52,7 @@ public class ObjectAccessDAO extends AbstractImmutableSnaDAO<ObjectAccessEntity>
 	 * @throws DataStoreException
 	 */
 	public ObjectAccessEntity find(final long identifier) throws DAOException, DataStoreException {
-		List<ObjectAccessEntity> objectAccessEntities = super.select(new HashMap<String, Object>() {
-			{
-				this.put("OAID", identifier);
-			}
-		});
-
+		List<ObjectAccessEntity> objectAccessEntities = super.select(Collections.singletonMap("OAID", identifier));
 		if (objectAccessEntities.size() != 1) {
 			return null;
 		}

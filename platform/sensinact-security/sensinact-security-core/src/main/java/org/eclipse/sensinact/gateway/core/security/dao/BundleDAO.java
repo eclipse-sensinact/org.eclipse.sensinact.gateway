@@ -48,8 +48,8 @@ public class BundleDAO extends AbstractMutableSnaDAO<BundleEntity> {
 	 *            environment
 	 * @throws DAOException
 	 */
-	public BundleDAO(Mediator mediator, DataStoreService dataStoreService) throws DAOException {
-		super(mediator, BundleEntity.class, dataStoreService);
+	public BundleDAO(DataStoreService dataStoreService) throws DAOException {
+		super(BundleEntity.class, dataStoreService);
 	}
 
 	/**

@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.dao.SnaDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.SnaEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
@@ -46,17 +45,17 @@ public class UpdateDirective extends Directive {
 	 * 
 	 * @return
 	 */
-	public static <E extends SnaEntity> UpdateDirective getUpdateDirective(Mediator mediator, E entity) {
+	public static <E extends SnaEntity> UpdateDirective getUpdateDirective(E entity) {
 		Class<? extends SnaEntity> entityType = entity.getClass();
 
 		Table table = entityType.getAnnotation(Table.class);
 		PrimaryKey primaryKey = entityType.getAnnotation(PrimaryKey.class);
 		Map<Field, Column> fields = SnaEntity.getFields(entityType);
 
-		KeyDirective keyDirective = KeyDirective.createKeyDirective(mediator, table, primaryKey, fields);
+		KeyDirective keyDirective = KeyDirective.createKeyDirective(table, primaryKey, fields);
 		keyDirective.assign(entity);
 
-		UpdateDirective updateDirective = new UpdateDirective(mediator, table.value(), keyDirective);
+		UpdateDirective updateDirective = new UpdateDirective(table.value(), keyDirective);
 		Iterator<Map.Entry<Field, Column>> iterator = fields.entrySet().iterator();
 
 		String[] keys = primaryKey == null ? null : primaryKey.value();
@@ -90,8 +89,8 @@ public class UpdateDirective extends Directive {
 	/**
 	 * Constructor
 	 */
-	public UpdateDirective(Mediator mediator, String table, KeyDirective keyDirective) {
-		super(mediator, table);
+	public UpdateDirective(String table, KeyDirective keyDirective) {
+		super(table);
 		this.update = new HashMap<String, Object>();
 		this.keyDirective = keyDirective;
 	}

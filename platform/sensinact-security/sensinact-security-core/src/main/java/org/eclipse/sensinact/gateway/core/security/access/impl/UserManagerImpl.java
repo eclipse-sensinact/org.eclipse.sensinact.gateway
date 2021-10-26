@@ -62,7 +62,7 @@ public class UserManagerImpl implements UserManager {
 	@Activate
 	public UserManagerImpl(BundleContext context) throws SecuredAccessException {
 		this.mediator = new Mediator(context);
-		this.userDAO = new UserDAO(mediator, dataStoreService);
+		this.userDAO = new UserDAO(dataStoreService);
 
 		try {
 			anonymous = userDAO.find(ANONYMOUS_ID);
@@ -121,7 +121,7 @@ public class UserManagerImpl implements UserManager {
 						).append(System.currentTimeMillis()).toString();
 				try {
 					publicKey = CryptoUtils.cryptWithMD5(publicKeyStr);
-					UserEntity user = new UserEntity(mediator, login, password, account, accountType, publicKey);
+					UserEntity user = new UserEntity(login, password, account, accountType, publicKey);
 					UserManagerImpl.this.userDAO.create(user);
 					UserManagerImpl.this.mediator.callServices(UserManagerFinalizer.class,new Executable<UserManagerFinalizer,Void>() {
 						@Override

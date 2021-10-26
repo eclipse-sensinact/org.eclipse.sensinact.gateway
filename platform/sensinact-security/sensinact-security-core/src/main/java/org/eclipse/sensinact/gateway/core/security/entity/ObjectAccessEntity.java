@@ -10,12 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.core.security.entity;
 
-import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
+import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
+import org.json.JSONObject;
 
 /**
  * ObjectAccess DAO Entity
@@ -37,39 +36,30 @@ public class ObjectAccessEntity extends ImmutableSnaEntity {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 */
-	public ObjectAccessEntity(Mediator mediator) {
-		super(mediator);
+	public ObjectAccessEntity() {
+		super();
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param row
 	 * 
 	 */
-	public ObjectAccessEntity(Mediator mediator, JSONObject row) {
-		super(mediator, row);
+	public ObjectAccessEntity(JSONObject row) {
+		super(row);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param identifier
 	 * @param name
 	 * @param level
 	 */
-	public ObjectAccessEntity(Mediator mediator, String name, int level) {
-		this(mediator);
+	public ObjectAccessEntity(String name, int level) {
+		this();
 		this.setLevel(level);
 		this.setName(name);
 	}

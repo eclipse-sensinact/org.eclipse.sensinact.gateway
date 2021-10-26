@@ -17,7 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.dao.SnaDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.SnaEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
@@ -49,14 +48,14 @@ public class SelectDirective extends Directive {
 	 * 
 	 * @return
 	 */
-	static <E extends SnaEntity> SelectDirective getSelectDirective(Mediator mediator, Class<E> entityType,
+	static <E extends SnaEntity> SelectDirective getSelectDirective(Class<E> entityType,
 			Map<Field, Column> fields) {
 		Table table = entityType.getAnnotation(Table.class);
 
-		KeyDirective keyDirective = KeyDirective.createKeyDirective(mediator, table,
+		KeyDirective keyDirective = KeyDirective.createKeyDirective(table,
 				entityType.getAnnotation(PrimaryKey.class), fields);
 
-		SelectDirective selectDirective = new SelectDirective(mediator, table.value(), keyDirective);
+		SelectDirective selectDirective = new SelectDirective(table.value(), keyDirective);
 
 		Iterator<Map.Entry<Field, Column>> iterator = fields.entrySet().iterator();
 
@@ -85,8 +84,8 @@ public class SelectDirective extends Directive {
 	 * @param entityType
 	 * @return
 	 */
-	public static <E extends SnaEntity> SelectDirective getSelectDirective(Mediator mediator, Class<E> entityType) {
-		return SelectDirective.getSelectDirective(mediator, entityType,
+	public static <E extends SnaEntity> SelectDirective getSelectDirective(Class<E> entityType) {
+		return SelectDirective.getSelectDirective(entityType,
 				ReflectUtils.getAnnotatedFields(entityType, Column.class));
 	}
 
@@ -101,8 +100,8 @@ public class SelectDirective extends Directive {
 	/**
 	 * Constructor
 	 */
-	public SelectDirective(Mediator mediator, String table, KeyDirective keyDirective) {
-		super(mediator, table);
+	public SelectDirective(String table, KeyDirective keyDirective) {
+		super(table);
 		this.keyDirective = keyDirective;
 		this.select = new HashMap<String, List<String>>();
 		this.where = new HashMap<String, Object>();
@@ -231,7 +230,7 @@ public class SelectDirective extends Directive {
 			super.buildEqualityDirective(builder, conditionIterator.next());
 			directives.add(builder.toString());
 		}
-		String keyDirectiveStr = null;
+//		String keyDirectiveStr = null;
 		String keyDirectiveValue = null;
 
 		if (keyDirective != null

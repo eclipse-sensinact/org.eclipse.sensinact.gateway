@@ -36,12 +36,9 @@ public class UserAccessEntity extends ImmutableSnaEntity implements AccessLevel 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 */
-	public UserAccessEntity(Mediator mediator) {
-		super(mediator);
+	public UserAccessEntity() {
+		super();
 	}
 
 	/**
@@ -54,8 +51,8 @@ public class UserAccessEntity extends ImmutableSnaEntity implements AccessLevel 
 	 * @param name
 	 * @param level
 	 */
-	public UserAccessEntity(Mediator mediator, String name, int level) {
-		this(mediator);
+	public UserAccessEntity(String name, int level) {
+		this();
 		this.setLevel(level);
 		this.setName(name);
 	}

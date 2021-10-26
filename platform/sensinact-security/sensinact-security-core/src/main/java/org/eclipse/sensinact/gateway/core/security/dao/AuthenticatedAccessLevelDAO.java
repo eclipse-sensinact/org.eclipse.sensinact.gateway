@@ -14,10 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.security.entity.AuthenticatedAccessLevelEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
-import org.eclipse.sensinact.gateway.core.security.entity.AuthenticatedAccessLevelEntity;
 
 /**
  * User Access Level DAO
@@ -50,9 +50,9 @@ public class AuthenticatedAccessLevelDAO extends AbstractImmutableSnaDAO<Authent
 	 *            environment
 	 * @throws DAOException
 	 */
-	public AuthenticatedAccessLevelDAO(Mediator mediator, DataStoreService dataStoreService) throws DAOException {
-		super(mediator, AuthenticatedAccessLevelEntity.class, dataStoreService);
-		this.objectDAO = new ObjectDAO(mediator, dataStoreService);
+	public AuthenticatedAccessLevelDAO(DataStoreService dataStoreService) throws DAOException {
+		super(AuthenticatedAccessLevelEntity.class, dataStoreService);
+		this.objectDAO = new ObjectDAO(dataStoreService);
 	}
 
 	/**

@@ -13,12 +13,12 @@ package org.eclipse.sensinact.gateway.core.security.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.security.dao.AuthenticatedDAO;
 import org.eclipse.sensinact.gateway.core.security.dao.BundleDAO;
@@ -49,7 +48,6 @@ import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreExceptio
 import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService;
 import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService.SQLLiteConfig;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -103,7 +101,6 @@ public class TestDAO {
 	private final ServiceReference referenceDataStoreService = Mockito.mock(ServiceReference.class);
 
 	private DataStoreService dataStoreService;
-	private Mediator mediator;
 
 	private File tempDB;
 
@@ -184,8 +181,7 @@ public class TestDAO {
 				return null;
 			}
 		});
-		mediator = new Mediator(context);
-		
+	
 		tempDB = File.createTempFile("test", ".sqlite");
 		tempDB.deleteOnExit();
 		
@@ -207,7 +203,7 @@ public class TestDAO {
 
 	@Test
 	public void testSelectUserDAO() throws DAOException, DataStoreException {
-		UserDAO userDAO = new UserDAO(mediator, dataStoreService);
+		UserDAO userDAO = new UserDAO(dataStoreService);
 		List<UserEntity> userEntities = userDAO.select();
 		int index = 0;
 
@@ -233,7 +229,7 @@ public class TestDAO {
 	@Disabled
 	public void testSelectObjectDAO() throws DAOException, DataStoreException {
 		int index = 0;
-		ObjectDAO objectDAO = new ObjectDAO(mediator, dataStoreService);
+		ObjectDAO objectDAO = new ObjectDAO(dataStoreService);
 
 		Object[][] objects = new Object[][] { new Object[] { 6, 5, "/slider/cursor/position", 3, "position", 1 },
 				new Object[] { 4, 3, "/slider/[^/]+/location", 3, "location", 1 },
@@ -256,7 +252,7 @@ public class TestDAO {
 
 	@Test
 	public void testSelectExactObjectDAO() throws DAOException, DataStoreException {
-		ObjectDAO objectDAO = new ObjectDAO(mediator, dataStoreService);
+		ObjectDAO objectDAO = new ObjectDAO(dataStoreService);
 		String[] paths = new String[] { "/slider/cursor/position", "/slider/cursor/location", "/slider/cursor/fake" };
 		String[] resultingPaths = new String[] { "/slider/cursor/position", "/slider/[^/]+/location"
 				// this last one will not be used
@@ -285,7 +281,7 @@ public class TestDAO {
 
 	@Test
 	public void testSelectObjectChildren() throws DAOException, DataStoreException {
-		ObjectDAO objectDAO = new ObjectDAO(mediator, dataStoreService);
+		ObjectDAO objectDAO = new ObjectDAO(dataStoreService);
 		List<ObjectEntity> list = objectDAO.findChildren(2l);
 
 		assertTrue(list.size() == 2);
@@ -294,31 +290,18 @@ public class TestDAO {
 	}
 
 	@Test
-	public void testFakePredefinedSelectStatement() throws DAOException, DataStoreException {
-		Mockito.when(bundle.getResource(Mockito.anyString())).thenAnswer(new Answer<URL>() {
-			@Override
-			public URL answer(InvocationOnMock invocation) throws Throwable {
-				Object[] arguments = invocation.getArguments();
-				if (arguments == null || arguments.length != 1) {
-					return null;
-				} else if (arguments[0].equals("script/getObjectFromPath.sql")) {
-					return new File("src/main/resources/script/fake.sql").getAbsoluteFile().toURI().toURL();
-				} else if (arguments[0].equals("script/getMethodAccessibilities.sql")) {
-					return new File("src/main/resources/script/getMethodAccessibilities.sql").getAbsoluteFile().toURI()
-							.toURL();
-				}
-				return null;
-			}
-		});
-		ObjectDAO objectDAO = new ObjectDAO(mediator, dataStoreService);
+	public void testFakePredefinedSelectStatement() throws DAOException, DataStoreException, MalformedURLException {
+
+		URL url=FrameworkUtil.getBundle(TestDAO.class).getResource("script/fake.sql");
+		ObjectDAO objectDAO = new ObjectDAO(dataStoreService,url);
 		List<ObjectEntity> list = objectDAO.select("getObjectFromPath", "/slider/cursor/position");
 		assertEquals(15, list.size());
 	}
 
 	@Test
 	public void testImmutableCreate() throws DAOException {
-		ObjectAccessDAO objectAccessDAO = new ObjectAccessDAO(mediator, dataStoreService);
-		ObjectAccessEntity entity = new ObjectAccessEntity(mediator, "FAKE", 12);
+		ObjectAccessDAO objectAccessDAO = new ObjectAccessDAO(dataStoreService);
+		ObjectAccessEntity entity = new ObjectAccessEntity("FAKE", 12);
 		
 		assertThrows(DAOException.class,()->{
 			
@@ -328,7 +311,7 @@ public class TestDAO {
 
 	@Test
 	public void testImmutableDelete() throws DAOException, DataStoreException {
-		ObjectAccessDAO objectAccessDAO = new ObjectAccessDAO(mediator, dataStoreService);
+		ObjectAccessDAO objectAccessDAO = new ObjectAccessDAO(dataStoreService);
 		ObjectAccessEntity entity = objectAccessDAO.find(1l);
 		assertThrows(DAOException.class,()->{
 
@@ -337,7 +320,7 @@ public class TestDAO {
 
 	@Test
 	public void testImmutableUpdate() throws DAOException, DataStoreException {
-		ObjectAccessDAO objectAccessDAO = new ObjectAccessDAO(mediator, dataStoreService);
+		ObjectAccessDAO objectAccessDAO = new ObjectAccessDAO(dataStoreService);
 		ObjectAccessEntity entity = objectAccessDAO.find(1l);
 		entity.setLevel(10);
 		assertThrows(DAOException.class,()->{
@@ -346,7 +329,7 @@ public class TestDAO {
 
 	@Test
 	public void testImmutableSelect() throws DAOException, DataStoreException {
-		ObjectAccessDAO objectAccessDAO = new ObjectAccessDAO(mediator, dataStoreService);
+		ObjectAccessDAO objectAccessDAO = new ObjectAccessDAO(dataStoreService);
 		ObjectAccessEntity entity = objectAccessDAO.find(1l);
 		assertTrue(1l == entity.getIdentifier());
 		assertTrue("Anonymous".equals(entity.getName()));
@@ -355,8 +338,8 @@ public class TestDAO {
 
 	@Test
 	public void testMutable() throws DAOException, DataStoreException {
-		ObjectDAO objectDAO = new ObjectDAO(mediator, dataStoreService);
-		ObjectEntity entity = new ObjectEntity(mediator, 2l, 2l, "admin", 0, 1, 2, null);
+		ObjectDAO objectDAO = new ObjectDAO(dataStoreService);
+		ObjectEntity entity = new ObjectEntity(2l, 2l, "admin", 0, 1, 2, null);
 		objectDAO.create(entity);
 
 		long identifier = entity.getIdentifier();
@@ -386,27 +369,27 @@ public class TestDAO {
 
 	@Test
 	public void testDeleteParentObject() throws DAOException, DataStoreException {
-		ObjectDAO objectDAO = new ObjectDAO(mediator, dataStoreService);
+		ObjectDAO objectDAO = new ObjectDAO(dataStoreService);
 
-		ObjectEntity entity = new ObjectEntity(mediator, 2l, 1l, "fake", 0, 0, 0, null);
+		ObjectEntity entity = new ObjectEntity(2l, 1l, "fake", 0, 0, 0, null);
 		objectDAO.create(entity);
 
 		final long identifier = entity.getIdentifier();
 		assertTrue(identifier > 0l);
 
-		ObjectEntity newEntity = new ObjectEntity(mediator, 2l, 2l, "admin", 0, 1, identifier, null);
+		ObjectEntity newEntity = new ObjectEntity(2l, 2l, "admin", 0, 1, identifier, null);
 		objectDAO.create(newEntity);
 
 		final long newIdentifier = newEntity.getIdentifier();
 		assertTrue(newIdentifier > 0l);
 
-		ObjectEntity otherEntity = new ObjectEntity(mediator, 2l, 1l, "service", 0, 1, identifier, null);
+		ObjectEntity otherEntity = new ObjectEntity(2l, 1l, "service", 0, 1, identifier, null);
 		objectDAO.create(otherEntity);
 
 		final long otherIdentifier = otherEntity.getIdentifier();
 		assertTrue(otherIdentifier > 0l);
 
-		ObjectEntity lastEntity = new ObjectEntity(mediator, 2l, 1l, "resource", 0, 1, otherIdentifier, null);
+		ObjectEntity lastEntity = new ObjectEntity(2l, 1l, "resource", 0, 1, otherIdentifier, null);
 		objectDAO.create(lastEntity);
 
 		final long lastIdentifier = lastEntity.getIdentifier();
@@ -417,7 +400,7 @@ public class TestDAO {
 
 		assertNull(newEntity);
 
-		AuthenticatedDAO authenticatedDAO = new AuthenticatedDAO(mediator, dataStoreService);
+		AuthenticatedDAO authenticatedDAO = new AuthenticatedDAO(dataStoreService);
 		List<AuthenticatedEntity> entities = authenticatedDAO.select(new HashMap<String, Object>() {
 			{
 				this.put("OID", lastIdentifier);
@@ -446,31 +429,31 @@ public class TestDAO {
 
 	@Test
 	public void testDeleteBundle() throws DAOException, DataStoreException {
-		BundleDAO bundleDAO = new BundleDAO(mediator, dataStoreService);
-		BundleEntity bundleEntity = new BundleEntity(mediator, "fake-bundle", "fake-bundle", 0, 1);
+		BundleDAO bundleDAO = new BundleDAO( dataStoreService);
+		BundleEntity bundleEntity = new BundleEntity("fake-bundle", "fake-bundle", 0, 1);
 		bundleDAO.create(bundleEntity);
 
-		ObjectDAO objectDAO = new ObjectDAO(mediator, dataStoreService);
+		ObjectDAO objectDAO = new ObjectDAO(dataStoreService);
 
-		ObjectEntity entity = new ObjectEntity(mediator, bundleEntity.getIdentifier(), 1l, "fake", 0, 0, 0, null);
+		ObjectEntity entity = new ObjectEntity(bundleEntity.getIdentifier(), 1l, "fake", 0, 0, 0, null);
 		objectDAO.create(entity);
 
 		final long identifier = entity.getIdentifier();
 		assertTrue(identifier > 0l);
 
-		ObjectEntity newEntity = new ObjectEntity(mediator, 2l, 2l, "admin", 0, 1, identifier, null);
+		ObjectEntity newEntity = new ObjectEntity(2l, 2l, "admin", 0, 1, identifier, null);
 		objectDAO.create(newEntity);
 
 		final long newIdentifier = newEntity.getIdentifier();
 		assertTrue(newIdentifier > 0l);
 
-		ObjectEntity otherEntity = new ObjectEntity(mediator, 2l, 1l, "service", 0, 1, identifier, null);
+		ObjectEntity otherEntity = new ObjectEntity(2l, 1l, "service", 0, 1, identifier, null);
 		objectDAO.create(otherEntity);
 
 		final long otherIdentifier = otherEntity.getIdentifier();
 		assertTrue(otherIdentifier > 0l);
 
-		ObjectEntity lastEntity = new ObjectEntity(mediator, 2l, 1l, "resource", 0, 1, otherIdentifier, null);
+		ObjectEntity lastEntity = new ObjectEntity(2l, 1l, "resource", 0, 1, otherIdentifier, null);
 		objectDAO.create(lastEntity);
 
 		final long lastIdentifier = lastEntity.getIdentifier();
@@ -478,7 +461,7 @@ public class TestDAO {
 
 		bundleDAO.delete(bundleEntity);
 
-		AuthenticatedDAO authenticatedDAO = new AuthenticatedDAO(mediator, dataStoreService);
+		AuthenticatedDAO authenticatedDAO = new AuthenticatedDAO(dataStoreService);
 		List<AuthenticatedEntity> entities = authenticatedDAO.select(new HashMap<String, Object>() {
 			{
 				this.put("OID", lastIdentifier);

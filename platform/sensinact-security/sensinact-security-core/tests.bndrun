@@ -90,7 +90,6 @@
 	org.osgi.util.promise;version='[1.1.1,1.1.2)',\
 	org.osgi.util.pushstream;version='[1.0.1,1.0.2)',\
 	slf4j.api;version='[1.7.30,1.7.31)',\
-	slf4j.log4j12;version='[1.7.25,1.7.26)',\
 	org.eclipse.sensinact.gateway.sensinact-sqlite-connector;version='[2.0.0,2.0.1)',\
 	org.eclipse.sensinact.gateway.protocol.http;version='[2.0.0,2.0.1)',\
 	org.eclipse.sensinact.gateway.sensinact-common;version='[2.0.0,2.0.1)',\
@@ -106,4 +105,6 @@
 	org.eclipse.sensinact.gateway.simulated.devices.slider;version='[2.0.0,2.0.1)',\
 	org.apache.felix.framework.security;version='[2.8.1,2.8.2)',\
 	org.apache.felix.configadmin;version='[1.9.16,1.9.17)',\
-	org.apache.felix.log;version='[1.2.2,1.2.3)'
+	org.apache.felix.log;version='[1.2.2,1.2.3)',\
+	ch.qos.logback.classic;version='[1.2.3,1.2.4)',\
+	org.osgi.service.cm;version='[1.6.0,1.6.1)'

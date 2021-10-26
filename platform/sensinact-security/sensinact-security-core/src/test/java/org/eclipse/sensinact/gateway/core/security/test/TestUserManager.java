@@ -19,10 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.FileAttribute;
-import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.AnonymousSession;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.security.dao.UserDAO;
@@ -37,7 +34,6 @@ import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfiguratio
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
-import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +46,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectInstalledBundle;
 import org.osgi.test.common.annotation.InjectService;
-import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.context.InstalledBundleExtension;
@@ -110,7 +105,6 @@ public class TestUserManager {
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
 
-    private Mediator mediator;
     private DataStoreService dataStoreService;
     
 
@@ -126,7 +120,6 @@ public class TestUserManager {
 	    Path originalPath = Paths.get(context.getProperty("sqlitedb"));
 	    Files.copy(originalPath, copied, StandardCopyOption.REPLACE_EXISTING);
 		
-		mediator = new Mediator(context);
 		SQLLiteConfig sqlLiteConfig = Mockito.mock(SQLiteDataStoreService.SQLLiteConfig.class);
 		Mockito.when(sqlLiteConfig.database()).thenReturn(tempDB.getAbsolutePath());
 		dataStoreService = new SQLiteDataStoreService(context, sqlLiteConfig);
@@ -138,104 +131,6 @@ public class TestUserManager {
 			tempDB.delete();
 		}
 	}
-	
-	/**
-	 * @inheritDoc
-	 *
-	 * @see MidOSGiTest#isExcluded(java.lang.String)
-	 */
-	public boolean isExcluded(String fileName) {
-		if ("org.apache.felix.framework.security.jar".equals(fileName)) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * @inheritDoc
-	 *
-	 * @see MidOSGiTest#doInit(java.util.Map)
-	 */
-	protected void doInit(Map configuration) {
-		configuration.put("org.osgi.framework.system.packages.extra",
-		"org.eclipse.sensinact.gateway.test," 
-		+ "com.sun.net.httpserver," 
-		+ "javax.net.ssl,"
-		+ "javax.xml.parsers," 
-		+ "javax.imageio," 
-		+ "javax.management," 
-		+ "javax.naming," 
-		+ "javax.sql,"
-		+ "javax.swing," 
-		+ "javax.swing.border," 
-		+ "javax.swing.event," 
-		+ "javax.mail,"
-		+ "javax.mail.internet," 
-		+ "javax.management.modelmbean," 
-		+ "javax.management.remote,"
-		+ "javax.xml.parsers," 
-		+ "javax.security.auth," 
-		+ "javax.security.cert," 
-		+ "junit.framework,"
-		+ "junit.textui," 
-		+ "org.w3c.dom," 
-		+ "org.xml.sax," 
-		+ "org.xml.sax.helpers," 
-		+ "sun.misc,"
-		+ "sun.security.action");
-
-		configuration.put("org.eclipse.sensinact.simulated.gui.enabled", "false");
-
-		configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
-		configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
-
-		configuration.put("org.eclipse.sensinact.gateway.security.database",
-				new File("src/test/resources/sensinact.sqlite").getAbsolutePath());
-
-		configuration.put("felix.auto.start.1",
-				"file:target/felix/bundle/org.osgi.compendium.jar "
-			  + "file:target/felix/bundle/org.apache.felix.framework.security.jar "
-			  + "file:target/felix/bundle/org.apache.felix.configadmin.jar "
-			  + "file:target/felix/bundle/org.apache.felix.fileinstall.jar");
-
-		configuration.put("felix.auto.install.2",
-				"file:target/felix/bundle/sensinact-utils.jar "
-			  + "file:target/felix/bundle/sensinact-datastore-api.jar "
-			  + "file:target/felix/bundle/sensinact-sqlite-connector.jar "
-			  + "file:target/felix/bundle/sensinact-common.jar "
-			  + "file:target/felix/bundle/http.jar "  
-			  + "file:target/felix/bundle/sensinact-framework-extension.jar "
-		      + "file:target/felix/bundle/dynamicBundle.jar");
-
-		configuration.put("felix.auto.start.2", 
-				"file:target/felix/bundle/sensinact-test-configuration.jar "
-			  + "file:target/felix/bundle/sensinact-signature-validator.jar "
-			  + "file:target/felix/bundle/javax.servlet-api.jar "
-			  + "file:target/felix/bundle/org.apache.felix.http.api.jar "
-			  + "file:target/felix/bundle/org.apache.felix.http.jetty.jar "
-			  + "file:target/felix/bundle/http-tools.jar " );
-
-		configuration.put("felix.auto.start.3",
-				"file:target/felix/bundle/sensinact-core.jar " + 
-				"file:target/felix/bundle/sensinact-generic.jar " +
-				"file:target/felix/bundle/sensinact-northbound-access.jar ");
-
-		configuration.put("felix.auto.start.4", 
-				"file:target/felix/bundle/rest-access.jar " +
-				"file:target/felix/bundle/slider.jar " + 
-				"file:target/felix/bundle/fan.jar " + 
-				"file:target/felix/bundle/button.jar " );
-		
-		configuration.put("mail.account.connector.host","smtp.server.fr");
-		configuration.put("mail.account.connector.port","465");
-		configuration.put("mail.account.connector.from","sensinact@bigclout.eu");
-		configuration.put("mail.account.connector.login","cmunilla@server.fr");
-		configuration.put("mail.account.connector.password","478569LM");
-
-		configuration.put("org.osgi.service.http.host","localhost");
-		configuration.put("org.osgi.service.http.port","8899");
-		configuration.put("org.apache.felix.http.enable","true");
-	}
 
 	@Test
 	public void testUserManager(
@@ -244,7 +139,7 @@ public class TestUserManager {
 			@InjectService(cardinality = 0) ServiceAware<MailAccountConnectorMailReplacement> mailReplacerAware
 			) throws Exception {
 		
-		UserDAO dao = new UserDAO(mediator, dataStoreService);
+		UserDAO dao = new UserDAO(dataStoreService);
 		String encryptedPassword = CryptoUtils.cryptWithMD5("mytestpassword");
 		UserEntity entity = dao.find("mytester", encryptedPassword);
 		assertNull(entity);

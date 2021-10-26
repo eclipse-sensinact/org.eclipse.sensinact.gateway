@@ -115,19 +115,19 @@ public class SecuredAccessImpl implements SecuredAccess {
 		this.mediator = new Mediator(ctx);
 		this.dataStoreService = dataStore;
 		try {
-			this.applicationDAO = new ApplicationDAO(mediator, dataStoreService);
-			this.agentDAO = new AgentDAO(mediator, dataStoreService);
-			this.objectDAO = new ObjectDAO(mediator, dataStoreService);
-			this.bundleDAO = new BundleDAO(mediator, dataStoreService);
-			this.objectProfileAccessDAO = new ObjectProfileAccessDAO(mediator, dataStoreService);
-			this.authenticatedAccessLevelDAO = new AuthenticatedAccessLevelDAO(mediator, dataStoreService);
+			this.applicationDAO = new ApplicationDAO(dataStoreService);
+			this.agentDAO = new AgentDAO(dataStoreService);
+			this.objectDAO = new ObjectDAO(dataStoreService);
+			this.bundleDAO = new BundleDAO(dataStoreService);
+			this.objectProfileAccessDAO = new ObjectProfileAccessDAO(dataStoreService);
+			this.authenticatedAccessLevelDAO = new AuthenticatedAccessLevelDAO(dataStoreService);
 
 			root = this.objectDAO.select(singletonMap("OID", 0l)).get(0);
 
 			rootObjectProfileOption = this.objectProfileAccessDAO.getAccessProfileOption(root.getObjectProfileEntity());
 			
 			this.authorizationRegistration = this.mediator.getContext().registerService(AuthorizationService.class,
-					new AuthorizationServiceImpl(mediator, this.authenticatedAccessLevelDAO), null);
+					new AuthorizationServiceImpl(this.authenticatedAccessLevelDAO), null);
 		} catch (DAOException | DataStoreException e) {
 			throw new SecuredAccessException(e);
 		}

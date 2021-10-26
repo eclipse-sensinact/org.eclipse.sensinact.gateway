@@ -225,7 +225,7 @@ public class TestUserManager {
 			@InjectService Core core,
 			@InjectService(cardinality = 0) ServiceAware<MailAccountConnectorMailReplacement> replacerServiceAware) throws Exception {
 		
-		UserDAO dao = new UserDAO(mediator, dataStoreService);
+		UserDAO dao = new UserDAO( dataStoreService);
 		String encryptedPassword = CryptoUtils.cryptWithMD5("mytestpassword");
 		UserEntity entity = dao.find("mytester", encryptedPassword);
 		assertNull(entity);

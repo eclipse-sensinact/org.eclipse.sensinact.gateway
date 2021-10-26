@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.security.dao.SnaDAO;
@@ -149,8 +148,8 @@ public class KeyDirective extends Directive {
 	 * @return a new {@link KeyDirective} instance for the specified
 	 *         {@link SnaEntity} type
 	 */
-	public static <E extends SnaEntity> KeyDirective createKeyDirective(Mediator mediator, Class<E> entityType) {
-		return createKeyDirective(mediator, entityType.getAnnotation(Table.class),
+	public static <E extends SnaEntity> KeyDirective createKeyDirective(Class<E> entityType) {
+		return createKeyDirective(entityType.getAnnotation(Table.class),
 				entityType.getAnnotation(PrimaryKey.class), SnaEntity.getFields(entityType));
 	}
 
@@ -161,9 +160,9 @@ public class KeyDirective extends Directive {
 	 * @return a new {@link KeyDirective} instance for the specified
 	 *         {@link SnaEntity} type
 	 */
-	public static <E extends SnaEntity> KeyDirective createKeyDirective(Mediator mediator, Table table,
+	public static <E extends SnaEntity> KeyDirective createKeyDirective(Table table,
 			PrimaryKey primaryKey, Map<Field, Column> fields) {
-		KeyDirective keyDirective = new KeyDirective(mediator, table.value());
+		KeyDirective keyDirective = new KeyDirective(table.value());
 		String[] keys = primaryKey == null ? null : primaryKey.value();
 		int length = keys == null ? 0 : keys.length;
 
@@ -204,8 +203,8 @@ public class KeyDirective extends Directive {
 	/**
 	 * Constructor
 	 */
-	public KeyDirective(Mediator mediator, String table) {
-		super(mediator, table);
+	public KeyDirective(String table) {
+		super(table);
 		this.keyEntries = new ArrayList<KeyEntry>();
 	}
 

@@ -19,11 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.dao.directive.CreateDirective;
 import org.eclipse.sensinact.gateway.core.security.dao.directive.DeleteDirective;
 import org.eclipse.sensinact.gateway.core.security.dao.directive.KeyDirective;
@@ -35,6 +30,10 @@ import org.eclipse.sensinact.gateway.core.security.entity.annotation.Immutable.O
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 import org.eclipse.sensinact.gateway.util.IOUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generic and abstract Data Access Object to interact with the datastore where
@@ -43,6 +42,7 @@ import org.eclipse.sensinact.gateway.util.IOUtils;
 abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractSnaDAO.class);
+
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
 	// ********************************************************************//
@@ -53,25 +53,19 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 	 * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
 	 */
 	protected class UserDefinedSelectStatement {
-		private Mediator mediator;
 		private URL definition;
 		private String statement;
 
 		/**
 		 * Constructor
 		 * 
-		 * @param mediator
-		 *            the {@link Mediator} allowing to interact with the OSGi host
-		 *            environment
-		 * 
 		 * @param definition
-		 *            the string path of the file where is defined the select statement
+		 *            the url of the file where is defined the select statement
 		 *            to load
 		 */
-		protected UserDefinedSelectStatement(Mediator mediator, String definition) {
-			this.mediator = mediator;
+		protected UserDefinedSelectStatement(URL definition) {
 			this.statement = null;
-			this.definition = mediator.getContext().getBundle().getResource(definition);
+			this.definition = definition;
 		}
 
 		/**
@@ -87,7 +81,7 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 					this.statement = new String(statementBytes);
 
 				} catch (Exception e) {
-					this.statement = SelectDirective.getSelectDirective(mediator, AbstractSnaDAO.this.entityType)
+					this.statement = SelectDirective.getSelectDirective( AbstractSnaDAO.this.entityType)
 							.toString();
 				}
 			}
@@ -187,7 +181,6 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
 
-	protected final Mediator mediator;
 	protected final Class<E> entityType;
 	protected final DataStoreService dataStoreService;
 	protected final Map<String, UserDefinedSelectStatement> userDefinedSelectStatements;
@@ -198,8 +191,7 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 	 * @param mediator
 	 * @param entityType
 	 */
-	AbstractSnaDAO(Mediator mediator, Class<E> entityType, DataStoreService dataStoreService) {
-		this.mediator = mediator;
+	AbstractSnaDAO(Class<E> entityType, DataStoreService dataStoreService) {
 		this.dataStoreService = dataStoreService;
 		this.entityType = entityType;
 		this.userDefinedSelectStatements = new HashMap<String, UserDefinedSelectStatement>();
@@ -278,7 +270,7 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 			try {
 				JSONObject jsonObject = array.getJSONObject(index);
 				entitiesList.add(
-						entityType.getConstructor(Mediator.class, JSONObject.class).newInstance(mediator, jsonObject));
+						entityType.getConstructor(JSONObject.class).newInstance(jsonObject));
 
 			} catch (Exception e) {
 				LOG.error(e.getMessage(), e);
@@ -298,7 +290,7 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 		if (whereDirectives == null) {
 			return select();
 		}
-		SelectDirective selectDirective = SelectDirective.getSelectDirective(this.mediator, entityType);
+		SelectDirective selectDirective = SelectDirective.getSelectDirective(entityType);
 
 		Iterator<Map.Entry<String, Object>> iterator = whereDirectives.entrySet().iterator();
 
@@ -316,7 +308,7 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 			try {
 				JSONObject jsonObject = array.getJSONObject(index);
 				entitiesList.add(
-						entityType.getConstructor(Mediator.class, JSONObject.class).newInstance(mediator, jsonObject));
+						entityType.getConstructor(JSONObject.class).newInstance(jsonObject));
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -329,7 +321,7 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 
 	@Override
 	public E select(List<SnaEntity.Key> keyMap) throws DAOException, DataStoreException {
-		KeyDirective keyDirective = KeyDirective.createKeyDirective(mediator, entityType);
+		KeyDirective keyDirective = KeyDirective.createKeyDirective(entityType);
 		keyDirective.assign(keyMap);
 
 		E entity = this.getEntity(this.entityType, keyDirective);
@@ -406,7 +398,7 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 	 */
 	public <E extends SnaEntity> List<E> getEntities(Class<E> entityType, KeyDirective keyDirective)
 			throws DataStoreException {
-		SelectDirective selectDirective = SelectDirective.getSelectDirective(mediator, entityType);
+		SelectDirective selectDirective = SelectDirective.getSelectDirective(entityType);
 
 		selectDirective.join(keyDirective);
 
@@ -418,11 +410,11 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 		Constructor<E> constructor = null;
 		if (length > 0) {
 			try {
-				constructor = entityType.getConstructor(Mediator.class, JSONObject.class);
+				constructor = entityType.getConstructor(JSONObject.class);
 
 				for (; index < length; index++) {
 					JSONObject jsonObject = array.getJSONObject(index);
-					entitiesList.add(constructor.newInstance(mediator, jsonObject));
+					entitiesList.add(constructor.newInstance(jsonObject));
 				}
 			} catch (Exception e) {
 				LOG.error(e.getMessage(), e);
@@ -440,20 +432,19 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 
 	@Override
 	public void create(E entity) throws DAOException, DataStoreException {
-		CreateDirective createDirective = CreateDirective.getCreateDirective(this.mediator, entity);
-
+		CreateDirective createDirective = CreateDirective.getCreateDirective(entity);
 		this.created(entity, this.create(createDirective.toString()));
 	}
 
 	@Override
 	public void update(E entity) throws DAOException, DataStoreException {
-		UpdateDirective updateDirective = UpdateDirective.getUpdateDirective(this.mediator, entity);
+		UpdateDirective updateDirective = UpdateDirective.getUpdateDirective(entity);
 		this.updated(this.update(updateDirective.toString()));
 	}
 
 	@Override
 	public void delete(E entity) throws DAOException, DataStoreException {
-		DeleteDirective deleteDirective = DeleteDirective.getDeleteDirective(this.mediator, entity);
+		DeleteDirective deleteDirective = DeleteDirective.getDeleteDirective(entity);
 		this.deleted(this.delete(deleteDirective.toString()));
 	}
 

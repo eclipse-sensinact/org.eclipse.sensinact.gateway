@@ -10,19 +10,17 @@
  */
 package org.eclipse.sensinact.gateway.core.security.entity;
 
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.security.InvalidKeyException;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.security.User;
+import org.eclipse.sensinact.gateway.core.security.UserManager;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
-import org.eclipse.sensinact.gateway.core.security.User;
-import org.eclipse.sensinact.gateway.core.security.UserManager;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Method Entity
@@ -32,8 +30,8 @@ import org.eclipse.sensinact.gateway.core.security.UserManager;
 @Table(value = "SNAUSER")
 @PrimaryKey(value = { "SUID" })
 public class UserEntity extends SnaEntity implements User {
-	
 	private static final Logger LOG = LoggerFactory.getLogger(UserEntity.class);
+
 	@Column(value = "SUID")
 	private long identifier;
 
@@ -54,67 +52,55 @@ public class UserEntity extends SnaEntity implements User {
 
 	/**
 	 * Constructor
-	 * 
-	 * @param mediator the {@link Mediator} allowing to interact with the OSGi 
-	 * host environment
 	 */
-	public UserEntity(Mediator mediator) {
-		super(mediator);
+	public UserEntity() {
+		super();
 	}
 
 	/**
 	 * Constructor
-	 * 
-	 * @param mediator the {@link Mediator} allowing to interact with the OSGi 
-	 * host environment
 	 * @param row
 	 * 
 	 */
-	public UserEntity(Mediator mediator, JSONObject row) {
-		super(mediator, row);
+	public UserEntity(JSONObject row) {
+		super(row);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator the {@link Mediator} allowing to interact with the OSGi 
-	 * host environment
 	 * @param login
 	 * @param password
 	 * @param mail
 	 */
-	public UserEntity(Mediator mediator, String login, String password, String account) {
-		this(mediator, login, password, account, null, null);
+	public UserEntity(String login, String password, String account) {
+		this(login, password, account, null, null);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator the {@link Mediator} allowing to interact with the OSGi 
-	 * host environment
 	 * @param login
 	 * @param password
 	 * @param account
 	 * @param accountType
 	 */
-	public UserEntity(Mediator mediator, String login, String password, String account, String accounttype) {
-		this(mediator, login, password, account, accounttype, null);
+	public UserEntity(String login, String password, String account, String accounttype) {
+		this(login, password, account, accounttype, null);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator the {@link Mediator} allowing to interact with the OSGi 
-	 * host environment
 	 * @param login
 	 * @param password
 	 * @param account
 	 * @param accountType
 	 * @param publicKey
 	 */
-	public UserEntity(Mediator mediator, String login, String password, String account, String accounttype,
+	public UserEntity(String login, String password, String account, String accounttype,
 			String publicKey) {
-		this(mediator);
+		this();
 		this.setLogin(login);
 		this.setPassword(password);
 		this.setAccount(account);

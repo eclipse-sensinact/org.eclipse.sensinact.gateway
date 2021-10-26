@@ -42,12 +42,9 @@ public class MethodDAO extends AbstractImmutableSnaDAO<MethodEntity> {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 */
-	public MethodDAO(Mediator mediator, DataStoreService dataStoreService) throws DAOException {
-		super(mediator, MethodEntity.class, dataStoreService);
+	public MethodDAO(DataStoreService dataStoreService) throws DAOException {
+		super(MethodEntity.class, dataStoreService);
 	}
 
 	/**

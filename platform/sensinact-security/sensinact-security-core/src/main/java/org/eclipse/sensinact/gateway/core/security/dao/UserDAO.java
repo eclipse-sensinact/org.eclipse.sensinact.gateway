@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core.security.dao;
 import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.UserEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
@@ -44,13 +43,10 @@ public class UserDAO extends AbstractMutableSnaDAO<UserEntity> {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @throws DAOException
 	 */
-	public UserDAO(Mediator mediator, DataStoreService dataStoreService) throws DAOException {
-		super(mediator, UserEntity.class, dataStoreService);
+	public UserDAO(DataStoreService dataStoreService) throws DAOException {
+		super(UserEntity.class, dataStoreService);
 	}
 
 	/**
@@ -172,7 +168,7 @@ public class UserDAO extends AbstractMutableSnaDAO<UserEntity> {
 		if (((entity = find(login)) != null)) {
 			throw new DAOException("A user with the login already exists");
 		}
-		entity = new UserEntity(mediator, login, password, account, accountType);
+		entity = new UserEntity(login, password, account, accountType);
 		super.create(entity);
 		return entity;
 

@@ -10,14 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.core.security.entity;
 
+import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
+import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.NotNull;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
 import org.json.JSONObject;
-
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
-import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 
 /**
  * ObjectProfileAccess DAO Entity
@@ -44,38 +42,29 @@ public class AuthenticatedEntity extends SnaEntity {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 */
-	public AuthenticatedEntity(Mediator mediator) {
-		super(mediator);
+	public AuthenticatedEntity() {
+		super();
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param row
 	 */
-	public AuthenticatedEntity(Mediator mediator, JSONObject row) {
-		super(mediator, row);
+	public AuthenticatedEntity(JSONObject row) {
+		super(row);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param methodEntity
 	 * @param objectProfileEntity
 	 * @param objectAccessEntity
 	 */
-	public AuthenticatedEntity(Mediator mediator, String publicKey, long objectEntity, long userAccessEntity) {
-		super(mediator);
+	public AuthenticatedEntity(String publicKey, long objectEntity, long userAccessEntity) {
+		super();
 		this.setPublicKey(publicKey);
 		this.setObjectEntity(objectEntity);
 		this.setUserAccessEntity(userAccessEntity);

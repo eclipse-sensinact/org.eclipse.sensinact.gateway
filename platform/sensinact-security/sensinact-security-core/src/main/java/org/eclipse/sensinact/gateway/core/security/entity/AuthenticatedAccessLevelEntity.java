@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.security.entity;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AccessLevel;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
@@ -43,42 +42,33 @@ public class AuthenticatedAccessLevelEntity extends ImmutableSnaEntity implement
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 */
-	public AuthenticatedAccessLevelEntity(Mediator mediator) {
-		super(mediator);
+	public AuthenticatedAccessLevelEntity() {
+		super();
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param row
 	 *            the JSON formated description of the UserAccessLevelEntity to be
 	 *            instantiated
 	 */
-	public AuthenticatedAccessLevelEntity(Mediator mediator, JSONObject row) {
-		super(mediator, row);
+	public AuthenticatedAccessLevelEntity(JSONObject row) {
+		super(row);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param publicKey
 	 * @param user
 	 * @param object
 	 * @param accessLevel
 	 */
-	public AuthenticatedAccessLevelEntity(Mediator mediator, long objectId, String publicKey, long authenticatedId,
+	public AuthenticatedAccessLevelEntity(long objectId, String publicKey, long authenticatedId,
 			long userAccessId, int accessLevel) {
-		this(mediator);
+		this();
 		this.setObjectId(objectId);
 		this.setPublicKey(publicKey);
 		this.setAuthenticatedId(authenticatedId);

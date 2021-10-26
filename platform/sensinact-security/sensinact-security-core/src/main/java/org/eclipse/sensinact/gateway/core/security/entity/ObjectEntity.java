@@ -10,14 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.core.security.entity;
 
-import org.json.JSONObject;
-
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.NotNull;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
+import org.json.JSONObject;
 
 /**
  * Object Entity
@@ -57,41 +55,32 @@ public class ObjectEntity extends SnaEntity {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 */
-	public ObjectEntity(Mediator mediator) {
-		super(mediator);
+	public ObjectEntity() {
+		super();
 	}
 
 	/**
 	 * Constructor
-	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
+
 	 * @param row
 	 * 
 	 */
-	public ObjectEntity(Mediator mediator, JSONObject row) {
-		super(mediator, row);
+	public ObjectEntity(JSONObject row) {
+		super(row);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param parent
 	 * @param path
 	 * @param userProfileEntity
 	 * @param objectProfileEntity
 	 */
-	public ObjectEntity(Mediator mediator, long bundleEntity, long objectProfileEntity, String name, int pattern,
+	public ObjectEntity(long bundleEntity, long objectProfileEntity, String name, int pattern,
 			int sauth, long parent, String path) {
-		this(mediator);
+		this();
 		this.setParent(parent);
 		this.setName(name);
 		this.setPattern(pattern);

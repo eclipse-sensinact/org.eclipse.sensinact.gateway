@@ -10,14 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.core.security.entity;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
+import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.NotNull;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
 import org.json.JSONObject;
-
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 
 /**
  * ObjectProfileAccess DAO Entity
@@ -45,24 +44,18 @@ public class ObjectProfileAccessEntity extends ImmutableSnaEntity {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 */
-	public ObjectProfileAccessEntity(Mediator mediator) {
-		super(mediator);
+	public ObjectProfileAccessEntity() {
+		super();
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param row
 	 */
-	protected ObjectProfileAccessEntity(Mediator mediator, JSONObject row) {
-		super(mediator, row);
+	protected ObjectProfileAccessEntity(JSONObject row) {
+		super(row);
 	}
 
 	/**
@@ -75,9 +68,9 @@ public class ObjectProfileAccessEntity extends ImmutableSnaEntity {
 	 * @param objectProfileEntity
 	 * @param objectAccessEntity
 	 */
-	protected ObjectProfileAccessEntity(Mediator mediator, long methodEntity, long objectProfileEntity,
+	protected ObjectProfileAccessEntity(long methodEntity, long objectProfileEntity,
 			long objectAccessEntity) {
-		super(mediator);
+		super();
 		this.setMethodEntity(methodEntity);
 		this.setObjectProfileEntity(objectProfileEntity);
 		this.setObjectAccessEntity(objectAccessEntity);

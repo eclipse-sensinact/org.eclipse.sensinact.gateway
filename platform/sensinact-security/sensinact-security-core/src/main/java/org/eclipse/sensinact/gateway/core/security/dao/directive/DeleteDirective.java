@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core.security.dao.directive;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.dao.SnaDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.SnaEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
@@ -44,16 +43,16 @@ public class DeleteDirective extends Directive {
 	 * 
 	 * @return
 	 */
-	public static <E extends SnaEntity> DeleteDirective getDeleteDirective(Mediator mediator, E entity) {
+	public static <E extends SnaEntity> DeleteDirective getDeleteDirective(E entity) {
 		Class<? extends SnaEntity> entityType = entity.getClass();
 
 		Table table = entityType.getAnnotation(Table.class);
 		Map<Field, Column> fields = SnaEntity.getFields(entityType);
 
-		KeyDirective keyDirective = KeyDirective.createKeyDirective(mediator, table,
+		KeyDirective keyDirective = KeyDirective.createKeyDirective(table,
 				entityType.getAnnotation(PrimaryKey.class), fields);
 		keyDirective.assign(entity);
-		DeleteDirective deleteDirective = new DeleteDirective(mediator, table.value(), keyDirective);
+		DeleteDirective deleteDirective = new DeleteDirective(table.value(), keyDirective);
 		return deleteDirective;
 	}
 
@@ -66,8 +65,8 @@ public class DeleteDirective extends Directive {
 	/**
 	 * Constructor
 	 */
-	public DeleteDirective(Mediator mediator, String table, KeyDirective keyDirective) {
-		super(mediator, table);
+	public DeleteDirective(String table, KeyDirective keyDirective) {
+		super(table);
 		this.keyDirective = keyDirective;
 	}
 

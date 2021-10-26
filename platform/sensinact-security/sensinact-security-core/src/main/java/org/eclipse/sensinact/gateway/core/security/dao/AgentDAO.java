@@ -53,9 +53,9 @@ public class AgentDAO extends AbstractMutableSnaDAO<AgentEntity> {
 	 * 
 	 * @throws DAOException
 	 */
-	public AgentDAO(Mediator mediator, DataStoreService dataStoreService) throws DAOException {
-		super(mediator, AgentEntity.class, dataStoreService);
-		this.bundleDAO = new BundleDAO(mediator, dataStoreService);
+	public AgentDAO(DataStoreService dataStoreService) throws DAOException {
+		super( AgentEntity.class, dataStoreService);
+		this.bundleDAO = new BundleDAO(dataStoreService);
 	}
 
 	/**

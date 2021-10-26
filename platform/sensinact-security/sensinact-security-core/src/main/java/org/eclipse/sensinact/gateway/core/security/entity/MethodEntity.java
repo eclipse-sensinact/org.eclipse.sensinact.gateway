@@ -15,8 +15,6 @@ import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
 import org.json.JSONObject;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-
 /**
  * Method Entity
  * 
@@ -34,38 +32,29 @@ public class MethodEntity extends ImmutableSnaEntity {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 */
-	public MethodEntity(Mediator mediator) {
-		super(mediator);
+	public MethodEntity() {
+		super();
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param row
 	 * 
 	 */
-	public MethodEntity(Mediator mediator, JSONObject row) {
-		super(mediator, row);
+	public MethodEntity(JSONObject row) {
+		super(row);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param identifier
 	 * @param name
 	 */
-	public MethodEntity(Mediator mediator, String name) {
-		this(mediator);
+	public MethodEntity(String name) {
+		this();
 		this.setName(name);
 	}
 

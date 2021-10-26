@@ -10,13 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.core.security.entity;
 
-import org.json.JSONObject;
-
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
+import org.json.JSONObject;
 
 /**
  * Agent Entity
@@ -39,39 +37,30 @@ public class AgentEntity extends SnaEntity {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 */
-	public AgentEntity(Mediator mediator) {
-		super(mediator);
+	public AgentEntity() {
+		super();
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param row
 	 * 
 	 */
-	public AgentEntity(Mediator mediator, JSONObject row) {
-		super(mediator, row);
+	public AgentEntity(JSONObject row) {
+		super(row);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @param login
 	 * @param password
 	 * @param mail
 	 */
-	public AgentEntity(Mediator mediator, String publicKey, long bundleEntity) {
-		this(mediator);
+	public AgentEntity(String publicKey, long bundleEntity) {
+		this();
 		this.setPublicKey(publicKey);
 		this.setBundleEntity(bundleEntity);
 	}

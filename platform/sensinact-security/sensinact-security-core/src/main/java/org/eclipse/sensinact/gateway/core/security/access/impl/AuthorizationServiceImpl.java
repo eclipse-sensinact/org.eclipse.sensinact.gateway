@@ -10,12 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.core.security.access.impl;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationServiceException;
-import org.eclipse.sensinact.gateway.core.security.dao.DAOException;
 import org.eclipse.sensinact.gateway.core.security.dao.AuthenticatedAccessLevelDAO;
+import org.eclipse.sensinact.gateway.core.security.dao.DAOException;
 import org.eclipse.sensinact.gateway.core.security.entity.AuthenticatedAccessLevelEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 
@@ -33,7 +32,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 	 * 
 	 * @throws DAOException
 	 */
-	public AuthorizationServiceImpl(Mediator mediator, AuthenticatedAccessLevelDAO authenticatedAccessLevelDAO)
+	public AuthorizationServiceImpl(AuthenticatedAccessLevelDAO authenticatedAccessLevelDAO)
 			throws DAOException {
 		this.authenticatedAccessLevelDAO = authenticatedAccessLevelDAO;
 	}

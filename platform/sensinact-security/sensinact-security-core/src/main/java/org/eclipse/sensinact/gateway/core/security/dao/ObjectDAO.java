@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.eclipse.sensinact.gateway.util.tree.PathNode;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +44,7 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity> {
 	// ********************************************************************//
 	// STATIC DECLARATIONS //
 	// ********************************************************************//
+	private static Logger LOGGER=LoggerFactory.getLogger(ObjectDAO.class);
 
 	private static final Logger LOG = LoggerFactory.getLogger(ObjectDAO.class);
 	// ********************************************************************//
@@ -51,25 +54,23 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity> {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
-	 * 
 	 * @throws DAOException
 	 */
-	public ObjectDAO(Mediator mediator, DataStoreService dataStoreService) throws DAOException {
-		super(mediator, ObjectEntity.class, dataStoreService);
+	public ObjectDAO(DataStoreService dataStoreService) throws DAOException {
+		this(dataStoreService,FrameworkUtil.getBundle(ObjectDAO.class).getResource("script/getObjectFromPath.sql"));
+	}
+	
+	public ObjectDAO(DataStoreService dataStoreService,URL url) throws DAOException {
+		super(ObjectEntity.class, dataStoreService);
 
 		super.registerUserDefinedSelectStatement("getObjectFromPath",
-				new UserDefinedSelectStatement(mediator, "script/getObjectFromPath.sql"));
+				new UserDefinedSelectStatement(url));
 	}
 
 	/**
 	 * Returns the {@link ObjectEntity}s from the datastore matching the given
 	 * String path, otherwise null.
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} to interact with the OSGi host environment
 	 * @param path
 	 *            The String path of the {@link ObjectEntity} to be returned.
 	 * 

@@ -23,6 +23,8 @@ import org.eclipse.sensinact.gateway.generic.packet.annotation.ResourceID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.Timestamp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -36,6 +38,7 @@ import java.util.List;
  * @param <P>
  */
 public class StructuredPacketReader<P extends Packet> extends SimplePacketReader<P> {
+	private static final Logger LOG = LoggerFactory.getLogger(PacketReader.class);
 	
     private static final List<String> ANNOTATIONS = Arrays.asList(
     		AttributeID.class.getCanonicalName(), 

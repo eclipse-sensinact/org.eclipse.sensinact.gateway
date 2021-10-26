@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.SnaEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Immutable;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
@@ -45,8 +44,8 @@ public abstract class AbstractMutableSnaDAO<E extends SnaEntity> extends Abstrac
 	 * @param entityType
 	 * @throws DAOException
 	 */
-	AbstractMutableSnaDAO(Mediator mediator, Class<E> entityType, DataStoreService dataStoreService) throws DAOException {
-		super(mediator, entityType, dataStoreService);
+	AbstractMutableSnaDAO(Class<E> entityType, DataStoreService dataStoreService) throws DAOException {
+		super(entityType, dataStoreService);
 		if (this.entityType.getAnnotation(Immutable.class) != null)
 			throw new DAOException("Mutable type expected");
 	}
@@ -56,7 +55,7 @@ public abstract class AbstractMutableSnaDAO<E extends SnaEntity> extends Abstrac
 		if (entity == null || identifier < 0) {
 			return;
 		}
-		if (SnaEntity.setUniqueLongPrimaryKey(mediator, entity, identifier)) {
+		if (SnaEntity.setUniqueLongPrimaryKey(entity, identifier)) {
 			LOG.debug("new %s record in the datastore", entityType.getSimpleName());
 
 		} else {

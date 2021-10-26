@@ -19,8 +19,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.security.dao.SnaDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
+import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.NotNull;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
@@ -32,14 +34,17 @@ import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class SnaEntity {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(SnaEntity.class);
+		private static final Logger LOG = LoggerFactory.getLogger(SnaEntity.class);
+
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
 	// ********************************************************************//
@@ -133,8 +138,7 @@ public abstract class SnaEntity {
 		return fields;
 	}
 
-	private static final <E extends SnaEntity> java.lang.reflect.Field getUniqueFieldPrimaryKey(Mediator mediator,
-			E entity) {
+	private static final <E extends SnaEntity> java.lang.reflect.Field getUniqueFieldPrimaryKey(E entity) {
 		Class<E> entityType = (Class<E>) entity.getClass();
 		PrimaryKey primaryKey = entityType.getAnnotation(PrimaryKey.class);
 		String[] columns = null;
@@ -159,14 +163,13 @@ public abstract class SnaEntity {
 	 * @param snaEntityType
 	 * @return
 	 */
-	public static <E extends SnaEntity> long getUniqueLongPrimaryKey(Mediator mediator, E entity) {
-		java.lang.reflect.Field field = getUniqueFieldPrimaryKey(mediator, entity);
+	public static <E extends SnaEntity> long getUniqueLongPrimaryKey(E entity) {
+		java.lang.reflect.Field field = getUniqueFieldPrimaryKey(entity);
 
 		if (field != null) {
 			try {
 				field.setAccessible(true);
 				return CastUtils.cast(long.class, field.get(entity));
-
 			} catch (Exception e) {
 				LOG.debug(e.getMessage());
 			}
@@ -178,8 +181,8 @@ public abstract class SnaEntity {
 	 * @param snaEntityType
 	 * @return
 	 */
-	public static <E extends SnaEntity> boolean setUniqueLongPrimaryKey(Mediator mediator, E entity, long identifier) {
-		java.lang.reflect.Field field = getUniqueFieldPrimaryKey(mediator, entity);
+	public static <E extends SnaEntity> boolean setUniqueLongPrimaryKey(E entity, long identifier) {
+		java.lang.reflect.Field field = getUniqueFieldPrimaryKey(entity);
 
 		if (field != null) {
 			try {
@@ -199,11 +202,6 @@ public abstract class SnaEntity {
 	// ********************************************************************//
 
 	/**
-	 * the {@link Mediator} allowing to interact with the OSGi host environment
-	 */
-	protected Mediator mediator;
-
-	/**
 	 * List of SnaEntity.Key of this SnaEntity
 	 */
 	protected List<Key> keys;
@@ -211,13 +209,8 @@ public abstract class SnaEntity {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 */
-	protected SnaEntity(Mediator mediator) {
-		this.mediator = mediator;
-
+	protected SnaEntity() {
 		Map<Field, Column> fields = SnaEntity.getFields(getClass());
 		this.keys = this.createKeyList(this.getClass().getAnnotation(PrimaryKey.class), fields);
 	}
@@ -225,14 +218,12 @@ public abstract class SnaEntity {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
+
 	 * @param row
 	 *            the JSONObject describing this SnaEntity
 	 */
-	protected SnaEntity(Mediator mediator, JSONObject row) {
-		this(mediator);
+	protected SnaEntity(JSONObject row) {
+		this();
 		if (JSONObject.NULL.equals(row)) {
 			return;
 		}
@@ -252,17 +243,17 @@ public abstract class SnaEntity {
 			String column = new StringBuilder().append(table.value()).append(SnaDAO.DOT).append(rowColumn).toString();
 
 			if (row.has(column)) {
-				setFieldValue(mediator.getClassLoader(), entry.getKey(), row.get(column));
+				setFieldValue(entry.getKey(), row.get(column));
 
 			} else if (row.has(rowColumn)) {
-				setFieldValue(mediator.getClassLoader(), entry.getKey(), row.get(rowColumn));
+				setFieldValue(entry.getKey(), row.get(rowColumn));
 			}
 			// } else if(SnaEntity.class.isAssignableFrom(entry.getKey().getType()))
 			// {
 			// try
 			// {
-			// Object entity = entry.getKey().getType().getConstructor(Mediator.class,JSONObject.class
-			//).newInstance(mediator, row);
+			// Object entity = entry.getKey().getType().getConstructor(JSONObject.class
+			//).newInstance(row);
 			// setFieldValue(entry.getKey(), entity);
 			//
 			// } catch(Exception e)
@@ -360,12 +351,11 @@ public abstract class SnaEntity {
 	 * @param field
 	 * @param value
 	 */
-	protected void setFieldValue(ClassLoader classLoader, Field field, Object value) {
+	protected void setFieldValue(Field field, Object value) {
 		Method method = null;
 		try {
 			if ((method = this.getMethod(this.getMethodName(field.getName(), "set"), field.getType())) != null) {
 				method.invoke(this, CastUtils.cast(field.getType(), value));
-
 			} else {
 				field.setAccessible(true);
 				field.set(this, CastUtils.cast(field.getType(), value));

@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.ImmutableSnaEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Immutable;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
@@ -43,9 +42,9 @@ public abstract class AbstractImmutableSnaDAO<E extends ImmutableSnaEntity> exte
 	 * @param mediator
 	 * @param entityType
 	 */
-	AbstractImmutableSnaDAO(Mediator mediator, Class<E> entityType, DataStoreService dataStoreService)
+	AbstractImmutableSnaDAO(Class<E> entityType, DataStoreService dataStoreService)
 			throws DAOException {
-		super(mediator, entityType, dataStoreService);
+		super(entityType, dataStoreService);
 		this.immutable = super.entityType.getAnnotation(Immutable.class);
 	}
 
