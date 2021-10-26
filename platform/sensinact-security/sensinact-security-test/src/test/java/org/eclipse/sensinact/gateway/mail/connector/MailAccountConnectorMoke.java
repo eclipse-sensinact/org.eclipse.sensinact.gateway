@@ -24,6 +24,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -32,6 +34,7 @@ import org.osgi.service.component.annotations.Component;
 @Component(property = "org.eclipse.sensinact.security.account.type=" + MailAccountConnectorMoke.ACCOUNT_TYPE)
 public class MailAccountConnectorMoke implements AccountConnector {
     
+	private static final Logger LOG = LoggerFactory.getLogger(MailAccountConnectorMoke.class);
 	public static final String ACCOUNT_TYPE = "MAIL";
 	
 	private Mediator mediator;
@@ -114,7 +117,7 @@ public class MailAccountConnectorMoke implements AccountConnector {
 
       } catch (Exception mex) {
     	  mex.printStackTrace();
-          this.mediator.error(mex);
+          LOG.error(mex.getMessage(),mex);
       }
 	}
 
