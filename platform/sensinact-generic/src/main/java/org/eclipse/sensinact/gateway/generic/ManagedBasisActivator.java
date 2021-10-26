@@ -16,6 +16,8 @@ import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ManagedServiceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -23,6 +25,7 @@ import org.osgi.service.cm.ManagedServiceFactory;
  */
 public abstract class ManagedBasisActivator<M extends Mediator> extends AbstractActivator<M> {
 	
+	private static final Logger LOG = LoggerFactory.getLogger(ManagedBasisActivator.class);
 	/**
 	 * Returns the String value defining the name of the {@link ManagedServiceFactory}
 	 * implementation to be registered
@@ -48,7 +51,7 @@ public abstract class ManagedBasisActivator<M extends Mediator> extends Abstract
      */
     @Override
     public void doStart() throws Exception {
-    	super.mediator.info("Registering ManagedProtocolStackEndpointFactory");
+    	LOG.info("Registering ManagedProtocolStackEndpointFactory");
     	this.factory = new ManagedProtocolStackEndpointFactory(super.mediator, name()) {
 			@Override
 			protected ProtocolStackEndpointConfigurator configurator() {
@@ -66,7 +69,7 @@ public abstract class ManagedBasisActivator<M extends Mediator> extends Abstract
      */
     @Override
     public void doStop() throws Exception {
-    	mediator.info("Unregistering ManagedProtocolStackEndpointFactory");
+    	LOG.info("Unregistering ManagedProtocolStackEndpointFactory");
     	if(this.factory != null)
     		this.factory.stop();
     }

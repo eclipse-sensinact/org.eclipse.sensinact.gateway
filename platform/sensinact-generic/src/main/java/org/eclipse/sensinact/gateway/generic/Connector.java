@@ -19,6 +19,8 @@ import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.generic.packet.PacketReader;
 import org.eclipse.sensinact.gateway.generic.packet.PayloadFragment;
 import org.eclipse.sensinact.gateway.generic.packet.TaskIdValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,6 +33,8 @@ import java.util.List;
  * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
  */
 public class Connector<P extends Packet> extends TaskManager {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(Connector.class);
     /**
      * map of managed {@link ExtModelInstance}s
      */
@@ -105,7 +109,7 @@ public class Connector<P extends Packet> extends TaskManager {
             if (this.customizer == null)
                 this.customizer = new DefaultConnectorCustomizer<P>(mediator, this.extModelConfiguration);
         } catch (Exception e) {
-            mediator.error(e);
+            LOG.error(e.getMessage(), e);
         }
     }
     
@@ -120,8 +124,8 @@ public class Connector<P extends Packet> extends TaskManager {
     public void process(P packet) throws InvalidPacketException {
 
         if (!this.customizer.preProcessing(packet)) {
-            if (super.mediator.isDebugLoggable()) {
-                super.mediator.debug("Do not process the received packet : exiting");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Do not process the received packet : exiting");
             }
             return;
         }
@@ -164,8 +168,8 @@ public class Connector<P extends Packet> extends TaskManager {
             String serviceProviderName = subPacket.getServiceProviderIdentifier();
             
             if (serviceProviderName == null) {
-                if (this.mediator.isDebugLoggable())
-                    this.mediator.debug("Unable to identify the targeted service provider");
+                if (LOG.isDebugEnabled())
+                    LOG.debug("Unable to identify the targeted service provider");
                 continue;
             }
             int index = -1;
@@ -186,7 +190,7 @@ public class Connector<P extends Packet> extends TaskManager {
                     instance = this.addModelInstance(subPacket.getProfileId(), serviceProviderName);
                     if (instance == null)
                         continue;
-                    super.mediator.debug("Service provider discovered : %s", serviceProviderName);
+                    LOG.debug("Service provider discovered : %s", serviceProviderName);
                 } catch (InvalidServiceProviderException e) {
                     throw new InvalidPacketException(e);
                 }
@@ -207,8 +211,8 @@ public class Connector<P extends Packet> extends TaskManager {
      */
     protected void processHello(ExtServiceProviderImpl serviceProvider) {
         if (ServiceProvider.LifecycleStatus.INACTIVE.equals(serviceProvider.getStatus())) {
-            if (super.mediator.isDebugLoggable()) {
-                super.mediator.debug(new StringBuilder().append("Service provider ").append(serviceProvider.getName()).append("activated").toString());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(new StringBuilder().append("Service provider ").append(serviceProvider.getName()).append("activated").toString());
             }
             serviceProvider.start();
         }
@@ -222,13 +226,13 @@ public class Connector<P extends Packet> extends TaskManager {
      */
     protected void processGoodbye(final ExtModelInstance<?> instance) {
         if (instance == null) {
-            if (super.mediator.isDebugLoggable()) {
-                super.mediator.debug("An unknown model instance is leaving the network");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("An unknown model instance is leaving the network");
             }
             return;
         }
-        if (super.mediator.isInfoLoggable()) {
-            super.mediator.info(new StringBuilder().append("Service provider '").append(instance.getName()).append("' is leaving the network").toString());
+        if (LOG.isInfoEnabled()) {
+            LOG.info(new StringBuilder().append("Service provider '").append(instance.getName()).append("' is leaving the network").toString());
         }
         instance.unregister();
     }

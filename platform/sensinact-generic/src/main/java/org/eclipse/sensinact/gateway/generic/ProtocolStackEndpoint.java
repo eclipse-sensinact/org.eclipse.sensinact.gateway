@@ -25,12 +25,15 @@ import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.generic.parser.Commands;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTranslator {
 	
+	private static final Logger LOG = LoggerFactory.getLogger(ProtocolStackEndpoint.class);
     /**
      * the {@link Mediator} that will be used by the ProtocolStackConnector to instantiate 
      * to interact with the OSGi host environment
@@ -206,7 +209,7 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
      */
     public void process(P packet) throws InvalidPacketException {
         if (connector == null) {
-            this.mediator.debug("No processor connected");
+        	ProtocolStackEndpoint.this.LOG.debug("No processor connected");
             return;
         }
         connector.process(packet);
@@ -319,6 +322,6 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
         if (this.connector != null) 
             this.connector.stop();
         else 
-            this.mediator.debug("No processor connected");
+        	ProtocolStackEndpoint.this.LOG.debug("No processor connected");
     }
 }

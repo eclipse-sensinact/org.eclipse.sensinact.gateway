@@ -27,6 +27,8 @@ import org.eclipse.sensinact.gateway.generic.parser.Commands;
 import org.eclipse.sensinact.gateway.generic.parser.FixedProviders;
 import org.eclipse.sensinact.gateway.generic.parser.XmlResourceConfigHandler;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -47,6 +49,8 @@ import java.util.Map.Entry;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ExtModelConfiguration<P extends Packet> extends ModelConfiguration {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ExtModelConfiguration.class);
 	
     /**
      * Returns true if the two bytes arrays passed as parameters are equals
@@ -310,7 +314,7 @@ public class ExtModelConfiguration<P extends Packet> extends ModelConfiguration 
 	                }
 	                super.addResourceConfigCatalog(new ExtResourceConfigCatalog(handler, defaults));
         		}catch( ParserConfigurationException | SAXException | IOException e){
-        			mediator.debug("%s does not contains a valid catalog", catalog.toExternalForm());
+        			LOG.debug("%s does not contains a valid catalog", catalog.toExternalForm());
         			continue;
         		}
         	}
@@ -319,7 +323,7 @@ public class ExtModelConfiguration<P extends Packet> extends ModelConfiguration 
         super.profiles = Collections.unmodifiableMap(builtProfiles);
         this.fixedProviders =  Collections.unmodifiableMap(builtFixedProviders);
         
-        this.mediator.info("ExtModelConfiguration initialized...");
+        LOG.info("ExtModelConfiguration initialized...");
     }
 
     /**

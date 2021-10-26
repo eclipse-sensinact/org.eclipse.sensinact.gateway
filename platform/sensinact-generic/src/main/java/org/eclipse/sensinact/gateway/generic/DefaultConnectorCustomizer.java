@@ -16,6 +16,8 @@ import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.generic.packet.PacketReader;
 import org.eclipse.sensinact.gateway.generic.packet.PacketReaderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,6 +25,8 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 public class DefaultConnectorCustomizer<P extends Packet> implements ConnectorCustomizer<P> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultConnectorCustomizer.class);
     /**
      * the list of available {@link PacketReaderFactory}s
      */
@@ -70,16 +74,16 @@ public class DefaultConnectorCustomizer<P extends Packet> implements ConnectorCu
 
     @Override
     public boolean preProcessing(P packet) {
-        if (this.mediator.isDebugLoggable()) {
-            this.mediator.debug("pre-processing done");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("pre-processing done");
         }
         return true;
     }
 
     @Override
     public void postProcessing(ExtServiceProviderImpl processor, PacketReader<P> packet) {
-        if (this.mediator.isDebugLoggable()) {
-            this.mediator.debug("post-processing done");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("post-processing done");
         }
     }
 

@@ -15,6 +15,8 @@ import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -27,6 +29,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class TaskImpl implements Task {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(TaskImpl.class);
     protected final Object lock = new Object();
     protected final Mediator mediator;
 
@@ -179,8 +183,8 @@ public abstract class TaskImpl implements Task {
         synchronized (this.status) {
             status = this.status;
         }
-        if (this.mediator.isDebugLoggable()) {
-            this.mediator.debug(new StringBuilder("Task status ").append(status).append("[").append(System.currentTimeMillis()).append("]").toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(new StringBuilder("Task status ").append(status).append("[").append(System.currentTimeMillis()).append("]").toString());
         }
         return status;
     }
@@ -228,8 +232,8 @@ public abstract class TaskImpl implements Task {
     @Override
     public void setResult(Object result, long timestamp) {
         if (isResultAvailable()) {
-            if (this.mediator.isWarningLoggable()) 
-                this.mediator.warn(new StringBuilder("result already set [").append(this).append("][current: ").append((this.result == AccessMethod.EMPTY ? "EMPTY" : this.result)).append("][new = ").append((result == AccessMethod.EMPTY ? "EMPTY" : result + "]")).toString());
+            if (LOG.isWarnEnabled()) 
+                LOG.warn(new StringBuilder("result already set [").append(this).append("][current: ").append((this.result == AccessMethod.EMPTY ? "EMPTY" : this.result)).append("][new = ").append((result == AccessMethod.EMPTY ? "EMPTY" : result + "]")).toString());
             return;
         }
         this.result = result;
@@ -269,8 +273,8 @@ public abstract class TaskImpl implements Task {
     @Override
     public Object getResult() {
         if (!isResultAvailable()) {
-            if (this.mediator.isDebugLoggable()) {
-                this.mediator.debug("result is not available");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("result is not available");
             }
             return null;
         }
@@ -284,8 +288,8 @@ public abstract class TaskImpl implements Task {
     @Override
     public long getTimestamp() {
         if (!isResultAvailable()) {
-            if (this.mediator.isDebugLoggable()) {
-                this.mediator.debug("result is not available");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("result is not available");
             }
             return -1;
         }

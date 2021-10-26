@@ -22,6 +22,8 @@ import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link ManagedServiceFactory} implementation maintaining a set of {@link 
@@ -31,6 +33,7 @@ import org.osgi.service.cm.ManagedServiceFactory;
  */
 public abstract class ManagedProtocolStackEndpointFactory implements ManagedServiceFactory {
 	
+	private static final Logger LOG = LoggerFactory.getLogger(ManagedProtocolStackEndpointFactory.class);
 	/**
 	 * Returns the {@link ProtocolStackEndpointConfigurator} to be used to configure
 	 * a newly created {@link ProtocolStackEndpoint}
@@ -118,7 +121,7 @@ public abstract class ManagedProtocolStackEndpointFactory implements ManagedServ
             
     	} catch (Exception e) {
     		e.printStackTrace();
-			mediator.error(e);
+			LOG.error(e.getMessage(), e);
 		}
     }
 
@@ -131,7 +134,7 @@ public abstract class ManagedProtocolStackEndpointFactory implements ManagedServ
     		ProtocolStackEndpoint<?> endpoint = this.pids.remove(servicePID);
         	endpoint.stop();    		
     	} catch (Exception e) {
-			mediator.error(e);
+			LOG.error(e.getMessage(), e);
 		}
     }
 	

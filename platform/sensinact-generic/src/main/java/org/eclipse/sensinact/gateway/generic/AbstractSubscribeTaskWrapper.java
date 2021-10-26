@@ -5,12 +5,15 @@ package org.eclipse.sensinact.gateway.generic;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public abstract class AbstractSubscribeTaskWrapper implements SubscribeTaskWrapper {
 	
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractSubscribeTaskWrapper.class);
 	/**
 	 * The wrapped subscribe access method {@link Task}
 	 */
@@ -67,7 +70,7 @@ public abstract class AbstractSubscribeTaskWrapper implements SubscribeTaskWrapp
 		try {
 			return this.targetIdExtractor().execute(this.task);
 		} catch (Exception e) {
-			mediator.error("Error when extracting the subscriber identifier", e);
+			LOG.error("Error when extracting the subscriber identifier", e);
 		}
 		return null;
 	}
@@ -137,7 +140,7 @@ public abstract class AbstractSubscribeTaskWrapper implements SubscribeTaskWrapp
 		try {
 			this.setSubscriptionId(this.subscriptionIdExtractor().execute(result));
 		} catch (Exception e) {
-			mediator.error("Error when extracting the subscription identifier", e);
+			LOG.error("Error when extracting the subscription identifier", e);
 		}
 		task.setResult(result);
 	}
@@ -147,7 +150,7 @@ public abstract class AbstractSubscribeTaskWrapper implements SubscribeTaskWrapp
 		try {
 			this.setSubscriptionId(this.subscriptionIdExtractor().execute(result));
 		} catch (Exception e) {
-			mediator.error("Error when extracting the subscription identifier", e);
+			LOG.error("Error when extracting the subscription identifier", e);
 		}
 		task.setResult(result,timestamp);
 	}

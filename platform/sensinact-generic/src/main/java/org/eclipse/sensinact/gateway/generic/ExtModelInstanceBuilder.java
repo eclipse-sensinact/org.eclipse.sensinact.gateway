@@ -15,6 +15,8 @@ import org.eclipse.sensinact.gateway.core.ModelAlreadyRegisteredException;
 import org.eclipse.sensinact.gateway.core.ModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Allows to build in a simple way an {@link ExtModelInstance}
@@ -24,7 +26,8 @@ import org.eclipse.sensinact.gateway.util.ReflectUtils;
  */
 public class ExtModelInstanceBuilder<P extends Packet,C extends ExtModelConfiguration<P>, I extends ExtModelInstance<C>> 
 extends ModelInstanceBuilder<C,I> {
-
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ExtModelInstanceBuilder.class);
 	private Connector<? extends Packet> connector;
 
     /**
@@ -74,7 +77,7 @@ extends ModelInstanceBuilder<C,I> {
                 super.register(instance);
 
             } catch (ModelAlreadyRegisteredException e) {
-                mediator.error("Model instance '%s' already exists", name);
+                LOG.error("Model instance '%s' already exists", name);
                 instance = null;
             }
         }

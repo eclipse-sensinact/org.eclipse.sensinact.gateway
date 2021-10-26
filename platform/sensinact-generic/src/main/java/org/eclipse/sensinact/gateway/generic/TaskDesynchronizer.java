@@ -11,6 +11,8 @@
 package org.eclipse.sensinact.gateway.generic;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,6 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class TaskDesynchronizer implements Runnable {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(TaskDesynchronizer.class);
     private final LinkedList<TaskManager> listeners;
     private final AtomicInteger leftTasks;
     private boolean running = true;
@@ -120,8 +124,8 @@ public class TaskDesynchronizer implements Runnable {
 
                 } catch (InterruptedException e) {
                     running = false;
-                    if (this.mediator.isErrorLoggable()) {
-                        this.mediator.error(e, e.getMessage());
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error( e.getMessage(), e);
                     }
                     Thread.interrupted();
                 }

@@ -28,6 +28,8 @@ import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract extended {@link AbstractActivator} implementation providing a default
@@ -40,6 +42,7 @@ import org.osgi.framework.BundleContext;
  */
 public abstract class BasisActivator<P extends Packet> extends AbstractActivator<Mediator> {
 	
+	private static final Logger LOG = LoggerFactory.getLogger(BasisActivator.class);
 	private static final SensiNactBridgeConfiguration DEFAULT_SENSINACT_BRIDGE_CONFIGURATION = 
 		new SensiNactBridgeConfiguration() {
 		
@@ -127,7 +130,7 @@ public abstract class BasisActivator<P extends Packet> extends AbstractActivator
 			try {
 				packetType = (Class<P>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 			} catch (ClassCastException | TypeNotPresentException e) {
-				mediator.error(e);
+				LOG.error(e.getMessage(), e);
 				throw new NullPointerException("No valid packet type defined");
 			}
 		} else {
@@ -166,7 +169,7 @@ public abstract class BasisActivator<P extends Packet> extends AbstractActivator
 	 * to the {@link Configuration} - To be overridden if necessary
 	 */
 	protected void configure() {
-		super.mediator.debug("BasisActivator configuration ... done !");
+		LOG.debug("BasisActivator configuration ... done !");
 	}
 	
 	@Override

@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.generic.parser;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 
 /**
@@ -21,6 +23,8 @@ import org.xml.sax.Attributes;
  */
 @XmlElement(tag = "value", field = "value")
 public class ValueDefinition<C> extends XmlModelParsingContext {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ValueDefinition.class);
     /**
      * the value object defined in the associated XML "value" element
      */
@@ -54,7 +58,7 @@ public class ValueDefinition<C> extends XmlModelParsingContext {
 	        try {
 	            this.value = CastUtils.cast((Class<?>)type, value);
 	        } catch (ClassCastException e) {
-	            super.mediator.error(e);
+	            LOG.error(e.getMessage(), e);
 	        }catch(Exception e) {
 	        	e.printStackTrace();
 	        }

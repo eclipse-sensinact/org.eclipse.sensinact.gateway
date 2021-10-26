@@ -14,6 +14,8 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.InvalidSyntaxException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -33,6 +35,8 @@ import java.util.Set;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class AnnotationResolver implements Iterable<Object> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AnnotationResolver.class);
     /**
      * the associated {@link Mediator} used to
      * interact with the OSGi host environment
@@ -156,8 +160,8 @@ public class AnnotationResolver implements Iterable<Object> {
                             value = null;
                         }
                     } catch (InvalidSyntaxException e) {
-                        if (mediator.isDebugLoggable()) {
-                            mediator.error(e, e.getMessage());
+                        if (LOG.isDebugEnabled()) {
+                            LOG.error( e.getMessage(), e);
                         }
                     }
                     if (value != null || (value = ReflectUtils.getTheBestInstance(type, new Object[]{this.mediator})) != null) {
@@ -169,8 +173,8 @@ public class AnnotationResolver implements Iterable<Object> {
                         field.set(instance, value);
 
                     } catch (Exception e) {
-                        if (mediator.isDebugLoggable()) {
-                            mediator.error(e, e.getMessage());
+                        if (LOG.isDebugEnabled()) {
+                            LOG.error( e.getMessage(), e);
                         }
                         continue;
                     }

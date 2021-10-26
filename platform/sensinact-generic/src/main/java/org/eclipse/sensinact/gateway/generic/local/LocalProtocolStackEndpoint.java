@@ -37,6 +37,8 @@ import org.eclipse.sensinact.gateway.generic.annotation.TaskExecution;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Basis {@link ProtocolStackEndpoint} implementation
@@ -45,6 +47,8 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackEndpoint<P> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(LocalProtocolStackEndpoint.class);
     public static final Task.RequestType REQUEST_TYPE = Task.RequestType.LOCAL;
 
     /**
@@ -96,7 +100,7 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
             this.execute(task);
         } catch (Exception e) {
             task.abort(AccessMethod.EMPTY);
-            mediator.error(e);
+            LOG.error(e.getMessage(), e);
         }
     }
 

@@ -23,6 +23,8 @@ import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory;
 import org.eclipse.sensinact.gateway.generic.parser.ReferenceDefinition;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -33,6 +35,8 @@ import java.util.List;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ExtServiceImpl extends ServiceImpl {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ExtServiceImpl.class);
     protected final String defaultResourceConfig;
 
     /**
@@ -95,7 +99,7 @@ public class ExtServiceImpl extends ServiceImpl {
      */
     protected void buildTriggers(String resourceName, Signature signature, List<ReferenceDefinition> references) {
         if (signature.getName().intern() != AccessMethod.ACT && signature.getName().intern() != AccessMethod.SET) {
-            super.modelInstance.mediator().debug("Trigger allowed for ACT and SET methods only");
+            LOG.debug("Trigger allowed for ACT and SET methods only");
             return;
         }
         int index = 0;
@@ -115,7 +119,7 @@ public class ExtServiceImpl extends ServiceImpl {
             }
         } catch (Exception e) {
         	e.printStackTrace();
-            super.modelInstance.mediator().error(e);
+            LOG.error(e.getMessage(), e);
 
         } finally {
             AccessMethodTriggerFactory.LOADER.remove();

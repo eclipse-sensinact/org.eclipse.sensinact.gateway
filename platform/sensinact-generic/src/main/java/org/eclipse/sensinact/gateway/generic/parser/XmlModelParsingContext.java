@@ -11,6 +11,8 @@
 package org.eclipse.sensinact.gateway.generic.parser;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -22,6 +24,8 @@ import org.xml.sax.SAXException;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class XmlModelParsingContext extends XmlDefinition {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(XmlModelParsingContext.class);
 	
 	private XmlModelParsingContext next;
 	protected StringBuilder textContent;
@@ -87,7 +91,7 @@ public class XmlModelParsingContext extends XmlDefinition {
      * @throws SAXException
      */
     public void processingInstruction(String target, String data) throws SAXException {
-    	 mediator.debug("processing instruction : \n\t" + target + " \n\t " + data);
+    	 LOG.debug("processing instruction : \n\t" + target + " \n\t " + data);
     }
 
     /**
@@ -98,7 +102,7 @@ public class XmlModelParsingContext extends XmlDefinition {
      * @param name the skipped entity name
      */
     public void skippedEntity(String name) throws SAXException {
-    	 mediator.debug("skipped entity : " + name);
+    	 LOG.debug("skipped entity : " + name);
     }
     
 	/**

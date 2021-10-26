@@ -13,6 +13,8 @@ package org.eclipse.sensinact.gateway.generic.packet;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.generic.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -20,6 +22,8 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 
 public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, SubPacket {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(PojoPacketWrapper.class);
 
     private final class PojoPacketExecutable<T> implements Executable<P, T> {
         private Field annotated;
@@ -29,7 +33,7 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
                 this.annotated = PojoPacketWrapper.class.getDeclaredField(annotated);
 
             } catch (Exception e) {
-                PojoPacketWrapper.this.mediator.error(e);
+                PojoPacketWrapper.LOG.error(e.getMessage(), e);
             }
         }
 
@@ -193,8 +197,8 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
             return this.commandExtractor.execute(packet);
 
         } catch (Exception e) {
-        	if(mediator.isDebugLoggable())
-        		mediator.debug(e.getMessage());
+        	if(LOG.isDebugEnabled())
+        		LOG.debug(e.getMessage());
         }
         return null;
     }
@@ -207,8 +211,8 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
         	   return false;
            return hello.booleanValue();
         } catch (Exception e) {
-        	if(mediator.isDebugLoggable())
-        		mediator.debug(e.getMessage());
+        	if(LOG.isDebugEnabled())
+        		LOG.debug(e.getMessage());
         }
         return false;
     }
@@ -221,8 +225,8 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
             	return false;
             return goodbye.booleanValue();
         } catch (Exception e) {
-        	if(mediator.isDebugLoggable())
-        		mediator.debug(e.getMessage());
+        	if(LOG.isDebugEnabled())
+        		LOG.debug(e.getMessage());
         }
         return false;
     }
@@ -233,8 +237,8 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
             return this.profileIdExtractor.execute(packet);
 
         } catch (Exception e) {
-        	if(mediator.isDebugLoggable())
-        		mediator.debug(e.getMessage());
+        	if(LOG.isDebugEnabled())
+        		LOG.debug(e.getMessage());
         }
         return null;
     }
@@ -245,8 +249,8 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
             return this.serviceProviderIdExtractor.execute(packet);
 
         } catch (Exception e) {
-        	if(mediator.isDebugLoggable())
-        		mediator.debug(e.getMessage());
+        	if(LOG.isDebugEnabled())
+        		LOG.debug(e.getMessage());
         }
         return null;
     }
@@ -257,8 +261,8 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
             return this.serviceIdExtractor.execute(packet);
 
         } catch (Exception e) {
-        	if(mediator.isDebugLoggable())
-        		mediator.debug(e.getMessage());
+        	if(LOG.isDebugEnabled())
+        		LOG.debug(e.getMessage());
         }
         return null;
     }
@@ -269,8 +273,8 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
             return this.resourceIdExtractor.execute(packet);
 
         } catch (Exception e) {
-        	if(mediator.isDebugLoggable())
-        		mediator.debug(e.getMessage());
+        	if(LOG.isDebugEnabled())
+        		LOG.debug(e.getMessage());
         }
         return null;
     }
@@ -281,8 +285,8 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
             return this.attributeIdExtractor.execute(packet);
 
         } catch (Exception e) {
-        	if(mediator.isDebugLoggable())
-        		mediator.debug(e.getMessage());
+        	if(LOG.isDebugEnabled())
+        		LOG.debug(e.getMessage());
         }
         return null;
     }
@@ -293,8 +297,8 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
             return this.metadataIdExtractor.execute(packet);
 
         } catch (Exception e) {
-        	if(mediator.isDebugLoggable())
-        		mediator.debug(e.getMessage());
+        	if(LOG.isDebugEnabled())
+        		LOG.debug(e.getMessage());
         }
         return null;
     }
@@ -305,8 +309,8 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
             return this.dataExtractor.execute(packet);
 
         } catch (Exception e) {
-        	if(mediator.isDebugLoggable())
-        		mediator.debug(e.getMessage());
+        	if(LOG.isDebugEnabled())
+        		LOG.debug(e.getMessage());
         }
         return null;
     }
@@ -319,8 +323,8 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
             	return -1;
             return l.longValue();
         } catch (Exception e) {
-        	if(mediator.isDebugLoggable())
-        		mediator.debug(e.getMessage());
+        	if(LOG.isDebugEnabled())
+        		LOG.debug(e.getMessage());
         }
         return -1;
     }
