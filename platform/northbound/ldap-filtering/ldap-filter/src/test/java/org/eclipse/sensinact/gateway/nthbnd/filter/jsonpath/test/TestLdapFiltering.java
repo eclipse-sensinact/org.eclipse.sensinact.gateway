@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.json.JSONObject;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.Bundle;
@@ -35,7 +34,6 @@ import org.osgi.test.junit5.service.ServiceExtension;
 @ExtendWith(InstalledBundleExtension.class)
 @ExtendWith(ServiceExtension.class)
 @ExtendWith(BundleContextExtension.class)
-@Disabled
 public class TestLdapFiltering {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //

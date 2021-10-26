@@ -528,16 +528,13 @@ public abstract class ReflectUtils {
         if (method != null) {
             String methodName = method.getName();
             Class<?>[] parameterTypes = method.getParameterTypes();
-            Class<?> declaringClass = method.getDeclaringClass();
-
+            Class<?> declaringClass = method.getDeclaringClass().getSuperclass();
+            
             while (overwritten == null && declaringClass != null) {
                 try {
-                    declaringClass = declaringClass.getSuperclass();
                     overwritten = declaringClass.getDeclaredMethod(methodName, parameterTypes);
-
-                } catch (Exception e) {
-                    continue;
-                }
+                } catch (Exception e) { }
+                declaringClass = declaringClass.getSuperclass();
             }
         }
         return overwritten;

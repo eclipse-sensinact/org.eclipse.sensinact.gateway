@@ -1,1 +1,0 @@
-The test is deactivated. For some reason it complains that the session token is invalid. While debugingthis, I saw that the `org.eclipse.sensinact.gateway.core.SensiNact.getSessionKeyFromToken` is called 3 times in succession and the third time no session token is found.
