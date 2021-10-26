@@ -25,7 +25,8 @@ import org.eclipse.sensinact.gateway.core.security.entity.annotation.NotNull;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
 import org.json.JSONObject;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
@@ -37,6 +38,8 @@ import org.eclipse.sensinact.gateway.util.ReflectUtils;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class SnaEntity {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(SnaEntity.class);
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
 	// ********************************************************************//
@@ -165,7 +168,7 @@ public abstract class SnaEntity {
 				return CastUtils.cast(long.class, field.get(entity));
 
 			} catch (Exception e) {
-				mediator.debug(e.getMessage());
+				LOG.debug(e.getMessage());
 			}
 		}
 		return -1;
@@ -185,7 +188,7 @@ public abstract class SnaEntity {
 				return true;
 
 			} catch (Exception e) {
-				mediator.debug(e.getMessage());
+				LOG.debug(e.getMessage());
 			}
 		}
 		return false;

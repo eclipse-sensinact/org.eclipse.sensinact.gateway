@@ -54,6 +54,8 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Secured access service implementation
@@ -72,7 +74,8 @@ public class SecuredAccessImpl implements SecuredAccess {
 	// ********************************************************************//
 	// STATIC DECLARATIONS //
 	// ********************************************************************//
-
+	
+	private static final Logger LOG = LoggerFactory.getLogger(SecuredAccessImpl.class);
 	// ********************************************************************//
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
@@ -505,8 +508,8 @@ public class SecuredAccessImpl implements SecuredAccess {
 	
 	@Override
 	public void close() {
-		if (mediator.isDebugLoggable()) {
-			mediator.debug("closing sensiNact secured access");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("closing sensiNact secured access");
 		}
 		if (this.authorizationRegistration != null) {
 			try {
@@ -514,7 +517,7 @@ public class SecuredAccessImpl implements SecuredAccess {
 
 			} catch (IllegalStateException e) {
 				try {
-					mediator.debug(e.getMessage());
+					LOG.debug(e.getMessage());
 				} catch (IllegalStateException ise) {
 					// do nothing because it probably means
 					// that the OSGi environment is closing

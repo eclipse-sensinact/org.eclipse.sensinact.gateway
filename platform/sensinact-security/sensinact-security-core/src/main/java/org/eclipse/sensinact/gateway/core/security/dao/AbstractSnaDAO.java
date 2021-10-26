@@ -21,7 +21,8 @@ import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.dao.directive.CreateDirective;
 import org.eclipse.sensinact.gateway.core.security.dao.directive.DeleteDirective;
@@ -40,6 +41,8 @@ import org.eclipse.sensinact.gateway.util.IOUtils;
  * secured access information of sensiNact are stored
  */
 abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractSnaDAO.class);
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
 	// ********************************************************************//
@@ -278,7 +281,7 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 						entityType.getConstructor(Mediator.class, JSONObject.class).newInstance(mediator, jsonObject));
 
 			} catch (Exception e) {
-				mediator.error(e.getMessage(), e);
+				LOG.error(e.getMessage(), e);
 				return Collections.<E>emptyList();
 			}
 		}
@@ -317,7 +320,7 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 
 			} catch (Exception e) {
 				e.printStackTrace();
-				mediator.error(e.getMessage(), e);
+				LOG.error(e.getMessage(), e);
 				return Collections.<E>emptyList();
 			}
 		}
@@ -422,7 +425,7 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 					entitiesList.add(constructor.newInstance(mediator, jsonObject));
 				}
 			} catch (Exception e) {
-				mediator.error(e.getMessage(), e);
+				LOG.error(e.getMessage(), e);
 				return Collections.<E>emptyList();
 			}
 		}

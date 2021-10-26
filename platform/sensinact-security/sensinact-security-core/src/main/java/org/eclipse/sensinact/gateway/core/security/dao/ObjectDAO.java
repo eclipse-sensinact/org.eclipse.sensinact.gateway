@@ -22,6 +22,8 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.eclipse.sensinact.gateway.util.tree.PathNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Method DAO
@@ -41,6 +43,7 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity> {
 	// STATIC DECLARATIONS //
 	// ********************************************************************//
 
+	private static final Logger LOG = LoggerFactory.getLogger(ObjectDAO.class);
 	// ********************************************************************//
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
@@ -132,7 +135,7 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity> {
 						filtered.add(tmpEntity);
 					}
 				} catch (PatternSyntaxException e) {
-					mediator.debug("exact path '%s' not found", path);
+					LOG.debug("exact path '%s' not found", path);
 				}
 			}
 		}
