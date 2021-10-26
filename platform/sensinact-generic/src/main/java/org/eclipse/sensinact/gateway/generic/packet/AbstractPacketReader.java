@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractPacketReader<P extends Packet> implements PacketReader<P> {
     
-	protected static final Logger LOG = LoggerFactory.getLogger(PacketReader.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PacketReader.class);
 	
 	protected CountDownLatch countDown;
 	protected ExecutorService worker;

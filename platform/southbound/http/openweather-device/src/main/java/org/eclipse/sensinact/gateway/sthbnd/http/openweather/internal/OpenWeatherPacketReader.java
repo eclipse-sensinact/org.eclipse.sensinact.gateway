@@ -11,25 +11,27 @@
 package org.eclipse.sensinact.gateway.sthbnd.http.openweather.internal;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Base64;
+import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.LocationResource;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
-import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
-    
+	private static final Logger LOG = LoggerFactory.getLogger(OpenWeatherPacketReader.class);
+
 	class WeatherSubPacket {
 		String serviceProvider;
 		String service;
@@ -84,7 +86,7 @@ public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
 	            	this.subPackets.add(sp); 
 	            }
 	        } catch (Exception e) {
-	            mediator.error(e);
+	        	OpenWeatherPacketReader.this.LOG.error(e.getMessage(), e);
 	            super.configureEOF();
 	            throw new InvalidPacketException(e);
 	        }
