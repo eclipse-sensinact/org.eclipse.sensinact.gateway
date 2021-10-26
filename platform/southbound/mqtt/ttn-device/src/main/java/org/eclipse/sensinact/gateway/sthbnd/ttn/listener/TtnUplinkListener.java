@@ -21,8 +21,12 @@ import org.eclipse.sensinact.gateway.sthbnd.ttn.model.TtnUplinkPayload;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.packet.TtnUplinkPacket;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TtnUplinkListener extends MqttTopicMessage {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(TtnUplinkListener.class);
 
 	public static final String DOWNLINK_MARKER = "#DOWNLINK#";
 	
@@ -42,8 +46,8 @@ public class TtnUplinkListener extends MqttTopicMessage {
     @Override
     public void messageReceived(String topic, String message) {
 
-        if(mediator.isDebugLoggable()) 
-            mediator.debug("Uplink message: " + message);
+        if(LOG.isDebugEnabled()) 
+            LOG.debug("Uplink message: " + message);
         
         String device = topic.split("/")[2];
         JSONObject json = new JSONObject(message);
@@ -52,8 +56,8 @@ public class TtnUplinkListener extends MqttTopicMessage {
         try {
             payload = new TtnUplinkPayload(mediator, json);
         } catch (JSONException e) {
-            if(mediator.isErrorLoggable()) 
-                mediator.error(e.getMessage(),e);
+            if(LOG.isErrorEnabled()) 
+                LOG.error(e.getMessage(),e);
         }
         if (payload != null) {
         	List<TtnSubPacket> subPackets = payload.getSubPackets();
