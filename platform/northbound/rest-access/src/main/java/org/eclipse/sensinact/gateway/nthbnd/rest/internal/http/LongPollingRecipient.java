@@ -14,6 +14,8 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -22,6 +24,8 @@ import java.io.IOException;
  * This class is a wrapper for long polling callback subscription
  */
 public class LongPollingRecipient extends NorthboundRecipient {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(LongPollingRecipient.class);
     private HttpServletResponse response;
 
     /**
@@ -55,7 +59,7 @@ public class LongPollingRecipient extends NorthboundRecipient {
             this.response.setStatus(200);
             this.response.getWriter().println(builder.toString());
         } catch (IOException e) {
-            super.mediator.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             ;
         }
     }

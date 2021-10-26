@@ -21,6 +21,8 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
 import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 public class HttpRestAccessRequest extends HttpServletRequestWrapper implements NorthboundRequestWrapper {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(HttpRestAccessRequest.class);
     private NorthboundMediator mediator;
     private Map<QueryKey, List<String>> queryMap;
     private Authentication<?> authentication;
@@ -62,7 +66,7 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
             try {
                 this.queryMap = NorthboundRequest.processRequestQuery(super.getQueryString());
             } catch (UnsupportedEncodingException e) {
-                mediator.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
                 this.queryMap = Collections.<QueryKey, List<String>>emptyMap();
             }
         }
@@ -78,7 +82,7 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
                 this.content = new String(stream);
 
             } catch (IOException e) {
-                this.mediator.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
         }
         return this.content;

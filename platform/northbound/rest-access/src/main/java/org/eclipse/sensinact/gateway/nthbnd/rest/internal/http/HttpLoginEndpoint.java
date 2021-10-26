@@ -25,6 +25,8 @@ import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.LoginResponse;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is the REST interface between each others classes
@@ -33,6 +35,8 @@ import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 @SuppressWarnings("serial")
 @WebServlet()
 public class HttpLoginEndpoint extends HttpServlet {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(HttpLoginEndpoint.class);
     private NorthboundMediator mediator;
 
     /**
@@ -97,11 +101,11 @@ public class HttpLoginEndpoint extends HttpServlet {
             response.setStatus(200);
 
         } catch (InvalidCredentialException e) {
-            mediator.error(e);
+            LOG.error(e.getMessage(), e);
             response.sendError(403, e.getMessage());
 
         } catch (Exception e) {
-            mediator.error(e);
+            LOG.error(e.getMessage(), e);
             response.sendError(520, "Internal server error");
 
         }
