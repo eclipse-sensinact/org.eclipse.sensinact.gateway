@@ -21,16 +21,19 @@ import org.eclipse.sensinact.gateway.app.manager.component.data.ConstantData;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestStringFunction {
     
+	private static final Logger LOG = LoggerFactory.getLogger(TestStringFunction.class);
     private Mediator mediator=Mockito.mock(Mediator.class);
     
     private FunctionUpdateListener listener=Mockito.mock(FunctionUpdateListener.class);
 
     @BeforeEach
     public void init() throws Exception {
-        Mockito.when(mediator.isDebugLoggable()).thenReturn(false);
+        Mockito.when(LOG.isDebugEnabled()).thenReturn(false);
     }
 
     public void testConcatenate() {

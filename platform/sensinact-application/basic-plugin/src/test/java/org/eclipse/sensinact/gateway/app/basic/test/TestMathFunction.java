@@ -28,9 +28,12 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestMathFunction  {
-
+	
+	private static final Logger LOG = LoggerFactory.getLogger(TestMathFunction.class);
     
     private Mediator mediator=Mockito.mock(Mediator.class);
     
@@ -39,7 +42,7 @@ public class TestMathFunction  {
     @BeforeEach
     public void init() throws Exception {
         MockitoAnnotations.initMocks(this);
-        Mockito.when(mediator.isDebugLoggable()).thenReturn(false);
+        Mockito.when(LOG.isDebugEnabled()).thenReturn(false);
     }
 
     public void testAddition() {
