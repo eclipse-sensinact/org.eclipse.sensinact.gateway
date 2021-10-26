@@ -34,6 +34,8 @@ import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class triggers an alert that stops the application when a resource disappears
@@ -43,6 +45,8 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  * @see AbstractAppWatchDog
  */
 public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AppResourceLifecycleWatchDog.class);
     private Collection<String> resourceUris;
     private Map<String,MidAgentCallback> registrations;
 
@@ -165,7 +169,7 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
                         break;
                 }
             } catch (Exception e) {
-                mediator.error(e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }

@@ -16,6 +16,8 @@ import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This abstract class is implemented by the watchdogs of the AppManager
@@ -23,6 +25,8 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethod;
  * @author Remi Druilhe
  */
 abstract class AbstractAppWatchDog {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractAppWatchDog.class);
     protected AppServiceMediator mediator;
     protected ApplicationService service;
 
@@ -57,8 +61,8 @@ abstract class AbstractAppWatchDog {
      * @param message the message that triggered this alert
      */
     void alert(String message) {
-        if (mediator.isDebugLoggable()) {
-            mediator.debug("Application exception: " + message);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Application exception: " + message);
         }
         service.getResource(AppConstant.EXCEPTION).getAccessMethod(AccessMethod.Type.valueOf(AccessMethod.ACT)).invoke(null);
     }

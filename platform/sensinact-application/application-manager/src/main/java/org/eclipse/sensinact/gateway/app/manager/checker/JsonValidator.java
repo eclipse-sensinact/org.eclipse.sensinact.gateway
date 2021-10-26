@@ -17,6 +17,8 @@ import org.eclipse.sensinact.gateway.app.manager.osgi.PluginsProxy;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,6 +30,8 @@ import java.io.InputStreamReader;
  * @author Remi Druilhe
  */
 public class JsonValidator {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(JsonValidator.class);
     private static final String JSON_SCHEMA = "application.json";
 
     /**
@@ -72,14 +76,14 @@ public class JsonValidator {
             try {
                 functionSchema = PluginsProxy.getComponentJSONSchema(mediator, function);
             } catch (FunctionNotFoundException e) {
-                if (mediator.isErrorLoggable()) {
-                    mediator.error(e.getMessage(), e);
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(e.getMessage(), e);
                 }
                 return;
             }
             if (functionSchema == null) {
-                if (mediator.isErrorLoggable()) {
-                    mediator.error("The JSON of the application is not valid.");
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("The JSON of the application is not valid.");
                 }
                 throw new FileNotFoundException("Unable to find the JSON schema of the function: " + function);
             }
@@ -95,8 +99,8 @@ public class JsonValidator {
             Json.Schema schema = Json.schema(schemaJson);
             Json errors = schema.validate(inputJson);
             if (!errors.at("ok").asBoolean()) {
-                if(mediator.isDebugLoggable()) {
-                    mediator.debug("The JSON of the component \""
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("The JSON of the component \""
                             + components.getJSONObject(i).getString("identifier") + "\" is not valid");
                 }
                 throw new ValidationException("The JSON of the component \"" + components.getJSONObject(i).getString("identifier")
@@ -105,8 +109,8 @@ public class JsonValidator {
             /*try {
                 schema.validate(reformatedFunction);
             } catch (ValidationException e) {
-                if(mediator.isDebugLoggable()) {
-                    mediator.debug("The JSON of the component \""
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("The JSON of the component \""
                             + components.getJSONObject(i).getString("identifier") + "\" is not valid");
                 }
                 throw new ValidationException(schema,

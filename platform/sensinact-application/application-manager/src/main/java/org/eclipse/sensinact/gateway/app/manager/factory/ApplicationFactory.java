@@ -35,6 +35,8 @@ import org.eclipse.sensinact.gateway.core.InvalidResourceException;
 import org.eclipse.sensinact.gateway.core.SensorDataResource;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -54,6 +56,8 @@ import java.util.Set;
  * @author Rémi Druilhe
  */
 public class ApplicationFactory {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ApplicationFactory.class);
     /**
      * Create the application, i.e., components and bindings, from the {@link AppContainer}.
      *
@@ -81,8 +85,8 @@ public class ApplicationFactory {
                 function = PluginsProxy.getFunction(mediator, component.getFunction());
             } catch (FunctionNotFoundException e) {
                 ApplicationFactoryException exception = new ApplicationFactoryException("Unable to create application " + container.getApplicationName() + ". " + e.getMessage());
-                if (mediator.isErrorLoggable()) {
-                    mediator.error("Unable to create application " + container.getApplicationName() + ". " + e.getMessage(), exception);
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Unable to create application " + container.getApplicationName() + ". " + e.getMessage(), exception);
                 }
                 throw exception;
             }
@@ -101,8 +105,8 @@ public class ApplicationFactory {
                 }
             }
             if (superType == null) {
-                if (mediator.isErrorLoggable()) {
-                    mediator.error("Instance creation error", new RuntimeException("Unable to instantiate: " + function.getClass()));
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Instance creation error", new RuntimeException("Unable to instantiate: " + function.getClass()));
                 }
                 return null;
             }
@@ -198,8 +202,8 @@ public class ApplicationFactory {
                 } else {
                     ApplicationFactoryException exception = new ApplicationFactoryException(
                             "Unable to create event listener: unable to find type: " + event.getVariable().getType());
-                    if (mediator.isErrorLoggable()) {
-                        mediator.error(exception.getMessage(), exception);
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error(exception.getMessage(), exception);
                     }
                     throw exception;
                 }*/
@@ -227,8 +231,8 @@ public class ApplicationFactory {
             try {
                 components.put(map.getKey(), map.getValue().build());
             } catch (ApplicationFactoryException exception) {
-                if (mediator.isErrorLoggable()) {
-                    mediator.error("Unable to create the component", exception);
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Unable to create the component", exception);
                 }
                 throw exception;
             }
