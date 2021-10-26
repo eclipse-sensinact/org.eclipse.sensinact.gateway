@@ -14,6 +14,8 @@ package org.eclipse.sensinact.gateway.datastore.sqlite;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreConnectionProvider;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 
 import java.io.File;
@@ -32,6 +34,8 @@ import org.sqlite.Function;
  * databases connections
  */
 public class SQLiteConnectionProvider implements DataStoreConnectionProvider<Connection> {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(SQLiteConnectionProvider.class);
 	/**
 	 * User defined REGEXP function
 	 * 
@@ -149,7 +153,7 @@ public class SQLiteConnectionProvider implements DataStoreConnectionProvider<Con
 				Function.create(connection, "regexp", new SQLiteRegexp());
 
 			} catch (SQLException e) {
-				this.mediator.error("openConnection error :", e);
+				LOG.error("openConnection error :", e);
 				return null;
 			}
 		}
@@ -170,7 +174,7 @@ public class SQLiteConnectionProvider implements DataStoreConnectionProvider<Con
 				connection = null;
 
 			} catch (SQLException e) {
-				this.mediator.error("openConnection error :", e);
+				LOG.error("openConnection error :", e);
 			}
 		}
 	}
