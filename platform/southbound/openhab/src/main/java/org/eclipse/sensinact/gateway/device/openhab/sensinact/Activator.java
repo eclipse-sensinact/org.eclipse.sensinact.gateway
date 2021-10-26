@@ -128,7 +128,7 @@ public class Activator extends HttpActivator implements ServiceListener {
 	            endpoints.put(endpointId, endpoint);
 	            ((OpenHabMediator) mediator).addBroker(endpointId, new Broker(server));
 	        } catch (Exception e) {
-	            mediator.error(e);
+	            LOG.error(e.getMessage(), e);
 	        }
         }
     }
@@ -165,8 +165,8 @@ public class Activator extends HttpActivator implements ServiceListener {
     public void serviceAdded(ServiceEvent event) {
         try {
             ServiceInfo info = event.getInfo();
-            mediator.debug("event " + event);
-            mediator.debug("event info" + event.getInfo());
+            LOG.debug("event " + event);
+            LOG.debug("event info" + event.getInfo());
             int port = info.getPort();
             String ips[] = info.getHostAddresses();
             if (ips != null && ips.length > 0) {
@@ -180,12 +180,12 @@ public class Activator extends HttpActivator implements ServiceListener {
                     endpoint.connect(configuration);
                     this.endpoints.put(endpointId, endpoint);
                     ((OpenHabMediator) mediator).addBroker(endpointId, new Broker(server));
-                    mediator.info("Openhab2 device instance added. name %s type %s", event.getName(), event.getType());
+                    LOG.info("Openhab2 device instance added. name %s type %s", event.getName(), event.getType());
                 } catch (Exception e) {
-                    mediator.error(e);
+                    LOG.error(e.getMessage(), e);
                 }
             } else {
-                mediator.debug("not a new openhab2 device: " + event);
+                LOG.debug("not a new openhab2 device: " + event);
             }
         } catch (Throwable t) {
             LOG.debug("unexpected error", t);
@@ -203,13 +203,13 @@ public class Activator extends HttpActivator implements ServiceListener {
         try {
             this.endpoints.remove(endpointId).stop();
         } catch (Exception e) {
-            mediator.error(e);
+            LOG.error(e.getMessage(), e);
         }
     }
 
     @Override // ServiceListener
     public void serviceResolved(ServiceEvent event) {
-        mediator.debug("Openhab instance resolved. name %s type %s", event.getName(), event.getType());
+        LOG.debug("Openhab instance resolved. name %s type %s", event.getName(), event.getType());
     }
     
     private static String buildEndpointId(ServerLocation server) {

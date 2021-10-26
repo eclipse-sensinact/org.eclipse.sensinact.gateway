@@ -124,21 +124,21 @@ public class OpenHabServerFinder {
     	String openhabScheme = DEFAULT_OPENHAB_SERVICE_SSL_TYPE.startsWith(openhabServiceType)?DEFAULT_OPENHAB_SSL_SCHEME:DEFAULT_OPENHAB_SCHEME;
 		int openhabPort = 0;
                            
-    	mediator.info("Starting openhab2 discovery...");
+    	LOG.info("Starting openhab2 discovery...");
     	JmDNS dns = JmDNS.create();
-        mediator.info("...dns created...");
+        LOG.info("...dns created...");
         dns.addServiceListener(openhabServiceType, serviceListener);
-        mediator.info("...started openhab2 discovery");
-        mediator.debug("...dns searching service info for type " + openhabServiceType + "...");
+        LOG.info("...started openhab2 discovery");
+        LOG.debug("...dns searching service info for type " + openhabServiceType + "...");
         ServiceInfo[] list = dns.list(openhabServiceType);
         if (list.length == 0) {
-            mediator.warn("...no service info found by dns for type " + openhabServiceType);
+            LOG.warn("...no service info found by dns for type " + openhabServiceType);
         }
         List<ServerLocation> locations = new ArrayList<ServerLocation>();
         if(openhabServiceName!=null) {            
             final ServiceInfo info = dns.getServiceInfo(openhabServiceType, openhabServiceName);
             if (info == null) {
-                mediator.error("among the " + list.length + " found openhab2 service(s), unable to find one available with name " + openhabServiceName);
+                LOG.error("among the " + list.length + " found openhab2 service(s), unable to find one available with name " + openhabServiceName);
                 throw new RuntimeException("unable to find any openhab2 service available with " + openhabServiceType + " type and " + openhabServiceName + " name");
             }
             openhabPort = info.getPort();
@@ -157,7 +157,7 @@ public class OpenHabServerFinder {
 	        }
         }  else {      
 		    for (ServiceInfo service : list) {
-		         mediator.info("...dns found openhab2 service for type " + openhabServiceType + ": " + service.getName() + " " + service);
+		         LOG.info("...dns found openhab2 service for type " + openhabServiceType + ": " + service.getName() + " " + service);
 		         openhabPort = service.getPort();
 		         final String[] openhabHostAddresses = service.getHostAddresses();
 		         if (openhabHostAddresses.length == 0) 
@@ -187,10 +187,10 @@ public class OpenHabServerFinder {
         String openhabServiceType = null;
         if (openhabServiceTypePropertyValue != null) {
             openhabServiceType = openhabServiceTypePropertyValue;
-            mediator.info("Openhab2 service type configurated by %s property set to %s", OPENHAB_SERVICE_TYPE_PROPERTY_NAME, openhabServiceType);
+            LOG.info("Openhab2 service type configurated by %s property set to %s", OPENHAB_SERVICE_TYPE_PROPERTY_NAME, openhabServiceType);
         } else {
         	openhabServiceType = DEFAULT_OPENHAB_SERVICE_TYPE;
-            mediator.info("No openhab2 service type configurated. Using default type: " + openhabServiceType);
+            LOG.info("No openhab2 service type configurated. Using default type: " + openhabServiceType);
         }
 		return openhabServiceType;
 	}
@@ -205,10 +205,10 @@ public class OpenHabServerFinder {
         String openhabServiceName = null;
         if (openhabServiceNamePropertyValue != null) {
             openhabServiceName = openhabServiceNamePropertyValue;
-            mediator.info("Openhab2 service name configurated by %s property set to %s", OPENHAB_SERVICE_NAME_PROPERTY_NAME, openhabServiceName);
+            LOG.info("Openhab2 service name configurated by %s property set to %s", OPENHAB_SERVICE_NAME_PROPERTY_NAME, openhabServiceName);
         } else {
         	openhabServiceName = DEFAULT_OPENHAB_SERVICE_SSL_TYPE.startsWith(getOpenhabServiceType(mediator,suffix))?DEFAULT_OPENHAB_SERVICE_SSL_NAME:DEFAULT_OPENHAB_SERVICE_NAME;
-            mediator.info("No openhab2 service name configurated. Using default type: " + openhabServiceName);
+            LOG.info("No openhab2 service name configurated. Using default type: " + openhabServiceName);
         }
 		return openhabServiceName;
 	}
@@ -218,9 +218,9 @@ public class OpenHabServerFinder {
         boolean discoveryDescativated = false;
         if (activateDiscoveryPropertyValue != null) {
             discoveryDescativated = Boolean.parseBoolean(activateDiscoveryPropertyValue);
-            mediator.info("Openhab2 discovery configurated by %s property set to %s", ACTIVATE_DISCOVERY_PROPERTY_NAME, discoveryDescativated);
+            LOG.info("Openhab2 discovery configurated by %s property set to %s", ACTIVATE_DISCOVERY_PROPERTY_NAME, discoveryDescativated);
         } else {
-            mediator.info("No openhab2 discovery configurated. Default configuration is enabled...");
+            LOG.info("No openhab2 discovery configurated. Default configuration is enabled...");
         }
 		return !discoveryDescativated;
 	}
