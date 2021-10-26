@@ -24,8 +24,12 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.core.security.UserManager;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class SecuredAccessImpl implements SecuredAccess {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(SecuredAccessImpl.class);
 	
 	private Mediator mediator;
 
@@ -88,8 +92,8 @@ class SecuredAccessImpl implements SecuredAccess {
 
 	@Override
 	public void close() {
-		if (mediator.isDebugLoggable()) {
-			mediator.debug("closing sensiNact secured access");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("closing sensiNact secured access");
 		}
 		if (this.authorizationRegistration != null) {
 			try {
@@ -97,7 +101,7 @@ class SecuredAccessImpl implements SecuredAccess {
 
 			} catch (IllegalStateException e) {
 				try {
-					mediator.debug(e.getMessage());
+					LOG.debug(e.getMessage());
 				} catch (IllegalStateException ise) {
 					// do nothing because it probably means
 					// that the OSGi environment is closing
