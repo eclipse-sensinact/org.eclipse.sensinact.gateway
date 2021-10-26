@@ -26,6 +26,8 @@ import org.eclipse.sensinact.gateway.nthbnd.http.forward.ForwardingService;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.service.http.whiteboard.annotations.RequireHttpWhiteboard;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A ForwardingFactory is in charge of creating the {@link ForwardingFilter}s attached
@@ -36,6 +38,8 @@ import org.osgi.service.http.whiteboard.annotations.RequireHttpWhiteboard;
  */
 @RequireHttpWhiteboard
 public class ForwardingFactory {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ForwardingFactory.class);
     private Mediator mediator;
     private String appearingKey;
     private String disappearingKey;
@@ -149,14 +153,14 @@ public class ForwardingFactory {
         }
         String endpoint = forwardingService.getPattern();
         if (endpoint == null || endpoint.length() == 0 || "/".equals(endpoint)) {
-            mediator.error("Invalid endpoint '%s' - expected '^|/([^/]+)(/([^/]+)*'", endpoint);
+            LOG.error("Invalid endpoint '%s' - expected '^|/([^/]+)(/([^/]+)*'", endpoint);
             return;
         }
         if (!endpoint.startsWith("/")) {
             endpoint = "/".concat(endpoint);
         }
         if (registrations.containsKey(endpoint)) {
-            mediator.error("A forwarding service is already registered at '%s'", endpoint);
+            LOG.error("A forwarding service is already registered at '%s'", endpoint);
             return;
         }
         ForwardingFilter forwardingFilter = new ForwardingFilter(mediator, forwardingService);
@@ -198,7 +202,7 @@ public class ForwardingFactory {
 	    			//do nothing
 	    		}
     		}
-    		mediator.info("Forwarding filter and servlet  for '%s' pattern are unregistered", endpoint);
+    		LOG.info("Forwarding filter and servlet  for '%s' pattern are unregistered", endpoint);
     	}	        
     }
 }

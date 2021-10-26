@@ -35,6 +35,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.service.http.whiteboard.annotations.RequireHttpWhiteboard;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A CallbackFactory is in charge of creating the {@link CallbackServlet}s attached
@@ -46,7 +48,8 @@ import org.osgi.service.http.whiteboard.annotations.RequireHttpWhiteboard;
 @RequireHttpWhiteboard
 public class CallbackFactory {
 
-    private static ClassLoader loader = null;
+	private static final Logger LOG = LoggerFactory.getLogger(CallbackFactory.class);
+	private static ClassLoader loader = null;
     
     private static void findJettyClassLoader(BundleContext context) {
     	Bundle[] bundles = context.getBundles();
@@ -174,14 +177,14 @@ public class CallbackFactory {
         }
         String endpoint = callbackService.getPattern();
         if (endpoint == null || endpoint.length() == 0 || "/".equals(endpoint)) {
-            mediator.error("Invalid endpoint '%s' - expected '^|/([^/]+)(/([^/]+)*'", endpoint);
+            LOG.error("Invalid endpoint '%s' - expected '^|/([^/]+)(/([^/]+)*'", endpoint);
             return;
         }
         if (!endpoint.startsWith("/")) {
             endpoint = "/".concat(endpoint);
         }
         if (registrations.containsKey(endpoint)) {
-            mediator.error("A callback service is already registered at '%s'", endpoint);
+            LOG.error("A callback service is already registered at '%s'", endpoint);
             return;
         }
         int callbackType = callbackService.getCallbackType();
@@ -213,7 +216,7 @@ public class CallbackFactory {
 				private final CountDownLatch initBarrier = new CountDownLatch(1); 
 				@Override
 		        public void init() throws ServletException {
-		            mediator.info("The Echo servlet has been initialized, but we delay initialization until the first request so that a Jetty Context is available");	
+		            LOG.info("The Echo servlet has been initialized, but we delay initialization until the first request so that a Jetty Context is available");	
 		        }
 			
 		        @Override
@@ -258,7 +261,7 @@ public class CallbackFactory {
 	        	webSocketServlet, props);
 	        
 		    this.registrations.put(wsEndpoint, registration);		    
-		    this.mediator.info(String.format("%s servlet registered", wsEndpoint));
+		    LOG.info(String.format("%s servlet registered", wsEndpoint));
         }
     }
 
@@ -280,7 +283,7 @@ public class CallbackFactory {
     	if(registration != null) {
     		try {
     			registration.unregister();
-                mediator.info("Callback servlet '%s' unregistered", endpoint);
+                LOG.info("Callback servlet '%s' unregistered", endpoint);
     		}catch(IllegalStateException e) {
     			//do nothing
     		}
@@ -291,7 +294,7 @@ public class CallbackFactory {
 	    	if(registration != null) {
 	    		try {
 	    			registration.unregister();
-	                mediator.info("Callback servlet '%s' unregistered", endpoint);
+	                LOG.info("Callback servlet '%s' unregistered", endpoint);
 	    		}catch(IllegalStateException e) {
 	    			//do nothing
 	    		}

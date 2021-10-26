@@ -35,6 +35,8 @@ import org.eclipse.jetty.util.MultiMap;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.nthbnd.http.forward.ForwardingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link Filter} Implementation in charge of forwarding a request
@@ -43,7 +45,8 @@ import org.eclipse.sensinact.gateway.nthbnd.http.forward.ForwardingService;
  */
 @WebFilter()
 public class ForwardingFilter implements Filter {
-
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ForwardingFilter.class);
 	public static final java.lang.String __INCLUDE_PREFIX = "javax.servlet.include.";
 
 	public static final java.lang.String __FORWARD_PREFIX = "javax.servlet.forward.";
@@ -212,7 +215,7 @@ public class ForwardingFilter implements Filter {
 	 */
 	public void init(FilterConfig config) throws ServletException {
 		this.config = config;
-		mediator.debug("Init with config [" + config + "]");
+		LOG.debug("Init with config [" + config + "]");
 	}
 
 	/**
@@ -282,6 +285,6 @@ public class ForwardingFilter implements Filter {
 	 * @see javax.servlet.Filter#destroy()
 	 */
 	public void destroy() {
-		mediator.debug("Destroyed filter");
+		LOG.debug("Destroyed filter");
 	}
 }
