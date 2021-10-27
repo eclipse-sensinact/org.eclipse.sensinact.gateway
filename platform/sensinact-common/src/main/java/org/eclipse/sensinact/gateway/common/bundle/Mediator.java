@@ -30,7 +30,6 @@ import org.eclipse.sensinact.gateway.util.PropertyUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +54,6 @@ public class Mediator {
 		}
 	};
 
-	private int logLevel;
 	protected Properties properties;
 	protected BundleContext context;
 	private Map<String, TrackerCustomizer<?>> customizers;
@@ -69,7 +67,6 @@ public class Mediator {
 	 * @param context
 	 */
 	public Mediator(BundleContext context) {
-		this.logLevel = -1;
 		this.context = context;
 		this.properties = new Properties();
 		this.customizers = new HashMap<String, TrackerCustomizer<?>>();
@@ -99,7 +96,6 @@ public class Mediator {
 	}
 
 	private void loadBundleProperties() {
-		updateLogLevel("felix.log.level");
 
 		final String fileInstallDir = context.getProperty(DEFAULT_BUNDLE_PROPERTY_FILEDIR);
 
@@ -136,20 +132,6 @@ public class Mediator {
 
 		for (Map.Entry<Object, Object> name : bundleProperties.entrySet()) {
 			this.properties.put(name.getKey().toString(), name.getValue().toString());
-		}
-		updateLogLevel("log.level");
-	}
-
-	private void updateLogLevel(String property) {
-		String logLevelStr = (String) getProperty(property);
-		try {
-			int logLevel = Integer.parseInt(logLevelStr);
-			this.setLogLevel(logLevel);
-
-		} catch (Exception e) {
-			if (logLevel < 0) {
-				this.setLogLevel(LogExecutor.DEFAULT_LOG_LEVEL);
-			}
 		}
 	}
 
@@ -585,19 +567,6 @@ public class Mediator {
 		return null;
 	}
 
-	/**
-	 * Define the log level
-	 * 
-	 * @param logLevel
-	 *            the log level
-	 */
-	public void setLogLevel(int logLevel) {
-		this.logLevel = logLevel;
-
-		if (this.logLevel < LogExecutor.NO_LOG || this.logLevel > LogService.LOG_DEBUG) {
-			this.logLevel = LogExecutor.NO_LOG;
-		}
-	}
 
 	/**
 	 * the mediator is deactivated before bundle stopping
