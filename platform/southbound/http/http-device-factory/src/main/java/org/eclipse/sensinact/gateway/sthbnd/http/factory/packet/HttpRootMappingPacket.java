@@ -79,7 +79,7 @@ public class HttpRootMappingPacket extends HttpMappingPacket<RootMappingDescript
 	}	
 	
 	protected void initParsing() {
-		getEvent();
+		LOG.debug("Root mapping parsing initialized");
 	}	
 
 	protected Map<String,String> getEvent () {
@@ -90,9 +90,10 @@ public class HttpRootMappingPacket extends HttpMappingPacket<RootMappingDescript
 			it.next();
 			iteration+=1;
 		}
+		Map<String,String> event = null; 
 		list = it.next();
 		if(list == null) {
-			this.resultMapping = null;				
+			return event;				
 		} else {
 			JSONParser parser = null;
 			StringReader reader = null;
@@ -106,7 +107,7 @@ public class HttpRootMappingPacket extends HttpMappingPacket<RootMappingDescript
 			List<Evaluation> evaluations = null;
 			try {
 				evaluations = parser.parse(list);
-				this.resultMapping = evaluations.stream().<Map<String,String>>collect(
+				event = evaluations.stream().<Map<String,String>>collect(
 					HashMap::new,
 					(m,e)-> {m.put(e.path,e.result);},
 					Map::putAll);
@@ -118,10 +119,7 @@ public class HttpRootMappingPacket extends HttpMappingPacket<RootMappingDescript
 			}
 		}
 		pos++;
-		this.serviceProviderMapping = null;
-		if(this.resultMapping != null) 	
-			this.serviceProviderMapping = reverseModelMapping(PROVIDER_IDENTIFIER);
-		return this.resultMapping;		
+		return event;		
 	}
 
 	@Iteration

@@ -105,22 +105,21 @@ public class HttpNestedMappingPacket  extends HttpMappingPacket<NestedMappingDes
 				}
 			}			
 		});
-		super.resultMapping = getEvent();
-		this.listener.countDown();
-		if(super.resultMapping != null) 	
-			super.serviceProviderMapping = buildProviderId();
 	}
 
 	protected Map<String,String> getEvent () {
 		super.serviceProviderMapping = null;
-		Map<String,String> event = this.listener.getEvent(super.jsonMapping);
-		while(event == null && !this.listener.isEndOfParsing()) {
+		Map<String,String> event = null;
+		while(true) {
+			event = this.listener.getEvent(super.jsonMapping);
+			this.listener.countDown();
+			if(event!=null || this.listener.isEndOfParsing())
+				break;
 			try {
 				Thread.sleep(5);
 			} catch (InterruptedException e) {
 				Thread.interrupted();
 			}
-			event = this.listener.getEvent(super.jsonMapping);
 		}
 		if(this.listener.isEndOfParsing()) {
 			this.worker.shutdownNow();
@@ -130,10 +129,6 @@ public class HttpNestedMappingPacket  extends HttpMappingPacket<NestedMappingDes
 			if(super.savedContent!=null)
 				new File(super.savedContent).delete();
 		}
-		super.resultMapping = event;
-		this.listener.countDown();
-		if(super.resultMapping != null) 	
-			super.serviceProviderMapping = buildProviderId();
 		return event;
 	}
 

@@ -45,8 +45,6 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 	static final Pattern PROVIDER_IDENTIFIER_PATTERN = Pattern.compile(PROVIDER_IDENTIFIER_REGEX);
 	static final Pattern CONCATENATION_FUNCTION_PATTERN = Pattern.compile(CONCATENATION_FUNCTION_REGEX);
 	
-	protected int index;
-
 	protected String serviceProviderMapping = null;
 	protected String serviceProviderIdPattern = null;
 	protected String timestampPattern = null;	
@@ -105,6 +103,7 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 		
 		doSetMapping(mappings);
 		initParsing();
+		wasLast();
 	}
 
 	/**
@@ -261,17 +260,20 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 			}
 		}
 		if(iterator == null) {
+			this.resultMapping = getEvent();
+			if(this.resultMapping == null)
+				return;
+			this.serviceProviderMapping = buildProviderId();
+			this.timestampValue = 0;
 			iterator = modelMapping.entrySet().iterator();
-			if(iterator.hasNext()) {
+			if(iterator.hasNext()) 
 				current = iterator.next();
-				index = 0;
-			}
 		}
 	}
 	
-	protected boolean wasLast() {	
-		iterate();
-		String path = current.getValue();		
+	protected boolean wasLast() {
+		String path = null;		
+		int n = 0;
     	while(true) { 
     		if(path!=null && 
     			!TIMESTAMP.equals(path) && 
@@ -279,10 +281,14 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
     			!path.startsWith("__"))
     			break;
     		iterate();
+    		if(current == null)
+    			return true;
     		path = current.getValue(); 
-		}
-    	
+    		if(++n==modelMapping.size())
+    			break;
+		}    	
     	path = substitute(path);
+
     	if(this.serviceProviderMapping == null) 
     		providerId = this.serviceProviderId;
     	else
@@ -311,13 +317,7 @@ public abstract class HttpMappingPacket<M extends MappingDescription>  extends H
 			this.timestampValue = this.resolveTimestamp();
 			this.timestamp = this.timestampValue;
 		}		
-		if(index > 0)
-			return false;
-		
-		index=1;
-		this.resultMapping = getEvent();
-		this.timestampValue = 0;
-		return this.resultMapping == null;
+		return false;
 	}
 
 	protected String getServiceProviderId() {

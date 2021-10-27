@@ -82,6 +82,7 @@ class JSONParserListener extends JSONParser.JSONParserCallback{
 	}
 	
 	public void countDown() {
+		this.evaluation = null;
 		this.countDown.countDown();
 	}
 	
