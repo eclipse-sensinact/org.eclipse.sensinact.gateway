@@ -64,29 +64,6 @@
 				<groupId>biz.aQute.bnd</groupId>
 				<artifactId>bnd-maven-plugin</artifactId>
 			</plugin>
-<!-- 			<plugin> -->
-<!-- 				<groupId>org.apache.felix</groupId> -->
-<!-- 				<artifactId>maven-bundle-plugin</artifactId> -->
-<!-- 				<configuration> -->
-<!-- 					<instructions> -->
-<!-- 						<Fragment-Host> -->
-<!-- 							sensinact-core -->
-<!-- 						</Fragment-Host> -->
-<!-- 						<Export-Package> -->
-<!-- 							org.eclipse.sensinact.gateway.core.security.impl -->
-<!-- 						</Export-Package> -->
-<!-- 						<Provide-Capability> -->
-<!-- 							org.eclipse.sensinact.user.manager, -->
-<!-- 							org.eclipse.sensinact.security, -->
-<!-- 							org.eclipse.sensinact.data.store -->
-<!-- 						</Provide-Capability> -->
-<!-- 						<Include-Resource> -->
-<!-- 							about.html, -->
-<!-- 							src/main/resources/ -->
-<!-- 						</Include-Resource> -->
-<!-- 					</instructions> -->
-<!-- 				</configuration> -->
-<!-- 			</plugin> -->
 		</plugins>
 	</build>
 </project>
