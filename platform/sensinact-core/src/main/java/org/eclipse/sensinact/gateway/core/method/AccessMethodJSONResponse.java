@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.core.method;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONObject;
 

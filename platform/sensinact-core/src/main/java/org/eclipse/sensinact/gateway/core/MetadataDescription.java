@@ -10,10 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
-import org.json.JSONObject;
-
+import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
+import org.json.JSONObject;
 
 /**
  * {@link Description} of a {@link Metadata}

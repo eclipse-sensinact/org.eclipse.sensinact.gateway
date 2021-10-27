@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.core.security;
 
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.core.ModelElement;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
 
 /**

@@ -13,6 +13,7 @@
  */
 package org.eclipse.sensinact.gateway.core.security;
 
+import org.eclipse.sensinact.gateway.util.tree.PathTree;
 
 /**
  * Extended {@link PathTree} gathering access rights to a sensiNact gateway's

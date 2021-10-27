@@ -26,11 +26,15 @@ import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.UserKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
  */
 public class SessionKey {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(SessionKey.class);
 	private Mediator mediator;
 
 	private String token;
@@ -101,7 +105,7 @@ public class SessionKey {
 	 */
 	public boolean registerAgent(MidAgentCallback callback, SnaFilter filter) {
 		if(this.agents.contains(callback.getName())){
-			this.mediator.warn("Agent '%s' already registered",callback.getName());
+			LOG.warn("Agent '%s' already registered",callback.getName());
 			return false;
 		}
 		SnaAgent agent = null;
@@ -119,7 +123,7 @@ public class SessionKey {
 	 */
 	public boolean registerAgent(String agentId, SnaAgent agent) {
 		if(this.agents.contains(agentId)) {
-			this.mediator.warn("Agent %s already registered",agentId);
+			LOG.warn("Agent %s already registered",agentId);
 			return false;
 		}
 		synchronized(this) {
@@ -144,7 +148,7 @@ public class SessionKey {
 					agent.stop();
 					return true;
 				} catch (Exception e) {
-					mediator.error(e);
+					LOG.error(e.getMessage(),e);
 				}
 				return false;
 			}

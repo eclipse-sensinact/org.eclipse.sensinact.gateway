@@ -12,7 +12,10 @@ package org.eclipse.sensinact.gateway.core.method.builder;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract implementation of a {@link DynamicParameterValue}
@@ -20,6 +23,8 @@ import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class AbstractDynamicParameterValue implements DynamicParameterValue {
+	private static final Logger LOG=LoggerFactory.getLogger(AbstractDynamicParameterValue.class);
+
 	protected final String resourceName;
 	protected final String parameterName;
 
@@ -59,8 +64,8 @@ public abstract class AbstractDynamicParameterValue implements DynamicParameterV
 			try {
 				return this.resourceValueExtractor.execute(null);
 			} catch (Exception e) {
-				if (this.mediator.isErrorLoggable()) {
-					this.mediator.error(e, e.getMessage());
+				if (LOG.isErrorEnabled()) {
+					LOG.error(e.getMessage(),e);
 				}
 			}
 		}

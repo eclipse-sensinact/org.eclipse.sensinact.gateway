@@ -10,12 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.core.method;
 
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
+import org.eclipse.sensinact.gateway.common.primitive.JSONable;
+import org.eclipse.sensinact.gateway.common.primitive.Primitive;
 import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
+import org.eclipse.sensinact.gateway.core.ResourceImpl;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A extended {@link Parameter} whose value is build dynamically using a
@@ -24,6 +28,8 @@ import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class DynamicParameter extends Parameter {
+	private static final Logger LOG=LoggerFactory.getLogger(DynamicParameter.class);
+
 	/**
 	 * Constructor
 	 * 
@@ -47,8 +53,8 @@ public class DynamicParameter extends Parameter {
 	 */
 	@Override
 	public void reset() {
-		if (super.mediator.isDebugLoggable()) {
-			super.mediator.debug("reset not implemented for DynamicParameter");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("reset not implemented for DynamicParameter");
 		}
 	}
 

@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
+
 /**
  * A set of {@link ProcessableData} processable by one {@link ResourceImpl} and
  * targeting one identified {@link ServiceImpl}

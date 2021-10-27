@@ -14,10 +14,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.Sessions.SessionObserver;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract implementation of a {@link RemoteEndpoint} service.
@@ -25,6 +28,9 @@ import org.json.JSONObject;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionObserver {
+	
+	private static final Logger LOG=LoggerFactory.getLogger(AbstractRemoteEndpoint.class);
+
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
 	// ********************************************************************//
@@ -187,7 +193,7 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	@Override
 	public void open(RemoteCore remoteCore) {
 		if (this.getConnected()) {
-			mediator.debug("Endpoint already connected");
+			LOG.debug("Endpoint already connected");
 			return;
 		}
 		this.remoteCore = remoteCore;
@@ -242,7 +248,7 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 			this.recipients.put(response.getJSONObject("response").getString("subscriptionId"), recipient);
 
 		} catch (Exception e) {
-			mediator.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 		}
 		return response;
 	}

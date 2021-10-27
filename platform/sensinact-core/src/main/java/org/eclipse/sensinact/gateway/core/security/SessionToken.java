@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.core.security;
 
+import org.eclipse.sensinact.gateway.core.Session;
+
 /**
  * {@link Authentication} implementation holding an existing sensiNact's {@link Session} authentication material
  * 

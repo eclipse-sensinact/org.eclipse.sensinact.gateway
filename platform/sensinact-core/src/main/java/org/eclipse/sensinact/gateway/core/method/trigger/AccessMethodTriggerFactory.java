@@ -13,10 +13,9 @@ package org.eclipse.sensinact.gateway.core.method.trigger;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
+import org.json.JSONObject;
 
 /**
  * {@link AccessMethodTrigger} factory service

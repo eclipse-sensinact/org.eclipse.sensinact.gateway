@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.core.remote;
 
 import org.eclipse.sensinact.gateway.core.Endpoint;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 

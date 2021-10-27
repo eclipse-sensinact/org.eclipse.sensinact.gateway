@@ -19,8 +19,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
+import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
 import org.eclipse.sensinact.gateway.common.execution.DefaultErrorHandler;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.common.primitive.Describable;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
@@ -50,6 +52,8 @@ import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Basis {@link Resource} implementation
@@ -59,6 +63,8 @@ import org.json.JSONObject;
 public class ResourceImpl extends
 		ModelElement<ModelInstance<?>, ResourceProxy, ResourceProcessableContainer<?>, Attribute, AttributeDescription>
 		implements Typable<Resource.Type> {
+	private static final Logger LOG=LoggerFactory.getLogger(ResourceImpl.class);
+
 	public class ResourceProxyWrapper extends ModelElementProxyWrapper implements Typable<Resource.Type> {
 		ResourceProxyWrapper(ResourceProxy proxy, ImmutableAccessTree tree) {
 			super(proxy, tree);
@@ -258,7 +264,7 @@ public class ResourceImpl extends
 				this.update(attributeId, metadataName, resourceProcessableData.getData(),
 						resourceProcessableData.getTimestamp());
 			} catch (InvalidValueException e) {
-				super.modelInstance.mediator().error(e, "'%s' resource cannot be updated", getPath());
+				LOG.error( "'%s' resource cannot be updated", getPath(),e);
 			}
 		}
 	}
@@ -282,16 +288,14 @@ public class ResourceImpl extends
 	protected void update(String attributeName, String metadataName, Object value, long timestamp)
 			throws InvalidValueException {
 		if (value == null) {
-			super.modelInstance.mediator()
-					.warn(new StringBuilder().append("Null object value : unable to update resource '")
+			LOG.warn(new StringBuilder().append("Null object value : unable to update resource '")
 							.append(getPath()).append("'").toString());
 			return;
 		}
 		String name = attributeName == null ? this.getDefault() : attributeName;
 
 		if (name == null) {
-			super.modelInstance.mediator()
-					.warn(new StringBuilder().append("Null attribute name : unable to update resource '")
+			LOG.warn(new StringBuilder().append("Null attribute name : unable to update resource '")
 							.append(getPath()).append("'").toString());
 			return;
 		}
@@ -304,13 +308,13 @@ public class ResourceImpl extends
 					Modifiable.UPDATABLE, false);
 
 			if (!this.addAttribute(attribute)) {
-				super.modelInstance.mediator().warn("Error when creating attribute '%s': unable to update resource '%s",
+				LOG.warn("Error when creating attribute '%s': unable to update resource '%s",
 						name, getPath());
 				return;
 			}
 		}
 		if (attribute == null) {
-			super.modelInstance.mediator().warn(new StringBuilder().append("Null attribute '").append(name)
+			LOG.warn(new StringBuilder().append("Null attribute '").append(name)
 					.append("': unable to update resource '").append(getPath()).append("'").toString());
 
 			return;
@@ -325,7 +329,7 @@ public class ResourceImpl extends
 				attribute.addMetadata(metadata);
 			}
 			if (metadata == null) {
-				super.modelInstance.mediator().warn(new StringBuilder().append("Null metadata ").append(metadataName)
+				LOG.warn(new StringBuilder().append("Null metadata ").append(metadataName)
 						.append(": unable to update resource '").append(getPath()).append("'").toString());
 				return;
 			}
@@ -366,7 +370,7 @@ public class ResourceImpl extends
 					this, resourceConfig.getTypeConfig());
 
 			} catch (InvalidAttributeException e) {
-				super.modelInstance.mediator().error(e);
+				LOG.error(e.getMessage());
 			}
 			if (attribute != null) {
 				if (attribute.getName().equals(defaultAttributeName)) {
@@ -377,7 +381,7 @@ public class ResourceImpl extends
 						attribute.addMetadata(metadata);
 
 					} catch (InvalidValueException e) {
-						super.modelInstance.mediator().error(e);
+						LOG.error(e.getMessage());
 					}
 				}
 				this.addAttribute(attribute);
@@ -772,11 +776,11 @@ public class ResourceImpl extends
 		if (!super.getModelInstance().isRegistered() || this.isHidden()) 
 			return;
 		if (super.started.get()) {
-			this.modelInstance.mediator().debug("%s already started", this.getName());
+			LOG.debug("%s already started", this.getName());
 			return;
 		}
 		super.started.set(true);
-		super.modelInstance.mediator().debug("'%s' resource registered", this.getName());
+		LOG.debug("'%s' resource registered", this.getName());
 
 		String path = this.getPath();
 

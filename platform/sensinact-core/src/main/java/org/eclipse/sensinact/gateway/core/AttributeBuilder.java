@@ -23,6 +23,8 @@ import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An AttributeBuilder allows to create an {@link Attribute} and to defines
@@ -31,6 +33,8 @@ import org.eclipse.sensinact.gateway.common.primitive.Nameable;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public final class AttributeBuilder implements Nameable, Cloneable {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AttributeBuilder.class);
 	/**
 	 * the property name words separator
 	 */
@@ -410,8 +414,8 @@ public final class AttributeBuilder implements Nameable, Cloneable {
 				this.updateRequirements(requirement);
 
 			} catch (Exception e) {
-				if (mediator.isErrorLoggable()) {
-					mediator.error(e, e.getMessage());
+				if (LOG.isErrorEnabled()) {
+					LOG.error(e.getMessage(),e);
 				}
 			}
 		}

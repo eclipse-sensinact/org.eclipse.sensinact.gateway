@@ -15,6 +15,7 @@ import java.util.TimerTask;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
+import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 
 /**
  * Extended {@link BufferMidCallback} allowing to schedule the transmission of

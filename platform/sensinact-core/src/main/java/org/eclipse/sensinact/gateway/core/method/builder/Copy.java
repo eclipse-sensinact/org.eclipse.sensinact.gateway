@@ -11,7 +11,9 @@
 package org.eclipse.sensinact.gateway.core.method.builder;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
+import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 
 /**

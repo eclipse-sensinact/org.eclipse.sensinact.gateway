@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.core.method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import org.eclipse.sensinact.gateway.common.constraint.Fixed;
 

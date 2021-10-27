@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
@@ -32,6 +31,8 @@ import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents a ServiceProvider on the sensiNact gateway.
@@ -41,6 +42,8 @@ import org.json.JSONObject;
 public class ServiceProviderImpl extends
 		ModelElement<ModelInstance<?>, ServiceProviderProxy, ServiceProviderProcessableData<?>, ServiceImpl, Service>
 		implements Localizable {
+	private static final Logger LOG=LoggerFactory.getLogger(ServiceProviderImpl.class);
+
 	class ServiceProviderProxyWrapper extends ModelElementProxyWrapper
 			implements ServiceCollection, Localizable, Stateful<ServiceProvider.LifecycleStatus> {
 		protected ServiceProviderProxyWrapper(ServiceProviderProxy proxy, ImmutableAccessTree tree) {
@@ -260,11 +263,11 @@ public class ServiceProviderImpl extends
 					service = this.addService(serviceId);
 
 				} catch (Exception e) {
-					super.modelInstance.mediator().error(e);
+					LOG.error(e.getMessage(),e);
 				}
 			}
 			if (service == null) {
-				super.modelInstance.mediator().warn("Service '%s' not found", serviceId);
+				LOG.warn("Service '%s' not found", serviceId);
 				continue;
 			}
 			service.process(serviceProcessableData);
@@ -360,7 +363,7 @@ public class ServiceProviderImpl extends
 					this.listeners.get(index).update(newStatus);
 				}
 			} catch (InvalidValueException e) {
-				super.modelInstance.mediator().error(e);
+				LOG.error(e.getMessage(),e);
 			}
 		}
 		return (ServiceProvider.LifecycleStatus) attribute.getValue();
@@ -466,7 +469,7 @@ public class ServiceProviderImpl extends
 				bridgeResourceBuilder.configureName(ServiceProvider.BRIDGE);
 				admin.addResource(bridgeResourceBuilder);
 			} catch (Exception e) {
-				super.modelInstance.mediator().debug("Unable to create the 'bridge' resource");
+				LOG.debug("Unable to create the 'bridge' resource");
 				bridgeResourceBuilder = null;
 			}
 		}
@@ -510,7 +513,7 @@ public class ServiceProviderImpl extends
 		ServiceImpl service = null;
 
 		if ((service = this.getService(serviceName)) != null) {
-			super.modelInstance.mediator().warn("'%s' service already exists", serviceName);
+			LOG.warn("'%s' service already exists", serviceName);
 
 			return service;
 		}
@@ -519,7 +522,7 @@ public class ServiceProviderImpl extends
 		if (!SensiNactResourceModelConfiguration.BuildPolicy.isBuildPolicy(buildPolicy,
 				SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED)
 				&& !this.serviceNames.contains(serviceName)) {
-			super.modelInstance.mediator().warn("Incompatible build policy : unable to create the '%s' service",
+			LOG.warn("Incompatible build policy : unable to create the '%s' service",
 					serviceName);
 
 			return null;
@@ -552,7 +555,7 @@ public class ServiceProviderImpl extends
 			if (resources == null) {
 				resources = Collections.emptyList();
 			}
-			super.modelInstance.mediator().info("New service discovered for '%s' service provider : %s", super.name,
+			LOG.info("New service discovered for '%s' service provider : %s", super.name,
 					serviceName);
 
 			Iterator<ResourceConfig> iterator = resources.iterator();
@@ -588,7 +591,7 @@ public class ServiceProviderImpl extends
 			throws InvalidServiceException, InvalidResourceException, InvalidValueException {
 		ServiceImpl service = builder.build(super.modelInstance, this);
 		if (service == null) {
-			super.getModelInstance().mediator().debug("Unable to create the service '%s'", builder.getConfiguredName());
+			LOG.debug("Unable to create the service '%s'", builder.getConfiguredName());
 			return null;
 		}
 		return super.addElement(service) ? service : null;
@@ -614,7 +617,7 @@ public class ServiceProviderImpl extends
 	@Override
 	public void start() {
 		if (!super.getModelInstance().isRegistered()) {
-			this.modelInstance.mediator().error("The resource model is not registered");
+			LOG.error("The resource model is not registered");
 			return;
 		}
 		this.setStatus(ServiceProvider.LifecycleStatus.JOINING);
@@ -623,12 +626,12 @@ public class ServiceProviderImpl extends
 			this.doStart();
 
 		} catch (Exception e) {
-			super.modelInstance.mediator().error(e);
+			LOG.error(e.getMessage(),e);
 			this.stop();
 			return;
 		}
 		this.setStatus(ServiceProvider.LifecycleStatus.ACTIVE);
-		super.modelInstance.mediator().debug("ServiceProvider '%s' started", this.getName());
+		LOG.debug("ServiceProvider '%s' started", this.getName());
 	}
 
 	/**
@@ -664,7 +667,7 @@ public class ServiceProviderImpl extends
 			this.doStop();
 
 		} catch (Exception e) {
-			super.modelInstance.mediator().error(e);
+			LOG.error(e.getMessage(),e);
 		}
 		this.setStatus(ServiceProvider.LifecycleStatus.INACTIVE);
 	}

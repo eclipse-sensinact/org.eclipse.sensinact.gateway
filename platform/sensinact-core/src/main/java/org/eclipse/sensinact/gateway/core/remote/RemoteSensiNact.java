@@ -38,6 +38,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link RemoteCore} implementation
@@ -46,6 +48,8 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class RemoteSensiNact implements RemoteCore {
 	
+	private static final Logger LOG=LoggerFactory.getLogger(RemoteSensiNact.class);
+
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
 	// ********************************************************************//
@@ -164,7 +168,7 @@ public class RemoteSensiNact implements RemoteCore {
 	public void connect(final String namespace) {
 		synchronized(this) {
 			if (namespace == null) {
-				mediator.debug("Unable to register because of null namespace");
+				LOG.debug("Unable to register because of null namespace");
 				return;
 			}
 			this.registration = AccessController.<ServiceRegistration<RemoteCore>>doPrivileged(
@@ -176,12 +180,12 @@ public class RemoteSensiNact implements RemoteCore {
 
 						ServiceRegistration<RemoteCore> reg = mediator.getContext().registerService(
 							RemoteCore.class, RemoteSensiNact.this, props);
-						mediator.debug("RemoteCore '%s' registration done", namespace);
+						LOG.debug("RemoteCore '%s' registration done", namespace);
 						return reg;
 					}
 				});
 			if (this.registration == null) {
-				mediator.debug("Registration error");
+				LOG.debug("Registration error");
 				return;
 			}
 			if (this.onConnectedCallback != null) {
@@ -190,7 +194,7 @@ public class RemoteSensiNact implements RemoteCore {
 					try {
 						it.next().execute(namespace);
 					} catch (Exception e) {
-						mediator.error(e);
+						LOG.error(e.getMessage(),e);
 					}
 				}
 			}
@@ -216,7 +220,7 @@ public class RemoteSensiNact implements RemoteCore {
 					try {
 						it.next().execute(namespace);
 					} catch (Exception e) {
-						mediator.error(e);
+						LOG.error(e.getMessage(),e);
 					}
 				}
 			}
@@ -228,7 +232,7 @@ public class RemoteSensiNact implements RemoteCore {
 							RemoteSensiNact.this.registration.unregister();
 	
 						} catch (IllegalStateException e) {
-							RemoteSensiNact.this.mediator.error(e);
+							LOG.error(e.getMessage(),e);
 	
 						} finally {
 							RemoteSensiNact.this.registration = null;
@@ -251,7 +255,7 @@ public class RemoteSensiNact implements RemoteCore {
 						}
 						JSONObject response = this.localEndpoint.unsubscribe(ref.publicKey, 
 							ref.serviceProviderId, ref.serviceId, ref.resourceId, keys[index]);
-						mediator.debug(response.toString());
+						LOG.debug(response.toString());
 					}
 				}
 			}
@@ -345,7 +349,7 @@ public class RemoteSensiNact implements RemoteCore {
 						new SubscriptionReference(publicKey, serviceProviderId, serviceId, resourceId));
 
 			} catch (JSONException e) {
-				mediator.error(e);
+				LOG.error(e.getMessage(),e);
 			}
 		}
 		return response;
@@ -379,7 +383,7 @@ public class RemoteSensiNact implements RemoteCore {
 	@Override
 	public void registerAgent(final String remoteAgentId, final SnaFilter filter, final String publicKey) {		
 		if(this.localAgents.get(remoteAgentId) != null) {
-			mediator.warn("the remote agent already exists");
+			LOG.warn("the remote agent already exists");
 			return;
 		}
 		Session session = this.localEndpoint.getSession(publicKey);

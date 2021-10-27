@@ -10,14 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
+import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
 import org.eclipse.sensinact.gateway.common.primitive.DescribablePrimitive;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueTypeException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
+import org.eclipse.sensinact.gateway.common.primitive.Primitive;
+import org.json.JSONObject;
 
 /**
  * Extended {@link Primitive} defining a Metadata

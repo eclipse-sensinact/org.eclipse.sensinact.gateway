@@ -10,8 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
-import java.util.Arrays;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;

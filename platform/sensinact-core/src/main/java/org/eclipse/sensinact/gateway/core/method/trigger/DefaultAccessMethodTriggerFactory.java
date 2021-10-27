@@ -13,13 +13,12 @@ package org.eclipse.sensinact.gateway.core.method.trigger;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintConstantPair;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Default core's {@link AccessMethodTriggerFactory} implementation

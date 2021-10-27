@@ -11,6 +11,8 @@
 package org.eclipse.sensinact.gateway.core.message;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -24,6 +26,7 @@ public class RemoteAgentImpl extends AbstractAgent implements RemoteAgent {
 	// ********************************************************************//
 	// STATIC DECLARATIONS //
 	// ********************************************************************//
+	private static final Logger LOG=LoggerFactory.getLogger(RemoteAgentImpl.class);
 
 	// ********************************************************************//
 	// INSTANCE DECLARATIONS //
@@ -48,7 +51,7 @@ public class RemoteAgentImpl extends AbstractAgent implements RemoteAgent {
 	 */
 	@Override
 	public void doStart() {
-		super.mediator.debug("starting RemoteAgent [%s]", super.callback.getName());
+		LOG.debug("starting RemoteAgent [%s]", super.callback.getName());
 	}
 
 	/** 
@@ -58,7 +61,7 @@ public class RemoteAgentImpl extends AbstractAgent implements RemoteAgent {
 	 */
 	@Override
 	public void doStop() {
-		super.mediator.debug("stopping RemoteAgent [%s]", super.callback.getName());
+		LOG.debug("stopping RemoteAgent [%s]", super.callback.getName());
 	}
 	
 	/** 

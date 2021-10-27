@@ -10,14 +10,13 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
-import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage.Update;
-import org.eclipse.sensinact.gateway.core.message.SnaRemoteMessage.Remote;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
+import org.eclipse.sensinact.gateway.core.message.SnaRemoteMessage.Remote;
+import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage.Update;
 import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.json.JSONObject;
 
 /**
  * 

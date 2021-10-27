@@ -15,6 +15,8 @@ import java.util.Hashtable;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -28,6 +30,8 @@ public abstract class AbstractAgent implements SnaAgent {
 	// ********************************************************************//
 	// STATIC DECLARATIONS //
 	// ********************************************************************//
+	private static final Logger LOG=LoggerFactory.getLogger(AbstractAgent.class);
+
 
 	// ********************************************************************//
 	// ABSTRACT DECLARATIONS //
@@ -119,7 +123,7 @@ public abstract class AbstractAgent implements SnaAgent {
 	public void start() {
 		synchronized(this){
 			if(!this.callback.isActive()) {
-				this.mediator.error("The agent cannot be registered while its callback is inactive");
+				LOG.error("The agent cannot be registered while its callback is inactive");
 				return;
 			}
 			Dictionary properties = new Hashtable();
@@ -129,7 +133,7 @@ public abstract class AbstractAgent implements SnaAgent {
 					getAgentInterfaces(),  this, properties);
 			} catch (Exception e) {
 				e.printStackTrace();
-				this.mediator.error("The agent is not registered ", e);
+				LOG.error("The agent is not registered ", e);
 			}
 			doStart();
 		}
@@ -145,7 +149,7 @@ public abstract class AbstractAgent implements SnaAgent {
 				try {
 					this.callback.stop();		
 				} catch (Exception e) {
-					this.mediator.error(e);
+					LOG.error(e.getMessage(),e);
 				}
 			}
 			if (this.registration != null) {
@@ -153,7 +157,7 @@ public abstract class AbstractAgent implements SnaAgent {
 					this.registration.unregister();
 					this.registration = null;
 				} catch (IllegalStateException e) {
-					this.mediator.error(e);
+					LOG.error(e.getMessage(),e);
 				}
 			}
 			doStop();			

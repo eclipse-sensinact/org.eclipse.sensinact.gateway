@@ -24,6 +24,7 @@ import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 //import org.eclipse.sensinact.gateway.common.primitive.Typable;
 //import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.ModelElementProxy;
 
 /**
  * A method provided by an {@link ModelElementProxy}

@@ -12,10 +12,12 @@ package org.eclipse.sensinact.gateway.core;
 
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.filtering.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.message.ResourceIntent;
+import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.method.ActResponse;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponse;

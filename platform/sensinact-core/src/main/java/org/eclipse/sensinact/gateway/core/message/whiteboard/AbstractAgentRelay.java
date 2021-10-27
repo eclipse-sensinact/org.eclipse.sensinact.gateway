@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.core.message.whiteboard;
 
 import org.eclipse.sensinact.gateway.core.message.AgentRelay;
+import org.eclipse.sensinact.gateway.core.message.MessageFilterDefinition;
 import org.eclipse.sensinact.gateway.core.message.MidCallback;
 import org.eclipse.sensinact.gateway.core.message.MidCallbackException;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;

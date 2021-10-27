@@ -15,6 +15,7 @@ import java.security.PrivilegedAction;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
@@ -22,12 +23,15 @@ import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Allows to build a {@link ModelInstance} in a simple way
  */
 public class ModelInstanceBuilder<C extends ModelConfiguration,I extends ModelInstance<C>> {
-	
+	private static final Logger LOG=LoggerFactory.getLogger(ModelInstanceBuilder.class);
+
 	protected Mediator mediator;
 
 	/**
@@ -106,7 +110,7 @@ public class ModelInstanceBuilder<C extends ModelConfiguration,I extends ModelIn
 				this.register(instance);
 
 			} catch (ModelAlreadyRegisteredException e) {
-				mediator.error("Model instance '%s' already exists", name);
+				LOG.error("Model instance '%s' already exists", name);
 				instance = null;
 			}
 		}

@@ -15,6 +15,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A FilteringCollection wraps a set of {@link FilteringAccessor}s, allowing on
@@ -25,6 +27,8 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class FilteringCollection {
+	private static final Logger LOG=LoggerFactory.getLogger(FilteringAccessor.class);
+
 	private Iterable<FilteringAccessor> accessors;
 	private boolean hideFilter;
 	private String filterJsonDefinition;
@@ -73,7 +77,7 @@ public class FilteringCollection {
 				pos++;
 
 			} catch (RuntimeException e) {
-				mediator.error(e);
+				LOG.error(e.getMessage(),e);
 			}
 		}
 		if (index != length) {

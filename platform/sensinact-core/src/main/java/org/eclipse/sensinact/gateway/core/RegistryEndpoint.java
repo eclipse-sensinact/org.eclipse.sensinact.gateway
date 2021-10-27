@@ -19,9 +19,12 @@ import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({"rawtypes","unchecked"}) 
 public final class RegistryEndpoint {
+	private static final Logger LOG=LoggerFactory.getLogger(RegistryEndpoint.class);
 	
 	private Mediator mediator;
 	private final String defaultLocation;
@@ -59,7 +62,7 @@ public final class RegistryEndpoint {
                 }
             }
         } catch (InvalidSyntaxException e) {
-           mediator.error(e.getMessage(), e);
+        	LOG.error(e.getMessage(), e);
         }
         return result;
     }
@@ -614,7 +617,7 @@ public final class RegistryEndpoint {
                             		sessionKey.getAccessTree());
 
                         } catch (ModelElementProxyBuildException e) {
-                            mediator.error(e);
+                        	LOG.error(e.getMessage(),e);
                         }
                         if (provider != null && provider.isAccessible())
                             providers.add(provider);

@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.method;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,13 +18,16 @@ import java.util.Stack;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Shortcut to a {@link Signature} of an {@link AccessMethod}
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class Shortcut extends Signature {
+public class Shortcut extends Signature {	
+	private static final Logger LOG=LoggerFactory.getLogger(Shortcut.class);
 	private final Map<Integer, Parameter> fixedParameters;
 	private final Stack<Shortcut> shortucts;
 
@@ -140,7 +142,7 @@ public class Shortcut extends Signature {
 		try {
 			return new Shortcut(super.mediator, super.name, super.returnedType, super.parameters, this.fixedParameters);
 		} catch (InvalidValueException e) {
-			super.mediator.error(e);
+			LOG.error(e.getMessage(),e);
 		}
 		return null;
 	}

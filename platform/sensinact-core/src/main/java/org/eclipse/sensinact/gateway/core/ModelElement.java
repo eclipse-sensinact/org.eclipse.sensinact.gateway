@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Elements;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
@@ -31,6 +32,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.core.message.SnaNotificationMessageImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.core.security.AccessLevel;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
@@ -38,6 +40,8 @@ import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract sensiNact resource model element (service provider, service &
@@ -47,6 +51,8 @@ import org.json.JSONObject;
  */
 public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelElementProxy, P extends ProcessableData, E extends Nameable, R extends Nameable>
 	extends Elements<E> implements SensiNactResourceModelElement<M> {
+	private static final Logger LOG=LoggerFactory.getLogger(ModelElement.class);
+
 	abstract class ModelElementProxyWrapper extends ElementsProxyWrapper<M, R> {
 		private final ImmutableAccessTree tree;
 
@@ -369,11 +375,11 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 	protected void start() {
 		try {
 			if (!this.modelInstance.isRegistered()) {
-				this.modelInstance.mediator().error("%s not registered", this.modelInstance.getName());
+				LOG.error("%s not registered", this.modelInstance.getName());
 				return;
 			}
 			if (this.started.get()) {
-				this.modelInstance.mediator().debug("%s already started", this.getName());
+				LOG.debug("%s already started", this.getName());
 				return;
 			}
 			this.started.set(true);
@@ -399,7 +405,7 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 				}
 			});
 		} catch (Exception e) {
-			this.getModelInstance().mediator().error(e);
+			LOG.error(e.getMessage(),e);
 		}
 	}
 
@@ -408,7 +414,7 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 	 */
 	protected void stop() {
 		if (!this.started.get()) {
-			this.modelInstance.mediator().debug("%s not started", this.getName());
+			LOG.debug("%s not started", this.getName());
 			return;
 		}
 		this.started.set(false);
@@ -425,7 +431,7 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 				}
 			});
 		} catch (Exception e) {
-			this.getModelInstance().mediator().error(e);
+			LOG.error(e.getMessage(),e);
 		}
 		Lifecycle event = this.getUnregisteredEvent();
 		String path = super.getPath();

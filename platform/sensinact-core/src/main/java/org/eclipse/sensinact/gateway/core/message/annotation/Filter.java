@@ -17,6 +17,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import org.eclipse.sensinact.gateway.core.message.AgentRelay;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 
 

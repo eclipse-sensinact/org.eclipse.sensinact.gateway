@@ -29,6 +29,8 @@ import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link SnaMessage} handler managing a set of callbacks mapped to
@@ -37,6 +39,8 @@ import org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>> implements MessageRouter {
+	private static final Logger LOG=LoggerFactory.getLogger(SnaMessageListener.class);
+
 	/**
 	 * The set of {@link MidCallback} mapped to {@link SnaFilter}s defining whether
 	 * to call them or not
@@ -186,7 +190,7 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 				doHandleAgents(message, messageMethod);			
 			doHandleSubscribers(message);
 		}catch(Exception e) {
-			mediator.error(e);
+			LOG.error(e.getMessage(),e);
 		}
 	}
 

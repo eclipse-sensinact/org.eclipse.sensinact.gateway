@@ -19,6 +19,7 @@ import java.util.Stack;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
