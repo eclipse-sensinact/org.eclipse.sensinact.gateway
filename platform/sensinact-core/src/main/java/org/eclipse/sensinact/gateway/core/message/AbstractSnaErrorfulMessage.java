@@ -10,11 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Abstract implementation of an {@link AbstractSnaErrorfulMessage}

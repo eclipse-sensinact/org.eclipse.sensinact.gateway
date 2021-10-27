@@ -14,6 +14,8 @@ import java.util.Collection;
 
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Endpoint;
+import org.eclipse.sensinact.gateway.core.Session;
+import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.json.JSONArray;

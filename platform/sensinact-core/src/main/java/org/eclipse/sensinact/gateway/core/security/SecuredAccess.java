@@ -10,7 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.core.security;
 
+import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
+import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
+import org.eclipse.sensinact.gateway.util.tree.PathTree;
 
 /**
  * A secured {@link Session}s provider service

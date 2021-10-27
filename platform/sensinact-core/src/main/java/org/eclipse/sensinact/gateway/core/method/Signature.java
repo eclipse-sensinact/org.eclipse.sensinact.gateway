@@ -10,15 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.core.method;
 
-import java.util.Arrays;
 import java.util.Iterator;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Signature of an {@link AccessMethod}
@@ -29,6 +30,8 @@ import org.eclipse.sensinact.gateway.common.primitive.JSONable;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
+	private static final Logger LOG=LoggerFactory.getLogger(Signature.class);
+
 	/**
 	 * the queue of owned parameters
 	 */
@@ -409,7 +412,7 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 		try {
 			return new Signature(this.mediator, this.name, this.returnedType, this.parameters);
 		} catch (InvalidValueException e) {
-			mediator.error(e);
+			LOG.error(e.getMessage(),e);
 		}
 		return null;
 	}

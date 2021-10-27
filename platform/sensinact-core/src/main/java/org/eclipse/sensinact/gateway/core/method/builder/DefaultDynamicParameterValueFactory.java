@@ -13,15 +13,14 @@ package org.eclipse.sensinact.gateway.core.method.builder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintConstantPair;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Default core's {@link DynamicParameterValueFactory} implementation

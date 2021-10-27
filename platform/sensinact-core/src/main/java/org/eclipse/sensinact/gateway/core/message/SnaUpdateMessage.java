@@ -17,10 +17,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 import org.eclipse.sensinact.gateway.common.props.TypedKey;
+import org.json.JSONObject;
 
 /**
  * Update dedicated {@link SnaMessage}

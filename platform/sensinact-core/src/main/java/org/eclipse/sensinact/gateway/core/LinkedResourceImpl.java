@@ -16,6 +16,8 @@ import java.util.List;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Linked {@link Resource} implementation
@@ -23,6 +25,7 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class LinkedResourceImpl extends ResourceImpl {
+	private static final Logger LOG=LoggerFactory.getLogger(LinkedResourceImpl.class);
 	protected final ResourceImpl targetedResource;
 
 	/**
@@ -52,7 +55,7 @@ public class LinkedResourceImpl extends ResourceImpl {
 					UriUtils.getLeaf(super.uri), Modifiable.FIXED, true));
 
 		} catch (InvalidValueException e) {
-			super.modelInstance.mediator().error(e, e.getMessage());
+			LOG.error(e.getMessage(), e);
 		}
 	}
 
@@ -101,6 +104,6 @@ public class LinkedResourceImpl extends ResourceImpl {
 
 	@Override
 	public void registerLink(String path) {
-		super.modelInstance.mediator().debug("Unable to register a link for a LinkedResourceImpl");
+		LOG.debug("Unable to register a link for a LinkedResourceImpl");
 	}
 }

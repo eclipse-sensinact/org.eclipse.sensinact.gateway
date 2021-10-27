@@ -113,7 +113,6 @@ import org.slf4j.LoggerFactory;
  */
 @Component(immediate=true)
 public class SensiNact implements Core {
-	
 	/**
 	 * Abstract {@link Session} service implementation
 	 */
@@ -416,7 +415,7 @@ public class SensiNact implements Core {
 							constraint = ConstraintFactory.Loader.load(mediator.getClassLoader(), conditions);
 
 						} catch (InvalidConstraintDefinitionException e) {
-							mediator.error(e);
+							LOG.error(e.getLocalizedMessage(),e);
 						}
 					}
 					response = ((DataResource) resource).subscribe(recipient, (constraint == null 
@@ -464,7 +463,7 @@ public class SensiNact implements Core {
 				try {
 					constraint = ConstraintFactory.Loader.load(mediator.getClassLoader(), conditions);
 				} catch (InvalidConstraintDefinitionException e) {
-					mediator.error(e);
+					LOG.error(e.getMessage(),e);
 				}
 			}
 			filter.addCondition(constraint);
@@ -1393,7 +1392,7 @@ public class SensiNact implements Core {
 				SensiNact.this.sessions.put(sessionKey, session);
 			}
 		} catch (Exception e) {
-			mediator.error(e);
+			LOG.error(e.getMessage(),e);
 		}
 		return session;
 	}
@@ -1506,7 +1505,7 @@ public class SensiNact implements Core {
 				SensiNact.this.sessions.put(sessionKey, session);
 			}
 		} catch (Exception e) {
-			mediator.error(e);
+			LOG.error(e.getMessage(),e);
 		}
 		return session;
 	}
@@ -1859,7 +1858,7 @@ public class SensiNact implements Core {
 				references = mediator.getContext().getServiceReferences(SensinactCoreBaseIface.class, String.format("(!(%s=%s))",
 					SensinactCoreBaseIFaceManager.REMOTE_NAMESPACE_PROPERTY,namespace()));
 			} catch (InvalidSyntaxException e) {
-				mediator.debug(e.getMessage());
+				LOG.debug(e.getMessage());
 			}
 			if(references!=null) {
 				for (ServiceReference<SensinactCoreBaseIface> reference : references) {
@@ -2249,7 +2248,7 @@ public class SensiNact implements Core {
 	}
 
 	public void close() {
-		mediator.debug("closing sensiNact core");
+		LOG.debug("closing sensiNact core");
 		this.mediator.callService(SensinactCoreBaseIFaceManager.class, 
 			new Executable<SensinactCoreBaseIFaceManager,Void>() {
 				@Override

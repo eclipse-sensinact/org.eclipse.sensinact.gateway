@@ -18,13 +18,17 @@ import java.util.List;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.primitive.DescribablePrimitive;
+import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
+import org.eclipse.sensinact.gateway.common.primitive.Primitive;
 import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Extended {@link Primitive} defining an Attribute of a {@link Resource}
@@ -32,6 +36,8 @@ import org.json.JSONObject;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class Attribute extends DescribablePrimitive {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(Attribute.class);
 	public static final String NICKNAME = "nickname";
 
 	/**
@@ -203,8 +209,8 @@ public class Attribute extends DescribablePrimitive {
 				try {
 					this.setMetadataValue(metadata.getName(), metadata.getValue());
 				} catch (InvalidValueException e) {
-					if (super.mediator.isErrorLoggable()) 
-						super.mediator.error(e);
+					if (LOG.isErrorEnabled())
+						LOG.error(e.getMessage(),e);
 				}
 				return;
 			}
@@ -370,8 +376,8 @@ public class Attribute extends DescribablePrimitive {
 			modifiable = (Modifiable) metadata.getValue();
 
 		} catch (ClassCastException e) {
-			if (this.mediator.isErrorLoggable()) {
-				this.mediator.error(e, e.getMessage());
+			if (LOG.isErrorEnabled()) {
+				LOG.error( e.getMessage(),e);
 			}
 		}
 		return modifiable;
@@ -392,7 +398,7 @@ public class Attribute extends DescribablePrimitive {
 			locked = (Boolean) this.get(Metadata.LOCKED).getValue();
 
 		} catch (Exception e) {
-			this.mediator.error(e);
+			LOG.error(e.getMessage(),e);
 		}
 		return locked;
 	}
@@ -405,7 +411,7 @@ public class Attribute extends DescribablePrimitive {
 			this.get(Metadata.LOCKED).setValue(true);
 
 		} catch (Exception e) {
-			this.mediator.error(e);
+			LOG.error(e.getMessage(),e);
 		}
 	}
 
@@ -417,7 +423,7 @@ public class Attribute extends DescribablePrimitive {
 			this.get(Metadata.LOCKED).setValue(false);
 
 		} catch (Exception e) {
-			this.mediator.error(e);
+			LOG.error(e.getMessage(),e);
 		}
 	}
 
@@ -439,7 +445,7 @@ public class Attribute extends DescribablePrimitive {
 				hidden = ((Boolean) metadata.getValue()).booleanValue();
 
 			} catch (ClassCastException e) {
-				this.mediator.error(e, e.getMessage());
+				LOG.error(e.getMessage(),e);
 			}
 		}
 		return hidden;

@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.core.method;
 
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
+import org.eclipse.sensinact.gateway.core.ResourceImpl;
 
 /**
  * Extended {@link Executable} whose execution is parameterized by an Object and

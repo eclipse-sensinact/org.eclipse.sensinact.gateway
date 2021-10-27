@@ -13,12 +13,12 @@ package org.eclipse.sensinact.gateway.core.method.builder;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
+import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
+import org.json.JSONObject;
 
 /**
  * {@link DynamicParameterValue} factory service

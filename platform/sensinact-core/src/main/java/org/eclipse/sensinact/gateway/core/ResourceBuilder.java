@@ -10,23 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.core.message.MidCallback;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.eclipse.sensinact.gateway.core.message.SnaNotificationMessageImpl;
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
+import org.eclipse.sensinact.gateway.core.message.MidCallback;
+import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.message.SnaNotificationMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
@@ -41,6 +38,9 @@ import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.core.method.SubscribeMethod;
 import org.eclipse.sensinact.gateway.core.method.UnsubscribeMethod;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Builder of a {@link ResourceImpl}
@@ -48,6 +48,8 @@ import org.eclipse.sensinact.gateway.util.ReflectUtils;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ResourceBuilder {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ResourceBuilder.class);
 	private static final AccessMethod.Type GET = AccessMethod.Type.valueOf(AccessMethod.GET);
 	private static final AccessMethod.Type SET = AccessMethod.Type.valueOf(AccessMethod.SET);
 	private static final AccessMethod.Type ACT = AccessMethod.Type.valueOf(AccessMethod.ACT);
@@ -166,8 +168,8 @@ public class ResourceBuilder {
 				this.buildMethods(resourceImpl);
 
 			} catch (InvalidValueException e) {
-				if (this.mediator.isErrorLoggable()) 
-					this.mediator.error(e);				
+				if (LOG.isErrorEnabled()) 
+					LOG.error(e.getMessage(),e);				
 				throw new InvalidResourceException("Error while creating methods", e);
 			}
 		}

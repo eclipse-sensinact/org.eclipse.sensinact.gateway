@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.core;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -26,7 +25,9 @@ import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
+import org.eclipse.sensinact.gateway.core.method.ActMethod;
 import org.eclipse.sensinact.gateway.core.method.InvalidTriggerException;
+import org.eclipse.sensinact.gateway.core.method.LinkedActMethod;
 import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 import org.eclipse.sensinact.gateway.core.method.trigger.TriggerArgumentBuilder;
@@ -36,6 +37,8 @@ import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Service implementation
@@ -43,7 +46,8 @@ import org.json.JSONObject;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, ServiceProcessableData<?>, ResourceImpl, Resource> {
-	
+	private static final Logger LOG=LoggerFactory.getLogger(ServiceImpl.class);
+
 	class ServiceProxyWrapper extends ModelElementProxyWrapper implements ResourceCollection {
 		protected ServiceProxyWrapper(ServiceProxy proxy, ImmutableAccessTree tree) {
 			super(proxy, tree);
@@ -196,7 +200,7 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 		}
 		String resourceId = data.getResourceId();
 		if (resourceId == null) {
-			super.modelInstance.mediator().warn("Resource identifier not found");
+			LOG.warn("Resource identifier not found");
 			return;
 		}
 		ResourceImpl resource = this.getResource(resourceId);
@@ -258,12 +262,12 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 				try {
 					resource = this.addResource(builder);
 				} catch (Exception e) {
-					super.modelInstance.mediator().error(e);
+					LOG.error(e.getMessage(),e);
 				}
 			}
 		}
 		if (resource == null) {
-			super.modelInstance.mediator().warn("Resource '%s' not found for '%s' service", resourceId,
+			LOG.warn("Resource '%s' not found for '%s' service", resourceId,
 					super.getName());
 			return;
 		}
@@ -343,7 +347,7 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 	public ResourceImpl addLinkedResource(String link, ResourceImpl targetedResource) throws InvalidResourceException {
 		if (targetedResource == null || this.getResource(link) != null
 				|| LinkedResourceImpl.class.isAssignableFrom(targetedResource.getClass())) {
-			super.modelInstance.mediator().debug("Unable to create the linked resource : %s", link);
+			LOG.debug("Unable to create the linked resource : %s", link);
 			return null;
 		}
 		if (targetedResource.getType() == Resource.Type.ACTION) 
@@ -384,7 +388,7 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 			throws InvalidResourceException {
 		if (targetedResource == null || targetedResource.getType() != Resource.Type.ACTION
 				|| this.getResource(link) != null) {
-			super.modelInstance.mediator().debug(new StringBuilder()
+			LOG.debug(new StringBuilder()
 					.append("Unable to create the resource - Invalid Name :").append(link).toString());
 			return null;
 		}
@@ -418,7 +422,7 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 		ResourceImpl resource = null;
 
 		if (resourceName == null || (resource = this.getResource(resourceName)) != null) {
-			super.modelInstance.mediator().debug("The resource '%s' already exists", resourceName);
+			LOG.debug("The resource '%s' already exists", resourceName);
 			return null;
 		}
 		if ((resource = builder.build(super.modelInstance, this)) != null && this.addResource(resource)) {
@@ -653,7 +657,7 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 			return proxy;
 
 		} catch (Exception e) {
-			super.modelInstance.mediator().error(e);
+			LOG.error(e.getMessage(),e);
 		}
 		return null;
 	}

@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.core.method.trigger;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintConstantPair;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.util.JSONUtils;

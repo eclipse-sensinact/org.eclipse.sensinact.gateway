@@ -12,16 +12,9 @@ package org.eclipse.sensinact.gateway.core.method;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import org.eclipse.sensinact.gateway.core.DataResource;
-import org.eclipse.sensinact.gateway.core.Metadata;
-import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
@@ -33,8 +26,15 @@ import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.Primitive;
 import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
+import org.eclipse.sensinact.gateway.core.DataResource;
+import org.eclipse.sensinact.gateway.core.Metadata;
+import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Parameter of an {@link AccessMethod} on which can apply set of constraints
@@ -42,6 +42,8 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class Parameter extends Primitive implements JSONable, Cloneable {
+	private static final Logger LOG=LoggerFactory.getLogger(Parameter.class);
+
 	public static final String FIXED_PARAMETER_KEY = "fixed";
 
 	protected boolean fixed = false;
@@ -237,7 +239,7 @@ public class Parameter extends Primitive implements JSONable, Cloneable {
 		try {
 			super.setValue(this.fixedValue);
 		} catch (InvalidValueException e) {
-			mediator.error(e);
+			LOG.error(e.getMessage(),e);
 		}
 	}
 

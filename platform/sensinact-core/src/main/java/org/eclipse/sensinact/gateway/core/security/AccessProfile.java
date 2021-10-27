@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.core.security;
 
 import java.util.Set;
 
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+
 /**
  * An AccessProfile maps {@link AccessLevel}s to the set of existing
  * {@link AccessMethod.Type}s

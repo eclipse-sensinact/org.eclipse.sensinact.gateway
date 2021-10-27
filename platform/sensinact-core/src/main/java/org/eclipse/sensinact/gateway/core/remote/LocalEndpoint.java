@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core.remote;
 
+import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.Endpoint;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.Recipient;

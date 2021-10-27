@@ -17,10 +17,6 @@ import java.util.ListIterator;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Changed;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
@@ -30,6 +26,11 @@ import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefiniti
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.common.props.TypedProperties;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage.Type;
+import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Allows to check whether an {@link SnaMessage} has to be transmitted or
@@ -38,7 +39,9 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage.Type;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class SnaFilter implements JSONable {
+public class SnaFilter implements JSONable {	
+	private static final Logger LOG=LoggerFactory.getLogger(SnaFilter.class);
+
 	/**
 	 * List of handled {@link SnaMessage.Type}s
 	 */
@@ -163,9 +166,9 @@ public class SnaFilter implements JSONable {
 		try {
 			this.addCondition(ConstraintFactory.Loader.load(mediator.getClassLoader(), jsonCondition));
 		} catch (ClassCastException e) {
-			mediator.debug(e.getMessage());
+			LOG.debug(e.getMessage());
 		} catch (InvalidConstraintDefinitionException e) {
-			mediator.debug(e.getMessage());
+			LOG.debug(e.getMessage());
 		}
 	}
 

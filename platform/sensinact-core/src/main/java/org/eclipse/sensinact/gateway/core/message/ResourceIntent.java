@@ -26,6 +26,8 @@ import org.eclipse.sensinact.gateway.core.remote.RemoteCore;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.eclipse.sensinact.gateway.util.stack.AbstractStackEngineHandler;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A ResourceIntent provides a way to trigger a specific process when 
@@ -33,6 +35,7 @@ import org.osgi.framework.ServiceRegistration;
  */
 public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessage<?>>  implements LocalAgent,Nameable {
 	
+	private static final Logger LOG = LoggerFactory.getLogger(ResourceIntent.class);
 	private class Namespace implements Nameable {
 		
 		final String namespace;
@@ -275,7 +278,7 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 				try {
 					ResourceIntent.this.onAccessible.execute(accessible);
 				} catch (Exception e) {
-					ResourceIntent.this.mediator.error(e);
+					LOG.error(e.getMessage(),e);
 				}
 			}
 		});
@@ -442,7 +445,7 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 				this, properties);
 				registerRemote();
 		} catch (IllegalStateException e) {
-			this.mediator.error("The agent is not registered ", e);
+			LOG.error("The agent is not registered ", e);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -489,7 +492,7 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 				this.registration.unregister();
 				this.registration = null;
 			} catch (IllegalStateException e) {
-				this.mediator.error(e);
+				LOG.error(e.getMessage(),e);
 			}
 		}
 	}

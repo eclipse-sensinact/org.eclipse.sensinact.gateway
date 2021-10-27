@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.core;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Builder of a {@link ServiceImpl}
@@ -19,6 +21,8 @@ import org.eclipse.sensinact.gateway.util.ReflectUtils;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ServiceBuilder {
+	private static final Logger LOG=LoggerFactory.getLogger(ServiceBuilder.class);
+
 	private Mediator mediator;
 
 	protected final Class<? extends ServiceImpl> baseClass;
@@ -100,7 +104,7 @@ public class ServiceBuilder {
 			(Class<F>) (implementationClass == null ? ServiceImpl.class : implementationClass),
 			new Object[] { snaModelInstance, name, provider });
 		} catch (Exception e) {
-			this.mediator.error(e);
+			LOG.error(e.getMessage(),e);
 			throw new InvalidServiceException(e.getMessage(), e);
 		}
 		return serviceImpl;

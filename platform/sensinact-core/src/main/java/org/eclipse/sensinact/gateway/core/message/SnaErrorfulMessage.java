@@ -10,10 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
-import org.json.JSONArray;
-
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 import org.eclipse.sensinact.gateway.common.props.TypedKey;
+import org.json.JSONArray;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>

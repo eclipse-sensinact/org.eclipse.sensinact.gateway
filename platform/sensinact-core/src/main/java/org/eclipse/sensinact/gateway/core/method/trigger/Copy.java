@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.core.method.trigger;
 
+import org.eclipse.sensinact.gateway.common.primitive.JSONable;
+
 /**
  * Extended {@link AccessMethodTrigger} returning the value of the Primitive
  * parameter when executed

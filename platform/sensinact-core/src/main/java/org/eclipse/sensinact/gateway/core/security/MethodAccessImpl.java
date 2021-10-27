@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core.security;
 
+import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 
 /**

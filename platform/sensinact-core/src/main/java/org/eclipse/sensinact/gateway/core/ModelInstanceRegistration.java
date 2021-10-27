@@ -12,8 +12,8 @@ package org.eclipse.sensinact.gateway.core;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -37,6 +37,8 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONObject;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Wraps the {@link ServiceRegistration} of a {@link SensiNactResourceModel}
@@ -45,6 +47,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ModelInstanceRegistration extends AbstractMidCallback {
+	private static final Logger LOG=LoggerFactory.getLogger(ModelInstanceRegistration.class);
 
 	private boolean registered;
 	private ServiceRegistration<?> instanceRegistration;
@@ -222,7 +225,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 					properties.put("longitude", longitude);
 
 				} catch (NumberFormatException e) {
-					this.configuration.mediator.debug(e.getMessage());
+					LOG.debug(e.getMessage());
 				}
 			}
 		}
@@ -310,7 +313,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 							properties.put("longitude", longitude);
 
 						} catch (NumberFormatException e) {
-							configuration.mediator.debug(e.getMessage());
+							LOG.debug(e.getMessage());
 						}
 					}
 				}

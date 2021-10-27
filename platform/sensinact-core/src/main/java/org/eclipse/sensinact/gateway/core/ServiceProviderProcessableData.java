@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
+
 /**
  * A {@link ProcessableData} targeting one {@link ServiceProviderImpl}
  * 

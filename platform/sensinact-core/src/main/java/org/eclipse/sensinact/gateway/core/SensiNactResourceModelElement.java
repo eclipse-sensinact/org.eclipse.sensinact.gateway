@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.core;
 
 import java.util.List;
+
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 
 /**

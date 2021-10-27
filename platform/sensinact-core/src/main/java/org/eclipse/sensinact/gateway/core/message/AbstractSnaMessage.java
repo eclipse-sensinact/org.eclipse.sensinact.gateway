@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.core.message;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 import org.eclipse.sensinact.gateway.common.props.TypedProperties;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;

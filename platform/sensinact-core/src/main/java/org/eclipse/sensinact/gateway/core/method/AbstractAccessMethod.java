@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.core.method;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
@@ -30,6 +29,9 @@ import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefiniti
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract {@link AccessMethod} implementation
@@ -37,6 +39,8 @@ import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>> implements AccessMethod<T, R> {
+	private static final Logger LOG=LoggerFactory.getLogger(AbstractAccessMethod.class);
+
 	/**
 	 * Creates and returns an extended {@link AccessMethodResponseBuilder} of the
 	 * appropriate type
@@ -296,8 +300,8 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 							this.mediator.getClassLoader(), parameter.getType(), parameter.getValue(), false));
 
 				} catch (InvalidConstraintDefinitionException e) {
-					if (this.mediator.isErrorLoggable()) {
-						this.mediator.error(e, e.getMessage());
+					if (LOG.isErrorEnabled()) {
+						LOG.error(e.getMessage(),e);
 					}
 					return;
 				}

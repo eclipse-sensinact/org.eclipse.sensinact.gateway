@@ -41,6 +41,8 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A AgentFactory is in charge of asking for the registration of an {@link Agent}  
@@ -51,7 +53,8 @@ import org.osgi.service.component.annotations.Deactivate;
  */
 @Component(immediate=true)
 public class AgentFactory {
-	
+	private static final Logger LOG=LoggerFactory.getLogger(AgentFactory.class);
+
 	private final class EmptyFilterDefinition implements MessageFilterDefinition {
 
 		@Override
@@ -108,7 +111,7 @@ public class AgentFactory {
 					    JSONObject constraint = new JSONObject(s);
 					    constraints.add(ConstraintFactory.Loader.load(cl, constraint));
 					} catch(JSONException | InvalidConstraintDefinitionException e) {
-						mediator.error("Unable to read attached constraints", e);
+						LOG.error("Unable to read attached constraints", e);
 						constraints.clear();
 						break;
 					}
@@ -399,7 +402,7 @@ public class AgentFactory {
         
         
         if (registrations.containsKey(id)) {
-            mediator.error("An AgentRelay is already registered with ID '%s'", id);
+        	LOG.error("An AgentRelay is already registered with ID '%s'", id);
             return;
         }
         AgentRelayWrapper wrapper = new AgentRelayWrapper(agentRelay);   
@@ -466,7 +469,7 @@ public class AgentFactory {
     	if(callback != null) {
     		try {
     			callback.stop();
-                mediator.info("Agent callback '%s' unregistered", id);
+    			LOG.info("Agent callback '%s' unregistered", id);
     		}catch(IllegalStateException e) {
     			//do nothing
     		}

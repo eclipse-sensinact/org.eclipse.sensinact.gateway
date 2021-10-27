@@ -16,6 +16,8 @@ import java.util.NoSuchElementException;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Intermediate helper to use a {@link Filtering} service registered in the OSGi
@@ -24,6 +26,8 @@ import org.osgi.framework.ServiceReference;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class FilteringAccessor extends FilteringDefinition {
+	private static final Logger LOG=LoggerFactory.getLogger(FilteringAccessor.class);
+
 	private ServiceReference<Filtering> reference;
 	private Mediator mediator;
 
@@ -73,7 +77,7 @@ public class FilteringAccessor extends FilteringDefinition {
 		Filtering filtering = this.mediator.getContext().getService(reference);
 
 		if (filtering == null) {
-			mediator.error("Unable to retrieve the appropriate Filtering service");
+			LOG.error("Unable to retrieve the appropriate Filtering service");
 			return false;
 		}
 		boolean handle = filtering.handle(type);
@@ -92,7 +96,7 @@ public class FilteringAccessor extends FilteringDefinition {
 	public String getLDAPComponent() {
 		Filtering filtering = this.mediator.getContext().getService(reference);
 		if (filtering == null) {
-			mediator.error("Unable to retrieve the appropriate Filtering service");
+			LOG.error("Unable to retrieve the appropriate Filtering service");
 			return null;
 		}
 		String ldap = filtering.getLDAPComponent(super.filter);
@@ -111,7 +115,7 @@ public class FilteringAccessor extends FilteringDefinition {
 	public String apply(Object obj) {
 		Filtering filtering = this.mediator.getContext().getService(reference);
 		if (filtering == null) {
-			mediator.error("Unable to retrieve the appropriate Filtering service");
+			LOG.error("Unable to retrieve the appropriate Filtering service");
 			return null;
 		}
 		String result = filtering.apply(super.filter, obj);

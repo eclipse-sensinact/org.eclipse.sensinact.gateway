@@ -15,6 +15,9 @@ import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.ErrorHandler;
+import org.eclipse.sensinact.gateway.common.primitive.Describable;
+import org.eclipse.sensinact.gateway.common.primitive.Nameable;
+import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 
 /**
  * An unaccessible {@link AccessMethod} implementation

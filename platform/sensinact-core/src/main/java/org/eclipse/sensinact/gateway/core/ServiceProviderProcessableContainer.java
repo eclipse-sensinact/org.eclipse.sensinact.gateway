@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.core;
 
 import org.eclipse.sensinact.gateway.common.primitive.ProcessableContainer;
+import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
 
 /**
  * A set of {@link ProcessableData} processable by {@link ServiceProviderImpl}s

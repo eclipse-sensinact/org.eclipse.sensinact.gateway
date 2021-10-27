@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.core;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -25,7 +24,12 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
 import org.eclipse.sensinact.gateway.core.ServiceProvider.LifecycleStatus;
-import org.eclipse.sensinact.gateway.core.message.*;
+import org.eclipse.sensinact.gateway.core.message.AbstractSnaMessage;
+import org.eclipse.sensinact.gateway.core.message.MessageRouter;
+import org.eclipse.sensinact.gateway.core.message.MidCallback;
+import org.eclipse.sensinact.gateway.core.message.SnaFilter;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaMessageListener;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
@@ -37,6 +41,8 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A sensiNact Resource Model instance
@@ -44,6 +50,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ModelInstance<C extends ModelConfiguration> implements SensiNactResourceModel<C>, LifecycleStatusListener {
+	private static final Logger LOG=LoggerFactory.getLogger(ModelElement.class);
 
 	public static final String LOCATION_PROPERTY = "admin.".concat(LocationResource.LOCATION);
 	public static final String ICON_PROPERTY = "admin.".concat(ServiceProvider.ICON);
@@ -344,7 +351,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 					    SensiNactResourceModel.class, new StringBuilder().append("(name=").append(name).append(")"
 					    		).toString());
 				} catch (InvalidSyntaxException e) {
-					ModelInstance.this.mediator.error(e);
+					LOG.error(e.getMessage(),e);
 				}
 				return (references != null && references.size() > 0);
 			}
@@ -363,7 +370,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 			props.put(LocationResource.LOCATION, location);
 
 		} catch (NullPointerException e) {
-			mediator.debug(String.format("No initial location defined for %s", name));
+			LOG.debug(String.format("No initial location defined for %s", name));
 		}
 		AccessNode node = null;
 		AccessNode root = this.configuration.getAccessTree().getRoot();
@@ -465,7 +472,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 			this.getRootElement().stop();
 
 		} catch (Exception e) {
-			mediator.error(e);
+			LOG.error(e.getMessage(),e);
 		}
 		this.messageRouter.close(true);
 		this.messageRouter = null;

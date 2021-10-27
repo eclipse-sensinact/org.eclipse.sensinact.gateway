@@ -10,10 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 import org.eclipse.sensinact.gateway.common.props.TypedKey;
+import org.json.JSONObject;
 
 /**
  * @param <S>

@@ -13,15 +13,14 @@ package org.eclipse.sensinact.gateway.core.message;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.core.Resource;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.props.TypedProperties;
 import org.eclipse.sensinact.gateway.core.DataResource;
+import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
