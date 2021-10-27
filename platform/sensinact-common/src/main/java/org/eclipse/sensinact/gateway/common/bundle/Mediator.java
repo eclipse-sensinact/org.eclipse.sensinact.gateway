@@ -11,6 +11,20 @@
 
 package org.eclipse.sensinact.gateway.common.bundle;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.util.PropertyUtils;
 import org.osgi.framework.BundleContext;
@@ -18,17 +32,14 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Mediator Pattern Architecture purpose
  */
 public class Mediator {
+	private static final Logger LOG=LoggerFactory.getLogger(Mediator.class);
 	public static final String DEFAULT_BUNDLE_PROPERTY_FILEDIR = "felix.fileinstall.dir";
 
 	public static final String SENSINACT_CONFIG_FILE = "sensiNact-conf.xml";
@@ -95,10 +106,10 @@ public class Mediator {
 		if (fileInstallDir == null) {
 			return;
 		}
-		info("Configuration directory %s", fileInstallDir);
+		LOG.info("Configuration directory %s", fileInstallDir);
 
 		final String symbolicName = context.getBundle().getSymbolicName();
-		info("Bundle symbolic name %s", symbolicName);
+		LOG.info("Bundle symbolic name %s", symbolicName);
 
 		final String bundlePropertyFileName = String.format("%s/%s.config", fileInstallDir, symbolicName);
 		Boolean propertiesLoaded = Boolean.FALSE;
@@ -109,7 +120,7 @@ public class Mediator {
 		 */
 		try {
 			bundleProperties.load(new FileInputStream(bundlePropertyFileName));
-			debug("File %s loaded successfully", bundlePropertyFileName);
+			LOG.debug("File %s loaded successfully", bundlePropertyFileName);
 			logBundleProperties(symbolicName, bundlePropertyFileName, bundleProperties);
 			propertiesLoaded = true;
 		} catch (IOException e) {
@@ -119,7 +130,7 @@ public class Mediator {
 		// If not even the fallback didnt manage to get loaded, display message in the
 		// log
 		if (!propertiesLoaded) {
-			debug("bundle %s does not have custom configuration %s, using default values.", symbolicName,
+			LOG.debug("bundle %s does not have custom configuration %s, using default values.", symbolicName,
 					bundlePropertyFileName);
 		}
 
@@ -143,9 +154,9 @@ public class Mediator {
 	}
 
 	private void logBundleProperties(String bundleName, String propertyFile, Properties properties) {
-		debug("Loading properties for bundle %s located in %s", bundleName, propertyFile);
+		LOG.debug("Loading properties for bundle %s located in %s", bundleName, propertyFile);
 		for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-			info("%s:%s", entry.getKey(), entry.getValue());
+			LOG.info("%s:%s", entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -239,7 +250,7 @@ public class Mediator {
 			return caller.callService(serviceType, filter, executable);
 
 		} catch (Exception e) {
-			this.error(e);
+			LOG.error(e.getMessage(),e);
 
 		} finally {
 			if (caller.release() == 0) {
@@ -269,7 +280,7 @@ public class Mediator {
 			caller.callServices(serviceType, filter, executable);
 
 		} catch (Exception e) {
-			this.error(e);
+			LOG.error(e.getMessage(),e);
 
 		} finally {
 			if (caller.release() == 0) {
@@ -293,7 +304,7 @@ public class Mediator {
 			return caller.callServices(serviceType, returnType, filter, executable);
 
 		} catch (Exception e) {
-			this.error(e);
+			LOG.error(e.getMessage(),e);
 
 		} finally {
 			if (caller.release() == 0) {
@@ -649,7 +660,7 @@ public class Mediator {
 					classloader = clazz.getClassLoader();
 
 				} catch (ClassNotFoundException ex) {
-					this.error(ex);
+					LOG.error(ex.getMessage(),ex);
 				}
 			}
 		}
@@ -685,200 +696,6 @@ public class Mediator {
 		this.properties.put(property, value);
 	}
 
-	/**
-	 * Define whether or not a log message which log level is passed as parameter
-	 * can be displayed according to the current log mode and log level
-	 * 
-	 * @param logLevel
-	 *            the log level of the message to display
-	 * @return true if the log level allow to display the message false otherwise
-	 */
-	public boolean isLoggable(int logLevel) {
-		return (this.logLevel > LogExecutor.NO_LOG && logLevel <= this.logLevel);
-	}
-
-	/**
-	 * Returns true if the logger is configured to display error messages ; returns
-	 * false otherwise
-	 * 
-	 * @return true if the logger is configured to display error messages ;
-	 *         <p/>
-	 *         false otherwise
-	 */
-	public boolean isErrorLoggable() {
-		return this.isLoggable(LogService.LOG_ERROR);
-	}
-
-	/**
-	 * Returns true if the logger is configured to display warning messages ;
-	 * returns false otherwise
-	 * 
-	 * @return true if the logger is configured to display warning messages ;
-	 *         <p/>
-	 *         false otherwise
-	 */
-	public boolean isWarningLoggable() {
-		return this.isLoggable(LogService.LOG_WARNING);
-	}
-
-	/**
-	 * Returns true if the logger is configured to display info messages ; returns
-	 * false otherwise
-	 * 
-	 * @return true if the logger is configured to display info messages ;
-	 *         <p/>
-	 *         false otherwise
-	 */
-	public boolean isInfoLoggable() {
-		return this.isLoggable(LogService.LOG_INFO);
-	}
-
-	/**
-	 * Returns true if the logger is configured to display debug messages ; returns
-	 * false otherwise
-	 * 
-	 * @return true if the logger is configured to display debug messages ;
-	 *         <p/>
-	 *         false otherwise
-	 */
-	public boolean isDebugLoggable() {
-		return this.isLoggable(LogService.LOG_DEBUG);
-	}
-
-	/**
-	 * Display an information message through the LogService if if exists
-	 * 
-	 * @param msg
-	 *            the message to display
-	 */
-	public void info(String msg, Object... variables) {
-		this.log(LogService.LOG_INFO, msg, variables);
-	}
-
-	/**
-	 * Display the execution stack trace of the {@link Throwable} object passed as
-	 * parameter through the LogService if it exists.
-	 * 
-	 * @param thrown
-	 *            the {@link Throwable} to display the stacktrace of
-	 */
-	public void error(Throwable thrown) {
-		this.log(LogService.LOG_ERROR, thrown, thrown.getMessage());
-	}
-
-	/**
-	 * Display an error message and the execution stack trace of the
-	 * {@link Throwable} object passed as parameter through the LogService if it
-	 * exists.
-	 * 
-	 * @param thrown
-	 *            the {@link Throwable} to display the stacktrace of
-	 * @param msg
-	 *            the message to display
-	 * @param variables
-	 *            the variable set of arguments parameterizing the message to
-	 *            display
-	 */
-	public void error(Throwable thrown, String msg, Object... variables) {
-		this.log(LogService.LOG_ERROR, thrown, msg, variables);
-	}
-
-	/**
-	 * Display an error message through the LogService if if exists.
-	 * 
-	 * @param msg
-	 *            the message to display
-	 * @param variables
-	 *            the variable set of arguments parameterizing the message to
-	 *            display
-	 */
-	public void error(String msg, Object... variables) {
-		this.log(LogService.LOG_ERROR, msg, variables);
-	}
-
-	/**
-	 * Display an debug message through the LogService if it exists.
-	 * 
-	 * @param msg
-	 *            the message to display
-	 * @param variables
-	 *            the variable set of arguments parameterizing the message to
-	 *            display
-	 */
-	public void debug(String msg, Object... variables) {
-		this.log(LogService.LOG_DEBUG, msg, variables);
-	}
-
-	/**
-	 * Display a warning message through the LogService if it exists.
-	 * 
-	 * @param msg
-	 *            the message to display
-	 * @param variables
-	 *            the variable set of arguments parameterizing the message to
-	 *            display
-	 */
-	public void warn(String msg, Object... variables) {
-		this.log(LogService.LOG_WARNING, msg, variables);
-	}
-
-	/**
-	 * Display an information message through the LogService if if exists, and if
-	 * the Log level is less or equals to the system's one
-	 * 
-	 * @param level
-	 *            the Log level
-	 * @param msg
-	 *            the message to display
-	 * @param variables
-	 *            the variable set of arguments parameterizing the message to
-	 *            display
-	 */
-	protected void log(int level, String msg, Object... variables) {
-		this.log(level, null, msg, variables);
-	}
-
-	/**
-	 * Display an information message through the LogService if if exists, and if
-	 * the Log level is less or equals to the system's one
-	 * 
-	 * @param level
-	 *            the Log level
-	 * @param throwable
-	 *            the {@link Throwable} to display the stacktrace of
-	 * @param msg
-	 *            the message to display
-	 * @param variables
-	 *            the variable set of arguments parameterizing the message to
-	 *            display
-	 */
-	protected void log(int level, Throwable throwable, String msg, Object... variables) {
-		if (!this.isLoggable(level)) {
-			// do not process the message or search
-			// for the LogService if the message
-			// is not supposed to be displayed
-			return;
-		}
-		String message = null;
-		if(msg != null) {
-			// format the message
-			if (variables != null && variables.length > 0) {
-				Object[] replacements = null;
-	
-				if (variables.length == 1 && variables[0] != null && variables[0].getClass().isArray()) {
-					replacements = (Object[]) variables[0];
-	
-				} else {
-					replacements = variables;
-				}
-				message = String.format(msg, replacements);
-	
-			} else {
-				message = msg;
-			}
-		}
-		callService(LogService.class, new LogExecutor(level, message, throwable));
-	}
 
 	public Map getProperties() {
 		return Collections.unmodifiableMap(properties);
