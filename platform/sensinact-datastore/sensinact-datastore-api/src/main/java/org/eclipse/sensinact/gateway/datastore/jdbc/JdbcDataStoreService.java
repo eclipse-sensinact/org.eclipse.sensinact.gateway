@@ -10,23 +10,21 @@
  */
 package org.eclipse.sensinact.gateway.datastore.jdbc;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreConnectionProvider;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
-import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreConnectionProvider;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link DataStoreService} service implementation
@@ -70,21 +68,7 @@ public abstract class JdbcDataStoreService implements DataStoreService {
      * Lock use for synchronization
      */
     protected final Object lock = new Object();
-    
-    /**
-     * The {@link Mediator}
-     */
-    protected Mediator mediator;
 
-    /**
-     * Constructor
-     *
-     * @throws UnableToLoadDriverClassException
-     * @throws UnableToFindDataStoreException
-     */
-    public JdbcDataStoreService(Mediator mediator) throws UnableToFindDataStoreException {
-        this.mediator = mediator;
-    }
 
     /**
      * Converts the {@link ResultSet} passed as parameter into

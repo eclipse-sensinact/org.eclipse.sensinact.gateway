@@ -23,17 +23,15 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.AnonymousSession;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.security.dao.UserDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.UserEntity;
 import org.eclipse.sensinact.gateway.core.security.test.api.MailAccountConnectorMailReplacement;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService;
-import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService.SQLLiteConfig;
+import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService.SQLiteConfig;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
@@ -105,8 +103,7 @@ public class TestUserManager {
     Method getDescription = null;
     Method getMethod = null;
 
-    private Mediator mediator;
-    private DataStoreService dataStoreService;
+    private SQLiteDataStoreService dataStoreService;
 	private File tempDB;
     
 	@BeforeEach
@@ -119,10 +116,10 @@ public class TestUserManager {
 	    Path originalPath = Paths.get(context.getProperty("sqlitedb"));
 	    Files.copy(originalPath, copied, StandardCopyOption.REPLACE_EXISTING);
 		
-		mediator = new Mediator(context);
-		SQLLiteConfig sqlLiteConfig = Mockito.mock(SQLiteDataStoreService.SQLLiteConfig.class);
+		SQLiteConfig sqlLiteConfig = Mockito.mock(SQLiteDataStoreService.SQLiteConfig.class);
 		Mockito.when(sqlLiteConfig.database()).thenReturn(tempDB.getAbsolutePath());
-		dataStoreService = new SQLiteDataStoreService(context, sqlLiteConfig);
+		dataStoreService = new SQLiteDataStoreService();
+		dataStoreService.start(sqlLiteConfig);
 	}
 	
 	@AfterEach

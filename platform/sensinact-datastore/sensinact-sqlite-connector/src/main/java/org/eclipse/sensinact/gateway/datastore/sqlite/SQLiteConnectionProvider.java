@@ -11,13 +11,6 @@
 
 package org.eclipse.sensinact.gateway.datastore.sqlite;
 
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreConnectionProvider;
-import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
-import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -27,6 +20,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreConnectionProvider;
+import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
+import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
+import org.eclipse.sensinact.gateway.datastore.api.UnableToLoadDriverClassException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sqlite.Function;
 
 /**
@@ -87,10 +86,6 @@ public class SQLiteConnectionProvider implements DataStoreConnectionProvider<Con
 	 */
 	private AtomicBoolean stopped;
 
-	/**
-	 * The {@link ServiceMediator}
-	 */
-	private Mediator mediator;
 
 	/**
 	 * Constructor
@@ -99,9 +94,8 @@ public class SQLiteConnectionProvider implements DataStoreConnectionProvider<Con
 	 * 
 	 * @throws UnableToLoadDriverClassException
 	 */
-	public SQLiteConnectionProvider(Mediator mediator, String dbName)
+	public SQLiteConnectionProvider(String dbName)
 			throws UnableToConnectToDataStoreException, UnableToFindDataStoreException {
-		this.mediator = mediator;
 		try {
 			// load the sqlite-JDBC driver using the current class loader
 			Class.forName("org.sqlite.JDBC");
