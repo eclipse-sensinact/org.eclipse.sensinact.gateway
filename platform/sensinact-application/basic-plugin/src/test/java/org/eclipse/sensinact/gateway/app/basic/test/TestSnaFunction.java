@@ -99,7 +99,7 @@ public class TestSnaFunction{
 
         Mockito.when(authorization.getAuthenticatedAccessLevelOption(Mockito.anyString(), Mockito.anyString())).thenReturn(AccessLevelOption.ANONYMOUS);
 
-        Mockito.when(securedAccess.getAccessTree(Mockito.any(String.class))).thenReturn(new AccessTreeImpl(mediator).withAccessProfile(AccessProfileOption.ALL_ANONYMOUS));
+        Mockito.when(securedAccess.getAccessTree(Mockito.any(String.class))).thenReturn(new AccessTreeImpl().withAccessProfile(AccessProfileOption.ALL_ANONYMOUS));
         BundleContext context = Mockito.mock(BundleContext.class);
 
         final ServiceReference reference = Mockito.mock(ServiceReference.class);
@@ -160,7 +160,7 @@ public class TestSnaFunction{
         ServiceProviderImpl serviceProvider = modelInstance.getRootElement();
         ServiceImpl service = serviceProvider.addService("LightService_SimulatedLight_001");
         ResourceImpl resource = service.addDataResource(PropertyResource.class, "DIM", int.class, 0);
-        dimResource = resource.getProxy(new AccessTreeImpl<>(mediator).withAccessProfile(AccessProfileOption.ALL_ANONYMOUS));
+        dimResource = resource.getProxy(new AccessTreeImpl<>().withAccessProfile(AccessProfileOption.ALL_ANONYMOUS));
         
         Mockito.when(session.resource(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("TURN_ON"))).thenReturn(new StateActionResource(mediator, "TURN_ON", this));
 

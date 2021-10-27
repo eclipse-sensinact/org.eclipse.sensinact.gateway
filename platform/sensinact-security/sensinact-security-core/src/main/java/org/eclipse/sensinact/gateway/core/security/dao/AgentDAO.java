@@ -10,10 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.AgentEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.BundleEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
@@ -47,10 +47,6 @@ public class AgentDAO extends AbstractMutableSnaDAO<AgentEntity> {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
-	 * 
 	 * @throws DAOException
 	 */
 	public AgentDAO(DataStoreService dataStoreService) throws DAOException {
@@ -71,11 +67,7 @@ public class AgentDAO extends AbstractMutableSnaDAO<AgentEntity> {
 	 * @throws DataStoreException
 	 */
 	public AgentEntity find(final long identifier) throws DAOException, DataStoreException {
-		List<AgentEntity> agentEntities = super.select(new HashMap<String, Object>() {
-			{
-				this.put("AID", identifier);
-			}
-		});
+		List<AgentEntity> agentEntities = super.select(Collections.singletonMap("AID", identifier));
 
 		if (agentEntities.size() != 1) {
 			return null;
@@ -96,12 +88,8 @@ public class AgentDAO extends AbstractMutableSnaDAO<AgentEntity> {
 	 * @throws DataStoreException
 	 */
 	public AgentEntity find(final String publicKey) throws DAOException, DataStoreException {
-		List<AgentEntity> agentEntities = super.select(new HashMap<String, Object>() {
-			{
-				this.put("APUBLIC_KEY", publicKey);
-			}
-		});
-
+		List<AgentEntity> agentEntities = super.select(Collections.singletonMap("APUBLIC_KEY", publicKey));
+		
 		if (agentEntities.size() != 1) {
 			return null;
 		}
@@ -129,11 +117,7 @@ public class AgentDAO extends AbstractMutableSnaDAO<AgentEntity> {
 		if (bundleEntity == null) {
 			return null;
 		}
-		List<AgentEntity> agentEntities = super.select(new HashMap<String, Object>() {
-			{
-				this.put("BID", bundleEntity.getIdentifier());
-			}
-		});
+		List<AgentEntity> agentEntities = super.select(Collections.singletonMap("BID", bundleEntity.getIdentifier()));
 
 		if (agentEntities.size() != 1) {
 			return null;

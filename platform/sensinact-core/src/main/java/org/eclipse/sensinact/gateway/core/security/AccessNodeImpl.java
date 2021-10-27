@@ -18,12 +18,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
+import org.eclipse.sensinact.gateway.core.ModelElement;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
 import org.eclipse.sensinact.gateway.util.tree.ImmutablePathNode;
 import org.eclipse.sensinact.gateway.util.tree.PathNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -41,11 +43,11 @@ public class AccessNodeImpl<N extends AccessNodeImpl<N>> extends PathNode<N> imp
 	// STATIC DECLARATIONS //
 	// ********************************************************************//
 
+	private static final Logger LOG=LoggerFactory.getLogger(AccessNodeImpl.class);
 	// ********************************************************************//
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
 
-	protected Mediator mediator;
 	protected Map<AccessLevelOption, List<MethodAccessibility>> accesses;
 	private AccessProfile profile;
 
@@ -56,9 +58,8 @@ public class AccessNodeImpl<N extends AccessNodeImpl<N>> extends PathNode<N> imp
 	 * @param name
 	 * @param isPattern
 	 */
-	public AccessNodeImpl(Mediator mediator, String name, boolean isPattern) {
+	public AccessNodeImpl(String name, boolean isPattern) {
 		super(name, isPattern);
-		this.mediator = mediator;
 		this.accesses = new EnumMap<AccessLevelOption, List<MethodAccessibility>>(AccessLevelOption.class);
 	}
 
@@ -131,7 +132,7 @@ public class AccessNodeImpl<N extends AccessNodeImpl<N>> extends PathNode<N> imp
 				}
 			}
 		} catch (Exception e) {
-			mediator.error(e);
+			LOG.error(e.getMessage(),e);
 		}
 	}
 
@@ -275,8 +276,8 @@ public class AccessNodeImpl<N extends AccessNodeImpl<N>> extends PathNode<N> imp
 		N clone = null;
 		try {
 			clone = ((Class<N>) getClass())
-					.getConstructor(new Class<?>[] { Mediator.class, String.class, boolean.class })
-					.newInstance(new Object[] { this.mediator, this.nodeName, this.isPattern });
+					.getConstructor(new Class<?>[] { String.class, boolean.class })
+					.newInstance(new Object[] { this.nodeName, this.isPattern });
 
 			clone.withAccessProfile(this.profile);
 			Iterator<N> iterator = children.iterator();
@@ -284,7 +285,7 @@ public class AccessNodeImpl<N extends AccessNodeImpl<N>> extends PathNode<N> imp
 				clone.add((N) iterator.next().clone());
 			}
 		} catch (Exception e) {
-			mediator.error(e);
+			LOG.error(e.getMessage(),e);
 		}
 		return clone;
 	}

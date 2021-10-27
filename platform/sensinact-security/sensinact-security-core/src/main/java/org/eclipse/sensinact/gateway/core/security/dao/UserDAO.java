@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -64,11 +65,7 @@ public class UserDAO extends AbstractMutableSnaDAO<UserEntity> {
 	 * @throws DataStoreException
 	 */
 	public UserEntity find(final long identifier) throws DAOException, DataStoreException {
-		List<UserEntity> userEntities = super.select(new HashMap<String, Object>() {
-			{
-				this.put("SUID", identifier);
-			}
-		});
+		List<UserEntity> userEntities = super.select(Collections.singletonMap("SUID", identifier));
 
 		if (userEntities.size() != 1) {
 			return null;
@@ -90,11 +87,7 @@ public class UserDAO extends AbstractMutableSnaDAO<UserEntity> {
 	 * @throws DataStoreException
 	 */
 	public UserEntity findFromAccount(final String account) throws DAOException, DataStoreException {
-		List<UserEntity> userEntities = super.select(new HashMap<String, Object>() {
-			{
-				this.put("SUACCOUNT", account);
-			}
-		});
+		List<UserEntity> userEntities = super.select(Collections.singletonMap("SUACCOUNT", account));
 
 		if (userEntities.size() != 1) {
 			return null;
@@ -146,11 +139,7 @@ public class UserDAO extends AbstractMutableSnaDAO<UserEntity> {
 	 * @throws DataStoreException
 	 */
 	public UserEntity find(final String publicKey) throws DAOException, DataStoreException {
-		List<UserEntity> userEntities = super.select(new HashMap<String, Object>() {
-			{
-				this.put("SUPUBLIC_KEY", publicKey);
-			}
-		});
+		List<UserEntity> userEntities = super.select(Collections.singletonMap("SUPUBLIC_KEY", publicKey));
 
 		if (userEntities.size() != 1) {
 			return null;

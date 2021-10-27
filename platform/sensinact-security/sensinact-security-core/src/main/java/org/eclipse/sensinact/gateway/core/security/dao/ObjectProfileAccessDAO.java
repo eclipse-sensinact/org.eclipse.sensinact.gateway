@@ -10,10 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.core.security.dao;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectProfileAccessEntity;
@@ -48,9 +47,6 @@ public class ObjectProfileAccessDAO extends AbstractImmutableSnaDAO<ObjectProfil
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 */
 	public ObjectProfileAccessDAO(DataStoreService dataStoreService) throws DAOException {
 		super(ObjectProfileAccessEntity.class, dataStoreService);
@@ -102,11 +98,7 @@ public class ObjectProfileAccessDAO extends AbstractImmutableSnaDAO<ObjectProfil
 	 */
 	public List<ObjectProfileAccessEntity> getObjectProfileAccesses(final long identifier)
 			throws DAOException, DataStoreException {
-		return super.select(new HashMap<String, Object>() {
-			{
-				this.put("OPID", identifier);
-			}
-		});
+		return super.select(Collections.singletonMap("OPID", identifier));
 	}
 
 }

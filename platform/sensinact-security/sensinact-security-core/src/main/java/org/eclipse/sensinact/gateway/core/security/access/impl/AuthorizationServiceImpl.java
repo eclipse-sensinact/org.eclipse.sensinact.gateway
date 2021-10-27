@@ -27,7 +27,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
 	 * @param authenticatedAccessLevelDAO
 	 * 
 	 * @throws DAOException

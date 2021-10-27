@@ -11,11 +11,8 @@
 package org.eclipse.sensinact.gateway.core.security.dao;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectAccessEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
@@ -29,9 +26,6 @@ public class ObjectAccessDAO extends AbstractImmutableSnaDAO<ObjectAccessEntity>
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 */
 	public ObjectAccessDAO(DataStoreService dataStoreService) throws DAOException {
 		super(ObjectAccessEntity.class, dataStoreService);

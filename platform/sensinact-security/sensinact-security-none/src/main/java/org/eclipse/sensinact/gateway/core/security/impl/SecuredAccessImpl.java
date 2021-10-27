@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.security.impl;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
@@ -33,18 +32,13 @@ import org.slf4j.LoggerFactory;
 public class SecuredAccessImpl implements SecuredAccess {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SecuredAccessImpl.class);
-	
-	private Mediator mediator;
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator the {@link Mediator} allowing the {@link SecuredAccess} service 
-	 * to be instantiated to interact with the OSGi host environment
 	 */
 	@Activate
 	public SecuredAccessImpl(BundleContext ctx) {
-		this.mediator = new Mediator(ctx);
 	}
 
 	@Override
@@ -76,7 +70,7 @@ public class SecuredAccessImpl implements SecuredAccess {
 	@Override
 	public MutableAccessTree<? extends MutableAccessNode> getAccessTree(String identifier)
 			throws SecuredAccessException {
-		MutableAccessTree<? extends MutableAccessNode> accessTree = new AccessTreeImpl<>(mediator)
+		MutableAccessTree<? extends MutableAccessNode> accessTree = new AccessTreeImpl<>()
 				.withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
 		return accessTree;
 	}

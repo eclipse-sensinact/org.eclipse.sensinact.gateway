@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core.security.dao;
 import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.AgentEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ApplicationEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.AuthenticatedEntity;
@@ -53,9 +52,6 @@ public class AuthenticatedDAO extends AbstractMutableSnaDAO<AuthenticatedEntity>
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @throws DAOException
 	 */
 	public AuthenticatedDAO(DataStoreService dataStoreService) throws DAOException {

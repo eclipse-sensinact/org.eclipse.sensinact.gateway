@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core.security.dao;
 import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.entity.AuthenticatedAccessLevelEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
@@ -45,9 +44,6 @@ public class AuthenticatedAccessLevelDAO extends AbstractImmutableSnaDAO<Authent
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host
-	 *            environment
 	 * @throws DAOException
 	 */
 	public AuthenticatedAccessLevelDAO(DataStoreService dataStoreService) throws DAOException {

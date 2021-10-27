@@ -13,8 +13,9 @@ package org.eclipse.sensinact.gateway.core.security;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link UserUpdater} abstract implementation
@@ -22,6 +23,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class AbstractUserUpdater implements UserUpdater{
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractUserUpdater.class);
 
 	/**
 	 * @return
@@ -29,7 +31,6 @@ public abstract class AbstractUserUpdater implements UserUpdater{
 	 */
 	protected abstract String doUpdate() throws SecuredAccessException;
 	
-	private final Mediator mediator;
 	private final String token;
 	private final String updateType;
 	
@@ -38,18 +39,13 @@ public abstract class AbstractUserUpdater implements UserUpdater{
 
 	/**
 	 * Constructor 
-	 * 
-	 * @param mediator 
-	 * 		the {@link Mediator} allowing the {@link UserUpdater} to be created 
-	 * 		to interact with the OSGi host environment 
 	 * @param token 
 	 * 		the String token validating the operation held by the {@link UserUpdater}
 	 * 		to be created
 	 * @param updateType 
 	 * 		the String operation held by the {@link UserUpdater} to be created
 	 */
-	protected AbstractUserUpdater(Mediator mediator, String token, String updateType){
-		this.mediator = mediator;
+	protected AbstractUserUpdater(String token, String updateType){
 		this.token = token;
 		if(this.token == null) {
 			throw new NullPointerException("Token required");
@@ -76,7 +72,7 @@ public abstract class AbstractUserUpdater implements UserUpdater{
 				try {
 					AbstractUserUpdater.this.registration.unregister();
 				}catch(IllegalStateException e) {
-					AbstractUserUpdater.this.mediator.error(e);
+					LOG.error(e.getMessage(),e);
 				}
 			}
 		}, 1000*60*60);		
@@ -100,7 +96,7 @@ public abstract class AbstractUserUpdater implements UserUpdater{
 				try{
 					registration.unregister();
 				} catch(IllegalStateException e) {
-					this.mediator.error(e);
+					LOG.error(e.getMessage(),e);
 				}
 			}		
 			builder.append("validated");

@@ -52,7 +52,7 @@ public class TestResourceIntent<R extends ModelInstance> {
 	public void init() throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException,
 			DataStoreException, BundleException {
 		this.testContext = new TestContext();
-		this.tree = new AccessTreeImpl(testContext.getMediator()).withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
+		this.tree = new AccessTreeImpl().withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
 	}
 
 	@AfterEach

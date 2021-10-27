@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
@@ -87,7 +86,6 @@ public class SecuredAccessImpl implements SecuredAccess {
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
 
-	private final Mediator mediator;
 	private final SecurityDataStoreService dataStoreService;
 
 	private BundleDAO bundleDAO;
@@ -102,17 +100,14 @@ public class SecuredAccessImpl implements SecuredAccess {
 
 	private ServiceRegistration<AuthorizationService> authorizationRegistration;
 
+
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing to interact with the OSGi host 
-	 *            environment
 	 * @throws DataStoreException
 	 */
 	@Activate
 	public SecuredAccessImpl(BundleContext ctx, @Reference SecurityDataStoreService dataStore) throws SecuredAccessException {
-		this.mediator = new Mediator(ctx);
 		this.dataStoreService = dataStore;
 		try {
 			this.applicationDAO = new ApplicationDAO(dataStoreService);
@@ -126,7 +121,7 @@ public class SecuredAccessImpl implements SecuredAccess {
 
 			rootObjectProfileOption = this.objectProfileAccessDAO.getAccessProfileOption(root.getObjectProfileEntity());
 			
-			this.authorizationRegistration = this.mediator.getContext().registerService(AuthorizationService.class,
+			this.authorizationRegistration = ctx.registerService(AuthorizationService.class,
 					new AuthorizationServiceImpl(this.authenticatedAccessLevelDAO), null);
 		} catch (DAOException | DataStoreException e) {
 			throw new SecuredAccessException(e);
@@ -178,7 +173,7 @@ public class SecuredAccessImpl implements SecuredAccess {
 			} else {
 				option = this.objectProfileAccessDAO.getAccessProfileOption(object.getObjectProfileEntity());
 			}
-			tree = new AccessTreeImpl<>(mediator).withAccessProfile(option);
+			tree = new AccessTreeImpl<>().withAccessProfile(option);
 
 		} catch (Exception e) {
 			throw new SecuredAccessException(e);
@@ -211,7 +206,7 @@ public class SecuredAccessImpl implements SecuredAccess {
 			for (int index = 0; index < length; index++) {
 				methodAccesses.add(new MethodAccessImpl(option.getAccessLevel(), types[index]));
 			}
-			tree = new AccessTreeImpl<>(mediator);
+			tree = new AccessTreeImpl<>();
 			tree.getRoot().withAccessProfile(new AccessProfileImpl(methodAccesses));
 			this.buildTree(tree, publicKey);// user);
 
@@ -340,7 +335,7 @@ public class SecuredAccessImpl implements SecuredAccess {
 			for (int index = 0; index < length; index++) {
 				methodAccesses.add(new MethodAccessImpl(option.getAccessLevel(), types[index]));
 			}
-			tree = new AccessTreeImpl<>(mediator);
+			tree = new AccessTreeImpl<>();
 			tree.getRoot().withAccessProfile(new AccessProfileImpl(methodAccesses));
 			this.buildTree(tree, // this.applicationDAO.findFromPublicKey(
 					publicKey);// );
