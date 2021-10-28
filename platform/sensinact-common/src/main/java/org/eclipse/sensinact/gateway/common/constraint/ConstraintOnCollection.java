@@ -46,19 +46,13 @@ public abstract class ConstraintOnCollection<T> implements Constraint {
      * Operand array component type
      */
     protected Class<T> operandClass;
-    /**
-     * Mediator used to interact with the OSGi host
-     * environment
-     */
-    protected final ClassLoader classloader;
 
     /**
      * @param operator
      * @param operand
      * @throws InvalidConstraintDefinitionException
      */
-    public ConstraintOnCollection(ClassLoader classloader, String operator, T[] operand, boolean complement) throws InvalidConstraintDefinitionException {
-        this.classloader = classloader;
+    public ConstraintOnCollection(String operator, T[] operand, boolean complement) throws InvalidConstraintDefinitionException {
         this.operator = operator;
         if (operand == null) {
             throw new InvalidConstraintDefinitionException("operand argument is required");
@@ -81,11 +75,10 @@ public abstract class ConstraintOnCollection<T> implements Constraint {
      * @throws InvalidConstraintDefinitionException
      */
     @SuppressWarnings("unchecked")
-    public ConstraintOnCollection(ClassLoader classloader, String operator, Class<T> operandClass, Object operand, boolean complement) throws InvalidConstraintDefinitionException {
+    public ConstraintOnCollection(String operator, Class<T> operandClass, Object operand, boolean complement) throws InvalidConstraintDefinitionException {
         if (operandClass == null) {
             throw new InvalidConstraintDefinitionException("type is required");
         }
-        this.classloader = classloader;
         this.operator = operator;
         this.complement = complement;
 

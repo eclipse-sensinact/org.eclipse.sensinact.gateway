@@ -31,8 +31,8 @@ public class Contains<T> extends ConstraintOnCollection<T> {
      * @param operand
      * @throws InvalidConstraintDefinitionException
      */
-    public Contains(ClassLoader classloader, Class<T> operandClass, Object operand, boolean complement) throws InvalidConstraintDefinitionException {
-        super(classloader, OPERATOR, operandClass, operand, complement);
+    public Contains(Class<T> operandClass, Object operand, boolean complement) throws InvalidConstraintDefinitionException {
+        super(OPERATOR, operandClass, operand, complement);
     }
 
     /**
@@ -66,7 +66,7 @@ public class Contains<T> extends ConstraintOnCollection<T> {
     public Constraint getComplement() {
         Contains complement = null;
         try {
-            complement = new Contains(super.classloader, super.operandClass, super.operand, !super.complement);
+            complement = new Contains(super.operandClass, super.operand, !super.complement);
         } catch (InvalidConstraintDefinitionException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }

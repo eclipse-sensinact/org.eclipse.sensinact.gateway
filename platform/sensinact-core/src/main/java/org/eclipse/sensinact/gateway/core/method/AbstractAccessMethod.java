@@ -297,7 +297,7 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 				Parameter parameter = entry.getValue();
 				try {
 					((AccessMethodExecutorWrapper) methodExecutor).put(entry.getKey(), new Fixed(
-							this.mediator.getClassLoader(), parameter.getType(), parameter.getValue(), false));
+						 parameter.getType(), parameter.getValue(), false));
 
 				} catch (InvalidConstraintDefinitionException e) {
 					if (LOG.isErrorEnabled()) {

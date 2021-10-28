@@ -23,8 +23,8 @@ public class MinLength extends ConstraintOnCollectionSize {
      * @param length   integer value on which will be based the compliance evaluation
      *                 of the size of a collection
      */
-    public MinLength(ClassLoader classloader, int length, boolean complement) {
-        super(classloader, OPERATOR, length, complement);
+    public MinLength(int length, boolean complement) {
+        super(OPERATOR, length, complement);
     }
 
     /**
@@ -44,7 +44,7 @@ public class MinLength extends ConstraintOnCollectionSize {
     @Override
     public Constraint getComplement() {
         MinLength complement = null;
-        complement = new MinLength(super.classloader, super.length, !this.complement);
+        complement = new MinLength(super.length, !this.complement);
         return complement;
     }
 }

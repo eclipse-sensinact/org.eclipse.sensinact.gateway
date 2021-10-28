@@ -419,7 +419,7 @@ public class SnaFilter implements JSONable {
 	 */
 	private boolean handleChangedStatus(Boolean status) {
 		if (this.changed == null) {
-			this.changed = new Changed(mediator.getClassLoader());
+			this.changed = new Changed();
 		}
 		boolean handle = this.changed.complies(status);
 		return handle;

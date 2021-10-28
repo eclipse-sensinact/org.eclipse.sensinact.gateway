@@ -10,13 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.common.constraint;
 
-import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.ServiceLoader;
+
+import javax.swing.SpringLayout.Constraints;
+
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * {@link Constraint} factory service
@@ -54,7 +57,7 @@ public interface ConstraintFactory {
             if (factory == null) {
                 throw new InvalidConstraintDefinitionException("No factory found");
             }
-            return factory.newInstance(classloader, constraint, referenceClass, reference, complement);
+            return factory.newInstance(constraint, referenceClass, reference, complement);
         }
 
         /**
@@ -232,6 +235,6 @@ public interface ConstraintFactory {
      * @return the new created {@link Constraint}
      * @throws InvalidConstraintDefinitionException
      */
-    Constraint newInstance(ClassLoader classloader, String constraint, Class<?> referenceType, Object reference, boolean complement) throws InvalidConstraintDefinitionException;
+    Constraint newInstance(String constraint, Class<?> referenceType, Object reference, boolean complement) throws InvalidConstraintDefinitionException;
 
 }

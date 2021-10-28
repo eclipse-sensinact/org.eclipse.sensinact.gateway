@@ -32,20 +32,14 @@ public class Pattern implements Constraint {
     protected final String operand;
 
     protected final boolean complement;
-    /**
-     * Mediator used to interact with the OSGi host
-     * environment
-     */
-    protected final ClassLoader classloader;
 
     /**
      * @param operator
      * @param operand
      * @throws InvalidConstraintDefinitionException
      */
-    public Pattern(ClassLoader classloader, String operand, boolean complement) throws InvalidConstraintDefinitionException {
+    public Pattern(String operand, boolean complement) throws InvalidConstraintDefinitionException {
         this.complement = complement;
-        this.classloader = classloader;
 
         if ((operand == null) || (operand.length() == 0)) {
             throw new InvalidConstraintDefinitionException("Unable to create a regular expression using an empty or null string");
@@ -136,7 +130,7 @@ public class Pattern implements Constraint {
     public Constraint getComplement() {
         Pattern complement = null;
         try {
-            complement = new Pattern(this.classloader, this.operand, !this.complement);
+            complement = new Pattern(this.operand, !this.complement);
         } catch (InvalidConstraintDefinitionException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }

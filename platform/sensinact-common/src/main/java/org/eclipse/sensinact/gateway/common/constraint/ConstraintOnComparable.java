@@ -10,10 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.common.constraint;
 
+import java.util.logging.Logger;
+
+import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
-
-import java.util.logging.Logger;
 
 /**
  * Constraint applying on {@link Comparable} objects
@@ -52,19 +53,13 @@ public abstract class ConstraintOnComparable<T> implements Constraint {
      * logical complement of the raw defined constraint
      */
     protected final boolean complement;
-    /**
-     * Mediator used to interact with the OSGi host
-     * environment
-     */
-    protected final ClassLoader classloader;
 
     /**
      * @param operator
      * @param operand
      * @throws InvalidConstraintDefinitionException
      */
-    public ConstraintOnComparable(ClassLoader classloader, String operator, Comparable<T> operand, boolean complement) {
-        this.classloader = classloader;
+    public ConstraintOnComparable(String operator, Comparable<T> operand, boolean complement) {
         this.operator = operator;
         this.operand = operand;
         this.complement = complement;
@@ -77,8 +72,7 @@ public abstract class ConstraintOnComparable<T> implements Constraint {
      * @throws InvalidConstraintDefinitionException
      */
     @SuppressWarnings("unchecked")
-    public ConstraintOnComparable(ClassLoader classloader, String operator, Class<?> operandClass, Object operand, boolean complement) throws InvalidConstraintDefinitionException {
-        this.classloader = classloader;
+    public ConstraintOnComparable(String operator, Class<?> operandClass, Object operand, boolean complement) throws InvalidConstraintDefinitionException {
         this.operator = operator;
         Class<?> comparableClass = operandClass;
 

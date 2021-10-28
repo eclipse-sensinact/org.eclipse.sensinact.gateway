@@ -27,8 +27,8 @@ public class MinInclusive<T> extends ConstraintOnComparable<T> {
      * @param operand
      * @throws InvalidConstraintDefinitionException
      */
-    public MinInclusive(ClassLoader classloader, Class<T> operandClass, Object operand, boolean complement) throws InvalidConstraintDefinitionException {
-        super(classloader, OPERATOR, operandClass, operand, complement);
+    public MinInclusive(Class<T> operandClass, Object operand, boolean complement) throws InvalidConstraintDefinitionException {
+        super(OPERATOR, operandClass, operand, complement);
     }
 
     /**
@@ -49,7 +49,7 @@ public class MinInclusive<T> extends ConstraintOnComparable<T> {
     public Constraint getComplement() {
         MinInclusive complement = null;
         try {
-            complement = new MinInclusive(super.classloader, (Class<Comparable<T>>) super.operand.getClass(), super.operand, !this.complement);
+            complement = new MinInclusive((Class<Comparable<T>>) super.operand.getClass(), super.operand, !this.complement);
         } catch (InvalidConstraintDefinitionException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }

@@ -75,7 +75,7 @@ public class DefaultConstraintFactory implements ConstraintFactory {
      * newInstance(java.lang.String, java.lang.Class, java.lang.Object, boolean)
      */
     @Override
-    public Constraint newInstance(ClassLoader classloader, String constraint, Class<?> referenceType, Object reference, boolean complement) throws InvalidConstraintDefinitionException {
+    public Constraint newInstance(String constraint, Class<?> referenceType, Object reference, boolean complement) throws InvalidConstraintDefinitionException {
         Type type = null;
 
         if ((type = valueOf(constraint.toUpperCase())) == null && (type = Type.fromOperator(constraint)) == null) {
@@ -87,56 +87,56 @@ public class DefaultConstraintFactory implements ConstraintFactory {
                 if (!reference.getClass().isArray() || Array.getLength(reference) != 2) {
                     throw new InvalidConstraintDefinitionException(new StringBuilder().append("Invalid constraint definition :  ").append("array of Numbers expected").toString());
                 }
-                instance = new Absolute(classloader, Array.get(reference, 0), Array.get(reference, 1), complement);
+                instance = new Absolute(Array.get(reference, 0), Array.get(reference, 1), complement);
                 break;
             case CHANGED:
-                instance = new Changed(classloader, complement);
+                instance = new Changed(complement);
                 break;
             case DELTA:
                 if (!reference.getClass().isArray() || Array.getLength(reference) != 2) {
                     throw new InvalidConstraintDefinitionException(new StringBuilder().append("Invalid constraint definition :  ").append("array of Numbers expected").toString());
                 }
-                instance = new Delta(classloader, Array.get(reference, 0), Array.get(reference, 1), complement);
+                instance = new Delta(Array.get(reference, 0), Array.get(reference, 1), complement);
                 break;
             case DIFFERENT:
-                instance = new Different(classloader, referenceType, reference, complement);
+                instance = new Different(referenceType, reference, complement);
                 break;
             case EXISTS:
                 instance = new Exists(complement);
                 break;
             case FIXED:
-                instance = new Fixed(classloader, referenceType, reference, complement);
+                instance = new Fixed(referenceType, reference, complement);
                 break;
             case MAXEXCLUSIVE:
-                instance = new MaxExclusive(classloader, referenceType, reference, complement);
+                instance = new MaxExclusive(referenceType, reference, complement);
                 break;
             case MAXINCLUSIVE:
-                instance = new MaxInclusive(classloader, referenceType, reference, complement);
+                instance = new MaxInclusive(referenceType, reference, complement);
                 break;
             case MINEXCLUSIVE:
-                instance = new MinExclusive(classloader, referenceType, reference, complement);
+                instance = new MinExclusive(referenceType, reference, complement);
                 break;
             case MININCLUSIVE:
-                instance = new MinInclusive(classloader, referenceType, reference, complement);
+                instance = new MinInclusive(referenceType, reference, complement);
                 break;
             case ENUMERATION:
-                instance = new Contains(classloader, referenceType, reference, complement);
+                instance = new Contains(referenceType, reference, complement);
                 break;
             case LENGTH:
                 referenceType = int.class;
-                instance = new Length(classloader, CastUtils.cast(int.class, reference), complement);
+                instance = new Length(CastUtils.cast(int.class, reference), complement);
                 break;
             case MAXLENGTH:
                 referenceType = int.class;
-                instance = new MaxLength(classloader, CastUtils.cast(int.class, reference), complement);
+                instance = new MaxLength(CastUtils.cast(int.class, reference), complement);
                 break;
             case MINLENGTH:
                 referenceType = int.class;
-                instance = new MinLength(classloader, CastUtils.cast(int.class, reference), complement);
+                instance = new MinLength(CastUtils.cast(int.class, reference), complement);
                 break;
             case PATTERN:
                 referenceType = String.class;
-                instance = new Pattern(classloader, String.valueOf(reference), complement);
+                instance = new Pattern(String.valueOf(reference), complement);
                 break;
             case TRUE:
                 instance = new True(complement);
