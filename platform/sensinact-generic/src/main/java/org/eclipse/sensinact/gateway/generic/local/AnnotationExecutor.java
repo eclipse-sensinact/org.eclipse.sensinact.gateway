@@ -17,8 +17,6 @@ import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskCommand;
 import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.eclipse.sensinact.gateway.util.UriUtils;
-
 import java.util.Arrays;
 
 /**

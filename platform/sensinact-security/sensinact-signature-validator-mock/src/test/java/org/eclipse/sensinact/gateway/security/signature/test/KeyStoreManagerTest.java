@@ -25,10 +25,7 @@ import java.security.cert.CertificateException;
 
 import org.eclipse.sensinact.gateway.security.signature.internal.KeyStoreManager;
 import org.eclipse.sensinact.gateway.security.signature.internal.KeyStoreManagerException;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.osgi.framework.BundleContext;
-import org.osgi.test.common.annotation.InjectBundleContext;
 
 public class KeyStoreManagerTest {
     static KeyStoreManager ksm = null;

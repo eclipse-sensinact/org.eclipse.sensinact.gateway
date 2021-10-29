@@ -12,9 +12,7 @@ package org.eclipse.sensinact.gateway.generic.test.tb.moke3;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
-import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.uri.GenericURITask;
-import org.eclipse.sensinact.gateway.generic.uri.URITask;
 import org.eclipse.sensinact.gateway.generic.uri.URITaskTranslator;
 
 import java.util.Collections;

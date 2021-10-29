@@ -13,14 +13,8 @@ package org.eclipse.sensinact.gateway.sthbnd.http.task.config;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.sthbnd.http.annotation.SimpleHttpTask;
-import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTasks;
-import org.eclipse.sensinact.gateway.sthbnd.http.task.JSONHttpChainedTasks;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

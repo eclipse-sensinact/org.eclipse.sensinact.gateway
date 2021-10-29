@@ -18,7 +18,6 @@ import org.eclipse.sensinact.gateway.app.api.function.FunctionUpdateListener;
 import org.eclipse.sensinact.gateway.app.basic.time.SleepFunction;
 import org.eclipse.sensinact.gateway.app.manager.component.data.ConstantData;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 public class TestTimeFunction {

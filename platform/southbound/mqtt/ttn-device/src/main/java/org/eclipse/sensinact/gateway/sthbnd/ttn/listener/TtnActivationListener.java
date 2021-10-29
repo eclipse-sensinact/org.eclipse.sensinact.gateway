@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.sthbnd.ttn.listener;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttPacket;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.listener.MqttTopicMessage;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.model.TtnActivationPayload;

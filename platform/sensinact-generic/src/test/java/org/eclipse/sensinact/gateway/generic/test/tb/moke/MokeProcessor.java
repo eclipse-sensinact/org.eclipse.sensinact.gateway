@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.generic.test.tb.moke;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.Connector;
-import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.test.ProcessorService;
 
 /**

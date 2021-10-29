@@ -27,7 +27,6 @@ import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricSpatial
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricSpatioTemporalRequest;
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricTemporalRequest;
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.TemporalDTO;
-import org.json.JSONObject;
 import org.osgi.dto.DTO;
 
 /**

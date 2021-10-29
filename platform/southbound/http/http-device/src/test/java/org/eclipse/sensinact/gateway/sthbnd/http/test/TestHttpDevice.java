@@ -10,8 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.test;
 
-import org.eclipse.sensinact.gateway.common.primitive.Describable;
-import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Resource;
@@ -22,26 +20,18 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.Bundle;
 import org.osgi.test.common.annotation.InjectInstalledBundle;
 import org.osgi.test.common.annotation.InjectService;
-import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.context.InstalledBundleExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;

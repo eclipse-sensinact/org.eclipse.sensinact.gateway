@@ -14,7 +14,6 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory;
-import org.eclipse.sensinact.gateway.generic.packet.PacketReaderFactory;
 import org.json.JSONObject;
 
 import aQute.bnd.annotation.Resolution;
