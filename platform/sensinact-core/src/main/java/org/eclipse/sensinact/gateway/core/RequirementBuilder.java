@@ -110,7 +110,7 @@ public class RequirementBuilder implements Nameable, Iterable<Map.Entry<String, 
 				builder.modifiable((Modifiable) value);
 				break;
 			case TYPE:
-				builder.type((Class) value);
+				builder.type((Class<?>) value);
 				break;
 			case VALUE:
 				builder.value(value);
@@ -129,7 +129,7 @@ public class RequirementBuilder implements Nameable, Iterable<Map.Entry<String, 
 	public boolean equals(Object object) {
 		if (object == null) 
 			return false;
-		Class objectClass = object.getClass();
+		Class<?> objectClass = object.getClass();
 		if (RequirementBuilder.class.isAssignableFrom(objectClass)) {
 			RequirementBuilder builder = (RequirementBuilder) object;
 			return this.equals(builder.attributeName) && this.equals(builder.requirement);

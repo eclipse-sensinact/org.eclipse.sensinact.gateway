@@ -24,7 +24,7 @@ class AppTestSnaMessage extends SnaUpdateMessageImpl {
      * @param value the object value
      * @see SnaUpdateMessageImpl
      */
-    AppTestSnaMessage(String uri, Class type, Object value) {
+    AppTestSnaMessage(String uri, Class<?> type, Object value) {
         super(uri, Update.ATTRIBUTE_VALUE_UPDATED);
         JSONObject json = new JSONObject().put(Metadata.TIMESTAMP, System.currentTimeMillis()).put(DataResource.VALUE, value).put(DataResource.TYPE, type.getCanonicalName()).put(DataResource.NAME, uri.split("/")[2]);
         super.setNotification(json);

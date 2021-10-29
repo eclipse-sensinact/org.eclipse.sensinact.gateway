@@ -21,7 +21,7 @@ public class ResourceDataProvider extends AbstractDataProvider {
     /**
      * @see AbstractDataProvider#getDataType()
      */
-    public Class getDataType() {
+    public Class<?> getDataType() {
         return null;
     }
 }

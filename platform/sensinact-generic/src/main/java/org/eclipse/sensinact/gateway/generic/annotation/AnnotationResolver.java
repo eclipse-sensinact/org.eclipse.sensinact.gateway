@@ -91,7 +91,7 @@ public class AnnotationResolver implements Iterable<Object> {
             String path = url.getPath().replaceAll("\\/|\\$", ".");
             path = path.substring(path.startsWith(".") ? 1 : 0, path.length() - 6);
             try {
-                Class loaded = bundle.loadClass(path);
+                Class<?> loaded = bundle.loadClass(path);
                 if (loaded.getAnnotation(TaskExecution.class) != null) {
                     Object instance = ReflectUtils.getTheBestInstance(loaded, new Object[]{this.mediator});
 

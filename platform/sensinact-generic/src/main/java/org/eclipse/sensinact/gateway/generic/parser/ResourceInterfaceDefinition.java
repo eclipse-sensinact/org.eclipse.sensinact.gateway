@@ -65,7 +65,7 @@ final class ResourceInterfaceDefinition extends XmlModelParsingContext {
         }
     }
 
-    private Class resolveInterfaceType(String interfaceName) {
+    private Class<?> resolveInterfaceType(String interfaceName) {
 		switch(interfaceName) {
     		case "org.eclipse.sensinact.gateway.core.StateVariableResource" :
     			return XmlResourceConfigHandler.DEFAULT_VARIABLE_INTERFACE;

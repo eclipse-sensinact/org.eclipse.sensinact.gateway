@@ -274,7 +274,7 @@ public final class AttributeBuilder implements Nameable, Cloneable {
 	 *            the type of the {@link Attribute} to build
 	 * @return this AttributeBuilder
 	 */
-	public AttributeBuilder type(Class attributeType) {
+	public AttributeBuilder type(Class<?> attributeType) {
 		if (attributeType != null && this.updateRequirements(Requirement.TYPE)) {
 			this.type = attributeType;
 		}

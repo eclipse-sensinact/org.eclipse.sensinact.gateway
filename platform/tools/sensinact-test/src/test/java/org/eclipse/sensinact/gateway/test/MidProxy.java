@@ -44,9 +44,9 @@ public class MidProxy<T> implements InvocationHandler {
         if (contextualizedClazz == null ) {
         	return null;
         }
-        ServiceReference reference = null;
+        ServiceReference<?> reference = null;
     	if((reference = this.contextProvider.getBundleContext().getServiceReference(contextualizedClazz)) != null) {
-    		return (T)this.buildProxy(this.contextProvider.getBundleContext().getService(reference));
+    		return this.buildProxy(this.contextProvider.getBundleContext().getService(reference));
     	} 
 		ServiceReference<?>[] fs = this.contextProvider.getBundleContext().getAllServiceReferences(this.serviceType.getCanonicalName(), null);
         if(fs == null || fs.length == 0) {
@@ -81,7 +81,7 @@ public class MidProxy<T> implements InvocationHandler {
 
         if (contextualizedImplementation != null && contextualizedClazz != null && contextualizedClazz.isAssignableFrom(contextualizedImplementation)) {
             try {
-                Class[] contextualizedTypes = new Class[parameterTypes.length];
+                Class<?>[] contextualizedTypes = new Class[parameterTypes.length];
                 Object[] contextualizedArgs = new Object[parameterTypes.length];
 
                 for (int i = 0; i < parameterTypes.length; i++) {
@@ -109,7 +109,7 @@ public class MidProxy<T> implements InvocationHandler {
         this.instance = instance;
         LinkedList<Class<?>> iis = ReflectUtils.getOrderedImplementedInterfaces(serviceType);
 
-        Class[] interfaces = iis.toArray(new Class[0]);
+        Class<?>[] interfaces = iis.toArray(new Class[0]);
         if (interfaces.length == 0) {
             throw new NullPointerException("No implemented interface");
         }
@@ -124,7 +124,7 @@ public class MidProxy<T> implements InvocationHandler {
 
         if (contextualizedImplementation != null && serviceType.isAssignableFrom(contextualizedImplementation)) {
             try {
-                Class[] contextualizedTypes = new Class[parameterTypes.length];
+                Class<?>[] contextualizedTypes = new Class[parameterTypes.length];
                 Object[] contextualizedArgs = new Object[parameterTypes.length];
 
                 for (int i = 0; i < parameterTypes.length; i++) {
@@ -157,7 +157,7 @@ public class MidProxy<T> implements InvocationHandler {
         Class<?> contextualizedClazz = this.omnipotentclassloader.loadClass(classname);
         LinkedList<Class<?>> iis = ReflectUtils.getOrderedImplementedInterfaces(contextualizedClazz);
 
-        Class[] interfaces = iis.toArray(new Class[0]);
+        Class<?>[] interfaces = iis.toArray(new Class[0]);
         if (interfaces.length == 0) {
             throw new NullPointerException("No implemented interface");
         }
@@ -207,7 +207,7 @@ public class MidProxy<T> implements InvocationHandler {
             result = contextualizedMethod.invoke(this.instance);
 
         } else {
-            Class[] parameterTypes = method.getParameterTypes();
+            Class<?>[] parameterTypes = method.getParameterTypes();
             Object[] contextualizedArgs = new Object[args.length];
             for (int i = 0; i < args.length; i++) {
                 contextualizedArgs[i] = this.fromOSGi(parameterTypes[i], args[i]);
@@ -233,7 +233,7 @@ public class MidProxy<T> implements InvocationHandler {
         }
         try {
             Class<?> cl = null;
-            Class clazz = m.getDeclaringClass();
+            Class<?> clazz = m.getDeclaringClass();
 
             cl = clazz.isArray() ? Class.forName("[L" + clazz.getComponentType().getName() + ";") : Thread.currentThread().getContextClassLoader().loadClass(clazz.getName());
 
@@ -241,13 +241,13 @@ public class MidProxy<T> implements InvocationHandler {
                 return null;
             }
             if (cl != clazz) {
-                Class[] parameterTypes = m.getParameterTypes();
+                Class<?>[] parameterTypes = m.getParameterTypes();
                 if (parameterTypes == null || parameterTypes.length == 0) {
                     return cl.getMethod(m.getName());
                 }
-                Class[] pts = new Class[parameterTypes.length];
+                Class<?>[] pts = new Class[parameterTypes.length];
                 for (int i = 0; i < parameterTypes.length; i++) {
-                    Class c = parameterTypes[i];
+                    Class<?> c = parameterTypes[i];
 
                     pts[i] = c.isPrimitive() ? c : (c.isArray() ? Class.forName("[L" + c.getComponentType().getName() + ";") : Thread.currentThread().getContextClassLoader().loadClass(c.getName()));
                 }
@@ -260,7 +260,7 @@ public class MidProxy<T> implements InvocationHandler {
         return m;
     }
 
-    public Object fromOSGi(Class type, Object o) {
+    public Object fromOSGi(Class<?> type, Object o) {
         if (o == null) {
             return null;
         }
@@ -275,7 +275,7 @@ public class MidProxy<T> implements InvocationHandler {
             return null;
         }
         try {
-            Class clazz = type == null ? o.getClass() : type;
+            Class<?> clazz = type == null ? o.getClass() : type;
             Class<?> cl = clazz.isArray() ? Class.forName("[L" + clazz.getComponentType().getName() + ";") : Thread.currentThread().getContextClassLoader().loadClass(clazz.getName());
 
             if (cl == null) {
@@ -312,7 +312,7 @@ public class MidProxy<T> implements InvocationHandler {
             result = contextualizedMethod.invoke(this.instance);
 
         } else {
-            Class[] parameterTypes = method.getParameterTypes();
+            Class<?>[] parameterTypes = method.getParameterTypes();
             Object[] contextualizedArgs = new Object[args.length];
             for (int i = 0; i < args.length; i++) {
                 contextualizedArgs[i] = this.toOSGi(parameterTypes[i], args[i]);
@@ -338,7 +338,7 @@ public class MidProxy<T> implements InvocationHandler {
         }
         try {
             Class<?> cl = null;
-            Class clazz = m.getDeclaringClass();
+            Class<?> clazz = m.getDeclaringClass();
 
             cl = omnipotentclassloader.loadClass(clazz.isArray() ? "[L" + clazz.getComponentType().getName() + ";" : clazz.getName());
 
@@ -347,14 +347,14 @@ public class MidProxy<T> implements InvocationHandler {
                 return null;
             }
             if (cl != clazz) {
-                Class[] parameterTypes = m.getParameterTypes();
+                Class<?>[] parameterTypes = m.getParameterTypes();
                 if (parameterTypes == null || parameterTypes.length == 0) {
                     return cl.getDeclaredMethod(m.getName());
                 }
 
-                Class[] pts = new Class[parameterTypes.length];
+                Class<?>[] pts = new Class[parameterTypes.length];
                 for (int i = 0; i < parameterTypes.length; i++) {
-                    Class c = parameterTypes[i];
+                    Class<?> c = parameterTypes[i];
                     if (c.isPrimitive()) {
                         pts[i] = c;
 
@@ -375,7 +375,7 @@ public class MidProxy<T> implements InvocationHandler {
         return m;
     }
 
-    public Object toOSGi(Class type, Object o) {
+    public Object toOSGi(Class<?> type, Object o) {
         if (o == null) {
             return null;
         }
@@ -388,7 +388,7 @@ public class MidProxy<T> implements InvocationHandler {
         }
 
         try {
-            Class clazz = type == null ? o.getClass() : type;
+            Class<?> clazz = type == null ? o.getClass() : type;
             Class<?> cl = omnipotentclassloader.loadClass(clazz.isArray() ? "[L" + clazz.getComponentType().getName() + ";" : clazz.getName());
 
             if (cl == null) {

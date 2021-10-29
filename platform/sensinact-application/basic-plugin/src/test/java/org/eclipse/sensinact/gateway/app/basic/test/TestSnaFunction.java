@@ -108,9 +108,9 @@ public class TestSnaFunction{
         Mockito.when(context.getServiceReferences(Mockito.any(Class.class), Mockito.anyString())).thenAnswer(new Answer<Object>() {
             @Override
             public Collection<ServiceReference> answer(InvocationOnMock invocation) throws Throwable {
-                if (SecuredAccess.class.isAssignableFrom((Class) invocation.getArguments()[0])) {
+                if (SecuredAccess.class.isAssignableFrom((Class<?>) invocation.getArguments()[0])) {
                     return Collections.singletonList(reference);
-                } else if (AuthorizationService.class.isAssignableFrom((Class) invocation.getArguments()[0])) {
+                } else if (AuthorizationService.class.isAssignableFrom((Class<?>) invocation.getArguments()[0])) {
                     return Collections.singletonList(referenceAuth);
                 }
                 return null;

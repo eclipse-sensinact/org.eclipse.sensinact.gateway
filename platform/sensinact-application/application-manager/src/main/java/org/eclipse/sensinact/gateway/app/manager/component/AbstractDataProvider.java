@@ -52,7 +52,7 @@ public abstract class AbstractDataProvider implements DataProviderItf {
         return data;
     }
 
-    public abstract Class getDataType();
+    public abstract Class<?> getDataType();
 
     /**
      * Add a new listener to the notifier list

@@ -116,10 +116,10 @@ public class ApplicationFactory {
             }
             nodeMap.put(resultUri, new Node(resultUri, function.isAsynchronous()));
             // Construct the DataProviders (i.e., the result of the functions)
-            DataProvider resultData = new DataProvider(resultUri, (Class) argumentType);
+            DataProvider resultData = new DataProvider(resultUri, (Class<?>) argumentType);
             Dictionary<String, String> resultProperties = new Hashtable<String, String>();
             resultProperties.put("application", container.getApplicationName());
-            resultProperties.put("type", ((Class) argumentType).getCanonicalName());
+            resultProperties.put("type", ((Class<?>) argumentType).getCanonicalName());
             resultProperties.put("uri", resultUri);
             dataProvidersRegistration.add(mediator.registerService(DataProviderItf.class.getCanonicalName(), resultData, resultProperties));
             Map<String, DataProvider> componentDataProviderMap = new HashMap<String, DataProvider>();

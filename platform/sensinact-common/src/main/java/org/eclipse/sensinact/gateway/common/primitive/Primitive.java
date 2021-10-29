@@ -57,7 +57,7 @@ public abstract class Primitive implements Nameable {
     /**
      * the type of this Primitive's value
      */
-    protected final Class type;
+    protected final Class<?> type;
 
     /**
      * the name of this {@link Primitive}
@@ -75,7 +75,7 @@ public abstract class Primitive implements Nameable {
      * @param name the name of the Primitive to instantiate
      * @param type the type of the Primitive to instantiate
      */
-    protected Primitive(Mediator mediator, String name, Class type) throws InvalidValueException {
+    protected Primitive(Mediator mediator, String name, Class<?> type) throws InvalidValueException {
         checkType(type);
         this.mediator = mediator;
         this.name = name;
@@ -114,7 +114,7 @@ public abstract class Primitive implements Nameable {
      * @param value the value of the Primitive to instantiate
      * @throws InvalidConstraintDefinitionException
      */
-    protected Primitive(Mediator mediator, String name, Class type, Object value) throws InvalidValueException {
+    protected Primitive(Mediator mediator, String name, Class<?> type, Object value) throws InvalidValueException {
         this(mediator, name, type);
         if (value != null) {
             this.setValue(value);
