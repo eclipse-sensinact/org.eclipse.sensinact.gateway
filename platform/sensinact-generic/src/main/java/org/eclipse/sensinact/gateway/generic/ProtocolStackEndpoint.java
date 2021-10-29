@@ -209,7 +209,7 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
      */
     public void process(P packet) throws InvalidPacketException {
         if (connector == null) {
-        	ProtocolStackEndpoint.this.LOG.debug("No processor connected");
+        	ProtocolStackEndpoint.LOG.debug("No processor connected");
             return;
         }
         connector.process(packet);
@@ -322,6 +322,6 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
         if (this.connector != null) 
             this.connector.stop();
         else 
-        	ProtocolStackEndpoint.this.LOG.debug("No processor connected");
+        	ProtocolStackEndpoint.LOG.debug("No processor connected");
     }
 }
