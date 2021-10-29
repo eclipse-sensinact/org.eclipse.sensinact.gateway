@@ -169,15 +169,15 @@ public class TestSnaFunction{
         Mockito.when(session.resource(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("DIM"))).thenReturn(dimResource);
    
         Mockito.when(session.getResource(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("TURN_ON"))).thenReturn(
-    		new DescribeResponse<JSONObject>(mediator, "/SimulatedLight_001/LightService_SimulatedLight_001/TURN_ON", Status.SUCCESS, DescribeType.RESOURCE) {
+    		new DescribeResponse<JSONObject>("/SimulatedLight_001/LightService_SimulatedLight_001/TURN_ON", Status.SUCCESS, DescribeType.RESOURCE) {
     			{this.putValue(SnaConstants.RESPONSE_KEY, new JSONObject().put(Resource.TYPE, Resource.Type.ACTION.name()));}
     		});
         Mockito.when(session.getResource(Mockito.eq("SimulatedTV_001"), Mockito.eq("DisplayService_SimulatedTV_001"), Mockito.eq("DISPLAY"))).thenReturn(
-        	new DescribeResponse<JSONObject>(mediator, "/SimulatedTV_001/DisplayService_SimulatedTV_001/DISPLAY", Status.SUCCESS, DescribeType.RESOURCE) {
+        	new DescribeResponse<JSONObject>("/SimulatedTV_001/DisplayService_SimulatedTV_001/DISPLAY", Status.SUCCESS, DescribeType.RESOURCE) {
     			{this.putValue(SnaConstants.RESPONSE_KEY, new JSONObject().put(Resource.TYPE, Resource.Type.ACTION.name()));}
         	});
         Mockito.when(session.getResource(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("DIM"))).thenReturn(
-        	new DescribeResponse<JSONObject>(mediator, "/SimulatedLight_001/LightService_SimulatedLight_001/DIM", Status.SUCCESS, DescribeType.RESOURCE) {
+        	new DescribeResponse<JSONObject>("/SimulatedLight_001/LightService_SimulatedLight_001/DIM", Status.SUCCESS, DescribeType.RESOURCE) {
     			{this.putValue(SnaConstants.RESPONSE_KEY, new JSONObject().put(Resource.TYPE, Resource.Type.PROPERTY.name()));}
         	});
         final ActResponse actionResponse = Mockito.mock(ActResponse.class);

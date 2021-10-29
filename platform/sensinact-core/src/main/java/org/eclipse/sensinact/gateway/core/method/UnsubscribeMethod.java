@@ -34,6 +34,6 @@ public class UnsubscribeMethod extends AbstractAccessMethod<JSONObject, Unsubscr
 	 */
 	@Override
 	protected UnsubscribeResponseBuilder createAccessMethodResponseBuilder(Object[] parameters) {
-		return new UnsubscribeResponseBuilder(super.mediator, uri, parameters);
+		return new UnsubscribeResponseBuilder(uri, parameters);
 	}
 }

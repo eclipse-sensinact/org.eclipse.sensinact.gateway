@@ -162,7 +162,7 @@ public class TestComponentInstance implements TestResult {
         Mockito.when(session.get(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(getResponse);
 
         Mockito.when(session.getResource(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(
-    		new DescribeResponse<JSONObject>(mediator, "/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider", Status.SUCCESS, DescribeType.RESOURCE) {});
+    		new DescribeResponse<JSONObject>("/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider", Status.SUCCESS, DescribeType.RESOURCE) {});
 
         Mockito.when(session.subscribe(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Recipient.class), Mockito.any(JSONArray.class))).thenReturn(
     		subscribeResponse);
@@ -251,7 +251,7 @@ public class TestComponentInstance implements TestResult {
                 e.printStackTrace();
             }
             application.start();
-            message = new AppTestSnaMessage(mediator, "/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider", int.class, 1);
+            message = new AppTestSnaMessage("/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider", int.class, 1);
             try {
                 application.callback("id", new SnaMessage[]{message});
             } catch (Exception e) {

@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.method;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONObject;
@@ -27,8 +26,8 @@ public abstract class AccessMethodJSONResponse extends AccessMethodResponse<JSON
 	 * @param type
 	 * @param status
 	 */
-	protected AccessMethodJSONResponse(Mediator mediator, String uri, Response type, Status status) {
-		this(mediator, uri, type, status,
+	protected AccessMethodJSONResponse(String uri, Response type, Status status) {
+		this(uri, type, status,
 				(status == Status.SUCCESS) ? AccessMethodJSONResponse.SUCCESS_CODE : UNKNOWN_ERROR_CODE);
 	}
 
@@ -37,8 +36,8 @@ public abstract class AccessMethodJSONResponse extends AccessMethodResponse<JSON
 	 * @param type
 	 * @param status
 	 */
-	protected AccessMethodJSONResponse(Mediator mediator, String uri, Response type, Status status, int statusCode) {
-		super(mediator, uri, type, status, statusCode);
+	protected AccessMethodJSONResponse(String uri, Response type, Status status, int statusCode) {
+		super(uri, type, status, statusCode);
 	}
 
 	/**

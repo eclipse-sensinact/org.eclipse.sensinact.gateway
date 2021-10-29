@@ -41,7 +41,7 @@ class DisplayActionResource implements ActionResource {
     @Override
     public ActResponse act(Object... objects) {
         function.setDisplay((String) objects[0], (Integer) objects[1]);
-        return new AppActionResponse(this.mediator, "/SimulatedTV_001/DisplayService_SimulatedTV_001/DISPLAY", AccessMethodResponse.Status.SUCCESS, 200);
+        return new AppActionResponse("/SimulatedTV_001/DisplayService_SimulatedTV_001/DISPLAY", AccessMethodResponse.Status.SUCCESS, 200);
     }
 
     @Override

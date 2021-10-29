@@ -35,24 +35,22 @@ public class UnknownAccessMethodResponse extends AccessMethodResponse<String> {
 	// ********************************************************************//
 
 	/**
-	 * @param mediator
 	 * @param uri
 	 * @param typeName
 	 * @param status
 	 */
-	public UnknownAccessMethodResponse(Mediator mediator, String uri) {
-		this(mediator, uri, Response.UNKNOWN_METHOD_RESPONSE, Status.ERROR, 404);
+	public UnknownAccessMethodResponse(String uri) {
+		this( uri, Response.UNKNOWN_METHOD_RESPONSE, Status.ERROR, 404);
 	}
 
 	/**
-	 * @param mediator
 	 * @param uri
 	 * @param type
 	 * @param status
 	 * @param statusCode
 	 */
-	public UnknownAccessMethodResponse(Mediator mediator, String uri, Response type, Status status, int statusCode) {
-		super(mediator, uri, type, status, statusCode);
+	public UnknownAccessMethodResponse(String uri, Response type, Status status, int statusCode) {
+		super(uri, type, status, statusCode);
 	}
 
 }

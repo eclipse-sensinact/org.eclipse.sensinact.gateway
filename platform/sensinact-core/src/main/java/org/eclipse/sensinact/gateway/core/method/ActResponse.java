@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core.method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.core.StateVariableResource;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
@@ -32,16 +31,16 @@ public class ActResponse extends AccessMethodJSONResponse {
 	 * @param status
 	 * @param code
 	 */
-	protected ActResponse(Mediator mediator, String uri, Status status) {
-		this(mediator, uri, status,
+	protected ActResponse(String uri, Status status) {
+		this(uri, status,
 				Status.SUCCESS.equals(status) ? SnaErrorfulMessage.NO_ERROR : SnaErrorfulMessage.UNKNOWN_ERROR_CODE);
 	}
 
 	/**
 	 * @param status
 	 */
-	public ActResponse(Mediator mediator, String uri, Status status, int code) {
-		super(mediator, uri, AccessMethodResponse.Response.ACT_RESPONSE, status, code);
+	public ActResponse(String uri, Status status, int code) {
+		super(uri, AccessMethodResponse.Response.ACT_RESPONSE, status, code);
 	}
 
 	/**

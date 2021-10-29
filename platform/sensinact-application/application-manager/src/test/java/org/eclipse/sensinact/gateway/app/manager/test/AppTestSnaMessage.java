@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.test;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Metadata;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
@@ -25,8 +24,8 @@ class AppTestSnaMessage extends SnaUpdateMessageImpl {
      * @param value the object value
      * @see SnaUpdateMessageImpl
      */
-    AppTestSnaMessage(Mediator mediator, String uri, Class type, Object value) {
-        super(mediator, uri, Update.ATTRIBUTE_VALUE_UPDATED);
+    AppTestSnaMessage(String uri, Class type, Object value) {
+        super(uri, Update.ATTRIBUTE_VALUE_UPDATED);
         JSONObject json = new JSONObject().put(Metadata.TIMESTAMP, System.currentTimeMillis()).put(DataResource.VALUE, value).put(DataResource.TYPE, type.getCanonicalName()).put(DataResource.NAME, uri.split("/")[2]);
         super.setNotification(json);
     }

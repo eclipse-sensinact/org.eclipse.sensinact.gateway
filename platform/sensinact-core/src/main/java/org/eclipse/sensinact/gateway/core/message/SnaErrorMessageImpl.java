@@ -10,8 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-
 /**
  * Extended notification message dedicated to update events
  * 
@@ -21,7 +19,7 @@ public class SnaErrorMessageImpl extends AbstractSnaErrorfulMessage<SnaErrorMess
 	/**
 	 * Constructor
 	 */
-	protected SnaErrorMessageImpl(Mediator mediator, String uri, SnaErrorMessage.Error type) {
-		super(mediator, uri, type);
+	protected SnaErrorMessageImpl(String uri, SnaErrorMessage.Error type) {
+		super(uri, type);
 	}
 }

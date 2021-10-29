@@ -75,13 +75,10 @@ public class LoginResponse extends AbstractSnaErrorfulMessage<LoginResponse.Toke
     /**
      * Constructor
      *
-     * @param mediator the {@link NorthboundMediator} that will allow
-     *                 the LoginEndpoint to be instantiated to interact with the
-     *                 OSGi host environment
      * @throws InvalidCredentialException
      */
-    public LoginResponse(NorthboundMediator mediator, TokenMode type) {
-        super(mediator, "/login", type);
+    public LoginResponse(TokenMode type) {
+        super("/login", type);
     }
 
     /**

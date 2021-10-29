@@ -10,8 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-
 /**
  * Extended notification message dedicated to update events
  * 
@@ -22,7 +20,7 @@ public class SnaUpdateMessageImpl extends SnaNotificationMessageImpl<SnaUpdateMe
 	/**
 	 * Constructor
 	 */
-	public SnaUpdateMessageImpl(Mediator mediator, String uri, Update type) {
-		super(mediator, uri, type);
+	public SnaUpdateMessageImpl(String uri, Update type) {
+		super(uri, type);
 	}
 }

@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.method;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.json.JSONObject;
 
@@ -27,9 +26,9 @@ public class DescribeJSONResponse extends DescribeResponse<JSONObject> {
 	 * @param status
 	 *            the associated {@link Status}
 	 */
-	protected DescribeJSONResponse(Mediator mediator, String uri, Status status,
+	protected DescribeJSONResponse(String uri, Status status,
 			DescribeMethod.DescribeType describeType) {
-		this(mediator, uri, status,
+		this(uri, status,
 				Status.SUCCESS.equals(status) ? SnaErrorfulMessage.NO_ERROR : SnaErrorfulMessage.UNKNOWN_ERROR_CODE,
 				describeType);
 	}
@@ -42,9 +41,9 @@ public class DescribeJSONResponse extends DescribeResponse<JSONObject> {
 	 * @param code
 	 *            the associated status code
 	 */
-	public DescribeJSONResponse(Mediator mediator, String uri, Status status, int code,
+	public DescribeJSONResponse(String uri, Status status, int code,
 			DescribeMethod.DescribeType describeType) {
-		super(mediator, uri, status, code, describeType);
+		super(uri, status, code, describeType);
 	}
 
 }

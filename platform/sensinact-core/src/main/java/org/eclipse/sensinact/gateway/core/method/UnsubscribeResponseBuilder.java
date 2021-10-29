@@ -25,8 +25,8 @@ public class UnsubscribeResponseBuilder extends AccessMethodResponseBuilder<JSON
 	 * @param uri
 	 * @param parameters
 	 */
-	protected UnsubscribeResponseBuilder(Mediator mediator, String uri, Object[] parameters) {
-		super(mediator, uri, parameters);
+	protected UnsubscribeResponseBuilder(String uri, Object[] parameters) {
+		super(uri, parameters);
 	}
 
 	/**
@@ -37,7 +37,7 @@ public class UnsubscribeResponseBuilder extends AccessMethodResponseBuilder<JSON
 	 */
 	@Override
 	public UnsubscribeResponse createAccessMethodResponse(AccessMethodResponse.Status status) {
-		return new UnsubscribeResponse(super.mediator, super.getPath(), status);
+		return new UnsubscribeResponse(super.getPath(), status);
 	}
 
 	/**

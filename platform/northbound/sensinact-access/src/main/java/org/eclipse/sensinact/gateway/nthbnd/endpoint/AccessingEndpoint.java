@@ -56,7 +56,7 @@ public class AccessingEndpoint {
      * Credentials}
      */
     public LoginResponse createNorthboundEndpoint(Credentials credentials) throws InvalidCredentialException {
-        LoginResponse response = new LoginResponse(mediator, TokenMode.TOKEN_CREATION);
+        LoginResponse response = new LoginResponse(TokenMode.TOKEN_CREATION);
         if (credentials != null) {
             NorthboundEndpoints endpoints = this.mediator.getNorthboundEndpoints();
             NorthboundEndpoint endpoint = endpoints.add(new NorthboundEndpoint(this.mediator, credentials));
@@ -84,7 +84,7 @@ public class AccessingEndpoint {
      * @return {@link NorthboundEndpoint} for the specified {@link accessToken}
      */
     public LoginResponse createNorthboundEndpoint(AccessToken accessToken) throws InvalidCredentialException {
-        LoginResponse response = new LoginResponse(mediator, TokenMode.TOKEN_CREATION);
+        LoginResponse response = new LoginResponse(TokenMode.TOKEN_CREATION);
         if (accessToken != null) {
             NorthboundEndpoints endpoints = this.mediator.getNorthboundEndpoints();
             NorthboundEndpoint endpoint = endpoints.add(new NorthboundEndpoint(this.mediator, accessToken));
@@ -111,7 +111,7 @@ public class AccessingEndpoint {
      * been reactivated; false otherwise
      */
     public LoginResponse reactivateEndpoint(SessionToken token) {
-        LoginResponse response = new LoginResponse(mediator, TokenMode.TOKEN_RENEW);
+        LoginResponse response = new LoginResponse(TokenMode.TOKEN_RENEW);
         String authenticationMaterial = token == null ? null : token.getAuthenticationMaterial();
         if (token != null) {
             NorthboundEndpoints endpoints = this.mediator.getNorthboundEndpoints();
@@ -144,7 +144,7 @@ public class AccessingEndpoint {
      * @return
      */
     public RegisteringResponse registeringEndpoint(String login, String password, String account, String accountType) {
-        RegisteringResponse response = new RegisteringResponse(mediator, RegisteringRequest.USER_CREATION);
+        RegisteringResponse response = new RegisteringResponse( RegisteringRequest.USER_CREATION);
         if (login != null && password != null && account!=null && accountType!=null) {
             try {
                 NorthboundEndpoint endpoint = this.mediator.getNorthboundEndpoints().getEndpoint();
@@ -172,7 +172,7 @@ public class AccessingEndpoint {
      * @return
      */
     public RegisteringResponse passwordRenewingEndpoint(String account) {
-        RegisteringResponse response = new RegisteringResponse(mediator, RegisteringRequest.PASSWORD_RENEW);
+        RegisteringResponse response = new RegisteringResponse(RegisteringRequest.PASSWORD_RENEW);
         if (account!=null) {
             try {
                 NorthboundEndpoint endpoint = this.mediator.getNorthboundEndpoints().getEndpoint();

@@ -24,12 +24,11 @@ public abstract class DescribeResponseBuilder<T> extends AccessMethodResponseBui
 	protected boolean payloadOnly;
 
 	/**
-	 * @param mediator
 	 * @param uri
 	 * @param describeType
 	 */
 	protected DescribeResponseBuilder(Mediator mediator, String uri, DescribeMethod.DescribeType describeType) {
-		super(mediator, uri, null);
+		super(uri, null);
 		this.describeType = describeType;
 	}
 

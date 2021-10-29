@@ -29,6 +29,7 @@ import org.eclipse.sensinact.gateway.app.manager.json.AppContainer;
 import org.eclipse.sensinact.gateway.app.manager.json.AppSnaMessage;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.app.manager.watchdog.AppExceptionWatchDog;
+import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
@@ -104,17 +105,17 @@ public class Application extends AbstractSensiNactApplication {
             this.actionHookQueue.instantiate();
 
         } catch (LifeCycleException e) {
-            return new AppSnaMessage(super.mediator, "/AppManager/" + getName(), SnaErrorMessage.Error.SYSTEM_ERROR, "Unable to start the application " + getName() + " > " + e.getMessage());
+            return new AppSnaMessage("/AppManager/" + getName(), SnaErrorMessage.Error.SYSTEM_ERROR, "Unable to start the application " + getName() + " > " + e.getMessage());
         }
         for (Map.Entry<String, Component> map : components.entrySet()) {
             try {
                 map.getValue().instantiate(super.getSession());
 
             } catch (LifeCycleException e) {
-                return new AppSnaMessage(this.mediator, "/AppManager/" + getName(), SnaErrorMessage.Error.SYSTEM_ERROR, "Unable to start the application " + getName() + " > " + e.getMessage());
+                return new AppSnaMessage("/AppManager/" + getName(), SnaErrorMessage.Error.SYSTEM_ERROR, "Unable to start the application " + getName() + " > " + e.getMessage());
 
             } catch (ApplicationRuntimeException e) {
-                return new AppSnaMessage(this.mediator, "/AppManager/" + getName(), SnaErrorMessage.Error.SYSTEM_ERROR, "Unable to start the application " + getName() + " > " + e.getMessage());
+                return new AppSnaMessage("/AppManager/" + getName(), SnaErrorMessage.Error.SYSTEM_ERROR, "Unable to start the application " + getName() + " > " + e.getMessage());
             }
         }
         try {
@@ -131,9 +132,9 @@ public class Application extends AbstractSensiNactApplication {
                 }
             }
         } catch (Exception e) {
-            return new AppSnaMessage(this.mediator, "/AppManager/" + getName(), SnaErrorMessage.Error.SYSTEM_ERROR, "Unable to start the application " + getName() + " > " + e.getMessage());
+            return new AppSnaMessage("/AppManager/" + getName(), SnaErrorMessage.Error.SYSTEM_ERROR, "Unable to start the application " + getName() + " > " + e.getMessage());
         }
-        return new AppSnaMessage(this.mediator, "/AppManager/" + getName(), SnaErrorMessage.Error.NO_ERROR, "Application " + getName() + " started");
+        return new AppSnaMessage("/AppManager/" + getName(), SnaErrorMessage.Error.NO_ERROR, "Application " + getName() + " started");
     }
 
     /**
@@ -161,16 +162,16 @@ public class Application extends AbstractSensiNactApplication {
                 map.getValue().uninstantiate();
 
             } catch (LifeCycleException e) {
-                return new AppSnaMessage(this.mediator, "/AppManager/" + getName(), SnaErrorMessage.Error.SYSTEM_ERROR, "Unable to stop the application " + getName() + " > " + e.getMessage());
+                return new AppSnaMessage("/AppManager/" + getName(), SnaErrorMessage.Error.SYSTEM_ERROR, "Unable to stop the application " + getName() + " > " + e.getMessage());
             }
         }
         try {
             this.actionHookQueue.uninstantiate();
 
         } catch (LifeCycleException e) {
-            return new AppSnaMessage(this.mediator, "/AppManager/" + getName(), SnaErrorMessage.Error.SYSTEM_ERROR, "Unable to start the application " + getName() + " > " + e.getMessage());
+            return new AppSnaMessage("/AppManager/" + getName(), SnaErrorMessage.Error.SYSTEM_ERROR, "Unable to start the application " + getName() + " > " + e.getMessage());
         }
-        return new AppSnaMessage(this.mediator, "/AppManager/" + getName(), SnaErrorMessage.Error.NO_ERROR, "Application " + getName() + " stopped");
+        return new AppSnaMessage("/AppManager/" + getName(), SnaErrorMessage.Error.NO_ERROR, "Application " + getName() + " stopped");
     }
 
     /**
@@ -182,7 +183,7 @@ public class Application extends AbstractSensiNactApplication {
         for (ServiceRegistration serviceRegistration : serviceRegistrations) {
             serviceRegistration.unregister();
         }
-        return new AppSnaMessage(this.mediator, "/AppManager/" + getName(), SnaErrorMessage.Error.NO_ERROR, "Application " + getName() + " uninstalled");
+        return new AppSnaMessage("/AppManager/" + getName(), SnaErrorMessage.Error.NO_ERROR, "Application " + getName() + " uninstalled");
     }
 
     /**

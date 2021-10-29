@@ -116,7 +116,7 @@ public class TriggerTest {
 
 			assertEquals(0, trigger.execute(new TriggerArgumentBuilder.Parameter(
 				trigger.<Integer>getArgument()).build(
-					new AccessMethodResponseBuilder(mediator, "/", new Object[]{2}) {
+					new AccessMethodResponseBuilder("/", new Object[]{2}) {
 					private static final long serialVersionUID = 1L;
 
 					@Override
@@ -131,7 +131,7 @@ public class TriggerTest {
 				})));
 			assertEquals(100,trigger.execute(new TriggerArgumentBuilder.Parameter(
 				trigger.<Integer>getArgument()).build(
-					new AccessMethodResponseBuilder(mediator, "/", new Object[]{22}) {
+					new AccessMethodResponseBuilder("/", new Object[]{22}) {
 					private static final long serialVersionUID = 1L;
 
 					@Override
@@ -146,7 +146,7 @@ public class TriggerTest {
 				})));
 			assertEquals(100, trigger.execute(new TriggerArgumentBuilder.Parameter(
 				trigger.<Integer>getArgument()).build(
-					new AccessMethodResponseBuilder(mediator, "/", new Object[]{18}) {
+					new AccessMethodResponseBuilder("/", new Object[]{18}) {
 					private static final long serialVersionUID = 1L;
 
 					@Override
@@ -161,7 +161,7 @@ public class TriggerTest {
 				})));
 			assertEquals(1000,trigger.execute(new TriggerArgumentBuilder.Parameter(
 				trigger.<Integer>getArgument()).build(
-					new AccessMethodResponseBuilder(mediator, "/", new Object[]{55}) {
+					new AccessMethodResponseBuilder("/", new Object[]{55}) {
 					private static final long serialVersionUID = 1L;
 
 					@Override
@@ -184,7 +184,7 @@ public class TriggerTest {
 
 			trigger = factory.<Object>newInstance(mediator, new JSONObject(TriggerTest.TRIGGER_2));
 			assertEquals("value", trigger.execute(new TriggerArgumentBuilder.Parameter(trigger.<Integer>getArgument()).build(
-				new AccessMethodResponseBuilder(mediator, "/", new Object[]{ 2, "copy", "value"}) {
+				new AccessMethodResponseBuilder( "/", new Object[]{ 2, "copy", "value"}) {
 
 					private static final long serialVersionUID = 1L;
 
@@ -199,7 +199,7 @@ public class TriggerTest {
 					}					
 				})));
 			assertEquals(2, trigger.execute(new TriggerArgumentBuilder.Parameter(trigger.<Integer>getArgument()).build(
-				new AccessMethodResponseBuilder(mediator, "/", new Object[]{ "copy", "value", 2}) {
+				new AccessMethodResponseBuilder( "/", new Object[]{ "copy", "value", 2}) {
 
 					private static final long serialVersionUID = 1L;
 
@@ -214,7 +214,7 @@ public class TriggerTest {
 					}					
 				})));
 			assertEquals("copy", trigger.execute(new TriggerArgumentBuilder.Parameter(trigger.<Integer>getArgument()).build(
-				new AccessMethodResponseBuilder(mediator, "/", new Object[]{ "value", 2, "copy"}) {
+				new AccessMethodResponseBuilder("/", new Object[]{ "value", 2, "copy"}) {
 
 					private static final long serialVersionUID = 1L;
 

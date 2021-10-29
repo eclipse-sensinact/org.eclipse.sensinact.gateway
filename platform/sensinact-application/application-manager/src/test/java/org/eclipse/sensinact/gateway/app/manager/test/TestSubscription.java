@@ -164,7 +164,7 @@ public class TestSubscription   implements TestResult {
         Mockito.when(session.get(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(getResponse);
         
         Mockito.when(session.getResource(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(
-    		new DescribeResponse<JSONObject>(mediator, "/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider", Status.SUCCESS, DescribeType.RESOURCE) {});
+    		new DescribeResponse<JSONObject>("/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider", Status.SUCCESS, DescribeType.RESOURCE) {});
 
         Mockito.when(session.subscribe(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Recipient.class), Mockito.any(JSONArray.class))).thenReturn(
     		subscribeResponse);
@@ -251,7 +251,7 @@ public class TestSubscription   implements TestResult {
                 e.printStackTrace();
             }
             application.start();
-            message = new AppTestSnaMessage(mediator, "/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider", int.class, 100);
+            message = new AppTestSnaMessage("/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider", int.class, 100);
             try {
                 application.callback("id", new SnaMessage[]{message});
             } catch (Exception e) {
@@ -263,7 +263,7 @@ public class TestSubscription   implements TestResult {
                 e.printStackTrace();
             }
             assertTrue(result == 0);
-            message = new AppTestSnaMessage(mediator, "/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider", int.class, 600);
+            message = new AppTestSnaMessage("/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider", int.class, 600);
             try {
                 application.callback("id", new SnaMessage[]{message});
             } catch (Exception e) {
@@ -275,7 +275,7 @@ public class TestSubscription   implements TestResult {
                 e.printStackTrace();
             }
             assertTrue(result == 600);
-            message = new AppTestSnaMessage(mediator, "/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider", int.class, 200);
+            message = new AppTestSnaMessage("/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider", int.class, 200);
             try {
                 application.callback("id", new SnaMessage[]{message});
             } catch (Exception e) {

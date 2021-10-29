@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.method;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 /**
  * Extended {@link AccessMethodResponse} returned by an {@link DescribeMethod}
@@ -27,9 +26,9 @@ public class DescribeStringResponse extends DescribeResponse<String> {
 	 * @param status
 	 * @param describeType
 	 */
-	public DescribeStringResponse(Mediator mediator, String uri, Status status,
+	public DescribeStringResponse(String uri, Status status,
 			DescribeMethod.DescribeType describeType) {
-		this(mediator, uri, status,
+		this(uri, status,
 				Status.SUCCESS.equals(status) ? SnaErrorfulMessage.NO_ERROR : SnaErrorfulMessage.UNKNOWN_ERROR_CODE,
 				describeType);
 	}
@@ -43,9 +42,9 @@ public class DescribeStringResponse extends DescribeResponse<String> {
 	 * @param code
 	 * @param describeType
 	 */
-	public DescribeStringResponse(Mediator mediator, String uri, Status status, int code,
+	public DescribeStringResponse(String uri, Status status, int code,
 			DescribeMethod.DescribeType describeType) {
-		super(mediator, uri, status, code, describeType);
+		super(uri, status, code, describeType);
 	}
 
 }

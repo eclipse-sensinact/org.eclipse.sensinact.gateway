@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.core.method;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.props.TypedKey;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
@@ -33,8 +32,8 @@ public abstract class DescribeResponse<T> extends AccessMethodResponse<T> {
 	 * @param status
 	 *            the associated {@link Status}
 	 */
-	protected DescribeResponse(Mediator mediator, String uri, Status status, DescribeMethod.DescribeType describeType) {
-		this(mediator, uri, status,
+	protected DescribeResponse(String uri, Status status, DescribeMethod.DescribeType describeType) {
+		this(uri, status,
 				Status.SUCCESS.equals(status) ? SnaErrorfulMessage.NO_ERROR : SnaErrorfulMessage.UNKNOWN_ERROR_CODE,
 				describeType);
 	}
@@ -47,9 +46,9 @@ public abstract class DescribeResponse<T> extends AccessMethodResponse<T> {
 	 * @param code
 	 *            the associated status code
 	 */
-	public DescribeResponse(Mediator mediator, String uri, Status status, int code,
+	public DescribeResponse(String uri, Status status, int code,
 			DescribeMethod.DescribeType describeType) {
-		super(mediator, uri, AccessMethodResponse.Response.DESCRIBE_RESPONSE, status, code);
+		super(uri, AccessMethodResponse.Response.DESCRIBE_RESPONSE, status, code);
 		this.describeType = describeType;
 	}
 

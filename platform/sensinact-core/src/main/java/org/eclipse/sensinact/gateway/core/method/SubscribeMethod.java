@@ -34,6 +34,6 @@ public class SubscribeMethod extends AbstractAccessMethod<JSONObject, SubscribeR
 	 */
 	@Override
 	protected SubscribeResponseBuilder createAccessMethodResponseBuilder(Object[] parameters) {
-		return new SubscribeResponseBuilder(super.mediator, uri, parameters);
+		return new SubscribeResponseBuilder(uri, parameters);
 	}
 }

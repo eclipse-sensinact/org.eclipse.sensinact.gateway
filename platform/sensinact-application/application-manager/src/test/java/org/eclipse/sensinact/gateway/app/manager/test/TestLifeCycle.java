@@ -60,7 +60,7 @@ public class TestLifeCycle {
     public void testNormalCycle() throws Exception {
         AppLifecycleTrigger trigger = new AppLifecycleTrigger(service);
         status = ApplicationStatus.valueOf("INSTALLED");
-        ApplicationStatus result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder(mediator, "AppManager/test/START", null) {
+        ApplicationStatus result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder("AppManager/test/START", null) {
             @Override
             public AccessMethodResponse<?> createAccessMethodResponse(Status status) {
                 return null;
@@ -74,7 +74,7 @@ public class TestLifeCycle {
         });
         assertTrue(result.equals(ApplicationStatus.valueOf("RESOLVING")));
         status = ApplicationStatus.valueOf("RESOLVING");
-        result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder(mediator, "AppManager/test/START", null) {
+        result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder("AppManager/test/START", null) {
             @Override
             public AccessMethodResponse<?> createAccessMethodResponse(Status status) {
                 return null;
@@ -89,7 +89,7 @@ public class TestLifeCycle {
         assertTrue(result.equals(ApplicationStatus.valueOf("ACTIVE")));
         status = ApplicationStatus.valueOf("ACTIVE");
 
-        result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder(mediator, "AppManager/test/STOP", null) {
+        result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder("AppManager/test/STOP", null) {
             @Override
             public AccessMethodResponse<?> createAccessMethodResponse(Status status) {
                 return null;
@@ -103,7 +103,7 @@ public class TestLifeCycle {
         });
         assertTrue(result.equals(ApplicationStatus.valueOf("INSTALLED")));
         status = ApplicationStatus.valueOf("INSTALLED");
-        result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder(mediator, "AppManager/test/UNINSTALL", null) {
+        result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder("AppManager/test/UNINSTALL", null) {
             @Override
             public AccessMethodResponse<?> createAccessMethodResponse(Status status) {
                 return null;
@@ -122,7 +122,7 @@ public class TestLifeCycle {
     public void testUnresolvedCycle() throws Exception {
         AppLifecycleTrigger trigger = new AppLifecycleTrigger(service);
         status = ApplicationStatus.valueOf("INSTALLED");
-        ApplicationStatus result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder(mediator, "AppManager/test/START", null) {
+        ApplicationStatus result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder("AppManager/test/START", null) {
             @Override
             public AccessMethodResponse<?> createAccessMethodResponse(Status status) {
                 return null;
@@ -141,7 +141,7 @@ public class TestLifeCycle {
         });
         assertTrue(result.equals(ApplicationStatus.valueOf("UNRESOLVED")));
         status = ApplicationStatus.valueOf("UNRESOLVED");
-        result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder(mediator, "AppManager/test/UNINSTALL", null) {
+        result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder("AppManager/test/UNINSTALL", null) {
             @Override
             public AccessMethodResponse<?> createAccessMethodResponse(Status status) {
                 return null;
@@ -159,7 +159,7 @@ public class TestLifeCycle {
     @Test
     public void testIncompatibleCycle() throws Exception {
         AppLifecycleTrigger trigger = new AppLifecycleTrigger(service);
-        AccessMethodResponseBuilder snaMethodResult = new AccessMethodResponseBuilder(mediator, "AppManager/test/STOP", null) {
+        AccessMethodResponseBuilder snaMethodResult = new AccessMethodResponseBuilder("AppManager/test/STOP", null) {
             @Override
             public AccessMethodResponse<?> createAccessMethodResponse(Status status) {
                 return null;
@@ -179,7 +179,7 @@ public class TestLifeCycle {
         status = ApplicationStatus.valueOf("ACTIVE");
         ApplicationStatus result = (ApplicationStatus) trigger.execute(snaMethodResult);
         assertTrue(result.equals(ApplicationStatus.valueOf("INSTALLED")));
-        snaMethodResult = new AccessMethodResponseBuilder(mediator, "AppManager/test/UNINSTALL", null) {
+        snaMethodResult = new AccessMethodResponseBuilder("AppManager/test/UNINSTALL", null) {
             @Override
             public AccessMethodResponse<?> createAccessMethodResponse(Status status) {
                 return null;

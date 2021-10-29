@@ -76,7 +76,7 @@ public class DescribeStringResponseBuilder extends DescribeResponseBuilder<Strin
 	 */
 	@Override
 	public DescribeStringResponse createAccessMethodResponse(AccessMethodResponse.Status status) {
-		DescribeStringResponse response = new DescribeStringResponse(super.mediator, super.getPath(), status,
+		DescribeStringResponse response = new DescribeStringResponse(super.getPath(), status,
 				describeType);
 
 		if (exceptions != null && exceptions.size() > 0) {
