@@ -91,6 +91,7 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -922,7 +923,7 @@ public class SensiNact implements Core {
 					    	final String token = SensiNact.this.nextToken();
 					        final UserUpdater userUpdater = userManager.createUser(token, login, password, account, accountType);
 
-					        ServiceReference[] references = SensiNact.this.mediator.getContext().getServiceReferences(
+					        ServiceReference[] references = bc.getServiceReferences(
 					        	AccountConnector.class.getName(), new StringBuilder().append("(org.eclipse.sensinact.security.account.type="
 					        		).append(accountType).append(")").toString());
 					        
@@ -931,11 +932,10 @@ public class SensiNact implements Core {
 					        }
 					        int index = 0;
 					        for(;index < references.length;index++) {
-					        	AccountConnector connector = (AccountConnector)SensiNact.this.mediator.getContext(
-					        			).getService(references[index]);
+					        	AccountConnector connector = (AccountConnector)bc.getService(references[index]);
 					        	if(connector != null) {
 					        		connector.connect(token, userUpdater);
-					        		SensiNact.this.mediator.getContext().ungetService(references[index]);
+					        		SensiNact.this.bc.ungetService(references[index]);
 					        		break;
 					        	}
 					        }
@@ -967,7 +967,7 @@ public class SensiNact implements Core {
 					    	final String token = SensiNact.this.nextToken();
 					        final UserUpdater userUpdater = userManager.renewUserPassword(token, account, user.getAccountType());
 					        
-					        ServiceReference[] references = SensiNact.this.mediator.getContext().getServiceReferences(
+					        ServiceReference[] references = SensiNact.this.bc.getServiceReferences(
 					        	AccountConnector.class.getName(), new StringBuilder().append("(org.eclipse.sensinact.security.account.type="
 					        		).append(user.getAccountType()).append(")").toString());
 					        
@@ -976,11 +976,10 @@ public class SensiNact implements Core {
 					        }
 					        int index = 0;
 					        for(;index < references.length;index++) {
-					        	AccountConnector connector = (AccountConnector)SensiNact.this.mediator.getContext(
-					        			).getService(references[index]);
+					        	AccountConnector connector = (AccountConnector)SensiNact.this.bc.getService(references[index]);
 					        	if(connector != null) {
 					        		connector.connect(token, userUpdater);
-					        		SensiNact.this.mediator.getContext().ungetService(references[index]);
+					        		SensiNact.this.bc.ungetService(references[index]);
 					        		break;
 					        	}
 					        }
@@ -1143,6 +1142,7 @@ public class SensiNact implements Core {
 	
 	@Reference
 	private ConditionalPermissionAdmin cpa;
+	private BundleContext bc;
 
 	public SensiNact() {
 		this.sessions = new Sessions();
@@ -1151,9 +1151,9 @@ public class SensiNact implements Core {
 	@Activate
 	public void activate(ComponentContext context) throws SecuredAccessException, 
 	BundleException, DataStoreException  {
-		
-		Mediator mediator = new Mediator(context.getBundleContext());
-		List<String> types = ReflectUtils.getAllStringTypes(mediator.getContext().getBundle());
+		this.bc=context.getBundleContext();
+		this.mediator = new Mediator(bc);
+		List<String> types = ReflectUtils.getAllStringTypes(bc.getBundle());
 
 		StringBuilder builder = new StringBuilder();
 
@@ -1207,7 +1207,6 @@ public class SensiNact implements Core {
 		
 		this.anonymousTree = securedAccess.getUserAccessTree(UserManager.ANONYMOUS_PKEY);
 		
-		this.mediator = mediator;
 		this.registry = new RegistryEndpoint(mediator);
 		
 		ServiceLoader<SensinactCoreBaseIFaceManagerFactory> loader = ServiceLoader.load(
@@ -1855,7 +1854,7 @@ public class SensiNact implements Core {
 			
 			Collection<ServiceReference<SensinactCoreBaseIface>> references = null;
 			try {
-				references = mediator.getContext().getServiceReferences(SensinactCoreBaseIface.class, String.format("(!(%s=%s))",
+				references = bc.getServiceReferences(SensinactCoreBaseIface.class, String.format("(!(%s=%s))",
 					SensinactCoreBaseIFaceManager.REMOTE_NAMESPACE_PROPERTY,namespace()));
 			} catch (InvalidSyntaxException e) {
 				LOG.debug(e.getMessage());
@@ -1863,7 +1862,7 @@ public class SensiNact implements Core {
 			if(references!=null) {
 				for (ServiceReference<SensinactCoreBaseIface> reference : references) {
 					final SensinactCoreBaseIface core;
-					if (reference == null || (core = mediator.getContext().getService(reference)) == null)
+					if (reference == null || (core = bc.getService(reference)) == null)
 						continue;					
 					results.add(executor.submit(new Callable<String>() {
 						@Override
@@ -1879,7 +1878,7 @@ public class SensiNact implements Core {
 		try {
 			for (ServiceReference<SensiNactResourceModel> modelReference : modelReferences) {
 				SensiNactResourceModel resourceModel;
-				if (modelReference == null || (resourceModel = mediator.getContext().getService(modelReference)) == null)
+				if (modelReference == null || (resourceModel = bc.getService(modelReference)) == null)
 					continue;
 				
 				ServiceProvider p = null;
@@ -1941,7 +1940,7 @@ public class SensiNact implements Core {
 		} finally {
 			for (ServiceReference<SensiNactResourceModel> modelReference : modelReferences) {
 				if (modelReference != null) 
-					mediator.getContext().ungetService(modelReference);
+					bc.ungetService(modelReference);
 			}
 		}
 	}
@@ -2116,7 +2115,7 @@ public class SensiNact implements Core {
 		String effectiveFilter = null;
 		if (filter != null && filter.length() > 0) {
 			try {
-				mediator.getContext().createFilter(filter);
+				bc.createFilter(filter);
 				effectiveFilter = filter;
 
 			} catch (InvalidSyntaxException e) {
@@ -2176,7 +2175,7 @@ public class SensiNact implements Core {
 		String effectiveFilter = null;
 		if (filter != null && filter.length() > 0) {
 			try {
-				mediator.getContext().createFilter(filter);
+				bc.createFilter(filter);
 				effectiveFilter = filter;
 			} catch (InvalidSyntaxException e) {
 				effectiveFilter = null;
@@ -2204,7 +2203,7 @@ public class SensiNact implements Core {
 		String effectiveFilter = null;
 		if (filter != null && filter.length() > 0) {
 			try {
-				mediator.getContext().createFilter(filter);
+				bc.createFilter(filter);
 				effectiveFilter = filter;
 
 			} catch (InvalidSyntaxException e) {
