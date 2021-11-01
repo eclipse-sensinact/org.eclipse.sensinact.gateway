@@ -19,6 +19,7 @@ import org.osgi.service.log.LoggerFactory;
 @Component(immediate=true, service = {AgentRelay.class})
 public class HttpStorageAgent extends StorageAgent {
 	
+
 	@Reference(service = LoggerFactory.class)
 	private Logger logger;
 
@@ -31,9 +32,10 @@ public class HttpStorageAgent extends StorageAgent {
 	private Mediator mediator;
 
 	@Activate
-	public void activate(ComponentContext context) {
-		BundleContext bc = context.getBundleContext();
-		this.mediator = new Mediator(bc);
+	public HttpStorageAgent(ComponentContext context) {
+		super(context.getBundleContext());
+		
+		this.mediator = new Mediator(context.getBundleContext());
 				
 		this.login =  (String) mediator.getProperty("login");		
 		this.password = (String) mediator.getProperty("password");
