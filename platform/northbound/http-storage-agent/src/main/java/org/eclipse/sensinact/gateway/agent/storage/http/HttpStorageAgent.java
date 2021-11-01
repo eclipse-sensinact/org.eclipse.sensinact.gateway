@@ -56,4 +56,9 @@ public class HttpStorageAgent extends StorageAgent {
 	public void deactivate() {
 		super.stop();
 	}
+
+	@Override
+	protected String[] getKeyProcessorProviderIdentifiers() {
+		return null;
+	}
 }

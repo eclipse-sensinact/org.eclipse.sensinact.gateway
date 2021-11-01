@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.historic.storage.agent.generic;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
@@ -33,6 +34,8 @@ import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.whiteboard.AbstractAgentRelay;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONObject;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,10 +50,14 @@ public abstract class StorageAgent extends AbstractAgentRelay {
     private static final Logger LOG = LoggerFactory.getLogger(StorageAgent.class);
 
 	protected static final String STORAGE_AGENT_KEYS_PROPS = "org.eclipse.sensinact.gateway.history.keys";
+	protected static final String STORAGE_KEY_PROCESSOR_PROVIDER = "sensinact.history.key.processor";
     
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 	
+    protected abstract String[] getKeyProcessorProviderIdentifiers();
 	
+    protected BundleContext bc;
+    
 	private Map<String,Executable<SnaMessage<?>,Object>> keyProcessors;
 	private Map<String,Object> storageKeyValuesMap;
 	private Map<String,String> storageKeyNamesMap;
@@ -69,12 +76,13 @@ public abstract class StorageAgent extends AbstractAgentRelay {
     /**
      * Constructor
      */
-    public StorageAgent() {
+    public StorageAgent(BundleContext bc) {
         super();
+        this.bc = bc;
         this.locations = new HashMap<>();		
 		this.storageKeyValuesMap = new HashMap<>();		
 		this.keyProcessors = new HashMap<>();		
-//		Key processor example		
+
 		this.keyProcessors.put("path", new Executable<SnaMessage<?>,Object>(){
 			@Override
 			public Object execute(SnaMessage<?> message) throws Exception {
@@ -103,13 +111,52 @@ public abstract class StorageAgent extends AbstractAgentRelay {
 				return StorageAgent.this.getLocation(pathElements[0]);
 			}			
 		});
-//		Define keys mapping at initialization time
     }
 
+    protected Map<String,Executable<SnaMessage<?>,Object>> loadRegisteredProcessors() {
+    	
+    	Map<String,Executable<SnaMessage<?>,Object>>processors = new HashMap<>();
+    	processors.putAll(this.keyProcessors);
+
+		String[] keyProcessorProviderIdentifiers = getKeyProcessorProviderIdentifiers();
+		
+		if(keyProcessorProviderIdentifiers != null && keyProcessorProviderIdentifiers.length>0) {
+			StringBuilder builder = Arrays.stream(keyProcessorProviderIdentifiers).<StringBuilder>collect(
+					StringBuilder::new,(sb,s)->{
+						sb.append("(");
+						sb.append(STORAGE_KEY_PROCESSOR_PROVIDER);
+						sb.append("=");
+						sb.append(s);
+						sb.append(")");
+					},
+					(sb1,sb2)->{sb1.append(sb2.toString());}
+			);
+			if(keyProcessorProviderIdentifiers.length>1) {
+				builder.insert(0, "(|");
+				builder.append(")");
+			}
+			String filter = builder.toString();
+			try {
+				Collection<ServiceReference<StorageKeyProcessorProvider>> refs = 
+						bc.getServiceReferences(StorageKeyProcessorProvider.class, filter);
+
+				processors.putAll( refs.stream().map(r -> {return bc.getService(r);}
+				).<Map<String,Executable<SnaMessage<?>,Object>>>collect(
+						HashMap::new,
+						(m,s)->{m.putAll(s.getStorageKeyProcessors());},
+						Map::putAll));
+				refs.stream().forEach(r -> bc.ungetService(r));
+			} catch (Exception e) {
+				LOG.error(e.getMessage(),e);
+			}		
+		}
+		return processors;
+    }
+    
 	/**
-	 * Defines the mapping between key names and the String paths of the attributes from which the mapped values 
-	 * will be extracted - ex : &lt;key&gt;=/&lt;service&gt;/&lt;resource&gt;/&lt;attribute&gt; or &lt;key&gt;=/&lt;service&gt;/&lt;resource&gt;, in this last 
-	 * case the default 'value' attribute will be used 
+	 * Defines the mapping between the String paths of the attributes from which the mapped values 
+	 * will be extracted and key (field) names used in the storage - ex : /&lt;service&gt;/&lt;resource&gt;/&lt;attribute&gt;=&lt;key&gt;  or 
+	 * /&lt;service&gt;/&lt;resource&gt;=&lt;key&gt;, in this last  case the default 'value' attribute will be used 
 	 *   
 	 * @param keys colon separated String formated keys mapping 
 	 */
@@ -181,12 +228,12 @@ public abstract class StorageAgent extends AbstractAgentRelay {
 	
 	private Dictionary<String,Object> preProcessSnaMessage(SnaMessage<?> message){
         final Dictionary<String,Object> ts = new Hashtable<>();
-        
-        for(Iterator<String> it = this.keyProcessors.keySet().iterator();it.hasNext();) {
+        Map<String,Executable<SnaMessage<?>,Object>>processors = this.loadRegisteredProcessors();
+        for(Iterator<String> it = processors.keySet().iterator();it.hasNext();) {
 			String key = it.next();
 			Object val = null; 
 			try {
-				val = this.keyProcessors.get(key).execute(message);
+				val = processors.get(key).execute(message);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -211,7 +258,7 @@ public abstract class StorageAgent extends AbstractAgentRelay {
     // 
     private void doHandle(String path, JSONObject content, Dictionary<String, Object> ts) {
         Object value = content.opt(DataResource.VALUE);
-        if (JSONObject.NULL.equals(value)) {
+        if (content.has(DataResource.VALUE) &&  JSONObject.NULL.equals(value)) {
             //exclude initial null value
             return;
         }        
