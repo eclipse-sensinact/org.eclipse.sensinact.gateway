@@ -86,7 +86,7 @@ public class AppResourceLifecycleWatchDog extends AbstractAppWatchDog {
                      throw new NullPointerException();
                  }
             } catch (NullPointerException e) {
-                return new AppSnaMessage(this.mediator, "/AppManager", SnaErrorMessage.Error.SYSTEM_ERROR, "Resource " + resourceUri + " does not exist or you are not allowed to access it.");
+                return new AppSnaMessage("/AppManager", SnaErrorMessage.Error.SYSTEM_ERROR, "Resource " + resourceUri + " does not exist or you are not allowed to access it.");
             }
         }
         mediator.callService(Core.class, new Executable<Core, Void>() {

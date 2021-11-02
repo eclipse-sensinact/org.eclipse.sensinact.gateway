@@ -38,15 +38,15 @@ public abstract class SnaNotificationMessageImpl<S extends Enum<S> & SnaMessageS
 			case ERROR:
 				break;
 			case LIFECYCLE:
-				notification = (N) new SnaLifecycleMessageImpl(mediator, uri,(Lifecycle) notificationType);
+				notification = (N) new SnaLifecycleMessageImpl(uri,(Lifecycle) notificationType);
 				break;
 			case RESPONSE:
 				break;
 			case UPDATE:
-				notification = (N) new SnaUpdateMessageImpl(mediator, uri, (Update) notificationType);
+				notification = (N) new SnaUpdateMessageImpl(uri, (Update) notificationType);
 				break;
 			case REMOTE:
-				notification = (N) new SnaRemoteMessageImpl(mediator, uri, (Remote) notificationType);
+				notification = (N) new SnaRemoteMessageImpl(uri, (Remote) notificationType);
 				break;
 			default:
 				break;
@@ -58,8 +58,8 @@ public abstract class SnaNotificationMessageImpl<S extends Enum<S> & SnaMessageS
 	/**
 	 * Constructor
 	 */
-	protected SnaNotificationMessageImpl(Mediator mediator, String uri, S type) {
-		super(mediator, uri, type);
+	protected SnaNotificationMessageImpl(String uri, S type) {
+		super(uri, type);
 	}
 
 	/**

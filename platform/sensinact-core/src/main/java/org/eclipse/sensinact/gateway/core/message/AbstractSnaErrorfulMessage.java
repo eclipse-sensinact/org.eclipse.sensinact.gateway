@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.message;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -28,8 +27,8 @@ public abstract class AbstractSnaErrorfulMessage<S extends Enum<S> & KeysCollect
 	 * @param uri
 	 * @param type
 	 */
-	protected AbstractSnaErrorfulMessage(Mediator mediator, String uri, S type) {
-		super(mediator, uri, type);
+	protected AbstractSnaErrorfulMessage(String uri, S type) {
+		super(uri, type);
 	}
 
 	/**

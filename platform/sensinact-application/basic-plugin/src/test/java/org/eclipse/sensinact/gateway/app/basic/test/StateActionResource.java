@@ -43,7 +43,7 @@ class StateActionResource implements ActionResource {
     @Override
     public ActResponse act(Object... objects) {
         function.setState(name);
-        return new AppActionResponse(this.mediator, "/LightDevice/LightService/TURN_ON", AccessMethodResponse.Status.SUCCESS, 200);
+        return new AppActionResponse("/LightDevice/LightService/TURN_ON", AccessMethodResponse.Status.SUCCESS, 200);
     }
 
     @Override

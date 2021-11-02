@@ -51,7 +51,7 @@ public class DescribeJSONResponseBuilder extends DescribeResponseBuilder<JSONObj
 	 */
 	@Override
 	public DescribeJSONResponse createAccessMethodResponse(AccessMethodResponse.Status status) {
-		return new DescribeJSONResponse(super.mediator, super.getPath(), status, describeType);
+		return new DescribeJSONResponse(super.getPath(), status, describeType);
 	}
 
 	/**

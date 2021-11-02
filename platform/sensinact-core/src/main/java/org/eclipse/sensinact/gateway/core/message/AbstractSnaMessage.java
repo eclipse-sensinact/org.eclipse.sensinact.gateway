@@ -44,18 +44,18 @@ public abstract class AbstractSnaMessage<S extends Enum<S> & KeysCollection & Sn
 			case "RESOURCE_APPEARING":
 			case "RESOURCE_DISAPPEARING":
 				Lifecycle l = Lifecycle.valueOf(typeStr);
-				message = new SnaLifecycleMessageImpl(mediator, uri, l);
+				message = new SnaLifecycleMessageImpl(uri, l);
 				break;
 			case "ATTRIBUTE_VALUE_UPDATED":
 			case "METADATA_VALUE_UPDATED":
 			case "ACTUATED":
 				Update u = Update.valueOf(typeStr);
-				message = new SnaUpdateMessageImpl(mediator, uri, u);
+				message = new SnaUpdateMessageImpl(uri, u);
 				break;
 			case "CONNECTED":
 			case "DISCONNECTED":
 				SnaRemoteMessage.Remote r = SnaRemoteMessage.Remote.valueOf(typeStr);
-				message = new SnaRemoteMessageImpl(mediator, uri, r);
+				message = new SnaRemoteMessageImpl(uri, r);
 				break;
 			case "NO_ERROR" :
 			case "UPDATE_ERROR": 
@@ -63,7 +63,7 @@ public abstract class AbstractSnaMessage<S extends Enum<S> & KeysCollection & Sn
 			case "LIFECYCLE_ERROR": 
 			case "SYSTEM_ERROR":
 				SnaErrorMessage.Error e = SnaErrorMessage.Error.valueOf(typeStr);
-				message = new SnaErrorMessageImpl(mediator, uri, e);
+				message = new SnaErrorMessageImpl(uri, e);
 			default:
 				break;
 		}
@@ -85,8 +85,8 @@ public abstract class AbstractSnaMessage<S extends Enum<S> & KeysCollection & Sn
 	 * @param uri
 	 * @param type
 	 */
-	protected AbstractSnaMessage(Mediator mediator, String uri, S type) {
-		super(mediator, type);
+	protected AbstractSnaMessage(String uri, S type) {
+		super(type);
 		super.putValue(SnaConstants.URI_KEY, uri);
 
 	}

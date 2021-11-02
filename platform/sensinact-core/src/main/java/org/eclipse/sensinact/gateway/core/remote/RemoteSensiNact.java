@@ -440,7 +440,7 @@ public class RemoteSensiNact implements RemoteCore {
 	}
 	
 	private final void propagateRemoteConnectionStatus(boolean connected, String namespace) {
-		SnaRemoteMessageImpl message = new SnaRemoteMessageImpl(mediator, UriUtils.ROOT, 
+		SnaRemoteMessageImpl message = new SnaRemoteMessageImpl(UriUtils.ROOT, 
 			connected?SnaRemoteMessage.Remote.CONNECTED:SnaRemoteMessage.Remote.DISCONNECTED);
 		message.setNotification(new JSONObject().put(SnaConstants.REMOTE, 
 			connected?SnaRemoteMessage.Remote.CONNECTED.name():SnaRemoteMessage.Remote.DISCONNECTED.name())

@@ -74,7 +74,7 @@ public class SensinactCoreBaseIFaceManagerImpl implements SensinactCoreBaseIFace
 			try {
 				mb.subscribeToTopic(topic);
 				mb.connect();
-				SnaRemoteMessageImpl message = new SnaRemoteMessageImpl(mediator, "/", SnaRemoteMessage.Remote.CONNECTED);
+				SnaRemoteMessageImpl message = new SnaRemoteMessageImpl("/", SnaRemoteMessage.Remote.CONNECTED);
 				message.setNotification(new JSONObject().append(SnaConstants.NAMESPACE, remoteNamespace));
 				notifyCallbacks(message);
 			} catch (Exception e) {
@@ -90,7 +90,7 @@ public class SensinactCoreBaseIFaceManagerImpl implements SensinactCoreBaseIFace
 			LOG.info("Removing RSA sensinact remote instance {} from the pool", key.toString());
 			try {
 				service.disconnect();
-				SnaRemoteMessageImpl message = new SnaRemoteMessageImpl(mediator, "/", SnaRemoteMessage.Remote.DISCONNECTED);
+				SnaRemoteMessageImpl message = new SnaRemoteMessageImpl("/", SnaRemoteMessage.Remote.DISCONNECTED);
 				message.setNotification(new JSONObject().append(SnaConstants.NAMESPACE, key));
 				notifyCallbacks(message);
 			} catch (Exception e) {

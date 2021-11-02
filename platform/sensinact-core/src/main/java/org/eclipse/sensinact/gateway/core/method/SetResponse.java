@@ -26,8 +26,8 @@ public class SetResponse extends AccessMethodJSONResponse {
 	 * @param status
 	 *            the associated {@link Status}
 	 */
-	protected SetResponse(Mediator mediator, String uri, Status status) {
-		this(mediator, uri, status,
+	protected SetResponse(String uri, Status status) {
+		this(uri, status,
 				Status.SUCCESS.equals(status) ? SnaErrorfulMessage.NO_ERROR : SnaErrorfulMessage.UNKNOWN_ERROR_CODE);
 	}
 
@@ -39,7 +39,7 @@ public class SetResponse extends AccessMethodJSONResponse {
 	 * @param code
 	 *            the associated status code
 	 */
-	public SetResponse(Mediator mediator, String uri, Status status, int code) {
-		super(mediator, uri, AccessMethodResponse.Response.SET_RESPONSE, status, code);
+	public SetResponse( String uri, Status status, int code) {
+		super(uri, AccessMethodResponse.Response.SET_RESPONSE, status, code);
 	}
 }

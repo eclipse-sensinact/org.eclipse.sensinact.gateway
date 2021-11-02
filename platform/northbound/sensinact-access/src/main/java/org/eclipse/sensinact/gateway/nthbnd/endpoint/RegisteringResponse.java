@@ -10,14 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import org.eclipse.sensinact.gateway.common.props.KeysCollection;
-import org.eclipse.sensinact.gateway.common.props.TypedKey;
-import org.eclipse.sensinact.gateway.core.message.AbstractSnaErrorfulMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaConstants;
-import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.eclipse.sensinact.gateway.core.message.SnaMessageSubType;
-import org.eclipse.sensinact.gateway.util.JSONUtils;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -25,6 +17,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.sensinact.gateway.common.props.KeysCollection;
+import org.eclipse.sensinact.gateway.common.props.TypedKey;
+import org.eclipse.sensinact.gateway.core.message.AbstractSnaErrorfulMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaConstants;
+import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.message.SnaMessageSubType;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
+import org.eclipse.sensinact.gateway.util.JSONUtils;
 
 /**
  * A UserResponse 
@@ -83,13 +84,10 @@ public class RegisteringResponse extends AbstractSnaErrorfulMessage<RegisteringR
     /**
      * Constructor
      *
-     * @param mediator the {@link NorthboundMediator} that will allow
-     *                 the LoginEndpoint to be instantiated to interact with the
-     *                 OSGi host environment
      * @throws InvalidCredentialException
      */
-    public RegisteringResponse(NorthboundMediator mediator, RegisteringRequest type) {
-        super(mediator, "/register", type);
+    public RegisteringResponse(RegisteringRequest type) {
+        super("/register", type);
     }
     
     /**

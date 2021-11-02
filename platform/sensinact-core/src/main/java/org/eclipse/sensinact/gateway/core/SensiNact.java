@@ -165,7 +165,7 @@ public class SensiNact implements Core {
 			}
 			SubscribeResponse response = null;
 			if (registered) {
-				response = new SubscribeResponse(mediator, uri, Status.SUCCESS, 200);
+				response = new SubscribeResponse(uri, Status.SUCCESS, 200);
 				response.setResponse(new JSONObject().put("subscriptionId", callback.getName()));
 			} else {
 				response = SensiNact.<JSONObject, SubscribeResponse>createErrorResponse(
@@ -191,7 +191,7 @@ public class SensiNact implements Core {
 			});
 			UnsubscribeResponse response = null;
 			if (unregistered) {
-				response = new UnsubscribeResponse(mediator, UriUtils.PATH_SEPARATOR, Status.SUCCESS, 200);
+				response = new UnsubscribeResponse(UriUtils.PATH_SEPARATOR, Status.SUCCESS, 200);
 				response.setResponse(new JSONObject().put("message", "The agent has been properly unregistered"));
 
 			} else {
@@ -223,7 +223,7 @@ public class SensiNact implements Core {
 			});
 			SubscribeResponse response = null;
 			if (registered) {
-				response = new SubscribeResponse(mediator, intent.getCommonPath(), Status.SUCCESS, 200);
+				response = new SubscribeResponse(intent.getCommonPath(), Status.SUCCESS, 200);
 				response.setResponse(new JSONObject().put("subscriptionId", intent.getName()));
 			} else {
 				response = SensiNact.<JSONObject, SubscribeResponse>createErrorResponse(
@@ -249,7 +249,7 @@ public class SensiNact implements Core {
 			});
 			UnsubscribeResponse response = null;
 			if (unregistered) {
-				response = new UnsubscribeResponse(mediator, UriUtils.PATH_SEPARATOR, Status.SUCCESS, 200);
+				response = new UnsubscribeResponse( UriUtils.PATH_SEPARATOR, Status.SUCCESS, 200);
 				response.setResponse(new JSONObject().put("message", "The intent has been properly unregistered"));
 
 			} else {
@@ -441,7 +441,7 @@ public class SensiNact implements Core {
 				return tatooRequestId(requestId, response);
 			}			
 			final String uriRemote=String.format("/%s/%s/%s",serviceProviderId,serviceId,resourceId);
-			response=new SubscribeResponse(mediator,uriRemote,Status.SUCCESS);
+			response=new SubscribeResponse(uriRemote,Status.SUCCESS);
 			response.setResponse(new JSONObject().put("subscriptionId",recipient.toString()));	
 			MidAgentCallback cb = new AbstractMidAgentCallback(true,true,recipient.toString()){					
 				@Override
@@ -508,7 +508,7 @@ public class SensiNact implements Core {
 				return tatooRequestId(requestId, response);
 			}
 			final String uriRemote=String.format("/%s/%s/%s",serviceProviderId,serviceId,resourceId);
-			response=new UnsubscribeResponse(mediator,uriRemote,Status.SUCCESS, 200);
+			response=new UnsubscribeResponse(uriRemote,Status.SUCCESS, 200);
 			response.setResponse(new JSONObject().put("message","unsubscription done"));
 			mediator.callService(SnaAgent.class, new StringBuilder().append("(org.eclipse.sensinact.gateway.agent.id="
 				).append(subscriptionId).append(")").toString(), new Executable<SnaAgent,Void>(){

@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.method;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
 import org.json.JSONObject;
 
@@ -26,8 +25,8 @@ public class SetResponseBuilder extends AccessMethodResponseBuilder<JSONObject, 
 	 * @param uri
 	 * @param parameters
 	 */
-	protected SetResponseBuilder(Mediator mediator, String uri, Object[] parameters) {
-		super(mediator, uri, parameters);
+	protected SetResponseBuilder(String uri, Object[] parameters) {
+		super(uri, parameters);
 	}
 
 	/**
@@ -38,7 +37,7 @@ public class SetResponseBuilder extends AccessMethodResponseBuilder<JSONObject, 
 	 */
 	@Override
 	public SetResponse createAccessMethodResponse(Status status) {
-		return new SetResponse(super.mediator, super.getPath(), status);
+		return new SetResponse(super.getPath(), status);
 	}
 
 	/**

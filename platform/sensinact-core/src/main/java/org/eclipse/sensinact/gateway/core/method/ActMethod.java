@@ -51,6 +51,6 @@ public class ActMethod extends AbstractAccessMethod<JSONObject, ActResponse> {
 	 */
 	@Override
 	protected ActResponseBuilder createAccessMethodResponseBuilder(Object[] parameters) {
-		return new ActResponseBuilder(super.mediator, uri, parameters);
+		return new ActResponseBuilder(uri, parameters);
 	}
 }

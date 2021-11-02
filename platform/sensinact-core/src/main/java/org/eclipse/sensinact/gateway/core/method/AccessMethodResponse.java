@@ -140,19 +140,19 @@ public abstract class AccessMethodResponse<T> extends AbstractSnaErrorfulMessage
 		AccessMethodResponse<?> response = null;
 		switch (method) {
 		case "ACT":
-			response = new ActResponse(mediator, uri, AccessMethodResponse.Status.ERROR, code);
+			response = new ActResponse(uri, AccessMethodResponse.Status.ERROR, code);
 			break;
 		case "GET":
-			response = new GetResponse(mediator, uri, AccessMethodResponse.Status.ERROR, code);
+			response = new GetResponse(uri, AccessMethodResponse.Status.ERROR, code);
 			break;
 		case "SET":
-			response = new SetResponse(mediator, uri, AccessMethodResponse.Status.ERROR, code);
+			response = new SetResponse(uri, AccessMethodResponse.Status.ERROR, code);
 			break;
 		case "SUBSCRIBE":
-			response = new SubscribeResponse(mediator, uri, AccessMethodResponse.Status.ERROR, code);
+			response = new SubscribeResponse(uri, AccessMethodResponse.Status.ERROR, code);
 			break;
 		case "UNSUBSCRIBE":
-			response = new UnsubscribeResponse(mediator, uri, AccessMethodResponse.Status.ERROR, code);
+			response = new UnsubscribeResponse(uri, AccessMethodResponse.Status.ERROR, code);
 			break;
 		default:
 			try {
@@ -160,7 +160,7 @@ public abstract class AccessMethodResponse<T> extends AbstractSnaErrorfulMessage
 				response = error(mediator, uri, t, statusCode, message, throwable);
 
 			} catch (Exception e) {
-				response = new UnknownAccessMethodResponse(mediator, uri);
+				response = new UnknownAccessMethodResponse(uri);
 			}
 			break;
 		}
@@ -195,12 +195,12 @@ public abstract class AccessMethodResponse<T> extends AbstractSnaErrorfulMessage
 		case PROVIDERS_LIST:
 		case SERVICES_LIST:
 		case RESOURCES_LIST:
-			response = new DescribeStringResponse(mediator, uri, Status.ERROR, code, type);
+			response = new DescribeStringResponse(uri, Status.ERROR, code, type);
 			break;
 		case PROVIDER:
 		case SERVICE:
 		case RESOURCE:
-			response = new DescribeJSONResponse(mediator, uri, Status.ERROR, code, type);
+			response = new DescribeJSONResponse(uri, Status.ERROR, code, type);
 			break;
 		default:
 			break;
@@ -221,8 +221,8 @@ public abstract class AccessMethodResponse<T> extends AbstractSnaErrorfulMessage
 	 * @param type
 	 * @param status
 	 */
-	protected AccessMethodResponse(Mediator mediator, String uri, Response type, Status status) {
-		this(mediator, uri, type, status,
+	protected AccessMethodResponse(String uri, Response type, Status status) {
+		this(uri, type, status,
 				(status == Status.SUCCESS) ? AccessMethodResponse.SUCCESS_CODE : UNKNOWN_ERROR_CODE);
 	}
 
@@ -231,8 +231,8 @@ public abstract class AccessMethodResponse<T> extends AbstractSnaErrorfulMessage
 	 * @param type
 	 * @param status
 	 */
-	protected AccessMethodResponse(Mediator mediator, String uri, Response type, Status status, int statusCode) {
-		super(mediator, uri, type);
+	protected AccessMethodResponse(String uri, Response type, Status status, int statusCode) {
+		super(uri, type);
 		this.status = status;
 		super.putValue(SnaConstants.STATUS_CODE_KEY, statusCode);
 	}

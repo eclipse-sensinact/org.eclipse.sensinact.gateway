@@ -10,11 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.test;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.method.ActResponse;
 
 class AppActionResponse extends ActResponse {
-    public AppActionResponse(Mediator mediator, String uri, Status status, int code) {
-        super(mediator, uri, status, code);
+    public AppActionResponse(String uri, Status status, int code) {
+        super( uri, status, code);
     }
 }

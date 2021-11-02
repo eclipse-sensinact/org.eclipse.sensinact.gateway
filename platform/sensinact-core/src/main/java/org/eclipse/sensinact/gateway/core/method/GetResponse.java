@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.method;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
 
 /**
@@ -26,8 +25,8 @@ public class GetResponse extends AccessMethodJSONResponse {
 	 * @param status
 	 *            the associated {@link Status}
 	 */
-	public GetResponse(Mediator mediator, String uri, Status status) {
-		this(mediator, uri, status,
+	public GetResponse(String uri, Status status) {
+		this(uri, status,
 				Status.SUCCESS.equals(status) ? SnaErrorfulMessage.NO_ERROR : SnaErrorfulMessage.UNKNOWN_ERROR_CODE);
 	}
 
@@ -39,7 +38,7 @@ public class GetResponse extends AccessMethodJSONResponse {
 	 * @param code
 	 *            the associated status code
 	 */
-	public GetResponse(Mediator mediator, String uri, Status status, int code) {
-		super(mediator, uri, AccessMethodResponse.Response.GET_RESPONSE, status, code);
+	public GetResponse(String uri, Status status, int code) {
+		super(uri, AccessMethodResponse.Response.GET_RESPONSE, status, code);
 	}
 }

@@ -34,6 +34,6 @@ public class SetMethod extends AbstractAccessMethod<JSONObject, SetResponse> {
 	 */
 	@Override
 	protected SetResponseBuilder createAccessMethodResponseBuilder(Object[] parameters) {
-		return new SetResponseBuilder(super.mediator, uri, parameters);
+		return new SetResponseBuilder(uri, parameters);
 	}
 }

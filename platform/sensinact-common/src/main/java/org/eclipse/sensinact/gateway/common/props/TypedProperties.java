@@ -10,15 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.common.props;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * A typed set of properties
@@ -31,17 +30,13 @@ public abstract class TypedProperties<T extends Enum<T> & KeysCollection> implem
 
     protected final Map<TypedKey<?>, Object> properties;
 
-    protected final Mediator mediator;
 
     /**
      * Constructor
      *
-     * @param source    the name of the {@link Primitive} throwing the event
      * @param type      the type of this event
-     * @param timestamp the timestamp (milliseconds) of the PrimitiveEvent
      */
-    public TypedProperties(Mediator mediator, T type) {
-        this.mediator = mediator;
+    public TypedProperties(T type) {
         this.properties = new HashMap<TypedKey<?>, Object>();
         TypedKey<?> key = type.key(TypedProperties.TYPE);
         if (key == null) {

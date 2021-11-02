@@ -26,8 +26,8 @@ public class UnsubscribeResponse extends AccessMethodJSONResponse {
 	 * @param status
 	 *            the associated {@link Status}
 	 */
-	protected UnsubscribeResponse(Mediator mediator, String uri, Status status) {
-		this(mediator, uri, status,
+	protected UnsubscribeResponse(String uri, Status status) {
+		this(uri, status,
 				Status.SUCCESS.equals(status) ? SnaErrorfulMessage.NO_ERROR : SnaErrorfulMessage.UNKNOWN_ERROR_CODE);
 	}
 
@@ -39,7 +39,7 @@ public class UnsubscribeResponse extends AccessMethodJSONResponse {
 	 * @param code
 	 *            the associated status code
 	 */
-	public UnsubscribeResponse(Mediator mediator, String uri, Status status, int code) {
-		super(mediator, uri, AccessMethodResponse.Response.UNSUBSCRIBE_RESPONSE, status, code);
+	public UnsubscribeResponse(String uri, Status status, int code) {
+		super(uri, AccessMethodResponse.Response.UNSUBSCRIBE_RESPONSE, status, code);
 	}
 }

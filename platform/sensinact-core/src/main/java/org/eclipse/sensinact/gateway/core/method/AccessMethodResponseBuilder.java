@@ -17,7 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.json.JSONArray;
@@ -55,11 +54,6 @@ public abstract class AccessMethodResponseBuilder<T, A extends AccessMethodRespo
 	 */
 	public abstract Class<T> getComponentType();
 
-	/**
-	 * Mediator used to interact with the OSGi host environment
-	 */
-	protected final Mediator mediator;
-
 	protected final Object[] parameters;
 
 	protected boolean exitOnError;
@@ -73,9 +67,6 @@ public abstract class AccessMethodResponseBuilder<T, A extends AccessMethodRespo
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing the AccessMethodResponseBuilder to
-	 *            be instantiated to interact with the OSGi host environment
 	 * @param uri
 	 *            the String uri of the target on which the related
 	 *            {@link AccessMethod} is called
@@ -83,16 +74,13 @@ public abstract class AccessMethodResponseBuilder<T, A extends AccessMethodRespo
 	 *            the parameter objects array of parameterizing the related
 	 *            {@link AccessMethod} call
 	 */
-	protected AccessMethodResponseBuilder(Mediator mediator, String uri, Object[] parameters) {
-		this(mediator, uri, parameters, true);
+	protected AccessMethodResponseBuilder(String uri, Object[] parameters) {
+		this(uri, parameters, true);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param mediator
-	 *            the {@link Mediator} allowing the AccessMethodResponseBuilder to
-	 *            be instantiated to interact with the OSGi host environment
 	 * @param uri
 	 *            the String uri of the target on which the related
 	 *            {@link AccessMethod} is called
@@ -103,10 +91,9 @@ public abstract class AccessMethodResponseBuilder<T, A extends AccessMethodRespo
 	 *            defines whether the {@link AccessMethodResponse} build process
 	 *            will have to be interrupted if an error occurred
 	 */
-	protected AccessMethodResponseBuilder(Mediator mediator, String uri, Object[] parameters, boolean exitOnError) {
+	protected AccessMethodResponseBuilder(String uri, Object[] parameters, boolean exitOnError) {
 		super();
 		this.uri = uri;
-		this.mediator = mediator;
 		this.exitOnError = exitOnError;
 		this.parameters = parameters;
 	}

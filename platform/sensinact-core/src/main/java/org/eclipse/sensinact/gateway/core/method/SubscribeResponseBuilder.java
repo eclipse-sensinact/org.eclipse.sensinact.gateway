@@ -25,8 +25,8 @@ public class SubscribeResponseBuilder extends AccessMethodResponseBuilder<JSONOb
 	 * @param uri
 	 * @param parameters
 	 */
-	public SubscribeResponseBuilder(Mediator mediator, String uri, Object[] parameters) {
-		super(mediator, uri, parameters);
+	public SubscribeResponseBuilder(String uri, Object[] parameters) {
+		super(uri, parameters);
 	}
 
 	/**
@@ -37,7 +37,7 @@ public class SubscribeResponseBuilder extends AccessMethodResponseBuilder<JSONOb
 	 */
 	@Override
 	public SubscribeResponse createAccessMethodResponse(AccessMethodResponse.Status status) {
-		return new SubscribeResponse(super.mediator, super.getPath(), status);
+		return new SubscribeResponse(super.getPath(), status);
 	}
 
 	/**
