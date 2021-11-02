@@ -98,7 +98,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>${maven-surefire-plugin.version}</version>
 				<!-- We let bnd-testing-maven-plugin do all the testing -->
 				<configuration>
 					<skipTests>false</skipTests>
