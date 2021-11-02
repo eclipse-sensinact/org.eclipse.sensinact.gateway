@@ -10,8 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.security.signature.test;
 
-import java.io.File;
-
 import org.assertj.core.api.Assertions;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.security.signature.api.SignatureValidatorConstants;

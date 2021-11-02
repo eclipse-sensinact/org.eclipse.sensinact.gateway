@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.generic.test.tb.bundle;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
-import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 
 /**

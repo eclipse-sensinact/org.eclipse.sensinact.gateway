@@ -27,10 +27,8 @@ import java.util.zip.ZipEntry;
 
 import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 

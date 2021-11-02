@@ -22,8 +22,6 @@ import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.config.MappingDescription;
-import org.eclipse.sensinact.gateway.sthbnd.http.task.config.NestedMappingDescription;
-import org.eclipse.sensinact.gateway.sthbnd.http.task.config.RootMappingDescription;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 
 import java.io.IOException;

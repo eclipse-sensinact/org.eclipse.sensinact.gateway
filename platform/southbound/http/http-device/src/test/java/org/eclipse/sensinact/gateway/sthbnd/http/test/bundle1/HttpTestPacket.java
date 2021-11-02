@@ -11,8 +11,6 @@
 
 package org.eclipse.sensinact.gateway.sthbnd.http.test.bundle1;
 
-import java.util.Arrays;
-
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.*;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;

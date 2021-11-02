@@ -12,8 +12,6 @@ package org.eclipse.sensinact.gateway.generic.packet;
 
 import org.eclipse.sensinact.gateway.core.ServiceProviderProcessableContainer;
 
-import java.util.Iterator;
-
 /**
  * A PacketReader provides access to the semantic units of a {@link
  * Packet} reified as {@link PayloadFragment}s. Its also iterable over all

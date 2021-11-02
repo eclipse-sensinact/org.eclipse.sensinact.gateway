@@ -16,7 +16,6 @@ import org.eclipse.sensinact.gateway.sthbnd.http.HttpConnectionConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.config.MappingDescription;
-import org.eclipse.sensinact.gateway.sthbnd.http.task.config.NestedMappingDescription;
 
 /**
  * Extended {@link URITask} dedicated to HTTP communication

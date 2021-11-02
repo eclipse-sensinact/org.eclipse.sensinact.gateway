@@ -15,7 +15,6 @@ import org.eclipse.sensinact.gateway.generic.TaskTranslator;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpConnectionConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpRequest;
 import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpResponse;
-import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTaskImpl;
 import org.eclipse.sensinact.gateway.sthbnd.liveobjects.LiveObjectsConstant;
 import org.eclipse.sensinact.gateway.util.UriUtils;
