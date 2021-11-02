@@ -1155,13 +1155,9 @@ public class SensiNact implements Core {
 		this.mediator = new Mediator(bc);
 		List<String> types = ReflectUtils.getAllStringTypes(bc.getBundle());
 
-		StringBuilder builder = new StringBuilder();
+		
+		String joinTypes=String.join("\\,", types);
 
-		for (int index = 0; index < types.size(); index++) {
-			if (index > 0)
-				builder.append("\\,");
-			builder.append(types.get(index));
-		}
 
 		ConditionalPermissionUpdate cpu = cpa.newConditionalPermissionUpdate();
 		List piList = cpu.getConditionalPermissionInfos();
@@ -1178,7 +1174,7 @@ public class SensiNact implements Core {
 			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.UserManager\" \"register,get\")"
 			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.UserKeyBuilder\" \"register,get\")"
 			+ "(org.osgi.framework.ServicePermission \"org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService\" \"register,get\")"
-			+ "} null", builder.toString()));
+			+ "} null", joinTypes));
 		piList.add(cpiDeny);
 		
 		ConditionalPermissionInfo cpiAllow = null;
