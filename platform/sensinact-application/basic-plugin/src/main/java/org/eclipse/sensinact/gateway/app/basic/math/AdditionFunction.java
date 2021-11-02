@@ -10,18 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.math;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.List;
+
+import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.api.function.DataItf;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.List;
 
 /**
  * This class implements the addition function
@@ -34,8 +34,8 @@ public class AdditionFunction extends MathFunction<Double> {
 	private static final Logger LOG = LoggerFactory.getLogger(AdditionFunction.class);
     private static final String JSON_SCHEMA = "addition.json";
 
-    public AdditionFunction(Mediator mediator) {
-        super(mediator);
+    public AdditionFunction() {
+        super();
     }
 
     /**

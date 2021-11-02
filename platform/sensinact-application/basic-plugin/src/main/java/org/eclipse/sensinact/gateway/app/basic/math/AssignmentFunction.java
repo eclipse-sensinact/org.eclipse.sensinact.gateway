@@ -10,15 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.math;
 
-import org.eclipse.sensinact.gateway.app.api.function.DataItf;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.osgi.framework.BundleContext;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+
+import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
+import org.eclipse.sensinact.gateway.app.api.function.DataItf;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.osgi.framework.BundleContext;
 
 /**
  * This class implements the assignment function
@@ -29,8 +29,8 @@ import java.util.List;
 public class AssignmentFunction extends MathFunction<Object> {
     private static final String JSON_SCHEMA = "assignment.json";
 
-    public AssignmentFunction(Mediator mediator) {
-        super(mediator);
+    public AssignmentFunction() {
+        super();
     }
 
     /**

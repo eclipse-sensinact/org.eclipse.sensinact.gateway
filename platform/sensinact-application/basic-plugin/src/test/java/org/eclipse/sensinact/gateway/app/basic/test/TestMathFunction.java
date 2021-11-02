@@ -24,7 +24,6 @@ import org.eclipse.sensinact.gateway.app.basic.math.ModuloFunction;
 import org.eclipse.sensinact.gateway.app.basic.math.MultiplicationFunction;
 import org.eclipse.sensinact.gateway.app.basic.math.SubtractionFunction;
 import org.eclipse.sensinact.gateway.app.manager.component.data.ConstantData;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -35,7 +34,6 @@ public class TestMathFunction  {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(TestMathFunction.class);
     
-    private Mediator mediator=Mockito.mock(Mediator.class);
     
     private FunctionUpdateListener listener=Mockito.mock(FunctionUpdateListener.class);
 
@@ -46,7 +44,7 @@ public class TestMathFunction  {
     }
 
     public void testAddition() {
-        AdditionFunction function = new AdditionFunction(mediator);
+        AdditionFunction function = new AdditionFunction();
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData(1, Integer.class));
@@ -57,7 +55,7 @@ public class TestMathFunction  {
     }
 
     public void testSubtraction() {
-        SubtractionFunction function = new SubtractionFunction(mediator);
+        SubtractionFunction function = new SubtractionFunction();
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData(10, Integer.class));
@@ -67,7 +65,7 @@ public class TestMathFunction  {
     }
 
     public void testMultiplication() {
-        MultiplicationFunction function = new MultiplicationFunction(mediator);
+        MultiplicationFunction function = new MultiplicationFunction();
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData(10, Integer.class));
@@ -78,7 +76,7 @@ public class TestMathFunction  {
     }
 
     public void testDivision() {
-        DivisionFunction function = new DivisionFunction(mediator);
+        DivisionFunction function = new DivisionFunction();
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData(11, Integer.class));
@@ -88,7 +86,7 @@ public class TestMathFunction  {
     }
 
     public void testModulo() {
-        ModuloFunction function = new ModuloFunction(mediator);
+        ModuloFunction function = new ModuloFunction();
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData(11, Integer.class));
@@ -98,7 +96,7 @@ public class TestMathFunction  {
     }
 
     public void testAssignment() {
-        AssignmentFunction function = new AssignmentFunction(mediator);
+        AssignmentFunction function = new AssignmentFunction();
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData(11, Integer.class));

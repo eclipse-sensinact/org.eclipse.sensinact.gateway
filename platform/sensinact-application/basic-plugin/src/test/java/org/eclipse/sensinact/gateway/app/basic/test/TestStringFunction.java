@@ -48,7 +48,7 @@ public class TestStringFunction {
     }
 
     public void testSubstringFromStart() {
-        SubstringFunction function = new SubstringFunction(mediator);
+        SubstringFunction function = new SubstringFunction();
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData("Something to substring", String.class));
@@ -58,7 +58,7 @@ public class TestStringFunction {
     }
 
     public void testSubstringStartEnd() {
-        SubstringFunction function = new SubstringFunction(mediator);
+        SubstringFunction function = new SubstringFunction();
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData("Something to substring", String.class));

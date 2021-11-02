@@ -94,23 +94,23 @@ public class BasicInstaller extends AbstractPlugin {
     public AbstractFunction getFunction(AppFunction function) {
         String functionName = function.getName();
         if (functionName.equals("lesserThan") || functionName.equals("lesserEqual") || functionName.equals("greaterThan") || functionName.equals("greaterEqual") || functionName.equals("equal") || functionName.equals("diff") || functionName.equals("regex") || functionName.equals("abs") || functionName.equals("delta")) {
-            return new SimpleConditionFunction(mediator, functionName);
+            return new SimpleConditionFunction(mediator.getClassLoader(), functionName);
         } else if (functionName.equals("and") || functionName.equals("or")) {
             return new DoubleConditionFunction(functionName);
         } else if (functionName.equals("in")) {
             return new BetweenFunction();
         } else if (MathFunction.MathOperator.ADDITION.getOperator().equalsIgnoreCase(functionName)) {
-            return new AdditionFunction(this.mediator);
+            return new AdditionFunction();
         } else if (MathFunction.MathOperator.SUBTRACTION.getOperator().equalsIgnoreCase(functionName)) {
-            return new SubtractionFunction(this.mediator);
+            return new SubtractionFunction();
         } else if (MathFunction.MathOperator.MULTIPLICATION.getOperator().equalsIgnoreCase(functionName)) {
-            return new MultiplicationFunction(this.mediator);
+            return new MultiplicationFunction();
         } else if (MathFunction.MathOperator.DIVISION.getOperator().equalsIgnoreCase(functionName)) {
-            return new DivisionFunction(this.mediator);
+            return new DivisionFunction();
         } else if (MathFunction.MathOperator.MODULO.getOperator().equalsIgnoreCase(functionName)) {
-            return new ModuloFunction(this.mediator);
+            return new ModuloFunction();
         } else if (MathFunction.MathOperator.ASSIGNMENT.getOperator().equalsIgnoreCase(functionName)) {
-            return new AssignmentFunction(this.mediator);
+            return new AssignmentFunction();
         } else if (ActionFunction.SnaOperator.ACT.getOperator().equalsIgnoreCase(functionName)) {
             return new ActActionFunction();
         } else if (ActionFunction.SnaOperator.SET.getOperator().equalsIgnoreCase(functionName)) {
@@ -118,9 +118,9 @@ public class BasicInstaller extends AbstractPlugin {
         } else if (StringFunction.StringOperator.CONCATENATE.getOperator().equalsIgnoreCase(functionName)) {
             return new ConcatenateFunction();
         } else if (StringFunction.StringOperator.SUBSTRING.getOperator().equalsIgnoreCase(functionName)) {
-            return new SubstringFunction(this.mediator);
+            return new SubstringFunction();
         } else if (TimeFunction.TimeOperator.SLEEP.getOperator().equalsIgnoreCase(functionName)) {
-            return new SleepFunction(this.mediator);
+            return new SleepFunction();
         }
         return null;
     }

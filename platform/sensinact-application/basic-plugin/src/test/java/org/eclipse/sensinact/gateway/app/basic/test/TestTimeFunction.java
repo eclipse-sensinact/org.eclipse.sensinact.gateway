@@ -17,19 +17,17 @@ import org.eclipse.sensinact.gateway.app.api.function.DataItf;
 import org.eclipse.sensinact.gateway.app.api.function.FunctionUpdateListener;
 import org.eclipse.sensinact.gateway.app.basic.time.SleepFunction;
 import org.eclipse.sensinact.gateway.app.manager.component.data.ConstantData;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.mockito.Mockito;
 
 public class TestTimeFunction {
     
-    private Mediator mediator=Mockito.mock(Mediator.class);
     
     private FunctionUpdateListener listener=Mockito.mock(FunctionUpdateListener.class);
 
 
 
     public void testSleep() {
-        SleepFunction function = new SleepFunction(mediator);
+        SleepFunction function = new SleepFunction();
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData(100, Integer.class));

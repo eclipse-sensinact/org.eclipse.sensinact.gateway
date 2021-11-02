@@ -10,16 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.string;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.List;
+
+import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.api.function.DataItf;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.osgi.framework.BundleContext;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.List;
 
 /**
  * This class implements the substring function
@@ -28,11 +28,9 @@ import java.util.List;
  * @see StringFunction
  */
 public class SubstringFunction extends StringFunction<String> {
-    private final Mediator mediator;
     private static final String JSON_SCHEMA = "substring.json";
 
-    public SubstringFunction(Mediator mediator) {
-        this.mediator = mediator;
+    public SubstringFunction() {
     }
 
     /**

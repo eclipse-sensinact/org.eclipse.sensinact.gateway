@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.app.basic.math;
 
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 
 /**
  * This class abstracts the math functions
@@ -20,7 +19,6 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
  * @see AbstractFunction
  */
 public abstract class MathFunction<T> extends AbstractFunction<T> {
-    protected Mediator mediator;
 
     /**
      * List of the supported operators
@@ -38,7 +36,6 @@ public abstract class MathFunction<T> extends AbstractFunction<T> {
         }
     }
 
-    MathFunction(Mediator mediator) {
-        this.mediator = mediator;
+    MathFunction() {
     }
 }

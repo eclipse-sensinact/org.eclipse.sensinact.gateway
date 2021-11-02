@@ -26,7 +26,7 @@ import org.mockito.MockitoAnnotations;
 
 public class TestLogicFunction {
     
-    private Mediator mediator=Mockito.mock(Mediator.class);
+    private ClassLoader cl=Mockito.mock(ClassLoader.class);
     
     private FunctionUpdateListener listener=Mockito.mock(FunctionUpdateListener.class);
 
@@ -36,7 +36,7 @@ public class TestLogicFunction {
     }
 
     public void testIntegerSimpleConditionEquals() {
-        SimpleConditionFunction function = new SimpleConditionFunction(mediator, "equal");
+        SimpleConditionFunction function = new SimpleConditionFunction(cl, "equal");
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData(10, Integer.class));
@@ -46,7 +46,7 @@ public class TestLogicFunction {
     }
 
     public void testStringSimpleConditionEquals() {
-        SimpleConditionFunction function = new SimpleConditionFunction(mediator, "equal");
+        SimpleConditionFunction function = new SimpleConditionFunction(cl, "equal");
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData("sNa test", String.class));
@@ -56,7 +56,7 @@ public class TestLogicFunction {
     }
 
     public void testBooleanSimpleConditionEquals() {
-        SimpleConditionFunction function = new SimpleConditionFunction(mediator, "equal");
+        SimpleConditionFunction function = new SimpleConditionFunction(cl, "equal");
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData(false, Boolean.class));
@@ -66,7 +66,7 @@ public class TestLogicFunction {
     }
 
     public void testFloatSimpleConditionEquals() {
-        SimpleConditionFunction function = new SimpleConditionFunction(mediator, "equal");
+        SimpleConditionFunction function = new SimpleConditionFunction(cl, "equal");
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData(1.0f, Float.class));
@@ -76,7 +76,7 @@ public class TestLogicFunction {
     }
 
     public void testIntegerSimpleConditionGreater() {
-        SimpleConditionFunction function = new SimpleConditionFunction(mediator, "greaterThan");
+        SimpleConditionFunction function = new SimpleConditionFunction(cl, "greaterThan");
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData(2, Integer.class));
@@ -86,7 +86,7 @@ public class TestLogicFunction {
     }
 
     public void testIntegerSimpleConditionGreaterOrEquals() {
-        SimpleConditionFunction function = new SimpleConditionFunction(mediator, "greaterEqual");
+        SimpleConditionFunction function = new SimpleConditionFunction(cl, "greaterEqual");
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData(2, Integer.class));
@@ -96,7 +96,7 @@ public class TestLogicFunction {
     }
 
     public void testIntegerSimpleConditionLesser() {
-        SimpleConditionFunction function = new SimpleConditionFunction(mediator, "lesserThan");
+        SimpleConditionFunction function = new SimpleConditionFunction(cl, "lesserThan");
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData(1, Integer.class));
@@ -106,7 +106,7 @@ public class TestLogicFunction {
     }
 
     public void testIntegerSimpleConditionLesserOrEquals() {
-        SimpleConditionFunction function = new SimpleConditionFunction(mediator, "lesserEqual");
+        SimpleConditionFunction function = new SimpleConditionFunction(cl, "lesserEqual");
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData(2, Integer.class));
@@ -116,7 +116,7 @@ public class TestLogicFunction {
     }
 
     public void testRegexSimpleCondition() {
-        SimpleConditionFunction function = new SimpleConditionFunction(mediator, "regex");
+        SimpleConditionFunction function = new SimpleConditionFunction(cl, "regex");
         function.setListener(listener);
         List<DataItf> variables = new ArrayList<DataItf>();
         variables.add(new ConstantData("Hello", String.class));

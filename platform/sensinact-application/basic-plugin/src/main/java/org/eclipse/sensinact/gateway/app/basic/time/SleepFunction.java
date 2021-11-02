@@ -10,16 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.time;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.List;
+
+import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.api.function.DataItf;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.osgi.framework.BundleContext;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.List;
 
 /**
  * This class implements the sleep function
@@ -27,11 +27,9 @@ import java.util.List;
  * @author Remi Druilhe
  */
 public class SleepFunction extends TimeFunction<Boolean> {
-    private final Mediator mediator;
     private static final String JSON_SCHEMA = "sleep.json";
 
-    public SleepFunction(Mediator mediator) {
-        this.mediator = mediator;
+    public SleepFunction() {
     }
 
     /**
