@@ -21,19 +21,15 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
 public class Changed extends ConstraintOnComparable<Boolean> {
     public static final String OPERATOR = "changed";
 
-    /**
-     * @param classloader
-     */
-    public Changed(ClassLoader classloader) {
-        this(classloader, false);
+    public Changed() {
+        this(false);
     }
 
     /**
-     * @param classloader
      * @param complement
      */
-    public Changed(ClassLoader classloader, boolean complement) {
-        super(classloader, OPERATOR, new Boolean(true), complement);
+    public Changed(boolean complement) {
+        super(OPERATOR, new Boolean(true), complement);
     }
 
     @Override
@@ -43,7 +39,7 @@ public class Changed extends ConstraintOnComparable<Boolean> {
 
     @Override
     public Constraint getComplement() {
-        Changed complement = new Changed(super.classloader, !this.complement);
+        Changed complement = new Changed(!this.complement);
         return complement;
     }
 

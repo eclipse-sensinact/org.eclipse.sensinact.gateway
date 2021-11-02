@@ -23,8 +23,8 @@ public class Length extends ConstraintOnCollectionSize {
      * @param length   integer value on which will be based the compliance evaluation
      *                 of the size of a collection
      */
-    public Length(ClassLoader classloader, int length, boolean complement) {
-        super(classloader, OPERATOR, length, complement);
+    public Length(int length, boolean complement) {
+        super(OPERATOR, length, complement);
     }
 
     /**
@@ -44,7 +44,7 @@ public class Length extends ConstraintOnCollectionSize {
     @Override
     public Constraint getComplement() {
         Length complement = null;
-        complement = new Length(super.classloader, super.length, !this.complement);
+        complement = new Length(super.length, !this.complement);
         return complement;
     }
 }

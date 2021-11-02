@@ -23,8 +23,8 @@ public class MaxLength extends ConstraintOnCollectionSize {
      * @param length   integer value on which will be based the compliance evaluation
      *                 of the size of a collection
      */
-    public MaxLength(ClassLoader classloader, int length, boolean complement) {
-        super(classloader, OPERATOR, length, complement);
+    public MaxLength(int length, boolean complement) {
+        super(OPERATOR, length, complement);
     }
 
     /**
@@ -44,7 +44,7 @@ public class MaxLength extends ConstraintOnCollectionSize {
     @Override
     public Constraint getComplement() {
         MaxLength complement = null;
-        complement = new MaxLength(super.classloader, super.length, !this.complement);
+        complement = new MaxLength(super.length, !this.complement);
         return complement;
     }
 }

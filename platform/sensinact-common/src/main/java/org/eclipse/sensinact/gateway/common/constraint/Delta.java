@@ -30,19 +30,13 @@ public class Delta implements Constraint {
     private final double referenceValue;
 
     private final boolean complement;
-    /**
-     * Mediator used to interact with the OSGi host
-     * environment
-     */
-    protected final ClassLoader classloader;
 
     /**
      * @param delta
      * @param referenceValue
      * @throws InvalidConstraintDefinitionException
      */
-    public Delta(ClassLoader classloader, Object delta, Object referenceValue, boolean complement) throws InvalidConstraintDefinitionException {
-        this.classloader = classloader;
+    public Delta(Object delta, Object referenceValue, boolean complement) throws InvalidConstraintDefinitionException {
         this.complement = complement;
         try {
             double deltaValue = Math.abs(CastUtils.cast(double.class, delta));
@@ -134,7 +128,7 @@ public class Delta implements Constraint {
     public Constraint getComplement() {
         Delta complement = null;
         try {
-            complement = new Delta(this.classloader, this.delta, this.referenceValue, !this.complement);
+            complement = new Delta(this.delta, this.referenceValue, !this.complement);
         } catch (InvalidConstraintDefinitionException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }

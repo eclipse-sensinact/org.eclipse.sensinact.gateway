@@ -27,8 +27,8 @@ public class MaxInclusive<T> extends ConstraintOnComparable<T> {
      * @param operand
      * @throws InvalidConstraintDefinitionException
      */
-    public MaxInclusive(ClassLoader classloader, Class<T> operandClass, Object operand, boolean complement) throws InvalidConstraintDefinitionException {
-        super(classloader, OPERATOR, operandClass, operand, complement);
+    public MaxInclusive(Class<T> operandClass, Object operand, boolean complement) throws InvalidConstraintDefinitionException {
+        super(OPERATOR, operandClass, operand, complement);
     }
 
     /**
@@ -49,7 +49,7 @@ public class MaxInclusive<T> extends ConstraintOnComparable<T> {
     public Constraint getComplement() {
         MaxInclusive complement = null;
         try {
-            complement = new MaxInclusive(super.classloader, (Class<Comparable<T>>) super.operand.getClass(), super.operand, !this.complement);
+            complement = new MaxInclusive((Class<Comparable<T>>) super.operand.getClass(), super.operand, !this.complement);
         } catch (InvalidConstraintDefinitionException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }

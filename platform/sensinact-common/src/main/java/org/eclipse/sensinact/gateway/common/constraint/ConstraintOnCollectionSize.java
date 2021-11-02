@@ -51,11 +51,6 @@ public abstract class ConstraintOnCollectionSize implements Constraint {
      * logical complement of the raw defined constraint
      */
     protected final boolean complement;
-    /**
-     * Mediator used to interact with the OSGi host
-     * environment
-     */
-    protected final ClassLoader classloader;
 
     /**
      * Constructor
@@ -64,8 +59,7 @@ public abstract class ConstraintOnCollectionSize implements Constraint {
      * @param length   integer value on which will be based the compliance evaluation
      *                 of the size of a collection
      */
-    public ConstraintOnCollectionSize(ClassLoader classloader, String operator, int length, boolean complement) {
-        this.classloader = classloader;
+    public ConstraintOnCollectionSize(String operator, int length, boolean complement) {
         this.operator = operator;
         this.length = length;
         this.complement = complement;
@@ -79,8 +73,7 @@ public abstract class ConstraintOnCollectionSize implements Constraint {
      *                 of the size of a collection
      * @throws InvalidConstraintDefinitionException if the length object cannot be cast into an integer
      */
-    public ConstraintOnCollectionSize(ClassLoader classloader, String operator, Object length, boolean complement) throws InvalidConstraintDefinitionException {
-        this.classloader = classloader;
+    public ConstraintOnCollectionSize(String operator, Object length, boolean complement) throws InvalidConstraintDefinitionException {
         this.operator = operator;
         this.complement = complement;
         try {

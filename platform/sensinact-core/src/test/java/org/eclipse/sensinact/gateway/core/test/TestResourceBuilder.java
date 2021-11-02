@@ -139,7 +139,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		JSONAssert.assertEquals(get1, get2, false);
 
 		final JSONObject changed = new JSONObject(
-				new Changed(Thread.currentThread().getContextClassLoader(), true).getJSON());
+				new Changed(true).getJSON());
 
 		SubscribeResponse res = session.subscribe("serviceProvider", "testService", "TestProperty", new Recipient() {
 			@Override
@@ -297,7 +297,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 				return null;
 			}
 		}, new HashSet<Constraint>() {{
-				this.add(new Changed(Thread.currentThread().getContextClassLoader(), true));
+				this.add(new Changed(true));
 		}});
 
 		r1.set("hello");
@@ -560,8 +560,8 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		Attribute valueAttribute = r2impl.getAttribute(DataResource.VALUE);
 		valueAttribute
 				.addMetadata(new Metadata(this.testContext.getMediator(), Metadata.CONSTRAINTS, Constraint[].class,
-						new Constraint[] { new MinLength(this.testContext.getMediator().getClassLoader(), 5, false),
-								new MaxLength(this.testContext.getMediator().getClassLoader(), 10, false)
+						new Constraint[] { new MinLength(5, false),
+								new MaxLength(10, false)
 
 						}, Modifiable.FIXED));
 		try {
