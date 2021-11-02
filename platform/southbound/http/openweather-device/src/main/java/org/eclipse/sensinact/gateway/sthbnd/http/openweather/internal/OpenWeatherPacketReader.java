@@ -86,7 +86,7 @@ public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
 	            	this.subPackets.add(sp); 
 	            }
 	        } catch (Exception e) {
-	        	OpenWeatherPacketReader.this.LOG.error(e.getMessage(), e);
+	        	OpenWeatherPacketReader.LOG.error(e.getMessage(), e);
 	            super.configureEOF();
 	            throw new InvalidPacketException(e);
 	        }

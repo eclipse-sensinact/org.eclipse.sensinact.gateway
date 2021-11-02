@@ -315,7 +315,7 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
             ((HttpMediator) mediator).configure(_task);
             super.send(_task);
         } catch (Exception e) {
-            SimpleHttpProtocolStackEndpoint.this.LOG.error(e.getMessage(), e);
+            SimpleHttpProtocolStackEndpoint.LOG.error(e.getMessage(), e);
         } finally {
             ((HttpMediator) mediator).unregisterProcessingContext(_task);
         }
@@ -342,7 +342,7 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
             }
             return task;
         } catch (Exception e) {
-        	SimpleHttpProtocolStackEndpoint.this.LOG.error(e.getMessage(), e);
+        	SimpleHttpProtocolStackEndpoint.LOG.error(e.getMessage(), e);
             ((HttpMediator) mediator).unregisterProcessingContext(task);
         }
         return null;
