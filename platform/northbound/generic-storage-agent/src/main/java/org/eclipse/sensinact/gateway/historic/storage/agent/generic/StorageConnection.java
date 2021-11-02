@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.historic.storage.agent.generic;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +37,7 @@ public abstract class StorageConnection {
     /**
      * Constructor
      *
-     * @param mediator the {@link Mediator} allowing the StorageConnection to be 
-     * instantiated to interact with the OSGi host environment 
+
      */
     public StorageConnection() {
         this.stack = new Stack();
