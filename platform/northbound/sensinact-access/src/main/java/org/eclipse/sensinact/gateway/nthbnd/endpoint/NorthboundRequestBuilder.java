@@ -215,40 +215,40 @@ public class NorthboundRequestBuilder {
                 FilteringCollection collection = null;
                 if (this.filterDefinitions != null) 
                     collection = new FilteringCollection(mediator, this.hiddenFilter, this.filterDefinitions);
-                request = new AllRequest(mediator, getRequestIdentifier(), collection);
+                request = new AllRequest(getRequestIdentifier(), collection);
                 break;
             case "ACT":
                 if (this.resource != null) 
-                    request = new ResourceActRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, 
+                    request = new ResourceActRequest(getRequestIdentifier(), serviceProvider, service, resource, 
                        this.arguments.stream().<List<Object>>collect(ArrayList::new,(l,a)->{l.add(a.value);},List::addAll).toArray());
                 break;
             case "DESCRIBE":
                 if (this.resource != null) 
-                    request = new ResourceRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource);
+                    request = new ResourceRequest(getRequestIdentifier(), serviceProvider, service, resource);
                 else if (service != null) {
                     if (this.listElements) 
-                        request = new ResourcesRequest(mediator, getRequestIdentifier(), serviceProvider, service, 
+                        request = new ResourcesRequest(getRequestIdentifier(), serviceProvider, service, 
                         	this.filterDefinitions == null ? null : new FilteringCollection(mediator, this.hiddenFilter, this.filterDefinitions));
                     else 
-                        request = new ServiceRequest(mediator, getRequestIdentifier(), serviceProvider, service, null);                    
+                        request = new ServiceRequest(getRequestIdentifier(), serviceProvider, service, null);                    
                 } else if (serviceProvider != null) {
                     if (this.listElements) 
-                        request = new ServicesRequest(mediator, getRequestIdentifier(), serviceProvider, 
+                        request = new ServicesRequest(getRequestIdentifier(), serviceProvider, 
                         	this.filterDefinitions == null ? null : new FilteringCollection(mediator, this.hiddenFilter, this.filterDefinitions));
                     else 
-                        request = new ServiceProviderRequest(mediator, getRequestIdentifier(), serviceProvider, null);
+                        request = new ServiceProviderRequest(getRequestIdentifier(), serviceProvider, null);
                     
                 } else 
-                    request = new ServiceProvidersRequest(mediator, getRequestIdentifier(), 
+                    request = new ServiceProvidersRequest(getRequestIdentifier(), 
                     	this.filterDefinitions == null ? null : new FilteringCollection(mediator, this.hiddenFilter, this.filterDefinitions));                
                 break;
             case "GET":
-                request = new AttributeGetRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, 
+                request = new AttributeGetRequest(getRequestIdentifier(), serviceProvider, service, resource, 
                 	attribute, this.arguments==null || this.arguments.size()==0 ?null:this.arguments.toArray(new Argument[0]));
                 break;
             case "SET":
             	List<Argument> extraArguments = this.arguments.size()>1?this.arguments.subList(1, this.arguments.size()-1):null;
-                request = new AttributeSetRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, 
+                request = new AttributeSetRequest(getRequestIdentifier(), serviceProvider, service, resource, 
                 	attribute, this.arguments.get(0).value, extraArguments==null|| extraArguments.size()==0?null:extraArguments.toArray(new Argument[0]));
                 break;
             case "SUBSCRIBE":
@@ -263,21 +263,21 @@ public class NorthboundRequestBuilder {
                 String policy =  this.arguments.size() > 2?((String) this.arguments.get(2).value):String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY);
             	extraArguments = this.arguments.size() > 3?this.arguments.subList(3, this.arguments.size()-1):null;
                 if (this.resource != null) 
-                    request = new AttributeSubscribeRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, attribute, 
+                    request = new AttributeSubscribeRequest(getRequestIdentifier(), serviceProvider, service, resource, attribute, 
                     	northboundRecipient, (JSONArray)(this.arguments.size() > 1?this.arguments.get(1).value:new JSONArray()), 
                     	policy, extraArguments==null|| extraArguments.size()==0?null:extraArguments.toArray(new Argument[0]));
                 else 
-                    request = new RegisterAgentRequest(mediator, getRequestIdentifier(), serviceProvider, service, northboundRecipient, 
+                    request = new RegisterAgentRequest(getRequestIdentifier(), serviceProvider, service, northboundRecipient, 
                     	(SnaFilter) (this.arguments.size() > 1 ?this.arguments.get(1).value:null), policy);               
                 break;
             case "UNSUBSCRIBE":
             	extraArguments = this.arguments.size()>1?this.arguments.subList(1, this.arguments.size()-1):null;
             	String subcriptionId = CastUtils.cast(String.class, this.arguments.get(0).value);
                 if (this.resource != null)
-                    request = new AttributeUnsubscribeRequest(mediator, getRequestIdentifier(), serviceProvider, service, resource, 
+                    request = new AttributeUnsubscribeRequest(getRequestIdentifier(), serviceProvider, service, resource, 
                     	attribute, subcriptionId, extraArguments==null|| extraArguments.size()==0?null:extraArguments.toArray(new Argument[0]));
                 else 
-                    request = new UnregisterAgentRequest(mediator, getRequestIdentifier(), subcriptionId);                
+                    request = new UnregisterAgentRequest(getRequestIdentifier(), subcriptionId);                
                 break;
             default:
                 break;

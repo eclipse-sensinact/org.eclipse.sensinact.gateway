@@ -41,9 +41,9 @@ public class RegisterAgentRequest extends NorthboundRequest {
      * @param recipient
      * @param constraints
      */
-    public RegisterAgentRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider,
+    public RegisterAgentRequest(String requestIdentifier, String serviceProvider,
     		String service, NorthboundRecipient recipient, SnaFilter filter, String policy) {
-        super(mediator, requestIdentifier, null);
+        super(requestIdentifier, null);
         this.serviceProvider = serviceProvider;
         this.service = service;
         this.recipient = recipient;

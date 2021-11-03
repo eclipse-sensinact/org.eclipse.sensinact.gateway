@@ -131,13 +131,11 @@ public abstract class NorthboundRequest implements PathElement, Nameable {
     private String requestIdentifier;
 
     /**
-     * @param mediator
      * @param requestIdentifier
      * @param responseFormat
      * @param authentication
      */
-    public NorthboundRequest(NorthboundMediator mediator, String requestIdentifier, FilteringCollection filteringCollection) {
-        this.mediator = mediator;
+    public NorthboundRequest(String requestIdentifier, FilteringCollection filteringCollection) {
         this.requestIdentifier = requestIdentifier;
         this.filteringCollection = filteringCollection;
     }

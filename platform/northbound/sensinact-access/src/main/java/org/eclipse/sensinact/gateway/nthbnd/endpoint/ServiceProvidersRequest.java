@@ -14,8 +14,8 @@ import org.eclipse.sensinact.gateway.core.filtering.FilteringCollection;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 
 public class ServiceProvidersRequest extends NorthboundRequest {
-    public ServiceProvidersRequest(NorthboundMediator mediator, String requestIdentifier, FilteringCollection filteringCollection) {
-        super(mediator, requestIdentifier, filteringCollection);
+    public ServiceProvidersRequest(String requestIdentifier, FilteringCollection filteringCollection) {
+        super(requestIdentifier, filteringCollection);
     }
     
     @Override

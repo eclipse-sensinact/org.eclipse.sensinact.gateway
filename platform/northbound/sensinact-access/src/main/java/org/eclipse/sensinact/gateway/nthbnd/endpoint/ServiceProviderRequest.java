@@ -16,8 +16,8 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 public class ServiceProviderRequest extends ServiceProvidersRequest {
     private String serviceProvider;
 
-    public ServiceProviderRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, FilteringCollection filteringCollection) {
-        super(mediator, requestIdentifier, filteringCollection);
+    public ServiceProviderRequest(String requestIdentifier, String serviceProvider, FilteringCollection filteringCollection) {
+        super(requestIdentifier, filteringCollection);
         this.serviceProvider = serviceProvider;
 //      if (this.serviceProvider == null) {
 //      throw new NullPointerException("ServiceProvider missing");

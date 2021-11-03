@@ -10,10 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class AttributeGetRequest extends AttributeRequest {
 	
     private Argument[] extraArguments;
@@ -25,9 +21,9 @@ public class AttributeGetRequest extends AttributeRequest {
      * @param resource
      * @param attribute
      */
-    public AttributeGetRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, String resource, 
+    public AttributeGetRequest(String requestIdentifier, String serviceProvider, String service, String resource, 
     		String attribute, Argument[] extraArguments) {
-        super(mediator, requestIdentifier, serviceProvider, service, resource, attribute);
+        super(requestIdentifier, serviceProvider, service, resource, attribute);
         this.extraArguments = extraArguments;
     }
 

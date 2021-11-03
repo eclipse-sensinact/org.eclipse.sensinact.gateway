@@ -10,26 +10,21 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class AttributeSetRequest extends AttributeRequest {
 
     private Argument[] extraArguments;
     private Object argument;
 
     /**
-     * @param mediator
      * @param serviceProvider
      * @param service
      * @param resource
      * @param attribute
      * @param argument
      */
-    public AttributeSetRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, String resource, 
+    public AttributeSetRequest(String requestIdentifier, String serviceProvider, String service, String resource, 
     		String attribute, Object argument, Argument[] extraArguments) {
-        super(mediator, requestIdentifier, serviceProvider, service, resource, attribute);
+        super(requestIdentifier, serviceProvider, service, resource, attribute);
         this.argument = argument;
         this.extraArguments = extraArguments;
     }

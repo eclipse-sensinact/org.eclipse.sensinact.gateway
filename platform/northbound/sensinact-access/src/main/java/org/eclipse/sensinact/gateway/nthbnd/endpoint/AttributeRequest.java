@@ -15,14 +15,13 @@ public abstract class AttributeRequest extends ResourceRequest {
     private String attribute;
 
     /**
-     * @param mediator
      * @param serviceProvider
      * @param service
      * @param resource
      * @param attribute
      */
-    public AttributeRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, String resource, String attribute) {
-        super(mediator, requestIdentifier, serviceProvider, service, resource);
+    public AttributeRequest(String requestIdentifier, String serviceProvider, String service, String resource, String attribute) {
+        super(requestIdentifier, serviceProvider, service, resource);
         this.attribute = attribute;
     }
 
