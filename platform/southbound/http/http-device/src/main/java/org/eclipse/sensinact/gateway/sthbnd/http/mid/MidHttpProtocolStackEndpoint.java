@@ -10,7 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.mid;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.protocol.http.client.mid.MidClient;
@@ -20,9 +23,6 @@ import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 
 /**
  * Extended abstract {@link BasisDeviceURIFactory} dedicated to devices using
@@ -39,13 +39,13 @@ public abstract class MidHttpProtocolStackEndpoint<RESPONSE extends HttpResponse
     protected final MidClient<RESPONSE, REQUEST> client;
 
     /**
-     * @param mediator
+
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws IOException
      */
-    public MidHttpProtocolStackEndpoint(Mediator mediator) throws ParserConfigurationException, SAXException, IOException {
-        super(mediator);
+    public MidHttpProtocolStackEndpoint() throws ParserConfigurationException, SAXException, IOException {
+        super();
         this.client = new MidClient<RESPONSE, REQUEST>(this);
     }
 

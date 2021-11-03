@@ -68,11 +68,9 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
     /**
      * Constructor
      *
-     * @param mediator the {@link Mediator} that will be used by the LocalProtocolStackConnector 
-     * to instantiate to interact with the OSGi host environment
      */
     public LocalProtocolStackEndpoint(Mediator mediator) {
-        super(mediator);
+        super();
         this.resolver = new AnnotationResolver(mediator);
         this.executors = new ArrayList<AnnotationExecutor>();
         this.cache = new HashMap<PathCommandKey, AnnotationExecutor>();
@@ -82,7 +80,6 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
 
     @Override
     public void connect(ExtModelConfiguration<P> manager) throws InvalidProtocolStackException {
-        this.resolver.addInjectableInstance(Mediator.class, super.mediator);
         this.resolver.addInjectableInstance(LocalProtocolStackEndpoint.class, this);
         this.resolver.addInjectableInstance(ExtModelConfiguration.class, manager);
         this.resolver.buildInjected();
@@ -314,8 +311,8 @@ public class LocalProtocolStackEndpoint<P extends Packet> extends ProtocolStackE
     }
 
     @Override
-    public Task createTask(Mediator mediator, CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-    	Task task =  super.wrap(Task.class, new GenericLocalTask(mediator, command, this, path, profileId, resourceConfig, parameters)); 
+    public Task createTask(CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+    	Task task =  super.wrap(Task.class, new GenericLocalTask(command, this, path, profileId, resourceConfig, parameters)); 
     	return task;
     }
 

@@ -3,7 +3,6 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +23,6 @@ public abstract class AbstractUnsubscribeTaskWrapper implements UnsubscribeTaskW
 	 */
 	protected String subscriptionId;
 
-	/**
-	 * the {@link Mediator} allowing the UnsubscribeTaskWrapper to be 
-	 * instantiated to interact with the OSGi host environment  
-	 */
-	protected Mediator mediator;
-
 	protected ProtocolStackEndpoint<?> endpoint;
 
 	/**
@@ -46,11 +39,10 @@ public abstract class AbstractUnsubscribeTaskWrapper implements UnsubscribeTaskW
 	 * 
 	 * @param task the {@link Task} subscribe access method
 	 */
-	protected AbstractUnsubscribeTaskWrapper(Mediator mediator, Task task, ProtocolStackEndpoint<?> endpoint) {
+	protected AbstractUnsubscribeTaskWrapper(Task task, ProtocolStackEndpoint<?> endpoint) {
 		if(!CommandType.UNSUBSCRIBE.equals(task.getCommand()))
 			throw new IllegalArgumentException("Unsubscribe Task expected");
 		this.task = task;
-		this.mediator = mediator;
 		this.endpoint = endpoint;
 	}
 

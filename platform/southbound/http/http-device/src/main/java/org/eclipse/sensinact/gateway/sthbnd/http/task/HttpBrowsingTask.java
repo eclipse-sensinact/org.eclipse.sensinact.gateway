@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.task;
 
+import org.eclipse.jetty.client.HttpRequest;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpProtocolStackEndpoint;
@@ -32,8 +33,8 @@ extends HttpDiscoveryTask<RESPONSE, REQUEST> {
      * @param requestType the extended {@link HttpRequest} type handled
      *                    by this HttpDiscoveryConnectionConfiguration
      */
-    public HttpBrowsingTask(Mediator mediator, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType) {
-        super(mediator, transmitter, requestType);
+    public HttpBrowsingTask(HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType) {
+        super(transmitter, requestType);
     }
 
     @Override

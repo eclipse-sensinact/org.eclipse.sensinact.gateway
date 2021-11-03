@@ -22,11 +22,14 @@ import org.json.JSONObject;
 
 public class OneM2MGetTask extends HttpTaskImpl<SimpleHttpResponse, SimpleHttpRequest> {
     
+	private Mediator mediator;
+
 	public OneM2MGetTask(Mediator mediator, CommandType command, TaskTranslator transmitter, 
 		Class<SimpleHttpRequest> requestType, String path, String profileId, 
 		ResourceConfig resourceConfig, Object[] parameters) {
-        super(mediator, command, transmitter, requestType, path, profileId, 
+        super(command, transmitter, requestType, path, profileId, 
         		resourceConfig, parameters);
+        this.mediator=mediator;
     }
 
     @Override

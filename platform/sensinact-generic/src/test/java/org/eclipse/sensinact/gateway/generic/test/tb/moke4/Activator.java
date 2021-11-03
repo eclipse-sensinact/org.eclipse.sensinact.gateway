@@ -46,7 +46,7 @@ public class Activator extends AbstractActivator<Mediator> {
 
         this.endpoint = new MokeStack(mediator);
         this.endpoint.connect(this.manager);
-        MokeProcessor processor = new MokeProcessor(super.mediator, this.endpoint.getConnector());
+        MokeProcessor processor = new MokeProcessor(this.endpoint.getConnector());
         this.processorRegistration = super.mediator.getContext().registerService(ProcessorService.class, processor, null);
 
     }

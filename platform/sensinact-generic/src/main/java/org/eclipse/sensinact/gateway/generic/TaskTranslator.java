@@ -35,7 +35,7 @@ public interface TaskTranslator {
      * @param parameters     the objects array parameterizing the task execution
      * @return a new created {@link Get} task
      */
-    public Task createTask(Mediator mediator, Task.CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters);
+    public Task createTask(Task.CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters);
 
 //	/**
 //     * Returns a new created {@link Get} task

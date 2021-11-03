@@ -24,15 +24,14 @@ public class SimpleHttpResponse extends HttpResponse {
     private Class<? extends HttpPacket> packetType;
 
     /**
-     * @param mediator
      * @param connection
      * @param configuration
      * @throws IOException
      */
-    public SimpleHttpResponse(Mediator mediator, HttpURLConnection connection, 
+    public SimpleHttpResponse(HttpURLConnection connection, 
     		HttpConnectionConfiguration<? extends HttpResponse, ? extends Request<? extends HttpResponse>> configuration) 
     				throws IOException {
-        super(mediator, connection, configuration);
+        super(connection, configuration);
         this.packetType = configuration.getPacketType();
     }
 

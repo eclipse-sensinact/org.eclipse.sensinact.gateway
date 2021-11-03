@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.generic.test.tb.moke3;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.TaskManager;
@@ -22,7 +21,6 @@ import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceID;
 import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID;
 
 public class MokePacket implements Packet {
-    private Mediator mediator;
 
     private String serviceId;
     private String resourceId;
@@ -35,14 +33,13 @@ public class MokePacket implements Packet {
     /**
      * Constructor
      *
-     * @param mediator    the associated {@link Mediator}
+
      * @param processorId the targeted {@link PacketProcessor} string
      *                    identifier
      * @param taskId      the associated {@link Task} string identifier
      * @param data        the embedded data array
      */
-    public MokePacket(Mediator mediator, String processorId, String taskId, String serviceId, String resourceId, Object data) {
-        this.mediator = mediator;
+    public MokePacket(String processorId, String taskId, String serviceId, String resourceId, Object data) {
         this.processorId = processorId;
         this.taskId = taskId;
         this.resourceId = resourceId;
@@ -52,12 +49,11 @@ public class MokePacket implements Packet {
 
     /**
      * @param taskId
-     * @param mediator2
      * @param string
      * @param strings
      */
-    public MokePacket(Mediator mediator, String processorId, String taskId, String[] serviceIds) {
-        this.mediator = mediator;
+    public MokePacket(String processorId, String taskId, String[] serviceIds) {
+
         this.processorId = processorId;
         this.data = serviceIds;
         this.taskId = taskId;

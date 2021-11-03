@@ -25,12 +25,12 @@ import org.eclipse.sensinact.gateway.generic.uri.URITaskTranslator;
 
 public class MokeStack extends URIProtocolStackEndpoint<MokePacket> {
     public MokeStack(Mediator mediator) {
-        super(mediator);
+        super();
     }
 
     @Override
-    public Task createTask(Mediator mediator, CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        return new MokeTask(mediator, command, (URITaskTranslator) this, path, profileId, (ExtResourceConfig) resourceConfig, parameters);
+    public Task createTask(CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+        return new MokeTask(command, (URITaskTranslator) this, path, profileId, (ExtResourceConfig) resourceConfig, parameters);
     }
 
     public Connector<MokePacket> getConnector() {
@@ -42,7 +42,7 @@ public class MokeStack extends URIProtocolStackEndpoint<MokePacket> {
     	
         final MokePacket packet;
         String taskId = (String) options.remove("taskId").get(0);
-        packet = new MokePacket(mediator, processorIdentifier, taskId, new String[]{});
+        packet = new MokePacket(processorIdentifier, taskId, new String[]{});
 
         new Thread(new Runnable() {
             @Override

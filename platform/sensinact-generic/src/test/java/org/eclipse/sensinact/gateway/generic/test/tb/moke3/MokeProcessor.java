@@ -42,7 +42,7 @@ public class MokeProcessor implements ProcessorService {
             String argument3 = packetElements.length > 3 ? packetElements[3] : "null";
             String argument4 = packetElements.length > 4 ? packetElements[4] : "null";
 
-            this.connector.process(new MokePacket(mediator, argument0, argument1, argument2, argument3, argument4));
+            this.connector.process(new MokePacket(argument0, argument1, argument2, argument3, argument4));
         } catch (InvalidPacketException e) {
             e.printStackTrace();
         }

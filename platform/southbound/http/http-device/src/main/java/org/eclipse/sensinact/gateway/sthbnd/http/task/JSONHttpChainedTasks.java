@@ -10,7 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.task;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.generic.TaskTranslator;
@@ -19,9 +21,6 @@ import org.eclipse.sensinact.gateway.sthbnd.http.HttpConnectionConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -34,8 +33,8 @@ public class JSONHttpChainedTasks<REQUEST extends Request<SimpleHttpResponse>> e
      * @param resourceConfig
      * @param parameters
      */
-    public JSONHttpChainedTasks(Mediator mediator, CommandType command, TaskTranslator transmitter, Class<REQUEST> requestType, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        super(mediator, command, transmitter, requestType, path, profileId, resourceConfig, parameters);
+    public JSONHttpChainedTasks(CommandType command, TaskTranslator transmitter, Class<REQUEST> requestType, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+        super(command, transmitter, requestType, path, profileId, resourceConfig, parameters);
     }
 
     /**
@@ -67,7 +66,7 @@ public class JSONHttpChainedTasks<REQUEST extends Request<SimpleHttpResponse>> e
      */
     @Override
     public JSONHttpChainedTask<REQUEST> createChainedTask(String identifier, CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        JSONHttpChainedTask<REQUEST> chain = new JSONHttpChainedTask<REQUEST>(mediator, command, transmitter, requestType, path, profileId, resourceConfig, parameters);
+        JSONHttpChainedTask<REQUEST> chain = new JSONHttpChainedTask<REQUEST>(command, transmitter, requestType, path, profileId, resourceConfig, parameters);
 
         chain.setChainedIdentifier(identifier);
         return chain;

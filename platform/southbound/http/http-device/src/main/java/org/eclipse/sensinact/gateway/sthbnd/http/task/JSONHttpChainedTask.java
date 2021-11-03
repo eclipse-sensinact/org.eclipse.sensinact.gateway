@@ -10,10 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.task;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.generic.TaskImpl;
 import org.eclipse.sensinact.gateway.generic.TaskTranslator;
+import org.eclipse.sensinact.gateway.generic.uri.URITask;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpConnectionConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpResponse;
@@ -22,9 +26,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -48,14 +49,13 @@ public class JSONHttpChainedTask<REQUEST extends Request<SimpleHttpResponse>> ex
     private String chainedIdentifier;
 
     /**
-     * @param mediator
      * @param transmitter
      * @param path
      * @param resourceConfig
      * @param parameters
      */
-    public JSONHttpChainedTask(Mediator mediator, CommandType command, TaskTranslator transmitter, Class<REQUEST> requestType, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        super(mediator, command, transmitter, requestType, path, profileId, resourceConfig, parameters);
+    public JSONHttpChainedTask(CommandType command, TaskTranslator transmitter, Class<REQUEST> requestType, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+        super(command, transmitter, requestType, path, profileId, resourceConfig, parameters);
     }
 
     /**

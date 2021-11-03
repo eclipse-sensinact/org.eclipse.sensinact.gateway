@@ -17,7 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.AbstractUnsubscribeTaskWrapper;
 import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.Task;
@@ -40,8 +39,8 @@ extends AbstractUnsubscribeTaskWrapper implements HttpTask<RESPONSE,REQUEST>, Un
 	 * 
 	 * @param task the {@link Task} subscribe access method
 	 */
-	protected AbstractUnsubscribeHttpTaskWrapper(Mediator mediator, HttpTask<RESPONSE,REQUEST> task, ProtocolStackEndpoint<?> endpoint) {
-		super(mediator, task, endpoint);
+	protected AbstractUnsubscribeHttpTaskWrapper(HttpTask<RESPONSE,REQUEST> task, ProtocolStackEndpoint<?> endpoint) {
+		super(task, endpoint);
 	}
 
 	@Override
@@ -249,6 +248,6 @@ extends AbstractUnsubscribeTaskWrapper implements HttpTask<RESPONSE,REQUEST>, Un
 	@Override
     public REQUEST build() {
 	    return ReflectUtils.getInstance(Request.class,((HttpTaskImpl<RESPONSE,REQUEST>)task
-	    		).requestType, new Object[]{super.mediator, this});
+	    		).requestType, new Object[]{this});
     }
 }

@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.liveobjects.task;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.TaskTranslator;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpConnectionConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpRequest;
@@ -24,8 +23,8 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
  */
 public class LiveObjectsUserLogout extends HttpTaskImpl<SimpleHttpResponse, SimpleHttpRequest> {
     
-	public LiveObjectsUserLogout(Mediator mediator, TaskTranslator transmitter) {
-        super(mediator, null, transmitter, SimpleHttpRequest.class, UriUtils.ROOT, 
+	public LiveObjectsUserLogout(TaskTranslator transmitter) {
+        super(null, transmitter, SimpleHttpRequest.class, UriUtils.ROOT, 
         		null, null, null);
     }
 

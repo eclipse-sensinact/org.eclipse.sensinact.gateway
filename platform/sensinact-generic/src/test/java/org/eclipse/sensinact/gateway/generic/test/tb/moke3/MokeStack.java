@@ -26,13 +26,13 @@ import java.util.List;
 import java.util.Map;
 
 public class MokeStack extends URIProtocolStackEndpoint<MokePacket> {
-    public MokeStack(Mediator mediator) {
-        super(mediator);
+    public MokeStack() {
+        super();
     }
 
     @Override
-    public Task createTask(Mediator mediator, CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        return new MokeTask(mediator, command, (URITaskTranslator) this, path, profileId, (ExtResourceConfig) resourceConfig, parameters);
+    public Task createTask(CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+        return new MokeTask(command, (URITaskTranslator) this, path, profileId, (ExtResourceConfig) resourceConfig, parameters);
     }
 
     public Connector<MokePacket> getConnector() {
@@ -52,14 +52,14 @@ public class MokeStack extends URIProtocolStackEndpoint<MokePacket> {
         String taskId = (String) options.remove("taskId").get(0);
 
         if (taskId.equals("device1#SERVICES_ENUMERATION")) {
-            packet = new MokePacket(mediator, "device1", taskId, new String[]{"pir", "ldr", "gpr"});
+            packet = new MokePacket("device1", taskId, new String[]{"pir", "ldr", "gpr"});
 
         } else if (taskId.equals("weather_5#SERVICES_ENUMERATION") || taskId.equals("weather_6#SERVICES_ENUMERATION") || taskId.equals("weather_7#SERVICES_ENUMERATION") || taskId.equals("weather_8#SERVICES_ENUMERATION")) {
             String sp = taskId.split("#")[0];
-            packet = new MokePacket(mediator, sp, taskId, new String[]{"weather"});
+            packet = new MokePacket(sp, taskId, new String[]{"weather"});
 
         } else if (taskId.equals("hydrometers_4#SERVICES_ENUMERATION")) {
-            packet = new MokePacket(mediator, "hydrometers_4", taskId, new String[]{"weather"});
+            packet = new MokePacket("hydrometers_4", taskId, new String[]{"weather"});
 
         } else {
             if (!taskId.endsWith("SERVICES_ENUMERATION")) {
@@ -67,9 +67,9 @@ public class MokeStack extends URIProtocolStackEndpoint<MokePacket> {
                 String service = taskIdElements[taskIdElements.length - 2];
                 String resource = taskIdElements[taskIdElements.length - 1];
 
-                packet = new MokePacket(mediator, processorIdentifier, taskId, service, resource, AccessMethod.EMPTY);
+                packet = new MokePacket(processorIdentifier, taskId, service, resource, AccessMethod.EMPTY);
             } else {
-                packet = new MokePacket(mediator, processorIdentifier, taskId, new String[]{});
+                packet = new MokePacket(processorIdentifier, taskId, new String[]{});
             }
         }
 //		System.out.println("####################################");

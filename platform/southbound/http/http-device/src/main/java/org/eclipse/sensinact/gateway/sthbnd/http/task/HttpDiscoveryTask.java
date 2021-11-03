@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.task;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.jetty.client.HttpRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
@@ -26,37 +26,33 @@ extends HttpTaskImpl<RESPONSE, REQUEST> {
     /**
      * Constructor
      *
-     * @param mediator    the {@link Mediator} allowing to interact with
-     *                    the OSGi host environment
      * @param transmitter the {@link HttpProtocolStackEndpoint} transmitting
      *                    the requests build by the HttpDiscoveryTask to instantiate
      * @param requestType the extended {@link HttpRequest} type handled
      *                    by this HttpDiscoveryConnectionConfiguration
      */
-    public HttpDiscoveryTask(Mediator mediator, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType) {
-        this(mediator, CommandType.GET, transmitter, requestType, null);
+    public HttpDiscoveryTask(HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType) {
+        this( CommandType.GET, transmitter, requestType, null);
     }
 
     /**
      * Constructor
      *
-     * @param mediator    the {@link Mediator} allowing to interact with
-     *                    the OSGi host environment
+
      * @param transmitter the {@link HttpProtocolStackEndpoint} transmitting
      *                    the requests build by the HttpDiscoveryTask to instantiate
      * @param requestType the extended {@link HttpRequest} type handled
      *                    by this HttpDiscoveryConnectionConfiguration
      * @param parameters   the Objects array parameterizing the remote discovery call
      */
-    public HttpDiscoveryTask(Mediator mediator, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType, Object[] parameters) {
-        this(mediator, CommandType.GET, transmitter, requestType, parameters);
+    public HttpDiscoveryTask(HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType, Object[] parameters) {
+        this(CommandType.GET, transmitter, requestType, parameters);
     }
     
     /**
      * Constructor
      *
-     * @param mediator    the {@link Mediator} allowing to interact with
-     *                    the OSGi host environment
+
      * @param command     the {@link CommandType} of the HttpDiscoveryTask to be
      *                    instantiated
      * @param transmitter the {@link HttpProtocolStackEndpoint} transmitting
@@ -64,15 +60,14 @@ extends HttpTaskImpl<RESPONSE, REQUEST> {
      * @param requestType the extended {@link HttpRequest} type handled
      *                    by this HttpDiscoveryConnectionConfiguration
      */
-    public HttpDiscoveryTask(Mediator mediator, CommandType command, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType) {
-        this(mediator, command, transmitter, requestType, null);
+    public HttpDiscoveryTask(CommandType command, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType) {
+        this(command, transmitter, requestType, null);
     }
 
     /**
      * Constructor
      *
-     * @param mediator    the {@link Mediator} allowing to interact with
-     *                    the OSGi host environment
+
      * @param command     the {@link CommandType} of the HttpDiscoveryTask to be
      *                    instantiated
      * @param transmitter the {@link HttpProtocolStackEndpoint} transmitting
@@ -81,7 +76,7 @@ extends HttpTaskImpl<RESPONSE, REQUEST> {
      *                    by this HttpDiscoveryConnectionConfiguration
      * @param parameters   the Objects array parameterizing the remote discovery call
      */
-    public HttpDiscoveryTask(Mediator mediator, CommandType command, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType, Object[] parameters) {
-        super(mediator, command, transmitter, requestType, null, null, null, parameters);
+    public HttpDiscoveryTask(CommandType command, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType, Object[] parameters) {
+        super(command, transmitter, requestType, null, null, null, parameters);
     }
 }

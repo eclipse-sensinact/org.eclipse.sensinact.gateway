@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.generic.stream;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
@@ -25,11 +24,9 @@ public abstract class StreamProtocolStackEndpoint<P extends Packet> extends Prot
 	/**
      * Constructor
      *
-     * @param mediator the {@link Mediator} that used by the StreamProtocolStackConnector to be
-     * instantiated to interact with the OSGi host environment
      */
-    public StreamProtocolStackEndpoint(Mediator mediator) {
-        super(mediator);
+    public StreamProtocolStackEndpoint() {
+        super();
     }
 
     @Override

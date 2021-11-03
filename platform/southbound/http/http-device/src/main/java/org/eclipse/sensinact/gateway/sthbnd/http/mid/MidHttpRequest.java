@@ -10,27 +10,24 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.mid;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import java.io.IOException;
+
 import org.eclipse.sensinact.gateway.protocol.http.client.AbstractRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.mid.Reusable;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpConnectionConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 
-import java.io.IOException;
-
 /**
  *
  */
 public abstract class MidHttpRequest<RESPONSE extends HttpResponse> extends AbstractRequest<RESPONSE> implements Reusable {
-    protected Mediator mediator;
 
     /**
      * @param mediator
      * @param configuration
      */
-    public MidHttpRequest(Mediator mediator, HttpConnectionConfiguration<RESPONSE, MidHttpRequest<RESPONSE>> configuration) {
+    public MidHttpRequest(HttpConnectionConfiguration<RESPONSE, MidHttpRequest<RESPONSE>> configuration) {
         super(configuration);
-        this.mediator = mediator;
     }
 
     @Override

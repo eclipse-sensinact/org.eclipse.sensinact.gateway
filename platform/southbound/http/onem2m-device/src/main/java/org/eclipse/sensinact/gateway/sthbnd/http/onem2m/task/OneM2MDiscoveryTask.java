@@ -19,8 +19,11 @@ import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpBrowsingTask;
 import java.util.UUID;
 
 public class OneM2MDiscoveryTask extends HttpBrowsingTask<SimpleHttpResponse, SimpleHttpRequest> {
-    public OneM2MDiscoveryTask(Mediator mediator, HttpProtocolStackEndpoint transmitter) {
-        super(mediator, transmitter, SimpleHttpRequest.class);
+    private Mediator mediator;
+
+	public OneM2MDiscoveryTask(Mediator mediator, HttpProtocolStackEndpoint transmitter) {
+        super(transmitter, SimpleHttpRequest.class);
+        this.mediator=mediator;
     }
 
     @Override

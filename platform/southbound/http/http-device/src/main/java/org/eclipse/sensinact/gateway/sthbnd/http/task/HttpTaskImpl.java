@@ -10,7 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.task;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.Proxy;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.generic.TaskImpl;
 import org.eclipse.sensinact.gateway.generic.TaskTranslator;
@@ -23,14 +31,6 @@ import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.config.MappingDescription;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.Proxy;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * {@link HttpTask} implementation 
@@ -61,7 +61,6 @@ extends TaskImpl implements HttpTask<RESPONSE, REQUEST> {
     /**
      * Constructor
      *
-     * @param mediator       the associated {@link Mediator}
      * @param command        the {@link CommandType} of the task to be
      *                       instantiated
      * @param transmitter    the {@link TaskTranslator} in charge of sending
@@ -76,11 +75,11 @@ extends TaskImpl implements HttpTask<RESPONSE, REQUEST> {
      *                       which created the task to be instantiated if it applies
      * @param parameters     the objects array parameterizing the task execution
      */
-    public HttpTaskImpl(Mediator mediator, CommandType command, TaskTranslator transmitter, 
+    public HttpTaskImpl(CommandType command, TaskTranslator transmitter, 
     	Class<REQUEST> requestType, String path, String profileId, ResourceConfig resourceConfig, 
     	Object[] parameters) {
     	
-        super(mediator, command, transmitter, path, profileId, resourceConfig, 
+        super(command, transmitter, path, profileId, resourceConfig, 
         		parameters);
 
         this.requestType = requestType;
@@ -333,6 +332,6 @@ extends TaskImpl implements HttpTask<RESPONSE, REQUEST> {
     @Override
     public REQUEST build() {
         return ReflectUtils.getInstance(Request.class, this.requestType, 
-        		new Object[]{super.mediator, this});
+        		new Object[]{this});
     }    
 }

@@ -45,7 +45,7 @@ public class Activator extends AbstractActivator<Mediator> {
     		).withResourceBuildPolicy(BuildPolicy.BUILD_COMPLETE_ON_DESCRIPTION.getPolicy()
     		).build("genova-resource.xml", Collections.<String, String>emptyMap());
 
-        this.endpoint = new MokeStack(mediator);
+        this.endpoint = new MokeStack();
         this.endpoint.connect(this.manager);
 
         MokeProcessor processor = new MokeProcessor(super.mediator, this.endpoint.getConnector());
