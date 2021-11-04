@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.generic.test.tb.bundle;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 
@@ -22,10 +21,9 @@ public class GenericTestPacketReader extends SimplePacketReader<GenericTestPacke
 	private GenericTestPacket packet;
 	
 	/**
-     * @param mediator
      */
-    protected GenericTestPacketReader(Mediator mediator) {
-        super(mediator);
+    protected GenericTestPacketReader() {
+        super();
     }
 
     @Override

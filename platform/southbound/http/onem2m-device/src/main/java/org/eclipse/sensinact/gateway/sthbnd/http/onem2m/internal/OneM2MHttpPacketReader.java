@@ -13,7 +13,6 @@ package org.eclipse.sensinact.gateway.sthbnd.http.onem2m.internal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.PacketReader;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
@@ -37,10 +36,9 @@ public class OneM2MHttpPacketReader extends SimplePacketReader<HttpPacket> {
     private List<OneM2MHttpSubPacket> subPackets;
     private HttpPacket packet;
     /**
-     * @param mediator the mediator of the bundle
      */
-    public OneM2MHttpPacketReader(Mediator mediator) {
-        super(mediator);
+    public OneM2MHttpPacketReader() {
+        super();
     }
 
     @Override

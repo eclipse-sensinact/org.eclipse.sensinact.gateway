@@ -61,13 +61,11 @@ public class HttpMappingProtocolStackConnectorCustomizer extends DefaultConnecto
 	private final SimpleDateFormat timestampFormat;
 	private final String serviceProviderIdPattern;
 
-	private final Mediator mediator;
 	
-	public HttpMappingProtocolStackConnectorCustomizer(Mediator mediator, 
+	public HttpMappingProtocolStackConnectorCustomizer(Mediator mediator,
 			@SuppressWarnings("rawtypes") ExtModelConfiguration ExtModelConfiguration,
 			HttpMappingProtocolStackEndpointDescription config) {
-		super(mediator, ExtModelConfiguration);
-		this.mediator = mediator;
+		super(mediator,ExtModelConfiguration);
 		this.timestampFormat = config.getTimestampPattern() == null ? null : new SimpleDateFormat(config.getTimestampPattern());
 		this.serviceProviderIdPattern = config.getServiceProviderIdPattern();
 		JsonFactory jsonFactory = new JsonFactoryBuilder().configure(AUTO_CLOSE_SOURCE, true)
@@ -250,7 +248,7 @@ public class HttpMappingProtocolStackConnectorCustomizer extends DefaultConnecto
 				if(pathElements.length > 3)
 					metadataId = pathElements[3];
 				
-		        PayloadServiceFragmentImpl payloadFragment = new PayloadServiceFragmentImpl(mediator);
+		        PayloadServiceFragmentImpl payloadFragment = new PayloadServiceFragmentImpl();
 		        payloadFragment.setServiceId(serviceId);
 		        payloadFragment.setResourceId(resourceId);
 		        
@@ -262,7 +260,7 @@ public class HttpMappingProtocolStackConnectorCustomizer extends DefaultConnecto
 		        return payloadFragment;
 			}).collect(toList());
 		
-		PayloadFragmentImpl subPacket = new PayloadFragmentImpl(mediator, serviceFragments);
+		PayloadFragmentImpl subPacket = new PayloadFragmentImpl(serviceFragments);
 		subPacket.setServiceProviderIdentifier(serviceProviderId);
 		subPacket.isGoodbyeMessage(false);
 		subPacket.isHelloMessage(false);

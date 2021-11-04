@@ -49,7 +49,7 @@ public class DefaultPacketReaderFactory implements PacketReaderFactory {
     }
 
     @Override
-    public <P extends Packet> PacketReader<P> newInstance(Mediator mediator, ExtModelConfiguration manager, P packet) throws InvalidPacketException {
+    public <P extends Packet> PacketReader<P> newInstance(ExtModelConfiguration manager, P packet) throws InvalidPacketException {
         int index = 0;
         int length = packetReaders == null ? 0 : packetReaders.size();
         PacketReader<P> packetReader = null;
@@ -57,9 +57,9 @@ public class DefaultPacketReaderFactory implements PacketReaderFactory {
             try {
                 Class<? extends PacketReader<P>> packetReaderType = (Class<? extends PacketReader<P>>) packetReaders.get(index);
                 if (StructuredPacketReader.class.isAssignableFrom(packetReaderType)) 
-                    packetReader = new StructuredPacketReader<P>(mediator, (Class<P>) packet.getClass());
+                    packetReader = new StructuredPacketReader<P>((Class<P>) packet.getClass());
                 else
-                    packetReader = ReflectUtils.getTheBestInstance(packetReaderType, new Object[]{mediator, manager});
+                    packetReader = ReflectUtils.getTheBestInstance(packetReaderType, new Object[]{manager});
                 packetReader.load(packet);
                 break;
 

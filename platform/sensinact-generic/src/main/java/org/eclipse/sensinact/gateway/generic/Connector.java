@@ -10,21 +10,23 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
+import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketTypeException;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.generic.packet.PacketReader;
 import org.eclipse.sensinact.gateway.generic.packet.PayloadFragment;
 import org.eclipse.sensinact.gateway.generic.packet.TaskIdValuePair;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Manages IO between a {@link ProtocolStackEndpoint} and
@@ -61,6 +63,7 @@ public class Connector<P extends Packet> extends TaskManager {
      * Initial lock status
      */
     protected boolean locked;
+	private Mediator mediator;
 
     /**
      * Constructor
@@ -73,8 +76,8 @@ public class Connector<P extends Packet> extends TaskManager {
     		ProtocolStackEndpoint<?> endpoint, 
     		ExtModelConfiguration extModelConfiguration, 
     		ConnectorCustomizer<P> customizer) {
-        super(mediator, endpoint, extModelConfiguration.isLockedAtInitializationTime(), extModelConfiguration.isDesynchronized());
-
+        super( endpoint, extModelConfiguration.isLockedAtInitializationTime(), extModelConfiguration.isDesynchronized());
+        this.mediator=mediator;
         this.extModelConfiguration = extModelConfiguration;        
         this.extModelInstanceBuilder = new ExtModelInstanceBuilder(mediator);
         this.extModelInstanceBuilder.withConnector(this);
@@ -93,8 +96,8 @@ public class Connector<P extends Packet> extends TaskManager {
      * @param locked  Defines the initial lock state of the
      *                {@link TokenEventProvider} to instantiate
      */
-    public Connector(Mediator mediator, ProtocolStackEndpoint<?> endpoint, ExtModelConfiguration ExtModelConfiguration) {
-        this(mediator, endpoint, ExtModelConfiguration, null);
+    public Connector(Mediator mediator,ProtocolStackEndpoint<?> endpoint, ExtModelConfiguration ExtModelConfiguration) {
+        this(mediator,endpoint, ExtModelConfiguration, null);
     }
 
     /**
@@ -107,7 +110,7 @@ public class Connector<P extends Packet> extends TaskManager {
     protected void configureCustomizer() {
         try {
             if (this.customizer == null)
-                this.customizer = new DefaultConnectorCustomizer<P>(mediator, this.extModelConfiguration);
+                this.customizer = new DefaultConnectorCustomizer<P>(mediator,this.extModelConfiguration);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }

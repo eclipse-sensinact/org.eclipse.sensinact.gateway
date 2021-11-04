@@ -10,16 +10,25 @@
  */
 package org.eclipse.sensinact.gateway.generic.packet;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.generic.Task;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Iterator;
+
+import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.generic.Task;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.AttributeID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.CommandID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.GoodbyeMessage;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.HelloMessage;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.Iteration;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.MetadataID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ProfileID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ResourceID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, SubPacket {
 	
@@ -58,7 +67,6 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
     }
 
     private P packet;
-    private Mediator mediator;
     protected AnnotatedElement attributeIDAnnotated = null;
     protected AnnotatedElement commandIDAnnotated = null;
     protected AnnotatedElement dataAnnotated = null;
@@ -141,12 +149,9 @@ public class PojoPacketWrapper<P extends Packet> implements StructuredPacket, Su
     /**
      * Constructor
      *
-     * @param mediator the {@link Mediator} allowing to interact
-     *                 with the OSGi host environment
      * @throws InvalidPacketException
      */
-    public PojoPacketWrapper(Mediator mediator) {
-        this.mediator = mediator;
+    public PojoPacketWrapper() {
     }
 
     /**

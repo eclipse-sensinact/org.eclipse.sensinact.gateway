@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
@@ -63,10 +62,6 @@ public abstract class TaskManager {
      * to ask for Task creation and transmission
      */
     protected final TaskTranslator connector;
-    /**
-     * the associated {@link Mediator}
-     */
-    protected Mediator mediator;
 
     /**
      * Constructor
@@ -74,14 +69,13 @@ public abstract class TaskManager {
      * @param requireTokenEventProvider
      * @param desynchronizer            the associated token provider
      */
-    public TaskManager(Mediator mediator, TaskTranslator connector, boolean initialLockState, boolean isDesynchronized) {
-        this.mediator = mediator;
+    public TaskManager( TaskTranslator connector, boolean initialLockState, boolean isDesynchronized) {
         this.connector = connector;
         this.waitingTasks = new LinkedList<Task>();
         this.executedTasks = new HashMap<String, List<Task>>();
 
         if (isDesynchronized) {
-            this.desynchronizer = new TaskDesynchronizer(mediator);
+            this.desynchronizer = new TaskDesynchronizer();
             this.desynchronizer.setLocked(initialLockState);
             new Thread(this.desynchronizer).start();
         }

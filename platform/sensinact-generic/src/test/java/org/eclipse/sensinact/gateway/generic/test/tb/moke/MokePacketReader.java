@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.generic.test.tb.moke;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.PayloadServiceFragment;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
@@ -24,10 +23,9 @@ public class MokePacketReader extends SimplePacketReader<MokePacket> {
 	/**
      * Constructor
      *
-     * @param mediator the mediator
      */
-    public MokePacketReader(Mediator mediator) {
-        super(mediator);
+    public MokePacketReader() {
+        super();
     }
 
     @Override

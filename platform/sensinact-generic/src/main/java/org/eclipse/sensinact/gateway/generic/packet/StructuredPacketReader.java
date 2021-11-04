@@ -57,24 +57,19 @@ public class StructuredPacketReader<P extends Packet> extends SimplePacketReader
     private PojoPacketWrapper<P> wrapper = null;
     private Iterator<SubPacket> iterator = null;
 
-    /**
-     * @param mediator the {@link Mediator} allowing to
-     *                 interact with the OSGi host environment
-     */
-    public StructuredPacketReader(Mediator mediator) {
-        super(mediator);
+
+    public StructuredPacketReader() {
+        super();
     }
 
     /**
      * Constructor
      *
-     * @param mediator   the {@link Mediator} allowing to
-     *                   interact with the OSGi host environment
      * @param packetType the {@link Packet} type to handle
      * @throws InvalidPacketTypeException
      */
-    public StructuredPacketReader(Mediator mediator, Class<P> packetType) throws InvalidPacketTypeException {
-        this(mediator);
+    public StructuredPacketReader(Class<P> packetType) throws InvalidPacketTypeException {
+        this();
         boolean isAnnotated = false;
 
         Field[] fields = packetType.getDeclaredFields();
@@ -93,7 +88,7 @@ public class StructuredPacketReader<P extends Packet> extends SimplePacketReader
         }
         int index = 0;
         int length = elements == null ? 0 : elements.length;
-        PojoPacketWrapper<P> wrapper = new PojoPacketWrapper<P>(mediator);
+        PojoPacketWrapper<P> wrapper = new PojoPacketWrapper<P>();
         for (; index < length; index++) {
         	Annotation[] annotations = null;
         	try {

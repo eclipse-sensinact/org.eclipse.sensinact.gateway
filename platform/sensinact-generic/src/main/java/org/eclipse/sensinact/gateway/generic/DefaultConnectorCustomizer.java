@@ -38,23 +38,19 @@ public class DefaultConnectorCustomizer<P extends Packet> implements ConnectorCu
      */
     private ExtModelConfiguration ExtModelConfiguration;
 
-    /**
+    /*
      * the {@link Mediator} allowing to interact
      * with the OSGi host environment
      */
-    private Mediator mediator;
 
     /**
      * Constructor
-     *
-     * @param mediator              the {@link Mediator} allowing
      *                              to interact with the OSGi host environment
-     * @param ExtModelConfiguration
+     * @param extModelConfiguration
      * @throws InvalidPacketTypeException
      */
-    public DefaultConnectorCustomizer(Mediator mediator, ExtModelConfiguration ExtModelConfiguration) {
-        this.mediator = mediator;
-        this.ExtModelConfiguration = ExtModelConfiguration;
+    public DefaultConnectorCustomizer(Mediator mediator,ExtModelConfiguration extModelConfiguration) {
+        this.ExtModelConfiguration = extModelConfiguration;
         this.factories = new ArrayList<PacketReaderFactory>();
 
         //Mediator classloader because we don't need to retrieve
@@ -65,11 +61,11 @@ public class DefaultConnectorCustomizer<P extends Packet> implements ConnectorCu
         Iterator<PacketReaderFactory> iterator = loader.iterator();
         while (iterator.hasNext()) {
             PacketReaderFactory factory = iterator.next();
-            if (ExtModelConfiguration.getPacketType() == null || factory.handle(ExtModelConfiguration.getPacketType()))
+            if (extModelConfiguration.getPacketType() == null || factory.handle(extModelConfiguration.getPacketType()))
                 factories.add(factory);
         }
         if (this.factories.isEmpty())
-            this.factories.add(new DefaultPacketReaderFactory(mediator, ExtModelConfiguration));
+            this.factories.add(new DefaultPacketReaderFactory(mediator, extModelConfiguration));
     }
 
     @Override
@@ -95,7 +91,7 @@ public class DefaultConnectorCustomizer<P extends Packet> implements ConnectorCu
         while (iterator.hasNext()) {
             PacketReaderFactory factory = iterator.next();
             if (factory.handle(packet.getClass())) {
-                reader = factory.newInstance(this.mediator, this.ExtModelConfiguration, packet);
+                reader = factory.newInstance(this.ExtModelConfiguration, packet);
                 break;
             }
         }

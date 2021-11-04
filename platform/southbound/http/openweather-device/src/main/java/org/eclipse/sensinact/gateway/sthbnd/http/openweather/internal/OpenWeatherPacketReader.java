@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.LocationResource;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
@@ -44,10 +43,9 @@ public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
 	private HttpPacket packet = null;
     
 	/**
-     * @param mediator
      */
-    public OpenWeatherPacketReader(Mediator mediator) {
-        super(mediator);
+    public OpenWeatherPacketReader() {
+        super();
     }
 
     @Override

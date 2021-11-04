@@ -38,7 +38,7 @@ public class GenericTestPacketReaderFactory implements PacketReaderFactory {
      * @see PacketReaderFactory#newInstance(Mediator, ExtModelConfiguration, Packet)
      */
     @Override
-    public <P extends Packet> PacketReader<P> newInstance(Mediator mediator, ExtModelConfiguration manager, P packet) {
+    public <P extends Packet> PacketReader<P> newInstance(ExtModelConfiguration manager, P packet) {
         return null;
     }
 }

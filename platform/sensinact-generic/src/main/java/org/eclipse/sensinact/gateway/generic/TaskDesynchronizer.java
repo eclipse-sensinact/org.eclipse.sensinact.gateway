@@ -10,12 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Allow to desynchronize task processing
@@ -28,16 +27,13 @@ public class TaskDesynchronizer implements Runnable {
     private final LinkedList<TaskManager> listeners;
     private final AtomicInteger leftTasks;
     private boolean running = true;
-    private Mediator mediator;
-
     /**
      * Constructor
      */
-    public TaskDesynchronizer(Mediator mediator) {
+    public TaskDesynchronizer() {
         this.listeners = new LinkedList<TaskManager>();
         // default initial status is unlocked
         this.leftTasks = new AtomicInteger(1);
-        this.mediator = mediator;
     }
 
     /**

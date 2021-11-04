@@ -12,7 +12,6 @@ package org.eclipse.sensinact.gateway.sthbnd.liveobjects.internal;
 
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
@@ -40,11 +39,9 @@ public class LiveObjectsPacketReader extends SimplePacketReader<HttpPacket> {
 	/**
      * Constructor
      *
-     * @param mediator the {@link Mediato r} allowing to interact
-     *                 with the OSGi host environment
      */
-    public LiveObjectsPacketReader(Mediator mediator) {
-        super(mediator);
+    public LiveObjectsPacketReader() {
+        super();
     }
 
     @Override

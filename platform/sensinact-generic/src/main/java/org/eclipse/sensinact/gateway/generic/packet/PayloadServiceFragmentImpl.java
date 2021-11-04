@@ -10,14 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.generic.packet;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.generic.Task;
-import org.eclipse.sensinact.gateway.generic.TaskManager;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.sensinact.gateway.common.primitive.Nameable;
+import org.eclipse.sensinact.gateway.generic.Task;
+import org.eclipse.sensinact.gateway.generic.TaskManager;
 
 /**
  * Abstract implementation of a {@link PayloadServiceFragment}
@@ -25,7 +25,6 @@ import java.util.List;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class PayloadServiceFragmentImpl implements PayloadServiceFragment {
-    protected Mediator mediator;
     private String name;
     private String taskIdentifier;
 
@@ -38,8 +37,7 @@ public class PayloadServiceFragmentImpl implements PayloadServiceFragment {
     /**
      * Constructor
      */
-    public PayloadServiceFragmentImpl(Mediator mediator) {
-        this.mediator = mediator;
+    public PayloadServiceFragmentImpl() {
         this.payloadAttributeFragments = new ArrayList<PayloadResourceFragment>();
     }
 

@@ -65,9 +65,12 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
 	private JSONArray itemsArray = null;
 	private JSONObject item = null;
 	private int pos = 0;
+
+	private Mediator mediator;
     
     public OpenHabPacketReader(Mediator mediator) {
-        super(mediator);
+        super();
+        this.mediator=mediator;
     }
     
     @Override
@@ -98,7 +101,7 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
     			this.devices.entrySet().stream().forEach(e -> {
     				String openHabId = e.getKey(); 
     				Set<String> devices = e.getValue();
-    				((OpenHabMediator) super.mediator).updateBroker(openHabId, devices
+    				((OpenHabMediator) mediator).updateBroker(openHabId, devices
 		            	).stream().forEach(s-> { this.processables.add(
 		            	    new Processable(Mode.DELETE, new HierarchyDTO(s,null,null), 
 		            	    		null, null));});

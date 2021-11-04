@@ -23,7 +23,6 @@ import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 public abstract class MidHttpRequest<RESPONSE extends HttpResponse> extends AbstractRequest<RESPONSE> implements Reusable {
 
     /**
-     * @param mediator
      * @param configuration
      */
     public MidHttpRequest(HttpConnectionConfiguration<RESPONSE, MidHttpRequest<RESPONSE>> configuration) {

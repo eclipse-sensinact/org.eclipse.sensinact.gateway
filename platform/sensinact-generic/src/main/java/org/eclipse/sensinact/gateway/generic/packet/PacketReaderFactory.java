@@ -44,5 +44,5 @@ public interface PacketReaderFactory {
      * @return a new {@link PacketReader} instance
      * @throws InvalidPacketException
      */
-    <P extends Packet> PacketReader<P> newInstance(Mediator mediator, ExtModelConfiguration manager, P packet) throws InvalidPacketException;
+    <P extends Packet> PacketReader<P> newInstance(ExtModelConfiguration manager, P packet) throws InvalidPacketException;
 }

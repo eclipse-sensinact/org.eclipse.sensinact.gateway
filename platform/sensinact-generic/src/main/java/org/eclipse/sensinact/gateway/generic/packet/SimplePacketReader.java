@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.generic.packet;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.TaskManager;
@@ -32,16 +31,12 @@ public abstract class SimplePacketReader<P extends Packet> extends AbstractPacke
     protected boolean isGoodbyeMessage;
 
     protected CommandType command;
-    protected Mediator mediator;
 
     /**
      * Constructor
      *
-     * @param mediator the {@link Mediator} used to interact with
-     *                 the host OSGi environment
      */
-    protected SimplePacketReader(Mediator mediator) {
-        this.mediator = mediator;
+    protected SimplePacketReader() {
     }
 
     /**
@@ -255,7 +250,7 @@ public abstract class SimplePacketReader<P extends Packet> extends AbstractPacke
      * @return a new {@link PayloadFragment} instance
      */
     protected PayloadFragmentImpl newSubPacket() {
-        return new PayloadFragmentImpl(this.mediator);
+        return new PayloadFragmentImpl();
     }
 
     /**
@@ -265,7 +260,7 @@ public abstract class SimplePacketReader<P extends Packet> extends AbstractPacke
      * @return a new {@link PayloadServiceFragment} instance
      */
     protected PayloadServiceFragmentImpl newPayloadFragment() {
-        return new PayloadServiceFragmentImpl(this.mediator);
+        return new PayloadServiceFragmentImpl();
     }
 
     /**

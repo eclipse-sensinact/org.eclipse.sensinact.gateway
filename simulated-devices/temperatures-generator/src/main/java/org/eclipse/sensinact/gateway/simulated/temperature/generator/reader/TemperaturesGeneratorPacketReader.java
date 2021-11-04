@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.simulated.temperature.generator.reader;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 import org.eclipse.sensinact.gateway.simulated.temperature.generator.internal.TemperaturesGeneratorAbstractPacket;
@@ -19,10 +18,9 @@ public class TemperaturesGeneratorPacketReader extends SimplePacketReader<Temper
     private TemperaturesGeneratorPacket packet;
 
 	/**
-     * @param mediator the mediator
      */
-    public TemperaturesGeneratorPacketReader(Mediator mediator) {
-        super(mediator);
+    public TemperaturesGeneratorPacketReader() {
+        super();
     }
 
     @Override

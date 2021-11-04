@@ -35,16 +35,16 @@ public class TemperaturesGeneratorPacketReaderFactory implements PacketReaderFac
      * @see PacketReaderFactory#newInstance(Mediator, ExtModelConfiguration, Packet)
      */
     @Override
-    public <P extends Packet> PacketReader<P> newInstance(Mediator mediator, ExtModelConfiguration manager, P packet) throws InvalidPacketException {
+    public <P extends Packet> PacketReader<P> newInstance(ExtModelConfiguration manager, P packet) throws InvalidPacketException {
         TemperaturesGeneratorAbstractPacket tpacket = (TemperaturesGeneratorAbstractPacket) packet;
 
         if (packet instanceof TemperaturesGeneratorDiscoveryPacket) {
-            PacketReader<TemperaturesGeneratorAbstractPacket> reader = new TemperaturesGeneratorDiscoveryPacketReader(mediator);
+            PacketReader<TemperaturesGeneratorAbstractPacket> reader = new TemperaturesGeneratorDiscoveryPacketReader();
             reader.load(tpacket);
             return (PacketReader<P>) reader;
 
         } else {
-            PacketReader<TemperaturesGeneratorAbstractPacket> reader = new TemperaturesGeneratorPacketReader(mediator);
+            PacketReader<TemperaturesGeneratorAbstractPacket> reader = new TemperaturesGeneratorPacketReader();
             reader.load(tpacket);
             return (PacketReader<P>) reader;
         }

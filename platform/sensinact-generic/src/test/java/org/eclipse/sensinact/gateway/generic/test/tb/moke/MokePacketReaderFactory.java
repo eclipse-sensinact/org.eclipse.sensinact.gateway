@@ -60,9 +60,9 @@ public class MokePacketReaderFactory implements PacketReaderFactory {
      * @see PacketReaderFactory#newInstance(Mediator, ExtModelConfiguration, Packet)
      */
     @Override
-    public <P extends Packet> PacketReader<P> newInstance(Mediator mediator, ExtModelConfiguration manager, P packet) throws InvalidPacketException {
+    public <P extends Packet> PacketReader<P> newInstance(ExtModelConfiguration manager, P packet) throws InvalidPacketException {
         MokePacket mokePacket = (MokePacket) packet;
-        MokePacketReader reader = new MokePacketReader(mediator);
+        MokePacketReader reader = new MokePacketReader();
         reader.load(mokePacket);
         return (PacketReader<P>) reader;
     }

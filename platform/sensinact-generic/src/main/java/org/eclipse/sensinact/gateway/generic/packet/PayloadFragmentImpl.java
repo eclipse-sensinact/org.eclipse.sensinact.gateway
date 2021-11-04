@@ -10,12 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.generic.packet;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.primitive.Name;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.sensinact.gateway.common.primitive.Name;
 
 /**
  * Implementation of a {@link PayloadFragment}
@@ -34,16 +33,13 @@ public class PayloadFragmentImpl implements PayloadFragment {
     protected String serviceProviderIdentifier;
     protected String profileId;
 
-    private Mediator mediator;
 
     /**
      * Constructor
      *
-     * @param mediator the {@link Mediator} used to interact with
-     *                 the OSGi host environment
+
      */
-    public PayloadFragmentImpl(Mediator mediator) {
-        this.mediator = mediator;
+    public PayloadFragmentImpl() {
         this.payloadFragments = new ArrayList<PayloadServiceFragment>();
     }
 
@@ -53,8 +49,8 @@ public class PayloadFragmentImpl implements PayloadFragment {
      * @param payloadFragments the initial set of held {@link PayloadServiceFragment}s of the
      *                         SubPacket to instantiate
      */
-    public PayloadFragmentImpl(Mediator mediator, List<PayloadServiceFragment> payloadFragments) {
-        this(mediator);
+    public PayloadFragmentImpl(List<PayloadServiceFragment> payloadFragments) {
+        this();
         if (payloadFragments != null) {
             Iterator<PayloadServiceFragment> iterator = payloadFragments.iterator();
 
