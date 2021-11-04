@@ -10,25 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class AttributeUnsubscribeRequest extends AttributeRequest {
 	
     private String subscriptionId;
 	private Argument[] extraArguments;
 
     /**
-     * @param mediator
      * @param responseFormat
      * @param serviceProvider
      * @param service
      * @param resource
      */
-    public AttributeUnsubscribeRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, String resource, 
+    public AttributeUnsubscribeRequest(String requestIdentifier, String serviceProvider, String service, String resource, 
     		String attribute, String subscriptionId, Argument[] extraArguments) {
-        super(mediator, requestIdentifier, serviceProvider, service, resource, attribute);
+        super(requestIdentifier, serviceProvider, service, resource, attribute);
 
         this.subscriptionId = subscriptionId;
         this.extraArguments = extraArguments;

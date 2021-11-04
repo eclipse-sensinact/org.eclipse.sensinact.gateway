@@ -14,12 +14,11 @@ import org.eclipse.sensinact.gateway.core.filtering.FilteringCollection;
 
 public class AllRequest extends NorthboundRequest {
     /**
-     * @param mediator
      * @param requestIdentifier
      * @param filteringCollection
      */
-    public AllRequest(NorthboundMediator mediator, String requestIdentifier, FilteringCollection filteringCollection) {
-        super(mediator, requestIdentifier, filteringCollection);
+    public AllRequest(String requestIdentifier, FilteringCollection filteringCollection) {
+        super(requestIdentifier, filteringCollection);
     }
 
     @Override

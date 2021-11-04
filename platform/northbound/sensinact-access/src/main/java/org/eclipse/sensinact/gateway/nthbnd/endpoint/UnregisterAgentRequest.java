@@ -21,8 +21,8 @@ public class UnregisterAgentRequest extends NorthboundRequest {
      * @param mediator
      * @param agentId
      */
-    public UnregisterAgentRequest(NorthboundMediator mediator, String requestIdentifier, String agentId) {
-        super(mediator, requestIdentifier, null);
+    public UnregisterAgentRequest(String requestIdentifier, String agentId) {
+        super(requestIdentifier, null);
         this.agentId = agentId;
     }
 

@@ -16,13 +16,12 @@ public class ResourceRequest extends ResourcesRequest {
     private String resource;
 
     /**
-     * @param mediator
      * @param responseFormat
      * @param serviceProvider
      * @param service
      */
-    public ResourceRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, String resource) {
-        super(mediator, requestIdentifier, serviceProvider, service, null);
+    public ResourceRequest(String requestIdentifier, String serviceProvider, String service, String resource) {
+        super(requestIdentifier, serviceProvider, service, null);
         this.resource = resource;
     }
 

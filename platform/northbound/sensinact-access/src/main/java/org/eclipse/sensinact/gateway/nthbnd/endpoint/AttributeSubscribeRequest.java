@@ -10,10 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.json.JSONArray;
 
 public class AttributeSubscribeRequest extends AttributeRequest {
@@ -24,19 +20,18 @@ public class AttributeSubscribeRequest extends AttributeRequest {
 	private Argument[] extraArguments;
 
     /**
-     * @param mediator
      * @param serviceProvider
      * @param service
      * @param resource
      * @param attribute
      * @param recipient
      */
-    public AttributeSubscribeRequest(NorthboundMediator mediator, String requestIdentifier, 
+    public AttributeSubscribeRequest(String requestIdentifier, 
     		String serviceProvider, String service, String resource, String attribute, 
     		NorthboundRecipient recipient, JSONArray conditions, String policy, 
     		Argument[] extraArguments) {
     	
-        super(mediator, requestIdentifier, serviceProvider, service, resource, attribute);
+        super(requestIdentifier, serviceProvider, service, resource, attribute);
         this.recipient = recipient;
         this.conditions = conditions;
         this.policy = policy;

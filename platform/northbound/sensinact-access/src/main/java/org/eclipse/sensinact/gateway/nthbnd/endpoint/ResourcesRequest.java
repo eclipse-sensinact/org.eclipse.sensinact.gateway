@@ -15,14 +15,13 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 
 public class ResourcesRequest extends ServiceRequest {
     /**
-     * @param mediator
      * @param responseFormat
      * @param serviceProvider
      * @param service
      * @param filteringCollection
      */
-    public ResourcesRequest(NorthboundMediator mediator, String requestIdentifier, String serviceProvider, String service, FilteringCollection filteringCollection) {
-        super(mediator, requestIdentifier, serviceProvider, service, filteringCollection);
+    public ResourcesRequest(String requestIdentifier, String serviceProvider, String service, FilteringCollection filteringCollection) {
+        super(requestIdentifier, serviceProvider, service, filteringCollection);
     }
 
     @Override
