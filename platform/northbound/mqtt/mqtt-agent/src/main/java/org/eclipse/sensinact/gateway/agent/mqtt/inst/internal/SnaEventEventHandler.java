@@ -48,11 +48,12 @@ public class SnaEventEventHandler extends AbstractMqttHandler {
             String service = event.getPath().split("/")[2];
             String resource = event.getPath().split("/")[3];
             String valueProperty = event.getPath().split("/")[4];
-            String value=eventJson.getString(valueProperty);
+            Object value=eventJson.get(valueProperty);
             switch (event.getType()) {
                 // Create contentInstance
                 case ATTRIBUTE_VALUE_UPDATED:
-                    this.agent.publish(String.format("%s%s/%s/%s",prefix,provider,service,resource),value);
+                    this.agent.publish(String.format("%s%s/%s/%s",prefix,provider,service,resource),
+                    		String.valueOf(value));
                     break;
                 default:
                     return;
