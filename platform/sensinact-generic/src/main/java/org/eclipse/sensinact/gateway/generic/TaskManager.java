@@ -10,14 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.core.ResourceConfig;
-import org.eclipse.sensinact.gateway.core.method.AccessMethod;
-import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
@@ -26,6 +18,16 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.core.ResourceConfig;
+import org.eclipse.sensinact.gateway.core.method.AccessMethod;
+import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages {@link Task}s to execute
@@ -204,22 +206,22 @@ public abstract class TaskManager {
         Task task = null;
         switch (command) {
             case GET:
-                task = this.connector.createTask(this.mediator, Task.CommandType.GET, path, profileId, resourceConfig, parameters);
+                task = this.connector.createTask(Task.CommandType.GET, path, profileId, resourceConfig, parameters);
                 break;
             case SET:
-                task = this.connector.createTask(this.mediator, Task.CommandType.SET, path, profileId, resourceConfig, parameters);
+                task = this.connector.createTask(Task.CommandType.SET, path, profileId, resourceConfig, parameters);
                 break;
             case ACT:
-                task = this.connector.createTask(this.mediator, Task.CommandType.ACT, path, profileId, resourceConfig, parameters);
+                task = this.connector.createTask( Task.CommandType.ACT, path, profileId, resourceConfig, parameters);
                 break;
             case SUBSCRIBE:
-                task = this.connector.createTask(this.mediator, Task.CommandType.SUBSCRIBE, path, profileId, resourceConfig, parameters);
+                task = this.connector.createTask(Task.CommandType.SUBSCRIBE, path, profileId, resourceConfig, parameters);
                 break;
             case UNSUBSCRIBE:
-                task = this.connector.createTask(this.mediator, Task.CommandType.UNSUBSCRIBE, path, profileId, resourceConfig, parameters);
+                task = this.connector.createTask(Task.CommandType.UNSUBSCRIBE, path, profileId, resourceConfig, parameters);
                 break;
             case SERVICES_ENUMERATION:
-                task = this.connector.createTask(this.mediator, Task.CommandType.SERVICES_ENUMERATION, path, profileId, resourceConfig, parameters);
+                task = this.connector.createTask(Task.CommandType.SERVICES_ENUMERATION, path, profileId, resourceConfig, parameters);
                 break;
             default:
                 ;

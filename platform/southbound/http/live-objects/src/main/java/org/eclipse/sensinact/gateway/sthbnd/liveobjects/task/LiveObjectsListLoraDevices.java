@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.liveobjects.task;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpConnectionConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpRequest;
@@ -22,8 +21,8 @@ import org.eclipse.sensinact.gateway.sthbnd.liveobjects.LiveObjectsConstant;
  * @author Rémi Druilhe
  */
 public class LiveObjectsListLoraDevices extends HttpBrowsingTask<SimpleHttpResponse, SimpleHttpRequest> {
-    public LiveObjectsListLoraDevices(Mediator mediator, HttpProtocolStackEndpoint transmitter) {
-        super(mediator, transmitter, SimpleHttpRequest.class);
+    public LiveObjectsListLoraDevices(HttpProtocolStackEndpoint transmitter) {
+        super(transmitter, SimpleHttpRequest.class);
     }
 
     @Override

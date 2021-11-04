@@ -89,7 +89,7 @@ public class FreeSmsProtocolStackEndpoint extends SimpleHttpProtocolStackEndpoin
     public FreeSmsProtocolStackEndpoint(HttpMediator mediator) throws ParserConfigurationException, SAXException, IOException {
         super(mediator);
         this.configuredResources = new HashMap<String, FreeSmsResourceConfig>();
-        super.mediator.addListener(this);
+        mediator.addListener(this);
     }
 
     /**

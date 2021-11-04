@@ -34,11 +34,6 @@ import org.slf4j.LoggerFactory;
 public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTranslator {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ProtocolStackEndpoint.class);
-    /**
-     * the {@link Mediator} that will be used by the ProtocolStackConnector to instantiate 
-     * to interact with the OSGi host environment
-     */
-    protected final Mediator mediator;
 
     /**
      * the {@link Connector} connected to this ProtocolStackConnector instance
@@ -62,14 +57,8 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
 	 */
 	protected SubscriptionHandlerDelegate subscriptionHandlerDelegate;
 	
-    /**
-     * Constructor
-     *
-     * @param mediator the {@link Mediator} that will be used by the ProtocolStackConnector 
-     * to instantiate to interact with the OSGi host environment
-     */
-    public ProtocolStackEndpoint(Mediator mediator) {
-        this.mediator = mediator;
+
+    public ProtocolStackEndpoint() {
     	this.subscriptions = new HashMap<>();
     }
     
@@ -176,7 +165,7 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
 	       	if(wrapperType != null) { 
 		         	try {
 		 				_task =  (T) wrapperType.getDeclaredConstructor(new Class<?>[]{Mediator.class, type, ProtocolStackEndpoint.class}
-		 				).newInstance(new Object[] {mediator,task,this});
+		 				).newInstance(new Object[] {task,this});
 		 			} catch (Exception e) {
 		 				e.printStackTrace();
 		 				_task = null;
@@ -187,7 +176,7 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
 	       	if(wrapperType != null) { 
 		         	try {
 		 				_task =  (T) wrapperType.getDeclaredConstructor(new Class<?>[]{Mediator.class, type, ProtocolStackEndpoint.class}
-		 				).newInstance(new Object[] {mediator,task,this});
+		 				).newInstance(new Object[] {task,this});
 		 			} catch (Exception e) {
 		 				e.printStackTrace();
 		 				_task = null;

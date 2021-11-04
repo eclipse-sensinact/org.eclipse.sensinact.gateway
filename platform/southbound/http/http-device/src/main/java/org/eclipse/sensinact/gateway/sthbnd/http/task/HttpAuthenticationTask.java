@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.task;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.jetty.client.HttpRequest;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
@@ -36,15 +36,13 @@ public class HttpAuthenticationTask<RESPONSE extends HttpResponse, REQUEST exten
     /**
      * Constructor
      *
-     * @param mediator    the {@link Mediator} allowing to interact with
-     *                    the OSGi host environment
      * @param transmitter the {@link HttpProtocolStackEndpoint} transmitting
      *                    the requests build by the HttpDiscoveryTask to instantiate
      * @param requestType the extended {@link HttpRequest} type handled
      *                    by this HttpDiscoveryConnectionConfiguration
      */
-    public HttpAuthenticationTask(Mediator mediator, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType) {
-        super(mediator, transmitter, requestType);
+    public HttpAuthenticationTask(HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType) {
+        super(transmitter, requestType);
     }
 
     /**

@@ -35,8 +35,7 @@ extends HttpDiscoveryTask<RESPONSE, REQUEST> {
 	/**
      * Constructor
      *
-     * @param mediator       
-     * 		the {@link Mediator} allowing to interact with the OSGi host environment
+
      * @param transmitter    
      * 		the {@link HttpProtocolStackEndpoint} transmitting the requests build by 
      * 		the HttpSubscribingTask to be instantiated
@@ -44,8 +43,8 @@ extends HttpDiscoveryTask<RESPONSE, REQUEST> {
      * 		the extended {@link Request} type of the Http request created by the
      * 		the HttpSubscribingTask to be instantiated
      */
-    public HttpSubscribingTask(Mediator mediator, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType, Object[] parameters) {
-        super(mediator, CommandType.SUBSCRIBE, transmitter, requestType, parameters);
+    public HttpSubscribingTask(HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType, Object[] parameters) {
+        super(CommandType.SUBSCRIBE, transmitter, requestType, parameters);
     }
     
     public boolean isDirect() {

@@ -10,6 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
@@ -17,11 +22,6 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * A generic {@link Task} implementation
@@ -32,7 +32,6 @@ public abstract class TaskImpl implements Task {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(TaskImpl.class);
     protected final Object lock = new Object();
-    protected final Mediator mediator;
 
     protected final ResourceConfig resourceConfig;
     protected final Object[] parameters;
@@ -65,8 +64,7 @@ public abstract class TaskImpl implements Task {
      *                       on which the task applies
      * @param parameters     the objects array parameterizing the call
      */
-    public TaskImpl(Mediator mediator, CommandType command, TaskTranslator transmitter, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        this.mediator = mediator;
+    public TaskImpl(CommandType command, TaskTranslator transmitter, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
         this.available = new AtomicBoolean(false);
         this.transmitter = transmitter;
         this.path = path;

@@ -12,7 +12,9 @@ package org.eclipse.sensinact.gateway.sthbnd.http.mid;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
+import org.eclipse.sensinact.gateway.generic.ExtResourceImpl;
 import org.eclipse.sensinact.gateway.generic.TaskTranslator;
+import org.eclipse.sensinact.gateway.generic.uri.URITask;
 import org.eclipse.sensinact.gateway.protocol.http.client.mid.Reusable;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTaskImpl;
@@ -36,7 +38,7 @@ extends HttpTaskImpl<RESPONSE, REQUEST> implements Reusable {
      *                       on which the task applies
      * @param parameters     the objects array parameterizing the call
      */
-    public MidHttpTask(Mediator mediator, CommandType command, TaskTranslator transmitter, Class<REQUEST> requestType, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        super(mediator, command, transmitter, requestType, path, profileId, resourceConfig, parameters);
+    public MidHttpTask(CommandType command, TaskTranslator transmitter, Class<REQUEST> requestType, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+        super(command, transmitter, requestType, path, profileId, resourceConfig, parameters);
     }
 }

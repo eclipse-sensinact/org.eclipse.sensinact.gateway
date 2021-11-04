@@ -10,22 +10,20 @@
  */
 package org.eclipse.sensinact.gateway.generic.test.tb.moke3;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.ResourceConfig;
-import org.eclipse.sensinact.gateway.generic.uri.GenericURITask;
-import org.eclipse.sensinact.gateway.generic.uri.URITaskTranslator;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.eclipse.sensinact.gateway.core.ResourceConfig;
+import org.eclipse.sensinact.gateway.generic.uri.GenericURITask;
+import org.eclipse.sensinact.gateway.generic.uri.URITaskTranslator;
 
 /**
  * A Task service for test
  */
 public class MokeTask extends GenericURITask {
     /**
-     * @param mediator
      * @param command
      * @param transmitter
      * @param path
@@ -33,8 +31,8 @@ public class MokeTask extends GenericURITask {
      * @param resourceConfig
      * @param parameters
      */
-    public MokeTask(Mediator mediator, CommandType command, URITaskTranslator transmitter, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        super(mediator, command, transmitter, path, profileId, resourceConfig, parameters);
+    public MokeTask(CommandType command, URITaskTranslator transmitter, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+        super(command, transmitter, path, profileId, resourceConfig, parameters);
     }
 
     /**

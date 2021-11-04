@@ -24,8 +24,6 @@ public abstract class GenericStreamTask extends TaskImpl implements StreamTask {
     /**
      * Constructor
      *
-     * @param mediator       the {@link Mediator} allowing to interact with the
-     *                       OSGi hot environment
      * @param transmitter    the {@link TaskTranslator} executing the {@link Task}
      *                       to be instantiated
      * @param path           the string path of the requirer {@link ModelElement}
@@ -36,8 +34,8 @@ public abstract class GenericStreamTask extends TaskImpl implements StreamTask {
      * @param parameters     the objects parameter parameterizing the task
      *                       execution
      */
-    public GenericStreamTask(Mediator mediator, CommandType command, StreamTaskTranslator transmitter, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        super(mediator, command, transmitter, path, profileId, resourceConfig, parameters);
+    public GenericStreamTask(CommandType command, StreamTaskTranslator transmitter, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+        super(command, transmitter, path, profileId, resourceConfig, parameters);
     }
 
     /**

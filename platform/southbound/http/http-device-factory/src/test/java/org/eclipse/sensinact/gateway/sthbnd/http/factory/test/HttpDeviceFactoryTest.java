@@ -31,6 +31,7 @@ import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
@@ -88,6 +89,7 @@ public class HttpDeviceFactoryTest {
 	}
 	
 	@Test
+	@Order(1)
 	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
 	    location = "?",
 		properties = {
@@ -114,6 +116,8 @@ public class HttpDeviceFactoryTest {
 	}
 
 	@Test
+
+	@Order(2)
 	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
 	location = "?",
 	properties = {

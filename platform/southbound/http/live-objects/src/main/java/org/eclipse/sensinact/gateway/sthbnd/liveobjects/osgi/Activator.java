@@ -39,11 +39,11 @@ public class Activator extends HttpActivator {
      */
     @Override
     protected void connect(ExtModelConfiguration configuration) throws InvalidProtocolStackException {
-        super.endpoint.registerDiscoveryTask(new LiveObjectsUserAuthentication(mediator, super.endpoint, (String) mediator.getProperty("sensinact.mail"), (String) mediator.getProperty("sensinact.user"), (String) mediator.getProperty("sensinact.password")));
+        super.endpoint.registerDiscoveryTask(new LiveObjectsUserAuthentication(super.endpoint, (String) mediator.getProperty("sensinact.mail"), (String) mediator.getProperty("sensinact.user"), (String) mediator.getProperty("sensinact.password")));
 
-        super.endpoint.registerDiscoveryTask(new LiveObjectsGetAssetsList(mediator, super.endpoint));
+        super.endpoint.registerDiscoveryTask(new LiveObjectsGetAssetsList(super.endpoint));
 
-        super.endpoint.registerDisconnexionTask(new LiveObjectsUserLogout(mediator, super.endpoint));
+        super.endpoint.registerDisconnexionTask(new LiveObjectsUserLogout(super.endpoint));
 
         super.connect(configuration);
     }

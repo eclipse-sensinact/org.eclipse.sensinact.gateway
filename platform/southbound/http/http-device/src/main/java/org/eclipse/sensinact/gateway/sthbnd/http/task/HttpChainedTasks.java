@@ -10,7 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.task;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.generic.TaskTranslator;
@@ -20,11 +24,6 @@ import org.eclipse.sensinact.gateway.sthbnd.http.HttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
 
 /**
  *
@@ -70,8 +69,8 @@ HTTP_CHAINED_TASK extends HttpChainedTask<REQUEST>> extends HttpTaskImpl<SimpleH
      * @param resourceConfig
      * @param parameters
      */
-    public HttpChainedTasks(Mediator mediator, CommandType command, TaskTranslator transmitter, Class<REQUEST> requestType, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        super(mediator, command, transmitter, requestType, path, profileId, resourceConfig, parameters);
+    public HttpChainedTasks(CommandType command, TaskTranslator transmitter, Class<REQUEST> requestType, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+        super(command, transmitter, requestType, path, profileId, resourceConfig, parameters);
         this.chain = new LinkedList<HTTP_CHAINED_TASK>();
     }
 

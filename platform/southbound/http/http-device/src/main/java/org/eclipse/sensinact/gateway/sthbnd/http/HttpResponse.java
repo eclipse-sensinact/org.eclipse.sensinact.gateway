@@ -10,14 +10,14 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+
+import org.eclipse.jetty.client.HttpRequest;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
 
 /**
  * A response to an {@link HttpRequest}
@@ -30,20 +30,17 @@ public abstract class HttpResponse extends SimpleResponse implements PathElement
      */
     public abstract HttpPacket createPacket();
 
-    protected Mediator mediator;
     protected HttpConnectionConfiguration<? extends HttpResponse, ? extends Request<? extends HttpResponse>> configuration;
 
     /**
-     * @param mediator
      * @param connection
      * @param configuration
      * @throws IOException
      */
-    public HttpResponse(Mediator mediator, HttpURLConnection connection, 
+    public HttpResponse(HttpURLConnection connection, 
     		HttpConnectionConfiguration<? extends HttpResponse, ? extends Request<? extends HttpResponse>> configuration) 
     				throws IOException {
         super(connection);
-        this.mediator = mediator;
         this.configuration = configuration;
     }
 

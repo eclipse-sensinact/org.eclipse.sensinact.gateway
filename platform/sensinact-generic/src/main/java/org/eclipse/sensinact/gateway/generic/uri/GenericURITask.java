@@ -36,8 +36,8 @@ public abstract class GenericURITask extends TaskImpl implements URITask {
      * @param parameters     the objects parameter parameterizing the task
      *                       execution
      */
-    public GenericURITask(Mediator mediator, CommandType command, URITaskTranslator transmitter, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        super(mediator, command, transmitter, path, profileId, resourceConfig, parameters);
+    public GenericURITask( CommandType command, URITaskTranslator transmitter, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+        super(command, transmitter, path, profileId, resourceConfig, parameters);
     }
 
     /**

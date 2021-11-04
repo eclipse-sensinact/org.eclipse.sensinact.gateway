@@ -25,7 +25,6 @@ import org.eclipse.sensinact.gateway.generic.uri.URITaskTranslator;
  */
 public class MokeTask extends GenericURITask {
     /**
-     * @param mediator
      * @param command
      * @param transmitter
      * @param path
@@ -33,8 +32,8 @@ public class MokeTask extends GenericURITask {
      * @param resourceConfig
      * @param parameters
      */
-    public MokeTask(Mediator mediator, CommandType command, URITaskTranslator transmitter, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        super(mediator, command, transmitter, path, profileId, resourceConfig, parameters);
+    public MokeTask(CommandType command, URITaskTranslator transmitter, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+        super(command, transmitter, path, profileId, resourceConfig, parameters);
     }
 
     /**

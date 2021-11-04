@@ -29,7 +29,7 @@ public class MokeProcessor implements ProcessorService {
     @Override
     public void process(String packet) {
         try {
-            this.connector.process(new MokePacket(mediator, packet, null, null, null, null));
+            this.connector.process(new MokePacket(packet, null, null, null, null));
         } catch (Exception e) {
             e.printStackTrace();
         }

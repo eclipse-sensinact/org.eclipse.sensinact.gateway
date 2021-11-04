@@ -17,7 +17,6 @@ import java.util.LinkedList;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
 import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
@@ -70,15 +69,14 @@ public abstract class HttpProtocolStackEndpoint extends ProtocolStackEndpoint<Ht
     /**
      * Constructor
      * 
-     * @param mediator
      * 
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public HttpProtocolStackEndpoint(Mediator mediator) 
+    public HttpProtocolStackEndpoint() 
     	throws ParserConfigurationException, SAXException, IOException {
-        super(mediator);
+        super();
         this.stopping = false;
 
         this.permanentHeaders = new HeadersCollection();

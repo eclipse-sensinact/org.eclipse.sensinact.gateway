@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.task;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
@@ -26,8 +25,7 @@ extends HttpDiscoveryTask<RESPONSE, REQUEST> {
 	/**
      * Constructor
      *
-     * @param mediator       
-     * 		the {@link Mediator} allowing to interact with the OSGi host environment
+
      * @param transmitter    
      * 		the {@link HttpProtocolStackEndpoint} transmitting the requests build by 
      * 		the HttpUnsubscribingTask to be instantiated
@@ -37,15 +35,14 @@ extends HttpDiscoveryTask<RESPONSE, REQUEST> {
      * @param subscriptionId 
      * 		the String identifier of the subscription to be deleted
      */
-    public HttpUnsubscribingTask(Mediator mediator, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType, String subscriptionId) {
-        super(mediator, CommandType.UNSUBSCRIBE, transmitter, requestType, new Object[] {subscriptionId});
+    public HttpUnsubscribingTask(HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType, String subscriptionId) {
+        super(CommandType.UNSUBSCRIBE, transmitter, requestType, new Object[] {subscriptionId});
     }
 
 	/**
      * Constructor
      *
-     * @param mediator       
-     * 		the {@link Mediator} allowing to interact with the OSGi host environment
+
      * @param transmitter    
      * 		the {@link HttpProtocolStackEndpoint} transmitting the requests build by 
      * 		the HttpUnsubscribingTask to be instantiated
@@ -56,8 +53,8 @@ extends HttpDiscoveryTask<RESPONSE, REQUEST> {
      * 		the HttpSubscribingTask holding the string identifier of the subscription 
      * 		to be deleted
      */
-    public HttpUnsubscribingTask(Mediator mediator, HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType, HttpSubscribingTask<?,?> subscribingTask) {
-        super(mediator, CommandType.UNSUBSCRIBE, transmitter, requestType, new Object[] {subscribingTask});
+    public HttpUnsubscribingTask( HttpProtocolStackEndpoint transmitter, Class<REQUEST> requestType, HttpSubscribingTask<?,?> subscribingTask) {
+        super(CommandType.UNSUBSCRIBE, transmitter, requestType, new Object[] {subscribingTask});
     }
 
     /**

@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.task;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.generic.TaskTranslator;
@@ -23,7 +22,6 @@ import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpResponse;
 public abstract class HttpChainedTask<REQUEST extends Request<SimpleHttpResponse>> extends HttpTaskImpl<SimpleHttpResponse, REQUEST> implements Executable<Object, Void> {
     
     /**
-     * @param mediator
      * @param command
      * @param transmitter
      * @param requestType
@@ -32,8 +30,8 @@ public abstract class HttpChainedTask<REQUEST extends Request<SimpleHttpResponse
      * @param resourceConfig
      * @param parameters
      */
-    public HttpChainedTask(Mediator mediator, CommandType command, TaskTranslator transmitter, Class<REQUEST> requestType, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        super(mediator, command, transmitter, requestType, path, profileId, resourceConfig, parameters);
+    public HttpChainedTask(CommandType command, TaskTranslator transmitter, Class<REQUEST> requestType, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+        super(command, transmitter, requestType, path, profileId, resourceConfig, parameters);
     }
 
     

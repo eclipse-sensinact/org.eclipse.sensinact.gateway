@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.Timer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -29,7 +28,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.InvalidProtocolStackException;
@@ -93,6 +91,7 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
     protected Map<CommandType, HttpTaskUrlConfigurator> builders;
     protected Set<String> recurrenceTasks;
     protected ScheduledExecutorService worker;
+	private HttpMediator mediator;
 
     /**
      * @param mediator
@@ -101,7 +100,7 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
      * @throws IOException
      */
     public SimpleHttpProtocolStackEndpoint(HttpMediator mediator) throws ParserConfigurationException, SAXException, IOException {
-        super(mediator);
+       this.mediator=mediator;
         this.recurrences = new LinkedList<>();
         this.adapters = new HashMap<>();
         this.builders = new HashMap<>();
@@ -269,8 +268,7 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
                     		future.cancel(true);
                         return;
                     }
-                    HttpTask<?, ?> task = ReflectUtils.getInstance(executable.getTaskType(), new Object[]{mediator, 
-                    	executable.handled(), SimpleHttpProtocolStackEndpoint.this, SimpleHttpRequest.class, UriUtils.ROOT, 
+                    HttpTask<?, ?> task = ReflectUtils.getInstance(executable.getTaskType(), new Object[]{executable.handled(), SimpleHttpProtocolStackEndpoint.this, SimpleHttpRequest.class, UriUtils.ROOT, 
                     		null, null, null});
                     try {
                         if (ChainedHttpTaskConfigurator.class.isAssignableFrom(executable.getClass()))
@@ -296,7 +294,7 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
      * @return
      */
     public HttpMediator getMediator() {
-        return (HttpMediator) super.mediator;
+        return (HttpMediator) mediator;
     }
 
     /**
@@ -322,13 +320,13 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
     }
 
     @Override
-    public Task createTask(Mediator mediator, CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+    public Task createTask(CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
         HttpTaskConfigurator configuration = this.adapters.get(command);
         if (configuration == null) {
             return null;
         }
         HttpTask<?, ?> task = super.wrap(HttpTask.class, ReflectUtils.getInstance(this.getTaskType(command), 
-        	new Object[]{mediator, command, this, SimpleHttpRequest.class, path, profileId, 
+        	new Object[]{command, this, SimpleHttpRequest.class, path, profileId, 
         		resourceConfig, parameters}));
         try {
             if (task.getPacketType() == null) 

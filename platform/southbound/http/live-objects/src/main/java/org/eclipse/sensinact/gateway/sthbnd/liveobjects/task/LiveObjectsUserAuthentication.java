@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.liveobjects.task;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpConnectionConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpProtocolStackEndpoint;
@@ -28,8 +27,8 @@ public class LiveObjectsUserAuthentication extends HttpAuthenticationTask<Simple
     private final String login;
     private final String password;
 
-    public LiveObjectsUserAuthentication(Mediator mediator, HttpProtocolStackEndpoint transmitter, String email, String login, String password) {
-        super(mediator, transmitter, SimpleHttpRequest.class);
+    public LiveObjectsUserAuthentication(HttpProtocolStackEndpoint transmitter, String email, String login, String password) {
+        super(transmitter, SimpleHttpRequest.class);
         this.email = email;
         this.login = login;
         this.password = password;

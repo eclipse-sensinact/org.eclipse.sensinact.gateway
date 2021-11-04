@@ -10,8 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.generic.local;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.ModelElement;
+import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
+import org.eclipse.sensinact.gateway.generic.ExtResourceConfig;
+import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.TaskImpl;
 import org.eclipse.sensinact.gateway.generic.TaskTranslator;
 
@@ -22,8 +25,6 @@ public class GenericLocalTask extends TaskImpl {
     /**
      * Constructor
      *
-     * @param mediator       the {@link Mediator} allowing to interact with the
-     *                       OSGi hot environment
      * @param command
      * @param transmitter    the {@link TaskTranslator} executing the {@link Task}
      *                       to be instantiated
@@ -35,8 +36,8 @@ public class GenericLocalTask extends TaskImpl {
      * @param parameters     the objects parameter parameterizing the task
      *                       execution
      */
-    public GenericLocalTask(Mediator mediator, CommandType command, TaskTranslator transmitter, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        super(mediator, command, transmitter, path, profileId, resourceConfig, parameters);
+    public GenericLocalTask(CommandType command, TaskTranslator transmitter, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+        super(command, transmitter, path, profileId, resourceConfig, parameters);
     }
 
     /**
