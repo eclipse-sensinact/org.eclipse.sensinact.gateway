@@ -1,0 +1,6 @@
+{
+  "modifiable": "UPDATEABLE",
+  "serviceProviderIdPattern": "test3_%s",
+  "timestampPattern": "dd.MM.yy-hh:mm",
+  "overrideResponseContentType": "vnd.special/custom+json"
+}

@@ -1,0 +1,6 @@
+{
+  "modifiable": "UPDATEABLE",
+  "serviceProviderIdPattern": "test5_%s",
+  "timestampPattern": "dd.MM.yy-hh:mm",
+  "csvTitles": false
+}

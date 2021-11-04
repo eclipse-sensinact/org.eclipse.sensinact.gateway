@@ -1,0 +1,31 @@
+{
+  "standalone": {
+    "recurrences": [
+      {
+        "period": 2000,
+        "delay": 500,
+        "configuration": {
+          "acceptType": "text/csv",
+          "scheme": "http",
+          "host": "localhost",
+          "port": 8898,
+          "path": "/http-factory-test-resources/test5/response.csv",
+          "rootMapping": [
+            {
+              "mapping": {
+                "[2]": "::provider::",
+                "[5]": "data/value",
+                "[3]": "__lat",
+                "[4]": "__lon",
+                "$concat(${lat},':',${lon})": "admin/location",
+                "[0]": "__date",
+                "[1]": "__time",
+                "$concat(${date},'-',${time})": "::timestamp::"
+              }
+            }
+          ]
+        }
+      } 
+    ]
+  }
+}

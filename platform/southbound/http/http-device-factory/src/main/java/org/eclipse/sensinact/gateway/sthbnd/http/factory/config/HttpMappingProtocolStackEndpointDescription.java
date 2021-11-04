@@ -47,6 +47,12 @@ public class HttpMappingProtocolStackEndpointDescription {
 
 	@JsonProperty(value="timestampPattern")
 	private String timestampPattern;
+
+	@JsonProperty(value="overrideResponseContentType")
+	private String overrideResponseContentType;
+
+	@JsonProperty(value="csvTitles")
+	private boolean csvTitles;
 	
 	public HttpMappingProtocolStackEndpointDescription() {}
 	
@@ -59,7 +65,9 @@ public class HttpMappingProtocolStackEndpointDescription {
 			String[] resourceBuildPolicy, 
 			String[] serviceBuildPolicy,
 			String serviceProviderIdPattern,
-			String timestampPattern) {
+			String timestampPattern,
+			String defaultResponseContentType,
+			boolean csvTitles) {
 		this.startAtInitializationTime = startAtInitializationTime;
 		this.startAtInitializationTimeSet = true;
 		this.packetTypeName = packetTypeName;
@@ -69,6 +77,8 @@ public class HttpMappingProtocolStackEndpointDescription {
 		this.serviceBuildPolicy = serviceBuildPolicy;
 		this.serviceProviderIdPattern = serviceProviderIdPattern;
 		this.timestampPattern = timestampPattern;
+		this.overrideResponseContentType = defaultResponseContentType;
+		this.csvTitles = csvTitles;
 	}
 
 	/**
@@ -195,5 +205,33 @@ public class HttpMappingProtocolStackEndpointDescription {
 	 */
 	public void setTimestampPattern(String timestampPattern) {
 		this.timestampPattern = timestampPattern;
+	}
+	
+	/**
+	 * @return the defaultResponseContentType
+	 */
+	public String getOverrideResponseContentType() {
+		return overrideResponseContentType;
+	}
+	
+	/**
+	 * @param defaultResponseContentType the defaultResponseContentType to set
+	 */
+	public void setOverrideResponseContentType(String overrideResponseContentType) {
+		this.overrideResponseContentType = overrideResponseContentType;
+	}
+
+	/**
+	 * @return the csvTitles
+	 */
+	public boolean getCsvTitles() {
+		return csvTitles;
+	}
+
+	/**
+	 * @param csvTitles the csvTitles to set
+	 */
+	public void setCsvTitles(boolean csvTitles) {
+		this.csvTitles = csvTitles;
 	}
 }

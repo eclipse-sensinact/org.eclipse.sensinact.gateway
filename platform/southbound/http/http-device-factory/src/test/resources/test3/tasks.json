@@ -1,0 +1,31 @@
+{
+  "standalone": {
+    "recurrences": [
+      {
+        "period": 2000,
+        "delay": 500,
+        "configuration": {
+          "scheme": "http",
+          "host": "localhost",
+          "port": 8898,
+          "path": "/http-factory-test-resources/test3/response.json",
+          "nestedMapping": [
+            {
+              "path": "[0]/*",
+              "mapping": {
+                "Name": "::provider::",
+                "Value": "data/value",
+                "Latitude": "__lat",
+                "Longitude": "__lon",
+                "$concat(${lat},':',${lon})": "admin/location",
+                "Date": "__date",
+                "Time": "__time",
+                "$concat(${date},'-',${time})": "::timestamp::"
+              }
+            }
+          ]
+        }
+      } 
+    ]
+  }
+}

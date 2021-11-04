@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2021 Kentyou.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Kentyou - initial API and implementation
+ */
 package org.eclipse.sensinact.gateway.sthbnd.http.factory.test;
 
 import static org.eclipse.sensinact.gateway.sthbnd.http.factory.HttpMappingProtocolStackEndpointFactory.ENDPOINT_CONFIGURATION_PROP;
@@ -68,6 +78,8 @@ public class HttpDeviceFactoryTest {
 				if(resource == null) {
 					resp.sendError(404);
 				} else {
+					resp.setContentType(req.getHeader("Accept"));
+
 					PrintWriter pw = resp.getWriter();
 					try (BufferedReader br = new BufferedReader(new InputStreamReader(resource.openStream()))) {
 						br.lines().forEach(pw::println);
@@ -97,7 +109,7 @@ public class HttpDeviceFactoryTest {
 				@Property(key = ENDPOINT_TASKS_CONFIGURATION_PROP, value="src/test/resources/test1/tasks.json")
 		}
 	)
-	public void testRawArray() throws Exception {
+	public void testRawJsonArray() throws Exception {
 		Thread.sleep(5000);
 		
 		Session session = core.getAnonymousSession();
@@ -116,15 +128,14 @@ public class HttpDeviceFactoryTest {
 	}
 
 	@Test
-
 	@Order(2)
 	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
-	location = "?",
-	properties = {
+		location = "?",
+		properties = {
 			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test2/config.json"),
 			@Property(key = ENDPOINT_TASKS_CONFIGURATION_PROP, value="src/test/resources/test2/tasks.json")
-	}
-			)
+		}
+	)
 	public void testOpenDataAPIFormat() throws Exception {
 		Thread.sleep(5000);
 		
@@ -145,6 +156,87 @@ public class HttpDeviceFactoryTest {
 				LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
 		testProvider(session, "test2_1151", "data", "PEACOCK_value", "0", "48.882697:2.344013", 
 				LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
+		
+	}
+	
+	@Test
+	@Order(3)
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
+	    location = "?",
+		properties = {
+				@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test3/config.json"),
+				@Property(key = ENDPOINT_TASKS_CONFIGURATION_PROP, value="src/test/resources/test3/tasks.json")
+		}
+	)
+	public void testJsonArrayNestedInArray() throws Exception {
+		Thread.sleep(5000);
+		
+		Session session = core.getAnonymousSession();
+		
+		assertEquals(2, session.serviceProviders().size());
+
+        testProvider(session, "test3_Foo", "data", "value", "94", "1.2:3.4", 
+        		LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
+        testProvider(session, "test3_Bar", "data", "value", "28", "5.6:7.8", 
+        		LocalDateTime.of(2021, 10, 20, 18, 17).toEpochSecond(ZoneOffset.UTC));
+        
+        for (ServiceProvider serviceProvider : session.serviceProviders()) {
+			serviceProvider.getName();
+		}
+        
+	}
+
+	@Test
+	@Order(4)
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
+	location = "?",
+	properties = {
+			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test4/config.json"),
+			@Property(key = ENDPOINT_TASKS_CONFIGURATION_PROP, value="src/test/resources/test4/tasks.json")
+	}
+			)
+	public void testCsvWithTitles() throws Exception {
+		Thread.sleep(5000);
+		
+		Session session = core.getAnonymousSession();
+		
+		assertEquals(2, session.serviceProviders().size());
+		
+		testProvider(session, "test4_Foo", "data", "value", "94", "1.2:3.4", 
+				LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
+		testProvider(session, "test4_Bar", "data", "value", "28", "5.6:7.8", 
+				LocalDateTime.of(2021, 10, 20, 18, 17).toEpochSecond(ZoneOffset.UTC));
+		
+		for (ServiceProvider serviceProvider : session.serviceProviders()) {
+			serviceProvider.getName();
+		}
+		
+	}
+	
+	@Test
+	@Order(5)
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
+	location = "?",
+	properties = {
+			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test5/config.json"),
+			@Property(key = ENDPOINT_TASKS_CONFIGURATION_PROP, value="src/test/resources/test5/tasks.json")
+	}
+			)
+	public void testCsvWithoutTitles() throws Exception {
+		Thread.sleep(5000);
+		
+		Session session = core.getAnonymousSession();
+		
+		assertEquals(2, session.serviceProviders().size());
+		
+		testProvider(session, "test5_Foo", "data", "value", "94", "1.2:3.4", 
+				LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
+		testProvider(session, "test5_Bar", "data", "value", "28", "5.6:7.8", 
+				LocalDateTime.of(2021, 10, 20, 18, 17).toEpochSecond(ZoneOffset.UTC));
+		
+		for (ServiceProvider serviceProvider : session.serviceProviders()) {
+			serviceProvider.getName();
+		}
 		
 	}
 
