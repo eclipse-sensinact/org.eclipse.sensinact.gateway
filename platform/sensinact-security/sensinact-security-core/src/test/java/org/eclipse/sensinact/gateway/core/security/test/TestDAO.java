@@ -98,7 +98,7 @@ public class TestDAO {
 	private final BundleContext context = Mockito.mock(BundleContext.class);
 	private final Bundle bundle = Mockito.mock(Bundle.class);
 
-	private final ServiceReference referenceDataStoreService = Mockito.mock(ServiceReference.class);
+	private final ServiceReference<?> referenceDataStoreService = Mockito.mock(ServiceReference.class);
 
 	private SQLiteDataStoreService dataStoreService;
 
@@ -118,24 +118,24 @@ public class TestDAO {
 		Mockito.when(filterDataStore.toString()).thenReturn(DATA_STORE_FILTER);
 
 		Mockito.when(context.getServiceReferences(Mockito.anyString(), Mockito.anyString()))
-				.then(new Answer<ServiceReference[]>() {
+				.then(new Answer<ServiceReference<?>[]>() {
 					@Override
-					public ServiceReference[] answer(InvocationOnMock invocation) throws Throwable {
+					public ServiceReference<?>[] answer(InvocationOnMock invocation) throws Throwable {
 						Object[] arguments = invocation.getArguments();
 						if (arguments == null || arguments.length != 2) {
 							return null;
 						}
 						if (arguments[0] != null && arguments[0].equals(DataStoreService.class.getCanonicalName())) {
-							return new ServiceReference[] { referenceDataStoreService };
+							return new ServiceReference<?>[] { referenceDataStoreService };
 
 						}
 						return null;
 					}
 				});
 		Mockito.when(context.getServiceReferences(Mockito.any(Class.class), Mockito.anyString()))
-				.then(new Answer<Collection<ServiceReference>>() {
+				.then(new Answer<Collection<ServiceReference<?>>>() {
 					@Override
-					public Collection<ServiceReference> answer(InvocationOnMock invocation) throws Throwable {
+					public Collection<ServiceReference<?>> answer(InvocationOnMock invocation) throws Throwable {
 						Object[] arguments = invocation.getArguments();
 						if (arguments == null || arguments.length != 2) {
 							return null;
@@ -143,7 +143,7 @@ public class TestDAO {
 						if (arguments[0] != null && arguments[0].equals(DataStoreService.class)) {
 							return Collections.singleton(referenceDataStoreService);
 						}
-						return Collections.<ServiceReference>emptyList();
+						return Collections.<ServiceReference<?>>emptyList();
 					}
 				});
 		Mockito.when(context.getService(Mockito.any(ServiceReference.class))).then(new Answer<Object>() {

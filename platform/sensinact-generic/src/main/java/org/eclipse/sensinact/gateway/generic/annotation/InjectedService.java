@@ -37,7 +37,7 @@ public class InjectedService implements InvocationHandler, ServiceListener {
     private final String filter;
     private final Mediator mediator;
 
-    private ServiceReference reference;
+    private ServiceReference<?> reference;
 
     /**
      * Constructor
@@ -115,7 +115,7 @@ public class InjectedService implements InvocationHandler, ServiceListener {
      * comply those of this InjectedService
      */
     private void searchReference() {
-        ServiceReference[] references = null;
+        ServiceReference<?>[] references = null;
         try {
             references = this.mediator.getContext().getServiceReferences(this.type.getCanonicalName(), this.filter);
 

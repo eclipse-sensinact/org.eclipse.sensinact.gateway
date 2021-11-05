@@ -97,14 +97,14 @@ public class TestComponentInstance implements TestResult {
     public void init() throws Exception {
         MockitoAnnotations.initMocks(this);
         mockedRegistry = new HashMap<String, DataProviderItf>();
-        ServiceReference serviceReferenceInstaller = Mockito.mock(ServiceReference.class);
-        ServiceReference serviceReferenceResource = Mockito.mock(ServiceReference.class);
-        ServiceReference serviceReferenceResult1 = Mockito.mock(ServiceReference.class);
+        ServiceReference<?> serviceReferenceInstaller = Mockito.mock(ServiceReference.class);
+        ServiceReference<?> serviceReferenceResource = Mockito.mock(ServiceReference.class);
+        ServiceReference<?> serviceReferenceResult1 = Mockito.mock(ServiceReference.class);
         final ServiceRegistration<DataProviderItf> serviceRegistration = Mockito.mock(ServiceRegistration.class);
-        @SuppressWarnings("rawtypes") ServiceReference[] serviceReferencesInstaller = new ServiceReference[]{serviceReferenceInstaller};
-        @SuppressWarnings("rawtypes") ServiceReference[] serviceReferencesActionHook = new ServiceReference[]{};
-        @SuppressWarnings("rawtypes") ServiceReference[] serviceReferencesResource = new ServiceReference[]{serviceReferenceResource};
-        @SuppressWarnings("rawtypes") ServiceReference[] serviceReferencesResult1 = new ServiceReference[]{serviceReferenceResult1};
+        @SuppressWarnings("rawtypes") ServiceReference<?>[] serviceReferencesInstaller = new ServiceReference<?>[]{serviceReferenceInstaller};
+        @SuppressWarnings("rawtypes") ServiceReference<?>[] serviceReferencesActionHook = new ServiceReference<?>[]{};
+        @SuppressWarnings("rawtypes") ServiceReference<?>[] serviceReferencesResource = new ServiceReference<?>[]{serviceReferenceResource};
+        @SuppressWarnings("rawtypes") ServiceReference<?>[] serviceReferencesResult1 = new ServiceReference<?>[]{serviceReferenceResult1};
         // Mock of the session
         final Session session = Mockito.mock(Session.class);
         // Mock of the responses

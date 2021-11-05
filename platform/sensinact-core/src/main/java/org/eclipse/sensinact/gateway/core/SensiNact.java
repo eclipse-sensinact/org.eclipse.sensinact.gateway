@@ -923,7 +923,7 @@ public class SensiNact implements Core {
 					    	final String token = SensiNact.this.nextToken();
 					        final UserUpdater userUpdater = userManager.createUser(token, login, password, account, accountType);
 
-					        ServiceReference[] references = bc.getServiceReferences(
+					        ServiceReference<?>[] references = bc.getServiceReferences(
 					        	AccountConnector.class.getName(), new StringBuilder().append("(org.eclipse.sensinact.security.account.type="
 					        		).append(accountType).append(")").toString());
 					        
@@ -967,7 +967,7 @@ public class SensiNact implements Core {
 					    	final String token = SensiNact.this.nextToken();
 					        final UserUpdater userUpdater = userManager.renewUserPassword(token, account, user.getAccountType());
 					        
-					        ServiceReference[] references = SensiNact.this.bc.getServiceReferences(
+					        ServiceReference<?>[] references = SensiNact.this.bc.getServiceReferences(
 					        	AccountConnector.class.getName(), new StringBuilder().append("(org.eclipse.sensinact.security.account.type="
 					        		).append(user.getAccountType()).append(")").toString());
 					        

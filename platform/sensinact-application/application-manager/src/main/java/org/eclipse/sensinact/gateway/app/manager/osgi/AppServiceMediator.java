@@ -52,7 +52,7 @@ public class AppServiceMediator extends Mediator {
      * @param filter the filter
      * @return the array of service references
      */
-    public ServiceReference[] getServiceReferences(String filter) {
+    public ServiceReference<?>[] getServiceReferences(String filter) {
         /*try {
             Collection<ServiceReference<DataProviderItf>> serv = super.getContext().getServiceReferences(DataProviderItf.class, null);
             for(ServiceReference<DataProviderItf> toto : serv) {
@@ -79,7 +79,7 @@ public class AppServiceMediator extends Mediator {
      * @param serviceReference the service reference
      * @return the OSGi service
      */
-    public Object getService(ServiceReference serviceReference) {
+    public Object getService(ServiceReference<?> serviceReference) {
         return super.getContext().getService(serviceReference);
     }
 

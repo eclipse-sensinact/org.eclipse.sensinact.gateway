@@ -102,12 +102,12 @@ public class TestSnaFunction{
         Mockito.when(securedAccess.getAccessTree(Mockito.any(String.class))).thenReturn(new AccessTreeImpl().withAccessProfile(AccessProfileOption.ALL_ANONYMOUS));
         BundleContext context = Mockito.mock(BundleContext.class);
 
-        final ServiceReference reference = Mockito.mock(ServiceReference.class);
-        final ServiceReference referenceAuth = Mockito.mock(ServiceReference.class);
+        final ServiceReference<SecuredAccess> reference = Mockito.mock(ServiceReference.class);
+        final ServiceReference<AuthorizationService> referenceAuth = Mockito.mock(ServiceReference.class);
 
         Mockito.when(context.getServiceReferences(Mockito.any(Class.class), Mockito.anyString())).thenAnswer(new Answer<Object>() {
             @Override
-            public Collection<ServiceReference> answer(InvocationOnMock invocation) throws Throwable {
+            public Collection<ServiceReference<?>> answer(InvocationOnMock invocation) throws Throwable {
                 if (SecuredAccess.class.isAssignableFrom((Class<?>) invocation.getArguments()[0])) {
                     return Collections.singletonList(reference);
                 } else if (AuthorizationService.class.isAssignableFrom((Class<?>) invocation.getArguments()[0])) {
@@ -116,13 +116,13 @@ public class TestSnaFunction{
                 return null;
             }
         });
-        Mockito.when(context.getServiceReferences(Mockito.anyString(), Mockito.anyString())).thenAnswer(new Answer<ServiceReference[]>() {
+        Mockito.when(context.getServiceReferences(Mockito.anyString(), Mockito.anyString())).thenAnswer(new Answer<ServiceReference<?>[]>() {
             @Override
-            public ServiceReference[] answer(InvocationOnMock invocation) throws Throwable {
+            public ServiceReference<?>[] answer(InvocationOnMock invocation) throws Throwable {
                 if (SecuredAccess.class.getCanonicalName().equals(invocation.getArguments()[0])) {
-                    return new ServiceReference[]{reference};
+                    return new ServiceReference<?>[]{reference};
                 } else if (AuthorizationService.class.getCanonicalName().equals(invocation.getArguments()[0])) {
-                    return new ServiceReference[]{referenceAuth};
+                    return new ServiceReference<?>[]{referenceAuth};
                 }
                 return null;
             }

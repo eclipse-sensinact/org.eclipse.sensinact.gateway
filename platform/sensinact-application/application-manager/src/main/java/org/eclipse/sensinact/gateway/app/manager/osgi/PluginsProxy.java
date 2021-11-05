@@ -30,8 +30,8 @@ public class PluginsProxy {
      */
     public static JSONObject getComponentJSONSchema(AppServiceMediator mediator, String function) throws FunctionNotFoundException {
         JSONObject schema = null;
-        ServiceReference[] serviceReferences = mediator.getServiceReferences(APP_INSTALL_HOOK_FILTER);
-        for (ServiceReference serviceReference : serviceReferences) {
+        ServiceReference<?>[] serviceReferences = mediator.getServiceReferences(APP_INSTALL_HOOK_FILTER);
+        for (ServiceReference<?> serviceReference : serviceReferences) {
             schema = ((PluginInstaller) mediator.getService(serviceReference)).getComponentJSONSchema(function);
             if (schema != null) {
                 break;
@@ -53,9 +53,9 @@ public class PluginsProxy {
      */
     public static AbstractFunction<?> getFunction(AppServiceMediator mediator, AppFunction function) throws FunctionNotFoundException {
         AbstractFunction<?> functionBlock = null;
-        ServiceReference[] serviceReferences = mediator.getServiceReferences(APP_INSTALL_HOOK_FILTER);
+        ServiceReference<?>[] serviceReferences = mediator.getServiceReferences(APP_INSTALL_HOOK_FILTER);
         if (serviceReferences != null) {
-            for (ServiceReference serviceReference : serviceReferences) {
+            for (ServiceReference<?> serviceReference : serviceReferences) {
                 functionBlock = ((PluginInstaller) mediator.getService(serviceReference)).getFunction(function);
                 if (functionBlock != null) {
                     break;

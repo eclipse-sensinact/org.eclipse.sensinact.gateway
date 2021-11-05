@@ -87,14 +87,14 @@ public class TestSecuredAccess {
 	private final BundleContext context = Mockito.mock(BundleContext.class);
 	private final Bundle bundle = Mockito.mock(Bundle.class);
 
-	private final ServiceReference referenceHandler = Mockito.mock(ServiceReference.class);
-	private final ServiceReference referenceAgent = Mockito.mock(ServiceReference.class);
+	private final ServiceReference<?> referenceHandler = Mockito.mock(ServiceReference.class);
+	private final ServiceReference<?> referenceAgent = Mockito.mock(ServiceReference.class);
 	private final ServiceRegistration<MessageRouter> registrationHandler = Mockito.mock(ServiceRegistration.class);
 	private final ServiceRegistration<ModelElement> snaObjectRegistration = Mockito.mock(ServiceRegistration.class);
-	private final ServiceReference referenceAuthorization = Mockito.mock(ServiceReference.class);
-	private final ServiceRegistration<?> registration = Mockito.mock(ServiceRegistration.class);
+	private final ServiceReference<?> referenceAuthorization = Mockito.mock(ServiceReference.class);
+	private final ServiceRegistration<Object> registration = Mockito.mock(ServiceRegistration.class);
 	private final ServiceRegistration<SnaAgent> registrationAgent = Mockito.mock(ServiceRegistration.class);
-	private final ServiceReference referenceProvider = Mockito.mock(ServiceReference.class);
+	private final ServiceReference<Object> referenceProvider = Mockito.mock(ServiceReference.class);
 
 	private Mediator mediator;
 	private SensiNactResourceModel provider;
@@ -132,9 +132,9 @@ public class TestSecuredAccess {
 		Mockito.when(filterAuthorization.match(referenceAuthorization)).thenReturn(true);
 
 		Mockito.when(context.getServiceReferences(Mockito.anyString(), Mockito.anyString()))
-				.then(new Answer<ServiceReference[]>() {
+				.then(new Answer<ServiceReference<?>[]>() {
 					@Override
-					public ServiceReference[] answer(InvocationOnMock invocation) throws Throwable {
+					public ServiceReference<?>[] answer(InvocationOnMock invocation) throws Throwable {
 						Object[] arguments = invocation.getArguments();
 						if (arguments == null || arguments.length != 2) {
 							return null;
@@ -144,24 +144,24 @@ public class TestSecuredAccess {
 							if (handler == null) {
 								return null;
 							}
-							return new ServiceReference[] { referenceHandler };
+							return new ServiceReference<?>[] { referenceHandler };
 
 						} else if (arguments[0] != null && arguments[0].equals(SnaAgent.class.getCanonicalName())) {
 							if (agent == null) {
 								return null;
 							}
-							return new ServiceReference[] { referenceAgent };
+							return new ServiceReference<?>[] { referenceAgent };
 
 						} else if (arguments[0] != null
 								&& arguments[0].equals(SensiNactResourceModel.class.getCanonicalName())
 								&& arguments[1] != null && arguments[1].equals("(uri=/serviceProvider)")) {
-							return new ServiceReference[] { referenceProvider };
+							return new ServiceReference<?>[] { referenceProvider };
 
 						} else if ((arguments[0] != null
 								&& arguments[0].equals(AuthorizationService.class.getCanonicalName())
 								&& arguments[1] == null)
 								|| (arguments[0] == null && arguments[1].equals(AUTHORIZATION_FILTER))) {
-							return new ServiceReference[] { referenceAuthorization };
+							return new ServiceReference<?>[] { referenceAuthorization };
 						}
 						return null;
 					}
@@ -231,9 +231,9 @@ public class TestSecuredAccess {
 						return snaObjectRegistration;
 					}
 				});
-		Mockito.when(registration.getReference()).thenReturn(referenceProvider);
-		Mockito.when(registrationHandler.getReference()).thenReturn(referenceHandler);
-		Mockito.when(registrationAgent.getReference()).thenReturn(referenceAgent);
+		Mockito.when(registration.getReference()).thenReturn((ServiceReference<Object>) referenceProvider);
+		Mockito.when(registrationHandler.getReference()).thenReturn((ServiceReference<MessageRouter>) referenceHandler);
+		Mockito.when(registrationAgent.getReference()).thenReturn((ServiceReference<SnaAgent>) referenceAgent);
 
 		Mockito.when(filterHandler.match(referenceHandler)).thenReturn(true);
 

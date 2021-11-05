@@ -37,7 +37,7 @@ class ActionHookQueue implements DataListenerItf {
     public void instantiate() throws LifeCycleException {
         try {
             String filter = "(&(objectClass=" + DataProviderItf.class.getName() + ")" + "(type=" + PluginHook.class.getName() + "))";
-            ServiceReference[] serviceReferences = mediator.getServiceReferences(filter);
+            ServiceReference<?>[] serviceReferences = mediator.getServiceReferences(filter);
 //            Mediator.ServiceCaller caller = mediator.CALLERS.get();
 //
 //            caller.attach();
@@ -54,7 +54,7 @@ class ActionHookQueue implements DataListenerItf {
 //                mediator.CALLERS.remove();
 //            }
             if(serviceReferences!=null) {
-	            for (ServiceReference serviceReference : serviceReferences) {
+	            for (ServiceReference<?> serviceReference : serviceReferences) {
 	                DataProviderItf dataProviderItf = ((DataProviderItf) mediator.getService(serviceReference));
 	                dataProviderItf.addListener(this, null);
 	            }
@@ -68,8 +68,8 @@ class ActionHookQueue implements DataListenerItf {
     public void uninstantiate() throws LifeCycleException {
         try {
             String filter = "(&(objectClass=" + DataProviderItf.class.getName() + ")" + "(type=" + PluginHook.class.getName() + "))";
-            ServiceReference[] serviceReferences = mediator.getContext().getServiceReferences((String) null, filter);
-            for (ServiceReference serviceReference : serviceReferences) {
+            ServiceReference<?>[] serviceReferences = mediator.getContext().getServiceReferences((String) null, filter);
+            for (ServiceReference<?> serviceReference : serviceReferences) {
                 DataProviderItf dataProviderItf = (DataProviderItf) mediator.getService(serviceReference);
                 dataProviderItf.removeListener(this);
             }

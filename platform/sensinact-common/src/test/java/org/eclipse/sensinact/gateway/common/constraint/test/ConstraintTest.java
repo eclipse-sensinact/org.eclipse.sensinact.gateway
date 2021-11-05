@@ -62,9 +62,9 @@ public class ConstraintTest {
         Mockito.when(context.createFilter(LOG_FILTER)).thenReturn(filter);
         Mockito.when(context.getServiceReferences((String) Mockito.eq(null), Mockito.eq(LOG_FILTER))).thenReturn(null);
         Mockito.when(context.getServiceReference(LOG_FILTER)).thenReturn(null);
-        Mockito.when(context.getServiceReferences(Mockito.anyString(), Mockito.anyString())).then(new Answer<ServiceReference[]>() {
+        Mockito.when(context.getServiceReferences(Mockito.anyString(), Mockito.anyString())).then(new Answer<ServiceReference<?>[]>() {
             @Override
-            public ServiceReference[] answer(InvocationOnMock invocation) throws Throwable {
+            public ServiceReference<?>[] answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 if (arguments == null || arguments.length != 2) {
                     return null;
