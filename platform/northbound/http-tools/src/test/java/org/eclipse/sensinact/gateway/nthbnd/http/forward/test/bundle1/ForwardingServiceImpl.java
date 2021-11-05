@@ -9,7 +9,6 @@ import java.util.Hashtable;
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.sensinact.gateway.nthbnd.http.forward.ForwardingService;
-import org.osgi.service.component.annotations.Component;
 
 /**
  *

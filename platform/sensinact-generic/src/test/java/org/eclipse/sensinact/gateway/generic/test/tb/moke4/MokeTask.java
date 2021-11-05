@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.generic.uri.GenericURITask;
 import org.eclipse.sensinact.gateway.generic.uri.URITaskTranslator;

@@ -90,7 +90,7 @@ public class ShellAccess extends NorthboundAccess<ShellAccessRequest> {
         } else {
             resultStr = cap.getJSON();
         }
-        JSONObject result = new JSONResponseFormat(mediator).format(resultStr);
+        JSONObject result = new JSONResponseFormat().format(resultStr);
         if (result == null) {
             this.sendError(500, "Internal server error");
             return false;

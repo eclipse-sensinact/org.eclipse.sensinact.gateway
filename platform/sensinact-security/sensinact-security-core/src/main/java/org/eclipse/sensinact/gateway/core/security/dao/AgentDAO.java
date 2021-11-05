@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.core.security.dao;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.core.security.entity.AgentEntity;

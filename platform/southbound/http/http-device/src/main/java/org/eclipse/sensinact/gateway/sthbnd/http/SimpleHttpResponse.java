@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 
 import java.io.IOException;

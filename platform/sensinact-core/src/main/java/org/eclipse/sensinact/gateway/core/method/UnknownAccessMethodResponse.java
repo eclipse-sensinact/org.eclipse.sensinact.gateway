@@ -10,8 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.method;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-
 /**
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>

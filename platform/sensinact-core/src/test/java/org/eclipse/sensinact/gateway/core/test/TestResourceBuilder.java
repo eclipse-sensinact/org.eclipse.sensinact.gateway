@@ -99,9 +99,6 @@ public class TestResourceBuilder<R extends ModelInstance> {
 	protected Dictionary<String, Object> props;
 	protected AccessTree tree;
 
-	private final BundleContext context = Mockito.mock(BundleContext.class);
-	private final Bundle bundle = Mockito.mock(Bundle.class);
-
 	@BeforeEach
 	public void init() throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException,
 			DataStoreException, BundleException {

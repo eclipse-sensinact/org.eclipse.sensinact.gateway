@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper.QueryKey;
 
 /**
  * Northbound request wrapper service.

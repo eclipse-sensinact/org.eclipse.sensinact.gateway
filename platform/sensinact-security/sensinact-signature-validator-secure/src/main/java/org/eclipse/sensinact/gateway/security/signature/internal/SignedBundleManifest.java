@@ -19,12 +19,10 @@ import java.io.InputStream;
 import java.util.jar.Manifest;
 
 public class SignedBundleManifest extends Manifest {
-    private Mediator mediator;
     private CryptographicUtils cryptoUtils;
 
-    public SignedBundleManifest(Mediator mediator, InputStream iStream, CryptographicUtils cryptoUtils) throws IOException {
+    public SignedBundleManifest(InputStream iStream, CryptographicUtils cryptoUtils) throws IOException {
         super(iStream);
-        this.mediator = mediator;
         this.cryptoUtils = cryptoUtils;
     }
 

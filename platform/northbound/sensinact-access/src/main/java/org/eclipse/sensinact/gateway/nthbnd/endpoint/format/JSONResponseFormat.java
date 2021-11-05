@@ -10,18 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.endpoint.format;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.json.JSONObject;
 
 public class JSONResponseFormat implements ResponseFormat<JSONObject> {
-    private Mediator mediator;
-
-    public JSONResponseFormat(Mediator mediator) {
-        this.mediator = mediator;
-    }
 
     @Override
     public JSONObject format(Object object) {

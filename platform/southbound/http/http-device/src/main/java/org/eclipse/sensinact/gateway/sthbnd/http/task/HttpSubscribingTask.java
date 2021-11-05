@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.task;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
@@ -35,7 +34,6 @@ extends HttpDiscoveryTask<RESPONSE, REQUEST> {
 	/**
      * Constructor
      *
-
      * @param transmitter    
      * 		the {@link HttpProtocolStackEndpoint} transmitting the requests build by 
      * 		the HttpSubscribingTask to be instantiated

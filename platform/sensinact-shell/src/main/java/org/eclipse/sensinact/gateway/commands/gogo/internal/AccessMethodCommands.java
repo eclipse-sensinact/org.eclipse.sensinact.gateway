@@ -67,7 +67,7 @@ public class AccessMethodCommands {
                     return false;
                 }
                 AccessMethodResponse<?> cap = super.endpoint.execute(nthbndRequest);
-                JSONObject result = new JSONResponseFormat(mediator).format(cap.getJSON());
+                JSONObject result = new JSONResponseFormat().format(cap.getJSON());
                 if (result == null) {
                     this.sendError(500, "Internal server error");
                     return false;

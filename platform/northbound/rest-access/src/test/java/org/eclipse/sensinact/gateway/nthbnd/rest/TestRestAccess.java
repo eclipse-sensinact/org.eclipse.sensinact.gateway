@@ -10,13 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.rest;
 
-import org.eclipse.sensinact.gateway.util.IOUtils;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.osgi.test.junit5.context.BundleContextExtension;
-import org.osgi.test.junit5.service.ServiceExtension;
-
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;

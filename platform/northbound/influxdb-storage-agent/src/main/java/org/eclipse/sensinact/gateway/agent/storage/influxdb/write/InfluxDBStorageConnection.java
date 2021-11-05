@@ -16,9 +16,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.Dictionary;
-
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.historic.storage.agent.generic.StorageConnection;
 import org.eclipse.sensinact.gateway.tools.connector.influxdb.InfluxDbDatabase;
