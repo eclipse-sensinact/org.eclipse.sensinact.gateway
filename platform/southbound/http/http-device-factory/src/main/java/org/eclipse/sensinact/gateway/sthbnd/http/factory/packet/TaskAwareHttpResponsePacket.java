@@ -53,7 +53,6 @@ public class TaskAwareHttpResponsePacket extends HttpResponsePacket {
 			if(idx >=0) {
 				int charsetStartIdx = contentType.indexOf("charset=", idx) + 8;
 				if(charsetStartIdx >= 0) {
-					charsetStartIdx += 8;
 					int charsetStopIdx;
 					if(contentType.charAt(charsetStartIdx) == '"') {
 						charsetStartIdx += 1;

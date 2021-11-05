@@ -78,7 +78,10 @@ public class HttpDeviceFactoryTest {
 				if(resource == null) {
 					resp.sendError(404);
 				} else {
-					resp.setContentType(req.getHeader("Accept"));
+					String header = req.getHeader("Accept");
+					if(header != null) {
+						resp.setContentType(header + "; charset=utf-8");
+					}
 
 					PrintWriter pw = resp.getWriter();
 					try (BufferedReader br = new BufferedReader(new InputStreamReader(resource.openStream()))) {
