@@ -469,7 +469,7 @@ public class TestThirdPartyAccessToken{
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void doInit(Map configuration) {
+	protected void doInit(Map<String, Comparable> configuration) {
 		configuration.put("org.osgi.framework.system.packages.extra",
 			"org.eclipse.sensinact.gateway.test," + 
 			"com.sun.net.httpserver," + 

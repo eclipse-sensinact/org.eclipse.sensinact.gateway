@@ -143,19 +143,19 @@ public class BundleValidationImpl implements BundleValidation {
                 sjar.setKeyStoreManager(ksm);
 
                 Map<String, Certificate> validCertificates = sjar.getValidCertificates(this.getSignerPassword());
-                Iterator signers = validCertificates.entrySet().iterator();
+                Iterator<Map.Entry<String, Certificate>> signers = validCertificates.entrySet().iterator();
 
                 final List<Certificate> certs4validSig = new ArrayList<Certificate>();
                 Certificate currentCert = null;
                 String signer = "";
-                Map.Entry entry = null;
+                Map.Entry<String,Certificate> entry = null;
 
                 while (signers.hasNext()) {
-                    entry = (Map.Entry) signers.next();
-                    signer = (String) entry.getKey();
+                    entry = (Map.Entry<String,Certificate>) signers.next();
+                    signer = entry.getKey();
 
                     LOG.debug("signers: %s", signers);
-                    currentCert = (Certificate) validCertificates.get(signer);
+                    currentCert = validCertificates.get(signer);
                     SignatureFile signatureFile = sjar.getSignatureFile(signer);
 
                     if (signatureFile == null) {

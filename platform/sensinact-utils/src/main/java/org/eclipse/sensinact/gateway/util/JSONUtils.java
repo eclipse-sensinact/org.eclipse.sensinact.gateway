@@ -10,10 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.util;
 
-import org.eclipse.sensinact.gateway.util.json.JSONValidator;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -22,6 +18,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.eclipse.sensinact.gateway.util.json.JSONValidator;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * JSON Helpers
@@ -86,16 +86,16 @@ public class JSONUtils {
             return JSONUtils.arrayToJSONFormat(object, context);
         }
         if (List.class.isAssignableFrom(object.getClass())) {
-            return toJSONFormat(((List) object).toArray(new Object[0]), context);
+            return toJSONFormat(((List<?>) object).toArray(new Object[0]), context);
         }
         if (Map.class.isAssignableFrom(object.getClass())) {
-            Iterator<Map.Entry> iterator = ((Map) object).entrySet().iterator();
+            Iterator<Map.Entry<?,?>> iterator = ((Map) object).entrySet().iterator();
             int index = 0;
             StringBuilder builder = new StringBuilder();
             builder.append(JSONUtils.OPEN_BRACE);
 
             while (iterator.hasNext()) {
-                Map.Entry entry = iterator.next();
+                Map.Entry<?, ?> entry = iterator.next();
                 String key = toJSONFormat(entry.getKey());
                 if (key == null) {
                     continue;

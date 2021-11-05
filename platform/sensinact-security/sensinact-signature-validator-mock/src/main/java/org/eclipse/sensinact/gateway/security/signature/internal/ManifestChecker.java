@@ -23,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.jar.Attributes;
 
 public class ManifestChecker {
@@ -132,9 +133,9 @@ public class ManifestChecker {
     protected static String getEntryHash(final Attributes atts) {
         String entryHash = "";
         if (atts != null) {
-            final Iterator iter = atts.entrySet().iterator();
+            final Iterator<Entry<Object, Object>> iter = atts.entrySet().iterator();
             if (iter.hasNext()) {
-                entryHash = (String) ((Map.Entry) iter.next()).getValue();
+                entryHash = (String) ((Map.Entry<Object, Object>) iter.next()).getValue();
             }
         }
         return entryHash;

@@ -1160,7 +1160,7 @@ public class SensiNact implements Core {
 
 
 		ConditionalPermissionUpdate cpu = cpa.newConditionalPermissionUpdate();
-		List piList = cpu.getConditionalPermissionInfos();
+		List<ConditionalPermissionInfo> piList = cpu.getConditionalPermissionInfos();
 		
 		ConditionalPermissionInfo cpiDeny = cpa.newConditionalPermissionInfo(
 		String.format("DENY { [org.eclipse.sensinact.gateway.core.security.perm.StrictCodeBaseCondition \"%s\" \"!\"]"

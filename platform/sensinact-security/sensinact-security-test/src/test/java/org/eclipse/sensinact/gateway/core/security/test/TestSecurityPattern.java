@@ -82,7 +82,7 @@ public class TestSecurityPattern{
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void doInit(Map configuration) {
+	protected void doInit(Map<String, String> configuration) {
 		configuration.put("org.osgi.framework.system.packages.extra",
 			"org.eclipse.sensinact.gateway.test," + 
 			"com.sun.net.httpserver," + 

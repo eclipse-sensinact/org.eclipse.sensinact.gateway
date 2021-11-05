@@ -24,9 +24,12 @@ import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
+
+import javax.swing.text.html.parser.Entity;
 
 public class SignedBundleChecker {
 	
@@ -165,12 +168,12 @@ public class SignedBundleChecker {
         // TODO JarValidation: the hash values of the resources in embedded
         // archives must be checked if they are available
         boolean checked = true;
-        final Map entries = manifest.getEntries();
-        final Iterator iter = entries.entrySet().iterator();
-        Map.Entry entry;
+        final Map<String, Attributes> entries = manifest.getEntries();
+        final Iterator<Entry<String, Attributes>> iter = entries.entrySet().iterator();
+        Map.Entry<String, Attributes> entry;
         Attributes data;
-        Iterator iter2;
-        Map.Entry entry2;
+        Iterator<Entry<Object, Object>> iter2;
+        Map.Entry<Object, Object> entry2;
         Attributes.Name key2;
         String hashValue;
         String file, type;
@@ -179,7 +182,7 @@ public class SignedBundleChecker {
         while (iter.hasNext()) {
             //final LogUtils logManifestEntry = new LogUtils();
             //logManifestEntry.initTimeMeasure();
-            entry = (Map.Entry) iter.next();
+            entry = iter.next();
             file = (String) entry.getKey();
             if (LOG.isDebugEnabled()) {
                 LOG.debug("file: " + file);
@@ -189,7 +192,7 @@ public class SignedBundleChecker {
             while (iter2.hasNext()) {
                 //final LogUtils logHash = new LogUtils();
                 //logHash.initTimeMeasure();
-                entry2 = (Map.Entry) iter2.next();
+                entry2 =  iter2.next();
                 key2 = (Attributes.Name) entry2.getKey();
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("key2: " + key2);

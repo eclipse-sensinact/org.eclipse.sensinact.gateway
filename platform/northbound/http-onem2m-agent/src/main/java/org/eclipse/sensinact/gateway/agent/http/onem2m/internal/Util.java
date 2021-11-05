@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public class Util {
@@ -43,7 +44,7 @@ public class Util {
         configuration.setContent(content.toString());
         LOG.debug("Sending request to URI {}", configuration.getUri());
         LOG.debug("Headers from request to {}", configuration.getUri());
-        for (Map.Entry entry : configuration.getHeaders().entrySet()) {
+        for (Map.Entry<String,List<String>> entry : configuration.getHeaders().entrySet()) {
             LOG.debug("{} : {}", entry.getKey(), entry.getValue().toString());
         }
         LOG.debug("Request body: {}", content.toString());

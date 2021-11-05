@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +40,7 @@ public abstract class MidOSGiTestBak implements BundleContextProvider {
      * @param configuration the initialization
      *                      configuration Map to be completed
      */
-    protected abstract void doInit(Map configuration);
+    protected abstract void doInit(Map<String, Serializable> configuration);
 
     /**
      * Returns true if the file whose name is passed as

@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.jar.Attributes;
 
@@ -49,15 +50,15 @@ public class SignatureFileChecker {
         boolean manifestEntriesValid = true;
         final Attributes pretendedMainAttributes = pretendedSigFile.getMainAttributes();
 
-        final Map pretendedEntries = pretendedSigFile.getEntries();
+        final Map<?, ?> pretendedEntries = pretendedSigFile.getEntries();
 
         final Map<String, String> dataMap = ManifestChecker.extractEntryHashes(mediator, signedBundle.getEntry("/META-INF/MANIFEST.MF").openStream(), cryptoUtils, pretendedSigFile.getHashAlgo());
         // logger.log(Level.DEBUG, "number of entries: "+dataMap.size());
         String entryName, currentHash, pretendedHash;
-        Map.Entry entry;
+        Map.Entry<String, String> entry;
         boolean currentEntryValid;
-        for (final Iterator iter = dataMap.entrySet().iterator(); iter.hasNext() && manifestEntriesValid; ) {
-            entry = (Map.Entry) iter.next();
+        for (final Iterator<Entry<String, String>> iter = dataMap.entrySet().iterator(); iter.hasNext() && manifestEntriesValid; ) {
+            entry = iter.next();
             entryName = (String) entry.getKey();
             // logger.log(Level.ALL, "entry name: "+entryName);
             currentHash = (String) entry.getValue();
