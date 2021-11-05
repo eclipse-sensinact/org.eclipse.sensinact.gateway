@@ -1,9 +1,9 @@
 -include: ${sensinact.root.dir}/bnd/default.bnd.bnd
--split-package:=merge-first
+
 
 -privatepackage:\
 	 !org.bouncycastle.util.test,\
-	 org.bouncycastle.*
+	 org.bouncycastle.*;-split-package:=merge-first
 	 
 Import-Package: \
 	!junit.framework,\
