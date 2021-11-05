@@ -43,7 +43,7 @@ public class Component implements DataListenerItf, FunctionUpdateListener {
     private final AppServiceMediator mediator;
     private final String identifier;
     private final Map<String, DataProviderSubscription> inputDataProviderMap;
-    private final AbstractFunction function;
+    private final AbstractFunction<?> function;
     private final List<AppParameter> functionParameters;
     private final Map<String, AbstractPropertyBlock> propertyBlocks;
     private final Map<String, DataProvider> outputDataProviderMap;
@@ -61,7 +61,7 @@ public class Component implements DataListenerItf, FunctionUpdateListener {
      * @param propertyBlocks        the properties of the component
      * @param outputDataProviderMap the {@link DataProvider} of a component
      */
-    public Component(AppServiceMediator mediator, String identifier, Map<String, DataProviderSubscription> inputDataProviderMap, AbstractFunction function, List<AppParameter> functionParameters, Map<String, AbstractPropertyBlock> propertyBlocks, Map<String, DataProvider> outputDataProviderMap) {
+    public Component(AppServiceMediator mediator, String identifier, Map<String, DataProviderSubscription> inputDataProviderMap, AbstractFunction<?> function, List<AppParameter> functionParameters, Map<String, AbstractPropertyBlock> propertyBlocks, Map<String, DataProvider> outputDataProviderMap) {
         this.mediator = mediator;
         this.identifier = identifier;
         this.inputDataProviderMap = inputDataProviderMap;

@@ -31,7 +31,7 @@ import java.util.Map;
 class ComponentBuilder {
     private final AppServiceMediator mediator;
     private final String identifier;
-    private final AbstractFunction function;
+    private final AbstractFunction<?> function;
     private final Map<String, DataProvider> dataProviderMap;
     private Map<String, DataProviderSubscription> abstractDataListenerMap;
     private List<AppParameter> parameters;
@@ -46,7 +46,7 @@ class ComponentBuilder {
      * @param parameters      the parameters of the function
      * @param dataProviderMap the data providers
      */
-    ComponentBuilder(AppServiceMediator mediator, String identifier, AbstractFunction function, List<AppParameter> parameters, Map<String, DataProvider> dataProviderMap) {
+    ComponentBuilder(AppServiceMediator mediator, String identifier, AbstractFunction<?> function, List<AppParameter> parameters, Map<String, DataProvider> dataProviderMap) {
         this.mediator = mediator;
         this.identifier = identifier;
         this.function = function;

@@ -91,7 +91,7 @@ public class BasicInstaller extends AbstractPlugin {
     /**
      * @see PluginInstaller#getFunction(AppFunction)
      */
-    public AbstractFunction getFunction(AppFunction function) {
+    public AbstractFunction<?> getFunction(AppFunction function) {
         String functionName = function.getName();
         if (functionName.equals("lesserThan") || functionName.equals("lesserEqual") || functionName.equals("greaterThan") || functionName.equals("greaterEqual") || functionName.equals("equal") || functionName.equals("diff") || functionName.equals("regex") || functionName.equals("abs") || functionName.equals("delta")) {
             return new SimpleConditionFunction(mediator.getClassLoader(), functionName);

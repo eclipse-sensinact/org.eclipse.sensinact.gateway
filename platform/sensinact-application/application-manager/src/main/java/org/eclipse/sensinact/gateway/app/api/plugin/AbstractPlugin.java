@@ -17,5 +17,5 @@ public abstract class AbstractPlugin implements PluginInstaller {
     /**
      * @see PluginInstaller#getFunction(AppFunction)
      */
-    public abstract AbstractFunction getFunction(AppFunction function);
+    public abstract AbstractFunction<?> getFunction(AppFunction function);
 }

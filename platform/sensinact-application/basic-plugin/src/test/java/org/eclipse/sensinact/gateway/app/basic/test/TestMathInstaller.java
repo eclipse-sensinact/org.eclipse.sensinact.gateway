@@ -58,7 +58,7 @@ public class TestMathInstaller  {
             BasicInstaller installer = new BasicInstaller();
             installer.activate(context);
             AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
-            AbstractFunction function = installer.getFunction(appFunction);
+            AbstractFunction<?> function = installer.getFunction(appFunction);
             assertTrue(function instanceof AdditionFunction);
         }
     }
@@ -75,7 +75,7 @@ public class TestMathInstaller  {
             BasicInstaller installer = new BasicInstaller();
             installer.activate(context);
             AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
-            AbstractFunction function = installer.getFunction(appFunction);
+            AbstractFunction<?> function = installer.getFunction(appFunction);
             assertTrue(function instanceof SubtractionFunction);
         }
     }
@@ -92,7 +92,7 @@ public class TestMathInstaller  {
             BasicInstaller installer = new BasicInstaller();
             installer.activate(context);
             AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
-            AbstractFunction function = installer.getFunction(appFunction);
+            AbstractFunction<?> function = installer.getFunction(appFunction);
             assertTrue(function instanceof MultiplicationFunction);
         }
     }
@@ -109,7 +109,7 @@ public class TestMathInstaller  {
             BasicInstaller installer = new BasicInstaller();
             installer.activate(context);
             AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
-            AbstractFunction function = installer.getFunction(appFunction);
+            AbstractFunction<?> function = installer.getFunction(appFunction);
             assertTrue(function instanceof DivisionFunction);
         }
     }
@@ -126,7 +126,7 @@ public class TestMathInstaller  {
             BasicInstaller installer = new BasicInstaller();
             installer.activate(context);
             AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
-            AbstractFunction function = installer.getFunction(appFunction);
+            AbstractFunction<?> function = installer.getFunction(appFunction);
             assertTrue(function instanceof ModuloFunction);
         }
     }

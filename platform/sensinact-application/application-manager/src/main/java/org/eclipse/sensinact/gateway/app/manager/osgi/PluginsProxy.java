@@ -51,8 +51,8 @@ public class PluginsProxy {
      * @return the corresponding {@link AbstractFunction}
      * @throws FunctionNotFoundException when no plugins can return the corresponding function
      */
-    public static AbstractFunction getFunction(AppServiceMediator mediator, AppFunction function) throws FunctionNotFoundException {
-        AbstractFunction functionBlock = null;
+    public static AbstractFunction<?> getFunction(AppServiceMediator mediator, AppFunction function) throws FunctionNotFoundException {
+        AbstractFunction<?> functionBlock = null;
         ServiceReference[] serviceReferences = mediator.getServiceReferences(APP_INSTALL_HOOK_FILTER);
         if (serviceReferences != null) {
             for (ServiceReference serviceReference : serviceReferences) {

@@ -80,7 +80,7 @@ public class ApplicationFactory {
             final String componentUri = applicationUri + AppJsonConstant.URI_SEPARATOR + component.getIdentifier();
             final String resultUri = componentUri + AppJsonConstant.URI_SEPARATOR + ComponentConstant.RESULT_DATA;
             // Construct the function of the component
-            AbstractFunction function;
+            AbstractFunction<?> function;
             try {
                 function = PluginsProxy.getFunction(mediator, component.getFunction());
             } catch (FunctionNotFoundException e) {

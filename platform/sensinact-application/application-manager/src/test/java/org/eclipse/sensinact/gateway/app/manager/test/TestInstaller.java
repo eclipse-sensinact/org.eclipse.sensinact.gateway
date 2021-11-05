@@ -34,7 +34,7 @@ class TestInstaller extends AbstractPlugin {
         return null;
     }
 
-    public AbstractFunction getFunction(AppFunction function) {
+    public AbstractFunction<?> getFunction(AppFunction function) {
         if (function.getName().equals("mock_addition")) {
             return new MockComponentAddition(mediator);
         } else if (function.getName().equals("mock_set")) {

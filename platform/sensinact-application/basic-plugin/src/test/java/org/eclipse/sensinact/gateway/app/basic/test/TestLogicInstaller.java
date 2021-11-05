@@ -56,7 +56,7 @@ public class TestLogicInstaller {
             BasicInstaller installer = new BasicInstaller();
             installer.activate(context);
             AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
-            AbstractFunction function = installer.getFunction(appFunction);
+            AbstractFunction<?> function = installer.getFunction(appFunction);
             assertTrue(function instanceof SimpleConditionFunction);
         }
     }
@@ -73,7 +73,7 @@ public class TestLogicInstaller {
             BasicInstaller installer = new BasicInstaller();
             installer.activate(context);
             AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
-            AbstractFunction function = installer.getFunction(appFunction);
+            AbstractFunction<?> function = installer.getFunction(appFunction);
             assertTrue(function instanceof DoubleConditionFunction);
         }
     }
@@ -90,7 +90,7 @@ public class TestLogicInstaller {
             BasicInstaller installer = new BasicInstaller();
             installer.activate(context);
             AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
-            AbstractFunction function = installer.getFunction(appFunction);
+            AbstractFunction<?> function = installer.getFunction(appFunction);
             assertTrue(function instanceof BetweenFunction);
         }
     }
