@@ -47,6 +47,7 @@
 		<org.osgi.util.function.version>1.1.0</org.osgi.util.function.version>
 		<org.osgi.util.promise.version>1.1.1</org.osgi.util.promise.version>
 		<org.osgi.util.pushstream.version>1.0.1</org.osgi.util.pushstream.version>
+		<org.osgi.util.converter.version>1.0.8</org.osgi.util.converter.version>
 		
 		<!-- Apache Felix Version -->
 		<org.apache.felix.version>6.0.3</org.apache.felix.version>
@@ -469,6 +470,11 @@
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.util.pushstream</artifactId>
 				<version>${org.osgi.util.pushstream.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.util.converter</artifactId>
+				<version>${org.osgi.util.converter.version}</version>
 			</dependency>
 			
 			<!-- Apache Aries -->

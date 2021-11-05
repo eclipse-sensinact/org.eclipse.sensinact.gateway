@@ -23,6 +23,7 @@ import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.eclipse.sensinact.gateway.agent.mqtt.inst.internal.NorthboundBroker;
 import org.eclipse.sensinact.gateway.core.AnonymousSession;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
@@ -33,10 +34,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
-import org.osgi.test.common.annotation.config.WithFactoryConfigurations;
 import org.osgi.test.junit5.cm.ConfigurationExtension;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
+import org.sensinact.mqtt.server.impl.MQTTServerImpl;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -47,36 +48,33 @@ import org.osgi.test.junit5.service.ServiceExtension;
 public class MQTTAgentTest {
 
     private final BlockingQueue<String> events = new ArrayBlockingQueue<String>(16);
-    
+    private static final String PORT="1884";
     /**
      * @throws Exception
      */
-    @Test
-    @WithFactoryConfigurations({
-    	
-    	@WithFactoryConfiguration(
-    			factoryPid = "mqtt.agent.broker",
-    			name = "ag1",
-    			location = "?",
-    			properties = {
-    					@Property(key = "port", value = "1884"),
-    					@Property(key = "qos", value = "1")
-    			}
-    	),
-    	@WithFactoryConfiguration(
-    			factoryPid = "mqtt.server",
-    			name = "ag1",
-    			location = "?",
-    			properties = {
-    					@Property(key = "port", value = "1884"),
-    					@Property(key = "autostart", value = "true")
-    			}
-    	)
-    })
+    @Test    	
+   	@WithFactoryConfiguration(
+   			factoryPid = NorthboundBroker.MQTT_AGENT_BROKER,
+   			name = "ag1",
+  			location = "?",
+   			properties = {
+   					@Property(key = "port", value = PORT),
+   					@Property(key = "qos", value = "1")
+   			}
+   	)
+   	@WithFactoryConfiguration(
+   			factoryPid = MQTTServerImpl.CONFIGURATION_PID,
+   			name = "ag1",
+   			location = "?",
+   			properties = {
+   					@Property(key = "port", value = PORT),
+   					@Property(key = "autostart", value = "true")
+   			}
+   	)
     public void mqttAgentsTest(@InjectService SliderSetterItf slider, 
     		@InjectService Core core) throws Throwable {
     	Thread.sleep(5000);
-        try (MqttClient client = new MqttClient("tcp://127.0.0.1:1884", 
+        try (MqttClient client = new MqttClient("tcp://127.0.0.1:"+PORT, 
         		UUID.randomUUID().toString(), new MemoryPersistence())) {        
 	        client.setCallback(new MqttCallback() {
 	
@@ -93,7 +91,9 @@ public class MQTTAgentTest {
 				}
 	
 				@Override
-				public void deliveryComplete(IMqttDeliveryToken token) {}
+				public void deliveryComplete(IMqttDeliveryToken token) {
+
+				}
 	        });
 	        client.connect();
 	        client.subscribe("/slider/cursor/position");
@@ -104,7 +104,6 @@ public class MQTTAgentTest {
 		    int targetValue = value == 0 ? 5 : 0;
 		    
 	        slider.move(targetValue);
-	        
 	        assertEquals(targetValue, getSliderValue(session));
 	        assertEquals("[/slider/cursor/position]" + targetValue, events.poll(2, TimeUnit.SECONDS));
 	        
