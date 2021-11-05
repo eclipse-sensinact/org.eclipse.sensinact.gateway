@@ -163,11 +163,6 @@
 				<artifactId>mongodb-connector</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.eclipse.sensinact.gateway.tools</groupId>
-				<artifactId>mixed-osgi-over-slf4j</artifactId>
-				<version>${project.version}</version>
-			</dependency>
 
 			<!-- protocol -->
 

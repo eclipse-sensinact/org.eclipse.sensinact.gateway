@@ -258,13 +258,6 @@
 									<overWrite>true</overWrite>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.eclipse.sensinact.gateway.tools</groupId>
-									<artifactId>mixed-osgi-over-slf4j</artifactId>
-									<version>${project.version}</version>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-								</artifactItem>
-								<artifactItem>
 									<groupId>org.apache.felix</groupId>
 									<artifactId>org.apache.felix.fileinstall</artifactId>
 									<type>jar</type>
