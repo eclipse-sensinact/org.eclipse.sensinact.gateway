@@ -10,6 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.factory.endpoint;
 
+import static java.lang.Integer.parseInt;
 import static java.util.stream.Collectors.toList;
 
 import java.text.ParseException;
@@ -19,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,8 +68,30 @@ public abstract class AbstractHttpDevicePacketReader implements PacketReader<Tas
     	if(startVariable > -1 && endVariable > -1 && endVariable > startVariable) {
 			try {
 				String pathVariable = variable.substring(startVariable + 2, endVariable);
-				String key = findKeyForValue(mapping, String.format("__%s", pathVariable));
-				Object pathResult = getFromDataMap(data,key);
+				
+				String searchVariable;
+				Function<Object,String> transform;
+				if(pathVariable.indexOf(':') >= 0) {
+					String[] split = pathVariable.split(":");
+					searchVariable = split[0];
+					int start = parseInt(split[1]);
+					if(split.length == 2) {
+						transform = o -> o == null ? "null" :
+								String.valueOf(o).substring(start);
+					} else if (split.length == 3) {
+						transform = o -> o == null ? "null" :
+								String.valueOf(o).substring(start, start + parseInt(split[2]));
+					} else {
+						LOG.error("Unable to validate variable {}", pathVariable);
+						throw new IllegalArgumentException("The variable " + pathVariable + " is not valid");
+					}
+				} else {
+					searchVariable = pathVariable;
+					transform = String::valueOf;
+				}
+				
+				String key = findKeyForValue(mapping, String.format("__%s", searchVariable));
+				String pathResult = transform.apply(getFromDataMap(data,key));
 				variable = String.format("%s%s%s", expression.substring(0,startVariable), pathResult, expression.substring(endVariable+1));
 			} catch (Exception e) {
 				LOG.error(e.getMessage(),e);

@@ -101,6 +101,11 @@ public class CsvPacketReader extends AbstractHttpDevicePacketReader {
 		int tokenStartIdx = 0;
 		int tokenStopIdx;
 		while(tokenStartIdx < line.length()) {
+			if(line.charAt(tokenStartIdx) == ',') {
+				tokens.add("");
+				tokenStartIdx += 1;
+				continue;
+			}
 			boolean stripQuote = false;
 			tokenStopIdx = tokenStartIdx + 1;
 			if(line.charAt(tokenStartIdx) == '"') {

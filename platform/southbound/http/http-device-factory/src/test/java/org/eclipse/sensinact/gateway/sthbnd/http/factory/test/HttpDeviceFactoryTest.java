@@ -243,6 +243,34 @@ public class HttpDeviceFactoryTest {
 		
 	}
 
+	@Test
+	@Order(6)
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
+	location = "?",
+	properties = {
+			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test6/config.json"),
+			@Property(key = ENDPOINT_TASKS_CONFIGURATION_PROP, value="src/test/resources/test6/tasks.json")
+	}
+			)
+	public void testCsvWithNumberLikeValues() throws Exception {
+		Thread.sleep(5000);
+		
+		Session session = core.getAnonymousSession();
+		
+		assertEquals(5, session.serviceProviders().size());
+		
+		testProvider(session, "test6_1114", "vehicle", "line", "3", "59.445000:24.742240", -1);
+		testProvider(session, "test6_1119", "vehicle", "line", "43", "59.429320:24.698510", -1);
+		testProvider(session, "test6_1120", "vehicle", "line", "20A", "59.404720:24.681790", -1);
+		testProvider(session, "test6_1121", "vehicle", "line", "59", "59.441820:24.742210", -1);
+		testProvider(session, "test6_1141", "vehicle", "line", "24A", "59.404510:24.654770", -1);
+
+		for (ServiceProvider serviceProvider : session.serviceProviders()) {
+			serviceProvider.getName();
+		}
+		
+	}
+
 	private void testProvider(Session session, String providerName, String serviceName, String resourceName,
 			String value, String location, long timestamp) {
 		ServiceProvider provider = session.serviceProvider(providerName);

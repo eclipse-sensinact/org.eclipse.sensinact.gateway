@@ -1,0 +1,5 @@
+{
+  "modifiable": "UPDATEABLE",
+  "serviceProviderIdPattern": "test6_%s",
+  "overrideResponseContentType": "text/csv"
+}

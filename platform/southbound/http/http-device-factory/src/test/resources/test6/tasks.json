@@ -1,0 +1,27 @@
+{
+  "standalone": {
+    "recurrences": [
+      {
+        "configuration": {
+          "acceptType": "text/plain",
+          "scheme": "http",
+          "host": "localhost",
+          "port": 8898,
+          "path": "/http-factory-test-resources/test6/response.csv",
+          "rootMapping": [
+            {
+              "mapping": {
+                "[6]": "::provider::",
+                "[0]": "vehicle/type",
+                "[1]": "vehicle/line",
+                "[2]": "__lon",
+                "[3]": "__lat",
+                "$concat(${lat:0:2},'.',${lat:2},':',${lon:0:2},'.',${lon:2})": "admin/location"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
