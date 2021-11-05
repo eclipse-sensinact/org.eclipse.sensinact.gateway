@@ -37,7 +37,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 
-public class OpenIDServer extends IdentityServerWrapper implements oAuthServer {
+public class OpenIDServer extends IdentityServerWrapper implements OAuthServer {
 
 	private Hashtable<String, UserInfo> credentials;
 	UserInfo anonymous;

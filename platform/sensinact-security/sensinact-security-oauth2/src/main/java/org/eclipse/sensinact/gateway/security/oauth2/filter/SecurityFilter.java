@@ -23,7 +23,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 
 import org.eclipse.sensinact.gateway.security.oauth2.IdentityServer;
-import org.eclipse.sensinact.gateway.security.oauth2.oAuthServer;
+import org.eclipse.sensinact.gateway.security.oauth2.OAuthServer;
 import org.eclipse.sensinact.gateway.security.oauth2.UserInfo;
 
 import java.io.IOException;
@@ -31,9 +31,9 @@ import java.io.IOException;
 @WebFilter(/*asyncSupported = true*/)
 public class SecurityFilter implements Filter {
 	private IdentityServer idServer;
-	private oAuthServer authServer;
+	private OAuthServer authServer;
 
-	public SecurityFilter(IdentityServer idServer, oAuthServer authServer) {
+	public SecurityFilter(IdentityServer idServer, OAuthServer authServer) {
 		this.idServer = idServer;
 		this.authServer = authServer;
 	}

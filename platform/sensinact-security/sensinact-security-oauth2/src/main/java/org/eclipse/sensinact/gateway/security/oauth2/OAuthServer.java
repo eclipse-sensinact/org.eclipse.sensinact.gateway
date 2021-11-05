@@ -17,7 +17,7 @@ import javax.servlet.ServletResponse;
 
 import org.json.JSONObject;
 
-public interface oAuthServer {
+public interface OAuthServer {
 
 	public static final String AUTH_BASEURL_PROP = "org.eclipse.sensinact.gateway.auth.server.baseurl";
 	
