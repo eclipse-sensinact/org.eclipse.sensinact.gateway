@@ -44,7 +44,7 @@ public class ForwardingFactory {
     private String appearingKey;
     private String disappearingKey;
 
-    private Map<String, ServiceRegistration[]> registrations;
+    private Map<String, ServiceRegistration<Filter>[]> registrations;
 
     private final AtomicBoolean running;
 
@@ -56,7 +56,7 @@ public class ForwardingFactory {
      */
     public ForwardingFactory(Mediator mediator) {
         this.mediator = mediator;
-        this.registrations = Collections.synchronizedMap(new HashMap<String, ServiceRegistration[]>());
+        this.registrations = Collections.synchronizedMap(new HashMap<String, ServiceRegistration<Filter>[]>());
         this.running = new AtomicBoolean(false);
     }
 
@@ -169,7 +169,7 @@ public class ForwardingFactory {
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, endpoint);
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
         
-	    ServiceRegistration[] registrations = new ServiceRegistration[2];
+	    ServiceRegistration<Filter>[] registrations = new ServiceRegistration[2];
 	    registrations[0] = mediator.getContext().registerService(Filter.class, forwardingFilter, props);
 	    
         props = new Hashtable<>();
@@ -193,9 +193,9 @@ public class ForwardingFactory {
             return;
         }
         String endpoint = forwardingService.getPattern();
-        ServiceRegistration[] registrations = this.registrations.remove(endpoint);
+        ServiceRegistration<Filter>[] registrations = this.registrations.remove(endpoint);
     	if(registrations != null) {
-    		for(ServiceRegistration registration : registrations) {
+    		for(ServiceRegistration<?> registration : registrations) {
 	    		try {
 	    			registration.unregister();
 	    		}catch(IllegalStateException e) {

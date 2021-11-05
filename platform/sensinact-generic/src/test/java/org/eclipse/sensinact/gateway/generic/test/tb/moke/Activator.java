@@ -32,8 +32,8 @@ import java.util.Properties;
 public class Activator extends AbstractActivator<Mediator> {
     private ExtModelConfiguration manager;
     private MokeStack endpoint;
-    private ServiceRegistration starterRegistration;
-    private ServiceRegistration processorRegistration;
+    private ServiceRegistration<StarterService> starterRegistration;
+    private ServiceRegistration<ProcessorService> processorRegistration;
 
     @Override
     public void doStart() throws Exception {

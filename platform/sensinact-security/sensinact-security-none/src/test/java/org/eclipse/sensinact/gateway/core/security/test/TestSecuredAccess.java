@@ -89,11 +89,11 @@ public class TestSecuredAccess {
 
 	private final ServiceReference referenceHandler = Mockito.mock(ServiceReference.class);
 	private final ServiceReference referenceAgent = Mockito.mock(ServiceReference.class);
-	private final ServiceRegistration registrationHandler = Mockito.mock(ServiceRegistration.class);
-	private final ServiceRegistration snaObjectRegistration = Mockito.mock(ServiceRegistration.class);
+	private final ServiceRegistration<MessageRouter> registrationHandler = Mockito.mock(ServiceRegistration.class);
+	private final ServiceRegistration<ModelElement> snaObjectRegistration = Mockito.mock(ServiceRegistration.class);
 	private final ServiceReference referenceAuthorization = Mockito.mock(ServiceReference.class);
-	private final ServiceRegistration registration = Mockito.mock(ServiceRegistration.class);
-	private final ServiceRegistration registrationAgent = Mockito.mock(ServiceRegistration.class);
+	private final ServiceRegistration<?> registration = Mockito.mock(ServiceRegistration.class);
+	private final ServiceRegistration<SnaAgent> registrationAgent = Mockito.mock(ServiceRegistration.class);
 	private final ServiceReference referenceProvider = Mockito.mock(ServiceReference.class);
 
 	private Mediator mediator;
@@ -194,9 +194,9 @@ public class TestSecuredAccess {
 		});
 		Mockito.when(context.registerService(Mockito.eq(MessageRouter.class.getCanonicalName()),
 				Mockito.any(MessageRouter.class), Mockito.any(Dictionary.class)))
-				.thenAnswer(new Answer<ServiceRegistration>() {
+				.thenAnswer(new Answer<ServiceRegistration<MessageRouter>>() {
 					@Override
-					public ServiceRegistration answer(InvocationOnMock invocation) throws Throwable {
+					public ServiceRegistration<MessageRouter> answer(InvocationOnMock invocation) throws Throwable {
 						// TestResourceBuilder.this.setHandler(
 						// (SnaMessageHandler) invocation.getArguments()[1]);
 						return registrationHandler;
@@ -204,9 +204,9 @@ public class TestSecuredAccess {
 				});
 		Mockito.when(context.registerService(Mockito.eq(SnaAgent.class.getCanonicalName()),
 				Mockito.any(SnaAgent.class), Mockito.any(Dictionary.class)))
-				.thenAnswer(new Answer<ServiceRegistration>() {
+				.thenAnswer(new Answer<ServiceRegistration<SnaAgent>>() {
 					@Override
-					public ServiceRegistration answer(InvocationOnMock invocation) throws Throwable {
+					public ServiceRegistration<SnaAgent> answer(InvocationOnMock invocation) throws Throwable {
 						// TestResourceBuilder.this.setAgent(
 						// (SnaAgent) invocation.getArguments()[1]);
 						return registrationAgent;
@@ -214,9 +214,9 @@ public class TestSecuredAccess {
 				});
 		Mockito.when(context.registerService(Mockito.any(String[].class),
 				Mockito.any(SnaAgent.class), Mockito.any(Dictionary.class)))
-				.thenAnswer(new Answer<ServiceRegistration>() {
+				.thenAnswer(new Answer<ServiceRegistration<SnaAgent>>() {
 					@Override
-					public ServiceRegistration answer(InvocationOnMock invocation) throws Throwable {
+					public ServiceRegistration<SnaAgent> answer(InvocationOnMock invocation) throws Throwable {
 						// TestResourceBuilder.this.setAgent(
 						// (SnaAgent) invocation.getArguments()[1]);
 						return registrationAgent;
@@ -225,9 +225,9 @@ public class TestSecuredAccess {
 
 		Mockito.when(context.registerService(Mockito.eq(SensiNactResourceModel.class.getCanonicalName()),
 				Mockito.any(ModelElement.class), Mockito.any(Dictionary.class)))
-				.thenAnswer(new Answer<ServiceRegistration>() {
+				.thenAnswer(new Answer<ServiceRegistration<ModelElement>>() {
 					@Override
-					public ServiceRegistration answer(InvocationOnMock invocation) throws Throwable {
+					public ServiceRegistration<ModelElement> answer(InvocationOnMock invocation) throws Throwable {
 						return snaObjectRegistration;
 					}
 				});

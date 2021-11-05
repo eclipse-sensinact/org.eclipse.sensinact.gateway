@@ -24,6 +24,7 @@ import org.eclipse.sensinact.gateway.app.api.exception.ApplicationRuntimeExcepti
 import org.eclipse.sensinact.gateway.app.api.exception.LifeCycleException;
 import org.eclipse.sensinact.gateway.app.api.exception.ResourceNotFoundException;
 import org.eclipse.sensinact.gateway.app.manager.component.Component;
+import org.eclipse.sensinact.gateway.app.manager.component.DataProviderItf;
 import org.eclipse.sensinact.gateway.app.manager.component.ResourceDataProvider;
 import org.eclipse.sensinact.gateway.app.manager.json.AppContainer;
 import org.eclipse.sensinact.gateway.app.manager.json.AppSnaMessage;
@@ -48,7 +49,7 @@ public class Application extends AbstractSensiNactApplication {
     private static Logger LOG = LoggerFactory.getLogger(Application.class);
     private static Logger LOG4J = LoggerFactory.getLogger(Application.class.getCanonicalName());
    
-    private final List<ServiceRegistration> serviceRegistrations;
+    private final List<ServiceRegistration<DataProviderItf>> serviceRegistrations;
     private final Map<ResourceDataProvider, Collection<ResourceSubscription>> resourceSubscriptions;
     private final Map<String, Component> components;
     
@@ -69,7 +70,7 @@ public class Application extends AbstractSensiNactApplication {
      * @param components            the components making up the application
      * @param watchDog              the exception watchdog that is associated with the threads
      */
-    public Application(AppServiceMediator mediator, AppContainer container, String name, List<ServiceRegistration> serviceRegistrations, Map<ResourceDataProvider, Collection<ResourceSubscription>> resourceSubscriptions, Map<String, Component> components, AppExceptionWatchDog watchDog) {
+    public Application(AppServiceMediator mediator, AppContainer container, String name, List<ServiceRegistration<DataProviderItf>> serviceRegistrations, Map<ResourceDataProvider, Collection<ResourceSubscription>> resourceSubscriptions, Map<String, Component> components, AppExceptionWatchDog watchDog) {
         this(mediator, container, name, null, serviceRegistrations, resourceSubscriptions, components, watchDog);
     }
 
@@ -84,7 +85,7 @@ public class Application extends AbstractSensiNactApplication {
      * @param components            the components making up the application
      * @param watchDog              the exception watchdog that is associated with the threads
      */
-    public Application(AppServiceMediator mediator, AppContainer container, String name, String identifier, List<ServiceRegistration> serviceRegistrations, Map<ResourceDataProvider, Collection<ResourceSubscription>> resourceSubscriptions, Map<String, Component> components, AppExceptionWatchDog watchDog) {
+    public Application(AppServiceMediator mediator, AppContainer container, String name, String identifier, List<ServiceRegistration<DataProviderItf>> serviceRegistrations, Map<ResourceDataProvider, Collection<ResourceSubscription>> resourceSubscriptions, Map<String, Component> components, AppExceptionWatchDog watchDog) {
         super(mediator, name, identifier);
         this.serviceRegistrations = serviceRegistrations;
         this.resourceSubscriptions = resourceSubscriptions;
@@ -180,7 +181,7 @@ public class Application extends AbstractSensiNactApplication {
      * @return a success/error message
      */
     public SnaErrorMessage uninstall() {
-        for (ServiceRegistration serviceRegistration : serviceRegistrations) {
+        for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
             serviceRegistration.unregister();
         }
         return new AppSnaMessage("/AppManager/" + getName(), SnaErrorMessage.Error.NO_ERROR, "Application " + getName() + " uninstalled");

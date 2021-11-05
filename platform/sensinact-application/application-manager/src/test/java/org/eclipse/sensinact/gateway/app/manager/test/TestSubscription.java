@@ -104,7 +104,7 @@ public class TestSubscription   implements TestResult {
         mockedRegistry = new HashMap<String, DataProviderItf>();
         ServiceReference serviceReferenceInstaller = Mockito.mock(ServiceReference.class);
         ServiceReference serviceReferenceResource = Mockito.mock(ServiceReference.class);
-        final ServiceRegistration serviceRegistration = Mockito.mock(ServiceRegistration.class);
+        final ServiceRegistration<DataProviderItf> serviceRegistration = Mockito.mock(ServiceRegistration.class);
         @SuppressWarnings("rawtypes") ServiceReference[] serviceReferencesInstaller = new ServiceReference[]{serviceReferenceInstaller};
         @SuppressWarnings("rawtypes") ServiceReference[] serviceReferencesActionHook = new ServiceReference[]{};
         @SuppressWarnings("rawtypes") ServiceReference[] serviceReferencesResource = new ServiceReference[]{serviceReferenceResource};
@@ -144,7 +144,7 @@ public class TestSubscription   implements TestResult {
         builder.configureName(AppConstant.UNINSTALL);
         ResourceImpl uninstallResource = builder.build(modelInstance, service);
         // Mock of the OSGi objects
-        ServiceRegistration registration = Mockito.mock(ServiceRegistration.class);
+        ServiceRegistration<?> registration = Mockito.mock(ServiceRegistration.class);
         BundleContext context = Mockito.mock(BundleContext.class);
         Mockito.when(context.registerService(Mockito.anyString(), Mockito.any(), Mockito.any(Dictionary.class))).thenReturn(registration);
 
@@ -190,9 +190,9 @@ public class TestSubscription   implements TestResult {
             }
         });
         Mockito.when(mediator.getServiceReferences("(&(objectClass=" + DataProviderItf.class.getName() + ")" + "(uri=/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider))")).thenReturn(serviceReferencesResource);
-        Mockito.when(mediator.registerService(Mockito.eq(DataProviderItf.class.getCanonicalName()), Mockito.any(DataProvider.class), Mockito.any(Dictionary.class))).thenAnswer(new Answer<ServiceRegistration>() {
+        Mockito.when(mediator.registerService(Mockito.eq(DataProviderItf.class.getCanonicalName()), Mockito.any(DataProvider.class), Mockito.any(Dictionary.class))).thenAnswer(new Answer<ServiceRegistration<DataProviderItf>>() {
             @Override
-            public ServiceRegistration answer(InvocationOnMock invocationOnMock) throws Throwable {
+            public ServiceRegistration<DataProviderItf> answer(InvocationOnMock invocationOnMock) throws Throwable {
                 mockedRegistry.put(((Dictionary<String, String>) invocationOnMock.getArguments()[2]).get("uri"), (DataProviderItf) invocationOnMock.getArguments()[1]);
                 return serviceRegistration;
             }

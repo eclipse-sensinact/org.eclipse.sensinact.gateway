@@ -13,19 +13,21 @@ package org.slf4j.osgi.logservice.impl;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.log.LogService;
 
 /**
  * <code>LogServiceFactory</code> creates LogService implementations.
  */
-public class LogServiceFactory implements ServiceFactory {
+public class LogServiceFactory implements ServiceFactory<LogService> {
 
 	@Override
-    public Object getService(Bundle bundle, ServiceRegistration arg1) {
+    public LogService getService(Bundle bundle, ServiceRegistration<LogService> arg1) {
         return new LogServiceImpl(bundle);
     }
 
 	@Override
-    public void ungetService(Bundle bundle, ServiceRegistration arg1, Object arg2) {
-        // nothing to do.
-    }
+	public void ungetService(Bundle bundle, ServiceRegistration<LogService> registration, LogService service) {
+		// nothing to do.
+	
+	}
 }
