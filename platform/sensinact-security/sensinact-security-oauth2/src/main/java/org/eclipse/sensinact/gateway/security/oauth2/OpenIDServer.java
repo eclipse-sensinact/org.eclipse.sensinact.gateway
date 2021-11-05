@@ -81,7 +81,7 @@ public class OpenIDServer extends IdentityServerWrapper implements oAuthServer {
 		credentials = new Hashtable<String, UserInfo>();
 		localAuth = System.getProperty(AUTH_BASEURL_PROP, AUTH_BASEURL_DEFAULT);
 		try {
-			ConnectionConfigurationImpl conf = new ConnectionConfigurationImpl();
+			ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> conf = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
 			conf.setHttpMethod("GET");
 			conf.setAccept("application/json");
 			conf.setUri(discoveryURL.toString());
@@ -95,7 +95,7 @@ public class OpenIDServer extends IdentityServerWrapper implements oAuthServer {
 				userinfoEP = new URI(jsonObject.getString("userinfo_endpoint"));
 				issuer = jsonObject.getString("issuer");
 			}
-			conf = new ConnectionConfigurationImpl();
+			conf = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
 			conf.setHttpMethod("GET");
 			conf.setAccept("application/json");
 			conf.setUri(certsURL.toString());
@@ -173,7 +173,7 @@ public class OpenIDServer extends IdentityServerWrapper implements oAuthServer {
 	@Override
 	public JSONObject verify(String code, ServletRequest req) {
 		JSONObject jsonObject = null;
-		ConnectionConfigurationImpl conf = new ConnectionConfigurationImpl();
+		ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> conf = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
 		conf.setHttpMethod("POST");
 		conf.setContentType("application/x-www-form-urlencoded");
 		try {
@@ -270,7 +270,7 @@ public class OpenIDServer extends IdentityServerWrapper implements oAuthServer {
 
 	public String basicToken(ServletRequest request, String authorization) {
 		try {
-			ConnectionConfigurationImpl conf = new ConnectionConfigurationImpl();
+			ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> conf = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
 			conf.setHttpMethod("POST");
 			conf.setContentType("application/x-www-form-urlencoded");
 			
@@ -334,7 +334,7 @@ public class OpenIDServer extends IdentityServerWrapper implements oAuthServer {
 	public UserInfo getUserInfo(String token, String authorization) {
 		OpenID user = null;
 		try {
-			ConnectionConfigurationImpl conf = new ConnectionConfigurationImpl();
+			ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> conf = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
 			conf.setHttpMethod("GET");
 			conf.setUri(userinfoEP.toURL().toExternalForm()+ "?client_id=" + client_id);
 			conf.addHeader("Authorization", "Bearer " + authorization);	
