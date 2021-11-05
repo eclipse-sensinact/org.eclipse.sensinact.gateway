@@ -648,7 +648,6 @@ public class TestThirdPartyAccessToken{
 		}
 	}
 	
-	@SuppressWarnings("rawtypes")
 	@Disabled
 	@Test
 	public void testThirdPartyIdentityProviderWithCredentials(@InjectService Core core) throws Throwable {

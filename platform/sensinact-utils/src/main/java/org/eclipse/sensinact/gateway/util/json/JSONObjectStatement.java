@@ -132,7 +132,7 @@ public class JSONObjectStatement extends JSONObject implements JSONStatement {
             return true;
 
         } else {
-            @SuppressWarnings("unchecked") Iterator<String> iterator = super.keys();
+            Iterator<String> iterator = super.keys();
             while (iterator.hasNext()) {
                 Object object = super.get(iterator.next());
                 if (JSONStatement.class.isAssignableFrom(object.getClass()) && ((JSONStatement) object).apply(variable, value)) {
@@ -152,7 +152,7 @@ public class JSONObjectStatement extends JSONObject implements JSONStatement {
         while (variableIterator.hasNext()) {
             variableIterator.next().reset();
         }
-        @SuppressWarnings("unchecked") Iterator<String> iterator = super.keys();
+        Iterator<String> iterator = super.keys();
         while (iterator.hasNext()) {
             Object object = super.get(iterator.next());
             if (JSONStatement.class.isAssignableFrom(object.getClass())) {

@@ -191,7 +191,6 @@ public class CryptographicUtils {
         return verified;
     }
 
-    @SuppressWarnings({"unchecked", "deprecation"})
     protected boolean checkCMSDataValidity(final CMSSignedData cmsData, final String securityProvider, String algo) throws Exception {
         boolean verified = false;
 //		if (cmsData.getSignedContent() == null)
