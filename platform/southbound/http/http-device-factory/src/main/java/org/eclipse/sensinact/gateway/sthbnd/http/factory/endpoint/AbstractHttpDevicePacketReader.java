@@ -40,12 +40,11 @@ public abstract class AbstractHttpDevicePacketReader implements PacketReader<Tas
 	
 	private static final String TIMESTAMP = "::timestamp::";
 	private static final String PROVIDER_IDENTIFIER = "::provider::";
-	private static final String PROVIDER_IDENTIFIER_REGEX = "::(provider)::\\[([0-9])\\]";
-	private static final String PROVIDER_IDENTIFIER_JOIN = ":";
 	private static final String CONCATENATION_FUNCTION_REGEX = "\\$(concat)\\(([^,]+(,[^,]+)+)\\)";
+	private static final String LITERAL_FUNCTION_REGEX = "^\\$(literal)\\((.+)\\)$";
 	
-	private static final Pattern PROVIDER_IDENTIFIER_PATTERN = Pattern.compile(PROVIDER_IDENTIFIER_REGEX);
 	private static final Pattern CONCATENATION_FUNCTION_PATTERN = Pattern.compile(CONCATENATION_FUNCTION_REGEX);
+	private static final Pattern LITERAL_FUNCTION_PATTERN = Pattern.compile(LITERAL_FUNCTION_REGEX);
 	
 	private final SimpleDateFormat timestampFormat;
 	private final String serviceProviderIdPattern;
@@ -116,37 +115,22 @@ public abstract class AbstractHttpDevicePacketReader implements PacketReader<Tas
 			}
 			return builder.toString();
  		}
+		matcher = LITERAL_FUNCTION_PATTERN.matcher(key);
+		if(matcher.matches()) {
+			return matcher.group(2);
+		}
     	return getFromDataMap(data, key);
 	}
 	
 	private String buildProviderId(Map<String, Object> data, Map<String, String> mapping) {
-	    String identifier = null;
-	    try {
-		    identifier = mapping.entrySet(
-			).stream().filter(e -> {return e.getValue().startsWith(PROVIDER_IDENTIFIER);}
-				).sorted((e1,e2)->{
-					Matcher m1 = PROVIDER_IDENTIFIER_PATTERN.matcher(e1.getValue());
-					Matcher m2 = PROVIDER_IDENTIFIER_PATTERN.matcher(e2.getValue());
-					if(m1.matches() && m2.matches()) {
-						String v1 = m1.group(2);
-						String v2 = m2.group(2);
-						return Integer.valueOf(v1).compareTo(Integer.valueOf(v2));
-					} else 
-						return 0;}
-				).<StringBuilder>collect( 
-					StringBuilder::new,
-					(s,e)->{
-						String id = String.valueOf(getFromDataMap(data, e.getKey()));
-						id = id.trim().replace(' ', '_');
-						if(s.length() > 0)
-							s.append(PROVIDER_IDENTIFIER_JOIN);
-						s.append(id);
-					},
-					(sb1,sb2)->{sb1.append(sb2.toString());}).toString();
-	    } catch(Exception e) {
-	    	LOG.error(e.getMessage(),e);
-	    }
-	    return identifier;
+		String providerIdentifier = null;
+		
+		String path = findKeyForValue(mapping, PROVIDER_IDENTIFIER);
+		if(path != null) {
+			providerIdentifier = String.valueOf(resolveValue(data, mapping, path));
+		}
+		
+		return providerIdentifier;
 	}
 	
 	private long resolveTimestamp(Map<String, Object> data, Map<String, String> mapping) {
@@ -225,7 +209,8 @@ public abstract class AbstractHttpDevicePacketReader implements PacketReader<Tas
 	
 	protected PayloadFragment createFragments(Map<String, Object> data, Map<String, String> mapping) {
 		String providerId = buildProviderId(data, mapping);
-		String serviceProviderId = String.format(serviceProviderIdPattern, providerId);
+		String serviceProviderId = serviceProviderIdPattern == null ? providerId :
+			String.format(serviceProviderIdPattern, providerId);
 		long timestamp = resolveTimestamp(data, mapping);
 		
 		List<PayloadServiceFragment> serviceFragments = mapping.entrySet().stream()

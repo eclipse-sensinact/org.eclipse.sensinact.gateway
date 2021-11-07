@@ -48,8 +48,7 @@
 	org.osgi.test.junit5.cm;version='[1.0.1,1.0.2)',\
 	org.apache.felix.http.jetty;version='[4.1.10,4.1.11)',\
 	org.apache.felix.http.servlet-api;version='[1.1.4,1.1.5)',\
-	slf4j.log4j12;version='[1.7.25,1.7.26)',\
-	json;version='[20190722.0.0,20190722.0.1)'
+	slf4j.log4j12;version='[1.7.25,1.7.26)'
 	
 -runproperties: \
 	org.eclipse.sensinact.gateway.security.jks.filename=${.}/../../../sensinact-security/cert/keystore.jks,\

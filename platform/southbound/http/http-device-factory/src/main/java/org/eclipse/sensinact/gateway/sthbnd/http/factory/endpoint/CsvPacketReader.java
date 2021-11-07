@@ -14,11 +14,14 @@ import static org.eclipse.sensinact.gateway.sthbnd.http.task.config.MappingDescr
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
@@ -40,15 +43,40 @@ public class CsvPacketReader extends AbstractHttpDevicePacketReader {
 	
 	private final Map<String, String> mappings = new HashMap<>();
 	private final List<String> headers = new ArrayList<>();
+	private final char delimiterChar;
 	private final boolean firstRowHeaders;
+	private final NumberFormat numberLocale;
+	private final Integer maxRows;
 
 	private BufferedReader reader;
+	private int currentRow;
 	private String nextLine;
 	
 	public CsvPacketReader(SimpleDateFormat timestampFormat, String serviceProviderIdPattern,
-			boolean firstRowHeaders) {
+			char delimiterChar, boolean firstRowHeaders, String csvNumberLocale, Integer maxRows) {
 		super(timestampFormat, serviceProviderIdPattern);
+		this.delimiterChar = delimiterChar;
 		this.firstRowHeaders = firstRowHeaders;
+		this.maxRows = maxRows;
+		if(csvNumberLocale == null || "".equals(csvNumberLocale)) {
+			numberLocale = null;
+		} else {
+			String[] segments = csvNumberLocale.split("_");
+			switch(segments.length) {
+				case 1:
+					numberLocale = NumberFormat.getNumberInstance(new Locale(segments[0]));
+					break;
+				case 2:
+					numberLocale = NumberFormat.getNumberInstance(new Locale(segments[0], segments[1]));
+					break;
+				case 3:
+					numberLocale = NumberFormat.getNumberInstance(new Locale(segments[0], segments[1], segments[2]));
+					break;
+				default:
+					LOG.error("The locale format {} is not valid", csvNumberLocale);
+					throw new IllegalArgumentException("The format " + csvNumberLocale + " is not valid");
+			}
+		}
 	}
 
 	@Override
@@ -65,23 +93,20 @@ public class CsvPacketReader extends AbstractHttpDevicePacketReader {
 		
 		try {
 			reader = packet.getReader();
-			if(firstRowHeaders) {
-				String first = reader.readLine();
-				if(first != null) {
-					List<Object> tokenise = tokenise(first, false);
-					for (int i = 0; i < tokenise.size(); i++) {
-						Object name = tokenise.get(i);
-						if(!"".equals(name)) {
-							headers.add((String) name);
-						} else {
-							headers.add(Integer.toString(i));
-						}
+			advanceLine();
+			if(firstRowHeaders && nextLine != null) {
+				List<Object> tokenise = tokenise(nextLine, false);
+				for (int i = 0; i < tokenise.size(); i++) {
+					Object name = tokenise.get(i);
+					if(!"".equals(name)) {
+						headers.add((String) name);
+					} else {
+						headers.add(Integer.toString(i));
 					}
 				}
+				currentRow--;
+				advanceLine();
 			}
-			do {
-				nextLine = reader.readLine();
-			} while("".equals(nextLine));
 		} catch (Exception e) {
 			if(reader != null) {
 				safeClose(reader);
@@ -96,12 +121,27 @@ public class CsvPacketReader extends AbstractHttpDevicePacketReader {
 		}
 	}
 
+	private void advanceLine() throws IOException {
+		if(maxRows != null && (++currentRow > maxRows)) {
+			nextLine = null;
+			safeClose(reader);
+		} else {
+			do {
+				nextLine = reader.readLine();
+			} while("".equals(nextLine));
+			
+			if(nextLine == null) {
+				safeClose(reader);
+			}
+		}
+	}
+
 	private List<Object> tokenise(String line, boolean inferTypes) throws InvalidPacketException {
 		List<Object> tokens = new ArrayList<>();
 		int tokenStartIdx = 0;
 		int tokenStopIdx;
 		while(tokenStartIdx < line.length()) {
-			if(line.charAt(tokenStartIdx) == ',') {
+			if(line.charAt(tokenStartIdx) == delimiterChar) {
 				tokens.add("");
 				tokenStartIdx += 1;
 				continue;
@@ -112,16 +152,16 @@ public class CsvPacketReader extends AbstractHttpDevicePacketReader {
 				stripQuote = true;
 				tokenStopIdx = line.indexOf('"', tokenStopIdx);
 				if(tokenStopIdx < 0) {
-					LOG.error("CSV Parsing failed. The line {} had an unbalanced \" starting at index {}", headers, tokenStartIdx);
+					LOG.error("CSV Parsing failed. The line {} had an unbalanced \" starting at index {}", line, tokenStartIdx);
 					throw new InvalidPacketException("CSV parsing failed due to an unbalanced \" in the input");
 				}
-				if(tokenStopIdx < line.length() -1 && line.charAt(tokenStopIdx + 1) != ',') {
-					LOG.error("CSV Parsing failed. The line {} had a quoted token starting at index {} and finishing at index {} that was not followed by a delimiter", headers, tokenStartIdx, tokenStopIdx);
+				if(tokenStopIdx < line.length() -1 && line.charAt(tokenStopIdx + 1) != delimiterChar) {
+					LOG.error("CSV Parsing failed. The line {} had a quoted token starting at index {} and finishing at index {} that was not followed by a delimiter", line, tokenStartIdx, tokenStopIdx);
 					throw new InvalidPacketException("CSV parsing failed due to a misquoted token in the input");
 				}
 				tokenStopIdx++;
 			} else {
-				tokenStopIdx = line.indexOf(',', tokenStopIdx);
+				tokenStopIdx = line.indexOf(delimiterChar, tokenStopIdx);
 			}
 			if(tokenStopIdx < 0) {
 				tokenStopIdx = line.length();
@@ -136,14 +176,23 @@ public class CsvPacketReader extends AbstractHttpDevicePacketReader {
 	}
 
 	private Object inferType(String token) {
-		if(INT_PATTERN.matcher(token).matches())
-			return Long.parseLong(token);
-		else if(NUMBER_PATTERN.matcher(token).matches())
-			return Double.parseDouble(token);
-		else if(BOOLEAN_PATTERN.matcher(token.toUpperCase()).matches())
+		if(BOOLEAN_PATTERN.matcher(token.toUpperCase()).matches())
 			return Boolean.parseBoolean(token);
-		else 
-			return token;
+		
+		if(numberLocale == null) {
+			if(INT_PATTERN.matcher(token).matches())
+				return Long.parseLong(token);
+			else if(NUMBER_PATTERN.matcher(token).matches())
+				return Double.parseDouble(token);
+		} else {
+			ParsePosition pp = new ParsePosition(0);
+			Number n = numberLocale.parse(token, pp);
+			if(pp.getErrorIndex() == -1 && pp.getIndex() == token.length()) {
+				// The entire token counted as a number
+				return n;
+			}
+		}
+		return token;
 	}
 
 	@Override
@@ -166,16 +215,11 @@ public class CsvPacketReader extends AbstractHttpDevicePacketReader {
 		
 		if(nextLine == null) {
 			try {
-				do {
-					nextLine = reader.readLine();
-				} while("".equals(nextLine));
+				advanceLine();
 			} catch (IOException e) {
 				safeClose(reader);
 				LOG.error("Failed to parse a CSV packet.", e);
 				throw new IllegalArgumentException("Unable to read the complete packet", e);
-			}
-			if(nextLine == null) {
-				safeClose(reader);
 			}
 		}
 		

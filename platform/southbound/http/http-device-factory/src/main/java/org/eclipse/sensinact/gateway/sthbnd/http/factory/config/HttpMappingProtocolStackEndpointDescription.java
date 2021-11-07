@@ -53,6 +53,15 @@ public class HttpMappingProtocolStackEndpointDescription {
 
 	@JsonProperty(value="csvTitles")
 	private boolean csvTitles;
+
+	@JsonProperty(value="csvDelimiter")
+	private Character csvDelimiter;
+	
+	@JsonProperty(value="csvNumberLocale")
+	private String csvNumberLocale;
+
+	@JsonProperty(value="csvMaxRows")
+	private Integer csvMaxRows;
 	
 	public HttpMappingProtocolStackEndpointDescription() {}
 	
@@ -233,5 +242,47 @@ public class HttpMappingProtocolStackEndpointDescription {
 	 */
 	public void setCsvTitles(boolean csvTitles) {
 		this.csvTitles = csvTitles;
+	}
+
+	/**
+	 * @return the csvDelimiter
+	 */
+	public char getCsvDelimiter() {
+		return csvDelimiter == null ? ',' : csvDelimiter.charValue();
+	}
+	
+	/**
+	 * @param csvTitles the csvTitles to set
+	 */
+	public void setCsvDelimiter(Character csvDelimiter) {
+		this.csvDelimiter = csvDelimiter;
+	}
+
+	/**
+	 * @return the csvLocale
+	 */
+	public String getCsvNumberLocale() {
+		return csvNumberLocale;
+	}
+	
+	/**
+	 * @param csvTitles the csvTitles to set
+	 */
+	public void setCsvNumberLocale(String csvNumberLocale) {
+		this.csvNumberLocale = csvNumberLocale;
+	}
+
+	/**
+	 * @return the csvLocale
+	 */
+	public Integer getCsvMaxRows() {
+		return csvMaxRows;
+	}
+	
+	/**
+	 * @param csvTitles the csvTitles to set
+	 */
+	public void setCsvMaxRows(Integer csvMaxRows) {
+		this.csvMaxRows = csvMaxRows;
 	}
 }

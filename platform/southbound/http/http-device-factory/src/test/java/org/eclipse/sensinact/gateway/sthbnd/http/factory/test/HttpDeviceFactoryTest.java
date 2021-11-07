@@ -271,6 +271,32 @@ public class HttpDeviceFactoryTest {
 		
 	}
 
+	@Test
+	@Order(7)
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
+	location = "?",
+	properties = {
+			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test7/config.json"),
+			@Property(key = ENDPOINT_TASKS_CONFIGURATION_PROP, value="src/test/resources/test7/tasks.json")
+	}
+			)
+	public void testCsvWithForeignLocale() throws Exception {
+		Thread.sleep(5000);
+		
+		Session session = core.getAnonymousSession();
+		
+		assertEquals(1, session.serviceProviders().size());
+		
+		testProvider(session, "test7_Test", "pollutant", "O3", "42.2", "1.23:4.56", 
+				LocalDateTime.of(2021, 11, 05, 18, 00).toEpochSecond(ZoneOffset.UTC));
+		
+		
+		for (ServiceProvider serviceProvider : session.serviceProviders()) {
+			serviceProvider.getName();
+		}
+		
+	}
+
 	private void testProvider(Session session, String providerName, String serviceName, String resourceName,
 			String value, String location, long timestamp) {
 		ServiceProvider provider = session.serviceProvider(providerName);

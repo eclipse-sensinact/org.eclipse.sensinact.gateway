@@ -1,0 +1,33 @@
+{
+  "standalone": {
+    "recurrences": [
+      {
+        "configuration": {
+          "acceptType": "text/csv",
+          "scheme": "http",
+          "host": "localhost",
+          "port": 8898,
+          "path": "/http-factory-test-resources/test7/response.csv",
+          "rootMapping": [
+            {
+              "mapping": {
+                "$literal(Test)": "::provider::",
+                "Date": "::timestamp::",
+                "SO2": "pollutant/SO2",
+                "NO2": "pollutant/NO2",
+                "CO": "pollutant/CO",
+                "O3": "pollutant/O3",
+                "C6H6": "pollutant/C6H6",
+                "C7H8": "pollutant/C7H8",
+                "C8H10": "pollutant/C8H10",
+                "PM10": "pollutant/PM10",
+                "PM2.5": "pollutant/PM2.5",
+                "$literal(1.23:4.56)": "admin/location"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

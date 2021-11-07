@@ -36,7 +36,10 @@ public class HttpMappingProtocolStackConnectorCustomizer extends DefaultConnecto
 	private final SimpleDateFormat timestampFormat;
 	private final String serviceProviderIdPattern;
 	private final String overrideResponseContentType;
+	private final char csvDelimiterChar;
 	private final boolean csvTitles;
+	private final String csvNumberLocale;
+	private final Integer csvMaxLines;
 	private final MappingJsonFactory factory;
 	
 	public HttpMappingProtocolStackConnectorCustomizer(Mediator mediator,
@@ -46,7 +49,10 @@ public class HttpMappingProtocolStackConnectorCustomizer extends DefaultConnecto
 		this.timestampFormat = config.getTimestampPattern() == null ? null : new SimpleDateFormat(config.getTimestampPattern());
 		this.serviceProviderIdPattern = config.getServiceProviderIdPattern();
 		this.overrideResponseContentType = config.getOverrideResponseContentType();
+		this.csvDelimiterChar = config.getCsvDelimiter();
+		this.csvNumberLocale = config.getCsvNumberLocale();
 		this.csvTitles = config.getCsvTitles();
+		this.csvMaxLines = config.getCsvMaxRows();
 		JsonFactory jsonFactory = new JsonFactoryBuilder().configure(AUTO_CLOSE_SOURCE, true)
 				.build();
 		factory = new MappingJsonFactory(jsonFactory, new ObjectMapper(jsonFactory));
@@ -79,7 +85,8 @@ public class HttpMappingProtocolStackConnectorCustomizer extends DefaultConnecto
 				reader = new JsonPacketReader(timestampFormat, serviceProviderIdPattern, factory);
 				break;
 			case "text/csv":
-				reader = new CsvPacketReader(timestampFormat, serviceProviderIdPattern, csvTitles);
+				reader = new CsvPacketReader(timestampFormat, serviceProviderIdPattern, csvDelimiterChar, csvTitles, 
+						csvNumberLocale, csvMaxLines);
 				break;
 			default:
 				if(contentType.endsWith("+json")) {
