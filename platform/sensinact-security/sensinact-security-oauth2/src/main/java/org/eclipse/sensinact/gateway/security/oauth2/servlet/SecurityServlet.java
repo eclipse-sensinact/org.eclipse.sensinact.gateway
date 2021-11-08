@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.eclipse.sensinact.gateway.security.oauth2.IdentityServer;
-import org.eclipse.sensinact.gateway.security.oauth2.oAuthServer;
+import org.eclipse.sensinact.gateway.security.oauth2.OAuthServer;
 import org.eclipse.sensinact.gateway.security.oauth2.UserInfo;
 
 import org.json.JSONObject;
@@ -31,9 +31,9 @@ import org.json.JSONObject;
 public class SecurityServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private IdentityServer idServer;
-	private oAuthServer authServer;
+	private OAuthServer authServer;
 
-	public SecurityServlet(IdentityServer idServer, oAuthServer authServer) {
+	public SecurityServlet(IdentityServer idServer, OAuthServer authServer) {
 		this.authServer = authServer;
 		this.idServer = idServer;
 	}
