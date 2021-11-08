@@ -145,26 +145,22 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
 	            	}
                 }
                 if(keys == null) {
-                    URL clientCertificate = null;
-                    String password = null;
-            		try {
-            			clientCertificate = new URL(config.getClientSSLCertificate());
-            			password = config.getClientSSLCertificatePassword();
-            		} catch(NullPointerException|IOException e) {
-            			LOG.log(Level.CONFIG, e.getMessage());
-            		}                    
-                	if(clientCertificate != null) {
+                	String clientCertURL = config.getClientSSLCertificate();
+                	
+                	if(clientCertURL != null) {
                 		try {
-	                		 InputStream is = clientCertificate.openStream();                		 
-	                		 KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-	                		 KeyStore ks = KeyStore.getInstance("PKCS12");
-	                		 ks.load(is, password!=null?password.toCharArray():new char[] {});              		 
-	                		 kmf.init(ks, password!=null?password.toCharArray():new char[] {});
-	                		 keys = kmf.getKeyManagers();
-	                		 KEY_MANAGERS.put(host,keys);
+                			URL clientCertificate = new URL(clientCertURL);
+                			String password = config.getClientSSLCertificatePassword();
+                			InputStream is = clientCertificate.openStream();                		 
+                			KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                			KeyStore ks = KeyStore.getInstance("PKCS12");
+                			ks.load(is, password!=null?password.toCharArray():new char[] {});              		 
+                			kmf.init(ks, password!=null?password.toCharArray():new char[] {});
+                			keys = kmf.getKeyManagers();
+                			KEY_MANAGERS.put(host,keys);
                 		} catch(NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException | UnrecoverableKeyException e) {
                 			LOG.log(Level.SEVERE,e.getMessage(), e);
-                        	keys = null;
+                			keys = null;
                 		}                		  
                 	}
                 }                
@@ -176,9 +172,9 @@ public interface ConnectionConfiguration<RESPONSE extends Response, REQUEST exte
                 	LOG.log(Level.SEVERE,e.getMessage(), e);
                     return null;
                 }                
-            } else 
+            } else {
             	connection = (HttpURLConnection) url.openConnection(proxy);
-            
+            }
             connection.setConnectTimeout(config.getConnectTimeout());
             connection.setReadTimeout(config.getReadTimeout());
             connection.setDoInput(true);
