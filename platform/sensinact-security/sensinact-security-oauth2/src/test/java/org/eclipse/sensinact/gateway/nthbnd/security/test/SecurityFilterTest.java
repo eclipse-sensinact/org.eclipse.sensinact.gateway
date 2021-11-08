@@ -165,7 +165,7 @@ public class SecurityFilterTest {
 		String credentials = new String("anonymousTester:anonymousTester");
 		String basic = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 		
-		ConnectionConfigurationImpl conf = new ConnectionConfigurationImpl();
+		ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> conf = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
 		conf.setHttpMethod("GET");
 		conf.setAccept("application/json");
 		conf.addHeader("Authorization", "Basic " + basic);
@@ -177,7 +177,7 @@ public class SecurityFilterTest {
 		credentials = new String("adminTester:adminTester");
 		basic = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 		
-		conf = new ConnectionConfigurationImpl();
+		conf = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
 		conf.setHttpMethod("GET");
 		conf.setAccept("application/json");
 		conf.addHeader("Authorization", "Basic " + basic);
@@ -189,7 +189,7 @@ public class SecurityFilterTest {
 		credentials = new String("unknown:unknown");
 		basic = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 		
-		conf = new ConnectionConfigurationImpl();
+		conf = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
 		conf.setHttpMethod("GET");
 		conf.setAccept("application/json");
 		conf.addHeader("Authorization", "Basic " + basic);
