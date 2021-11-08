@@ -666,7 +666,7 @@ public class Mediator {
 	}
 
 
-	public Map getProperties() {
+	public Map<?, ?> getProperties() {
 		return Collections.unmodifiableMap(properties);
 	}
 }

@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -150,21 +151,22 @@ public class SignatureFile {
         if (LOG.isDebugEnabled()) {
             LOG.debug("SignatureFile.show");
         }
-        Map.Entry entry;
+        Map.Entry<Object, Object> entry;
         String value;
         // mainAttributes
-        for (final Iterator iter = mainAttributes.entrySet().iterator(); iter.hasNext(); ) {
-            entry = (Map.Entry) iter.next();
+        for (final Iterator<Entry<Object, Object>> iter = mainAttributes.entrySet().iterator(); iter.hasNext(); ) {
+            entry = iter.next();
             if (LOG.isDebugEnabled()) {
                 LOG.debug(entry.getKey() + ", " + entry.getValue());
             }
         }
+        Map.Entry<String, Attributes> entry2;
         // resourcesEntries
-        for (final Iterator iter = resourcesEntries.entrySet().iterator(); iter.hasNext(); ) {
-            entry = (Map.Entry) iter.next();
-            value = (String) ((Map.Entry) ((Attributes) entry.getValue()).entrySet().iterator().next()).getValue();
+        for (final Iterator<Entry<String, Attributes>> iter = resourcesEntries.entrySet().iterator(); iter.hasNext(); ) {
+            entry2 = iter.next();
+            value = (String) (((Attributes) entry2.getValue()).entrySet().iterator().next()).getValue();
             if (LOG.isDebugEnabled()) {
-                LOG.debug(entry.getKey() + ", " + value);
+                LOG.debug(entry2.getKey() + ", " + value);
             }
         }
     }

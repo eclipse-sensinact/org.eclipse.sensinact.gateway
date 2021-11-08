@@ -41,8 +41,10 @@ import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationPlugin;
@@ -58,6 +60,7 @@ import org.osgi.test.junit5.service.ServiceExtension;
 @ExtendWith(BundleContextExtension.class)
 @ExtendWith(ConfigurationExtension.class)
 @ExtendWith(ServiceExtension.class)
+@TestMethodOrder(OrderAnnotation.class)
 public class HttpDeviceFactoryTest {
 	
 	@InjectService

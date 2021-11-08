@@ -26,9 +26,9 @@ public class TtnMetadata {
     private final String modulation;
     private final String dataRate;
     private final String codingRate;
-    private final List gateways;
+    private final List<?> gateways;
 
-    public TtnMetadata(String time, long frequency, String modulation, String dataRate, String codingRate, List gateways) {
+    public TtnMetadata(String time, long frequency, String modulation, String dataRate, String codingRate, List<?> gateways) {
         this.time = time;
         this.frequency = frequency;
         this.modulation = modulation;
@@ -73,7 +73,7 @@ public class TtnMetadata {
         return codingRate;
     }
 
-    public List getGateways() {
+    public List<?> getGateways() {
         return gateways;
     }
 

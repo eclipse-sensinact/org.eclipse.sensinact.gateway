@@ -41,7 +41,7 @@ public class Interpolator {
     	this.propertyBucket = new MediatorPropertyBucket(mediator);
     }
 
-    public Interpolator(Map map) {
+    public Interpolator(Map<?, ?> map) {
     	this.propertyBucket = new MapPropertyBucket(map);
     }    
 
@@ -145,9 +145,9 @@ public class Interpolator {
 
     private class MapPropertyBucket implements PropertyBucket {
     	
-    	private final Map map;
+    	private final Map<?, ?> map;
     	
-    	MapPropertyBucket(Map map) {
+    	MapPropertyBucket(Map<?, ?> map) {
     		this.map = map;
     	}
 

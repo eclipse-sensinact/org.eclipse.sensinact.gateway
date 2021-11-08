@@ -87,10 +87,10 @@ public class WebSocketRequestWrapper extends AbstractRequestWrapper {
 			try {
 	    		JSONObject request = new JSONObject(content);
 	            request.remove("uri");
-	            for(Iterator en = request.keys();en.hasNext();) {
+	            for(Iterator<String> en = request.keys();en.hasNext();) {
 	            	String key = (String) en.next();
 	            	String value = String.valueOf(request.get(key));
-	            	map.put(key, new ArrayList() {{ this.add (value);}});
+	            	map.put(key, Collections.singletonList(value));
 	            }
 	    	} catch(JSONException e) {
 	    		LOG.config(String.format("Unable to convert the request content into a JSON object:\n %s",content));

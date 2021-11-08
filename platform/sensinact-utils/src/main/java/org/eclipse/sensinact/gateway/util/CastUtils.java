@@ -920,7 +920,7 @@ public abstract class CastUtils {
      * @param jsonString the JSON formated string to convert into a {@link Map}
      * @return the {@link Map} built from the {@link JSONObject}
      */
-    public static Map toMap(String jsonString) {
+    public static Map<?, Object> toMap(String jsonString) {
         if (jsonString != null && jsonString.length() > 0) {
             try {
                 return toMap(new JSONObject(jsonString));
@@ -940,7 +940,7 @@ public abstract class CastUtils {
      * @param jsonObject the {@link JSONObject} object to convert into a {@link Map}
      * @return the {@link Map} built from the {@link JSONObject}
      */
-    public static Map toMap(JSONObject jsonObject) {
+    public static Map<?, Object> toMap(JSONObject jsonObject) {
         if (JSONObject.NULL.equals(jsonObject) || (jsonObject.length() == 0)) {
             return Collections.emptyMap();
         }
@@ -976,7 +976,7 @@ public abstract class CastUtils {
      * @param jsonArray the {@link JSONArray} object to convert into a {@link List}
      * @return the {@link List} built using the {@link JSONArray}
      */
-    public static List toList(JSONArray jsonArray) {
+    public static List<Object> toList(JSONArray jsonArray) {
         if (jsonArray == null || (jsonArray.length() == 0)) {
             return Collections.emptyList();
         }

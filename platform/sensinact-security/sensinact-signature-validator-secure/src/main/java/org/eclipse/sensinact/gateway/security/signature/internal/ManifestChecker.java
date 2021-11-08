@@ -132,9 +132,9 @@ public class ManifestChecker {
     protected static String getEntryHash(final Attributes atts) {
         String entryHash = "";
         if (atts != null) {
-            final Iterator iter = atts.entrySet().iterator();
+            final Iterator<Map.Entry<Object, Object>> iter = atts.entrySet().iterator();
             if (iter.hasNext()) {
-                entryHash = (String) ((Map.Entry) iter.next()).getValue();
+                entryHash = (String) ((Map.Entry<Object, Object>) iter.next()).getValue();
             }
         }
         return entryHash;

@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.jar.Manifest;
 
@@ -191,7 +192,7 @@ public class SignedBundle {
             builder.addCertificates(block.getCertificates());
             builder.addCRLs(block.getCRLs());
             builder.setProvider("SUN");
-            Iterator iter = signers.getSigners().iterator();
+            Iterator<SignerInformation> iter = signers.getSigners().iterator();
             if (iter.hasNext()) {
                 SignerInformation signerInfo = (SignerInformation) iter.next();
                 try {
@@ -285,13 +286,13 @@ public class SignedBundle {
         // getCertificates for the different signers
         final Map<String, Certificate> certificates = this.getCertificates();
         // for each certificate
-        final Iterator iter = certificates.entrySet().iterator();
+        final Iterator<Entry<String, Certificate>> iter = certificates.entrySet().iterator();
         Certificate currentCert = null;
         boolean currentCertificateValid = false;
         String signer = "";
-        Map.Entry entry;
+        Map.Entry<String, Certificate> entry;
         while (iter.hasNext()) {
-            entry = (Map.Entry) iter.next();
+            entry = iter.next();
             signer = (String) entry.getKey();
             currentCert = (Certificate) certificates.get(signer);
             currentCertificateValid = this.isCertValid(currentCert, passwd);

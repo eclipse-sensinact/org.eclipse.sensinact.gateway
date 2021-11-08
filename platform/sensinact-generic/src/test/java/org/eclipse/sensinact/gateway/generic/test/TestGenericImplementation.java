@@ -612,7 +612,7 @@ public class TestGenericImplementation {
         }
     }
 
-    private void initializeMoke(URL resource, Map defaults, boolean startAtInitializationTime) throws Exception {
+    private void initializeMoke(URL resource, Map<?, ?> defaults, boolean startAtInitializationTime) throws Exception {
 //        StringBuilder builder = new StringBuilder();
 //        builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
 //        builder.append("<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">");
