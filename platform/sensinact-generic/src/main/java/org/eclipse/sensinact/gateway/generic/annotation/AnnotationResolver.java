@@ -74,7 +74,6 @@ public class AnnotationResolver implements Iterable<Object> {
      * @return the list of {@link Class}es embedded in the
      * specified {@link Bundle}
      */
-    @SuppressWarnings("unchecked")
     private void buildInstances(Bundle bundle) {
         this.instances = new ArrayList<Object>();
 
