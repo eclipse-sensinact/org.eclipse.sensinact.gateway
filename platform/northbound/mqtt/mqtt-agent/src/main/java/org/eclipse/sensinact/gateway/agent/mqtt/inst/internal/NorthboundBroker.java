@@ -8,84 +8,136 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.agent.mqtt.inst.osgi;
+package org.eclipse.sensinact.gateway.agent.mqtt.inst.internal;
 
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.AbstractMqttHandler;
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.GenericMqttAgent;
-import org.eclipse.sensinact.gateway.agent.mqtt.inst.internal.SnaEventEventHandler;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.Core;
-import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedServiceFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.AttributeType;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.osgi.util.converter.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- */
-public class NorthboundBrokerManagedServiceFactory implements ManagedServiceFactory {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(NorthboundBrokerManagedServiceFactory.class);
-    public static final String MANAGER_NAME = "mqtt.agent.broker";
-	private Map<String, MidAgentCallback> pids;
+@Component(name = NorthboundBroker.MQTT_AGENT_BROKER, configurationPolicy = ConfigurationPolicy.REQUIRE)
+public class NorthboundBroker {
 
-	private Mediator mediator ;
-    
-    public NorthboundBrokerManagedServiceFactory(Mediator mediator) {
-    	this.mediator = mediator;
-    	this.pids = Collections.synchronizedMap(new HashMap<String,MidAgentCallback>());
-    }
+	@Reference
+	private Core core;
 
-    /* (non-Javadoc)
-     * @see org.osgi.service.cm.ManagedServiceFactory#getName()
-     */
-    @Override
-    public String getName() {
-        return MANAGER_NAME;
-    }
+	@ObjectClassDefinition(factoryPid = MQTT_AGENT_BROKER)
+	interface Config {
 
-    /* (non-Javadoc)
-     * @see org.osgi.service.cm.ManagedServiceFactory#updated(java.lang.String, java.util.Dictionary)
-     */
-    @Override
-    public void updated(String servicePID, Dictionary dictionary) throws ConfigurationException {
-        if(this.pids.containsKey(servicePID)) {
-        	deleted(servicePID);
-        }
-    	try {
-    		//retrieve connecting data
-    		String host = (String)dictionary.get("host");
+		@AttributeDefinition(defaultValue = "127.0.0.1")
+
+		default String host() {
+			return "127.0.0.1";
+		}
+
+		@AttributeDefinition(defaultValue = "1883")
+		default String port() {
+			return "1883";
+		}
+
+		@AttributeDefinition(defaultValue = "1")
+		default String qos() {
+			return "1";
+		}
+
+		@AttributeDefinition(defaultValue = "/")
+		default String prefix() {
+			return "/";
+		}
+
+		@AttributeDefinition(defaultValue = "tcp")
+
+		default String protocol() {
+			return "tcp";
+		}
+
+		@AttributeDefinition()
+		default String username() {
+			return null;
+		}
+
+		@AttributeDefinition(type = AttributeType.PASSWORD)
+		default String _password() {
+			return null;
+		}
+
+		default String pattern() {
+			return null;
+		}
+
+		default String complement() {
+			return null;
+		}
+
+		default String sender() {
+			return null;
+		}
+
+		default String types() {
+			return null;
+		}
+
+		default String conditions() {
+			return null;
+		}
+	}
+
+	@Activate
+	BundleContext bc;
+
+	private static final Logger LOG = LoggerFactory.getLogger(NorthboundBroker.class);
+	public static final String MQTT_AGENT_BROKER = "mqtt.agent.broker";
+	private SnaEventEventHandler handler;
+
+	public NorthboundBroker() {
+	}
+
+	@Activate
+	public void activate(Map<String, Object> configMap) {
+
+		Config config = Converters.standardConverter().convert(configMap).to(Config.class);
+		Mediator mediator = new Mediator(bc);
+
+		try {
+			String host = config.host();
     	    if(host == null) {
     	    	host = "127.0.0.1";
     	    }
-    	    String port = (String)dictionary.get("port");
+    	    String port = config.port();
     	    if(port == null) {
     	    	port = "1883";
     	    }
-    	    String qos = (String)dictionary.get("qos");
+    	    String qos = config.qos();
     	    if(qos == null) {
     	    	qos = "1";
     	    }
-    	    String prefix = (String)dictionary.get("prefix");
+    	    String prefix = config.prefix();
     	    if(prefix == null){
     	    	prefix = "/";
     	    }
-    	    String protocol = (String)dictionary.get("protocol");
+    	    String protocol = config.protocol();
     	    if(protocol == null) {
     	    	protocol = "tcp";
     	    }
-    	    String username = (String)dictionary.get("username");
-    	    String password = (String)dictionary.get("password");
+    	    String username = config.username();
+    	    String password = config._password();
     	    
     	    //retrieve filtering data 
     	    boolean defined = false;
@@ -95,24 +147,24 @@ public class NorthboundBrokerManagedServiceFactory implements ManagedServiceFact
     	    JSONArray constraints = null;
     	    SnaMessage.Type[] handled = null;
     	    
-    	    String pattern = (String)dictionary.get("pattern");
+    	    String pattern = config.pattern();
     	    if(pattern != null) {
     	    	isPattern = Boolean.parseBoolean(pattern);
     	    	defined = true;
     	    }
-    	    String sender = (String)dictionary.get("sender");
+    	    String sender = config.sender();
     	    if(sender == null) {
     	    	sender = "(/[^/]+)+";
     	    	isPattern = true;
     	    } else {
     	    	defined = true;
     	    }
-    	    String complement = (String)dictionary.get("complement");
+    	    String complement = config.complement();
     	    if(complement != null) {
     	    	isComplement = Boolean.parseBoolean(complement);
     	    	defined = true;
     	    }
-    	    String types = (String)dictionary.get("types");
+    	    String types = config.types();
     	    if(types == null) {
     	    	handled = SnaMessage.Type.values();
     	    } else {
@@ -128,7 +180,7 @@ public class NorthboundBrokerManagedServiceFactory implements ManagedServiceFact
     	    		LOG.error("Unable to build the array of handled message types",e);
     	    	}
     	    }
-    	    String conditions = (String)dictionary.get("conditions");
+    	    String conditions = config.conditions();
     	    if(conditions != null) {
     	    	try {
     	    		constraints = new JSONArray(conditions);
@@ -143,10 +195,10 @@ public class NorthboundBrokerManagedServiceFactory implements ManagedServiceFact
     	    	filter = new SnaFilter(mediator,sender,isPattern,isComplement,constraints); 
     	    	filter.addHandledType(handled);
     	    }
-    	    final SnaFilter flt = filter;
+
     	    final String broker = String.format("%s://%s:%s",protocol,host,port);    	    
     	    
-    	    final AbstractMqttHandler  handler = new SnaEventEventHandler(prefix);
+    	    handler = new SnaEventEventHandler(prefix);
     	    LOG.debug("Starting MQTT Agent point to server %s with prefix %s and qos %s",broker,prefix,qos);
             
     	    GenericMqttAgent agent;
@@ -156,36 +208,16 @@ public class NorthboundBrokerManagedServiceFactory implements ManagedServiceFact
                 agent = new GenericMqttAgent(broker, Integer.parseInt(qos), prefix);
             }
             handler.setAgent(agent);
-            String registration = mediator.callService(Core.class, new Executable<Core, String>() {
-                @Override
-                public String execute(Core core) throws Exception {
-                    return core.registerAgent(mediator, handler, flt);
-                }
-            });
-            LOG.info("Agent with id:[%s] registered ", registration);
-            this.pids.put(servicePID, handler);
-    	} catch (Exception e) {
-			LOG.error(e.getMessage(),e);
-		}
-    }
 
-	/* (non-Javadoc)
-	 * @see org.osgi.service.cm.ManagedServiceFactory#deleted(java.lang.String)
-	 */
-	@Override
-    public void deleted(String servicePID) {
-    	try {
-    		MidAgentCallback callback = this.pids.remove(servicePID);
-        	callback.stop();    		
-    	} catch (Exception e) {
-			LOG.error(e.getMessage(),e);
+			core.registerAgent(mediator, handler, filter);
+
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
 		}
-    }
-	
-	public void stop() {
-		for(MidAgentCallback callback :this.pids.values()) {
-			callback.stop();
-		}
-		this.pids.clear();
+	}
+
+	@Deactivate
+	public void deleted() {
+		handler.stop();
 	}
 }
