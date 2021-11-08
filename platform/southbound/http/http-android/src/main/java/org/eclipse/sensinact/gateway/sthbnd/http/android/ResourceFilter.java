@@ -10,13 +10,10 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.android;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.GZIPOutputStream;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;

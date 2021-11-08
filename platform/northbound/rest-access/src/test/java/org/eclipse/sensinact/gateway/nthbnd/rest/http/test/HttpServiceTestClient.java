@@ -18,7 +18,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.ConnectException;
 
 //import org.eclipse.sensinact.gateway.util.crypto.Base64;
 public class HttpServiceTestClient {

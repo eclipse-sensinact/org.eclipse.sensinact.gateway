@@ -35,9 +35,6 @@ import org.mockito.stubbing.Answer;
 
 public class TestLifeCycle {
     private ApplicationStatus status;
-    
-    private AppServiceMediator mediator=mock(AppServiceMediator.class);
-    
     private ApplicationService service=mock(ApplicationService.class);
 
     @BeforeEach

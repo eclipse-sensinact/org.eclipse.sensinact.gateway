@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackContext;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
-import org.osgi.service.component.annotations.Component;
 
 /**
  *

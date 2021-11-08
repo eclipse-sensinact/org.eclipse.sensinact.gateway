@@ -19,7 +19,6 @@ import org.eclipse.sensinact.gateway.app.basic.logic.BetweenFunction;
 import org.eclipse.sensinact.gateway.app.basic.logic.DoubleConditionFunction;
 import org.eclipse.sensinact.gateway.app.basic.logic.SimpleConditionFunction;
 import org.eclipse.sensinact.gateway.app.manager.component.data.ConstantData;
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;

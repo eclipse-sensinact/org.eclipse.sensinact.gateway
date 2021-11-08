@@ -7,7 +7,6 @@ import org.eclipse.sensinact.gateway.agent.storage.http.internal.HttpStorageConn
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.message.AgentRelay;
 import org.eclipse.sensinact.gateway.historic.storage.agent.generic.StorageAgent;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
