@@ -32,7 +32,7 @@ public class Activator extends AbstractActivator<Mediator> {
 
     private ButtonSetterItf buttonPanel;
     private JFrame jFrame;
-    private ServiceRegistration buttonRegistration;
+    private ServiceRegistration<ButtonSetterItf> buttonRegistration;
 
     public void doStart() throws Exception {
        

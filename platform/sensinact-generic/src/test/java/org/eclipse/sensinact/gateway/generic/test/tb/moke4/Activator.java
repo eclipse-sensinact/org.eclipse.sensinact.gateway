@@ -28,8 +28,8 @@ import org.osgi.framework.ServiceRegistration;
 public class Activator extends AbstractActivator<Mediator> {
     private ExtModelConfiguration manager;
     private MokeStack endpoint;
-    private ServiceRegistration processorRegistration;
-    private ServiceRegistration starterRegistration;
+    private ServiceRegistration<ProcessorService> processorRegistration;
+    private ServiceRegistration<?> starterRegistration;
 
     @Override
     public void doStart() throws Exception {

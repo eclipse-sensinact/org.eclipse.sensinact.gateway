@@ -134,7 +134,7 @@ public class TestSnaFunction{
         Mockito.when(context.getService(reference)).thenReturn(securedAccess);
         Mockito.when(context.getService(referenceAuth)).thenReturn(authorization);
 
-        ServiceRegistration registration = Mockito.mock(ServiceRegistration.class);
+        ServiceRegistration<?> registration = Mockito.mock(ServiceRegistration.class);
 
         Mockito.when(context.registerService(Mockito.eq(SensiNactResourceModel.class), Mockito.any(SensiNactResourceModel.class), Mockito.any(Dictionary.class))).thenReturn(registration);
         Mockito.when(context.registerService(Mockito.eq(SensiNactResourceModel.class.getCanonicalName()), Mockito.any(SensiNactResourceModel.class), Mockito.any(Dictionary.class))).thenReturn(registration);

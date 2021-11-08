@@ -75,7 +75,7 @@ public class ApplicationFactory {
         Map<ResourceDataProvider, Collection<ResourceSubscription>> resourceSubscriptions = new HashMap<ResourceDataProvider, Collection<ResourceSubscription>>();
         // Construct the different ComponentBuilder
         Map<String, ComponentBuilder> componentBuilderMap = new HashMap<String, ComponentBuilder>();
-        List<ServiceRegistration> dataProvidersRegistration = new ArrayList<ServiceRegistration>();
+        List<ServiceRegistration<DataProviderItf>> dataProvidersRegistration = new ArrayList<ServiceRegistration<DataProviderItf>>();
         for (AppComponent component : container.getComponents()) {
             final String componentUri = applicationUri + AppJsonConstant.URI_SEPARATOR + component.getIdentifier();
             final String resultUri = componentUri + AppJsonConstant.URI_SEPARATOR + ComponentConstant.RESULT_DATA;
@@ -121,7 +121,7 @@ public class ApplicationFactory {
             resultProperties.put("application", container.getApplicationName());
             resultProperties.put("type", ((Class<?>) argumentType).getCanonicalName());
             resultProperties.put("uri", resultUri);
-            dataProvidersRegistration.add(mediator.registerService(DataProviderItf.class.getCanonicalName(), resultData, resultProperties));
+            dataProvidersRegistration.add(mediator.registerService(DataProviderItf.class, resultData, resultProperties));
             Map<String, DataProvider> componentDataProviderMap = new HashMap<String, DataProvider>();
             componentDataProviderMap.put(ComponentConstant.RESULT_DATA, resultData);
             allDataProvidersMap.put(resultUri, resultData);
@@ -137,7 +137,7 @@ public class ApplicationFactory {
                     dataProviderProperties.put("application", container.getApplicationName());
                     //dataProviderProperties.put("type", resourceType.getCanonicalName());
                     dataProviderProperties.put("uri", resourceUri);
-                    dataProvidersRegistration.add(mediator.registerService(DataProviderItf.class.getCanonicalName(), dataProvider, dataProviderProperties));
+                    dataProvidersRegistration.add(mediator.registerService(DataProviderItf.class, dataProvider, dataProviderProperties));
                     if (!resourceSubscriptions.containsKey(dataProvider)) {
                         Set<ResourceSubscription> resourceSubscriptionsSet = new HashSet<ResourceSubscription>();
                         resourceSubscriptionsSet.add(new ResourceSubscription(resourceUri, event.getConditions()));

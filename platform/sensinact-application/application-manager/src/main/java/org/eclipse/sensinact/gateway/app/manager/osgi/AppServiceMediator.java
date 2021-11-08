@@ -86,8 +86,12 @@ public class AppServiceMediator extends Mediator {
     /**
      * @see BundleContext#registerService(Class, Object, Dictionary)
      */
-    public ServiceRegistration registerService(String className, Object service, Dictionary<String, String> properties) {
+    public ServiceRegistration<?> registerService(String className, Object service, Dictionary<String, String> properties) {
         return super.getContext().registerService(className, service, properties);
+    }
+
+    public <S> ServiceRegistration<S> registerService(Class<S> classS, S service, Dictionary<String, String> properties) {
+        return super.getContext().registerService(classS, service, properties);
     }
 
     /**

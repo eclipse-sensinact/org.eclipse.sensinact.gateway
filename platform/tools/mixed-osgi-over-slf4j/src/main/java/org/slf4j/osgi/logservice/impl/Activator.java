@@ -37,7 +37,7 @@ public class Activator implements BundleActivator {
         Dictionary<String,Object> props = new Hashtable<String, Object>();
         props.put("description", "An SLF4J LogService implementation.");
         ServiceFactory factory = new LogServiceFactory();
-        bundleContext.registerService(LogService.class.getName(), factory, props);
+        bundleContext.registerService(LogService.class, factory, props);
     }
 
     /**
