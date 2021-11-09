@@ -108,7 +108,7 @@ public class HttpDeviceFactoryTest {
 	
 	@Test
 	@Order(1)
-	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test1",
 	    location = "?",
 		properties = {
 				@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test1/config.json"),
@@ -135,7 +135,7 @@ public class HttpDeviceFactoryTest {
 
 	@Test
 	@Order(2)
-	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test2",
 		location = "?",
 		properties = {
 			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test2/config.json"),
@@ -167,7 +167,7 @@ public class HttpDeviceFactoryTest {
 	
 	@Test
 	@Order(3)
-	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test3",
 	    location = "?",
 		properties = {
 				@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test3/config.json"),
@@ -194,7 +194,7 @@ public class HttpDeviceFactoryTest {
 
 	@Test
 	@Order(4)
-	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test4",
 	location = "?",
 	properties = {
 			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test4/config.json"),
@@ -221,7 +221,7 @@ public class HttpDeviceFactoryTest {
 	
 	@Test
 	@Order(5)
-	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test5",
 	location = "?",
 	properties = {
 			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test5/config.json"),
@@ -248,7 +248,7 @@ public class HttpDeviceFactoryTest {
 
 	@Test
 	@Order(6)
-	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test6",
 	location = "?",
 	properties = {
 			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test6/config.json"),
@@ -276,7 +276,7 @@ public class HttpDeviceFactoryTest {
 
 	@Test
 	@Order(7)
-	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test7",
 	location = "?",
 	properties = {
 			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test7/config.json"),
