@@ -10,6 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.core;
 
+import static org.eclipse.sensinact.gateway.common.primitive.Modifiable.FIXED;
+import static org.eclipse.sensinact.gateway.common.primitive.Modifiable.MODIFIABLE;
+import static org.eclipse.sensinact.gateway.common.primitive.Modifiable.UPDATABLE;
+import static org.eclipse.sensinact.gateway.core.LocationResource.LOCATION;
+import static org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy.AUTO;
+import static org.eclipse.sensinact.gateway.core.ServiceProvider.BRIDGE;
+import static org.eclipse.sensinact.gateway.core.ServiceProvider.FRIENDLY_NAME;
+import static org.eclipse.sensinact.gateway.core.ServiceProvider.ICON;
+import static org.eclipse.sensinact.gateway.core.ServiceProvider.LIFECYCLE_STATUS;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -20,10 +30,7 @@ import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Localizable;
-import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.Stateful;
-import org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
@@ -393,105 +400,105 @@ public class ServiceProviderImpl extends
 		List<ResourceConfig> resourceConfigs = super.getModelInstance().configuration(
 				).getResourceConfigs(profile, ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 
-		int index = -1;
+//		int index = -1;
 
-		if (admin.getResource(ServiceProvider.LIFECYCLE_STATUS) == null) {
+		if (admin.getResource(LIFECYCLE_STATUS) == null) {
 			ResourceBuilder statusResourceBuilder = super.getModelInstance().getResourceBuilder(
 					super.getModelInstance().configuration().getResourceDescriptor(
 							).withResourceType(PropertyResource.class
-							).withResourceName(ServiceProvider.LIFECYCLE_STATUS
+							).withResourceName(LIFECYCLE_STATUS
 							).withDataType(ServiceProvider.LifecycleStatus.class
 							).withDataValue(ServiceProvider.LifecycleStatus.INACTIVE
 							).withHidden(true
-							).withUpdatePolicy(UpdatePolicy.AUTO
-							).withModifiable(Modifiable.UPDATABLE
+							).withUpdatePolicy(AUTO
+							).withModifiable(UPDATABLE
 							).withProfile(profile), buildPolicy);
-			statusResourceBuilder.configureName(ServiceProvider.LIFECYCLE_STATUS);
+			statusResourceBuilder.configureName(LIFECYCLE_STATUS);
 			admin.addResource(statusResourceBuilder);
 		}
-		if (admin.getResource(ServiceProvider.FRIENDLY_NAME) == null) {
+		if (admin.getResource(FRIENDLY_NAME) == null) {
 			ResourceBuilder friendlyNameResourceBuilder = null;
-			ResourceConfig rc = null;
-			if ((index = resourceConfigs.indexOf(new Name<ResourceConfig>(ServiceProvider.FRIENDLY_NAME, true))) > -1) {
-				rc = resourceConfigs.get(index);
+			ResourceConfig rc = resourceConfigs.stream()
+					.filter(r -> FRIENDLY_NAME.equals(r.getName()))
+					.findFirst().orElse(null);
+			if (rc != null) {
 				friendlyNameResourceBuilder = super.getModelInstance().getResourceBuilder(rc);
-				index = -1;
 			} else {
 				friendlyNameResourceBuilder = super.getModelInstance().getResourceBuilder(
 						super.getModelInstance().configuration().getResourceDescriptor(
 							).withResourceType(PropertyResource.class
-							).withResourceName(ServiceProvider.FRIENDLY_NAME
+							).withResourceName(FRIENDLY_NAME
 							).withDataType(String.class
 							).withHidden(false
-							).withUpdatePolicy(UpdatePolicy.AUTO
-							).withModifiable(Modifiable.MODIFIABLE
+							).withUpdatePolicy(AUTO
+							).withModifiable(MODIFIABLE
 							).withProfile(profile), buildPolicy);
 			}
-			friendlyNameResourceBuilder.configureName(ServiceProvider.FRIENDLY_NAME);
+			friendlyNameResourceBuilder.configureName(FRIENDLY_NAME);
 			admin.addResource(friendlyNameResourceBuilder);
 		}
-		if (admin.getResource(LocationResource.LOCATION) == null) {
+		if (admin.getResource(LOCATION) == null) {
 			String defaultLocation=ModelInstance.defaultLocation(super.modelInstance.mediator());			
 			ResourceBuilder locationResourceBuilder = null;
-			ResourceConfig rc = null;
-			if ((index = resourceConfigs.indexOf(new Name<ResourceConfig>(LocationResource.LOCATION, true))) > -1) {
-				rc = resourceConfigs.get(index);
+			ResourceConfig rc = resourceConfigs.stream()
+					.filter(r -> LOCATION.equals(r.getName()))
+					.findFirst().orElse(null);
+			if (rc != null) {
 				locationResourceBuilder = super.getModelInstance().getResourceBuilder(rc);
-				index = -1;
 			}  else {
 				locationResourceBuilder = super.getModelInstance().getResourceBuilder(
 					super.getModelInstance().configuration().getResourceDescriptor(
 							).withResourceType(LocationResource.class
-							).withResourceName(LocationResource.LOCATION
+							).withResourceName(LOCATION
 							).withDataType(String.class
 							).withDataValue(defaultLocation
 							).withHidden(false
-							).withModifiable(Modifiable.MODIFIABLE
+							).withModifiable(MODIFIABLE
 							).withProfile(profile), 
 					buildPolicy);
 			}
 			locationResourceBuilder.configureName(LocationResource.LOCATION);
 			admin.addResource(locationResourceBuilder);
 		}
-		if (admin.getResource(ServiceProvider.BRIDGE) == null) {
+		if (admin.getResource(BRIDGE) == null) {
 			ResourceBuilder bridgeResourceBuilder = null;
 			try {
 				bridgeResourceBuilder = super.getModelInstance().getResourceBuilder(
 						super.getModelInstance().configuration().getResourceDescriptor(
 						    ).withResourceType(PropertyResource.class
-							).withResourceName(ServiceProvider.BRIDGE
+							).withResourceName(BRIDGE
 							).withDataType(String.class
 							).withDataValue(super.modelInstance.mediator().getContext().getBundle().getSymbolicName()
 							).withHidden(false
-							).withUpdatePolicy(UpdatePolicy.AUTO
-							).withModifiable(Modifiable.FIXED
+							).withUpdatePolicy(AUTO
+							).withModifiable(FIXED
 							).withProfile(profile),buildPolicy);
-				bridgeResourceBuilder.configureName(ServiceProvider.BRIDGE);
+				bridgeResourceBuilder.configureName(BRIDGE);
 				admin.addResource(bridgeResourceBuilder);
 			} catch (Exception e) {
 				LOG.debug("Unable to create the 'bridge' resource");
 				bridgeResourceBuilder = null;
 			}
 		}
-		if (admin.getResource(ServiceProvider.ICON) == null) {
+		if (admin.getResource(ICON) == null) {
 			ResourceBuilder iconResourceBuilder = null;
-			ResourceConfig rc = null;
-			if ((index = resourceConfigs.indexOf(new Name<ResourceConfig>(ServiceProvider.ICON, true))) > -1) {
-				rc = resourceConfigs.get(index);
+			ResourceConfig rc = resourceConfigs.stream()
+					.filter(r -> ICON.equals(r.getName()))
+					.findFirst().orElse(null);
+			if (rc != null) {
 				iconResourceBuilder = super.getModelInstance().getResourceBuilder(rc);
-				index = -1;
 			} else {
 				iconResourceBuilder = super.getModelInstance().getResourceBuilder(
 						super.getModelInstance().configuration().getResourceDescriptor(
 							).withResourceType(PropertyResource.class
-							).withResourceName(ServiceProvider.ICON
+							).withResourceName(ICON
 							).withDataType(String.class
 						    ).withHidden(false
-						    ).withUpdatePolicy(UpdatePolicy.AUTO
-						    ).withModifiable(Modifiable.MODIFIABLE
+						    ).withUpdatePolicy(AUTO
+						    ).withModifiable(MODIFIABLE
 						    ).withProfile(profile), buildPolicy);
 			}
-			iconResourceBuilder.configureName(ServiceProvider.ICON);
+			iconResourceBuilder.configureName(ICON);
 			admin.addResource(iconResourceBuilder);
 		}
 		return admin;

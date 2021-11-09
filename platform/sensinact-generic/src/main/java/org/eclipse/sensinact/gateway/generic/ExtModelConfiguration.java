@@ -522,22 +522,22 @@ public class ExtModelConfiguration<P extends Packet> extends ModelConfiguration 
      *                 Connector} to instantiate will be connected to
      * @return a new {@link Connector} instance
      */
-    protected <N extends Connector<P>> N newConnector(ProtocolStackEndpoint<P> endpoint) 
+    protected Connector<P> newConnector(ProtocolStackEndpoint<P> endpoint) 
     	throws InvalidProtocolStackException {
-    	N connector = null;
+    	Connector<P> connector = null;
     	if(this.connectorType != null) {
             if (this.customizer != null) {
-                connector = (N) ReflectUtils.<N>getTheBestInstance(
-                (Class<N>)this.connectorType, new Object[] {mediator, endpoint, this, this.customizer});
+                connector = ReflectUtils.getTheBestInstance(this.connectorType, 
+                		new Object[] {mediator, endpoint, this, this.customizer});
             } else {
-                connector = (N) ReflectUtils.<N>getTheBestInstance(
-                (Class<N>)this.connectorType, new Object[] {mediator, endpoint, this});
+                connector = ReflectUtils.getTheBestInstance(this.connectorType, 
+                		new Object[] {mediator, endpoint, this});
             }  		
     	} else {
             if (this.customizer != null) {
-                connector = (N) new Connector<P>(mediator, endpoint, this, (ConnectorCustomizer<P>) this.customizer);
+                connector = new Connector<P>(mediator, endpoint, this, (ConnectorCustomizer<P>) this.customizer);
             } else {
-            	connector = (N) new Connector<P>(mediator, endpoint, this);
+            	connector = new Connector<P>(mediator, endpoint, this);
             }  		
     	}
         return connector;
