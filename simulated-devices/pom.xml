@@ -43,13 +43,45 @@
 								<goal>execute</goal>
 							</goals>
 							<configuration>
-								<sqlCommand>UPDATE BUNDLE SET BSHA = '${sha}' WHERE BNAME = '${project.groupId}.${project.artifactId}'</sqlCommand>
+								<sqlCommand>UPDATE BUNDLE SET BSHA = '${sha}' WHERE BNAME =
+									'${project.groupId}.${project.artifactId}'</sqlCommand>
 							</configuration>
 						</execution>
 					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>${maven-jar-plugin.version}</version>
+				<configuration>
+					<archive>
+						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+					<skipIfEmpty>true</skipIfEmpty>
+				</configuration>
+				<executions>
+					<execution>
+						<id>test-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+						<configuration>
+							<archive>
+								<manifestFile>${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+							</archive>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
 
 	<modules>
