@@ -47,8 +47,8 @@ public class TestAppChecker {
     @BeforeEach
     public void init() throws Exception {
         MockitoAnnotations.initMocks(this);
-        ServiceReference serviceReference = Mockito.mock(ServiceReference.class);
-        ServiceReference[] serviceReferences = new ServiceReference[]{serviceReference};
+        ServiceReference<?> serviceReference = Mockito.mock(ServiceReference.class);
+        ServiceReference<?>[] serviceReferences = new ServiceReference<?>[]{serviceReference};
         BundleContext context = Mockito.mock(BundleContext.class);
         Bundle bundle = Mockito.mock(Bundle.class);
         TestInstaller installer = new TestInstaller(mediator, null);

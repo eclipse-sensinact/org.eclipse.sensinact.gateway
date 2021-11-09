@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  * {@link SSDPMulticastListenerThread} before notifying the registered listeners
  */
 public class SSDPDiscoveryNotifier implements SSDPDiscoveryNotifierItf {
-    private ServiceReference registration;
+    private ServiceReference<SSDPDiscoveryNotifierItf> registration;
     private Map<SSDPDiscoveryListenerItf, String> listeners;
     private Map<String, SSDPDescriptionPacket> discoveredDevices;
 

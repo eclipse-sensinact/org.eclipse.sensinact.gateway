@@ -88,11 +88,11 @@ public class Component implements DataListenerItf, FunctionUpdateListener {
             DataProviderSubscription subscription = map.getValue();
             try {
                 String filter = "(&(objectClass=" + DataProviderItf.class.getName() + ")" + "(uri=" + subscription.getDataProviderUri() + "))";
-                ServiceReference[] serviceReferences = mediator.getServiceReferences(filter);
+                ServiceReference<?>[] serviceReferences = mediator.getServiceReferences(filter);
                 if (serviceReferences.length == 0) {
                     throw new LifeCycleException("Unable to find " + subscription.getDataProviderUri() + ". " + "No service registered.");
                 }
-                for (ServiceReference serviceReference : serviceReferences) {
+                for (ServiceReference<?> serviceReference : serviceReferences) {
                     DataProviderItf dataProviderItf = ((DataProviderItf) mediator.getService(serviceReference));
                     dataProviderItf.addListener(this, subscription.getConstraints());
                 }
@@ -120,11 +120,11 @@ public class Component implements DataListenerItf, FunctionUpdateListener {
             DataProviderSubscription subscription = map.getValue();
             try {
                 String filter = "(&(objectClass=" + DataProviderItf.class.getName() + ")" + "(uri=" + subscription.getDataProviderUri() + "))";
-                ServiceReference[] serviceReferences = mediator.getContext().getServiceReferences((String) null, filter);
+                ServiceReference<?>[] serviceReferences = mediator.getContext().getServiceReferences((String) null, filter);
                 if (serviceReferences.length == 0) {
                     throw new LifeCycleException("Unable to find " + subscription.getDataProviderUri() + ". " + "No service registered.");
                 }
-                for (ServiceReference serviceReference : serviceReferences) {
+                for (ServiceReference<?> serviceReference : serviceReferences) {
                     DataProviderItf dataProviderItf = ((DataProviderItf) mediator.getService(serviceReference));
                     dataProviderItf.removeListener(this);
                 }
@@ -197,14 +197,14 @@ public class Component implements DataListenerItf, FunctionUpdateListener {
                 data = new ResourceData(session, (String) parameter.getValue());
             } else if (parameter.getType().equals(AppJsonConstant.TYPE_VARIABLE)) {
                 String filter = "(&(objectClass=" + DataProviderItf.class.getName() + ")" + "(uri=" + parameter.getValue() + "))";
-                ServiceReference[] serviceReferences = mediator.getServiceReferences(filter);
+                ServiceReference<?>[] serviceReferences = mediator.getServiceReferences(filter);
                 data = ((DataProviderItf) mediator.getService(serviceReferences[0])).getData();
             } else if (parameter.getType().equals(AppJsonConstant.TYPE_EVENT)) {
                 if (event.getData().getSourceUri().matches((String) parameter.getValue())) {
                     data = event.getData();
                 } else {
                 	String filter = "(&(objectClass=" + DataProviderItf.class.getName() + ")" + "(uri=" + parameter.getValue() + "))";
-	                ServiceReference[] serviceReferences = mediator.getServiceReferences(filter);
+	                ServiceReference<?>[] serviceReferences = mediator.getServiceReferences(filter);
 	                data = ((DataProviderItf) mediator.getService(serviceReferences[0])).getData();
                 }
             } else if (CastUtils.jsonTypeToJavaType(parameter.getType()) != null) {

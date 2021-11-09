@@ -74,9 +74,9 @@ public class TriggerTest {
 		Mockito.when(context.getServiceReference(LOG_FILTER)).thenReturn(null);
 
 		Mockito.when(context.getServiceReferences(Mockito.anyString(), Mockito.anyString()))
-				.then(new Answer<ServiceReference[]>() {
+				.then(new Answer<ServiceReference<?>[]>() {
 					@Override
-					public ServiceReference[] answer(InvocationOnMock invocation) throws Throwable {
+					public ServiceReference<?>[] answer(InvocationOnMock invocation) throws Throwable {
 						Object[] arguments = invocation.getArguments();
 						if (arguments == null || arguments.length != 2) {
 							return null;

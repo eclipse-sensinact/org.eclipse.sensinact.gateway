@@ -107,10 +107,10 @@ public class TtnUplinkPayload extends TtnPacketPayload {
         List<TtnSubPacket> subPackets = new ArrayList<>();
         if (payloadRaw != null) {
             try {
-                ServiceReference[] serviceReferences = this.mediator.getContext().getServiceReferences((String) null, PAYLOAD_DECODER);
+                ServiceReference<?>[] serviceReferences = this.mediator.getContext().getServiceReferences((String) null, PAYLOAD_DECODER);
 
                 if (serviceReferences != null) {
-                    for (ServiceReference serviceReference : serviceReferences) {
+                    for (ServiceReference<?> serviceReference : serviceReferences) {
                         Map<String, Object> decodedPayload = ((PayloadDecoder) mediator.getContext().getService(serviceReference)).decodeRawPayload(payloadRaw);
 
                         if(!decodedPayload.isEmpty()) {

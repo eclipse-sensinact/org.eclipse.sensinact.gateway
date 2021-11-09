@@ -286,7 +286,7 @@ public class RestLikeMapper {
         }
         //apply filters and process the intersection
         //of resulting ServiceReference arrays two at a time
-        List<ServiceReference> services = Collections.emptyList();
+        List<ServiceReference<?>> services = Collections.emptyList();
 
         while (!fstack.isEmpty()) {
             //retrieve the first registered filter...
@@ -294,13 +294,13 @@ public class RestLikeMapper {
             try {
                 //retrieve all registered ServiceReferences compliant with the
                 //filter
-                ServiceReference[] current = context.getServiceReferences((String) null, filter);
+                ServiceReference<?>[] current = context.getServiceReferences((String) null, filter);
 
                 if (current != null) {
-                    List<ServiceReference> srs = new LinkedList<ServiceReference>(Arrays.asList(current));
+                    List<ServiceReference<?>> srs = new LinkedList<ServiceReference<?>>(Arrays.asList(current));
 
-                    List<ServiceReference> intersection = null;
-                    List<ServiceReference> references = null;
+                    List<ServiceReference<?>> intersection = null;
+                    List<ServiceReference<?>> references = null;
 
                     if (services.size() == 0) {
                         services = srs;
@@ -309,13 +309,13 @@ public class RestLikeMapper {
                     } else {
                         //process the intersection of the retrieved ServiceReferences
                         //and the previous ones
-                        ServiceReference[] copy = new ServiceReference[current.length];
+                        ServiceReference<?>[] copy = new ServiceReference[current.length];
                         System.arraycopy(current, 0, copy, 0, current.length);
 
-                        references = new LinkedList<ServiceReference>(Arrays.asList(copy));
+                        references = new LinkedList<ServiceReference<?>>(Arrays.asList(copy));
                         references.removeAll(services);
 
-                        intersection = new LinkedList<ServiceReference>(Arrays.asList(current));
+                        intersection = new LinkedList<ServiceReference<?>>(Arrays.asList(current));
                         intersection.removeAll(references);
 
                         services = intersection.size() == 0 ? srs : intersection;

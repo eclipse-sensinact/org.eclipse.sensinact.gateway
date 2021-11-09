@@ -76,8 +76,8 @@ public class TestComponentFactory {
     public void init() throws Exception {
         MockitoAnnotations.initMocks(this);
         GetResponse getResponse = Mockito.mock(GetResponse.class);
-        ServiceReference serviceReference = Mockito.mock(ServiceReference.class);
-        ServiceReference[] serviceReferences = new ServiceReference[]{serviceReference};
+        ServiceReference<?> serviceReference = Mockito.mock(ServiceReference.class);
+        ServiceReference<?>[] serviceReferences = new ServiceReference<?>[]{serviceReference};
 
         Session session = Mockito.mock(Session.class);
         PluginInstaller installer = Mockito.mock(PluginInstaller.class);

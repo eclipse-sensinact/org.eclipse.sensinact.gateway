@@ -147,7 +147,7 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
             device.removeService(applicationService.getName());
         }
         // Create the sNa application service
-        ServiceReference[] references = mediator.getContext().getServiceReferences(PluginInstaller.class.getCanonicalName(), "(objectClass=*)");
+        ServiceReference<?>[] references = mediator.getContext().getServiceReferences(PluginInstaller.class.getCanonicalName(), "(objectClass=*)");
         if (references == null) {
             mediator.getContext().addServiceListener(new ServiceListener() {
                 @Override

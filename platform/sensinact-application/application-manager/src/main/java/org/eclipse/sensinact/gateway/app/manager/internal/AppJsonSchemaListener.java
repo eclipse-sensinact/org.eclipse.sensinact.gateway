@@ -77,10 +77,10 @@ class AppJsonSchemaListener implements ServiceListener {
     }
 
     private JSONArray getJsonSchema() {
-        ServiceReference[] serviceReferences = this.mediator.getServiceReferences(APP_INSTALL_HOOK_FILTER);
+        ServiceReference<?>[] serviceReferences = this.mediator.getServiceReferences(APP_INSTALL_HOOK_FILTER);
         JSONArray pluginsKeywords = new JSONArray();
         if (serviceReferences != null) {
-            for (ServiceReference serviceReference : serviceReferences) {
+            for (ServiceReference<?> serviceReference : serviceReferences) {
                 Enumeration enumFile = serviceReference.getBundle().findEntries("/", "*.json", false);
                 if (enumFile != null) {
                     while (enumFile.hasMoreElements()) {

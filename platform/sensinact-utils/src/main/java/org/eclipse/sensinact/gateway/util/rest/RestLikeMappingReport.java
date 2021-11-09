@@ -30,7 +30,7 @@ public class RestLikeMappingReport {
     /**
      * map of ServiceReferences array according to uri element
      */
-    private Map<String, List<ServiceReference>> referencesMap;
+    private Map<String, List<ServiceReference<?>>> referencesMap;
     /**
      * unparsed part initial index
      */
@@ -62,7 +62,7 @@ public class RestLikeMappingReport {
         this.uriElements = uriElements;
         this.unparsed = this.uriElements.length;
         this.filtersMap = new HashMap<String, String>();
-        this.referencesMap = new HashMap<String, List<ServiceReference>>();
+        this.referencesMap = new HashMap<String, List<ServiceReference<?>>>();
         this.trace = new LinkedList<StackTraceElement>();
     }
 
@@ -73,7 +73,7 @@ public class RestLikeMappingReport {
      * @param filter     the string filter
      * @param references the registered {@link ServiceReference}s list
      */
-    void reportReferences(String filter, List<ServiceReference> references) {
+    void reportReferences(String filter, List<ServiceReference<?>> references) {
         this.referencesMap.put(filter, references);
     }
 
@@ -188,12 +188,12 @@ public class RestLikeMappingReport {
      * @return the set of {@link ServiceReference}s as an array
      * retrieved for the key passed as parameter
      */
-    public ServiceReference[] get(String key) {
+    public ServiceReference<?>[] get(String key) {
         String filter = this.filtersMap.get(key);
-        ServiceReference[] references = new ServiceReference[0];
+        ServiceReference<?>[] references = new ServiceReference[0];
 
         if (filter != null) {
-            List<ServiceReference> referencesList = this.referencesMap.get(this.filtersMap.get(key));
+            List<ServiceReference<?>> referencesList = this.referencesMap.get(this.filtersMap.get(key));
 
             references = referencesList == null ? references : referencesList.toArray(references);
         }
