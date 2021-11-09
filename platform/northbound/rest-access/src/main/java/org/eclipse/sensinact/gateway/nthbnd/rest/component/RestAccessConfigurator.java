@@ -95,7 +95,7 @@ public class RestAccessConfigurator {
     	        
     	this.corsHeader = Boolean.valueOf((String) this.mediator.getProperty(RestAccessConstants.CORS_HEADER));
         if (this.corsHeader) {
-            this.corsFilter = new CorsFilter(mediator);                    
+            this.corsFilter = new CorsFilter();                    
             mediator.register(RestAccessConfigurator.this.corsFilter, Filter.class, new Hashtable() {{
             	this.put(Constants.SERVICE_RANKING, 1);
                 this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");

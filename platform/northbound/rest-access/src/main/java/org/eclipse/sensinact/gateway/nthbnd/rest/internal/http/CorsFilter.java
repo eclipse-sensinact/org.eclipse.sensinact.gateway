@@ -10,10 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
-import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
 
 //import javax.servlet.AsyncContext;
 import javax.servlet.Filter;
@@ -23,11 +20,13 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-//import javax.servlet.WriteListener;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * CORS Filter
@@ -36,17 +35,6 @@ import java.io.IOException;
 public class CorsFilter implements Filter {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(CorsFilter.class);
-    private NorthboundMediator mediator;
-
-    /**
-     * Constructor
-     *
-     * @param mediator the {@link NorthboundMediator} allowing to
-     *                 interact with the OSGi host environment
-     */
-    public CorsFilter(NorthboundMediator mediator) {
-        this.mediator = mediator;
-    }
 
     /**
      * @inheritDoc
