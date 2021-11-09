@@ -26,6 +26,9 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
+import org.osgi.test.junit5.cm.ConfigurationExtension;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 
@@ -35,8 +38,8 @@ import org.osgi.test.junit5.service.ServiceExtension;
  */
 @ExtendWith(BundleContextExtension.class)
 @ExtendWith(ServiceExtension.class)
-@Disabled
-public class TestSecurityPattern {
+@ExtendWith(ConfigurationExtension.class)
+public class TestSecurityPattern extends AbstractConfiguredSecurityTest {
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
 	// ********************************************************************//
@@ -49,16 +52,24 @@ public class TestSecurityPattern {
 	// STATIC DECLARATIONS //
 	// ********************************************************************//
 
-	private static final String SLIDERS_DEFAULT = "[\"slider01\",\"slider02\",\"slider11\"]";
-	private static final String SLIDERS_PROP = "org.eclipse.sensinact.simulated.sliders";
-	private static final String GUI_ENABLED = "org.eclipse.sensinact.simulated.gui.enabled";
+//	private static final String SLIDERS_DEFAULT = "[\"slider01\",\"slider02\",\"slider11\"]";
+//	private static final String SLIDERS_PROP = "org.eclipse.sensinact.simulated.sliders";
+//	private static final String GUI_ENABLED = "org.eclipse.sensinact.simulated.gui.enabled";
 
 	// ********************************************************************//
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
 
+	@Disabled
 	@Test
-	public void testSecurityAccessWithPattern(@InjectService Core core) throws Throwable {
+	@WithConfiguration(
+			pid = "SQLiteDataStoreService",
+			location = "?",
+			properties = {
+					@Property(key = "database", value = "${sqlitedb}")
+			}
+		)
+	public void testSecurityAccessWithPattern(@InjectService(timeout = 1000) Core core) throws Throwable {
 		// slider[0-9]{2} - authenticated access level
 		// slider[0-9]{2}/admin - admin authenticated access level
 		// cea user is admin on slider[0-9]{2}
@@ -77,7 +88,7 @@ public class TestSecurityPattern {
 		Session session = core.getAnonymousSession();
 		assertNotNull(session);
 
-		Set providers = session.serviceProviders();
+		Set<ServiceProvider> providers = session.serviceProviders();
 		System.out.println("====================================>>>>>");
 		System.out.println(providers);
 		System.out.println("====================================>>>>>");
@@ -195,7 +206,7 @@ public class TestSecurityPattern {
 
 		providers = session.serviceProviders();
 
-		assertEquals(2, providers.size());
+		assertEquals(1, providers.size());
 		iterator = providers.iterator();
 
 		while (iterator.hasNext()) {

@@ -52,7 +52,9 @@
 	bnd.identity;id='org.eclipse.sensinact.gateway.simulated.devices.slider',\
 	bnd.identity;id='org.eclipse.sensinact.gateway.simulated.devices.fan',\
 	bnd.identity;id='org.eclipse.sensinact.gateway.simulated.devices.button',\
-	bnd.identity;id='org.eclipse.sensinact.gateway.sensinact-sqlite-connector'
+	bnd.identity;id='org.eclipse.sensinact.gateway.sensinact-sqlite-connector',\
+	bnd.identity;id='org.eclipse.sensinact.gateway.nthbnd.http-tools',\
+	bnd.identity;id='org.eclipse.sensinact.gateway.sensinact-mail-connector'
 	
 -runproperties: \
 	org.eclipse.sensinact.gateway.security.jks.filename=${.}/../../sensinact-security/cert/keystore.jks,\
@@ -83,7 +85,6 @@
 	org.objenesis;version='[3.2.0,3.2.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
 	org.osgi.service.component;version='[1.4.0,1.4.1)',\
-	org.osgi.service.log;version='[1.4.0,1.4.1)',\
 	org.osgi.test.common;version='[1.0.1,1.0.2)',\
 	org.osgi.test.junit5;version='[1.0.1,1.0.2)',\
 	org.osgi.util.function;version='[1.1.0,1.1.1)',\
@@ -106,6 +107,14 @@
 	org.apache.felix.framework.security;version='[2.8.1,2.8.2)',\
 	org.apache.felix.configadmin;version='[1.9.16,1.9.17)',\
 	org.apache.felix.log;version='[1.2.2,1.2.3)',\
-	ch.qos.logback.classic;version='[1.2.3,1.2.4)',\
 	org.osgi.service.cm;version='[1.6.0,1.6.1)',\
-	json;version='[20190722.0.0,20190722.0.1)'
+	slf4j.log4j12;version='[1.7.25,1.7.26)',\
+	org.osgi.test.junit5.cm;version='[1.0.1,1.0.2)',\
+	org.apache.felix.http.jetty;version='[4.1.10,4.1.11)',\
+	org.apache.felix.http.servlet-api;version='[1.1.4,1.1.5)',\
+	org.eclipse.jetty.websocket.servlet;version='[9.4.42,9.4.43)',\
+	org.eclipse.sensinact.gateway.nthbnd.http-tools;version='[2.0.0,2.0.1)',\
+	com.sun.mail.javax.mail;version='[1.6.2,1.6.3)',\
+	json;version='[20190722.0.0,20190722.0.1)',\
+	org.eclipse.sensinact.gateway.sensinact-mail-connector;version='[2.0.0,2.0.1)',\
+	org.osgi.util.converter;version='[1.0.8,1.0.9)'

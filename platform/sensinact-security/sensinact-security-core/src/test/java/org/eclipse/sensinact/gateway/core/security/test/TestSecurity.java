@@ -26,6 +26,9 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
+import org.osgi.test.junit5.cm.ConfigurationExtension;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 
@@ -35,8 +38,8 @@ import org.osgi.test.junit5.service.ServiceExtension;
  */
 @ExtendWith(BundleContextExtension.class)
 @ExtendWith(ServiceExtension.class)
-@Disabled
-public class TestSecurity {
+@ExtendWith(ConfigurationExtension.class)
+public class TestSecurity extends AbstractConfiguredSecurityTest {
 	// ********************************************************************//
 	// NESTED DECLARATIONS //
 	// ********************************************************************//
@@ -53,27 +56,40 @@ public class TestSecurity {
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
 
-	@Test
 	@Disabled
-	public void testSecurityAccessInitialization(@InjectService Core core) throws Throwable {
+	@Test
+	@WithConfiguration(
+			pid = "SQLiteDataStoreService",
+			location = "?",
+			properties = {
+					@Property(key = "database", value = "${sqlitedb}")
+			}
+		)
+	public void testSecurityAccessInitialization(@InjectService(timeout = 1000) Core core) throws Throwable {
 		Session session = core.getAnonymousSession();
 		assertNotNull(session);
 
 		
-		Set providers = session.serviceProviders();
+		Set<ServiceProvider> providers = session.serviceProviders();
 		System.out.println("====================================>>>>>");
 		System.out.println(providers);
 		System.out.println("====================================>>>>>");
 		assertTrue(providers.isEmpty());
-//
+
 		Credentials credentials = new Credentials("cea", "sensiNact_team");
 		session = core.getSession(credentials);
 		
 		assertNotNull(session);
-//
+
 		providers = session.serviceProviders();
 		assertEquals(3, providers.size());
 		Iterator<ServiceProvider> iterator = providers.iterator();
+		
+		while (iterator.hasNext()) {
+			ServiceProvider serviceProvider = iterator.next();
+
+			System.out.println(serviceProvider.getDescription().getJSON());
+		}
 //		
 //		MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
 //

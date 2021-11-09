@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.security.dao.SnaDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.SnaEntity;
@@ -40,22 +39,19 @@ public class KeyDirective extends Directive {
 	 * References a Column of the Table of this KeyDirective
 	 */
 	public class KeyEntry implements Nameable {
-		private String column;
+		private final String column;
+		private String name = null;
 		private Object value = null;
+
+		public KeyEntry(String column) {
+			this.column = column;
+		}
 
 		/**
 		 * @return the column
 		 */
 		public String getColumn() {
 			return column;
-		}
-
-		/**
-		 * @param column
-		 *            the column to set
-		 */
-		public void setColumn(String column) {
-			this.column = column;
 		}
 
 		/**
@@ -69,7 +65,7 @@ public class KeyDirective extends Directive {
 		 * @param value
 		 *            the value to set
 		 */
-		public void setValue(Object value) {
+		void setValue(Object value) {
 			this.value = value;
 		}
 
@@ -80,6 +76,13 @@ public class KeyDirective extends Directive {
 		 */
 		@Override
 		public String getName() {
+			if(name == null) {
+				name = generateName();
+			}
+			return name;
+		}
+		
+		protected String generateName() {
 			return KeyDirective.this.getColumnName(this.column);
 		}
 	}
@@ -88,22 +91,20 @@ public class KeyDirective extends Directive {
 	 * References Foreign Column and Table for a composed primary key definition
 	 */
 	class ForeignKeyEntry extends KeyEntry {
-		private String foreignTable;
-		private String foreignColumn;
+		private final String foreignTable;
+		private final String foreignColumn;
+
+		public ForeignKeyEntry(String column, String foreignTable, String foreignColumn) {
+			super(column);
+			this.foreignTable = foreignTable;
+			this.foreignColumn = foreignColumn;
+		}
 
 		/**
 		 * @return the foreignTable
 		 */
 		public String getForeignTable() {
 			return foreignTable;
-		}
-
-		/**
-		 * @param foreignTable
-		 *            the foreignTable to set
-		 */
-		public void setForeignTable(String foreignTable) {
-			this.foreignTable = foreignTable;
 		}
 
 		/**
@@ -114,20 +115,12 @@ public class KeyDirective extends Directive {
 		}
 
 		/**
-		 * @param foreignColumn
-		 *            the foreignColumn to set
-		 */
-		public void setForeignColumn(String foreignColumn) {
-			this.foreignColumn = foreignColumn;
-		}
-
-		/**
 		 * @inheritDoc
 		 * 
 		 * @see Nameable#getName()
 		 */
 		@Override
-		public String getName() {
+		protected String generateName() {
 			return new StringBuilder().append(this.foreignTable).append(SnaDAO.DOT).append(this.foreignColumn)
 					.toString();
 		}
@@ -237,22 +230,17 @@ public class KeyDirective extends Directive {
 	 * @param entity
 	 */
 	public void assign(String name, Object value) {
-		int index = this.keyEntries.indexOf(new Name<KeyEntry>(name));
-		if (index == -1) {
-			return;
-		}
-		this.keyEntries.get(index).setValue(value);
+		keyEntries.stream()
+			.filter(k -> name.equals(k.getName()))
+			.findFirst()
+			.ifPresent(k -> k.setValue(value));
 	}
 
 	/**
 	 * Defines the value of all KeyEntries of this KeyDirective to -1
 	 */
 	protected void reset() {
-		Iterator<KeyEntry> iterator = this.keyEntries.iterator();
-		while (iterator.hasNext()) {
-			KeyEntry entry = iterator.next();
-			entry.setValue(-1);
-		}
+		keyEntries.forEach(k -> k.setValue(-1));
 	}
 
 	/**
@@ -260,8 +248,7 @@ public class KeyDirective extends Directive {
 	 * @param column
 	 */
 	public KeyEntry addKeyEntry(String column) {
-		KeyEntry keyEntry = new KeyEntry();
-		keyEntry.setColumn(column);
+		KeyEntry keyEntry = new KeyEntry(column);
 		this.keyEntries.add(keyEntry);
 		return keyEntry;
 	}
@@ -273,10 +260,7 @@ public class KeyDirective extends Directive {
 	 * @param foreignColumn
 	 */
 	public ForeignKeyEntry addForeignKeyEntry(String column, String foreignTable, String foreignColumn) {
-		ForeignKeyEntry keyEntry = new ForeignKeyEntry();
-		keyEntry.setColumn(column);
-		keyEntry.setForeignTable(foreignTable);
-		keyEntry.setForeignColumn(foreignColumn);
+		ForeignKeyEntry keyEntry = new ForeignKeyEntry(column, foreignTable, foreignColumn);
 		this.keyEntries.add(keyEntry);
 		return keyEntry;
 	}

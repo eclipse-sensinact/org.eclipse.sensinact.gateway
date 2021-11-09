@@ -91,6 +91,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-mail-connector</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.sensinact.gateway.simulated.devices</groupId>
 			<artifactId>light</artifactId>
 			<version>${project.version}</version>
