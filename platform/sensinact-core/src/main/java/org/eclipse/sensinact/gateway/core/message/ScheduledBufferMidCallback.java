@@ -60,7 +60,7 @@ public class ScheduledBufferMidCallback extends BufferMidCallback {
 					int index = 0;
 					int length = ScheduledBufferMidCallback.this.length;
 					if (length > 0) {
-						SnaMessage[] buffer = new SnaMessage[length];
+						SnaMessage<?>[] buffer = new SnaMessage[length];
 
 						for (; index < length; index++) {
 							buffer[index] = ScheduledBufferMidCallback.this.buffer[index];

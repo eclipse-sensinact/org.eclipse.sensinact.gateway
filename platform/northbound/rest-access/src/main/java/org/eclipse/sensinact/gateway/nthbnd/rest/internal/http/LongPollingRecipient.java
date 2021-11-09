@@ -43,7 +43,7 @@ public class LongPollingRecipient extends NorthboundRecipient {
      * @inheritDoc
      * @see Recipient#callback(String, SnaMessage[])
      */
-    public void callback(String callbackId, SnaMessage[] messages) {
+    public void callback(String callbackId, SnaMessage<?>[] messages) {
         int index = 0;
         int length = messages == null ? 0 : messages.length;
 

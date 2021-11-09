@@ -89,7 +89,7 @@ public class TestSubscription   implements TestResult {
     
     private Core core=mock(Core.class);
 
-    private SnaMessage message;
+    private SnaMessage<?> message;
     private int result;
     private Map<String, DataProviderItf> mockedRegistry;
     /**
@@ -105,9 +105,9 @@ public class TestSubscription   implements TestResult {
         ServiceReference<?> serviceReferenceInstaller = Mockito.mock(ServiceReference.class);
         ServiceReference<?> serviceReferenceResource = Mockito.mock(ServiceReference.class);
         final ServiceRegistration<DataProviderItf> serviceRegistration = Mockito.mock(ServiceRegistration.class);
-        @SuppressWarnings("rawtypes") ServiceReference<?>[] serviceReferencesInstaller = new ServiceReference<?>[]{serviceReferenceInstaller};
-        @SuppressWarnings("rawtypes") ServiceReference<?>[] serviceReferencesActionHook = new ServiceReference<?>[]{};
-        @SuppressWarnings("rawtypes") ServiceReference<?>[] serviceReferencesResource = new ServiceReference<?>[]{serviceReferenceResource};
+        ServiceReference<?>[] serviceReferencesInstaller = new ServiceReference<?>[]{serviceReferenceInstaller};
+        ServiceReference<?>[] serviceReferencesActionHook = new ServiceReference<?>[]{};
+        ServiceReference<?>[] serviceReferencesResource = new ServiceReference<?>[]{serviceReferenceResource};
         // Mock of the session
         final Session session = Mockito.mock(Session.class);
 

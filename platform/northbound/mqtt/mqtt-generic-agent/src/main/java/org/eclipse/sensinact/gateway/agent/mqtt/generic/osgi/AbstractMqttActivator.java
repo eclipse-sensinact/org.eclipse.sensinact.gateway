@@ -26,8 +26,6 @@ public abstract class AbstractMqttActivator extends AbstractActivator<Mediator> 
     private AbstractMqttHandler handler;
     private GenericMqttAgent agent;
 
-    private String registration;
-
     /**
      * @inheritDoc
      * @see AbstractActivator#doStart()
@@ -49,7 +47,7 @@ public abstract class AbstractMqttActivator extends AbstractActivator<Mediator> 
         }
 
         this.handler.setAgent(agent);
-        this.registration = mediator.callService(Core.class, new Executable<Core, String>() {
+        mediator.callService(Core.class, new Executable<Core, String>() {
             @Override
             public String execute(Core service) throws Exception {
                 return service.registerAgent(mediator, AbstractMqttActivator.this.handler, null);
@@ -65,7 +63,6 @@ public abstract class AbstractMqttActivator extends AbstractActivator<Mediator> 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Stopping MQTT agent");
         }
-        this.registration = null;
         this.handler.stop();
         this.handler = null;
         this.agent.close();

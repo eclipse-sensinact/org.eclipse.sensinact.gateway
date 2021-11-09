@@ -12,10 +12,15 @@ package org.eclipse.sensinact.gateway.core.security.test;
 
 import java.util.Dictionary;
 
+import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.ModelElement;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModel;
-import org.eclipse.sensinact.gateway.core.security.UserKeyBuilder;
+import org.eclipse.sensinact.gateway.core.message.MessageRouter;
+import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
+import org.eclipse.sensinact.gateway.core.security.UserKeyBuilder;
+import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -27,13 +32,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.log.LogService;
-
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
-import org.eclipse.sensinact.gateway.core.message.SnaAgent;
-import org.eclipse.sensinact.gateway.core.message.MessageRouter;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
-import org.junit.jupiter.api.BeforeEach;
 
 /**
  *
@@ -96,7 +94,6 @@ public class TestSecuredAccess {
 	private final ServiceRegistration<SnaAgent> registrationAgent = Mockito.mock(ServiceRegistration.class);
 	private final ServiceReference<Object> referenceProvider = Mockito.mock(ServiceReference.class);
 
-	private Mediator mediator;
 	private SensiNactResourceModel provider;
 	private MessageRouter handler;
 	private SnaAgent agent;
@@ -241,7 +238,6 @@ public class TestSecuredAccess {
 		Mockito.when(bundle.getSymbolicName()).thenReturn(MOCK_BUNDLE_NAME);
 		Mockito.when(bundle.getBundleId()).thenReturn(MOCK_BUNDLE_ID);
 
-		mediator = new Mediator(context);
 		callbackCount = 0;
 		linkCallbackCount = 0;
 	}

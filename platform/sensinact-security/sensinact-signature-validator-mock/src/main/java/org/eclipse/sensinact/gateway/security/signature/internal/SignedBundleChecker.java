@@ -29,8 +29,6 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
-import javax.swing.text.html.parser.Entity;
-
 public class SignedBundleChecker {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SignedBundleChecker.class);

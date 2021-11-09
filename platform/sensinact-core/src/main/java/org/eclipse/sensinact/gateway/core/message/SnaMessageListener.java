@@ -142,7 +142,7 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 	}
 
 	@Override
-	public void handle(SnaMessage message) {
+	public void handle(SnaMessage<?> message) {
 		super.eventEngine.push(message);
 	}
 

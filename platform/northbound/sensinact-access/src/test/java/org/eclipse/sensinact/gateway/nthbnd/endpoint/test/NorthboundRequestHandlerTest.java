@@ -59,7 +59,7 @@ public class NorthboundRequestHandlerTest {
     @BeforeEach
     public void init() throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException, BundleException, DataStoreException {
         this.testContext = new TestContext();
-        this.tree = new AccessTreeImpl().withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
+        this.tree = new AccessTreeImpl<>().withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
     }
 
 

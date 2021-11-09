@@ -10,12 +10,11 @@
  */
 package org.eclipse.sensinact.gateway.generic.packet;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collections;
 import java.util.Iterator;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @param <P>
@@ -23,13 +22,9 @@ import java.util.Iterator;
 public class EmptyPacketReader<P extends Packet> implements PacketReader<P> {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(EmptyPacketReader.class);
-    private Mediator mediator;
 
-    /**
-     * @param mediator
-     */
-    protected EmptyPacketReader(Mediator mediator) {
-        this.mediator = mediator;
+
+    protected EmptyPacketReader() {
     }
 
     @Override

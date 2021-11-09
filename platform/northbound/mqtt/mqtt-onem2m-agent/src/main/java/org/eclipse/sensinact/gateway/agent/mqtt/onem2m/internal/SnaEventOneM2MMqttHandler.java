@@ -148,6 +148,6 @@ public class SnaEventOneM2MMqttHandler extends AbstractMqttHandler {
     /**
      * @see AbstractMidAgentCallback#doHandle(SnaResponseMessage)
      */
-    public void doHandle(SnaResponseMessage event) {
+    public void doHandle(SnaResponseMessage<?, ?> event) {
     }
 }

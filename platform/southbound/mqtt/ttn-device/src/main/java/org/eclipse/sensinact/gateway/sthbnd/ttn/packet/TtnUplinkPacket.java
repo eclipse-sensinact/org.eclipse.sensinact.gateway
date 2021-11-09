@@ -32,10 +32,10 @@ public class TtnUplinkPacket extends MqttPacket {
     @HelloMessage
     private static final boolean HELLO_MESSAGE = false;
 
-    private final List<TtnSubPacket> subPackets;
+    private final List<TtnSubPacket<?>> subPackets;
     private int index = -1;
 
-    public TtnUplinkPacket(String device, List<TtnSubPacket> subPackets) {
+    public TtnUplinkPacket(String device, List<TtnSubPacket<?>> subPackets) {
         super(device);
 
         this.device = device;

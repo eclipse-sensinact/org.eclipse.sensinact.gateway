@@ -283,7 +283,7 @@ public class SnaFilter implements JSONable {
 	 *         <li>false otherwise</li>
 	 *         </ul>
 	 */
-	boolean matchesSender(SnaMessage message) {
+	boolean matchesSender(SnaMessage<?> message) {
 		boolean matchSender = false;
 		String uri = message.getPath();
 		if (!this.isPattern) {
@@ -323,7 +323,7 @@ public class SnaFilter implements JSONable {
 	 *         <li>false otherwise</li>
 	 *         </ul>
 	 */
-	boolean matchesType(SnaMessage message) {
+	boolean matchesType(SnaMessage<?> message) {
 		return handledTypes.contains(((SnaMessageSubType) message.getType()).getSnaMessageType());
 	}
 
@@ -340,7 +340,7 @@ public class SnaFilter implements JSONable {
 	 *         <li>false otherwise</li>
 	 *         </ul>
 	 */
-	boolean matchesConditions(SnaMessage message) {
+	boolean matchesConditions(SnaMessage<?> message) {
 		Object toValidate = null;
 
 		switch (((SnaMessageSubType) message.getType()).getSnaMessageType()) {

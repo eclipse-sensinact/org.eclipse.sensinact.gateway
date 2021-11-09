@@ -71,7 +71,7 @@ public class TestComponentFactory {
     
     private Resource resource=mock(Resource.class);
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked"})
     @BeforeEach
     public void init() throws Exception {
         MockitoAnnotations.initMocks(this);

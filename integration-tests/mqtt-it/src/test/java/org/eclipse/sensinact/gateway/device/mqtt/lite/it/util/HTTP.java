@@ -21,9 +21,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 /**
  * Helper class to perform HTTP request
  */
@@ -34,7 +31,6 @@ public class HTTP {
         NONE
     }
     AuthenticationMethod authenticationMethod = AuthenticationMethod.NONE;
-    private static final Logger LOG = LoggerFactory.getLogger(HTTP.class);
     private String contentType="application/json";
     private String method="GET";
     private Map<String,String> headers=new HashMap<String,String>();
@@ -115,7 +111,7 @@ public class HTTP {
         return submit(url,getMethod(),getHeaders());
     }
     public String submit(String url,Map<String,String> headers) throws Exception{
-        HashMap allHeaders=new HashMap<String,String>(getHeaders());
+        HashMap<String, String> allHeaders=new HashMap<String,String>(getHeaders());
         allHeaders.putAll(headers);
         return submit(url,getMethod(),allHeaders);
     }
@@ -144,8 +140,8 @@ public class HTTP {
                 while((token=con.getInputStream().read())!=-1){
                     sb.write(token);
                 }
-            final byte[] datareturned=sb.toByteArray();
             /*
+            final byte[] datareturned=sb.toByteArray();
             if(datareturned.length>0 && isGZipCompressed(datareturned)){
                 LOG.debug("Response is compressed, starting decompression");
                 setBodyResponse(decompress(datareturned));

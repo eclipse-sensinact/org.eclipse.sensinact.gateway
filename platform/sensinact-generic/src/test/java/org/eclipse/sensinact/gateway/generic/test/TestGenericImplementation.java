@@ -69,7 +69,7 @@ public class TestGenericImplementation {
         Resource variation = service.getResource("variation");
         //System.out.println(service.getDescription().getDescription());
 
-        SnaMessage response = variable.get(DataResource.VALUE, (Object[]) null);
+        SnaMessage<?> response = variable.get(DataResource.VALUE, (Object[]) null);
         JSONObject jsonObject = new JSONObject(response.getJSON());
 
         assertEquals(1, (int) jsonObject.getJSONObject("response").getInt("value"));
@@ -118,7 +118,7 @@ public class TestGenericImplementation {
         JSONObject jsonObject;
 //        MidProxy midTemperature = (MidProxy) Proxy.getInvocationHandler(temperature);
 //        SnaMessage response = (SnaMessage) midTemperature.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
-        SnaMessage response = temperature.get(DataResource.VALUE, (Object[]) null);
+        SnaMessage<?> response = temperature.get(DataResource.VALUE, (Object[]) null);
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(5.0f, (float) jsonObject.getJSONObject("response").getDouble("value"), 0.0f);
 
@@ -258,7 +258,7 @@ public class TestGenericImplementation {
         Description response = service.getDescription();
 //        MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(resource);
 //        SnaMessage message = (SnaMessage) midResource.toOSGi(setMethod, new Object[]{"value", "45.5667:5.9333", null});
-        SnaMessage message = resource.set("value", "45.5667:5.9333", null);
+        SnaMessage<?> message = resource.set("value", "45.5667:5.9333", null);
         JSONObject jsonObject = new JSONObject(message.getJSON());
 
         jsonObject.getJSONObject("response").remove("timestamp");

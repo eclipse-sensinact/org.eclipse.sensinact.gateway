@@ -41,7 +41,7 @@ public class CryptographicUtilsTest {
     KeyStore ks = null;
 
     public CryptographicUtilsTest() throws NoSuchAlgorithmException {
-        cutils = new CryptographicUtils(null);
+        cutils = new CryptographicUtils();
     }
 
     KeyStore getKeyStore() throws KeyStoreException, FileNotFoundException, NoSuchAlgorithmException, IOException, CertificateException {

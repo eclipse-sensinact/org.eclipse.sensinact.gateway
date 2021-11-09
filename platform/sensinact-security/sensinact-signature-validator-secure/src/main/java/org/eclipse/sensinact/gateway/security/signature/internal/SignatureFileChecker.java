@@ -29,8 +29,8 @@ public class SignatureFileChecker {
     }
 
     private static boolean checkAbsenceOfModification(final SignedBundle signedJar, final SignatureFile pretendedSigFile) throws IOException {
-        final Set sigEntries = pretendedSigFile.getEntries().keySet();
-        final Set mfEntries = signedJar.getManifest().getEntries().keySet();
+        final Set<?> sigEntries = pretendedSigFile.getEntries().keySet();
+        final Set<?> mfEntries = signedJar.getManifest().getEntries().keySet();
         // logger.log(Level.DEBUG, "sigEntries size: "+sigEntries.size());
         // logger.log(Level.DEBUG, "mfEntries size: "+mfEntries.size());
         boolean noAddition = false;

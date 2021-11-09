@@ -172,7 +172,6 @@ public class CallbackFactory {
      *
      * @param callbackService the {@link CallbackService} to be attached
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
 	public final void attach(CallbackService callbackService) {
         if (callbackService == null || !this.running.get()) {
             return;

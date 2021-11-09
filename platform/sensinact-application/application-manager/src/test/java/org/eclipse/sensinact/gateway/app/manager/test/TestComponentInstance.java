@@ -89,7 +89,7 @@ public class TestComponentInstance implements TestResult {
     private Resource resource=mock(Resource.class);
     @Mock
     private Core core=mock(Core.class);
-    private SnaMessage message;
+    private SnaMessage<?> message;
     private int result;
     private Map<String, DataProviderItf> mockedRegistry;
 
@@ -101,10 +101,10 @@ public class TestComponentInstance implements TestResult {
         ServiceReference<?> serviceReferenceResource = Mockito.mock(ServiceReference.class);
         ServiceReference<?> serviceReferenceResult1 = Mockito.mock(ServiceReference.class);
         final ServiceRegistration<DataProviderItf> serviceRegistration = Mockito.mock(ServiceRegistration.class);
-        @SuppressWarnings("rawtypes") ServiceReference<?>[] serviceReferencesInstaller = new ServiceReference<?>[]{serviceReferenceInstaller};
-        @SuppressWarnings("rawtypes") ServiceReference<?>[] serviceReferencesActionHook = new ServiceReference<?>[]{};
-        @SuppressWarnings("rawtypes") ServiceReference<?>[] serviceReferencesResource = new ServiceReference<?>[]{serviceReferenceResource};
-        @SuppressWarnings("rawtypes") ServiceReference<?>[] serviceReferencesResult1 = new ServiceReference<?>[]{serviceReferenceResult1};
+        ServiceReference<?>[] serviceReferencesInstaller = new ServiceReference<?>[]{serviceReferenceInstaller};
+        ServiceReference<?>[] serviceReferencesActionHook = new ServiceReference<?>[]{};
+        ServiceReference<?>[] serviceReferencesResource = new ServiceReference<?>[]{serviceReferenceResource};
+        ServiceReference<?>[] serviceReferencesResult1 = new ServiceReference<?>[]{serviceReferenceResult1};
         // Mock of the session
         final Session session = Mockito.mock(Session.class);
         // Mock of the responses
@@ -208,7 +208,7 @@ public class TestComponentInstance implements TestResult {
 
         });
 
-        Mockito.when(mediator.callService(Mockito.eq(Core.class), Mockito.any(Executable.class))).then(new Answer() {
+        Mockito.when(mediator.callService(Mockito.eq(Core.class), Mockito.any(Executable.class))).then(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object result = ((Executable) invocation.getArguments()[1]).execute(core);

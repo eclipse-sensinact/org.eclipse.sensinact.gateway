@@ -37,7 +37,7 @@ public class ShellRecipient extends NorthboundRecipient {
      * @see org.eclipse.sensinact.gateway.core.message.Recipient#
      * callback(java.lang.String, org.eclipse.sensinact.gateway.core.message.SnaMessage[])
      */
-    public void callback(String callbackId, SnaMessage[] messages) {
+    public void callback(String callbackId, SnaMessage<?>[] messages) {
         int index = 0;
         int length = messages == null ? 0 : messages.length;
 

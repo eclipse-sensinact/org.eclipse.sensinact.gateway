@@ -51,7 +51,7 @@ public class HttpRecipient extends NorthboundRecipient {
     }
 
     @Override
-    public void callback(String callbackId, SnaMessage[] messages) throws IOException {
+    public void callback(String callbackId, SnaMessage<?>[] messages) throws IOException {
         int index = 0;
         int length = messages == null ? 0 : messages.length;
 

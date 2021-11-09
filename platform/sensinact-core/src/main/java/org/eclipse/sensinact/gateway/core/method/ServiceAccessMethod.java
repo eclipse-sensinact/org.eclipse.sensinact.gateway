@@ -166,7 +166,7 @@ public class ServiceAccessMethod implements AccessMethod {
 	 */
 	@Override
 	public Set<Signature> getSignatures() {
-		return Collections.<Signature>unmodifiableSet(new HashSet(this.signatures));
+		return Collections.<Signature>unmodifiableSet(new HashSet<Signature>(this.signatures));
 	}
 
 	/**

@@ -13,12 +13,10 @@ package org.eclipse.sensinact.gateway.common.constraint.test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -52,7 +50,6 @@ public class ConstraintTest {
 
     private final BundleContext context = Mockito.mock(BundleContext.class);
     private final Bundle bundle = Mockito.mock(Bundle.class);
-    private Mediator mediator;
 
     @BeforeEach
     public void init() throws InvalidSyntaxException {
@@ -87,7 +84,6 @@ public class ConstraintTest {
         Mockito.when(bundle.getSymbolicName()).thenReturn(MOCK_BUNDLE_NAME);
         Mockito.when(bundle.getBundleId()).thenReturn(MOCK_BUNDLE_ID);
 
-        mediator = new Mediator(context);
     }
 
     @Test

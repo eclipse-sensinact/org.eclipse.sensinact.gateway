@@ -128,7 +128,7 @@ public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
     /**
      * @see AbstractMidAgentCallback#doHandle(SnaResponseMessage)
      */
-    public void doHandle(SnaResponseMessage event) {
+    public void doHandle(SnaResponseMessage<?, ?> event) {
     }
 
 }

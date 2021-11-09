@@ -15,5 +15,5 @@ import java.util.List;
 
 public abstract class TtnPacketPayload {
 
-    abstract List<TtnSubPacket> getSubPackets();
+    abstract List<TtnSubPacket<?>> getSubPackets();
 }

@@ -33,7 +33,7 @@ public class BufferMidCallback extends UnaryMidCallback {
 	/**
 	 * the {@link SnaMessage}s buffer
 	 */
-	protected final SnaMessage[] buffer;
+	protected final SnaMessage<?>[] buffer;
 
 	/**
 	 * Constructor
@@ -65,7 +65,7 @@ public class BufferMidCallback extends UnaryMidCallback {
 			this.buffer[length++] = message;
 
 			if (this.length == this.bufferSize) {
-				SnaMessage[] msgBuffer = new SnaMessage[length];
+				SnaMessage<?>[] msgBuffer = new SnaMessage[length];
 				int index = 0;
 
 				for (; index < length; index++) {

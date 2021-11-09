@@ -348,7 +348,6 @@ public class TestSecurityPatternWithNorthbound{
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void doInit(Map<String, Comparable> configuration) {
 		configuration.put("org.osgi.framework.system.packages.extra",
 			"org.eclipse.sensinact.gateway.test," + 

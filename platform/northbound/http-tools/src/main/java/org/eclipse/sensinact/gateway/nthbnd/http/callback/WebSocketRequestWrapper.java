@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.nthbnd.http.callback;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;

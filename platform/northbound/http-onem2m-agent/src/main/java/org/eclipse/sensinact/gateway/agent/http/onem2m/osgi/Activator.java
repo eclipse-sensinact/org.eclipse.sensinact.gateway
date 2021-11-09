@@ -34,7 +34,6 @@ public class Activator extends AbstractActivator<Mediator> {
 
     private SnaEventOneM2MHttpHandler handler;
 
-    private String registration;
 
     /**
      * @inheritDoc
@@ -44,7 +43,7 @@ public class Activator extends AbstractActivator<Mediator> {
     public void doStart() throws Exception {
 
         this.handler = new SnaEventOneM2MHttpHandler(cseBase);
-        this.registration = super.mediator.callService(Core.class, new Executable<Core, String>() {
+        super.mediator.callService(Core.class, new Executable<Core, String>() {
             @Override
             public String execute(Core core) throws Exception {
                 //Expression used in tests: "(\\/slider\\/cursor\\/position(\\/[^\\/]+)*)|(\\/(slider|(lora\\-tracker\\-[0-9]+))\\/admin\\/location(\\/[^\\/]+)*)"
@@ -60,7 +59,6 @@ public class Activator extends AbstractActivator<Mediator> {
         
         this.handler.stop();
         this.handler = null;
-        this.registration = null;
     }
 
     @Override

@@ -74,7 +74,6 @@ public class TestSecurity {
 		return false;
 	}
 	
-	@SuppressWarnings("unchecked")
 	protected void doInit(Map<String, String> configuration) {
 		
 		configuration.put("org.osgi.framework.system.capabilities",

@@ -147,7 +147,6 @@ public class ForwardingFactory {
      *
      * @param forwardingService the {@link ForwardingService} to be attached
      */
-    @SuppressWarnings("unchecked")
 	public final void attach(ForwardingService forwardingService) {
         if (forwardingService == null || !this.running.get()) {
             return;
@@ -164,7 +163,7 @@ public class ForwardingFactory {
             LOG.error("A forwarding service is already registered at '%s'", endpoint);
             return;
         }
-        ForwardingFilter forwardingFilter = new ForwardingFilter(mediator, forwardingService);
+        ForwardingFilter forwardingFilter = new ForwardingFilter(forwardingService);
         
         Dictionary<String, Object> propsGiven = forwardingService.getProperties();
 

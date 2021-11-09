@@ -164,7 +164,7 @@ public class TestSnaFunction{
         
         Mockito.when(session.resource(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("TURN_ON"))).thenReturn(new StateActionResource(mediator, "TURN_ON", this));
 
-        Mockito.when(session.resource(Mockito.eq("SimulatedTV_001"), Mockito.eq("DisplayService_SimulatedTV_001"), Mockito.eq("DISPLAY"))).thenReturn(new DisplayActionResource(mediator, this));
+        Mockito.when(session.resource(Mockito.eq("SimulatedTV_001"), Mockito.eq("DisplayService_SimulatedTV_001"), Mockito.eq("DISPLAY"))).thenReturn(new DisplayActionResource(this));
 
         Mockito.when(session.resource(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("DIM"))).thenReturn(dimResource);
    

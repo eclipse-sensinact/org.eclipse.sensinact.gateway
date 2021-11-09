@@ -27,7 +27,7 @@ public class WebSocketRecipient extends NorthboundRecipient {
     }
 
     @Override
-    public void callback(String callbackId, SnaMessage[] messages) throws Exception {
+    public void callback(String callbackId, SnaMessage<?>[] messages) throws Exception {
         int index = 0;
         int length = messages == null ? 0 : messages.length;
         StringBuilder builder = new StringBuilder();

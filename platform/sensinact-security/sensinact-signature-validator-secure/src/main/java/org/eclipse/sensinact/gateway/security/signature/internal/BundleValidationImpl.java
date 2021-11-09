@@ -87,7 +87,7 @@ public class BundleValidationImpl implements BundleValidation {
         this.validated = new HashMap<>();
         this.unknown = new HashMap<>();
 
-        this.cryptoUtils = new CryptographicUtils(mediator);
+        this.cryptoUtils = new CryptographicUtils();
         this.ksm = new KeyStoreManager(this.getKeyStoreFileName(), this.getKeyStorePassword());
     }
 

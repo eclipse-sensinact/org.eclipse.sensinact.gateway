@@ -37,7 +37,6 @@ public class JSONMapper {
     private Map<String, JSONPath> mapping;
     private Map<String, Object> patterns;
 
-    private ClassLoader classloader;
 
     /**
      * Constructor
@@ -71,7 +70,6 @@ public class JSONMapper {
     private JSONMapper(ClassLoader classloader) {
         this.mapping = new HashMap<String, JSONPath>();
         this.patterns = new HashMap<String, Object>();
-        this.classloader = classloader;
     }
 
     /**
@@ -79,8 +77,8 @@ public class JSONMapper {
      *
      * @param mapping
      */
-    public JSONMapper(ClassLoader classloader, JSONObject mapping) {
-        this(classloader);
+    public JSONMapper(JSONObject mapping) {
+        this();
         int length = mapping == null ? 0 : mapping.length();
         if (length > 0) {
             int index = 0;
@@ -97,8 +95,8 @@ public class JSONMapper {
      *
      * @param mapping
      */
-    public JSONMapper(/*Mediator mediator,*/ Map<String, String> mapping) {
-        this(/*mediator*/);
+    public JSONMapper(Map<String, String> mapping) {
+        this();
         int length = mapping == null ? 0 : mapping.size();
         if (length > 0) {
             String key = null;
@@ -125,7 +123,7 @@ public class JSONMapper {
 
         for (Iterator<String> iterator = this.mapping.keySet().iterator(); iterator.hasNext(); ) {
             String key = iterator.next();
-            JSONPath jsonPath = this.mapping.get(key);
+//            JSONPath jsonPath = this.mapping.get(key);
 
             Iterator<String> patternIterator = this.patterns.keySet().iterator();
             while (patternIterator.hasNext()) {

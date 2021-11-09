@@ -191,8 +191,6 @@ public class ForwardingFilter implements Filter {
 
 	private FilterConfig config;
 
-	private Mediator mediator;
-
 	/**
 	 * Constructor
 	 * 
@@ -204,8 +202,7 @@ public class ForwardingFilter implements Filter {
 	 *            instantiated to build the forwarding String URI according to the
 	 *            processed {@link HttpServletRequest} 
 	 */
-	public ForwardingFilter(Mediator mediator, ForwardingService forwardingService) {
-		this.mediator = mediator;
+	public ForwardingFilter(ForwardingService forwardingService) {
 		this.forwardingService = forwardingService;
 	}
 

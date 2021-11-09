@@ -10,7 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.generic.test.tb.moke3;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.generic.Connector;
@@ -21,9 +23,6 @@ import org.eclipse.sensinact.gateway.generic.TaskManager;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.uri.URIProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.uri.URITaskTranslator;
-
-import java.util.List;
-import java.util.Map;
 
 public class MokeStack extends URIProtocolStackEndpoint<MokePacket> {
     public MokeStack() {

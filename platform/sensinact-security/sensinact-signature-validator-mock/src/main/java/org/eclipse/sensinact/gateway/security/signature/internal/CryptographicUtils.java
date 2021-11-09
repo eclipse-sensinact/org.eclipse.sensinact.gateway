@@ -30,13 +30,11 @@ import org.slf4j.LoggerFactory;
 public class CryptographicUtils {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(CryptographicUtils.class);
-    private Mediator mediator;
 
     /**
      * Constructor
      */
-    public CryptographicUtils(Mediator mediator) throws NoSuchAlgorithmException {
-        this.mediator = mediator;
+    public CryptographicUtils() throws NoSuchAlgorithmException {
     }
 
     private boolean checkHashValue(final String realHash, final String pretendedHash) {

@@ -17,7 +17,6 @@ import java.util.Hashtable;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackContext;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
-import org.osgi.test.common.dictionary.Dictionaries;
 
 /**
  * @author christophe

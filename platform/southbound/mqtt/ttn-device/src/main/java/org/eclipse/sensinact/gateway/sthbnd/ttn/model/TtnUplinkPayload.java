@@ -103,8 +103,8 @@ public class TtnUplinkPayload extends TtnPacketPayload {
     }    
     
     @Override
-    public List<TtnSubPacket> getSubPackets() {
-        List<TtnSubPacket> subPackets = new ArrayList<>();
+    public List<TtnSubPacket<?>> getSubPackets() {
+        List<TtnSubPacket<?>> subPackets = new ArrayList<>();
         if (payloadRaw != null) {
             try {
                 ServiceReference<?>[] serviceReferences = this.mediator.getContext().getServiceReferences((String) null, PAYLOAD_DECODER);

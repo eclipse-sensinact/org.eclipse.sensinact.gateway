@@ -47,15 +47,14 @@ import org.slf4j.LoggerFactory;
  */
 public class Application extends AbstractSensiNactApplication {
     private static Logger LOG = LoggerFactory.getLogger(Application.class);
-    private static Logger LOG4J = LoggerFactory.getLogger(Application.class.getCanonicalName());
-   
+
     private final List<ServiceRegistration<DataProviderItf>> serviceRegistrations;
     private final Map<ResourceDataProvider, Collection<ResourceSubscription>> resourceSubscriptions;
     private final Map<String, Component> components;
     
     private ExecutorService executor = Executors.newFixedThreadPool(1);
     
-    private final LinkedBlockingQueue<SnaMessage> waitingEvents;
+    private final LinkedBlockingQueue<SnaMessage<?>> waitingEvents;
     private final ActionHookQueue actionHookQueue;
     private final AppExceptionWatchDog watchDog;
 
@@ -91,7 +90,7 @@ public class Application extends AbstractSensiNactApplication {
         this.resourceSubscriptions = resourceSubscriptions;
         //TODO: switch to an unmodifiable collection ?
         this.components = components;
-        this.waitingEvents = new LinkedBlockingQueue<SnaMessage>();
+        this.waitingEvents = new LinkedBlockingQueue<SnaMessage<?>>();
         this.actionHookQueue = new ActionHookQueue(mediator);
         this.watchDog = watchDog;
     }
@@ -190,7 +189,7 @@ public class Application extends AbstractSensiNactApplication {
     /**
      * @see Recipient#callback(String, SnaMessage[])
      */
-    public void callback(String callbackId, SnaMessage[] messages) throws Exception {
+    public void callback(String callbackId, SnaMessage<?>[] messages) throws Exception {
         waitingEvents.put(messages[0]);
         triggerNextEvent();
     }
@@ -202,13 +201,13 @@ public class Application extends AbstractSensiNactApplication {
         executor.execute(new Runnable() {
             public void run() {
             	try {
-	                SnaMessage message = waitingEvents.poll();
+	                SnaMessage<?> message = waitingEvents.poll();
 	                if(message == null) {
 	                	return;
 	                }
 	                JSONObject messageJson = new JSONObject(message.getJSON());
 	                System.out.println(message.getJSON());
-	                LOG4J.debug("Processing message {}", message.getJSON());
+	                LOG.debug("Processing message {}", message.getJSON());
 	                String[] uri = message.getPath().split("/");
 	                String resourceUri = "/" + uri[1] + "/" + uri[2] + "/" + uri[3];
 	                Object value = messageJson.getJSONObject("notification").get("value");

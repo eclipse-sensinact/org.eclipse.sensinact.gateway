@@ -31,6 +31,6 @@ public interface Recipient extends JSONable {
 	 * @throws Exception
 	 *             If an error occurred while transmitting the messages array
 	 */
-	void callback(String callbackId, SnaMessage[] messages) throws Exception;
+	void callback(String callbackId, SnaMessage<?>[] messages) throws Exception;
 
 }

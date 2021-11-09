@@ -10,7 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.app.basic.test;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import java.util.Enumeration;
+import java.util.Set;
+
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
@@ -26,16 +28,11 @@ import org.eclipse.sensinact.gateway.core.method.SetResponse;
 import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
 import org.eclipse.sensinact.gateway.core.method.UnsubscribeResponse;
 
-import java.util.Enumeration;
-import java.util.Set;
-
 class DisplayActionResource implements ActionResource {
     private TestSnaFunction function;
-    private Mediator mediator;
 
-    public DisplayActionResource(Mediator mediator, TestSnaFunction function) {
+    public DisplayActionResource(TestSnaFunction function) {
         this.function = function;
-        this.mediator = mediator;
     }
 
     @Override

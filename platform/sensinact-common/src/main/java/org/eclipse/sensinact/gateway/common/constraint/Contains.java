@@ -64,9 +64,9 @@ public class Contains<T> extends ConstraintOnCollection<T> {
      */
     @Override
     public Constraint getComplement() {
-        Contains complement = null;
+        Contains<T> complement = null;
         try {
-            complement = new Contains(super.operandClass, super.operand, !super.complement);
+            complement = new Contains<T>(super.operandClass, super.operand, !super.complement);
         } catch (InvalidConstraintDefinitionException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }

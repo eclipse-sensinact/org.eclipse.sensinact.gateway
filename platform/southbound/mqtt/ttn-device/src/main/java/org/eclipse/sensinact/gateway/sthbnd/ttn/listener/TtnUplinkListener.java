@@ -60,12 +60,12 @@ public class TtnUplinkListener extends MqttTopicMessage {
                 LOG.error(e.getMessage(),e);
         }
         if (payload != null) {
-        	List<TtnSubPacket> subPackets = payload.getSubPackets();
+        	List<TtnSubPacket<?>> subPackets = payload.getSubPackets();
         	if(subPackets.isEmpty())
         		return;
         	int i=0;
         	while(i<subPackets.size()) {
-        		TtnSubPacket subPacket = subPackets.get(i);
+        		TtnSubPacket<?> subPacket = subPackets.get(i);
         		if(DOWNLINK_MARKER.equals(subPacket.getMetadata())) {
         			this.dowlinkListener.messageReceived(payload.getApplicationId(),payload.getDeviceId(), subPacket.getValue());
         			subPackets.remove(i);
