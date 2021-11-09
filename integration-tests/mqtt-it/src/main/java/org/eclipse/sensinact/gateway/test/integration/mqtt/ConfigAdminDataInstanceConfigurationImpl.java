@@ -24,7 +24,7 @@ public class ConfigAdminDataInstanceConfigurationImpl implements ConfigAdminData
 
         try {
             Configuration configSensinact=configurationAdmin.getConfiguration("sensinact","?");
-            Hashtable props= new Hashtable<>();
+            Hashtable<String, Object> props= new Hashtable<>();
             props.put( "namespace", "sna1" );
             props.put( "broker", "tcp://sensinact-cea.ddns.net:5269" );
             props.put( "broker.topic.prefix", "/" );
@@ -36,7 +36,7 @@ public class ConfigAdminDataInstanceConfigurationImpl implements ConfigAdminData
 
         try {
             Configuration configSensinactMQTT=configurationAdmin.getConfiguration("mqtt.server","?");
-            Hashtable props1= new Hashtable<>();
+            Hashtable<String, Object> props1= new Hashtable<>();
             props1.put( "port", "1883" );
             props1.put( "autoStart", "false" );
             configSensinactMQTT.update(props1);

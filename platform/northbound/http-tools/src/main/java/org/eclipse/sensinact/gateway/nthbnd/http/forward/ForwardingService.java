@@ -39,7 +39,7 @@ public interface ForwardingService {
      *
      * @return the set of properties of this ForwardingService
      */
-    Dictionary getProperties();
+    Dictionary<String, Object> getProperties();
     
     /**
      * Returns the {@link Executable} in charge of building the query to

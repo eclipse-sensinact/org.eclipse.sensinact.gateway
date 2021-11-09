@@ -45,7 +45,7 @@ public class Interpolator {
     	this.propertyBucket = new MapPropertyBucket(map);
     }    
 
-    public Interpolator(Dictionary dictionary) {
+    public Interpolator(Dictionary<String, ?> dictionary) {
     	this.propertyBucket = new DictionaryPropertyBucket(dictionary);
     }
 
@@ -159,9 +159,9 @@ public class Interpolator {
 
     private class DictionaryPropertyBucket implements PropertyBucket {
     	
-    	private final Dictionary dictionary;
+    	private final Dictionary<String, ?> dictionary;
     	
-    	DictionaryPropertyBucket(Dictionary dictionary) {
+    	DictionaryPropertyBucket(Dictionary<String, ?> dictionary) {
     		this.dictionary = dictionary;
     	}
 

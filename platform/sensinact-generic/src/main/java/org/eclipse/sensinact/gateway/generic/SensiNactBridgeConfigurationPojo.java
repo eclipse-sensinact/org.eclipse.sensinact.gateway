@@ -269,7 +269,7 @@ public class SensiNactBridgeConfigurationPojo {
 	 * 
 	 * @param dictionary the Dictionary providing the elements of the bridge configuration
 	 */
-	public void populate(Dictionary dictionary){		
+	public void populate(Dictionary<String, ?> dictionary){		
 		if(dictionary != null) {
 			ClassLoader loader = Thread.currentThread().getContextClassLoader();
 

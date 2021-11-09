@@ -34,7 +34,7 @@ public interface ProtocolStackEndpointConfigurator {
 	 * @param props the set of properties applying on the specified {@link 
 	 * ProtocolStackEndpoint}
 	 */
-	void preConnectConfiguration(ProtocolStackEndpoint<?> endpoint, ModelConfiguration configuration, Dictionary props);
+	void preConnectConfiguration(ProtocolStackEndpoint<?> endpoint, ModelConfiguration configuration, Dictionary<?, ?> props);
 	
 	/**
 	 * Finalizes the configuration of the {@link ProtocolStackEndpoint} passed
@@ -47,7 +47,7 @@ public interface ProtocolStackEndpointConfigurator {
 	 * new instances of the service model
 	 * @param props the set of properties applying on the specified {@link ProtocolStackEndpoint}
 	 */
-	void postConnectConfiguration(ProtocolStackEndpoint<?> endpoint, ModelConfiguration configuration, Dictionary props);
+	void postConnectConfiguration(ProtocolStackEndpoint<?> endpoint, ModelConfiguration configuration, Dictionary<?, ?> props);
 	
 	/**
 	 * Returns the {@link ProtocolStackEndpoint} type to be used if no one 

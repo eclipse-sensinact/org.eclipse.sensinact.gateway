@@ -181,7 +181,7 @@ public class Mediator {
 	 * @param properties
 	 *            the set of properties associated to the service registration
 	 */
-	public <S> void register(S service, Class<S> serviceType, Dictionary properties) {
+	public <S> void register(S service, Class<S> serviceType, Dictionary<String, ?> properties) {
 		synchronized (this.registrations) {
 			this.registrations.add(this.context.registerService(serviceType, service, properties));
 		}
@@ -198,7 +198,7 @@ public class Mediator {
 	 * @param properties
 	 *            the set of properties associated to the service registration
 	 */
-	public void register(Dictionary properties, Object service, Class<?>[] serviceTypes) {
+	public void register(Dictionary<String, ?> properties, Object service, Class<?>[] serviceTypes) {
 		int length = serviceTypes == null ? 0 : serviceTypes.length;
 		int index = 0;
 		String[] types = new String[length];

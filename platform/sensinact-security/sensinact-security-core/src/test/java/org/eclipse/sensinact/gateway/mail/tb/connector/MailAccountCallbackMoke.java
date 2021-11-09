@@ -17,6 +17,7 @@ import java.util.Hashtable;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackContext;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
+import org.osgi.test.common.dictionary.Dictionaries;
 
 /**
  * @author christophe
@@ -26,19 +27,19 @@ public class MailAccountCallbackMoke implements CallbackService{
 
 	private String pattern;
 	private Executable<CallbackContext, Void> processor;
-	private Dictionary properties;
+	private Dictionary<String, Object> props;
 
 	/**
 	 * 
 	 */
-	public MailAccountCallbackMoke(String pattern, Dictionary properties, Executable<CallbackContext, Void> processor) {
+	public MailAccountCallbackMoke(String pattern, Dictionary<String, ?> properties, Executable<CallbackContext, Void> processor) {
 		this.pattern = pattern;
 		if(properties != null) {
-			this.properties = new Hashtable();
-			Enumeration enumeration = properties.keys();
+			this.props = new Hashtable<>();
+			Enumeration<String> enumeration = properties.keys();
 			while(enumeration.hasMoreElements()) {
-				Object key = enumeration.nextElement();
-				this.properties.put(key, properties.get(key));
+				String key = enumeration.nextElement();
+				this.props.put(key, properties.get(key));
 			}
 		} 
 		this.processor = processor;
@@ -50,8 +51,8 @@ public class MailAccountCallbackMoke implements CallbackService{
 	}
 
 	@Override
-	public Dictionary getProperties() {
-		return this.properties;
+	public Dictionary<String, ?> getProperties() {
+		return this.props;
 	}
 
 	@Override

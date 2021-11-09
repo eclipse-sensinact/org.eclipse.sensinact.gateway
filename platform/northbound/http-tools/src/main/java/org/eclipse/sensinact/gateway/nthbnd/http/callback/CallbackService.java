@@ -49,7 +49,7 @@ public interface CallbackService {
      *
      * @return the initial set of properties
      */
-    Dictionary getProperties();
+    Dictionary<String, ?> getProperties();
 
     /**
      * Processes the request wrapped by the {@link CallbackContext} passed 

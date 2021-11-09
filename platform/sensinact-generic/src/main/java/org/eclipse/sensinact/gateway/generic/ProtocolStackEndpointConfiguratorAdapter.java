@@ -31,14 +31,14 @@ public class ProtocolStackEndpointConfiguratorAdapter implements ProtocolStackEn
 	 * @see org.eclipse.sensinact.gateway.generic.ProtocolStackEndpointConfigurator#preConnectConfiguration(org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint, org.eclipse.sensinact.gateway.core.ModelConfiguration, java.util.Dictionary)
 	 */
 	@Override
-	public void preConnectConfiguration(ProtocolStackEndpoint<?> endpoint, ModelConfiguration configuration, Dictionary props) {
+	public void preConnectConfiguration(ProtocolStackEndpoint<?> endpoint, ModelConfiguration configuration, Dictionary<?, ?> props) {
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.sensinact.gateway.generic.ProtocolStackEndpointConfigurator#postConnectConfiguration(org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint, org.eclipse.sensinact.gateway.core.ModelConfiguration, java.util.Dictionary)
 	 */
 	@Override
-	public void postConnectConfiguration(ProtocolStackEndpoint<?> endpoint, ModelConfiguration configuration, Dictionary props) {
+	public void postConnectConfiguration(ProtocolStackEndpoint<?> endpoint, ModelConfiguration configuration, Dictionary<?, ?> props) {
 	}
 	
 	/* (non-Javadoc)

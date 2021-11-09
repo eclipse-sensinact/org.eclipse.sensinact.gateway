@@ -14,7 +14,9 @@ import java.io.IOException;
 //import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -191,8 +193,13 @@ public class CallbackFactory {
         if((callbackType & CallbackService.CALLBACK_SERVLET) == CallbackService.CALLBACK_SERVLET) {
 	        
         	CallbackServlet callbackServlet = new CallbackServlet(mediator, callbackService);
-
-	        Dictionary props = callbackService.getProperties();
+        	Dictionary<String, Object> props=new Hashtable<>();
+	        Dictionary<String, ?> propsGiven = callbackService.getProperties();
+	        Enumeration<String> enumKeys=propsGiven.keys();
+	        while(enumKeys.hasMoreElements()) {
+	        	String key=enumKeys.nextElement();
+	        	props.put(key, propsGiven.get(key));
+	        }
 	        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, endpoint);
 	        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
 
@@ -204,7 +211,13 @@ public class CallbackFactory {
         	if(!endpoint.startsWith("/ws/")) {
         		wsEndpoint = "/ws".concat(endpoint);
         	}
-        	Dictionary props = callbackService.getProperties();
+        	Dictionary<String, Object> props=new Hashtable<>();
+	        Dictionary<String, ?> propsGiven = callbackService.getProperties();
+	        Enumeration<String> enumKeys=propsGiven.keys();
+	        while(enumKeys.hasMoreElements()) {
+	        	String key=enumKeys.nextElement();
+	        	props.put(key, propsGiven.get(key));
+	        }
         	props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, wsEndpoint);
         	props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)"); 
         	

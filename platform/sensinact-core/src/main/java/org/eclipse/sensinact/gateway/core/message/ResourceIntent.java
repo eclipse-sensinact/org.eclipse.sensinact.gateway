@@ -437,7 +437,7 @@ public abstract class ResourceIntent extends AbstractStackEngineHandler<SnaMessa
 	 * @see org.eclipse.sensinact.gateway.core.message.SnaAgent#start()
 	 */
 	public void start() {
-		Dictionary properties = new Hashtable();
+		Dictionary<String, String> properties = new Hashtable<String, String>();
 		properties.put("org.eclipse.sensinact.gateway.agent.id", this.identifier); 
 		try {
 				this.registration = this.mediator.getContext().registerService(

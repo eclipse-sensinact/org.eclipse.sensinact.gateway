@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.nthbnd.http.forward.internal;
 
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -44,7 +45,7 @@ public class ForwardingFactory {
     private String appearingKey;
     private String disappearingKey;
 
-    private Map<String, ServiceRegistration<Filter>[]> registrations;
+    private Map<String, ServiceRegistration<?>[]> registrations;
 
     private final AtomicBoolean running;
 
@@ -56,7 +57,7 @@ public class ForwardingFactory {
      */
     public ForwardingFactory(Mediator mediator) {
         this.mediator = mediator;
-        this.registrations = Collections.synchronizedMap(new HashMap<String, ServiceRegistration<Filter>[]>());
+        this.registrations = Collections.synchronizedMap(new HashMap<String, ServiceRegistration<?>[]>());
         this.running = new AtomicBoolean(false);
     }
 
@@ -165,11 +166,18 @@ public class ForwardingFactory {
         }
         ForwardingFilter forwardingFilter = new ForwardingFilter(mediator, forwardingService);
         
-        Dictionary props = forwardingService.getProperties();
+        Dictionary<String, Object> propsGiven = forwardingService.getProperties();
+
+        Dictionary<String, Object>props = new Hashtable<>();
+        Enumeration<String> enumKeys=propsGiven.keys();
+        while(enumKeys.hasMoreElements()) {
+        	String key=enumKeys.nextElement();
+        	props.put(key, propsGiven.get(key));
+        }
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, endpoint);
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
         
-	    ServiceRegistration<Filter>[] registrations = new ServiceRegistration[2];
+	    ServiceRegistration<?>[] registrations = new ServiceRegistration[2];
 	    registrations[0] = mediator.getContext().registerService(Filter.class, forwardingFilter, props);
 	    
         props = new Hashtable<>();
@@ -193,7 +201,7 @@ public class ForwardingFactory {
             return;
         }
         String endpoint = forwardingService.getPattern();
-        ServiceRegistration<Filter>[] registrations = this.registrations.remove(endpoint);
+        ServiceRegistration<?>[] registrations = this.registrations.remove(endpoint);
     	if(registrations != null) {
     		for(ServiceRegistration<?> registration : registrations) {
 	    		try {

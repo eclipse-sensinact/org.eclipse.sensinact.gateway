@@ -71,7 +71,7 @@ public abstract class ManagedProtocolStackEndpointFactory implements ManagedServ
      * @see org.osgi.service.cm.ManagedServiceFactory#updated(java.lang.String, java.util.Dictionary)
      */
 	@Override
-    public void updated(String servicePID, Dictionary dictionary) throws ConfigurationException {
+    public void updated(String servicePID, Dictionary<String, ?> dictionary) throws ConfigurationException {
 		if(this.pids.containsKey(servicePID)) {
         	deleted(servicePID);
         }

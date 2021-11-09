@@ -75,7 +75,7 @@ public class Activator extends AbstractActivator<Mediator> {
             } else {
                 sliderPanel = new SliderSetter(new SliderAdapter(id, connector));
 
-                Dictionary props = new Hashtable();
+                Dictionary<String, Object> props = new Hashtable<>();
                 props.put("slider.id", id);
 
                 ServiceRegistration<SliderSetterItf> sliderRegistration = mediator.getContext(

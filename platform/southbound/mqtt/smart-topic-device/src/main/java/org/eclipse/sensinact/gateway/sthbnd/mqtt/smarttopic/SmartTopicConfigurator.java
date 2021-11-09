@@ -65,7 +65,7 @@ class SmartTopicConfigurator extends ProtocolStackEndpointConfiguratorAdapter {
 	 * @see org.eclipse.sensinact.gateway.generic.ProtocolStackEndpointConfiguratorAdapter#preConnectConfiguration(org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint, org.eclipse.sensinact.gateway.core.ModelConfiguration, java.util.Dictionary)
 	 */
 	@Override
-	public void preConnectConfiguration(final ProtocolStackEndpoint<?> endpoint, ModelConfiguration configuration, Dictionary props) {
+	public void preConnectConfiguration(final ProtocolStackEndpoint<?> endpoint, ModelConfiguration configuration, Dictionary<?, ?> props) {
 		final String id = (String) props.get("id");
 	    String username = (String) props.get("username");
 	    String password =(String) props.get("password");
@@ -203,7 +203,7 @@ class SmartTopicConfigurator extends ProtocolStackEndpointConfiguratorAdapter {
 	 * @see org.eclipse.sensinact.gateway.generic.ProtocolStackEndpointConfiguratorAdapter#postConnectConfiguration(org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint, org.eclipse.sensinact.gateway.core.ModelConfiguration, java.util.Dictionary)
 	 */
 	@Override
-	public void postConnectConfiguration(final ProtocolStackEndpoint<?> endpoint, ModelConfiguration configuration, Dictionary props) {
+	public void postConnectConfiguration(final ProtocolStackEndpoint<?> endpoint, ModelConfiguration configuration, Dictionary<?, ?> props) {
 		if(!preconfigured)
 			return;
 		if(startAtInitializationTime) {

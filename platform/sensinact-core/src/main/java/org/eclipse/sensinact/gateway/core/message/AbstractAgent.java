@@ -126,7 +126,7 @@ public abstract class AbstractAgent implements SnaAgent {
 				LOG.error("The agent cannot be registered while its callback is inactive");
 				return;
 			}
-			Dictionary properties = new Hashtable();
+			Dictionary<String, String> properties = new Hashtable<String, String>();
 			properties.put("org.eclipse.sensinact.gateway.agent.id", this.callback.getName());
 			try {
 				this.registration = this.mediator.getContext().registerService(

@@ -4,11 +4,12 @@
 package org.eclipse.sensinact.gateway.nthbnd.http.forward.test.bundle1;
 
 import java.util.Dictionary;
-import java.util.Hashtable;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.sensinact.gateway.nthbnd.http.forward.ForwardingService;
+import org.osgi.test.common.dictionary.Dictionaries;
+
 
 /**
  *
@@ -32,10 +33,8 @@ public class ForwardingServiceImpl implements ForwardingService {
      * @see org.eclipse.sensinact.gateway.nthbnd.forward.http.ForwardingService#getProperties()
      */
     @Override
-    public Dictionary getProperties() {
-        return new Hashtable() {{
-            this.put("pattern", getPattern());
-        }};
+    public Dictionary<String, Object> getProperties() {
+        return Dictionaries.dictionaryOf("pattern", getPattern());
     }
 
 	@Override

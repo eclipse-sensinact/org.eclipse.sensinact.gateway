@@ -1,13 +1,13 @@
 package org.eclipse.sensinact.gateway.nthbnd.http.callback.test;
 
 import java.util.Dictionary;
-import java.util.Hashtable;
 
 import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackContext;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.ServletCallbackContext;
+import org.osgi.test.common.dictionary.Dictionaries;
 
 /**
  *
@@ -26,10 +26,8 @@ public class CallbackServiceImpl implements CallbackService {
      * @see org.eclipse.sensinact.gateway.nthbnd.forward.http.ForwardingService#getProperties()
      */
     @Override
-    public Dictionary getProperties() {
-        return new Hashtable() {{
-            this.put("pattern", getPattern());
-        }};
+    public Dictionary<String, ?> getProperties() {
+        return Dictionaries.dictionaryOf("pattern", getPattern());
     }
 
 	@Override
