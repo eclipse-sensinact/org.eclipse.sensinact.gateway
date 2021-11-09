@@ -10,12 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
@@ -40,7 +40,7 @@ public class Connector<P extends Packet> extends TaskManager {
     /**
      * map of managed {@link ExtModelInstance}s
      */
-    protected final List<ExtModelInstance<?>> instances;
+    protected final Map<String,ExtModelInstance<?>> instances;
 
     /**
      * The global XML formated sensiNact resource model
@@ -74,16 +74,16 @@ public class Connector<P extends Packet> extends TaskManager {
      */
     public Connector(Mediator mediator,
     		ProtocolStackEndpoint<?> endpoint, 
-    		ExtModelConfiguration extModelConfiguration, 
+    		ExtModelConfiguration<P> extModelConfiguration, 
     		ConnectorCustomizer<P> customizer) {
         super( endpoint, extModelConfiguration.isLockedAtInitializationTime(), extModelConfiguration.isDesynchronized());
         this.mediator=mediator;
         this.extModelConfiguration = extModelConfiguration;        
-        this.extModelInstanceBuilder = new ExtModelInstanceBuilder(mediator);
+        this.extModelInstanceBuilder = new ExtModelInstanceBuilder<>(mediator);
         this.extModelInstanceBuilder.withConnector(this);
         
         this.locked = extModelConfiguration.isLockedAtInitializationTime();
-        this.instances = new ArrayList<ExtModelInstance<?>>();
+        this.instances = new ConcurrentHashMap<>();
 
         this.customizer = customizer;
         this.configureCustomizer();
@@ -96,8 +96,8 @@ public class Connector<P extends Packet> extends TaskManager {
      * @param locked  Defines the initial lock state of the
      *                {@link TokenEventProvider} to instantiate
      */
-    public Connector(Mediator mediator,ProtocolStackEndpoint<?> endpoint, ExtModelConfiguration ExtModelConfiguration) {
-        this(mediator,endpoint, ExtModelConfiguration, null);
+    public Connector(Mediator mediator,ProtocolStackEndpoint<?> endpoint, ExtModelConfiguration extModelConfiguration) {
+        this(mediator,endpoint, extModelConfiguration, null);
     }
 
     /**
@@ -175,17 +175,14 @@ public class Connector<P extends Packet> extends TaskManager {
                     LOG.debug("Unable to identify the targeted service provider");
                 continue;
             }
-            int index = -1;
-            ExtModelInstance<?> instance = null;
+            
+            ExtModelInstance<?> instance = this.instances.get(serviceProviderName);
             ExtServiceProviderImpl serviceProvider = null;
 
-            if ((index = this.instances.indexOf(new Name<ExtModelInstance<?>>(serviceProviderName))) > -1)
-                instance = this.instances.get(index);
-            
             if (subPacket.isGoodByeMessage()) {
                 this.processGoodbye(instance);
-                if (index > -1)
-                    this.instances.remove(index);
+                if (instance != null)
+                    this.instances.remove(serviceProviderName, instance);
                 continue;
             }
             if (instance == null) {
@@ -193,7 +190,7 @@ public class Connector<P extends Packet> extends TaskManager {
                     instance = this.addModelInstance(subPacket.getProfileId(), serviceProviderName);
                     if (instance == null)
                         continue;
-                    LOG.debug("Service provider discovered : %s", serviceProviderName);
+                    LOG.debug("Service provider discovered : {}", serviceProviderName);
                 } catch (InvalidServiceProviderException e) {
                     throw new InvalidPacketException(e);
                 }
@@ -215,7 +212,7 @@ public class Connector<P extends Packet> extends TaskManager {
     protected void processHello(ExtServiceProviderImpl serviceProvider) {
         if (ServiceProvider.LifecycleStatus.INACTIVE.equals(serviceProvider.getStatus())) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder().append("Service provider ").append(serviceProvider.getName()).append("activated").toString());
+                LOG.debug("Service provider {} activated", serviceProvider.getName());
             }
             serviceProvider.start();
         }
@@ -254,14 +251,13 @@ public class Connector<P extends Packet> extends TaskManager {
      * @return a new {@link ExtModelInstance} instance
      * @throws InvalidServiceProviderException
      */
-    @SuppressWarnings({ "unchecked", "rawtypes", "unused" })
 	protected synchronized ExtModelInstance<?> addModelInstance(String profileId, 
     	final String serviceProviderName) throws InvalidServiceProviderException {
 
-    	ExtModelInstance<?> instance = this.extModelInstanceBuilder.<ExtModelConfiguration, 
-    		ExtModelInstance>build(serviceProviderName, profileId,this.extModelConfiguration);
+    	ExtModelInstance<?> instance = this.extModelInstanceBuilder
+    			.build(serviceProviderName, profileId,this.extModelConfiguration);
         if (instance != null) {
-            this.instances.add(instance);
+            this.instances.put(serviceProviderName, instance);
         }
         return instance;
     }
@@ -276,12 +272,7 @@ public class Connector<P extends Packet> extends TaskManager {
      * name
      */
     public ExtModelInstance<?> getModelInstance(String instanceName) {
-        int index = this.instances.indexOf(new Name<ExtModelInstance<?>>(instanceName));
-
-        if (index < 0) {
-            return null;
-        }
-        return this.instances.get(index);
+        return this.instances.get(instanceName);
     }
 
     /**
@@ -293,16 +284,14 @@ public class Connector<P extends Packet> extends TaskManager {
         if (this.instances == null || this.instances.size() == 0) {
             return;
         }
+        
         synchronized (this.instances) {
-            int length = this.instances.size();
-            for (; length > 0; ) {
-                try {
-                    this.instances.remove(0).unregister();
-
-                } catch (IllegalStateException e) {
-                }
-                length = this.instances.size();
-            }
+        	this.instances.values().forEach(e -> {
+        		try {
+        			e.unregister();
+        		} catch (IllegalStateException ex) {
+        		}
+        	});
             this.instances.clear();
         }
     }
