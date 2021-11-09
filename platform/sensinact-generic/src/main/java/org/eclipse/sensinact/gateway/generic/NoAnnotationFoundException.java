@@ -18,6 +18,11 @@ package org.eclipse.sensinact.gateway.generic;
  */
 public class NoAnnotationFoundException extends Exception {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
      * Constructor
      */
     public NoAnnotationFoundException() {

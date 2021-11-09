@@ -44,7 +44,11 @@ import java.net.URL;
  * The light JPanel.
  */
 public class FanPanel extends JPanel implements FanConfigListener {
-    private static final int NUM_IMAGES = 11;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private static final int NUM_IMAGES = 11;
     /**
      * The fan frame.
      */

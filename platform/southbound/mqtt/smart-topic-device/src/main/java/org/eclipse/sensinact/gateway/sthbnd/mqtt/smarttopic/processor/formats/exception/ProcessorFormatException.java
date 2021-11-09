@@ -16,7 +16,12 @@ package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.e
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class ProcessorFormatException extends org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.exception.ProcessorException {
-    public ProcessorFormatException(String message) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public ProcessorFormatException(String message) {
         super(message);
     }
 

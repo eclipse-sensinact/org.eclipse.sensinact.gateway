@@ -16,7 +16,12 @@ package org.eclipse.sensinact.gateway.app.api.exception;
  * @author Rémi Druilhe
  */
 public class ResourceNotFoundException extends Exception {
-    public ResourceNotFoundException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public ResourceNotFoundException() {
         super();
     }
 

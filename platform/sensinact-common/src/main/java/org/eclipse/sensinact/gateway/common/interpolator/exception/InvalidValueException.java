@@ -11,7 +11,12 @@
 package org.eclipse.sensinact.gateway.common.interpolator.exception;
 
 public class InvalidValueException extends InterpolationException {
-    public InvalidValueException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public InvalidValueException() {
         super();
     }
 

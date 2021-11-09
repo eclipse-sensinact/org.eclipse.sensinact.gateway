@@ -22,6 +22,10 @@ import java.util.List;
 
 public class JettyTestCallbackServlet extends HttpServlet {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      */
     private CallbackCollection callbackCollection;
 

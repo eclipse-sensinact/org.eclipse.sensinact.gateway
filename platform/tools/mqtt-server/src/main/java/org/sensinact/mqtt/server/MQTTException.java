@@ -11,7 +11,12 @@
 package org.sensinact.mqtt.server;
 
 public class MQTTException extends Exception {
-    public MQTTException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public MQTTException() {
         super();
     }
 

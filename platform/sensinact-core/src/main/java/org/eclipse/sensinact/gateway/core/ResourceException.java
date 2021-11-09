@@ -18,6 +18,11 @@ package org.eclipse.sensinact.gateway.core;
 public class ResourceException extends RuntimeException {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Constructs an <code>ResourceException</code> with no detail message.
 	 */
 	public ResourceException() {

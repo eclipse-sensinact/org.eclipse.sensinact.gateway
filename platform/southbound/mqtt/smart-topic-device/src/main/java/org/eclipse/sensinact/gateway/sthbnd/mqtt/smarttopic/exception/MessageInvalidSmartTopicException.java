@@ -11,7 +11,12 @@
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.exception;
 
 public class MessageInvalidSmartTopicException extends Exception {
-    public MessageInvalidSmartTopicException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public MessageInvalidSmartTopicException() {
         super();
     }
 

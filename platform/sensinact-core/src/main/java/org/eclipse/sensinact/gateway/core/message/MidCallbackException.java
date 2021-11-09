@@ -16,6 +16,11 @@ package org.eclipse.sensinact.gateway.core.message;
 public class MidCallbackException extends Exception {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Construtor
 	 * 
 	 * @param message

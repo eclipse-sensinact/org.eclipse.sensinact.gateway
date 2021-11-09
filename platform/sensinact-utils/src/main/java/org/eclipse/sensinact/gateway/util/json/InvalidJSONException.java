@@ -15,6 +15,11 @@ package org.eclipse.sensinact.gateway.util.json;
  */
 public class InvalidJSONException extends Exception {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
      * Constructor
      */
     public InvalidJSONException() {

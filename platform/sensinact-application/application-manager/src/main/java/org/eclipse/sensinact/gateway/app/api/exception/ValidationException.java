@@ -16,7 +16,12 @@ package org.eclipse.sensinact.gateway.app.api.exception;
  * @author Rémi Druilhe
  */
 public class ValidationException extends Exception {
-    public ValidationException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public ValidationException() {
         super();
     }
 

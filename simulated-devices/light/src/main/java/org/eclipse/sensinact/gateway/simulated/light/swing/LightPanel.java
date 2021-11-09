@@ -27,6 +27,10 @@ import java.awt.BorderLayout;
  */
 public class LightPanel extends JPanel implements LightConfigListener {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
      * The light frame.
      */
     private JFrame jFrame;

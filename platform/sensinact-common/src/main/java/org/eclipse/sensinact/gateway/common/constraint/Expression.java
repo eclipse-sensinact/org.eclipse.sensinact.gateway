@@ -21,7 +21,12 @@ import java.util.LinkedList;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class Expression extends LinkedList<Constraint> implements Constraint {
-    static enum LogicalOperator {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	static enum LogicalOperator {
         AND, OR;
     }
 

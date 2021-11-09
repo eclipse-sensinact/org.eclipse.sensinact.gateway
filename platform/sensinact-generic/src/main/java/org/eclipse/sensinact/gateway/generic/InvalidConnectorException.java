@@ -17,7 +17,10 @@ package org.eclipse.sensinact.gateway.generic;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class InvalidConnectorException extends Exception {
-    /**
+
+	private static final long serialVersionUID = 1L;
+
+	/**
      * Constructor
      */
     public InvalidConnectorException() {

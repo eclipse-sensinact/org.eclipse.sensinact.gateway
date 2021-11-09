@@ -12,6 +12,11 @@ package org.eclipse.sensinact.gateway.core.security;
 
 public class InvalidCredentialException extends SecuredAccessException {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public InvalidCredentialException() {
 		super();
 	}

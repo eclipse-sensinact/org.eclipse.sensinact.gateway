@@ -28,6 +28,11 @@ public class KeyStoreManagerException extends Exception {
     //********************************************************************//
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
      * Constructor
      *
      * @param e the Exception which has caused this one

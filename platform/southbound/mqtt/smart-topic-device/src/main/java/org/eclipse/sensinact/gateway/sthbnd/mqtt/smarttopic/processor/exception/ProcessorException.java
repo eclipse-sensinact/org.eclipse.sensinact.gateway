@@ -16,7 +16,12 @@ package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.exception
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class ProcessorException extends Exception {
-    public ProcessorException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public ProcessorException() {
         super();
     }
 

@@ -24,6 +24,10 @@ import java.io.IOException;
 
 public class KodiRemoteControlHttpListener extends HttpServlet {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private static final Logger LOG = LoggerFactory.getLogger(KodiRemoteControlHttpListener.class);
     SimpleHttpProtocolStackEndpoint connector;
     KodiServiceMediator mediator;

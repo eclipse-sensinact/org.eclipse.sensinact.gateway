@@ -11,7 +11,12 @@
 package org.eclipse.sensinact.gateway.common.interpolator.exception;
 
 public class ObjectInstantiationException extends InterpolationException {
-    public ObjectInstantiationException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public ObjectInstantiationException() {
     }
 
     public ObjectInstantiationException(String message) {
