@@ -40,6 +40,7 @@ import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
@@ -47,11 +48,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationPlugin;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
 import org.osgi.test.junit5.cm.ConfigurationExtension;
 import org.osgi.test.junit5.context.BundleContextExtension;
@@ -106,9 +109,33 @@ public class HttpDeviceFactoryTest {
 		}, dictionaryOf("cm.target", FACTORY_PID));
 	}
 	
+	@AfterEach
+	public void waitForDeletion(@InjectConfiguration(FACTORY_PID + "~test") Configuration config) throws IOException {
+		config.delete();
+		expectNServiceProviders(0);
+	}
+
+	private Session expectNServiceProviders(int targetSize) {
+		Session session = core.getAnonymousSession();
+		
+		for(int i = 0; i < 10; i++) {
+			if(session.serviceProviders().size() == targetSize) {
+				break;
+			}
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				break;
+			}
+		}
+		assertEquals(targetSize, session.serviceProviders().size());
+		
+		return session;
+	}
+	
 	@Test
 	@Order(1)
-	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test1",
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
 	    location = "?",
 		properties = {
 				@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test1/config.json"),
@@ -116,12 +143,8 @@ public class HttpDeviceFactoryTest {
 		}
 	)
 	public void testRawJsonArray() throws Exception {
-		Thread.sleep(5000);
+		Session session = expectNServiceProviders(2);
 		
-		Session session = core.getAnonymousSession();
-		
-		assertEquals(2, session.serviceProviders().size());
-
         testProvider(session, "test1_Foo", "data", "value", "94", "1.2:3.4", 
         		LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
         testProvider(session, "test1_Bar", "data", "value", "28", "5.6:7.8", 
@@ -135,7 +158,7 @@ public class HttpDeviceFactoryTest {
 
 	@Test
 	@Order(2)
-	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test2",
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
 		location = "?",
 		properties = {
 			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test2/config.json"),
@@ -143,11 +166,7 @@ public class HttpDeviceFactoryTest {
 		}
 	)
 	public void testOpenDataAPIFormat() throws Exception {
-		Thread.sleep(5000);
-		
-		Session session = core.getAnonymousSession();
-		
-		assertEquals(21, session.serviceProviders().size());
+		Session session = expectNServiceProviders(21);
 		
 		testProvider(session, "test2_1452", "data", "GOOSE_value", "0", "48.849577:2.350867", 
         		LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
@@ -167,7 +186,7 @@ public class HttpDeviceFactoryTest {
 	
 	@Test
 	@Order(3)
-	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test3",
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
 	    location = "?",
 		properties = {
 				@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test3/config.json"),
@@ -175,11 +194,7 @@ public class HttpDeviceFactoryTest {
 		}
 	)
 	public void testJsonArrayNestedInArray() throws Exception {
-		Thread.sleep(5000);
-		
-		Session session = core.getAnonymousSession();
-		
-		assertEquals(2, session.serviceProviders().size());
+		Session session = expectNServiceProviders(2);
 
         testProvider(session, "test3_Foo", "data", "value", "94", "1.2:3.4", 
         		LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
@@ -194,7 +209,7 @@ public class HttpDeviceFactoryTest {
 
 	@Test
 	@Order(4)
-	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test4",
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
 	location = "?",
 	properties = {
 			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test4/config.json"),
@@ -202,11 +217,7 @@ public class HttpDeviceFactoryTest {
 	}
 			)
 	public void testCsvWithTitles() throws Exception {
-		Thread.sleep(5000);
-		
-		Session session = core.getAnonymousSession();
-		
-		assertEquals(2, session.serviceProviders().size());
+		Session session = expectNServiceProviders(2);
 		
 		testProvider(session, "test4_Foo", "data", "value", "94", "1.2:3.4", 
 				LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
@@ -221,7 +232,7 @@ public class HttpDeviceFactoryTest {
 	
 	@Test
 	@Order(5)
-	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test5",
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
 	location = "?",
 	properties = {
 			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test5/config.json"),
@@ -229,11 +240,7 @@ public class HttpDeviceFactoryTest {
 	}
 			)
 	public void testCsvWithoutTitles() throws Exception {
-		Thread.sleep(5000);
-		
-		Session session = core.getAnonymousSession();
-		
-		assertEquals(2, session.serviceProviders().size());
+		Session session = expectNServiceProviders(2);
 		
 		testProvider(session, "test5_Foo", "data", "value", "94", "1.2:3.4", 
 				LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
@@ -248,7 +255,7 @@ public class HttpDeviceFactoryTest {
 
 	@Test
 	@Order(6)
-	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test6",
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
 	location = "?",
 	properties = {
 			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test6/config.json"),
@@ -256,11 +263,7 @@ public class HttpDeviceFactoryTest {
 	}
 			)
 	public void testCsvWithNumberLikeValues() throws Exception {
-		Thread.sleep(5000);
-		
-		Session session = core.getAnonymousSession();
-		
-		assertEquals(5, session.serviceProviders().size());
+		Session session = expectNServiceProviders(5);
 		
 		testProvider(session, "test6_1114", "vehicle", "line", "3", "59.445000:24.742240", -1);
 		testProvider(session, "test6_1119", "vehicle", "line", "43", "59.429320:24.698510", -1);
@@ -276,7 +279,7 @@ public class HttpDeviceFactoryTest {
 
 	@Test
 	@Order(7)
-	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test7",
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
 	location = "?",
 	properties = {
 			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test7/config.json"),
@@ -284,11 +287,7 @@ public class HttpDeviceFactoryTest {
 	}
 			)
 	public void testCsvWithForeignLocale() throws Exception {
-		Thread.sleep(5000);
-		
-		Session session = core.getAnonymousSession();
-		
-		assertEquals(1, session.serviceProviders().size());
+		Session session = expectNServiceProviders(1);
 		
 		testProvider(session, "test7_Test", "pollutant", "O3", "42.2", "1.23:4.56", 
 				LocalDateTime.of(2021, 11, 05, 18, 00).toEpochSecond(ZoneOffset.UTC));
