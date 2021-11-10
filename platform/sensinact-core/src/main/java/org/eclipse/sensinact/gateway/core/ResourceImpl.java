@@ -187,7 +187,7 @@ public class ResourceImpl extends
 						AccessMethod.Type[] types = AccessMethod.Type.values();
 
 						for (; index < types.length; index++) {
-							AccessMethod m = proxy.getAccessMethod(types[index].name());
+							AccessMethod<?, ?> m = proxy.getAccessMethod(types[index].name());
 							if (m != null && m.size() > 0) {
 								buffer.append(pos > 0 ? JSONUtils.COMMA : JSONUtils.EMPTY);
 								buffer.append(m.getDescription().getJSONDescription());
@@ -209,7 +209,7 @@ public class ResourceImpl extends
 	/**
 	 * {@link AccessMethod}s of this {@link Resource}
 	 */
-	protected final Map<AccessMethod.Type, AccessMethod> methods;
+	protected final Map<AccessMethod.Type, AccessMethod<?,?>> methods;
 
 	/**
 	 * Path of registered {@link LinkedResourceImpl} referring to this resource
@@ -242,7 +242,7 @@ public class ResourceImpl extends
 	 */
 	protected ResourceImpl(ModelInstance<?> modelInstance, ResourceConfig resourceConfig, ServiceImpl service) {
 		super(modelInstance, service, UriUtils.getUri(new String[] { service.getPath(), resourceConfig.buildName(service.getName())}));
-		this.methods = new HashMap<AccessMethod.Type, AccessMethod>();
+		this.methods = new HashMap<AccessMethod.Type, AccessMethod<?,?>>();
 		this.links = new ArrayList<String>();
 		this.resourceType = resourceConfig.getTypeConfig().getResourceImplementedInterface();
 		this.setUpdatePolicy(resourceConfig.getUpdatePolicy());
@@ -652,7 +652,7 @@ public class ResourceImpl extends
 	 * 
 	 * @return the {@link AccessMethod} of this resource of the specified type
 	 */
-	public AccessMethod getAccessMethod(AccessMethod.Type method) {
+	public AccessMethod<?, ?> getAccessMethod(AccessMethod.Type method) {
 		return this.methods.get(method);
 	}
 
@@ -671,12 +671,12 @@ public class ResourceImpl extends
 	 * @throws InvalidConstraintDefinitionException
 	 */
 	@SuppressWarnings("unchecked")
-	public AccessMethod registerExecutor(AccessMethod.Type type, Class<?>[] parameterTypes, String[] parameterNames, 
+	public AccessMethod<?, ?> registerExecutor(AccessMethod.Type type, Class<?>[] parameterTypes, String[] parameterNames, 
 		AccessMethodExecutor executor, AccessMethodExecutor.ExecutionPolicy policy) 
 		throws InvalidValueException {
-		AccessMethod method = this.getAccessMethod(type);
+		AccessMethod<?,?> method = this.getAccessMethod(type);
 		if (method != null)
-			((AbstractAccessMethod) method).addSignature(parameterTypes, parameterNames, executor, policy);
+			((AbstractAccessMethod<?,?>) method).addSignature(parameterTypes, parameterNames, executor, policy);
 		return method;
 	}
 
@@ -694,11 +694,11 @@ public class ResourceImpl extends
 	 * @throws InvalidConstraintDefinitionException
 	 * @throws InvalidValueException
 	 */
-	public AccessMethod registerExecutor(Signature signature, AccessMethodExecutor executor,
+	public AccessMethod<?,?> registerExecutor(Signature signature, AccessMethodExecutor executor,
 			AccessMethodExecutor.ExecutionPolicy policy) {
-		AccessMethod method = this.getAccessMethod(AccessMethod.Type.valueOf(signature.getName()));
+		AccessMethod<?,?> method = this.getAccessMethod(AccessMethod.Type.valueOf(signature.getName()));
 		if (method != null) {
-			((AbstractAccessMethod) method).addSignature(signature, executor, policy);
+			((AbstractAccessMethod<?,?>) method).addSignature(signature, executor, policy);
 		}
 		return method;
 	}
@@ -843,7 +843,7 @@ public class ResourceImpl extends
 		int index = 0;
 		int length = types == null ? 0 : types.length;
 		for (; index < length; index++) {
-			AccessMethod method = this.methods.remove(types[index].name());
+			AccessMethod<?,?> method = this.methods.remove(types[index].name());
 
 			if (method != null) {
 				((AbstractAccessMethod) method).stop();
@@ -874,7 +874,7 @@ public class ResourceImpl extends
 	 * @param method
 	 *            the {@link AccessMethod} to register
 	 */
-	void registerMethod(AccessMethod.Type type, AccessMethod method) {
+	void registerMethod(AccessMethod.Type type, AccessMethod<?,?> method) {
 		if (this.methods.get(type) == null) {
 			this.methods.put(type, method);
 		}

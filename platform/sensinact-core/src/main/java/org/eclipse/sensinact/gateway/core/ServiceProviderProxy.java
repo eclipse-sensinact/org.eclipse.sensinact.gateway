@@ -29,7 +29,7 @@ public class ServiceProviderProxy extends ModelElementProxy {
 	}
 
 	@Override
-	public AccessMethod getAccessMethod(String name) {
+	public AccessMethod<?,?> getAccessMethod(String name) {
 		return null;
 	}
 }

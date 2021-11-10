@@ -80,7 +80,7 @@ public class AppManagerFactory extends ApplicationAvailabilityListenerAbstract {
         installResource.registerExecutor(new Signature(mediator, act, new Class[]{String.class, JSONObject.class}, null), installExecutor, AccessMethodExecutor.ExecutionPolicy.AFTER);
         //installResource.getAccessMethod(act).invoke()
         ResourceImpl uninstallResource = adminService.addActionResource(AppConstant.UNINSTALL, ActionResource.class);
-        uninstallExecutor = new AppUninstallExecutor(mediator, this.serviceProvider, persistenceService);
+        uninstallExecutor = new AppUninstallExecutor(this.serviceProvider, persistenceService);
         uninstallResource.registerExecutor(new Signature(mediator, act, new Class[]{String.class}, null), uninstallExecutor, AccessMethodExecutor.ExecutionPolicy.AFTER);
         ResourceImpl resource = adminService.addDataResource(PropertyResource.class, AppConstant.KEYWORDS, JSONArray.class, null);
         this.jsonSchemaListener = new AppJsonSchemaListener(mediator, resource);

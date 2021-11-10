@@ -552,7 +552,6 @@ public class TestThirdPartyAccessToken{
 		configuration.put("felix.log.level", "4");
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Disabled
 	@Test
 	public void testThirdPartyIdentityProvider(@InjectService Core core) throws Throwable {
@@ -577,7 +576,7 @@ public class TestThirdPartyAccessToken{
 		Session session = core.getAnonymousSession();
 		assertNotNull(session);
 
-		Set providers = session.serviceProviders();
+		Set<ServiceProvider> providers = session.serviceProviders();
 		System.out.println(providers);
 		assertTrue(providers.isEmpty());
 

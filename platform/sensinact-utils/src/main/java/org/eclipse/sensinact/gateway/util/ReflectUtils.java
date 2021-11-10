@@ -639,16 +639,16 @@ public abstract class ReflectUtils {
      */
     public static <F> F getTheBestInstance(Class<F> clazz, Object[] parameters) {
         F instance = null;
-        Constructor[] constructors = clazz.getConstructors();
+        Constructor<?>[] constructors = clazz.getConstructors();
         int index = constructors.length - 1;
 
         //order constructors by decreasing arguments number
         //to use the maximum number of passed parameters
         for (; index >= 0; index--) {
             int pos = index;
-            Constructor current = constructors[index];
+            Constructor<?> current = constructors[index];
             while (pos > 0) {
-                Constructor previous = constructors[pos - 1];
+                Constructor<?> previous = constructors[pos - 1];
                 if (previous.getParameterTypes().length < current.getParameterTypes().length) {
                     constructors[pos] = previous;
                     constructors[pos - 1] = current;
