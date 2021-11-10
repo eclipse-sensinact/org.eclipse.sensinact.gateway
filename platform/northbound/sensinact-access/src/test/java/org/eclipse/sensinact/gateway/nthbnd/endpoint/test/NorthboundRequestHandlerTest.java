@@ -85,7 +85,7 @@ public class NorthboundRequestHandlerTest {
         NorthboundRequestBuilder builder = handler.handle();
         NorthboundRequest request = builder.build();
         NorthboundEndpoint endpoint = new NorthboundEndpoint((NorthboundMediator) testContext.getMediator(), null);
-        AccessMethodResponse response = endpoint.execute(request);
+        AccessMethodResponse<?> response = endpoint.execute(request);
 
         String obj = response.getJSON();
         System.out.println(obj);

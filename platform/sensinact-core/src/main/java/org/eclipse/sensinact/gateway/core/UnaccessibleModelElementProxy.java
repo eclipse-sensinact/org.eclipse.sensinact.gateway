@@ -57,7 +57,7 @@ public class UnaccessibleModelElementProxy extends ModelElementProxy {
 	 * @see SensiNactResourceModelElementProxy# getAccessMethod(AccessMethod.Type)
 	 */
 	@Override
-	public AccessMethod getAccessMethod(String method) {
+	public AccessMethod<?,?> getAccessMethod(String method) {
 		return null;
 	}
 }

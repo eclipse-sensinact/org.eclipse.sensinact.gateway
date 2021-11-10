@@ -35,7 +35,7 @@ public class AccessMethodDescription implements Description, Iterable<Signature>
 	 * @param method
 	 *            the {@link AccessMethod} to describe
 	 */
-	protected AccessMethodDescription(AccessMethod method) {
+	protected AccessMethodDescription(AccessMethod<?, ?> method) {
 		this.signatures = method.getSignatures();
 		this.name = method.getName();
 	}

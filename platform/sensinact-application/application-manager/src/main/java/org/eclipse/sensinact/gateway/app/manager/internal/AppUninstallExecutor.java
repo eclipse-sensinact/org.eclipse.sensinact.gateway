@@ -14,7 +14,6 @@ import org.eclipse.sensinact.gateway.app.api.exception.InvalidApplicationExcepti
 import org.eclipse.sensinact.gateway.app.api.persistence.ApplicationPersistenceService;
 import org.eclipse.sensinact.gateway.app.api.persistence.exception.ApplicationPersistenceException;
 import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAvailabilityListenerAbstract;
-import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
@@ -28,7 +27,6 @@ import org.slf4j.LoggerFactory;
  */
 public class AppUninstallExecutor extends ApplicationAvailabilityListenerAbstract implements AccessMethodExecutor {
     private static Logger LOG = LoggerFactory.getLogger(AppUninstallExecutor.class);
-    private final AppServiceMediator mediator;
     private final ServiceProviderImpl device;
     private final ApplicationPersistenceService persistenceService;
 
@@ -37,8 +35,7 @@ public class AppUninstallExecutor extends ApplicationAvailabilityListenerAbstrac
      *
      * @param device the AppManager service provider
      */
-    AppUninstallExecutor(AppServiceMediator mediator, ServiceProviderImpl device, ApplicationPersistenceService persistenceService) {
-        this.mediator = mediator;
+    AppUninstallExecutor(ServiceProviderImpl device, ApplicationPersistenceService persistenceService) {
         this.device = device;
         this.persistenceService = persistenceService;
     }

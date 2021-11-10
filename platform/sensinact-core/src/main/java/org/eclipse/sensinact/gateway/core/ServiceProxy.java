@@ -34,7 +34,7 @@ public class ServiceProxy extends ModelElementProxy {
 	/**
 	 * {@link AccessMethod}s of this ModelElementProxy
 	 */
-	protected final Map<String, AccessMethod> methods;
+	protected final Map<String, AccessMethod<?,?>> methods;
 
 	/**
 	 * Constructor
@@ -45,11 +45,11 @@ public class ServiceProxy extends ModelElementProxy {
 	 */
 	ServiceProxy(Mediator mediator, String path) throws InvalidServiceException {
 		super(mediator, Service.class, path);
-		this.methods = new HashMap<String, AccessMethod>();
+		this.methods = new HashMap<String, AccessMethod<?,?>>();
 	}
 
 	@Override
-	public AccessMethod getAccessMethod(String method) {
+	public AccessMethod<?,?> getAccessMethod(String method) {
 		return this.methods.get(method);
 	}
 
@@ -63,7 +63,7 @@ public class ServiceProxy extends ModelElementProxy {
 	 * @param method
 	 *            the {@link AccessMethod} to register
 	 */
-	void registerMethod(String methodType, AccessMethod method) {
+	void registerMethod(String methodType, AccessMethod<?,?> method) {
 		if (this.methods.get(methodType) == null) {
 			this.methods.put(methodType, method);
 		}
@@ -150,7 +150,7 @@ public class ServiceProxy extends ModelElementProxy {
 			registerMethod(AccessMethod.GET, getMethod);
 
 		} else {
-			AccessMethod snaMethod = new UnaccessibleAccessMethod(mediator, getPath(),
+			AccessMethod<?,?> snaMethod = new UnaccessibleAccessMethod(mediator, getPath(),
 					AccessMethod.Type.valueOf(AccessMethod.GET));
 			registerMethod(AccessMethod.GET, snaMethod);
 		}
@@ -160,7 +160,7 @@ public class ServiceProxy extends ModelElementProxy {
 			registerMethod(AccessMethod.SET, setMethod);
 
 		} else {
-			AccessMethod snaMethod = new UnaccessibleAccessMethod(mediator, getPath(),
+			AccessMethod<?,?> snaMethod = new UnaccessibleAccessMethod(mediator, getPath(),
 					AccessMethod.Type.valueOf(AccessMethod.SET));
 			registerMethod(AccessMethod.SET, snaMethod);
 		}
@@ -170,7 +170,7 @@ public class ServiceProxy extends ModelElementProxy {
 			registerMethod(AccessMethod.ACT, actMethod);
 
 		} else {
-			AccessMethod snaMethod = new UnaccessibleAccessMethod(mediator, getPath(),
+			AccessMethod<?,?> snaMethod = new UnaccessibleAccessMethod(mediator, getPath(),
 					AccessMethod.Type.valueOf(AccessMethod.ACT));
 			registerMethod(AccessMethod.ACT, snaMethod);
 		}
@@ -191,7 +191,7 @@ public class ServiceProxy extends ModelElementProxy {
 			registerMethod(AccessMethod.SUBSCRIBE, subscribeMethod);
 
 		} else {
-			AccessMethod snaMethod = new UnaccessibleAccessMethod(mediator, getPath(),
+			AccessMethod<?,?> snaMethod = new UnaccessibleAccessMethod(mediator, getPath(),
 					AccessMethod.Type.valueOf(AccessMethod.SUBSCRIBE));
 			registerMethod(AccessMethod.SUBSCRIBE, snaMethod);
 		}
@@ -206,7 +206,7 @@ public class ServiceProxy extends ModelElementProxy {
 			registerMethod(AccessMethod.UNSUBSCRIBE, unsubscribeMethod);
 
 		} else {
-			AccessMethod snaMethod = new UnaccessibleAccessMethod(mediator, getPath(),
+			AccessMethod<?,?> snaMethod = new UnaccessibleAccessMethod(mediator, getPath(),
 					AccessMethod.Type.valueOf(AccessMethod.UNSUBSCRIBE));
 			registerMethod(AccessMethod.UNSUBSCRIBE, snaMethod);
 		}

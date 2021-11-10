@@ -30,7 +30,7 @@ public class ResourceProxy extends ModelElementProxy {
 	/**
 	 * {@link AccessMethod}s of this ResourceProxy
 	 */
-	protected final Map<String, AccessMethod> methods;
+	protected final Map<String, AccessMethod<?,?>> methods;
 
 	/**
 	 * Constructor
@@ -41,14 +41,14 @@ public class ResourceProxy extends ModelElementProxy {
 	ResourceProxy(Mediator mediator, ResourceImpl resource, List<MethodAccessibility> methodAccessibilities) {
 		super(mediator, Resource.class, resource.getPath());
 
-		Map<String, AccessMethod> methods = new HashMap<String, AccessMethod>();
+		Map<String, AccessMethod<?,?>> methods = new HashMap<String, AccessMethod<?,?>>();
 		AccessMethod.Type[] existingTypes = AccessMethod.Type.values();
 
 		int index = 0;
 		int length = existingTypes == null ? 0 : existingTypes.length;
 
 		for (; index < length; index++) {
-			AccessMethod method = null;
+			AccessMethod<?,?> method = null;
 			if ((method = resource.getAccessMethod(existingTypes[index])) == null) {
 				continue;
 			}
@@ -61,11 +61,11 @@ public class ResourceProxy extends ModelElementProxy {
 				methods.put(existingTypes[index].name(), method);
 			}
 		}
-		this.methods = Collections.<String, AccessMethod>unmodifiableMap(methods);
+		this.methods = Collections.<String, AccessMethod<?,?>>unmodifiableMap(methods);
 	}
 
 	@Override
-	public AccessMethod getAccessMethod(String type) {
+	public AccessMethod<?,?> getAccessMethod(String type) {
 		return this.methods.get(type);
 	}
 }
