@@ -152,40 +152,42 @@ public abstract class MidOSGiTestBak implements BundleContextProvider {
     	// Create a buffer for reading the files
         byte[] buf = new byte[1024];
 
-        JarOutputStream jarOut = new JarOutputStream(fOut, manifest);
-        FileInputStream reader = null;
-        int index = 0;
-        int length = sourceDirectories == null ? 0 : sourceDirectories.length;
+		try (JarOutputStream jarOut = new JarOutputStream(fOut, manifest);) {
+			FileInputStream reader = null;
+			int index = 0;
+			int length = sourceDirectories == null ? 0 : sourceDirectories.length;
 
-        for (; index < length; index++) {
-            File sourceDirectory = sourceDirectories[index];
-            FilesEnumerator enumerator = new FilesEnumerator(sourceDirectory);
-            while (enumerator.hasMoreElements()) {
-                File file = enumerator.nextElement();
-                if (file.isFile()) {
-                    String entryName = null;
-                    if (sourceDirectory.isDirectory()) {
-                        entryName = file.getAbsolutePath().substring(sourceDirectory.getAbsolutePath().length() + 1);
+			for (; index < length; index++) {
+				File sourceDirectory = sourceDirectories[index];
+				FilesEnumerator enumerator = new FilesEnumerator(sourceDirectory);
+				while (enumerator.hasMoreElements()) {
+					File file = enumerator.nextElement();
+					if (file.isFile()) {
+						String entryName = null;
+						if (sourceDirectory.isDirectory()) {
+							entryName = file.getAbsolutePath()
+									.substring(sourceDirectory.getAbsolutePath().length() + 1);
 
-                    } else {
-                        entryName = file.getName();
-                    }
-                    entryName = entryName.replace(File.separatorChar, '/');
-                    jarOut.putNextEntry(new ZipEntry(entryName));
+						} else {
+							entryName = file.getName();
+						}
+						entryName = entryName.replace(File.separatorChar, '/');
+						jarOut.putNextEntry(new ZipEntry(entryName));
 
-                    reader = new FileInputStream(file);
-                    int len;
-                    while ((len = reader.read(buf)) > 0) {
-                        jarOut.write(buf, 0, len);
-                    }
-                    // Complete the entry
-                    reader.close();
-                    jarOut.closeEntry();
-                }
-            }
-        }
-        jarOut.close();
-        this.classloader.addFiltered(new File(destDirectory, "dynamicBundle.jar").toURI().toURL());
+						reader = new FileInputStream(file);
+						int len;
+						while ((len = reader.read(buf)) > 0) {
+							jarOut.write(buf, 0, len);
+						}
+						// Complete the entry
+						reader.close();
+						jarOut.closeEntry();
+					}
+				}
+			}
+			jarOut.close();
+			this.classloader.addFiltered(new File(destDirectory, "dynamicBundle.jar").toURI().toURL());
+		}
     }
 
     /**
