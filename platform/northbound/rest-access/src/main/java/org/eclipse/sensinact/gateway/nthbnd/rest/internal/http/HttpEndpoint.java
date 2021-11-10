@@ -100,7 +100,7 @@ public class HttpEndpoint extends HttpServlet {
 
         } catch (InvalidCredentialException e) {
             LOG.error(e.getMessage(), e);
-            response.sendError(403, e.getMessage());
+            response.sendError(401, e.getMessage());
 
         } catch (Exception e) {
         	e.printStackTrace();
