@@ -53,7 +53,7 @@ public class ActResponse extends AccessMethodJSONResponse {
 	 */
 	@SuppressWarnings("unchecked")
 	public JSONArray getTriggers() {
-		List<String> triggered = (List<String>) super.properties.get(SnaConstants.TRIGGERED_KEY);
+		List<String> triggered = this.<List<String>>get(SnaConstants.TRIGGERED_KEY);
 
 		if (triggered == null) {
 			triggered = new ArrayList<String>();
@@ -70,7 +70,7 @@ public class ActResponse extends AccessMethodJSONResponse {
 	 *            {@link StateVariableResource}
 	 */
 	public void addTriggered(String trigger) {
-		List<String> triggered = (List<String>) super.properties.get(SnaConstants.TRIGGERED_KEY);
+		List<String> triggered = this.<List<String>>get(SnaConstants.TRIGGERED_KEY);
 
 		if (triggered == null) {
 			triggered = new ArrayList<String>();

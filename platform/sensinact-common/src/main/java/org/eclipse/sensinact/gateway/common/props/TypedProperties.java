@@ -13,9 +13,9 @@ package org.eclipse.sensinact.gateway.common.props;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 
@@ -26,10 +26,37 @@ import org.eclipse.sensinact.gateway.util.JSONUtils;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public abstract class TypedProperties<T extends Enum<T> & KeysCollection> implements JSONable {
+	
+	private static class TypedKeyValue implements Entry<TypedKey<?>, Object>{
+		private final TypedKey<?> key;
+		private final Object value;
+		
+		public TypedKeyValue(TypedKey<?> key, Object value) {
+			this.key = key;
+			this.value = value;
+		}
+
+		@Override
+		public TypedKey<?> getKey() {
+			return key;
+		}
+
+		@Override
+		public Object getValue() {
+			return value;
+		}
+
+		@Override
+		public Object setValue(Object value) {
+			throw new UnsupportedOperationException("Changing the value via the iterator is not supported");
+		}
+	}
+	
     protected static final String TYPE = "type";
 
-    protected final Map<TypedKey<?>, Object> properties;
+    private final Map<String,Entry<TypedKey<?>, Object>> properties;
 
+    private final T type;
 
     /**
      * Constructor
@@ -37,13 +64,9 @@ public abstract class TypedProperties<T extends Enum<T> & KeysCollection> implem
      * @param type      the type of this event
      */
     public TypedProperties(T type) {
-        this.properties = new HashMap<TypedKey<?>, Object>();
-        TypedKey<?> key = type.key(TypedProperties.TYPE);
-        if (key == null) {
-            this.putValue(new TypedKey<T>(TypedProperties.TYPE, (Class<T>) type.getClass(), false), type);
-        } else {
-            this.putValue(key, type);
-        }
+        this.properties = new HashMap<>();
+        this.type = type;
+        putValue(TYPE, type);
     }
 
     /**
@@ -53,7 +76,7 @@ public abstract class TypedProperties<T extends Enum<T> & KeysCollection> implem
     @Override
     public String getJSON() {
         StringBuilder builder = new StringBuilder();
-        Iterator<Map.Entry<TypedKey<?>, Object>> iterator = this.properties.entrySet().iterator();
+        Iterator<Entry<TypedKey<?>, Object>> iterator = this.properties.values().iterator();
 
         builder.append(JSONUtils.OPEN_BRACE);
         int index = 0;
@@ -86,7 +109,7 @@ public abstract class TypedProperties<T extends Enum<T> & KeysCollection> implem
      * @param value the value to set
      */
     protected void putValue(TypedKey<?> key, Object value) {
-        this.properties.put(key, value);
+        this.properties.put(key.getName(), new TypedKeyValue(key, value));
     }
 
     /**
@@ -142,10 +165,14 @@ public abstract class TypedProperties<T extends Enum<T> & KeysCollection> implem
      *               created if relevant
      */
     public void put(String key, Object value, boolean hidden) {
-        if (!this.getType().keys().contains(new Name<TypedKey<?>>(key))) {
+        if (notPresentInType(key)) {
             this.putValue(key, value, hidden);
         }
     }
+
+	private boolean notPresentInType(String key) {
+		return this.getType().keys().stream().noneMatch(k -> k.getName().equals(key));
+	}
 
     /**
      * Removes from the key (and its associated value) from
@@ -154,10 +181,12 @@ public abstract class TypedProperties<T extends Enum<T> & KeysCollection> implem
      * @param key the key of the property to remove
      */
     public Object remove(String key) {
-        if (!this.getType().keys().contains(new Name<TypedKey<?>>(key))) {
-            return this.properties.remove(key);
+    	Object value = null;
+        if (notPresentInType(key)) {
+        	Entry<TypedKey<?>, Object> e = this.properties.remove(key);
+            value = e == null ? null : e.getValue(); 
         }
-        return null;
+        return value;
     }
 
     /**
@@ -168,22 +197,21 @@ public abstract class TypedProperties<T extends Enum<T> & KeysCollection> implem
      * property
      */
     @SuppressWarnings("unchecked")
-    public <V> V get(String key) {
-        TypedKey<V> typedKey = null;
+	public <V> V get(String key) {
 
-        Object object = this.properties.get(new Name<TypedKey<?>>(key));
-        try {
-            typedKey = (TypedKey<V>) this.getType().key(key);
-
-        } finally {
-            if (object == null) {
-                return (V) object;
-            }
-            if (typedKey != null && !typedKey.getType().isAssignableFrom(object.getClass())) {
-                return CastUtils.cast(typedKey.getType(), object);
-            }
+    	Entry<TypedKey<?>, Object> e = this.properties.get(key);
+    	
+        if (e == null) {
+        	return null;
         }
-        return (V) object;
+        
+        Class<?> type = e.getKey().getType();
+        Object value = e.getValue();
+        
+        if (!type.isInstance(value)) {
+        	return (V) CastUtils.cast(type, value);
+        }
+        return (V) e.getValue();
     }
 
     /**
@@ -192,6 +220,10 @@ public abstract class TypedProperties<T extends Enum<T> & KeysCollection> implem
      * @return this TypedProperties type
      */
     public T getType() {
-        return (T) this.properties.get(new Name<TypedKey>(TypedProperties.TYPE));
+        return type;
+    }
+    
+    protected Iterator<Map.Entry<TypedKey<?>, Object>> typedKeyValues() {
+    	return ((Map<String, Entry<TypedKey<?>, Object>>)properties).values().iterator();
     }
 }

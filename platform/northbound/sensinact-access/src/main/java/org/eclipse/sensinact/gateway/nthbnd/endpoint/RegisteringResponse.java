@@ -110,7 +110,7 @@ public class RegisteringResponse extends AbstractSnaErrorfulMessage<RegisteringR
      */
     public String getJSON() {
         StringBuilder builder = new StringBuilder();
-        Iterator<Map.Entry<TypedKey<?>, Object>> iterator = super.properties.entrySet().iterator();
+        Iterator<Map.Entry<TypedKey<?>, Object>> iterator = typedKeyValues();
 
         builder.append(JSONUtils.OPEN_BRACE);
         int index = 0;

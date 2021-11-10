@@ -21,7 +21,6 @@ import java.util.Map.Entry;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
-import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.core.SensiNactResourceModelConfiguration;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
@@ -98,15 +97,20 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 		synchronized (this.callbacks) {
 			Iterator<Entry<SnaFilter, List<MidCallback>>> iterator = this.callbacks.entrySet().iterator();
 
-			while (iterator.hasNext()) {
+			outer: while (iterator.hasNext()) {
 				Entry<SnaFilter, List<MidCallback>> entry = iterator.next();
 
 				List<MidCallback> list = entry.getValue();
-				if (list.remove(new Name<MidCallback>(callback))) {
-					if (list.isEmpty()) {
-						iterator.remove();
+				Iterator<MidCallback> it2 = list.iterator();
+				while(it2.hasNext()) {
+					MidCallback mid = it2.next();
+					if(mid.getName().equals(callback)) {
+						it2.remove();
+						if (list.isEmpty()) {
+							iterator.remove();
+						}
+						break outer;
 					}
-					break;
 				}
 			}
 		}
@@ -247,7 +251,6 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 						public Void execute(SnaAgent agent) throws Exception {	
 							String agentKey = agent.getPublicKey();						
 							List<MethodAccessibility> methodAccessibilities = SnaMessageListener.this.agentsAccessibility.get(agentKey);
-							int index = -1;
 							if (methodAccessibilities == null) {
 								AccessLevelOption option = SnaMessageListener.this.configuration.getAuthenticatedAccessLevelOption(path, agentKey);
 								if (option == null) {
@@ -255,9 +258,13 @@ public class SnaMessageListener extends AbstractStackEngineHandler<SnaMessage<?>
 								}
 								methodAccessibilities = SnaMessageListener.this.configuration.getAccessibleMethods(path, option);
 								SnaMessageListener.this.agentsAccessibility.put(agentKey, methodAccessibilities);
-							}						
-							if ((index = methodAccessibilities.indexOf(new Name<MethodAccessibility>(method))) > -1
-									&& methodAccessibilities.get(index).isAccessible()) {
+							}
+							
+							if (methodAccessibilities.stream()
+									.filter(ma -> method.equals(ma.getName()))
+									.map(MethodAccessibility::isAccessible)
+									.findFirst()
+									.orElse(false)) {
 								agent.register(message);
 							}
 							return null;

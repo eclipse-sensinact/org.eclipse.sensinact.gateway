@@ -10,7 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.generic.packet;
 
-import org.eclipse.sensinact.gateway.common.primitive.Name;
+import java.util.Optional;
+
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.TaskManager;
 
@@ -168,7 +169,6 @@ public abstract class SimplePacketReader<P extends Packet> extends AbstractPacke
      * Creates the SubPacket, PayloadFragment and PayloadAttributeFragment
      */
     protected void configure() {
-        boolean isNewPayloadFragment = false;
         PayloadFragmentImpl subPacket = null;
         
         if (this.serviceProviderId == null) {
@@ -181,7 +181,6 @@ public abstract class SimplePacketReader<P extends Packet> extends AbstractPacke
         subPacket.isGoodbyeMessage(this.isGoodbyeMessage);
         subPacket.isHelloMessage(this.isHelloMessage);
         
-        PayloadServiceFragmentImpl payloadFragment = null;
         StringBuilder builder = new StringBuilder();
         if (this.command != null) {
             builder.append(this.command.name());
@@ -195,28 +194,32 @@ public abstract class SimplePacketReader<P extends Packet> extends AbstractPacke
         }
         if (this.resourceId != null) 
             builder.append(this.resourceId);
-        int index = -1;
+
         String name = builder.toString();
         
         if (name.length() > 0) {
-            if ((index = subPacket.payloadFragments.indexOf(new Name<PayloadServiceFragment>(name))) != -1)
-                payloadFragment = (PayloadServiceFragmentImpl) subPacket.payloadFragments.get(index);
-            else {
+        	PayloadServiceFragmentImpl payloadFragment = null;
+
+        	Optional<PayloadServiceFragmentImpl> found = subPacket.payloadFragments.stream()
+        		.filter(PayloadServiceFragmentImpl.class::isInstance)
+        		.map(PayloadServiceFragmentImpl.class::cast)
+        		.filter(psf -> psf.getName().equals(name))
+        		.findFirst();
+            if (found.isPresent()) {
+            	payloadFragment = found.get();
+            } else {
                 payloadFragment = newPayloadFragment();
                 payloadFragment.setCommand(this.command);
                 payloadFragment.setServiceId(this.serviceId);
                 payloadFragment.setResourceId(this.resourceId);
-                isNewPayloadFragment = true;
-            }
-        }
-        if (payloadFragment != null) {
-            if (this.attributeId != null || this.data != null) {
-                PayloadResourceFragmentImpl payloadAttributeFragment = newPayloadAttributeFragment(this.attributeId, this.metadataId, this.data);
-                payloadAttributeFragment.setTimestamp(this.timestamp);
-                payloadFragment.addPayloadAttributeFragment(payloadAttributeFragment);
-            }
-            if (isNewPayloadFragment) 
                 subPacket.addPayloadFragment(payloadFragment);
+            }
+            
+            if (this.attributeId != null || this.data != null) {
+            	PayloadResourceFragmentImpl payloadAttributeFragment = newPayloadAttributeFragment(this.attributeId, this.metadataId, this.data);
+            	payloadAttributeFragment.setTimestamp(this.timestamp);
+            	payloadFragment.addPayloadAttributeFragment(payloadAttributeFragment);
+            }
         }
         reset();
         super.setSubPacket(subPacket);

@@ -75,7 +75,7 @@ public abstract class DescribeResponse<T> extends AccessMethodResponse<T> {
 			return JSONUtils.toJSONFormat(super.get("response"));
 		}
 		StringBuilder builder = new StringBuilder();
-		Iterator<Map.Entry<TypedKey<?>, Object>> iterator = super.properties.entrySet().iterator();
+		Iterator<Map.Entry<TypedKey<?>, Object>> iterator = typedKeyValues();
 
 		builder.append(JSONUtils.OPEN_BRACE);
 		int index = 0;

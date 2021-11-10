@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.common.props;
 
+import java.util.Objects;
+
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 
 /**
@@ -49,32 +51,25 @@ public class TypedKey<T> implements Nameable {
         return this.type;
     }
 
-    /**
-     * @inheritDoc
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    public boolean equals(Object object) {
-        if (object == null) {
-            return false;
-        }
-        if (object.getClass() == String.class) {
-            return ((String) object).equals(this.name);
-        }
-        if (Nameable.class.isAssignableFrom(object.getClass())) {
-            return ((Nameable) object).getName().equals(this.name);
-        }
-        return false;
+    @Override
+    public boolean equals(Object obj) {
+    	if (this == obj)
+    		return true;
+    	if (obj == null)
+    		return false;
+    	if (getClass() != obj.getClass())
+    		return false;
+    	TypedKey<?> other = (TypedKey<?>) obj;
+    	return Objects.equals(name, other.name);
     }
 
-    /**
-     * @inheritDoc
-     * @see java.lang.Object#hashCode()
-     */
-    public int hashCode() {
-        return this.name.hashCode();
-    }
+    @Override
+	public int hashCode() {
+		return Objects.hash(name);
+	}
 
-    /**
+
+	/**
      * Returns false if this TypeKey has to appear
      * into the JSON formated string describing the
      * TypedProperties instance holding it; otherwise

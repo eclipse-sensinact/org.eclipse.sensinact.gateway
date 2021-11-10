@@ -10,6 +10,9 @@
  */
 package org.eclipse.sensinact.gateway.core.security;
 
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,9 +20,9 @@ import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.core.ModelElement;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
@@ -179,17 +182,19 @@ public final class ImmutableAccessNode extends ImmutablePathNode<ImmutableAccess
 	 *         </ul>
 	 */
 	protected boolean isAccessibleMethod(AccessMethod.Type accessMethod, AccessLevelOption optionLevel) {
-		int index = -1;
 		boolean accessible = false;
 
-		List<MethodAccessibility> methodAccesses;
+		List<MethodAccessibility> methodAccesses = accesses == null ? emptyList() :
+			ofNullable(accesses.get(optionLevel)).orElse(emptyList()); 
 
-		if (this.accesses == null || (methodAccesses = this.accesses.get(optionLevel)) == null
-				|| (index = methodAccesses.indexOf(new Name<MethodAccessibility>(accessMethod.name()))) == -1) {
-			accessible = super.parent == null ? false : super.parent.isAccessibleMethod(accessMethod, optionLevel);
+		Optional<MethodAccessibility> found = methodAccesses.stream()
+				.filter(ma -> ma.getName().equals(accessMethod.name()))
+				.findFirst();
+		
+		if (found.isPresent()) {
+			accessible = found.get().isAccessible();
 		} else {
-			MethodAccessibility access = methodAccesses.get(index);
-			accessible = access == null ? false : access.isAccessible();
+			accessible = super.parent == null ? false : super.parent.isAccessibleMethod(accessMethod, optionLevel);
 		}
 		return accessible;
 	}

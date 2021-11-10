@@ -21,7 +21,6 @@ import org.eclipse.sensinact.gateway.common.primitive.DescribablePrimitive;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.Primitive;
 import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
 import org.eclipse.sensinact.gateway.util.CastUtils;
@@ -147,23 +146,24 @@ public class Attribute extends DescribablePrimitive {
 		}
 		// modifiable Metadata added only if it does not already exist
 		// it is not overridden if defined as modifiable
-		if (!this.metadata.contains(new Name<Metadata>(Metadata.MODIFIABLE))) {
+		
+		if (this.metadata.stream().noneMatch(m -> Metadata.MODIFIABLE.equals(m.getName()))) {
 			Metadata modifiableMeta = new Metadata(super.mediator, Metadata.MODIFIABLE, Modifiable.class,
 					Modifiable.MODIFIABLE, Modifiable.FIXED);
 			this.addMetadata(modifiableMeta);
 		}
 		// hidden Metadata added only if it does not already exist
 		// it is not overridden if defined as modifiable
-		if (!this.metadata.contains(new Name<Metadata>(Metadata.HIDDEN))) {
+		if (this.metadata.stream().noneMatch(m -> Metadata.HIDDEN.equals(m.getName()))) {
 			Metadata hiddenMeta = new Metadata(super.mediator, Metadata.HIDDEN, boolean.class, false, Modifiable.FIXED);
 			this.addMetadata(hiddenMeta);
 		}
-		if (!this.metadata.contains(new Name<Metadata>(Metadata.TIMESTAMP))) {
+		if (this.metadata.stream().noneMatch(m -> Metadata.TIMESTAMP.equals(m.getName()))) {
 			Metadata timestampMeta = new Metadata(super.mediator, Metadata.TIMESTAMP, long.class,
 					System.currentTimeMillis(), Modifiable.UPDATABLE);
 			this.addMetadata(timestampMeta);
 		}
-		if (!this.metadata.contains(new Name<Metadata>(Metadata.LOCKED))) {
+		if (this.metadata.stream().noneMatch(m -> Metadata.LOCKED.equals(m.getName()))) {
 			Metadata lockedMeta = new Metadata(super.mediator, Metadata.LOCKED, boolean.class, false,
 					Modifiable.UPDATABLE);
 			this.addMetadata(lockedMeta);
@@ -460,14 +460,12 @@ public class Attribute extends DescribablePrimitive {
 	 * @return the {@link Metadata} with the specified name
 	 */
 	protected Metadata get(String name) {
-		int index = -1;
-		Metadata metadata = null;
 		synchronized (this.metadata) {
-			if ((index = this.metadata.indexOf(new Name<Attribute>(name))) != -1) {
-				metadata = this.metadata.get(index);
-			}
+			return this.metadata.stream()
+				.filter(m -> m.getName().equals(name))
+				.findFirst()
+				.orElse(null);
 		}
-		return metadata;
 	}
 
 	/**

@@ -15,6 +15,7 @@ import org.eclipse.sensinact.gateway.util.UriUtils;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -95,15 +96,12 @@ public abstract class Elements<P extends Nameable> implements Nameable, PathElem
         if (name == null) {
             return null;
         }
-        int index = -1;
-        P element = null;
-
         synchronized (this.elements) {
-            if ((index = this.elements.indexOf(new Name<P>(name))) > -1) {
-                element = this.elements.get(index);
-            }
+        	return elements.stream()
+        			.filter(p -> name.equals(p.getName()))
+        			.findFirst()
+        			.orElse(null);
         }
-        return element;
     }
 
     /**
@@ -136,10 +134,13 @@ public abstract class Elements<P extends Nameable> implements Nameable, PathElem
         if (element == null) {
             return false;
         }
+        String name = element.getName();
+        if(name == null) {
+        	return false;
+        }
         synchronized (this.elements) {
-            if (this.elements.indexOf(new Name<P>(element.getName())) == -1) {
-                this.elements.add(element);
-                return true;
+            if (this.elements.stream().noneMatch(p -> name.equals(p.getName()))) {
+                return this.elements.add(element);
             }
         }
         return false;
@@ -158,10 +159,14 @@ public abstract class Elements<P extends Nameable> implements Nameable, PathElem
             return null;
         }
         synchronized (this.elements) {
-            int index = -1;
-            if ((index = this.elements.indexOf(new Name<Description>(element))) > -1) {
-                return this.elements.remove(index);
-            }
+        	Iterator<P> iterator = this.elements.iterator();
+        	while(iterator.hasNext()) {
+        		P p = iterator.next();
+        		if(element.equals(p.getName())) {
+        			iterator.remove();
+        			return p;
+        		}
+        	}
         }
         return null;
     }
