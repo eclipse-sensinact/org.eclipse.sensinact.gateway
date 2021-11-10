@@ -50,8 +50,12 @@ public class HttpRestAccess extends NorthboundAccess<HttpRestAccessRequest> {
         if (authentication == null) {
             this.endpoint = request.getMediator().getNorthboundEndpoints().getEndpoint();
             response.setHeader("X-Auth-Token", this.endpoint.getSessionToken());
-        } else if (SessionToken.class.isAssignableFrom(authentication.getClass()))
+        } else if (SessionToken.class.isAssignableFrom(authentication.getClass())) {
             this.endpoint = request.getMediator().getNorthboundEndpoints().getEndpoint((SessionToken) authentication);
+            if(this.endpoint == null) {
+            	throw new InvalidCredentialException("Unrecognised session token");
+            }
+        }
         else 
             throw new InvalidCredentialException("Authentication token was expected");
     }
