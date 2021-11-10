@@ -71,6 +71,7 @@ public class TestLifeCycle {
         assertTrue(result.equals(ApplicationStatus.valueOf("RESOLVING")));
         status = ApplicationStatus.valueOf("RESOLVING");
         result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder("AppManager/test/START", null) {
+			private static final long serialVersionUID = 1L;
             @Override
             public AccessMethodResponse<?> createAccessMethodResponse(Status status) {
                 return null;
@@ -86,7 +87,8 @@ public class TestLifeCycle {
         status = ApplicationStatus.valueOf("ACTIVE");
 
         result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder("AppManager/test/STOP", null) {
-            @Override
+			private static final long serialVersionUID = 1L;
+			@Override
             public AccessMethodResponse<?> createAccessMethodResponse(Status status) {
                 return null;
             }
@@ -100,7 +102,9 @@ public class TestLifeCycle {
         assertTrue(result.equals(ApplicationStatus.valueOf("INSTALLED")));
         status = ApplicationStatus.valueOf("INSTALLED");
         result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder("AppManager/test/UNINSTALL", null) {
-            @Override
+			private static final long serialVersionUID = 1L;
+
+			@Override
             public AccessMethodResponse<?> createAccessMethodResponse(Status status) {
                 return null;
             }
@@ -119,7 +123,8 @@ public class TestLifeCycle {
         AppLifecycleTrigger trigger = new AppLifecycleTrigger(service);
         status = ApplicationStatus.valueOf("INSTALLED");
         ApplicationStatus result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder("AppManager/test/START", null) {
-            @Override
+			private static final long serialVersionUID = 1L;
+			@Override
             public AccessMethodResponse<?> createAccessMethodResponse(Status status) {
                 return null;
             }
@@ -138,6 +143,7 @@ public class TestLifeCycle {
         assertTrue(result.equals(ApplicationStatus.valueOf("UNRESOLVED")));
         status = ApplicationStatus.valueOf("UNRESOLVED");
         result = (ApplicationStatus) trigger.execute(new AccessMethodResponseBuilder("AppManager/test/UNINSTALL", null) {
+			private static final long serialVersionUID = 1L;
             @Override
             public AccessMethodResponse<?> createAccessMethodResponse(Status status) {
                 return null;
@@ -156,6 +162,7 @@ public class TestLifeCycle {
     public void testIncompatibleCycle() throws Exception {
         AppLifecycleTrigger trigger = new AppLifecycleTrigger(service);
         AccessMethodResponseBuilder snaMethodResult = new AccessMethodResponseBuilder("AppManager/test/STOP", null) {
+			private static final long serialVersionUID = 1L;
             @Override
             public AccessMethodResponse<?> createAccessMethodResponse(Status status) {
                 return null;
@@ -176,7 +183,9 @@ public class TestLifeCycle {
         ApplicationStatus result = (ApplicationStatus) trigger.execute(snaMethodResult);
         assertTrue(result.equals(ApplicationStatus.valueOf("INSTALLED")));
         snaMethodResult = new AccessMethodResponseBuilder("AppManager/test/UNINSTALL", null) {
-            @Override
+			private static final long serialVersionUID = 1L;
+
+			@Override
             public AccessMethodResponse<?> createAccessMethodResponse(Status status) {
                 return null;
             }

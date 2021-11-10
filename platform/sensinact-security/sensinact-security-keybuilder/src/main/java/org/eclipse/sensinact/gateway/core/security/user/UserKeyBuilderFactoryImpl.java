@@ -35,7 +35,9 @@ public class UserKeyBuilderFactoryImpl implements UserKeyBuilderFactory<Credenti
 	@Override
 	public void newInstance(Mediator mediator) throws SecuredAccessException {
 		UserKeyBuilder<Credentials,Credentials> builder = new UserKeyBuilderImpl(mediator);
-		mediator.register(new Hashtable() {{
+		mediator.register(new Hashtable<String,Object>() {
+			private static final long serialVersionUID = 1L;
+		{
 			this.put("identityMaterial",Credentials.class.getCanonicalName());
 		}}, builder, new Class<?>[] { UserKeyBuilder.class });
 	}

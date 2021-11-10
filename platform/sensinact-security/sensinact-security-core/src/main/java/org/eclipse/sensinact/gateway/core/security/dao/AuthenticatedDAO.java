@@ -161,6 +161,7 @@ public class AuthenticatedDAO extends AbstractMutableSnaDAO<AuthenticatedEntity>
 			throw new DAOException(String.format("Unknown element at '%s'", path));
 		}
 		List<AuthenticatedEntity> authenticatedEntities = super.select(new HashMap<String, Object>() {
+			private static final long serialVersionUID = 1L;
 			{
 				this.put("OID", objectEntity.getIdentifier());
 				this.put("PUBLIC_KEY", publicKey);

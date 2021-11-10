@@ -111,7 +111,7 @@ public class MailAccountConnectorMoke implements AccountConnector {
 			}}, MailAccountConnectorMailReplacement.class, null);         
          
          ServiceRegistration<?> registration = this.mediator.getContext().registerService(
-        	 new String[] {CallbackService.class.getCanonicalName()},	 callback, new Hashtable() {{}});
+        	 new String[] {CallbackService.class.getCanonicalName()},	 callback, new Hashtable<String, Object>() );
 
          userUpdater.setRegistration(registration);
 

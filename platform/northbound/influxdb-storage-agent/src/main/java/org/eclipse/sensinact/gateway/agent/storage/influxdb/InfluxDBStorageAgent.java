@@ -114,7 +114,9 @@ public class InfluxDBStorageAgent extends StorageAgent {
 		this.database = this.connector.createIfNotExists(db);
 		
 		InfluxDBHistoricProvider provider = new InfluxDBHistoricProvider(connector, db, this.measurement);
-		this.mediator.register(new Hashtable<String, Object>(){{
+		this.mediator.register(new Hashtable<String, Object>(){
+			private static final long serialVersionUID = 1L;
+			{
 			this.put(STORAGE_HISTORY_PROVIDER, measurement);
 		}}, provider,new Class[] { HistoricProvider.class});
 		

@@ -75,7 +75,9 @@ public class TtnActivator extends BasisActivator<MqttPacket> {
             .port(brokerPort)
             .protocol(MqttBroker.Protocol.valueOf(brokerProtocol))
             .authentication(authentication)
-            .topics(new ArrayList<MqttTopic>() {{
+            .topics(new ArrayList<MqttTopic>() {
+				private static final long serialVersionUID = 1L;
+			{
                 add(activationTopic);
                 add(messageTopic);
             }}).build();

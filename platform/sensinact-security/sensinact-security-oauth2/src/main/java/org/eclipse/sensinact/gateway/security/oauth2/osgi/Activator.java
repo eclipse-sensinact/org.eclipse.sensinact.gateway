@@ -44,7 +44,9 @@ public class Activator extends AbstractActivator<Mediator> {
 		super.mediator.register(
 			new SecurityFilter(oidcServer, oidcServer),
 			Filter.class,
-			new Hashtable() {{
+			new Hashtable<String, Object>() {
+				private static final long serialVersionUID = 1L;
+				{
 				this.put(Constants.SERVICE_RANKING, 0);
 				this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/sensinact/*");	
 				this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");}}
@@ -52,7 +54,9 @@ public class Activator extends AbstractActivator<Mediator> {
 	    super.mediator.register(
 	    	new SecurityServlet(oidcServer, oidcServer), 
 	    	Servlet.class,
-	    	new Hashtable() {{
+	    	new Hashtable<String, Object>() {
+	    		private static final long serialVersionUID = 1L;
+	    		{
 	    	    this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/sensinact.auth");
 				this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");}}
 	    	);

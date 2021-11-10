@@ -112,7 +112,8 @@ public class UserDAO extends AbstractMutableSnaDAO<UserEntity> {
 	 * @throws DataStoreException
 	 */
 	public UserEntity find(final String login, final String password) throws DAOException, DataStoreException {
-		List<UserEntity> userEntities = super.select(new HashMap<String, Object>() {
+		List<UserEntity> userEntities = super.select(new HashMap<String,Object>() {
+			private static final long serialVersionUID = 1L;
 			{
 				this.put("SULOGIN", login);
 				this.put("SUPASSWORD", password);

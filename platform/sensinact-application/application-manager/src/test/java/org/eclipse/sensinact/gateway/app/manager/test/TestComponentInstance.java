@@ -211,7 +211,7 @@ public class TestComponentInstance implements TestResult {
         Mockito.when(mediator.callService(Mockito.eq(Core.class), Mockito.any(Executable.class))).then(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object result = ((Executable) invocation.getArguments()[1]).execute(core);
+                Object result = ((Executable<Core, ?>) invocation.getArguments()[1]).execute(core);
                 return result;
             }
         });

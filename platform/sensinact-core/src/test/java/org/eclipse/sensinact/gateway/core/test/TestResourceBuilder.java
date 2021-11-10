@@ -291,7 +291,9 @@ public class TestResourceBuilder<R extends ModelInstance> {
 			public String getJSON() {
 				return null;
 			}
-		}, new HashSet<Constraint>() {{
+		}, new HashSet<Constraint>() {
+			private static final long serialVersionUID = 1L;
+		{
 				this.add(new Changed(true));
 		}});
 
@@ -654,6 +656,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 								new Class<?>[] { int.class }, new String[] { "count" }),
 						new Shortcut(this.testContext.getMediator(), AccessMethod.Type.valueOf(AccessMethod.ACT),
 								new Class<?>[0], new String[0], new HashMap<Integer, Parameter>() {
+									private static final long serialVersionUID = 1L;
 									{
 										this.put(0, new Parameter(TestResourceBuilder.this.testContext.getMediator(),
 												"count", int.class, 4));

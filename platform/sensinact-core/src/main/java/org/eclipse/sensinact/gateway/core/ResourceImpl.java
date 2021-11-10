@@ -670,7 +670,6 @@ public class ResourceImpl extends
 	 * @throws InvalidValueException
 	 * @throws InvalidConstraintDefinitionException
 	 */
-	@SuppressWarnings("unchecked")
 	public AccessMethod<?, ?> registerExecutor(AccessMethod.Type type, Class<?>[] parameterTypes, String[] parameterNames, 
 		AccessMethodExecutor executor, AccessMethodExecutor.ExecutionPolicy policy) 
 		throws InvalidValueException {

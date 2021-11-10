@@ -86,7 +86,9 @@ public class ApplicationService extends ServiceImpl {
 
         ResourceImpl uninstallLinkedResource = this.addLinkedActionResource(AppConstant.UNINSTALL, uninstallResource, false);
         LinkedActMethod method = (LinkedActMethod) uninstallLinkedResource.getAccessMethod(act);
-        method.createShortcut(new Signature(super.modelInstance.mediator(), act, new Class[]{String.class}, null), new Shortcut(super.modelInstance.mediator(), act, new Class[]{}, null, new HashMap<Integer, Parameter>() {{
+        method.createShortcut(new Signature(super.modelInstance.mediator(), act, new Class[]{String.class}, null), new Shortcut(super.modelInstance.mediator(), act, new Class[]{}, null, new HashMap<Integer, Parameter>() {
+			private static final long serialVersionUID = 1L;
+			{
             this.put(0, new Parameter(ApplicationService.super.modelInstance.mediator(), "name", String.class, name));
         }}));
         ResourceImpl status = this.addDataResource(StateVariableResource.class, AppConstant.STATUS, ApplicationStatus.class, ApplicationStatus.INSTALLED);
