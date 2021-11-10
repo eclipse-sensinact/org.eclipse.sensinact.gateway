@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.sensinact.gateway.common.primitive.Name;
-
 /**
  * Implementation of a {@link PayloadFragment}
  *
@@ -40,7 +38,7 @@ public class PayloadFragmentImpl implements PayloadFragment {
 
      */
     public PayloadFragmentImpl() {
-        this.payloadFragments = new ArrayList<PayloadServiceFragment>();
+        this.payloadFragments = new ArrayList<>();
     }
 
     /**
@@ -191,31 +189,5 @@ public class PayloadFragmentImpl implements PayloadFragment {
     @Override
     public String getName() {
         return this.getServiceProviderIdentifier();
-    }
-
-    /**
-     * Returns the index of the {@link PayloadServiceFragment} of
-     * this PayloadFragment, whose name is passed as parameter  
-     * 
-     * @param name the name of the {@link PayloadServiceFragment}
-     * 
-     * @return the index of the {@link PayloadServiceFragment} with
-     * the specified name
-     */
-    public int indexOf(Name<PayloadServiceFragment> name) {
-        return this.payloadFragments.indexOf(name);
-    }
-
-    /**
-     * Returns the {@link PayloadServiceFragment} of this {@link PayloadFragment}
-     * at the index passed as parameter  
-     * 
-     * @param index the index of the {@link PayloadServiceFragment}
-     * 
-     * @return the {@link PayloadServiceFragment} with
-     * the specified index
-     */
-    public PayloadServiceFragmentImpl get(int index) {
-        return (PayloadServiceFragmentImpl) this.payloadFragments.get(index);
     }
 }

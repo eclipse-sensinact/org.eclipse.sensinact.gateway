@@ -16,8 +16,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.core.AttributeBuilder.Requirement;
 import org.eclipse.sensinact.gateway.core.Resource.UpdatePolicy;
@@ -52,11 +52,13 @@ public class ResourceConfig implements Nameable {
 	public String buildName(String service) {			
 		if (service == null || service.length() == 0) 
 			return null;	
-		String name = null;
-		int index = -1;
-		if ((index = this.requirementBuilders.indexOf(new Name<RequirementBuilder>(Resource.NAME))) > -1)
-			name = ((StringPatternValue) this.requirementBuilders.get(index).get(service)).build();
-		return name;
+		return this.requirementBuilders.stream()
+				.filter(rb -> Resource.NAME.equals(rb.getName()))
+				.map(rb -> rb.get(service))
+				.map(StringPatternValue.class::cast)
+				.map(StringPatternValue::build)
+				.findFirst()
+				.orElse(null);
 	}
 	
 	@Override
@@ -70,11 +72,13 @@ public class ResourceConfig implements Nameable {
 	public String getName(String service) {			
 		if (service == null || service.length() == 0) 
 			return this.getName(ResourceConfig.ALL_TARGETS);		
-		String name = null;
-		int index = -1;
-		if ((index = this.requirementBuilders.indexOf(new Name<RequirementBuilder>(Resource.NAME))) > -1)
-			name = ((StringPatternValue) this.requirementBuilders.get(index).get(service)).getLast();
-		return name;
+		return this.requirementBuilders.stream()
+				.filter(rb -> Resource.NAME.equals(rb.getName()))
+				.map(rb -> rb.get(service))
+				.map(StringPatternValue.class::cast)
+				.map(StringPatternValue::getLast)
+				.findFirst()
+				.orElse(null);
 	}
 
 
@@ -85,11 +89,13 @@ public class ResourceConfig implements Nameable {
 	public String getRawName(String serviceName) {	
 		if (serviceName == null || serviceName.length() == 0) 
 			return this.getRawName(ResourceConfig.ALL_TARGETS);		
-		String name = null;
-		int index = -1;
-		if ((index = this.requirementBuilders.indexOf(new Name<RequirementBuilder>(Resource.NAME))) > -1)
-			name = ((StringPatternValue) this.requirementBuilders.get(index).get(serviceName)).getRaw();
-		return name;
+		return this.requirementBuilders.stream()
+			.filter(rb -> Resource.NAME.equals(rb.getName()))
+			.map(rb -> rb.get(serviceName))
+			.map(StringPatternValue.class::cast)
+			.map(StringPatternValue::getRaw)
+			.findFirst()
+			.orElse(null);
 	}
 
 	/**
@@ -99,9 +105,11 @@ public class ResourceConfig implements Nameable {
 	 * @param name the name to be set
 	 */
 	public void configureName(String service, String name) {
-		int index = -1;
-		if ((index = this.requirementBuilders.indexOf(new Name<RequirementBuilder>(Resource.NAME))) > -1) 
-			this.requirementBuilders.get(index).put(service, name);
+		Optional<RequirementBuilder> found = this.requirementBuilders.stream()
+			.filter(rb -> Resource.NAME.equals(rb.getName()))
+			.findFirst();
+		if (found.isPresent()) 
+			found.get().put(service, name);
 		else {
 			RequirementBuilder builder = new RequirementBuilder(Requirement.VALUE, Resource.NAME);
 			builder.put(service, name);

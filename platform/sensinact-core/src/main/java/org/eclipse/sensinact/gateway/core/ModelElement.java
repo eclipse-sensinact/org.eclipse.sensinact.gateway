@@ -24,7 +24,6 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.Elements;
 import org.eclipse.sensinact.gateway.common.primitive.ElementsProxy;
-import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.common.primitive.ProcessableData;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
@@ -294,13 +293,15 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 		Class<S> proxied = (Class<S>) this.getProxyType();
 		M proxy = this.proxies.get(accessLevelOption);
 		if (proxy == null) {
-			int index = -1;
 			List<MethodAccessibility> methodAccessibilities = this.modelInstance.getAuthorizations(this, accessLevelOption);
-
+			
 			// if the describe method does not exists it means
 			// that the user is not allowed to access this ModelElement
-			if ((index = methodAccessibilities.indexOf(new Name<MethodAccessibility>(AccessMethod.DESCRIBE))) == -1
-					|| !methodAccessibilities.get(index).isAccessible()) {
+			if (methodAccessibilities.stream()
+					.filter(ma -> AccessMethod.DESCRIBE.equals(ma.getName()))
+					.map(ma -> !ma.isAccessible())
+					.findFirst()
+					.orElse(true)) {
 				return (S) Proxy.newProxyInstance(ModelElement.class.getClassLoader(), new Class<?>[] { proxied },
 						new UnaccessibleModelElementProxyWrapper(new UnaccessibleModelElementProxy(
 								this.modelInstance.mediator(), proxied, this.getPath())));

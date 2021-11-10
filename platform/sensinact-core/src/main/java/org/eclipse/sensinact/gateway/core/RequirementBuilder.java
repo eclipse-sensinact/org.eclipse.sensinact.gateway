@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
-import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 
 /**
@@ -81,10 +80,10 @@ public class RequirementBuilder implements Nameable, Iterable<Map.Entry<String, 
 	 * @param builders
 	 */
 	public void apply(String service, List<AttributeBuilder> builders) {
-		int index = builders.indexOf(new Name<AttributeBuilder>(this.attributeName));
-		if (index == -1) 
-			return;		
-		this.apply(service, builders.get(index));
+		builders.stream()
+			.filter(b -> this.attributeName.equals(b.getName()))
+			.findFirst()
+			.ifPresent(b -> this.apply(service, b));
 	}
 
 	/**

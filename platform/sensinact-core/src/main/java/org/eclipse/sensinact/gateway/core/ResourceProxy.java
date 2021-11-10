@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.UnaccessibleAccessMethod;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
@@ -41,7 +40,7 @@ public class ResourceProxy extends ModelElementProxy {
 	ResourceProxy(Mediator mediator, ResourceImpl resource, List<MethodAccessibility> methodAccessibilities) {
 		super(mediator, Resource.class, resource.getPath());
 
-		Map<String, AccessMethod<?,?>> methods = new HashMap<String, AccessMethod<?,?>>();
+		Map<String, AccessMethod<?,?>> methods = new HashMap<>();
 		AccessMethod.Type[] existingTypes = AccessMethod.Type.values();
 
 		int index = 0;
@@ -52,16 +51,19 @@ public class ResourceProxy extends ModelElementProxy {
 			if ((method = resource.getAccessMethod(existingTypes[index])) == null) {
 				continue;
 			}
-			int accessIndex = -1;
-
-			if ((accessIndex = methodAccessibilities.indexOf(new Name<MethodAccessibility>(existingTypes[index].name()))) == -1
-					|| !methodAccessibilities.get(accessIndex).isAccessible()) {
+			String name = existingTypes[index].name();
+			
+			if (methodAccessibilities.stream()
+					.filter(ma -> name.equals(ma.getName()))
+					.map(ma -> !ma.isAccessible())
+					.findFirst()
+					.orElse(true)) {
 				methods.put(existingTypes[index].name(),new UnaccessibleAccessMethod(mediator, super.getPath(), existingTypes[index]));
 			} else {
 				methods.put(existingTypes[index].name(), method);
 			}
 		}
-		this.methods = Collections.<String, AccessMethod<?,?>>unmodifiableMap(methods);
+		this.methods = Collections.unmodifiableMap(methods);
 	}
 
 	@Override

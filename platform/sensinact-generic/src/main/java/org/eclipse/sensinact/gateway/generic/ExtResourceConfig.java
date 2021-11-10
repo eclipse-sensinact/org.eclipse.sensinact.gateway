@@ -11,7 +11,6 @@
 package org.eclipse.sensinact.gateway.generic;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.eclipse.sensinact.gateway.common.primitive.Name;
 import org.eclipse.sensinact.gateway.core.AttributeBuilder;
 import org.eclipse.sensinact.gateway.core.RequirementBuilder;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
@@ -33,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Extended {@link ExtResourceConfig} generated from an xml file
@@ -155,9 +155,12 @@ public class ExtResourceConfig extends ResourceConfig implements Iterable<Method
             AttributeDefinition attributeDefinition = iterator.next();
             if (!attributeDefinition.isTargeted(service))
                 continue;
-            int builderIndex = -1;
-            if ((builderIndex = builders.indexOf(new Name<AttributeBuilder>(attributeDefinition.getName()))) > -1) {
-                AttributeBuilder builder = builders.get(builderIndex);
+            String name = attributeDefinition.getName();
+            Optional<AttributeBuilder> found = builders.stream()
+            	.filter(b -> name.equals(b.getName()))
+            	.findFirst();
+            if (found.isPresent()) {
+                AttributeBuilder builder = found.get();
                 List<RequirementBuilder> requirementBuilders = attributeDefinition.getRequirementBuilders(service);
                 int index = 0;
                 int length = requirementBuilders.size();
