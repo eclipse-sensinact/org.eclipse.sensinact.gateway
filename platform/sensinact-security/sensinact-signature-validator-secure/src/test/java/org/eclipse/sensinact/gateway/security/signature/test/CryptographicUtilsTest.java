@@ -56,10 +56,11 @@ public class CryptographicUtilsTest {
      * @throws IOException
      */
     byte[] getData(String fileName) throws IOException {
-        FileInputStream fis = new FileInputStream(fileName);
+      try(FileInputStream fis = new FileInputStream(fileName);){
         byte[] data = new byte[fis.available()];
         fis.read(data);
         return data;
+      }
     }
 
     /**
