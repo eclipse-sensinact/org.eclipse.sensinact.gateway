@@ -66,7 +66,7 @@ public class Activator extends AbstractActivator<Mediator> {
 
     public LocalProtocolStackEndpoint<DevGenPacket> connector;
 
-    @SuppressWarnings({ "unchecked","serial"})
+    @SuppressWarnings({ "serial"})
 	@Override
     public void doStart() {
     	findJettyClassLoader(super.mediator.getContext());
@@ -84,7 +84,7 @@ public class Activator extends AbstractActivator<Mediator> {
 		}
 
         super.mediator.register(
-            	new Hashtable() {{
+            	new Hashtable<String, Object>() {{
             		this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "/androidws");
             		this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");}}, 
             	new WebSocketServlet() { 			
@@ -139,7 +139,7 @@ public class Activator extends AbstractActivator<Mediator> {
             );
             LOG.info(String.format("%s servlet registered", "/androidws"));
             
-            super.mediator.register(new IndexFilter("/android"), Filter.class, new Hashtable() {{
+            super.mediator.register(new IndexFilter("/android"), Filter.class, new Hashtable<String, Object>() {{
             	this.put(Constants.SERVICE_RANKING, 3);
                 this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/android");
                 this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");
@@ -147,7 +147,7 @@ public class Activator extends AbstractActivator<Mediator> {
             });
             LOG.info(String.format("%s filter registered", "/android"));
             
-            super.mediator.register(new ResourceFilter(super.mediator), Filter.class, new Hashtable() {{
+            super.mediator.register(new ResourceFilter(super.mediator), Filter.class, new Hashtable<String, Object>() {{
             	this.put(Constants.SERVICE_RANKING, 2);
                 this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/android/*");
                 this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=org.eclipse.sensinact)");

@@ -42,9 +42,9 @@ public interface ConstraintFactory {
             if (!factory.handle(constraint)) {
                 factory = null;
 
-                ServiceLoader serviceLoader = ServiceLoader.load(ConstraintFactory.class, classloader);
+                ServiceLoader<ConstraintFactory> serviceLoader = ServiceLoader.load(ConstraintFactory.class, classloader);
 
-                Iterator iterator = serviceLoader.iterator();
+                Iterator<ConstraintFactory> iterator = serviceLoader.iterator();
 
                 while (iterator.hasNext()) {
                     factory = (ConstraintFactory) iterator.next();

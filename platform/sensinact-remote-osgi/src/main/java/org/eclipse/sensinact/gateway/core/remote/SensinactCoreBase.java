@@ -186,7 +186,7 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
     private Object[] createObjectArrayParamFromJSON(String parameters){
         JSONArray parameterJSONArray = new JSONArray(parameters);
         String[] parametersObjectArray = new String[parameterJSONArray.length()];
-        Iterator it = parameterJSONArray.iterator();
+        Iterator<?> it = parameterJSONArray.iterator();
         for(int x = 0;parameters != null && (x < parameters.length()) && it.hasNext();x++){
             parametersObjectArray[x]=it.next().toString();
         }

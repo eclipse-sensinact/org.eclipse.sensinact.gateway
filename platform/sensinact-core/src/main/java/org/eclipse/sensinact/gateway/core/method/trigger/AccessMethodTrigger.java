@@ -20,7 +20,7 @@ import org.eclipse.sensinact.gateway.core.StateVariableResource;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public interface AccessMethodTrigger extends Executable, JSONable {
+public interface AccessMethodTrigger extends Executable<Object, Object>, JSONable {
 	/**
 	 * handled {@link AccessMethodTrigger} types
 	 */

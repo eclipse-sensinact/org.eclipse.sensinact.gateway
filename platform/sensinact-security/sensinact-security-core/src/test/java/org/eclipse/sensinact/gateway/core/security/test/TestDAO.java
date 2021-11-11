@@ -400,29 +400,13 @@ public class TestDAO {
 		assertNull(newEntity);
 
 		AuthenticatedDAO authenticatedDAO = new AuthenticatedDAO(dataStoreService);
-		List<AuthenticatedEntity> entities = authenticatedDAO.select(new HashMap<String, Object>() {
-			{
-				this.put("OID", lastIdentifier);
-			}
-		});
+		List<AuthenticatedEntity> entities = authenticatedDAO.select(Collections.singletonMap("OID", lastIdentifier));
 		assertTrue(entities.isEmpty());
-		entities = authenticatedDAO.select(new HashMap<String, Object>() {
-			{
-				this.put("OID", otherIdentifier);
-			}
-		});
+		entities = authenticatedDAO.select(Collections.singletonMap("OID", otherIdentifier));
 		assertTrue(entities.isEmpty());
-		entities = authenticatedDAO.select(new HashMap<String, Object>() {
-			{
-				this.put("OID", newIdentifier);
-			}
-		});
+		entities = authenticatedDAO.select(Collections.singletonMap("OID", newIdentifier));
 		assertTrue(entities.isEmpty());
-		entities = authenticatedDAO.select(new HashMap<String, Object>() {
-			{
-				this.put("OID", identifier);
-			}
-		});
+		entities = authenticatedDAO.select(Collections.singletonMap("OID", identifier));
 		assertTrue(entities.isEmpty());
 	}
 
@@ -461,29 +445,14 @@ public class TestDAO {
 		bundleDAO.delete(bundleEntity);
 
 		AuthenticatedDAO authenticatedDAO = new AuthenticatedDAO(dataStoreService);
-		List<AuthenticatedEntity> entities = authenticatedDAO.select(new HashMap<String, Object>() {
-			{
-				this.put("OID", lastIdentifier);
-			}
-		});
+		List<AuthenticatedEntity> entities = authenticatedDAO.select(Collections.singletonMap("OID", lastIdentifier));
 		assertTrue(entities.isEmpty());
-		entities = authenticatedDAO.select(new HashMap<String, Object>() {
-			{
-				this.put("OID", otherIdentifier);
-			}
-		});
+		entities = authenticatedDAO.select(Collections.singletonMap("OID", otherIdentifier));
 		assertTrue(entities.isEmpty());
-		entities = authenticatedDAO.select(new HashMap<String, Object>() {
-			{
-				this.put("OID", newIdentifier);
-			}
-		});
+		entities = authenticatedDAO.select(Collections.singletonMap("OID", newIdentifier));
+
 		assertTrue(entities.isEmpty());
-		entities = authenticatedDAO.select(new HashMap<String, Object>() {
-			{
-				this.put("OID", identifier);
-			}
-		});
+		entities = authenticatedDAO.select(Collections.singletonMap("OID", identifier));
 		assertTrue(entities.isEmpty());
 	}
 }

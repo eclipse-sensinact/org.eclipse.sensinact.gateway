@@ -96,7 +96,9 @@ public class RestAccessConfigurator {
     	this.corsHeader = Boolean.valueOf((String) this.mediator.getProperty(RestAccessConstants.CORS_HEADER));
         if (this.corsHeader) {
             this.corsFilter = new CorsFilter();                    
-            mediator.register(RestAccessConfigurator.this.corsFilter, Filter.class, new Hashtable() {{
+            mediator.register(RestAccessConfigurator.this.corsFilter, Filter.class, new Hashtable<String,Object>() {
+    			private static final long serialVersionUID = 1L;
+            	{
             	this.put(Constants.SERVICE_RANKING, 1);
                 this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
                 this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
@@ -105,7 +107,9 @@ public class RestAccessConfigurator {
         }
         
         this.mediator.register(
-        	new Hashtable() {{
+        	new Hashtable<String,Object>() {
+    			private static final long serialVersionUID = 1L;
+    			{
         		this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.WS_ROOT);
         		this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");}}, 
         	new WebSocketServlet() { 			
@@ -160,21 +164,27 @@ public class RestAccessConfigurator {
         	new Class[]{ Servlet.class, WebSocketServlet.class });
         LOG.info(String.format("%s servlet registered", RestAccessConstants.WS_ROOT));
         
-        this.mediator.register(new HttpLoginEndpoint(mediator), Servlet.class, new Hashtable() {{
+        this.mediator.register(new HttpLoginEndpoint(mediator), Servlet.class, new Hashtable<String, Object>() {
+			private static final long serialVersionUID = 1L;
+			{
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.LOGIN_ENDPOINT);
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
         	}
         });
         LOG.info(String.format("%s servlet registered", RestAccessConstants.LOGIN_ENDPOINT));
         
-        mediator.register(new HttpRegisteringEndpoint(mediator), Servlet.class, new Hashtable() {{
+        mediator.register(new HttpRegisteringEndpoint(mediator), Servlet.class, new Hashtable<String, Object>() {
+			private static final long serialVersionUID = 1L;
+        	{
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.REGISTERING_ENDPOINT);
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
         	}
         });
         LOG.info(String.format("%s servlet registered", RestAccessConstants.REGISTERING_ENDPOINT));
         
-        mediator.register(new HttpEndpoint(mediator), Servlet.class, new Hashtable() {{
+        mediator.register(new HttpEndpoint(mediator), Servlet.class, new Hashtable<String,Object>() {
+			private static final long serialVersionUID = 1L;
+			{
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, RestAccessConstants.HTTP_ROOT);
         	this.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,"("+HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME+"=default)");
         	}

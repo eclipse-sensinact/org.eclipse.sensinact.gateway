@@ -60,7 +60,9 @@ public abstract class ManagedBasisActivator<M extends Mediator> extends Abstract
     	};
         super.mediator.register(
         	this.factory,
-        	ManagedServiceFactory.class, new Hashtable() {{this.put(Constants.SERVICE_PID, name());}}
+        	ManagedServiceFactory.class, new Hashtable<String, Object>() {
+    			private static final long serialVersionUID = 1L;
+    			{this.put(Constants.SERVICE_PID, name());}}
         );
     }
     

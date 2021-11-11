@@ -61,7 +61,9 @@ public class MokeTask extends GenericURITask {
     @Override
     public Map<String, List<String>> getOptions() {
         final String taskId = getTaskIdentifier();
-        return new HashMap<String, List<String>>() {{
+        return new HashMap<String, List<String>>() {
+			private static final long serialVersionUID = 1L;
+			{
             this.put("taskId", Collections.<String>singletonList(taskId));
         }};
     }

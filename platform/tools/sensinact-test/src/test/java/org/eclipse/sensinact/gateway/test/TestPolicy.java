@@ -25,7 +25,9 @@ public class TestPolicy extends java.security.Policy {
     private static final Permission ALL_PERMISSION = new AllPermission();
 
     private static final PermissionCollection PERMISSION_COLLECTION = new PermissionCollection() {
-        final Vector<Permission> v = new Vector<Permission>();
+
+		private static final long serialVersionUID = 1L;
+		final Vector<Permission> v = new Vector<Permission>();
 
         @Override
         public void add(Permission permission) {

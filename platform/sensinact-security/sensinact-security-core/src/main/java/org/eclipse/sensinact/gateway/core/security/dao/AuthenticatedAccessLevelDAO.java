@@ -70,6 +70,7 @@ public class AuthenticatedAccessLevelDAO extends AbstractImmutableSnaDAO<Authent
 	protected AuthenticatedAccessLevelEntity find(final long objectIdentifier, final String publicKey)
 			throws DAOException, DataStoreException {
 		List<AuthenticatedAccessLevelEntity> userAccessLevelEntities = super.select(new HashMap<String, Object>() {
+			private static final long serialVersionUID = 1L;
 			{
 				this.put("UOID", objectIdentifier);
 				this.put("PUBLIC_KEY", publicKey);
@@ -101,6 +102,7 @@ public class AuthenticatedAccessLevelDAO extends AbstractImmutableSnaDAO<Authent
 	protected AuthenticatedAccessLevelEntity find(final long objectIdentifier, final long userIdentifier)
 			throws DAOException, DataStoreException {
 		List<AuthenticatedAccessLevelEntity> userAccessLevelEntities = super.select(new HashMap<String, Object>() {
+			private static final long serialVersionUID = 1L;
 			{
 				this.put("UOID", objectIdentifier);
 				this.put("UID", userIdentifier);
