@@ -15,6 +15,11 @@ import org.eclipse.sensinact.gateway.app.api.persistence.dao.Application;
 import org.eclipse.sensinact.gateway.app.api.persistence.exception.ApplicationPersistenceException;
 import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAvailabilityListener;
 import org.json.JSONObject;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,13 +29,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class SNAPersistApplicationInMemory implements ApplicationPersistenceService {
-    private static Logger LOG = LoggerFactory.getLogger(SNAPersistApplicationInMemory.class);
-    private List<Application> applicationList = new ArrayList<Application>();
-    private final Set<ApplicationAvailabilityListener> listener = new HashSet<ApplicationAvailabilityListener>();
+@Component(service = ApplicationPersistenceService.class,scope = ServiceScope.SINGLETON,configurationPolicy = ConfigurationPolicy.REQUIRE)
+@ServiceRanking(500)
+public class InMemoryApplicationPersistenceService implements ApplicationPersistenceService {
+    private static Logger LOG = LoggerFactory.getLogger(InMemoryApplicationPersistenceService.class);
+    private List<Application> applications = new ArrayList<Application>();
+    private final Set<ApplicationAvailabilityListener> listeners = new HashSet<ApplicationAvailabilityListener>();
 
-    private Application findApplication(String name) {
-        for (Application application : applicationList) {
+    
+	@Activate
+	public void activate() {
+		notifyServiceAvailable();
+	}
+
+	private Application findApplication(String name) {
+        for (Application application : applications) {
             if (application.getName().equals(name)) return application;
         }
         return null;
@@ -41,11 +54,11 @@ public class SNAPersistApplicationInMemory implements ApplicationPersistenceServ
         //Not implemented
         Application applicationStored = findApplication(application.getName());
         if (applicationStored == null) {
-            applicationList.add(application);
+            applications.add(application);
             notifyInclusion(application);
         } else if (!application.getDiggest().equals(applicationStored.getDiggest())) {
-            applicationList.remove(applicationStored);
-            applicationList.add(application);
+            applications.remove(applicationStored);
+            applications.add(application);
             notifyModification(application);
         }
     }
@@ -53,7 +66,7 @@ public class SNAPersistApplicationInMemory implements ApplicationPersistenceServ
     @Override
     public void delete(String applicationName) throws ApplicationPersistenceException {
         notifyRemoval(findApplication(applicationName));
-        applicationList.remove(findApplication(applicationName));
+        applications.remove(findApplication(applicationName));
     }
 
     @Override
@@ -63,20 +76,20 @@ public class SNAPersistApplicationInMemory implements ApplicationPersistenceServ
 
     @Override
     public Collection<Application> list() {
-        return applicationList;
+        return applications;
     }
 
     @Override
     public void registerServiceAvailabilityListener(ApplicationAvailabilityListener listenerClient) {
-        synchronized (this.listener) {
-            this.listener.add(listenerClient);
+        synchronized (this.listeners) {
+            this.listeners.add(listenerClient);
         }
     }
 
     @Override
     public void unregisterServiceAvailabilityListener(ApplicationAvailabilityListener listenerClient) {
-        synchronized (this.listener) {
-            this.listener.remove(listenerClient);
+        synchronized (this.listeners) {
+            this.listeners.remove(listenerClient);
         }
     }
 
@@ -85,7 +98,7 @@ public class SNAPersistApplicationInMemory implements ApplicationPersistenceServ
     		return;
         try {
             LOG.info("Notifying application '{}' inclusion ", application.getName());
-            for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listener)) {
+            for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listeners)) {
                 try {
                     synchronized (list) {
                         list.applicationFound(application.getName(), application.getContent().toString());
@@ -104,7 +117,7 @@ public class SNAPersistApplicationInMemory implements ApplicationPersistenceServ
     		return;
         try {
             LOG.info("Notifying application '{}' modification ", application.getName());
-            for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listener)) {
+            for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listeners)) {
                 try {
                     synchronized (list) {
                         list.applicationChanged(application.getName(), application.getContent().toString());
@@ -123,7 +136,7 @@ public class SNAPersistApplicationInMemory implements ApplicationPersistenceServ
     		return;
         try {
             LOG.info("Notifying application '{}' removal ", application.getName());
-            for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listener)) {
+            for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listeners)) {
                 try {
                     synchronized (list) {
                         list.applicationRemoved(application.getName());
@@ -139,7 +152,7 @@ public class SNAPersistApplicationInMemory implements ApplicationPersistenceServ
 
     private void notifyServiceUnavailable() {
         LOG.debug("Memory Persistence service is going offline");
-        for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listener)) {
+        for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listeners)) {
             try {
                 list.serviceOffline();
             } catch (Exception e) {
@@ -150,17 +163,12 @@ public class SNAPersistApplicationInMemory implements ApplicationPersistenceServ
 
     private void notifyServiceAvailable() {
         LOG.debug("Memory Persistence service is going online");
-        for (ApplicationAvailabilityListener list : new HashSet<ApplicationAvailabilityListener>(listener)) {
+        for (ApplicationAvailabilityListener listener : new HashSet<ApplicationAvailabilityListener>(listeners)) {
             try {
-                list.serviceOnline();
+                listener.serviceOnline();
             } catch (Exception e) {
                 LOG.error("Memory Persistence service is going online", e);
             }
         }
-    }
-
-    @Override
-    public void run() {
-        notifyServiceAvailable();
     }
 }

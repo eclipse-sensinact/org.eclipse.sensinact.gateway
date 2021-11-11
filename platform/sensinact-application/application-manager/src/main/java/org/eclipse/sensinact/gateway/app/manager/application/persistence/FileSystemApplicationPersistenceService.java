@@ -10,15 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.app.manager.application.persistence;
 
-import org.eclipse.sensinact.gateway.app.api.persistence.ApplicationPersistenceService;
-import org.eclipse.sensinact.gateway.app.api.persistence.dao.Application;
-import org.eclipse.sensinact.gateway.app.api.persistence.exception.ApplicationPersistenceException;
-import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAvailabilityListener;
-import org.eclipse.sensinact.gateway.app.manager.application.persistence.exception.ApplicationParseException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
@@ -32,26 +23,118 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class SNAPersistApplicationFileSystem implements ApplicationPersistenceService {
-    private final Logger LOG = LoggerFactory.getLogger(SNAPersistApplicationFileSystem.class);
-    private final File directoryMonitor;
+import org.eclipse.sensinact.gateway.app.api.persistence.ApplicationPersistenceService;
+import org.eclipse.sensinact.gateway.app.api.persistence.dao.Application;
+import org.eclipse.sensinact.gateway.app.api.persistence.exception.ApplicationPersistenceException;
+import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAvailabilityListener;
+import org.eclipse.sensinact.gateway.app.manager.application.persistence.exception.ApplicationParseException;
+import org.json.JSONObject;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.component.propertytypes.ServiceRanking;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Component(service = ApplicationPersistenceService.class,scope = ServiceScope.SINGLETON)
+@ServiceRanking(100)
+@Designate(ocd = FileSystemApplicationPersistenceService.Config.class)
+public class FileSystemApplicationPersistenceService implements ApplicationPersistenceService {
+    private final Logger LOG = LoggerFactory.getLogger(FileSystemApplicationPersistenceService.class);
+    @ObjectClassDefinition
+	@interface Config {
+		String directory() default "application";
+		long readingDelay() default 0;
+		String fileExtention() default "json";
+	}
+	
+    private File directory;
+    private long readingDelay;
+    private String fileExtention;
     private final List<String> files = new ArrayList<>();
     private final Map<String, Application> filesPath = new HashMap<>();
     private final Set<ApplicationAvailabilityListener> listener = new HashSet<ApplicationAvailabilityListener>();
-    private final Long readingDelay;
-    private final String fileExtention;
     private Boolean active = Boolean.TRUE;
+	private Thread persistenceThread;
     private static final Object lock = new Object();
 
-    public SNAPersistApplicationFileSystem(File directoryMonitor, Long readingDelay, String fileExtention) {
-        this.directoryMonitor = directoryMonitor;
-        this.readingDelay = readingDelay;
-        this.fileExtention = fileExtention;
-    }
+	@Activate
+	public void activate(Config config) {
+		this.directory = new File(config.directory());
+		this.readingDelay = config.readingDelay();
+		this.fileExtention = config.fileExtention();
+		
+        persistenceThread = new Thread(() ->{
+        	
+        	 notifyServiceAvailable();
+             while (active) {
+                 try {
+                     //Thread.sleep(readingDelay);
+                     synchronized (lock) {
+                         List<String> filesToBeProcessed = new ArrayList<>();
+                         for (File applicationFile : directory.listFiles(new FilenameFilter() {
+                             @Override
+                             public boolean accept(File dir, String name) {
+                                 return name.endsWith("." + fileExtention);
+                             }
+                         })) {
+                             filesToBeProcessed.add(applicationFile.getAbsolutePath());
+                         }
+                         List<String> filesRemoved = new ArrayList<>(files);
+                         filesRemoved.removeAll(filesToBeProcessed);
+                         //Remove old application files
+                         for (String fileRemoved : filesRemoved) {
+                             notifyRemoval(fileRemoved);
+                         }
+                         //Process (new files or already installed) files
+                         for (String toprocess : filesToBeProcessed) {
+                             try {
+                                 Boolean fileManaged = filesPath.containsKey(toprocess);
+                                 if (!fileManaged) { //new file
+                                     LOG.info("Application file {} will be loaded.", toprocess);
+                                     notifyInclusion(toprocess);
+                                 } else {
+                                     Application applicationManaged = filesPath.get(toprocess);
+                                     Application applicationInFs = FileToApplicationParser.parse(toprocess);
+                                     //taken into account modified files
+                                     if (!applicationManaged.getDiggest().equals(applicationInFs.getDiggest())) {
+                                         LOG.info("Application file {} was already loaded but its content changed, dispatching update.", toprocess);
+                                         notifyModification(toprocess);
+                                         LOG.info("Application file {}, update procedure finished.", toprocess);
+                                     } else {
+                                         //Dont do anything, file already taken into account
+                                     }
+                                 }
+                             } catch (Exception e) {
+                                 LOG.warn("Failed to process application description file {}", toprocess, e);
+                             }
+                         }
+                     }
+                     Thread.sleep(readingDelay);
+                 } catch (Exception e) {
+                     LOG.error("Application persistency system failed", e);
+                 }
+             }
+             notifyServiceUnavailable();
+             LOG.error("Application persistency system is exiting");
+        });
+        persistenceThread.setDaemon(true);
+        persistenceThread.setPriority(Thread.MIN_PRIORITY);
+        persistenceThread.start();
+	}
 
+	@Deactivate
+	public void deactivate() {
+        if (persistenceThread != null) {
+        	persistenceThread.interrupt();
+        }
+	}
     @Override
     public void persist(Application application) throws ApplicationPersistenceException {
-        final String filename = directoryMonitor + File.separator + application.getName() + "." + fileExtention;
+        final String filename = directory + File.separator + application.getName() + "." + fileExtention;
         synchronized (lock) {
             File file = new File(filename);
             try {
@@ -69,7 +152,7 @@ public class SNAPersistApplicationFileSystem implements ApplicationPersistenceSe
 
     @Override
     public void delete(String applicationName) throws ApplicationPersistenceException {
-        final String filename = directoryMonitor + File.separator + applicationName + "." + fileExtention;
+        final String filename = directory + File.separator + applicationName + "." + fileExtention;
         synchronized (lock) {
             File file = new File(filename);
             try {
@@ -104,59 +187,7 @@ public class SNAPersistApplicationFileSystem implements ApplicationPersistenceSe
         }
     }
 
-    public void run() {
-        notifyServiceAvailable();
-        while (active) {
-            try {
-                //Thread.sleep(readingDelay);
-                synchronized (lock) {
-                    List<String> filesToBeProcessed = new ArrayList<>();
-                    for (File applicationFile : directoryMonitor.listFiles(new FilenameFilter() {
-                        @Override
-                        public boolean accept(File dir, String name) {
-                            return name.endsWith("." + fileExtention);
-                        }
-                    })) {
-                        filesToBeProcessed.add(applicationFile.getAbsolutePath());
-                    }
-                    List<String> filesRemoved = new ArrayList<>(files);
-                    filesRemoved.removeAll(filesToBeProcessed);
-                    //Remove old application files
-                    for (String fileRemoved : filesRemoved) {
-                        notifyRemoval(fileRemoved);
-                    }
-                    //Process (new files or already installed) files
-                    for (String toprocess : filesToBeProcessed) {
-                        try {
-                            Boolean fileManaged = filesPath.containsKey(toprocess);
-                            if (!fileManaged) { //new file
-                                LOG.info("Application file {} will be loaded.", toprocess);
-                                notifyInclusion(toprocess);
-                            } else {
-                                Application applicationManaged = filesPath.get(toprocess);
-                                Application applicationInFs = FileToApplicationParser.parse(toprocess);
-                                //taken into account modified files
-                                if (!applicationManaged.getDiggest().equals(applicationInFs.getDiggest())) {
-                                    LOG.info("Application file {} was already loaded but its content changed, dispatching update.", toprocess);
-                                    notifyModification(toprocess);
-                                    LOG.info("Application file {}, update procedure finished.", toprocess);
-                                } else {
-                                    //Dont do anything, file already taken into account
-                                }
-                            }
-                        } catch (Exception e) {
-                            LOG.warn("Failed to process application description file {}", toprocess, e);
-                        }
-                    }
-                }
-                Thread.sleep(readingDelay);
-            } catch (Exception e) {
-                LOG.error("Application persistency system failed", e);
-            }
-        }
-        notifyServiceUnavailable();
-        LOG.error("Application persistency system is exiting");
-    }
+
 
     private void notifyInclusion(String filepath) {
         try {
