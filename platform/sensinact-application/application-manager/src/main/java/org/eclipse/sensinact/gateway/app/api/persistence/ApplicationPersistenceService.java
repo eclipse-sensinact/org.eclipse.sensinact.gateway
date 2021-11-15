@@ -17,7 +17,7 @@ import org.json.JSONObject;
 
 import java.util.Collection;
 
-public interface ApplicationPersistenceService extends Runnable {
+public interface ApplicationPersistenceService{
     void persist(Application application) throws ApplicationPersistenceException;
 
     void delete(String applicationName) throws ApplicationPersistenceException;
