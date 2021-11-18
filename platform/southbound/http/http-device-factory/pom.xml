@@ -74,6 +74,12 @@
 		    <artifactId>jackson-databind</artifactId>
 		    <scope>provided</scope>
 		</dependency>
+		<dependency>
+		    <groupId>org.eclipse.sensinact.gateway.nthbnd</groupId>
+		    <artifactId>ldap-filter</artifactId>
+		    <version>${project.version}</version>
+		    <scope>test</scope>
+		</dependency>
 	</dependencies>
 
 </project>

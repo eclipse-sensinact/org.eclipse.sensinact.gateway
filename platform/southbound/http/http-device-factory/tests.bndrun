@@ -4,16 +4,15 @@
 	bnd.identity;id=junit-jupiter-engine,\
 	bnd.identity;id=junit-platform-launcher,\
 	bnd.identity;id='${project.groupId}.${project.artifactId}-tests',\
-	bnd.identity;id=org.apache.felix.http.jetty,\
-	bnd.identity;id=org.eclipse.sensinact.gateway.sensinact-security-none,\
-	bnd.identity;id=org.eclipse.sensinact.gateway.sensinact-signature-validator-mock
+	bnd.identity;id='org.apache.felix.http.jetty',\
+	bnd.identity;id='org.eclipse.sensinact.gateway.sensinact-security-none',\
+	bnd.identity;id='org.eclipse.sensinact.gateway.sensinact-signature-validator-mock',\
+	bnd.identity;id='org.eclipse.sensinact.gateway.nthbnd.ldap-filter'
 
 -runbundles: \
 	org.osgi.service.cm;version='[1.6.0,1.6.1)',\
-	org.osgi.service.log;version='[1.4.0,1.4.1)',\
 	org.osgi.util.function;version='[1.1.0,1.1.1)',\
 	org.osgi.util.promise;version='[1.1.1,1.1.2)',\
-	org.osgi.util.pushstream;version='[1.0.1,1.0.2)',\
 	junit-platform-commons;version='[1.7.2,1.7.3)',\
 	junit-jupiter-api;version='[5.7.2,5.7.3)',\
 	junit-jupiter-engine;version='[5.7.2,5.7.3)',\
@@ -48,7 +47,9 @@
 	org.osgi.test.junit5.cm;version='[1.0.1,1.0.2)',\
 	org.apache.felix.http.jetty;version='[4.1.10,4.1.11)',\
 	org.apache.felix.http.servlet-api;version='[1.1.4,1.1.5)',\
-	slf4j.log4j12;version='[1.7.25,1.7.26)'
+	slf4j.log4j12;version='[1.7.25,1.7.26)',\
+	json;version='[20190722.0.0,20190722.0.1)',\
+	org.eclipse.sensinact.gateway.nthbnd.ldap-filter;version='[2.0.0,2.0.1)'
 	
 -runproperties: \
 	org.eclipse.sensinact.gateway.security.jks.filename=${.}/../../../sensinact-security/cert/keystore.jks,\

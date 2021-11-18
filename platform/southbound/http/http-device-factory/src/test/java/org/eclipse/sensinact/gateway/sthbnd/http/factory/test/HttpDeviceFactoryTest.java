@@ -32,13 +32,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.core.Session;
+import org.eclipse.sensinact.gateway.core.filtering.FilteringCollection;
+import org.eclipse.sensinact.gateway.core.filtering.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
+import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -296,6 +301,36 @@ public class HttpDeviceFactoryTest {
 		for (ServiceProvider serviceProvider : session.serviceProviders()) {
 			serviceProvider.getName();
 		}
+		
+	}
+
+	@Test
+	@Order(8)
+	@WithFactoryConfiguration(factoryPid = FACTORY_PID, name = "test",
+	location = "?",
+	properties = {
+			@Property(key = ENDPOINT_CONFIGURATION_PROP, value="src/test/resources/test8/config.json"),
+			@Property(key = ENDPOINT_TASKS_CONFIGURATION_PROP, value="src/test/resources/test8/tasks.json")
+	}
+			)
+	public void testObserved(@InjectBundleContext BundleContext ctx) throws Exception {
+		Session session = expectNServiceProviders(2);
+		
+        testProvider(session, "test8_Foo", "data", "value", "94", "1.2:3.4", 
+        		LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
+        testProvider(session, "test8_Bar", "data", "value", "28", "5.6:7.8", 
+        		LocalDateTime.of(2021, 10, 20, 18, 17).toEpochSecond(ZoneOffset.UTC));
+        
+        
+        DescribeResponse<String> response = session.getAll(
+        		new FilteringCollection(new Mediator(ctx), false, 
+        				new FilteringDefinition("ldap", "(data.value.value<=40)")));
+        
+        JSONObject jsonObject = new JSONObject(response.getJSON());
+        JSONArray array = jsonObject.getJSONArray("providers");
+        
+        assertEquals(1, array.length());
+        assertEquals("test8_Bar", array.getJSONObject(0).get("name"));
 		
 	}
 

@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.sthbnd.http.factory;
 
+import static java.util.Arrays.asList;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -160,15 +162,13 @@ public class HttpMappingProtocolStackEndpointFactory implements ManagedServiceFa
 	private final ExtModelConfiguration<TaskAwareHttpResponsePacket> buildConfiguration(HttpMediator mediator, 
 		HttpMappingProtocolStackEndpointDescription endpointDescription, String resourceConfig) {
 			
-		byte serviceBuildPolicy  = Arrays.stream(endpointDescription.getServiceBuildPolicy()).<Byte>collect(
-				()->{return Byte.valueOf((byte)0);},
-				(b,s)->{b = Byte.valueOf((byte)(b.byteValue() | BuildPolicy.valueOf(s).getPolicy()));},
-				(b1,b2)->{b1 = Byte.valueOf((byte)(b1.byteValue() | b2.byteValue()));}).byteValue();
+		byte serviceBuildPolicy = Arrays.stream(endpointDescription.getServiceBuildPolicy())
+				.map(s -> (int) BuildPolicy.valueOf(s).getPolicy())
+				.reduce(0, (b1,b2) -> b1.byteValue() | b2.byteValue()).byteValue();
 		
-		byte resourceBuildPolicy  = Arrays.stream(endpointDescription.getResourceBuildPolicy()).<Byte>collect(
-				()->{return Byte.valueOf((byte)0);},
-				(b,s)->{b = Byte.valueOf((byte)(b.byteValue() | BuildPolicy.valueOf(s).getPolicy()));},
-				(b1,b2)->{b1 = Byte.valueOf((byte)(b1.byteValue() | b2.byteValue()));}).byteValue();
+		byte resourceBuildPolicy  = Arrays.stream(endpointDescription.getResourceBuildPolicy())
+				.map(s -> (int) BuildPolicy.valueOf(s).getPolicy())
+				.reduce(0, (b1,b2) -> b1.byteValue() | b2.byteValue()).byteValue();
 		
 		Modifiable modifiable = null;
 		try {
@@ -183,6 +183,7 @@ public class HttpMappingProtocolStackEndpointFactory implements ManagedServiceFa
         		).withServiceBuildPolicy(resourceConfig==null?BuildPolicy.BUILD_NON_DESCRIBED.getPolicy():serviceBuildPolicy
         		).withResourceBuildPolicy(resourceConfig==null?BuildPolicy.BUILD_NON_DESCRIBED.getPolicy():resourceBuildPolicy
         		).withDefaultModifiable(modifiable 
+        		).withObserved(asList(endpointDescription.getObserved())
         		).build(resourceConfig, endpointDescription.getDefaults());
      
         HttpMappingProtocolStackConnectorCustomizer customizer = new HttpMappingProtocolStackConnectorCustomizer(

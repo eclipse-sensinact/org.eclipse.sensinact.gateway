@@ -42,6 +42,9 @@ public class HttpMappingProtocolStackEndpointDescription {
 	@JsonProperty(value="serviceBuildPolicy")
 	private String[] serviceBuildPolicy;
 
+	@JsonProperty(value="observed")
+	private String[] observed;
+
 	@JsonProperty(value="serviceProviderIdPattern")
 	private String serviceProviderIdPattern;
 
@@ -186,6 +189,22 @@ public class HttpMappingProtocolStackEndpointDescription {
 	 */
 	public void setServiceBuildPolicy(String[] serviceBuildPolicy) {
 		this.serviceBuildPolicy = serviceBuildPolicy;
+	}
+	
+	/**
+	 * @return the serviceBuildPolicy
+	 */
+	public String[] getObserved() {
+		if(this.observed == null)
+			return new String[0];
+		return observed;
+	}
+	
+	/**
+	 * @param serviceBuildPolicy the serviceBuildPolicy to set
+	 */
+	public void setObserved(String[] observed) {
+		this.observed = observed;
 	}
 
 	/**
