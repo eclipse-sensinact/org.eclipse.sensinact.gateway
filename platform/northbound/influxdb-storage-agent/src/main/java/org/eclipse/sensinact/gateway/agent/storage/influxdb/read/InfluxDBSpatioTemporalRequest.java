@@ -18,11 +18,9 @@ import org.eclipse.sensinact.gateway.historic.storage.reader.api.SpatioTemporalD
 import org.eclipse.sensinact.gateway.tools.connector.influxdb.InfluxDbConnector;
 
 
-public class InfluxDBSpatioTemporalRequest extends InfluxDBRequest<SpatioTemporalDTO> implements HistoricSpatioTemporalRequest{
+public class InfluxDBSpatioTemporalRequest extends AbstractInfluxDBTemporalRequest<List<SpatioTemporalDTO>> implements HistoricSpatioTemporalRequest{
 
 	protected String region;
-	protected String function;
-	protected long temporalWindow;
 	
 	public InfluxDBSpatioTemporalRequest(InfluxDbConnector influxDbConnector) {
 		super(influxDbConnector);
@@ -31,16 +29,6 @@ public class InfluxDBSpatioTemporalRequest extends InfluxDBRequest<SpatioTempora
 	@Override
 	public List<SpatioTemporalDTO> execute() {
 		return Collections.emptyList();
-	}
-
-	@Override
-	public void setFunction(String function) {
-		this.function = function;
-	}
-
-	@Override
-	public void setTemporalWindow(long temporalWindow) {
-		this.temporalWindow = temporalWindow;
 	}
 
 	@Override

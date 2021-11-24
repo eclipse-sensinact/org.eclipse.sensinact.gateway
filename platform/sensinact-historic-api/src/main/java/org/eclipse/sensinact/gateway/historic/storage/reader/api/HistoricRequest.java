@@ -10,13 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.historic.storage.reader.api;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.ZonedDateTime;
 
 /**
  * HistoricRequest allows to collect a set of points from a connected 
  * historic database depending on a targeted path and a time window defined
- * using a {@link LocalDateTime} start time and a {@link LocalDateTime} end time 
+ * using a {@link ZonedDateTime} start time and a {@link ZonedDateTime} end time 
  */
 public interface HistoricRequest<T> {
 			
@@ -26,10 +25,6 @@ public interface HistoricRequest<T> {
 
 	void setResourceIdentifier(String resourceId);
 	
-	void setHistoricStartTime(LocalDateTime fromTime);
-
-	void setHistoricEndTime(LocalDateTime toTime);
-	
-	List<T> execute();
+	T execute();
 
 }

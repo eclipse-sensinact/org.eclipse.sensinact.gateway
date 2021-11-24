@@ -17,6 +17,7 @@ import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricProvide
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricSpatialRequest;
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricSpatioTemporalRequest;
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricTemporalRequest;
+import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricValueRequest;
 import org.eclipse.sensinact.gateway.tools.connector.influxdb.InfluxDbConnector;
 
 /**
@@ -68,6 +69,12 @@ public class InfluxDBHistoricProvider implements HistoricProvider {
 		request.setDatabase(this.database);
 		request.setMeasurement(this.measurement);
 		return request;
+	}
+
+	@Override
+	public HistoricValueRequest newValueRequest() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

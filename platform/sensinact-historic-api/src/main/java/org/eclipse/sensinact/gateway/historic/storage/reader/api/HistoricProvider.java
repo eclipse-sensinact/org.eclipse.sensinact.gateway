@@ -16,6 +16,8 @@ package org.eclipse.sensinact.gateway.historic.storage.reader.api;
  */
 public interface HistoricProvider {
 
+	HistoricValueRequest newValueRequest();
+	
 	HistoricTemporalRequest newTemporalRequest();
 
 	HistoricSpatialRequest newSpatialRequest();

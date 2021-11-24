@@ -10,11 +10,18 @@
  */
 package org.eclipse.sensinact.gateway.historic.storage.reader.api;
 
+import java.time.ZonedDateTime;
+import java.util.List;
+
 /**
  *
  */
-public interface HistoricSpatioTemporalRequest extends HistoricRequest<SpatioTemporalDTO> {
+public interface HistoricSpatioTemporalRequest extends HistoricRequest<List<SpatioTemporalDTO>> {
 
+	void setHistoricStartTime(ZonedDateTime fromTime);
+
+	void setHistoricEndTime(ZonedDateTime toTime);
+	
 	void setFunction(String function);	
 
 	void setTemporalWindow(long period);

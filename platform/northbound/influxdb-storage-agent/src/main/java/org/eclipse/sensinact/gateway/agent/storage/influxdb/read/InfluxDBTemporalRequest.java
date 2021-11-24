@@ -20,11 +20,8 @@ import org.eclipse.sensinact.gateway.tools.connector.influxdb.InfluxDbConnector;
 import org.eclipse.sensinact.gateway.tools.connector.influxdb.InfluxDbDatabase;
 
 
-public class InfluxDBTemporalRequest extends InfluxDBRequest<TemporalDTO> implements HistoricTemporalRequest{
+public class InfluxDBTemporalRequest extends AbstractInfluxDBTemporalRequest<List<TemporalDTO>> implements HistoricTemporalRequest {
 
-	protected String function;
-	protected long temporalWindow;
-	
 	public InfluxDBTemporalRequest(InfluxDbConnector influxDbConnector) {
 		super(influxDbConnector);
 	}
@@ -39,28 +36,18 @@ public class InfluxDBTemporalRequest extends InfluxDBRequest<TemporalDTO> implem
 			s = super.get(db,
 					super.measurement.concat("_num"),
 					Arrays.asList(super.getDataSourcePath(), super.getResource()),
-					super.start,
-					super.end);
+					start,
+					end);
 	     } else {
 			s = super.get(db,
 					super.measurement.concat("_num"),
 					Arrays.asList(super.getDataSourcePath(), super.getResource()),
 					this.function, 
 					this.temporalWindow <=0?10000:temporalWindow,
-					super.start,
-					super.end);
+					start,
+					end);
 		}
 		return s;
-	}
-
-	@Override
-	public void setFunction(String function) {
-		this.function = function;
-	}
-
-	@Override
-	public void setTemporalWindow(long temporalWindow) {
-		this.temporalWindow = temporalWindow;
 	}
 
 }

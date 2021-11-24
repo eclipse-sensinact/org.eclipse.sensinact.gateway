@@ -7,13 +7,12 @@
  */
 package org.eclipse.sensinact.gateway.tools.connector.influxdb;
 
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
+import static java.time.ZoneOffset.UTC;
+import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+
 import java.time.ZoneOffset;
-import java.util.Arrays;
+import java.time.ZonedDateTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
@@ -31,42 +30,20 @@ import org.influxdb.dto.QueryResult;
  */
 public class InfluxDbDatabase {
 
-	private static final long MILLISECOND = 1;
+	private static final long MILLISECOND = TimeUnit.MILLISECONDS.toMillis(1);
 	
-	private static final long SECOND = MILLISECOND * 1000;
+	private static final long SECOND = TimeUnit.SECONDS.toMillis(1);
 
-	private static final long MINUTE = SECOND * 60;
+	private static final long MINUTE = TimeUnit.MINUTES.toMillis(1);
 
-	private static final long HOUR = MINUTE * 60;
+	private static final long HOUR = TimeUnit.HOURS.toMillis(1);
 
-	private static final long DAY = HOUR * 24;
+	private static final long DAY = TimeUnit.DAYS.toMillis(1);
 	
 	private static final long WEEK = DAY * 7;
 	
-	
-	private interface SimpleDateFormatProvider {
-		Iterator<SimpleDateFormat> iterator();
-	}
-	
-	private static final ThreadLocal<SimpleDateFormatProvider> THREAD_LOCAL_FORMATS = new ThreadLocal<SimpleDateFormatProvider>() {
-		
-		protected SimpleDateFormatProvider initialValue() {
-			return new SimpleDateFormatProvider(){
-
-				@Override
-				public Iterator<SimpleDateFormat> iterator() {
-					return Arrays.asList(
-						new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
-						new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-					).iterator();
-				}
-			};
-		}
-	};
-
     private InfluxDB influxDB;
 	private String database;
-	private final ZoneOffset offset;
 
 	/**
 	 * Constructor
@@ -88,7 +65,6 @@ public class InfluxDbDatabase {
 	public InfluxDbDatabase(InfluxDB influxDB, String database, String retention) {
 		this.influxDB = influxDB;
 		this.database = database;
-		this.offset = ZoneOffset.systemDefault().getRules().getOffset(Instant.now());
 
         influxDB.setDatabase(database);
         influxDB.setRetentionPolicy(retention);
@@ -210,14 +186,14 @@ public class InfluxDbDatabase {
 	    			builder.addField(key, (Double) value);
 					break;
 	    		case "java.lang.Character":
-	    			builder.addField(key, new String(new char[] {((Character)value).charValue()}));
+	    			builder.addField(key, value.toString());
 					break;
 	    		case "java.lang.Boolean":
-	    			builder.addField(key, new String(new char[] {(char)value}));
+	    			builder.addField(key, (Boolean) value);
 					break;
         	}			
 		} else if(value instanceof Enum){
-			builder.addField(key, ((Enum)value).name());
+			builder.addField(key, ((Enum<?>)value).name());
 		} else {
 			builder.addField(key, String.valueOf(value));			
 		}
@@ -356,7 +332,7 @@ public class InfluxDbDatabase {
     	return result;
     }
 
-    public QueryResult getResult(String measurement, List<InfluxDBTagDTO> tags, List<String> columns, LocalDateTime start) {
+    public QueryResult getResult(String measurement, List<InfluxDBTagDTO> tags, List<String> columns, ZonedDateTime start) {
     	if(start == null)
     		return getResult(measurement, tags, columns);
     	String select = null;
@@ -372,14 +348,9 @@ public class InfluxDbDatabase {
     	String from = String.format(" FROM %s " , measurement);
     	
     	String where =  buildWhereClause(tags);
+    	
+    	String startDate = ISO_OFFSET_DATE_TIME.format(start.toInstant().atOffset(UTC));
 
-    	SimpleDateFormatProvider formatProvider = THREAD_LOCAL_FORMATS.get();
-    	
-    	SimpleDateFormat df = formatProvider.iterator().next();
-    	
-    	String startDate = df.format(new Date(start.toInstant(offset).toEpochMilli()));
-    	
-    	THREAD_LOCAL_FORMATS.remove();
     	if(where.length() == 0)
     		where = String.format(" WHERE time > '%s'", startDate);
     	else {
@@ -393,7 +364,7 @@ public class InfluxDbDatabase {
     	return result;
     }	
 
-    public QueryResult getResult(String measurement,  List<InfluxDBTagDTO> tags, String column, String function, long timeWindow, LocalDateTime start) {
+    public QueryResult getResult(String measurement,  List<InfluxDBTagDTO> tags, String column, String function, long timeWindow, ZonedDateTime start) {
     	if(start == null)
     		return getResult(measurement, tags, column, function, timeWindow);
     	String select = getSelectFunction(column, function);
@@ -401,12 +372,9 @@ public class InfluxDbDatabase {
     		return null;
     	String from = String.format(" FROM %s " , measurement);
     	String where =  buildWhereClause(tags);
-    	SimpleDateFormatProvider formatProvider = THREAD_LOCAL_FORMATS.get();
     	
-    	SimpleDateFormat df = formatProvider.iterator().next();    	
-    	String startDate = df.format(new Date(start.toInstant(offset).toEpochMilli()));
+    	String startDate = ISO_OFFSET_DATE_TIME.format(start.toInstant().atOffset(UTC));
     	
-    	THREAD_LOCAL_FORMATS.remove();
     	if(where.length() == 0)
     		where = String.format(" WHERE time > '%s'", startDate);
     	else {
@@ -421,7 +389,7 @@ public class InfluxDbDatabase {
     	return result;
     }
 
-    public QueryResult getResult(String measurement, List<InfluxDBTagDTO> tags, List<String> columns,  LocalDateTime start, LocalDateTime end) {    	
+    public QueryResult getResult(String measurement, List<InfluxDBTagDTO> tags, List<String> columns,  ZonedDateTime start, ZonedDateTime end) {    	
     	if(end == null)
     		return this.getResult(measurement, tags,  columns, start);
     	String select = null;
@@ -434,16 +402,8 @@ public class InfluxDbDatabase {
     		}, (h,t)->h.append(t.toString())).toString();
     	select =select.substring(0,select.length()-1);
     	    	
-    	SimpleDateFormatProvider formatProvider = THREAD_LOCAL_FORMATS.get();
-    	SimpleDateFormat df = formatProvider.iterator().next();
-    	
-    	String startDate=null;
-    	String endDate=null;
-    	
-    	startDate = df.format(new Date(start.toInstant(offset).toEpochMilli()));
-    	endDate = df.format(new Date(end.toInstant(offset).toEpochMilli()));
-    	
-    	THREAD_LOCAL_FORMATS.remove();
+    	String startDate = ISO_OFFSET_DATE_TIME.format(start.toInstant().atOffset(UTC));
+    	String endDate = ISO_OFFSET_DATE_TIME.format(end.toInstant().atOffset(UTC));
     	
     	String from = String.format(" FROM %s " , measurement);
     	String where =  buildWhereClause(tags);
@@ -460,7 +420,7 @@ public class InfluxDbDatabase {
     	return result;
     }	
 	
-    public QueryResult getResult(String measurement,  List<InfluxDBTagDTO> tags, String column, String function, long timeWindow, LocalDateTime start, LocalDateTime end) {
+    public QueryResult getResult(String measurement,  List<InfluxDBTagDTO> tags, String column, String function, long timeWindow, ZonedDateTime start, ZonedDateTime end) {
     	if(end == null)
     		return getResult(measurement,  tags, column, function, timeWindow, start);
 
@@ -469,13 +429,9 @@ public class InfluxDbDatabase {
     		return null;
     	String from = String.format(" FROM %s " , measurement);
 
-    	SimpleDateFormatProvider formatProvider = THREAD_LOCAL_FORMATS.get();    	
-    	SimpleDateFormat df = formatProvider.iterator().next();
+    	String startDate = ISO_OFFSET_DATE_TIME.format(start.toInstant().atOffset(UTC));
+    	String endDate = ISO_OFFSET_DATE_TIME.format(end.toInstant().atOffset(UTC));
     	
-    	String startDate = df.format(new Date(start.toInstant(offset).toEpochMilli()));
-    	String endDate = df.format(new Date(end.toInstant(offset).toEpochMilli()));
-    	
-    	THREAD_LOCAL_FORMATS.remove();
     	String where =  buildWhereClause(tags);
     	if(where.length() == 0)
     		where = String.format(" WHERE time > '%s' AND time < '%s'", startDate, endDate);

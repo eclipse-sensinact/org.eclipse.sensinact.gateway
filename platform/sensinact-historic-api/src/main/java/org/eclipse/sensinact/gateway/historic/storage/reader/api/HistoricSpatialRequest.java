@@ -10,12 +10,15 @@
  */
 package org.eclipse.sensinact.gateway.historic.storage.reader.api;
 
+import java.time.ZonedDateTime;
+
 /**
  *
  */
 public interface HistoricSpatialRequest extends HistoricRequest<SpatialDTO> {
 
-		void setRegion(String region);
+	void setHistoricTime(ZonedDateTime time);
+	void setRegion(String region);
 }
 
 

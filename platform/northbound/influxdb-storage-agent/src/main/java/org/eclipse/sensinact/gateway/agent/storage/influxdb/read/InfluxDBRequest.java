@@ -11,7 +11,7 @@
 package org.eclipse.sensinact.gateway.agent.storage.influxdb.read;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,8 +40,6 @@ public abstract class InfluxDBRequest<T> implements HistoricRequest<T>{
 	protected String provider;
 	protected String service;
 	protected String resource;
-	protected LocalDateTime start;
-	protected LocalDateTime end;
 
 	protected InfluxDbConnector influxDbConnector;
 
@@ -70,16 +68,6 @@ public abstract class InfluxDBRequest<T> implements HistoricRequest<T>{
 	@Override
 	public void setResourceIdentifier(String resource) {	
 		this.resource = resource;
-	}
-
-	@Override
-	public void setHistoricStartTime(LocalDateTime fromTime) {
-		this.start = fromTime;
-	}
-
-	@Override
-	public void setHistoricEndTime(LocalDateTime toTime) {
-		this.end = toTime;
 	}
 	
 	protected InfluxDBTagDTO getDataSourcePath() {
@@ -217,7 +205,7 @@ public abstract class InfluxDBRequest<T> implements HistoricRequest<T>{
     * @param start the LocalDateTime defining the chronological beginning of records in which to search 
     * @return the JSON formated String result of the research
     */
-   protected List<TemporalDTO> get(InfluxDbDatabase db, String measurement, List<InfluxDBTagDTO> tags, LocalDateTime start) {
+   protected List<TemporalDTO> get(InfluxDbDatabase db, String measurement, List<InfluxDBTagDTO> tags, ZonedDateTime start) {
    	   QueryResult result = db.getResult(measurement, tags, Arrays.asList("time","value"), start);
        List<TemporalDTO> list = buildTemporalDTOList(result);
    	   return list;
@@ -237,7 +225,7 @@ public abstract class InfluxDBRequest<T> implements HistoricRequest<T>{
     * 
     * @return the JSON formated String result of the research
     */
-   protected List<TemporalDTO> get(InfluxDbDatabase db, String measurement,  List<InfluxDBTagDTO> tags, String function, long timeWindow, LocalDateTime start) {
+   protected List<TemporalDTO> get(InfluxDbDatabase db, String measurement,  List<InfluxDBTagDTO> tags, String function, long timeWindow, ZonedDateTime start) {
    	   QueryResult result = db.getResult(measurement, tags, "value", function, timeWindow, start);
        List<TemporalDTO> list = buildTemporalDTOList(result);
    	   return list;
@@ -256,7 +244,7 @@ public abstract class InfluxDBRequest<T> implements HistoricRequest<T>{
     * 
     * @return the JSON formated String result of the research
     */
-   protected List<TemporalDTO> get(InfluxDbDatabase db, String measurement, List<InfluxDBTagDTO> tags, LocalDateTime start, LocalDateTime end) { 
+   protected List<TemporalDTO> get(InfluxDbDatabase db, String measurement, List<InfluxDBTagDTO> tags, ZonedDateTime start, ZonedDateTime end) { 
    	   QueryResult result = db.getResult(measurement, tags, Arrays.asList("time","value"), start, end);
        List<TemporalDTO> list = buildTemporalDTOList(result);
    	   return list;
@@ -277,7 +265,7 @@ public abstract class InfluxDBRequest<T> implements HistoricRequest<T>{
 	 * 
 	 * @return the JSON formated String result of the research
 	*/
-	protected List<TemporalDTO> get(InfluxDbDatabase db, String measurement,  List<InfluxDBTagDTO> tags, String function, long timeWindow, LocalDateTime start, LocalDateTime end) {
+	protected List<TemporalDTO> get(InfluxDbDatabase db, String measurement,  List<InfluxDBTagDTO> tags, String function, long timeWindow, ZonedDateTime start, ZonedDateTime end) {
 		QueryResult result = db.getResult(measurement, tags, "value", function, timeWindow, start, end);
 	    List<TemporalDTO> list = buildTemporalDTOList(result);
 	 	return list;

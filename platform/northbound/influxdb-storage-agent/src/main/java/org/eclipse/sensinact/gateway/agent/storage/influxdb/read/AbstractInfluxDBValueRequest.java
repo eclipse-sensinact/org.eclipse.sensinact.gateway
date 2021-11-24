@@ -10,26 +10,21 @@
  */
 package org.eclipse.sensinact.gateway.agent.storage.influxdb.read;
 
-import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricSpatialRequest;
-import org.eclipse.sensinact.gateway.historic.storage.reader.api.SpatialDTO;
+import java.time.ZonedDateTime;
+
 import org.eclipse.sensinact.gateway.tools.connector.influxdb.InfluxDbConnector;
 
 
-public class InfluxDBSpatialRequest extends AbstractInfluxDBValueRequest<SpatialDTO> implements HistoricSpatialRequest{
+public abstract class AbstractInfluxDBValueRequest<T> extends InfluxDBRequest<T> {
 
-	protected String region;
+	protected ZonedDateTime time;
 	
-	public InfluxDBSpatialRequest(InfluxDbConnector influxDbConnector) {
+	public AbstractInfluxDBValueRequest(InfluxDbConnector influxDbConnector) {
 		super(influxDbConnector);
 	}
-
-	@Override
-	public SpatialDTO execute() {
-		return null;
+	
+	public void setHistoricTime(ZonedDateTime time) {
+		this.time = time;
 	}
 
-	@Override
-	public void setRegion(String region) {
-		this.region = region;
-	}
 }

@@ -10,10 +10,12 @@
  */
 package org.eclipse.sensinact.gateway.historic.storage.manager;
 
+import static java.time.ZoneOffset.UTC;
+
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -35,8 +37,6 @@ import org.osgi.dto.DTO;
 @TaskExecution
 public class HistoricTaskCaller {
 
-	private static final ZoneOffset OFFSET = ZoneOffset.systemDefault().getRules().getOffset(Instant.now());
-	
     private enum AggregationType { 
     	COUNT, 
     	MEAN, 
@@ -48,13 +48,13 @@ public class HistoricTaskCaller {
     	DISTINCT 
     };
 
-	private class HistoricKey {
+	private static class HistoricKey {
 		
 		String sensinactId, konceptId, kapabilityId, function, region; 
-		LocalDateTime fromTime, toTime;
+		Instant fromTime, toTime;
 		long timeWindow;
 		
-		HistoricKey(String sensinactId, String konceptId, String kapabilityId, LocalDateTime fromTime, LocalDateTime toTime,
+		HistoricKey(String sensinactId, String konceptId, String kapabilityId, Instant fromTime, Instant toTime,
 			String function, long timeWindow, String region){
 			this.sensinactId = sensinactId;
 			this.konceptId = konceptId; 
@@ -65,19 +65,28 @@ public class HistoricTaskCaller {
 			this.timeWindow = timeWindow;
 			this.region = region;
 		}
-		
+
 		@Override
 		public int hashCode() {
-			int hash = this.sensinactId.hashCode();
-			hash += this.konceptId.hashCode();
-			hash += this.kapabilityId.hashCode();
-			hash += this.fromTime.hashCode();
-			hash += this.toTime.hashCode();
-			hash += this.function!=null?this.function.hashCode():0;
-			hash += this.function!=null?this.timeWindow:0;
-			hash += this.region!=null?this.region.hashCode():0;
-			return hash;
-		}                                     
+			return Objects.hash(fromTime, function, kapabilityId, konceptId, region, sensinactId, timeWindow, toTime);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			HistoricKey other = (HistoricKey) obj;
+			return Objects.equals(fromTime, other.fromTime) && Objects.equals(function, other.function)
+					&& Objects.equals(kapabilityId, other.kapabilityId) && Objects.equals(konceptId, other.konceptId)
+					&& Objects.equals(region, other.region) && Objects.equals(sensinactId, other.sensinactId)
+					&& timeWindow == other.timeWindow && Objects.equals(toTime, other.toTime);
+		}
+		
+		                                  
 	}
 
 	private Mediator mediator;
@@ -89,17 +98,24 @@ public class HistoricTaskCaller {
 		this.cache = new WeakHashMap<>();
 	}
 	
+	private ZonedDateTime parseTime(String time) {
+		try {
+			long longTime = Long.parseLong(time);
+			return Instant.ofEpochMilli(longTime).atOffset(UTC).toZonedDateTime();
+		} catch (NumberFormatException nfe) {
+			return ZonedDateTime.parse(time);
+		}
+	}
+	
 	@TaskCommand(method = Task.CommandType.GET, target = "/historicManager/history/requester")
 	public String get(String uri, String attributeName, String provider, String service, String resource, String from, String to, 
 		String function, String window, String region) {
 		try {
 			String result = null;
-			long f = Long.parseLong(from);
-			long t = Long.parseLong(to);
 			long w = Long.parseLong(window);
 			
-			LocalDateTime dtf = LocalDateTime.ofEpochSecond(f/1000l, (int) (f - ((f/1000) * 1000))*1000, OFFSET);
-			LocalDateTime dtt = LocalDateTime.ofEpochSecond(t/1000l, (int) (t - ((t/1000) * 1000))*1000, OFFSET);
+			ZonedDateTime dtf = parseTime(from);
+			ZonedDateTime dtt = parseTime(to);
 			
 			if(function!=null && !"#NONE#".equals(function) && w > 0) {
 				AggregationType aggregation = null;		
@@ -121,11 +137,11 @@ public class HistoricTaskCaller {
 		return null;
 	}
 	
-	private String getTemporalHistory(String provider, String service, String resource, LocalDateTime from, LocalDateTime to) {
+	private String getTemporalHistory(String provider, String service, String resource, ZonedDateTime from, ZonedDateTime to) {
 		HistoricTemporalRequest request = createTemporalRequest(provider, service, resource, from, to);
 		if(request == null)
 			return "[]";		
-		HistoricKey historic = new HistoricKey(provider, service, resource, from, to, null, 0, null);
+		HistoricKey historic = new HistoricKey(provider, service, resource, from.toInstant(), to.toInstant(), null, 0, null);
 		DTO[] data = this.cache.get(historic);
 		if(data == null)
 			data = request.execute().toArray(new TemporalDTO[] {});
@@ -152,7 +168,7 @@ public class HistoricTaskCaller {
 		).append("]").toString();
 	}	
 	
-	private String getAggregatedTemporalHistory(String provider, String service, String resource, LocalDateTime from, LocalDateTime to,
+	private String getAggregatedTemporalHistory(String provider, String service, String resource, ZonedDateTime from, ZonedDateTime to,
 			AggregationType method, long period) {		
 		
 		HistoricTemporalRequest request = createTemporalRequest(provider, service, resource, from, to);
@@ -162,7 +178,7 @@ public class HistoricTaskCaller {
 		request.setFunction(method.name().toLowerCase());
 		request.setTemporalWindow(period);
 		
-		HistoricKey historic = new HistoricKey(provider, service, resource, from, to, method.name(), period, null);
+		HistoricKey historic = new HistoricKey(provider, service, resource, from.toInstant(), to.toInstant(), method.name(), period, null);
 		DTO[] data = this.cache.get(historic);
 		if(data == null)
 			data = request.execute().toArray(new TemporalDTO[] {});
@@ -190,7 +206,7 @@ public class HistoricTaskCaller {
 	}
 	
 	private HistoricTemporalRequest createTemporalRequest(String provider, String service, String resource, 
-			LocalDateTime fromTime, LocalDateTime toTime){		
+			ZonedDateTime fromTime, ZonedDateTime toTime){		
 		
 		HistoricTemporalRequest request = this.mediator.callService(HistoricProvider.class, 
 			new Executable<HistoricProvider,HistoricTemporalRequest>(){
@@ -211,7 +227,7 @@ public class HistoricTaskCaller {
 	}
 	
 	private HistoricSpatialRequest createSpatialRequest(String provider, String service, String resource, 
-		String region, LocalDateTime fromTime, LocalDateTime toTime){
+		String region, ZonedDateTime time){
 		
 		HistoricSpatialRequest request = this.mediator.callService(HistoricProvider.class, 
 			new Executable<HistoricProvider,HistoricSpatialRequest>(){
@@ -225,15 +241,14 @@ public class HistoricTaskCaller {
 		request.setServiceProviderIdentifier(provider);
 		request.setServiceIdentifier(service);
 		request.setResourceIdentifier(resource);
-		request.setHistoricStartTime(fromTime);
-		request.setHistoricEndTime(toTime);
+		request.setHistoricTime(time);
 		request.setRegion(region);
 		
 		return request;		
 	}
 
 	private HistoricSpatioTemporalRequest createSpatioTemporalRequest(String provider, String service, String resource, 
-		String region, LocalDateTime fromTime, LocalDateTime toTime){
+		String region, ZonedDateTime fromTime, ZonedDateTime toTime){
 		
 		HistoricSpatioTemporalRequest request = this.mediator.callService(HistoricProvider.class, 
 			new Executable<HistoricProvider,HistoricSpatioTemporalRequest>(){
