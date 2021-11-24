@@ -9,14 +9,15 @@ package org.eclipse.sensinact.gateway.tools.connector.influxdb;
 
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+import static java.util.stream.Collectors.joining;
 
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Point;
@@ -446,4 +447,18 @@ public class InfluxDbDatabase {
     	QueryResult result = this.influxDB.query(query);
     	return result;
     }  
+    
+    public QueryResult getPointInTimeResults(List<String> measurements, List<List<InfluxDBTagDTO>> tags, ZonedDateTime time) {
+    	String measure = measurements.stream().collect(joining(","));
+    	
+    	String t = ISO_OFFSET_DATE_TIME.format(time.toInstant().atOffset(UTC));
+    	
+    	String query = tags.stream()
+    		.map(this::buildWhereClause)
+    		.map(w -> String.format("SELECT path, time, value FROM %s %s AND time < '%s' limit 1;", measure, w, t))
+    		.collect(Collectors.joining(" "));
+    	
+    	return this.influxDB.query(new Query(query, database));
+    }
+   
 }

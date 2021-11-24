@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.agent.storage.influxdb.read;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricSpatioTemporalRequest;
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.SpatioTemporalDTO;
@@ -27,8 +28,8 @@ public class InfluxDBSpatioTemporalRequest extends AbstractInfluxDBTemporalReque
 	}
 
 	@Override
-	public List<SpatioTemporalDTO> execute() {
-		return Collections.emptyList();
+	public Map<String, List<SpatioTemporalDTO>> execute() {
+		return Collections.emptyMap();
 	}
 
 	@Override

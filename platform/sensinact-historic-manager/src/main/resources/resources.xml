@@ -96,6 +96,19 @@
 			</method>		
 		</methods>
 	</resourceInfo>
+	<resourceInfo xsi:type="resourceInfoProperty" name="SINGLE" target="history">
+		<policy name="PROPERTY" update="NONE" />
+		<identifier xsi:type="stringContent">single</identifier>
+		<attributes>
+			<attribute name="value" type="string" modifiable="UPDATABLE" />
+		</attributes>
+		<methods>
+			<method type="GET">
+				<parameter name="paths" type="Array of java.lang.String"/>
+				<parameter name="time" type="string"/>
+			</method>							
+		</methods>
+	</resourceInfo>
 	<devices>
 		<device identifier="historicManager">
 			<service name="history"/>

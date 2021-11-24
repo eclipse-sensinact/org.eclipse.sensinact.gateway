@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.agent.storage.influxdb.read;
 
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricSpatialRequest;
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.SpatialDTO;
 import org.eclipse.sensinact.gateway.tools.connector.influxdb.InfluxDbConnector;
@@ -24,7 +26,7 @@ public class InfluxDBSpatialRequest extends AbstractInfluxDBValueRequest<Spatial
 	}
 
 	@Override
-	public SpatialDTO execute() {
+	public Map<String, SpatialDTO> execute() {
 		return null;
 	}
 

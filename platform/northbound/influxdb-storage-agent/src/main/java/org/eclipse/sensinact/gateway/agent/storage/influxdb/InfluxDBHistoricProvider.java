@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.agent.storage.influxdb;
 import org.eclipse.sensinact.gateway.agent.storage.influxdb.read.InfluxDBSpatialRequest;
 import org.eclipse.sensinact.gateway.agent.storage.influxdb.read.InfluxDBSpatioTemporalRequest;
 import org.eclipse.sensinact.gateway.agent.storage.influxdb.read.InfluxDBTemporalRequest;
+import org.eclipse.sensinact.gateway.agent.storage.influxdb.read.InfluxDBValueRequest;
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricProvider;
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricSpatialRequest;
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricSpatioTemporalRequest;
@@ -73,8 +74,10 @@ public class InfluxDBHistoricProvider implements HistoricProvider {
 
 	@Override
 	public HistoricValueRequest newValueRequest() {
-		// TODO Auto-generated method stub
-		return null;
+		InfluxDBValueRequest request = new InfluxDBValueRequest(connector);
+		request.setDatabase(database);
+		request.setMeasurement(measurement);
+		return request;
 	}
 
 

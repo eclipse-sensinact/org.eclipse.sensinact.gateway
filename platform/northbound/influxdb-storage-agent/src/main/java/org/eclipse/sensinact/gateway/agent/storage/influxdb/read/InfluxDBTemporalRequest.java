@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.agent.storage.influxdb.read;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricTemporalRequest;
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.TemporalDTO;
@@ -27,27 +28,28 @@ public class InfluxDBTemporalRequest extends AbstractInfluxDBTemporalRequest<Lis
 	}
 
 	@Override
-	public List<TemporalDTO> execute() {
+	public Map<String,List<TemporalDTO>> execute() {
 		InfluxDbDatabase db = influxDbConnector.getIfExists(super.database);
-		if(db == null)
-			return Collections.emptyList();
+		if(db == null || resources.isEmpty())
+			return Collections.emptyMap();
+		ResourceInfo ri = resources.get(0);
 		List<TemporalDTO> s;
 		if(this.function == null) {
 			s = super.get(db,
 					super.measurement.concat("_num"),
-					Arrays.asList(super.getDataSourcePath(), super.getResource()),
+					Arrays.asList(super.getDataSourcePath(ri), super.getResource(ri)),
 					start,
 					end);
 	     } else {
 			s = super.get(db,
 					super.measurement.concat("_num"),
-					Arrays.asList(super.getDataSourcePath(), super.getResource()),
+					Arrays.asList(super.getDataSourcePath(ri), super.getResource(ri)),
 					this.function, 
 					this.temporalWindow <=0?10000:temporalWindow,
 					start,
 					end);
 		}
-		return s;
+		return Collections.singletonMap(ri.getPath(), s);
 	}
 
 }

@@ -37,9 +37,23 @@ public abstract class InfluxDBRequest<T> implements HistoricRequest<T>{
 	protected String database;
 	protected String measurement;
 	
-	protected String provider;
-	protected String service;
-	protected String resource;
+	protected List<ResourceInfo> resources = new ArrayList<>();
+	
+	public static class ResourceInfo {
+		public final String provider;
+		public final String service;
+		public final String resource;
+		
+		public ResourceInfo(String provider, String service, String resource) {
+			this.provider = provider;
+			this.service = service;
+			this.resource = resource;
+		}
+
+		public String getPath() {
+			return String.format("%s/%s/%s", provider, service, resource);
+		}
+	}
 
 	protected InfluxDbConnector influxDbConnector;
 
@@ -56,30 +70,20 @@ public abstract class InfluxDBRequest<T> implements HistoricRequest<T>{
 	}
 
 	@Override
-	public void setServiceProviderIdentifier(String provider) {
-		this.provider = provider;
+	public void addTargetResource(String provider, String service, String resource) {
+		resources.add(new ResourceInfo(provider, service, resource));
 	}
 
-	@Override
-	public void setServiceIdentifier(String service) {	
-		this.service = service;
-	}
-
-	@Override
-	public void setResourceIdentifier(String resource) {	
-		this.resource = resource;
-	}
-	
-	protected InfluxDBTagDTO getDataSourcePath() {
+	protected InfluxDBTagDTO getDataSourcePath(ResourceInfo ri) {
 	    InfluxDBTagDTO historicAttributeDTO = new InfluxDBTagDTO();
 		historicAttributeDTO.name="path";		
 		String datasource = null;
-		if(this.resource == null) {
+		if(ri.resource == null) {
 			
-			if(this.provider == null)
+			if(ri.provider == null)
 				return null;
 			
-			datasource = provider;			
+			datasource = ri.provider;			
 			for(String replacement:REPLACEMENTS)
 				datasource = datasource.replace(replacement,"\\".concat(replacement));
 			
@@ -91,11 +95,11 @@ public abstract class InfluxDBRequest<T> implements HistoricRequest<T>{
 			historicAttributeDTO.pattern=true;			
 			return historicAttributeDTO;			
 		}			
-		if(this.provider == null){
-			if(this.service == null)
+		if(ri.provider == null){
+			if(ri.service == null)
 				return null;
 			
-			datasource = this.service;				
+			datasource = ri.service;				
 			for(String replacement:REPLACEMENTS)
 				datasource = datasource.replace(replacement,"\\".concat(replacement));
 			
@@ -111,11 +115,11 @@ public abstract class InfluxDBRequest<T> implements HistoricRequest<T>{
 		}
 		historicAttributeDTO.value=new StringBuilder(
 		    ).append("/"
-			).append(this.provider
+			).append(ri.provider
 			).append("/"
-			).append(this.service
+			).append(ri.service
 			).append("/"
-			).append(this.resource
+			).append(ri.resource
 			).append("/"
 			).append(DataResource.VALUE
 			).toString();			
@@ -123,12 +127,12 @@ public abstract class InfluxDBRequest<T> implements HistoricRequest<T>{
 		return historicAttributeDTO;	
 	}
 
-	protected InfluxDBTagDTO getResource() {
-		if(this.resource == null) 
+	protected InfluxDBTagDTO getResource(ResourceInfo ri) {
+		if(ri.resource == null) 
 			return null;
 	    InfluxDBTagDTO historicAttributeDTO = new InfluxDBTagDTO();
 		historicAttributeDTO.name="resource";	
-		historicAttributeDTO.value=resource;
+		historicAttributeDTO.value=ri.resource;
 		historicAttributeDTO.pattern=false;
 		return historicAttributeDTO;
 	}

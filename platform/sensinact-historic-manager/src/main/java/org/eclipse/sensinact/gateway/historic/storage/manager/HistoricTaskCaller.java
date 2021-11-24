@@ -144,7 +144,8 @@ public class HistoricTaskCaller {
 		HistoricKey historic = new HistoricKey(provider, service, resource, from.toInstant(), to.toInstant(), null, 0, null);
 		DTO[] data = this.cache.get(historic);
 		if(data == null)
-			data = request.execute().toArray(new TemporalDTO[] {});
+			data = request.execute().get(String.format("%s/%s/%s", provider, service, resource))
+				.toArray(new TemporalDTO[] {});
 		this.cache.put(historic,data);
 		final AtomicBoolean first = new AtomicBoolean(true);
 		return Arrays.stream(data).<StringBuilder>collect(
@@ -181,7 +182,8 @@ public class HistoricTaskCaller {
 		HistoricKey historic = new HistoricKey(provider, service, resource, from.toInstant(), to.toInstant(), method.name(), period, null);
 		DTO[] data = this.cache.get(historic);
 		if(data == null)
-			data = request.execute().toArray(new TemporalDTO[] {});
+			data = request.execute().get(String.format("%s/%s/%s", provider, service, resource))
+				.toArray(new TemporalDTO[] {});
 		this.cache.put(historic,data);
 		final AtomicBoolean first = new AtomicBoolean(true);
 		return Arrays.stream(data).<StringBuilder>collect(
@@ -217,9 +219,7 @@ public class HistoricTaskCaller {
 		});		
 		if(request == null)
 			return null;
-		request.setServiceProviderIdentifier(provider);
-		request.setServiceIdentifier(service);
-		request.setResourceIdentifier(resource);
+		request.addTargetResource(provider, service, resource);
 		request.setHistoricStartTime(fromTime);
 		request.setHistoricEndTime(toTime);
 		
@@ -238,9 +238,7 @@ public class HistoricTaskCaller {
 		});		
 		if(request == null)
 			return null;
-		request.setServiceProviderIdentifier(provider);
-		request.setServiceIdentifier(service);
-		request.setResourceIdentifier(resource);
+		request.addTargetResource(provider, service, resource);
 		request.setHistoricTime(time);
 		request.setRegion(region);
 		
@@ -259,9 +257,7 @@ public class HistoricTaskCaller {
 		});		
 		if(request == null)
 			return null;
-		request.setServiceProviderIdentifier(provider);
-		request.setServiceIdentifier(service);
-		request.setResourceIdentifier(resource);
+		request.addTargetResource(provider, service, resource);
 		request.setHistoricStartTime(fromTime);
 		request.setHistoricEndTime(toTime);
 		request.setRegion(region);

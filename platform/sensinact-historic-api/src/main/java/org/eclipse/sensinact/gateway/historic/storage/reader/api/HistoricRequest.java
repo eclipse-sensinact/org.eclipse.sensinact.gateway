@@ -11,6 +11,7 @@
 package org.eclipse.sensinact.gateway.historic.storage.reader.api;
 
 import java.time.ZonedDateTime;
+import java.util.Map;
 
 /**
  * HistoricRequest allows to collect a set of points from a connected 
@@ -19,12 +20,8 @@ import java.time.ZonedDateTime;
  */
 public interface HistoricRequest<T> {
 			
-	void setServiceProviderIdentifier(String providerId);
+	void addTargetResource(String provider, String service, String resource);
 	
-	void setServiceIdentifier(String serviceId);
-
-	void setResourceIdentifier(String resourceId);
-	
-	T execute();
+	Map<String, T> execute();
 
 }
