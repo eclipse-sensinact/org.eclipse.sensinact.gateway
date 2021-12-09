@@ -84,10 +84,7 @@
 		<jsonassert.version>1.5.0</jsonassert.version>
 		<com.h2database.version>1.4.200</com.h2database.version>
 		<com.puppycrawl.tools.checkstyle.version>8.28</com.puppycrawl.tools.checkstyle.version>
-		<junit-jupiter.compile.version>5.6.0</junit-jupiter.compile.version>
-		<junit-platform.compile.version>1.6.0</junit-platform.compile.version>
-		<junit-jupiter.version>5.7.2</junit-jupiter.version>
-		<junit-platform.version>1.7.2</junit-platform.version>
+		<junit-jupiter.version>5.8.2</junit-jupiter.version>
 		<assertj.version>3.20.2</assertj.version>
 		<osgi.test.version>1.0.1</osgi.test.version>
 
@@ -149,7 +146,7 @@
 		<org.apache.maven.shared.maven-filtering.version>3.1.1</org.apache.maven.shared.maven-filtering.version>
 		<maven-scm-plugin.version>1.11.2</maven-scm-plugin.version>
 		<maven-site-plugin.version>3.8.2</maven-site-plugin.version>
-		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+		<maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
 
 		<!-- BUILD: BND Maven plugins -->
 		<bnd-maven-plugin.version>6.1.0-SNAPSHOT</bnd-maven-plugin.version>
@@ -662,47 +659,12 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-api</artifactId>
-				<version>${junit-jupiter.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.platform</groupId>
-				<artifactId>junit-platform-commons</artifactId>
-				<version>${junit-platform.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-params</artifactId>
-				<version>${junit-jupiter.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-engine</artifactId>
-				<version>${junit-jupiter.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.platform</groupId>
-				<artifactId>junit-platform-engine</artifactId>
-				<version>${junit-platform.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.platform</groupId>
-				<artifactId>junit-platform-launcher</artifactId>
-				<version>${junit-platform.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.platform</groupId>
-				<artifactId>junit-platform-testkit</artifactId>
-				<version>${junit-platform.version}</version>
-				<scope>test</scope>
-			</dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>

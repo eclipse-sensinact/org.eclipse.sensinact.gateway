@@ -58,9 +58,9 @@ public class ResourceProxy extends ModelElementProxy {
 					.map(ma -> !ma.isAccessible())
 					.findFirst()
 					.orElse(true)) {
-				methods.put(existingTypes[index].name(),new UnaccessibleAccessMethod(mediator, super.getPath(), existingTypes[index]));
+				methods.put(name, new UnaccessibleAccessMethod(mediator, super.getPath(), existingTypes[index]));
 			} else {
-				methods.put(existingTypes[index].name(), method);
+				methods.put(name, method);
 			}
 		}
 		this.methods = Collections.unmodifiableMap(methods);

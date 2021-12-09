@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.constraint.Changed;
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.MaxLength;
@@ -33,15 +34,18 @@ import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.props.TypedProperties;
 import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.Attribute;
+import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
 import org.eclipse.sensinact.gateway.core.LocationResource;
 import org.eclipse.sensinact.gateway.core.Metadata;
+import org.eclipse.sensinact.gateway.core.ModelConfiguration;
+import org.eclipse.sensinact.gateway.core.ModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
+import org.eclipse.sensinact.gateway.core.ModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.core.PropertyResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
-import org.eclipse.sensinact.gateway.core.SensiNact;
 import org.eclipse.sensinact.gateway.core.Service;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceProvider;
@@ -80,29 +84,43 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.service.ServiceExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 
 /**
  * Test ResourceFactory
  */
-@SuppressWarnings({ "rawtypes" })
+@SuppressWarnings({ "rawtypes", "unused" })
+@ExtendWith(ServiceExtension.class)
+@ExtendWith(BundleContextExtension.class)
 public class TestResourceBuilder<R extends ModelInstance> {
-	protected TestContext testContext;
 	protected Dictionary<String, Object> props;
 	protected AccessTree tree;
+	
+	private Mediator mediator;
+	private MyModelInstance instance;
 
+	@SuppressWarnings("unchecked")
 	@BeforeEach
-	public void init() throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException,
+	public void init(@InjectBundleContext BundleContext context) throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException,
 			DataStoreException, BundleException {
+		
+		mediator = new Mediator(context);
 		try {
-		this.testContext = new TestContext();
-		this.tree = new AccessTreeImpl().withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
+			
+			instance = (MyModelInstance) new ModelInstanceBuilder(mediator
+					).build("serviceProvider", null, new ModelConfigurationBuilder(
+						mediator,ModelConfiguration.class, MyModelInstance.class
+						).withStartAtInitializationTime(true).build());
+			this.tree = new AccessTreeImpl().withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -110,16 +128,17 @@ public class TestResourceBuilder<R extends ModelInstance> {
 
 	@AfterEach
 	public void tearDown() {
-		this.testContext.stop();
+		this.instance.unregister();
+		this.instance.getRootElement().stop();
 	}
 
 	@Test
-	public void testSessionMethods() throws Exception {
-		ServiceImpl service = this.testContext.getModelInstance().getRootElement().addService("testService");
+	public void testSessionMethods(@InjectService Core core) throws Exception {
+		ServiceImpl service = instance.getRootElement().addService("testService");
 
 		ResourceImpl r1impl = service.addDataResource(PropertyResource.class, "TestProperty", String.class, "hello");
 
-		Session session = this.testContext.getSensiNact().getAnonymousSession();
+		Session session = core.getAnonymousSession();
 
 		PropertyResource r1 = r1impl.<PropertyResource>getProxy(this.tree);
 
@@ -136,12 +155,14 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		final JSONObject changed = new JSONObject(
 				new Changed(true).getJSON());
 
+		final AtomicInteger callbackCounter = new AtomicInteger();
+		
 		SubscribeResponse res = session.subscribe("serviceProvider", "testService", "TestProperty", new Recipient() {
 			@Override
 			public void callback(String callbackId, SnaMessage[] messages) throws Exception {
 				boolean hasChanged = ((TypedProperties<?>) messages[0]).<Boolean>get("hasChanged");
 				if (!hasChanged){
-					TestResourceBuilder.this.testContext.extraCallbackInc();
+					callbackCounter.addAndGet(100);
 				}
 			}
 
@@ -158,7 +179,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 
 		Thread.sleep(500);
 
-		Assertions.assertEquals(1, this.testContext.getExtraCallbackCount());
+		Assertions.assertEquals(100, callbackCounter.get());
 
 		ResourceImpl r2impl = service.addDataResource(PropertyResource.class, "TestProperty2", String.class, null);
 
@@ -175,13 +196,14 @@ public class TestResourceBuilder<R extends ModelInstance> {
 				session.get("serviceProvider", "testService", "TestProperty", DataResource.VALUE).getResponse(),
 				session.get("serviceProvider", "testService", "LinkedProperty", null).getResponse(), false);
 
-		service.addLinkedResource(LocationResource.LOCATION, this.testContext.getModelInstance().getRootElement()
+		service.addLinkedResource(LocationResource.LOCATION, instance.getRootElement()
 				.getAdminService().getResource(LocationResource.LOCATION));
 
 		ResourceImpl r4impl = service.getResource("location");
 
 		r4impl.registerExecutor(AccessMethod.Type.valueOf(AccessMethod.GET), new Class<?>[0], new String[0],
 				new AccessMethodExecutor() {
+					@SuppressWarnings("unchecked")
 					@Override
 					public Void execute(AccessMethodResponseBuilder result) throws Exception {
 						JSONObject jsonObject = (JSONObject) result.getAccessMethodObjectResult();
@@ -208,7 +230,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		String subId = session.subscribe("serviceProvider", "testService", "TestProperty2", new Recipient() {
 			@Override
 			public void callback(String callbackId, SnaMessage[] messages) throws Exception {
-				TestResourceBuilder.this.testContext.callbackInc();
+				callbackCounter.incrementAndGet();
 			}
 
 			@Override
@@ -220,7 +242,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		session.subscribe("serviceProvider", "testService", "LinkedProperty", new Recipient() {
 			@Override
 			public void callback(String callbackId, SnaMessage[] messages) throws Exception {
-				TestResourceBuilder.this.testContext.linkCallbackInc();
+				callbackCounter.addAndGet(10);
 			}
 
 			@Override
@@ -242,30 +264,30 @@ public class TestResourceBuilder<R extends ModelInstance> {
 
 		Thread.sleep(500);
 		Assertions.assertTrue(time1 != time2);
-		assertEquals(1, this.testContext.getCallbackCount());
+		assertEquals(111, callbackCounter.get());
 
 		session.set("serviceProvider", "testService", "TestProperty2", null, "property5");
 		Thread.sleep(500);
-		assertEquals(2, this.testContext.getCallbackCount());
+		assertEquals(112, callbackCounter.get());
 
 		String filter = "/serviceProvider/testService/TestProperty2/value";
 		Assertions.assertEquals(1,
-				((MyModelInstance) this.testContext.getModelInstance()).getHandler().count(filter));
+				instance.getHandler().count(filter));
 
 		session.unsubscribe("serviceProvider", "testService", "TestProperty2", subId);
 
 		Assertions.assertEquals(0,
-				((MyModelInstance) this.testContext.getModelInstance()).getHandler().count(filter));
+				instance.getHandler().count(filter));
 
 		Service proxy = service.<Service>getProxy(this.tree);
 		SetResponse error = proxy.set("location", DataResource.VALUE, "unknown");
 		assertTrue(error.getStatusCode() == 403);
-		assertEquals(1, this.testContext.getLinkCallbackCount());
+		assertEquals(112, callbackCounter.get());
 	}
 
 	@Test
 	public void testResourceModel() throws Exception {
-		ServiceImpl service = this.testContext.getModelInstance().getRootElement().addService("testService");
+		ServiceImpl service = instance.getRootElement().addService("testService");
 
 		ResourceImpl r1impl = service.addDataResource(PropertyResource.class, "TestProperty", String.class, "hello");
 
@@ -278,13 +300,15 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		String get1 = r1.get(DataResource.VALUE).getJSON();		
 		String get2 = r1.get().getJSON();
 		
+		final AtomicInteger callbackCounter = new AtomicInteger();
+		
 		JSONAssert.assertEquals(get1, get2, false);
 		SubscribeResponse res = r1.subscribe(new Recipient() {
 			@Override
 			public void callback(String callbackId, SnaMessage[] messages) throws Exception {
 				boolean hasChanged = ((TypedProperties<?>) messages[0]).<Boolean>get("hasChanged");
 				if (!hasChanged)
-					TestResourceBuilder.this.testContext.extraCallbackInc();
+					callbackCounter.addAndGet(100);
 			}
 			
 			@Override
@@ -300,7 +324,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		r1.set("hello");
 		Thread.sleep(500);
 
-		Assertions.assertTrue(				1 == this.testContext.getExtraCallbackCount(),"the message should have been processed even if the value has not changed");
+		Assertions.assertEquals(100, callbackCounter.get(),"the message should have been processed even if the value has not changed");
 
 		ResourceImpl r2impl = service.addDataResource(PropertyResource.class, "TestProperty2", String.class, null);
 
@@ -308,7 +332,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		ResourceImpl r3impl = service.addLinkedResource("LinkedProperty", r1impl);
 		PropertyResource r3 = r3impl.<PropertyResource>getProxy(this.tree);
 
-		ResourceImpl r4impl = service.addLinkedResource(LocationResource.LOCATION, this.testContext.getModelInstance().getRootElement()
+		ResourceImpl r4impl = service.addLinkedResource(LocationResource.LOCATION, instance.getRootElement()
 				.getAdminService().getResource(LocationResource.LOCATION));
 
 		// test linked resource
@@ -320,6 +344,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 
 		r4impl.registerExecutor(AccessMethod.Type.valueOf(AccessMethod.GET), new Class<?>[0], new String[0],
 			new AccessMethodExecutor() {
+				@SuppressWarnings("unchecked")
 				@Override
 				public Void execute(AccessMethodResponseBuilder result) throws Exception {
 					JSONObject jsonObject = (JSONObject) result.getAccessMethodObjectResult();
@@ -347,7 +372,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		String subId = ((SubscribeResponse) r2.subscribe(new Recipient() {
 			@Override
 			public void callback(String callbackId, SnaMessage[] messages) throws Exception {
-				TestResourceBuilder.this.testContext.callbackInc();
+				callbackCounter.incrementAndGet();
 			}
 
 			@Override
@@ -359,7 +384,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		r3.subscribe(new Recipient() {
 			@Override
 			public void callback(String callbackId, SnaMessage[] messages) throws Exception {
-				TestResourceBuilder.this.testContext.linkCallbackInc();
+				callbackCounter.addAndGet(10);
 			}
 
 			@Override
@@ -382,93 +407,91 @@ public class TestResourceBuilder<R extends ModelInstance> {
 
 		Thread.sleep(500);
 		Assertions.assertTrue(time1 != time2);
-		assertEquals(1, this.testContext.getCallbackCount());
+		assertEquals(111, callbackCounter.get());
 
 		r2.set("value", "property5").getJSON();
 		Thread.sleep(500);
-		assertEquals(2, this.testContext.getCallbackCount());
+		assertEquals(112, callbackCounter.get());
 
 		String filter = "/serviceProvider/testService/TestProperty2/value";
-		Assertions.assertEquals(1,
-				((MyModelInstance) this.testContext.getModelInstance()).getHandler().count(filter));
+		Assertions.assertEquals(1, instance.getHandler().count(filter));
 		r2.unsubscribe(subId);
-		Assertions.assertEquals(0,
-				((MyModelInstance) this.testContext.getModelInstance()).getHandler().count(filter));
+		Assertions.assertEquals(0,instance.getHandler().count(filter));
 
 		Service proxy = service.<Service>getProxy(this.tree);
 
 		SetResponse error = proxy.set("location", DataResource.VALUE, (Object)"unknown");
 		assertEquals(403, error.getStatusCode());
-		assertEquals(1, this.testContext.getLinkCallbackCount());
+		assertEquals(112, callbackCounter.get());
 	}
 
 	@Test
-	public void testAgent() throws Exception {
+	public void testAgent(@InjectService Core core) throws Exception {
 		
-		ServiceImpl service1 = this.testContext.getModelInstance().getRootElement().addService("testService");
+		ServiceImpl service1 = instance.getRootElement().addService("testService");
 		ResourceImpl r1impl = service1.addDataResource(PropertyResource.class, "TestProperty", String.class, "hello");
-		ServiceImpl service2 = this.testContext.getModelInstance().getRootElement().addService("tostService");
+		ServiceImpl service2 = instance.getRootElement().addService("tostService");
 		ResourceImpl r2impl = service2.addDataResource(PropertyResource.class, "TestProperty", String.class, "hello");
 		
 		// wait for the previously generated events to be consumed
 		Thread.sleep(1000);
-		SnaFilter filter = new SnaFilter(this.testContext.getMediator(), "/serviceProvider/(test).*", true, false);
+		SnaFilter filter = new SnaFilter(mediator, "/serviceProvider/(test).*", true, false);
 
+		final AtomicInteger callbackCounter = new AtomicInteger();
+		
 		filter.addHandledType(SnaMessage.Type.UPDATE);
-		String agentId = this.testContext.getSensiNact().registerAgent(this.testContext.getMediator(), new AbstractMidAgentCallback() {
+		String agentId = core.registerAgent(mediator, new AbstractMidAgentCallback() {
 			@Override
 			public void doHandle(SnaUpdateMessageImpl message) {
-				TestResourceBuilder.this.testContext.agentCallbackInc();
-				// System.out.println("TestResourceBuilder.this.agentCallbackCount++");
+				callbackCounter.addAndGet(1000);
 			}
 		}, filter);
 		//System.out.println("AGENT ID = " + agentId);
 		PropertyResource r1 = r1impl.<PropertyResource>getProxy(this.tree);
 		PropertyResource r2 = r2impl.<PropertyResource>getProxy(this.tree);
 
-		assertEquals(0, TestResourceBuilder.this.testContext.getAgentCallbackCount());
+		assertEquals(0, callbackCounter.get());
 		System.out.println(r2.set("goodbye").getJSON());
 
 		Thread.sleep(250);
-		assertEquals(0, TestResourceBuilder.this.testContext.getAgentCallbackCount());
+		assertEquals(0, callbackCounter.get());
 
 		System.out.println(r1.set("goodbye").getJSON());
 
 		Thread.sleep(250);
-		assertEquals(1, TestResourceBuilder.this.testContext.getAgentCallbackCount());
+		assertEquals(1000, callbackCounter.get());
 
-		Mockito.when(this.testContext.getMediator().getContext().getProperty(Mockito.anyString()))
-				.thenAnswer(new Answer<Object>() {
-					@Override
-					public String answer(InvocationOnMock invocation) throws Throwable {
-						String parameter = (String) invocation.getArguments()[0];
-						if ("org.eclipse.sensinact.gateway.filter.suffix".equals(parameter)) {
-							return "test";
-						}
-						if ("org.eclipse.sensinact.gateway.filter.types.test".equals(parameter)) {
-							return "LIFECYCLE";
-						}
-						if ("org.eclipse.sensinact.gateway.filter.sender.test".equals(parameter)) {
-							return "/(serviceProvider)/(test).*";
-						}
-						if ("org.eclipse.sensinact.gateway.filter.pattern.test".equals(parameter)) {
-							return "true";
-						}
-						if ("org.eclipse.sensinact.gateway.filter.complement.test".equals(parameter)) {
-							return "true";
-						}
-						if ("org.eclipse.sensinact.gateway.filter.conditions.test".equals(parameter)) {
-							return null;
-						}
-						return null;
-					}
-				});
-		TestResourceBuilder.this.testContext.agentCallbackCountReset();
-		this.testContext.getSensiNact().registerAgent(this.testContext.getMediator(), new AbstractMidAgentCallback() {
+//		Mockito.when(mediator.getContext().getProperty(Mockito.anyString()))
+//				.thenAnswer(new Answer<Object>() {
+//					@Override
+//					public String answer(InvocationOnMock invocation) throws Throwable {
+//						String parameter = (String) invocation.getArguments()[0];
+//						if ("org.eclipse.sensinact.gateway.filter.suffix".equals(parameter)) {
+//							return "test";
+//						}
+//						if ("org.eclipse.sensinact.gateway.filter.types.test".equals(parameter)) {
+//							return "LIFECYCLE";
+//						}
+//						if ("org.eclipse.sensinact.gateway.filter.sender.test".equals(parameter)) {
+//							return "/(serviceProvider)/(test).*";
+//						}
+//						if ("org.eclipse.sensinact.gateway.filter.pattern.test".equals(parameter)) {
+//							return "true";
+//						}
+//						if ("org.eclipse.sensinact.gateway.filter.complement.test".equals(parameter)) {
+//							return "true";
+//						}
+//						if ("org.eclipse.sensinact.gateway.filter.conditions.test".equals(parameter)) {
+//							return null;
+//						}
+//						return null;
+//					}
+//				});
+		callbackCounter.set(0);
+		core.registerAgent(mediator, new AbstractMidAgentCallback() {
 			@Override
 			public void doHandle(SnaLifecycleMessageImpl message) {
-
-				TestResourceBuilder.this.testContext.agentCallbackInc();
+				callbackCounter.addAndGet(1000);
 			}
 
 			@Override
@@ -488,7 +511,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 			}
 		}, null);
 
-		this.testContext.getModelInstance().getRootElement().stop();
+		instance.getRootElement().stop();
 		Thread.sleep(500);
 
 		// {"notification":{"lifecycle":"RESOURCE_DISAPPEARING"},"uri":"/serviceProvider/admin/location"}
@@ -499,20 +522,21 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		// {"notification":{"lifecycle":"RESOURCE_DISAPPEARING"},"uri":"/serviceProvider/tostService/TestProperty"}
 		// {"notification":{"lifecycle":"SERVICE_DISAPPEARING"},"uri":"/serviceProvider/tostService"}
 		// {"notification":{"lifecycle":"PROVIDER_DISAPPEARING"},"uri":"/serviceProvider"}
-		assertEquals(8, this.testContext.getAgentCallbackCount());
+		assertEquals(8000, callbackCounter.get());
 	}
 
 	@Test
-	public void testSecuredAccess() throws Exception {
-		ServiceImpl service = this.testContext.getModelInstance().getRootElement().addService("testService");
+	public void testSecuredAccess(@InjectService Core core) throws Exception {
+		ServiceImpl service = instance.getRootElement().addService("testService");
 
-		service.addLinkedResource(LocationResource.LOCATION, this.testContext.getModelInstance().getRootElement()
+		service.addLinkedResource(LocationResource.LOCATION, instance.getRootElement()
 				.getAdminService().getResource(LocationResource.LOCATION));
 
 		ResourceImpl r4impl = service.getResource("location");
 
 		r4impl.registerExecutor(AccessMethod.Type.valueOf(AccessMethod.GET), new Class<?>[0], new String[0],
 				new AccessMethodExecutor() {
+					@SuppressWarnings("unchecked")
 					@Override
 					public Void execute(AccessMethodResponseBuilder result) throws Exception {
 						JSONObject jsonObject = (JSONObject) result.getAccessMethodObjectResult();
@@ -526,7 +550,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 				}, AccessMethodExecutor.ExecutionPolicy.AFTER);
 
 		String attributeValue = (String) r4impl.getAttribute("value").setValue("0:0");
-		Session session = this.testContext.getSensiNact().getAnonymousSession();
+		Session session = core.getAnonymousSession();
 
 		Resource r4 = session.resource("serviceProvider", "testService", "location");
 
@@ -548,7 +572,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 
 	@Test
 	public void testConstrained() throws Exception {
-		ServiceImpl service = this.testContext.getModelInstance().getRootElement().addService("testService");
+		ServiceImpl service = instance.getRootElement().addService("testService");
 
 		ResourceImpl r2impl = service.addDataResource(PropertyResource.class, "TestProperty2", String.class, null);
 
@@ -556,7 +580,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 
 		Attribute valueAttribute = r2impl.getAttribute(DataResource.VALUE);
 		valueAttribute
-				.addMetadata(new Metadata(this.testContext.getMediator(), Metadata.CONSTRAINTS, Constraint[].class,
+				.addMetadata(new Metadata(mediator, Metadata.CONSTRAINTS, Constraint[].class,
 						new Constraint[] { new MinLength(5, false),
 								new MaxLength(10, false)
 
@@ -572,19 +596,18 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		org.assertj.core.api.Assertions.assertThatThrownBy(
 				()->{
 		valueAttribute.setValue("too much characters");}).isInstanceOf(InvalidValueException.class);
-		fail("MaxLength constraint fails");
 	}
 
 	@Test
 	public void testDynamicAdded() throws Exception {
-		ServiceImpl service = this.testContext.getModelInstance().getRootElement().addService("testService");
+		ServiceImpl service = instance.getRootElement().addService("testService");
 
-		ServiceProvider proxy = this.testContext.getModelInstance().getRootElement().getProxy(this.tree);
+		ServiceProvider proxy = instance.getRootElement().getProxy(this.tree);
 
 		List<Service> services = proxy.getServices();
 		Assertions.assertEquals(2, services.size());
 
-		this.testContext.getModelInstance().getRootElement().addService("dynamicService");
+		instance.getRootElement().addService("dynamicService");
 
 		services = proxy.getServices();
 		Assertions.assertEquals(3, services.size());
@@ -595,13 +618,13 @@ public class TestResourceBuilder<R extends ModelInstance> {
 
 	@Test
 	public void testLinkedAction() throws Exception {
-		ServiceImpl service = this.testContext.getModelInstance().getRootElement().addService("testService");
+		ServiceImpl service = instance.getRootElement().addService("testService");
 
 		ResourceImpl action = service.addActionResource("action", ActionResource.class);
 
 		final AtomicInteger counter = new AtomicInteger(0);
 
-		action.registerExecutor(new Signature(this.testContext.getMediator(),
+		action.registerExecutor(new Signature(mediator,
 				AccessMethod.Type.valueOf(AccessMethod.ACT), new Class<?>[] { int.class }, new String[] { "count" }),
 				new AccessMethodExecutor() {
 
@@ -616,7 +639,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 				}, AccessMethodExecutor.ExecutionPolicy.AFTER);
 
 		action.registerExecutor(
-				new Signature(this.testContext.getMediator(), AccessMethod.Type.valueOf(AccessMethod.ACT),
+				new Signature(mediator, AccessMethod.Type.valueOf(AccessMethod.ACT),
 						new Class<?>[] { int.class, boolean.class }, new String[] { "count", "plus" }),
 				new AccessMethodExecutor() {
 
@@ -652,13 +675,13 @@ public class TestResourceBuilder<R extends ModelInstance> {
 
 		method.invoke(linkedActMethod,
 				new Object[] {
-						new Signature(this.testContext.getMediator(), AccessMethod.Type.valueOf(AccessMethod.ACT),
+						new Signature(mediator, AccessMethod.Type.valueOf(AccessMethod.ACT),
 								new Class<?>[] { int.class }, new String[] { "count" }),
-						new Shortcut(this.testContext.getMediator(), AccessMethod.Type.valueOf(AccessMethod.ACT),
+						new Shortcut(mediator, AccessMethod.Type.valueOf(AccessMethod.ACT),
 								new Class<?>[0], new String[0], new HashMap<Integer, Parameter>() {
 									private static final long serialVersionUID = 1L;
 									{
-										this.put(0, new Parameter(TestResourceBuilder.this.testContext.getMediator(),
+										this.put(0, new Parameter(mediator,
 												"count", int.class, 4));
 									}
 								}) });
@@ -666,7 +689,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		// securedAccess.getAnonymousSession().registered(instance);
 		// instance.getServiceProvider().start();
 
-		ServiceProvider proxy = (ServiceProvider) this.testContext.getModelInstance().getRootElement()
+		ServiceProvider proxy = (ServiceProvider) instance.getRootElement()
 				.getProxy(this.tree);
 		Service testService = proxy.getService("testService");
 
@@ -693,7 +716,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 
 	@Test
 	public void testTrigger() throws Throwable {
-		ServiceImpl service = this.testContext.getModelInstance().getRootElement().addService("testService");
+		ServiceImpl service = instance.getRootElement().addService("testService");
 
 		ResourceImpl r1impl = service.addActionResource("TestAction", ActionResource.class);
 
@@ -701,7 +724,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 				"untriggered");
 
 		service.addTrigger("TestAction", "TestVariable",
-			new Signature(this.testContext.getMediator(), AccessMethod.Type.valueOf(AccessMethod.ACT), null, null),
+			new Signature(mediator, AccessMethod.Type.valueOf(AccessMethod.ACT), null, null),
 				new Constant("triggered", false), AccessMethodExecutor.ExecutionPolicy.AFTER);
 
 		// test locked
@@ -722,23 +745,22 @@ public class TestResourceBuilder<R extends ModelInstance> {
 	}
 
 	@Test
-	public void testFiltering() throws Throwable {
-		ServiceImpl service = this.testContext.getModelInstance().getRootElement().addService("testService");
+	public void testFiltering(@InjectService Core core) throws Throwable {
+		ServiceImpl service = instance.getRootElement().addService("testService");
 
 		ResourceImpl r1impl = service.addActionResource("TestAction", ActionResource.class);
 
 		ResourceImpl r2impl = service.addDataResource(StateVariableResource.class, "TestVariable", String.class,
 				"untriggered");
-		SensiNact sensinact = testContext.getSensiNact();
-		Session s = sensinact.getAnonymousSession();
+		Session s = core.getAnonymousSession();
 
 		Thread.sleep(1000);		
 		String obj = s.getAll(
-				new FilteringCollection(this.testContext.getMediator(), false, new FilteringDefinition("xfilter", "a")))
+				new FilteringCollection(mediator, false, new FilteringDefinition("xfilter", "a")))
 				.getJSON();
 
 		JSONAssert.assertEquals(
-				new JSONObject("{\"providers\":" + "[{\"locXtion\":\"45.19334890078532:5.706474781036377\","
+				new JSONObject("{\"providers\":" + "[{\"locXtion\":\"45.234:5.789\","
 						+ "\"services\":[{\"resources\":" + "[{\"type\":\"PROPERTY\",\"nXme\":\"friendlyNXme\"},"
 						+ "{\"type\":\"PROPERTY\",\"nXme\":\"locXtion\"},"
 						+ "{\"type\":\"PROPERTY\",\"nXme\":\"bridge\"}," + "{\"type\":\"PROPERTY\",\"nXme\":\"icon\"}],"

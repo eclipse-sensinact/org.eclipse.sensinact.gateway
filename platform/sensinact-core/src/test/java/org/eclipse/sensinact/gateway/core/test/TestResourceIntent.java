@@ -15,9 +15,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Dictionary;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
+import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
+import org.eclipse.sensinact.gateway.core.ModelConfiguration;
+import org.eclipse.sensinact.gateway.core.ModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
+import org.eclipse.sensinact.gateway.core.ModelInstanceBuilder;
 import org.eclipse.sensinact.gateway.core.PropertyResource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
@@ -26,53 +31,63 @@ import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.AccessTreeImpl;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.osgi.framework.Bundle;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.service.ServiceExtension;
 
 /**
  * Test ResourceFactory
  */
-@SuppressWarnings({ "rawtypes" })
+@SuppressWarnings({ "rawtypes", "unused" })
+@ExtendWith(BundleContextExtension.class)
+@ExtendWith(ServiceExtension.class)
 public class TestResourceIntent<R extends ModelInstance> {
-	protected TestContext testContext;
 	protected Dictionary<String, Object> props;
 	protected AccessTree tree;
 
-	private final BundleContext context = Mockito.mock(BundleContext.class);
-	private final Bundle bundle = Mockito.mock(Bundle.class);
+	private Mediator mediator;
+	private MyModelInstance instance;
 
+	@SuppressWarnings("unchecked")
 	@BeforeEach
-	public void init() throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException,
+	public void init(@InjectBundleContext BundleContext context) throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException,
 			DataStoreException, BundleException {
-		this.testContext = new TestContext();
+		mediator = new Mediator(context);
+			
+			instance = (MyModelInstance) new ModelInstanceBuilder(mediator
+					).build("serviceProvider", null, new ModelConfigurationBuilder(
+						mediator,ModelConfiguration.class, MyModelInstance.class
+						).withStartAtInitializationTime(true).build());
 		this.tree = new AccessTreeImpl().withAccessProfile(AccessProfileOption.ALL_ANONYMOUS);
 	}
 
 	@AfterEach
 	public void tearDown() {
-		this.testContext.stop();
+		this.instance.unregister();
+		this.instance.getRootElement().stop();
 	}
 
 	private final AtomicInteger countOn = new AtomicInteger(0);
 	private final AtomicInteger countOff = new AtomicInteger(0);
 	
 	@Test
-	public void testOneIntent() throws Exception {
-		ServiceImpl service1 = this.testContext.getModelInstance().getRootElement().addService("testService");
+	public void testOneIntent(@InjectService(timeout = 500) Core core) throws Exception {
+		ServiceImpl service1 = instance.getRootElement().addService("testService");
 		ResourceImpl r1impl = service1.addDataResource(PropertyResource.class, "TestProperty", String.class, "hello");
-		ServiceImpl service2 = this.testContext.getModelInstance().getRootElement().addService("tostService");
+		ServiceImpl service2 = instance.getRootElement().addService("tostService");
 		ResourceImpl r2impl = service2.addDataResource(PropertyResource.class, "TestProperty", String.class, "hello");
 
 		Thread.sleep(1000);
-		String intentId = this.testContext.getSensiNact().registerIntent(
-			this.testContext.getMediator(), new Executable<Boolean,Void>(){
+		String intentId = core.registerIntent(
+			mediator, new Executable<Boolean,Void>(){
 				@Override
 				public Void execute(Boolean parameter) throws Exception {
 					if(parameter.booleanValue()) {
@@ -97,15 +112,15 @@ public class TestResourceIntent<R extends ModelInstance> {
 	}
 
 	@Test
-	public void testTwoIntents() throws Exception {
-		ServiceImpl service1 = this.testContext.getModelInstance().getRootElement().addService("testService");
+	public void testTwoIntents(@InjectService(timeout = 500) Core core) throws Exception {
+		ServiceImpl service1 = instance.getRootElement().addService("testService");
 		ResourceImpl r1impl = service1.addDataResource(PropertyResource.class, "TestProperty", String.class, "hello");
-		ServiceImpl service2 = this.testContext.getModelInstance().getRootElement().addService("tostService");
+		ServiceImpl service2 = instance.getRootElement().addService("tostService");
 		ResourceImpl r2impl = service2.addDataResource(PropertyResource.class, "TestProperty", String.class, "hello");
 
 		Thread.sleep(1000);
-		String intentId = this.testContext.getSensiNact().registerIntent(
-			this.testContext.getMediator(), new Executable<Boolean,Void>(){
+		String intentId = core.registerIntent(
+			mediator, new Executable<Boolean,Void>(){
 				@Override
 				public Void execute(Boolean parameter) throws Exception {
 					if(parameter.booleanValue()) {
@@ -132,14 +147,14 @@ public class TestResourceIntent<R extends ModelInstance> {
 	
 
 	@Test
-	public void testTwoIntentsResourcesAppearing() throws Exception {
-		ServiceImpl service1 = this.testContext.getModelInstance().getRootElement().addService("testService");
+	public void testTwoIntentsResourcesAppearing(@InjectService(timeout = 500) Core core) throws Exception {
+		ServiceImpl service1 = instance.getRootElement().addService("testService");
 		ResourceImpl r1impl = service1.addDataResource(PropertyResource.class, "TestProperty", String.class, "hello");
-		ServiceImpl service2 = this.testContext.getModelInstance().getRootElement().addService("tostService");
+		ServiceImpl service2 = instance.getRootElement().addService("tostService");
 		
 		Thread.sleep(1000);
-		String intentId = this.testContext.getSensiNact().registerIntent(
-			this.testContext.getMediator(), new Executable<Boolean,Void>(){
+		String intentId = core.registerIntent(
+			mediator, new Executable<Boolean,Void>(){
 				@Override
 				public Void execute(Boolean parameter) throws Exception {
 					if(parameter.booleanValue()) {

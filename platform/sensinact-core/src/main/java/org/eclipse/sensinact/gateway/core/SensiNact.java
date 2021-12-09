@@ -1141,7 +1141,7 @@ public class SensiNact implements Core {
 	}
 	
 	@Reference
-	private ConditionalPermissionAdmin cpa;
+	ConditionalPermissionAdmin cpa;
 	private BundleContext bc;
 
 	public SensiNact() {
