@@ -45,8 +45,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectInstalledBundle;
 import org.osgi.test.common.annotation.InjectService;
-import org.osgi.test.common.annotation.Property;
-import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.junit5.cm.ConfigurationExtension;
 import org.osgi.test.junit5.context.BundleContextExtension;
@@ -138,17 +136,6 @@ public class TestUserManager extends AbstractConfiguredSecurityTest {
 	}
 
 	@Test
-	@WithConfiguration(
-			pid = "sensinact.mail.account.connector",
-			location = "?",
-			properties = {
-					@Property(key="host", value="smtp.server.fr"),
-					@Property(key="port", value="465"),
-					@Property(key="from", value = "sensinact@bigclout.eu"),
-					@Property(key="login", value="cmunilla@server.fr"),
-					@Property(key="password", value="478569LM")
-			}
-		)
 	public void testUserManager(
 			@InjectService(timeout = 1000) Core core,
 			@InjectInstalledBundle(value = "tb.jar", start = true) Bundle bundle,
@@ -159,20 +146,12 @@ public class TestUserManager extends AbstractConfiguredSecurityTest {
 		String encryptedPassword = CryptoUtils.cryptWithMD5("mytestpassword");
 		UserEntity entity = dao.find("mytester", encryptedPassword);
 		assertNull(entity);
-//		
-//		MidProxy<Core> mid = new MidProxy<Core>(classloader, this, Core.class);
-//		Core core = mid.buildProxy();		
+
 		AnonymousSession as = core.getAnonymousSession();
 		assertNotNull(as);
 		as.registerUser("mytester", encryptedPassword, "fake@test.fr", "MAIL");
 		Thread.sleep(2000);
-//		
-//		ServiceReference<?>[] references = super.getBundleContext().getServiceReferences("org.eclipse.sensinact.gateway.mail.connector.MailAccountConnectorMailReplacement",null);
-//		Object mailAccountConnectorMailReplacement  = super.getBundleContext().getService(references[0]);		
-//		Method method = mailAccountConnectorMailReplacement.getClass().getMethod("getMailDetails");
-//		method.setAccessible(true);
-//		String message = (String) method.invoke(mailAccountConnectorMailReplacement);
-//		
+
 		MailAccountConnectorMailReplacement replacer = mailReplacerAware.waitForService(500);
 		String message = replacer.getMailDetails();
 		
