@@ -33,14 +33,14 @@ public class MailAccountCallbackMoke implements CallbackService{
 	 */
 	public MailAccountCallbackMoke(String pattern, Dictionary<String, ?> properties, Executable<CallbackContext, Void> processor) {
 		this.pattern = pattern;
+		this.props = new Hashtable<>();
 		if(properties != null) {
-			this.props = new Hashtable<>();
 			Enumeration<String> enumeration = properties.keys();
 			while(enumeration.hasMoreElements()) {
 				String key = enumeration.nextElement();
 				this.props.put(key, properties.get(key));
 			}
-		} 
+		}
 		this.processor = processor;
 	}
 

@@ -10,7 +10,6 @@
  */
 package org.eclipse.sensinact.gateway.core.test;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessProfileOption;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
@@ -21,16 +20,10 @@ import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
+import org.osgi.service.component.annotations.Component;
 
-class MySecuredAccess implements SecuredAccess {
-	private Mediator mediator;
-
-	/**
-	 * @param mediator
-	 */
-	public MySecuredAccess(Mediator mediator) {
-		this.mediator = mediator;
-	}
+@Component
+public class MySecuredAccess implements SecuredAccess {
 
 	/**
 	 * @inheritDoc

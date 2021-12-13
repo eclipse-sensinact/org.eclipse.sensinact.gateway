@@ -13,8 +13,10 @@ package org.eclipse.sensinact.gateway.core.test;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.AuthorizationServiceException;
+import org.osgi.service.component.annotations.Component;
 
-class MyAuthorization<R> implements AuthorizationService {
+@Component
+public class MyAuthorization<R> implements AuthorizationService {
 	/**
 	 * @inheritDoc
 	 *

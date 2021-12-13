@@ -1,0 +1,2 @@
+Bundle-SymbolicName: ${project.groupId}.${project.artifactId}-tests
+Conditional-Package: org.skyscreamer.jsonassert.*

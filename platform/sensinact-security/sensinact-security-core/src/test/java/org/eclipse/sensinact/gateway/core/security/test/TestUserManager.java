@@ -22,6 +22,7 @@ import java.nio.file.StandardCopyOption;
 
 import org.eclipse.sensinact.gateway.core.AnonymousSession;
 import org.eclipse.sensinact.gateway.core.Core;
+import org.eclipse.sensinact.gateway.core.security.SecurityDataStoreService;
 import org.eclipse.sensinact.gateway.core.security.dao.UserDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.UserEntity;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
@@ -36,7 +37,6 @@ import org.eclipse.sensinact.gateway.util.CryptoUtils;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -126,6 +126,8 @@ public class TestUserManager extends AbstractConfiguredSecurityTest {
 		Mockito.when(sqlLiteConfig.database()).thenReturn(tempDB.getAbsolutePath());
 		dataStoreService = new SQLiteDataStoreService( );
 		dataStoreService.start(sqlLiteConfig);
+		
+		context.registerService(SecurityDataStoreService.class, dataStoreService, null);
 	}
 	
 	@AfterEach
@@ -135,15 +137,7 @@ public class TestUserManager extends AbstractConfiguredSecurityTest {
 		}
 	}
 
-	@Disabled
 	@Test
-	@WithConfiguration(
-			pid = "SQLiteDataStoreService",
-			location = "?",
-			properties = {
-					@Property(key = "database", value = "${sqlitedb}")
-			}
-		)
 	@WithConfiguration(
 			pid = "sensinact.mail.account.connector",
 			location = "?",

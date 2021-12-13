@@ -1,11 +1,13 @@
 package org.eclipse.sensinact.gateway.core.test;
 
 import org.eclipse.sensinact.gateway.core.filtering.Filtering;
+import org.osgi.service.component.annotations.Component;
 
 /**
  *
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
+@Component(property = "sensinact.filtering.type=xfilter")
 public class XFilter implements Filtering {
 	// ********************************************************************//
 	// NESTED DECLARATIONS //

@@ -24,9 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.core.InvalidServiceProviderException;
@@ -42,7 +40,6 @@ import org.eclipse.sensinact.gateway.core.security.entity.ObjectAccessEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.ObjectEntity;
 import org.eclipse.sensinact.gateway.core.security.entity.UserEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService;
@@ -51,16 +48,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.log.LogService;
 
 /**
  *
@@ -79,25 +68,9 @@ public class TestDAO {
 	// STATIC DECLARATIONS //
 	// ********************************************************************//
 
-	private static final String LOG_FILTER = "(" + Constants.OBJECTCLASS + "=" + LogService.class.getCanonicalName()
-			+ ")";
-
-	private static final String DATA_STORE_FILTER = "(" + Constants.OBJECTCLASS + "="
-			+ DataStoreService.class.getCanonicalName() + ")";
-
-	private static final String MOCK_BUNDLE_NAME = "MockedBundle";
-	private static final long MOCK_BUNDLE_ID = 1;
-
 	// ********************************************************************//
 	// INSTANCE DECLARATIONS //
 	// ********************************************************************//
-
-	private final Filter filterDataStore = Mockito.mock(Filter.class);
-
-	private final BundleContext context = Mockito.mock(BundleContext.class);
-	private final Bundle bundle = Mockito.mock(Bundle.class);
-
-	private final ServiceReference<?> referenceDataStoreService = Mockito.mock(ServiceReference.class);
 
 	private SQLiteDataStoreService dataStoreService;
 
@@ -106,80 +79,6 @@ public class TestDAO {
 	@BeforeEach
 	public void init() throws InvalidServiceProviderException, UnableToFindDataStoreException,
 			UnableToConnectToDataStoreException, InvalidSyntaxException, IOException {
-		Filter filter = Mockito.mock(Filter.class);
-		Mockito.when(filter.toString()).thenReturn(LOG_FILTER);
-
-		Mockito.when(context.createFilter(LOG_FILTER)).thenReturn(filter);
-		Mockito.when(context.getServiceReferences((String) Mockito.eq(null), Mockito.eq(LOG_FILTER))).thenReturn(null);
-		Mockito.when(context.getServiceReference(LOG_FILTER)).thenReturn(null);
-
-		Mockito.when(context.createFilter(DATA_STORE_FILTER)).thenReturn(filterDataStore);
-		Mockito.when(filterDataStore.toString()).thenReturn(DATA_STORE_FILTER);
-
-		Mockito.when(context.getServiceReferences(Mockito.anyString(), Mockito.anyString()))
-				.then(new Answer<ServiceReference<?>[]>() {
-					@Override
-					public ServiceReference<?>[] answer(InvocationOnMock invocation) throws Throwable {
-						Object[] arguments = invocation.getArguments();
-						if (arguments == null || arguments.length != 2) {
-							return null;
-						}
-						if (arguments[0] != null && arguments[0].equals(DataStoreService.class.getCanonicalName())) {
-							return new ServiceReference<?>[] { referenceDataStoreService };
-
-						}
-						return null;
-					}
-				});
-		Mockito.when(context.getServiceReferences(Mockito.any(Class.class), Mockito.anyString()))
-				.then(new Answer<Collection<ServiceReference<?>>>() {
-					@Override
-					public Collection<ServiceReference<?>> answer(InvocationOnMock invocation) throws Throwable {
-						Object[] arguments = invocation.getArguments();
-						if (arguments == null || arguments.length != 2) {
-							return null;
-						}
-						if (arguments[0] != null && arguments[0].equals(DataStoreService.class)) {
-							return Collections.singleton(referenceDataStoreService);
-						}
-						return Collections.<ServiceReference<?>>emptyList();
-					}
-				});
-		Mockito.when(context.getService(Mockito.any(ServiceReference.class))).then(new Answer<Object>() {
-
-			@Override
-			public Object answer(InvocationOnMock invocation) throws Throwable {
-				Object[] arguments = invocation.getArguments();
-				if (arguments == null || arguments.length != 1) {
-					return null;
-				} else if (arguments[0] == referenceDataStoreService) {
-					return dataStoreService;
-				}
-				return null;
-			}
-		});
-
-		Mockito.when(context.getBundle()).thenReturn(bundle);
-		Mockito.when(bundle.getSymbolicName()).thenReturn(MOCK_BUNDLE_NAME);
-		Mockito.when(bundle.getBundleId()).thenReturn(MOCK_BUNDLE_ID);
-		Mockito.when(bundle.getState()).thenReturn(Bundle.ACTIVE);
-
-		Mockito.when(bundle.getResource(Mockito.anyString())).thenAnswer(new Answer<URL>() {
-			@Override
-			public URL answer(InvocationOnMock invocation) throws Throwable {
-				Object[] arguments = invocation.getArguments();
-				if (arguments == null || arguments.length != 1) {
-					return null;
-				} else if (arguments[0].equals("script/getObjectFromPath.sql")) {
-					return new File("src/main/resources/script/getObjectFromPath.sql").getAbsoluteFile().toURI()
-							.toURL();
-				} else if (arguments[0].equals("script/getMethodAccessibilities.sql")) {
-					return new File("src/main/resources/script/getMethodAccessibilities.sql").getAbsoluteFile().toURI()
-							.toURL();
-				}
-				return null;
-			}
-		});
 	
 		tempDB = File.createTempFile("test", ".sqlite");
 		tempDB.deleteOnExit();

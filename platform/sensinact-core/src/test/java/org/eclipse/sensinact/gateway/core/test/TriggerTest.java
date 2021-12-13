@@ -23,21 +23,17 @@ import org.eclipse.sensinact.gateway.core.method.trigger.TriggerArgumentBuilder;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.osgi.framework.Bundle;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.log.LogService;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.junit5.context.BundleContextExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * test Constraint
  */
+@ExtendWith(BundleContextExtension.class)
 public class TriggerTest {
 	public static final String TRIGGER_0 = "{\"type\":\"CONDITIONAL\",\"passOn\":false,\"argument\": 0,\"builder\":\"PARAMETER\","
 			+ "\"constants\":[" + "{\"constant\":100,"
@@ -53,52 +49,10 @@ public class TriggerTest {
 
 	public static final String TRIGGER_3 = "{\"type\":\"VARIATIONTEST_TRIGGER\",\"passOn\":false,\"argument\":0, \"builder\":\"EMPTY\"}";
 
-	private static final String LOG_FILTER = "(" + Constants.OBJECTCLASS + "=" + LogService.class.getCanonicalName()
-			+ ")";
-
-	private static final String MOCK_BUNDLE_NAME = "MockedBundle";
-	private static final long MOCK_BUNDLE_ID = 1;
-
-	private final BundleContext context = Mockito.mock(BundleContext.class);
-	private final Bundle bundle = Mockito.mock(Bundle.class);
-
 	private Mediator mediator;
 
 	@BeforeEach
-	public void init() throws InvalidSyntaxException {
-		Filter filter = Mockito.mock(Filter.class);
-		Mockito.when(filter.toString()).thenReturn(LOG_FILTER);
-
-		Mockito.when(context.createFilter(LOG_FILTER)).thenReturn(filter);
-		Mockito.when(context.getServiceReferences((String) Mockito.eq(null), Mockito.eq(LOG_FILTER))).thenReturn(null);
-		Mockito.when(context.getServiceReference(LOG_FILTER)).thenReturn(null);
-
-		Mockito.when(context.getServiceReferences(Mockito.anyString(), Mockito.anyString()))
-				.then(new Answer<ServiceReference<?>[]>() {
-					@Override
-					public ServiceReference<?>[] answer(InvocationOnMock invocation) throws Throwable {
-						Object[] arguments = invocation.getArguments();
-						if (arguments == null || arguments.length != 2) {
-							return null;
-						}
-						return null;
-					}
-				});
-		Mockito.when(context.getService(Mockito.any(ServiceReference.class))).then(new Answer<Object>() {
-
-			@Override
-			public Object answer(InvocationOnMock invocation) throws Throwable {
-				Object[] arguments = invocation.getArguments();
-				if (arguments == null || arguments.length != 1) {
-					return null;
-				}
-				return null;
-			}
-		});
-		Mockito.when(context.getBundle()).thenReturn(bundle);
-		Mockito.when(bundle.getSymbolicName()).thenReturn(MOCK_BUNDLE_NAME);
-		Mockito.when(bundle.getBundleId()).thenReturn(MOCK_BUNDLE_ID);
-
+	public void init(@InjectBundleContext BundleContext context) throws InvalidSyntaxException {
 		mediator = new Mediator(context);
 	}
 
@@ -177,12 +131,12 @@ public class TriggerTest {
 			
 			JSONAssert.assertEquals(TriggerTest.TRIGGER_0, triggerJSON, false);
 
-			trigger = factory.<Object>newInstance(mediator, new JSONObject(TriggerTest.TRIGGER_1));
+			trigger = factory.newInstance(mediator, new JSONObject(TriggerTest.TRIGGER_1));
 			assertEquals("constant", trigger.execute(new TriggerArgumentBuilder.Empty().build(null)));
 
 			JSONAssert.assertEquals(TriggerTest.TRIGGER_1, trigger.getJSON(), false);
 
-			trigger = factory.<Object>newInstance(mediator, new JSONObject(TriggerTest.TRIGGER_2));
+			trigger = factory.newInstance(mediator, new JSONObject(TriggerTest.TRIGGER_2));
 			assertEquals("value", trigger.execute(new TriggerArgumentBuilder.Parameter(trigger.<Integer>getArgument()).build(
 				new AccessMethodResponseBuilder( "/", new Object[]{ 2, "copy", "value"}) {
 
