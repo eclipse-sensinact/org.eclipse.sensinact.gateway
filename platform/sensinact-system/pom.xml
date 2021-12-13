@@ -32,6 +32,10 @@
 				<artifactId>xml-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
+				<groupId>org.codehaus.gmaven</groupId>
+				<artifactId>groovy-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>sql-maven-plugin</artifactId>
 			</plugin>

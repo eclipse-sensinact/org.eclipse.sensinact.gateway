@@ -36,6 +36,8 @@ public class Activator extends AbstractActivator<Mediator> {
     public void doStart() throws Exception {
         Dictionary<String, Object> props = new Hashtable<String, Object>();
         props.put("org.eclipse.sensinact.security.account.type", MailAccountConnectorMoke.ACCOUNT_TYPE);
+        // Rank higher than the real service
+        props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
         mediator.getContext().registerService(AccountConnector.class.getName(), new MailAccountConnectorMoke(mediator), props);
     }
 

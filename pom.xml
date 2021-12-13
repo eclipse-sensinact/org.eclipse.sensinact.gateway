@@ -155,6 +155,7 @@
 		<mojo-build-helper-maven-plugin.version>3.0.0</mojo-build-helper-maven-plugin.version>
 		<mojo-license-maven-plugin.version>1.20</mojo-license-maven-plugin.version>
 		<mojo-sql-maven-plugin.version>1.5</mojo-sql-maven-plugin.version>
+		<mojo-groovy-maven-plugin.version>2.1.1</mojo-groovy-maven-plugin.version>
 		<mojo-versions-maven-plugin.version>2.7</mojo-versions-maven-plugin.version>
 		<mojo-xml-maven-plugin.version>1.0.2</mojo-xml-maven-plugin.version>
 		<directory-maven-plugin.version>0.3.1</directory-maven-plugin.version>
@@ -1313,6 +1314,45 @@
 					<version>${mojo-license-maven-plugin.version}</version>
 				</plugin>
 				<plugin>
+				  <groupId>org.codehaus.gmaven</groupId>
+				  <artifactId>groovy-maven-plugin</artifactId>
+				  <version>${mojo-groovy-maven-plugin.version}</version>
+				    <executions>
+				      <execution>
+				        <id>extract-sha</id>
+				        <phase>install</phase>
+				        <goals>
+				          <goal>execute</goal>
+				        </goals>
+				        <configuration>
+				          <source>
+                            org.apache.maven.artifact.Artifact a = project.getArtifact()
+                  
+                            if(a != null) {
+                  
+                              java.util.jar.JarFile jarFile = new java.util.jar.JarFile(a.getFile());
+                              java.util.zip.ZipEntry entry = jarFile.getEntry("META-INF/SELFSIGN.SF")
+
+                              if(entry != null) {
+                                println 'Found a signature entry'
+                                String fileContents = jarFile.getInputStream(entry).getText('UTF-8')
+                                matcher = (fileContents =~ /(?s)SHA(1|-256)-Digest-Manifest\s*:\s*([^\s]+)\s*$?/)
+
+                                String sha = matcher.getAt(0).getAt(2)
+                                log.info('SHA: {}', sha)
+                                project.properties.setProperty('sha',sha)
+                              } else {
+                                log.warn('Did not find a signature entry')
+                              }
+                            } else {
+                              log.warn('Did not find an artifact')
+                            }
+                          </source>
+				        </configuration>
+				      </execution>
+				  </executions>
+				</plugin>
+				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>sql-maven-plugin</artifactId>
 					<version>${mojo-sql-maven-plugin.version}</version>
@@ -1323,6 +1363,19 @@
 							<version>${org.xerial.sqlite-jdbc.version}</version>
 						</dependency>
 					</dependencies>
+					<executions>
+						<execution>
+							<id>insert-bundle-signature</id>
+							<phase>install</phase>
+							<goals>
+								<goal>execute</goal>
+							</goals>
+							<configuration>
+								<sqlCommand>UPDATE BUNDLE SET BSHA = '${sha}' WHERE BNAME =
+									'${project.groupId}.${project.artifactId}'</sqlCommand>
+							</configuration>
+						</execution>
+					</executions>
 					<configuration>
 						<driver>org.sqlite.JDBC</driver>
 						<url>jdbc:sqlite:${sensinact.root.dir}/platform/sensinact-security/sensinact-security-core/src/test/resources/sensinact.sqlite</url>
@@ -1392,27 +1445,25 @@
                      </executions>
                  </plugin>
 
-<!-- 					<plugin> -->
-<!-- 						<groupId>org.apache.maven.plugins</groupId> -->
-<!-- 						<artifactId>maven-jarsigner-plugin</artifactId> -->
-<!-- 						<version>3.0.0</version> -->
-<!-- 						<executions> -->
-<!-- 							<execution> -->
-<!-- 								<id>sign</id> -->
-<!-- 								<phase>prepare-package</phase> -->
-<!-- 								<goals> -->
-<!-- 									<goal>sign</goal> -->
-<!-- 								</goals> -->
-<!-- 							</execution> -->
-<!-- 						</executions> -->
-<!-- 						<configuration> -->
-<!-- 							<keystore>${sensinact.root.dir}/platform/sensinact-security/cert/keystore.jks</keystore> -->
-<!-- 							<alias>Sensinact Keystore</alias> -->
-<!-- 							<storepass>sensiNact_team</storepass> -->
-<!-- 						</configuration> -->
-<!-- 					</plugin> -->
-                    <!-- Required to make the maven-jar-plugin pick up the bnd generated manifest. Also avoid packaging empty Jars -->
-
+                 <plugin>
+				     <groupId>org.apache.maven.plugins</groupId>
+					 <artifactId>maven-jarsigner-plugin</artifactId>
+					 <version>3.0.0</version>
+					 <executions>
+						 <execution>
+							 <id>sign</id>
+							 <phase>package</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<keystore>${sensinact.root.dir}/platform/sensinact-security/cert/keystore.jks</keystore>
+							<alias>selfsigned</alias>
+							<storepass>sensiNact_team</storepass>
+						</configuration>
+				</plugin>
 				<plugin>
 					<groupId>org.sonarsource.scanner.maven</groupId>
 					<artifactId>sonar-maven-plugin</artifactId>

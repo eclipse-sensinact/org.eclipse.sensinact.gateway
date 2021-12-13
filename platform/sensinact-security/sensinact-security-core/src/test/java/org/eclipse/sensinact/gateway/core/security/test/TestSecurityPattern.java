@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -25,6 +26,9 @@ import org.eclipse.sensinact.gateway.core.security.Credentials;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
@@ -69,7 +73,8 @@ public class TestSecurityPattern extends AbstractConfiguredSecurityTest {
 					@Property(key = "database", value = "${sqlitedb}")
 			}
 		)
-	public void testSecurityAccessWithPattern(@InjectService(timeout = 1000) Core core) throws Throwable {
+	public void testSecurityAccessWithPattern(@InjectService(timeout = 1000) Core core,
+			@InjectBundleContext BundleContext context) throws Throwable {
 		// slider[0-9]{2} - authenticated access level
 		// slider[0-9]{2}/admin - admin authenticated access level
 		// cea user is admin on slider[0-9]{2}
@@ -87,6 +92,18 @@ public class TestSecurityPattern extends AbstractConfiguredSecurityTest {
 //		Core core = mid.buildProxy();
 		Session session = core.getAnonymousSession();
 		assertNotNull(session);
+		
+		// Restart the bundles due to the unpleasant startup ordering (they create models before
+		// security is started)
+		Arrays.stream(context.getBundles())
+			.filter(b -> b.getSymbolicName().startsWith("org.eclipse.sensinact.gateway.simulated.devices"))
+			.forEach(b -> {
+				try {
+					b.stop();
+					b.start();
+				} catch (BundleException be) {}
+			});
+		
 
 		Set<ServiceProvider> providers = session.serviceProviders();
 		System.out.println("====================================>>>>>");

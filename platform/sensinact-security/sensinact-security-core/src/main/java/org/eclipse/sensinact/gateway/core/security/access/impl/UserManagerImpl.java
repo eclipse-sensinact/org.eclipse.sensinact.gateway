@@ -27,7 +27,6 @@ import org.eclipse.sensinact.gateway.core.security.dao.UserDAO;
 import org.eclipse.sensinact.gateway.core.security.entity.UserEntity;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -55,9 +54,6 @@ public class UserManagerImpl implements UserManager {
 	@Reference(cardinality = ReferenceCardinality.MULTIPLE,policy = ReferencePolicy.DYNAMIC)
 	private volatile List<UserManagerFinalizer> userManagerFinalizers;
 	
-	@Activate
-	private BundleContext context;
-	
 	/**
 	 * 
 	 * @param mediator
@@ -66,7 +62,7 @@ public class UserManagerImpl implements UserManager {
 	 * 
 	 */
 	@Activate
-	public UserManagerImpl() throws SecuredAccessException {
+	void start() throws SecuredAccessException {
 		this.userDAO = new UserDAO(dataStoreService);
 
 		try {
