@@ -26,6 +26,10 @@
 	<artifactId>parent</artifactId>
 	<packaging>pom</packaging>
 	<name>sensiNact IoT Gateway - Archetypes parent project</name>
+	
+	<properties>
+	  <maven.deploy.skip>true</maven.deploy.skip>
+	</properties>
 
 	<modules>
 		<module>sensinact-basis-archetype</module>
