@@ -35,6 +35,7 @@
         <module>generator</module>
         <module>archetypes</module>
         <module>exports</module>
+        <module>sdk</module>
     </modules>
 </project>
 
