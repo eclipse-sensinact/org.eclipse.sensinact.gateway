@@ -11,21 +11,32 @@
 package org.eclipse.sensinact.gateway.commands.gogo.internal;
 
 import org.apache.felix.service.command.Descriptor;
-import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
+import org.apache.felix.service.command.annotations.GogoCommand;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import java.security.InvalidKeyException;
 
 /**
  * @author Rémi Druilhe
  */
+@Component(service = DescribeCommands.class)
+@GogoCommand(
+		scope = "sna", 
+		function = {"describe"}
+	)
 public class DescribeCommands {
-    private CommandServiceMediator mediator;
+    
+	@Reference
+	private DeviceCommands deviceCommands;
 
-    public DescribeCommands(CommandServiceMediator mediator) throws DataStoreException, InvalidKeyException {
-        this.mediator = mediator;
-    }
+	@Reference
+	private ServiceCommands serviceCommands;
+
+	@Reference
+	private ResourceCommands resourceCommands;
 
     /**
      * Display the information regarding the URL
@@ -36,26 +47,23 @@ public class DescribeCommands {
         switch (uriElements.length) {
             case 1:
                 if (uriElements[0].equals("providers")) {
-                    new DeviceCommands(mediator).devices();
-
+                	deviceCommands.devices();
                 } else {
-                    new DeviceCommands(mediator).device(uriElements[0]);
+                	deviceCommands.device(uriElements[0]);
                 }
                 break;
             case 2:
                 if (uriElements[1].equals("services")) {
-                    new ServiceCommands(mediator).services(uriElements[0]);
-
+                    serviceCommands.services(uriElements[0]);
                 } else {
-                    new ServiceCommands(mediator).service(uriElements[0], uriElements[1]);
+                    serviceCommands.service(uriElements[0], uriElements[1]);
                 }
                 break;
             case 3:
                 if (uriElements[2].equals("resources")) {
-                    new ResourceCommands(mediator).resources(uriElements[0], uriElements[1]);
-
+                    resourceCommands.resources(uriElements[0], uriElements[1]);
                 } else {
-                    new ResourceCommands(mediator).resource(uriElements[0], uriElements[1], uriElements[2]);
+                    resourceCommands.resource(uriElements[0], uriElements[1], uriElements[2]);
                 }
                 break;
             default:

@@ -11,19 +11,24 @@
 package org.eclipse.sensinact.gateway.commands.gogo.internal;
 
 import org.apache.felix.service.command.Descriptor;
-import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
+import org.apache.felix.service.command.annotations.GogoCommand;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import java.io.Console;
 import java.security.InvalidKeyException;
 
+@Component(service = UserCommands.class)
+@GogoCommand(
+		scope = "sna", 
+		function = {"su", "info"}
+	)
 public class UserCommands {
-    private CommandServiceMediator mediator;
-
-    public UserCommands(CommandServiceMediator mediator) {
-        this.mediator = mediator;
-    }
+    
+	@Reference
+	private CommandComponent component;
 
     /**
      * Enable to switch to the anonymous user
@@ -31,7 +36,7 @@ public class UserCommands {
     @Descriptor("switch to the anonymous user")
     public void su() {
         try {
-            mediator.switchUser();
+            component.getCommandMediator().switchUser();
         } catch (InvalidCredentialException e) {
             System.out.println("Invalid credentials. Try again.");
         } catch (DataStoreException e) {
@@ -51,7 +56,7 @@ public class UserCommands {
         Console console = System.console();
         char[] passwordChar = console.readPassword("Enter the password: ");
         try {
-            mediator.switchUser(userID, new String(passwordChar));
+            component.getCommandMediator().switchUser(userID, new String(passwordChar));
         } catch (InvalidCredentialException e) {
             System.out.println("Invalid credentials. Try again.");
         } catch (DataStoreException e) {
@@ -66,6 +71,6 @@ public class UserCommands {
      */
     @Descriptor("information about the current user")
     public void info() {
-        System.out.println("Current user: " + mediator.getCurrentUser());
+        System.out.println("Current user: " + component.getCommandMediator().getCurrentUser());
     }
 }

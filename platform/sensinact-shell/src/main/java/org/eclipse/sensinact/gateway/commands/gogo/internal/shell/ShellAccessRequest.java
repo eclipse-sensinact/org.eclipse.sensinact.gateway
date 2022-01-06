@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.commands.gogo.internal.shell;
 
-import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
+import org.eclipse.sensinact.gateway.commands.gogo.internal.CommandServiceMediator;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.SessionToken;

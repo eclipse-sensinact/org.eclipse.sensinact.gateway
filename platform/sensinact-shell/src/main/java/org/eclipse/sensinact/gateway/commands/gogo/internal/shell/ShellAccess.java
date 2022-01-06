@@ -10,7 +10,7 @@
  */
 package org.eclipse.sensinact.gateway.commands.gogo.internal.shell;
 
-import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
+import org.eclipse.sensinact.gateway.commands.gogo.internal.CommandServiceMediator;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;

@@ -11,16 +11,21 @@
 package org.eclipse.sensinact.gateway.commands.gogo.internal;
 
 import org.apache.felix.service.command.Descriptor;
+import org.apache.felix.service.command.annotations.GogoCommand;
 import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccess;
-import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
 import org.json.JSONObject;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
+@Component(service = ResourceCommands.class)
+@GogoCommand(
+		scope = "sna", 
+		function = {"resource", "resources"}
+	)
 public class ResourceCommands {
-    private CommandServiceMediator mediator;
-
-    public ResourceCommands(CommandServiceMediator mediator) {
-        this.mediator = mediator;
-    }
+    
+	@Reference
+	private CommandComponent component;
 
     /**
      * Display the existing sensiNact service instances
@@ -30,7 +35,7 @@ public class ResourceCommands {
      */
     @Descriptor("display the existing sensiNact service instances")
     public void resources(@Descriptor("the service provider ID") String serviceProviderID, @Descriptor("the service ID") String serviceID) {
-        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, null, true)));
+        ShellAccess.proceed(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, null, true)));
     }
 
     /**
@@ -42,6 +47,6 @@ public class ResourceCommands {
      */
     @Descriptor("get the description of a specific resource of a sensiNact service")
     public void resource(@Descriptor("the service provider ID") String serviceProviderID, @Descriptor("the service ID") String serviceID, @Descriptor("the resource IS") String resourceID) {
-        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, false)));
+        ShellAccess.proceed(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, false)));
     }
 }

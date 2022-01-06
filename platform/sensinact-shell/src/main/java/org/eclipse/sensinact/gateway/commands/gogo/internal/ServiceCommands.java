@@ -11,16 +11,21 @@
 package org.eclipse.sensinact.gateway.commands.gogo.internal;
 
 import org.apache.felix.service.command.Descriptor;
+import org.apache.felix.service.command.annotations.GogoCommand;
 import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccess;
-import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
 import org.json.JSONObject;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
+@Component(service = ServiceCommands.class)
+@GogoCommand(
+		scope = "sna", 
+		function = {"service", "services"}
+	)
 public class ServiceCommands {
-    private CommandServiceMediator mediator;
-
-    public ServiceCommands(CommandServiceMediator mediator) {
-        this.mediator = mediator;
-    }
+   
+	@Reference
+	private CommandComponent component;
 
     /**
      * Display the existing sensiNact service instances
@@ -29,7 +34,7 @@ public class ServiceCommands {
      */
     @Descriptor("display the existing sensiNact service instances")
     public void services(@Descriptor("the service provider ID") String serviceProviderID) {
-        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, null, null, true)));
+        ShellAccess.proceed(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, null, null, true)));
     }
 
     /**
@@ -40,6 +45,6 @@ public class ServiceCommands {
      */
     @Descriptor("display the description of a specific sensiNact service instance")
     public void service(@Descriptor("the service provider ID") String serviceProviderID, @Descriptor("the service ID") String serviceID) {
-        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, null, false)));
+        ShellAccess.proceed(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, null, false)));
     }
 }
