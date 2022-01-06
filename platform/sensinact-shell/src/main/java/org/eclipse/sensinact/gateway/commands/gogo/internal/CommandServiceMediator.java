@@ -8,7 +8,7 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.commands.gogo.osgi;
+package org.eclipse.sensinact.gateway.commands.gogo.internal;
 
 import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellOutput;
 import org.eclipse.sensinact.gateway.core.security.Credentials;

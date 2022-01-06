@@ -11,9 +11,9 @@
 package org.eclipse.sensinact.gateway.commands.gogo.internal;
 
 import org.apache.felix.service.command.Descriptor;
+import org.apache.felix.service.command.annotations.GogoCommand;
 import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccess;
 import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccessRequest;
-import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
@@ -24,19 +24,24 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+@Component(service = AccessMethodCommands.class)
+@GogoCommand(
+		scope = "sna", 
+		function = {"method", "get", "set", "act", "subscribe", "unsubscribe"}
+	)
 public class AccessMethodCommands {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(AccessMethodCommands.class);
-    private CommandServiceMediator mediator;
-
-    public AccessMethodCommands(CommandServiceMediator mediator) {
-        this.mediator = mediator;
-    }
+    
+	@Reference
+	private CommandComponent component;
 
     /**
      * Get the description of a specific method of a resource of a sensiNact service
@@ -52,7 +57,7 @@ public class AccessMethodCommands {
     @Descriptor("get the description of a specific method of a resource of a sensiNact service")
     public void method(@Descriptor("the service provider ID") String serviceProviderID, @Descriptor("the service ID") String serviceID, @Descriptor("the resource ID") String resourceID, @Descriptor("the method type") final String methodType) throws InvalidCredentialException, JSONException, IOException {
 
-        new ShellAccess(new ShellAccessRequest(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, false)))) {
+        new ShellAccess(new ShellAccessRequest(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, false)))) {
             /**
              * @inheritDoc
              *
@@ -96,7 +101,7 @@ public class AccessMethodCommands {
      */
     @Descriptor("get the value of the default attribute resource of a sensiNact service")
     public void get(@Descriptor("the service provider ID") String serviceProviderID, @Descriptor("the service ID") String serviceID, @Descriptor("the resource ID") String resourceID) {
-        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, "GET")));
+        ShellAccess.proceed(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, "GET")));
     }
 
     /**
@@ -113,7 +118,7 @@ public class AccessMethodCommands {
         if (attributeID != null) {
             params.put(new JSONObject().put("name", "attributeName").put("type", "string").put("value", attributeID));
         }
-        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, "GET")).put("parameters", params));
+        ShellAccess.proceed(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, "GET")).put("parameters", params));
     }
 
     /**
@@ -145,7 +150,7 @@ public class AccessMethodCommands {
             params.put(new JSONObject().put("name", "attributeName").put("type", "string").put("value", attributeID));
         }
         params.put(new JSONObject().put("name", "argument").put("type", "string").put("value", String.valueOf(value)));
-        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, "SET")).put("parameters", params));
+        ShellAccess.proceed(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, "SET")).put("parameters", params));
     }
 
     /**
@@ -157,7 +162,7 @@ public class AccessMethodCommands {
      */
     @Descriptor("execute a specific resource of a sensiNact service")
     public void act(@Descriptor("the service provider ID") String serviceProviderID, @Descriptor("the service ID") String serviceID, @Descriptor("the resource ID") String resourceID) {
-        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, "ACT")));
+        ShellAccess.proceed(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, "ACT")));
     }
 
     /**
@@ -176,7 +181,7 @@ public class AccessMethodCommands {
         for (; index < length; index++) {
             params.put(new JSONObject().put("name", "arg" + index).put("type", "string").put("value", String.valueOf(parameters[index])));
         }
-        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, "ACT")).put("parameters", params));
+        ShellAccess.proceed(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, "ACT")).put("parameters", params));
     }
 
     /**
@@ -201,7 +206,7 @@ public class AccessMethodCommands {
             LOG.error("Unable to parse the conditions", e);
 
         }
-        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, "SUBSCRIBE")).put("parameters", params));
+        ShellAccess.proceed(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, "SUBSCRIBE")).put("parameters", params));
     }
 
     /**
@@ -217,6 +222,6 @@ public class AccessMethodCommands {
         JSONArray params = new JSONArray();
         params.put(new JSONObject().put("name", "subscriptionId").put("type", "string").put("value", subscriptionID));
 
-        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, "UNSUBSCRIBE")).put("parameters", params));
+        ShellAccess.proceed(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, serviceID, resourceID, "UNSUBSCRIBE")).put("parameters", params));
     }
 }

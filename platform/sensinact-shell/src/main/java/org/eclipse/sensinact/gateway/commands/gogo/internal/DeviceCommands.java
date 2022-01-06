@@ -11,26 +11,28 @@
 package org.eclipse.sensinact.gateway.commands.gogo.internal;
 
 import org.apache.felix.service.command.Descriptor;
+import org.apache.felix.service.command.annotations.GogoCommand;
 import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccess;
-import org.eclipse.sensinact.gateway.commands.gogo.osgi.CommandServiceMediator;
-import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.json.JSONObject;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
-import java.security.InvalidKeyException;
-
+@Component(service = DeviceCommands.class)
+@GogoCommand(
+		scope = "sna", 
+		function = {"device", "devices"}
+	)
 public class DeviceCommands {
-    private CommandServiceMediator mediator;
-
-    public DeviceCommands(CommandServiceMediator mediator) throws DataStoreException, InvalidKeyException {
-        this.mediator = mediator;
-    }
+    
+	@Reference
+	private CommandComponent component;
 
     /**
      * Display the existing sensiNact service providers instances
      */
     @Descriptor("display the existing sensiNact service providers instances")
     public void devices() {
-        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(null, null, null, true)));
+        ShellAccess.proceed(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(null, null, null, true)));
     }
 
     /**
@@ -40,6 +42,6 @@ public class DeviceCommands {
      */
     @Descriptor("display the description of a specific sensiNact service provider instance")
     public void device(@Descriptor("the device ID") String serviceProviderID) {
-        ShellAccess.proceed(mediator, new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, null, null, false)));
+        ShellAccess.proceed(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, null, null, false)));
     }
 }
