@@ -8,39 +8,38 @@
  * Contributors:
 *    Kentyou - initial API and implementation
  */
-package org.eclipse.sensinact.gateway.system.osgi;
+package org.eclipse.sensinact.gateway.system.invoker;
 
-import java.io.IOException;
 import java.util.Collections;
 
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.eclipse.sensinact.gateway.common.bundle.AbstractActivator;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
-import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.xml.sax.SAXException;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 
-@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
-public class Activator extends AbstractActivator<Mediator> {
+@Component
+public class Activator {
+	
+	// Not really needed but required for the lifecycle otherwise the
+	// connector#connect call will NPE due to a missing security model
+	@Reference
+	Core core;
+	
     private ExtModelConfiguration<Packet> manager = null;
     private LocalProtocolStackEndpoint<Packet> connector = null;
 
-    /**
-     * @throws IOException
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @inheritDoc
-     * @see AbstractActivator#doStart()
-     */
-    public void doStart() throws Exception {
+    @Activate
+    void start(BundleContext ctx) throws Exception {
+    	Mediator mediator = new Mediator(ctx);
         if (manager == null) {
-            manager = ExtModelConfigurationBuilder.instance(super.mediator
+            manager = ExtModelConfigurationBuilder.instance(mediator
             ).withStartAtInitializationTime(true
             ).build("system-resource.xml", Collections.<String, String>emptyMap());
         }
@@ -50,24 +49,12 @@ public class Activator extends AbstractActivator<Mediator> {
         this.connector.connect(manager);
     }
 
-    /**
-     * @inheritDoc
-     * @see AbstractActivator#doStop()
-     */
-    public void doStop() {
+    @Deactivate
+    void stop() {
         if (this.connector != null) {
             this.connector.stop();
             this.connector = null;
         }
         this.manager = null;
-    }
-
-    /**
-     * @inheritDoc
-     * @see AbstractActivator#
-     * doInstantiate(org.osgi.framework.BundleContext, int, java.io.FileOutputStream)
-     */
-    public Mediator doInstantiate(BundleContext context) {
-        return new Mediator(context);
     }
 }
