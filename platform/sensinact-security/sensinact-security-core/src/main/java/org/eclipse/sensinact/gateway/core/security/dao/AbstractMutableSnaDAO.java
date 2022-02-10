@@ -59,18 +59,18 @@ public abstract class AbstractMutableSnaDAO<E extends SnaEntity> extends Abstrac
 			LOG.debug("new %s record in the datastore", entityType.getSimpleName());
 
 		} else {
-			LOG.debug("Unable to define the new entity '%s' identifier [%s]", entityType.getSimpleName(),
+			LOG.debug("Unable to define the new entity '{}' identifier [{}]", entityType.getSimpleName(),
 					identifier);
 		}
 	}
 
 	@Override
 	void updated(int records) {
-		LOG.debug("%s %s record(s) updated in the datastore", records, entityType.getSimpleName());
+		LOG.debug("{} {} record(s) updated in the datastore", records, entityType.getSimpleName());
 	}
 
 	@Override
 	void deleted(int records) {
-		LOG.debug("%s %s record(s) deleted in the datastore", records, entityType.getSimpleName());
+		LOG.debug("{} {} record(s) deleted in the datastore", records, entityType.getSimpleName());
 	}
 }

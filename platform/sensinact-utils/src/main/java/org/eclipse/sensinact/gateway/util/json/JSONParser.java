@@ -108,7 +108,7 @@ public class JSONParser {
 			String value = null;
 			if(context.value != null && !NUMBER_PATTERN.matcher(context.value).matches()
 					&& !BOOLEAN_PATTERN.matcher(context.value.toUpperCase()).matches())
-				value = String.format("\"%s\"", context.value.replaceAll("\"", "\\\""));
+				value = String.format("\"%s\"", context.value.replace("\"", "\\\""));
 			else
 				value = context.value;
 			

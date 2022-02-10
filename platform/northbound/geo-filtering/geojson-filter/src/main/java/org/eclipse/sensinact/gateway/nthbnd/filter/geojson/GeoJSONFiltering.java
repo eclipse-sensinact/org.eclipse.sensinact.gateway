@@ -19,12 +19,15 @@ import org.eclipse.sensinact.gateway.core.LocationResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.core.filtering.Filtering;
 import org.eclipse.sensinact.gateway.core.filtering.FilteringType;
+import org.eclipse.sensinact.gateway.util.GeoJsonUtils;
 import org.eclipse.sensinact.gateway.util.LocationUtils;
 import org.eclipse.sensinact.gateway.util.json.JSONObjectStatement;
 import org.eclipse.sensinact.gateway.util.json.JSONTokenerStatement;
 import org.eclipse.sensinact.gateway.util.json.JSONValidator;
 import org.eclipse.sensinact.gateway.util.json.JSONValidator.JSONToken;
+import org.eclipse.sensinact.gateway.util.location.Point;
 import org.eclipse.sensinact.gateway.util.location.Segment;
+import org.eclipse.sensinact.gateway.util.location.geojson.GeoJson;
 import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
@@ -57,9 +60,7 @@ public class GeoJSONFiltering implements Filtering {
     		new JSONObjectStatement(new JSONTokenerStatement(
 			    "{" + 
 			    " \"type\": \"Feature\"," + 
-			    " \"properties\": {" + 
-			    "	    \"name\": $(name)" + 
-			    "  }," + 
+			    " \"properties\": {}," + 
 			    "  \"geometry\": {" + 
 			    "     \"type\": \"Point\"," + 
 			    "     \"coordinates\": [ $(longitude),$(latitude)] " + 
@@ -137,6 +138,13 @@ public class GeoJSONFiltering implements Filtering {
 
     boolean writeLocation(String name, String location, int index, StringBuilder builder) {
         try {
+        	GeoJson g = GeoJsonUtils.readGeoJson(location);
+        	if(g != null) {
+                if (index > 0) 
+                    builder.append(",");
+        		builder.append(GeoJsonUtils.geoJsonFeaturesToString(g));
+        		return true;
+        	}
         	char[] seps = new char[] {':',',',' '};
         	int pos = 0;
         	for(;pos < seps.length; pos++) {
@@ -144,16 +152,15 @@ public class GeoJSONFiltering implements Filtering {
         		if(sep >= 0)
         			break;
         	}
-        	if(pos == seps.length)
+        	if(pos == seps.length) {
         		return false;
-        	
+        	}        	
         	char sep = seps[pos];        	
             String[] locationElements = location.split(new String(new char[] {sep}));
             double latitude = Double.parseDouble(locationElements[0]);
             double longitude = Double.parseDouble(locationElements[1]);
             STATEMENT.apply("latitude", latitude);
             STATEMENT.apply("longitude", longitude);
-            STATEMENT.apply("name", name);
             if (index > 0) 
                 builder.append(",");
             
@@ -162,7 +169,6 @@ public class GeoJSONFiltering implements Filtering {
 
         } catch (Exception e) {
         	LOG.error("could not write location",e);
-
         } finally {
             STATEMENT.reset();
         }

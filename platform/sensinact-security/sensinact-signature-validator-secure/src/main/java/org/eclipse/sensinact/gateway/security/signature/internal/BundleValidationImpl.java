@@ -109,7 +109,7 @@ public class BundleValidationImpl implements BundleValidation {
             LOG.debug("null bundle");
             return null;
         }
-        LOG.debug("check bundle: %s", bundle.getLocation());
+        LOG.debug("check bundle: {}", bundle.getLocation());
 
         int hashcode = bundle.hashCode();
         String bundleName = bundle.getSymbolicName();
@@ -154,7 +154,7 @@ public class BundleValidationImpl implements BundleValidation {
                     entry = (Map.Entry<String,Certificate>) signers.next();
                     signer = entry.getKey();
 
-                    LOG.debug("signers: %s", signers);
+                    LOG.debug("signers: {}", signers);
                     currentCert = validCertificates.get(signer);
                     SignatureFile signatureFile = sjar.getSignatureFile(signer);
 

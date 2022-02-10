@@ -36,6 +36,7 @@ import org.eclipse.sensinact.gateway.core.security.AccessNode;
 import org.eclipse.sensinact.gateway.core.security.AccessNodeImpl;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
+import org.eclipse.sensinact.gateway.util.GeoJsonUtils;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.osgi.framework.InvalidSyntaxException;
@@ -69,15 +70,14 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 		double systemLongitude = 0d;
 		try {
 			systemLatitude = Double.parseDouble(mediator.getContext().getProperty(ServiceProvider.LATITUDE_PROPERTY));
-
 			systemLongitude = Double.parseDouble(mediator.getContext().getProperty(ServiceProvider.LONGITUDE_PROPERTY));
-
 		} catch (Exception e) {
 			systemLatitude = ServiceProvider.DEFAULT_Kentyou_LOCATION_LATITUDE;
 			systemLongitude = ServiceProvider.DEFAULT_Kentyou_LOCATION_LONGITUDE;
 		}
-		String locationStr = new StringBuilder().append(systemLatitude).append(":").append(systemLongitude).toString();
-		return locationStr;
+		String location =  GeoJsonUtils.geoJsonToString(GeoJsonUtils.getGeoJsonPointFromCoordinates(
+						new double[] {systemLatitude,systemLongitude}));
+		return location;
 	}
 
 	/**

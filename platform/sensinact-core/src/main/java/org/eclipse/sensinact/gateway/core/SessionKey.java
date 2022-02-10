@@ -123,7 +123,7 @@ public class SessionKey {
 	 */
 	public boolean registerAgent(String agentId, SnaAgent agent) {
 		if(this.agents.contains(agentId)) {
-			LOG.warn("Agent %s already registered",agentId);
+			LOG.warn("Agent {} already registered",agentId);
 			return false;
 		}
 		synchronized(this) {

@@ -153,14 +153,14 @@ public class ForwardingFactory {
         }
         String endpoint = forwardingService.getPattern();
         if (endpoint == null || endpoint.length() == 0 || "/".equals(endpoint)) {
-            LOG.error("Invalid endpoint '%s' - expected '^|/([^/]+)(/([^/]+)*'", endpoint);
+            LOG.error("Invalid endpoint '{}' - expected '^|/([^/]+)(/([^/]+)*'", endpoint);
             return;
         }
         if (!endpoint.startsWith("/")) {
             endpoint = "/".concat(endpoint);
         }
         if (registrations.containsKey(endpoint)) {
-            LOG.error("A forwarding service is already registered at '%s'", endpoint);
+            LOG.error("A forwarding service is already registered at '{}'", endpoint);
             return;
         }
         ForwardingFilter forwardingFilter = new ForwardingFilter(forwardingService);
@@ -209,7 +209,7 @@ public class ForwardingFactory {
 	    			//do nothing
 	    		}
     		}
-    		LOG.info("Forwarding filter and servlet  for '%s' pattern are unregistered", endpoint);
+    		LOG.info("Forwarding filter and servlet  for '{}' pattern are unregistered", endpoint);
     	}	        
     }
 }

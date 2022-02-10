@@ -34,14 +34,14 @@ import org.eclipse.sensinact.gateway.util.ReflectUtils;
  */
 public abstract class AbstractSubscribeHttpTaskWrapper<RESPONSE extends HttpResponse, REQUEST extends Request<RESPONSE>> 
 extends AbstractSubscribeTaskWrapper implements HttpTask<RESPONSE,REQUEST>, SubscribeTaskWrapper {
-
+	
 	/**
 	 * Constructor
 	 * 
 	 * @param task the {@link Task} subscribe access method
 	 */
-	protected AbstractSubscribeHttpTaskWrapper(Mediator mediator, HttpTask<RESPONSE,REQUEST> task, ProtocolStackEndpoint<?> endpoint) {
-		super(mediator, task, endpoint);
+	protected AbstractSubscribeHttpTaskWrapper(HttpTask<RESPONSE,REQUEST> task, ProtocolStackEndpoint<?> endpoint) {
+		super(task, endpoint);
 	}
 
 	@Override
@@ -257,6 +257,6 @@ extends AbstractSubscribeTaskWrapper implements HttpTask<RESPONSE,REQUEST>, Subs
     public REQUEST build() {
 	    return ReflectUtils.getInstance(Request.class,
 	    	((HttpTaskImpl<RESPONSE,REQUEST>)task).requestType, 
-	    	new Object[]{super.mediator, this});
+	    	new Object[]{this});
     }
 }

@@ -102,10 +102,10 @@ public class Mediator {
 		if (fileInstallDir == null) {
 			return;
 		}
-		LOG.info("Configuration directory %s", fileInstallDir);
+		LOG.info("Configuration directory {}", fileInstallDir);
 
 		final String symbolicName = context.getBundle().getSymbolicName();
-		LOG.info("Bundle symbolic name %s", symbolicName);
+		LOG.info("Bundle symbolic name {}", symbolicName);
 
 		final String bundlePropertyFileName = String.format("%s/%s.config", fileInstallDir, symbolicName);
 		Boolean propertiesLoaded = Boolean.FALSE;
@@ -116,7 +116,7 @@ public class Mediator {
 		 */
 		try {
 			bundleProperties.load(new FileInputStream(bundlePropertyFileName));
-			LOG.debug("File %s loaded successfully", bundlePropertyFileName);
+			LOG.debug("File {} loaded successfully", bundlePropertyFileName);
 			logBundleProperties(symbolicName, bundlePropertyFileName, bundleProperties);
 			propertiesLoaded = true;
 		} catch (IOException e) {
@@ -126,8 +126,8 @@ public class Mediator {
 		// If not even the fallback didnt manage to get loaded, display message in the
 		// log
 		if (!propertiesLoaded) {
-			LOG.debug("bundle %s does not have custom configuration %s, using default values.", symbolicName,
-					bundlePropertyFileName);
+			LOG.debug("bundle {} does not have custom configuration {}, using default values.", 
+					symbolicName, bundlePropertyFileName);
 		}
 
 		for (Map.Entry<Object, Object> name : bundleProperties.entrySet()) {
@@ -136,9 +136,9 @@ public class Mediator {
 	}
 
 	private void logBundleProperties(String bundleName, String propertyFile, Properties properties) {
-		LOG.debug("Loading properties for bundle %s located in %s", bundleName, propertyFile);
+		LOG.debug("Loading properties for bundle {} located in {}", bundleName, propertyFile);
 		for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-			LOG.info("%s:%s", entry.getKey(), entry.getValue());
+			LOG.info("{}:{}", entry.getKey(), entry.getValue());
 		}
 	}
 

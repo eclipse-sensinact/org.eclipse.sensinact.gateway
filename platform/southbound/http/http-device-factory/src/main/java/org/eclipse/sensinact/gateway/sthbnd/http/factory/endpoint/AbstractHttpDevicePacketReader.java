@@ -41,9 +41,11 @@ public abstract class AbstractHttpDevicePacketReader implements PacketReader<Tas
 	private static final String TIMESTAMP = "::timestamp::";
 	private static final String PROVIDER_IDENTIFIER = "::provider::";
 	private static final String CONCATENATION_FUNCTION_REGEX = "\\$(concat)\\(([^,]+(,[^,]+)+)\\)";
+	private static final String CONCATENATION_PARAMETER_REGEX = "('[^']+'|[^',]+),?";
 	private static final String LITERAL_FUNCTION_REGEX = "^\\$(literal)\\((.+)\\)$";
-	
+
 	private static final Pattern CONCATENATION_FUNCTION_PATTERN = Pattern.compile(CONCATENATION_FUNCTION_REGEX);
+	private static final Pattern CONCATENATION_PARAMETER_PATTERN = Pattern.compile(CONCATENATION_PARAMETER_REGEX);
 	private static final Pattern LITERAL_FUNCTION_PATTERN = Pattern.compile(LITERAL_FUNCTION_REGEX);
 	
 	private final SimpleDateFormat timestampFormat;
@@ -103,14 +105,14 @@ public abstract class AbstractHttpDevicePacketReader implements PacketReader<Tas
 		Matcher matcher = CONCATENATION_FUNCTION_PATTERN.matcher(key);
 		if(matcher.matches()) {
 			String argument = matcher.group(2);
-			String[] arguments = argument.split(",");
+			Matcher mparam = CONCATENATION_PARAMETER_PATTERN.matcher(argument);
 			StringBuilder builder = new StringBuilder();
-			for(int i =0;i<arguments.length;i++) {
-				String arg = arguments[i];
+			while(mparam.find()) {
+				String arg = mparam.group(1);
 				if(arg.charAt(0) == '\'' && arg.charAt(arg.length() - 1) == '\'') {
 					builder.append(arg.substring(1, arg.length() - 1));
 				} else {
-					builder.append(substitute(data, mapping, arguments[i]).trim());
+					builder.append(substitute(data, mapping, arg).trim());
 				}
 			}
 			return builder.toString();

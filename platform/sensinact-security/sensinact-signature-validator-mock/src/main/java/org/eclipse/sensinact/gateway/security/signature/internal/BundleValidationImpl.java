@@ -99,7 +99,7 @@ public class BundleValidationImpl implements BundleValidation {
             LOG.debug("null bundle");
             return null;
         }
-        LOG.debug("check bundle: %s", bundle.getLocation());
+        LOG.debug("check bundle: {}", bundle.getLocation());
 
         int hashcode = bundle.hashCode();
         String bundleName = bundle.getSymbolicName();
@@ -129,7 +129,7 @@ public class BundleValidationImpl implements BundleValidation {
 	        sjar.setKeyStoreManager(ksm);
 	        SignatureFile signatureFile = sjar.getSignatureFile();
 	        String sha1 = signatureFile.getManifestHash();
-	        LOG.debug("%s %s is valid? %s", FILE, bundle.getLocation(), sha1 != null);
+	        LOG.debug("{} {} is valid? {}", FILE, bundle.getLocation(), sha1 != null);
 	        this.validated.put(bundleName, new ValidBundleKey(hashcode, bundleName, sha1));
 	        return sha1;
 		} catch (IOException e) {

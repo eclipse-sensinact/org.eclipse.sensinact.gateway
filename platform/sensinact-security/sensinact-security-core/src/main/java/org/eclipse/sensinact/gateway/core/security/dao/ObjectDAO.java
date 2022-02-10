@@ -131,7 +131,7 @@ public class ObjectDAO extends AbstractMutableSnaDAO<ObjectEntity> {
 						filtered.add(tmpEntity);
 					}
 				} catch (PatternSyntaxException e) {
-					LOG.debug("exact path '%s' not found", path);
+					LOG.debug("exact path '{}' not found", path);
 				}
 			}
 		}

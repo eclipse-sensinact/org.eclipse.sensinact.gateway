@@ -376,11 +376,11 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 	protected void start() {
 		try {
 			if (!this.modelInstance.isRegistered()) {
-				LOG.error("%s not registered", this.modelInstance.getName());
+				LOG.error("{} not registered", this.modelInstance.getName());
 				return;
 			}
 			if (this.started.get()) {
-				LOG.debug("%s already started", this.getName());
+				LOG.debug("{} already started", this.getName());
 				return;
 			}
 			this.started.set(true);
@@ -415,7 +415,7 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 	 */
 	protected void stop() {
 		if (!this.started.get()) {
-			LOG.debug("%s not started", this.getName());
+			LOG.debug("{} not started", this.getName());
 			return;
 		}
 		this.started.set(false);

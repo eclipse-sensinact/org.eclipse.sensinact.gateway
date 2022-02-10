@@ -16,6 +16,8 @@ import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
+import org.eclipse.sensinact.gateway.util.GeoJsonUtils;
+import org.eclipse.sensinact.gateway.util.location.Point;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,17 +65,15 @@ public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
                 LOG.debug("Extracted value '{}' from message", value.toString());
                 if (event.getPath().endsWith("/admin/location/value")) {
                     LOG.debug("Location update message");
-                    String[] locs = String.valueOf(value).split(":");
-                    if (locs.length != 2) {
+                    Point p = GeoJsonUtils.getFirstPointFromGeoJsonPoint(String.valueOf(value));
+                    if(p == null){
                         return;
                     }
                     try {
-                        Double latitude = Double.parseDouble(locs[0]);
-                        LOG.debug("Extracted latitude '{}'", latitude);
-                        Double longitude = Double.parseDouble(locs[1]);
-                        LOG.debug("Extracted longitude '{}'", longitude);
-                        model.integrateReading(provider, "location", "latitude", latitude.toString());
-                        model.integrateReading(provider, "location", "longitude", longitude.toString());
+                        LOG.debug("Extracted latitude '{}'", p.latitude);
+                        LOG.debug("Extracted longitude '{}'", p.longitude);
+                        model.integrateReading(provider, "location", "latitude", String.valueOf(p.latitude));
+                        model.integrateReading(provider, "location", "longitude", String.valueOf(p.longitude));
                     } catch (NumberFormatException e) {
                         LOG.error("Failed to integrate value", e);
                     }

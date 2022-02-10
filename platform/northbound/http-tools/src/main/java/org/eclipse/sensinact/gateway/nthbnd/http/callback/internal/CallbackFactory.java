@@ -178,14 +178,14 @@ public class CallbackFactory {
         }
         String endpoint = callbackService.getPattern();
         if (endpoint == null || endpoint.length() == 0 || "/".equals(endpoint)) {
-            LOG.error("Invalid endpoint '%s' - expected '^|/([^/]+)(/([^/]+)*'", endpoint);
+            LOG.error("Invalid endpoint '{}' - expected '^|/([^/]+)(/([^/]+)*'", endpoint);
             return;
         }
         if (!endpoint.startsWith("/")) {
             endpoint = "/".concat(endpoint);
         }
         if (registrations.containsKey(endpoint)) {
-            LOG.error("A callback service is already registered at '%s'", endpoint);
+            LOG.error("A callback service is already registered at '{}'", endpoint);
             return;
         }
         int callbackType = callbackService.getCallbackType();
@@ -256,7 +256,7 @@ public class CallbackFactory {
 		            try {
 		                super.init();
 		            } catch(Exception e) {
-		            	e.printStackTrace();		            
+		            	LOG.error(e.getMessage(),e);	            
 		            } finally {
 		                currentThread.setContextClassLoader(tccl);
 		            }
@@ -295,7 +295,7 @@ public class CallbackFactory {
     	if(registration != null) {
     		try {
     			registration.unregister();
-                LOG.info("Callback servlet '%s' unregistered", endpoint);
+                LOG.info("Callback servlet '{}' unregistered", endpoint);
     		}catch(IllegalStateException e) {
     			//do nothing
     		}
@@ -306,7 +306,7 @@ public class CallbackFactory {
 	    	if(registration != null) {
 	    		try {
 	    			registration.unregister();
-	                LOG.info("Callback servlet '%s' unregistered", endpoint);
+	                LOG.info("Callback servlet '{}' unregistered", endpoint);
 	    		}catch(IllegalStateException e) {
 	    			//do nothing
 	    		}

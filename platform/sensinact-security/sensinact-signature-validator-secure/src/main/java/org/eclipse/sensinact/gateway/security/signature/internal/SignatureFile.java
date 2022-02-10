@@ -108,7 +108,7 @@ public class SignatureFile {
      */
     public String getManifestHash() {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Looking for Manifest hash header [%s]", this.hashHeader);
+            LOG.debug("Looking for Manifest hash header [{}]", this.hashHeader);
         }
         return mainAttributes.getValue(this.hashHeader);
     }

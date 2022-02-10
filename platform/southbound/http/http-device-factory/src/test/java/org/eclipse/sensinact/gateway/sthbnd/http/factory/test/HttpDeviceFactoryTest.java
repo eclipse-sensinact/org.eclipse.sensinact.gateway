@@ -71,7 +71,10 @@ import org.osgi.test.junit5.service.ServiceExtension;
 @TestMethodOrder(OrderAnnotation.class)
 public class HttpDeviceFactoryTest {
 	
-	@InjectService
+	private static final String LOCATION_FORMAT = "{\"type\":\"FeatureCollection\",\"features\":"
+			 + "[{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"coordinates\":[%s,%s],\"type\":\"Point\"}}]}";
+	
+ 	@InjectService
 	Core core; 
 	
 	@BeforeAll
@@ -150,9 +153,9 @@ public class HttpDeviceFactoryTest {
 	public void testRawJsonArray() throws Exception {
 		Session session = expectNServiceProviders(2);
 		
-        testProvider(session, "test1_Foo", "data", "value", "94", "1.2:3.4", 
+        testProvider(session, "test1_Foo", "data", "value", "94", String.format(LOCATION_FORMAT,"3.4", "1.2"), 
         		LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
-        testProvider(session, "test1_Bar", "data", "value", "28", "5.6:7.8", 
+        testProvider(session, "test1_Bar", "data", "value", "28", String.format(LOCATION_FORMAT,"7.8", "5.6"), 
         		LocalDateTime.of(2021, 10, 20, 18, 17).toEpochSecond(ZoneOffset.UTC));
         
         for (ServiceProvider serviceProvider : session.serviceProviders()) {
@@ -173,18 +176,18 @@ public class HttpDeviceFactoryTest {
 	public void testOpenDataAPIFormat() throws Exception {
 		Session session = expectNServiceProviders(21);
 		
-		testProvider(session, "test2_1452", "data", "GOOSE_value", "0", "48.849577:2.350867", 
+		testProvider(session, "test2_1452", "data", "GOOSE_value", "0", String.format(LOCATION_FORMAT,"2.350867", "48.849577"), 
         		LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
-		testProvider(session, "test2_1452", "data", "DUCK_value", "0", "48.849577:2.350867", 
+		testProvider(session, "test2_1452", "data", "DUCK_value", "0", String.format(LOCATION_FORMAT,"2.350867", "48.849577"), 
 				LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
 
-		testProvider(session, "test2_1151", "data", "GOOSE_value", "122", "48.882697:2.344013", 
+		testProvider(session, "test2_1151", "data", "GOOSE_value", "122", String.format(LOCATION_FORMAT,"2.344013", "48.882697"), 
 				LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
-		testProvider(session, "test2_1151", "data", "DUCK_value", "7", "48.882697:2.344013", 
+		testProvider(session, "test2_1151", "data", "DUCK_value", "7", String.format(LOCATION_FORMAT,"2.344013", "48.882697"), 
 				LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
-		testProvider(session, "test2_1151", "data", "SWAN_value", "4", "48.882697:2.344013", 
+		testProvider(session, "test2_1151", "data", "SWAN_value", "4", String.format(LOCATION_FORMAT,"2.344013", "48.882697"), 
 				LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
-		testProvider(session, "test2_1151", "data", "PEACOCK_value", "0", "48.882697:2.344013", 
+		testProvider(session, "test2_1151", "data", "PEACOCK_value", "0", String.format(LOCATION_FORMAT,"2.344013", "48.882697"), 
 				LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
 		
 	}
@@ -201,9 +204,9 @@ public class HttpDeviceFactoryTest {
 	public void testJsonArrayNestedInArray() throws Exception {
 		Session session = expectNServiceProviders(2);
 
-        testProvider(session, "test3_Foo", "data", "value", "94", "1.2:3.4", 
+        testProvider(session, "test3_Foo", "data", "value", "94",String.format(LOCATION_FORMAT,"3.4", "1.2"), 
         		LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
-        testProvider(session, "test3_Bar", "data", "value", "28", "5.6:7.8", 
+        testProvider(session, "test3_Bar", "data", "value", "28",  String.format(LOCATION_FORMAT,"7.8", "5.6"), 
         		LocalDateTime.of(2021, 10, 20, 18, 17).toEpochSecond(ZoneOffset.UTC));
         
         for (ServiceProvider serviceProvider : session.serviceProviders()) {
@@ -224,9 +227,9 @@ public class HttpDeviceFactoryTest {
 	public void testCsvWithTitles() throws Exception {
 		Session session = expectNServiceProviders(2);
 		
-		testProvider(session, "test4_Foo", "data", "value", "94", "1.2:3.4", 
+		testProvider(session, "test4_Foo", "data", "value", "94", String.format(LOCATION_FORMAT,"3.4", "1.2"), 
 				LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
-		testProvider(session, "test4_Bar", "data", "value", "28", "5.6:7.8", 
+		testProvider(session, "test4_Bar", "data", "value", "28",  String.format(LOCATION_FORMAT,"7.8", "5.6"), 
 				LocalDateTime.of(2021, 10, 20, 18, 17).toEpochSecond(ZoneOffset.UTC));
 		
 		for (ServiceProvider serviceProvider : session.serviceProviders()) {
@@ -247,9 +250,9 @@ public class HttpDeviceFactoryTest {
 	public void testCsvWithoutTitles() throws Exception {
 		Session session = expectNServiceProviders(2);
 		
-		testProvider(session, "test5_Foo", "data", "value", "94", "1.2:3.4", 
+		testProvider(session, "test5_Foo", "data", "value", "94", String.format(LOCATION_FORMAT,"3.4", "1.2"), 
 				LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
-		testProvider(session, "test5_Bar", "data", "value", "28", "5.6:7.8", 
+		testProvider(session, "test5_Bar", "data", "value", "28", String.format(LOCATION_FORMAT,"7.8", "5.6"), 
 				LocalDateTime.of(2021, 10, 20, 18, 17).toEpochSecond(ZoneOffset.UTC));
 		
 		for (ServiceProvider serviceProvider : session.serviceProviders()) {
@@ -270,11 +273,11 @@ public class HttpDeviceFactoryTest {
 	public void testCsvWithNumberLikeValues() throws Exception {
 		Session session = expectNServiceProviders(5);
 		
-		testProvider(session, "test6_1114", "vehicle", "line", "3", "59.445000:24.742240", -1);
-		testProvider(session, "test6_1119", "vehicle", "line", "43", "59.429320:24.698510", -1);
-		testProvider(session, "test6_1120", "vehicle", "line", "20A", "59.404720:24.681790", -1);
-		testProvider(session, "test6_1121", "vehicle", "line", "59", "59.441820:24.742210", -1);
-		testProvider(session, "test6_1141", "vehicle", "line", "24A", "59.404510:24.654770", -1);
+		testProvider(session, "test6_1114", "vehicle", "line", "3", String.format(LOCATION_FORMAT,"24.742240", "59.445000"), -1);
+		testProvider(session, "test6_1119", "vehicle", "line", "43", String.format(LOCATION_FORMAT,"24.698510", "59.429320"), -1);
+		testProvider(session, "test6_1120", "vehicle", "line", "20A", String.format(LOCATION_FORMAT,"24.681790", "59.404720"), -1);
+		testProvider(session, "test6_1121", "vehicle", "line", "59", String.format(LOCATION_FORMAT,"24.742210", "59.441820"), -1);
+		testProvider(session, "test6_1141", "vehicle", "line", "24A", String.format(LOCATION_FORMAT,"24.654770", "59.404510"), -1);
 
 		for (ServiceProvider serviceProvider : session.serviceProviders()) {
 			serviceProvider.getName();
@@ -294,7 +297,7 @@ public class HttpDeviceFactoryTest {
 	public void testCsvWithForeignLocale() throws Exception {
 		Session session = expectNServiceProviders(1);
 		
-		testProvider(session, "test7_Test", "pollutant", "O3", "42.2", "1.23:4.56", 
+		testProvider(session, "test7_Test", "pollutant", "O3", "42.2", String.format(LOCATION_FORMAT, "1.23","4.56"), 
 				LocalDateTime.of(2021, 11, 05, 18, 00).toEpochSecond(ZoneOffset.UTC));
 		
 		
@@ -316,9 +319,9 @@ public class HttpDeviceFactoryTest {
 	public void testObserved(@InjectBundleContext BundleContext ctx) throws Exception {
 		Session session = expectNServiceProviders(2);
 		
-        testProvider(session, "test8_Foo", "data", "value", "94", "1.2:3.4", 
+        testProvider(session, "test8_Foo", "data", "value", "94", String.format(LOCATION_FORMAT,"3.4", "1.2"), 
         		LocalDateTime.of(2021, 10, 20, 18, 14).toEpochSecond(ZoneOffset.UTC));
-        testProvider(session, "test8_Bar", "data", "value", "28", "5.6:7.8", 
+        testProvider(session, "test8_Bar", "data", "value", "28", String.format(LOCATION_FORMAT,"7.8", "5.6"), 
         		LocalDateTime.of(2021, 10, 20, 18, 17).toEpochSecond(ZoneOffset.UTC));
         
         

@@ -13,6 +13,7 @@ package org.eclipse.sensinact.gateway.nthbnd.rest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.nthbnd.rest.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.rest.ws.test.WsServiceTestClient;
@@ -35,10 +36,14 @@ public class TestRestGETAccess {
 
 	@InjectBundleContext BundleContext context;
 	
+	private String location =null;
+	
 	@BeforeEach
 	public void before() {
 		Mediator mediator = new Mediator(context);
-		String simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/SET", "{\"parameters\":[{\"name\": \"location\",\"value\": \"45.2:5.7\",\"type\": \"string\"}]}", "POST");
+		location = ModelInstance.defaultLocation(mediator);
+		String simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/SET", 
+			"{\"parameters\":[{\"name\": \"location\",\"value\": \""+location.replace("\"", "\\\"")+"\",\"type\": \"string\"}]}", "POST");
         JSONObject response = new JSONObject(simulated);
         assertEquals(200, response.get("statusCode"));
 	}
@@ -58,8 +63,19 @@ public class TestRestGETAccess {
     @Test
     public void testHttpRoot(@InjectBundleContext BundleContext context) throws Exception {
     	Mediator mediator = new Mediator(context);
-        String simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL, null, "GET");        
-        JSONObject response = new JSONObject("{\"providers\":[{\"name\":\"slider\",\"location\":\"45.2:5.7\",\"services\":[{\"name\":\"admin\",\"resources\":[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"},{\"name\":\"location\",\"type\":\"PROPERTY\"},{\"name\":\"bridge\",\"type\":\"PROPERTY\"},{\"name\":\"icon\",\"type\":\"PROPERTY\"}]},{\"name\":\"cursor\",\"resources\":[{\"name\":\"position\",\"type\":\"SENSOR\"}]}]},{\"name\":\"light\",\"location\":\"45.2:5.7\",\"services\":[{\"name\":\"admin\",\"resources\":[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"},{\"name\":\"location\",\"type\":\"PROPERTY\"},{\"name\":\"bridge\",\"type\":\"PROPERTY\"},{\"name\":\"icon\",\"type\":\"PROPERTY\"}]},{\"name\":\"switch\",\"resources\":[{\"name\":\"status\",\"type\":\"STATE_VARIABLE\"},{\"name\":\"brightness\",\"type\":\"STATE_VARIABLE\"},{\"name\":\"turn_on\",\"type\":\"ACTION\"},{\"name\":\"turn_off\",\"type\":\"ACTION\"},{\"name\":\"dim\",\"type\":\"ACTION\"}]}]}],\"type\":\"COMPLETE_LIST\",\"uri\":\"/\",\"statusCode\":200}");
+        String simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL, null, "GET");    
+        String loc = location.replace("\"", "\\\"");
+        JSONObject response = new JSONObject(
+        "{\"providers\":[{\"name\":\"slider\",\"location\":\""+loc+"\",\"services\":[{\"name\":\"admin\",\"resources\":"
+        + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"},{\"name\":\"location\",\"type\":\"PROPERTY\"},{\"name\":"
+        + "\"bridge\",\"type\":\"PROPERTY\"},{\"name\":\"icon\",\"type\":\"PROPERTY\"}]},{\"name\":\"cursor\",\"resources\":"
+        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]}]},{\"name\":\"light\",\"location\":\""+loc+"\",\"services\":"
+        + "[{\"name\":\"admin\",\"resources\":[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"},{\"name\":"
+        + "\"location\",\"type\":\"PROPERTY\"},{\"name\":\"bridge\",\"type\":\"PROPERTY\"},{\"name\":\"icon\",\"type\":"
+        + "\"PROPERTY\"}]},{\"name\":\"switch\",\"resources\":[{\"name\":\"status\",\"type\":\"STATE_VARIABLE\"},"
+        + "{\"name\":\"brightness\",\"type\":\"STATE_VARIABLE\"},{\"name\":\"turn_on\",\"type\":\"ACTION\"},"
+        + "{\"name\":\"turn_off\",\"type\":\"ACTION\"},{\"name\":\"dim\",\"type\":\"ACTION\"}]}]}],\"type\":"
+        + "\"COMPLETE_LIST\",\"uri\":\"/\",\"statusCode\":200}");
         JSONAssert.assertEquals(response, new JSONObject(simulated), false);
     }
 
@@ -95,7 +111,8 @@ public class TestRestGETAccess {
 //        SliderSetterItf slider = sliderProxy.buildProxy();
         slider.move(1);
         Thread.sleep(1000);
-        simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/slider/services/" + "cursor/resources/position/GET", null, "GET");
+        simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/slider/services/" 
+        + "cursor/resources/position/GET", null, "GET");
         response = new JSONObject(simulated);
         System.out.println(response);
 
@@ -158,7 +175,8 @@ public class TestRestGETAccess {
         String simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers", null);
         System.out.println(simulated);
 
-        JSONObject response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"]," + "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
+        JSONObject response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"]," +
+        "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
         JSONAssert.assertEquals(response, new JSONObject(simulated), false);
         simulated = null;
         simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers/slider/services", null);

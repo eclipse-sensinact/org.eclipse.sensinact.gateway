@@ -33,7 +33,9 @@ import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
+import org.eclipse.sensinact.gateway.util.GeoJsonUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.eclipse.sensinact.gateway.util.location.Point;
 import org.json.JSONObject;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -105,19 +107,18 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 			}
 		}		
 		Arrays.asList(ModelInstance.LOCATION_PROPERTY, 
-				ModelInstance.ICON_PROPERTY, 
-				ModelInstance.FRIENDLY_NAME_PROPERTY, 
-				ModelInstance.BRIDGE_PROPERTY
-				).stream().forEach(
-				p -> {
-						List<String> list = ModelInstanceRegistration.this.observed.get(p);
-						if (list == null) {
-							list = new ArrayList<String>();
-							ModelInstanceRegistration.this.observed.put(p, list);
-						}
-						if (!list.contains(DataResource.VALUE)) 
-							list.add(DataResource.VALUE);
+			ModelInstance.ICON_PROPERTY, 
+			ModelInstance.FRIENDLY_NAME_PROPERTY, 
+			ModelInstance.BRIDGE_PROPERTY
+			).stream().forEach( p -> {
+				List<String> list = ModelInstanceRegistration.this.observed.get(p);
+				if (list == null) {
+					list = new ArrayList<String>();
+					ModelInstanceRegistration.this.observed.put(p, list);
 				}
+				if (!list.contains(DataResource.VALUE)) 
+					list.add(DataResource.VALUE);
+			}
 		);
 		
 		this.instanceRegistration = registration;
@@ -206,33 +207,21 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 			return;
 		Dictionary<String, Object> properties = properties();
 		properties.remove(observed);
-
-		if (observed.startsWith(ModelInstance.LOCATION_PROPERTY)) {
+		if (observed.equals(ModelInstance.LOCATION_PROPERTY.concat(".value"))) {
 			properties.remove("latitude");
 			properties.remove("longitude");
-
-			double latitude = 0d;
-			double longitude = 0d;
-
-			String[] latlon = value == null ? new String[] {} : String.valueOf(value).split(":");
-
-			if (latlon.length == 2) {
-				try {
-					latitude = Double.parseDouble(latlon[0]);
-					longitude = Double.parseDouble(latlon[1]);
-
-					properties.put("latitude", latitude);
-					properties.put("longitude", longitude);
-
-				} catch (NumberFormatException e) {
+			try {
+					Point p = GeoJsonUtils.getFirstPointFromGeoJsonPoint(String.valueOf(value));
+					properties.put("latitude", p.latitude);
+					properties.put("longitude", p.longitude);					
+				} catch (Exception e) {
 					LOG.debug(e.getMessage());
 				}
-			}
 		}
-		if (value == null)
-			return;		
-		properties.put(observed, value);
-		this.update(properties);
+		if (value != null) {
+			properties.put(observed, value);
+			this.update(properties);
+		}
 	}
 
 	/**
@@ -299,27 +288,20 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 					value = initial.opt(DataResource.VALUE);
 				
 				if (ModelInstance.LOCATION_PROPERTY.equals(resourceKey)) {
-					double latitude = 0d;
-					double longitude = 0d;
-
-					String[] latlon = value == null ? new String[] {} : String.valueOf(value).split(":");
-
-					if (latlon.length == 2) {
-						try {
-							latitude = Double.parseDouble(latlon[0]);
-							longitude = Double.parseDouble(latlon[1]);
-
-							properties.put("latitude", latitude);
-							properties.put("longitude", longitude);
-
-						} catch (NumberFormatException e) {
+					try {
+							Point p = GeoJsonUtils.getFirstPointFromGeoJsonPoint(String.valueOf(value));
+							properties.put("latitude", p.latitude);
+							properties.put("longitude", p.longitude);					
+						} catch (Exception e) {
 							LOG.debug(e.getMessage());
 						}
-					}
 				}
 				if (value != null) {
-					properties.put(new StringBuilder().append(resourceKey).append(".").append(attribute).toString(),
-							value);
+					properties.put(new StringBuilder(
+						).append(resourceKey
+						).append("."
+						).append(attribute
+						).toString(), value);
 				}
 			}
 		}

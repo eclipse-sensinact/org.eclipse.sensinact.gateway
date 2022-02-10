@@ -10,12 +10,16 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.filter.attributes.test;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.nthbnd.filter.attributes.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.filter.attributes.ws.test.WsServiceTestClient;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.framework.BundleContext;
+import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -42,9 +46,13 @@ public class TestAttributesFiltering {
     //********************************************************************//
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
-    
-    @BeforeEach
-    public void beforeEach() throws Exception {
+
+	 private String location; 
+	 
+	@BeforeEach
+	public void before(@InjectBundleContext BundleContext context) throws InterruptedException {
+		Mediator mediator = new Mediator(context);
+		location = ModelInstance.defaultLocation(mediator);
     	HttpServiceTestClient.newRequest(HTTP_ROOTURL + "/sensinact/slider/admin/friendlyName/SET",
     	        "[{\"name\":\"attributeName\",\"type\":\"string\",\"value\":\"value\"},{\"name\":\"value\",\"type\":\"string\",\"value\":\"startName\"}]", "POST");
     	Thread.sleep(2000);
@@ -64,7 +72,7 @@ public class TestAttributesFiltering {
         + "{\"name\":\"cursor\",\"resources\":" 
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
-        + ",\"location\":\"45.2:5.7\""
+        + ",\"location\":\""+location.replace("\"","\\\"")+"\""
         + ",\"friendlyName\":\"startName\"}]}");
         
         System.out.println("==============================================");
@@ -92,7 +100,7 @@ public class TestAttributesFiltering {
         + "{\"name\":\"cursor\",\"resources\":" 
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
-        + ",\"location\":\"45.2:5.7\""
+        + ",\"location\":\""+location.replace("\"","\\\"")+"\""
         + ",\"friendlyName\":\"mySlider\"}]}");
         JSONAssert.assertEquals(expected, new JSONObject(response), false);
         
@@ -108,7 +116,7 @@ public class TestAttributesFiltering {
         + "{\"name\":\"cursor\",\"resources\":" 
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
-        + ",\"location\":\"45.2:5.7\""
+        + ",\"location\":\""+location.replace("\"","\\\"")+"\""
         + ",\"icon\":null"
         + ",\"friendlyName\":\"mySlider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
@@ -125,7 +133,7 @@ public class TestAttributesFiltering {
         + "{\"name\":\"cursor\",\"resources\":" 
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
-        + ",\"location\":\"45.2:5.7\""
+        + ",\"location\":\""+location.replace("\"","\\\"")+"\""
         + ",\"friendlyName\":\"mySlider\""
         + ",\"icon\":null"
         + ",\"bridge\":\"org.eclipse.sensinact.gateway.simulated.devices.slider\"}]}");
@@ -137,7 +145,8 @@ public class TestAttributesFiltering {
         WsServiceTestClient client = new WsServiceTestClient();
         new Thread(client).start();
         
-        String response = this.synchronizedRequest(client, "/sensinact", "[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"[friendlyName]\"}]");
+        String response = this.synchronizedRequest(client, "/sensinact", 
+        		"[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"[friendlyName]\"}]");
         JSONObject result = new JSONObject(response);
         JSONObject expected = new JSONObject(
         "{\"filters\":[{\"definition\":\"[friendlyName]\",\"type\":\"attrs\"}]," 
@@ -149,15 +158,17 @@ public class TestAttributesFiltering {
         + "{\"name\":\"cursor\",\"resources\":" 
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
-        + ",\"location\":\"45.2:5.7\""
+        + ",\"location\":\""+location.replace("\"","\\\"")+"\""
         + ",\"friendlyName\":\"startName\"}]}");
         JSONAssert.assertEquals(expected, result, false);
 
-        this.synchronizedRequest(client, "/sensinact/slider/admin/friendlyName/SET", "[{\"name\":\"attributeName\",\"type\":\"string\",\"value\":\"value\"},{\"name\":\"value\",\"type\":\"string\",\"value\":\"mySlider\"}]");
+        this.synchronizedRequest(client, "/sensinact/slider/admin/friendlyName/SET", 
+        		"[{\"name\":\"attributeName\",\"type\":\"string\",\"value\":\"value\"},{\"name\":\"value\",\"type\":\"string\",\"value\":\"mySlider\"}]");
 
         Thread.sleep(2000);
 
-        response = this.synchronizedRequest(client, "/sensinact", "[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"[friendlyName]\"}]");
+        response = this.synchronizedRequest(client, "/sensinact", 
+        		"[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"[friendlyName]\"}]");
         result = new JSONObject(response);
         expected = new JSONObject(
         "{\"filters\":[{\"definition\":\"[friendlyName]\",\"type\":\"attrs\"}]," 
@@ -169,11 +180,12 @@ public class TestAttributesFiltering {
         + "{\"name\":\"cursor\",\"resources\":" 
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
-        + ",\"location\":\"45.2:5.7\""
+        + ",\"location\":\""+location.replace("\"","\\\"")+"\""
         + ",\"friendlyName\":\"mySlider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
 
-        response = this.synchronizedRequest(client, "/sensinact", "[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"{friendlyName,icon}\"}]");
+        response = this.synchronizedRequest(client, "/sensinact", 
+        		"[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"{friendlyName,icon}\"}]");
         result = new JSONObject(response);
         expected = new JSONObject(
         "{\"filters\":[{\"definition\":\"{friendlyName,icon}\",\"type\":\"attrs\"}]," 
@@ -185,12 +197,13 @@ public class TestAttributesFiltering {
         + "{\"name\":\"cursor\",\"resources\":" 
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
-        + ",\"location\":\"45.2:5.7\""
+        + ",\"location\":\""+location.replace("\"","\\\"")+"\""
         + ",\"icon\":null"
         + ",\"friendlyName\":\"mySlider\"}]}");
         JSONAssert.assertEquals(expected, result, false);
 
-        response = this.synchronizedRequest(client, "/sensinact", "[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"friendlyName,icon,bridge\"}]");
+        response = this.synchronizedRequest(client, "/sensinact", 
+        		"[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"friendlyName,icon,bridge\"}]");
         System.err.println(response);
         result = new JSONObject(response);
         expected = new JSONObject(
@@ -203,7 +216,7 @@ public class TestAttributesFiltering {
         + "{\"name\":\"cursor\",\"resources\":" 
         + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
         + "}]" 
-        + ",\"location\":\"45.2:5.7\""
+        + ",\"location\":\""+location.replace("\"","\\\"")+"\""
         + ",\"friendlyName\":\"mySlider\""
         + ",\"icon\":null"
         + ",\"bridge\":\"org.eclipse.sensinact.gateway.simulated.devices.slider\"}]}");

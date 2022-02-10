@@ -16,12 +16,12 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.eclipse.sensinact.gateway.util.json.JSONValidator;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JSON Helpers
@@ -29,7 +29,7 @@ import org.json.JSONObject;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class JSONUtils {
-    protected static final Logger LOGGER = Logger.getLogger(JSONUtils.class.getCanonicalName());
+    protected static final Logger LOGGER = LoggerFactory.getLogger(JSONUtils.class);
 
     public static final int DEFAULT_MAX_DEEP = 3;
 
@@ -116,8 +116,14 @@ public class JSONUtils {
             builder.append(JSONUtils.CLOSE_BRACE);
             return builder.toString();
         }
-        if (String.class == object.getClass() && new JSONValidator((String) object).valid()) {
-            return (String) object;
+        if (String.class == object.getClass() /*&& new JSONValidator((String)object).valid()*/) {
+        	    try {
+	        	 	if(new JSONValidator((String)object).valid()) {
+	        	 		return (String)object;
+	        	 	}
+        	    }catch(Exception e) {
+        	    	LOGGER.error(e.getMessage(),e);
+        	    }
         }
         if (CastUtils.isPrimitive(object.getClass())) {
             return JSONUtils.primitiveToJSONFormat(object);
@@ -132,7 +138,7 @@ public class JSONUtils {
                     return (String) method.invoke(object);
                 }
             } catch (Exception e) {
-                LOGGER.log(Level.CONFIG, "Object to cast is not a JSONable instance");
+                LOGGER.debug("Object to cast is not a JSONable instance");
             }
         }
         if (context.tooDeep() || context.circularReference()) {
@@ -204,12 +210,15 @@ public class JSONUtils {
         Class<?> argClass = primitive.getClass();
 
         if (CastUtils.isPrimitive(argClass)) {
-            if (String.class.equals(argClass) || Character.class.equals(argClass) || char.class.equals(argClass)) {
+            if (String.class.equals(argClass)) {
                 builder.append(QUOTE);
-                builder.append(primitive);
+                builder.append(((String)primitive).replace("\"", "\\\""));
                 builder.append(QUOTE);
-
-            } else {
+            } else if (Character.class.equals(argClass) || char.class.equals(argClass)) {
+                    builder.append(QUOTE);
+                    builder.append(primitive);
+                    builder.append(QUOTE);
+           } else {
                 builder.append(String.valueOf(primitive));
             }
         } else {

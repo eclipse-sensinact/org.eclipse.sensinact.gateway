@@ -16,7 +16,7 @@
                 "[1]": "vehicle/line",
                 "[2]": "__lon",
                 "[3]": "__lat",
-                "$concat(${lat:0:2},'.',${lat:2},':',${lon:0:2},'.',${lon:2})": "admin/location"
+                "$concat('{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"coordinates\":[',${lon:0:2},'.',${lon:2},',',${lat:0:2},'.',${lat:2},'],\"type\":\"Point\"}}]}')": "admin/location"
               }
             }
           ]

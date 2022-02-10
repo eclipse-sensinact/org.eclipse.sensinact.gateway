@@ -180,7 +180,7 @@ public class RemoteSensiNact implements RemoteCore {
 
 						ServiceRegistration<RemoteCore> reg = mediator.getContext().registerService(
 							RemoteCore.class, RemoteSensiNact.this, props);
-						LOG.debug("RemoteCore '%s' registration done", namespace);
+						LOG.debug("RemoteCore '{}' registration done", namespace);
 						return reg;
 					}
 				});

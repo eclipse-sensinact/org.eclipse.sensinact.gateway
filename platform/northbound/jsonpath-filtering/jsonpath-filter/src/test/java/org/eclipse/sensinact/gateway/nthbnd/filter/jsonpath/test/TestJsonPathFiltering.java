@@ -10,15 +10,24 @@
  */
 package org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.test;
 
+import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.ws.test.WsServiceTestClient;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.framework.BundleContext;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.service.ServiceExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
+@ExtendWith(BundleContextExtension.class)
+@ExtendWith(ServiceExtension.class)
 public class TestJsonPathFiltering {
     //********************************************************************//
     //						NESTED DECLARATIONS			  			      //
@@ -39,14 +48,28 @@ public class TestJsonPathFiltering {
 
 
     @Test
-    public void testHttpFiltered() throws Exception {
-
+    public void testHttpFiltered(@InjectBundleContext BundleContext context) throws Exception {
+    	Mediator mediator = new Mediator(context);
+		String location = ModelInstance.defaultLocation(mediator);
         String simulated3 = HttpServiceTestClient.newRequest( HTTP_ROOTURL + "/sensinact?jsonpath=$.[?(@.name=='slider')]", null, "GET");
-        JSONObject response = new JSONObject("{\"filters\":[{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"}]," + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," + "{\"name\":\"cursor\",\"resources\":" + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" + "}]" + ",\"location\":\"45.2:5.7\"}]}");
+        JSONObject response = new JSONObject(
+        "{\"filters\":[{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"}]," 
+        + "\"providers\":" 
+        + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
+        + "\"resources\":" 
+        + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," 
+        + "{\"name\":\"cursor\",\"resources\":" 
+        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
+        + "}]" 
+        + ",\"location\":\""+location.replace("\"", "\\\"")+"\"}]}");
         JSONAssert.assertEquals(response, new JSONObject(simulated3), false);
 
         String simulated1 = HttpServiceTestClient.newRequest( HTTP_ROOTURL + "/sensinact/providers", null, "GET");
-        response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"]," + "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
+        response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"]," 
+        + "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
         JSONAssert.assertEquals(response, new JSONObject(simulated1), false);
 
         String simulated2 = HttpServiceTestClient.newRequest( HTTP_ROOTURL + "/sensinact/providers?jsonpath=$.[:1]", null, "GET");
@@ -55,7 +78,9 @@ public class TestJsonPathFiltering {
     }
 
     @Test
-    public void testWsFiltered() throws Exception {
+    public void testWsFiltered(@InjectBundleContext BundleContext context) throws Exception {
+    	Mediator mediator = new Mediator(context);
+		String location = ModelInstance.defaultLocation(mediator);
         JSONObject response;
         WsServiceTestClient client = new WsServiceTestClient();
 
@@ -64,7 +89,18 @@ public class TestJsonPathFiltering {
 
         //System.out.println(simulated3);
 
-        response = new JSONObject("{\"filters\":[{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"}]," + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," + "{\"name\":\"cursor\"," + "\"resources\":" + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]}]" + ",\"location\":\"45.2:5.7\"}]}");
+        response = new JSONObject("{\"filters\":[{\"definition\":\"$.[?(@.name=='slider')]\",\"type\":\"jsonpath\"}]," 
+        + "\"providers\":" 
+        + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
+        + "\"resources\":" 
+        + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," 
+        + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," 
+        + "{\"name\":\"cursor\"," 
+        + "\"resources\":" 
+        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]}]" 
+        + ",\"location\":\""+location.replace("\"", "\\\"")+"\"}]}");
         JSONObject obj = new JSONObject(simulated3);
         JSONAssert.assertEquals(response, obj, false);
 
