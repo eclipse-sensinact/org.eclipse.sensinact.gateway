@@ -50,7 +50,7 @@ public abstract class AbstractActivator<M extends Mediator> implements BundleAct
     protected M mediator;
 
     protected void injectPropertyFields() throws Exception {
-        LOG.debug("Starting introspection in bundle %s", mediator.getContext().getBundle().getSymbolicName());
+        LOG.debug("Starting introspection in bundle {}", mediator.getContext().getBundle().getSymbolicName());
         //This line creates an interpolator and inject the properties into the activator
         Interpolator interpolator = new Interpolator(this.mediator);
         interpolator.getInstance(this);

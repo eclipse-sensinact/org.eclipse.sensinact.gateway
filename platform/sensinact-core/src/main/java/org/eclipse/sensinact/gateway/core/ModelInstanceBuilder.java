@@ -110,7 +110,7 @@ public class ModelInstanceBuilder<C extends ModelConfiguration,I extends ModelIn
 				this.register(instance);
 
 			} catch (ModelAlreadyRegisteredException e) {
-				LOG.error("Model instance '%s' already exists", name);
+				LOG.error("Model instance '{}' already exists", name);
 				instance = null;
 			}
 		}

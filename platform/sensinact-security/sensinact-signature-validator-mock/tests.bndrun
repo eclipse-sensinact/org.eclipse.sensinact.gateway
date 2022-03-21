@@ -50,18 +50,10 @@
 	bnd.identity;id='${project.groupId}.${project.artifactId}-tests'
 -runbundles: \
 	org.osgi.service.cm;version='[1.6.0,1.6.1)',\
-	org.osgi.service.log;version='[1.4.0,1.4.1)',\
 	org.osgi.util.function;version='[1.1.0,1.1.1)',\
 	org.osgi.util.promise;version='[1.1.1,1.1.2)',\
-	org.osgi.util.pushstream;version='[1.0.1,1.0.2)',\
-	junit-platform-commons;version='[1.7.2,1.7.3)',\
-	junit-jupiter-api;version='[5.7.2,5.7.3)',\
-	junit-jupiter-engine;version='[5.7.2,5.7.3)',\
-	junit-platform-engine;version='[1.7.2,1.7.3)',\
-	junit-platform-launcher;version='[1.7.2,1.7.3)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
 	assertj-core;version='[3.20.2,3.20.3)',\
-	junit-jupiter-params;version='[5.7.2,5.7.3)',\
 	org.apache.felix.scr;version='[2.1.16,2.1.17)',\
 	org.osgi.test.common;version='[1.0.1,1.0.2)',\
 	org.osgi.test.junit5;version='[1.0.1,1.0.2)',\
@@ -74,6 +66,15 @@
 	log4j;version='[1.2.17,1.2.18)',\
 	slf4j.api;version='[1.7.30,1.7.31)',\
 	ch.qos.logback.classic;version='[1.2.3,1.2.4)',\
+	com.fasterxml.jackson.core.jackson-annotations;version='[2.10.0,2.10.1)',\
+	com.fasterxml.jackson.core.jackson-core;version='[2.10.0,2.10.1)',\
+	com.fasterxml.jackson.core.jackson-databind;version='[2.10.0,2.10.1)',\
+	junit-jupiter-api;version='[5.8.2,5.8.3)',\
+	junit-jupiter-engine;version='[5.8.2,5.8.3)',\
+	junit-jupiter-params;version='[5.8.2,5.8.3)',\
+	junit-platform-commons;version='[1.8.2,1.8.3)',\
+	junit-platform-engine;version='[1.8.2,1.8.3)',\
+	junit-platform-launcher;version='[1.8.2,1.8.3)',\
 	json;version='[20190722.0.0,20190722.0.1)'
 	
 -runvm.test: \

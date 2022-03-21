@@ -109,8 +109,8 @@ public abstract class AbstractSession implements Session {
 			object.remove("uri");
 			Integer statusCode = (Integer) object.remove("statusCode");
 			if (responseType != null) {
-				response = responseType.getConstructor(new Class<?>[] { Mediator.class, String.class, 
-					Status.class, int.class }).newInstance(mediator, uri, statusCode.intValue() == 200 
+				response = responseType.getConstructor(new Class<?>[] { String.class, 
+					Status.class, int.class }).newInstance(uri, statusCode.intValue() == 200 
 					? Status.SUCCESS : Status.ERROR, statusCode.intValue());
 
 				response.setResponse((JSONObject) object.remove("response"));

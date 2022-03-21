@@ -129,7 +129,7 @@ public class SignedBundleChecker {
             final String hashValue = sigFile.getManifestHash();
             final String hashAlgo = sigFile.getHashAlgo();
             manifestHashValid = cryptoUtils.checkHashValue(mediator, signedJar.getEntry(METADATA_DIR + MF_FILE), hashValue, hashAlgo);
-            LOG.debug("manifest hash valid: %s", manifestHashValid);
+            LOG.debug("manifest hash valid: {}", manifestHashValid);
             // check the validity of the hashes for the manifest entries
             manifestEntriesValid = SignatureFileChecker.checkEntriesValidity(mediator, signedJar, sigFile, cryptoUtils);
             if (LOG.isWarnEnabled()) {

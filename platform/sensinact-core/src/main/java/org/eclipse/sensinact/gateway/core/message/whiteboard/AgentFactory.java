@@ -402,7 +402,7 @@ public class AgentFactory {
         
         
         if (registrations.containsKey(id)) {
-        	LOG.error("An AgentRelay is already registered with ID '%s'", id);
+        	LOG.error("An AgentRelay is already registered with ID '{}'", id);
             return;
         }
         AgentRelayWrapper wrapper = new AgentRelayWrapper(agentRelay);   
@@ -469,7 +469,7 @@ public class AgentFactory {
     	if(callback != null) {
     		try {
     			callback.stop();
-    			LOG.info("Agent callback '%s' unregistered", id);
+    			LOG.info("Agent callback '{}' unregistered", id);
     		}catch(IllegalStateException e) {
     			//do nothing
     		}

@@ -760,7 +760,8 @@ public class TestResourceBuilder<R extends ModelInstance> {
 				.getJSON();
 
 		JSONAssert.assertEquals(
-				new JSONObject("{\"providers\":" + "[{\"locXtion\":\"45.234:5.789\","
+				new JSONObject("{\"providers\":[{\"locXtion\":\"{\\\"type\\\":\\\"FeXtureCollection\\\",\\\"feXtures\\\":[{\\\"type\\\":\\\"FeXture\\\","
+						+ "\\\"properties\\\":{},\\\"geometry\\\":{\\\"coordinXtes\\\":[5.789,45.234],\\\"type\\\":\\\"Point\\\"}}]}\","
 						+ "\"services\":[{\"resources\":" + "[{\"type\":\"PROPERTY\",\"nXme\":\"friendlyNXme\"},"
 						+ "{\"type\":\"PROPERTY\",\"nXme\":\"locXtion\"},"
 						+ "{\"type\":\"PROPERTY\",\"nXme\":\"bridge\"}," + "{\"type\":\"PROPERTY\",\"nXme\":\"icon\"}],"

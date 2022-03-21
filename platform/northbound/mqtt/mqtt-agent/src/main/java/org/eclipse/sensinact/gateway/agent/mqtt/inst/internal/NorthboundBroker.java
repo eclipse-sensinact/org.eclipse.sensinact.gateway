@@ -199,7 +199,7 @@ public class NorthboundBroker {
     	    final String broker = String.format("%s://%s:%s",protocol,host,port);    	    
     	    
     	    handler = new SnaEventEventHandler(prefix);
-    	    LOG.debug("Starting MQTT Agent point to server %s with prefix %s and qos %s",broker,prefix,qos);
+    	    LOG.debug("Starting MQTT Agent point to server {} with prefix {} and qos {}",broker,prefix,qos);
             
     	    GenericMqttAgent agent;
             if(username!=null&&password!=null&&!username.toString().trim().equals("")&&!password.toString().trim().equals("")){

@@ -17,7 +17,7 @@
                 "[5]": "data/value",
                 "[3]": "__lat",
                 "[4]": "__lon",
-                "$concat(${lat},':',${lon})": "admin/location",
+                 "$concat('{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"coordinates\":[',${lon},',',${lat},'],\"type\":\"Point\"}}]}')": "admin/location",
                 "[0]": "__date",
                 "[1]": "__time",
                 "$concat(${date},'-',${time})": "::timestamp::"

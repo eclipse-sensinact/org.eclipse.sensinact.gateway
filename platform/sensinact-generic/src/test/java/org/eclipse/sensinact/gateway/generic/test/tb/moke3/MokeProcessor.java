@@ -10,6 +10,8 @@
  */
 package org.eclipse.sensinact.gateway.generic.test.tb.moke3;
 
+import java.util.Arrays;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.Connector;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
@@ -34,14 +36,25 @@ public class MokeProcessor implements ProcessorService {
      */
     @Override
     public void process(String packet) {
-        String[] packetElements = packet.split(",");
+    	int n=0;
+    	int pos = 0;
+    	String packetElements[] = new String[5];
+    	while(n < 4 && pos < packet.length()) {
+    		int index = packet.indexOf(",", pos);
+    		if(index > -1) {
+    			packetElements[n++]=packet.substring(pos,index);
+    			pos = index+1;
+    		} else {
+    			break;
+    		}
+    	}
+    	packetElements[n] = packet.substring(pos);
         try {
             String argument0 = packetElements[0];
-            String argument1 = packetElements.length > 1 ? packetElements[1] : "null";
-            String argument2 = packetElements.length > 2 ? packetElements[2] : "null";
-            String argument3 = packetElements.length > 3 ? packetElements[3] : "null";
-            String argument4 = packetElements.length > 4 ? packetElements[4] : "null";
-
+            String argument1 = n > 0 ? packetElements[1] : "null";
+            String argument2 = n > 1 ? packetElements[2] : "null";
+            String argument3 = n > 2 ? packetElements[3] : "null";
+            String argument4 = n > 3 ? packetElements[4] : "null";
             this.connector.process(new MokePacket(argument0, argument1, argument2, argument3, argument4));
         } catch (InvalidPacketException e) {
             e.printStackTrace();

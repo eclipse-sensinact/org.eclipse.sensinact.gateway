@@ -12,6 +12,8 @@ package org.eclipse.sensinact.gateway.util.json;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -27,6 +29,8 @@ import java.util.Stack;
 //TODO: to be extended to be able to provide the last parsed 
 //item's [key and] value, when relevant
 public class JSONValidator {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(JSONValidator.class);
 	
     public static class TokenContext {
         public final String path;
@@ -116,8 +120,8 @@ public class JSONValidator {
             }
             return count > 0;
 
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+           LOG.error(e.getMessage(),e);
         }
         return false;
     }
@@ -167,7 +171,9 @@ public class JSONValidator {
                         key = nextString(c);
                         break;
                     default:
-                        throw syntaxError("Expected String delimiter");
+                        throw syntaxError(new StringBuilder(
+                        		).append("Found '").append(c).append("', but String delimiter was expected"
+                        		).toString());
                 }
                 c = nextClean();
                 if (c == '=') {

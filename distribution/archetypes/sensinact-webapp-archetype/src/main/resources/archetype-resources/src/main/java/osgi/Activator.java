@@ -64,7 +64,7 @@ public class Activator extends AbstractActivator<Mediator> {
 
     @Override
     public void doStop() {
-        LOG.info("Swagger API was unregistered from %s context", WebAppConstants.WEBAPP_ALIAS);
+        LOG.info("Swagger API was unregistered from {} context", WebAppConstants.WEBAPP_ALIAS);
     }
     
 	@Override

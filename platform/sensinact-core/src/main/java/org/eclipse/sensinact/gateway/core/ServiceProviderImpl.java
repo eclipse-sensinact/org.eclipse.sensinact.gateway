@@ -274,7 +274,7 @@ public class ServiceProviderImpl extends
 				}
 			}
 			if (service == null) {
-				LOG.warn("Service '%s' not found", serviceId);
+				LOG.warn("Service '{}' not found", serviceId);
 				continue;
 			}
 			service.process(serviceProcessableData);
@@ -520,7 +520,7 @@ public class ServiceProviderImpl extends
 		ServiceImpl service = null;
 
 		if ((service = this.getService(serviceName)) != null) {
-			LOG.warn("'%s' service already exists", serviceName);
+			LOG.warn("'{}' service already exists", serviceName);
 
 			return service;
 		}
@@ -529,9 +529,7 @@ public class ServiceProviderImpl extends
 		if (!SensiNactResourceModelConfiguration.BuildPolicy.isBuildPolicy(buildPolicy,
 				SensiNactResourceModelConfiguration.BuildPolicy.BUILD_NON_DESCRIBED)
 				&& !this.serviceNames.contains(serviceName)) {
-			LOG.warn("Incompatible build policy : unable to create the '%s' service",
-					serviceName);
-
+			LOG.warn("Incompatible build policy : unable to create the '{}' service", serviceName);
 			return null;
 		}
 		ServiceBuilder builder = super.modelInstance.getServiceBuilder();
@@ -562,8 +560,7 @@ public class ServiceProviderImpl extends
 			if (resources == null) {
 				resources = Collections.emptyList();
 			}
-			LOG.info("New service discovered for '%s' service provider : %s", super.name,
-					serviceName);
+			LOG.info("New service discovered for '{}' service provider : {}", super.name, serviceName);
 
 			Iterator<ResourceConfig> iterator = resources.iterator();
 			while (iterator.hasNext()) {
@@ -598,7 +595,7 @@ public class ServiceProviderImpl extends
 			throws InvalidServiceException, InvalidResourceException, InvalidValueException {
 		ServiceImpl service = builder.build(super.modelInstance, this);
 		if (service == null) {
-			LOG.debug("Unable to create the service '%s'", builder.getConfiguredName());
+			LOG.debug("Unable to create the service '{}'", builder.getConfiguredName());
 			return null;
 		}
 		return super.addElement(service) ? service : null;
@@ -638,7 +635,7 @@ public class ServiceProviderImpl extends
 			return;
 		}
 		this.setStatus(ServiceProvider.LifecycleStatus.ACTIVE);
-		LOG.debug("ServiceProvider '%s' started", this.getName());
+		LOG.debug("ServiceProvider '{}' started", this.getName());
 	}
 
 	/**

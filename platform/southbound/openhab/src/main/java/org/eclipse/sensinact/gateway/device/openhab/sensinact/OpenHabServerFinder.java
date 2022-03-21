@@ -187,7 +187,7 @@ public class OpenHabServerFinder {
         String openhabServiceType = null;
         if (openhabServiceTypePropertyValue != null) {
             openhabServiceType = openhabServiceTypePropertyValue;
-            LOG.info("Openhab2 service type configurated by %s property set to %s", OPENHAB_SERVICE_TYPE_PROPERTY_NAME, openhabServiceType);
+            LOG.info("Openhab2 service type configurated by {} property set to {}", OPENHAB_SERVICE_TYPE_PROPERTY_NAME, openhabServiceType);
         } else {
         	openhabServiceType = DEFAULT_OPENHAB_SERVICE_TYPE;
             LOG.info("No openhab2 service type configurated. Using default type: " + openhabServiceType);
@@ -205,7 +205,7 @@ public class OpenHabServerFinder {
         String openhabServiceName = null;
         if (openhabServiceNamePropertyValue != null) {
             openhabServiceName = openhabServiceNamePropertyValue;
-            LOG.info("Openhab2 service name configurated by %s property set to %s", OPENHAB_SERVICE_NAME_PROPERTY_NAME, openhabServiceName);
+            LOG.info("Openhab2 service name configurated by {} property set to {}", OPENHAB_SERVICE_NAME_PROPERTY_NAME, openhabServiceName);
         } else {
         	openhabServiceName = DEFAULT_OPENHAB_SERVICE_SSL_TYPE.startsWith(getOpenhabServiceType(mediator,suffix))?DEFAULT_OPENHAB_SERVICE_SSL_NAME:DEFAULT_OPENHAB_SERVICE_NAME;
             LOG.info("No openhab2 service name configurated. Using default type: " + openhabServiceName);
@@ -218,7 +218,7 @@ public class OpenHabServerFinder {
         boolean discoveryDescativated = false;
         if (activateDiscoveryPropertyValue != null) {
             discoveryDescativated = Boolean.parseBoolean(activateDiscoveryPropertyValue);
-            LOG.info("Openhab2 discovery configurated by %s property set to %s", ACTIVATE_DISCOVERY_PROPERTY_NAME, discoveryDescativated);
+            LOG.info("Openhab2 discovery configurated by {} property set to {}", ACTIVATE_DISCOVERY_PROPERTY_NAME, discoveryDescativated);
         } else {
             LOG.info("No openhab2 discovery configurated. Default configuration is enabled...");
         }

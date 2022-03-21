@@ -48,6 +48,8 @@ import org.skyscreamer.jsonassert.JSONAssert;
 @ExtendWith(ServiceExtension.class)
 public class TestGenericImplementation {
 
+	private static final String LOCATION_FORMAT = "{\"type\":\"FeatureCollection\",\"features\":"
+			 + "[{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"coordinates\":[%s,%s],\"type\":\"Point\"}}]}";
 
     @Test
     public void testActionResourceModel(
@@ -116,8 +118,7 @@ public class TestGenericImplementation {
         Service service = provider.getService("sensor");
         Resource temperature = service.getResource("temperature");
         JSONObject jsonObject;
-//        MidProxy midTemperature = (MidProxy) Proxy.getInvocationHandler(temperature);
-//        SnaMessage response = (SnaMessage) midTemperature.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
+
         SnaMessage<?> response = temperature.get(DataResource.VALUE, (Object[]) null);
         jsonObject = new JSONObject(response.getJSON());
         assertEquals(5.0f, (float) jsonObject.getJSONObject("response").getDouble("value"), 0.0f);
@@ -198,39 +199,22 @@ public class TestGenericImplementation {
     		) throws Throwable {
         Session session = core.getAnonymousSession();
 
-//        MidProxy midSession = (MidProxy) Proxy.getInvocationHandler(session);
-//        Object providers = midSession.toOSGi(getProviders,null);        
-//        MidProxy midDesc = (MidProxy) Proxy.getInvocationHandler(providers);
-//        String resp = (String)midDesc.toOSGi(getJSON,null);
         DescribeResponse<String> providers = session.getProviders();
         String resp = providers.getJSON();
         System.out.println(resp);
         
-        
-//        Object services = midSession.toOSGi(getServices, new Object[] {"providerTest"});
-//        midDesc = (MidProxy) Proxy.getInvocationHandler(services);
-//        resp = (String)midDesc.toOSGi(getJSON,null);
         DescribeResponse<String> services = session.getServices("providerTest");
         resp = services.getJSON();
         System.out.println(resp);
-        
-//        Object resources = midSession.toOSGi(getResources, new Object[] {"providerTest","measureTest"});
-//        midDesc = (MidProxy) Proxy.getInvocationHandler(resources);
-//        resp = (String)midDesc.toOSGi(getJSON,null);
+
         DescribeResponse<String> resources = session.getResources("providerTest","measureTest");
         resp = resources.getJSON();
         System.out.println(resp);
-        
-//        resources = midSession.toOSGi(getResources, new Object[] {"providerTest","serviceTest"});
-//        midDesc = (MidProxy) Proxy.getInvocationHandler(resources);
-//        resp = (String)midDesc.toOSGi(getJSON,null);
+
         resources = session.getResources("providerTest","serviceTest");
         resp = resources.getJSON();
         System.out.println(resp);
         
-//        Object res = midSession.toOSGi(resource, new Object[]{"providerTest", "measureTest", "condition"});        
-//        MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(res);
-//        Description description = (Description) midResource.toOSGi(getDescription, null);
         Resource resource = session.resource("providerTest", "measureTest", "condition");
         Description description = resource.getDescription();
         System.out.println(description.getJSON());
@@ -254,30 +238,33 @@ public class TestGenericImplementation {
         Service service = provider.getService("admin");
         Resource resource = service.getResource("location");
 
-//        Description response = (Description) midAdmin.toOSGi(getDescription, null);
         Description response = service.getDescription();
-//        MidProxy midResource = (MidProxy) Proxy.getInvocationHandler(resource);
-//        SnaMessage message = (SnaMessage) midResource.toOSGi(setMethod, new Object[]{"value", "45.5667:5.9333", null});
-        SnaMessage<?> message = resource.set("value", "45.5667:5.9333", null);
+        SnaMessage<?> message = resource.set("value", String.format(LOCATION_FORMAT, "5.9333","45.5667"), (Object[])null);
         JSONObject jsonObject = new JSONObject(message.getJSON());
 
         jsonObject.getJSONObject("response").remove("timestamp");
-        JSONAssert.assertEquals(new JSONObject("{\"statusCode\":200,\"response\":{\"name\":\"location\",\"value\":\"45.5667:5.9333\"," + "\"type\":\"string\"},\"type\":\"SET_RESPONSE\",\"uri\":\"/weather_7/admin/location\"}"), jsonObject, false);
+        JSONAssert.assertEquals(new JSONObject("{\"statusCode\":200,\"response\":{\"name\":\"location\",\"value\":\""+
+        String.format(LOCATION_FORMAT,"5.9333", "45.5667").replace("\"","\\\"")
+        +"\"," + "\"type\":\"string\"},\"type\":\"SET_RESPONSE\",\"uri\":\"/weather_7/admin/location\"}"), jsonObject, false);
 //        MidProxy<ProcessorService> processor = new MidProxy<ProcessorService>(classloader, this, ProcessorService.class);
 //
 //        ProcessorService processorService = processor.buildProxy();
 
         ProcessorService processorService = processorServiceAware.waitForService(500);
         
-        processorService.process("weather_7,null,admin,location,45.900002:6.11667");
+        processorService.process("weather_7,null,admin,location,"+String.format(LOCATION_FORMAT, "6.11667","45.900002"));
         
 //        message = (SnaMessage) midResource.toOSGi(getMethod, new Object[]{"value", null});
         message = resource.get("value", (Object[]) null);
 
         jsonObject = new JSONObject(message.getJSON());
         jsonObject.getJSONObject("response").remove("timestamp");
+        
+        String expected = "{\"statusCode\":200,\"response\":{\"name\":\"location\",\"value\":\""+
+        		String.format(LOCATION_FORMAT, "6.11667","45.900002").replace("\"","\\\"")+"\",\"type\":\"string\"},\"type\""
+				+ ":\"GET_RESPONSE\",\"uri\":\"/weather_7/admin/location\"}";
 
-        JSONAssert.assertEquals(new JSONObject("{\"statusCode\":200,\"response\":{\"name\":\"location\",\"value\":\"45.900002:6.11667\"," + "\"type\":\"string\"},\"type\":\"GET_RESPONSE\",\"uri\":\"/weather_7/admin/location\"}"), jsonObject, false);
+        JSONAssert.assertEquals(new JSONObject(expected), jsonObject, false);
         core.close();
     }
 
@@ -293,7 +280,7 @@ public class TestGenericImplementation {
     			   "\"providers\": ["+
     			     "{"+
     			       "\"name\": \"weather_0\","+
-    			       "\"location\": \"45.2:5.7\","+
+    			       "\"location\": \""+String.format(LOCATION_FORMAT, "5.7","45.2").replace("\"", "\\\"")+"\","+
     			       "\"services\": ["+
     			         "{"+
     			           "\"name\": \"admin\","+
@@ -378,7 +365,7 @@ public class TestGenericImplementation {
     			     "},"+
     			     "{"+
     			       "\"name\": \"weather_2\","+
-    			       "\"location\": \"45.2:5.7\","+
+    			       "\"location\": \""+String.format(LOCATION_FORMAT, "5.7","45.2").replace("\"", "\\\"")+"\","+
     			       "\"services\": ["+
     			         "{"+
     			           "\"name\": \"admin\","+
@@ -476,7 +463,7 @@ public class TestGenericImplementation {
     			     "},"+
     			     "{"+
     			       "\"name\": \"weather_1\","+
-    			       "\"location\": \"45.2:5.7\","+
+    			       "\"location\": \""+String.format(LOCATION_FORMAT, "5.7","45.2").replace("\"", "\\\"")+"\","+
     			       "\"services\": ["+
     			         "{"+
     			           "\"name\": \"admin\","+
@@ -558,112 +545,5 @@ public class TestGenericImplementation {
         
         JSONAssert.assertEquals(all, response.getJSON(), false);
         core.close();
-    }
-
-    protected void doInit(Map<String, Object> configuration) {
-
-        configuration.put("felix.auto.start.1",  
-                "file:target/felix/bundle/org.osgi.service.component.jar "+  
-                "file:target/felix/bundle/org.osgi.service.cm.jar "+  
-                "file:target/felix/bundle/org.osgi.service.metatype.jar "+  
-                "file:target/felix/bundle/org.osgi.namespace.extender.jar "+  
-                "file:target/felix/bundle/org.osgi.util.promise.jar "+  
-                "file:target/felix/bundle/org.osgi.util.function.jar "+  
-                "file:target/felix/bundle/org.osgi.util.pushstream.jar "+
-                "file:target/felix/bundle/org.osgi.service.log.jar "  +
-                "file:target/felix/bundle/org.apache.felix.log.jar " + 
-                "file:target/felix/bundle/org.apache.felix.scr.jar " +
-        		"file:target/felix/bundle/org.apache.felix.fileinstall.jar " +
-        		"file:target/felix/bundle/org.apache.felix.configadmin.jar " + 
-        		"file:target/felix/bundle/org.apache.felix.framework.security.jar ");
-        configuration.put("felix.auto.install.2",  
-        	    "file:target/felix/bundle/org.eclipse.paho.client.mqttv3.jar " + 
-                "file:target/felix/bundle/mqtt-utils.jar " + 
-        	    "file:target/felix/bundle/sensinact-utils.jar " + 
-                "file:target/felix/bundle/sensinact-common.jar " + 
-        	    "file:target/felix/bundle/sensinact-datastore-api.jar " + 
-                "file:target/felix/bundle/sensinact-security-none.jar " + 
-                "file:target/felix/bundle/slf4j-api.jar " + 
-                "file:target/felix/bundle/slf4j-simple.jar");
-        configuration.put("felix.auto.start.2", 
-        		"file:target/felix/bundle/sensinact-signature-validator.jar " + 
-        		"file:target/felix/bundle/sensinact-core.jar ");
-        configuration.put("felix.auto.start.3", 
-        		"file:target/felix/bundle/dynamicBundle.jar ");
-        configuration.put("org.eclipse.sensinact.gateway.security.jks.filename", "target/felix/bundle/keystore.jks");
-        configuration.put("org.eclipse.sensinact.gateway.security.jks.password", "sensiNact_team");
-
-        configuration.put("org.eclipse.sensinact.gateway.location.latitude", "45.2d");
-        configuration.put("org.eclipse.sensinact.gateway.location.longitude", "5.7d");
-
-        configuration.put("org.osgi.service.http.port", "8899");
-        configuration.put("org.apache.felix.http.jettyEnabled", true);
-        configuration.put("org.apache.felix.http.whiteboardEnabled", true);
-
-        try {
-        	String fileName = "sensinact.config";
-            File testFile = new File(new File("src/test/resources"), fileName);
-            URL testFileURL = testFile.toURI().toURL();
-//            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
-//            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
-//            IOUtils.write(testCng, output);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void initializeMoke(URL resource, Map<?, ?> defaults, boolean startAtInitializationTime) throws Exception {
-//        StringBuilder builder = new StringBuilder();
-//        builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
-//        builder.append("<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">");
-//        builder.append("<properties>");
-//        builder.append("<entry key=\"startAtInitializationTime\">");
-//        builder.append(startAtInitializationTime);
-//        builder.append("</entry>");
-//
-//        if (defaults != null && !defaults.isEmpty()) {
-//            Iterator<Map.Entry> iterator = defaults.entrySet().iterator();
-//            while (iterator.hasNext()) {
-//                Map.Entry entry = iterator.next();
-//                builder.append("<entry key=\"");
-//                builder.append(entry.getKey());
-//                builder.append("\">)");
-//                builder.append(entry.getValue());
-//                builder.append("</entry>");
-//            }
-//        }
-//        builder.append("</properties>");
-//
-//        File tmpDirectory = new File("./target/felix/tmp");
-//        if(!tmpDirectory.exists()) {
-//        	tmpDirectory.mkdir();
-//        } else {
-//        	new File(tmpDirectory, "resources.xml").delete();
-//        	new File(tmpDirectory, "dynamicBundle.jar").delete();
-//        }
-//        File confDirectory = new File("./target/felix/conf");
-//        new File(confDirectory, "props.xml").delete();
-//
-//        FileOutputStream output = new FileOutputStream(new File(confDirectory, "props.xml"));
-//        IOUtils.write(builder.toString().getBytes(), output);
-//        
-//        byte[] resourcesBytes = IOUtils.read(resource.openStream());        
-//        output = new FileOutputStream(new File(tmpDirectory, "resources.xml"));
-//        IOUtils.write(resourcesBytes, output);
-//
-//        super.createDynamicBundle(new File("./extra-src/test/resources/MANIFEST.MF"), tmpDirectory, new File("./extra-src/test/resources/meta"), new File(confDirectory, "props.xml"), new File(tmpDirectory, "resources.xml"), new File("./target/extra-test-classes"));
-//
-//        Bundle bundle = super.installDynamicBundle(new File(tmpDirectory, "dynamicBundle.jar").toURI().toURL());
-//
-//        ClassLoader current = Thread.currentThread().getContextClassLoader();
-//        Thread.currentThread().setContextClassLoader(classloader);
-//        try {
-//            bundle.start();
-//        } catch(Exception e){
-//        	e.printStackTrace();
-//        }finally {
-//            Thread.currentThread().setContextClassLoader(current);
-//        }
-//        Thread.sleep(5000);
     }
 }

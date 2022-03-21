@@ -164,7 +164,7 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
 	       	Class<? extends SubscribeTaskWrapper> wrapperType = this.getSubscribeTaskWrapperType();
 	       	if(wrapperType != null) { 
 		         	try {
-		 				_task =  (T) wrapperType.getDeclaredConstructor(new Class<?>[]{Mediator.class, type, ProtocolStackEndpoint.class}
+		 				_task =  (T) wrapperType.getDeclaredConstructor(new Class<?>[]{Task.class, ProtocolStackEndpoint.class}
 		 				).newInstance(new Object[] {task,this});
 		 			} catch (Exception e) {
 		 				e.printStackTrace();
@@ -175,7 +175,7 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
 	       	Class<? extends UnsubscribeTaskWrapper> wrapperType = this.getUnsubscribeTaskWrapperType();
 	       	if(wrapperType != null) { 
 		         	try {
-		 				_task =  (T) wrapperType.getDeclaredConstructor(new Class<?>[]{Mediator.class, type, ProtocolStackEndpoint.class}
+		 				_task =  (T) wrapperType.getDeclaredConstructor(new Class<?>[]{Task.class, ProtocolStackEndpoint.class}
 		 				).newInstance(new Object[] {task,this});
 		 			} catch (Exception e) {
 		 				e.printStackTrace();

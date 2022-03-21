@@ -103,9 +103,9 @@ public final class RegistryEndpoint {
             String location = null;
             Object obj = reference.getProperty(ModelInstance.LOCATION_PROPERTY.concat(".value"));
             if (obj == null || "null".equals(String.valueOf(obj)))           
-            	location = defaultLocation;
+            	location = defaultLocation.replace("\"", "\\\"");
             else	
-                location = String.valueOf(obj).replace('"', '\'');  
+                location = String.valueOf(obj).replace("\"", "\\\"");  
 
             Integer locationGetLevel = (Integer) reference.getProperty(ModelInstance.LOCATION_PROPERTY.concat(".GET"));
             if (locationGetLevel == null)
@@ -122,7 +122,7 @@ public final class RegistryEndpoint {
             if (obj == null || "null".equals(String.valueOf(obj))) 
             	friendlyName = null;
             else
-            	friendlyName = String.valueOf(obj).replace('"', '\'');
+            	friendlyName = String.valueOf(obj).replace("\"","\\\"");
 
             Integer friendlyNameGetLevel = (Integer) reference.getProperty(ModelInstance.FRIENDLY_NAME_PROPERTY.concat(".GET"));
             if (friendlyNameGetLevel == null)
@@ -139,7 +139,7 @@ public final class RegistryEndpoint {
             if (obj == null || "null".equals(String.valueOf(obj)))  
             	bridge = null;
             else
-            	bridge = String.valueOf(obj).replace('"', '\'');
+            	bridge = String.valueOf(obj).replace("\"","\\\"");
 
             Integer bridgeGetLevel = (Integer) reference.getProperty(ModelInstance.BRIDGE_PROPERTY.concat(".GET"));
             if (bridgeGetLevel == null)
@@ -156,7 +156,7 @@ public final class RegistryEndpoint {
             if (obj == null || "null".equals(String.valueOf(obj)))  
             	icon = null;
             else
-            	icon = String.valueOf(obj).replace('"', '\'');
+            	icon = String.valueOf(obj).replace("\"","\\\"");
 
             Integer iconGetLevel = (Integer) reference.getProperty(ModelInstance.ICON_PROPERTY.concat(".GET"));
             if (iconGetLevel == null)
@@ -394,9 +394,9 @@ public final class RegistryEndpoint {
 	                        String location = null;
 	                        Object obj = ref.getProperty(ModelInstance.LOCATION_PROPERTY.concat(".value"));
 	                        if (obj == null || "null".equals(String.valueOf(obj)))           
-	                        	location = defaultLocation;
+	                        	location = defaultLocation.replace("\"", "\\\"");
 	                        else	
-	                            location = String.valueOf(obj).replace('"', '\'');  
+	                            location = String.valueOf(obj).replace("\"", "\\\"");  
 
 	                        Integer locationGetLevel = (Integer) ref.getProperty(ModelInstance.LOCATION_PROPERTY.concat(".GET"));
 	                        if (locationGetLevel == null)
@@ -413,7 +413,7 @@ public final class RegistryEndpoint {
 	                        if (obj == null || "null".equals(String.valueOf(obj))) 
 	                        	friendlyName = null;
 	                        else
-	                        	friendlyName = String.valueOf(obj).replace('"', '\'');
+	                        	friendlyName = String.valueOf(obj).replace("\"","\\\"");
 
 	                        Integer friendlyNameGetLevel = (Integer) ref.getProperty(ModelInstance.FRIENDLY_NAME_PROPERTY.concat(".GET"));
 	                        if (friendlyNameGetLevel == null)
@@ -430,7 +430,7 @@ public final class RegistryEndpoint {
 	                        if (obj == null || "null".equals(String.valueOf(obj)))  
 	                        	bridge = null;
 	                        else
-	                        	bridge = String.valueOf(obj).replace('"', '\'');
+	                        	bridge = String.valueOf(obj).replace("\"","\\\"");
 
 	                        Integer bridgeGetLevel = (Integer) ref.getProperty(ModelInstance.BRIDGE_PROPERTY.concat(".GET"));
 	                        if (bridgeGetLevel == null)
@@ -447,7 +447,7 @@ public final class RegistryEndpoint {
 	                        if (obj == null || "null".equals(String.valueOf(obj)))  
 	                        	icon = null;
 	                        else
-	                        	icon = String.valueOf(obj).replace('"', '\'');
+	                        	icon = String.valueOf(obj).replace("\"","\\\"");
 
 	                        Integer iconGetLevel = (Integer) ref.getProperty(ModelInstance.ICON_PROPERTY.concat(".GET"));
 	                        if (iconGetLevel == null)

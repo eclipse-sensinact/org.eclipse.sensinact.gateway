@@ -198,7 +198,7 @@ public class ResourceImpl extends
 						buffer.append(JSONUtils.CLOSE_BRACE);
 						return buffer.toString();
 					} catch (Exception e) {
-						e.printStackTrace();
+						LOG.error(e.getMessage(),e);
 					}
 					return null;
 				}
@@ -264,7 +264,7 @@ public class ResourceImpl extends
 				this.update(attributeId, metadataName, resourceProcessableData.getData(),
 						resourceProcessableData.getTimestamp());
 			} catch (InvalidValueException e) {
-				LOG.error( "'%s' resource cannot be updated", getPath(),e);
+				LOG.error( "'{}' resource cannot be updated", getPath(),e);
 			}
 		}
 	}
@@ -308,7 +308,7 @@ public class ResourceImpl extends
 					Modifiable.UPDATABLE, false);
 
 			if (!this.addAttribute(attribute)) {
-				LOG.warn("Error when creating attribute '%s': unable to update resource '%s",
+				LOG.warn("Error when creating attribute '{}': unable to update resource '{}",
 						name, getPath());
 				return;
 			}
@@ -388,7 +388,7 @@ public class ResourceImpl extends
 			}
 		}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOG.error(e.getMessage(),e);
 		}
 	}
 	/**
@@ -775,11 +775,11 @@ public class ResourceImpl extends
 		if (!super.getModelInstance().isRegistered() || this.isHidden()) 
 			return;
 		if (super.started.get()) {
-			LOG.debug("%s already started", this.getName());
+			LOG.debug("{} already started", this.getName());
 			return;
 		}
 		super.started.set(true);
-		LOG.debug("'%s' resource registered", this.getName());
+		LOG.debug("'{}' resource registered", this.getName());
 
 		String path = this.getPath();
 

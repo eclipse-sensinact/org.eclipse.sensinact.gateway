@@ -20,7 +20,7 @@
                 "fields/value": "data/${type}_value",
                 "fields/geo/[0]": "__lat",
                 "fields/geo/[1]": "__lon",
-                "$concat(${lat},':',${lon})": "admin/location"
+                 "$concat('{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"coordinates\":[',${lon},',',${lat},'],\"type\":\"Point\"}}]}')": "admin/location"
               }
             }
           ]

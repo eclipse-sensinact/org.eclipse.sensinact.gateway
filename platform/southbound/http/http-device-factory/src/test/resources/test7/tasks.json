@@ -22,7 +22,7 @@
                 "C8H10": "pollutant/C8H10",
                 "PM10": "pollutant/PM10",
                 "PM2.5": "pollutant/PM2.5",
-                "$literal(1.23:4.56)": "admin/location"
+                "$literal({\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"coordinates\":[1.23,4.56],\"type\":\"Point\"}}]})": "admin/location"
               }
             }
           ]

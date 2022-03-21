@@ -3,7 +3,6 @@
  */
 package org.eclipse.sensinact.gateway.generic;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +23,6 @@ public abstract class AbstractSubscribeTaskWrapper implements SubscribeTaskWrapp
 	 */
 	protected String subscriptionId;
 
-	/**
-	 * the {@link Mediator} allowing the SubscribeTaskWrapper to be 
-	 * instantiated to interact with the OSGi host environment  
-	 */
-	protected Mediator mediator;
-
 	protected ProtocolStackEndpoint<?> endpoint;
 
 	/**
@@ -46,11 +39,10 @@ public abstract class AbstractSubscribeTaskWrapper implements SubscribeTaskWrapp
 	 * 
 	 * @param task the {@link Task} subscribe access method
 	 */
-	protected AbstractSubscribeTaskWrapper(Mediator mediator, Task task, ProtocolStackEndpoint<?> endpoint) {
+	protected AbstractSubscribeTaskWrapper(Task task, ProtocolStackEndpoint<?> endpoint) {
 		if(!CommandType.SUBSCRIBE.equals(task.getCommand()))
 			throw new IllegalArgumentException("Subscribe Task expected");
 		this.task = task;
-		this.mediator = mediator;
 		this.endpoint = endpoint;
 	}
 

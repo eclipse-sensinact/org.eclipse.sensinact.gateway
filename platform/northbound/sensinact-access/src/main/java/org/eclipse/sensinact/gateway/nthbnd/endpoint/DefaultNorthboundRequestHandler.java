@@ -199,7 +199,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
                 try {
                     parameters = new JSONArray(content);
                 } catch (JSONException je) {
-                    LOG.debug("No JSON formated content in %s", content);
+                    LOG.debug("No JSON formated content in {}", content);
                 }
             }
         }

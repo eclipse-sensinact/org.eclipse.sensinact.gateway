@@ -267,8 +267,7 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 			}
 		}
 		if (resource == null) {
-			LOG.warn("Resource '%s' not found for '%s' service", resourceId,
-					super.getName());
+			LOG.warn("Resource '{}' not found for '{}' service", resourceId, super.getName());
 			return;
 		}
 		resource.process(data);
@@ -347,7 +346,7 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 	public ResourceImpl addLinkedResource(String link, ResourceImpl targetedResource) throws InvalidResourceException {
 		if (targetedResource == null || this.getResource(link) != null
 				|| LinkedResourceImpl.class.isAssignableFrom(targetedResource.getClass())) {
-			LOG.debug("Unable to create the linked resource : %s", link);
+			LOG.debug("Unable to create the linked resource : {}", link);
 			return null;
 		}
 		if (targetedResource.getType() == Resource.Type.ACTION) 
@@ -422,7 +421,7 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 		ResourceImpl resource = null;
 
 		if (resourceName == null || (resource = this.getResource(resourceName)) != null) {
-			LOG.debug("The resource '%s' already exists", resourceName);
+			LOG.debug("The resource '{}' already exists", resourceName);
 			return null;
 		}
 		if ((resource = builder.build(super.modelInstance, this)) != null && this.addResource(resource)) {
