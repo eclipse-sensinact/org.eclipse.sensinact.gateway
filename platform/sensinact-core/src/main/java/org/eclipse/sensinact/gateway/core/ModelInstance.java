@@ -63,7 +63,7 @@ public class ModelInstance<C extends ModelConfiguration> implements SensiNactRes
 	 * providers for which it is not specified. This method should be called once at
 	 * initialization time
 	 * 
-	 * @return the initial string location value ( latitude:longitude)
+	 * @return the initial string location value (a GeoJSON point)
 	 */
 	public static String defaultLocation(Mediator mediator) {
 		double systemLatitude = 0d;

@@ -65,7 +65,7 @@ public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
                 LOG.debug("Extracted value '{}' from message", value.toString());
                 if (event.getPath().endsWith("/admin/location/value")) {
                     LOG.debug("Location update message");
-                    Point p = GeoJsonUtils.getFirstPointFromGeoJsonPoint(String.valueOf(value));
+                    Point p = GeoJsonUtils.getFirstPointFromLocationString(String.valueOf(value));
                     if(p == null){
                         return;
                     }

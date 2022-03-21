@@ -211,7 +211,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 			properties.remove("latitude");
 			properties.remove("longitude");
 			try {
-					Point p = GeoJsonUtils.getFirstPointFromGeoJsonPoint(String.valueOf(value));
+					Point p = GeoJsonUtils.getFirstPointFromLocationString(String.valueOf(value));
 					properties.put("latitude", p.latitude);
 					properties.put("longitude", p.longitude);					
 				} catch (Exception e) {
@@ -289,7 +289,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 				
 				if (ModelInstance.LOCATION_PROPERTY.equals(resourceKey)) {
 					try {
-							Point p = GeoJsonUtils.getFirstPointFromGeoJsonPoint(String.valueOf(value));
+							Point p = GeoJsonUtils.getFirstPointFromLocationString(String.valueOf(value));
 							properties.put("latitude", p.latitude);
 							properties.put("longitude", p.longitude);					
 						} catch (Exception e) {

@@ -2,8 +2,9 @@ package org.eclipse.sensinact.gateway.util;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.sensinact.gateway.util.location.Point;
 import org.eclipse.sensinact.gateway.util.location.geojson.GeoJson;
@@ -50,6 +51,23 @@ public class GeoJsonUtils {
 		return points;
 	}
 
+	private static final Pattern LOCATION_PATTERN = Pattern.compile("^\\s*(?<lat>-?\\d{1,3}((\\.)(\\d)+)?)[:,](?<lon>-?\\d{1,3}((\\.)(\\d)+)?)\\s*$");
+	
+	public static Point getFirstPointFromLocationString(String s) {
+		Point p;
+		if(s == null) {
+			p = null;
+		} else {
+			Matcher m = LOCATION_PATTERN.matcher(s);
+			if(m.matches()) {
+				p = new Point(Double.parseDouble(m.group("lat")), Double.parseDouble(m.group("lon")));
+			} else {
+				p = getFirstPointFromGeoJsonPoint(s);
+			}
+		}
+		return p;
+	}
+	
 	public static Point getFirstPointFromGeoJsonPoint(String s) {
 			List<Point> points = getPointsFromGeoJson(s);
 			if(points.isEmpty())
