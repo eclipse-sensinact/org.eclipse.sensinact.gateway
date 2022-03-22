@@ -21,6 +21,7 @@ import static org.eclipse.sensinact.gateway.core.ServiceProvider.ICON;
 import static org.eclipse.sensinact.gateway.core.ServiceProvider.LIFECYCLE_STATUS;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -38,6 +39,7 @@ import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.json.JSONObject;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -635,6 +637,28 @@ public class ServiceProviderImpl extends
 			return;
 		}
 		this.setStatus(ServiceProvider.LifecycleStatus.ACTIVE);
+		
+		// The following code is a workaround for a race condition which prevents
+		// the service provider from being marked active. The source of the race
+		// condition is extremely hard to identify, and probably the whole provider
+		// thread model needs to be reconsidered.
+		try {
+			@SuppressWarnings("rawtypes")
+			Collection<ServiceReference<SensiNactResourceModel>> serviceReferences = modelInstance
+					.mediator.getContext().getServiceReferences(SensiNactResourceModel.class, 
+							String.format("(name=%s)", getName()));
+			
+			ServiceReference<?> next = serviceReferences.iterator().next();
+			
+			String ls = String.valueOf(next.getProperty("lifecycle.status"));
+			if(!ls.equals(ServiceProvider.LifecycleStatus.ACTIVE.name())) {
+				this.setStatus(ServiceProvider.LifecycleStatus.ACTIVE);
+			}
+		} catch (Exception e) {
+			LOG.error(e.getMessage(),e);
+			this.stop();
+			return;
+		}
 		LOG.debug("ServiceProvider '{}' started", this.getName());
 	}
 
