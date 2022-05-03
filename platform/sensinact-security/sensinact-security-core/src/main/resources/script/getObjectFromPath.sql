@@ -1,13 +1,12 @@
-/*
- * Copyright (c) 2020 Kentyou.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
-
- * Contributors:
- *    Christophe Munilla - initial API and implementation
- */
+/*********************************************************************
+* Copyright (c) 2021 Kentyou and others
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+**********************************************************************/
 WITH RECURSIVE path_element (ITERATION, PATH, LAST, POSITION, ELEMENT, PARENT, OID, PATTERN) AS
 (
 SELECT 0, '#VAR#' as PATH, 0 as LAST, 1 as POSITION, '' as ELEMENT, NULL, 0, 0
