@@ -1,29 +1,22 @@
-/*
-* Copyright (c) 2020 Kentyou.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
-*    Kentyou - initial API and implementation
- */
+/*********************************************************************
+* Copyright (c) 2021 Kentyou and others
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+**********************************************************************/
 package io.moquette.server.netty;
-/*
- * Copyright (c) 2012-2017 The original author or authorsgetRockQuestions()
- * ------------------------------------------------------
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * and Apache License v2.0 which accompanies this distribution.
- *
- * The Eclipse Public License is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * The Apache License v2.0 is available at
- * http://www.opensource.org/licenses/apache2.0.php
- *
- * You may elect to redistribute this code under either of these licenses.
- */
+/*********************************************************************
+* Copyright (c) 2021 Kentyou and others
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+**********************************************************************/
 
 import io.moquette.BrokerConstants;
 import io.moquette.parser.commons.Constants;
