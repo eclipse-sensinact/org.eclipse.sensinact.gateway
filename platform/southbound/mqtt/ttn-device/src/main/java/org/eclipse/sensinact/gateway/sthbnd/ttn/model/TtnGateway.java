@@ -10,8 +10,7 @@
 
 package org.eclipse.sensinact.gateway.sthbnd.ttn.model;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import jakarta.json.JsonObject;
 
 public class TtnGateway {
 
@@ -33,14 +32,14 @@ public class TtnGateway {
         this.rfChain = rfChain;
     }
 
-    public TtnGateway(JSONObject json) throws JSONException {
+    public TtnGateway(JsonObject json) {
         this.gatewayId = json.getString("gtw_id");
-        this.timestamp = json.getLong("timestamp");
+        this.timestamp = json.getJsonNumber("timestamp").longValueExact();
         this.time = json.getString("time");
         this.channel = json.getInt("channel");
-        this.rssi = json.getDouble("rssi");
-        this.snr = json.getLong("snr");
-        this.rfChain= json.getLong("rf_chain");
+        this.rssi = json.getJsonNumber("rssi").doubleValue();
+        this.snr = json.getJsonNumber("snr").longValueExact();
+        this.rfChain= json.getJsonNumber("rf_chain").longValueExact();
     }
 
     public String getGatewayId() {

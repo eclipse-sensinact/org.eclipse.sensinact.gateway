@@ -18,14 +18,29 @@ import org.eclipse.sensinact.gateway.generic.TaskTranslator;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpConnectionConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpResponse;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonValue;
 
 /**
  *
  */
 public class JSONHttpChainedTasks<REQUEST extends Request<SimpleHttpResponse>> extends HttpChainedTasks<REQUEST, JSONHttpChainedTask<REQUEST>> {
-    /**
+	
+	private static final Logger LOG = LoggerFactory.getLogger(JSONHttpChainedTasks.class);
+	
+	private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
+	
+	/**
      * @param mediator
      * @param transmitter
      * @param path
@@ -65,7 +80,7 @@ public class JSONHttpChainedTasks<REQUEST extends Request<SimpleHttpResponse>> e
      */
     @Override
     public JSONHttpChainedTask<REQUEST> createChainedTask(String identifier, CommandType command, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
-        JSONHttpChainedTask<REQUEST> chain = new JSONHttpChainedTask<REQUEST>(command, transmitter, requestType, path, profileId, resourceConfig, parameters);
+        JSONHttpChainedTask<REQUEST> chain = new JSONHttpChainedTask<REQUEST>(command, transmitter, requestType, path, profileId, resourceConfig, parameters, mapper);
 
         chain.setChainedIdentifier(identifier);
         return chain;
@@ -80,11 +95,12 @@ public class JSONHttpChainedTasks<REQUEST extends Request<SimpleHttpResponse>> e
         Object result = null;
 
         if ((result = super.getIntermediateResult()) != null && result != AccessMethod.EMPTY) {
-            if (JSONObject.class.isAssignableFrom(result.getClass())) {
-                return ((JSONObject) result).toString().getBytes();
-            }
-            if (JSONArray.class.isAssignableFrom(result.getClass())) {
-                return ((JSONArray) result).toString().getBytes();
+            if (JsonValue.class.isInstance(result)) {
+                try {
+					return mapper.writeValueAsString(result).getBytes();
+				} catch (JsonProcessingException e) {
+					LOG.error("Unable to convert result JSON to bytes", e);
+				}
             }
             if (String.class == result.getClass()) {
                 return ((String) result).getBytes();

@@ -9,6 +9,11 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.sthbnd.http.kodi.internal;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.core.ResourceConfig;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.generic.ExtResourceConfig;
@@ -18,10 +23,13 @@ import org.eclipse.sensinact.gateway.generic.parser.ParameterDefinition;
 import org.eclipse.sensinact.gateway.generic.parser.SignatureDefinition;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskConfigurator;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTask;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 
-import java.util.Iterator;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonObject;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -40,6 +48,10 @@ public class KodiTaskConfigurator implements HttpTaskConfigurator {
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
 
+	private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
+	
     /**
      * @inheritDoc
      * @see HttpTaskConfigurator#
@@ -49,51 +61,53 @@ public class KodiTaskConfigurator implements HttpTaskConfigurator {
     public <T extends HttpTask<?, ?>> void configure(T task) throws Exception {
         ResourceConfig resourceConfig = task.getResourceConfig();
 
-        JSONObject json = new JSONObject();
-        json.put("jsonrpc", "2.0");
-        json.put("method", resourceConfig.getName());
-        json.put("id", task.getTaskIdentifier());
-
+        Map<String, Object> map = new HashMap<>();
+        map.put("jsonrpc", "2.0");
+        map.put("method", resourceConfig.getName());
+        map.put("id", task.getTaskIdentifier());
+        
         KodiApi kodiApi = KodiApi.fromName(resourceConfig.getName());
-
+        
         Object[] parameters = task.getParameters();
-
+        
         if (kodiApi == null) {
-            if (CommandType.ACT.equals(task.getCommand())) {
-                Iterator<MethodDefinition> iterator = ((ExtResourceConfig) resourceConfig).iterator();
-
-                MethodDefinition actMethodDefinition = null;
-
-                while (iterator.hasNext()) {
-                    actMethodDefinition = iterator.next();
-                    if (!actMethodDefinition.getType().equals(AccessMethod.Type.valueOf(AccessMethod.ACT))) {
-                        continue;
-                    }
-                    Iterator<SignatureDefinition> it = actMethodDefinition.iterator();
-
-                    while (it.hasNext()) {
-                        List<ParameterDefinition> parametersName = it.next().getParameters();
-
-                        if (parametersName.size() != parameters.length) {
-                            continue;
-                        }
-                        JSONObject params = new JSONObject();
-                        for (int i = 0; i < parametersName.size(); i++) {
-                            params.put(parametersName.get(i).getName(), parameters[i]);
-                        }
-                        json.put("params", params);
-                        break;
-                    }
-                    break;
-                }
-            }
-
+        	if (CommandType.ACT.equals(task.getCommand())) {
+        		Iterator<MethodDefinition> iterator = ((ExtResourceConfig) resourceConfig).iterator();
+        		
+        		MethodDefinition actMethodDefinition = null;
+        		
+        		while (iterator.hasNext()) {
+        			actMethodDefinition = iterator.next();
+        			if (!actMethodDefinition.getType().equals(AccessMethod.Type.valueOf(AccessMethod.ACT))) {
+        				continue;
+        			}
+        			Iterator<SignatureDefinition> it = actMethodDefinition.iterator();
+        			
+        			while (it.hasNext()) {
+        				List<ParameterDefinition> parametersName = it.next().getParameters();
+        				
+        				if (parametersName.size() != parameters.length) {
+        					continue;
+        				}
+        				
+        				Map<String, Object> params = new HashMap<>();
+        				
+        				for (int i = 0; i < parametersName.size(); i++) {
+        					map.put(parametersName.get(i).getName(), parameters[i]);
+        				}
+        				map.put("params", params);
+        				break;
+        			}
+        			break;
+        		}
+        	}
+        	
         } else {
-            Object params = kodiApi.getContent(parameters);
-            if (params != null) {
-                json.put("params", params);
-            }
+        	JsonObject params = kodiApi.getContent(parameters);
+        	if (params != null) {
+        		map.put("params", params);
+        	}
         }
-        task.setContent(json.toString());
+        task.setContent(mapper.writeValueAsString(map));
     }
 }

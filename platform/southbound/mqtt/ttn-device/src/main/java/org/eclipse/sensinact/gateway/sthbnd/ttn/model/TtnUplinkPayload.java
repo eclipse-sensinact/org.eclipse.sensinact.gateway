@@ -10,18 +10,18 @@
 
 package org.eclipse.sensinact.gateway.sthbnd.ttn.model;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.listener.TtnUplinkListener;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.packet.PayloadDecoder;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import jakarta.json.JsonObject;
 
 public class TtnUplinkPayload extends TtnPacketPayload {
 
@@ -52,17 +52,17 @@ public class TtnUplinkPayload extends TtnPacketPayload {
         this.payloadRaw = payloadRaw;
     }
 
-    public TtnUplinkPayload(Mediator mediator, JSONObject json) throws JSONException {
+    public TtnUplinkPayload(Mediator mediator, JsonObject json) {
         this.mediator = mediator;
         this.applicationId = json.getString("app_id");
         this.deviceId = json.getString("dev_id");
         this.hardwareSerial = json.getString("hardware_serial");
         this.port = json.getInt("port");
         this.counter = json.getInt("counter");
-        this.confirmed = json.optBoolean("confirmed");
-        this.isRetry = json.optBoolean("is_retry");
-        this.metadata = new TtnMetadata(json.getJSONObject("metadata"));
-        this.payloadRaw =json.optString("payload_raw");
+        this.confirmed = json.getBoolean("confirmed", false);
+        this.isRetry = json.getBoolean("is_retry", false);
+        this.metadata = new TtnMetadata(json.getJsonObject("metadata"));
+        this.payloadRaw =json.getString("payload_raw", null);
     }
 
     public String getApplicationId() {

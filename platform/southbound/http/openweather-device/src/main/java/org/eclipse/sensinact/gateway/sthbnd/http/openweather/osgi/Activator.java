@@ -32,9 +32,15 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskProcessingContext;
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.SimpleHttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTask;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpChainedTasks;
-import org.json.JSONArray;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.Constants;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonArray;
 
 @ChainedHttpTasks(recurrences = {
 	@RecurrentChainedHttpTask(
@@ -66,6 +72,11 @@ import org.osgi.framework.Constants;
 })
 @Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends HttpActivator {
+	
+	private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
+	
     List<SimpleHttpProtocolStackEndpoint> endpoints;
 
     @Override
@@ -143,7 +154,9 @@ public class Activator extends HttpActivator {
                         return null;
                     }
                     String result = intermediate.toString();
-                    String icon = new JSONArray(result).optJSONObject(0).optJSONObject("weather").optJSONArray("weather").optJSONObject(0).getString("icon");
+                    String icon = mapper.readValue(result, JsonArray.class)
+                    	.getJsonObject(0).getJsonObject("weather").getJsonArray("weather")
+                    	.getJsonObject(0).getString("icon");
                     return icon;
                 }
             });

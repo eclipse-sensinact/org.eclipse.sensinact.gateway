@@ -10,13 +10,12 @@
 
 package org.eclipse.sensinact.gateway.sthbnd.ttn.model;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import jakarta.json.JsonObject;
 
 public class TtnMetadata {
 
@@ -36,17 +35,17 @@ public class TtnMetadata {
         this.gateways = gateways;
     }
 
-    public TtnMetadata(JSONObject json) throws JSONException {
+    public TtnMetadata(JsonObject json) {
         this.time = json.getString("time");
-        this.frequency = json.getDouble("frequency");
+        this.frequency = json.getJsonNumber("frequency").doubleValue();
         this.modulation = json.getString("modulation");
         this.dataRate = json.getString("data_rate");
         this.codingRate= json.getString("coding_rate");
 
         List<TtnGateway> gateways = new ArrayList<>();
 
-        for(int i = 0; i < json.getJSONArray("gateways").length(); i++) {
-            gateways.add(new TtnGateway(json.getJSONArray("gateways").getJSONObject(i)));
+        for(int i = 0; i < json.getJsonArray("gateways").size(); i++) {
+            gateways.add(new TtnGateway(json.getJsonArray("gateways").getJsonObject(i)));
         }
 
         this.gateways = gateways;

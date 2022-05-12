@@ -16,14 +16,24 @@ import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.PacketReader;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonObject;
 
 public class OneM2MHttpPacketReader extends SimplePacketReader<HttpPacket> {
 	private static final Logger LOG = LoggerFactory.getLogger(PacketReader.class);
 
     public static final String DEFAULT_SERVICE_NAME = "container";
+    
+    private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
     
     class OneM2MHttpSubPacket {
 		String serviceProvider;
@@ -54,11 +64,11 @@ public class OneM2MHttpPacketReader extends SimplePacketReader<HttpPacket> {
     	}
     	if(this.subPackets.isEmpty()) {
 	        try {
-	            JSONObject content = new JSONObject(new String(packet.getBytes()));
+	            JsonObject content = mapper.readValue(packet.getBytes(), JsonObject.class);
 	            if (LOG.isDebugEnabled()) {
 	                LOG.debug(content.toString());
 	            }
-	            if (content.has("m2m:uril")) {
+	            if (content.containsKey("m2m:uril")) {
 	                String[] uris = content.getString("m2m:uril").split(" ");
 	                for (String uri : uris) {
 	                    String[] elements = uri.split("/");

@@ -9,12 +9,19 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats;
 
+import java.util.StringTokenizer;
+
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.exception.ProcessorFormatException;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.formats.iface.ProcessorFormatIface;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.smarttopic.processor.selector.SelectorIface;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 
-import java.util.StringTokenizer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonObject;
 
 /**
  * ProcessorFormat plugin that accepts as entry an JSON value and received as expression to select an specific value inside the JSON. e.g. assume
@@ -27,19 +34,24 @@ import java.util.StringTokenizer;
  * @author <a href="mailto:Jander.BOTELHODONASCIMENTO@cea.fr">Jander Botelho do Nascimento</a>
  */
 public class ProcessorFormatJSON implements ProcessorFormatIface {
+	
+	private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
+	
     @Override
     public String getName() {
         return "json";
     }
 
-    public String jsonDepthSearch(String elementPath, String json) {
+    public String jsonDepthSearch(String elementPath, String json) throws JsonProcessingException {
         StringTokenizer st = new StringTokenizer(elementPath, ".");
-        JSONObject rootJSON = new JSONObject(json);
-        JSONObject current = rootJSON;
+        JsonObject rootJSON = mapper.readValue(json, JsonObject.class);
+        JsonObject current = rootJSON;
         while (st.hasMoreElements()) {
             String val = st.nextToken();
             if (st.hasMoreElements()) {
-                current = current.getJSONObject(val);
+                current = current.getJsonObject(val);
             } else {
                 return new String(current.get(val).toString());
             }
@@ -51,6 +63,10 @@ public class ProcessorFormatJSON implements ProcessorFormatIface {
 
     @Override
     public String process(String inData, SelectorIface selector) throws ProcessorFormatException {
-        return jsonDepthSearch(selector.getExpression(), inData);
+        try {
+			return jsonDepthSearch(selector.getExpression(), inData);
+		} catch (JsonProcessingException e) {
+			throw new ProcessorFormatException("JSON parsing failure", e);
+		}
     }
 }

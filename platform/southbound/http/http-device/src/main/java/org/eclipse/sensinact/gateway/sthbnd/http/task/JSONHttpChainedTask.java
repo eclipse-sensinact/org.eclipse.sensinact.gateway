@@ -9,6 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.sthbnd.http.task;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,11 +21,16 @@ import org.eclipse.sensinact.gateway.generic.uri.URITask;
 import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpConnectionConfiguration;
 import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpResponse;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 /**
  *
@@ -35,7 +41,7 @@ public class JSONHttpChainedTask<REQUEST extends Request<SimpleHttpResponse>> ex
     /**
      *
      */
-    protected JSONArray array;
+    protected List<JsonValue> array;
 
     /**
      *
@@ -46,15 +52,18 @@ public class JSONHttpChainedTask<REQUEST extends Request<SimpleHttpResponse>> ex
      *
      */
     private String chainedIdentifier;
+	private final ObjectMapper mapper;
 
     /**
      * @param transmitter
      * @param path
      * @param resourceConfig
      * @param parameters
+     * @param mapper 
      */
-    public JSONHttpChainedTask(CommandType command, TaskTranslator transmitter, Class<REQUEST> requestType, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters) {
+    public JSONHttpChainedTask(CommandType command, TaskTranslator transmitter, Class<REQUEST> requestType, String path, String profileId, ResourceConfig resourceConfig, Object[] parameters, ObjectMapper mapper) {
         super(command, transmitter, requestType, path, profileId, resourceConfig, parameters);
+		this.mapper = mapper;
     }
 
     /**
@@ -76,64 +85,65 @@ public class JSONHttpChainedTask<REQUEST extends Request<SimpleHttpResponse>> ex
      * @throws JSONException
      */
     protected void append(Object result) {
-        Object append = null;
 
         if (result == null) {
             return;
         }
-        JSONObject object = new JSONObject();
-        String chainedIdentifier = this.getChainedIdentifier();
-
-        if (chainedIdentifier == null) {
-            chainedIdentifier = Integer.toString(super.hashCode());
-        }
-        if (byte[].class.isAssignableFrom(result.getClass())) {
-            append = new String((byte[]) result);
-
-        } else if (result == AccessMethod.EMPTY) {
-            append = new String(new byte[0]);
-
-        } else {
-            append = result;
-        }
-        Object jsonAppend = null;
-
-        if (String.class == append.getClass()) {
-            String appendStr = (String) append;
-            try {
-                jsonAppend = new JSONObject(appendStr);
-
-            } catch (JSONException e) {
-                try {
-                    jsonAppend = new JSONArray(appendStr);
-
-                } catch (JSONException ex) {
-                    jsonAppend = appendStr;
-                }
-            }
-        } else {
-            jsonAppend = append;
-        }
+        
         try {
-            object.put(chainedIdentifier, jsonAppend);
+        	ObjectNode objectNode = mapper.createObjectNode();
+        	
+        	String chainedIdentifier = this.getChainedIdentifier();
+        	
+        	if (chainedIdentifier == null) {
+        		chainedIdentifier = Integer.toString(super.hashCode());
+        	}
+        	
+        	Object append = null;
+        	if (byte[].class.isAssignableFrom(result.getClass())) {
+        		append = new String((byte[]) result);
+        		
+        	} else if (result == AccessMethod.EMPTY) {
+        		append = "";
+        		
+        	} else {
+        		append = result;
+        	}
+        	
+        	Object jsonAppend = null;
+        	
+        	if (String.class == append.getClass()) {
+        		String appendStr = (String) append;
+        		try {
+        			jsonAppend = mapper.readValue(appendStr, JsonValue.class);
+        		} catch (Exception e) {
+        			jsonAppend = appendStr;
+        		}
+        	} else {
+        		jsonAppend = append;
+        	}
+        	
+        	objectNode.set(chainedIdentifier, mapper.convertValue(jsonAppend, JsonNode.class));
+        	
+        	this.array.add(mapper.convertValue(objectNode, JsonObject.class));
 
-        } catch (JSONException e) {
-            LOG.error("Unable to build the result object");
+        } catch (Exception e) {
+            LOG.error("Unable to build the result object", e);
         }
-        this.array.put(object);
     }
 
     /**
      * @inheritDoc
      * @see Executable#execute(java.lang.Object)
      */
-    public Void execute(Object result) throws Exception {
-        if (result == null || !JSONArray.class.isAssignableFrom(result.getClass())) {
-            this.array = new JSONArray();
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public Void execute(Object result) throws Exception {
+        if (result == null || !List.class.isAssignableFrom(result.getClass())) {
+            this.array = new ArrayList<>();
             this.append(result);
 
         } else {
-            this.array = (JSONArray) result;
+            this.array = new ArrayList<>((List)result);
         }
         return null;
     }
@@ -145,7 +155,7 @@ public class JSONHttpChainedTask<REQUEST extends Request<SimpleHttpResponse>> ex
      */
     public void setResult(Object result, long timestamp) {
         this.append(result);
-        super.setResult(this.array, timestamp);
+        super.setResult(mapper.convertValue(this.array, JsonArray.class), timestamp);
     }
 
     /**

@@ -9,6 +9,15 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.sthbnd.http.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Resource;
@@ -19,7 +28,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -30,13 +39,11 @@ import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.junit5.context.InstalledBundleExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import jakarta.json.JsonObject;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ExtendWith(InstalledBundleExtension.class)
@@ -54,6 +61,10 @@ public class TestHttpDevice {
     public static int HTTP_PORT = 8898;
     public static int SERVER_PORT = 8899;
     public static String HTTP_ROOTURL = "http://127.0.0.1:" + HTTP_PORT;
+    
+    private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
 
     public static String newRequest(String configuration) throws IOException {
         SimpleResponse response;
@@ -76,8 +87,7 @@ public class TestHttpDevice {
                 builder.setContentType("application/json");
                 builder.setHttpMethod("POST");
                 if (content != null && content.length() > 0) {
-                    JSONObject jsonData = new JSONObject(content);
-                    builder.setContent(jsonData.toString());
+                    builder.setContent(content);
                 }
             } else 
                 return null;
@@ -143,12 +153,21 @@ public class TestHttpDevice {
         return false;
     }
 
-    @Test
+	@Test
     public void testHttpTask(
     		@InjectService(timeout = 500) Core core, 
     		@InjectInstalledBundle(value = "resources.jar", start = true) Bundle bundle
     		) throws Throwable {
-        callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
+		@SuppressWarnings("serial")
+    	Map<String, Object> map = new HashMap<String, Object>() {
+    		{
+    			put("serviceProviderId", "TestForSensiNactGateway");
+    			put("serviceId", "service1");
+    			put("resourceId", "temperature");
+    			put("data", 24);
+    		}
+    	};
+        callback.setRemoteEntity(mapper.convertValue(map, JsonObject.class));
 
         Session session = core.getAnonymousSession();
 
@@ -161,24 +180,34 @@ public class TestHttpDevice {
         
 //        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
 
-        JSONObject jsonObject = new JSONObject(response.getJSON());
-        assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
+        JsonObject jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
+        assertEquals(24, (int) jsonObject.getJsonObject("response").getInt("value"));
 
         response = variable.set(DataResource.VALUE, 25, (Object[]) null);
 //        response = (SnaMessage) midVariable.toOSGi(setMethod, new Object[]{DataResource.VALUE, 25, null});
-        jsonObject = new JSONObject(response.getJSON());
-        assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
+        jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
+        assertEquals(25, (int) jsonObject.getJsonObject("response").getInt("value"));
 
         response = variable.get(DataResource.VALUE, (Object[]) null);
 //        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
-        jsonObject = new JSONObject(response.getJSON());
-        assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
+        jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
+        assertEquals(25, (int) jsonObject.getJsonObject("response").getInt("value"));
         core.close();
     }
 
-    @Test
+	@Test
     public void testHttpTaskWithProcessingContext(@InjectService(timeout = 500) Core core, @InjectInstalledBundle(value = "resources5.jar", start = true) Bundle bundle) throws Throwable {
-        callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway5").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
+		@SuppressWarnings("serial")
+    	Map<String, Object> map = new HashMap<String, Object>() {
+    		{
+    			put("serviceProviderId", "TestForSensiNactGateway5");
+    			put("serviceId", "service1");
+    			put("resourceId", "temperature");
+    			put("data", 24);
+    		}
+    	};
+    	
+    	callback.setRemoteEntity(mapper.convertValue(map, JsonObject.class));
 
 //        this.initializeMoke(new File("src/test/resources/resources5.xml").toURI().toURL(), new File("./extra-src5/test/resources/MANIFEST.MF"), new File("./extra-src5/test/resources/meta"), new File("./target/extra-test-classes5"));
 
@@ -192,25 +221,34 @@ public class TestHttpDevice {
 
         SnaMessage response = variable.get(DataResource.VALUE, (Object[]) null);
 //        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
-        JSONObject jsonObject = new JSONObject(response.getJSON());
-        assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
+        JsonObject jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
+        assertEquals(24, (int) jsonObject.getJsonObject("response").getInt("value"));
 
         response = variable.set(DataResource.VALUE, 25, (Object[]) null);
 //        response = (SnaMessage) midVariable.toOSGi(setMethod, new Object[]{DataResource.VALUE, 25, null});
-        jsonObject = new JSONObject(response.getJSON());
-        assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
+        jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
+        assertEquals(25, (int) jsonObject.getJsonObject("response").getInt("value"));
 
         response = variable.get(DataResource.VALUE, (Object[]) null);
 //        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
-        jsonObject = new JSONObject(response.getJSON());
-        assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
+        jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
+        assertEquals(25, (int) jsonObject.getJsonObject("response").getInt("value"));
 
         core.close();
     }
 
     @Test
     public void testHttpTaskWithServicesEnumeration(@InjectService(timeout = 500) Core core, @InjectInstalledBundle(value = "resources4.jar", start = true) Bundle bundle) throws Throwable {
-        callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway4").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
+    	@SuppressWarnings("serial")
+    	Map<String, Object> map = new HashMap<String, Object>() {
+    		{
+    			put("serviceProviderId", "TestForSensiNactGateway4");
+    			put("serviceId", "service1");
+    			put("resourceId", "temperature");
+    			put("data", 24);
+    		}
+    	};
+        callback.setRemoteEntity(mapper.convertValue(map, JsonObject.class));
 
         //        this.initializeMoke(new File("src/test/resources/resources4.xml").toURI().toURL(), new File("./extra-src4/test/resources/MANIFEST.MF"), new File("./extra-src4/test/resources/meta"), new File("./target/extra-test-classes4"));
 //        Thread.sleep(1000);
@@ -226,25 +264,35 @@ public class TestHttpDevice {
 
         SnaMessage response = variable.get(DataResource.VALUE, (Object[]) null);
 //        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
-        JSONObject jsonObject = new JSONObject(response.getJSON());
-        assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
+        JsonObject jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
+        assertEquals(24, (int) jsonObject.getJsonObject("response").getInt("value"));
 
         response = variable.set(DataResource.VALUE, 25, (Object[]) null);
 //        response = (SnaMessage) midVariable.toOSGi(setMethod, new Object[]{DataResource.VALUE, 25, null});
-        jsonObject = new JSONObject(response.getJSON());
-        assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
+        jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
+        assertEquals(25, (int) jsonObject.getJsonObject("response").getInt("value"));
 
         response = variable.get(DataResource.VALUE, (Object[]) null);
 //        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
-        jsonObject = new JSONObject(response.getJSON());
-        assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
+        jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
+        assertEquals(25, (int) jsonObject.getJsonObject("response").getInt("value"));
 
         core.close();
     }
 
     @Test
     public void testChainedHttpTask(@InjectService(timeout = 500) Core core, @InjectInstalledBundle(value = "resources3.jar", start = true) Bundle bundle) throws Throwable {
-        callback.setRemoteEntity(new JSONObject().put("serviceProviderId", "TestForSensiNactGateway3").put("serviceId", "service1").put("resourceId", "temperature").put("data", 24));
+        
+    	@SuppressWarnings("serial")
+    	Map<String, Object> map = new HashMap<String, Object>() {
+    		{
+    			put("serviceProviderId", "TestForSensiNactGateway3");
+    			put("serviceId", "service1");
+    			put("resourceId", "temperature");
+    			put("data", 24);
+    		}
+    	};
+        callback.setRemoteEntity(mapper.convertValue(map, JsonObject.class));
 
 //        this.initializeMoke(new File("src/test/resources/resources3.xml").toURI().toURL(), new File("./extra-src3/test/resources/MANIFEST.MF"), new File("./extra-src3/test/resources/meta"), new File("./target/extra-test-classes3"));
 
@@ -259,8 +307,8 @@ public class TestHttpDevice {
 
         SnaMessage response = variable.get(DataResource.VALUE, (Object[]) null);
 //        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
-        JSONObject jsonObject = new JSONObject(response.getJSON());
-        assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
+        JsonObject jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
+        assertEquals(24, (int) jsonObject.getJsonObject("response").getInt("value"));
 
         core.close();
     }
@@ -273,12 +321,16 @@ public class TestHttpDevice {
     	CountDownLatch latch = new CountDownLatch(1);
     	
     	callback.setCountDownLatch(latch);
-    	callback.setRemoteEntity(new JSONObject(
-    			).put("serviceProviderId", "TestForSensiNactGateway2"
-    			).put("serviceId", "service1"
-    			).put("resourceId", "temperature"
-    			).put("data", 24));
-        
+    	@SuppressWarnings("serial")
+    	Map<String, Object> map = new HashMap<String, Object>() {
+    		{
+    			put("serviceProviderId", "TestForSensiNactGateway2");
+    			put("serviceId", "service1");
+    			put("resourceId", "temperature");
+    			put("data", 24);
+    		}
+    	};
+        callback.setRemoteEntity(mapper.convertValue(map, JsonObject.class));        
         bundle.start();
 
         assertTrue(latch.await(5, TimeUnit.SECONDS), "GET was never called");
@@ -296,47 +348,38 @@ public class TestHttpDevice {
         SnaMessage response = variable.get(DataResource.VALUE, (Object[]) null);
 //        SnaMessage response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
 
-        JSONObject jsonObject = new JSONObject(response.getJSON());
-        assertEquals(24, (int) jsonObject.getJSONObject("response").getInt("value"));
+        JsonObject jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
+        assertEquals(24, (int) jsonObject.getJsonObject("response").getInt("value"));
 
-        callback.setRemoteEntity(new JSONObject(
-        		).put("serviceProviderId", "TestForSensiNactGateway2"
-        		).put("serviceId", "service1"
-        		).put("resourceId", "temperature"
-        		).put("data", 25));
+    	map.put("data", 25);
+        callback.setRemoteEntity(mapper.convertValue(map, JsonObject.class));
 
         Thread.sleep(2000);
         
         response = variable.get(DataResource.VALUE, (Object[]) null);
 //        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
-        jsonObject = new JSONObject(response.getJSON());
-        assertEquals(25, (int) jsonObject.getJSONObject("response").getInt("value"));
+        jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
+        assertEquals(25, (int) jsonObject.getJsonObject("response").getInt("value"));
         
-        callback.setRemoteEntity(new JSONObject(
-        		).put("serviceProviderId", "TestForSensiNactGateway2"
-        		).put("serviceId", "service1"
-        		).put("resourceId", "temperature"
-        		).put("data", 32));
+    	map.put("data", 32);
+        callback.setRemoteEntity(mapper.convertValue(map, JsonObject.class));
         
         Thread.sleep(2000);
         
         response = variable.get(DataResource.VALUE, (Object[]) null);
 //        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
-        jsonObject = new JSONObject(response.getJSON());
-        assertEquals(32, (int) jsonObject.getJSONObject("response").getInt("value"));
+        jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
+        assertEquals(32, (int) jsonObject.getJsonObject("response").getInt("value"));
         Thread.sleep(16 * 1000);
 
-        callback.setRemoteEntity(new JSONObject(
-        		).put("serviceProviderId", "TestForSensiNactGateway2"
-        		).put("serviceId", "service1"
-        		).put("resourceId", "temperature"
-        		).put("data", 45));
+        map.put("data", 45);
+        callback.setRemoteEntity(mapper.convertValue(map, JsonObject.class));
         
         Thread.sleep(2000);
         response = variable.get(DataResource.VALUE, (Object[]) null);
 //        response = (SnaMessage) midVariable.toOSGi(getMethod, new Object[]{DataResource.VALUE, null});
-        jsonObject = new JSONObject(response.getJSON());
-        assertEquals(32, (int) jsonObject.getJSONObject("response").getInt("value"));
+        jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
+        assertEquals(32, (int) jsonObject.getJsonObject("response").getInt("value"));
         
         core.close();
     }
@@ -354,55 +397,7 @@ public class TestHttpDevice {
         configuration.put("org.osgi.service.http.port", "8898");
         configuration.put("org.apache.felix.http.jettyEnabled", true);
         configuration.put("org.apache.felix.http.whiteboardEnabled", true);
-
-//        try {
-//        	String fileName = "sensinact.config";
-//            File testFile = new File(new File("src/test/resources"), fileName);
-//            URL testFileURL = testFile.toURI().toURL();
-//            FileOutputStream output = new FileOutputStream(new File(loadDir,fileName));
-//            byte[] testCng = IOUtils.read(testFileURL.openStream(), true);
-//            IOUtils.write(testCng, output);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
     
     }
-
-//    private void initializeMoke(URL resource, File manifestFile, File... sourceDirectories) throws Exception {
-//        File tmpDirectory = new File("./target/felix/tmp");
-//        if(!tmpDirectory.exists()) {
-//        	tmpDirectory.mkdir();
-//        } else {
-//        	new File(tmpDirectory, "resources.xml").delete();
-//        	new File(tmpDirectory, "dynamicBundle.jar").delete();
-//        }
-//        FileOutputStream output = null;
-//        byte[] resourcesBytes = IOUtils.read(resource.openStream());
-//        output = new FileOutputStream(new File(tmpDirectory, "resources.xml"));
-//        IOUtils.write(resourcesBytes, output);
-//
-//        int length = (sourceDirectories == null ? 0 : sourceDirectories.length);
-//        File[] sources = new File[length + 1];
-//        int index = 0;
-//        if (length > 0) {
-//            for (; index < length; index++) {
-//                sources[index] = sourceDirectories[index];
-//            }
-//        }
-//        sources[index] = new File(tmpDirectory, "resources.xml");
-//        super.createDynamicBundle(manifestFile, tmpDirectory, sources);
-//
-//        Bundle bundle = super.installDynamicBundle(new File(tmpDirectory, "dynamicBundle.jar").toURI().toURL());
-//
-//        ClassLoader current = Thread.currentThread().getContextClassLoader();
-//        Thread.currentThread().setContextClassLoader(super.classloader);
-//        try {
-//            bundle.start();
-//
-//        } finally {
-//            Thread.currentThread().setContextClassLoader(current);
-//        }
-//        Thread.sleep(5000);
-//    }
 
 }

@@ -18,17 +18,30 @@ import org.eclipse.sensinact.gateway.core.ServiceProvider;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
-import org.eclipse.sensinact.gateway.util.JSONUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
 
 /**
  *
  */
 public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
 	private static final Logger LOG = LoggerFactory.getLogger(OpenWeatherPacketReader.class);
+	
+	private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
 
 	class WeatherSubPacket {
 		String serviceProvider;
@@ -61,18 +74,18 @@ public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
     	}
     	if(this.subPackets.isEmpty()) {
             String content = new String(packet.getBytes());
-            JSONArray jsonArray = new JSONArray(content);
 	    	String serviceProvider = null;
 	        try {
-	            JSONObject jsonObject = jsonArray.optJSONObject(0);	
-	            JSONObject weatherObject = jsonObject.optJSONObject("weather");
+	        	JsonArray jsonArray = mapper.readValue(content, JsonArray.class);
+	            JsonObject jsonObject = jsonArray.getJsonObject(0);	
+	            JsonObject weatherObject = jsonObject.getJsonObject("weather");
 	
-	            if (!JSONObject.NULL.equals(weatherObject) && weatherObject.length() != 0) {
+	            if (!JsonObject.NULL.equals(weatherObject) && weatherObject.size() != 0) {
 	                serviceProvider = weatherObject.getString("name");
 	                this.parseWeather(serviceProvider, weatherObject);
 	            }
-	            jsonObject = jsonArray.optJSONObject(1);	
-	            String iconObject = jsonObject.optString("icon");
+	            jsonObject = jsonArray.getJsonObject(1);	
+	            String iconObject = jsonObject.getString("icon");
 	
 	            if (iconObject != null && iconObject.length() != 0) {
 	            	WeatherSubPacket sp = new WeatherSubPacket();
@@ -109,25 +122,27 @@ public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
      * @param station
      * @param object
      */
-    private void parseWeather(String station, JSONObject object) {
-        long timestamp = object.optLong("dt") * 1000L;
-        JSONObject coord = object.optJSONObject("coord");
+    private void parseWeather(String station, JsonObject object) {
+        long timestamp = object.getJsonNumber("dt").longValueExact() * 1000L;
+        JsonObject coord = object.getJsonObject("coord");
         if (coord != null) {
         	WeatherSubPacket sp = new WeatherSubPacket();
             sp.serviceProvider = station;
             sp.service= ServiceProvider.ADMINISTRATION_SERVICE_NAME;
             sp.resource = LocationResource.LOCATION;
-            sp.data = new StringBuilder().append(coord.optDouble("lat")).append(JSONUtils.COLON).append(coord.optDouble("lon")).toString();
+            sp.data = new StringBuilder().append(coord.getJsonNumber("lat").doubleValue())
+            		.append(":")
+            		.append(coord.getJsonNumber("lon").doubleValue()).toString();
             this.subPackets.add(sp);
         }
-        JSONArray weather = object.optJSONArray("weather");
-        JSONObject content = null;
-        if (weather != null && (content = weather.optJSONObject(0)) != null) {
+        JsonArray weather = object.getJsonArray("weather");
+        JsonObject content = null;
+        if (weather != null && !weather.isEmpty() && (content = weather.getJsonObject(0)) != null) {
         	WeatherSubPacket sp = new WeatherSubPacket();
             sp.serviceProvider = station;
             sp.service= "weather";
             sp.resource = "state";
-            sp.data = content.opt("main");
+            handleOptData(content, "main", sp);
             sp.timestamp = timestamp;
             this.subPackets.add(sp);
             
@@ -135,17 +150,17 @@ public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
             sp.serviceProvider = station;
             sp.service= "weather";
             sp.resource = "description";
-            sp.data = content.opt("description");
+            handleOptData(content, "description", sp);
             sp.timestamp = timestamp;
             this.subPackets.add(sp);
         }
-        JSONObject wind = object.optJSONObject("wind");
+        JsonObject wind = object.getJsonObject("wind");
         if (wind != null) {
         	WeatherSubPacket sp = new WeatherSubPacket();
             sp.serviceProvider = station;
             sp.service= "weather";
             sp.resource = "wind";
-            sp.data = wind.opt("speed");
+			handleOptData(wind, "speed", sp);
             sp.timestamp = timestamp;
             this.subPackets.add(sp);
 
@@ -153,18 +168,18 @@ public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
             sp.serviceProvider = station;
             sp.service= "weather";
             sp.resource = "orientation";
-            sp.data = wind.opt("deg");
+            handleOptData(wind, "deg", sp);
             sp.timestamp = timestamp;
             this.subPackets.add(sp);
         }
-        JSONObject main = object.optJSONObject("main");
+        JsonObject main = object.getJsonObject("main");
         if (main != null) {       	
 
         	WeatherSubPacket sp = new WeatherSubPacket();
             sp.serviceProvider = station;
             sp.service= "weather";
             sp.resource = "temperature";
-            sp.data = main.opt("temp");
+            handleOptData(main, "temp", sp);
             sp.timestamp = timestamp;
             this.subPackets.add(sp);
             
@@ -172,7 +187,7 @@ public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
             sp.serviceProvider = station;
             sp.service= "weather";
             sp.resource = "humidity";
-            sp.data = main.opt("humidity");
+            handleOptData(main, "humidity", sp);
             sp.timestamp = timestamp;
             this.subPackets.add(sp);
 
@@ -180,9 +195,17 @@ public class OpenWeatherPacketReader extends SimplePacketReader<HttpPacket> {
             sp.serviceProvider = station;
             sp.service= "weather";
             sp.resource = "pressure";
-            sp.data = main.opt("pressure");
+            handleOptData(main, "pressure", sp);
             sp.timestamp = timestamp;
             this.subPackets.add(sp);
         }
     }
+
+	private void handleOptData(JsonObject jo, String name, WeatherSubPacket sp) {
+		JsonValue jv = jo.get(name);
+		if(jv != null && jv.getValueType() != ValueType.NULL) {
+		    sp.data = jv.getValueType() == ValueType.NUMBER ? ((JsonNumber)jv).doubleValue() : 
+		    		((JsonString)jv).getString();
+		}
+	}
 }

@@ -14,14 +14,27 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.generic.Task;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.*;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.CommandID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.Data;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ResourceID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 public class HttpTestPacket extends HttpPacket
 {
+	private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
+	
 	private String serviceProviderId;
 	private String serviceId;
 	private String resourceId;
@@ -30,24 +43,24 @@ public class HttpTestPacket extends HttpPacket
 
 
 	public HttpTestPacket(Map<String,List<String>> headers, byte[] content) 
-			throws JSONException
+			throws Exception
     {
     	super(headers, content);
 
     	if(content != null &&  content.length>0)
     	{
-			JSONArray json = new JSONArray(new String(content));
+    		JsonArray ja = mapper.readValue(content, JsonArray.class);
 			
-			JSONObject object = json.getJSONObject(2);
-			JSONArray array = object.optJSONArray("resourceId");			
+			JsonObject object = ja.getJsonObject(2);
+			JsonArray array = object.getJsonArray("resourceId");			
 			this.resourceId = array.getString(0);
-			this.data = array.get(1);
+			this.data = array.getInt(1);
 			
-			object = json.getJSONObject(1);
+			object = ja.getJsonObject(1);
 			this.serviceId = object.getString("serviceId");
 			
-			object = json.getJSONObject(0);
-			object = object.getJSONObject("serviceProviderId");			
+			object = ja.getJsonObject(0);
+			object = object.getJsonObject("serviceProviderId");			
 			this.serviceProviderId = object.getString("serviceProviderId");
 			
 			this.command = Task.CommandType.GET;

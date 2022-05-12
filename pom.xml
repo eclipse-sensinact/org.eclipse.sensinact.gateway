@@ -113,8 +113,12 @@
 		<org.apache.httpcomponents.httpclient-osgi.version>4.5.11</org.apache.httpcomponents.httpclient-osgi.version>
 		<org.apache.httpcomponents.httpcore-osgi.version>4.4.13</org.apache.httpcomponents.httpcore-osgi.version>
 		<org.apache.httpcomponents.httpmime.version>4.5.11</org.apache.httpcomponents.httpmime.version>
-		<!-- Jackson -->
-		<com.fasterxml.jackson.core.version>2.10.0</com.fasterxml.jackson.core.version>
+	
+		<!-- JSON processing -->
+		<com.fasterxml.jackson.core.version>2.13.2</com.fasterxml.jackson.core.version>
+		<jakarta.json.api.version>2.1.0</jakarta.json.api.version>
+		<org.eclipse.parsson.version>1.1.0</org.eclipse.parsson.version>
+		
 		<!-- Misc -->
 		<bnd.lib.version>5.3.0</bnd.lib.version>
 		<com.hazelcast.version>3.12.5</com.hazelcast.version>
@@ -316,6 +320,16 @@
 			<id>cmunilla</id>
 			<name>Christophe Munilla</name>
 			<email>cmunilla@kentyou.com</email>
+			<organization>Kentyou</organization>
+			<roles>
+				<role>Developer</role>
+				<role>Documentation</role>
+			</roles>
+		</developer>
+		<developer>
+			<id>timothyjward</id>
+			<name>Timothy Ward</name>
+			<email>tim.ward@kentyou.com</email>
 			<organization>Kentyou</organization>
 			<roles>
 				<role>Developer</role>
@@ -841,7 +855,7 @@
 				<artifactId>httpmime</artifactId>
 				<version>${org.apache.httpcomponents.httpmime.version}</version>
 			</dependency>			
-			<!-- Jackson -->			
+			<!-- JSON processing -->			
 			<dependency>	
  				<groupId>com.fasterxml.jackson.core</groupId>
  				<artifactId>jackson-databind</artifactId>
@@ -857,6 +871,22 @@
  				<artifactId>jackson-core</artifactId>
  				<version>${com.fasterxml.jackson.core.version}</version>
 			</dependency>
+			<dependency>	
+ 				<groupId>com.fasterxml.jackson.datatype</groupId>
+ 				<artifactId>jackson-datatype-jakarta-jsonp</artifactId>
+ 				<version>${com.fasterxml.jackson.core.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>jakarta.json</groupId>
+			    <artifactId>jakarta.json-api</artifactId>
+			    <version>${jakarta.json.api.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.eclipse.parsson</groupId>
+			    <artifactId>parsson</artifactId>
+			    <version>${org.eclipse.parsson.version}</version>
+			</dependency>
+			
 			<!-- Misc -->
 
 			<dependency>

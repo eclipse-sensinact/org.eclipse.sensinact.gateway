@@ -42,8 +42,7 @@ import org.eclipse.sensinact.gateway.core.filtering.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.filtering.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -64,6 +63,16 @@ import org.osgi.test.junit5.cm.ConfigurationExtension;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
+
 @ExtendWith(BundleContextExtension.class)
 @ExtendWith(ConfigurationExtension.class)
 @ExtendWith(ServiceExtension.class)
@@ -72,6 +81,10 @@ public class HttpDeviceFactoryTest {
 	
 	private static final String LOCATION_FORMAT = "{\"type\":\"FeatureCollection\",\"features\":"
 			 + "[{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"coordinates\":[%s,%s],\"type\":\"Point\"}}]}";
+	
+	private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
 	
  	@InjectService
 	Core core; 
@@ -328,16 +341,16 @@ public class HttpDeviceFactoryTest {
         		new FilteringCollection(new Mediator(ctx), false, 
         				new FilteringDefinition("ldap", "(data.value.value<=40)")));
         
-        JSONObject jsonObject = new JSONObject(response.getJSON());
-        JSONArray array = jsonObject.getJSONArray("providers");
+        JsonObject jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
+        JsonArray array = jsonObject.getJsonArray("providers");
         
-        assertEquals(1, array.length());
-        assertEquals("test8_Bar", array.getJSONObject(0).get("name"));
+        assertEquals(1, array.size());
+        assertEquals("test8_Bar", array.getJsonObject(0).getString("name"));
 		
 	}
 
 	private void testProvider(Session session, String providerName, String serviceName, String resourceName,
-			String value, String location, long timestamp) {
+			String value, String location, long timestamp) throws Exception {
 		ServiceProvider provider = session.serviceProvider(providerName);
         assertNotNull(provider);
         
@@ -345,17 +358,19 @@ public class HttpDeviceFactoryTest {
         Resource variable = service.getResource(resourceName);
         
         SnaMessage<?> response = variable.get(DataResource.VALUE, (Object[]) null);
-        JSONObject jsonObject = new JSONObject(response.getJSON());
+        JsonObject jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
         
-        assertEquals(value, String.valueOf(jsonObject.getJSONObject("response").get("value")));
+        JsonValue jsonValue = jsonObject.getJsonObject("response").get("value");
+		assertEquals(value, jsonValue.getValueType() == ValueType.STRING ? 
+				((JsonString) jsonValue).getString() : jsonValue.toString());
 
         service = provider.getService("admin");
         variable = service.getResource("location");
         
         response = variable.get(DataResource.VALUE, (Object[]) null);
-        jsonObject = new JSONObject(response.getJSON());
+        jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
         
-        assertEquals(location, jsonObject.getJSONObject("response").get("value"));
+        assertEquals(location, jsonObject.getJsonObject("response").getString("value"));
         
         //TODO how to test the timestamp?
 	}

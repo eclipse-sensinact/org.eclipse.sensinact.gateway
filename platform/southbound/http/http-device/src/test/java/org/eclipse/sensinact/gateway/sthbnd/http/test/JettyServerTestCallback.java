@@ -10,33 +10,41 @@
 package org.eclipse.sensinact.gateway.sthbnd.http.test;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.sensinact.gateway.util.IOUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 
-//import java.util.concurrent.atomic.AtomicBoolean;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonObject;
 
 class JettyServerTestCallback {
     private enum PATH {
         get, services, json1, json2, json3;
     }
 
-    private JSONObject remoteEntity;
+    private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
+    
+    private Map<String, Object> remoteEntity = new HashMap<>();
 	private Optional<CountDownLatch> latch = Optional.empty();
 
     @doPost
-    public void callbackPost(HttpServletRequest request, HttpServletResponse response) throws IOException, JSONException {
+    public void callbackPost(HttpServletRequest request, HttpServletResponse response) throws Exception {
         try {
-            byte[] content = IOUtils.read(request.getInputStream());
-            JSONObject message = new JSONObject(new String(content));
+            JsonObject message = mapper.readValue(request.getInputStream(), JsonObject.class);
             this.remoteEntity.put("data", message.get("value"));
             response.setStatus(200);
         } catch (IOException e) {
@@ -45,7 +53,7 @@ class JettyServerTestCallback {
     }
 
     @doGet
-    public void callbackGet(HttpServletRequest request, HttpServletResponse response) throws IOException, JSONException {
+    public void callbackGet(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String uri = request.getRequestURI();
         String[] uriElements = UriUtils.getUriElements(uri);
         try {
@@ -54,10 +62,9 @@ class JettyServerTestCallback {
                 case get:
                 	System.out.println("Call get");
                     response.setContentType("application/json");
-                    response.setContentLength(this.remoteEntity.toString().length());
 
                     if (response.getOutputStream().isReady()) {
-                        response.getOutputStream().write(this.remoteEntity.toString().getBytes());
+                    	mapper.writeValue(response.getOutputStream(), this.remoteEntity);
                     }
                     response.setStatus(200);
                     System.err.println("Returning for get: " + this.remoteEntity.toString());
@@ -65,17 +72,18 @@ class JettyServerTestCallback {
                     break;
                 case services:
                 	System.out.println("Call services");
-                    JSONObject object = new JSONObject();
+                    Map<String, Object> object = new HashMap<>();
                     object.put("serviceProviderId", uriElements[1]);
 
-                    JSONArray services = new JSONArray();
-                    services.put("service1").put("service2").put("service3");
+                    List<Object> services = new ArrayList<>();
+                    services.add("service1");
+                    services.add("service2");
+                    services.add("service3");
                     object.put("services", services);
                     try {
                         response.setContentType("application/json");
-                        response.setContentLength(object.toString().length());
                         if (response.getOutputStream().isReady()) 
-                            response.getOutputStream().write(object.toString().getBytes());
+                        	mapper.writeValue(response.getOutputStream(), object);
                         response.setStatus(200);
                     } catch (IOException e) {
                         response.setStatus(520);
@@ -84,35 +92,33 @@ class JettyServerTestCallback {
                 case json1:
                 	System.out.println("Call json1");
                     response.setContentType("application/json");
-                    object = new JSONObject();
-                    object.put("serviceProviderId", this.remoteEntity.getString("serviceProviderId"));
-                    response.setContentLength(object.toString().length());
+                    object = new HashMap<>();
+                    object.put("serviceProviderId", this.remoteEntity.get("serviceProviderId"));
 
                     if (response.getOutputStream().isReady()) {
-                        response.getOutputStream().write(object.toString().getBytes());
+                    	mapper.writeValue(response.getOutputStream(), object);
                     }
                     response.setStatus(200);
                     break;
                 case json2:
                 	System.out.println("Call json2");
                     response.setContentType("text/plain");
-                    response.setContentLength(this.remoteEntity.getString("serviceId").length());
+                    response.setContentLength(this.remoteEntity.get("serviceId").toString().length());
 
                     if (response.getOutputStream().isReady()) {
-                        response.getOutputStream().write(this.remoteEntity.getString("serviceId").getBytes());
+                        response.getOutputStream().write(this.remoteEntity.get("serviceId").toString().getBytes());
                     }
                     response.setStatus(200);
                     break;
                 case json3:
                 	System.out.println("Call json3");
                     response.setContentType("application/json");
-                    JSONArray array = new JSONArray();
-                    array.put(this.remoteEntity.getString("resourceId"));
-                    array.put(this.remoteEntity.get("data"));
-                    response.setContentLength(array.toString().length());
+                    List<Object> array = new ArrayList<>();
+                    array.add(this.remoteEntity.get("resourceId"));
+                    array.add(this.remoteEntity.get("data"));
 
                     if (response.getOutputStream().isReady()) {
-                        response.getOutputStream().write(array.toString().getBytes());
+                    	mapper.writeValue(response.getOutputStream(), array);
                     }
                     response.setStatus(200);
                     break;
@@ -128,8 +134,9 @@ class JettyServerTestCallback {
 		this.latch = Optional.ofNullable(latch);
     }
 
-    public void setRemoteEntity(JSONObject remoteEntity) {
+    public void setRemoteEntity(JsonObject remoteEntity) {
     	System.err.println("Setting entity for: " + remoteEntity.getString("serviceProviderId"));
-        this.remoteEntity = remoteEntity;
+    	this.remoteEntity.clear();
+    	this.remoteEntity.putAll(remoteEntity);
     }
 }
