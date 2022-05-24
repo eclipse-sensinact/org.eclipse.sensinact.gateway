@@ -17,7 +17,9 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper.QueryKey;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonObjectBuilder;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -85,15 +87,11 @@ public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest> {
         else
             result = cap.getJSON();
         
-        byte[] resultBytes;
-        
         try {
 	        if (acceptEncoding != null && acceptEncoding.contains("gzip")) {
-	            resultBytes = NorthboundAccess.compress(result);
-	            this.wsConnection.send(resultBytes);
+	            this.wsConnection.send(NorthboundAccess.compress(result));
 	        } else {
-	            resultBytes = result.getBytes("UTF-8");
-	            this.wsConnection.send(new String(resultBytes));
+	            this.wsConnection.send(result);
 	        }
         } catch(Exception e) {
         	throw new IOException(e);
@@ -103,11 +101,12 @@ public class WsRestAccess extends NorthboundAccess<WsRestAccessRequest> {
 
     @Override
     protected void sendError(int i, String message) throws IOException {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("statusCode", i);
-        jsonObject.put("message", message);
+        JsonObjectBuilder jsonObject = JsonProviderFactory.getProvider()
+        		.createObjectBuilder()
+        		.add("statusCode", i)
+        		.add("message", message);
         try {
-			this.wsConnection.send(new String(jsonObject.toString().getBytes("UTF-8")));
+			this.wsConnection.send(jsonObject.toString());
 		} catch (Exception e) {
 			throw new IOException(e);
 		}

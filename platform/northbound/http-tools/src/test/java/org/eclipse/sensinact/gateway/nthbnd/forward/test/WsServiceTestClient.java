@@ -9,6 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.nthbnd.forward.test;
 
+import java.io.StringReader;
 import java.net.URI;
 import java.util.Stack;
 import java.util.concurrent.Future;
@@ -22,7 +23,9 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonObjectBuilder;
 
 @WebSocket(maxTextMessageSize = 64 * 1024)
 public class WsServiceTestClient implements Runnable {
@@ -143,13 +146,18 @@ public class WsServiceTestClient implements Runnable {
                 locked = !this.stack.isEmpty();
             }
             if (request != null) {
-                JSONObject json = new JSONObject();
-                json.put("uri", request.url);
+            	JsonObjectBuilder job = JsonProviderFactory.getProvider().createObjectBuilder();
+            	if(request.url != null) {
+            		job.add("uri", request.url);
+            	} else { 
+            		job.addNull("uri");
+            	}
                 if (request.content != null) {
-                    json.put("parameters", request.content);
+                    job.add("parameters", JsonProviderFactory.getProvider()
+                    		.createReader(new StringReader(request.content)).readValue());
                 }
                 try {
-                	this.send(json.toString());
+                	this.send(job.build().toString());
                 } catch(NullPointerException e){
                 	synchronized (this.stack) {
                 		this.stack.push(request);

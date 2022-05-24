@@ -9,10 +9,16 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.function.Predicate;
+
 import org.eclipse.sensinact.gateway.core.AnonymousSession;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.filtering.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.ActResponse;
@@ -24,15 +30,11 @@ import org.eclipse.sensinact.gateway.core.method.UnsubscribeResponse;
 import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.ResponseFormat;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.function.Predicate;
 
 /**
  * A NorthboundEndpoint is a connection point to a sensiNact instance

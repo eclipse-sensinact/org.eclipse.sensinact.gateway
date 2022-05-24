@@ -9,17 +9,28 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.agent.mqtt.onem2m.internal;
 
+import java.io.IOException;
+import java.util.UUID;
+
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.AbstractMqttHandler;
 import org.eclipse.sensinact.gateway.core.DataResource;
+import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.UUID;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * AE = sNa Provider
@@ -28,6 +39,12 @@ import java.util.UUID;
  * Instance = sNa Attribute
  */
 public class SnaEventOneM2MMqttHandler extends AbstractMqttHandler {
+	private static final Logger LOG = LoggerFactory.getLogger(SnaEventOneM2MMqttHandler.class);
+	
+	private final JsonProvider provider = JsonProviderFactory.getProvider();
+	private final ObjectMapper mapper = JsonMapper.builder()
+			.addModule(new JSONPModule(provider))
+			.build();
     private final String cseBase;
     // Request topic: /oneM2M/req/<originator>/<target-id>/<serialization-format>
     private static final String REQUEST_TOPIC = "/oneM2M/req/";
@@ -43,24 +60,34 @@ public class SnaEventOneM2MMqttHandler extends AbstractMqttHandler {
      * @param event the RegisteredUpdatedSnaEvent to process
      */
     public void doHandle(SnaUpdateMessageImpl event) {
-        JSONObject eventJson = new JSONObject(event.getJSON()).getJSONObject("notification");
+        JsonObject eventJson;
+		try {
+			eventJson = mapper.readValue(event.getJSON(), JsonObject.class).getJsonObject("notification");
+		} catch (Exception e) {
+			LOG.error("Failed to read the Sna Update Message", e);
+			return;
+		}
         String aeName = event.getPath().split("/")[1];
         String containerServiceName = event.getPath().split("/")[2];
         String containerResourceName = event.getPath().split("/")[2];
-        JSONObject request = new JSONObject().put("fr", aeName).put("to", "/" + cseBase + "/" + aeName + "/" + containerServiceName + "/" + containerResourceName).put("rqi", UUID.randomUUID().toString());
-        JSONObject content = new JSONObject();
+        JsonObjectBuilder request = provider.createObjectBuilder()
+        		.add("fr", aeName)
+        		.add("to", "/" + cseBase + "/" + aeName + "/" + containerServiceName + "/" + containerResourceName)
+        		.add("rqi", UUID.randomUUID().toString());
+        JsonObjectBuilder content = provider.createObjectBuilder();
         switch (event.getType()) {
             // Create contentInstance
             case ATTRIBUTE_VALUE_UPDATED:
-                request.put("op", 1);
-                request.put("ty", 4);
-                content.put("con", eventJson.get(DataResource.VALUE));
-                request.put("pc", new JSONObject().put("m2m:cin", content));
+                request.add("op", 1);
+                request.add("ty", 4);
+                content.add("con", eventJson.get(DataResource.VALUE));
+                request.add("pc", provider.createObjectBuilder().add("m2m:cin", content));
                 break;
             default:
                 return;
         }
-        this.agent.publish(REQUEST_TOPIC + aeName + "/" + cseBase + "/json", new JSONObject().put("m2m:rqp", request).toString());
+        this.agent.publish(REQUEST_TOPIC + aeName + "/" + cseBase + "/json", 
+        		provider.createObjectBuilder().add("m2m:rqp", request).build().toString());
     }
 
     /**
@@ -70,66 +97,69 @@ public class SnaEventOneM2MMqttHandler extends AbstractMqttHandler {
      */
     public void doHandle(SnaLifecycleMessageImpl event) {
         String aeName = event.getPath().split("/")[1];
-        JSONObject request = new JSONObject().put("fr", aeName).put("rqi", UUID.randomUUID().toString());
-        JSONObject content = new JSONObject();
+        JsonObjectBuilder request = provider.createObjectBuilder()
+        		.add("fr", aeName)
+        		.add("rqi", UUID.randomUUID().toString());
+        JsonObjectBuilder content = provider.createObjectBuilder();
         switch (event.getType()) {
             // Create AE
             case PROVIDER_APPEARING:
-                request.put("op", 1);
-                request.put("ty", 2);
-                request.put("to", "/" + cseBase);
-                content.put("rn", aeName);
-                content.put("api", "0.2.481.2.0001.001.000111");
-                content.put("lbl", new JSONArray().put("key1").put("key2"));
-                content.put("rr", true);
-                request.put("pc", new JSONObject().put("m2m:ae", content));
+                request.add("op", 1);
+                request.add("ty", 2);
+                request.add("to", "/" + cseBase);
+                content.add("rn", aeName);
+                content.add("api", "0.2.481.2.0001.001.000111");
+                content.add("lbl", provider.createArrayBuilder().add("key1").add("key2"));
+                content.add("rr", true);
+                request.add("pc", provider.createObjectBuilder().add("m2m:ae", content));
                 break;
             // Delete AE
             case PROVIDER_DISAPPEARING:
-                request.put("op", 4);
-                request.put("ty", 2);
-                request.put("to", "/" + cseBase);
-                content.put("rn", aeName);
-                request.put("pc", new JSONObject().put("m2m:ae", content));
+                request.add("op", 4);
+                request.add("ty", 2);
+                request.add("to", "/" + cseBase);
+                content.add("rn", aeName);
+                request.add("pc", provider.createObjectBuilder().add("m2m:ae", content));
                 break;
             // Create container
             case SERVICE_APPEARING:
-                request.put("op", 1);
-                request.put("ty", 3);
-                request.put("to", "/" + cseBase + "/" + aeName);
-                content.put("rn", event.getPath().split("/")[2]);
-                content.put("lbl", new JSONArray().put(aeName));
-                request.put("pc", new JSONObject().put("m2m:cnt", content));
+                request.add("op", 1);
+                request.add("ty", 3);
+                request.add("to", "/" + cseBase + "/" + aeName);
+                content.add("rn", event.getPath().split("/")[2]);
+                content.add("lbl", provider.createArrayBuilder().add(aeName));
+                request.add("pc", provider.createObjectBuilder().add("m2m:cnt", content));
                 break;
             // Delete container
             case SERVICE_DISAPPEARING:
-                request.put("op", 4);
-                request.put("ty", 3);
-                request.put("to", "/" + cseBase + "/" + aeName);
-                content.put("rn", event.getPath().split("/")[2]);
-                request.put("pc", new JSONObject().put("m2m:cnt", content));
+                request.add("op", 4);
+                request.add("ty", 3);
+                request.add("to", "/" + cseBase + "/" + aeName);
+                content.add("rn", event.getPath().split("/")[2]);
+                request.add("pc", provider.createObjectBuilder().add("m2m:cnt", content));
                 break;
             // Create container
             case RESOURCE_APPEARING:
-                request.put("op", 1);
-                request.put("ty", 3);
-                request.put("to", "/" + cseBase + "/" + aeName + "/" + event.getPath().split("/")[2]);
-                content.put("rn", event.getPath().split("/")[3]);
-                content.put("lbl", new JSONArray().put(aeName));
-                request.put("pc", new JSONObject().put("m2m:cnt", content));
+                request.add("op", 1);
+                request.add("ty", 3);
+                request.add("to", "/" + cseBase + "/" + aeName + "/" + event.getPath().split("/")[2]);
+                content.add("rn", event.getPath().split("/")[3]);
+                content.add("lbl", provider.createArrayBuilder().add(aeName));
+                request.add("pc", provider.createObjectBuilder().add("m2m:cnt", content));
                 break;
             // Delete container
             case RESOURCE_DISAPPEARING:
-                request.put("op", 4);
-                request.put("ty", 3);
-                request.put("to", "/" + cseBase + "/" + aeName + "/" + event.getPath().split("/")[2]);
-                content.put("rn", event.getPath().split("/")[3]);
-                request.put("pc", new JSONObject().put("m2m:cnt", content));
+                request.add("op", 4);
+                request.add("ty", 3);
+                request.add("to", "/" + cseBase + "/" + aeName + "/" + event.getPath().split("/")[2]);
+                content.add("rn", event.getPath().split("/")[3]);
+                request.add("pc", provider.createObjectBuilder().add("m2m:cnt", content));
                 break;
             default:
                 return;
         }
-        this.agent.publish(REQUEST_TOPIC + aeName + "/" + cseBase + "/json", new JSONObject().put("m2m:rqp", request).toString());
+        this.agent.publish(REQUEST_TOPIC + aeName + "/" + cseBase + "/json", 
+        		provider.createObjectBuilder().add("m2m:rqp", request).toString());
     }
 
     /**

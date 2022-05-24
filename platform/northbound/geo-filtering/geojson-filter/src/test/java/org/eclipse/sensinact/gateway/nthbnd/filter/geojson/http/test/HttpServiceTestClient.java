@@ -13,12 +13,14 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.eclipse.sensinact.gateway.util.json.JSONValidator;
-import org.json.JSONException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 
 public class HttpServiceTestClient {
+	private static ObjectMapper mapper = new ObjectMapper();
+	
     public static String newRequest(Mediator mediator, String url, String content, String method) {
         SimpleResponse response;
         ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> builder = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
@@ -35,9 +37,8 @@ public class HttpServiceTestClient {
                 builder.setContentType("application/json");
                 builder.setHttpMethod("POST");
                 if (content != null && content.length() > 0) {
-                    if (new JSONValidator(content).valid()) {
-                        builder.setContent(content);
-                    }
+                	mapper.readTree(content);
+                	builder.setContent(content);
                 }
             } else {
                 return null;
@@ -47,8 +48,6 @@ public class HttpServiceTestClient {
             byte[] responseContent = response.getContent();
             String contentStr = (responseContent == null ? null : new String(responseContent));
             return contentStr;
-        } catch (JSONException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {

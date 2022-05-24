@@ -9,6 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -27,9 +28,11 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper.Qu
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.RegisteringResponse;
 import org.eclipse.sensinact.gateway.nthbnd.rest.internal.RestAccessConstants;
 import org.eclipse.sensinact.gateway.util.IOUtils;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
 
 /**
  * This class is the REST interface between each others classes
@@ -94,20 +97,20 @@ public class HttpRegisteringEndpoint extends HttpServlet {
             	response.sendError(400, "'create' or 'renew' request parameter expected");
                               
             byte[] content = IOUtils.read(request.getInputStream(),false);
-            JSONObject jcontent = new JSONObject(new String(content));          
+            JsonObject jcontent = JsonProviderFactory.getProvider().createReader(new ByteArrayInputStream(content)).readObject();          
 
             RegisteringResponse registeringResponse = null;
             
             switch(query) {
                 case "create":
-                	String login = (String) jcontent.opt("login");
-                	String password= (String) jcontent.opt("password");
-                	String account= (String) jcontent.opt("account");
-                	String accountType= (String) jcontent.opt("accountType");
+                	String login = jcontent.getString("login", null);
+                	String password= jcontent.getString("password", null);
+                	String account= jcontent.getString("account", null);
+                	String accountType= jcontent.getString("accountType", null);
                     registeringResponse = mediator.getAccessingEndpoint().registeringEndpoint(login, password, account, accountType);
                      break;
                 case "renew":
-                	 account= (String) jcontent.opt("account");
+                	 account= jcontent.getString("account", null);
                     registeringResponse = mediator.getAccessingEndpoint().passwordRenewingEndpoint(account);
                      break;
 				default:
@@ -126,11 +129,9 @@ public class HttpRegisteringEndpoint extends HttpServlet {
         } catch (ClassCastException e) {
             LOG.error(e.getMessage(), e);
             response.sendError(400, "Invalid parameters type");
-
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             response.sendError(520, "Internal server error");
-
         } 
     }
 }

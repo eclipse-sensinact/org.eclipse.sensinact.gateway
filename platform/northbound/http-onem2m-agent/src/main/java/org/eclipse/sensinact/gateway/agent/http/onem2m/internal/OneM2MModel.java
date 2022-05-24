@@ -9,20 +9,24 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.agent.http.onem2m.internal;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class OneM2MModel {
     private static Logger LOG = LoggerFactory.getLogger(OneM2MModel.class.getCanonicalName());
     private String cseBase;
     private Map<String, OneM2MModelResource> model = new HashMap<String, OneM2MModelResource>();
     private static OneM2MModel instance;
+    
+    private final ObjectMapper mapper = new ObjectMapper();
 
     private OneM2MModel(String cseBase) {
         this.cseBase = cseBase;
@@ -38,15 +42,16 @@ public class OneM2MModel {
 
     private void createModel(String provider, String service, String resource, String value) {
         if (!model.keySet().contains(provider)) {
-            JSONObject m2mmodel = new JSONObject();
-            JSONObject content = new JSONObject();
+            Map<String, Object> m2mmodel = new HashMap<>();
+            Map<String, Object> content = new HashMap<>();
             content.put("rn", provider);
             content.put("api", provider);
-            content.put("lbl", new JSONArray().put("key1").put("key2"));
+            content.put("lbl", Arrays.asList("key1","key2"));
             content.put("rr", false);
             m2mmodel.put("m2m:ae", content);
             try {
-                Util.createRequest(cseBase, "POST", "Kentyou" + provider.toUpperCase(), null, "application/json;ty=2", m2mmodel);
+                Util.createRequest(cseBase, "POST", "Kentyou" + provider.toUpperCase(), null, "application/json;ty=2", 
+                		mapper.writeValueAsString(m2mmodel));
             } catch (IOException e) {
                 LOG.debug("Failed to create application container in OneM2M server", e);
             }
@@ -58,7 +63,7 @@ public class OneM2MModel {
     public void integrateReading(String provider, String service, String resource, String value) {
         if (!model.containsKey(provider)) {
             createModel(provider, service, resource, value);
-            OneM2MModelResource resourceModel = new OneM2MModelResource(provider, cseBase);
+            OneM2MModelResource resourceModel = new OneM2MModelResource(provider, cseBase, mapper);
             model.put(provider, resourceModel);
         }
         model.get(provider).addResourceInfo(service, resource, value);
@@ -72,10 +77,11 @@ public class OneM2MModel {
             } catch (Exception e) {
                 LOG.error("Failed to remove resource container {}", provider);
             }
-            JSONObject content = new JSONObject();
+            Map<String, Object> content = new HashMap<>();
             content.put("rn", provider);
             try {
-                Util.createRequest(cseBase, "DELETE", provider, null, "application/json;ty=2", new JSONObject().put("m2m:ae", content));
+                Util.createRequest(cseBase, "DELETE", provider, null, "application/json;ty=2", 
+                		mapper.writeValueAsString(Collections.singletonMap("m2m:ae", content)));
             } catch (IOException e) {
                 LOG.error("Failed to remove AE", e);
             }

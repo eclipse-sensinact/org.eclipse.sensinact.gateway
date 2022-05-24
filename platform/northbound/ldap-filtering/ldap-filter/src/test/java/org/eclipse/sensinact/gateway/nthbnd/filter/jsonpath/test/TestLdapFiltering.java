@@ -12,11 +12,12 @@ package org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.Bundle;
@@ -26,6 +27,8 @@ import org.osgi.test.common.annotation.InjectInstalledBundle;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.context.InstalledBundleExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
+
+import jakarta.json.spi.JsonProvider;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -51,6 +54,8 @@ public class TestLdapFiltering {
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
 
+    private final JsonProvider json = JsonProviderFactory.getProvider();
+    
     @Test
     public void testLdapFilter(
     			@InjectInstalledBundle(value = "extra.jar", start = true) Bundle bundle,
@@ -72,7 +77,7 @@ public class TestLdapFiltering {
 
         System.out.println(simulated1);
 
-        assertTrue(new JSONObject(simulated1).getJSONArray("providers").length() == 0);
+        assertTrue(json.createReader(new StringReader(simulated1)).readObject().getJsonArray("providers").size() == 0);
 
         String simulated2 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/sensor0/service1/humidity/SET", "[{\"name\":\"attributeName\",\"type\":\"string\", \"value\":\"accessible\"}," + "{\"name\":\"value\",\"type\":\"boolean\", \"value\":false}]", "POST");
         System.out.println(simulated2);
@@ -80,8 +85,8 @@ public class TestLdapFiltering {
         Thread.sleep(2000);
 
         simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?ldap='(service1.humidity.accessible=false)'", null, "GET");
-        assertTrue(new JSONObject(simulated1).getJSONArray("providers").length() == 1);
-        assertEquals("sensor0", new JSONObject(simulated1).getJSONArray("providers").getJSONObject(0).getString("name"));
+        assertTrue(json.createReader(new StringReader(simulated1)).readObject().getJsonArray("providers").size() == 1);
+        assertEquals("sensor0", json.createReader(new StringReader(simulated1)).readObject().getJsonArray("providers").getJsonObject(0).getString("name"));
 
         System.out.println(simulated1);
         String simulated3 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/sensor3/service1/humidity/SET", "[{\"name\":\"attributeName\",\"type\":\"string\", \"value\":\"accessible\"}," + "{\"name\":\"value\",\"type\":\"boolean\", \"value\":false}]", "POST");
@@ -93,10 +98,10 @@ public class TestLdapFiltering {
 
         System.out.println(simulated1);
         List<String> list = new ArrayList<String>();
-        list.add(new JSONObject(simulated1).getJSONArray("providers").getJSONObject(0).getString("name"));
-        list.add(new JSONObject(simulated1).getJSONArray("providers").getJSONObject(1).getString("name"));
+        list.add(json.createReader(new StringReader(simulated1)).readObject().getJsonArray("providers").getJsonObject(0).getString("name"));
+        list.add(json.createReader(new StringReader(simulated1)).readObject().getJsonArray("providers").getJsonObject(1).getString("name"));
 
-        assertTrue(new JSONObject(simulated1).getJSONArray("providers").length() == 2);
+        assertTrue(json.createReader(new StringReader(simulated1)).readObject().getJsonArray("providers").size() == 2);
         assertTrue(list.contains("sensor0"));
         assertTrue(list.contains("sensor3"));
         String simulated4 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/sensor3/service1/temperature/SET", "[{\"name\":\"value\",\"type\":\"float\", \"value\":2.5}]", "POST");
@@ -107,8 +112,8 @@ public class TestLdapFiltering {
         simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?ldap='(service1.temperature.value%20<=%204.0)'", null, "GET");
 
         System.out.println(simulated1);
-        assertTrue(new JSONObject(simulated1).getJSONArray("providers").length() == 1);
-        assertEquals("sensor3", new JSONObject(simulated1).getJSONArray("providers").getJSONObject(0).getString("name"));
+        assertTrue(json.createReader(new StringReader(simulated1)).readObject().getJsonArray("providers").size() == 1);
+        assertEquals("sensor3", json.createReader(new StringReader(simulated1)).readObject().getJsonArray("providers").getJsonObject(0).getString("name"));
 
         String simulated5 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/sensor2/service1/temperature/SET", "[{\"name\":\"value\",\"type\":\"float\", \"value\":2.5}]", "POST");
         System.out.println(simulated5);
@@ -117,17 +122,17 @@ public class TestLdapFiltering {
         simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?ldap='(service1.temperature.value<=4.0)'", null, "GET");
 
         list = new ArrayList<String>();
-        list.add(new JSONObject(simulated1).getJSONArray("providers").getJSONObject(0).getString("name"));
-        list.add(new JSONObject(simulated1).getJSONArray("providers").getJSONObject(1).getString("name"));
+        list.add(json.createReader(new StringReader(simulated1)).readObject().getJsonArray("providers").getJsonObject(0).getString("name"));
+        list.add(json.createReader(new StringReader(simulated1)).readObject().getJsonArray("providers").getJsonObject(1).getString("name"));
 
-        assertTrue(new JSONObject(simulated1).getJSONArray("providers").length() == 2);
+        assertTrue(json.createReader(new StringReader(simulated1)).readObject().getJsonArray("providers").size() == 2);
         assertTrue(list.contains("sensor2"));
         assertTrue(list.contains("sensor3"));
         System.out.println(simulated1);
 
         simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?ldap='(%26(service1.humidity.accessible=false)(service1.temperature.value<=4))'", null, "GET");
-        assertTrue(new JSONObject(simulated1).getJSONArray("providers").length() == 1);
-        assertEquals("sensor3", new JSONObject(simulated1).getJSONArray("providers").getJSONObject(0).getString("name"));
+        assertTrue(json.createReader(new StringReader(simulated1)).readObject().getJsonArray("providers").size() == 1);
+        assertEquals("sensor3", json.createReader(new StringReader(simulated1)).readObject().getJsonArray("providers").getJsonObject(0).getString("name"));
 
         System.out.println(simulated1);
     }

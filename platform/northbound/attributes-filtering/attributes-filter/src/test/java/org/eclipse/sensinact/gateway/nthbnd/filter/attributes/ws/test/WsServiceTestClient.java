@@ -9,6 +9,14 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.nthbnd.filter.attributes.ws.test;
 
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -16,14 +24,13 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 
-import java.net.URI;
-import java.util.Stack;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonValue;
 
 @WebSocket(maxTextMessageSize = 64 * 1024)
 public class WsServiceTestClient implements Runnable {
@@ -144,14 +151,17 @@ public class WsServiceTestClient implements Runnable {
                 locked = !this.stack.isEmpty();
             }
             if (request != null) {
-                JSONObject json = new JSONObject();
-                json.put("uri", request.url);
-                if (request.content != null) {
-                    json.put("parameters", new JSONArray(request.content));
-                }
                 try {
-                	this.send(json.toString());
-                } catch(NullPointerException e){
+                	ObjectMapper objectMapper = JsonMapper.builder()
+                			.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+                			.build();
+                	Map<String, Object> json = new HashMap<>();
+                	json.put("uri", request.url);
+                	if (request.content != null) {
+                		json.put("parameters", objectMapper.readValue(request.content, JsonValue.class));
+                	}
+					this.send(objectMapper.writeValueAsString(json));
+                } catch(Exception e){
                 	//e.printStackTrace(); 
                 	synchronized (this.stack) {
                 		this.stack.push(request);

@@ -9,28 +9,28 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.http;
 
-import org.eclipse.sensinact.gateway.core.method.Parameter;
-import org.eclipse.sensinact.gateway.core.security.Authentication;
-import org.eclipse.sensinact.gateway.core.security.SessionToken;
-import org.eclipse.sensinact.gateway.core.security.Credentials;
-import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
-import org.eclipse.sensinact.gateway.util.IOUtils;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+
+import org.eclipse.sensinact.gateway.core.method.Parameter;
+import org.eclipse.sensinact.gateway.core.security.Authentication;
+import org.eclipse.sensinact.gateway.core.security.Credentials;
+import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
+import org.eclipse.sensinact.gateway.core.security.SessionToken;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
+import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
+import org.eclipse.sensinact.gateway.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpRestAccessRequest extends HttpServletRequestWrapper implements NorthboundRequestWrapper {
 	
@@ -131,7 +131,6 @@ public class HttpRestAccessRequest extends HttpServletRequestWrapper implements 
         int index = 0;
         int length = parameters == null ? 0 : parameters.size();
         String callback = null;
-        JSONObject conditions = null;
 
         for (; index < length; index++) {
             String name = parameters.get(index).getName();

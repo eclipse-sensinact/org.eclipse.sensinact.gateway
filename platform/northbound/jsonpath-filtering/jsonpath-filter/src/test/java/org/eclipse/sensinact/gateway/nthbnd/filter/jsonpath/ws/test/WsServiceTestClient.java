@@ -16,9 +16,12 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.spi.JsonProvider;
+
+import java.io.StringReader;
 import java.net.URI;
 import java.util.Stack;
 import java.util.concurrent.Future;
@@ -144,13 +147,14 @@ public class WsServiceTestClient implements Runnable {
                 locked = !this.stack.isEmpty();
             }
             if (request != null) {
-                JSONObject json = new JSONObject();
-                json.put("uri", request.url);
+                JsonProvider provider = JsonProviderFactory.getProvider();
+				JsonObjectBuilder job = provider.createObjectBuilder();
+                job.add("uri", request.url);
                 if (request.content != null) {
-                    json.put("parameters", new JSONArray(request.content));
+                    job.add("parameters", provider.createReader(new StringReader(request.content)).readArray());
                 }
                 try {
-                	this.send(json.toString());
+                	this.send(job.build().toString());
                 } catch(NullPointerException e){
                 	//e.printStackTrace(); 
                 	synchronized (this.stack) {

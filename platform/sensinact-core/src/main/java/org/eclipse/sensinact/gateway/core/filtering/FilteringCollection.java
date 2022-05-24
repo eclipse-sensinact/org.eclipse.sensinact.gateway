@@ -14,8 +14,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * A FilteringCollection wraps a set of {@link FilteringAccessor}s, allowing on
@@ -53,41 +58,31 @@ public class FilteringCollection {
 			this.accessors = null;
 			return;
 		}
-		int index = 0;
-		int length = filterDefinition.length;
-
-		StringBuilder jsonFormatedFilterBuilder = new StringBuilder();
-		jsonFormatedFilterBuilder.append("[");
+		JsonProvider jp = JsonProviderFactory.getProvider();
 
 		List<FilteringAccessor> accessors = new ArrayList<FilteringAccessor>();
 
-		int pos = 0;
-
-		for (; index < length; index++) {
+		JsonArrayBuilder jab = jp.createArrayBuilder();
+		for (FilteringDefinition fd : filterDefinition) {
 			try {
-				accessors.add(new FilteringAccessor(mediator, filterDefinition[index]));
+				accessors.add(new FilteringAccessor(mediator, fd));
 
-				if (pos > 0) {
-					jsonFormatedFilterBuilder.append(",");
-				}
-				jsonFormatedFilterBuilder.append(String.format("{\"type\":\"%s\",\"definition\":\"%s\"}",
-						filterDefinition[index].type, filterDefinition[index].filter));
+				jab.add(jp.createObjectBuilder().add("type", fd.type).add("definition", fd.filter));
 
-				pos++;
-
-			} catch (RuntimeException e) {
+			} catch (Exception e) {
 				LOG.error(e.getMessage(),e);
 			}
 		}
-		if (index != length) {
+		JsonArray ja = jab.build();
+		if (ja.size() != filterDefinition.length) {
 			this.filterJsonDefinition = "[]";
 			this.hideFilter = true;
 			this.accessors = null;
 			return;
 		}
-		jsonFormatedFilterBuilder.append("]");
-		this.filterJsonDefinition = jsonFormatedFilterBuilder.toString();
+		this.filterJsonDefinition = ja.toString();
 		this.accessors = accessors;
+		this.hideFilter = hideFilter;
 	}
 
 	/**

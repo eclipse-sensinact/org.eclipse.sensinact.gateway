@@ -9,16 +9,20 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.nthbnd.rest;
 
+import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.eclipse.sensinact.gateway.core.ModelInstance;
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.HashSet;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.nthbnd.rest.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.rest.ws.test.WsServiceTestClient;
 import org.eclipse.sensinact.gateway.simulated.slider.api.SliderSetterItf;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +31,11 @@ import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
-import org.skyscreamer.jsonassert.JSONAssert;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.spi.JsonProvider;
 
 @ExtendWith(BundleContextExtension.class)
 @ExtendWith(ServiceExtension.class)
@@ -37,14 +45,16 @@ public class TestRestGETAccess {
 	
 	private String location =null;
 	
+	private JsonProvider provider = JsonProviderFactory.getProvider();
+	
 	@BeforeEach
 	public void before() {
 		Mediator mediator = new Mediator(context);
 		location = ModelInstance.defaultLocation(mediator);
 		String simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/slider/services/admin/resources/location/SET", 
 			"{\"parameters\":[{\"name\": \"location\",\"value\": \""+location.replace("\"", "\\\"")+"\",\"type\": \"string\"}]}", "POST");
-        JSONObject response = new JSONObject(simulated);
-        assertEquals(200, response.get("statusCode"));
+        JsonObject response = provider.createReader(new StringReader(simulated)).readObject();
+        assertEquals(200, response.getInt("statusCode"));
 	}
 	
     @Test
@@ -54,9 +64,11 @@ public class TestRestGETAccess {
         String simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers?rawDescribe=true", null, "GET");
         System.out.println(simulated);
 
-        JSONArray response = new JSONArray("[\"slider\",\"light\"]");
-
-        JSONAssert.assertEquals(response, new JSONArray(simulated), false);
+        assertEquals(new HashSet<>(Arrays.asList("slider", "light")), 
+        		provider.createReader(new StringReader(simulated)).readArray().stream()
+        			.map(JsonString.class::cast)
+        			.map(JsonString::getString)
+        			.collect(toSet()));
     }
 
     @Test
@@ -64,18 +76,28 @@ public class TestRestGETAccess {
     	Mediator mediator = new Mediator(context);
         String simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL, null, "GET");    
         String loc = location.replace("\"", "\\\"");
-        JSONObject response = new JSONObject(
-        "{\"providers\":[{\"name\":\"slider\",\"location\":\""+loc+"\",\"services\":[{\"name\":\"admin\",\"resources\":"
-        + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"},{\"name\":\"location\",\"type\":\"PROPERTY\"},{\"name\":"
-        + "\"bridge\",\"type\":\"PROPERTY\"},{\"name\":\"icon\",\"type\":\"PROPERTY\"}]},{\"name\":\"cursor\",\"resources\":"
-        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]}]},{\"name\":\"light\",\"location\":\""+loc+"\",\"services\":"
-        + "[{\"name\":\"admin\",\"resources\":[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"},{\"name\":"
-        + "\"location\",\"type\":\"PROPERTY\"},{\"name\":\"bridge\",\"type\":\"PROPERTY\"},{\"name\":\"icon\",\"type\":"
-        + "\"PROPERTY\"}]},{\"name\":\"switch\",\"resources\":[{\"name\":\"status\",\"type\":\"STATE_VARIABLE\"},"
-        + "{\"name\":\"brightness\",\"type\":\"STATE_VARIABLE\"},{\"name\":\"turn_on\",\"type\":\"ACTION\"},"
-        + "{\"name\":\"turn_off\",\"type\":\"ACTION\"},{\"name\":\"dim\",\"type\":\"ACTION\"}]}]}],\"type\":"
-        + "\"COMPLETE_LIST\",\"uri\":\"/\",\"statusCode\":200}");
-        JSONAssert.assertEquals(response, new JSONObject(simulated), false);
+        
+        JsonObject slider = provider.createReader(new StringReader(
+        "{\"name\":\"slider\",\"location\":\""+loc+"\",\"services\":[{\"name\":\"admin\",\"resources\":"
+        + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\",\"rws\":\"RW\"},{\"name\":\"location\",\"type\":\"PROPERTY\",\"rws\":\"RW\"},{\"name\":"
+        + "\"bridge\",\"type\":\"PROPERTY\",\"rws\":\"RO\"},{\"name\":\"icon\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}]},{\"name\":\"cursor\",\"resources\":"
+        + "[{\"name\":\"position\",\"type\":\"SENSOR\",\"rws\":\"RO\"}]}]}")).readObject();
+        
+        JsonObject light = provider.createReader(new StringReader(
+        "{\"name\":\"light\",\"location\":\""+loc+"\",\"services\":"
+        + "[{\"name\":\"admin\",\"resources\":[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\",\"rws\":\"RW\"},{\"name\":"
+        + "\"location\",\"type\":\"PROPERTY\",\"rws\":\"RW\"},{\"name\":\"bridge\",\"type\":\"PROPERTY\",\"rws\":\"RO\"},{\"name\":\"icon\",\"type\":"
+        + "\"PROPERTY\",\"rws\":\"RW\"}]},{\"name\":\"switch\",\"resources\":[{\"name\":\"status\",\"type\":\"STATE_VARIABLE\",\"rws\":\"RO\"},"
+        + "{\"name\":\"brightness\",\"type\":\"STATE_VARIABLE\",\"rws\":\"RO\"},{\"name\":\"turn_on\",\"type\":\"ACTION\"},"
+        + "{\"name\":\"turn_off\",\"type\":\"ACTION\"},{\"name\":\"dim\",\"type\":\"ACTION\"}]}]}")).readObject();
+        
+        JsonObject response = provider.createReader(new StringReader(simulated)).readObject();
+        
+        assertEquals("/", response.getString("uri"));
+		assertEquals(200, response.getInt("statusCode"));
+		assertEquals("COMPLETE_LIST", response.getString("type"));
+		assertEquals(new HashSet<>(Arrays.asList(slider, light)), response.getJsonArray("providers").stream()
+    			.collect(toSet()));
     }
 
     @Test
@@ -86,24 +108,29 @@ public class TestRestGETAccess {
 
         System.out.println(simulated);
 
-        JSONObject response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"]," + "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
-
-        JSONAssert.assertEquals(response, new JSONObject(simulated), false);
+        JsonObject response = provider.createReader(new StringReader(simulated)).readObject();
+		assertEquals("/", response.getString("uri"));
+		assertEquals(200, response.getInt("statusCode"));
+		assertEquals("PROVIDERS_LIST", response.getString("type"));
+		assertEquals(new HashSet<>(Arrays.asList("slider", "light")), response.getJsonArray("providers").stream()
+				.map(JsonString.class::cast)
+    			.map(JsonString::getString)
+    			.collect(toSet()));
 
         simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/slider/services", null, "GET");
         System.out.println(simulated);
 
-        response = new JSONObject(simulated);
+        response = provider.createReader(new StringReader(simulated)).readObject();
 
-        JSONArray array = response.getJSONArray("services");
-        assertTrue(array.length() == 2);
-        JSONAssert.assertEquals(new JSONArray("[\"admin\",\"cursor\"]"), array, false);
+        JsonArray array = response.getJsonArray("services");
+        assertTrue(array.size() == 2);
+        assertEquals(provider.createReader(new StringReader("[\"admin\",\"cursor\"]")).readArray(), array);
 
         simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/slider/services/cursor/resources", null, "GET");
 
-        response = new JSONObject(simulated);
-        array = response.getJSONArray("resources");
-        JSONAssert.assertEquals(new JSONArray("[\"position\"]"), array, false);
+        response = provider.createReader(new StringReader(simulated)).readObject();
+        array = response.getJsonArray("resources");
+        assertEquals(provider.createReader(new StringReader("[\"position\"]")).readArray(), array);
 
         simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/slider/services/cursor/resources/position", null, "GET");
 //        MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
@@ -112,12 +139,12 @@ public class TestRestGETAccess {
         Thread.sleep(1000);
         simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/providers/slider/services/" 
         + "cursor/resources/position/GET", null, "GET");
-        response = new JSONObject(simulated);
+        response = provider.createReader(new StringReader(simulated)).readObject();
         System.out.println(response);
 
-        assertTrue(response.get("statusCode").equals(200));
-        assertTrue(response.getString("uri").equals("/slider/cursor/position"));
-        assertTrue(response.getJSONObject("response").get("value").equals(1));
+        assertEquals(200, response.getInt("statusCode"));
+        assertEquals("/slider/cursor/position", response.getString("uri"));
+        assertEquals(1, response.getJsonObject("response").getInt("value"));
     }
 
     @Test
@@ -126,33 +153,33 @@ public class TestRestGETAccess {
 
         String simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/slider", null, "GET");
         System.out.println(simulated);
-        JSONObject response = new JSONObject(simulated).getJSONObject("response");
+        JsonObject response = provider.createReader(new StringReader(simulated)).readObject().getJsonObject("response");
 
-        JSONArray array = response.getJSONArray("services");
-        assertTrue(array.length() == 2);
-        JSONAssert.assertEquals(new JSONArray("[\"admin\",\"cursor\"]"), array, false);
+        JsonArray array = response.getJsonArray("services");
+        assertTrue(array.size() == 2);
+        assertEquals(provider.createReader(new StringReader("[\"admin\",\"cursor\"]")).readArray(), array);
 
         simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/slider/cursor", null, "GET");
 
-        response = new JSONObject(simulated).getJSONObject("response");
-        array = response.getJSONArray("resources");
+        response = provider.createReader(new StringReader(simulated)).readObject().getJsonObject("response");
+        array = response.getJsonArray("resources");
 
-        JSONAssert.assertEquals(new JSONArray("[{\"name\":\"position\",\"type\":\"SENSOR\"}]"), array, false);
+        assertEquals(provider.createReader(new StringReader("[{\"name\":\"position\",\"type\":\"SENSOR\",\"rws\":\"RO\"}]")).readArray(), array);
 
 //        MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
 //        SliderSetterItf slider = sliderProxy.buildProxy();
         slider.move(0);
         simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/slider/cursor/position/GET", null, "GET");
-        response = new JSONObject(simulated);
-        assertTrue(response.get("statusCode").equals(200));
-        assertTrue(response.getString("uri").equals("/slider/cursor/position"));
-        assertTrue(response.getJSONObject("response").get("value").equals(0));
+        response = provider.createReader(new StringReader(simulated)).readObject();
+        assertEquals(200, response.getInt("statusCode"));
+        assertEquals("/slider/cursor/position", response.getString("uri"));
+        assertEquals(0, response.getJsonObject("response").getInt("value"));
         slider.move(1);
         simulated = HttpServiceTestClient.newRequest(mediator, TestRestAccess.HTTP_ROOTURL + "/slider/cursor/position/GET", null, "GET");
-        response = new JSONObject(simulated);
-        assertTrue(response.get("statusCode").equals(200));
-        assertTrue(response.getString("uri").equals("/slider/cursor/position"));
-        assertTrue(response.getJSONObject("response").get("value").equals(1));
+        response = provider.createReader(new StringReader(simulated)).readObject();
+        assertEquals(200, response.getInt("statusCode"));
+        assertEquals("/slider/cursor/position", response.getString("uri"));
+        assertEquals(1, response.getJsonObject("response").getInt("value"));
     }
 
     @Test
@@ -162,8 +189,11 @@ public class TestRestGETAccess {
 
         String simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers?rawDescribe=true", null);        
         System.out.println(simulated);
-        JSONArray response = new JSONArray("[\"slider\",\"light\"]");
-        JSONAssert.assertEquals(response, new JSONArray(simulated), false);
+        JsonArray response = provider.createReader(new StringReader(simulated)).readArray();
+        assertEquals(new HashSet<>(Arrays.asList("slider", "light")), response.stream()
+				.map(JsonString.class::cast)
+    			.map(JsonString::getString)
+    			.collect(toSet()));
     }
 
     @Test
@@ -174,24 +204,28 @@ public class TestRestGETAccess {
         String simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers", null);
         System.out.println(simulated);
 
-        JSONObject response = new JSONObject("{\"statusCode\":200,\"providers\":[\"slider\",\"light\"]," +
-        "\"type\":\"PROVIDERS_LIST\",\"uri\":\"/\"}");
-        JSONAssert.assertEquals(response, new JSONObject(simulated), false);
-        simulated = null;
+        JsonObject response = provider.createReader(new StringReader(simulated)).readObject();
+        assertEquals("/", response.getString("uri"));
+		assertEquals(200, response.getInt("statusCode"));
+		assertEquals("PROVIDERS_LIST", response.getString("type"));
+		assertEquals(new HashSet<>(Arrays.asList("slider", "light")), response.getJsonArray("providers").stream()
+				.map(JsonString.class::cast)
+    			.map(JsonString::getString)
+    			.collect(toSet()));
+		
         simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers/slider/services", null);
 
-        response = new JSONObject(simulated);
-        JSONArray array = response.getJSONArray("services");
-        assertTrue(array.length() == 2);
-        JSONAssert.assertEquals(new JSONArray("[\"admin\",\"cursor\"]"), array, false);
+        response = provider.createReader(new StringReader(simulated)).readObject();
+        JsonArray array = response.getJsonArray("services");
+        assertTrue(array.size() == 2);
+        assertEquals(provider.createReader(new StringReader("[\"admin\",\"cursor\"]")).readArray(), array);
         
-        simulated = null;
         simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers/slider/services/cursor/resources", null);
 
-        response = new JSONObject(simulated);
-        array = response.getJSONArray("resources");
-        //JSONAssert.assertEquals(new JSONArray("[\"location\",\"position\"]"), array, false);
-        JSONAssert.assertEquals(new JSONArray("[\"position\"]"), array, false);
+        response = provider.createReader(new StringReader(simulated)).readObject();
+        array = response.getJsonArray("resources");
+        //JSONAssert.assertEquals(new JsonArray("[\"location\",\"position\"]"), array, false);
+        assertEquals(provider.createReader(new StringReader("[\"position\"]")).readArray(), array);
 //        MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
 //        SliderSetterItf slider = sliderProxy.buildProxy();
         slider.move(1);
@@ -199,31 +233,31 @@ public class TestRestGETAccess {
         
         simulated = null;        
         simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/providers/slider/services/cursor/resources/position/GET", null);
-        response = new JSONObject(simulated);
-        assertTrue(response.get("statusCode").equals(200));
-        assertTrue(response.getString("uri").equals("/slider/cursor/position"));
-        assertTrue(response.getJSONObject("response").get("value").equals(1));
+        response = provider.createReader(new StringReader(simulated)).readObject();
+        assertEquals(200, response.getInt("statusCode"));
+        assertEquals("/slider/cursor/position", response.getString("uri"));
+        assertEquals(1, response.getJsonObject("response").getInt("value"));
         client.close();
     }
 
     @Test
     public void testSimplifiedWsAccessMethodGET(@InjectService(timeout = 500) SliderSetterItf slider) throws Exception {
-        JSONObject response;
+        JsonObject response;
         WsServiceTestClient client = new WsServiceTestClient();
 
         new Thread(client).start();
         String simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/slider", null);
 
-        response = new JSONObject(simulated).getJSONObject("response");
-        JSONArray array = response.getJSONArray("services");
-        assertTrue(array.length() == 2);
-        JSONAssert.assertEquals(new JSONArray("[\"admin\",\"cursor\"]"), array, false);
+        response = provider.createReader(new StringReader(simulated)).readObject().getJsonObject("response");
+        JsonArray array = response.getJsonArray("services");
+        assertTrue(array.size() == 2);
+        assertEquals(provider.createReader(new StringReader("[\"admin\",\"cursor\"]")).readArray(), array);
         
         simulated = null;
         simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/slider/cursor", null);
-        response = new JSONObject(simulated).getJSONObject("response");
-        array = response.getJSONArray("resources");
-        JSONAssert.assertEquals(new JSONArray("[{\"name\":\"position\",\"type\":\"SENSOR\"}]"), array, false);
+        response = provider.createReader(new StringReader(simulated)).readObject().getJsonObject("response");
+        array = response.getJsonArray("resources");
+        assertEquals(provider.createReader(new StringReader("[{\"name\":\"position\",\"type\":\"SENSOR\",\"rws\":\"RO\"}]")).readArray(), array);
 //        MidProxy<SliderSetterItf> sliderProxy = new MidProxy<SliderSetterItf>(classloader, this, SliderSetterItf.class);
 //        SliderSetterItf slider = sliderProxy.buildProxy();
         slider.move(1);
@@ -231,10 +265,10 @@ public class TestRestGETAccess {
         
         simulated = null;
         simulated = this.synchronizedRequest(client, TestRestAccess.WS_ROOTURL + "/slider/cursor/position/GET", null);
-        response = new JSONObject(simulated);
-        assertTrue(response.get("statusCode").equals(200));
-        assertTrue(response.getString("uri").equals("/slider/cursor/position"));
-        assertTrue(response.getJSONObject("response").get("value").equals(1));
+        response = provider.createReader(new StringReader(simulated)).readObject();
+        assertEquals(200, response.getInt("statusCode"));
+        assertEquals("/slider/cursor/position", response.getString("uri"));
+        assertEquals(1, response.getJsonObject("response").getInt("value"));
         client.close();
     }
 

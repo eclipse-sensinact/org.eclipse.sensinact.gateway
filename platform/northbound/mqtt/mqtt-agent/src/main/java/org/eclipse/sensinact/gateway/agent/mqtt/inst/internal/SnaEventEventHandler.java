@@ -13,9 +13,15 @@ import java.io.IOException;
 
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.AbstractMqttHandler;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonObject;
 
 /**
  * AE = sNa Provider
@@ -28,6 +34,10 @@ public class SnaEventEventHandler extends AbstractMqttHandler {
     Logger LOG= LoggerFactory.getLogger(SnaEventEventHandler.class.getName());
     
     private final String prefix;
+    
+    private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
 
     public SnaEventEventHandler(String prefix) throws IOException {
         super();
@@ -42,7 +52,7 @@ public class SnaEventEventHandler extends AbstractMqttHandler {
     public void doHandle(SnaUpdateMessageImpl event) {
         try {        	
             LOG.debug("Event received update:"+event.getJSON().toString());
-            JSONObject eventJson = new JSONObject(event.getJSON()).getJSONObject("notification");
+            JsonObject eventJson = mapper.readValue(event.getJSON(), JsonObject.class).getJsonObject("notification");
             String provider = event.getPath().split("/")[1];
             String service = event.getPath().split("/")[2];
             String resource = event.getPath().split("/")[3];
@@ -52,7 +62,7 @@ public class SnaEventEventHandler extends AbstractMqttHandler {
                 // Create contentInstance
                 case ATTRIBUTE_VALUE_UPDATED:
                     this.agent.publish(String.format("%s%s/%s/%s",prefix,provider,service,resource),
-                    		String.valueOf(value));
+                    		mapper.writeValueAsString(value));
                     break;
                 default:
                     return;

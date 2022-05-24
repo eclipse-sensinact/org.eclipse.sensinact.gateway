@@ -13,10 +13,10 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.eclipse.sensinact.gateway.util.json.JSONValidator;
-import org.json.JSONException;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 
 import java.io.IOException;
+import java.io.StringReader;
 
 public class HttpServiceTestClient {
     public static String newRequest(Mediator mediator, String url, String content, String method) {
@@ -32,8 +32,8 @@ public class HttpServiceTestClient {
                 builder.setContentType("application/json");
                 builder.setHttpMethod("POST");
                 if (content != null && content.length() > 0) {
-                    if (new JSONValidator(content).valid()) 
-                        builder.setContent(content);                    
+                	JsonProviderFactory.getProvider().createReader(new StringReader(content)).readValue();
+                    builder.setContent(content);                    
                 }
             } else 
                 return null;
@@ -43,8 +43,6 @@ public class HttpServiceTestClient {
             String contentStr = (responseContent == null ? null : new String(responseContent));
             System.out.println("response from URL " + url + " was " + contentStr);
             return contentStr;
-        } catch (JSONException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {

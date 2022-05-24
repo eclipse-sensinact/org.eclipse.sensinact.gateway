@@ -15,10 +15,12 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
@@ -29,11 +31,11 @@ public class WsRestAccessRequest implements NorthboundRequestWrapper {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(WsRestAccessRequest.class);
     private NorthboundMediator mediator;
-    private JSONObject request;
+    private JsonObject request;
     private String content;
     private WebSocketConnection wsConnection;
 
-    public WsRestAccessRequest(NorthboundMediator mediator, WebSocketConnection wsConnection, JSONObject request) {
+    public WsRestAccessRequest(NorthboundMediator mediator, WebSocketConnection wsConnection, JsonObject request) {
         this.request = request;
         this.mediator = mediator;
         this.wsConnection = wsConnection;
@@ -51,19 +53,19 @@ public class WsRestAccessRequest implements NorthboundRequestWrapper {
 
 	@Override
 	public String getRequestId() {
-		return (String) this.request.opt(getRequestIdProperty());
+		return (String) this.request.getString(getRequestIdProperty(), null);
 	}
 
     @Override
     public String getRequestURI() {
-        String uri = request.optString("uri");
+        String uri = request.getString("uri", "");
         String[] uriElements = uri.split("\\?");
         return uriElements[0];
     }
 
     @Override
     public Map<QueryKey, List<String>> getQueryMap() {
-        String uri = request.optString("uri");
+        String uri = request.getString("uri", "");
         String[] uriElements = uri.split("\\?");
         if (uriElements.length == 2) {
             try {
@@ -78,9 +80,9 @@ public class WsRestAccessRequest implements NorthboundRequestWrapper {
     @Override
     public String getContent() {
         if (this.content == null) {
-            JSONArray parameters = request.optJSONArray("parameters");
+            JsonArray parameters = request.getJsonArray("parameters");
             if (parameters == null) {
-                parameters = new JSONArray();
+                parameters = JsonProviderFactory.getProvider().createArrayBuilder().build();
             }
             this.content = parameters.toString();
         }

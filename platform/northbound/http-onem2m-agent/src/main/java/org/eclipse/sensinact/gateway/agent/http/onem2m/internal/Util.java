@@ -13,7 +13,6 @@ import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfiguratio
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +23,7 @@ import java.util.Map;
 public class Util {
     private static Logger LOG = LoggerFactory.getLogger(Util.class.getCanonicalName());
 
-    public static final int createRequest(String cseBase, String method, String origin, String path, String contentType, JSONObject content) throws IOException {
+    public static final int createRequest(String cseBase, String method, String origin, String path, String contentType, String content) throws IOException {
         ConnectionConfiguration<SimpleResponse, SimpleRequest> configuration = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
         configuration.setHttpMethod(method);
         if (path != null) {
@@ -40,13 +39,13 @@ public class Util {
         }
         configuration.setAccept("application/json");
         configuration.setContentType(contentType);
-        configuration.setContent(content.toString());
+        configuration.setContent(content);
         LOG.debug("Sending request to URI {}", configuration.getUri());
         LOG.debug("Headers from request to {}", configuration.getUri());
         for (Map.Entry<String,List<String>> entry : configuration.getHeaders().entrySet()) {
             LOG.debug("{} : {}", entry.getKey(), entry.getValue().toString());
         }
-        LOG.debug("Request body: {}", content.toString());
+        LOG.debug("Request body: {}", content);
         SimpleRequest req = new SimpleRequest(configuration);
         SimpleResponse resp = req.send();
         Integer status = resp.getStatusCode();

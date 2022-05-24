@@ -19,9 +19,11 @@ import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.LoginResponse;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObjectBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -129,11 +131,12 @@ public class WebSocketConnectionFactory implements WebSocketCreator {
             }
         }
         if (endpoint == null) {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("statusCode", 403);
-            jsonObject.put("message", "Authentication failed");
+            JsonObjectBuilder jsonObject = JsonProviderFactory.getProvider()
+            		.createObjectBuilder()
+            		.add("statusCode", 403)
+            		.add("message", "Authentication failed");
             try {
-                resp.sendError(403, new String(jsonObject.toString().getBytes("UTF-8")));
+                resp.sendError(403, jsonObject.build().toString());
             } catch (IOException e) {
                 LOG.error(e.getMessage(), e);
             }
