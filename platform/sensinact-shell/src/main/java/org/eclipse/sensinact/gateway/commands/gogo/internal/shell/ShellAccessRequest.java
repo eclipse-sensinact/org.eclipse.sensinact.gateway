@@ -18,10 +18,11 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
@@ -38,11 +39,11 @@ public class ShellAccessRequest implements NorthboundRequestWrapper {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ShellAccessRequest.class);
     private NorthboundMediator mediator;
-    private JSONObject request;
+    private JsonObject request;
     private Authentication<?> authentication;
     private String content;
 
-    public ShellAccessRequest(NorthboundMediator mediator, JSONObject request) {
+    public ShellAccessRequest(NorthboundMediator mediator, JsonObject request) {
         this.request = request;
         this.mediator = mediator;
     }
@@ -63,7 +64,7 @@ public class ShellAccessRequest implements NorthboundRequestWrapper {
     @Override
     public String getRequestURI() {
 
-        String uri = request.optString("uri");
+        String uri = request.getString("uri");
         String[] uriElements = uri.split("\\?");
         return uriElements[0];
     }
@@ -74,7 +75,7 @@ public class ShellAccessRequest implements NorthboundRequestWrapper {
      */
     @Override
     public Map<QueryKey, List<String>> getQueryMap() {
-        String uri = request.optString("uri");
+        String uri = request.getString("uri");
         String[] uriElements = uri.split("\\?");
         if (uriElements.length == 2) {
             try {
@@ -93,11 +94,12 @@ public class ShellAccessRequest implements NorthboundRequestWrapper {
     @Override
     public String getContent() {
         if (this.content == null) {
-            JSONArray parameters = request.optJSONArray("parameters");
+            JsonArray parameters = request.getJsonArray("parameters");
             if (parameters == null) {
-                parameters = new JSONArray();
+                this.content = "[]";
+            } else {
+            	this.content = parameters.toString();
             }
-            this.content = parameters.toString();
         }
         return this.content;
     }
@@ -109,9 +111,9 @@ public class ShellAccessRequest implements NorthboundRequestWrapper {
     @Override
     public Authentication<?> getAuthentication() {
         if (this.authentication == null) {
-            String tokenHeader = (String) request.opt("token");
-            String login = (String) request.opt("login");
-            String password = (String) request.opt("password");
+            String tokenHeader = request.getString("token", null);
+            String login = request.getString("login", null);
+            String password = request.getString("password", null);
 
             if (tokenHeader != null) {
                 this.authentication = new SessionToken(tokenHeader);

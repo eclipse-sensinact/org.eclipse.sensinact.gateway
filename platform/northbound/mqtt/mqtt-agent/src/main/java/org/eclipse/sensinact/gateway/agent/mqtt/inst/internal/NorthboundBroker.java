@@ -9,6 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.agent.mqtt.inst.internal;
 
+import java.io.StringReader;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.agent.mqtt.generic.internal.GenericMqttAgent;
@@ -16,8 +17,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.json.JSONArray;
-import org.json.JSONException;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -30,6 +30,9 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.osgi.util.converter.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonException;
 
 @Component(name = NorthboundBroker.MQTT_AGENT_BROKER, configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class NorthboundBroker {
@@ -143,7 +146,7 @@ public class NorthboundBroker {
     	    boolean isPattern = false;
     	    boolean isComplement = false;
     	    
-    	    JSONArray constraints = null;
+    	    JsonArray constraints = null;
     	    SnaMessage.Type[] handled = null;
     	    
     	    String pattern = config.pattern();
@@ -168,13 +171,13 @@ public class NorthboundBroker {
     	    	handled = SnaMessage.Type.values();
     	    } else {
     	    	try {
-	    	    	JSONArray array = new JSONArray(types);
-	    	    	handled = new SnaMessage.Type[array.length()];
-	    	    	for(int i = 0;i < array.length(); i++) {
+	    	    	JsonArray array = JsonProviderFactory.getProvider().createReader(new StringReader(types)).readArray();
+	    	    	handled = new SnaMessage.Type[array.size()];
+	    	    	for(int i = 0;i < array.size(); i++) {
 	    	    		handled[i] = SnaMessage.Type.valueOf(array.getString(i));
 	    	    	}
 	    	    	defined = true;
-    	    	} catch(JSONException | NullPointerException e) {
+    	    	} catch(JsonException | NullPointerException | ClassCastException e) {
     	    		handled = SnaMessage.Type.values();
     	    		LOG.error("Unable to build the array of handled message types",e);
     	    	}
@@ -182,10 +185,10 @@ public class NorthboundBroker {
     	    String conditions = config.conditions();
     	    if(conditions != null) {
     	    	try {
-    	    		constraints = new JSONArray(conditions);
+    	    		constraints = JsonProviderFactory.getProvider().createReader(new StringReader(conditions)).readArray();
     	    		defined = true;
-    	    	} catch(JSONException e) {
-    	    		constraints = new JSONArray();
+    	    	} catch(JsonException e) {
+    	    		constraints = JsonProviderFactory.getProvider().createArrayBuilder().build();
     	    		LOG.error("Unable to build the constraint expession",e);
     	    	}
     	    }

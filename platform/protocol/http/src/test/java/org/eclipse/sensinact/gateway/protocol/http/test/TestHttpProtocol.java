@@ -10,19 +10,23 @@
 package org.eclipse.sensinact.gateway.protocol.http.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URL;
 
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
+
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.spi.JsonProvider;
 
 public class TestHttpProtocol {
     //********************************************************************//
@@ -60,7 +64,7 @@ public class TestHttpProtocol {
                 builder.setContentType("application/json");
                 builder.setHttpMethod("POST");
                 if (content != null && content.length() > 0) {
-                    JSONObject jsonData = new JSONObject(content);
+                    JsonObject jsonData = JsonProviderFactory.getProvider().createReader(new StringReader(content)).readObject();
                     builder.setContent(jsonData.toString());
                 }
             } else {
@@ -78,19 +82,19 @@ public class TestHttpProtocol {
         return null;
     }
 
-    private static JSONObject getExpected(URL url, String content, String method) {
-        JSONObject requestDescription = new JSONObject();
-        requestDescription.put("method", method);
-        requestDescription.put("url", url.getPath());
+    private static JsonObject getExpected(URL url, String content, String method) {
+        JsonObjectBuilder requestDescription = JsonProviderFactory.getProvider().createObjectBuilder()
+        		.add("method", method)
+        		.add("url", url.getPath());
 
 
         if (method.equals("POST")) {
-            JSONObject message = new JSONObject(content);
-            requestDescription.put("content-type", "application/json");
-            requestDescription.put("content-length", content.length());
-            requestDescription.put("message", message);
+            JsonObject message = JsonProviderFactory.getProvider().createReader(new StringReader(content)).readObject();
+            requestDescription.add("content-type", "application/json")
+            	.add("content-length", content.length())
+            	.add("message", message);
         }
-        return requestDescription;
+        return requestDescription.build();
     }
 
     private static HttpTestServer server = null;
@@ -121,22 +125,26 @@ public class TestHttpProtocol {
 
     @Test
     public void testHttpProtocolGet() throws Exception {
-        JSONObject expected = getExpected(new URL(HTTP_ROOTURL + "/providers"), null, "GET");
+        JsonObject expected = getExpected(new URL(HTTP_ROOTURL + "/providers"), null, "GET");
         String simulated = TestHttpProtocol.newRequest(HTTP_ROOTURL + "/providers", null, "GET");
 
-        JSONAssert.assertEquals(expected, new JSONObject(simulated), false);
+        JsonProvider provider = JsonProviderFactory.getProvider();
+		JsonObject actual = provider.createReader(new StringReader(simulated)).readObject();
+		assertEquals(expected, actual);
 
-        JSONObject configuration = new JSONObject();
-        configuration.put("uri", HTTP_ROOTURL + "/providers");
-        configuration.put("httpMethod", "GET");
+        JsonObject configuration = provider.createObjectBuilder()
+        		.add("uri", HTTP_ROOTURL + "/providers")
+        		.add("httpMethod", "GET")
         //configuration.put("content", null);
-        configuration.put("acceptType", "application/json");
+        		.add("acceptType", "application/json")
         //configuration.put("contentType", "application/json");
-        configuration.put("connectTimeout", 2000);
-        configuration.put("readTimeout", 2000);
+        		.add("connectTimeout", 2000)
+        		.add("readTimeout", 2000)
+        		.build();
         //configuration.put("parameters", new JSONArray());
         simulated = TestHttpProtocol.newRequest(configuration.toString());
-        JSONAssert.assertEquals(expected, new JSONObject(simulated), false);
+        actual = provider.createReader(new StringReader(simulated)).readObject();
+        assertEquals(expected, actual);
 
         StringBuilder builder = new StringBuilder();
         builder.append("HTTP ");
@@ -157,21 +165,36 @@ public class TestHttpProtocol {
 
         assertEquals(builder.toString(), config.toString());
 
-        configuration.put("parameters", new JSONArray().put(new JSONObject().put("key", "param1").put("value", "value1")).put(new JSONObject().put("key", "param2").put("value", 5)));
+        configuration = provider.createObjectBuilder(configuration)
+        		.add("parameters", provider.createArrayBuilder()
+        				.add(provider.createObjectBuilder().add("key", "param1").add("value", "value1"))
+        				.add(provider.createObjectBuilder().add("key", "param2").add("value", 5)))
+        		.build();
+        
         simulated = TestHttpProtocol.newRequest(configuration.toString());
-        JSONAssert.assertNotEquals(expected, new JSONObject(simulated), true);
+        actual = provider.createReader(new StringReader(simulated)).readObject();
+        assertNotEquals(expected, actual);
 
-        expected.remove("url");
-        expected.put("url", "/providers?param1=value1&param2=5");
-        JSONAssert.assertEquals(expected, new JSONObject(simulated), false);
+        expected = provider.createObjectBuilder(expected)
+        	.add("url", "/providers?param1=value1&param2=5")
+        	.build();
+        assertEquals(expected, actual);
     }
 
     @Test
     public void testHttpProtocolPost() throws Exception {
-        String simulated;
-        simulated = TestHttpProtocol.newRequest(HTTP_ROOTURL + "/providers/slider/services/cursor/resources/position/SUBSCRIBE", "{\"parameters\" : [{\"name\":\"callback\", \"type\":\"string\",\"value\":\"http://127.0.0.1:8898/\"}," + "{\"name\":\"conditions\",\"type\":\"array\",\"value\":" + "[{\"operator\":\"<\",\"operand\":200, \"type\":\"int\", \"complement\":false}]}]}", "POST");
+        String simulated = TestHttpProtocol.newRequest(HTTP_ROOTURL + "/providers/slider/services/cursor/resources/position/SUBSCRIBE", 
+        		"{\"parameters\" : [{\"name\":\"callback\", \"type\":\"string\",\"value\":\"http://127.0.0.1:8898/\"}," 
+        				+ "{\"name\":\"conditions\",\"type\":\"array\",\"value\":" 
+        				+ "[{\"operator\":\"<\",\"operand\":200, \"type\":\"int\", \"complement\":false}]}]}", 
+				"POST");
 
-        JSONAssert.assertEquals(getExpected(new URL(HTTP_ROOTURL + "/providers/slider/services/cursor/resources/position/SUBSCRIBE"), "{\"parameters\":[{\"name\":\"callback\",\"type\":\"string\",\"value\":\"http://127.0.0.1:8898/\"}," + "{\"name\":\"conditions\",\"type\":\"array\",\"value\":" + "[{\"operator\":\"<\",\"operand\":200,\"type\":\"int\",\"complement\":false}]}]}", "POST"), new JSONObject(simulated), false);
+        JsonObject actual = JsonProviderFactory.getProvider().createReader(new StringReader(simulated)).readObject();
+        assertEquals(getExpected(new URL(HTTP_ROOTURL + "/providers/slider/services/cursor/resources/position/SUBSCRIBE"), 
+        		"{\"parameters\":[{\"name\":\"callback\",\"type\":\"string\",\"value\":\"http://127.0.0.1:8898/\"}," 
+        				+ "{\"name\":\"conditions\",\"type\":\"array\",\"value\":" 
+        				+ "[{\"operator\":\"<\",\"operand\":200,\"type\":\"int\",\"complement\":false}]}]}", 
+        		"POST"), actual);
     }
 
 }

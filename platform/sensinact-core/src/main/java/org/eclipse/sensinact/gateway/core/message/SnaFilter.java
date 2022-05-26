@@ -31,6 +31,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.json.JsonArray;
+
 /**
  * Allows to check whether an {@link SnaMessage} has to be transmitted or
  * blocked, according to its type, the uri of the object sending it, or a set of
@@ -133,6 +135,15 @@ public class SnaFilter implements JSONable {
 	/**
 	 * @param mediator
 	 * @param sender
+	 * @param constraints
+	 */
+	public SnaFilter(Mediator mediator, String sender, JsonArray constraints) {
+		this(mediator, sender, false, false, new JSONArray(constraints.toString()));
+	}
+
+	/**
+	 * @param mediator
+	 * @param sender
 	 * @param isPattern
 	 * @param isComplement
 	 * @param constraints
@@ -144,6 +155,10 @@ public class SnaFilter implements JSONable {
 		for (; index < length; index++) {
 			this.addCondition(constraints.getJSONObject(index));
 		}
+	}
+	
+	public SnaFilter(Mediator mediator, String sender, boolean isPattern, boolean isComplement, JsonArray constraints) {
+		this(mediator, sender, isPattern, isComplement, new JSONArray(constraints.toString()));
 	}
 
 	/**

@@ -9,6 +9,12 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.commands.gogo.internal.shell;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.commands.gogo.internal.CommandServiceMediator;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
@@ -19,13 +25,9 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper.QueryKey;
-import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.JSONResponseFormat;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import jakarta.json.JsonObject;
 
 /**
  * Extended {@link NorthboundAccess} dedicated to shell access request
@@ -34,7 +36,7 @@ import java.util.Map;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 public class ShellAccess extends NorthboundAccess<ShellAccessRequest> {
-    public static void proceed(CommandServiceMediator mediator, JSONObject object) {
+    public static void proceed(CommandServiceMediator mediator, JsonObject object) {
         try {
             ShellAccessRequest request = new ShellAccessRequest(mediator, object);
             new ShellAccess(request).proceed();
@@ -89,7 +91,7 @@ public class ShellAccess extends NorthboundAccess<ShellAccessRequest> {
         } else {
             resultStr = cap.getJSON();
         }
-        JSONObject result = new JSONResponseFormat().format(resultStr);
+        JsonObject result = JsonProviderFactory.getProvider().createReader(new StringReader(resultStr)).readObject();
         if (result == null) {
             this.sendError(500, "Internal server error");
             return false;
