@@ -14,7 +14,8 @@ import java.io.IOException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.json.JSONObject;
+import jakarta.json.JsonObject;
+
 
 public interface OAuthServer {
 
@@ -22,7 +23,7 @@ public interface OAuthServer {
 	
 	public static final String AUTH_BASEURL_DEFAULT = "/sensinact.auth";
 	
-	JSONObject verify(String code, ServletRequest request);
+	JsonObject verify(String code, ServletRequest request);
 
 	boolean handleSecurity(ServletRequest request, ServletResponse response);
 

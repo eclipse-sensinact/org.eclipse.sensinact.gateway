@@ -9,6 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.core.security.user.openid;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -22,7 +23,7 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,8 +95,9 @@ public class OpenIdCredentialsUserKeyBuilder implements UserKeyBuilder<Credentia
 			SimpleResponse response = new SimpleRequest(conf).send();
 
 			if (response.getStatusCode() == 200) {
-				JSONObject obj = new JSONObject(new String(response.getContent(),"UTF-8"));
-				token = obj.getString("access_token");
+				token = JsonProviderFactory.getProvider()
+					.createReader(new ByteArrayInputStream(response.getContent()))
+					.readObject().getString("access_token");
 			}
 		} catch (Exception e) {
 			LOG.error(e.getMessage(),e);
