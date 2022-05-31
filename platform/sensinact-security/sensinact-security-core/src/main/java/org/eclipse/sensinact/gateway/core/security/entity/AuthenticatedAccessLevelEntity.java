@@ -14,7 +14,8 @@ import org.eclipse.sensinact.gateway.core.security.AccessLevelImpl;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * UserAccessLevel DAO Entity
@@ -53,7 +54,7 @@ public class AuthenticatedAccessLevelEntity extends ImmutableSnaEntity implement
 	 *            the JSON formated description of the UserAccessLevelEntity to be
 	 *            instantiated
 	 */
-	public AuthenticatedAccessLevelEntity(JSONObject row) {
+	public AuthenticatedAccessLevelEntity(JsonObject row) {
 		super(row);
 	}
 

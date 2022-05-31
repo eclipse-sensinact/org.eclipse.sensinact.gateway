@@ -20,8 +20,6 @@ import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToConnectToDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.UnableToFindDataStoreException;
 import org.eclipse.sensinact.gateway.datastore.sqlite.SQLiteDataStoreService;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
@@ -36,6 +34,9 @@ import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.junit5.cm.ConfigurationExtension;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 @RequireConfigurationAdmin
 @ExtendWith(BundleContextExtension.class)
@@ -75,9 +76,9 @@ public class TestDataBaseService {
 		Configuration cfg = ca.getConfiguration(SQLiteDataStoreService.PID, "?");
 		cfg.update(Dictionaries.dictionaryOf("database", TEST_DATABASE_PATH()));
 
-		JSONArray json = dataServiceAware.waitForService(1000).select("SELECT * FROM person WHERE person.id=1");
-		assertEquals(json.getJSONObject(0).getInt("id"), 1);
-		assertEquals(json.getJSONObject(0).getString("name"), "leo");
+		JsonArray json = dataServiceAware.waitForService(1000).select("SELECT * FROM person WHERE person.id=1");
+		assertEquals(json.getJsonObject(0).getInt("id"), 1);
+		assertEquals(json.getJsonObject(0).getString("name"), "leo");
 		cfg.delete();
 	}
 
@@ -103,9 +104,9 @@ public class TestDataBaseService {
 		dataServiceAware.waitForService(1000).delete("DELETE FROM person WHERE person.id=10");
 
 		int entries = (int) dataServiceAware.getService().insert("INSERT INTO person VALUES (10,'robert') ");
-		JSONArray json = dataServiceAware.getService().select("SELECT * FROM person WHERE person.id=10");
-		assertEquals(json.getJSONObject(0).getInt("id"), 10);
-		assertEquals(json.getJSONObject(0).getString("name"), "robert");
+		JsonArray json = dataServiceAware.getService().select("SELECT * FROM person WHERE person.id=10");
+		assertEquals(json.getJsonObject(0).getInt("id"), 10);
+		assertEquals(json.getJsonObject(0).getString("name"), "robert");
 		entries = dataServiceAware.getService().delete("DELETE FROM person WHERE person.id=10");
 		assertEquals(1, entries);
 		cfg.delete();
@@ -134,12 +135,12 @@ public class TestDataBaseService {
 		Configuration cfg = ca.getConfiguration(SQLiteDataStoreService.PID, "?");
 		cfg.update(Dictionaries.dictionaryOf("database", TEST_DATABASE_PATH()));
 
-		JSONObject object = dataServiceAware.waitForService(1000)
+		JsonObject object = dataServiceAware.waitForService(1000)
 				.select("WITH RECURSIVE t(n) AS ( VALUES (1)  UNION ALL  SELECT n+1 FROM t WHERE n < 100)"
 						+ " SELECT sum(n) AS TOTAL FROM t;")
-				.optJSONObject(0);
+				.getJsonObject(0);
 
-		assertEquals(5050, object.optInt("TOTAL"));
+		assertEquals(5050, object.getInt("TOTAL"));
 		cfg.delete();
 	}
 

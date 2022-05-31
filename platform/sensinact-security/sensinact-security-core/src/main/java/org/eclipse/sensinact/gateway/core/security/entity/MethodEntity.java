@@ -12,7 +12,8 @@ package org.eclipse.sensinact.gateway.core.security.entity;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * Method Entity
@@ -42,7 +43,7 @@ public class MethodEntity extends ImmutableSnaEntity {
 	 * @param row
 	 * 
 	 */
-	public MethodEntity(JSONObject row) {
+	public MethodEntity(JsonObject row) {
 		super(row);
 	}
 

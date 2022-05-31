@@ -9,6 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.core.security.ws.test;
 
+import java.io.StringReader;
 import java.net.URI;
 import java.util.Stack;
 import java.util.concurrent.Future;
@@ -23,8 +24,9 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonObjectBuilder;
 
 @WebSocket(maxTextMessageSize = 64 * 1024)
 public class WsServiceTestClient implements Runnable {
@@ -151,10 +153,10 @@ public class WsServiceTestClient implements Runnable {
                 locked = !this.stack.isEmpty();
             }
             if (request != null) {
-                JSONObject json = new JSONObject();
-                json.put("uri", request.url);
+                JsonObjectBuilder json = JsonProviderFactory.getProvider().createObjectBuilder();
+                json.add("uri", request.url);
                 if (request.content != null) {
-                    json.put("parameters", new JSONArray(request.content));
+                    json.add("parameters", JsonProviderFactory.getProvider().createReader(new StringReader(request.content)).readArray());
                 }
                 try {
                 	this.send(json.toString());

@@ -14,16 +14,23 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreConnectionProvider;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonException;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * {@link DataStoreService} service implementation
@@ -78,14 +85,16 @@ public abstract class JdbcDataStoreService implements DataStoreService {
      * @throws SQLException
      * @throws JSONException
      */
-    protected JSONArray resultSetToJSon(ResultSet resultSet) throws SQLException, JSONException {
+    @SuppressWarnings("unchecked")
+	protected JsonArray resultSetToJSon(ResultSet resultSet) throws SQLException, JsonException {
         ResultSetMetaData rsmd = resultSet.getMetaData();
         int columnCount = rsmd.getColumnCount();
 
-        JSONArray result = new JSONArray();
+        JsonProvider provider = JsonProviderFactory.getProvider();
+		JsonArrayBuilder result = provider.createArrayBuilder();
 
         while (resultSet.next()) {
-            JSONObject obj = new JSONObject();
+            Map<String,Object> children = new HashMap<>();
             for (int index = 1; index <= columnCount; index++) {
                 String column = rsmd.getColumnName(index);
                 Object value = resultSet.getObject(column);
@@ -93,24 +102,35 @@ public abstract class JdbcDataStoreService implements DataStoreService {
                 	continue;
                 }
                 String[] columnElements = column.split("#");
-            	JSONObject parent = obj;                
-            	Object subObj = null;
-            	int n=0;
-            	for(;n < columnElements.length-1;n++) {
-            		subObj = parent.opt(columnElements[n]);
-                	if(subObj==null) {
-                		subObj=new JSONObject();
-                		parent.put(columnElements[n], subObj);
-                	}
-                	parent=(JSONObject)subObj;
-            	}
-            	parent.put(columnElements[n], value);
+                Map<String, Object> addTo = children;
+                for(int n = 0; n < columnElements.length - 1; n++) {
+                	addTo = (Map<String, Object>) addTo.computeIfAbsent(columnElements[n], k -> new HashMap<>());
+                }
+                addTo.put(columnElements[columnElements.length - 1], value);
             }
-            result.put(obj);
+            
+            result.add(fromMap(children));
         }
-        return result;
+        return result.build();
     }
 
+    @SuppressWarnings("unchecked")
+	private JsonObjectBuilder fromMap(Map<String, Object> map) {
+    	JsonProvider provider = JsonProviderFactory.getProvider();
+		JsonObjectBuilder job = provider.createObjectBuilder();
+    	for (Entry<String, Object> e : map.entrySet()) {
+			Object value = e.getValue();
+			if(value instanceof Map) {
+				job.add(e.getKey(), fromMap((Map<String, Object>)value));
+			} else if(value instanceof Number) {
+				job.add(e.getKey(), provider.createValue((Number) value));
+			} else {
+				job.add(e.getKey(), value.toString());
+			}
+		}
+    	return job;
+    }
+    
     /**
      * Converts the {@link ResultSet} passed as parameter into
      * a JSON formated String
@@ -122,43 +142,7 @@ public abstract class JdbcDataStoreService implements DataStoreService {
      * @throws SQLException
      */
     protected String resultSetToJSonString(ResultSet resultSet) throws SQLException {
-        ResultSetMetaData rsmd = resultSet.getMetaData();
-        int columnCount = rsmd.getColumnCount();
-
-        StringBuilder builder = new StringBuilder();
-        int line = 0;
-        builder.append("[");
-
-        while (resultSet.next()) {
-            JSONObject obj = new JSONObject();
-            for (int index = 1; index <= columnCount; index++) {
-                String column = rsmd.getColumnName(index);
-                Object value = resultSet.getObject(column);
-                if(value == null) {
-                	continue;
-                }
-                String[] columnElements = column.split("#");
-            	JSONObject parent = obj;                
-            	Object subObj = null;
-            	int n=0;
-            	for(;n < columnElements.length-1;n++) {
-            		subObj = parent.opt(columnElements[n]);
-                	if(subObj==null) {
-                		subObj=new JSONObject();
-                		parent.put(columnElements[n], subObj);
-                	}
-                	parent=(JSONObject)subObj;
-            	}
-            	parent.put(columnElements[n], value);                
-            }
-            if(line > 0) {
-                builder.append(',');
-            }
-            builder.append(obj.toString());
-            line+=1;
-        }
-        builder.append("]");
-        return builder.toString();
+        return resultSetToJSon(resultSet).toString();
     }
 
     
@@ -232,16 +216,16 @@ public abstract class JdbcDataStoreService implements DataStoreService {
      * @inheritDoc
      * @see DataStoreService#select(java.lang.String)
      */
-    public JSONArray select(final String query) {
-        return this.<JSONArray>executeStatement(new Executable<Statement, JSONArray>() {
+    public JsonArray select(final String query) {
+        return this.<JsonArray>executeStatement(new Executable<Statement, JsonArray>() {
             @Override
-            public JSONArray execute(Statement statement) throws Exception {
+            public JsonArray execute(Statement statement) throws Exception {
                 try {
                     ResultSet rs = null;
                     synchronized (lock) {
                         rs = statement.executeQuery(query);
                     }
-                    JSONArray result = resultSetToJSon(rs);
+                    JsonArray result = resultSetToJSon(rs);
                     return result;
 
                 } catch (Exception e) {

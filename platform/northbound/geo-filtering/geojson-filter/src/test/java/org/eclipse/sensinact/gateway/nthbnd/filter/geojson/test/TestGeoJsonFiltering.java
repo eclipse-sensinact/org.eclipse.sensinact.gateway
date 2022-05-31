@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.nthbnd.filter.geojson.test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.StringReader;
+import java.util.HashSet;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
@@ -104,7 +105,11 @@ public class TestGeoJsonFiltering{
         + "\"type\":\"geojson\"}],\"type\":\"COMPLETE_LIST\"," 
         + "\"uri\":\"/\",\"statusCode\":200}")).readObject();
 
-        assertEquals(expected, result);
+        assertEquals(new HashSet<>(expected.getJsonArray("providers")), new HashSet<>(result.getJsonArray("providers")));
+        assertEquals(expected.get("filters"), result.get("filters"));
+        assertEquals(expected.get("type"), result.get("type"));
+        assertEquals(expected.get("uri"), result.get("uri"));
+        assertEquals(expected.get("statusCode"), result.get("statusCode"));
 
         simulated3 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact?geojson={%22latitude%22:45.2,%22longitude%22:5.7,%22distance%22:1000,%22output%22:true}", null, "GET");
         System.out.println(simulated3);
@@ -187,7 +192,11 @@ public class TestGeoJsonFiltering{
         + "\"type\":\"geojson\"}],\"type\":\"COMPLETE_LIST\"," 
         + "\"uri\":\"/\",\"statusCode\":200}")).readObject();
 
-        assertEquals(expected, result);
+        assertEquals(new HashSet<>(expected.getJsonArray("providers")), new HashSet<>(result.getJsonArray("providers")));
+        assertEquals(expected.get("filters"), result.get("filters"));
+        assertEquals(expected.get("type"), result.get("type"));
+        assertEquals(expected.get("uri"), result.get("uri"));
+        assertEquals(expected.get("statusCode"), result.get("statusCode"));
 
         simulated3 = this.synchronizedRequest(client, "/sensinact", 
         		"[{\"name\":\"geojson\",\"type\":\"string\",\"value\":\"{\\\"latitude\\\":45.2,\\\"longitude\\\":5.7,\\\"distance\\\":1000,\\\"output\\\":true}\"}]");

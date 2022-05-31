@@ -10,7 +10,8 @@
 package org.eclipse.sensinact.gateway.core.security.entity;
 
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Immutable;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  *
@@ -47,7 +48,7 @@ public abstract class ImmutableSnaEntity extends SnaEntity {
 	 * @param mediator
 	 * @param row
 	 */
-	public ImmutableSnaEntity(JSONObject row) {
+	public ImmutableSnaEntity(JsonObject row) {
 		super(row);
 	}
 }
