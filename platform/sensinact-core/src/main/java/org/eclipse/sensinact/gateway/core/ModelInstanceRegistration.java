@@ -32,6 +32,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.security.AccessLevelOption;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessNode;
+import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.GeoJsonUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.eclipse.sensinact.gateway.util.location.Point;
@@ -40,6 +41,10 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 
 /**
  * Wraps the {@link ServiceRegistration} of a {@link SensiNactResourceModel}
@@ -385,21 +390,24 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 		switch (((SnaMessageSubType) message.getType()).getSnaMessageType()) {
 		case UPDATE:
 			SnaUpdateMessage m = (SnaUpdateMessage) message;
-			JSONObject notification = m.getNotification();
+			JsonObject notification = m.getNotification();
 			String key = new StringBuilder().append(uriElements[1]).append(".").append(uriElements[2]).toString();
 			switch(m.getType()) {
 				case ATTRIBUTE_VALUE_UPDATED:
 					List<String> obs = this.observed.get(key);
 					if (obs != null && !obs.isEmpty() && obs.contains(uriElements[3])) {
-						Object value = notification.opt(DataResource.VALUE);
+						JsonValue value = notification.get(DataResource.VALUE);
+						Object decoded = CastUtils.cast(CastUtils.jsonTypeToJavaType(notification.getString("type")), value);
+						
 						this.updateObserved(new StringBuilder().append(key).append("."
-							).append(uriElements[3]).toString(), value);
+							).append(uriElements[3]).toString(), decoded);
 					}
 					break;
 				case METADATA_VALUE_UPDATED:
-					Object value = notification.opt(DataResource.VALUE);				
+					JsonValue value = notification.get(DataResource.VALUE);		
+					Object decoded = CastUtils.cast(CastUtils.jsonTypeToJavaType(notification.getString("type")), value);
 					this.updateObserved(new StringBuilder().append(key).append("."
-						).append(uriElements[3]).append(".").append(uriElements[4]).toString(), value);					
+						).append(uriElements[3]).append(".").append(uriElements[4]).toString(), decoded);					
 					break;
 				case ACTUATED: 
 					break;
@@ -414,7 +422,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 					key = new StringBuilder().append(uriElements[1]).append(".").append(uriElements[2]).toString();
 					initial = (JSONObject) ((SnaLifecycleMessageImpl) l).get("initial");
 									
-					type = ((SnaLifecycleMessageImpl) l).getNotification().optString("type");
+					type = ((SnaLifecycleMessageImpl) l).getNotification().getString("type", null);
 					ResourceConfig config = configuration.getResourceConfig(new ResourceDescriptor(
 							).withResourceName(uriElements[2]
 							).withServiceName(uriElements[1]));

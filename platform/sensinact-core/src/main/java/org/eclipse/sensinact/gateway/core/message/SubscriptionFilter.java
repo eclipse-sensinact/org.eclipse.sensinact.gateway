@@ -19,7 +19,8 @@ import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.json.JSONArray;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -66,7 +67,7 @@ public class SubscriptionFilter extends SnaFilter {
 		if (this.conditions.isEmpty()) {
 			return true;
 		}
-		JSONObject jsonObject = (JSONObject) ((TypedProperties<SnaUpdateMessage.Update>) message)
+		JsonObject jsonObject = (JsonObject) ((TypedProperties<SnaUpdateMessage.Update>) message)
 				.get(SnaConstants.NOTIFICATION_KEY);
 
 		String type = jsonObject.getString(Resource.TYPE);
@@ -76,7 +77,7 @@ public class SubscriptionFilter extends SnaFilter {
 		} catch (ClassNotFoundException e) {
 			return false;
 		}
-		Object object = CastUtils.cast(clazz, jsonObject.opt(DataResource.VALUE));
+		Object object = CastUtils.cast(clazz, jsonObject.get(DataResource.VALUE));
 
 		Iterator<Constraint> iterator = this.conditions.iterator();
 

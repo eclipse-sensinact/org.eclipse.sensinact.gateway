@@ -9,10 +9,19 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.util;
 
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import jakarta.json.JsonArray;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
+
+import java.io.StringReader;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -323,7 +332,20 @@ public abstract class CastUtils {
         if (clazz.isAssignableFrom(object.getClass())) {
             return (T) object;
         }
-        if (JSONObject.class.isAssignableFrom(object.getClass()) || JSONArray.class.isAssignableFrom(object.getClass())) {
+        
+        if(clazz == JsonValue.class) {
+        	JsonProvider provider = JsonProviderFactory.getProvider();
+        	if(object instanceof Number) {
+        		return (T) provider.createValue((Number) object);
+        	} else if(object instanceof String) {
+        		return (T) provider.createValue((String) object);
+        	} else {
+        		return (T) provider.createReader(new StringReader(object.toString())).readValue();
+        	}
+        }
+        
+        if (JSONObject.class.isAssignableFrom(object.getClass()) || JSONArray.class.isAssignableFrom(object.getClass()) ||
+        		JsonObject.class.isAssignableFrom(object.getClass()) || JsonArray.class.isAssignableFrom(object.getClass())) {
             return CastUtils.<T>getObjectFromJSON(clazz, object);
         }
         if (CastUtils.isPrimitive(clazz)) {
@@ -462,9 +484,20 @@ public abstract class CastUtils {
         if (!CastUtils.isPrimitive(clazz)) {
             throw new ClassCastException("Destination Class is not a Primitive one");
         }
+        if(object instanceof JsonValue) {
+        	if(object instanceof JsonNumber) {
+        		object = ((JsonNumber) object).bigDecimalValue();
+        	} else if (object instanceof JsonString) {
+        		object = ((JsonString)object).getString();
+        	} else {
+        		object = object.toString();
+        	}
+        }
+
         if (clazz.isAssignableFrom(object.getClass())) {
             return (T) object;
         }
+        
         Object primitive = null;
 
         if (String.class == object.getClass()) {
@@ -720,6 +753,10 @@ public abstract class CastUtils {
 
             } else if (JSONArray.class.isAssignableFrom(json.getClass()) && String.class.isAssignableFrom(clazz)) {
                 return (T) ((JSONArray) json).toString();
+            } else if (JsonString.class.isAssignableFrom(json.getClass()) && String.class.isAssignableFrom(clazz)) {
+            	return (T) ((JsonString) json).getString();
+            } else if (JsonValue.class.isAssignableFrom(json.getClass()) && String.class.isAssignableFrom(clazz)) {
+            	return (T) json.toString();
             }
             return CastUtils.castPrimitive(clazz, json);
 
@@ -728,6 +765,12 @@ public abstract class CastUtils {
 
         } else if (JSONArray.class.isAssignableFrom(json.getClass())) {
             return getObjectFromJSON(clazz, (JSONArray) json);
+            
+        } else if (JsonObject.class.isAssignableFrom(json.getClass())) {
+        	return getObjectFromJSON(clazz, (JsonObject) json);
+        	
+        } else if (JsonArray.class.isAssignableFrom(json.getClass())) {
+        	return getObjectFromJSON(clazz, (JsonArray) json);
 
         } else if (json.getClass().equals(String.class)) {
             try {
@@ -813,6 +856,61 @@ public abstract class CastUtils {
             return (T) array;
         }
         return ReflectUtils.instantiate(clazz, jsonArray);
+    }
+    
+    /**
+     * Converts and returns a JsonObject instance into the Java
+     * object it describes
+     *
+     * @param classloader the appropriate classloader
+     * @param clazz       the Class of the Java object to instantiate
+     * @param jsonObject  the JsonObject to convert
+     * @return the created Java object
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getObjectFromJSON(Class<T> clazz, JsonObject jsonObject) {
+    	if (jsonObject == null) {
+    		return (T) null;
+    	}
+    	if (String.class.isAssignableFrom(clazz)) {
+    		return (T) jsonObject.toString();
+    	}
+    	if (clazz.isArray()) {
+    		Class<?> componentType = clazz.getComponentType();
+    		
+    		return (T) jsonObject.values().stream()
+    				.map(v -> getObjectFromJSON(componentType, v))
+    				.toArray(i -> (Object[])Array.newInstance(componentType, i));
+    	}
+    	return ReflectUtils.instantiate(clazz, jsonObject);
+    }
+    
+    /**
+     * Converts and returns a JSONArray instance into the Java
+     * object it describes
+     *
+     * @param classloader the appropriate classloader
+     * @param clazz       the Class of the Java object to instantiate
+     * @param jsonArray   the JSONArray to convert
+     * @return the created Java object
+     */
+    public static <T> T getObjectFromJSON(Class<T> clazz, JsonArray jsonArray) {
+    	if (jsonArray == null) {
+    		return (T) null;
+    	}
+    	if (clazz.isAssignableFrom(JsonArray.class)) {
+    		return (T) jsonArray;
+    	}
+    	if (String.class.isAssignableFrom(clazz)) {
+    		return (T) jsonArray.toString();
+    	}
+    	if (clazz.isArray()) {
+    		Class<?> componentType = clazz.getComponentType();
+    		return (T) jsonArray.stream()
+    				.map(v -> getObjectFromJSON(componentType, v))
+    				.toArray(i -> (Object[])Array.newInstance(componentType, i));
+    	}
+    	return ReflectUtils.instantiate(clazz, jsonArray);
     }
 
 

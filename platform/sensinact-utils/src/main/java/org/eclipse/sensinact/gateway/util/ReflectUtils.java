@@ -13,6 +13,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -768,6 +771,88 @@ public abstract class ReflectUtils {
             parameters[i][1] = (jsonObject).get(names[i]);
         }
         return newInstance(clazz, parameters);
+    }
+
+    /**
+     * Instantiate the Java object described
+     * by the JSON array passed as parameter
+     *
+     * @param clazz      the Java type to instantiate
+     * @param jsonObject the JSON array describing the java object
+     *                   to instantiate
+     * @return the Java object
+     */
+    public static <E extends Object, T> T instantiate(Class<T> clazz, JsonArray jsonObject) {
+    	T instance = null;
+    	
+    	if (jsonObject == null) {
+    		return instance;
+    	}
+    	Constructor<T> constructor = null;
+    	try {
+    		constructor = clazz.getConstructor(JsonArray.class);
+    		instance = constructor.newInstance(jsonObject);
+    		
+    	} catch (Exception e) {
+    		try {
+    			constructor = clazz.getConstructor(new Class[]{JsonArray.class});
+    			instance = constructor.newInstance(new Object[]{jsonObject});
+    			
+    		} catch (Exception ex) {
+    			LOGGER.log(Level.CONFIG, e.getMessage(), e);
+    		}
+    	}
+    	if (instance != null) {
+    		return instance;
+    	}
+    	Object[][] parameters = null;
+    	int length = jsonObject.size();
+    	parameters = new Object[length][2];
+    	for (int i = 0; i < length; i++) {
+    		parameters[i][0] = null;
+    		parameters[i][1] = jsonObject.get(i);
+    	}
+    	return newInstance(clazz, parameters);
+    }
+    
+    /**
+     * Instantiate the Java object described by the JSON object
+     * (JSONObject or JSONArray ) passed as parameter
+     *
+     * @param clazz      the Java type to instantiate
+     * @param jsonObject the JSON object describing the java one to instantiate
+     * @return the Java object
+     */
+    public static <E extends Object, T> T instantiate(Class<T> clazz, JsonObject jsonObject) {
+    	T instance = null;
+    	if (jsonObject == null) {
+    		return instance;
+    	}
+    	Constructor<T> constructor = null;
+    	try {
+    		constructor = clazz.getConstructor(JsonObject.class);
+    		instance = constructor.newInstance(jsonObject);
+    	} catch (Exception e) {
+    		try {
+    			constructor = clazz.getConstructor(new Class[]{JsonObject.class});
+    			instance = constructor.newInstance(new Object[]{jsonObject});
+    			
+    		} catch (Exception ex) {
+    			LOGGER.log(Level.CONFIG, e.getMessage(), e);
+    		}
+    	}
+    	if (instance != null) {
+    		return instance;
+    	}
+    	Object[][] parameters = null;
+    	String[] names = JSONObject.getNames(jsonObject);
+    	int length = names.length;
+    	parameters = new Object[length][2];
+    	for (int i = 0; i < length; i++) {
+    		parameters[i][0] = names[i];
+    		parameters[i][1] = (jsonObject).get(names[i]);
+    	}
+    	return newInstance(clazz, parameters);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

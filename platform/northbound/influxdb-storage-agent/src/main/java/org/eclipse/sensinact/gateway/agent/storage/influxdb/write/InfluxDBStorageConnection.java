@@ -13,16 +13,21 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Set;
+
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.historic.storage.agent.generic.StorageConnection;
 import org.eclipse.sensinact.gateway.tools.connector.influxdb.InfluxDbDatabase;
 import org.eclipse.sensinact.gateway.util.json.JSONObjectStatement;
 import org.eclipse.sensinact.gateway.util.json.JSONTokenerStatement;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
 
 /**
  * Extended {@link SorageConnection} dedicated to InfluxDB data store
@@ -115,12 +120,11 @@ public class InfluxDBStorageConnection extends StorageConnection {
 	}
 	
 	@Override
-	public void store(JSONObject obj)  {
+	public void store(JsonObject obj)  {
 		String measurement = null;
 		final Dictionary<String,Object> fs = new Hashtable<>();		
 		final Dictionary<String,String> ts = new Hashtable<>();		
-		for(Iterator<String> it = obj.keys(); it.hasNext();) {
-			String key = it.next();
+		for(String key : obj.keySet()) {
 			if(this.fields.contains(key)) {
 				fs.put(key,obj.get(key));
 				continue;
@@ -128,18 +132,17 @@ public class InfluxDBStorageConnection extends StorageConnection {
 			if(this.tags.contains(key))
 				ts.put(key,String.valueOf(obj.get(key)));
 		}
-		this.extractLocation(fs, obj.opt("location"));
-		Object o = obj.opt(DataResource.VALUE);
+		this.extractLocation(fs, obj.get("location"));
+		JsonValue o = obj.get(DataResource.VALUE);
 		Object value = null;
 		if(o != null) {			
-			if(o.getClass().isPrimitive()) {
+			if(o instanceof JsonString) {
+				value = ((JsonString)o).getString();
+			} else if (o instanceof JsonNumber) {
+				value = ((JsonNumber)o).doubleValue();
+			} else { 
 				value = String.valueOf(o);
-				if(o.getClass() != char.class && o.getClass() != boolean.class ) 
-					value = Double.parseDouble((String) value);			
-			} else if(o instanceof Number) 
-				value = ((Number)o).doubleValue();
-			else 
-				value = String.valueOf(o);
+			}
 		}
 		if(value == null)
 			measurement = this.measurement;
@@ -147,7 +150,7 @@ public class InfluxDBStorageConnection extends StorageConnection {
 			measurement=this.measurement.concat("_str");
 		else
 			measurement=this.measurement.concat("_num");
-		long tm  = obj.optLong("timestamp");
+		long tm  = obj.getJsonNumber("timestamp").longValueExact();
 		long timestamp = 0;
 		if(tm>0)
 			timestamp = tm;
@@ -158,8 +161,8 @@ public class InfluxDBStorageConnection extends StorageConnection {
 			this.database.add(measurement, ts, fs, value,timestamp);	
 	}
 
-	private void extractLocation(Dictionary<String,Object> fields, Object location)  {		
-		if(location == null)
+	private void extractLocation(Dictionary<String,Object> fields, JsonValue location)  {		
+		if(location == null || location.getValueType() == ValueType.NULL)
 			return;		
 		double latitude = -1;
 		double longitude = -1;

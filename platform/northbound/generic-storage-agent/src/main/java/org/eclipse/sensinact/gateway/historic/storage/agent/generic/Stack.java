@@ -12,10 +12,10 @@ package org.eclipse.sensinact.gateway.historic.storage.agent.generic;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONObject;
+import jakarta.json.JsonObject;
 
 public class Stack {
-	private List<JSONObject> list = new ArrayList<>();
+	private List<JsonObject> list = new ArrayList<>();
 	
 	public boolean isEmpty() {
 		synchronized (list) {
@@ -29,7 +29,7 @@ public class Stack {
 		}
 	}
 	
-	public void push(JSONObject element) {
+	public void push(JsonObject element) {
 		if (element == null)
 			return;
 		synchronized (list) {
@@ -37,7 +37,7 @@ public class Stack {
 		}
 	}
 	
-	public JSONObject pop() {
+	public JsonObject pop() {
 		synchronized (list) {
 			if (list.isEmpty())
 				return null;

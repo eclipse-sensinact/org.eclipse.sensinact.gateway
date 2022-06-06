@@ -12,7 +12,11 @@ package org.eclipse.sensinact.gateway.app.manager.test;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Metadata;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 class AppTestSnaMessage extends SnaUpdateMessageImpl {
     /**
@@ -25,7 +29,13 @@ class AppTestSnaMessage extends SnaUpdateMessageImpl {
      */
     AppTestSnaMessage(String uri, Class<?> type, Object value) {
         super(uri, Update.ATTRIBUTE_VALUE_UPDATED);
-        JSONObject json = new JSONObject().put(Metadata.TIMESTAMP, System.currentTimeMillis()).put(DataResource.VALUE, value).put(DataResource.TYPE, type.getCanonicalName()).put(DataResource.NAME, uri.split("/")[2]);
+        JsonObject json = JsonProviderFactory.getProvider()
+				.createObjectBuilder()
+				.add(Metadata.TIMESTAMP, System.currentTimeMillis())
+				.add(DataResource.VALUE, CastUtils.cast(JsonValue.class, value))
+				.add(DataResource.TYPE, type.getCanonicalName())
+				.add(DataResource.NAME, uri.split("/")[2])
+				.build();
         super.setNotification(json);
     }
 }

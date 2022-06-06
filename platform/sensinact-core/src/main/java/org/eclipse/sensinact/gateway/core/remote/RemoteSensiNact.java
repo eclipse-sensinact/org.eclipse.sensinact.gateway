@@ -33,6 +33,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaRemoteMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaRemoteMessageImpl;
 import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -441,9 +442,13 @@ public class RemoteSensiNact implements RemoteCore {
 	private final void propagateRemoteConnectionStatus(boolean connected, String namespace) {
 		SnaRemoteMessageImpl message = new SnaRemoteMessageImpl(UriUtils.ROOT, 
 			connected?SnaRemoteMessage.Remote.CONNECTED:SnaRemoteMessage.Remote.DISCONNECTED);
-		message.setNotification(new JSONObject().put(SnaConstants.REMOTE, 
-			connected?SnaRemoteMessage.Remote.CONNECTED.name():SnaRemoteMessage.Remote.DISCONNECTED.name())
-				.put(SnaConstants.NAMESPACE, namespace));
+		
+		message.setNotification(JsonProviderFactory.getProvider()
+				.createObjectBuilder()
+				.add(SnaConstants.REMOTE, connected ? SnaRemoteMessage.Remote.CONNECTED.name() 
+						: SnaRemoteMessage.Remote.DISCONNECTED.name())
+				.add(SnaConstants.NAMESPACE, namespace)
+				.build());
 		dispatch("*", message);
 	}
 }

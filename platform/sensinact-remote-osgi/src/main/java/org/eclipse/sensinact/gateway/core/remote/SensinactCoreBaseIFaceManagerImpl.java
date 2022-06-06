@@ -1,6 +1,7 @@
 package org.eclipse.sensinact.gateway.core.remote;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -15,7 +16,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaRemoteMessageImpl;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttTopic;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.listener.MqttTopicMessage;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -27,6 +28,9 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
+import jakarta.json.spi.JsonProvider;
 
 public class SensinactCoreBaseIFaceManagerImpl implements SensinactCoreBaseIFaceManager  {
 	
@@ -60,13 +64,14 @@ public class SensinactCoreBaseIFaceManagerImpl implements SensinactCoreBaseIFace
 				@Override
 				protected void messageReceived(String topic, String mqttMessage) {
 					LOG.info("Received remote notification from namespace {} on topic {} with message {}",remoteNamespace, topic, mqttMessage);
-					JSONObject event=new JSONObject(mqttMessage);
+					JsonProvider jp = JsonProviderFactory.getProvider();
+					JsonObject event= jp.createReader(new StringReader(mqttMessage)).readObject();
 					String path=event.getString("uri");
 					String provider = path.split("/")[1];
 					String uriTranslated= path.replaceFirst("/"+ provider, String.format("/%s:%s", remoteNamespace, provider));
-					event.remove("uri");
-					event.put("uri",uriTranslated);
-					LOG.debug("Forwarding message received in local sensinact as {}",event.toString());
+					
+					JsonObject toForward = jp.createObjectBuilder(event).add("uri", uriTranslated).build();
+					LOG.debug("Forwarding message received in local sensinact as {}",toForward.toString());
 					SnaMessage<?> message = AbstractSnaMessage.fromJSON(SensinactCoreBaseIFaceObserverCustomizer.this.mediator,event.toString());
 					notifyCallbacks(message);
 				}
@@ -75,7 +80,10 @@ public class SensinactCoreBaseIFaceManagerImpl implements SensinactCoreBaseIFace
 				mb.subscribeToTopic(topic);
 				mb.connect();
 				SnaRemoteMessageImpl message = new SnaRemoteMessageImpl("/", SnaRemoteMessage.Remote.CONNECTED);
-				message.setNotification(new JSONObject().append(SnaConstants.NAMESPACE, remoteNamespace));
+				message.setNotification(JsonProviderFactory.getProvider()
+						.createObjectBuilder()
+						.add(SnaConstants.NAMESPACE, remoteNamespace)
+						.build());
 				notifyCallbacks(message);
 			} catch (Exception e) {
 				LOG.error("Failed to connect to broker {}",brokerAddr,e);
@@ -91,7 +99,10 @@ public class SensinactCoreBaseIFaceManagerImpl implements SensinactCoreBaseIFace
 			try {
 				service.disconnect();
 				SnaRemoteMessageImpl message = new SnaRemoteMessageImpl("/", SnaRemoteMessage.Remote.DISCONNECTED);
-				message.setNotification(new JSONObject().append(SnaConstants.NAMESPACE, key));
+				message.setNotification(JsonProviderFactory.getProvider()
+						.createObjectBuilder()
+						.add(SnaConstants.NAMESPACE, key)
+						.build());
 				notifyCallbacks(message);
 			} catch (Exception e) {
 				LOG.error("Failing disconnecting from broker {}",service.getHost());

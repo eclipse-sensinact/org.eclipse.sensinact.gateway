@@ -22,6 +22,9 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
+
 /**
  * JSON Helpers
  *
@@ -80,6 +83,12 @@ public class JSONUtils {
         }
         if (JSONArray.class.isAssignableFrom(object.getClass())) {
             return ((JSONArray) object).toString();
+        }
+        if (JsonString.class.isAssignableFrom(object.getClass())) {
+        	return ((JsonString) object).getString();
+        }
+        if (JsonValue.class.isAssignableFrom(object.getClass())) {
+        	return object.toString();
         }
         if (object.getClass().isArray()) {
             return JSONUtils.arrayToJSONFormat(object, context);

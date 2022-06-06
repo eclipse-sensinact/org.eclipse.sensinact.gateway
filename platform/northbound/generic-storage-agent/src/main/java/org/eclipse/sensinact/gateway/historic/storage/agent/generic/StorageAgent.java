@@ -14,29 +14,32 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.LocationResource;
 import org.eclipse.sensinact.gateway.core.Resource;
+import org.eclipse.sensinact.gateway.core.message.AgentRelay;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.whiteboard.AbstractAgentRelay;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
 
 /**
  * {@link AgentRelay} in charge of relaying event notifications to the {@link StorageConnection}
@@ -225,8 +228,8 @@ public abstract class StorageAgent extends AbstractAgentRelay {
 		}
 	}
 	
-	private Dictionary<String,Object> preProcessSnaMessage(SnaMessage<?> message){
-        final Dictionary<String,Object> ts = new Hashtable<>();
+	private Map<String,Object> preProcessSnaMessage(SnaMessage<?> message){
+        final Map<String,Object> ts = new HashMap<>();
         Map<String,Executable<SnaMessage<?>,Object>>processors = this.loadRegisteredProcessors();
         for(Iterator<String> it = processors.keySet().iterator();it.hasNext();) {
 			String key = it.next();
@@ -251,13 +254,13 @@ public abstract class StorageAgent extends AbstractAgentRelay {
     public void doHandle(SnaLifecycleMessageImpl message) {
         if (!Lifecycle.RESOURCE_APPEARING.equals(message.getType()) || Resource.Type.ACTION.equals(message.getNotification(Resource.Type.class, "type")))
             return;
-        this.doHandle( message.getPath(), message.<JSONObject>get("initial"), preProcessSnaMessage(message));
+        this.doHandle( message.getPath(), message.<JsonObject>get("initial"), preProcessSnaMessage(message));
     }
 
     // 
-    private void doHandle(String path, JSONObject content, Dictionary<String, Object> ts) {
-        Object value = content.opt(DataResource.VALUE);
-        if (content.has(DataResource.VALUE) &&  JSONObject.NULL.equals(value)) {
+    private void doHandle(String path, JsonObject content, Map<String, Object> ts) {
+        JsonValue value = content.get(DataResource.VALUE);
+        if (content.containsKey(DataResource.VALUE) &&  JsonObject.NULL.equals(value)) {
             //exclude initial null value
             return;
         }        
@@ -273,7 +276,7 @@ public abstract class StorageAgent extends AbstractAgentRelay {
     	if(this.storageConnection == null)
     		return;
 
-		String attribute = (String) content.opt("name");		
+		String attribute = (String) content.getString("name", null);		
 
 		if(pathElements[2].equals(attribute))
 			attribute = "value";
@@ -295,7 +298,7 @@ public abstract class StorageAgent extends AbstractAgentRelay {
 			}
 		}
 		Long timestamp;
-        Object timestampProp = content.opt("timestamp");
+        JsonValue timestampProp = content.get("timestamp");
         if (timestampProp == null) 
             timestamp = System.currentTimeMillis();
         else {
@@ -307,15 +310,21 @@ public abstract class StorageAgent extends AbstractAgentRelay {
         }
         String timestampStr = FORMAT.format(new Date(timestamp));
 		
-        JSONObject jsonObject = new JSONObject();
-        for(Enumeration<String> it = ts.keys();it.hasMoreElements();) {
-        	String k = it.nextElement();
-        	jsonObject.put(k, ts.get(k));
+        JsonObjectBuilder jsonObject = JsonProviderFactory.getProvider().createObjectBuilder();
+        for(Entry<String, Object> e : ts.entrySet()) {
+        	Object tmp = e.getValue();
+        	if(tmp instanceof JsonValue) {
+        		jsonObject.add(e.getKey(), (JsonValue) tmp);
+        	} else if(tmp instanceof Number) {
+        		jsonObject.add(e.getKey(), JsonProviderFactory.getProvider().createValue((Number) tmp));
+        	} else {
+        		jsonObject.add(e.getKey(), tmp.toString());
+        	}
         }
-        jsonObject.put(DataResource.VALUE, value);
-        jsonObject.put("timestamp", timestampStr);
+        jsonObject.add(DataResource.VALUE, value);
+        jsonObject.add("timestamp", timestampStr);
         
-        this.storageConnection.stack.push(jsonObject);
+        this.storageConnection.stack.push(jsonObject.build());
         
         LOG.debug("pushed to stack : {}/{}...", path, value);
     }

@@ -22,6 +22,8 @@ import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.message.MidCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.message.SnaConstants;
+import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaNotificationMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
@@ -37,6 +39,7 @@ import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.core.method.SubscribeMethod;
 import org.eclipse.sensinact.gateway.core.method.UnsubscribeMethod;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -430,11 +433,12 @@ public class ResourceBuilder {
 				SnaUpdateMessage message = SnaNotificationMessageImpl.Builder.<SnaUpdateMessage>notification(
 					mediator, SnaUpdateMessage.Update.ACTUATED, resource.getPath());
 
-				JSONObject notification = new JSONObject();
-				notification.put(Metadata.TIMESTAMP, System.currentTimeMillis());
-				notification.put(Resource.TYPE, "object");
-				notification.put(DataResource.VALUE, parameter.getAccessMethodObjectResult());
-				message.setNotification(notification);
+				message.setNotification(JsonProviderFactory.getProvider()
+						.createObjectBuilder()
+						.add(Metadata.TIMESTAMP, System.currentTimeMillis())
+						.add(Resource.TYPE, "object")
+						.add(DataResource.VALUE, parameter.getAccessMethodObjectResult().toString())
+						.build());
 
 				resource.getModelInstance().postMessage(message);
 				return null;

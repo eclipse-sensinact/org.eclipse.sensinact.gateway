@@ -11,7 +11,8 @@ package org.eclipse.sensinact.gateway.core.message;
 
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 import org.eclipse.sensinact.gateway.common.props.TypedKey;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * @param <S>
@@ -21,20 +22,20 @@ import org.json.JSONObject;
 public interface SnaNotificationMessage<S extends Enum<S> & SnaMessageSubType & KeysCollection> extends SnaMessage<S> {
 	
 	public static final TypedKey<?>[] PERMANENT_KEYS = new TypedKey[] {
-		new TypedKey<JSONObject>(SnaConstants.NOTIFICATION_KEY, JSONObject.class, false) };
+		new TypedKey<JsonObject>(SnaConstants.NOTIFICATION_KEY, JsonObject.class, false) };
 
 	/**
-	 * Returns the {@link JSONObject} notification's content
+	 * Returns the {@link JsonObject} notification's content
 	 * 
-	 * @return the {@link JSONObject} notification's content
+	 * @return the {@link JsonObject} notification's content
 	 */
-	JSONObject getNotification();
+	JsonObject getNotification();
 
 	/**
-	 * Defines the {@link JSONObject} notification's content
+	 * Defines the {@link JsonObject} notification's content
 	 * 
 	 * @param jsonObject
-	 *            the {@link JSONObject} notification's content
+	 *            the {@link JsonObject} notification's content
 	 */
-	void setNotification(JSONObject jsonObject);
+	void setNotification(JsonObject jsonObject);
 }

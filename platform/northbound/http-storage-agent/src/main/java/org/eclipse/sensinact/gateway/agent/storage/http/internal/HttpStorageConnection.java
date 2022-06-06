@@ -24,9 +24,10 @@ import org.eclipse.sensinact.gateway.protocol.http.client.Request;
 import org.eclipse.sensinact.gateway.protocol.http.client.Response;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
 
 /**
  * HTTP Agent dedicated to storage service
@@ -63,7 +64,7 @@ public class HttpStorageConnection extends StorageConnection {
 	 * Executes the HTTP request defined by the method, target, headers and entity
 	 * arguments
 	 */
-	protected void store(JSONObject object) {
+	protected void store(JsonObject object) {
 		ConnectionConfiguration<SimpleResponse, SimpleRequest> configuration = new ConnectionConfigurationImpl<>();
 		try {
 			configuration.setContentType("application/json");

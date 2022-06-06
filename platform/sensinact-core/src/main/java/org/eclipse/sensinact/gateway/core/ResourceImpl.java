@@ -9,6 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.core;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -50,9 +51,12 @@ import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
 
 /**
  * Basis {@link Resource} implementation
@@ -725,7 +729,8 @@ public class ResourceImpl extends
 		int index = 0;
 		int length = links.length;
 
-		JSONObject attributeDescription = new JSONObject(attribute.getDescription().getJSON());
+		JsonObject attributeDescription = JsonProviderFactory.getProvider().createReader(
+				new StringReader(attribute.getDescription().getJSON())).readObject();
 
 		for (; index < length; index++) {
 			StringBuilder buffer = new StringBuilder();
@@ -752,7 +757,11 @@ public class ResourceImpl extends
 		SnaUpdateMessage message = SnaNotificationMessageImpl.Builder.<SnaUpdateMessage>notification(
 			super.modelInstance.mediator(), SnaUpdateMessage.Update.METADATA_VALUE_UPDATED, 
 				UriUtils.getUri(new String[] {getPath(), attribute.getName(), metadata.getName()}));
-		message.setNotification(metadata.getJSONObjectDescription());
+		
+		JsonObject notification = JsonProviderFactory.getProvider().createReader(
+				new StringReader(metadata.getJSON())).readObject();
+		
+		message.setNotification(notification);
 		super.modelInstance.postMessage(message);
 	}
 	
@@ -785,11 +794,15 @@ public class ResourceImpl extends
 		SnaLifecycleMessage notification = SnaNotificationMessageImpl.Builder.<SnaLifecycleMessage>notification(
 				super.modelInstance.mediator(), SnaLifecycleMessage.Lifecycle.RESOURCE_APPEARING, path);
 
-		JSONObject notificationObject = new JSONObject();
+		notification.setNotification(JsonProviderFactory.getProvider()
+				.createObjectBuilder()
+				.add(SnaConstants.ADDED_OR_REMOVED, SnaLifecycleMessage.Lifecycle.RESOURCE_APPEARING.name())
+				.add(Resource.TYPE, this.getType().name())
+				.build());
 
-		notificationObject.put(SnaConstants.ADDED_OR_REMOVED, SnaLifecycleMessage.Lifecycle.RESOURCE_APPEARING.name());
-		notificationObject.put(Resource.TYPE, this.getType());
-		notification.setNotification(notificationObject);
+//		notificationObject.put(SnaConstants.ADDED_OR_REMOVED, SnaLifecycleMessage.Lifecycle.RESOURCE_APPEARING.name());
+//		notificationObject.put(Resource.TYPE, this.getType());
+//		notification.setNotification(notificationObject);
 
 		for(Attribute attribute : this.elements) {
 
