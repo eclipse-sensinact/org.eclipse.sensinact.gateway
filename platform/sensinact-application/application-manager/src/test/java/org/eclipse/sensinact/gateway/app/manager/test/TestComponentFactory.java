@@ -47,7 +47,7 @@ import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.TypeConfig;
 import org.eclipse.sensinact.gateway.core.method.GetResponse;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -55,6 +55,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.osgi.framework.ServiceReference;
+
+import jakarta.json.JsonObject;
 
 public class TestComponentFactory {
     
@@ -100,7 +102,7 @@ public class TestComponentFactory {
 
         ResourceImpl uninstallResource = builder.build(modelInstance, adminService);
         Mockito.when(adminService.getResource(AppConstant.UNINSTALL)).thenReturn(uninstallResource);
-        Mockito.when(getResponse.getResponse(DataResource.TYPE)).thenReturn("int");
+        Mockito.when(getResponse.getResponse(String.class, DataResource.TYPE)).thenReturn("int");
         Mockito.when(resource.get(DataResource.VALUE)).thenReturn(getResponse);
         Mockito.when(session.resource(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(resource);
         Mockito.when(device.getName()).thenReturn("TestAppDevice");
@@ -133,8 +135,8 @@ public class TestComponentFactory {
             e.printStackTrace();
         }
         if (content != null) {
-            String name = new JSONObject(content).getJSONArray("parameters").getJSONObject(0).getString(AppJsonConstant.VALUE);
-            JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
+            String name = JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(0).getString(AppJsonConstant.VALUE);
+            JsonObject json = JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(1).getJsonObject(AppJsonConstant.VALUE);
             AppContainer container = new AppContainer(mediator, name, json);
             assertNotNull(container);
             ApplicationService service = null;

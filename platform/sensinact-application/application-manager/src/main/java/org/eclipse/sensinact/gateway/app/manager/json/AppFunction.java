@@ -10,8 +10,13 @@
 package org.eclipse.sensinact.gateway.app.manager.json;
 
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.spi.JsonProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,20 +32,20 @@ public class AppFunction implements JSONable {
         this.runParameters = runParameters;
     }
 
-    public AppFunction(JSONObject json) {
+    public AppFunction(JsonObject json) {
         this.name = json.getString(AppJsonConstant.APP_FUNCTION_NAME);
         this.buildParameters = new ArrayList<AppParameter>();
-        if (json.has(AppJsonConstant.APP_FUNCTION_BUILD_PARAMETERS)) {
-            JSONArray parameterArray = json.getJSONArray(AppJsonConstant.APP_FUNCTION_BUILD_PARAMETERS);
-            for (int i = 0; i < parameterArray.length(); i++) {
-                buildParameters.add(new AppParameter(parameterArray.getJSONObject(i)));
+        if (json.containsKey(AppJsonConstant.APP_FUNCTION_BUILD_PARAMETERS)) {
+            JsonArray parameterArray = json.getJsonArray(AppJsonConstant.APP_FUNCTION_BUILD_PARAMETERS);
+            for (int i = 0; i < parameterArray.size(); i++) {
+                buildParameters.add(new AppParameter(parameterArray.getJsonObject(i)));
             }
         }
         this.runParameters = new ArrayList<AppParameter>();
-        if (json.has(AppJsonConstant.APP_FUNCTION_RUN_PARAMETERS)) {
-            JSONArray parameterArray = json.getJSONArray(AppJsonConstant.APP_FUNCTION_RUN_PARAMETERS);
-            for (int i = 0; i < parameterArray.length(); i++) {
-                runParameters.add(new AppParameter(parameterArray.getJSONObject(i)));
+        if (json.containsKey(AppJsonConstant.APP_FUNCTION_RUN_PARAMETERS)) {
+            JsonArray parameterArray = json.getJsonArray(AppJsonConstant.APP_FUNCTION_RUN_PARAMETERS);
+            for (int i = 0; i < parameterArray.size(); i++) {
+                runParameters.add(new AppParameter(parameterArray.getJsonObject(i)));
             }
         }
     }
@@ -61,22 +66,23 @@ public class AppFunction implements JSONable {
      * @see JSONable#getJSON()
      */
     public String getJSON() {
-        JSONObject function = new JSONObject();
-        function.put(AppJsonConstant.APP_FUNCTION_NAME, name);
+    	JsonProvider provider = JsonProviderFactory.getProvider();
+        JsonObjectBuilder function = provider.createObjectBuilder();
+        function.add(AppJsonConstant.APP_FUNCTION_NAME, name);
         if (!buildParameters.isEmpty()) {
-            JSONArray parametersArray = new JSONArray();
+            JsonArrayBuilder parametersArray = provider.createArrayBuilder();
             for (AppParameter parameter : buildParameters) {
-                parametersArray.put(parameter.getJSON());
+                parametersArray.add(parameter.getJSON());
             }
-            function.put(AppJsonConstant.APP_FUNCTION_BUILD_PARAMETERS, parametersArray);
+            function.add(AppJsonConstant.APP_FUNCTION_BUILD_PARAMETERS, parametersArray);
         }
         if (!runParameters.isEmpty()) {
-            JSONArray parametersArray = new JSONArray();
+            JsonArrayBuilder parametersArray = provider.createArrayBuilder();
             for (AppParameter parameter : runParameters) {
-                parametersArray.put(parameter.getJSON());
+                parametersArray.add(parameter.getJSON());
             }
-            function.put(AppJsonConstant.APP_FUNCTION_RUN_PARAMETERS, parametersArray);
+            function.add(AppJsonConstant.APP_FUNCTION_RUN_PARAMETERS, parametersArray);
         }
-        return function.toString();
+        return function.build().toString();
     }
 }

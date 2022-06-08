@@ -10,7 +10,6 @@
 package org.eclipse.sensinact.gateway.core.method;
 
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
-import org.json.JSONObject;
 
 /**
  * Extended {@link AccessMethodJSONResponse} returned by an
@@ -48,7 +47,6 @@ public class SubscribeResponse extends AccessMethodJSONResponse {
 	 * @return the subscription identifier
 	 */
 	public String getSubscriptionId() {
-		JSONObject response = super.getResponse();
-		return String.valueOf(response.opt("subscriptionId"));
+		return super.getResponse().getString("subscriptionId", null);
 	}
 }

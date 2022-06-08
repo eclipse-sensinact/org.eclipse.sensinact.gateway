@@ -10,6 +10,7 @@
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -33,13 +34,17 @@ import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper.QueryKey;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonException;
+import jakarta.json.JsonStructure;
+import jakarta.json.JsonValue.ValueType;
 
 /**
  * Default {@link NorthboundRequestHandler} implementation
@@ -184,32 +189,32 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
         return true;
     }
 
-    private List<Parameter> processParameters() throws IOException, JSONException {
+    private List<Parameter> processParameters() throws IOException, JsonException {
         String content = this.request.getContent();
-        JSONArray parameters = null;
+        JsonArray parameters = null;
         if (content == null) {
-            parameters = new JSONArray();
+            parameters = JsonArray.EMPTY_JSON_ARRAY;
         } else {
             try {
-                JSONObject jsonObject = new JSONObject(content);
-                parameters = jsonObject.optJSONArray("parameters");
-
-            } catch (JSONException e) {
-                try {
-                    parameters = new JSONArray(content);
-                } catch (JSONException je) {
-                    LOG.debug("No JSON formated content in {}", content);
-                }
+            	JsonStructure json = JsonProviderFactory.getProvider().createReader(new StringReader(content)).read();
+            	
+            	if(json.getValueType() == ValueType.OBJECT) {
+            		parameters = json.asJsonObject().getJsonArray("parameters");
+            	} else {
+            		parameters = json.asJsonArray();
+            	}
+            } catch (Exception e) {
+            	LOG.debug("No JSON formated content in {}", content);
             }
         }
         int index = 0;
-        int length = parameters == null ? 0 : parameters.length();
+        int length = parameters == null ? 0 : parameters.size();
 
         List<Parameter> parametersList = new ArrayList<Parameter>();
         for (; index < length; index++) {
             Parameter parameter = null;
             try {
-                parameter = new Parameter(mediator, parameters.optJSONObject(index));
+                parameter = new Parameter(mediator, parameters.getJsonObject(index));
             } catch (InvalidValueException e) {
                 LOG.error(e.getMessage(), e);
                 continue;
@@ -228,11 +233,12 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
             try {
                 parameter = new Parameter(mediator, 
                 	entry.getKey().name, 
-                	entry.getValue().size() > 1 ? JSONArray.class : String.class, 
-                	entry.getValue().size() == 0 ? "true" : (entry.getValue().size() == 1 ? entry.getValue().get(0) : new JSONArray(entry.getValue()))
+                	entry.getValue().size() > 1 ? JsonArray.class : String.class, 
+                	entry.getValue().size() == 0 ? "true" : (entry.getValue().size() == 1 ? entry.getValue().get(0) : 
+                		toJsonArray(entry.getValue()))
                 );
             } catch (InvalidValueException e) {
-                throw new JSONException(e);
+                throw new JsonException(e.getMessage(), e);
             }
             if ("attributeName".equals(parameter.getName()) && String.class == parameter.getType()) {
                 this.attribute = (String) parameter.getValue();
@@ -241,6 +247,14 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
             parametersList.add(parameter);
         }
         return parametersList;
+    }
+    
+    private JsonArray toJsonArray(List<String> list) {
+    	JsonArrayBuilder jab = JsonProviderFactory.getProvider().createArrayBuilder();
+    	for(String s : list) {
+    		jab.add(s);
+    	}
+    	return jab.build();
     }
 
     private void processAttribute(NorthboundRequestBuilder builder) {
@@ -309,7 +323,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
             LOG.error(e.getMessage(), e);
             this.buildError = new NorthboundResponseBuildError(500, "Error processing the request content");
             return null;
-        } catch (JSONException e) {
+        } catch (JsonException e) {
             LOG.error(e.getMessage(), e);
             String content = this.request.getContent();
             if (content != null && !content.isEmpty()) {
@@ -394,7 +408,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
                 boolean isComplement = false;
                 String policy = String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY);
                 SnaMessage.Type[] types = null;
-                JSONArray conditions = null;
+                JsonArray conditions = null;
 
                 List<Parameter> extraParameters = new ArrayList<>();
                 
@@ -408,7 +422,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
 	                    	found = true;
 	                        break;
 	                    case "conditions":
-	                        conditions = CastUtils.cast(JSONArray.class, parameter.getValue());
+	                        conditions = CastUtils.cast(JsonArray.class, parameter.getValue());
 	                    	found = true;
 	                        break;
                         case "sender":
@@ -446,7 +460,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
                     types = SnaMessage.Type.values();
                 
                 if (conditions == null) 
-                    conditions = new JSONArray();
+                    conditions = JsonArray.EMPTY_JSON_ARRAY;
                 
                 builder.withArgument(new Argument(NorthboundRecipient.class, recipient));
                 if (this.resource == null) {
@@ -454,7 +468,7 @@ public class DefaultNorthboundRequestHandler implements NorthboundRequestHandler
                     snaFilter.addHandledType(types);       
                     builder.withArgument(new Argument(SnaFilter.class, snaFilter));
                 } else {
-                    builder.withArgument(new Argument(JSONArray.class, conditions));
+                    builder.withArgument(new Argument(JsonArray.class, conditions));
                     builder.withArgument(new Argument(String.class, policy));
                 }                
                 index = 0;

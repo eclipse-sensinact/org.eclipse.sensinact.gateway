@@ -9,6 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.core.method;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -30,10 +31,16 @@ import org.eclipse.sensinact.gateway.core.Metadata;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * A Parameter of an {@link AccessMethod} on which can apply set of constraints
@@ -113,21 +120,21 @@ public class Parameter extends Primitive implements JSONable, Cloneable {
 	 * 
 	 * @throws InvalidValueException
 	 */
-	public Parameter(Mediator mediator, JSONObject parameter) throws InvalidValueException {
+	public Parameter(Mediator mediator, JsonObject parameter) throws InvalidValueException {
 		super(mediator, parameter);
-		this.fixed = parameter.optBoolean(FIXED_PARAMETER_KEY);	
+		this.fixed = parameter.getBoolean(FIXED_PARAMETER_KEY, false);	
 		if (fixed) {
-			this.fixedValue = parameter.opt(DataResource.VALUE);
+			this.fixedValue = CastUtils.getObjectFromJSON(this.getType(), parameter.get(DataResource.VALUE));
 			this.constraints = Collections.emptyList();
 		} else {
 			this.fixedValue = null;
-			JSONArray constraints = parameter.optJSONArray(Metadata.CONSTRAINTS);
+			JsonArray constraints = parameter.getJsonArray(Metadata.CONSTRAINTS);
 			List<Constraint> constraintList = new ArrayList<Constraint>();
 			int index = 0;
-			int length = constraints == null ? 0 : constraints.length();
+			int length = constraints == null ? 0 : constraints.size();
 			try {
 				for (; index < length; index++) {
-					JSONObject constraintJSON = constraints.getJSONObject(index);
+					JsonObject constraintJSON = constraints.getJsonObject(index);
 					Constraint constraint = ConstraintFactory.Loader.load(super.mediator.getClassLoader(),constraintJSON);
 					constraintList.add(constraint);
 				}
@@ -185,7 +192,7 @@ public class Parameter extends Primitive implements JSONable, Cloneable {
 	 *         <li>false otherwise</li>
 	 *         </ul>
 	 */
-	public boolean validParameter(JSONObject jsonParameter) {
+	public boolean validParameter(JsonObject jsonParameter) {
 		try {
 			Parameter parameter = new Parameter(super.mediator, jsonParameter);
 			this.validParameter(parameter, false);
@@ -249,11 +256,11 @@ public class Parameter extends Primitive implements JSONable, Cloneable {
 
 	@Override
 	public String getJSON() {
-		JSONObject description = getJSONObject();
+		JsonObjectBuilder description = getJSONObject();
 		if (String.class == this.getType() || this.getType().isPrimitive()) 
-			description.put(PrimitiveDescription.VALUE_KEY, this.getValue());
+			description.add(PrimitiveDescription.VALUE_KEY, CastUtils.cast(JsonValue.class, this.getValue()));
 		else
-			description.put(PrimitiveDescription.VALUE_KEY, JSONUtils.toJSONFormat(this.getValue()));
+			description.add(PrimitiveDescription.VALUE_KEY, JSONUtils.toJSONFormat(this.getValue()));
 		return description.toString();
 	}
 	
@@ -263,21 +270,22 @@ public class Parameter extends Primitive implements JSONable, Cloneable {
 	 * 
 	 * @return the basis JSONObject describing this Parameter
 	 */
-	protected final JSONObject getJSONObject() {
-		JSONObject description = new JSONObject();
-		description.put(PrimitiveDescription.NAME_KEY, name);
+	protected final JsonObjectBuilder getJSONObject() {
+		JsonProvider provider = JsonProviderFactory.getProvider();
+		JsonObjectBuilder description = provider.createObjectBuilder();
+		description.add(PrimitiveDescription.NAME_KEY, name);
 		String typeName = CastUtils.writeClass(this.type);
 
-		description.put(PrimitiveDescription.TYPE_KEY, typeName);
-		description.put(FIXED_PARAMETER_KEY, this.fixed);
+		description.add(PrimitiveDescription.TYPE_KEY, typeName);
+		description.add(FIXED_PARAMETER_KEY, this.fixed);
 		
-		JSONArray constraints = new JSONArray();
+		JsonArrayBuilder constraints = provider.createArrayBuilder();
 		Iterator<Constraint> iterator = this.constraints.iterator();
 		while (iterator.hasNext()) {
 			Constraint constraint = iterator.next();
-			constraints.put(new JSONObject(constraint.getJSON()));
+			constraints.add(provider.createReader(new StringReader(constraint.getJSON())).readObject());
 		}
-		description.put(Metadata.CONSTRAINTS, constraints);
+		description.add(Metadata.CONSTRAINTS, constraints);
 		return description;
 	}
 

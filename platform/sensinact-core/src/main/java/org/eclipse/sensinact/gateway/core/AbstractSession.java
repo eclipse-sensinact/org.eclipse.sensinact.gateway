@@ -36,6 +36,9 @@ import org.eclipse.sensinact.gateway.core.method.UnsubscribeResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+
 /**
  * Abstract {@link Session} implementation
  * 
@@ -71,10 +74,10 @@ public abstract class AbstractSession implements Session {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <A extends AccessMethodResponse<JSONObject>> A responseFromJSONObject(Mediator mediator, String uri,
-			String method, JSONObject object) throws Exception {
+	protected <A extends AccessMethodResponse<JsonObject>> A responseFromJSONObject(Mediator mediator, String uri,
+			String method, JsonObject object) throws Exception {
 		if (object == null) 
-			return AccessMethodResponse.<JSONObject, A>error(mediator, uri, AccessMethod.Type.valueOf(method),
+			return AccessMethodResponse.<JsonObject, A>error(mediator, uri, AccessMethod.Type.valueOf(method),
 				SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Not found", null);
 		else {			
 			switch (method) {
@@ -97,23 +100,23 @@ public abstract class AbstractSession implements Session {
 		return (A) null;
 	}
 
-	protected <A extends AccessMethodResponse<JSONObject>> A responseFromJSONObject(Class<A> responseType, Mediator mediator, 
-		String uri, String method, JSONObject object) throws Exception {
+	protected <A extends AccessMethodResponse<JsonObject>> A responseFromJSONObject(Class<A> responseType, Mediator mediator, 
+		String uri, String method, JsonObject object) throws Exception {
 		A response = null;
 		if (object == null) 
-			response = AccessMethodResponse.<JSONObject, A>error(mediator, uri, AccessMethod.Type.valueOf(method),
+			response = AccessMethodResponse.<JsonObject, A>error(mediator, uri, AccessMethod.Type.valueOf(method),
 				SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Not found", null);
 		else {
 			object.remove("type");
 			object.remove("uri");
-			Integer statusCode = (Integer) object.remove("statusCode");
+			Integer statusCode = object.getInt("statusCode");
 			if (responseType != null) {
 				response = responseType.getConstructor(new Class<?>[] { String.class, 
 					Status.class, int.class }).newInstance(uri, statusCode.intValue() == 200 
 					? Status.SUCCESS : Status.ERROR, statusCode.intValue());
 
-				response.setResponse((JSONObject) object.remove("response"));
-				response.setErrors((JSONArray) object.remove("errors"));
+				response.setResponse(object.getJsonObject("response"));
+				response.setErrors(object.getJsonArray("errors"));
 
 				String[] names = JSONObject.getNames(object);
 				int index = 0;
@@ -127,15 +130,15 @@ public abstract class AbstractSession implements Session {
 		return response;
 	}
 
-	protected DescribeResponse<JSONObject> describeFromJSONObject(Mediator mediator, DescribeResponseBuilder<JSONObject> builder, 
-		DescribeType describeType, JSONObject object) {
-		DescribeResponse<JSONObject> response = null;
+	protected DescribeResponse<JsonObject> describeFromJSONObject(Mediator mediator, DescribeResponseBuilder<JsonObject> builder, 
+		DescribeType describeType, JsonObject object) {
+		DescribeResponse<JsonObject> response = null;
 		if (object == null) {
 			String element = describeType.name().toLowerCase();
 			String first = element.substring(0, 1).toUpperCase();
 			String suite = element.substring(1);
 
-			response = AccessMethodResponse.<JSONObject, DescribeResponse<JSONObject>>error(mediator, builder.getPath(),
+			response = AccessMethodResponse.<JsonObject, DescribeResponse<JsonObject>>error(mediator, builder.getPath(),
 					describeType, SnaErrorfulMessage.NOT_FOUND_ERROR_CODE,
 					new StringBuilder().append(first).append(suite).append(" not found").toString(), null);
 
@@ -143,12 +146,12 @@ public abstract class AbstractSession implements Session {
 			object.remove("type");
 			object.remove("uri");
 
-			builder.setAccessMethodObjectResult((JSONObject) object.remove("response"));
+			builder.setAccessMethodObjectResult(object.getJsonObject("response"));
 
 			response = builder
-					.createAccessMethodResponse(object.optInt("statusCode") == 200 ? Status.SUCCESS : Status.ERROR);
+					.createAccessMethodResponse(object.getInt("statusCode", -1) == 200 ? Status.SUCCESS : Status.ERROR);
 
-			response.setErrors((JSONArray) object.remove("errors"));
+			response.setErrors(object.getJsonArray("errors"));
 
 			String[] names = JSONObject.getNames(object);
 			int index = 0;
@@ -243,19 +246,19 @@ public abstract class AbstractSession implements Session {
 
 	@Override
 	public SubscribeResponse subscribe(String serviceProviderId, String serviceId, 
-		    String resourceId, Recipient recipient, JSONArray conditions, Object...args) {
+		    String resourceId, Recipient recipient, JsonArray conditions, Object...args) {
 		return subscribe(null, serviceProviderId, serviceId, resourceId, recipient, conditions, args);
 	}
 
 	@Override
 	public SubscribeResponse subscribe(String serviceProviderId, String serviceId, 
-		    String resourceId, Recipient recipient, JSONArray conditions, String policy, Object...args) {
+		    String resourceId, Recipient recipient, JsonArray conditions, String policy, Object...args) {
 		return subscribe(null, serviceProviderId, serviceId, resourceId, recipient, conditions, policy, args);
 	}
 
 	@Override
 	public SubscribeResponse subscribe(String requestId, String serviceProviderId, String serviceId, 
-		    String resourceId, Recipient recipient, JSONArray conditions, Object...args) {
+		    String resourceId, Recipient recipient, JsonArray conditions, Object...args) {
 		return subscribe(requestId, serviceProviderId, serviceId, resourceId, recipient, 
 				conditions, String.valueOf(ErrorHandler.Policy.DEFAULT_POLICY), args);
 	}
@@ -292,7 +295,7 @@ public abstract class AbstractSession implements Session {
 	}
 
 	@Override
-	public DescribeResponse<JSONObject> getProvider(String serviceProviderId) {
+	public DescribeResponse<JsonObject> getProvider(String serviceProviderId) {
 		return getProvider(null, serviceProviderId);
 	}
 
@@ -307,7 +310,7 @@ public abstract class AbstractSession implements Session {
 	}
 
 	@Override
-	public DescribeResponse<JSONObject> getService(final String serviceProviderId, final String serviceId) {
+	public DescribeResponse<JsonObject> getService(final String serviceProviderId, final String serviceId) {
 		return getService(null, serviceProviderId, serviceId);
 	}
 
@@ -323,7 +326,7 @@ public abstract class AbstractSession implements Session {
 	}
 
 	@Override
-	public DescribeResponse<JSONObject> getResource(final String serviceProviderId, final String serviceId,
+	public DescribeResponse<JsonObject> getResource(final String serviceProviderId, final String serviceId,
 			final String resourceId) {
 		return getResource(null, serviceProviderId, serviceId, resourceId);
 	}

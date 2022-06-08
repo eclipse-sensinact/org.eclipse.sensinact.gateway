@@ -9,23 +9,28 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.generic;
 
+import java.util.List;
+
+import org.eclipse.sensinact.gateway.core.ActionResource;
 import org.eclipse.sensinact.gateway.core.InvalidResourceException;
 import org.eclipse.sensinact.gateway.core.InvalidServiceException;
 import org.eclipse.sensinact.gateway.core.ResourceBuilder;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
+import org.eclipse.sensinact.gateway.core.ResourceProxy;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
+import org.eclipse.sensinact.gateway.core.ServiceProxy;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor.ExecutionPolicy;
 import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory;
 import org.eclipse.sensinact.gateway.generic.parser.ReferenceDefinition;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import jakarta.json.JsonObject;
 
 /**
  * Extended abstract {@link ServiceImpl} implementation
@@ -106,8 +111,8 @@ public class ExtServiceImpl extends ServiceImpl {
         AccessMethodTriggerFactory.Loader loader = AccessMethodTriggerFactory.LOADER.get();
         try {
             for (; index < length; index++) {
-                JSONObject referenceJson = new JSONObject(references.get(index).getJSON());
-                JSONObject triggerJson = referenceJson.getJSONObject(AccessMethodTrigger.TRIGGER_KEY);
+                JsonObject referenceJson =  JsonProviderFactory.readObject(references.get(index).getJSON());
+                JsonObject triggerJson = referenceJson.getJsonObject(AccessMethodTrigger.TRIGGER_KEY);
 
                 AccessMethodTriggerFactory factory = loader.load(super.modelInstance.mediator(), 
                 		triggerJson.getString(AccessMethodTrigger.TRIGGER_TYPE_KEY));

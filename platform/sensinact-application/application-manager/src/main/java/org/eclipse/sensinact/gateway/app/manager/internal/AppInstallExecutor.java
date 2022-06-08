@@ -9,6 +9,11 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.app.manager.internal;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.app.api.exception.ApplicationFactoryException;
 import org.eclipse.sensinact.gateway.app.api.exception.InvalidApplicationException;
 import org.eclipse.sensinact.gateway.app.api.lifecycle.ApplicationStatus;
@@ -44,10 +49,7 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
+import jakarta.json.JsonObject;
 
 /**
  * @author Remi Druilhe
@@ -99,7 +101,7 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
         return null;
     }
 
-    public synchronized void install(final String name, JSONObject content) throws Exception {
+    public synchronized void install(final String name, JsonObject content) throws Exception {
         // Test the JSON parameters
         if (name == null) {
             throw new InvalidApplicationException("Unable to install the application: application 'name' is null");

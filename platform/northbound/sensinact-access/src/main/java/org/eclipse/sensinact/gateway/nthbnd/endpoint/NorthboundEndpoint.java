@@ -31,10 +31,11 @@ import org.eclipse.sensinact.gateway.core.security.Authentication;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccessException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.format.ResponseFormat;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 /**
  * A NorthboundEndpoint is a connection point to a sensiNact instance
@@ -287,7 +288,7 @@ public class NorthboundEndpoint {
      * @return the JSON formated description of the specified
      * service provider wrapped into a {@link DescribeResponse}
      */
-    public DescribeResponse<JSONObject> serviceProviderDescription(String requestIdentifier, String serviceProviderId) {
+    public DescribeResponse<JsonObject> serviceProviderDescription(String requestIdentifier, String serviceProviderId) {
         return session.getProvider(requestIdentifier, serviceProviderId);
     }
 
@@ -330,7 +331,7 @@ public class NorthboundEndpoint {
      * @return the JSON formated description of the specified
      * service wrapped into a {@link DescribeResponse}
      */
-    public DescribeResponse<JSONObject> serviceDescription(String requestIdentifier, String serviceProviderId, String serviceId) {
+    public DescribeResponse<JsonObject> serviceDescription(String requestIdentifier, String serviceProviderId, String serviceId) {
         return session.getService(requestIdentifier, serviceProviderId, serviceId);
     }
 
@@ -376,7 +377,7 @@ public class NorthboundEndpoint {
      * @return the JSON formated description of the specified
      * resource wrapped into a {@link DescribeResponse}
      */
-    public DescribeResponse<JSONObject> resourceDescription(String requestIdentifier, String serviceProviderId, String serviceId, String resourceId) {
+    public DescribeResponse<JsonObject> resourceDescription(String requestIdentifier, String serviceProviderId, String serviceId, String resourceId) {
         return session.getResource(requestIdentifier, serviceProviderId, serviceId, resourceId);
     }
 
@@ -442,7 +443,7 @@ public class NorthboundEndpoint {
      * @return
      */
     public SubscribeResponse subscribe(String requestIdentifier, String serviceProviderId, String serviceId, String resourceId, String attributeId, 
-    		NorthboundRecipient recipient, JSONArray conditions, String policy, Object...args) {
+    		NorthboundRecipient recipient, JsonArray conditions, String policy, Object...args) {
         return session.subscribe(requestIdentifier, serviceProviderId, serviceId, resourceId, recipient, conditions, policy, args);
     }
 

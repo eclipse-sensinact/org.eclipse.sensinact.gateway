@@ -9,7 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.core.method;
 
-import org.json.JSONObject;
+import jakarta.json.JsonObject;
 
 /**
  * Extended {@link AccessMethodResponseBuilder} dedicated to {@link ActMethod}
@@ -18,7 +18,7 @@ import org.json.JSONObject;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
-public class ActResponseBuilder extends AccessMethodResponseBuilder<JSONObject, ActResponse> {
+public class ActResponseBuilder extends AccessMethodResponseBuilder<JsonObject, ActResponse> {
 	/**
 	 * @param uri
 	 * @param parameters
@@ -49,7 +49,7 @@ public class ActResponseBuilder extends AccessMethodResponseBuilder<JSONObject, 
 	 * @see org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder#getComponentType()
 	 */
 	@Override
-	public Class<JSONObject> getComponentType() {
-		return JSONObject.class;
+	public Class<JsonObject> getComponentType() {
+		return JsonObject.class;
 	}
 }

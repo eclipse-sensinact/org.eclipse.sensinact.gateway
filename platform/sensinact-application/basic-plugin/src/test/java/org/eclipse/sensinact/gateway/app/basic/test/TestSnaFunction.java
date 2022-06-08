@@ -55,7 +55,7 @@ import org.eclipse.sensinact.gateway.core.security.AuthorizationService;
 import org.eclipse.sensinact.gateway.core.security.SecuredAccess;
 import org.eclipse.sensinact.gateway.security.signature.api.BundleValidation;
 import org.eclipse.sensinact.gateway.security.signature.exception.BundleValidationException;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -67,6 +67,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
 
 
 public class TestSnaFunction{
@@ -168,16 +170,16 @@ public class TestSnaFunction{
         Mockito.when(session.resource(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("DIM"))).thenReturn(dimResource);
    
         Mockito.when(session.getResource(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("TURN_ON"))).thenReturn(
-    		new DescribeResponse<JSONObject>("/SimulatedLight_001/LightService_SimulatedLight_001/TURN_ON", Status.SUCCESS, DescribeType.RESOURCE) {
-    			{this.putValue(SnaConstants.RESPONSE_KEY, new JSONObject().put(Resource.TYPE, Resource.Type.ACTION.name()));}
+    		new DescribeResponse<JsonObject>("/SimulatedLight_001/LightService_SimulatedLight_001/TURN_ON", Status.SUCCESS, DescribeType.RESOURCE) {
+    			{this.putValue(SnaConstants.RESPONSE_KEY, JsonProviderFactory.getProvider().createObjectBuilder().add(Resource.TYPE, Resource.Type.ACTION.name()));}
     		});
         Mockito.when(session.getResource(Mockito.eq("SimulatedTV_001"), Mockito.eq("DisplayService_SimulatedTV_001"), Mockito.eq("DISPLAY"))).thenReturn(
-        	new DescribeResponse<JSONObject>("/SimulatedTV_001/DisplayService_SimulatedTV_001/DISPLAY", Status.SUCCESS, DescribeType.RESOURCE) {
-    			{this.putValue(SnaConstants.RESPONSE_KEY, new JSONObject().put(Resource.TYPE, Resource.Type.ACTION.name()));}
+        	new DescribeResponse<JsonObject>("/SimulatedTV_001/DisplayService_SimulatedTV_001/DISPLAY", Status.SUCCESS, DescribeType.RESOURCE) {
+    			{this.putValue(SnaConstants.RESPONSE_KEY, JsonProviderFactory.getProvider().createObjectBuilder().add(Resource.TYPE, Resource.Type.ACTION.name()));}
         	});
         Mockito.when(session.getResource(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("DIM"))).thenReturn(
-        	new DescribeResponse<JSONObject>("/SimulatedLight_001/LightService_SimulatedLight_001/DIM", Status.SUCCESS, DescribeType.RESOURCE) {
-    			{this.putValue(SnaConstants.RESPONSE_KEY, new JSONObject().put(Resource.TYPE, Resource.Type.PROPERTY.name()));}
+        	new DescribeResponse<JsonObject>("/SimulatedLight_001/LightService_SimulatedLight_001/DIM", Status.SUCCESS, DescribeType.RESOURCE) {
+    			{this.putValue(SnaConstants.RESPONSE_KEY, JsonProviderFactory.getProvider().createObjectBuilder().add(Resource.TYPE, Resource.Type.PROPERTY.name()));}
         	});
         final ActResponse actionResponse = Mockito.mock(ActResponse.class);
         Mockito.when(session.act(Mockito.eq("SimulatedLight_001"), Mockito.eq("LightService_SimulatedLight_001"), Mockito.eq("TURN_ON"), Mockito.any(Object[].class))).thenAnswer(

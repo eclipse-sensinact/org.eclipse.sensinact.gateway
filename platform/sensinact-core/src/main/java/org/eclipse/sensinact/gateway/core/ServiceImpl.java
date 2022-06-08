@@ -35,7 +35,7 @@ import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -539,7 +539,7 @@ public class ServiceImpl extends ModelElement<ModelInstance<?>, ServiceProxy, Se
 					ServiceImpl.this.passOn(AccessMethod.SET, variable.getPath(), new Object[] { DataResource.VALUE, result });
 				
 				attribute.setValue(result);
-				builder.push(new JSONObject(attribute.getDescription().getJSON()));
+				builder.push(JsonProviderFactory.readObject(attribute.getDescription().getJSON()));
 				return null;
 			}
 		}, policy);

@@ -117,7 +117,6 @@ public class MQTTAgentTest {
 
 	private Integer getSliderValue(AnonymousSession session) {
 		GetResponse getResponse = session.get("slider", "cursor", "position", DataResource.VALUE);
-	    Integer value = (Integer) getResponse.getResponse("value");
-		return value;
+	    return getResponse.getResponse(Integer.class, "value");
 	}
 }

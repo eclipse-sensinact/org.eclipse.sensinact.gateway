@@ -20,6 +20,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.json.JsonObjectBuilder;
+
 /**
  * A extended {@link Parameter} whose value is build dynamically using a
  * {@link DynamicParameterValue}
@@ -74,8 +76,8 @@ public class DynamicParameter extends Parameter {
 	 */
 	@Override
 	public String getJSON() {
-		JSONObject description = super.getJSONObject();
-		description.put(PrimitiveDescription.VALUE_KEY, ((DynamicParameterValue) super.fixedValue).getJSON());
+		JsonObjectBuilder description = super.getJSONObject();
+		description.add(PrimitiveDescription.VALUE_KEY, ((DynamicParameterValue) super.fixedValue).getJSON());
 		return description.toString();
 	}
 

@@ -23,12 +23,14 @@ import org.eclipse.sensinact.gateway.app.basic.math.MultiplicationFunction;
 import org.eclipse.sensinact.gateway.app.basic.math.SubtractionFunction;
 import org.eclipse.sensinact.gateway.app.manager.json.AppFunction;
 import org.eclipse.sensinact.gateway.app.manager.json.AppJsonConstant;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+
+import jakarta.json.JsonObject;
 
 public class TestMathInstaller  {
 
@@ -53,10 +55,10 @@ public class TestMathInstaller  {
             e.printStackTrace();
         }
         if (content != null) {
-            JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE).getJSONArray("application").getJSONObject(0);
+            JsonObject json = JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(1).getJsonObject(AppJsonConstant.VALUE).getJsonArray("application").getJsonObject(0);
             BasicInstaller installer = new BasicInstaller();
             installer.activate(context);
-            AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
+            AppFunction appFunction = new AppFunction(json.getJsonObject(AppJsonConstant.APP_FUNCTION));
             AbstractFunction<?> function = installer.getFunction(appFunction);
             assertTrue(function instanceof AdditionFunction);
         }
@@ -70,10 +72,10 @@ public class TestMathInstaller  {
             e.printStackTrace();
         }
         if (content != null) {
-            JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE).getJSONArray("application").getJSONObject(0);
+            JsonObject json = JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(1).getJsonObject(AppJsonConstant.VALUE).getJsonArray("application").getJsonObject(0);
             BasicInstaller installer = new BasicInstaller();
             installer.activate(context);
-            AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
+            AppFunction appFunction = new AppFunction(json.getJsonObject(AppJsonConstant.APP_FUNCTION));
             AbstractFunction<?> function = installer.getFunction(appFunction);
             assertTrue(function instanceof SubtractionFunction);
         }
@@ -87,10 +89,10 @@ public class TestMathInstaller  {
             e.printStackTrace();
         }
         if (content != null) {
-            JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE).getJSONArray("application").getJSONObject(0);
+            JsonObject json = JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(1).getJsonObject(AppJsonConstant.VALUE).getJsonArray("application").getJsonObject(0);
             BasicInstaller installer = new BasicInstaller();
             installer.activate(context);
-            AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
+            AppFunction appFunction = new AppFunction(json.getJsonObject(AppJsonConstant.APP_FUNCTION));
             AbstractFunction<?> function = installer.getFunction(appFunction);
             assertTrue(function instanceof MultiplicationFunction);
         }
@@ -104,10 +106,10 @@ public class TestMathInstaller  {
             e.printStackTrace();
         }
         if (content != null) {
-            JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE).getJSONArray("application").getJSONObject(0);
+            JsonObject json = JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(1).getJsonObject(AppJsonConstant.VALUE).getJsonArray("application").getJsonObject(0);
             BasicInstaller installer = new BasicInstaller();
             installer.activate(context);
-            AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
+            AppFunction appFunction = new AppFunction(json.getJsonObject(AppJsonConstant.APP_FUNCTION));
             AbstractFunction<?> function = installer.getFunction(appFunction);
             assertTrue(function instanceof DivisionFunction);
         }
@@ -121,10 +123,10 @@ public class TestMathInstaller  {
             e.printStackTrace();
         }
         if (content != null) {
-            JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE).getJSONArray("application").getJSONObject(0);
+            JsonObject json = JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(1).getJsonObject(AppJsonConstant.VALUE).getJsonArray("application").getJsonObject(0);
             BasicInstaller installer = new BasicInstaller();
             installer.activate(context);
-            AppFunction appFunction = new AppFunction(json.getJSONObject(AppJsonConstant.APP_FUNCTION));
+            AppFunction appFunction = new AppFunction(json.getJsonObject(AppJsonConstant.APP_FUNCTION));
             AbstractFunction<?> function = installer.getFunction(appFunction);
             assertTrue(function instanceof ModuloFunction);
         }

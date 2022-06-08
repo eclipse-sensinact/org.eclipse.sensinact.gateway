@@ -10,14 +10,15 @@
 package org.eclipse.sensinact.gateway.core.method;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * Unsubscription {@link AccessMethod}
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class UnsubscribeMethod extends AbstractAccessMethod<JSONObject, UnsubscribeResponse> {
+public class UnsubscribeMethod extends AbstractAccessMethod<JsonObject, UnsubscribeResponse> {
 	/**
 	 * Constructor
 	 */

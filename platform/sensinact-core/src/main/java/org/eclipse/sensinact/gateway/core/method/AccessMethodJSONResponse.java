@@ -11,7 +11,9 @@ package org.eclipse.sensinact.gateway.core.method;
 
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 /**
  * Extended {@link SnaMessage} dedicated to the responses to the
@@ -19,7 +21,7 @@ import org.json.JSONObject;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public abstract class AccessMethodJSONResponse extends AccessMethodResponse<JSONObject> {
+public abstract class AccessMethodJSONResponse extends AccessMethodResponse<JsonObject> {
 	/**
 	 * @param uri
 	 * @param type
@@ -43,8 +45,8 @@ public abstract class AccessMethodJSONResponse extends AccessMethodResponse<JSON
 	 * @param key
 	 * @return
 	 */
-	public Object getResponse(String key) {
-		return super.getResponse().opt(key);
+	public JsonValue getResponse(String key) {
+		return super.getResponse().get(key);
 	}
 
 	/**
@@ -53,7 +55,7 @@ public abstract class AccessMethodJSONResponse extends AccessMethodResponse<JSON
 	 * @return
 	 */
 	public <T> T getResponse(Class<T> clazz, String key) {
-		Object o = this.getResponse(key);
+		JsonValue o = this.getResponse(key);
 		return CastUtils.cast(clazz, o);
 	}
 

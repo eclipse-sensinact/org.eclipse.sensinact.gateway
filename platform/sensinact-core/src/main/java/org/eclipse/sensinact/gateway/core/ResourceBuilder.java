@@ -44,6 +44,9 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.spi.JsonProvider;
+
 /**
  * Builder of a {@link ResourceImpl}
  * 
@@ -419,7 +422,8 @@ public class ResourceBuilder {
 					if (JSONObject.NULL.equals(result.opt("result"))) {
 						result.remove("result");
 					}
-					parameter.setAccessMethodObjectResult(result);
+					
+					parameter.setAccessMethodObjectResult(JsonProviderFactory.readObject(result.toString()));
 				}
 				return null;
 			}
@@ -450,12 +454,10 @@ public class ResourceBuilder {
 		return new AccessMethodExecutor() {
 			@Override
 			public Void execute(AccessMethodResponseBuilder snaResult) throws Exception {
-				JSONObject result = null;
 				AttributeDescription description = resource.getDescription((String) snaResult.getParameter(0));
 
 				if (description != null) {
-					result = new JSONObject(description.getJSON());
-					snaResult.setAccessMethodObjectResult(result);
+					snaResult.setAccessMethodObjectResult(JsonProviderFactory.readObject(description.getJSON()));
 				}
 				return null;
 			}
@@ -469,8 +471,7 @@ public class ResourceBuilder {
 				Object[] parameters = snaResult.getParameters();
 				int length = parameters == null?0:parameters.length;	
 				AttributeDescription desc = resource.set((String) parameters[0], (Object)parameters[1]);
-				JSONObject result = new JSONObject(desc.getJSON());
-				snaResult.setAccessMethodObjectResult(result);
+				snaResult.setAccessMethodObjectResult(JsonProviderFactory.readObject(desc.getJSON()));
 				return null;
 			}
 		};
@@ -544,10 +545,11 @@ public class ResourceBuilder {
 						lifetime, buffer, delay);
 
 				if (callbackId != null) {
-					JSONObject result = new JSONObject();
-					result.put("subscriptionId", callbackId);
-					result.put("initial", new JSONObject(attribute.getDescription().getJSON()));
-					snaResult.setAccessMethodObjectResult(result);
+					JsonProvider provider = JsonProviderFactory.getProvider();
+					JsonObjectBuilder job = provider.createObjectBuilder();
+					job.add("subscriptionId", callbackId);
+					job.add("initial", JsonProviderFactory.readObject(provider, attribute.getDescription().getJSON()));
+					snaResult.setAccessMethodObjectResult(job.build());
 				}
 				return null;
 			}
@@ -565,7 +567,9 @@ public class ResourceBuilder {
 							new StringBuilder().append("unknown attribute :").append(attributeName).toString());
 				}
 				resource.unlisten((String) result.getParameter(1));
-				result.setAccessMethodObjectResult(new JSONObject().put("message", "unsubscription done"));
+				JsonProvider provider = JsonProviderFactory.getProvider();
+				JsonObjectBuilder job = provider.createObjectBuilder();
+				result.setAccessMethodObjectResult(job.add("message", "unsubscription done").build());
 				return null;
 			}
 		};

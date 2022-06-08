@@ -19,7 +19,7 @@ import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory;
 import org.eclipse.sensinact.gateway.core.method.trigger.TriggerArgumentBuilder;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +28,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
+
+import jakarta.json.JsonObject;
 
 /**
  * test Constraint
@@ -62,7 +64,7 @@ public class TriggerTest {
 		try {
 			AccessMethodTriggerFactory factory = loader.load(mediator, AccessMethodTrigger.Type.CONDITIONAL.name());
 
-			JSONObject jsonTrigger = new JSONObject(TriggerTest.TRIGGER_0);
+			JsonObject jsonTrigger = JsonProviderFactory.readObject(TriggerTest.TRIGGER_0);
 			AccessMethodTrigger trigger = factory.newInstance(mediator, jsonTrigger);
 
 			String triggerJSON = trigger.getJSON();
@@ -128,14 +130,14 @@ public class TriggerTest {
 					}					
 				})));
 			
-			JSONAssert.assertEquals(TriggerTest.TRIGGER_0, triggerJSON, false);
+			assertEquals(JsonProviderFactory.readObject(TriggerTest.TRIGGER_0), JsonProviderFactory.readObject(triggerJSON));
 
-			trigger = factory.newInstance(mediator, new JSONObject(TriggerTest.TRIGGER_1));
+			trigger = factory.newInstance(mediator, JsonProviderFactory.readObject(TriggerTest.TRIGGER_1));
 			assertEquals("constant", trigger.execute(new TriggerArgumentBuilder.Empty().build(null)));
 
 			JSONAssert.assertEquals(TriggerTest.TRIGGER_1, trigger.getJSON(), false);
 
-			trigger = factory.newInstance(mediator, new JSONObject(TriggerTest.TRIGGER_2));
+			trigger = factory.newInstance(mediator, JsonProviderFactory.readObject(TriggerTest.TRIGGER_2));
 			assertEquals("value", trigger.execute(new TriggerArgumentBuilder.Parameter(trigger.<Integer>getArgument()).build(
 				new AccessMethodResponseBuilder( "/", new Object[]{ 2, "copy", "value"}) {
 
@@ -184,7 +186,7 @@ public class TriggerTest {
 
 			JSONAssert.assertEquals(TriggerTest.TRIGGER_2, trigger.getJSON(), false);
 
-			jsonTrigger = new JSONObject(TriggerTest.TRIGGER_3);
+			jsonTrigger =  JsonProviderFactory.readObject(TriggerTest.TRIGGER_3);
 			factory = loader.load(mediator, jsonTrigger.getString("type"));
 			trigger = factory.newInstance(mediator, jsonTrigger);
 

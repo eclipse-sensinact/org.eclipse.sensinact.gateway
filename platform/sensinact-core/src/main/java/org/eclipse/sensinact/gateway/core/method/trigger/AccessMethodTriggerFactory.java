@@ -14,7 +14,8 @@ import java.util.ServiceLoader;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * {@link AccessMethodTrigger} factory service
@@ -104,5 +105,5 @@ public interface AccessMethodTriggerFactory {
 	 * @throws InvalidValueException
 	 *             if the {@link AccessMethodTrigger} cannot be instantiated
 	 */
-	AccessMethodTrigger newInstance(Mediator mediator, JSONObject trigger) throws InvalidValueException;
+	AccessMethodTrigger newInstance(Mediator mediator, JsonObject trigger) throws InvalidValueException;
 }

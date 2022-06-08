@@ -12,10 +12,16 @@ package org.eclipse.sensinact.gateway.app.manager.json;
 import org.eclipse.sensinact.gateway.app.api.exception.FunctionNotFoundException;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.json.JSONArray;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.spi.JsonProvider;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,18 +48,18 @@ public class AppContainer implements JSONable {
      * @param applicationName the name of the application
      * @param content         the application as a JSON object
      */
-    public AppContainer(AppServiceMediator mediator, String applicationName, JSONObject content) {
+    public AppContainer(AppServiceMediator mediator, String applicationName, JsonObject content) {
         this.applicationName = applicationName;
-        this.initialize = new AppInitialize(content.has(AppJsonConstant.INITIALIZE)
-        		?content.optJSONObject(AppJsonConstant.INITIALIZE):new JSONObject());
+        this.initialize = new AppInitialize(content.containsKey(AppJsonConstant.INITIALIZE)
+        		?content.getJsonObject(AppJsonConstant.INITIALIZE):JsonObject.EMPTY_JSON_OBJECT);
         this.components = new ArrayList<AppComponent>();
-        this.finalize = new AppFinalize(content.has(AppJsonConstant.FINALIZE)
-        		?content.optJSONObject(AppJsonConstant.FINALIZE):new JSONObject());
-        JSONArray componentArray = content.optJSONArray("application");
-        for (int i = 0; i < componentArray.length(); i++) {
+        this.finalize = new AppFinalize(content.containsKey(AppJsonConstant.FINALIZE)
+        		?content.getJsonObject(AppJsonConstant.FINALIZE):JsonObject.EMPTY_JSON_OBJECT);
+        JsonArray componentArray = content.getJsonArray("application");
+        for (int i = 0; i < componentArray.size(); i++) {
             AppComponent component;
             try {
-                component = new AppComponent(mediator, componentArray.getJSONObject(i));
+                component = new AppComponent(mediator, componentArray.getJsonObject(i));
             } catch (FunctionNotFoundException e) {
                 if (LOG.isErrorEnabled()) {
                     LOG.error("Unable to create the component", e);
@@ -126,14 +132,16 @@ public class AppContainer implements JSONable {
      * @see JSONable#getJSON()
      */
     public String getJSON() {
-        JSONObject application = new JSONObject();
-        application.put(AppJsonConstant.INITIALIZE, initialize.getJSON());
-        JSONArray componentArray = new JSONArray();
+        JsonProvider provider = JsonProviderFactory.getProvider();
+		JsonObjectBuilder application = provider.createObjectBuilder();
+        
+        application.add(AppJsonConstant.INITIALIZE, initialize.getJSON());
+        JsonArrayBuilder componentArray = provider.createArrayBuilder();
         for (AppComponent component : components) {
-            componentArray.put(component.getJSON());
+            componentArray.add(component.getJSON());
         }
-        application.put(AppJsonConstant.APPLICATION, componentArray);
-        application.put(AppJsonConstant.FINALIZE, finalize.getJSON());
-        return application.toString();
+        application.add(AppJsonConstant.APPLICATION, componentArray);
+        application.add(AppJsonConstant.FINALIZE, finalize.getJSON());
+        return application.build().toString();
     }
 }

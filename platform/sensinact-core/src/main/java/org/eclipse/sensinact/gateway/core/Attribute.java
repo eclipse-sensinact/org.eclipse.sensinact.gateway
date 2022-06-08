@@ -23,10 +23,11 @@ import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.Primitive;
 import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
 import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 /**
  * Extended {@link Primitive} defining an Attribute of a {@link Resource}
@@ -120,26 +121,26 @@ public class Attribute extends DescribablePrimitive {
 	 * interact with the OSGi host environment
 	 * @param attribute the {@link JSONObject} describing the attribute to instantiate
 	 */
-	protected Attribute(Mediator mediator, ResourceImpl resource, JSONObject attribute) throws InvalidValueException {
-		super(mediator, attribute == null ? null : attribute.optString(PrimitiveDescription.NAME_KEY),
-				attribute == null ? null : attribute.optString(PrimitiveDescription.TYPE_KEY));
+	protected Attribute(Mediator mediator, ResourceImpl resource, JsonObject attribute) throws InvalidValueException {
+		super(mediator, attribute == null ? null : attribute.getString(PrimitiveDescription.NAME_KEY, null),
+				attribute == null ? null : attribute.getString(PrimitiveDescription.TYPE_KEY, null));
 
 		this.resource = resource;
 		this.metadata = new ArrayList<Metadata>();
 
 		// set the value if defined in the JSONObject
-		Object ovalue = attribute.opt(PrimitiveDescription.VALUE_KEY);
+		Object ovalue = attribute.get(PrimitiveDescription.VALUE_KEY);
 
 		if (ovalue != null) {
 			this.setValue(CastUtils.getObjectFromJSON(this.getType(), ovalue));
 		}
-		JSONArray metadataArray = attribute.optJSONArray("metadata");
+		JsonArray metadataArray = attribute.getJsonArray("metadata");
 
 		// adds Metadata specified in the JSON object if not null
 		if (metadataArray != null) {
 			int index = 0;
-			for (; index < metadataArray.length(); index++) {
-				Metadata metadata = new Metadata(super.mediator, metadataArray.getJSONObject(index));
+			for (; index < metadataArray.size(); index++) {
+				Metadata metadata = new Metadata(super.mediator, metadataArray.getJsonObject(index));
 				this.addMetadata(metadata);
 			}
 		}

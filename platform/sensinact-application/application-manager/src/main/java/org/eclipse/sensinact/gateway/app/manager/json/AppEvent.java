@@ -14,6 +14,9 @@ import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,7 +42,7 @@ public class AppEvent implements JSONable {
      * @param mediator the mediator
      * @param json     the json value of the subscription.
      */
-    public AppEvent(Mediator mediator, JSONObject json) {
+    public AppEvent(Mediator mediator, JsonObject json) {
         this.uri = json.getString(AppJsonConstant.VALUE);
         if (AppJsonConstant.TYPE_RESOURCE.equals(json.getString(AppJsonConstant.TYPE))) {
             this.type = EventType.RESOURCE;
@@ -47,10 +50,10 @@ public class AppEvent implements JSONable {
             this.type = EventType.VARIABLE;
         }
         this.conditions = new HashSet<AppCondition>();
-        if (json.has(AppJsonConstant.APP_EVENTS_CONDITIONS)) {
-            JSONArray conditionsArray = json.getJSONArray(AppJsonConstant.APP_EVENTS_CONDITIONS);
-            for (int i = 0; i < conditionsArray.length(); i++) {
-                this.conditions.add(new AppCondition(mediator, conditionsArray.getJSONObject(i)));
+        if (json.containsKey(AppJsonConstant.APP_EVENTS_CONDITIONS)) {
+            JsonArray conditionsArray = json.getJsonArray(AppJsonConstant.APP_EVENTS_CONDITIONS);
+            for (int i = 0; i < conditionsArray.size(); i++) {
+                this.conditions.add(new AppCondition(mediator, conditionsArray.getJsonObject(i)));
             }
         }
     }

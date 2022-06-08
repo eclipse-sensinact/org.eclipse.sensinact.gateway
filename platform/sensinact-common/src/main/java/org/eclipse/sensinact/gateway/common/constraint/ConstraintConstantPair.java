@@ -9,6 +9,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.common.constraint;
 
+import jakarta.json.JsonValue;
+
 /**
  * Maps a constant object value to a {@link Constraint} instance.
  * This data structure is used in a list to replace a Map in which
@@ -26,8 +28,10 @@ public class ConstraintConstantPair {
      * @param constraint the  {@link Constraint} of the pair to instantiate
      * @param constant   the constant object of the pair to instantiate
      */
-    public ConstraintConstantPair(Constraint constraint, Object constant) {
+    public ConstraintConstantPair(Constraint constraint, JsonValue constant) {
         this.constraint = constraint;
-        this.constant = constant;
+        this.constant = Constraint.toConstantValue(constant);
     }
+
+	
 }

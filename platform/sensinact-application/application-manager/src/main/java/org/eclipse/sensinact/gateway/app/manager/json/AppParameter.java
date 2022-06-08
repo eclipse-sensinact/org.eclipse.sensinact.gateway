@@ -10,7 +10,11 @@
 package org.eclipse.sensinact.gateway.app.manager.json;
 
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 import java.util.Objects;
 
@@ -40,7 +44,7 @@ public class AppParameter implements JSONable {
      *
      * @param json the json value of the parameter
      */
-    public AppParameter(JSONObject json) {
+    public AppParameter(JsonObject json) {
         this.value = json.get(AppJsonConstant.VALUE);
         this.type = json.getString(AppJsonConstant.TYPE);
     }
@@ -89,6 +93,9 @@ public class AppParameter implements JSONable {
      * @see JSONable#getJSON()
      */
     public String getJSON() {
-        return new JSONObject().put(AppJsonConstant.VALUE, value).put(AppJsonConstant.TYPE, type).toString();
+        return JsonProviderFactory.getProvider().createObjectBuilder()
+        		.add(AppJsonConstant.VALUE, CastUtils.cast(JsonValue.class,value))
+        		.add(AppJsonConstant.TYPE, type)
+        		.build().toString();
     }
 }

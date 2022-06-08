@@ -10,14 +10,15 @@
 package org.eclipse.sensinact.gateway.core.method;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * Extended {@link AccessMethod} dedicated to an Actuation
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class ActMethod extends AbstractAccessMethod<JSONObject, ActResponse> {
+public class ActMethod extends AbstractAccessMethod<JsonObject, ActResponse> {
 	/**
 	 * Constructor
 	 * 

@@ -9,11 +9,15 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.app.manager.application;
 
+import java.io.StringReader;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.app.manager.json.AppCondition;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * @author Rémi Druilhe
@@ -44,13 +48,16 @@ public class ResourceSubscription {
         this.subscriptionId = subscriptionId;
     }
 
-	public JSONArray getConditionsAsJSONArray() {
-        JSONArray constraints = new JSONArray();
+	public JsonArray getConditionsAsJSONArray() {
+        JsonProvider provider = JsonProviderFactory.getProvider();
+		JsonArrayBuilder constraints = provider.createArrayBuilder();
         if (this.conditions != null) {
             for (AppCondition condition : getConditions()) {
-                constraints.put(new JSONObject(condition.getConstraint().getJSON()));
+            	constraints.add(provider
+            			.createReader(new StringReader(condition.getConstraint().getJSON()))
+            			.readObject());
             }
         }
-        return constraints;
+        return constraints.build();
 	}
 }

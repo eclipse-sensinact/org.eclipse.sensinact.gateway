@@ -9,30 +9,38 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.nthbnd.endpoint.format;
 
+import java.io.StringReader;
+
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 
-public class JSONResponseFormat implements ResponseFormat<JSONObject> {
+import jakarta.json.JsonObject;
+
+public class JSONResponseFormat implements ResponseFormat<JsonObject> {
 
     @Override
-    public JSONObject format(Object object) {
+    public JsonObject format(Object object) {
         if (object == null) {
             return null;
         }
-        if (JSONObject.class.isAssignableFrom(object.getClass())) {
-            return (JSONObject) object;
+        if (JsonObject.class.isAssignableFrom(object.getClass())) {
+            return (JsonObject) object;
         }
         if (JSONable.class.isAssignableFrom(object.getClass())) {
-            return new JSONObject(((JSONable) object).getJSON());
+        	return JsonProviderFactory.getProvider()
+        			.createReader(new StringReader(((JSONable)object).getJSON()))
+        			.readObject();
         }
         String json = JSONUtils.toJSONFormat(object);
         try {
-            return CastUtils.cast(JSONObject.class, json);
+            return CastUtils.cast(JsonObject.class, json);
 
         } catch (ClassCastException e) {
-            return new JSONObject().put("response", json);
+        	return JsonProviderFactory.getProvider().createObjectBuilder()
+        		.add("response", json)
+        		.build();
         }
     }
 }

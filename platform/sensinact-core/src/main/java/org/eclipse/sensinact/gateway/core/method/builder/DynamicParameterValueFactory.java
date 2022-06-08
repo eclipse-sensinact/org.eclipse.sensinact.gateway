@@ -19,6 +19,8 @@ import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
 import org.json.JSONObject;
 
+import jakarta.json.JsonObject;
+
 /**
  * {@link DynamicParameterValue} factory service
  * 
@@ -113,5 +115,5 @@ public interface DynamicParameterValueFactory {
 	 *             if the {@link DynamicParameterValue} cannot be instantiated
 	 */
 	DynamicParameterValue newInstance(Mediator mediator, Executable<Void, Object> resourceValueExtractor,
-			JSONObject builder) throws InvalidValueException;
+			JsonObject builder) throws InvalidValueException;
 }

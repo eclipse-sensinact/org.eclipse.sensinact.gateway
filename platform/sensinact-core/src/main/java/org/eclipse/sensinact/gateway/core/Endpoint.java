@@ -10,8 +10,9 @@
 package org.eclipse.sensinact.gateway.core;
 
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.json.JSONArray;
-import org.json.JSONObject;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 /**
  * An Endpoint allows to invoke access methods on a sensiNact instance. It
@@ -165,7 +166,7 @@ public interface Endpoint {
 	 * 
 	 * @return the JSON formated response of the GET access method invocation
 	 */
-	JSONObject get(String publicKey, String serviceProviderId, String serviceId, 
+	JsonObject get(String publicKey, String serviceProviderId, String serviceId, 
 		String resourceId, String attributeId);
 
 	/**
@@ -191,7 +192,7 @@ public interface Endpoint {
 	 * 
 	 * @return the JSON formated response of the SET access method invocation
 	 */
-	JSONObject set(String publicKey, String serviceProviderId, String serviceId, 
+	JsonObject set(String publicKey, String serviceProviderId, String serviceId, 
 		String resourceId, String attributeId, Object parameter);
 
 	/**
@@ -214,7 +215,7 @@ public interface Endpoint {
 	 * 
 	 * @return the JSON formated response of the ACT access method invocation
 	 */
-	JSONObject act(String publicKey, String serviceProviderId, String serviceId, 
+	JsonObject act(String publicKey, String serviceProviderId, String serviceId, 
 		String resourceId, Object[] parameters);
 
 	/**
@@ -241,8 +242,8 @@ public interface Endpoint {
 	 * 
 	 * @return the JSON formated response of the SUBSCRIBE access method invocation
 	 */
-	JSONObject subscribe(String publicKey, String serviceProviderId, String serviceId, 
-		String resourceId, Recipient recipient, JSONArray conditions);
+	JsonObject subscribe(String publicKey, String serviceProviderId, String serviceId, 
+		String resourceId, Recipient recipient, JsonArray conditions);
 
 	/**
 	 * Invokes the UNSUBSCRIBE access method on the resource whose String identifier
@@ -265,7 +266,7 @@ public interface Endpoint {
 	 * @return the JSON formated response of the UNSUBSCRIBE access method
 	 *         invocation
 	 */
-	JSONObject unsubscribe(String publicKey, String serviceProviderId, String serviceId, 
+	JsonObject unsubscribe(String publicKey, String serviceProviderId, String serviceId, 
 		String resourceId, String subscriptionId);
 	
 	/**

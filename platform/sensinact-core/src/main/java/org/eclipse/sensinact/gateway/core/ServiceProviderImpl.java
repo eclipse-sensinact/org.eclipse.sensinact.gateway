@@ -35,12 +35,14 @@ import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
+import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONObject;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
 
 /**
  * This class represents a ServiceProvider on the sensiNact gateway.
@@ -90,8 +92,8 @@ public class ServiceProviderImpl extends
 			String location = null;
 			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 			if (admin != null) {
-				JSONObject response = admin.get(LocationResource.LOCATION, DataResource.VALUE).getResponse();
-				location = String.valueOf(response.opt(DataResource.VALUE));
+				JsonObject response = admin.get(LocationResource.LOCATION, DataResource.VALUE).getResponse();
+				location = CastUtils.cast(String.class, response.get(DataResource.VALUE));
 			}
 			return location;
 		}
@@ -101,8 +103,8 @@ public class ServiceProviderImpl extends
 			String setLocation = null;
 			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 			if (admin != null) {
-				JSONObject response = admin.set(LocationResource.LOCATION, DataResource.VALUE, location).getResponse();
-				setLocation = String.valueOf(response.opt(DataResource.VALUE));
+				JsonObject response = admin.set(LocationResource.LOCATION, DataResource.VALUE, location).getResponse();
+				setLocation = CastUtils.cast(String.class, response.get(DataResource.VALUE));
 			}
 			return setLocation;
 		}
@@ -112,8 +114,8 @@ public class ServiceProviderImpl extends
 			ServiceProvider.LifecycleStatus status = null;
 			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 			if (admin != null) {
-				JSONObject response = admin.get(ServiceProvider.LIFECYCLE_STATUS, DataResource.VALUE).getResponse();
-				status = ServiceProvider.LifecycleStatus.valueOf(String.valueOf(response.opt(DataResource.VALUE)));
+				JsonObject response = admin.get(ServiceProvider.LIFECYCLE_STATUS, DataResource.VALUE).getResponse();
+				status = ServiceProvider.LifecycleStatus.valueOf(CastUtils.cast(String.class, response.get(DataResource.VALUE)));
 			}
 			return status;
 		}
@@ -124,8 +126,8 @@ public class ServiceProviderImpl extends
 			ServiceProvider.LifecycleStatus setStatus = null;
 			Service admin = getService(ServiceProvider.ADMINISTRATION_SERVICE_NAME);
 			if (admin != null) {
-				JSONObject response = admin.set(ServiceProvider.LIFECYCLE_STATUS, DataResource.VALUE, status).getResponse();
-				setStatus = ServiceProvider.LifecycleStatus.valueOf(String.valueOf(response.opt(DataResource.VALUE)));
+				JsonObject response = admin.set(ServiceProvider.LIFECYCLE_STATUS, DataResource.VALUE, status).getResponse();
+				setStatus = ServiceProvider.LifecycleStatus.valueOf(CastUtils.cast(String.class, response.get(DataResource.VALUE)));
 			}
 			return setStatus;
 		}

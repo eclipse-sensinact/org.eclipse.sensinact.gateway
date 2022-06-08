@@ -11,6 +11,10 @@ package org.eclipse.sensinact.gateway.common.constraint;
 
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
+
 /**
  * a Constraint which applies on an object
  *
@@ -65,5 +69,36 @@ public interface Constraint extends JSONable {
      * @return this Constraint logical complement
      */
     Constraint getComplement();
+    
+    static Object toConstantValue(JsonValue constant) {
+    	if(constant == null) return null;
+		switch(constant.getValueType()) {
+	        case OBJECT:
+			case ARRAY:
+				return constant;
+			case TRUE:
+				return Boolean.TRUE;
+			case FALSE:
+				return Boolean.FALSE;
+			case NULL:
+				return null;
+			case NUMBER:
+				JsonNumber jn = (JsonNumber) constant;
+				if(jn.isIntegral()) {
+					long l = jn.longValueExact();
+					if(l < Integer.MAX_VALUE && l > Integer.MIN_VALUE) {
+						return jn.intValueExact();
+					} else {
+						return l;
+					}
+				} else {
+					return jn.doubleValue();
+				}
+			case STRING:
+				return ((JsonString)constant).getString();
+			default:
+				throw new IllegalArgumentException(constant.toString());
+        }
+	}
 
 }

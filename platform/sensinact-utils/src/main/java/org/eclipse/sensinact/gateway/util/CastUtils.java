@@ -238,10 +238,10 @@ public abstract class CastUtils {
             return char.class;
         }
         if (type.intern() == "object".intern() || type.intern() == "jsonobject".intern()) {
-            return JSONObject.class;
+            return JsonObject.class;
         }
         if (type.intern() == "array".intern() || type.intern() == "jsonarray".intern()) {
-            return JSONArray.class;
+            return JsonArray.class;
         }
         return null;
     }

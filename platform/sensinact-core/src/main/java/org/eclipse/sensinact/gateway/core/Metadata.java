@@ -17,7 +17,8 @@ import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueTypeException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.Primitive;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * Extended {@link Primitive} defining a Metadata
@@ -63,16 +64,16 @@ public class Metadata extends DescribablePrimitive {
 	}
 
 	/**
-	 * Constructs a Metadata using the given {@link JSONObject}
+	 * Constructs a Metadata using the given {@link JsonObject}
 	 * 
-	 * @param metadata the {@link JSONObject} describing the Metadata to instantiate
+	 * @param metadata the {@link JsonObject} describing the Metadata to instantiate
 	 * 
 	 * @throws InvalidConstraintDefinitionException
 	 */
-	public Metadata(Mediator mediator, JSONObject metadata) throws InvalidValueException {
+	public Metadata(Mediator mediator, JsonObject metadata) throws InvalidValueException {
 		super(mediator, metadata);
 		try {
-			this.modifiable = Modifiable.valueOf(metadata.optString(Metadata.MODIFIABLE));
+			this.modifiable = Modifiable.valueOf(metadata.getString(Metadata.MODIFIABLE));
 		} catch (Exception e) {
 			this.modifiable = Modifiable.FIXED;
 		}
