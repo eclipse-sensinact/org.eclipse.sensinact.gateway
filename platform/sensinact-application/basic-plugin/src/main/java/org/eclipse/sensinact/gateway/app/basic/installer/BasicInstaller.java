@@ -32,10 +32,11 @@ import org.eclipse.sensinact.gateway.app.basic.time.SleepFunction;
 import org.eclipse.sensinact.gateway.app.basic.time.TimeFunction;
 import org.eclipse.sensinact.gateway.app.manager.json.AppFunction;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.json.JSONObject;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+
+import jakarta.json.JsonObject;
 
 /**
  * @see PluginInstaller
@@ -53,7 +54,7 @@ public class BasicInstaller extends AbstractPlugin {
     /**
      * @see PluginInstaller#getComponentJSONSchema(String)
      */
-    public JSONObject getComponentJSONSchema(String function) {
+    public JsonObject getComponentJSONSchema(String function) {
         if (function.equals("lesserThan") || function.equals("lesserEqual") || function.equals("greaterThan") || function.equals("greaterEqual") || function.equals("equal") || function.equals("diff") || function.equals("regex") || function.equals("abs") || function.equals("delta")) {
             return SimpleConditionFunction.getJSONSchemaFunction(mediator.getContext());
         } else if (function.equals("and") || function.equals("or")) {

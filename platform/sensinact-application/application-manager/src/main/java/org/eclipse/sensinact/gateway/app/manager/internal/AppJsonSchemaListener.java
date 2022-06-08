@@ -14,11 +14,14 @@ import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.spi.JsonProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,9 +78,10 @@ class AppJsonSchemaListener implements ServiceListener {
         }
     }
 
-    private JSONArray getJsonSchema() {
+    private JsonArray getJsonSchema() {
         ServiceReference<?>[] serviceReferences = this.mediator.getServiceReferences(APP_INSTALL_HOOK_FILTER);
-        JSONArray pluginsKeywords = new JSONArray();
+        JsonProvider provider = JsonProviderFactory.getProvider();
+		JsonArrayBuilder pluginsKeywords = provider.createArrayBuilder();
         if (serviceReferences != null) {
             for (ServiceReference<?> serviceReference : serviceReferences) {
                 Enumeration enumFile = serviceReference.getBundle().findEntries("/", "*.json", false);
@@ -101,7 +105,8 @@ class AppJsonSchemaListener implements ServiceListener {
                                     break;
                                 }
                             }
-                            pluginsKeywords.put(new JSONObject(new String(encoded, Charset.defaultCharset())));
+                            pluginsKeywords.add(JsonProviderFactory.readObject(provider,
+                            		new String(encoded, Charset.defaultCharset())));
                             is.close();
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -110,6 +115,6 @@ class AppJsonSchemaListener implements ServiceListener {
                 }
             }
         }
-        return pluginsKeywords;
+        return pluginsKeywords.build();
     }
 }

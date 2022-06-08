@@ -11,7 +11,7 @@ package org.eclipse.sensinact.gateway.app.manager.application;
 
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 
 /**
  * This class is called by the AppManager when an exception occurs at runtime
@@ -30,7 +30,9 @@ class AppExceptionExecutor implements AccessMethodExecutor {
      */
     public Void execute(AccessMethodResponseBuilder jsonObjects) throws Exception {
         service.getApplication().stop();
-        jsonObjects.push(new JSONObject().put("message", "The application " + service.getName() + " has throw an exception. Stopping it."));
+        jsonObjects.push(JsonProviderFactory.getProvider().createObjectBuilder()
+        		.add("message", "The application " + service.getName() + " has throw an exception. Stopping it.")
+        		.build());
         return null;
     }
 }

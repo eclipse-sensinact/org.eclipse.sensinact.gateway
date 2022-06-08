@@ -13,7 +13,6 @@ import org.eclipse.sensinact.gateway.app.api.persistence.ApplicationPersistenceS
 import org.eclipse.sensinact.gateway.app.api.persistence.dao.Application;
 import org.eclipse.sensinact.gateway.app.api.persistence.exception.ApplicationPersistenceException;
 import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAvailabilityListener;
-import org.json.JSONObject;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -21,6 +20,8 @@ import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,7 +70,7 @@ public class InMemoryApplicationPersistenceService implements ApplicationPersist
     }
 
     @Override
-    public JSONObject fetch(String applicationName) throws ApplicationPersistenceException {
+    public JsonObject fetch(String applicationName) throws ApplicationPersistenceException {
         return findApplication(applicationName).getContent();
     }
 

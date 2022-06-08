@@ -41,15 +41,17 @@ import org.eclipse.sensinact.gateway.core.InvalidServiceException;
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * @author Remi Druilhe
@@ -79,25 +81,29 @@ public class AppInstallExecutor extends ApplicationAvailabilityListenerAbstract 
      */
     public Void execute(AccessMethodResponseBuilder jsonObjects) throws Exception {
         String name = (String) jsonObjects.getParameter(0);
-        JSONObject content = (JSONObject) jsonObjects.getParameter(1);
+        JsonObject content = (JsonObject) jsonObjects.getParameter(1);
         //install(name,content); this will pass directly by the persistence mechanism
+        JsonProvider jp = JsonProviderFactory.getProvider();
         if (persist) {
-            JSONObject httpJSONObject = new JSONObject();
-            JSONArray parametersArray = new JSONArray();
-            JSONObject appName = new JSONObject();
-            appName.put("name", "name");
-            appName.put("type", "string");
-            appName.put("value", name);
-            JSONObject appContent = new JSONObject();
-            appContent.put("name", "content");
-            appContent.put("type", "object");
-            appContent.put("value", content);
-            parametersArray.put(appName);
-            parametersArray.put(appContent);
-            httpJSONObject.put("parameters", parametersArray);
-            persistenceService.persist(new org.eclipse.sensinact.gateway.app.api.persistence.dao.Application(name, httpJSONObject));
+            JsonObjectBuilder httpJSONObject = jp.createObjectBuilder();
+            JsonArrayBuilder parametersArray = jp.createArrayBuilder();
+            JsonObjectBuilder appName = jp.createObjectBuilder();
+            appName.add("name", "name")
+            	.add("type", "string")
+            	.add("value", name);
+            JsonObjectBuilder appContent = jp.createObjectBuilder();
+            appContent.add("name", "content")
+            	.add("type", "object")
+            	.add("value", content);
+            
+            parametersArray.add(appName)
+            	.add(appContent);
+            httpJSONObject.add("parameters", parametersArray);
+            persistenceService.persist(new org.eclipse.sensinact.gateway.app.api.persistence.dao.Application(name, httpJSONObject.build()));
         }
-        jsonObjects.setAccessMethodObjectResult(new JSONObject().put("message", "Application " + name + " successfully installed."));
+        jsonObjects.setAccessMethodObjectResult(jp.createObjectBuilder()
+        		.add("message", "Application " + name + " successfully installed.")
+        		.build());
         return null;
     }
 

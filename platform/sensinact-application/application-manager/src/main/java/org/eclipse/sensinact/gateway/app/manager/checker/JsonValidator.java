@@ -17,12 +17,12 @@ import org.eclipse.sensinact.gateway.app.api.exception.ValidationException;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.app.manager.osgi.PluginsProxy;
 import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * This class validates the JSON provided by the client to deploy an application
@@ -74,7 +74,7 @@ public class JsonValidator {
     		String function = components.getJsonObject(i).getJsonObject("function").getString("name");
     		JsonObject functionSchema;
     		try {
-    			functionSchema = PluginsProxy.getComponentJsonSchema(mediator, function);
+    			functionSchema = PluginsProxy.getComponentJSONSchema(mediator, function);
     		} catch (FunctionNotFoundException e) {
     			if (LOG.isErrorEnabled()) {
     				LOG.error(e.getMessage(), e);
@@ -87,12 +87,12 @@ public class JsonValidator {
     			}
     			throw new FileNotFoundException("Unable to find the JSON schema of the function: " + function);
     		}
-    		JSONObject reformatedFunction = new JSONObject();
-    		reformatedFunction.put("name", function);
+    		JsonObjectBuilder reformatedFunction = JsonProviderFactory.getProvider().createObjectBuilder();
+    		reformatedFunction.add("name", function);
     		if (components.getJsonObject(i).getJsonObject("function").containsKey("buildparameters")) {
-    			reformatedFunction.put("buildparameters", components.getJsonObject(i).getJsonObject("function").getJsonArray("buildparameters"));
+    			reformatedFunction.add("buildparameters", components.getJsonObject(i).getJsonObject("function").getJsonArray("buildparameters"));
     		}
-    		reformatedFunction.put("runparameters", components.getJsonObject(i).getJsonObject("function").getJsonArray("runparameters"));
+    		reformatedFunction.add("runparameters", components.getJsonObject(i).getJsonObject("function").getJsonArray("runparameters"));
             //Schema schema = SchemaLoader.load(functionSchema);
             /*Json inputJson = Json.read(reformatedFunction.toString());
             Json schemaJson = Json.read(functionSchema.toString());

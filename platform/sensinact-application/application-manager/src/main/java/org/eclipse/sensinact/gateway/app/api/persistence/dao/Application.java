@@ -9,9 +9,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.app.api.persistence.dao;
 
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -20,15 +21,15 @@ public class Application {
     private final Logger LOG = LoggerFactory.getLogger(Application.class);
     private String name;
     private String diggest;
-    private JSONObject content;
+    private JsonObject content;
 
-    public Application(String name, String diggest, JSONObject content) {
+    public Application(String name, String diggest, JsonObject content) {
         this.name = name;
         this.diggest = diggest;
         this.content = content;
     }
 
-    public Application(String name, JSONObject content) {
+    public Application(String name, JsonObject content) {
         this.name = name;
         try {
             this.diggest = new String(MessageDigest.getInstance("MD5").digest(content.toString().getBytes()));
@@ -47,11 +48,11 @@ public class Application {
         this.name = name;
     }
 
-    public JSONObject getContent() {
+    public JsonObject getContent() {
         return content;
     }
 
-    public void setContent(JSONObject content) {
+    public void setContent(JsonObject content) {
         this.content = content;
     }
 

@@ -11,11 +11,13 @@ package org.eclipse.sensinact.gateway.app.manager.json;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 
 import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.spi.JsonProvider;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -89,13 +91,16 @@ public class AppEvent implements JSONable {
      * @see JSONable#getJSON()
      */
     public String getJSON() {
-        JSONObject json = new JSONObject().put(AppJsonConstant.VALUE, this.uri).put(AppJsonConstant.TYPE, this.type);
+    	JsonProvider jp = JsonProviderFactory.getProvider();
+        JsonObjectBuilder json = jp.createObjectBuilder();
+        json.add(AppJsonConstant.VALUE, this.uri)
+        	.add(AppJsonConstant.TYPE, this.type.name());
         if (!conditions.isEmpty()) {
-            JSONArray conditionsArray = new JSONArray();
+            JsonArrayBuilder conditionsArray = jp.createArrayBuilder();
             for (AppCondition condition : conditions) {
-                conditionsArray.put(condition.getJSON());
+                conditionsArray.add(JsonProviderFactory.readObject(jp, condition.getJSON()));
             }
-            json.put(AppJsonConstant.APP_EVENTS_CONDITIONS, conditionsArray);
+            json.add(AppJsonConstant.APP_EVENTS_CONDITIONS, conditionsArray);
         }
         return json.toString();
     }
