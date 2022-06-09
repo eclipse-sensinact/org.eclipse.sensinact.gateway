@@ -18,7 +18,8 @@ import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 import org.eclipse.sensinact.gateway.common.props.TypedKey;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * Update dedicated {@link SnaMessage}
@@ -29,7 +30,7 @@ public interface SnaUpdateMessage extends SnaNotificationMessage<SnaUpdateMessag
 	public static final SnaMessage.Type TYPE = SnaMessage.Type.UPDATE;
 
 	static final TypedKey<?>[] PERMANENT_KEYS = new TypedKey[] {
-			new TypedKey<JSONObject>(SnaConstants.UPDATE_KEY, JSONObject.class, false) };
+			new TypedKey<JsonObject>(SnaConstants.UPDATE_KEY, JsonObject.class, false) };
 
 	enum Update implements SnaMessageSubType, KeysCollection {
 		ATTRIBUTE_VALUE_UPDATED, METADATA_VALUE_UPDATED, ACTUATED;

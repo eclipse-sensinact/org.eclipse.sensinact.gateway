@@ -17,7 +17,6 @@ import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.ServiceImpl;
 import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
-import org.json.JSONObject;
 
 import jakarta.json.JsonObject;
 

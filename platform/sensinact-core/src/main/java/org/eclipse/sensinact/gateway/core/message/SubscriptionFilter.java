@@ -18,8 +18,8 @@ import org.eclipse.sensinact.gateway.common.props.TypedProperties;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.Resource;
 import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.json.JSONArray;
 
+import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 
 /**
@@ -50,7 +50,7 @@ public class SubscriptionFilter extends SnaFilter {
 	 * @param filter
 	 * @param set
 	 */
-	public SubscriptionFilter(Mediator mediator, String filter, JSONArray conditions) {
+	public SubscriptionFilter(Mediator mediator, String filter, JsonArray conditions) {
 		super(mediator, filter, conditions);
 	}
 

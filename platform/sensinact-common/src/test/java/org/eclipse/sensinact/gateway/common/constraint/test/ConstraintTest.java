@@ -14,8 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -89,12 +88,12 @@ public class ConstraintTest {
     public void testFactory() throws Exception {
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 
-        Constraint constraint = ConstraintFactory.Loader.load(classloader, new JSONArray(ConstraintTest.EXPRESSION));
+        Constraint constraint = ConstraintFactory.Loader.load(classloader, JsonProviderFactory.readArray(ConstraintTest.EXPRESSION));
         assertTrue(constraint.complies("0033921976095"));
         assertFalse(constraint.complies("0033aa9976095"));
         assertFalse(constraint.complies("003368997609544"));
         JSONAssert.assertEquals(ConstraintTest.EXPRESSION, constraint.getJSON(), false);
-        constraint = ConstraintFactory.Loader.load(classloader, new JSONObject(ConstraintTest.COLLECTION));
+        constraint = ConstraintFactory.Loader.load(classloader, JsonProviderFactory.readObject(ConstraintTest.COLLECTION));
         assertTrue(constraint.complies("3"));
         assertTrue(constraint.complies("a"));
         assertFalse(constraint.complies("d"));
@@ -106,7 +105,7 @@ public class ConstraintTest {
         assertFalse(constraint.complies("a"));
         assertTrue(constraint.complies("d"));
 
-        constraint = ConstraintFactory.Loader.load(classloader, new JSONObject(ConstraintTest.ABSOLUTE));
+        constraint = ConstraintFactory.Loader.load(classloader, JsonProviderFactory.readObject(ConstraintTest.ABSOLUTE));
         assertTrue(constraint.complies(23));
         assertTrue(constraint.complies(25));
         assertTrue(constraint.complies(13));

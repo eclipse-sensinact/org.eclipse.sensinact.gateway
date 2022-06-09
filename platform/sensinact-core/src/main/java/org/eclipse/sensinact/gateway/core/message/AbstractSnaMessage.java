@@ -9,14 +9,21 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.core.message;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map.Entry;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 import org.eclipse.sensinact.gateway.common.props.TypedProperties;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage.Update;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 /**
  * Abstract implementation of an {@link AbstractSnaMessage}
@@ -27,9 +34,9 @@ public abstract class AbstractSnaMessage<S extends Enum<S> & KeysCollection & Sn
 		extends TypedProperties<S> implements SnaMessage<S> {
 	
 	public static SnaMessage<?> fromJSON(final Mediator mediator, String json) {
-		final JSONObject jsonMessage = new JSONObject(json);
-		final String typeStr = (String) jsonMessage.remove("type");
-		final String uri = (String) jsonMessage.remove("uri");
+		final JsonObject jsonMessage = JsonProviderFactory.readObject(json);
+		final String typeStr = jsonMessage.getString("type", null);
+		final String uri = jsonMessage.getString("uri");
 		if (typeStr == null) {
 			return null;
 		}
@@ -67,12 +74,12 @@ public abstract class AbstractSnaMessage<S extends Enum<S> & KeysCollection & Sn
 				break;
 		}
 		if (message != null) {
-			JSONArray names = jsonMessage.names();
-			int index = 0;
-			int length = names == null ? 0 : names.length();
-			for (; index < length; index++) {
-				String name = names.getString(index);
-				((TypedProperties<?>) message).put(name, jsonMessage.get(name));
+			List<String> names = Arrays.asList("type", "uri");
+			for (Entry<String, JsonValue> e : jsonMessage.entrySet()) {
+				String name = e.getKey();
+				if(!names.contains(name)) {
+					((TypedProperties<?>) message).put(name,e.getValue());
+				}
 			}
 		}
 		return message;

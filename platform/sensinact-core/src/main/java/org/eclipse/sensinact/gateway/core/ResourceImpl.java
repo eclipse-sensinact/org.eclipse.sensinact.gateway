@@ -9,7 +9,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.core;
 
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -49,14 +48,17 @@ import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
+import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * Basis {@link Resource} implementation
@@ -729,8 +731,8 @@ public class ResourceImpl extends
 		int index = 0;
 		int length = links.length;
 
-		JsonObject attributeDescription = JsonProviderFactory.getProvider().createReader(
-				new StringReader(attribute.getDescription().getJSON())).readObject();
+		JsonObject attributeDescription = JsonProviderFactory
+				.readObject(attribute.getDescription().getJSON());
 
 		for (; index < length; index++) {
 			StringBuilder buffer = new StringBuilder();
@@ -758,8 +760,7 @@ public class ResourceImpl extends
 			super.modelInstance.mediator(), SnaUpdateMessage.Update.METADATA_VALUE_UPDATED, 
 				UriUtils.getUri(new String[] {getPath(), attribute.getName(), metadata.getName()}));
 		
-		JsonObject notification = JsonProviderFactory.getProvider().createReader(
-				new StringReader(metadata.getJSON())).readObject();
+		JsonObject notification = JsonProviderFactory.readObject(metadata.getJSON());
 		
 		message.setNotification(notification);
 		super.modelInstance.postMessage(message);
@@ -804,10 +805,12 @@ public class ResourceImpl extends
 //		notificationObject.put(Resource.TYPE, this.getType());
 //		notification.setNotification(notificationObject);
 
+		JsonProvider jp = JsonProviderFactory.getProvider();
 		for(Attribute attribute : this.elements) {
 
 			if (this.defaultAttribute != null && attribute.getName().equals(this.defaultAttribute)) {
-				JSONObject jsonAttribute = new JSONObject(attribute.getDescription().getJSON());	
+				JsonObjectBuilder jsonAttribute = jp.createObjectBuilder(
+						JsonProviderFactory.readObject(jp, attribute.getDescription().getJSON()));	
 				MetadataDescription[] metadataDescriptions = attribute.getAllDescriptions();	
 				int index = 0;
 				int length = metadataDescriptions.length;	
@@ -823,12 +826,13 @@ public class ResourceImpl extends
 					
 					if (Modifiable.FIXED.equals(metadataDescription.getModifiable())
 							&& Metadata.LOCKED.intern() != metadataName && Metadata.HIDDEN.intern() != metadataName 
-							&& Attribute.NICKNAME.intern() != metadataName)
-						jsonAttribute.put(metadataDescription.getName(), PrimitiveDescription.toJson(metadataDescription.getType(), 
-								metadataDescription.getValue()));
+							&& Attribute.NICKNAME.intern() != metadataName) {
+						JsonValue jv = CastUtils.cast(JsonValue.class, metadataDescription.getValue());
+						jsonAttribute.add(metadataDescription.getName(), jv == null ? JsonValue.NULL : jv);
+					}
 					
 				}
-				((SnaLifecycleMessageImpl) notification).put("initial", jsonAttribute);
+				((SnaLifecycleMessageImpl) notification).put("initial", jsonAttribute.build());
 			}
 			if(attribute.isHidden()) 
 				continue;

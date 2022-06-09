@@ -9,12 +9,18 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.common.execution;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * Default {@link ErrorHandler} implementation
@@ -24,7 +30,7 @@ import org.json.JSONObject;
 public class DefaultErrorHandler implements ErrorHandler {
 	
 	private static final Logger LOG = Logger.getLogger(DefaultErrorHandler.class.getName());
-    private JSONArray errors;
+    private List<JsonObject> errors;
 
     private volatile int exceptions = 0;
 	
@@ -54,8 +60,10 @@ public class DefaultErrorHandler implements ErrorHandler {
             return ErrorHandler.Policy.IGNORE;
         }
         this.exceptions++;
-        JSONObject exceptionObject = new JSONObject();
-        exceptionObject.put("message", exception.getMessage());
+        JsonProvider provider = JsonProviderFactory.getProvider();
+		JsonObjectBuilder exceptionObject = provider.createObjectBuilder();
+        exceptionObject.add("message", exception.getMessage() == null ? JsonValue.NULL : 
+        	provider.createValue(exception.getMessage()));
 
         StringBuilder buffer = new StringBuilder();
         if (exception != null) {
@@ -69,12 +77,12 @@ public class DefaultErrorHandler implements ErrorHandler {
                 buffer.append("\n");
             }
         }
-        exceptionObject.put("trace", buffer.toString());
+        exceptionObject.add("trace", buffer.toString());
 
         if (this.errors == null) {
-            this.errors = new JSONArray();
+            this.errors = new ArrayList<>();
         }
-        errors.put(exceptionObject);
+        errors.add(exceptionObject.build());
         int policy = this.getPolicy();
         
         if(ErrorHandler.Policy.contains(policy, ErrorHandler.Policy.LOG)){
@@ -117,8 +125,8 @@ public class DefaultErrorHandler implements ErrorHandler {
      * @see org.eclipse.sensinact.gateway.common.execution.ErrorHandler#getStackTrace()
      */
     @Override
-    public JSONArray getStackTrace() {
-        return this.errors;
+    public JsonArray getStackTrace() {
+        return JsonProviderFactory.getProvider().createArrayBuilder(errors).build();
     }
 
     /**

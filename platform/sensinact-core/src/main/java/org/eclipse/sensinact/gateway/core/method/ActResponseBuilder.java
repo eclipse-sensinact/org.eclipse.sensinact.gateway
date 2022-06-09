@@ -38,7 +38,7 @@ public class ActResponseBuilder extends AccessMethodResponseBuilder<JsonObject, 
 		ActResponse response = new ActResponse(super.getPath(), status);
 
 		while (!super.isEmpty()) {
-			response.addTriggered(super.pop().toString());
+			response.addTriggered(super.pop());
 		}
 		return response;
 	}

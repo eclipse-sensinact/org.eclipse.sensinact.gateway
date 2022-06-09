@@ -16,8 +16,12 @@ import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.core.StateVariableResource;
 import org.eclipse.sensinact.gateway.core.message.SnaConstants;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
-import org.eclipse.sensinact.gateway.util.JSONUtils;
-import org.json.JSONArray;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * Extended {@link AccessMethodJSONResponse} returned by an {@link ActMethod}
@@ -50,14 +54,19 @@ public class ActResponse extends AccessMethodJSONResponse {
 	 * @return the JSONArray of JSON formated {@link Description} of the modified
 	 *         {@link StateVariableResource}
 	 */
-	@SuppressWarnings("unchecked")
-	public JSONArray getTriggers() {
-		List<String> triggered = this.<List<String>>get(SnaConstants.TRIGGERED_KEY);
+	public JsonArray getTriggers() {
+		List<JsonObject> triggered = this.<List<JsonObject>>get(SnaConstants.TRIGGERED_KEY);
 
 		if (triggered == null) {
-			triggered = new ArrayList<String>();
+			triggered = new ArrayList<>();
 		}
-		return new JSONArray(JSONUtils.toJSONFormat(triggered));
+		
+		JsonProvider provider = JsonProviderFactory.getProvider();
+		JsonArrayBuilder jab = provider.createArrayBuilder();
+		for(JsonObject jo : triggered) {
+			jab.add(jo);
+		}
+		return jab.build();
 	}
 
 	/**
@@ -68,11 +77,11 @@ public class ActResponse extends AccessMethodJSONResponse {
 	 *            the JSON formated {@link Description} of a modified
 	 *            {@link StateVariableResource}
 	 */
-	public void addTriggered(String trigger) {
-		List<String> triggered = this.<List<String>>get(SnaConstants.TRIGGERED_KEY);
+	public void addTriggered(JsonObject trigger) {
+		List<JsonObject> triggered = this.<List<JsonObject>>get(SnaConstants.TRIGGERED_KEY);
 
 		if (triggered == null) {
-			triggered = new ArrayList<String>();
+			triggered = new ArrayList<>();
 			super.putValue(SnaConstants.TRIGGERED_KEY, triggered);
 		}
 		triggered.add(trigger);

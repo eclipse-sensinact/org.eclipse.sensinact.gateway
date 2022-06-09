@@ -34,7 +34,7 @@ public class MokeTriggerFactory implements AccessMethodTriggerFactory {
 
     /**
      * @InheritedDoc
-     * @see org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory#newInstance(org.eclipse.sensinact.gateway.common.bundle.Mediator, org.json.JSONObject)
+     * @see org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory#newInstance(org.eclipse.sensinact.gateway.common.bundle.Mediator, jakarta.json.JsonObject)
      */
     @Override
     public AccessMethodTrigger newInstance(Mediator mediator, JsonObject trigger) throws InvalidValueException {

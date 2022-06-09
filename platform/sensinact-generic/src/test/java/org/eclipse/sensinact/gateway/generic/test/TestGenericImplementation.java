@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.primitive.Description;
@@ -28,8 +29,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
 import org.eclipse.sensinact.gateway.test.ProcessorService;
 import org.eclipse.sensinact.gateway.test.StarterService;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +41,9 @@ import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.context.InstalledBundleExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 @ExtendWith(InstalledBundleExtension.class)
 @ExtendWith(BundleContextExtension.class)
@@ -71,9 +74,9 @@ public class TestGenericImplementation {
         //System.out.println(service.getDescription().getDescription());
 
         SnaMessage<?> response = variable.get(DataResource.VALUE, (Object[]) null);
-        JSONObject jsonObject = new JSONObject(response.getJSON());
+        JsonObject jsonObject = JsonProviderFactory.readObject(response.getJSON());
 
-        assertEquals(1, (int) jsonObject.getJSONObject("response").getInt("value"));
+        assertEquals(1, (int) jsonObject.getJsonObject("response").getInt("value"));
 
         Resource resource = service.getResource("turnon");
         
@@ -81,7 +84,7 @@ public class TestGenericImplementation {
         action.act(new Object[0]);
         
         response = variable.get(DataResource.VALUE, (Object[]) null);
-        assertEquals(1, (int) jsonObject.getJSONObject("response").getInt("value"));
+        assertEquals(1, jsonObject.getJsonObject("response").getInt("value"));
 
         resource = service.getResource("turnoff");
         
@@ -89,13 +92,13 @@ public class TestGenericImplementation {
         action.act(new Object[0]);
         
         response = variable.get(DataResource.VALUE, (Object[]) null);
-        jsonObject = new JSONObject(response.getJSON());
+        jsonObject = JsonProviderFactory.readObject(response.getJSON());
 
-        assertEquals(0, (int) jsonObject.getJSONObject("response").getInt("value"));
+        assertEquals(0, (int) jsonObject.getJsonObject("response").getInt("value"));
         response = variation.get(DataResource.VALUE, (Object[]) null);
-        jsonObject = new JSONObject(response.getJSON());
+        jsonObject = JsonProviderFactory.readObject(response.getJSON());
 
-        assertEquals(0.2f, (float) jsonObject.getJSONObject("response").getDouble("value"), 0.0f);
+        assertEquals(0.2f, (float) jsonObject.getJsonObject("response").getJsonNumber("value").doubleValue(), 0.0f);
         core.close();
     }
 
@@ -116,18 +119,18 @@ public class TestGenericImplementation {
         ServiceProvider provider = session.serviceProvider("TestForSensiNactGateway");
         Service service = provider.getService("sensor");
         Resource temperature = service.getResource("temperature");
-        JSONObject jsonObject;
+        JsonObject jsonObject;
 
         SnaMessage<?> response = temperature.get(DataResource.VALUE, (Object[]) null);
-        jsonObject = new JSONObject(response.getJSON());
-        assertEquals(5.0f, (float) jsonObject.getJSONObject("response").getDouble("value"), 0.0f);
+        jsonObject = JsonProviderFactory.readObject(response.getJSON());
+        assertEquals(5.0f, (float) jsonObject.getJsonObject("response").getJsonNumber("value").doubleValue(), 0.0f);
 
         response = temperature.set(DataResource.VALUE, -24.5f, (Object[]) null);
-        jsonObject = new JSONObject(response.getJSON());
-        assertEquals(-24.5f, (float) jsonObject.getJSONObject("response").getDouble("value"), 0.0f);
+        jsonObject = JsonProviderFactory.readObject(response.getJSON());
+        assertEquals(-24.5f, (float) jsonObject.getJsonObject("response").getJsonNumber("value").doubleValue(), 0.0f);
         response = temperature.set(DataResource.VALUE, 45.1f, (Object[]) null);
-        jsonObject = new JSONObject(response.getJSON());
-        assertEquals(520, (int) jsonObject.getInt("statusCode"));
+        jsonObject = JsonProviderFactory.readObject(response.getJSON());
+        assertEquals(520, jsonObject.getInt("statusCode"));
         core.close();
     }
 
@@ -147,7 +150,7 @@ public class TestGenericImplementation {
         ServiceProvider provider = session.serviceProvider("weather_5");
         Service service = provider.getService("admin");
         Description description = service.getDescription();
-        JSONObject jsonObject = new JSONObject(description.getJSON());
+        JsonObject jsonObject = JsonProviderFactory.readObject(description.getJSON());
         core.close();
     }
     
@@ -171,22 +174,32 @@ public class TestGenericImplementation {
         Resource ldrResource = ldrService.getResource("value");
         
         Description response = ldrResource.getDescription();
-        JSONObject responseDescription = new JSONObject(response.getJSONDescription());
+        JsonObject responseDescription = JsonProviderFactory.readObject(response.getJSONDescription());
 
-        JSONArray attributes = responseDescription.getJSONArray("attributes");
+        JsonArray attributes = responseDescription.getJsonArray("attributes");
 
         int index = 0;
-        int length = attributes.length();
-        JSONObject valueDescription = null;
+        int length = attributes.size();
+        JsonObject valueDescription = null;
 
         for (; index < length; index++) {
-            JSONObject object = attributes.getJSONObject(index);
-            if ("value".equals(object.optString("name"))) {
+            JsonObject object = attributes.getJsonObject(index);
+            if ("value".equals(object.getString("name", null))) {
                 valueDescription = object;
                 break;
             }
         }
-        JSONAssert.assertEquals(new JSONObject("{\"name\":\"value\",\"type\":\"float\",\"metadata\":" + "[{\"name\":\"modifiable\",\"value\":" + "\"UPDATABLE\",\"type\":\"org.eclipse.sensinact.gateway.common.primitive.Modifiable\"}," + "{\"name\":\"nickname\",\"value\":\"value\",\"type\":\"string\"}," + "{\"name\":\"Description\",\"value\":" + "\"Detected light/darkness\",\"type\":\"string\"}," + "{\"name\":\"Unit\"," + "\"value\":\"LUX\",\"type\":\"string\"}]}"), valueDescription, false);
+        JsonObject expected = JsonProviderFactory.readObject("{\"name\":\"value\",\"type\":\"float\",\"metadata\":" 
+        		+ "[{\"name\":\"modifiable\",\"value\":" 
+        		+ "\"UPDATABLE\",\"type\":\"org.eclipse.sensinact.gateway.common.primitive.Modifiable\"}," 
+        		+ "{\"name\":\"nickname\",\"value\":\"value\",\"type\":\"string\"}," 
+        		+ "{\"name\":\"Description\",\"value\":" 
+        		+ "\"Detected light/darkness\",\"type\":\"string\"}," 
+        		+ "{\"name\":\"Unit\"," + "\"value\":\"LUX\",\"type\":\"string\"}]}");
+		assertEquals(expected.get("name"), valueDescription.get("name"));
+		assertEquals(expected.get("type"), valueDescription.get("type"));
+		assertEquals(new HashSet<>(expected.getJsonArray("metadata")), 
+				new HashSet<>(valueDescription.getJsonArray("metadata")));
         core.close();
         
     }
@@ -239,12 +252,12 @@ public class TestGenericImplementation {
 
         Description response = service.getDescription();
         SnaMessage<?> message = resource.set("value", String.format(LOCATION_FORMAT, "5.9333","45.5667"), (Object[])null);
-        JSONObject jsonObject = new JSONObject(message.getJSON());
+        JsonObject jsonObject = JsonProviderFactory.readObject(message.getJSON());
 
-        jsonObject.getJSONObject("response").remove("timestamp");
-        JSONAssert.assertEquals(new JSONObject("{\"statusCode\":200,\"response\":{\"name\":\"location\",\"value\":\""+
+        long timestamp = jsonObject.getJsonObject("response").getJsonNumber("timestamp").longValue();
+        assertEquals(JsonProviderFactory.readObject("{\"statusCode\":200,\"response\":{\"name\":\"location\",\"value\":\""+
         String.format(LOCATION_FORMAT,"5.9333", "45.5667").replace("\"","\\\"")
-        +"\"," + "\"type\":\"string\"},\"type\":\"SET_RESPONSE\",\"uri\":\"/weather_7/admin/location\"}"), jsonObject, false);
+        +"\"," + "\"type\":\"string\",\"timestamp\":" + timestamp + "},\"type\":\"SET_RESPONSE\",\"uri\":\"/weather_7/admin/location\"}"), jsonObject);
 //        MidProxy<ProcessorService> processor = new MidProxy<ProcessorService>(classloader, this, ProcessorService.class);
 //
 //        ProcessorService processorService = processor.buildProxy();
@@ -256,14 +269,14 @@ public class TestGenericImplementation {
 //        message = (SnaMessage) midResource.toOSGi(getMethod, new Object[]{"value", null});
         message = resource.get("value", (Object[]) null);
 
-        jsonObject = new JSONObject(message.getJSON());
-        jsonObject.getJSONObject("response").remove("timestamp");
+        jsonObject = JsonProviderFactory.readObject(message.getJSON());
+        timestamp = jsonObject.getJsonObject("response").getJsonNumber("timestamp").longValue();
         
         String expected = "{\"statusCode\":200,\"response\":{\"name\":\"location\",\"value\":\""+
-        		String.format(LOCATION_FORMAT, "6.11667","45.900002").replace("\"","\\\"")+"\",\"type\":\"string\"},\"type\""
+        		String.format(LOCATION_FORMAT, "6.11667","45.900002").replace("\"","\\\"")+"\",\"type\":\"string\",\"timestamp\":" + timestamp + "},\"type\""
 				+ ":\"GET_RESPONSE\",\"uri\":\"/weather_7/admin/location\"}";
 
-        JSONAssert.assertEquals(new JSONObject(expected), jsonObject, false);
+        assertEquals(JsonProviderFactory.readObject(expected), jsonObject);
         core.close();
     }
 

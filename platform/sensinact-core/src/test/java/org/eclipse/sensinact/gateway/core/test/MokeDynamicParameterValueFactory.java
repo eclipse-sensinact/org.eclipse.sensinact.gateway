@@ -37,7 +37,7 @@ public class MokeDynamicParameterValueFactory implements DynamicParameterValueFa
 	 *
 	 * @see DynamicParameterValueFactory#newInstance(org.eclipse.sensinact.gateway.util.mediator.AbstractMediator,
 	 *      org.eclipse.sensinact.gateway.core.model.ServiceImpl, java.lang.String,
-	 *      org.json.JSONObject)
+	 *      jakarta.json.JSONObject)
 	 */
 	@Override
 	public DynamicParameterValue newInstance(Mediator mediator, Executable<Void, Object> resourceValueExtractor,

@@ -12,7 +12,9 @@ package org.eclipse.sensinact.gateway.core;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * {@link Description} of a {@link Metadata}
@@ -34,7 +36,7 @@ public class MetadataDescription extends PrimitiveDescription {
 
 	@Override
 	public String getJSONDescription() {
-		JSONObject description = this.getJSONObjectDescription();
+		JsonObject description = this.getJSONObjectDescription();
 		if (description == null) 
 			return EMPTY;		
 		return description.toString();
@@ -45,11 +47,11 @@ public class MetadataDescription extends PrimitiveDescription {
 	 * 
 	 * @return the JSON object representation of the described {@link Metadata}
 	 */
-	protected JSONObject getJSONObjectDescription() {
+	protected JsonObject getJSONObjectDescription() {
 		if (Modifiable.FIXED.equals(super.modifiable)) {
-			JSONObject description = super.getJSONObject();
-			description.put(VALUE_KEY, PrimitiveDescription.toJson(this.getType(), this.getValue()));
-			return description;
+			JsonObjectBuilder description = super.getJsonObject();
+			description.add(VALUE_KEY, this.getJsonValue());
+			return description.build();
 		}
 		return null;
 	}

@@ -36,7 +36,7 @@ public abstract class AbstractSnaErrorfulMessage<S extends Enum<S> & KeysCollect
 	/**
 	 * @InheritedDoc
 	 *
-	 * @see SnaErrorfulMessage#setErrors(org.json.JSONArray)
+	 * @see SnaErrorfulMessage#setErrors(jakarta.json.JsonArray)
 	 */
 	@Override
 	public void setErrors(JsonArray errorsArray) {

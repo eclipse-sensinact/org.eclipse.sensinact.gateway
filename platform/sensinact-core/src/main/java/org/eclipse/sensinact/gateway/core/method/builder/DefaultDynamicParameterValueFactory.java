@@ -46,7 +46,7 @@ public class DefaultDynamicParameterValueFactory implements DynamicParameterValu
 	/**
 	 * @inheritDoc
 	 *
-	 * @see AccessMethodTriggerFactory# newInstance(org.json.JSONObject)
+	 * @see AccessMethodTriggerFactory# newInstance(jakarta.json.JsonObject)
 	 */
 	@Override
 	public DynamicParameterValue newInstance(Mediator mediator, Executable<Void, Object> resourceValueExtractor,

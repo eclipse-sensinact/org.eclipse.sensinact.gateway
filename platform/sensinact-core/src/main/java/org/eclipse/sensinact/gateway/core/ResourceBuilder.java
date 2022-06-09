@@ -38,13 +38,15 @@ import org.eclipse.sensinact.gateway.core.method.Shortcut;
 import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.core.method.SubscribeMethod;
 import org.eclipse.sensinact.gateway.core.method.UnsubscribeMethod;
+import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
 import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 
 /**
@@ -416,14 +418,17 @@ public class ResourceBuilder {
 				Object resultObject = resource.passOn(type, resource.getPath(), parameter.getParameters());
 
 				if (resultObject != null && resultObject != AccessMethod.EMPTY
-						&& JSONObject.class.isAssignableFrom(resultObject.getClass())) {
-					JSONObject result = (JSONObject) resultObject;
+						&& resultObject instanceof JsonObject) {
+					JsonObject jsonObject = (JsonObject) resultObject;
+					JsonObjectBuilder result = JsonProviderFactory.getProvider()
+							.createObjectBuilder(jsonObject);
 					result.remove("taskId");
-					if (JSONObject.NULL.equals(result.opt("result"))) {
+					if (jsonObject.containsKey("result") && 
+							jsonObject.get("result") == JsonValue.NULL) {
 						result.remove("result");
 					}
 					
-					parameter.setAccessMethodObjectResult(JsonProviderFactory.readObject(result.toString()));
+					parameter.setAccessMethodObjectResult(result.build());
 				}
 				return null;
 			}
@@ -441,7 +446,7 @@ public class ResourceBuilder {
 						.createObjectBuilder()
 						.add(Metadata.TIMESTAMP, System.currentTimeMillis())
 						.add(Resource.TYPE, "object")
-						.add(DataResource.VALUE, parameter.getAccessMethodObjectResult().toString())
+						.add(DataResource.VALUE, CastUtils.cast(JsonValue.class, resource))
 						.build());
 
 				resource.getModelInstance().postMessage(message);

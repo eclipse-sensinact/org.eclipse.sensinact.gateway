@@ -361,8 +361,14 @@ public class HttpDeviceFactoryTest {
         JsonObject jsonObject = mapper.readValue(response.getJSON(), JsonObject.class);
         
         JsonValue jsonValue = jsonObject.getJsonObject("response").get("value");
-		assertEquals(value, jsonValue.getValueType() == ValueType.STRING ? 
-				((JsonString) jsonValue).getString() : jsonValue.toString());
+		String actual = jsonValue.getValueType() == ValueType.STRING ? 
+				((JsonString) jsonValue).getString() : jsonValue.toString();
+		try {
+			assertEquals(Double.parseDouble(value), Double.parseDouble(actual), 0.0);
+		} catch (NumberFormatException nfe) {
+			assertEquals(value, actual);
+		}
+		
 
         service = provider.getService("admin");
         variable = service.getResource("location");

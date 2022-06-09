@@ -15,6 +15,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonException;
 import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonString;
@@ -23,7 +25,11 @@ import jakarta.json.spi.JsonProvider;
 
 import java.io.StringReader;
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -339,8 +345,51 @@ public abstract class CastUtils {
         		return (T) provider.createValue((Number) object);
         	} else if(object instanceof String) {
         		return (T) provider.createValue((String) object);
+        	} else if (object instanceof Collection) {
+        		JsonArrayBuilder jab = provider.createArrayBuilder();
+        		for(Object o : ((Collection)object)) {
+        			jab.add(cast(JsonValue.class, o));
+        		}
+        		return (T) jab.build();
+        	} else if (object.getClass().isArray()) {
+        		JsonArrayBuilder jab = provider.createArrayBuilder();
+        		int length = Array.getLength(object);
+        		
+        		for(int i = 0; i < length; i++) {
+        			jab.add(cast(JsonValue.class, Array.get(object, i)));
+        		}
+        		return (T) jab.build();
         	} else {
-        		return (T) provider.createReader(new StringReader(object.toString())).readValue();
+        		boolean jsonStruct;
+        		String s;
+        		
+        		Method toJson = Arrays.stream(object.getClass().getMethods())
+        				.filter(m -> "getJSON".equals(m.getName()) && m.getParameterCount() == 0)
+        				.findFirst()
+        				.orElse(null);
+        		if(toJson != null) {
+        			jsonStruct = true;
+        			try {
+						s = (String) toJson.invoke(object);
+					} catch (Exception e) {
+						LOGGER.log(Level.SEVERE, "Failed to cast object", e);
+						throw new ClassCastException("Unable to cast " + object + " to " + clazz);
+					}
+        		} else {
+        			s = object.toString();
+        			int firstChar = s.codePoints()
+                			.filter(i -> !Character.isWhitespace(i))
+                			.findFirst()
+                			.orElse('x');
+                		
+                	jsonStruct = firstChar == '{' || firstChar == '[';
+        		}
+        		
+        		if(jsonStruct) {
+        			return (T) provider.createReader(new StringReader(s)).read();
+        		} else {
+        			return (T) provider.createValue(s);
+        		}
         	}
         }
         

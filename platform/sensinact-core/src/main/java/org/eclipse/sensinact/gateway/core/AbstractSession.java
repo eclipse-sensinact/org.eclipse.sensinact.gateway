@@ -9,7 +9,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.core;
 
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -33,11 +36,10 @@ import org.eclipse.sensinact.gateway.core.method.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.SetResponse;
 import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
 import org.eclipse.sensinact.gateway.core.method.UnsubscribeResponse;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 /**
  * Abstract {@link Session} implementation
@@ -107,8 +109,6 @@ public abstract class AbstractSession implements Session {
 			response = AccessMethodResponse.<JsonObject, A>error(mediator, uri, AccessMethod.Type.valueOf(method),
 				SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Not found", null);
 		else {
-			object.remove("type");
-			object.remove("uri");
 			Integer statusCode = object.getInt("statusCode");
 			if (responseType != null) {
 				response = responseType.getConstructor(new Class<?>[] { String.class, 
@@ -118,12 +118,11 @@ public abstract class AbstractSession implements Session {
 				response.setResponse(object.getJsonObject("response"));
 				response.setErrors(object.getJsonArray("errors"));
 
-				String[] names = JSONObject.getNames(object);
-				int index = 0;
-				int length = names == null ? 0 : names.length;
-				for (; index < length; index++) {
-					String name = names[index];
-					response.put(name, object.get(name));
+				List<String> names = Arrays.asList("type", "uri", "statusCode", "response", "errors");
+				for (Entry<String, JsonValue> e : object.entrySet()) {
+					String name = e.getKey();
+					if(!names.contains(name))
+					response.put(name, e.getValue());
 				}
 			}
 		}
@@ -143,9 +142,6 @@ public abstract class AbstractSession implements Session {
 					new StringBuilder().append(first).append(suite).append(" not found").toString(), null);
 
 		} else {
-			object.remove("type");
-			object.remove("uri");
-
 			builder.setAccessMethodObjectResult(object.getJsonObject("response"));
 
 			response = builder
@@ -153,12 +149,11 @@ public abstract class AbstractSession implements Session {
 
 			response.setErrors(object.getJsonArray("errors"));
 
-			String[] names = JSONObject.getNames(object);
-			int index = 0;
-			int length = names == null ? 0 : names.length;
-			for (; index < length; index++) {
-				String name = names[index];
-				response.put(name, object.get(name));
+			List<String> names = Arrays.asList("type", "uri", "statusCode", "response", "errors");
+			for (Entry<String, JsonValue> e : object.entrySet()) {
+				String name = e.getKey();
+				if(!names.contains(name))
+				response.put(name, e.getValue());
 			}
 		}
 		return response;

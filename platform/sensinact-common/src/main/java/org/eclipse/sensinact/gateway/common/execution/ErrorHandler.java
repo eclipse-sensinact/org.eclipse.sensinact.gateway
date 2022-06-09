@@ -11,7 +11,7 @@ package org.eclipse.sensinact.gateway.common.execution;
 
 import java.util.Arrays;
 
-import org.json.JSONArray;
+import jakarta.json.JsonArray;
 
 /**
  * Error handler service
@@ -126,7 +126,7 @@ public interface ErrorHandler {
      *
      * @return the JSONArray of registered exceptions traces
      */
-    JSONArray getStackTrace();
+    JsonArray getStackTrace();
 
     /**
      * Returns the number of exceptions registered by this

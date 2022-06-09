@@ -36,14 +36,12 @@ import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.GeoJsonUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
 import org.eclipse.sensinact.gateway.util.location.Point;
-import org.json.JSONObject;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.json.JsonObject;
-import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 
 /**
@@ -215,12 +213,13 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 			properties.remove("latitude");
 			properties.remove("longitude");
 			try {
-					Point p = GeoJsonUtils.getFirstPointFromLocationString(String.valueOf(value));
-					properties.put("latitude", p.latitude);
-					properties.put("longitude", p.longitude);					
-				} catch (Exception e) {
-					LOG.debug(e.getMessage());
-				}
+				value = CastUtils.cast(String.class, value);
+				Point p = GeoJsonUtils.getFirstPointFromLocationString(String.valueOf(value));
+				properties.put("latitude", p.latitude);
+				properties.put("longitude", p.longitude);					
+			} catch (Exception e) {
+				LOG.debug(e.getMessage());
+			}
 		}
 		if (value != null) {
 			properties.put(observed, value);
@@ -230,7 +229,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 
 	/**
 	 */
-	public void updateContent(SnaLifecycleMessage.Lifecycle lifecycle, String uri, JSONObject initial, String type) {
+	public void updateContent(SnaLifecycleMessage.Lifecycle lifecycle, String uri, JsonObject initial, String type) {
 		if (!registered) {
 			return;
 		}
@@ -263,7 +262,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 		this.update(properties);
 	}
 
-	private final void updateResourceAppearing(String service, String resource, String type, JSONObject initial,
+	private final void updateResourceAppearing(String service, String resource, String type, JsonObject initial,
 			MutableAccessNode node, Dictionary<String, Object> properties) {
 		if (!registered || service == null || resource == null) {
 			return;
@@ -282,18 +281,18 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 		List<String> attributes = this.observed.get(resourceKey);
 		if (attributes != null && !attributes.isEmpty()) {
 			Iterator<String> it = attributes.iterator();
-			String name = initial == null ? null : initial.optString(Resource.NAME);
+			String name = initial == null ? null : initial.getString(Resource.NAME, null);
 
 			while (it.hasNext()) {
-				Object value = null;
+				JsonValue value = null;
 				String attribute = it.next();
 
 				if (attribute.equals(name) || (attribute.equals(DataResource.VALUE) && resource.equals(name))) 
-					value = initial.opt(DataResource.VALUE);
+					value = initial.get(DataResource.VALUE);
 				
 				if (ModelInstance.LOCATION_PROPERTY.equals(resourceKey)) {
 					try {
-							Point p = GeoJsonUtils.getFirstPointFromLocationString(String.valueOf(value));
+							Point p = GeoJsonUtils.getFirstPointFromLocationString(CastUtils.cast(String.class,value));
 							properties.put("latitude", p.latitude);
 							properties.put("longitude", p.longitude);					
 						} catch (Exception e) {
@@ -305,7 +304,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 						).append(resourceKey
 						).append("."
 						).append(attribute
-						).toString(), value);
+						).toString(), CastUtils.cast(String.class, value));
 				}
 			}
 		}
@@ -416,11 +415,11 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 		case LIFECYCLE:
 			SnaLifecycleMessage l = (SnaLifecycleMessage) message;
 			String type = null;
-			JSONObject initial = null;
+			JsonObject initial = null;
 			switch (l.getType()) {
 				case RESOURCE_APPEARING:
 					key = new StringBuilder().append(uriElements[1]).append(".").append(uriElements[2]).toString();
-					initial = (JSONObject) ((SnaLifecycleMessageImpl) l).get("initial");
+					initial = (JsonObject) ((SnaLifecycleMessageImpl) l).get("initial");
 									
 					type = ((SnaLifecycleMessageImpl) l).getNotification().getString("type", null);
 					ResourceConfig config = configuration.getResourceConfig(new ResourceDescriptor(
@@ -459,7 +458,7 @@ public class ModelInstanceRegistration extends AbstractMidCallback {
 								list.add(attr);
 						}
 					}		
-					String modifiable = initial==null?null:String.valueOf(initial.opt(Metadata.MODIFIABLE));
+					String modifiable = initial==null?null:initial.getString(Metadata.MODIFIABLE, null);
 					if(modifiable!=null) 
 					    this.updateObserved(new StringBuilder().append(key).append("."
 							).append(DataResource.VALUE).append(".").append(Metadata.MODIFIABLE).toString(),

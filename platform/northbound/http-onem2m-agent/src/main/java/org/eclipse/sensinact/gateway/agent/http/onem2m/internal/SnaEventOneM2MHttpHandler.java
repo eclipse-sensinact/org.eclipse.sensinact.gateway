@@ -18,6 +18,7 @@ import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
+import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.GeoJsonUtils;
 import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.eclipse.sensinact.gateway.util.location.Point;
@@ -81,7 +82,7 @@ public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
                 LOG.debug("Extracted value '{}' from message", value.toString());
                 if (event.getPath().endsWith("/admin/location/value")) {
                     LOG.debug("Location update message");
-                    Point p = GeoJsonUtils.getFirstPointFromLocationString(String.valueOf(value));
+                    Point p = GeoJsonUtils.getFirstPointFromLocationString(CastUtils.cast(String.class, value));
                     if(p == null){
                         return;
                     }

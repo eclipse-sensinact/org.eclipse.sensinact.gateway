@@ -22,10 +22,11 @@ import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
 import org.eclipse.sensinact.gateway.generic.parser.Commands;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -269,11 +270,11 @@ public abstract class ProtocolStackEndpoint<P extends Packet> implements TaskTra
         if (String.class.isAssignableFrom(parameter.getClass())) {
             valueBytes = ((String) parameter).getBytes();
 
-        } else if (JSONObject.class.isAssignableFrom(parameter.getClass())) {
-            valueBytes = ((JSONObject) parameter).toString().getBytes();
+        } else if (JsonObject.class.isAssignableFrom(parameter.getClass())) {
+            valueBytes = ((JsonObject) parameter).toString().getBytes();
 
-        } else if (JSONArray.class.isAssignableFrom(parameter.getClass())) {
-            valueBytes = ((JSONArray) parameter).toString().getBytes();
+        } else if (JsonArray.class.isAssignableFrom(parameter.getClass())) {
+            valueBytes = ((JsonArray) parameter).toString().getBytes();
         } else if (Parameter.class.isAssignableFrom(parameter.getClass())) {
             valueBytes = formatParameter(((Parameter) parameter).getValue(), delimiter);
 

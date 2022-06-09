@@ -34,14 +34,15 @@ import org.eclipse.sensinact.gateway.core.message.SnaRemoteMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.annotation.Filter;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonException;
 
 /**
  * A AgentFactory is in charge of asking for the registration of an {@link Agent}  
@@ -107,9 +108,8 @@ public class AgentFactory {
 				ClassLoader cl = mediator.getClassLoader();
 				for(String s : cds) {
 					try {
-					    JSONObject constraint = new JSONObject(s);
-					    constraints.add(ConstraintFactory.Loader.load(cl, constraint));
-					} catch(JSONException | InvalidConstraintDefinitionException e) {
+					    constraints.add(ConstraintFactory.Loader.load(cl, JsonProviderFactory.readObject(s)));
+					} catch(JsonException | InvalidConstraintDefinitionException e) {
 						LOG.error("Unable to read attached constraints", e);
 						constraints.clear();
 						break;

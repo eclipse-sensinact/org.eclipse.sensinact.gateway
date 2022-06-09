@@ -19,8 +19,6 @@ import java.util.Stack;
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObjectBuilder;

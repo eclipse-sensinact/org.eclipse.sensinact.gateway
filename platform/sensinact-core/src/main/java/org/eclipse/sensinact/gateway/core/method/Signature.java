@@ -15,10 +15,14 @@ import java.util.Set;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * Signature of an {@link AccessMethod}
@@ -351,8 +355,8 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 	 *         contains parameters of the same type and in the same order than this
 	 *         current {@link Set}; false otherwise
 	 */
-	public boolean validParameters(JSONArray methodParameters) {
-		int length = methodParameters == null ? 0 : methodParameters.length();
+	public boolean validParameters(JsonArray methodParameters) {
+		int length = methodParameters == null ? 0 : methodParameters.size();
 
 		if (this.parameters.length != length) {
 			return false;
@@ -361,7 +365,7 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 		for (; index < length; index++) {
 			this.parameters[index].reset();
 
-			if (!this.parameters[index].validParameter(methodParameters.optJSONObject(index))) {
+			if (!this.parameters[index].validParameter(methodParameters.getJsonObject(index))) {
 				return false;
 			}
 		}
@@ -387,19 +391,19 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 	 * 
 	 * @return the JSON object representation of the described {@link Signature}
 	 */
-	public JSONObject getJSONObjectDescription() {
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("name", this.getName());
+	public JsonObject getJSONObjectDescription() {
+		JsonObjectBuilder jsonObject = JsonProviderFactory.getProvider().createObjectBuilder();
+		jsonObject.add("name", this.getName());
 
-		JSONArray paramtersArray = new JSONArray();
+		JsonArrayBuilder paramtersArray = JsonProviderFactory.getProvider().createArrayBuilder();
 
 		Iterator<Parameter> iterator = this.iterator();
 
 		while (iterator.hasNext()) {
-			paramtersArray.put(((Parameter) iterator.next()).getJSONObject());
+			paramtersArray.add(((Parameter) iterator.next()).getJSONObject());
 		}
-		jsonObject.put("parameters", paramtersArray);
-		return jsonObject;
+		jsonObject.add("parameters", paramtersArray);
+		return jsonObject.build();
 	}
 
 	@Override

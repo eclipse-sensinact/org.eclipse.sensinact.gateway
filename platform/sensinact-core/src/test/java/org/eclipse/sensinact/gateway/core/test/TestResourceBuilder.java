@@ -759,20 +759,20 @@ public class TestResourceBuilder<R extends ModelInstance> {
 				new FilteringCollection(mediator, false, new FilteringDefinition("xfilter", "a")))
 				.getJSON();
 
-		assertEquals(
-				JsonProviderFactory.readObject("{\"providers\":[{\"locXtion\":\"{\\\"type\\\":\\\"FeXtureCollection\\\",\\\"feXtures\\\":[{\\\"type\\\":\\\"FeXture\\\","
-						+ "\\\"properties\\\":{},\\\"geometry\\\":{\\\"coordinXtes\\\":[5.789,45.234],\\\"type\\\":\\\"Point\\\"}}]}\","
-						+ "\"services\":[{\"resources\":" 
-						+ "[{\"type\":\"PROPERTY\",\"nXme\":\"friendlyNXme\",\"rws\":\"RW\"},"
-						+ "{\"type\":\"PROPERTY\",\"nXme\":\"locXtion\",\"rws\":\"RW\"},"
-						+ "{\"type\":\"PROPERTY\",\"nXme\":\"bridge\",\"rws\":\"RO\"}," 
-						+ "{\"type\":\"PROPERTY\",\"nXme\":\"icon\",\"rws\":\"RW\"}],"
-						+ "\"nXme\":\"Xdmin\"}," + "{\"resources\":" 
-						+ "[{\"type\":\"ACTION\",\"nXme\":\"TestAction\"},"
-						+ "{\"type\":\"STATE_VARIABLE\",\"nXme\":\"TestVXriXble\",\"rws\":\"RW\"}],"
-						+ "\"nXme\":\"testService\"}],\"nXme\":\"serviceProvider\"}],"
-						+ "\"filters\":[{\"definition\":\"a\",\"type\":\"xfilter\"}]"
-						+ ",\"statusCode\":200,\"type\":\"COMPLETE_LIST\",\"uri\":\"/\"}"),
-					JsonProviderFactory.readObject(obj));
+		JsonObject expected = JsonProviderFactory.readObject("{\"providers\":[{\"locXtion\":\"{\\\"type\\\":\\\"FeXtureCollection\\\",\\\"feXtures\\\":[{\\\"type\\\":\\\"FeXture\\\","
+				+ "\\\"properties\\\":{},\\\"geometry\\\":{\\\"coordinXtes\\\":[5.789,45.234],\\\"type\\\":\\\"Point\\\"}}]}\","
+				+ "\"services\":[{\"resources\":" 
+				+ "[{\"type\":\"PROPERTY\",\"nXme\":\"friendlyNXme\",\"rws\":\"RW\"},"
+				+ "{\"type\":\"PROPERTY\",\"nXme\":\"locXtion\",\"rws\":\"RW\"},"
+				+ "{\"type\":\"PROPERTY\",\"nXme\":\"bridge\",\"rws\":\"RO\"}," 
+				+ "{\"type\":\"PROPERTY\",\"nXme\":\"icon\",\"rws\":\"RW\"}],"
+				+ "\"nXme\":\"Xdmin\"}," + "{\"resources\":" 
+				+ "[{\"type\":\"ACTION\",\"nXme\":\"TestAction\"},"
+				+ "{\"type\":\"STATE_VARIABLE\",\"nXme\":\"TestVXriXble\",\"rws\":\"RW\"}],"
+				+ "\"nXme\":\"testService\"}],\"nXme\":\"serviceProvider\"}],"
+				+ "\"filters\":[{\"definition\":\"a\",\"type\":\"xfilter\"}]"
+				+ ",\"statusCode\":200,\"type\":\"COMPLETE_LIST\",\"uri\":\"/\"}");
+		JsonObject actual = JsonProviderFactory.readObject(obj);
+		assertEquals(expected, actual);
 	}
 }

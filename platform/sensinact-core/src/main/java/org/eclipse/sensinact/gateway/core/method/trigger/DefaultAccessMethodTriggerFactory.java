@@ -48,7 +48,7 @@ public class DefaultAccessMethodTriggerFactory implements AccessMethodTriggerFac
 	 *
 	 * @see org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory#
 	 *      newInstance(org.eclipse.sensinact.gateway.common.bundle.Mediator,
-	 *      org.json.JSONObject)
+	 *      jakarta.json.JsonObject)
 	 */
 	@Override
 	public AccessMethodTrigger newInstance(Mediator mediator, JsonObject jsonTrigger)

@@ -66,7 +66,7 @@ public abstract class SnaNotificationMessageImpl<S extends Enum<S> & SnaMessageS
 	/**
 	 * @inheritDoc
 	 * 
-	 * @see SnaNotificationMessage# setNotification(org.json.JSONObject)
+	 * @see SnaNotificationMessage# setNotification(jakarta.json.JSONObject)
 	 */
 	public void setNotification(JsonObject jsonObject) {
 		if (jsonObject == null) {
